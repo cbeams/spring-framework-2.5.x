@@ -30,8 +30,6 @@ import org.springframework.aop.framework.AopProxyUtils;
  */
 public class AsmAopProxy implements AopProxy {
 
-	private static final String CONSTRUCTOR_INTERNAL_NAME = "<init>";
-
 	private static final Object PROXY_COUNT_LOCK = new Object();
 
 	private static final String OBJECT_INTERNAL_NAME = Type.getInternalName(Object.class);
@@ -161,17 +159,6 @@ public class AsmAopProxy implements AopProxy {
 		sb.append("$$SpringProxy$$");
 		sb.append(getAndIncrementProxyCount());
 		return sb.toString();
-	}
-
-	private String getMethodDescriptor(Class returnType, Class[] argumentTypes) {
-		Type asmReturnType = Type.getType(returnType);
-
-		Type[] asmArgumentTypes = new Type[argumentTypes.length];
-		for (int i = 0; i < asmArgumentTypes.length; i++) {
-			asmArgumentTypes[i] = Type.getType(argumentTypes[i]);
-		}
-
-		return Type.getMethodDescriptor(asmReturnType, asmArgumentTypes);
 	}
 
 	private int getAndIncrementProxyCount() {
