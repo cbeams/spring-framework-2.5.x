@@ -3,6 +3,8 @@ package org.springframework.aop.framework.asm;
 
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -10,12 +12,14 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.HashMap;
 
 import org.aopalliance.aop.AspectException;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.CodeVisitor;
 import org.objectweb.asm.Constants;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.util.ASMifierClassVisitor;
@@ -44,6 +48,8 @@ public class AsmAopProxy implements AopProxy {
 
 	private CodeGenerationStrategy constructorStrategy = new ProxyConstructorGenerationStrategy();
 
+	private static Map cache = new WeakHashMap();
+
 	public AsmAopProxy(AdvisedSupport advised) {
 		if (advised.getAdvisors().length == 0 && advised.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE) {
 			throw new AopConfigException("Cannot create AopProxy with no advisors and no target source");
@@ -54,7 +60,7 @@ public class AsmAopProxy implements AopProxy {
 	}
 
 	public Object getProxy(ClassLoader classLoader) {
-		Class proxyClass = generateProxyClass();
+		Class proxyClass = getProxyClass();
 
 		try {
 			Constructor ctor = proxyClass.getConstructor(new Class[]{AdvisedSupport.class});
@@ -74,18 +80,38 @@ public class AsmAopProxy implements AopProxy {
 		}
 	}
 
+	private Class getProxyClass() {
+		Class targetClass = (emptyTargetSource) ? null : this.advised.getTargetSource().getTargetClass();
+		Class[] proxyInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised);
+
+		CacheKey cacheKey = new CacheKey(this.advised, targetClass, proxyInterfaces);
+		Reference classReference = (Reference) cache.get(cacheKey);
+
+		if (classReference == null) {
+			Class proxyClass = generateProxyClass(targetClass, proxyInterfaces);
+			synchronized (cache) {
+				cache.put(cacheKey, new WeakReference(proxyClass));
+			}
+			return proxyClass;
+		}
+		else {
+			return (Class) classReference.get();
+		}
+
+	}
+
 	public Object getProxy() {
 		return getProxy(Thread.currentThread().getContextClassLoader());
 	}
 
-	private Class generateProxyClass() {
+	private Class generateProxyClass(Class targetClass, Class[] proxyInterfaces) {
 		// load target information
-		Class targetClass = (emptyTargetSource) ? null : this.advised.getTargetSource().getTargetClass();
+
 		String targetDescriptor = (emptyTargetSource) ? null : Type.getDescriptor(targetClass);
 		String targetInternalName = (emptyTargetSource) ? null : Type.getInternalName(targetClass);
 
 		// get proxy interfaces
-		Class[] proxyInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised);
+
 		String[] proxyInterfaceTypes = convertToInternalTypes(proxyInterfaces);
 
 		String proxyInternalName = generateProxyClassInternalName(targetClass);
@@ -196,5 +222,57 @@ public class AsmAopProxy implements AopProxy {
 		}
 
 		return (Method[]) methods.toArray(new Method[methods.size()]);
+	}
+
+	private static class CacheKey {
+
+		private AdvisedSupport advised;
+
+		private Class targetClass;
+
+		private Class[] proxyInterfaces;
+
+		private int hashCode;
+
+		public CacheKey(AdvisedSupport advised, Class targetClass, Class[] proxyInterfaces) {
+			this.advised = advised;
+			this.targetClass = targetClass;
+			this.proxyInterfaces = proxyInterfaces;
+
+			// calculate hashCode
+			int code = 17;
+			code = 37 * code + advised.hashCode();
+
+			if(targetClass != null) {
+				code = 37 * code + targetClass.getName().hashCode();
+			}
+
+			for (int i = 0; i < proxyInterfaces.length; i++) {
+				code = 37 * code + proxyInterfaces[i].getName().hashCode();
+
+			}
+
+			this.hashCode = code;
+		}
+
+		public boolean equals(Object obj) {
+			if (obj == null) return false;
+			if (obj == this) return true;
+
+			if (obj instanceof CacheKey) {
+				CacheKey other = (CacheKey) obj;
+				return ((other.advised.equals(advised)) &&
+									 (other.targetClass == targetClass) &&
+									 (Arrays.equals(other.proxyInterfaces, proxyInterfaces)));
+			}
+			else {
+				return false;
+			}
+		}
+
+		public int hashCode() {
+			return hashCode;
+		}
+
 	}
 }

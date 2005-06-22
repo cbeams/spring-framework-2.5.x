@@ -1,9 +1,9 @@
 
 package org.springframework.aop.framework.asm;
 
-import org.objectweb.asm.Type;
-import org.objectweb.asm.Constants;
 import org.objectweb.asm.CodeVisitor;
+import org.objectweb.asm.Constants;
+import org.objectweb.asm.Type;
 
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.AopContext;
@@ -134,7 +134,15 @@ public abstract class AbstractCodeGenerationStrategy implements CodeGenerationSt
 		}
 	}
 
-	protected int getFrameSpaceSize(Class type) {
+	protected int calculateInitialLocalsOffset(Class[] args) {
+		int localsSize = 0;
+		for (int i = 0; i < args.length; i++) {
+			localsSize += getLocalsSizeForType(args[i]);
+		}
+		return localsSize;
+	}
+
+	protected int getLocalsSizeForType(Class type) {
 		if ((type == double.class) || (type == long.class)) {
 			return 2;
 		}

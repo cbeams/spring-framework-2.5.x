@@ -25,11 +25,12 @@ public class AdvisedCodeGenerationStrategy extends AbstractMethodProxyCodeGenera
 
 		// TODO: need to calculate the size of the parameters
 		Class[] parameterTypes = method.getParameterTypes();
-		int parameterCount = parameterTypes.length;
 		int localThis = 0;
 
 		// used to calculate local variable indexes
-		int localCounter = 1 + parameterCount;
+		int parametersSize = calculateInitialLocalsOffset(parameterTypes);
+
+		int localCounter = 1 + parametersSize;
 
 		int localOldProxy = Integer.MIN_VALUE;
 
@@ -206,7 +207,7 @@ public class AdvisedCodeGenerationStrategy extends AbstractMethodProxyCodeGenera
 		}
 
 		// create the catch blocks for the exceptions on the method
-		int stackThrowable = 1 + parameterCount;
+		int stackThrowable = 1 + parametersSize;
 
 		if (exposeProxy) {
 			stackThrowable++;
@@ -375,7 +376,7 @@ public class AdvisedCodeGenerationStrategy extends AbstractMethodProxyCodeGenera
 				// store in array
 				cv.visitInsn(Constants.AASTORE);
 
-				stackCount += getFrameSpaceSize(parameterType);
+				stackCount += getLocalsSizeForType(parameterType);
 
 			}
 		}

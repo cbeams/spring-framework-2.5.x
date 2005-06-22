@@ -32,7 +32,7 @@ public class StraightToTargetCodeGenerationStrategy extends AbstractMethodProxyC
 		if (argCount > 0) {
 			for (int x = 0; x < argCount; x++) {
 				Class parameterType = parameterTypes[x];
-				int frameSpaceSize = getFrameSpaceSize(parameterType);
+				int frameSpaceSize = getLocalsSizeForType(parameterType);
 				cv.visitVarInsn(getLoadOpcodeForType(parameterTypes[x]), stackCount);
 				stackCount += frameSpaceSize;
 			}
