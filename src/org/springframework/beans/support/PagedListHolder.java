@@ -77,17 +77,30 @@ public class PagedListHolder implements Serializable {
 	/**
 	 * Create a new holder instance.
 	 * You'll need to set a source list to be able to use the holder.
+	 * @see #setSource
 	 */
 	public PagedListHolder() {
 		this(new ArrayList(0));
 	}
 
 	/**
-	 * Create a new holder instance with the given source list.
+	 * Create a new holder instance with the given source list, starting with
+	 * a default sort definition (with "toggleAscendingOnProperty" activated).
+	 * @param source the source List
+	 * @see MutableSortDefinition#setToggleAscendingOnProperty
 	 */
 	public PagedListHolder(List source) {
+		this(source, new MutableSortDefinition(true));
+	}
+
+	/**
+	 * Create a new holder instance with the given source list.
+	 * @param source the source List
+	 * @param sort the SortDefinition to start with
+	 */
+	public PagedListHolder(List source, SortDefinition sort) {
 		setSource(source);
-		setSort(new MutableSortDefinition(true));
+		setSort(sort);
 	}
 
 
@@ -276,15 +289,45 @@ public class PagedListHolder implements Serializable {
 
 
 	/**
-	 * Resort the list if necessary, i.e. if the current sort instance isn't equal
-	 * to the backed-up sortUsed instance.
+	 * Resort the list if necessary, i.e. if the current <code>sort</code> instance
+	 * isn't equal to the backed-up <code>sortUsed</code> instance.
+	 * <p>Calls <code>doSort</code> to trigger actual sorting.
+	 * @see #doSort
 	 */
 	public void resort() {
-		if (this.sort != null && !"".equals(this.sort.getProperty()) && !this.sort.equals(this.sortUsed)) {
-			PropertyComparator.sort(getSource(), this.sort);
-			this.sortUsed = new MutableSortDefinition(this.sort);
+		SortDefinition sort = getSort();
+		if (sort != null && !sort.equals(this.sortUsed)) {
+			this.sortUsed = copySortDefinition(sort);
+			doSort(getSource(), sort);
 			setPage(0);
 		}
+	}
+
+	/**
+	 * Create a deep copy of the given sort definition,
+	 * for use as state holder to compare a modified sort definition against.
+	 * <p>Default implementation creates a MutableSortDefinition instance.
+	 * Can be overridden in subclasses, in particular in case of custom
+	 * extensions to the SortDefinition interface. Is allowed to return
+	 * null, which means that no sort state will be held, triggering
+	 * actual sorting for each <code>resort</code> call.
+	 * @param sort the current SortDefinition object
+	 * @return a deep copy of the SortDefinition object
+	 * @see MutableSortDefinition#MutableSortDefinition(SortDefinition)
+	 */
+	protected SortDefinition copySortDefinition(SortDefinition sort) {
+		return new MutableSortDefinition(sort);
+	}
+
+	/**
+	 * Actually perform sorting of the given source list, according to
+	 * the given sort definition.
+	 * <p>The default implementation uses Spring's PropertyComparator.
+	 * Can be overridden in subclasses.
+	 * @see PropertyComparator#sort(java.util.List, SortDefinition)
+	 */
+	protected void doSort(List source, SortDefinition sort) {
+		PropertyComparator.sort(source, sort);
 	}
 
 }

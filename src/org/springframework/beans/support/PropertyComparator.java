@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.util.StringUtils;
 
 /**
  * PropertyComparator performs a comparison of two beans,
@@ -122,7 +123,9 @@ public class PropertyComparator implements Comparator {
 	 * @throws java.lang.IllegalArgumentException in case of a missing propertyName
 	 */
 	public static void sort(List source, SortDefinition sortDefinition) throws BeansException {
-		Collections.sort(source, new PropertyComparator(sortDefinition));
+		if (StringUtils.hasText(sortDefinition.getProperty())) {
+			Collections.sort(source, new PropertyComparator(sortDefinition));
+		}
 	}
 
 	/**
@@ -134,7 +137,9 @@ public class PropertyComparator implements Comparator {
 	 * @throws java.lang.IllegalArgumentException in case of a missing propertyName
 	 */
 	public static void sort(Object[] source, SortDefinition sortDefinition) throws BeansException {
-		Arrays.sort(source, new PropertyComparator(sortDefinition));
+		if (StringUtils.hasText(sortDefinition.getProperty())) {
+			Arrays.sort(source, new PropertyComparator(sortDefinition));
+		}
 	}
 
 }
