@@ -208,21 +208,28 @@ public abstract class SessionFactoryUtils {
 
 		private final SessionFactory sessionFactory;
 
+		private boolean holderActive = true;
+
 		private SessionSynchronization(SessionHolder sessionHolder, SessionFactory sessionFactory) {
 			this.sessionHolder = sessionHolder;
 			this.sessionFactory = sessionFactory;
 		}
 
 		public void suspend() {
-			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+			if (this.holderActive) {
+				TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+			}
 		}
 
 		public void resume() {
-			TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
+			if (this.holderActive) {
+				TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
+			}
 		}
 
 		public void beforeCompletion() {
 			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+			this.holderActive = false;
 		}
 
 		public void afterCompletion(int status) {

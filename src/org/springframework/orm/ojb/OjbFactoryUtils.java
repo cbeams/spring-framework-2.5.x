@@ -145,6 +145,8 @@ public abstract class OjbFactoryUtils {
 
 		private final PBKey pbKey;
 
+		private boolean holderActive = true;
+
 		private PersistenceBrokerSynchronization(PersistenceBrokerHolder pbHolder, PBKey pbKey) {
 			this.persistenceBrokerHolder = pbHolder;
 			this.pbKey = pbKey;
@@ -155,15 +157,20 @@ public abstract class OjbFactoryUtils {
 		}
 
 		public void suspend() {
-			TransactionSynchronizationManager.unbindResource(this.pbKey);
+			if (this.holderActive) {
+				TransactionSynchronizationManager.unbindResource(this.pbKey);
+			}
 		}
 
 		public void resume() {
-			TransactionSynchronizationManager.bindResource(this.pbKey, this.persistenceBrokerHolder);
+			if (this.holderActive) {
+				TransactionSynchronizationManager.bindResource(this.pbKey, this.persistenceBrokerHolder);
+			}
 		}
 
 		public void beforeCompletion() {
 			TransactionSynchronizationManager.unbindResource(this.pbKey);
+			this.holderActive = false;
 			releasePersistenceBroker(this.persistenceBrokerHolder.getPersistenceBroker(), this.pbKey);
 		}
 	}

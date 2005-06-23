@@ -285,6 +285,8 @@ public abstract class PersistenceManagerFactoryUtils {
 
 		private final PersistenceManagerFactory persistenceManagerFactory;
 
+		private boolean holderActive = true;
+
 		public PersistenceManagerSynchronization(PersistenceManagerHolder pmHolder, PersistenceManagerFactory pmf) {
 			this.persistenceManagerHolder = pmHolder;
 			this.persistenceManagerFactory = pmf;
@@ -295,15 +297,21 @@ public abstract class PersistenceManagerFactoryUtils {
 		}
 
 		public void suspend() {
-			TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
+			if (this.holderActive) {
+				TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
+			}
 		}
 
 		public void resume() {
-			TransactionSynchronizationManager.bindResource(this.persistenceManagerFactory, this.persistenceManagerHolder);
+			if (this.holderActive) {
+				TransactionSynchronizationManager.bindResource(
+						this.persistenceManagerFactory, this.persistenceManagerHolder);
+			}
 		}
 
 		public void beforeCompletion() {
 			TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
+			this.holderActive = false;
 			releasePersistenceManager(
 			    this.persistenceManagerHolder.getPersistenceManager(),
 			    this.persistenceManagerFactory);

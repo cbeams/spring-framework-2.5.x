@@ -810,6 +810,8 @@ public abstract class SessionFactoryUtils {
 
 		private Transaction jtaTransaction;
 
+		private boolean holderActive = true;
+
 		public SpringSessionSynchronization(
 				SessionHolder sessionHolder, SessionFactory sessionFactory,
 				SQLExceptionTranslator jdbcExceptionTranslator, boolean newSession) {
@@ -843,11 +845,15 @@ public abstract class SessionFactoryUtils {
 		}
 
 		public void suspend() {
-			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+			if (this.holderActive) {
+				TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+			}
 		}
 
 		public void resume() {
-			TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
+			if (this.holderActive) {
+				TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
+			}
 		}
 
 		public void beforeCommit(boolean readOnly) throws DataAccessException {
@@ -901,6 +907,7 @@ public abstract class SessionFactoryUtils {
 							// reused when a new data access operation starts on that thread.
 							TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 						}
+						this.holderActive = false;
 					}
 					// Do not close a pre-bound Session. In that case, we'll find the
 					// transaction-specific Session the same as the default Session.
@@ -918,6 +925,7 @@ public abstract class SessionFactoryUtils {
 			if (this.newSession) {
 				// Default behavior: unbind and close the thread-bound Hibernate Session.
 				TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+				this.holderActive = false;
 				if (this.hibernateTransactionCompletion) {
 					// Close the Hibernate Session here in case of a Hibernate TransactionManagerLookup:
 					// Hibernate will automatically defer the actual closing to JTA transaction completion.

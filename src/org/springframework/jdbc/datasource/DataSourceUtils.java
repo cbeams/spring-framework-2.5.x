@@ -318,6 +318,8 @@ public abstract class DataSourceUtils {
 
 		private final DataSource dataSource;
 
+		private boolean holderActive = true;
+
 		public ConnectionSynchronization(ConnectionHolder connectionHolder, DataSource dataSource) {
 			this.connectionHolder = connectionHolder;
 			this.dataSource = dataSource;
@@ -328,11 +330,15 @@ public abstract class DataSourceUtils {
 		}
 
 		public void suspend() {
-			TransactionSynchronizationManager.unbindResource(this.dataSource);
+			if (this.holderActive) {
+				TransactionSynchronizationManager.unbindResource(this.dataSource);
+			}
 		}
 
 		public void resume() {
-			TransactionSynchronizationManager.bindResource(this.dataSource, this.connectionHolder);
+			if (this.holderActive) {
+				TransactionSynchronizationManager.bindResource(this.dataSource, this.connectionHolder);
+			}
 		}
 
 		public void beforeCompletion() {
@@ -343,6 +349,7 @@ public abstract class DataSourceUtils {
 			// the close call before transaction completion.
 			if (!this.connectionHolder.isOpen()) {
 				TransactionSynchronizationManager.unbindResource(this.dataSource);
+				this.holderActive = false;
 				releaseConnection(this.connectionHolder.getConnection(), this.dataSource);
 			}
 		}
@@ -353,6 +360,7 @@ public abstract class DataSourceUtils {
 			// cleanup in the meantime, for example by a Hibernate Session.
 			if (TransactionSynchronizationManager.hasResource(this.dataSource)) {
 				TransactionSynchronizationManager.unbindResource(this.dataSource);
+				this.holderActive = false;
 				releaseConnection(this.connectionHolder.getConnection(), this.dataSource);
 			}
 		}

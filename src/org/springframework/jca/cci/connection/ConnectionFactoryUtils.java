@@ -148,21 +148,28 @@ public abstract class ConnectionFactoryUtils {
 
 		private final ConnectionFactory connectionFactory;
 
+		private boolean holderActive = true;
+
 		public ConnectionSynchronization(ConnectionHolder connectionHolder, ConnectionFactory connectionFactory) {
 			this.connectionHolder = connectionHolder;
 			this.connectionFactory = connectionFactory;
 		}
 
 		public void suspend() {
-			TransactionSynchronizationManager.unbindResource(this.connectionFactory);
+			if (this.holderActive) {
+				TransactionSynchronizationManager.unbindResource(this.connectionFactory);
+			}
 		}
 
 		public void resume() {
-			TransactionSynchronizationManager.bindResource(this.connectionFactory, this.connectionHolder);
+			if (this.holderActive) {
+				TransactionSynchronizationManager.bindResource(this.connectionFactory, this.connectionHolder);
+			}
 		}
 
 		public void beforeCompletion() {
 			TransactionSynchronizationManager.unbindResource(this.connectionFactory);
+			this.holderActive = false;
 			releaseConnection(this.connectionHolder.getConnection(), this.connectionFactory);
 		}
 	}
