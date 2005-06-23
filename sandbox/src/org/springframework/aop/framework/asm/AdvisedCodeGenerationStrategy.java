@@ -272,6 +272,8 @@ public class AdvisedCodeGenerationStrategy extends AbstractMethodProxyCodeGenera
 			}
 
 			if (!staticTargetSource) {
+
+				// TODO: need embedded try/catch block here
 				cv.visitVarInsn(Constants.ALOAD, localTargetSource);
 				cv.visitVarInsn(Constants.ALOAD, localTarget);
 				cv.visitMethodInsn(Constants.INVOKEINTERFACE, TARGET_SOURCE_INTERNAL_NAME, "releaseTarget", "(Ljava/lang/Object;)V");

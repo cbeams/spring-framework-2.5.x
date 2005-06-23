@@ -21,7 +21,7 @@ public class DefaultCodeGenerationStrategySelector implements CodeGenerationStra
 		List chain = advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(advised, null, method, targetClass);
 
 		if (chain.isEmpty()) {
-			if (advised.getTargetSource().isStatic()) {
+			if (advised.getTargetSource().isStatic() || (method.getDeclaringClass() == Object.class)) {
 				return new StraightToTargetCodeGenerationStrategy();
 			}
 			else {

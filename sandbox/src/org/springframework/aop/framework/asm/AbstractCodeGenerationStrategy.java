@@ -8,6 +8,8 @@ import org.objectweb.asm.Type;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.AopContext;
 
+import freemarker.template.utility.UndeclaredThrowableException;
+
 /**
  * @author robh
  */
@@ -70,6 +72,14 @@ public abstract class AbstractCodeGenerationStrategy implements CodeGenerationSt
 	protected static final String AOP_CONTEXT_INTERNAL_NAME = Type.getInternalName(AopContext.class);
 
 	protected static final String SET_CURRENT_PROXY_DESCRIPTOR = "(Ljava/lang/Object;)Ljava/lang/Object;";
+
+	protected static final String UNDECLARED_THROWABLE_EXCEPTION_INTERNAL_NAME = Type.getInternalName(UndeclaredThrowableException.class);
+
+	protected static final String SINGLE_ARG_EXCEPTION_CONSTRUCTOR_DESCRIPTOR = "(Ljava/lang/Throwable;)V";
+
+	protected static final String RELEASE_TARGET_METHOD = "releaseTarget";
+
+	protected static final String RELEASE_TARGET_DESCRIPTOR = "(Ljava/lang/Object;)V";
 
 	protected int getLoadOpcodeForType(Class type) {
 		if (type.isPrimitive()) {
