@@ -93,11 +93,13 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * See JtaTransactionManager's javadoc for details.
  *
  * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC
- * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to false, though,
+ * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to "false", though,
  * as nested transactions will just apply to the JDBC Connection, not to the
- * Hibernate Session and its cached objects. You can manually set the flag to true
+ * Hibernate Session and its cached objects. You can manually set the flag to "true"
  * if you want to use nested transactions for JDBC access code that participates
  * in Hibernate transactions (provided that your JDBC driver supports Savepoints).
+ * <i>Note that Hibernate itself does not support nested transactions! Hence,
+ * do not expect Hibernate access code to participate in a nested transaction.</i>
  *
  * <p>Note: Spring's Hibernate support requires Hibernate 2.1 (as of Spring 1.0).
  *
