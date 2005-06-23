@@ -66,15 +66,9 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public abstract class AbstractDependencyInjectionSpringContextTests extends AbstractSpringContextTests {
 
-	private boolean populateProtectedVariables;
+	private boolean populateProtectedVariables = false;
 	
 	private boolean dependencyCheck = true;
-
-	/**
-	 * Key for the context.
-	 * This enables multiple contexts to share the same key.
-	 */
-	private Object contextKey;
 
 	/**
 	 * Application context this test will run against.
@@ -86,6 +80,10 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	private int loadCount = 0;
 
 
+	/**
+	 * Set whether to populate protected variables of this test case.
+	 * Default is "false".
+	 */
 	public void setPopulateProtectedVariables(boolean populateFields) {
 		this.populateProtectedVariables = populateFields;
 	}
@@ -114,8 +112,9 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 		return loadCount;
 	}
 
+
 	/**
-	 * Called to say that the applicationContext instance variable is dirty and
+	 * Called to say that the "applicationContext" instance variable is dirty and
 	 * should be reloaded. We need to do this if a test has modified the context
 	 * (for example, by replacing a bean definition).
 	 */
@@ -125,11 +124,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 
 
 	protected final void setUp() throws Exception {
-		if (this.contextKey == null) {
-			this.contextKey = contextKey();
-		}
-
-		this.applicationContext = getContext(this.contextKey);
+		this.applicationContext = getContext(contextKey());
 
 		if (isPopulateProtectedVariables()) {
 			if (this.managedVariableNames == null) {
@@ -146,7 +141,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 			onSetUp();
 		}
 		catch (Exception ex) {
-			logger.error("Setup error: " + ex);
+			logger.error("Setup error", ex);
 			throw ex;
 		}
 	}
@@ -154,7 +149,6 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	/**
 	 * Return a key for this context. Usually based on config locations, but
 	 * a subclass overriding buildContext() might want to return its class.
-	 * Called once and cached.
 	 */
 	protected Object contextKey() {
 		return getConfigLocations();
@@ -171,21 +165,29 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 
 		do {
 			Field[] fields = clazz.getDeclaredFields();
-			logger.debug(fields.length + " fields on " + clazz);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found " + fields.length + " fields on " + clazz);
+			}
 
 			for (int i = 0; i < fields.length; i++) {
 				// TODO go up tree but not to this class
-				Field f = fields[i];
-				f.setAccessible(true);
-				logger.debug("Candidate field " + f);
-				if (!Modifier.isStatic(f.getModifiers()) && Modifier.isProtected(f.getModifiers())) {
-					Object oldValue = f.get(this);
+				Field field = fields[i];
+				field.setAccessible(true);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Candidate field: " + field);
+				}
+				if (!Modifier.isStatic(field.getModifiers()) && Modifier.isProtected(field.getModifiers())) {
+					Object oldValue = field.get(this);
 					if (oldValue == null) {
-						managedVarNames.add(f.getName());
-						logger.info("Added managed variable '" + f.getName() + "'");
+						managedVarNames.add(field.getName());
+						if (logger.isDebugEnabled()) {
+							logger.debug("Added managed variable '" + field.getName() + "'");
+						}
 					}
 					else {
-						logger.info("Rejected managed variable '" + f.getName() + "'");
+						if (logger.isDebugEnabled()) {
+							logger.debug("Rejected managed variable '" + field.getName() + "'");
+						}
 					}
 				}
 			}
@@ -199,20 +201,18 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	protected void populateProtectedVariables() throws IllegalAccessException {
 		for (int i = 0; i < this.managedVariableNames.length; i++) {
 			Object bean = null;
-			Field f = null;
 			try {
-				f = findField(getClass(), this.managedVariableNames[i]);
+				Field field = findField(getClass(), this.managedVariableNames[i]);
 				// TODO what if not found?
-				bean = this.applicationContext.getBean(this.managedVariableNames[i]);
-				f.setAccessible(true);
-				f.set(this, bean);
-				logger.info("Populated " + f);
+				bean = this.applicationContext.getBean(this.managedVariableNames[i], field.getType());
+				field.setAccessible(true);
+				field.set(this, bean);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Populated field: " + field);
+				}
 			}
 			catch (NoSuchFieldException ex) {
 				logger.warn("No field with name '" + this.managedVariableNames[i] + "'");
-			}
-			catch (IllegalArgumentException ex) {
-				logger.error("Value " + bean + " not compatible with " + f);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				logger.warn("No bean with name '" + this.managedVariableNames[i] + "'");
@@ -236,8 +236,8 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	}
 
 	/**
-	 * Subclasses can override this method in place of
-	 * the setUp() method, which is final in this class.
+	 * Subclasses can override this method in place of the
+	 * <code>setUp()</code> method, which is final in this class.
 	 * This implementation does nothing.
 	 */
 	protected void onSetUp() throws Exception {
@@ -268,11 +268,11 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 * Subclasses must implement this method to return the locations of their
 	 * config files. A plain path will be treated as class path location.
 	 * E.g.: "org/springframework/whatever/foo.xml". Note however that you may
-     * prefix path locations with standard Spring resource prefixes. Therefore,
-     * a config location path prefixed with "classpath:" with behave the same
-     * as a plain path, but a config location such as
-     * "file:/some/path/path/location/appContext.xml" will be treated as a 
-     * filesystem location.
+	 * prefix path locations with standard Spring resource prefixes. Therefore,
+	 * a config location path prefixed with "classpath:" with behave the same
+	 * as a plain path, but a config location such as
+	 * "file:/some/path/path/location/appContext.xml" will be treated as a
+	 * filesystem location.
 	 * @return an array of config locations
 	 */
 	protected abstract String[] getConfigLocations();

@@ -23,7 +23,6 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 /**
  * Convenient superclass for tests that should occur in a transaction, but normally
  * will roll the transaction back on the completion of each test.
- * <br>
  *
  * <p>This is useful in a range of circumstances, allowing the following benefits:
  * <ul>
@@ -38,15 +37,15 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * The defaultRollback() property, which defaults to true, determines whether
  * transactions will complete by default.
  *
- * <p>Transactional behaviour requires a single bean in the context implementing the PlatformTransactionManager
- * interface. This will be set by the superclass's Dependency Injection mechanism.
- * If using the superclass's Field Injection mechanism, the implementation should be
- * named "transactionManager". This mechanism allows the use of this superclass even
- * when there's more than one transaction manager in the context.
+ * <p>Transactional behaviour requires a single bean in the context implementing the
+ * PlatformTransactionManager interface. This will be set by the superclass's
+ * Dependency Injection mechanism. If using the superclass's Field Injection mechanism,
+ * the implementation should be named "transactionManager". This mechanism allows the
+ * use of this superclass even when there's more than one transaction manager in the context.
  * 
- * <p><i>This superclass can also be used without transaction management, if no PlatformTransactionManager
- * bean is found in the context provided. Be careful about using this mode,
- * as it allows the potential to permanently modify data. 
+ * <p><i>This superclass can also be used without transaction management, if no
+ * PlatformTransactionManager bean is found in the context provided. Be careful about
+ * using this mode, as it allows the potential to permanently modify data.
  * This mode is available only if dependency checking is turned off in
  * the AbstractDependencyInjectionSpringContextTests superclass. The non-transactional
  * capability is provided to enabled use of the same subclass in different environments.</i>
@@ -70,6 +69,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 */
 	private boolean complete;
 
+
 	/**
 	 * Subclasses can set this value in their constructor to change
 	 * default, which is always to roll the transaction back
@@ -88,17 +88,20 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 		this.transactionManager = ptm;
 	}
 
+
 	protected final void onSetUp() throws Exception {
 		this.complete = !this.defaultRollback;
 
 		if (transactionManager != null) {
 			// start a transaction
 			this.transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
-			logger.info("Began transaction: transaction manager [" + this.transactionManager + "]; defaultCommit "
-					+ this.complete);
+				if (logger.isInfoEnabled()) {
+					logger.info("Began transaction: transaction manager [" + this.transactionManager + "]; defaultRollback "
+							+ this.defaultRollback);
+				}
 		}
 		else {
-			logger.info("No transaction manager set: tests will NOT occur in a transaction");
+			logger.info("No transaction manager set: tests will NOT run within a transaction");
 		}
 		onSetUpInTransaction();
 	}
@@ -132,6 +135,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 */
 	protected void onTearDownInTransaction() {
 	}
+
 
 	/**
 	 * Cause the transaction to commit for this test method,

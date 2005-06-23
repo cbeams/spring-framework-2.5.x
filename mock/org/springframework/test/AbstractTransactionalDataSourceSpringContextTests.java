@@ -35,11 +35,13 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 
 	protected JdbcTemplate jdbcTemplate;
 
+
 	/**
 	 * Did this test delete any tables? If so, we forbid transaction completion,
 	 * and only allow rollback.
 	 */
 	private boolean zappedTables;
+
 
 	/**
 	 * Setter: DataSource is provided by Dependency Injection.
@@ -51,6 +53,7 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
+
 	/**
 	 * Convenient method to delete all rows from these tables.
 	 * Calling this method will make avoidance of rollback by calling
@@ -59,8 +62,10 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 	 */
 	protected void deleteFromTables(String[] names) {
 		for (int i = 0; i < names.length; i++) {
-			logger.info("Deleted " +
-			    this.jdbcTemplate.update("DELETE FROM " + names[i]) + " rows from table " + names[i]);
+			if (logger.isInfoEnabled()) {
+				int rowCount = this.jdbcTemplate.update("DELETE FROM " + names[i]);
+				logger.info("Deleted " + rowCount + " rows from table " + names[i]);
+			}
 		}
 		this.zappedTables = true;
 	}

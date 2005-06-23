@@ -53,11 +53,10 @@ import org.springframework.core.io.Resource;
  * JdoTransactionManager is much more convenient than setting up your
  * JDO implementation for JTA transactions (which might involve JCA).
  *
- * <p>As alternative to the properties-driven approach that this FactoryBean
- * offers (which is analogous to using the standard JDOHelper class with
- * a Properties object that is populated with standard JDO properties),
- * you can set up an instance of your PersistenceManagerFactory
- * implementation class directly.
+ * <p>As alternative to the properties-driven approach that this FactoryBean offers
+ * (which is analogous to using the standard JDOHelper class with a Properties
+ * object that is populated with standard JDO properties), you can set up an
+ * instance of your PersistenceManagerFactory implementation class directly.
  *
  * <p>Like a DataSource, a PersistenceManagerFactory is encouraged to
  * support bean-style configuration, which makes it very easy to set up as
@@ -76,13 +75,13 @@ import org.springframework.core.io.Resource;
  *
  * <p>Note that such direct setup of a PersistenceManagerFactory implementation
  * is the only way to pass an external connection factory (i.e. a JDBC DataSource)
- * into a JDO instance. With the standard properties-driven approach, you can
- * only use an internal connection pool or a JNDI DataSource.
+ * into a JDO PersistenceManagerFactory. With the standard properties-driven approach,
+ * you can only use an internal connection pool or a JNDI DataSource.
  *
  * <p>The "close" method is standardized as of JDO 1.0.1; don't forget to
  * specify it as "destroy-method" for any PersistenceManagerFactory instance.
- * Note that this FactoryBean will automatically invoke "close" for the
- * PersistenceManagerFactory it creates, without any special configuration.
+ * Note that this FactoryBean will automatically invoke <code>close</code> for
+ * the PersistenceManagerFactory it creates, without any special configuration.
  *
  * @author Juergen Hoeller
  * @since 03.06.2003
@@ -138,7 +137,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 		Properties props = new Properties();
 
 		if (this.configLocation != null) {
-			// load JDO properties from given location
+			// Load JDO properties from the given location.
 			InputStream is = this.configLocation.getInputStream();
 			try {
 				props.load(is);
@@ -149,31 +148,33 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 		}
 
 		if (this.jdoProperties != null) {
-			// use propertyNames enumeration to also catch default properties
+			// Use propertyNames enumeration to also catch default properties.
 			for (Enumeration en = this.jdoProperties.propertyNames(); en.hasMoreElements();) {
 				String key = (String) en.nextElement();
 				props.setProperty(key, this.jdoProperties.getProperty(key));
 			}
 		}
 
-		// build factory instance
+		// Build PersistenceManagerFactory instance.
+		logger.info("Building new JDO PersistenceManagerFactory");
 		this.persistenceManagerFactory = newPersistenceManagerFactory(props);
 	}
 
 	/**
 	 * Subclasses can override this to perform custom initialization of the
 	 * PersistenceManagerFactory instance, creating it via the given Properties
-	 * that got prepared by this LocalPersistenceManagerFactoryBean
-	 * <p>The default implementation invokes JDOHelper's getPersistenceManagerFactory.
-	 * A custom implementation could prepare the instance in a specific way,
-	 * or use a custom PersistenceManagerFactory implementation.
-	 * @param props Properties prepared by this LocalPersistenceManagerFactoryBean
+	 * that got prepared by this LocalPersistenceManagerFactoryBean.
+	 * <p>The default implementation invokes JDOHelper's <code>getPersistenceManagerFactory</code>.
+	 * A custom implementation could prepare the instance in a specific way, or use a custom
+	 * PersistenceManagerFactory implementation.
+	 * @param props the merged Properties prepared by this LocalPersistenceManagerFactoryBean
 	 * @return the PersistenceManagerFactory instance
 	 * @see javax.jdo.JDOHelper#getPersistenceManagerFactory
 	 */
 	protected PersistenceManagerFactory newPersistenceManagerFactory(Properties props) {
 		return JDOHelper.getPersistenceManagerFactory(props);
 	}
+
 
 	/**
 	 * Return the singleton PersistenceManagerFactory.
@@ -190,6 +191,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	public boolean isSingleton() {
 		return true;
 	}
+
 
 	/**
 	 * Close the PersistenceManagerFactory on context shutdown.

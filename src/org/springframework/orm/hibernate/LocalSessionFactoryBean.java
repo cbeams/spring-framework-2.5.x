@@ -499,6 +499,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			updateDatabaseSchema();
 		}
 	}
+	
 
 	/**
 	 * Subclasses can override this method to perform custom initialization
@@ -681,6 +682,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		return configuration;
 	}
 
+
 	/**
 	 * Return the singleton SessionFactory.
 	 */
@@ -695,6 +697,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	public boolean isSingleton() {
 		return true;
 	}
+
 
 	/**
 	 * Close the SessionFactory on bean factory shutdown.

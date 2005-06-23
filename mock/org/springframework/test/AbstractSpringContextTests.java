@@ -59,6 +59,7 @@ public abstract class AbstractSpringContextTests extends TestCase {
 	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+
 	/**
 	 * Set custom locations dirty.
 	 * This will cause them to be reloaded from the cache before the next test
@@ -88,8 +89,9 @@ public abstract class AbstractSpringContextTests extends TestCase {
 	}
 
 	protected ConfigurableApplicationContext getContext(Object key) {
+		String keyString = contextKeyString(key);
 		ConfigurableApplicationContext ctx =
-		    (ConfigurableApplicationContext) contextKeyToContextMap.get(contextKeyString(key));
+				(ConfigurableApplicationContext) contextKeyToContextMap.get(keyString);
 		if (ctx == null) {
 			if (key instanceof String[]) {
 				ctx = loadContextLocations((String[]) key);
@@ -97,7 +99,7 @@ public abstract class AbstractSpringContextTests extends TestCase {
 			else {
 				ctx = loadContext(key);
 			}
-			contextKeyToContextMap.put(contextKeyString(key), ctx);
+			contextKeyToContextMap.put(keyString, ctx);
 		}
 		return ctx;
 	}
@@ -109,7 +111,9 @@ public abstract class AbstractSpringContextTests extends TestCase {
 	 * Dependency Injection cannot be applied from such contexts.
 	 */
 	protected ConfigurableApplicationContext loadContextLocations(String[] locations) {
-		logger.info("Loading config for " + StringUtils.arrayToCommaDelimitedString(locations));
+		if (logger.isInfoEnabled()) {
+			logger.info("Loading config for: " + StringUtils.arrayToCommaDelimitedString(locations));
+		}
 		return new ClassPathXmlApplicationContext(locations);
 	}
 
