@@ -119,8 +119,9 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * JMX 1.2 specification. This should result in "never cache" behavior, always
 	 * reading attribute values freshly (which corresponds to a "currencyTimeLimit"
 	 * of <code>-1</code> in JMX 1.2).
-	 * <p>However, some JMX implementations might require an explicit value
-	 * to be set here to get "never cache" behavior.
+	 * <p>However, some JMX implementations (that do not follow the JMX 1.2 spec
+	 * in that respect) might require an explicit value to be set here to get
+	 * "never cache" behavior: for example, JBoss 3.2.x.
 	 * <p>Note that the "currencyTimeLimit" value can also be specified on a
 	 * managed attribute or operation. The default value will apply if not
 	 * overridden with a "currencyTimeLimit" value <code>>= 0</code> there:
@@ -143,10 +144,11 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	}
 
 	/**
-	 * Enables and disables strict casing for attributes. When using strict casing,
-	 * a JavaBean property with a getter method such as <code>getFoo()</code>
-	 * translates to an attribute called <code>Foo</code>. With strict casing disabled,
-	 * <code>getFoo()</code> would translate to just <code>foo</code>.
+	 * Set whether to use strict casing for attributes. Enabled by default.
+	 * <p>When using strict casing, a JavaBean property with a getter such as
+	 * <code>getFoo()</code> translates to an attribute called <code>Foo</code>.
+	 * With strict casing disabled, <code>getFoo()</code> would translate to just
+	 * <code>foo</code>.
 	 */
 	public void setUseStrictCasing(boolean useStrictCasing) {
 		this.useStrictCasing = useStrictCasing;

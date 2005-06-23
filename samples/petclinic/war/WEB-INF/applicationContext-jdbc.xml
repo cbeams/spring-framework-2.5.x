@@ -114,7 +114,7 @@
 		- you need to comment in the WebLogicMBeanServerFactoryBean definition on WebLogic,
 		- specifying appropriate configuration values there.
 		-
-		- Note that you need to comment in the "defaultCurrencyTimeLimit" value on JBoss.
+		- Note that you need to comment in the "defaultCurrencyTimeLimit" value on JBoss 3.x.
     -->
 	<bean id="jmxExporter" class="org.springframework.jmx.export.MBeanExporter">
 		<property name="beans">
@@ -131,7 +131,7 @@
 						<prop key="petclinic:service=callMonitor">org.springframework.samples.petclinic.jmx.CallMonitor</prop>
 					</props>
 				</property>
-				<!-- Comment the following in on JBoss, which doesn't follow -->
+				<!-- Comment the following in on JBoss 3.x, which doesn't follow -->
 				<!-- the JMX 1.2 recommendation for currencyTimeLimit behavior. -->
 				<!--
 				<property name="defaultCurrencyTimeLimit" value="0"/>
