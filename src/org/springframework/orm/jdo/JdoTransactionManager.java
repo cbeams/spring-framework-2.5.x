@@ -65,11 +65,13 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * don't need to explicitly specify the "dataSource" property.
  *
  * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC
- * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to false, though,
+ * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to "false", though,
  * as nested transactions will just apply to the JDBC Connection, not to the JDO
- * PersistenceManager and its cached objects. You can manually set the flag to true
+ * PersistenceManager and its cached objects. You can manually set the flag to "true"
  * if you want to use nested transactions for JDBC access code that participates
  * in JDO transactions (provided that your JDBC driver supports Savepoints).
+ * <i>Note that JDO itself does not support nested transactions! Hence,
+ * do not expect JDO access code to participate in a nested transaction.</i>
  *
  * @author Juergen Hoeller
  * @since 03.06.2003

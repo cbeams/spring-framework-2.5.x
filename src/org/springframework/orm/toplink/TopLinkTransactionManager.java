@@ -69,11 +69,13 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * SessionFactory.
  *
  * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC
- * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to false, though,
+ * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to "false", though,
  * as nested transactions will just apply to the JDBC Connection, not to the
- * TopLink Session and its cached objects. You can manually set the flag to true
+ * TopLink Session and its cached objects. You can manually set the flag to "true"
  * if you want to use nested transactions for JDBC access code that participates
  * in TopLink transactions (provided that your JDBC driver supports Savepoints).
+ * <i>Note that TopLink itself does not support nested transactions! Hence,
+ * do not expect TopLink access code to participate in a nested transaction.</i>
  *
  * <p>Thanks to Slavik Markovich for implementing the initial TopLink support prototype!
  *

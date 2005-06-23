@@ -212,7 +212,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 		if (isExistingTransaction(transaction)) {
 			// Existing transaction found -> check propagation behavior to find out how to behave.
-			return getExistingTransaction(definition, transaction, debugEnabled);
+			return handleExistingTransaction(definition, transaction, debugEnabled);
 		}
 
 		// Check definition settings for new transaction.
@@ -229,7 +229,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
 		    definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
 			if (debugEnabled) {
-				logger.debug("Creating new transaction");
+				logger.debug("Creating new transaction with name [" + definition.getName() + "]");
 			}
 			doBegin(transaction, definition);
 			boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
@@ -245,7 +245,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * Create a TransactionStatus for an existing transaction.
 	 */
-	private TransactionStatus getExistingTransaction(
+	private TransactionStatus handleExistingTransaction(
 			TransactionDefinition definition, Object transaction, boolean debugEnabled)
 			throws TransactionException {
 
@@ -266,7 +266,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW) {
 			if (debugEnabled) {
-				logger.debug("Creating new transaction, suspending current one");
+				logger.debug("Suspending current transaction, creating new transaction with name [" +
+						definition.getName() + "]");
 			}
 			Object suspendedResources = suspend(transaction);
 			doBegin(transaction, definition);
@@ -282,7 +283,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 						"specify 'nestedTransactionAllowed' property with value 'true'");
 			}
 			if (debugEnabled) {
-				logger.debug("Creating nested transaction");
+				logger.debug("Creating nested transaction with name [" + definition.getName() + "]");
 			}
 			if (useSavepointForNestedTransaction()) {
 				// Create savepoint within existing Spring-managed transaction,
@@ -728,10 +729,16 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Return whether to use a savepoint for a nested transaction. Default is true,
-	 * which causes delegation to DefaultTransactionStatus for holding a savepoint.
-	 * <p>Subclasses can override this to return false, causing a further invocation
-	 * of <code>doBegin</code> despite an already existing transaction.
+	 * Return whether to use a savepoint for a nested transaction.
+	 * <p>Default is <code>true</code>, which causes delegation to DefaultTransactionStatus
+	 * for creating and holding a savepoint. If the transaction object does not implement
+	 * the SavepointManager interface, a NestedTransactionNotSupportedException will be
+	 * thrown. Else, the SavepointManager will be asked to create a new savepoint to
+	 * demarcate the start of the nested transaction.
+	 * <p>Subclasses can override this to return <code>false</code>, causing a further
+	 * call to <code>doBegin</code> - within the context of an already existing transaction.
+	 * The <code>doBegin</code> implementation needs to handle this accordingly in such
+	 * a scenario. This is appropriate for JTA, for example.
 	 * @see DefaultTransactionStatus#createAndHoldSavepoint
 	 * @see DefaultTransactionStatus#rollbackToHeldSavepoint
 	 * @see DefaultTransactionStatus#releaseHeldSavepoint
@@ -742,12 +749,20 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Begin a new transaction with the given transaction definition.
-	 * Does not have to care about applying the propagation behavior,
+	 * Begin a new transaction with semantics according to the given transaction
+	 * definition. Does not have to care about applying the propagation behavior,
 	 * as this has already been handled by this abstract manager.
-	 * @param transaction transaction object returned by doGetTransaction
-	 * @param definition TransactionDefinition instance, describing
-	 * propagation behavior, isolation level, timeout etc.
+	 * <p>This method gets called when the transaction manager has decided to actually
+	 * start a new transaction. Either there wasn't any transaction before, or the
+	 * previous transaction has been suspended.
+	 * <p>A special scenario is a nested transaction without savepoint: If
+	 * <code>useSavepointForNestedTransaction()</code> returns "false", this method
+	 * will be called to start a nested transaction when necessary. In such a context,
+	 * there will be an active transaction: The implementation of this method has
+	 * to detect this and start an appropriate nested transaction.
+	 * @param transaction transaction object returned by <code>doGetTransaction</code>
+	 * @param definition TransactionDefinition instance, describing propagation
+	 * behavior, isolation level, read-only flag, timeout, and transaction name
 	 * @throws TransactionException in case of creation or system errors
 	 */
 	protected abstract void doBegin(Object transaction, TransactionDefinition definition)
@@ -758,7 +773,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Transaction synchronization will already have been suspended.
 	 * <p>Default implementation throws a TransactionSuspensionNotSupportedException,
 	 * assuming that transaction suspension is generally not supported.
-	 * @param transaction transaction object returned by doGetTransaction
+	 * @param transaction transaction object returned by <code>doGetTransaction</code>
 	 * @return an object that holds suspended resources
 	 * (will be kept unexamined for passing it into doResume)
 	 * @throws org.springframework.transaction.TransactionSuspensionNotSupportedException
@@ -776,7 +791,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Transaction synchronization will be resumed afterwards.
 	 * <p>Default implementation throws a TransactionSuspensionNotSupportedException,
 	 * assuming that transaction suspension is generally not supported.
-	 * @param transaction transaction object returned by doGetTransaction
+	 * @param transaction transaction object returned by <code>doGetTransaction</code>
 	 * @param suspendedResources the object that holds suspended resources,
 	 * as returned by doSuspend
 	 * @throws org.springframework.transaction.TransactionSuspensionNotSupportedException
