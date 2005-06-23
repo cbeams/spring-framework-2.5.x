@@ -71,6 +71,12 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 		this.ascending = ascending;
 	}
 
+	/**
+	 * Create a new MutableSortDefinition.
+	 * @param toggleAscendingOnSameProperty whether to toggle the ascending flag
+	 * if the same property gets set again (that is, <code>setProperty</code> gets
+	 * called with already set property name again).
+	 */
 	public MutableSortDefinition(boolean toggleAscendingOnSameProperty) {
 		this.toggleAscendingOnProperty = toggleAscendingOnSameProperty;
 	}
@@ -88,7 +94,7 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 		}
 		else {
 			// implicit toggling of ascending?
-			if (this.toggleAscendingOnProperty) {
+			if (isToggleAscendingOnProperty()) {
 				if (property.equals(this.property)) {
 					this.ascending = !this.ascending;
 				}
@@ -126,10 +132,23 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 		return ascending;
 	}
 
+	/**
+	 * Set whether to toggle the ascending flag if the same property gets set again
+	 * (that is, <code>setProperty</code> gets called with already set property name
+	 * again).
+	 * <p>This is particularly useful for parameter binding through a web request,
+	 * where clicking on the field header again might be supposed to trigger a
+	 * resort for the same field but opposite order.
+	 */
 	public void setToggleAscendingOnProperty(boolean toggleAscendingOnProperty) {
 		this.toggleAscendingOnProperty = toggleAscendingOnProperty;
 	}
 
+	/**
+	 * Return whether to toggle the ascending flag if the same property gets set again
+	 * (that is, <code>setProperty</code> gets called with already set property name
+	 * again).
+	 */
 	public boolean isToggleAscendingOnProperty() {
 		return toggleAscendingOnProperty;
 	}
@@ -148,9 +167,9 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 	}
 
 	public int hashCode() {
-		int hashCode = this.property.hashCode();
-		hashCode = 29 * hashCode + (this.ignoreCase ? 1 : 0);
-		hashCode = 29 * hashCode + (this.ascending ? 1 : 0);
+		int hashCode = getProperty().hashCode();
+		hashCode = 29 * hashCode + (isIgnoreCase() ? 1 : 0);
+		hashCode = 29 * hashCode + (isAscending() ? 1 : 0);
 		return hashCode;
 	}
 

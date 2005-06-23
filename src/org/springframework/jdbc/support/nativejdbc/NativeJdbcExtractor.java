@@ -52,7 +52,7 @@ import java.sql.Statement;
  * <p>The Oracle-specific implementation of Spring's LobHandler interface needs
  * a NativeJdbcExtractor to be able to work on the native OracleConnection.
  * This is also necessary for other Oracle-specific features that you may want
- * to leverage in your applications, like InterMedia.
+ * to leverage in your applications, such as InterMedia.
  *
  * @author Juergen Hoeller
  * @since 25.08.2003
@@ -108,10 +108,12 @@ public interface NativeJdbcExtractor {
 
 	/**
 	 * Retrieve the underlying native JDBC Connection for the given Statement.
-	 * Supposed to return the Statement.getConnection if not capable of unwrapping.
+	 * Supposed to return the <code>Statement.getConnection()</code> if not
+	 * capable of unwrapping.
 	 * <p>Having this extra method allows for more efficient unwrapping if data
-	 * access code already has a Statement. Statement.getConnection() often returns
-	 * the native JDBC Connection even if the Statement itself is wrapped by a pool. 
+	 * access code already has a Statement. <code>Statement.getConnection()</code>
+	 * often returns the native JDBC Connection even if the Statement itself
+	 * is wrapped by a pool.
 	 * @param stmt the Statement handle, potentially wrapped by a connection pool
 	 * @return the underlying native JDBC Connection, if possible;
 	 * else, the original Connection
