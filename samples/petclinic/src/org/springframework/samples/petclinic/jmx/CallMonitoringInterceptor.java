@@ -10,6 +10,7 @@ import org.springframework.util.StopWatch;
  * Implements the CallMonitor management interface.
  * 
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 1.2
  */
 public class CallMonitoringInterceptor implements CallMonitor, MethodInterceptor {
@@ -18,7 +19,7 @@ public class CallMonitoringInterceptor implements CallMonitor, MethodInterceptor
 
 	private int callCount = 0;
 
-	private long callTime = 0;
+	private long accumulatedCallTime = 0;
 
 
 	public void setEnabled(boolean enabled) {
@@ -31,7 +32,7 @@ public class CallMonitoringInterceptor implements CallMonitor, MethodInterceptor
 
 	public void reset() {
 		this.callCount = 0;
-		this.callTime = 0;
+		this.accumulatedCallTime = 0;
 	}
 
 	public int getCallCount() {
@@ -39,26 +40,26 @@ public class CallMonitoringInterceptor implements CallMonitor, MethodInterceptor
 	}
 
 	public long getCallTime() {
-		return callTime;
+		return (this.callCount > 0 ? this.accumulatedCallTime / this.callCount : 0);
 	}
 
 
-	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+	public Object invoke(MethodInvocation invocation) throws Throwable {
 		if (this.isEnabled) {
 			this.callCount++;
 
-			StopWatch sw = new StopWatch(methodInvocation.getMethod().getName());
+			StopWatch sw = new StopWatch(invocation.getMethod().getName());
 
 			sw.start("invoke");
-			Object retVal = methodInvocation.proceed();
+			Object retVal = invocation.proceed();
 			sw.stop();
 
-			this.callTime = sw.getTotalTimeMillis();
+			this.accumulatedCallTime += sw.getTotalTimeMillis();
 			return retVal;
 		}
 
 		else {
-			return methodInvocation.proceed();
+			return invocation.proceed();
 		}
 	}
 
