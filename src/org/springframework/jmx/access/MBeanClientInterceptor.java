@@ -34,9 +34,6 @@ import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import javax.management.MBeanException;
-import javax.management.AttributeNotFoundException;
-import javax.management.InvalidAttributeValueException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -75,6 +72,11 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	private ObjectName objectName;
 
 	/**
+	 * Indicates whether or not strict casing is being used for attributes.
+	 */
+  private boolean useStrictCasing = true;
+
+	/**
 	 * Caches the list of attributes exposed on the management interface of
 	 * the managed resouce.
 	 */
@@ -90,20 +92,6 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 * Caches method signatures for use during invocation.
 	 */
 	private final Map signatureCache = new HashMap();
-
-	/**
-	 * Indicates whether or not strict casing is being used for attributes.
-	 */
-  private boolean useStrictCasing = true;
-	
-	/**
-	 * Enables and disables strict casing for attributes. When using strict casing a JavaBean property
-	 * with a getter such as <code>getFoo()</code> translates to an attribute called <code>Foo</code>.
-	 * With strict casing disable <code>getFoo()</code> would translate to just <code>foo</code>.
-	 */
-	public void setUseStrictCasing(boolean useStrictCasing) {
-		this.useStrictCasing = useStrictCasing;
-	}
 
 
 	/**
@@ -128,6 +116,17 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 */
 	public void setObjectName(String objectName) throws MalformedObjectNameException {
 		this.objectName = ObjectNameManager.getInstance(objectName);
+	}
+
+	/**
+	 * Set whether to use strict casing for attributes. Enabled by default.
+	 * <p>When using strict casing, a JavaBean property with a getter such as
+	 * <code>getFoo()</code> translates to an attribute called <code>Foo</code>.
+	 * With strict casing disabled, <code>getFoo()</code> would translate to just
+	 * <code>foo</code>.
+	 */
+	public void setUseStrictCasing(boolean useStrictCasing) {
+		this.useStrictCasing = useStrictCasing;
 	}
 
 
@@ -203,19 +202,18 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 * resource results in an <code>InvalidInvocationException</code>.
 	 * @param invocation the <code>MethodInvocation</code> to re-route.
 	 * @return the value returned as a result of the re-routed invocation.
-	 * @throws InvalidInvocationException if the invocation does not match an attribute or
+	 * @throws InvocationFailureException if the invocation does not match an attribute or
 	 * operation on the management interface of the resource.
 	 * @throws Throwable typically as the result of an error during invocation
 	 */
-	public Object invoke(MethodInvocation invocation) throws InvalidInvocationException, Throwable {
+	public Object invoke(MethodInvocation invocation) throws Throwable {
 		try {
 			PropertyDescriptor pd = BeanUtils.findPropertyForMethod(invocation.getMethod());
 			if (pd != null) {
-
 				return invokeAttribute(pd, invocation);
 			}
 			else {
-				return invokeMethod(invocation.getMethod(), invocation.getArguments());
+				return invokeOperation(invocation.getMethod(), invocation.getArguments());
 			}
 		}
 		catch (JMException ex) {
@@ -226,7 +224,9 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 		}
 	}
 
-	private Object invokeAttribute(PropertyDescriptor pd, MethodInvocation invocation) throws MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException, IOException, InvalidAttributeValueException {
+	private Object invokeAttribute(PropertyDescriptor pd, MethodInvocation invocation)
+			throws JMException, IOException {
+
 		String attributeName = JmxUtils.getAttributeName(pd, this.useStrictCasing);
 		MBeanAttributeInfo inf = (MBeanAttributeInfo) this.allowedAttributes.get(attributeName);
 
@@ -266,7 +266,7 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 * @param args the invocation arguments
 	 * @return the value returned by the method invocation.
 	 */
-	private Object invokeMethod(Method method, Object[] args) throws JMException, IOException {
+	private Object invokeOperation(Method method, Object[] args) throws JMException, IOException {
 		MethodCacheKey key = new MethodCacheKey(method.getName(), method.getParameterTypes());
 		MBeanOperationInfo info = (MBeanOperationInfo) this.allowedOperations.get(key);
 		if (info == null) {
@@ -274,11 +274,14 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 					"' is not exposed on the management interface");
 		}
 		else {
-			String[] signature = (String[]) this.signatureCache.get(method);
-			if (signature == null) {
-				signature = JmxUtils.getMethodSignature(method);
-				synchronized (this.signatureCache) {
-					this.signatureCache.put(method, signature);
+			String[] signature = null;
+			synchronized (this.signatureCache) {
+				signature = (String[]) this.signatureCache.get(method);
+				if (signature == null) {
+					signature = JmxUtils.getMethodSignature(method);
+					synchronized (this.signatureCache) {
+						this.signatureCache.put(method, signature);
+					}
 				}
 			}
 			return this.server.invoke(this.objectName, method.getName(), args, signature);
@@ -314,10 +317,6 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 			}
 		}
 
-		public int hashCode() {
-			return this.name.hashCode();
-		}
-
 		public boolean equals(Object other) {
 			if (other == null) {
 				return false;
@@ -333,6 +332,10 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 			else {
 				return false;
 			}
+		}
+
+		public int hashCode() {
+			return this.name.hashCode();
 		}
 	}
 
