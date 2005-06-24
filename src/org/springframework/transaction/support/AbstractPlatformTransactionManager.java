@@ -581,8 +581,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK);
 	}
 
+
 	/**
-	 * Trigger beforeCommit callback.
+	 * Trigger beforeCommit callbacks.
 	 * @param status object representing the transaction
 	 */
 	private void triggerBeforeCommit(DefaultTransactionStatus status) {
@@ -596,7 +597,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Trigger beforeCompletion callback.
+	 * Trigger beforeCompletion callbacks.
 	 * @param status object representing the transaction
 	 */
 	private void triggerBeforeCompletion(DefaultTransactionStatus status) {
@@ -615,21 +616,49 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Trigger afterCompletion callback, handling exceptions properly.
+	 * Trigger afterCompletion callbacks.
 	 * @param status object representing the transaction
 	 * @param completionStatus completion status according to TransactionSynchronization constants
 	 */
 	private void triggerAfterCompletion(DefaultTransactionStatus status, int completionStatus) {
 		if (status.isNewSynchronization()) {
-			logger.debug("Triggering afterCompletion synchronization");
-			for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
-				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
-				try {
-					synchronization.afterCompletion(completionStatus);
-				}
-				catch (Throwable tsex) {
-					logger.error("TransactionSynchronization.afterCompletion threw exception", tsex);
-				}
+			List synchronizations = TransactionSynchronizationManager.getSynchronizations();
+			if (!status.hasTransaction() || status.isNewTransaction()) {
+				// No transaction or new transaction for the current scope ->
+				// invoke the afterCompletion callbacks immediately
+				invokeAfterCompletion(synchronizations, completionStatus);
+			}
+			else {
+				// Existing transaction that we participate in, controlled outside
+				// of the scope of this Spring transaction manager -> try to register
+				// an afterCompletion callback with the existing (JTA) transaction.
+				registerAfterCompletionWithExistingTransaction(synchronizations);
+			}
+		}
+	}
+
+	/**
+	 * Actually invoke the <code>afterCompletion</code> methods of the
+	 * given Spring TransactionSynchronization objects.
+	 * <p>To be called by this abstract manager itself, or by special implementations
+	 * of the <code>registerAfterCompletionWithExistingTransaction</code> callback.
+	 * @param synchronizations List of TransactionSynchronization objects
+	 * @param completionStatus the completion status according to the
+	 * constants in the TransactionSynchronization interface
+	 * @see #registerAfterCompletionWithExistingTransaction(java.util.List)
+	 * @see TransactionSynchronization#STATUS_COMMITTED
+	 * @see TransactionSynchronization#STATUS_ROLLED_BACK
+	 * @see TransactionSynchronization#STATUS_UNKNOWN
+	 */
+	protected final void invokeAfterCompletion(List synchronizations, int completionStatus) {
+		logger.debug("Triggering afterCompletion synchronization");
+		for (Iterator it = synchronizations.iterator(); it.hasNext();) {
+			TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+			try {
+				synchronization.afterCompletion(completionStatus);
+			}
+			catch (Throwable tsex) {
+				logger.error("TransactionSynchronization.afterCompletion threw exception", tsex);
 			}
 		}
 	}
@@ -874,6 +903,29 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		throw new IllegalTransactionStateException(
 				"Participating in existing transactions is not supported - when 'isExistingTransaction' " +
 				"returns true, appropriate 'doSetRollbackOnly' behavior must be provided");
+	}
+
+	/**
+	 * Register the given list of transaction synchronizations with the
+	 * existing transaction.
+	 * <p>Invoked when the control of the Spring transaction manager and thus
+	 * all Spring transaction synchronizations end, without the transaction
+	 * being completed yet. This is for example the case when participating
+	 * in an existing JTA or EJB CMT transaction.
+	 * <p>Default implementation simply invokes the <code>afterCompletion</code>
+	 * methods immediately, passing in "STATUS_UNKNOWN". This is the best we
+	 * can do if there's no chance to determine the actual outcome of the
+	 * outer transaction.
+	 * @param synchronizations List of TransactionSynchronization objects
+	 * @throws TransactionException in case of system errors
+	 * @see #invokeAfterCompletion(java.util.List, int)
+	 * @see TransactionSynchronization#afterCompletion(int)
+	 * @see TransactionSynchronization#STATUS_UNKNOWN
+	 */
+	protected void registerAfterCompletionWithExistingTransaction(List synchronizations)
+			throws TransactionException {
+
+		invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
 	}
 
 	/**

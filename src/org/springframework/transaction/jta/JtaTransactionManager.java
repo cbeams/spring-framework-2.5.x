@@ -19,6 +19,7 @@ package org.springframework.transaction.jta;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Properties;
 
 import javax.naming.NamingException;
@@ -28,6 +29,7 @@ import javax.transaction.InvalidTransactionException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
+import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
@@ -47,6 +49,7 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.TransactionSynchronization;
 
 /**
  * PlatformTransactionManager implementation for JTA, i.e. J2EE container transactions.
@@ -436,7 +439,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 		else {
-			logger.warn("No JTA TransactionManager found: transaction suspension not available");
+			logger.warn("No JTA TransactionManager found: " +
+					"transaction suspension and synchronization with existing JTA transactions not available");
 		}
 	}
 
@@ -655,8 +659,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * <p>Can be overridden in subclasses, for specific JTA implementations.
 	 * @return the suspended JTA Transaction object
 	 * @throws SystemException if thrown by JTA methods
-	 * @see #getTransactionManager
-	 * @see javax.transaction.TransactionManager#suspend
+	 * @see #getTransactionManager()
+	 * @see javax.transaction.TransactionManager#suspend()
 	 */
 	protected Transaction doJtaSuspend() throws SystemException {
 		return getTransactionManager().suspend();
@@ -686,8 +690,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @param suspendedTransaction the suspended JTA Transaction object
 	 * @throws InvalidTransactionException if thrown by JTA methods
 	 * @throws SystemException if thrown by JTA methods
-	 * @see #getTransactionManager
-	 * @see javax.transaction.TransactionManager#resume
+	 * @see #getTransactionManager()
+	 * @see javax.transaction.TransactionManager#resume(javax.transaction.Transaction)
 	 */
 	protected void doJtaResume(Transaction suspendedTransaction)
 	    throws InvalidTransactionException, SystemException {
@@ -750,6 +754,50 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 
+	protected void registerAfterCompletionWithExistingTransaction(List synchronizations) {
+		if (getTransactionManager() != null) {
+			try {
+				doRegisterAfterCompletionWithJtaTransaction(synchronizations);
+			}
+			catch (RollbackException ex) {
+				throw new UnexpectedRollbackException(
+						"JTA transaction unexpectedly rolled back (maybe due to a timeout)", ex);
+			}
+			catch (IllegalStateException ex) {
+				throw new NoTransactionException("No active JTA transaction");
+			}
+			catch (SystemException ex) {
+				throw new TransactionSystemException("JTA failure on registerSynchronization", ex);
+			}
+		}
+
+		else {
+			// No JTA TransactionManager available.
+			logger.warn("Participating in existing JTA transaction, but no JTA TransactionManager available: " +
+					"cannot register Spring afterCompletion callbacks with outer JTA transaction");
+			super.registerAfterCompletionWithExistingTransaction(synchronizations);
+		}
+	}
+
+	/**
+	 * Register a JTA synchronization on the JTA TransactionManager, for calling
+	 * <code>afterCompletion</code> on the given Spring TransactionSynchronizations.
+	 * <p>Can be overridden in subclasses, for specific JTA implementations.
+	 * @param synchronizations List of TransactionSynchronization objects
+	 * @throws RollbackException if thrown by JTA methods
+	 * @throws SystemException if thrown by JTA methods
+	 * @see #getTransactionManager()
+	 * @see javax.transaction.Transaction#registerSynchronization
+	 * @see #invokeAfterCompletion(java.util.List, int)
+	 */
+	protected void doRegisterAfterCompletionWithJtaTransaction(final List synchronizations)
+			throws RollbackException, SystemException {
+
+		getTransactionManager().getTransaction().registerSynchronization(
+				new JtaAfterCompletionSynchronization(synchronizations));
+	}
+
+
 	//---------------------------------------------------------------------
 	// Serialization support
 	//---------------------------------------------------------------------
@@ -770,6 +818,37 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 		// Perform lookup for JTA UserTransaction.
 		this.userTransaction = lookupUserTransaction(this.userTransactionName);
+	}
+
+
+	/**
+	 * Adapter for a JTA Synchronization, invoking the <code>afterCompletion</code> of
+	 * Spring TransactionSynchronizations after the outer JTA transaction has completed.
+	 * Applied when participating in an existing (non-Spring) JTA transaction.
+	 */
+	private class JtaAfterCompletionSynchronization implements Synchronization {
+
+		private final List synchronizations;
+
+		public JtaAfterCompletionSynchronization(List synchronizations) {
+			this.synchronizations = synchronizations;
+		}
+
+		public void beforeCompletion() {
+		}
+
+		public void afterCompletion(int status) {
+			switch (status) {
+				case Status.STATUS_COMMITTED:
+					invokeAfterCompletion(this.synchronizations, TransactionSynchronization.STATUS_COMMITTED);
+					break;
+				case Status.STATUS_ROLLEDBACK:
+					invokeAfterCompletion(this.synchronizations, TransactionSynchronization.STATUS_ROLLED_BACK);
+					break;
+				default:
+					invokeAfterCompletion(this.synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
+			}
+		}
 	}
 
 }

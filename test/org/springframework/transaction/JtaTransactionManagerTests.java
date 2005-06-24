@@ -285,7 +285,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		final TransactionSynchronization synch = (TransactionSynchronization) synchControl.getMock();
 		synch.beforeCompletion();
 		synchControl.setVoidCallable(1);
-		synch.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
+		synch.afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
@@ -305,6 +305,51 @@ public class JtaTransactionManagerTests extends TestCase {
 		synchControl.verify();
 	}
 
+	public void testJtaTransactionManagerWithExistingTransactionAndJtaSynchronization() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		MockJtaTransaction tx = new MockJtaTransaction();
+
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		ut.setRollbackOnly();
+		utControl.setVoidCallable(1);
+		tm.getTransaction();
+		tmControl.setReturnValue(tx, 1);
+
+		utControl.replay();
+		tmControl.replay();
+
+		MockControl synchControl = MockControl.createControl(TransactionSynchronization.class);
+		final TransactionSynchronization synch = (TransactionSynchronization) synchControl.getMock();
+		synch.beforeCompletion();
+		synchControl.setVoidCallable(1);
+		synch.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
+		synchControl.setVoidCallable(1);
+		synchControl.replay();
+
+		JtaTransactionManager ptm = new JtaTransactionManager(ut, tm);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+				TransactionSynchronizationManager.registerSynchronization(synch);
+				status.setRollbackOnly();
+			}
+		});
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertNotNull(tx.getSynchronization());
+		tx.getSynchronization().beforeCompletion();
+		tx.getSynchronization().afterCompletion(Status.STATUS_ROLLEDBACK);
+
+		utControl.verify();
+		tmControl.verify();
+		synchControl.verify();
+	}
+
 	public void testJtaTransactionManagerWithExistingTransactionAndSynchronizationOnActual() throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
@@ -318,7 +363,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		final TransactionSynchronization synch = (TransactionSynchronization) synchControl.getMock();
 		synch.beforeCompletion();
 		synchControl.setVoidCallable(1);
-		synch.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
+		synch.afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
@@ -376,7 +421,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		final TransactionSynchronization synch = (TransactionSynchronization) synchControl.getMock();
 		synch.beforeCompletion();
 		synchControl.setVoidCallable(1);
-		synch.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
+		synch.afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
