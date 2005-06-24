@@ -16,23 +16,28 @@
 
 package org.springframework.jmx.export.naming;
 
-import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 
 /**
- * Allows infrastructure components to provide their own <code>ObjectName</code>s to the
- * <code>MBeanExporter</code>.
- * <p/>
- * <stong>Note:</strong> this interface is intended for internal usage only.
+ * Interface that allows infrastructure components to provide their own
+ * <code>ObjectName</code>s to the <code>MBeanExporter</code>.
+ *
+ * <p><b>Note:</b> This interface is mainly intended for internal usage.
  *
  * @author Rob Harrop
- * @see org.springframework.jmx.export.MBeanExporter
  * @since 1.2.2
+ * @see org.springframework.jmx.export.MBeanExporter
  */
 public interface SelfNaming {
 
 	/**
-	 * Gets the <code>ObjectName</code> for the implementing object.
+	 * Return the <code>ObjectName</code> for the implementing object.
+	 * @throws MalformedObjectNameException if thrown by the ObjectName constructor
+	 * @see javax.management.ObjectName#ObjectName(String)
+	 * @see javax.management.ObjectName#getInstance(String)
+	 * @see org.springframework.jmx.support.ObjectNameManager#getInstance(String)
 	 */
 	ObjectName getObjectName() throws MalformedObjectNameException;
+
 }

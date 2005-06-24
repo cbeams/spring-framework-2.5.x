@@ -486,11 +486,12 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	}
 
 	/**
-	 * Retrieve the <code>ObjectName</code> for a bean. If the bean implements the <code>SelfNaming</code> interface
-	 * then the <code>ObjectName</code> will be retrieved using <code>SelfNaming.getObjectName()</code>. Otherwise, the
-	 * configured <code>ObjectNamingStrategy</code> is used.
+	 * Retrieve the <code>ObjectName</code> for a bean.
+	 * <p>If the bean implements the <code>SelfNaming</code> interface, then the
+	 * <code>ObjectName</code> will be retrieved using <code>SelfNaming.getObjectName()</code>.
+	 * Otherwise, the configured <code>ObjectNamingStrategy</code> is used.
 	 * @param bean the name of the bean in the <code>BeanFactory</code>
-	 * @param beanKey the key associated with the bean in the beans map.
+	 * @param beanKey the key associated with the bean in the beans map
 	 * @return the <code>ObjectName</code> for the supplied bean
 	 * @throws MalformedObjectNameException if the retrieved <code>ObjectName</code> is malformed.
 	 */
