@@ -20,13 +20,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Factory bean for
  * <a href="http://jakarta.apache.org/commons/logging.html">commons-logging</a>
  * Log instances.
- * Will expose the created Log object on getBean calls, and can be passed
- * to bean properites of type org.apache.commons.logging.Log.
+ * Will expose the created Log object on <code>getBean</code> calls, and can be
+ * passed to bean properties of type <code>org.apache.commons.logging.Log</code>.
  *
  * <p>Useful for sharing Log instances among multiple beans instead of using
  * one Log instance per class name, e.g. for common log topics.
@@ -35,16 +36,19 @@ import org.springframework.beans.factory.FactoryBean;
  * @since 16.11.2003
  * @see org.apache.commons.logging.Log
  */
-public class CommonsLogFactoryBean implements FactoryBean {
+public class CommonsLogFactoryBean implements FactoryBean, InitializingBean {
 
-  private Log log = null;
+  private Log log;
 
   public void setLogName(String logName) {
-		if (logName == null) {
-			throw new IllegalArgumentException("'logName' must be specified");
-		}
     this.log = LogFactory.getLog(logName);
   }
+
+	public void afterPropertiesSet() {
+		if (this.log == null) {
+			throw new IllegalArgumentException("logName is required");
+		}
+	}
 
   public Object getObject() {
     return log;
