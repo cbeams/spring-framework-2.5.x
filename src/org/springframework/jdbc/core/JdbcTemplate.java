@@ -226,7 +226,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			return action.doInConnection(conToUse);
 		}
 		catch (SQLException ex) {
-			throw getExceptionTranslator().translate("executing ConnectionCallback", getSql(action), ex);
+			// Release Connection early, to avoid potential connection pool deadlock
+			// in the case when the exception translator hasn't been initialized yet.
+			DataSourceUtils.releaseConnection(con, getDataSource());
+			con = null;
+			throw getExceptionTranslator().translate("ConnectionCallback", getSql(action), ex);
 		}
 		finally {
 			DataSourceUtils.releaseConnection(con, getDataSource());
@@ -259,7 +263,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			return result;
 		}
 		catch (SQLException ex) {
-			throw getExceptionTranslator().translate("executing StatementCallback", getSql(action), ex);
+			// Release Connection early, to avoid potential connection pool deadlock
+			// in the case when the exception translator hasn't been initialized yet.
+			JdbcUtils.closeStatement(stmt);
+			stmt = null;
+			DataSourceUtils.releaseConnection(con, getDataSource());
+			con = null;
+			throw getExceptionTranslator().translate("StatementCallback", getSql(action), ex);
 		}
 		finally {
 			JdbcUtils.closeStatement(stmt);
@@ -453,7 +463,18 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			return result;
 		}
 		catch (SQLException ex) {
-			throw getExceptionTranslator().translate("executing PreparedStatementCallback", getSql(psc), ex);
+			// Release Connection early, to avoid potential connection pool deadlock
+			// in the case when the exception translator hasn't been initialized yet.
+			if (psc instanceof ParameterDisposer) {
+				((ParameterDisposer) psc).cleanupParameters();
+			}
+			String sql = getSql(psc);
+			psc = null;
+			JdbcUtils.closeStatement(ps);
+			ps = null;
+			DataSourceUtils.releaseConnection(con, getDataSource());
+			con = null;
+			throw getExceptionTranslator().translate("PreparedStatementCallback", sql, ex);
 		}
 		finally {
 			if (psc instanceof ParameterDisposer) {
@@ -791,7 +812,18 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			return result;
 		}
 		catch (SQLException ex) {
-			throw getExceptionTranslator().translate("executing CallableStatementCallback", getSql(csc), ex);
+			// Release Connection early, to avoid potential connection pool deadlock
+			// in the case when the exception translator hasn't been initialized yet.
+			if (csc instanceof ParameterDisposer) {
+				((ParameterDisposer) csc).cleanupParameters();
+			}
+			String sql = getSql(csc);
+			csc = null;
+			JdbcUtils.closeStatement(cs);
+			cs = null;
+			DataSourceUtils.releaseConnection(con, getDataSource());
+			con = null;
+			throw getExceptionTranslator().translate("CallableStatementCallback", sql, ex);
 		}
 		finally {
 			if (csc instanceof ParameterDisposer) {
