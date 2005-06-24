@@ -66,10 +66,11 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean {
 	}
 
 	public void setConfigurationClass(Class configurationClass) {
-		if (!AnnotationConfiguration.class.isAssignableFrom(configurationClass)) {
+		if (configurationClass == null || !AnnotationConfiguration.class.isAssignableFrom(configurationClass)) {
 			throw new IllegalArgumentException(
 					"AnnotationSessionFactoryBean only supports AnnotationConfiguration or subclasses");
 		}
+		super.setConfigurationClass(configurationClass);
 	}
 
 	/**
