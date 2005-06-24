@@ -27,6 +27,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 
 /**
  * Default implementation of the AdvisorAdapterRegistry interface.
+ * Supports Interceptor, BeforeAdvice, AfterReturningAdvice, ThrowsAdvice.
  *
  * @author Rod Johnson
  */
@@ -35,7 +36,7 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 	private final List adapters = new ArrayList();
 	
 	public DefaultAdvisorAdapterRegistry() {
-		// register well-known adapters
+		// Register well-known adapters.
 		registerAdvisorAdapter(new BeforeAdviceAdapter());
 		registerAdvisorAdapter(new AfterReturningAdviceAdapter());
 		registerAdvisorAdapter(new ThrowsAdviceAdapter());
@@ -45,18 +46,16 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 		if (adviceObject instanceof Advisor) {
 			return (Advisor) adviceObject;
 		}
-		
 		if (!(adviceObject instanceof Advice)) {
 			throw new UnknownAdviceTypeException(adviceObject);
 		}
 		Advice advice = (Advice) adviceObject;
-		
 		if (advice instanceof Interceptor) {
-			// So well-known it doesn't even need an adapter
+			// So well-known it doesn't even need an adapter.
 			return new DefaultPointcutAdvisor(advice);
 		}
 		for (int i = 0; i < this.adapters.size(); i++) {
-			// Check that it is supported
+			// Check that it is supported.
 			AdvisorAdapter adapter = (AdvisorAdapter) this.adapters.get(i);
 			if (adapter.supportsAdvice(advice)) {
 				return new DefaultPointcutAdvisor(advice);

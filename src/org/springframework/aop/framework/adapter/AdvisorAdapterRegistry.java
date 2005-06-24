@@ -32,12 +32,17 @@ public interface AdvisorAdapterRegistry {
 	
 	/**
 	 * Return an Advisor wrapping the given advice.
-	 * @param advice object that should be an advice, such as
-	 * BeforeAdvice or ThrowsAdvice
+	 * <p>Should by default at least support Interceptor,
+	 * BeforeAdvice, AfterReturningAdvice, ThrowsAdvice.
+	 * @param advice object that should be an advice
 	 * @return an Advisor wrapping the given advice. Never returns null.
 	 * If the advice parameter is an Advisor, return it.
 	 * @throws UnknownAdviceTypeException if no registered AdvisorAdapter
 	 * can wrap the supposed advice
+	 * @see org.aopalliance.intercept.Interceptor
+	 * @see org.springframework.aop.BeforeAdvice
+	 * @see org.springframework.aop.AfterReturningAdvice
+	 * @see org.springframework.aop.ThrowsAdvice
 	 */
 	Advisor wrap(Object advice) throws UnknownAdviceTypeException;
 	
@@ -55,11 +60,10 @@ public interface AdvisorAdapterRegistry {
 	
 	/**
 	 * Register the given AdvisorAdapter. Note that it is not necessary to register
-	 * adapters for InterceptionAroundAdvice or AOP Alliance Interceptors:
-	 * these must be automatically recognized by an AdvisorAdapterRegistry
-	 * implementation.
-	 * @param adapter AdvisorAdapter that understands particular Advisor
-	 * and Advice types
+	 * adapters for an AOP Alliance Interceptors or Spring Advices: these must be
+	 * automatically recognized by an AdvisorAdapterRegistry implementation.
+	 * @param adapter AdvisorAdapter that understands a particular Advisor
+	 * or Advice types
 	 */
 	void registerAdvisorAdapter(AdvisorAdapter adapter);
 
