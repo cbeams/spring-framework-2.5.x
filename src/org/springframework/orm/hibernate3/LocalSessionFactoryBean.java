@@ -160,6 +160,8 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	private Resource[] mappingLocations;
 
+	private Resource[] cacheableMappingLocations;
+
 	private Resource[] mappingJarLocations;
 
 	private Resource[] mappingDirectoryLocations;
@@ -259,6 +261,19 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 */
 	public void setMappingLocations(Resource[] mappingLocations) {
 		this.mappingLocations = mappingLocations;
+	}
+
+	/**
+	 * Set locations of cacheable Hibernate mapping files, for example as web app
+	 * resource "/WEB-INF/mapping/example.hbm.xml". Supports any resource location
+	 * via Spring's resource abstraction, as long as the resource can be resolved
+	 * in the file system.
+	 * <p>Can be used to add to mappings from a Hibernate XML config file,
+	 * or to specify all mappings locally.
+	 * @see org.hibernate.cfg.Configuration#addCacheableFile(java.io.File)
+	 */
+	public void setCacheableMappingLocations(Resource[] cacheableMappingLocations) {
+		this.cacheableMappingLocations = cacheableMappingLocations;
 	}
 
 	/**
@@ -606,6 +621,13 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 				// Register given Hibernate mapping definitions, contained in resource files.
 				for (int i = 0; i < this.mappingLocations.length; i++) {
 					config.addInputStream(this.mappingLocations[i].getInputStream());
+				}
+			}
+
+			if (this.cacheableMappingLocations != null) {
+				// Register given cacheable Hibernate mapping definitions, read from the file system.
+				for (int i = 0; i < this.cacheableMappingLocations.length; i++) {
+					config.addCacheableFile(this.cacheableMappingLocations[i].getFile());
 				}
 			}
 
