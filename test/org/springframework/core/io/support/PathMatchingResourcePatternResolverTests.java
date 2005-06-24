@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.io.support;
 
 import java.io.IOException;
@@ -31,7 +32,7 @@ import org.springframework.core.io.Resource;
 public class PathMatchingResourcePatternResolverTests extends TestCase {
 
 	private static final String[] CLASSES_IN_CORE_IO_SUPPORT =
-			new String[] {"PathMatchingResourcePatternResolver.class",
+			new String[] {"PathMatchingResourcePatternResolver.class", "PropertiesLoaderSupport.class",
 					"ResourceArrayPropertyEditor.class", "ResourcePatternResolver.class"};
 
 	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT =

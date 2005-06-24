@@ -16,6 +16,7 @@
 
 package org.springframework.context.support;
 
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +49,7 @@ public class ResourceMapFactoryBean extends PropertiesFactoryBean implements Res
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
+
 	/**
 	 * Set a base path to prepend to each resource location value
 	 * in the properties file.
@@ -62,11 +64,12 @@ public class ResourceMapFactoryBean extends PropertiesFactoryBean implements Res
 		this.resourceLoader = resourceLoader;
 	}
 
+
 	public Class getObjectType() {
 		return Map.class;
 	}
 
-	protected Object createInstance() throws Exception {
+	protected Object createInstance() throws IOException {
 		Map resourceMap = new HashMap();
 		Properties props = mergeProperties();
 		for (Enumeration en = props.propertyNames(); en.hasMoreElements();) {

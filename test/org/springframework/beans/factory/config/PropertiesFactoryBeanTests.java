@@ -65,10 +65,25 @@ public class PropertiesFactoryBeanTests extends TestCase {
 		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/config/test.properties"));
 		Properties localProps = new Properties();
 		localProps.setProperty("key2", "value2");
+		localProps.setProperty("tb.array[0].age", "0");
 		pfb.setProperties(localProps);
 		pfb.afterPropertiesSet();
 		Properties props = (Properties) pfb.getObject();
 		assertEquals("99", props.getProperty("tb.array[0].age"));
+		assertEquals("value2", props.getProperty("key2"));
+	}
+
+	public void testWithPropertiesFileAndLocalPropertiesAndLocalOverride() throws Exception {
+		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
+		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/config/test.properties"));
+		Properties localProps = new Properties();
+		localProps.setProperty("key2", "value2");
+		localProps.setProperty("tb.array[0].age", "0");
+		pfb.setProperties(localProps);
+		pfb.setLocalOverride(true);
+		pfb.afterPropertiesSet();
+		Properties props = (Properties) pfb.getObject();
+		assertEquals("0", props.getProperty("tb.array[0].age"));
 		assertEquals("value2", props.getProperty("key2"));
 	}
 

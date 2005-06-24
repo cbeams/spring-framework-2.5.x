@@ -17,14 +17,11 @@
 package org.springframework.beans.factory.config;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Enumeration;
 import java.util.Properties;
 
-import org.springframework.core.io.Resource;
-import org.springframework.util.DefaultPropertiesPersister;
-import org.springframework.util.PropertiesPersister;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.io.support.PropertiesLoaderSupport;
 
 /**
  * Allows for making a properties file from a classpath location available
@@ -42,131 +39,60 @@ import org.springframework.util.PropertiesPersister;
  * @author Juergen Hoeller
  * @see java.util.Properties
  */
-public class PropertiesFactoryBean extends AbstractFactoryBean {
+public class PropertiesFactoryBean extends PropertiesLoaderSupport
+		implements FactoryBean, InitializingBean {
 
-	public static final String XML_FILE_EXTENSION = ".xml";
+	private boolean singleton = true;
 
-
-	private Properties properties;
-
-	private Resource[] locations;
-
-	private String fileEncoding;
-
-	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
+	private Object singletonInstance;
 
 
 	/**
-	 * Set local properties, e.g. via the "props" tag in XML bean definitions.
-	 * These can be considered defaults, to be overridden by properties
-	 * loaded from files.
+	 * Set if a singleton should be created, or a new object
+	 * on each request else. Default is true (a singleton).
 	 */
-	public void setProperties(Properties properties) {
-		this.properties = properties;
+	public final void setSingleton(boolean singleton) {
+		this.singleton = singleton;
 	}
 
-	/**
-	 * Set a location of a properties file to be loaded.
-	 * <p>Can point to a classic properties file or to an XML file
-	 * that follows JDK 1.5's properties XML format.
-	 */
-	public void setLocation(Resource location) {
-		this.locations = new Resource[] {location};
+	public final boolean isSingleton() {
+		return singleton;
 	}
 
-	/**
-	 * Set locations of properties files to be loaded.
-	 * <p>Can point to classic properties files or to XML files
-	 * that follow JDK 1.5's properties XML format.
-	 */
-	public void setLocations(Resource[] locations) {
-		this.locations = locations;
+
+	public final void afterPropertiesSet() throws IOException {
+		if (this.singleton) {
+			this.singletonInstance = createInstance();
+		}
 	}
 
-	/**
-	 * Set the encoding to use for parsing properties files.
-	 * <p>Default is none, using the <code>java.util.Properties</code>
-	 * default encoding.
-	 * <p>Only applies to classic properties files, not to XML files.
-	 * @see org.springframework.util.PropertiesPersister#load
-	 */
-	public void setFileEncoding(String encoding) {
-		this.fileEncoding = encoding;
+	public final Object getObject() throws IOException {
+		if (this.singleton) {
+			return this.singletonInstance;
+		}
+		else {
+			return createInstance();
+		}
 	}
-
-	/**
-	 * Set the PropertiesPersister to use for parsing properties files.
-	 * The default is DefaultPropertiesPersister.
-	 * @see org.springframework.util.DefaultPropertiesPersister
-	 */
-	public void setPropertiesPersister(PropertiesPersister propertiesPersister) {
-		this.propertiesPersister = propertiesPersister;
-	}
-
 
 	public Class getObjectType() {
 		return Properties.class;
 	}
 
-	protected Object createInstance() throws Exception {
+
+	/**
+	 * Template method that subclasses may override to construct the object
+	 * returned by this factory. Default returns the plain merged Properties.
+	 * <p>Invoked on initialization of this FactoryBean in case of
+	 * a singleton; else, on each <code>getObject()</code> call.
+	 * @return the object returned by this factory
+	 * @throws IOException if an exception occured during properties loading
+	 * @see #getObject()
+	 * @see #mergeProperties()
+	 */
+	protected Object createInstance() throws IOException {
 		return mergeProperties();
 	}
 
-	/**
-	 * Return a merged Properties instance containing both the
-	 * loaded properties and properties set on this FactoryBean.
-	 */
-	protected Properties mergeProperties() throws IOException {
-		if (this.properties == null && this.locations == null) {
-			throw new IllegalArgumentException("Either properties or location(s) must be set");
-		}
-
-		Properties result = new Properties();
-		
-		if (this.properties != null) {
-			// use propertyNames enumeration to also catch default properties
-			for (Enumeration en = this.properties.propertyNames(); en.hasMoreElements();) {
-				String key = (String) en.nextElement();
-				result.setProperty(key, this.properties.getProperty(key));
-			}
-		}
-
-		if (this.locations != null) {
-			loadProperties(result);
-		}
-
-		return result;
-	}
-
-	/**
-	 * Load properties into the given instance.
-	 * @throws java.io.IOException in case of I/O errors
-	 * @see #setLocations
-	 */
-	protected void loadProperties(Properties props) throws IOException {
-		for (int i = 0; i < this.locations.length; i++) {
-			Resource location = this.locations[i];
-			if (logger.isInfoEnabled()) {
-				logger.info("Loading properties file from " + location);
-			}
-			InputStream is = location.getInputStream();
-			try {
-				if (location.getFilename().endsWith(XML_FILE_EXTENSION)) {
-					this.propertiesPersister.loadFromXml(props, is);
-				}
-				else {
-					if (this.fileEncoding != null) {
-						this.propertiesPersister.load(props, new InputStreamReader(is, this.fileEncoding));
-					}
-					else {
-						this.propertiesPersister.load(props, is);
-					}
-				}
-			}
-			finally {
-				is.close();
-			}
-		}
-	}
-
 }
+

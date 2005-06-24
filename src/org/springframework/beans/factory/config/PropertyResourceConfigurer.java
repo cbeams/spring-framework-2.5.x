@@ -17,21 +17,14 @@
 package org.springframework.beans.factory.config;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.Properties;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.core.Ordered;
-import org.springframework.core.io.Resource;
-import org.springframework.util.DefaultPropertiesPersister;
+import org.springframework.core.io.support.PropertiesLoaderSupport;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.PropertiesPersister;
 
 /**
  * Allows for configuration of individual bean property values from a property resource,
@@ -56,24 +49,10 @@ import org.springframework.util.PropertiesPersister;
  * @see PropertyPlaceholderConfigurer
  * @see #convertPropertyValue
  */
-public abstract class PropertyResourceConfigurer implements BeanFactoryPostProcessor, Ordered {
-
-	public static final String XML_FILE_EXTENSION = ".xml";
-
-
-	protected final Log logger = LogFactory.getLog(getClass());
+public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
+		implements BeanFactoryPostProcessor, Ordered {
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
-
-	private Properties properties;
-
-	private Resource[] locations;
-
-	private String fileEncoding;
-
-	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
-
-	private boolean ignoreResourceNotFound = false;
 
 
 	public void setOrder(int order) {
@@ -84,122 +63,20 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 	  return order;
 	}
 
-	/**
-	 * Set local properties, e.g. via the "props" tag in XML bean definitions.
-	 * These can be considered defaults, to be overridden by properties
-	 * loaded from files.
-	 * @see #setLocation
-	 * @see #setLocations
-	 */
-	public void setProperties(Properties properties) {
-		this.properties = properties;
-	}
-
-	/**
-	 * Set a location of a properties file to be loaded.
-	 * <p>Can point to a classic properties file or to an XML file
-	 * that follows JDK 1.5's properties XML format.
-	 * @see #setLocations
-	 */
-	public void setLocation(Resource location) {
-		this.locations = new Resource[] {location};
-	}
-
-	/**
-	 * Set locations of properties files to be loaded.
-	 * <p>Can point to classic properties files or to XML files
-	 * that follow JDK 1.5's properties XML format.
-	 * @see #setLocation
-	 */
-	public void setLocations(Resource[] locations) {
-		this.locations = locations;
-	}
-
-	/**
-	 * Set the encoding to use for parsing properties files.
-	 * <p>Default is none, using the <code>java.util.Properties</code>
-	 * default encoding.
-	 * <p>Only applies to classic properties files, not to XML files.
-	 * @see org.springframework.util.PropertiesPersister#load
-	 */
-	public void setFileEncoding(String encoding) {
-		this.fileEncoding = encoding;
-	}
-
-	/**
-	 * Set the PropertiesPersister to use for parsing properties files.
-	 * The default is DefaultPropertiesPersister.
-	 * @see org.springframework.util.DefaultPropertiesPersister
-	 */
-	public void setPropertiesPersister(PropertiesPersister propertiesPersister) {
-		this.propertiesPersister = propertiesPersister;
-	}
-
-	/**
-	 * Set if failure to find the property resource should be ignored.
-	 * True is appropriate if the properties file is completely optional.
-	 * Default is false.
-	 */
-	public void setIgnoreResourceNotFound(boolean ignoreResourceNotFound) {
-		this.ignoreResourceNotFound = ignoreResourceNotFound;
-	}
-
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		Properties mergedProps = new Properties();
+		try {
+			Properties mergedProps = mergeProperties();
 
-		if (this.properties != null) {
-			// use propertyNames enumeration to also catch default properties
-			for (Enumeration en = this.properties.propertyNames(); en.hasMoreElements();) {
-				String key = (String) en.nextElement();
-				mergedProps.setProperty(key, this.properties.getProperty(key));
-			}
+			// Convert the merged properties, if necessary.
+			convertProperties(mergedProps);
+
+			// Let the subclass process the properties.
+			processProperties(beanFactory, mergedProps);
 		}
-
-		if (this.locations != null) {
-			for (int i = 0; i < this.locations.length; i++) {
-				Resource location = this.locations[i];
-				if (logger.isInfoEnabled()) {
-					logger.info("Loading properties from " + location + "");
-				}
-				try {
-					InputStream is = location.getInputStream();
-					try {
-						if (location.getFilename().endsWith(XML_FILE_EXTENSION)) {
-							this.propertiesPersister.loadFromXml(mergedProps, is);
-						}
-						else {
-							if (this.fileEncoding != null) {
-								this.propertiesPersister.load(mergedProps, new InputStreamReader(is, this.fileEncoding));
-							}
-							else {
-								this.propertiesPersister.load(mergedProps, is);
-							}
-						}
-					}
-					finally {
-						is.close();
-					}
-				}
-				catch (IOException ex) {
-					String msg = "Could not load properties from " + location;
-					if (this.ignoreResourceNotFound) {
-						if (logger.isWarnEnabled()) {
-							logger.warn(msg + ": " + ex.getMessage());
-						}
-					}
-					else {
-						throw new BeanInitializationException(msg, ex);
-					}
-				}
-			}
+		catch (IOException ex) {
+			throw new BeanInitializationException("Could not load properties", ex);
 		}
-
-		// Convert the merged properties, if necessary.
-		convertProperties(mergedProps);
-
-		// Let the subclass process the properties.
-		processProperties(beanFactory, mergedProps);
 	}
 
 	/**
