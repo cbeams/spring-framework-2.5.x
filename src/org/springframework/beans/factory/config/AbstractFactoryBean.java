@@ -26,15 +26,17 @@ import org.springframework.beans.factory.InitializingBean;
  * Simple template superclass for FactoryBean implementations thats allows
  * for creating a singleton or a prototype, depending on a flag.
  *
- * <p>If the "singleton" flag is "true" (the default), this class will
- * create once on initialization and subsequently return the singleton
- * instance. Else, this class will create a new instance each time.
- * Subclasses are responsible for implementing the abstract
- * <code>createInstance</code> template method to actually create objects.
+ * <p>If the "singleton" flag is "true" (the default), this class will create
+ * once on initialization and subsequently return the singleton instance.
+ * Else, this class will create a new instance each time. Subclasses are
+ * responsible for implementing the abstract <code>createInstance</code>
+ * template method to actually create the objects to expose.
  *
  * @author Juergen Hoeller
  * @author Keith Donald
  * @since 1.0.2
+ * @see #setSingleton(boolean)
+ * @see #createInstance()
  */
 public abstract class AbstractFactoryBean implements FactoryBean, InitializingBean {
 
@@ -79,7 +81,7 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 	 * a singleton; else, on each <code>getObject()</code> call.
 	 * @return the object returned by this factory
 	 * @throws Exception if an exception occured during object creation
-	 * @see #getObject
+	 * @see #getObject()
 	 */
 	protected abstract Object createInstance() throws Exception;
 
