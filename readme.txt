@@ -92,7 +92,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~220 KB)
+* "spring-beans" (~215 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
@@ -124,7 +124,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI, Velocity, FreeMarker, JasperReports)
 
-* "spring-remoting" (~130 KB)
+* "spring-remoting" (~125 KB)
 - Contents: remoting support, EJB support, JMS support
 - Dependencies: spring-aop, spring-beans, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB, JMS)
 
@@ -136,7 +136,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: Hibernate 2.1 support, Hibernate 3.x support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, Hibernate2, Hibernate3)
 
-* "spring" (~1775 KB)
+* "spring" (~1770 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
