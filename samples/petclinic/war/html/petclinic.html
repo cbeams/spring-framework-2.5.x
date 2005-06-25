@@ -719,14 +719,12 @@ directory for the web application. This parameter,&nbsp; <span
  style="font-weight: bold;">"petclinic.root"</span>, can be used to aid
 in configuring the application.</li>
   <li>In <span style="font-weight: bold; font-style: italic;">web.xml</span>,
-a <span style="font-weight: bold;">org.springframework.web.context.ContextLoaderServlet
+a <span style="font-weight: bold;">org.springframework.web.context.ContextLoaderListener
     </span>is
 defined that loads the root <span style="font-weight: bold;">ApplicationContext</span>
 object of this webapp at startup, by default from the designated <span
  style="font-weight: bold; font-style: italic;">/WEB-INF/applicationContext-???.xml</span>.
-Note that it is preferable to use <span style="font-weight: bold;">org.springframework.web.context.ContextLoaderListener
-    </span>in a servlet container that follows the Servlet 2.4
-initialization order (many Servlet 2.3 containers do). The
+The
 root <span style="font-weight: bold;">org.springframework.web.context.WebApplicationContext
     </span>of
 PetClinic is an instance of <span style="font-weight: bold;">org.springframework.web.context.support.XmlWebApplicationContext</span>
