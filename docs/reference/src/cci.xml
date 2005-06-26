@@ -155,20 +155,23 @@
       uses the <literal>getConnection</literal> variant without argument,
       else the one with the <literal>ConnectionSpec</literal> argument.</para>
 
-      <programlisting>&lt;bean id="managedConnectionFactory" class="com.sun.connector.cciblackbox.CciLocalTxManagedConnectionFactory"&gt;
+      <programlisting>&lt;bean id="managedConnectionFactory"
+    class="com.sun.connector.cciblackbox.CciLocalTxManagedConnectionFactory"&gt;
   &lt;property name="connectionURL"&gt;
     &lt;value&gt;jdbc:hsqldb:hsql://localhost:9001&lt;/value&gt;
   &lt;/property&gt;
   &lt;property name="driverName"&gt;&lt;value&gt;org.hsqldb.jdbcDriver&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="targetConnectionFactory" class="org.springframework.jca.support.LocalConnectionFactoryBean"&gt;
+&lt;bean id="targetConnectionFactory"
+    class="org.springframework.jca.support.LocalConnectionFactoryBean"&gt;
   &lt;property name="managedConnectionFactory"&gt;
     &lt;ref local="managedConnectionFactory"/&gt;
   &lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="connectionFactory" class="org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter"&gt;
+&lt;bean id="connectionFactory"
+    class="org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter"&gt;
   &lt;property name="targetConnectionFactory"&gt;
     &lt;ref bean="targetConnectionFactory"/&gt;
   &lt;/property&gt;
@@ -192,19 +195,22 @@
       proxies that behave accordingly, all sharing the same underlying physical
 			connection.</para>
 
-      <programlisting>&lt;bean id="eciManagedConnectionFactory" class="com.ibm.connector2.cics.ECIManagedConnectionFactory"&gt;
+      <programlisting>&lt;bean id="eciManagedConnectionFactory"
+    class="com.ibm.connector2.cics.ECIManagedConnectionFactory"&gt;
   &lt;property name="serverName"&gt;&lt;value&gt;TEST&lt;/value&gt;&lt;/property&gt;
   &lt;property name="connectionURL"&gt;&lt;value&gt;tcp://localhost/&lt;/value&gt;&lt;/property&gt;
   &lt;property name="portNumber"&gt;&lt;value&gt;2006&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="targetEciConnectionFactory" class="org.springframework.jca.support.LocalConnectionFactoryBean"&gt;
+&lt;bean id="targetEciConnectionFactory"
+    class="org.springframework.jca.support.LocalConnectionFactoryBean"&gt;
   &lt;property name="managedConnectionFactory"&gt;
     &lt;ref local="eciManagedConnectionFactory"/&gt;
   &lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="eciConnectionFactory" class="org.springframework.jca.cci.connection.SingleConnectionFactory"&gt;
+&lt;bean id="eciConnectionFactory"
+    class="org.springframework.jca.cci.connection.SingleConnectionFactory"&gt;
   &lt;property name="targetConnectionFactory"&gt;
     &lt;ref local="targetEciConnectionFactory"/&gt;
   &lt;/property&gt;
@@ -304,6 +310,7 @@
       <programlisting>public interface javax.resource.cci.Interaction {
   ...
   boolean execute(InteractionSpec spec, Record input, Record output) throws ResourceException;
+
   Record execute(InteractionSpec spec, Record input) throws ResourceException;
   ...
 }</programlisting>
@@ -336,8 +343,11 @@
 
       <programlisting>public class CciTemplate implements CciOperations {
   ...
-  public Record execute(InteractionSpec spec, Record inputRecord) throws DataAccessException { ... }
-  public void execute(InteractionSpec spec, Record inputRecord, Record outputRecord) throws DataAccessException { ... }
+  public Record execute(InteractionSpec spec, Record inputRecord)
+      throws DataAccessException { ... }
+
+  public void execute(InteractionSpec spec, Record inputRecord, Record outputRecord)
+      throws DataAccessException { ... }
   ...
 }</programlisting>
 
@@ -349,9 +359,14 @@
 
       <programlisting>public class CciTemplate implements CciOperations {
   ...
-  public Record execute(InteractionSpec spec, RecordCreator inputCreator) throws DataAccessException { ... }
-  public Object execute(InteractionSpec spec, Record inputRecord, RecordExtractor outputExtractor) throws DataAccessException { ... }
-  public Object execute(InteractionSpec spec, RecordCreator inputCreator, RecordExtractor outputExtractor) throws DataAccessException { ... }
+  public Record execute(InteractionSpec spec, RecordCreator inputCreator)
+      throws DataAccessException { ... }
+
+  public Object execute(InteractionSpec spec, Record inputRecord, RecordExtractor outputExtractor)
+      throws DataAccessException { ... }
+
+  public Object execute(InteractionSpec spec, RecordCreator creator, RecordExtractor extractor)
+      throws DataAccessException { ... }
   ...
 }</programlisting>
 
@@ -375,6 +390,7 @@
       <programlisting>public class CciTemplate implements CciOperations {
   ...
   public IndexedRecord createIndexedRecord(String name) throws DataAccessException { ... }
+
   public MappedRecord createMappedRecord(String name) throws DataAccessException { ... }
   ...
 }</programlisting>
@@ -394,13 +410,13 @@
       it to concrete data access implementations in subclasses.</para>
 
       <programlisting>public abstract class CciDaoSupport {
-  //...
-  public final void setConnectionFactory(ConnectionFactory connectionFactory) { ... }
-  public final ConnectionFactory getConnectionFactory() { ... }
+  ...
+  public void setConnectionFactory(ConnectionFactory connectionFactory) { ... }
+  public ConnectionFactory getConnectionFactory() { ... }
 
-  public final void setCciTemplate(CciTemplate cciTemplate) { ... }
-  public final CciTemplate getCciTemplate() { ... }
-  //...
+  public void setCciTemplate(CciTemplate cciTemplate) { ... }
+  public CciTemplate getCciTemplate() { ... }
+  ...
 }</programlisting>
     </sect2>
 
@@ -423,7 +439,7 @@
       property must be directly specified on the <literal>CciTemplate</literal>.
       This could be done in the application code:</para>
 
-      <programlisting>getCciTemplate().setOuputRecordCreator(new EciOutputRecordCreator());
+      <programlisting>cciTemplate.setOutputRecordCreator(new EciOutputRecordCreator());
 </programlisting>
 
       <para>or in the Spring configuration, if the <literal>CciTemplate</literal>
@@ -589,7 +605,8 @@
 
       <programlisting>public interface ConnectionCallback {
 
-  Object doInConnection(Connection connection, ConnectionFactory connectionFactory) throws ResourceException, SQLException, DataAccessException;
+  Object doInConnection(Connection connection, ConnectionFactory connectionFactory)
+      throws ResourceException, SQLException, DataAccessException;
 }</programlisting>
 
       <para>The interface <literal>InteractionCallback</literal> provides
@@ -599,7 +616,8 @@
 
       <programlisting>public interface InteractionCallback {
 
-  Object doInInteraction(Interaction interaction, ConnectionFactory connectionFactory) throws ResourceException, SQLException, DataAccessException;
+  Object doInInteraction(Interaction interaction, ConnectionFactory connectionFactory)
+      throws ResourceException, SQLException, DataAccessException;
 }</programlisting>
 
       <para><literal>Note</literal>: <literal>InteractionSpec</literal> objects
@@ -619,7 +637,7 @@
       program to access and how to interact with it.</para>
 
       <programlisting>ECIInteractionSpec interactionSpec = new ECIInteractionSpec();
-interactionSpec.setFunctionName("MONPROGR");
+interactionSpec.setFunctionName("MYPROG");
 interactionSpec.setInteractionVerb(ECIInteractionSpec.SYNC_SEND_RECEIVE);</programlisting>
 
       <para>Then the program can use CCI via Spring's template and specify
@@ -658,12 +676,14 @@ interactionSpec.setInteractionVerb(ECIInteractionSpec.SYNC_SEND_RECEIVE);</progr
   public OutputObject getData(InputObject input) {
     ObjectOutput output = (ObjectOutput) getCciTemplate().execute(
         new ConnectionCallback() {
-          public Object doInConnection(Connection connection, ConnectionFactory connectionFactory) throws ResourceException {
+          public Object doInConnection(Connection connection, ConnectionFactory factory)
+              throws ResourceException {
             ...
           }
         });
     }
     return output;
+  }
 }</programlisting>
 
       <para><emphasis>Important note</emphasis>: With a ConnectionCallback,
@@ -683,7 +703,8 @@ interactionSpec.setInteractionVerb(ECIInteractionSpec.SYNC_SEND_RECEIVE);</progr
 
     String output = (String) getCciTemplate().execute(interactionSpec,
         new InteractionCallback() {
-          public Object doInInteraction(Interaction interaction, ConnectionFactory connectionFactory) throws ResourceException {
+          public Object doInInteraction(Interaction interaction, ConnectionFactory factory)
+              throws ResourceException {
             Record input = new CommAreaRecord(inputString.getBytes());
             Record output = new CommAreaRecord();
             interaction.execute(holder.getInteractionSpec(), input, output);
@@ -768,10 +789,13 @@ interactionSpec.setInteractionVerb(ECIInteractionSpec.SYNC_SEND_RECEIVE);</progr
       <para>Here are the signatures of these methods:</para>
 
       <programlisting>public abstract class MappingRecordOperation extends EisOperation {
-  //...
-  protected abstract Record createInputRecord(RecordFactory recordFactory, Object inputObject) throws ResourceException, DataAccessException;
-  protected abstract Object extractOutputData(Record outputRecord) throws ResourceException, SQLException, DataAccessException;
-  //...
+  ...
+  protected abstract Record createInputRecord(RecordFactory recordFactory, Object inputObject)
+      throws ResourceException, DataAccessException { ... }
+
+  protected abstract Object extractOutputData(Record outputRecord)
+      throws ResourceException, SQLException, DataAccessException { ... }
+  ...
 }</programlisting>
 
       <para>Thereafter, in order to execute an EIS operation, you need to use
@@ -779,9 +803,9 @@ interactionSpec.setInteractionVerb(ECIInteractionSpec.SYNC_SEND_RECEIVE);</progr
 			and receiving an application-level output object as result:</para>
 
       <programlisting>public abstract class MappingRecordOperation extends EisOperation {
-  //...
+  ...
   public Object execute(Object inputObject) throws DataAccessException {
-  //...
+  ...
 }</programlisting>
 
       <para>As you can see, contrary to the <literal>CciTemplate</literal> class,
@@ -791,10 +815,10 @@ interactionSpec.setInteractionVerb(ECIInteractionSpec.SYNC_SEND_RECEIVE);</progr
 			The following constructor must be used to instantiate an operation
       object with a specific <literal>InteractionSpec</literal>:</para>
 
-      <programlisting>InteractionSpec interactionSpec = ...;
-MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnectionFactory(), interactionSpec) {
-  //...
-};</programlisting>
+      <programlisting>InteractionSpec spec = ...;
+MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnectionFactory(), spec);
+...
+</programlisting>
     </sect2>
 
     <sect2>
@@ -812,10 +836,13 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
       into an output object.</para>
 
       <programlisting>public abstract class MappingCommAreaOperation extends MappingRecordOperation {
-  //...
-  protected abstract byte[] objectToBytes(Object inObject) throws IOException, DataAccessException;
-  protected abstract Object bytesToObject(byte[] bytes) throws IOException, DataAccessException;
-  //...
+  ...
+  protected abstract byte[] objectToBytes(Object inObject)
+      throws IOException, DataAccessException;
+
+  protected abstract Object bytesToObject(byte[] bytes)
+      throws IOException, DataAccessException;
+  ...
 }</programlisting>
     </sect2>
 
@@ -894,21 +921,23 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
 
       <programlisting>public class PersonMappingOperation extends MappingRecordOperation {
 
-  public PersonMappingQuery(ConnectionFactory connectionFactory) {
+  public PersonMappingOperation(ConnectionFactory connectionFactory) {
     setConnectionFactory(connectionFactory);
     CciInteractionSpec interactionSpec = new CciConnectionSpec();
     interactionSpec.setSql("select * from person where person_id=?");
     setInteractionSpec(interactionSpec);
   }
 
-  protected Record createInputRecord(RecordFactory recordFactory, Object inputObject) throws ResourceException {
+  protected Record createInputRecord(RecordFactory recordFactory, Object inputObject)
+      throws ResourceException {
     Integer id = (Integer) inputObject;
     IndexedRecord input = recordFactory.createIndexedRecord("input");
     input.add(new Integer(id));
     return input;
   }
 
-  protected Object extractOutputData(Record outputRecord) throws ResourceException, SQLException {
+  protected Object extractOutputData(Record outputRecord)
+      throws ResourceException, SQLException {
     ResultSet rs = (ResultSet) outputRecord;
     Person person = null;
     if (rs.next()) {
@@ -928,7 +957,7 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
       <programlisting>public class MyDaoImpl extends CciDaoSupport implements MyDao {
 
   public Person getPerson(int id) {
-    CciMappingOperation query = new CciMappingOperation(getConnectionFactory());
+    PersonMappingOperation query = new PersonMappingOperation(getConnectionFactory());
     Person person = (Person) query.execute(new Integer(id));
     return person;
   }
@@ -937,20 +966,23 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
       <para>The corresponding configuration of Spring beans could look
       as follows in non-managed mode:</para>
 
-      <programlisting>&lt;bean id="managedConnectionFactory" class="com.sun.connector.cciblackbox.CciLocalTxManagedConnectionFactory"&gt;
+      <programlisting>&lt;bean id="managedConnectionFactory"
+    class="com.sun.connector.cciblackbox.CciLocalTxManagedConnectionFactory"&gt;
   &lt;property name="connectionURL"&gt;
     &lt;value&gt;jdbc:hsqldb:hsql://localhost:9001&lt;/value&gt;
   &lt;/property&gt;
   &lt;property name="driverName"&gt;&lt;value&gt;org.hsqldb.jdbcDriver&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="targetConnectionFactory" class="org.springframework.jca.support.LocalConnectionFactoryBean"&gt;
+&lt;bean id="targetConnectionFactory"
+    class="org.springframework.jca.support.LocalConnectionFactoryBean"&gt;
   &lt;property name="managedConnectionFactory"&gt;
     &lt;ref local="managedConnectionFactory"/&gt;
   &lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="connectionFactory" class="org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter"&gt;
+&lt;bean id="connectionFactory"
+    class="org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter"&gt;
   &lt;property name="targetConnectionFactory"&gt;
     &lt;ref bean="targetConnectionFactory"/&gt;
   &lt;/property&gt;
@@ -973,7 +1005,8 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
   &lt;property name="jndiName"&gt;&lt;value&gt;eis/blackbox&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="connectionFactory" class="org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter"&gt;
+&lt;bean id="connectionFactory"
+    class="org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter"&gt;
   &lt;property name="targetConnectionFactory"&gt;
     &lt;ref bean="targetConnectionFactory"/&gt;
   &lt;/property&gt;
@@ -1002,6 +1035,7 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
       with it.</para>
 
       <programlisting>public abstract class EciMappingOperation extends MappingCommAreaOperation {
+
   public EciMappingOperation(ConnectionFactory connectionFactory, String programName) {
     setConnectionFactory(connectionFactory);
     ECIInteractionSpec interactionSpec = new ECIInteractionSpec(),
@@ -1026,7 +1060,7 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
       <programlisting>public class MyDaoImpl extends CciDaoSupport implements MyDao {
 
   public OutputObject getData(Integer id) {
-    ECIMappingQuery query = new ECIMappingQuery(getConnectionFactory(), "MYPROG") {
+    EciMappingOperation query = new EciMappingOperation(getConnectionFactory(), "MYPROG") {
       protected abstract byte[] objectToBytes(Object inObject) throws IOException {
         Integer id = (Integer) inObject;
         return String.valueOf(id);
@@ -1096,6 +1130,7 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
     &lt;transaction-support&gt;XATransaction&lt;/transaction-support&gt;
     ...
   &lt;resourceadapter&gt;
+  ...
 &lt;connector&gt;</programlisting>
 
     <para>For global transactions, you can use Spring's generic transaction
@@ -1117,7 +1152,8 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
   &lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="eciTransactionManager" class="org.springframework.jca.cci.connection.CciLocalTransactionManager"&gt;
+&lt;bean id="eciTransactionManager"
+    class="org.springframework.jca.cci.connection.CciLocalTransactionManager"&gt;
   &lt;property name="connectionFactory"&gt;
     &lt;ref local="eciConnectionFactory" /&gt;
   &lt;/property&gt;
