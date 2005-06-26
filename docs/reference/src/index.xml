@@ -3,12 +3,12 @@
                       "../lib/docbook-dtd/docbookx.dtd"
 [
 <!ENTITY overview			SYSTEM "overview.xml">
+<!ENTITY background			SYSTEM "background.xml">
 <!ENTITY beans				SYSTEM "beans.xml">
-<!ENTITY mail				SYSTEM "mail.xml">
 <!ENTITY validation			SYSTEM "validation.xml">
-<!ENTITY transaction		SYSTEM "transaction.xml">
 <!ENTITY aop				SYSTEM "aop.xml">
 <!ENTITY aspectj			SYSTEM "aspectj.xml">
+<!ENTITY transaction		SYSTEM "transaction.xml">
 <!ENTITY metadata			SYSTEM "metadata.xml">
 <!ENTITY dao				SYSTEM "dao.xml">
 <!ENTITY jdbc				SYSTEM "jdbc.xml">
@@ -16,13 +16,14 @@
 <!ENTITY mvc				SYSTEM "mvc.xml">
 <!ENTITY views				SYSTEM "views.xml">
 <!ENTITY webintegration		SYSTEM "webintegration.xml">
-<!ENTITY jms				SYSTEM "jms.xml">
-<!ENTITY ejb				SYSTEM "ejb.xml">
-<!ENTITY scheduling			SYSTEM "scheduling.xml">
 <!ENTITY remoting			SYSTEM "remoting.xml">
-<!ENTITY background			SYSTEM "background.xml">
+<!ENTITY ejb				SYSTEM "ejb.xml">
+<!ENTITY jms				SYSTEM "jms.xml">
+<!ENTITY jmx        SYSTEM "jmx.xml">
+<!ENTITY cci				SYSTEM "cci.xml">
+<!ENTITY mail				SYSTEM "mail.xml">
+<!ENTITY scheduling			SYSTEM "scheduling.xml">
 <!ENTITY testing			SYSTEM "testing.xml">
-<!ENTITY jmx          SYSTEM "jmx.xml">
 <!ENTITY dtd				SYSTEM "dtd.xml">
 ]>
 
@@ -89,8 +90,6 @@
 	    
 	    &validation;
 	    
-	    <!-- &util; -->
-
 	    &aop;
 		
 			&aspectj;
@@ -111,19 +110,19 @@
 		
 	    &webintegration;
 
-		&jms;
-	    
+			&remoting;
+
 	    &ejb;
-	    
-	    <!-- &jndi; -->
-	    
-	    &remoting;
-	    
+
+			&jms;
+
+			&jmx;
+
+			&cci;
+
 	    &mail;
 	    
 	    &scheduling;
-
-			&jmx;
 
 	    &testing;
 	

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <chapter id="scheduling">
   <title>Scheduling jobs using Quartz or Timer</title>
   
