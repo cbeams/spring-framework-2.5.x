@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
+import javax.mail.Session;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
@@ -1212,6 +1213,16 @@ public class XmlBeanFactoryTests extends TestCase {
 		catch (BeanDefinitionStoreException ex) {
 			// OK
 		}
+	}
+
+	public void testFactoryMethodForJavaMailSession() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+		Session session = (Session) xbf.getBean("javaMailSession");
+		assertEquals("someuser", session.getProperty("mail.smtp.user"));
+		assertEquals("somepw", session.getProperty("mail.smtp.password"));
 	}
 
 	public void testCannotSpecifyFactoryMethodArgumentsExceptWithFactoryMethod() {
