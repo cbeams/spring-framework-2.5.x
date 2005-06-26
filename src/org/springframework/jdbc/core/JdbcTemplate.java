@@ -880,8 +880,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					returnedResults.putAll(processResultSet(cs.getResultSet(), rsParam));
 				}
 				else {
-					logger.warn("ResultSet returned from stored procedure but a corresponding " +
-							"SqlReturnResultSet parameter was not declared");
+					logger.warn("Results returned from stored procedure but a corresponding " +
+							"SqlOutParameter/SqlReturnResultSet parameter was not declared");
 				}
 				rsIndex++;
 			}
