@@ -15,6 +15,7 @@ Package org.springframework.beans
 * optimized PropertyComparator to reuse a single BeanWrapperImpl instance without default editors
 * factored out protected "copySortDefinition" and "doSort" hooks in PagedListHolder, allowing for custom comparators
 * MethodInvokingFactoryBean throws target exception in case of InvocationTargetException
+* fixed AbstractBeanFactory to hold names of dependent beans in Set rather than List, avoiding leak for prototype beans
 * fixed AbstractAutowireCapableBeanFactory to not track dependencies for passed-in existing beans (avoiding memory leak)
 
 Package org.springframework.context
