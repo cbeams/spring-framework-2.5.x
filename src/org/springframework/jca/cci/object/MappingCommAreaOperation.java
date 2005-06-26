@@ -28,9 +28,11 @@ import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.jca.cci.core.support.CommAreaRecord;
 
 /**
- * Query specific for COMMAREA based record.
+ * EIS operation object for access to COMMAREA records.
+ * Subclass of the generic MappingRecordOperation class.
  *
  * @author Thierry Templier
+ * @since 1.2
  */
 public abstract class MappingCommAreaOperation extends MappingRecordOperation {
 
@@ -77,17 +79,17 @@ public abstract class MappingCommAreaOperation extends MappingRecordOperation {
 	 * @param inObject the input data
 	 * @return the COMMAREA's bytes
 	 * @throws IOException if thrown by I/O methods
-	 * @throws DataRetrievalFailureException if conversion failed
+	 * @throws DataAccessException if conversion failed
 	 */
-	protected abstract byte[] objectToBytes(Object inObject) throws IOException, DataRetrievalFailureException;
+	protected abstract byte[] objectToBytes(Object inObject) throws IOException, DataAccessException;
 
 	/**
 	 * Method used to convert the COMMAREA's bytes to an object.
 	 * @param bytes the COMMAREA's bytes
 	 * @return the output data
 	 * @throws IOException if thrown by I/O methods
-	 * @throws DataRetrievalFailureException if conversion failed
+	 * @throws DataAccessException if conversion failed
 	 */
-	protected abstract Object bytesToObject(byte[] bytes) throws IOException, DataRetrievalFailureException;
+	protected abstract Object bytesToObject(byte[] bytes) throws IOException, DataAccessException;
 
 }
