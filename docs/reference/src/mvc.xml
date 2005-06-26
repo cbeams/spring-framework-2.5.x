@@ -585,7 +585,7 @@ public class SampleController extends AbstractController {
       name that it will return in the web application context (ahhh, no need to
       hard-code the viewname).</para>
 
-      <para>The <literal>FileNameViewController</literal> inspects the URL and
+      <para>The <literal>UrlFilenameViewController</literal> inspects the URL and
       retrieves the filename of the file request (the filename of
       <literal>http://www.springframework.org/index.html</literal> is
       <literal>index</literal>) and uses that as a viewname. Nothing more to
