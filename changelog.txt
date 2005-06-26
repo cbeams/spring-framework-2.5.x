@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.2 (24.6.2005)
+Changes in version 1.2.2 (26.6.2005)
 ------------------------------------
 
 Package org.springframework.aop
@@ -34,6 +34,7 @@ Package org.springframework.dao
 * added generic DaoSupport base class, defining a logger and "initDao" method and pre-implementing "afterPropertiesSet"
 
 Package org.springframework.jca
+* added CCI section to the reference documentation
 * reworked transaction synchronization to correctly handle suspension even from beforeCompletion/afterCompletion
 * reworked CciDaoSupport class to extend the new generic DaoSupport base class
 
