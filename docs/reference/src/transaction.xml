@@ -146,12 +146,12 @@
       <listitem>
         <para><emphasis role="bold">Transaction propagation</emphasis>:
         Normally all code executed within a transaction scope will run in that
-        transaction. However, there are several options specifying behavior
-        if a transactional method is executed when a transaction context
-        already exists: For example, simply running in the existing
-        transaction (the most common case); or suspending the existing
-        transaction and creating a new transaction. Spring offers the
-        transaction propagation options familiar from EJB CMT.</para>
+        transaction. However, there are several options specifying behavior if
+        a transactional method is executed when a transaction context already
+        exists: For example, simply running in the existing transaction (the
+        most common case); or suspending the existing transaction and creating
+        a new transaction. Spring offers the transaction propagation options
+        familiar from EJB CMT.</para>
       </listitem>
 
       <listitem>
@@ -418,7 +418,10 @@ transactionManager.commit(status);</programlisting></para>
     <title>Declarative transaction management</title>
 
     <para>Spring also offers declarative transaction management. This is
-    enabled by Spring AOP.</para>
+    enabled by Spring AOP, although, as the transactional aspects code comes
+    with Spring and may be used in a boilerplate fashion, AOP concepts do not
+    generally have to be understood to make effective use of this
+    code..</para>
 
     <remark>Most Spring users choose declarative transaction management. It is
     the option with the least impact on application code, and hence is most
@@ -523,13 +526,13 @@ transactionManager.commit(status);</programlisting></para>
 
     <para>The transactional proxy will implement the interfaces of the target:
     in this case, the bean with id petStoreTarget. (Using CGLIB it's possible
-    to transactionally proxy a target class. Set the "proxyTargetClass" property
-    to true for this. It will happen automatically if the target doesn't
-    implement any interfaces. In general, of course, we want to program to
-    interfaces rather than classes.) It's possible (and usually a good idea)
-    to restrict the transactional proxy to proxying only specific target
-    interfaces, using the proxyInterfaces property. It's also possible to
-    customize the behavior of a TransactionProxyFactoryBean via several
+    to transactionally proxy a target class. Set the "proxyTargetClass"
+    property to true for this. It will happen automatically if the target
+    doesn't implement any interfaces. In general, of course, we want to
+    program to interfaces rather than classes.) It's possible (and usually a
+    good idea) to restrict the transactional proxy to proxying only specific
+    target interfaces, using the proxyInterfaces property. It's also possible
+    to customize the behavior of a TransactionProxyFactoryBean via several
     properties inherited from
     <literal>org.springframework.aop.framework.ProxyConfig</literal>, and
     shared with all AOP proxy factories.</para>
@@ -584,6 +587,281 @@ transactionManager.commit(status);</programlisting></para>
     AOP capabilities.</remark>
 
     <sect2>
+      <title>Source Annotations for Transaction Demarcation</title>
+
+      <para>XML-based transaction attribute sources definitions are
+      convenient, and work in any environment, but if you are willing to
+      commit to a dependency on Java 5+ (JDK 1.5+), you will almost certainly
+      want to consider using Spring's support for transaction Annotations in
+      JDK standard format, as the attribute source instead.</para>
+
+      <para>Declaring transaction semantics directly in the Java source code
+      puts the declarations much closer to the affected code, and there is
+      generally not much danger of undue coupling, since typically, code that
+      is deployed as transactional is always deployed that way.</para>
+
+      <sect3>
+        <title>The <literal>Transactional</literal> Annotation</title>
+
+        <para>The
+        <literal>org.springframework.transaction.annotation.Transactional
+        Annotation</literal> is used to indicate that an interface, interface
+        method, class, or class method should have transaction
+        semantics.</para>
+
+        <para><programlisting>@Transactional
+public interface OrderService {
+
+void createOrder(Order order);
+List queryByCriteria(Order criteria);</programlisting>Used in bare form, this
+        Annotation specifies that an interface, class, or method must be
+        transactional. Default transaction semantics are read/write,
+        PROPAGATION_REQUIRED, ISOLATION_DEFAULT, TIMEOUT_DEFAULT, with
+        rollback on a <literal>RuntimeException</literal>, but not
+        <literal>Exception</literal>.</para>
+
+        <para>Optional properties of the annotation modify transaction
+        settings.</para>
+
+        <para><table>
+            <title>Properties of the <literal>Transactional</literal>
+            Annotation</title>
+
+            <tgroup cols="3">
+              <thead>
+                <row>
+                  <entry>Property</entry>
+
+                  <entry>Type</entry>
+
+                  <entry>Description</entry>
+                </row>
+              </thead>
+
+              <tbody>
+                <row>
+                  <entry><literal>propagation</literal></entry>
+
+                  <entry>enum:
+                  org.springframework.transaction.annotation.Propagation</entry>
+
+                  <entry>optional propagation setting (defaults to
+                  PROPAGATION_REQUIRED)</entry>
+                </row>
+
+                <row>
+                  <entry><literal>isolation</literal></entry>
+
+                  <entry>enum:
+                  org.springframework.transaction.annotation.Isolation</entry>
+
+                  <entry>optional isolation level (defaults to
+                  ISOLATION_DEFAULT)</entry>
+                </row>
+
+                <row>
+                  <entry><literal>readOnly</literal></entry>
+
+                  <entry>boolean</entry>
+
+                  <entry>read/write vs. read-only transaction (defaults to
+                  false, or read/write)</entry>
+                </row>
+
+                <row>
+                  <entry><literal>rollbackFor</literal></entry>
+
+                  <entry>array of Class objects, must be derived from
+                  Throwable</entry>
+
+                  <entry>optional array of exception classes which should
+                  cause rollback. By default, checked exceptions do not roll
+                  back, unchecked (RuntimeException derived) roll back</entry>
+                </row>
+
+                <row>
+                  <entry><literal>rollbackForClassname</literal></entry>
+
+                  <entry>array of String class names. Classes must be derived
+                  from Throwable</entry>
+
+                  <entry>optional array of names of exception classes which
+                  should cause rollback</entry>
+                </row>
+
+                <row>
+                  <entry><literal>noRollbackFor</literal></entry>
+
+                  <entry>array of Class objects, must be derived from
+                  Throwable</entry>
+
+                  <entry>optional array of exception classes which should not
+                  cause rollback.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>noRollbackForClassname</literal></entry>
+
+                  <entry>array of String class names, must be derived from
+                  Throwable</entry>
+
+                  <entry>optional array of names of exception classes which
+                  should not rollback</entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </table></para>
+
+        <para>The annotation may be placed before an interface definition, a
+        method on an interface, a class definition, or a method on a class. It
+        may exist on both an element of an interface, and a class which
+        implements that interface. The most derived location takes precedence
+        when evaluating the transaction semantics of a method.</para>
+
+        <sect4>
+          <title
+          id="beannameautoproxycreator-for-transactions"><literal>Transactional</literal>
+          Annotation Examples</title>
+
+          <para>Annotating a class definition:</para>
+
+          <para><programlisting>public class OrderServiceImpl implements OrderService {
+
+  @Transactional
+  void createOrder(Order order);
+  public List queryByCriteria(Order criteria);
+
+}</programlisting>In the following example, the interface is annotated for
+          read-only transactions, which will thus be the setting used for
+          methods by default. The Annotation on the createOrder method
+          overrides this, setting the transaction to read/write, and
+          specifying that transactions should also (in addition to the defualt
+          rollback rule for <literal>RuntimeException</literal>) rollback when
+          the <literal>DuplicateOrderIdException</literal> (presumably a
+          non-checked Exception) is thrown.</para>
+
+          <para><programlisting>@Transactional(readOnly=true)
+interface TestService {
+
+  @Transactional(readOnly=false,
+               rollbackFor=DuplicateOrderIdException.class)
+  void createOrder(Order order) throws DuplicateOrderIdException ;
+
+  List queryByCriteria(Order criteria);
+}</programlisting>Note that a class definition which implements this interface
+          may still override these settings on its own class or method
+          elements.</para>
+        </sect4>
+
+        <sect4>
+          <title id="beannameautoproxycreator-for-transactions">Telling Spring
+          to Apply the <literal>Transactional</literal> Annotation</title>
+
+          <para>By itself, adding instances of this annotation to interface or
+          class elements will not result in transactional wrapping of the
+          implementation clases. Spring must still be told somehow to create
+          transactional proxies around classes with these annotations.</para>
+
+          <para>The key is to take advantage of the
+          <literal>org.springframework.transaction.annotation.AnnotationTransactionAttributeSource</literal>
+          class, which reads Annotations format transaction attributes from
+          class files. Taking the previous example which uses
+          TransactionProxyFactoryBean, the
+          <literal>TransactionAttributes</literal> property which specified
+          transaction attributes in text form is replaced by the direct usage
+          of the <literal>TransactionAttribute</literal> property, specifying
+          an <literal>AnnotationTransactionAttributeSource</literal>.</para>
+
+          <para><programlisting>&lt;bean id="petStore"
+    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+    &lt;property name="transactionManager"&gt;&lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
+    &lt;property name="target"&gt;&lt;ref bean="petStoreTarget"/&gt;&lt;/property&gt;
+    &lt;property name="transactionAttributeSource"&gt;
+        &lt;bean class="...transaction.annotation.AnnotationTransactionAttributeSource"/&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting>Since the transactionAttributeSource property
+          does not need to change at all for each proxy instance, when using
+          parent and child bean definitions to avoid code duplication, the
+          property may just be set on the base, parent definition and
+          forgotten, there is never a need to override it in the child since
+          the attribute source will read the right settings from each class
+          file.</para>
+        </sect4>
+
+        <sect4>
+          <title id="beannameautoproxycreator-for-transactions">Using AOP to
+          ensure the <literal>Transactional</literal> Annotation is
+          applied</title>
+
+          <para>The previous example is still more work than would be ideal.
+          There is in principle no need for XML for each proxy (to point to
+          the target bean) when the annotations in the class files themselves
+          can be used as an indication that a proxy needs to be created for
+          the annotated classes.</para>
+
+          <para>A more AOP focused approach allows a small amount of
+          boilerplate XML (used once only, not for each target bean) to
+          automatically ensure that proxies are created for all classes with
+          Transactional annotations in them. Spring AOP was fully detailed in
+          a previous chapter, which you should consult for general AOP
+          documentation, but the key is the use of
+          <literal>DefaultAdvisorAutoProxyCreator</literal>, a
+          <literal>BeanPostProcessor</literal>. Because it is a bean post
+          processor, it gets a chance to look at every bean that is created as
+          it is created. If the bean contains the
+          <literal>Transactional</literal> Annotations, a transactional proxy
+          is automatically created to wrap it.</para>
+
+          <para><programlisting>&lt;bean
+class="org.springframework...DefaultAdvisorAutoProxyCreator"/&gt;
+
+&lt;bean class="org.springframework...TransactionAttributeSourceAdvisor"&gt;
+    &lt;property name="transactionInterceptor"&gt;
+        &lt;ref bean="transactionInterceptor"/&gt;&lt;/property&gt;
+&lt;/bean&gt;
+
+&lt;bean id="transactionInterceptor“
+      class="org.springframework...TransactionInterceptor"&gt;
+    &lt;property name="transactionManager"&gt;
+        &lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
+    &lt;property name="transactionAttributeSource"&gt;
+        &lt;bean class="org.springframework...AnnotationsTransactionAttributeSource"&gt;
+	      &lt;/bean&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;
+</programlisting>A number of classes are involved here:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal>TransactionInterceptor</literal>: the AOP Advice,
+              actually intercepts method call and wraps it with a
+              transaction</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>TransactionAttributeSourceAdvisor</literal>: AOP
+              Advisor (holds the TransactionInterceptor, which is the advice,
+              and a pointcut (where to apply the advice), in the form of a
+              TransactionAttributeSource)</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>AnnotationsTransactionAttributeSource</literal>:
+              TransactionAttributeSource implementation which provides
+              transaction attributes read from class files</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>DefaultAdvisorAutoProxyCreator</literal>: looks
+              for Advisors in the context, and automatically creates proxy
+              objects which are the transactional wrappers</para>
+            </listitem>
+          </itemizedlist>
+        </sect4>
+      </sect3>
+    </sect2>
+
+    <sect2>
       <title
       id="beannameautoproxycreator-for-transactions">BeanNameAutoProxyCreator,
       another declarative approach</title>
@@ -591,13 +869,14 @@ transactionManager.commit(status);</programlisting></para>
       <para><classname>TransactionProxyFactoryBean</classname> is very useful,
       and gives you full control when wrapping objects with a transactional
       proxy. Used with parent/child bean definitions and inner beans holding
-      the target, it is generally the best choice for transactional wrapping.
-      In the case that you need to wrap a number of beans in a completely
-      identical fashion (for example, a boilerplate, 'make all methods
-      transactional', using a <classname>BeanFactoryPostProcessor</classname>
-      called <classname>BeanNameAutoProxyCreator</classname> can offer an
-      alternative approach which can end up being even less verbose for this
-      simplified use case.</para>
+      the target, and when Java 5 Annotations are not available as an option,
+      it is generally the best choice for transactional wrapping. In the case
+      that you need to wrap a number of beans in a completely identical
+      fashion (for example, a boilerplate, 'make all methods transactional',
+      using a <classname>BeanFactoryPostProcessor</classname> called
+      <classname>BeanNameAutoProxyCreator</classname> can offer an alternative
+      approach which can end up being even less verbose for this simplified
+      use case.</para>
 
       <para>To recap, once the ApplicationContext has read its initialization
       information, it instantiates any beans within it which implement the
