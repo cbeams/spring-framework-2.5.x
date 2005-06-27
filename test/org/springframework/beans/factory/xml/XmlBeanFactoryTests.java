@@ -22,11 +22,12 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.mail.Session;
+import javax.servlet.ServletException;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
@@ -1152,14 +1153,17 @@ public class XmlBeanFactoryTests extends TestCase {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(true);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+
 		InstanceFactory.count = 0;
+		xbf.preInstantiateSingletons();
+		assertEquals(1, InstanceFactory.count);
 		FactoryMethods fm = (FactoryMethods) xbf.getBean("instanceFactoryMethodWithoutArgs");
 		assertEquals("instanceFactory", fm.getTestBean().getName());
 		assertEquals(1, InstanceFactory.count);
-
-		//tb = (TestBean) xbf.getBean("externalFactoryMethodWithArgs");
-		//assertEquals(33, tb.getAge());
-		//assertEquals("Rod", tb.getName());
+		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("instanceFactoryMethodWithoutArgs");
+		assertEquals("instanceFactory", fm2.getTestBean().getName());
+		assertSame(fm2, fm);
+		assertEquals(1, InstanceFactory.count);
 	}
 
 	public void testFactoryMethodNoMatchingStaticMethod() {
@@ -1213,6 +1217,23 @@ public class XmlBeanFactoryTests extends TestCase {
 		catch (BeanDefinitionStoreException ex) {
 			// OK
 		}
+	}
+
+	public void testFactoryMethodWithDifferentReturnType() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+
+		// Check that stringInstance is not considered a bean of type FactoryMethods.
+		assertNull(xbf.getType("stringInstance"));
+		String[] names = xbf.getBeanNamesForType(FactoryMethods.class);
+		assertTrue(!Arrays.asList(names).contains("stringInstance"));
+
+		xbf.preInstantiateSingletons();
+		assertEquals(String.class, xbf.getType("stringInstance"));
+		String str = (String) xbf.getBean("stringInstance");
+		assertEquals("string", str);
 	}
 
 	public void testFactoryMethodForJavaMailSession() {

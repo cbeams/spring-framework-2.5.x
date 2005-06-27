@@ -74,6 +74,9 @@
 		<constructor-arg index="3"><value>bogus</value></constructor-arg>
 	</bean>
 
+	<bean id="stringInstance" class="org.springframework.beans.factory.xml.FactoryMethods"
+	    factory-method="stringInstance"/>
+
 	<bean id="juergen" class="org.springframework.beans.TestBean">
 		<property name="name"><value>Juergen</value></property>
 	</bean>
@@ -97,7 +100,7 @@
 			factory-method="defaultInstance">
 	</bean>
 	
-	<bean id="instanceFactory" class="org.springframework.beans.factory.xml.InstanceFactory" singleton="false">
+	<bean id="instanceFactory" class="org.springframework.beans.factory.xml.InstanceFactory" singleton="true">
 		<property name="factoryBeanProperty"><value>instanceFactory</value></property>
 	</bean>
 

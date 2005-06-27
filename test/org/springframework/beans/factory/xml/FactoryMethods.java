@@ -18,11 +18,10 @@ package org.springframework.beans.factory.xml;
 
 import org.springframework.beans.TestBean;
 
-
 /**
- * Test class for Spring's ability to create
- * objects using static factory methods, rather
- * than constructors. 
+ * Test class for Spring's ability to create objects using static
+ * factory methods, rather than constructors.
+ *
  * @author Rod Johnson
  */
 public class FactoryMethods {
@@ -34,7 +33,7 @@ public class FactoryMethods {
 	}
 	
 	/**
-	 * Note that overloaded methods are supported
+	 * Note that overloaded methods are supported.
 	 */
 	public static FactoryMethods newInstance(TestBean tb) {
 		return new FactoryMethods(tb, "default", 0);
@@ -54,17 +53,20 @@ public class FactoryMethods {
 		return new FactoryMethods(tb, null, num);
 	}
 
+	public static String stringInstance() {
+		return "string";
+	}
+
+
 	private int num = 0;
 	private String name = "default";
 	private TestBean tb;
 	private String stringValue;
-	
+
+
 	/**
-	 * Constructor is private: not for use
-	 * outside this class, even by IoC container
-	 * @param tb
-	 * @param name
-	 * @param num
+	 * Constructor is private: not for use outside this class,
+	 * even by IoC container.
 	 */
 	private FactoryMethods(TestBean tb, String name, int num) {
 		this.tb = tb;
@@ -94,7 +96,6 @@ public class FactoryMethods {
 	
 	/**
 	 * Set via Setter Injection once instance is created
-	 * @param name
 	 */
 	public void setName(String name) {
 		this.name = name;
