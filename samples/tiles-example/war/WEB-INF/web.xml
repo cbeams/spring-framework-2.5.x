@@ -3,12 +3,16 @@
 
 <web-app>
 
+	<display-name>Spring Tiles Example</display-name>
+
+	<description>Spring Tiles sample application</description>
+
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>/WEB-INF/applicationContext.xml</param-value>
 	</context-param>
 	
-$	<listener>
+	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 
@@ -22,5 +26,14 @@ $	<listener>
 		<servlet-name>tiles</servlet-name>
 		<url-pattern>*.html</url-pattern>
 	</servlet-mapping>
+
+	<session-config>
+		<session-timeout>10</session-timeout>
+	</session-config>
+
+	<welcome-file-list>
+		<!-- Redirects to "index.html" for dispatcher handling -->
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
 
 </web-app>
