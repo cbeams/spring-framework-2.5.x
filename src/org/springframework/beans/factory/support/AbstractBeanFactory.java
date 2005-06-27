@@ -324,7 +324,11 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				// OK, let's assume it's a bean definition.
 				RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
 
-				// Return "undeterminable" for beans without class or with factory method.
+				// Create bean in case of factory method, to find out actual type.
+				if (mergedBeanDefinition.getFactoryMethodName() != null && mergedBeanDefinition.isSingleton()) {
+					return getBean(name).getClass();
+				}
+				// Return "undeterminable" for beans without class and for non-singleton beans with factory method.
 				if (!mergedBeanDefinition.hasBeanClass() || mergedBeanDefinition.getFactoryMethodName() != null) {
 					return null;
 				}

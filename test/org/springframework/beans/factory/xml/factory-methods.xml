@@ -74,8 +74,8 @@
 		<constructor-arg index="3"><value>bogus</value></constructor-arg>
 	</bean>
 
-	<bean id="stringInstance" class="org.springframework.beans.factory.xml.FactoryMethods"
-	    factory-method="stringInstance"/>
+	<bean id="listInstance" class="org.springframework.beans.factory.xml.FactoryMethods"
+		  factory-method="listInstance"/>
 
 	<bean id="juergen" class="org.springframework.beans.TestBean">
 		<property name="name"><value>Juergen</value></property>

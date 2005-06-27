@@ -16,6 +16,9 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.beans.TestBean;
 
 /**
@@ -53,8 +56,8 @@ public class FactoryMethods {
 		return new FactoryMethods(tb, null, num);
 	}
 
-	public static String stringInstance() {
-		return "string";
+	public static List listInstance() {
+		return Collections.EMPTY_LIST;
 	}
 
 

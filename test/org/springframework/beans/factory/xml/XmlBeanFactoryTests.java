@@ -23,6 +23,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -1139,13 +1140,25 @@ public class XmlBeanFactoryTests extends TestCase {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(true);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+
+		assertEquals(TestBean.class, xbf.getType("externalFactoryMethodWithoutArgs"));
+		assertEquals(TestBean.class, xbf.getType("externalFactoryMethodWithArgs"));
+		String[] names = xbf.getBeanNamesForType(TestBean.class);
+		assertTrue(Arrays.asList(names).contains("externalFactoryMethodWithoutArgs"));
+		assertTrue(Arrays.asList(names).contains("externalFactoryMethodWithArgs"));
+
 		TestBean tb = (TestBean) xbf.getBean("externalFactoryMethodWithoutArgs");
 		assertEquals(2, tb.getAge());
 		assertEquals("Tristan", tb.getName());
-
 		tb = (TestBean) xbf.getBean("externalFactoryMethodWithArgs");
 		assertEquals(33, tb.getAge());
 		assertEquals("Rod", tb.getName());
+
+		assertEquals(TestBean.class, xbf.getType("externalFactoryMethodWithoutArgs"));
+		assertEquals(TestBean.class, xbf.getType("externalFactoryMethodWithArgs"));
+		names = xbf.getBeanNamesForType(TestBean.class);
+		assertTrue(Arrays.asList(names).contains("externalFactoryMethodWithoutArgs"));
+		assertTrue(Arrays.asList(names).contains("externalFactoryMethodWithArgs"));
 	}
 
 	public void testInstanceFactoryMethodWithoutArgs() {
@@ -1225,15 +1238,21 @@ public class XmlBeanFactoryTests extends TestCase {
 		reader.setValidating(true);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 
-		// Check that stringInstance is not considered a bean of type FactoryMethods.
-		assertNull(xbf.getType("stringInstance"));
+		// Check that listInstance is not considered a bean of type FactoryMethods.
+		assertTrue(List.class.isAssignableFrom(xbf.getType("listInstance")));
 		String[] names = xbf.getBeanNamesForType(FactoryMethods.class);
-		assertTrue(!Arrays.asList(names).contains("stringInstance"));
+		assertTrue(!Arrays.asList(names).contains("listInstance"));
+		names = xbf.getBeanNamesForType(List.class);
+		assertTrue(Arrays.asList(names).contains("listInstance"));
 
 		xbf.preInstantiateSingletons();
-		assertEquals(String.class, xbf.getType("stringInstance"));
-		String str = (String) xbf.getBean("stringInstance");
-		assertEquals("string", str);
+		assertTrue(List.class.isAssignableFrom(xbf.getType("listInstance")));
+		names = xbf.getBeanNamesForType(FactoryMethods.class);
+		assertTrue(!Arrays.asList(names).contains("listInstance"));
+		names = xbf.getBeanNamesForType(List.class);
+		assertTrue(Arrays.asList(names).contains("listInstance"));
+		List list = (List) xbf.getBean("listInstance");
+		assertEquals(Collections.EMPTY_LIST, list);
 	}
 
 	public void testFactoryMethodForJavaMailSession() {
@@ -1241,6 +1260,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(true);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+
 		Session session = (Session) xbf.getBean("javaMailSession");
 		assertEquals("someuser", session.getProperty("mail.smtp.user"));
 		assertEquals("somepw", session.getProperty("mail.smtp.password"));
