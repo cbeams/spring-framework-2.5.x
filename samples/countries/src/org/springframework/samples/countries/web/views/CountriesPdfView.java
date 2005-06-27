@@ -49,7 +49,7 @@ public class CountriesPdfView extends AbstractPdfView {
 
 	protected void buildPdfMetadata(Map model, Document document, HttpServletRequest request) {
 		document.addTitle("Countries List");
-		document.addCreator("SPRING-Countries");
+		document.addCreator("Spring Countries");
 	}
 
 	protected void buildPdfDocument(Map model, Document document,	PdfWriter writer,
