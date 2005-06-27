@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.2 (26.6.2005)
+Changes in version 1.2.2 (27.6.2005)
 ------------------------------------
 
 Package org.springframework.aop
@@ -17,6 +17,8 @@ Package org.springframework.beans
 * MethodInvokingFactoryBean throws target exception in case of InvocationTargetException
 * fixed AbstractBeanFactory to hold names of dependent beans in Set rather than List, avoiding leak for prototype beans
 * fixed AbstractAutowireCapableBeanFactory to not track dependencies for passed-in existing beans (avoiding memory leak)
+* fixed DefaultListableBeanFactory to exclude bean definitions with factory method from pre-instantiation type matching
+* fixed DefaultListableBeanFactory to pre-instantiate and match beans with factory method / "factory-bean" definition
 
 Package org.springframework.context
 * added "alwaysUseMessageFormat" property to AbstractMessageSource, enforcing MessageFormat for messages without args
