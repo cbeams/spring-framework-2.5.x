@@ -62,7 +62,7 @@ distribution/website before using any of them in your own applications.
 - required for running PetClinic (by Hibernate)
 
 * freemarker/freemarker.jar
-- FreeMarker 2.3.2 (http://www.freemarker.org)
+- FreeMarker 2.3.3 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
