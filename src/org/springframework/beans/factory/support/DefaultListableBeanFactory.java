@@ -139,9 +139,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			String beanName = (String) it.next();
 			RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
 			// Only check bean definition if it is complete.
-			if (!rbd.isAbstract() && rbd.hasBeanClass()) {
+			if (!rbd.isAbstract()) {
 				// In case of FactoryBean, match object created by FactoryBean.
-				if (FactoryBean.class.isAssignableFrom(rbd.getBeanClass()) && !isFactoryType) {
+				if (rbd.hasBeanClass() && FactoryBean.class.isAssignableFrom(rbd.getBeanClass()) && !isFactoryType) {
 					if (includeFactoryBeans && (includePrototypes || isSingleton(beanName)) &&
 							isBeanTypeMatch(beanName, type)) {
 						result.add(beanName);
@@ -153,8 +153,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					if (isFactoryType) {
 						beanName = FACTORY_BEAN_PREFIX + beanName;
 					}
-					if ((includePrototypes || rbd.isSingleton()) &&
-							(type == null || type.isAssignableFrom(rbd.getBeanClass()))) {
+					if ((includePrototypes || rbd.isSingleton()) && isBeanTypeMatch(beanName, type)) {
 						result.add(beanName);
 					}
 				}
@@ -266,8 +265,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				String beanName = (String) it.next();
 				if (containsBeanDefinition(beanName)) {
 					RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
-					if (bd.hasBeanClass() && !bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
-						if (FactoryBean.class.isAssignableFrom(bd.getBeanClass())) {
+					if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+						if (bd.hasBeanClass() && FactoryBean.class.isAssignableFrom(bd.getBeanClass())) {
 							FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
 							if (factory.isSingleton()) {
 								getBean(beanName);
