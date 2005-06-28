@@ -612,7 +612,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @see #doTypeConversionIfNecessary(Object, Class, org.springframework.beans.BeanWrapperImpl)
 	 */
 	protected Object doTypeConversionIfNecessary(Object value, Class targetType) throws TypeMismatchException {
-		return doTypeConversionIfNecessary(value, targetType, new BeanWrapperImpl());
+		BeanWrapperImpl bw = new BeanWrapperImpl();
+		initBeanWrapper(bw);
+		return doTypeConversionIfNecessary(value, targetType, bw);
 	}
 
 	/**

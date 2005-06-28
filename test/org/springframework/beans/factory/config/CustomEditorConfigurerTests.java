@@ -49,10 +49,15 @@ public class CustomEditorConfigurerTests extends TestCase {
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("date", "2.12.1975");
-		bf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class, pvs));
+		bf.registerBeanDefinition("tb1", new RootBeanDefinition(TestBean.class, pvs));
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("someMap[myKey]", new TypedStringValue("2.12.1975", Date.class));
+		bf.registerBeanDefinition("tb2", new RootBeanDefinition(TestBean.class, pvs));
 
-		TestBean tb = (TestBean) bf.getBean("tb");
-		assertEquals(df.parse("2.12.1975"), tb.getDate());
+		TestBean tb1 = (TestBean) bf.getBean("tb1");
+		assertEquals(df.parse("2.12.1975"), tb1.getDate());
+		TestBean tb2 = (TestBean) bf.getBean("tb2");
+		assertEquals(df.parse("2.12.1975"), tb2.getSomeMap().get("myKey"));
 	}
 
 	public void testCustomEditorConfigurerWithClasses() throws ParseException {
