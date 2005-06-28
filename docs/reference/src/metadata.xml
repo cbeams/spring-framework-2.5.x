@@ -6,8 +6,9 @@
     <title>Source-level metadata</title>
 
     <para><authorinitials>Source-level metadata</authorinitials> is the
-    addition of <emphasis>attributes</emphasis> or <emphasis>annotations</emphasis>
-    to program elements: usually, classes and/or methods.</para>
+    addition of <emphasis>attributes</emphasis> or
+    <emphasis>annotations</emphasis> to program elements: usually, classes
+    and/or methods.</para>
 
     <para>For example, we might add metadata to a class as follows:</para>
 
@@ -23,7 +24,7 @@ public class PetStoreImpl implements PetStoreFacade, OrderService {</programlist
  * Normal comments
  * @@org.springframework.transaction.interceptor.RuleBasedTransactionAttribute()
  * @@org.springframework.transaction.interceptor.RollbackRuleAttribute(Exception.class)
- * @@org.springframework.transaction.interceptor.NoRollbackRuleAttribute(&#34;ServletException&#34;)
+ * @@org.springframework.transaction.interceptor.NoRollbackRuleAttribute("ServletException")
  */
 public void echoException(Exception ex) throws Exception {
     ....
@@ -32,14 +33,14 @@ public void echoException(Exception ex) throws Exception {
     <para>Both of these examples use Jakarta Commons Attributes syntax.</para>
 
     <para>Source-level metadata was introduced to the mainstream by XDoclet
-    (in the Java world) and by the release of Microsoft&#39;s .NET platform,
-    which uses source-level attributes to control transactions, pooling and
-    other behavior.</para>
+    (in the Java world) and by the release of Microsoft's .NET platform, which
+    uses source-level attributes to control transactions, pooling and other
+    behavior.</para>
 
     <para>The value in this approach has been recognized in the J2EE
-    community. For example, it&#39;s much less verbose than the traditional
-    XML deployment descriptors exclusively used by EJB. While it is desirable
-    to externalize some things from program source code, some important
+    community. For example, it's much less verbose than the traditional XML
+    deployment descriptors exclusively used by EJB. While it is desirable to
+    externalize some things from program source code, some important
     enterprise settings--notably transaction characteristics--arguably belong
     in program source. Contrary to the assumptions of the EJB spec, it seldom
     makes sense to modify the transactional characteristics of a method
@@ -55,9 +56,11 @@ public void echoException(Exception ex) throws Exception {
 
     <itemizedlist>
       <listitem>
-        <para><emphasis role="bold">JSR-175</emphasis>: the standard Java
-        metadata implementation, available in Java 1.5. But we need a solution
-        for Java 1.4 and even 1.3 too.</para>
+        <para><emphasis role="bold">Standard Java Annotations</emphasis>: the
+        standard Java metadata implementation (developed as JSR-175 and
+        available in Java 5. Spring already supports specific Java 5
+        Annotations for transactional demarcation, and for JMX. But we need a
+        solution for Java 1.4 and even 1.3 too.</para>
       </listitem>
 
       <listitem>
@@ -67,41 +70,59 @@ public void echoException(Exception ex) throws Exception {
 
       <listitem>
         <para>Various <emphasis role="bold">open source attribute
-        implementations</emphasis>, for Java 1.3 and 1.4, of which
-        Commons Attributes appears to be the most promising. All these
-        require a special pre- or post-compilation step.</para>
+        implementations</emphasis>, for Java 1.3 and 1.4, of which Commons
+        Attributes appears to be the most promising. All these require a
+        special pre- or post-compilation step.</para>
       </listitem>
     </itemizedlist>
   </sect1>
 
   <sect1 id="metadata-spring">
-    <title>Spring&#39;s metadata support</title>
+    <title>Spring's metadata support</title>
 
     <para>In keeping with its provision of abstractions over important
     concepts, Spring provides a facade to metadata implementations, in the
     form of the <literal>org.springframework.metadata.Attributes</literal>
     interface.</para>
 
-    <para>Such a facade adds value for several reasons:<itemizedlist><listitem><para>There
-    is currently no standard metadata solution. Java 1.5 will provide one, but
-    it is still in beta as of Spring 1.0. Furthermore, there will be a need
-    for metadata support in 1.3 and 1.4 applications for at least two years.
-    Spring aims to provide working solutions <emphasis>now</emphasis>; waiting
-    for 1.5 is not an option in such an important area.</para></listitem><listitem><para>Current
-    metadata APIs, such as Commons Attributes (used by Spring 1.0) are hard to
-    test. Spring provides a simple metadata interface that is much easier to
-    mock.</para></listitem><listitem><para>Even when Java 1.5 provides
-    metadata support at language level, there will still be value in providing
-    such an abstraction:</para><itemizedlist><listitem><para>JSR-175 metadata
-    is static. It is associated with a class at compile time, and cannot be
-    changed in a deployed environment. There is a need for hierarchical
-    metadata, providing the ability to override certain attribute values in
-    deployment--for example, in an XML file.</para></listitem><listitem><para>JSR-175
-    metadata is returned through the Java reflection API. This makes it
-    impossible to mock during test time. Spring provides a simple interface to
-    allow this.</para></listitem></itemizedlist></listitem></itemizedlist></para>
+    <para>Such a facade adds value for several reasons:<itemizedlist>
+        <listitem>
+          <para>Java 5 provides metadata support at language level, there will
+          still be value in providing such an abstraction:</para>
 
-    <para>The Spring <literal>Attributes</literal> interface looks like this:</para>
+          <itemizedlist>
+            <listitem>
+              <para>Java 5 metadata is static. It is associated with a class
+              at compile time, and cannot be changed in a deployed
+              environment. There is a need for hierarchical metadata,
+              providing the ability to override certain attribute values in
+              deployment--for example, in an XML file.</para>
+            </listitem>
+
+            <listitem>
+              <para>Java 5 metadata is returned through the Java reflection
+              API. This makes it impossible to mock during test time. Spring
+              provides a simple interface to allow this.</para>
+            </listitem>
+
+            <listitem>
+              <para>There will be a need for metadata support in 1.3 and 1.4
+              applications for at least two years. Spring aims to provide
+              working solutions <emphasis>now</emphasis>; forcing the use of
+              Java 5 is not an option in such an important area.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Current metadata APIs, such as Commons Attributes (used by
+          Spring 1.0-1.2) are hard to test. Spring provides a simple metadata
+          interface that is much easier to mock.</para>
+        </listitem>
+      </itemizedlist></para>
+
+    <para>The Spring <literal>Attributes</literal> interface looks like
+    this:</para>
 
     <para><programlisting>public interface Attributes {
 
@@ -121,9 +142,9 @@ public void echoException(Exception ex) throws Exception {
     <para>This is a lowest common denominator interface. JSR-175 offers more
     capabilities than this, such as attributes on method arguments. As of
     Spring 1.0, Spring aims to provide the subset of metadata required to
-    provide effective declarative enterprise services a la EJB or .NET,
-    on Java 1.3+. As of Spring 1.2, analogous JSR-175 annotations are
-    supported on JDK 1.5, as direct alternative to Commons Attributes.</para>
+    provide effective declarative enterprise services a la EJB or .NET, on
+    Java 1.3+. As of Spring 1.2, analogous JSR-175 annotations are supported
+    on JDK 1.5, as direct alternative to Commons Attributes.</para>
 
     <para>Note that this interface offers <literal>Object</literal>
     attributes, like .NET. This distinguishes it from attribute systems such
@@ -157,16 +178,15 @@ public void echoException(Exception ex) throws Exception {
     self-documentation in attribute definitions. (Support for JavaBean
     properties was added at the request of the Spring team.)</para>
 
-    <para>We&#39;ve already seen two examples of Commons Attributes attributes
+    <para>We've already seen two examples of Commons Attributes attributes
     definitions. In general, we will need to express:</para>
 
     <itemizedlist>
       <listitem>
         <para><emphasis>The name of the attribute class</emphasis>. This can
         be an FQN, as shown above. If the relevant attribute class has already
-        been imported, the FQN isn&#39;t required. It&#39;s also possible to
-        specify &#34;attribute packages&#34; in attribute compiler
-        configuration.</para>
+        been imported, the FQN isn't required. It's also possible to specify
+        "attribute packages" in attribute compiler configuration.</para>
       </listitem>
 
       <listitem>
@@ -181,7 +201,7 @@ public void echoException(Exception ex) throws Exception {
  * @@MyAttribute(myBooleanJavaBeanProperty=true)
  */</programlisting></para>
 
-    <para>It&#39;s possible to combine constructor arguments and JavaBean
+    <para>It's possible to combine constructor arguments and JavaBean
     properties (as in Spring IoC).</para>
 
     <para>Because, unlike Java 1.5 attributes, Commons Attributes is not
@@ -192,8 +212,9 @@ public void echoException(Exception ex) throws Exception {
     <para>To run Commons Attributes as part of the build process, you will
     need to do the following.</para>
 
-    <para>1. Copy the necessary library Jars to <literal>$ANT_HOME/lib</literal>.
-    Four Jars are required, and all are distributed with Spring:</para>
+    <para>1. Copy the necessary library Jars to
+    <literal>$ANT_HOME/lib</literal>. Four Jars are required, and all are
+    distributed with Spring:</para>
 
     <itemizedlist>
       <listitem>
@@ -212,23 +233,23 @@ public void echoException(Exception ex) throws Exception {
     <para>2. Import the Commons Attributes ant tasks into your project build
     script, as follows:</para>
 
-    <programlisting>&#60;taskdef resource=&#34;org/apache/commons/attributes/anttasks.properties&#34;/&#62;</programlisting>
+    <programlisting>&lt;taskdef resource="org/apache/commons/attributes/anttasks.properties"/&gt;</programlisting>
 
     <para>3. Next, define an attribute compilation task, which will use the
-    Commons Attributes attribute-compiler task to &#34;compile&#34; the
-    attributes in the source. This process results in the generation of
-    additional sources, to a location specified by the destdir attribute. Here
-    we show the use of a temporary directory:</para>
+    Commons Attributes attribute-compiler task to "compile" the attributes in
+    the source. This process results in the generation of additional sources,
+    to a location specified by the destdir attribute. Here we show the use of
+    a temporary directory:</para>
 
-    <para><programlisting>&#60;target name=&#34;compileAttributes&#34; &#62;
+    <para><programlisting>&lt;target name="compileAttributes" &gt;
 
-    &#60;attribute-compiler 
-        destdir=&#34;${commons.attributes.tempdir}&#34; 
-    &#62;
-        &#60;fileset dir=&#34;${src.dir}&#34; includes=&#34;**/*.java&#34;/&#62;
-    &#60;/attribute-compiler&#62;
+    &lt;attribute-compiler 
+        destdir="${commons.attributes.tempdir}" 
+    &gt;
+        &lt;fileset dir="${src.dir}" includes="**/*.java"/&gt;
+    &lt;/attribute-compiler&gt;
 
-&#60;/target&#62;</programlisting></para>
+&lt;/target&gt;</programlisting></para>
 
     <para>The compile target that runs Javac over the sources should depend on
     this attribute compilation task, and must also compile the generated
@@ -237,17 +258,18 @@ public void echoException(Exception ex) throws Exception {
     caught by the attribute compiler. However, if the attribute definitions
     are syntactically plausible, but specify invalid types or class names, the
     compilation of the generated attribute classes may fail. In this case, you
-    can look at the generated classes to establish the cause of the problem.</para>
+    can look at the generated classes to establish the cause of the
+    problem.</para>
 
     <remark>Commons Attributes also provides Maven support. Please refer to
     Commons Attributes documentation for further information.</remark>
 
     <para>While this attribute compilation process may look complex, in fact
-    it&#39;s a one-off cost. Once set up, attribute compilation is
-    incremental, so it doesn&#39;t usually noticeably slow the build process.
-    And once the compilation process is set up, you may find that use of
-    attributes as described in this chapter can save you a lot of time in
-    other areas. </para>
+    it's a one-off cost. Once set up, attribute compilation is incremental, so
+    it doesn't usually noticeably slow the build process. And once the
+    compilation process is set up, you may find that use of attributes as
+    described in this chapter can save you a lot of time in other
+    areas.</para>
 
     <para>If you require attribute indexing support (only currently required
     by Spring for attribute-targeted web controllers, discussed below), you
@@ -256,11 +278,11 @@ public void echoException(Exception ex) throws Exception {
     create an index of all the attributes defined on your sources, for
     efficient lookup at runtime. This step looks as follows:</para>
 
-    <para><programlisting>&#60;attribute-indexer jarFile=&#34;myCompiledSources.jar&#34;&#62;
+    <para><programlisting>&lt;attribute-indexer jarFile="myCompiledSources.jar"&gt;
     
-    &#60;classpath refid=&#34;master-classpath&#34;/&#62;
+    &lt;classpath refid="master-classpath"/&gt;
 
-&#60;/attribute-indexer&#62;</programlisting></para>
+&lt;/attribute-indexer&gt;</programlisting></para>
 
     <remark>See the /attributes directory of the Spring jPetStore sample
     application for an example of this build process. You can take the build
@@ -293,48 +315,49 @@ public void echoException(Exception ex) throws Exception {
       <para>This builds on the Spring AOP autoproxy functionality.
       Configuration might look like this:</para>
 
-      <para><programlisting>&#60;bean id=&#34;autoproxy&#34; 
-    class=&#34;org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator&#34;&#62;
-&#60;/bean&#62;
+      <para><programlisting>&lt;bean id="autoproxy" 
+    class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"&gt;
+&lt;/bean&gt;
 
-&#60;bean id=&#34;transactionAttributeSource&#34;
-    class=&#34;org.springframework.transaction.interceptor.AttributesTransactionAttributeSource&#34;
-    autowire=&#34;constructor&#34;&#62;
-&#60;/bean&#62;
+&lt;bean id="transactionAttributeSource"
+    class="org.springframework.transaction.interceptor.AttributesTransactionAttributeSource"
+    autowire="constructor"&gt;
+&lt;/bean&gt;
 
-&#60;bean id=&#34;transactionInterceptor&#34;
-    class=&#34;org.springframework.transaction.interceptor.TransactionInterceptor&#34;
-    autowire=&#34;byType&#34;&#62;
-&#60;/bean&#62;
+&lt;bean id="transactionInterceptor"
+    class="org.springframework.transaction.interceptor.TransactionInterceptor"
+    autowire="byType"&gt;
+&lt;/bean&gt;
 
-&#60;bean id=&#34;transactionAdvisor&#34;
-    class=&#34;org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor&#34;
-    autowire=&#34;constructor&#34; &#62;
-&#60;/bean&#62;
+&lt;bean id="transactionAdvisor"
+    class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"
+    autowire="constructor" &gt;
+&lt;/bean&gt;
 
-&#60;bean id=&#34;attributes&#34;
-    class=&#34;org.springframework.metadata.commons.CommonsAttributes&#34;
-/&#62;</programlisting></para>
+&lt;bean id="attributes"
+    class="org.springframework.metadata.commons.CommonsAttributes"
+/&gt;</programlisting></para>
 
       <para>The basic concepts here should be familiar from the discussion of
-      autoproxying in the AOP chapter. </para>
+      autoproxying in the AOP chapter.</para>
 
       <para>The most important bean definitions are those named <emphasis
-      role="bold">autoproxy</emphasis> and <emphasis role="bold">transactionAdvisor</emphasis>.
-      Note that the actual bean names are not important; what matters is their
-      class.</para>
+      role="bold">autoproxy</emphasis> and <emphasis
+      role="bold">transactionAdvisor</emphasis>. Note that the actual bean
+      names are not important; what matters is their class.</para>
 
-      <para>The autoproxy bean definition of class <literal>org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator</literal>
-      will automatically advise (&#34;autoproxy&#34;) all bean instances in
-      the current factory based on matching Advisor implementations. This
-      class knows nothing about attributes, but relies on Advisors&#39;
-      pointcuts matching. The pointcuts do know about attributes.</para>
+      <para>The autoproxy bean definition of class
+      <literal>org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator</literal>
+      will automatically advise ("autoproxy") all bean instances in the
+      current factory based on matching Advisor implementations. This class
+      knows nothing about attributes, but relies on Advisors' pointcuts
+      matching. The pointcuts do know about attributes.</para>
 
       <para>Thus we simply need an AOP advisor that will provide declarative
       transaction management based on attributes.</para>
 
-      <para>It&#39;s possible to add arbitrary custom Advisor implementations
-      as well, and they will also be evaluated and applied automatically. (You
+      <para>It's possible to add arbitrary custom Advisor implementations as
+      well, and they will also be evaluated and applied automatically. (You
       can use Advisors whose pointcuts match on criteria besides attributes in
       the same autoproxy configuration, if necessary.)</para>
 
@@ -357,8 +380,8 @@ public void echoException(Exception ex) throws Exception {
 
       <para><emphasis>Unlike</emphasis> in .NET, you can specify transaction
       attributes at either class or method level. Class-level attributes, if
-      specified, will be &#34;inherited&#34; by all methods. Method attributes
-      will wholly override any class-level attributes.</para>
+      specified, will be "inherited" by all methods. Method attributes will
+      wholly override any class-level attributes.</para>
     </sect2>
 
     <sect2 id="metadata-pool">
@@ -374,43 +397,44 @@ public void echoException(Exception ex) throws Exception {
  * 
  * @author Rod Johnson
  */
-public class MyClass {</programlisting>You&#39;ll need the usual autoproxy
+public class MyClass {</programlisting>You'll need the usual autoproxy
       infrastructure configuration. You then need to specify a pooling
       <literal>TargetSourceCreator</literal>, as follows. Because pooling
-      affects the creation of the target, we can&#39;t use a regular advice.
-      Note that pooling will apply even if there are no advisors applicable to
-      the class, if that class has a pooling attribute.</para>
+      affects the creation of the target, we can't use a regular advice. Note
+      that pooling will apply even if there are no advisors applicable to the
+      class, if that class has a pooling attribute.</para>
 
-      <para><programlisting>&#60;bean id=&#34;poolingTargetSourceCreator&#34;
-    class=&#34;org.springframework.aop.framework.autoproxy.metadata.AttributesPoolingTargetSourceCreator&#34;
-    autowire=&#34;constructor&#34; &#62;
-&#60;/bean&#62;</programlisting></para>
+      <para><programlisting>&lt;bean id="poolingTargetSourceCreator"
+    class="org.springframework.aop.framework.autoproxy.metadata.AttributesPoolingTargetSourceCreator"
+    autowire="constructor" &gt;
+&lt;/bean&gt;</programlisting></para>
 
       <para>The relevant autoproxy bean definition needs to specify a list of
-      &#34;custom target source creators&#34;, including the Pooling target
-      source creator. We could modify the example shown above to include this
+      "custom target source creators", including the Pooling target source
+      creator. We could modify the example shown above to include this
       property as follows:</para>
 
-      <para><programlisting>&#60;bean id=&#34;autoproxy&#34; 
-    class=&#34;org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator&#34;&#62;
-&#62;
-    &#60;property name=&#34;customTargetSourceCreators&#34;&#62;
-        &#60;list&#62;
-            &#60;ref local=&#34;poolingTargetSourceCreator&#34; /&#62;
-        &#60;/list&#62;
-    &#60;/property&#62;
-&#60;/bean&#62;</programlisting></para>
+      <para><programlisting>&lt;bean id="autoproxy" 
+    class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"&gt;
+&gt;
+    &lt;property name="customTargetSourceCreators"&gt;
+        &lt;list&gt;
+            &lt;ref local="poolingTargetSourceCreator" /&gt;
+        &lt;/list&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
 
       <para>As with the use of metadata in Spring in general, this is a
-      one-off cost: once setup is out of the way, it&#39;s very easy to use
-      pooling for additional business objects. </para>
+      one-off cost: once setup is out of the way, it's very easy to use
+      pooling for additional business objects.</para>
 
-      <remark>It&#39;s arguable that the need for pooling is rare, so
-      there&#39;s seldom a need to apply pooling to a large number of business
-      objects. Hence this feature does not appear to be used often.</remark>
+      <remark>It's arguable that the need for pooling is rare, so there's
+      seldom a need to apply pooling to a large number of business objects.
+      Hence this feature does not appear to be used often.</remark>
 
-      <para>Please see the Javadoc for the <literal>org.springframework.aop.framework.autoproxy</literal>
-      package for more details. It&#39;s possible to use a different pooling
+      <para>Please see the Javadoc for the
+      <literal>org.springframework.aop.framework.autoproxy</literal> package
+      for more details. It's possible to use a different pooling
       implementation than Commons Pool with minimal custom coding.</para>
     </sect2>
 
@@ -466,18 +490,31 @@ public class MyClass {</programlisting>You&#39;ll need the usual autoproxy
 
     <para>Spring MVC offers flexible <emphasis>handler mappings</emphasis>:
     mappings from incoming request to controller (or other handler) instance.
-    Normally handler mappings are configured in the <literal>xxxx-servlet.xml</literal>
-    file for the relevant Spring DispatcherServlet.</para>
+    Normally handler mappings are configured in the
+    <literal>xxxx-servlet.xml</literal> file for the relevant Spring
+    DispatcherServlet.</para>
 
     <para>Holding these mappings in the DispatcherServlet configuration file
-    is normally A Good Thing. It provides maximum flexibility. In particular:<itemizedlist><listitem><para>The
-    controller instance is explicitly managed by Spring IoC, through an XML
-    bean definition</para></listitem><listitem><para>The mapping is external
-    to the controller, so the same controller instance could be given multiple
-    mappings in the same DispatcherServlet context or reused in a different
-    configuration.</para></listitem><listitem><para>Spring MVC is able to
-    support mappings based on any criteria, rather than merely the request
-    URL-to-controller mappings available in most other frameworks.</para></listitem></itemizedlist></para>
+    is normally A Good Thing. It provides maximum flexibility. In
+    particular:<itemizedlist>
+        <listitem>
+          <para>The controller instance is explicitly managed by Spring IoC,
+          through an XML bean definition</para>
+        </listitem>
+
+        <listitem>
+          <para>The mapping is external to the controller, so the same
+          controller instance could be given multiple mappings in the same
+          DispatcherServlet context or reused in a different
+          configuration.</para>
+        </listitem>
+
+        <listitem>
+          <para>Spring MVC is able to support mappings based on any criteria,
+          rather than merely the request URL-to-controller mappings available
+          in most other frameworks.</para>
+        </listitem>
+      </itemizedlist></para>
 
     <para>However, this does mean that for each controller we typically need
     both a handler mapping (normally in a handler mapping XML bean definition)
@@ -511,7 +548,7 @@ public class MyClass {</programlisting>You&#39;ll need the usual autoproxy
     <para><programlisting>/**
  * Normal comments here
  * @author Rod Johnson
- * @@org.springframework.web.servlet.handler.metadata.PathMap(&#34;/bar.cgi&#34;)
+ * @@org.springframework.web.servlet.handler.metadata.PathMap("/bar.cgi")
  */
 public class BarController extends AbstractController {
 
@@ -524,9 +561,9 @@ public class BarController extends AbstractController {
     protected ModelAndView handleRequestInternal(
             HttpServletRequest arg0, HttpServletResponse arg1) 
             throws Exception {
-        System.out.println(&#34;Bar Crunching c and d =&#34; + 
-            cruncher.concatenate(&#34;c&#34;, &#34;d&#34;));
-        return new ModelAndView(&#34;test&#34;);
+        System.out.println("Bar Crunching c and d =" + 
+            cruncher.concatenate("c", "d"));
+        return new ModelAndView("test");
     }
 
 }</programlisting></para>
@@ -535,24 +572,25 @@ public class BarController extends AbstractController {
     relevant <literal>xxxx-servlet.xml</literal> file, specifying the
     attributes handler mapping. This special handler mapping can handle any
     number of controllers with attributes as shown above. The bean id
-    (&#34;commonsAttributesHandlerMapping&#34;) is not important. The type is
-    what matters:</para>
+    ("commonsAttributesHandlerMapping") is not important. The type is what
+    matters:</para>
 
-    <para><programlisting>&#60;bean id=&#34;commonsAttributesHandlerMapping&#34;      
-    class=&#34;org.springframework.web.servlet.handler.metadata.CommonsPathMapHandlerMapping&#34;
-/&#62;</programlisting></para>
+    <para><programlisting>&lt;bean id="commonsAttributesHandlerMapping"      
+    class="org.springframework.web.servlet.handler.metadata.CommonsPathMapHandlerMapping"
+/&gt;</programlisting></para>
 
     <para>We <emphasis>do not </emphasis>currently need an Attributes bean
     definition, as in the above example, because this class works directly
-    with the Commons Attributes API, not via the Spring metadata abstraction.</para>
+    with the Commons Attributes API, not via the Spring metadata
+    abstraction.</para>
 
     <para>We now need no XML configuration for each controller. Controllers
     are automatically mapped to the specified URL(s). Controllers benefit from
-    IoC, using Spring&#39;s autowiring capability. For example, the dependency
-    expressed in the &#34;cruncher&#34; bean property of the simple controller
-    shown above is automatically resolved in the current web application
-    context. Both Setter and Constructor Dependency Injection are available,
-    each with zero configuration.</para>
+    IoC, using Spring's autowiring capability. For example, the dependency
+    expressed in the "cruncher" bean property of the simple controller shown
+    above is automatically resolved in the current web application context.
+    Both Setter and Constructor Dependency Injection are available, each with
+    zero configuration.</para>
 
     <para>An example of Constructor Injection, also showing multiple URL
     paths:</para>
@@ -561,8 +599,8 @@ public class BarController extends AbstractController {
 * Normal comments here
 * @author Rod Johnson
 * 
-* @@org.springframework.web.servlet.handler.metadata.PathMap(&#34;/foo.cgi&#34;)
-* @@org.springframework.web.servlet.handler.metadata.PathMap(&#34;/baz.cgi&#34;)
+* @@org.springframework.web.servlet.handler.metadata.PathMap("/foo.cgi")
+* @@org.springframework.web.servlet.handler.metadata.PathMap("/baz.cgi")
 */
 public class FooController extends AbstractController {
 
@@ -575,7 +613,7 @@ public class FooController extends AbstractController {
     protected ModelAndView handleRequestInternal(
             HttpServletRequest arg0, HttpServletResponse arg1) 
             throws Exception {
-        return new ModelAndView(&#34;test&#34;);
+        return new ModelAndView("test");
     }
 
 }</programlisting></para>
@@ -612,11 +650,11 @@ public class FooController extends AbstractController {
       </listitem>
 
       <listitem>
-        <para>Only &#34;autowiring by type&#34; dependency injection is
-        supported for such controllers. However, this still leaves them far in
-        advance of Struts Actions (with no IoC support from the framework)
-        and, arguably, WebWork Actions (with only rudimentary IoC support)
-        where IoC is concerned.</para>
+        <para>Only "autowiring by type" dependency injection is supported for
+        such controllers. However, this still leaves them far in advance of
+        Struts Actions (with no IoC support from the framework) and, arguably,
+        WebWork Actions (with only rudimentary IoC support) where IoC is
+        concerned.</para>
       </listitem>
 
       <listitem>
@@ -629,8 +667,8 @@ public class FooController extends AbstractController {
     the common case using TransactionProxyFactoryBean, for example, we end up
     with <emphasis>two</emphasis> implementations of a business interface such
     as Cruncher: the original POJO definition, and the transactional AOP
-    proxy. This won&#39;t work, as the owning application context can&#39;t
-    resolve the type dependency unambiguously. The solution is to use AOP
+    proxy. This won't work, as the owning application context can't resolve
+    the type dependency unambiguously. The solution is to use AOP
     autoproxying, setting up the autoproxy infrastructure so that there is
     only one implementation of Cruncher defined, and that implementation is
     automatically advised. Thus this approach works well with
@@ -644,10 +682,11 @@ public class FooController extends AbstractController {
     This limitation is due to the fact that not only do we need attribute
     compilation, we need attribute <emphasis>indexing</emphasis>: the ability
     to ask the attributes API for all classes with the PathMap attribute.
-    Indexing is not currently offered on the <literal>org.springframework.metadata.Attributes</literal>
-    abstraction interface, although it may be in future. (If you want to add
-    support for another attributes implementation--which must support
-    indexing--you can easily extend the <literal>AbstractPathMapHandlerMapping</literal>
+    Indexing is not currently offered on the
+    <literal>org.springframework.metadata.Attributes</literal> abstraction
+    interface, although it may be in future. (If you want to add support for
+    another attributes implementation--which must support indexing--you can
+    easily extend the <literal>AbstractPathMapHandlerMapping</literal>
     superclass of <literal>CommonsPathMapHandlerMapping</literal>,
     implementing the two protected abstract methods to use your preferred
     attributes API.)</para>
@@ -659,17 +698,17 @@ public class FooController extends AbstractController {
 
     <remark>If you begin with a handler metadata mapping approach, it is
     possible to switch at any point to a classic Spring XML mapping approach.
-    So you don&#39;t close off this option. For this reason, I find that I
-    often start a web application using metadata mapping.</remark>
+    So you don't close off this option. For this reason, I find that I often
+    start a web application using metadata mapping.</remark>
   </sect1>
 
   <sect1>
     <title>Other uses of metadata attributes</title>
 
     <para>Other uses of metadata attributes appear to be growing in
-    popularity. As of Spring 1.2, metadata attributes for JMX exposure
-    are supported, through both Commons Attributes (on JDK 1.3+) and
-    JSR-175 annotations (on JDK 1.5).</para>
+    popularity. As of Spring 1.2, metadata attributes for JMX exposure are
+    supported, through both Commons Attributes (on JDK 1.3+) and JSR-175
+    annotations (on JDK 1.5).</para>
   </sect1>
 
   <sect1>
@@ -678,9 +717,10 @@ public class FooController extends AbstractController {
     <para>Should you wish to provide support for another metadata API it is
     easy to do so.</para>
 
-    <para>Simply implement the <literal>org.springframework.metadata.Attributes</literal>
-    interface as a facade for your metadata API. You can then include this
-    object in your bean definitions as shown above.</para>
+    <para>Simply implement the
+    <literal>org.springframework.metadata.Attributes</literal> interface as a
+    facade for your metadata API. You can then include this object in your
+    bean definitions as shown above.</para>
 
     <para>All framework services that use metadata, such as AOP
     metadata-driven autoproxying, will then automatically be able to use your
