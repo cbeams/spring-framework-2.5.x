@@ -43,7 +43,7 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 	private static Object NULL_VALUE = new Object();
 
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	private static final Log logger = LogFactory.getLog(CachingMapDecorator.class);
 
 	private final Map targetMap;
 
