@@ -497,13 +497,25 @@ transactionManager.commit(status);</programlisting></para>
     management exceeds that of EJB CMT.</para>
 
     <para>The usual way of setting up transactional proxying in Spring is via
-    the TransactionProxyFactoryBean. We need a target object to wrap in a
-    transactional proxy. The target object is normally a POJO bean definition.
-    When we define the TransactionProxyFactoryBean, we must supply a reference
-    to the relevant PlatformTransactionManager, and <emphasis
-    role="bold">transaction attributes</emphasis>. Transaction attributes
-    contain the transaction definitions, discussed above. Consider the
-    following sample:</para>
+    the the use of <literal>TransactionProxyFactoryBean</literal> to create
+    the transactional proxy. This factory bean is simply a specialized version
+    of Spring's generic <literal>ProxyFactoryBean</literal>, that, in addition
+    to creating a proxy to wrap a target object, will also always
+    automatically create and attach a
+    <literal>TransactionInterceptor</literal> to that proxy, reducing
+    boilerplate code. (Note that as with <literal>ProxyFactoryBean</literal>,
+    you may still specify other interceptors or AOP advice to apply via the
+    proxy).</para>
+
+    <para>When using <literal>TransactionProxyFactoryBean</literal>, you need
+    to first of all specify the target object to wrap in the transactional
+    proxy, via the <literal>target</literal> attribute.. The target object is
+    normally a POJO bean definition. You must also specify a reference to the
+    relevant <literal>PlatformTransactionManager</literal>. Finally, you must
+    specify the <emphasis role="bold">transaction attributes</emphasis>.
+    Transaction attributes contain the definition of what transaction
+    semantics we wish to use (as discussed above), as well as where they
+    apply. Now let's consider the following sample:</para>
 
     <para><programlisting>&lt;!-- this example is in verbose form, see note later about concise
      for multiple proxies! --&gt;
@@ -525,35 +537,101 @@ transactionManager.commit(status);</programlisting></para>
 &lt;/bean&gt;</programlisting></para>
 
     <para>The transactional proxy will implement the interfaces of the target:
-    in this case, the bean with id petStoreTarget. (Using CGLIB it's possible
-    to transactionally proxy a target class. Set the "proxyTargetClass"
-    property to true for this. It will happen automatically if the target
-    doesn't implement any interfaces. In general, of course, we want to
-    program to interfaces rather than classes.) It's possible (and usually a
-    good idea) to restrict the transactional proxy to proxying only specific
-    target interfaces, using the proxyInterfaces property. It's also possible
-    to customize the behavior of a TransactionProxyFactoryBean via several
-    properties inherited from
+    in this case, the bean with id <emphasis>petStoreTarget</emphasis>. (Note
+    that using CGLIB it's possible to transactionally proxy non-interface
+    methods of the target class as well. Set the "proxyTargetClass" property
+    to true to force this to always happen, although it will happen
+    automatically if the target doesn't implement any interfaces. In general,
+    of course, we want to program to interfaces rather than classes.) It's
+    possible (and usually a good idea) to restrict the transactional proxy to
+    proxying only specific target interfaces, using the
+    <emphasis>proxyInterfaces</emphasis> property. It's also possible to
+    customize the behavior of a <literal>TransactionProxyFactoryBean</literal>
+    via several properties inherited from
     <literal>org.springframework.aop.framework.ProxyConfig</literal>, and
     shared with all AOP proxy factories.</para>
 
-    <para>The transactionAttributes here are set using a Properties format
-    defined in the
-    <literal>org.springframework.transaction.interceptor.NameMatchTransactionAttributeSource</literal>
-    class. The mapping from method name, including wildcards, should be fairly
-    intuitive. Note that the value for the insert* mapping contains a rollback
-    rule. Adding <literal>-MyCheckedException</literal> here specifies that if
-    the method throws <literal>MyCheckedException</literal> or any subclasses,
-    the transaction will automatically be rolled back. Multiple rollback rules
-    can be specified here, comma-separated. A - prefix forces rollback; a +
-    prefix specifies commit. (This allows commit even on unchecked exceptions,
-    if you really know what you're doing!)</para>
+    <para>The transaction interceptor will ultimately use an object
+    implementating Spring's <literal>TransactionAttributeSource</literal>
+    interface to get at the transaction attributes (in the form of
+    <literal>TransactionAttribute</literal> objects) defining the transaction
+    semantics to be applied to specific methods of specific classes. The most
+    basic way to specify this <literal>TransactionAttributeSource</literal>
+    instance when creating the proxy is for you to create a bean implementing
+    the <literal>TransactionAttributeSource</literal> interface (Spring has
+    several implementations), and then directly set the the
+    <literal>transactionAttributeSource</literal> property of the proxy
+    factory bean to refer to it (or wrap it as an inner bean. Alternately, you
+    may set a text string for this property, and rely on the fact that the
+    pre-registered (by Spring)
+    <literal>TransactionAttributeSourceEditor</literal> will automatically
+    convert that text string to a
+    <literal>MethodMapTransactionAttributeSource</literal> instance.</para>
+
+    <para>However, as shown in this example, most users will instead prefer to
+    define the transaction attributes by setting the
+    <literal>transactionAttributes</literal> property. This property has a
+    type of <literal>Java.util.Properties</literal>, which will then
+    internally be converted to a
+    <literal>NameMatchTransactionAttributeSource</literal> object.</para>
+
+    <para>As can be seen in the above definition, a
+    <literal>NameMatchTransactionAttributeSource</literal> object holds a list
+    of name/value pairs. The key of each pair is a method or methods (a *
+    wildcard ending is optional) to apply transactional semantics to. Note
+    that the method name is <emphasis>not</emphasis> qualified with a package
+    name, but rather is considered relative to the class of the target object
+    being wrapped. The value portion of the name/value pair is the
+    <literal>TransactionAttribute</literal> itself that needs to be applied.
+    When specifying it as the <literal>Properties</literal> value as in this
+    example, it's in String format as defined by
+    <literal>TransactionAttributeEditor</literal>. This format is:</para>
+
+    <para><programlisting>PROPAGATION_NAME,ISOLATION_NAME,readOnly,timeout_NNNN,+Exception1,-Exception2</programlisting></para>
+
+    <para>Note that the only mandatory portion of the string is the
+    propagation setting. The default transactions semantics which apply are as
+    follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Exception Handling: RuntimeExceptions roll-back, normal
+        (checked) Exceptions don’t</para>
+      </listitem>
+
+      <listitem>
+        <para>Transactions are read/write</para>
+      </listitem>
+
+      <listitem>
+        <para>Isolation Level: TransactionDefinition.ISOLATION_DEFAULT</para>
+      </listitem>
+
+      <listitem>
+        <para>Timeout: TransactionDefinition.TIMEOUT_DEFAULT</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>See the JavaDocs for
+    <literal>org.springframework.transaction.TransactionDefinition</literal>
+    class for the format allowed for the propagation setting and isolation
+    level setting. The String format is the same as the Integer constant names
+    for the same values.</para>
+
+    <para>In this example, note that the value for the insert* mapping
+    contains a rollback rule. Adding <literal>-MyCheckedException</literal>
+    here specifies that if the method throws
+    <literal>MyCheckedException</literal> or any subclasses, the transaction
+    will automatically be rolled back. Multiple rollback rules can be
+    specified here, comma-separated. A - prefix forces rollback; a + prefix
+    specifies commit. (This allows commit even on unchecked exceptions, if you
+    really know what you're doing!)</para>
 
     <para>The <literal>TransactionProxyFactoryBean</literal> allows you to set
-    "pre" and "post" advice, for additional interception behavior, using the
-    "preInterceptors" and "postInterceptors" properties. Any number of pre and
-    post advices can be set, and their type may be <literal>Advisor</literal>
-    (in which case they can contain a pointcut),
+    optional "pre" and "post" advice, for additional interception behavior,
+    using the "preInterceptors" and "postInterceptors" properties. Any number
+    of pre and post advices can be set, and their type may be
+    <literal>Advisor</literal> (in which case they can contain a pointcut),
     <literal>MethodInterceptor</literal> or any advice type supported by the
     current Spring configuration (such as <literal>ThrowsAdvice</literal>,
     <literal>AfterReturningtAdvice</literal> or
@@ -565,13 +643,6 @@ transactionManager.commit(status);</programlisting></para>
     rather than the <literal>TransactionProxyFactoryBean</literal> convenience
     proxy creator.</para>
 
-    <para>It's also possible to set up autoproxying: that is, to configure the
-    AOP framework so that classes are automatically proxied without needing
-    individual proxy definitions.</para>
-
-    <para>Please see the chapter on AOP for more information and
-    examples.</para>
-
     <para><emphasis>Note</emphasis>: Using TransactionProxyFactoryBean
     definitions in the form above can seem overly verbose when many almost
     identical transaction proxies need to be created. You will almost always
@@ -579,12 +650,6 @@ transactionManager.commit(status);</programlisting></para>
     inner bean definitions, to significantly reduce the verbosity of your
     transaction proxy definitions, as described in <xref
     linkend="aop-concise-proxy" />.</para>
-
-    <remark>You don't need to be an AOP expert--or indeed, to know much at all
-    about AOP--to use Spring's declarative transaction management effectively.
-    However, if you do want to become a "power user" of Spring AOP, you will
-    find it easy to combine declarative transaction management with powerful
-    AOP capabilities.</remark>
 
     <sect2>
       <title>Source Annotations for Transaction Demarcation</title>
@@ -977,6 +1042,18 @@ class="org.springframework...DefaultAdvisorAutoProxyCreator"/&gt;
       ApplicationContext. When using TransactionProxyFactoryBean with the
       target specified as an inner bean, this naming issue is not a concern,
       since the inner bean is not normally given a name.</para>
+    </sect2>
+
+    <sect2>
+      <title id="beannameautoproxycreator-for-transactions">AOP and
+      Transactions</title>
+
+      <remark>As you've seen by reading this chapter, you don't really need to
+      be an AOP expert--or indeed, to know much at all about AOP--to use
+      Spring's declarative transaction management effectively. However, if you
+      do want to become a "power user" of Spring AOP, you will find it easy to
+      combine declarative transaction management with powerful AOP
+      capabilities.</remark>
     </sect2>
   </sect1>
 
