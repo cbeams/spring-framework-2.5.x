@@ -938,7 +938,7 @@ public class ExampleBean {
       this bean reference variant is when there is a need to wrap an existing
       bean in a parent context with some sort of proxy (which may have the
       same name as the parent), and needs the original object so it may wrap
-      it. </para>
+      it.</para>
 
       <para><programlisting>    &lt;ref parent="someBean"/&gt;</programlisting></para>
 
@@ -1007,6 +1007,30 @@ public class ExampleBean {
 </programlisting>Again, the shortcut form is equivalent to a <literal>&lt;ref
         bean="xxx"&gt;</literal> element, there is no shortcut for
         <literal>&lt;ref local="xxx"</literal>&gt;.</para>
+      </sect3>
+
+      <sect3>
+        <title id="beans-value-ref-shortcuts">Compound property names</title>
+
+        <para>Note that compound or nested property names are perfectly legal
+        when setting bean properties, as long as all components of the path
+        except the final property name are non-null. For example, in this bean
+        definition:</para>
+
+        <para><programlisting>&lt;bean id="foo" class="foo.Bar"&gt;
+   &lt;property name="fred.bob.sammy"&gt;
+      &lt;value&gt;123&lt;/value&gt;
+   &lt;/property&gt;
+ &lt;/bean&gt;</programlisting></para>
+
+        <para>the foo bean has a <literal>fred</literal> property which has a
+        <literal>bob</literal> property, which has a <literal>sammy</literal>
+        property, and that final <literal>sammy</literal> property is being
+        set to a scalar value of 123. In order for this to work, the
+        <literal>fred</literal> property of <literal>foo</literal>, and the
+        <literal>bob</literal> property of <literal>fred</literal> must both
+        be non-null after the bean is constructed, or a null-pointer exception
+        will be thrown.</para>
       </sect3>
     </sect2>
 
@@ -1929,6 +1953,16 @@ dataSource.url=jdbc:mysql:mydb</programlisting></para>
       which contains a bean in it called <emphasis>dataSource</emphasis>,
       which has <emphasis>driver</emphasis> and <emphasis>url</emphasis>
       properties.</para>
+
+      <para>Note that compound property names are also supported, as long as
+      every component of the path except the final property being overriden is
+      already non-null (presumably initialized by the constructors). In this
+      example:</para>
+
+      <para><programlisting>foo.fred.bob.sammy=123</programlisting>the
+      <literal>sammy</literal> property of the <literal>bob</literal> property
+      of the <literal>fred</literal> property of the <literal>foo</literal>
+      bean is being set to the scalar value 123.</para>
     </sect2>
   </sect1>
 
