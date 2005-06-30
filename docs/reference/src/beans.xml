@@ -768,13 +768,16 @@ public class ExampleBean {
       within its <literal>property</literal> and
       <literal>constructor-arg</literal> elements for this purpose.</para>
 
-      <para>The <literal>value</literal> element specifies a property or
-      constructor argument as a human-readable string representation. As
-      mentioned in detail <link
-      linkend="beans-factory-collaborators-propertyeditor">previously</link>,
-      JavaBeans PropertyEditors are used to convert these string values from a
-      <literal>java.lang.String</literal> to the actual property or argument
-      type.<programlisting>&lt;beans&gt;
+      <sect3 id="beans-value-element">
+        <title>The <literal>value</literal> element</title>
+
+        <para>The <literal>value</literal> element specifies a property or
+        constructor argument as a human-readable string representation. As
+        mentioned in detail <link
+        linkend="beans-factory-collaborators-propertyeditor">previously</link>,
+        JavaBeans PropertyEditors are used to convert these string values from
+        a <literal>java.lang.String</literal> to the actual property or
+        argument type.<programlisting>&lt;beans&gt;
     &lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
         &lt;!-- results in a setDriverClassName(String) call --&gt;
         &lt;property name="driverClassName"&gt;
@@ -787,27 +790,36 @@ public class ExampleBean {
             &lt;value&gt;root&lt;/value&gt;
         &lt;/property&gt;
     &lt;/bean&gt;
-&lt;/beans&gt; </programlisting></para>
+&lt;/beans&gt;</programlisting></para>
+      </sect3>
 
-      <para>The <literal>null</literal> element is used to handle null values.
-      Spring treats empty arguments for properties and the like as empty
-      Strings. The following XmlBeanFactory configuration: <programlisting>&lt;bean class="ExampleBean"&gt;
+      <sect3 id="beans-null-element">
+        <title>The <literal>null</literal> element</title>
+
+        <para>The <literal>null</literal> element is used to handle null
+        values. Spring treats empty arguments for properties and the like as
+        empty Strings. The following XmlBeanFactory configuration:
+        <programlisting>&lt;bean class="ExampleBean"&gt;
     &lt;property name="email"&gt;&lt;value&gt;&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;        </programlisting>results in the email property being set
-      to "", equivalent to the java code:
-      <literal>exampleBean.setEmail("")</literal>. The special
-      <literal>&lt;null&gt;</literal> element may be used to indicate a null
-      value, so that: <programlisting>&lt;bean class="ExampleBean"&gt;
+        to "", equivalent to the java code:
+        <literal>exampleBean.setEmail("")</literal>. The special
+        <literal>&lt;null&gt;</literal> element may be used to indicate a null
+        value, so that: <programlisting>&lt;bean class="ExampleBean"&gt;
     &lt;property name="email"&gt;&lt;null/&gt;&lt;/property&gt;
 &lt;/bean&gt;        </programlisting>is equivalent to the java code:
-      <literal>exampleBean.setEmail(null)</literal>.</para>
+        <literal>exampleBean.setEmail(null)</literal>.</para>
+      </sect3>
 
-      <para>The <literal>list</literal>, <literal>set</literal>,
-      <literal>map</literal>, and <literal>props</literal> elements allow
-      properties and arguments of Java type <literal>List</literal>,
-      <literal>Set</literal>, <literal>Map</literal>, and
-      <literal>Properties</literal>, respectively, to be defined and
-      set.<programlisting>&lt;beans&gt;
+      <sect3 id="beans-collection-elements">
+        <title>The collection elements</title>
+
+        <para>The <literal>list</literal>, <literal>set</literal>,
+        <literal>map</literal>, and <literal>props</literal> elements allow
+        properties and arguments of Java type <literal>List</literal>,
+        <literal>Set</literal>, <literal>Map</literal>, and
+        <literal>Properties</literal>, respectively, to be defined and
+        set.<programlisting>&lt;beans&gt;
     ...
     &lt;bean id="moreComplexObject" class="example.ComplexObject"&gt;
         &lt;!-- results in a setPeople(java.util.Properties) call --&gt;
@@ -846,14 +858,18 @@ public class ExampleBean {
     &lt;/bean&gt;
 &lt;/beans&gt;</programlisting></para>
 
-      <para><emphasis>Note that the value of a Map entry, or a set value, can
-      also again be any of the elements:</emphasis><programlisting>(bean | ref | idref | list | set | map | props | value | null)</programlisting></para>
+        <para><emphasis>Note that the value of a Map entry, or a set value,
+        can also again be any of the elements:</emphasis><programlisting>(bean | ref | idref | list | set | map | props | value | null)</programlisting></para>
+      </sect3>
 
-      <para>A <literal>bean</literal> element inside the
-      <literal>property</literal> element is used to define a bean value
-      inline, instead of referring to a bean defined elsewhere in the
-      BeanFactory. The inline bean definition does not need to have any id
-      defined. <programlisting>&lt;bean id="outer" class="..."&gt;
+      <sect3 id="beans-inner-beans">
+        <title>Inner bean definitions via nested bean elements</title>
+
+        <para>A <literal>bean</literal> element inside the
+        <literal>property</literal> element is used to define a bean value
+        inline, instead of referring to a bean defined elsewhere in the
+        BeanFactory. The inline bean definition does not need to have any id
+        defined. <programlisting>&lt;bean id="outer" class="..."&gt;
     &lt;!-- Instead of using a reference to target, just use an inner bean --&gt;
     &lt;property name="target"&gt;
         &lt;bean class="com.mycompany.PersonImpl"&gt;
@@ -861,86 +877,102 @@ public class ExampleBean {
             &lt;property name="age"&gt;&lt;value&gt;51&lt;/value&gt;&lt;/property&gt;
         &lt;/bean&gt;
    &lt;/property&gt;
-&lt;/bean&gt;</programlisting>An idref element is simply a shorthand and
-      error-proof way to set a property to the String <emphasis>id</emphasis>
-      or <emphasis>name</emphasis> of another bean in the
-      container.<programlisting>&lt;bean id="theTargetBean" class="..."&gt;
+&lt;/bean&gt;</programlisting></para>
+
+        <para>Note that the <literal>singleton</literal> flag and any
+        <literal>id</literal> attribute are effectively ignored. Inner beans
+        are anonymous prototypes.</para>
+      </sect3>
+
+      <sect3 id="beans-idref-element">
+        <title>The <literal>idref</literal> element</title>
+
+        <para>An idref element is simply a shorthand and error-proof way to
+        set a property to the String <emphasis>id</emphasis> or
+        <emphasis>name</emphasis> of another bean in the
+        container.<programlisting>&lt;bean id="theTargetBean" class="..."&gt;
 &lt;/bean&gt;
 &lt;bean id="theClientBean" class="..."&gt;
     &lt;property name="targetName"&gt;
         &lt;idref bean="theTargetBean"/&gt;
     &lt;/property&gt;
 &lt;/bean&gt;</programlisting>This is exactly equivalent at runtime to the
-      following fragment:<programlisting>&lt;bean id="theTargetBean" class="..."&gt;
+        following fragment:<programlisting>&lt;bean id="theTargetBean" class="..."&gt;
 &lt;/bean&gt;
 &lt;bean id="theClientBean" class="..."&gt;
     &lt;property name="targetName"&gt;
         &lt;value&gt;theTargetBean&lt;/value&gt;
     &lt;/property&gt;
 &lt;/bean&gt;</programlisting>The main reason the first form is preferable to
-      the second is that using the <literal>idref</literal> tag will allow
-      Spring to validate at deployment time that the other bean actually
-      exists. In the second variation, the class who's
-      <emphasis>targetName</emphasis> property is forced to do its own
-      validation, and that will only happen when that class is actually
-      instantiated by Spring, possibly long after the container is actually
-      deployed.</para>
+        the second is that using the <literal>idref</literal> tag will allow
+        Spring to validate at deployment time that the other bean actually
+        exists. In the second variation, the class who's
+        <emphasis>targetName</emphasis> property is forced to do its own
+        validation, and that will only happen when that class is actually
+        instantiated by Spring, possibly long after the container is actually
+        deployed.</para>
 
-      <para>Additionally, if the bean being referred to is in the same actual
-      XML file, and the bean name is the bean <emphasis>id</emphasis>, the
-      <literal>local</literal> attribute may be used, which will allow the XML
-      parser itself to validate the bean name even earlier, at XML document
-      parse time.<programlisting>    &lt;property name="targetName"&gt;
+        <para>Additionally, if the bean being referred to is in the same
+        actual XML file, and the bean name is the bean
+        <emphasis>id</emphasis>, the <literal>local</literal> attribute may be
+        used, which will allow the XML parser itself to validate the bean name
+        even earlier, at XML document parse time.<programlisting>    &lt;property name="targetName"&gt;
         &lt;idref local="theTargetBean"/&gt;
     &lt;/property&gt;</programlisting></para>
+      </sect3>
 
-      <para>The <literal>ref</literal> element is the final element allowed
-      inside a <literal>property</literal> definition element. It is used to
-      set the value of the specified property to be a reference to another
-      bean managed by the container, a collaborator, so to speak. As mentioned
-      in a previous section, the referred-to bean is considered to be a
-      dependency of the bean who's property is being set, and will be
-      initialized on demand as needed (if it is a singleton bean it may have
-      already been initialized by the container) before the property is set.
-      All references are ultimately just a reference to another object, but
-      there are 3 variations on how the id/name of the other object may be
-      specified, which determines how scoping and validation is
-      handled.</para>
+      <sect3 id="beans-ref-element">
+        <title>The <literal>ref</literal> element</title>
 
-      <para>Specifying the target bean by using the <literal>bean</literal>
-      attribute of the <literal>ref</literal> tag is the most general form,
-      and will allow creating a reference to any bean in the same
-      BeanFactory/ApplicationContext (whether or not in the same XML file), or
-      parent BeanFactory/ApplicationContext. The value of the
-      <literal>bean</literal> attribute may be the same as either the
-      <literal>id</literal> attribute of the target bean, or one of the values
-      in the <literal>name</literal> attribute of the target
-      bean.<programlisting>    &lt;ref bean="someBean"/&gt;</programlisting></para>
+        <para>The <literal>ref</literal> element is the final element allowed
+        inside a <literal>property</literal> definition element. It is used to
+        set the value of the specified property to be a reference to another
+        bean managed by the container, a collaborator, so to speak. As
+        mentioned in a previous section, the referred-to bean is considered to
+        be a dependency of the bean who's property is being set, and will be
+        initialized on demand as needed (if it is a singleton bean it may have
+        already been initialized by the container) before the property is set.
+        All references are ultimately just a reference to another object, but
+        there are 3 variations on how the id/name of the other object may be
+        specified, which determines how scoping and validation is
+        handled.</para>
 
-      <para>Specifying the target bean by using the <literal>local</literal>
-      attribute leverages the ability of the XML parser to validate XML id
-      references within the same file. The value of the
-      <literal>local</literal> attribute must be the same as the
-      <literal>id</literal> attribute of the target bean. The XML parser will
-      issue an error if no matching element is found in the same file. As
-      such, using the local variant is the best choice (in order to know about
-      errors are early as possible) if the target bean is in the same XML
-      file.<programlisting>    &lt;ref local="someBean"/&gt;</programlisting></para>
+        <para>Specifying the target bean by using the <literal>bean</literal>
+        attribute of the <literal>ref</literal> tag is the most general form,
+        and will allow creating a reference to any bean in the same
+        BeanFactory/ApplicationContext (whether or not in the same XML file),
+        or parent BeanFactory/ApplicationContext. The value of the
+        <literal>bean</literal> attribute may be the same as either the
+        <literal>id</literal> attribute of the target bean, or one of the
+        values in the <literal>name</literal> attribute of the target
+        bean.<programlisting>    &lt;ref bean="someBean"/&gt;</programlisting></para>
 
-      <para>Specifying the target bean by using the <literal>parent</literal>
-      attribute allows a reference to be created to a bean which is in a
-      parent BeanFactory (or ApplicationContext) of the current BeanFactory
-      (or ApplicationContext). The value of the <literal>parent</literal>
-      attribute may be the same as either the <literal>id</literal> attribute
-      of the target bean, or one of the values in the <literal>name</literal>
-      attribute of the target bean, and the target bean must be in a parent
-      BeanFactory or ApplicationContext to the current one. The main use of
-      this bean reference variant is when there is a need to wrap an existing
-      bean in a parent context with some sort of proxy (which may have the
-      same name as the parent), and needs the original object so it may wrap
-      it.</para>
+        <para>Specifying the target bean by using the <literal>local</literal>
+        attribute leverages the ability of the XML parser to validate XML id
+        references within the same file. The value of the
+        <literal>local</literal> attribute must be the same as the
+        <literal>id</literal> attribute of the target bean. The XML parser
+        will issue an error if no matching element is found in the same file.
+        As such, using the local variant is the best choice (in order to know
+        about errors are early as possible) if the target bean is in the same
+        XML file.<programlisting>    &lt;ref local="someBean"/&gt;</programlisting></para>
 
-      <para><programlisting>    &lt;ref parent="someBean"/&gt;</programlisting></para>
+        <para>Specifying the target bean by using the
+        <literal>parent</literal> attribute allows a reference to be created
+        to a bean which is in a parent BeanFactory (or ApplicationContext) of
+        the current BeanFactory (or ApplicationContext). The value of the
+        <literal>parent</literal> attribute may be the same as either the
+        <literal>id</literal> attribute of the target bean, or one of the
+        values in the <literal>name</literal> attribute of the target bean,
+        and the target bean must be in a parent BeanFactory or
+        ApplicationContext to the current one. The main use of this bean
+        reference variant is when there is a need to wrap an existing bean in
+        a parent context with some sort of proxy (which may have the same name
+        as the parent), and needs the original object so it may wrap
+        it.</para>
+
+        <para><programlisting>    &lt;ref parent="someBean"/&gt;</programlisting></para>
+      </sect3>
 
       <sect3>
         <title id="beans-value-ref-shortcuts">Value and Ref shortcut
