@@ -61,14 +61,18 @@ public abstract class AbstractSpringContextTests extends TestCase {
 
 
 	/**
-	 * Set custom locations dirty.
-	 * This will cause them to be reloaded from the cache before the next test
-	 * case is executed.
-	 * <br>Call this method only if you change the state of a singleton
+	 * Set custom locations dirty. This will cause them to be reloaded
+	 * from the cache before the next test case is executed.
+	 * <p>Call this method only if you change the state of a singleton
 	 * bean, potentially affecting future tests.
 	 */
 	protected void setDirty(String[] locations) {
-		contextKeyToContextMap.remove(contextKeyString(locations));
+		String keyString = contextKeyString(locations);
+		ConfigurableApplicationContext ctx =
+				(ConfigurableApplicationContext) contextKeyToContextMap.remove(keyString);
+		if (ctx != null) {
+			ctx.close();
+		}
 	}
 
 	protected boolean hasCachedContext(Object contextKey) {
