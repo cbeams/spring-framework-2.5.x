@@ -37,7 +37,7 @@ import org.springframework.context.ResourceLoaderAware;
  *
  * <pre>
  * &lt;bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean"&gt;
- *   &lt;property name="resourceLoaderPath"&gt;&lt;value&gt;file:/WEB-INF/velocity/&lt;/value&gt;lt;/property&gt;
+ *   &lt;property name="resourceLoaderPath"&gt;&lt;value&gt;/WEB-INF/velocity/&lt;/value&gt;lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
  * See the base class VelocityEngineFactory for configuration details.
