@@ -86,6 +86,7 @@ public class UrlPathHelper {
 	 * @see WebUtils#DEFAULT_CHARACTER_ENCODING
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding
 	 * @see java.net.URLDecoder#decode(String, String)
+	 * @see java.net.URLDecoder#decode(String)
 	 */
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlDecode = urlDecode;
