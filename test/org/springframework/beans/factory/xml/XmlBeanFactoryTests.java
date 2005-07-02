@@ -1040,7 +1040,8 @@ public class XmlBeanFactoryTests extends TestCase {
 
 		TestBean tb = (TestBean) xbf.getBean("defaultTestBean");
 		assertEquals("defaultInstance", tb.getName());
-		
+		assertEquals(1, tb.getAge());
+
 		FactoryMethods fm = (FactoryMethods) xbf.getBean("default");
 		assertEquals(0, fm.getNum());
 		assertEquals("default", fm.getName());
@@ -1060,6 +1061,9 @@ public class XmlBeanFactoryTests extends TestCase {
 
 		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("full");
 		assertSame(fm, fm2);
+
+		xbf.destroySingletons();
+		assertTrue(tb.wasDestroyed());
 	}
 
 	public void testFactoryMethodsWithNull() {

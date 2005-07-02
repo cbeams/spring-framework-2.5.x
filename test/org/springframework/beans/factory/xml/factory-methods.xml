@@ -9,7 +9,8 @@
 		<property name="stringValue"><value>setterString</value></property>
 	</bean>
 
-	<bean id="defaultTestBean" factory-bean="default" factory-method="getTestBean"/> 
+	<bean id="defaultTestBean" factory-bean="default" factory-method="getTestBean"
+			init-method="haveBirthday" destroy-method="destroy"/>
 
 	<bean id="testBeanOnly" class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="newInstance">
