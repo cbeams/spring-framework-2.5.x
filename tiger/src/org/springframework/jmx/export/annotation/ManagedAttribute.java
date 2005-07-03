@@ -42,8 +42,8 @@ public @interface ManagedAttribute {
 
 	int currencyTimeLimit() default -1;
 
-	String persistPolicy() default "Never";
+	String persistPolicy() default "";
 
-	int persistPeriod() default 0;
+	int persistPeriod() default -1;
 
 }

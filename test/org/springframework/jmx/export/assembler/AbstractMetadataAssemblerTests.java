@@ -93,7 +93,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		assertNotNull("Attribute should not be null", attr);
 	}
 
-	public void testManagedResourceDescriptor() throws Exception {
+	public void testMBeanDescriptor() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		Descriptor desc = info.getMBeanDescriptor();
 
@@ -106,7 +106,16 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		assertEquals("Persist Name should be bar", "bar.jmx", desc.getFieldValue("persistName"));
 	}
 
-	public void testAttributeDescriptor() throws Exception {
+	public void testAgeAttributeDescriptor() throws Exception {
+		ModelMBeanInfo info = getMBeanInfoFromAssembler();
+		Descriptor desc = info.getAttribute(AGE_ATTRIBUTE).getDescriptor();
+
+		assertEquals("Currency Time Limit should be 15", "15", desc.getFieldValue("currencyTimeLimit"));
+		assertEquals("Persist Policy should be inherited", null, desc.getFieldValue("persistPolicy"));
+		assertEquals("Persist Period should be inherited", null, desc.getFieldValue("persistPeriod"));
+	}
+
+	public void testNameAttributeDescriptor() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		Descriptor desc = info.getAttribute(NAME_ATTRIBUTE).getDescriptor();
 

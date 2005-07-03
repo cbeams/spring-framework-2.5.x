@@ -46,9 +46,9 @@ public @interface ManagedResource {
 
 	String logFile() default "";
 
-	String persistPolicy() default "Never";
+	String persistPolicy() default "";
 
-	int persistPeriod() default 0;
+	int persistPeriod() default -1;
 
 	String persistName() default "";
 

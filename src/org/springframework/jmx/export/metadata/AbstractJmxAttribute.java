@@ -28,6 +28,7 @@ public class AbstractJmxAttribute {
 
 	private int currencyTimeLimit = -1;
 
+
 	public void setDescription(String description) {
 		this.description = description;
 	}

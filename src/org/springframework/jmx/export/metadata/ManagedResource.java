@@ -34,7 +34,7 @@ public class ManagedResource extends AbstractJmxAttribute {
 
 	private String logFile;
 
-	private String persistPolicy = "Never";
+	private String persistPolicy;
 
 	private int persistPeriod;
 

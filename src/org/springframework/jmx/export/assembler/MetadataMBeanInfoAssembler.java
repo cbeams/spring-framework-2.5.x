@@ -243,15 +243,25 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		applyCurrencyTimeLimit(desc, mr.getCurrencyTimeLimit());
 
 		// Do not use Boolean.toString(boolean) here, to preserve JDK 1.3 compatibility!
-		desc.setField(FIELD_LOG, mr.isLog() ? "true" : "false");
-		if (mr.getLogFile() != null) {
+		if (mr.isLog()) {
+			desc.setField(FIELD_LOG, "true");
+		}
+		if (StringUtils.hasLength(mr.getLogFile())) {
 			desc.setField(FIELD_LOG_FILE, mr.getLogFile());
 		}
 
-		desc.setField(FIELD_PERSIST_POLICY, mr.getPersistPolicy());
-		desc.setField(FIELD_PERSIST_PERIOD, Integer.toString(mr.getPersistPeriod()));
-		desc.setField(FIELD_PERSIST_NAME, mr.getPersistName());
-		desc.setField(FIELD_PERSIST_LOCATION, mr.getPersistLocation());
+		if (StringUtils.hasLength(mr.getPersistPolicy())) {
+			desc.setField(FIELD_PERSIST_POLICY, mr.getPersistPolicy());
+		}
+		if (mr.getPersistPeriod() >= 0) {
+			desc.setField(FIELD_PERSIST_PERIOD, Integer.toString(mr.getPersistPeriod()));
+		}
+		if (StringUtils.hasLength(mr.getPersistName())) {
+			desc.setField(FIELD_PERSIST_NAME, mr.getPersistName());
+		}
+		if (StringUtils.hasLength(mr.getPersistLocation())) {
+			desc.setField(FIELD_PERSIST_LOCATION, mr.getPersistLocation());
+		}
 	}
 
 	/**
@@ -266,18 +276,19 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		ManagedAttribute sma =
 				(setter == null) ? ManagedAttribute.EMPTY : this.attributeSource.getManagedAttribute(setter);
 
-		applyCurrencyTimeLimit(desc,
-				resolveIntDescriptor(gma.getCurrencyTimeLimit(), sma.getCurrencyTimeLimit()));
+		applyCurrencyTimeLimit(desc, resolveIntDescriptor(gma.getCurrencyTimeLimit(), sma.getCurrencyTimeLimit()));
 
 		Object defaultValue = resolveObjectDescriptor(gma.getDefaultValue(), sma.getDefaultValue());
 		desc.setField(FIELD_DEFAULT, defaultValue);
 
-		String persistPolicy = resolveStringDescriptor(
-				gma.getPersistPolicy(), sma.getPersistPolicy(), PERSIST_POLICY_NEVER);
-		desc.setField(FIELD_PERSIST_POLICY, persistPolicy);
-
+		String persistPolicy = resolveStringDescriptor(gma.getPersistPolicy(), sma.getPersistPolicy());
+		if (StringUtils.hasLength(persistPolicy)) {
+			desc.setField(FIELD_PERSIST_POLICY, persistPolicy);
+		}
 		int persistPeriod = resolveIntDescriptor(gma.getPersistPeriod(), sma.getPersistPeriod());
-		desc.setField(FIELD_PERSIST_PERIOD, Integer.toString(persistPeriod));
+		if (persistPeriod >= 0) {
+			desc.setField(FIELD_PERSIST_PERIOD, Integer.toString(persistPeriod));
+		}
 	}
 
 	/**
@@ -295,38 +306,26 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	/**
 	 * Determines which of two <code>int</code> values should be used as the value
 	 * for an attribute descriptor. In general, only the getter or the setter will
-	 * be have a non-zero value so we use that value. In the event that both values
-	 * are non-zero we use the greater of the two. This method can be used to resolve
-	 * any <code>int</code> valued descriptor where there are two possible values.
-	 * @param getter the int value associated with the getter for this attribute.
-	 * @param setter the int associated with the setter for this attribute.
+	 * be have a non-negative value so we use that value. In the event that both values
+	 * are non-negative, we use the greater of the two. This method can be used to
+	 * resolve any <code>int</code> valued descriptor where there are two possible values.
+	 * @param getter the int value associated with the getter for this attribute
+	 * @param setter the int associated with the setter for this attribute
 	 */
 	private int resolveIntDescriptor(int getter, int setter) {
-		if (getter == 0 && setter != 0) {
-			return setter;
-		}
-		else if (setter == 0 && getter != 0) {
-			return getter;
-		}
-		return (getter >= setter) ? getter : setter;
+		return (getter >= setter ? getter : setter);
 	}
 
 	/**
 	 * Locates the value of a descriptor based on values attached
 	 * to both the getter and setter methods. If both have values
 	 * supplied then the value attached to the getter is preferred.
-	 * @param getter the Object value associated with the get method.
-	 * @param setter the Object value associated with the set method.
+	 * @param getter the Object value associated with the get method
+	 * @param setter the Object value associated with the set method
 	 * @return the appropriate Object to use as the value for the descriptor
 	 */
 	private Object resolveObjectDescriptor(Object getter, Object setter) {
-		if (getter != null) {
-			return getter;
-		}
-		if (setter != null) {
-			return setter;
-		}
-		return null;
+		return (getter != null ? getter : setter);
 	}
 
 	/**
@@ -337,17 +336,10 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * associated with the getter has changed from the default.
 	 * @param getter the String value associated with the get method
 	 * @param setter the String value associated with the set method
-	 * @param defaultValue the String value default associated with this descriptor
 	 * @return the appropriate String to use as the value for the descriptor
 	 */
-	private String resolveStringDescriptor(String getter, String setter, String defaultValue) {
-		if (getter != null && !defaultValue.equals(getter)) {
-			return getter;
-		}
-		if (setter != null) {
-			return setter;
-		}
-		return null;
+	private String resolveStringDescriptor(String getter, String setter) {
+		return (StringUtils.hasLength(getter) ? getter : setter);
 	}
 
 }

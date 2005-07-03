@@ -90,8 +90,6 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 	protected static final String FIELD_PERSIST_POLICY = "persistPolicy";
 
-	protected static final String PERSIST_POLICY_NEVER = "Never";
-
 	protected static final String FIELD_PERSIST_PERIOD = "persistPeriod";
 
 	protected static final String FIELD_PERSIST_LOCATION = "persistLocation";

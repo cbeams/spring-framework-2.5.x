@@ -32,9 +32,9 @@ public class ManagedAttribute extends AbstractJmxAttribute {
 
 	private Object defaultValue;
 
-	private String persistPolicy = "Never";
+	private String persistPolicy;
 
-	private int persistPeriod;
+	private int persistPeriod = -1;
 
 
 	public void setDefaultValue(Object defaultValue) {
