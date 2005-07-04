@@ -216,7 +216,7 @@ distribution/website before using any of them in your own applications.
 - required for running JPetStore and Image Database (by Commons DBCP)
 
 * jakarta-commons/commons-validator.jar
-- Commons Validator 1.1.3 (http://jakarta.apache.org/commons/validator)
+- Commons Validator 1.1.4 (http://jakarta.apache.org/commons/validator)
 - required for running JPetStore's Struts web tier on servers that eagerly load tag libraries (e.g. Resin)
 
 * jakarta-taglibs/standard.jar
