@@ -91,8 +91,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	protected static final Object[] PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS = new Object[0];
 
 
-	protected final Log logger = LogFactory.getLog(getClass());
-
 	/** Default value is same as non-ordered */
 	private int order = Integer.MAX_VALUE;
 
