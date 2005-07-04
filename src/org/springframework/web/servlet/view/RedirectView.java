@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
  * <p>View that redirects to an absolute, context relative, or current request
  * relative URL, exposing all model attributes as HTTP query parameters.
  *
- * <p>A URL for this view is supposed to be a HTTP redirect URL, .e.
+ * <p>A URL for this view is supposed to be a HTTP redirect URL, i.e.
  * suitable for HttpServletResponse's <code>sendRedirect</code> method, which
  * is what actually does the redirect if the HTTP 1.0 flag is on, or via sending
  * back an HTTP 303 code - if the HTTP 1.0 compatibility flag is off.
@@ -58,6 +58,7 @@ import javax.servlet.http.HttpServletResponse;
 public class RedirectView extends AbstractUrlBasedView {
 
 	public static final String DEFAULT_ENCODING_SCHEME = "UTF-8";
+	
 
 	private boolean contextRelative = false;
 
