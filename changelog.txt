@@ -3,8 +3,8 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.2 (27.6.2005)
-------------------------------------
+Changes in version 1.2.2 (4.7.2005)
+-----------------------------------
 
 Package org.springframework.aop
 * added "getTargetClass" method to AopProxyUtils (factored out from the JMX support's AbstractMBeanInfoAssembler)
@@ -15,6 +15,7 @@ Package org.springframework.beans
 * optimized PropertyComparator to reuse a single BeanWrapperImpl instance without default editors
 * factored out protected "copySortDefinition" and "doSort" hooks in PagedListHolder, allowing for custom comparators
 * MethodInvokingFactoryBean throws target exception in case of InvocationTargetException
+* fixed AbstractBeanFactory to apply custom property editors even for typed values as collection entries
 * fixed AbstractBeanFactory to hold names of dependent beans in Set rather than List, avoiding leak for prototype beans
 * fixed AbstractAutowireCapableBeanFactory to not track dependencies for passed-in existing beans (avoiding memory leak)
 * fixed DefaultListableBeanFactory to exclude bean definitions with factory method from pre-instantiation type matching
@@ -27,6 +28,7 @@ Package org.springframework.context
 
 Package org.springframework.core
 * fixed ClassPathResource to fall back to its ClassLoader if none specified and no thread context ClassLoader available
+* deprecated ResourcePatternResolver's "CLASSPATH_URL_PREFIX" constant in favor of "CLASSPATH_ALL_URL_PREFIX"
 * factored out PropertiesLoaderSupport class from PropertiesFactoryBean and PropertyResourceConfigurer
 * added "localOverride" property to PropertiesLoaderSupport, for configurable overriding (local or properties from file)
 * PropertiesLoaderSupport also supports JDK 1.5's properties XML files, for files with ".xml" filename
@@ -57,6 +59,7 @@ Package org.springframework.jmx
 * introduced MBeanExporterListener interface, for notification about MBean registration and unregistration events
 * added "listeners" bean property to MBeanExporter, accepting a list of MBeanExporterListeners to be notified
 * added SelfNaming interface, to be implemented by infrastructure components that provide their own JMX ObjectName
+* refined MetadataMBeanInfoAssembler to not specify defaults for a managed attribute (letting JMX use MBean defaults)
 
 Package org.springframework.jndi
 * added "expectedType" bean property to JndiObjectLocator, for eager checking of the type of the located JNDI object
@@ -72,6 +75,14 @@ Package org.springframework.orm
 * added dedicated support for Hibernate Annotation 3.0 beta 2: AnnotationSessionFactoryBean in "tiger" source tree
 * made JDO2-style "detachCopy(All)", "attachCopy(All)" and "newNamedQuery" behavior overridable through JdoDialect
 
+Package org.springframework.samples
+* added Hibernate 3.0's JMX statistics service to Hibernate version of PetClinic, exported via Spring's MBeanExporter
+* dropped unmaintained alternative scenarios (with database access) from Countries sample application
+* revised all XML application context definition files to use Spring 1.2 shortcut attributes as far as possible
+
+Package org.springframework.scheduling
+* fixed SchedulerFactoryBean to support passed-in JobDetails in combination witb autodetected JobDetailAwareTriggers
+
 Package org.springframework.transaction
 * fixed AbstractPlatformTransactionManager to always execute all synchronizations, even on unexpected assertion failures
 * AbstractPlatformTransactionManager logs exceptions thrown by before/afterCompletion, keeping the original exception
@@ -86,6 +97,8 @@ Package org.springframework.util
 
 Package org.springframework.web
 * DispatcherServlet throws ServletException in case of Error during request processing, rather than the Error itself
+* added "postProcessPage" hook to AbstractWizardFormController, called after binding and page-specific validation
+* fixed BindTag and BindErrorsTag to correctly reset all their instance variables in their "doFinally" implementations
 * added "indent" bean property to AbstractXlstView, to be turned off when the choice should be up to the stylesheet
 * changed "showErrors" macro for FreeMarker to not add a separator after the final error shown
 * added SpringBindingActionForm adapter, using Spring's POJO binding and validation, exposing results to Struts tags

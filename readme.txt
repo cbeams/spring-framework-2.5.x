@@ -1,4 +1,4 @@
-THE SPRING FRAMEWORK, release 1.2.2 (June 2005)
+THE SPRING FRAMEWORK, release 1.2.2 (July 2005)
 -----------------------------------------------
 http://www.springframework.org
 
@@ -88,7 +88,7 @@ The "dist" directory contains the following distinct jar files for use in applic
 jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-core" (~105 KB)
+* "spring-core" (~110 KB)
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
@@ -124,7 +124,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI, Velocity, FreeMarker, JasperReports)
 
-* "spring-remoting" (~125 KB)
+* "spring-remoting" (~130 KB)
 - Contents: remoting support, EJB support, JMS support
 - Dependencies: spring-aop, spring-beans, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB, JMS)
 
