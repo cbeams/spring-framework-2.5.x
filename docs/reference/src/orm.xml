@@ -380,7 +380,7 @@
       simpler and more convenient for many scenarios.</para>
 
       <para>In principle, a plain
-      <literal>SessionFactory.openSession</literal> call can be used as well,
+      <literal>SessionFactory.openSession()</literal> call can be used as well,
       with a corresponding <literal>close</literal> call at the end of the
       operation, and converting <literal>HibernateException</literal> to some
       custom DAO exception. This does not involve any Spring-specific API, but
@@ -389,7 +389,7 @@
       <literal>DataAccessException</literal> hierarchy. Hence, this is not
       recommended for newly written code (in general).</para>
 
-      <para>As a special feature, the <literal>currentSession()</literal>
+      <para>As a special feature, the <literal>getCurrentSession()</literal>
       method that Hibernate 3.0.1 introduced on the
       <literal>SessionFactory</literal> interface is supported by Spring's
       <literal>LocalSessionFactoryBean</literal> as well, returning the
