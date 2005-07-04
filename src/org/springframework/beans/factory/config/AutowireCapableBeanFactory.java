@@ -115,11 +115,16 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * to the given bean instance. The bean definition can either define a
 	 * fully self-contained bean, reusing its property values, or just
 	 * property values meant to be used for existing bean instances.
+	 * <p>Note: This method does <i>not</i> autowire bean properties;
+	 * it just applies explicitly defined property values.
+	 * Use the <code>autowireBeanProperties</code> method to autowire
+	 * an existing bean instance.
 	 * @param existingBean the existing bean instance
 	 * @param beanName the name of the bean definition in the bean factory
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if there is no bean with the given name
 	 * @throws BeansException if applying the property values failed
+	 * @see #autowireBeanProperties
 	 */
 	void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException;
 
