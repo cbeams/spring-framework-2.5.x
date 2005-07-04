@@ -78,7 +78,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @since 1.0.2
- * @see #CLASSPATH_URL_PREFIX
+ * @see #CLASSPATH_ALL_URL_PREFIX
  * @see org.springframework.util.AntPathMatcher
  * @see org.springframework.core.io.ResourceLoader#getResource
  */
@@ -180,15 +180,15 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	public Resource[] getResources(String locationPattern) throws IOException {
 		Assert.notNull(locationPattern, "locationPattern is required");
-		if (locationPattern.startsWith(CLASSPATH_URL_PREFIX)) {
+		if (locationPattern.startsWith(CLASSPATH_ALL_URL_PREFIX)) {
 			// a class path resource (multiple resources for same name possible)
-			if (getPathMatcher().isPattern(locationPattern.substring(CLASSPATH_URL_PREFIX.length()))) {
+			if (getPathMatcher().isPattern(locationPattern.substring(CLASSPATH_ALL_URL_PREFIX.length()))) {
 				// a class path resource pattern
 				return findPathMatchingResources(locationPattern);
 			}
 			else {
 				// all class path resources with the given name
-				return findAllClassPathResources(locationPattern.substring(CLASSPATH_URL_PREFIX.length()));
+				return findAllClassPathResources(locationPattern.substring(CLASSPATH_ALL_URL_PREFIX.length()));
 			}
 		}
 		else {

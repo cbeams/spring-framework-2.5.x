@@ -46,7 +46,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  */
 public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLocator {
 
-	public static final String BEANS_REFS_XML_NAME = "classpath*:beanRefContext.xml";
+	private static final String BEANS_REFS_XML_NAME = "classpath*:beanRefContext.xml";
 	
 	// the keyed singleton instances
 	private static final Map instances = new HashMap();
@@ -80,7 +80,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 		// For backwards compatibility, we prepend 'classpath*:' to the selector name if there
 		// is no other prefix (i.e. classpath*:, classpath:, or some URL prefix.
 		if (selector.indexOf(':') == -1) {
-			selector = ResourcePatternResolver.CLASSPATH_URL_PREFIX + selector;
+			selector = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + selector;
 		}
 
 		synchronized (instances) {

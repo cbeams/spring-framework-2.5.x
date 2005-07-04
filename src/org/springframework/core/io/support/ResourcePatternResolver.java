@@ -41,7 +41,7 @@ import org.springframework.core.io.ResourceLoader;
  *
  * @author Juergen Hoeller
  * @since 1.0.2
- * @see #CLASSPATH_URL_PREFIX
+ * @see #CLASSPATH_ALL_URL_PREFIX
  * @see PathMatchingResourcePatternResolver
  * @see org.springframework.core.io.Resource
  * @see org.springframework.context.ApplicationContext
@@ -50,13 +50,20 @@ import org.springframework.core.io.ResourceLoader;
 public interface ResourcePatternResolver extends ResourceLoader {
 
 	/**
+	 * @deprecated as of Spring 1.2.2, in favor of CLASSPATH_ALL_URL_PREFIX
+	 * (to avoid shadowing the constant of the same name in ResourceLoader)
+	 * @see CLASSPATH_ALL_URL_PREFIX
+	 */
+	String CLASSPATH_URL_PREFIX = "classpath*:";
+
+	/**
 	 * Pseudo URL prefix for all matching resources from the class path: "classpath*:"
 	 * This differs from ResourceLoader's classpath URL prefix in that it
 	 * retrieves all matching resources for a given name (e.g. "/beans.xml"),
 	 * for example in the root of all deployed JAR files.
 	 * @see org.springframework.core.io.ResourceLoader#CLASSPATH_URL_PREFIX
 	 */
-	String CLASSPATH_URL_PREFIX = "classpath*:";
+	String CLASSPATH_ALL_URL_PREFIX = "classpath*:";
 
 	/**
 	 * Resolve the given location pattern into Resource objects.

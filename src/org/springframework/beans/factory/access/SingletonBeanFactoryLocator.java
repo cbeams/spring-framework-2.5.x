@@ -274,7 +274,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  */
 public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 
-	public static final String BEANS_REFS_XML_NAME = "classpath*:beanRefFactory.xml";
+	private static final String BEANS_REFS_XML_NAME = "classpath*:beanRefFactory.xml";
 
 	protected static final Log logger = LogFactory.getLog(SingletonBeanFactoryLocator.class);
 
@@ -317,7 +317,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 		// For backwards compatibility, we prepend 'classpath*:' to the selector name if there
 		// is no other prefix (i.e. classpath*:, classpath:, or some URL prefix.
 		if (selector.indexOf(':') == -1) {
-			selector = ResourcePatternResolver.CLASSPATH_URL_PREFIX + selector;
+			selector = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + selector;
 		}
 
 		synchronized (instances) {
