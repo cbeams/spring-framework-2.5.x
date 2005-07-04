@@ -226,14 +226,14 @@
     container's global transaction management.</para>
 
     <para><programlisting>&lt;bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
-  &lt;property name="jndiName" value="jdbc/jpetstore"/>&gt;
+  &lt;property name="jndiName" value="jdbc/jpetstore"/&gt;&gt;
 &lt;/bean&gt;
 
 &lt;bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;</programlisting></para>
 
-    <para>We can use Hibernate local transactions easily, as shown in the following
-    examples from the Spring <emphasis role="bold">PetClinic</emphasis> sample
-    application.</para>
+    <para>We can use Hibernate local transactions easily, as shown in the
+    following examples from the Spring <emphasis
+    role="bold">PetClinic</emphasis> sample application.</para>
 
     <para>In this case, we need to define a Hibernate LocalSessionFactory,
     which application code will use to obtain Hibernate Sessions.</para>
@@ -246,7 +246,8 @@
     <para>The "txManager" bean in this case is of class
     HibernateTransactionManager. In the same way as the
     DataSourceTransactionManager needs a reference to the DataSource, the
-    HibernateTransactionManager needs a reference to the SessionFactory.</para>
+    HibernateTransactionManager needs a reference to the
+    SessionFactory.</para>
 
     <para><programlisting>&lt;bean id="sessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
   &lt;property name="dataSource" ref="dataSource"/&gt;
@@ -275,44 +276,118 @@
     as these are global transactions, which can enlist any transactional
     resource.</para>
 
-    <remark>In all these cases, application code won't need to change at all.
-    We can change how transactions are managed merely by changing
+    <para><remark>In all these cases, application code won't need to change at
+    all. We can change how transactions are managed merely by changing
     configuration, even if that change means moving from local to global
-    transactions or vice versa.</remark>
+    transactions or vice versa.</remark></para>
+  </sect1>
 
-    <para>When not using global transactions, you do need to follow one
-    special coding convention. Fortunately this is very simple. You need to
-    obtain connection or session resources in a special way, to allow the
-    relevant PlatformTransactionManager implementation to track connection
-    usage, and apply transaction management as necessary.</para>
+  <sect1>
+    <title>Resource synchronization with transactions</title>
 
-    <para>For example, if using JDBC, you should not call the
-    <literal>getConnection()</literal> method on a DataSource, but must use
-    the Spring
-    <literal>org.springframework.jdbc.datasource.DataSourceUtils</literal>
-    class as follows:</para>
+    <para>It should now be clear how different transaction managers are
+    created, and how they are linked to related resources which need to be
+    synchronized to transactions (i.e.
+    <literal>DataSourceTransactionManager</literal> to a JDBC
+    <literal>DataSource</literal>,
+    <literal>HibernateTransactionManager</literal> to a Hibernate
+    <literal>SessionFactory</literal>, etc.). There remains the question
+    however of how the application code directly or indirectly using a
+    persistence API (JDBC, Hibernate, JDO, etc.), ensures that these resources
+    are obtained and handled properly, in terms of proper
+    creation/reuse/cleanup and to trigger (optionally) transaction
+    synchronization via the relevant
+    <literal>PlatformTransactionManager</literal>.</para>
 
-    <programlisting>Connection conn = DataSourceUtils.getConnection(dataSource);</programlisting>
+    <sect2>
+      <title>High-level approach</title>
 
-    <para>This has the added advantage that any
-    <literal>SQLException</literal> will be wrapped in a Spring
-    <literal>CannotGetJdbcConnectionException</literal>--one of Spring's
-    hierarchy of unchecked DataAccessExceptions. This gives you more
-    information than can easily be obtained from the
-    <literal>SQLException</literal>, and ensures portability across databases:
-    even across different persistence technologies.</para>
+      <para>The preferred approach is to use Spring's highest level
+      persistence integration APIs. These do not replace the native APIs, but
+      do internally handle resource creation/reuse, cleanup, optional
+      transaction synchronization of the resources and exception mapping, so
+      that user data access code doesn't have to worry about these concerns at
+      all, but can concentrate purely on non-boilerplate persistence logic.
+      Generally, the same<emphasis> template</emphasis> approach is followed
+      for all persistence APIs, with classes such as
+      <literal>JdbcTemplate</literal>, <literal>HibernateTemplate</literal>,
+      <literal>JdoTemplate</literal>, etc.. These integrationA classes are
+      detailed in subsequent chapters of this manual.</para>
+    </sect2>
 
-    <para>This will work fine without Spring transaction management, so you
-    can use it whether or not you are using Spring for transaction
-    management.</para>
+    <sect2>
+      <title>Low-level approach</title>
 
-    <para>Of course, once you've used Spring's JDBC support or Hibernate
-    support, you won't want to use <literal>DataSourceUtils</literal> or the
-    other helper classes, because you'll be much happier working via the
-    Spring abstraction than directly with the relevant APIs. For example, if
-    you use the Spring JdbcTemplate or jdbc.object package to simplify your
-    use of JDBC, correct connection retrieval happens behind the scenes and
-    you won't need to write any special code.</para>
+      <para>At a lower level exist classes such as
+      <literal>DataSourceUtils</literal> (for JDBC),
+      <literal>SessionFactoryUtils</literal> (for Hibernate),
+      <literal>PersistenceManagerFactoryUtils</literal> (for JDO), and so on.
+      When it is preferred for application code to deal directly with the
+      resource types of the native persistence APIs, these classes ensure that
+      proper Spring-managed instances are obtained, transactions are
+      (optionally) synchronized to, and exceptions which happen in the process
+      are properly mapped to a consistent API.</para>
+
+      <para>For example, for JDBC, instead of the traditional JDBC approach of
+      calling the <literal>getConnection()</literal> method on the
+      <literal>DataSource</literal>, you would instead use Spring's
+      <literal>org.springframework.jdbc.datasource.DataSourceUtils</literal>
+      class as follows:</para>
+
+      <programlisting>Connection conn = DataSourceUtils.getConnection(dataSource);</programlisting>
+
+      <para>If an existing transaction exists, and already has a connection
+      synchronized (linked) to it, that instance will be returned. Otherwise,
+      the method call will trigger the creation of a new connection, which
+      will be (optionally) synchronized to any existing transaction, and
+      available for subsequent reuse in that same transaction. As mentioned,
+      this has the added advantage that any <literal>SQLException</literal>
+      will be wrapped in a Spring
+      <literal>CannotGetJdbcConnectionException</literal>--one of Spring's
+      hierarchy of unchecked DataAccessExceptions. This gives you more
+      information than can easily be obtained from the
+      <literal>SQLException</literal>, and ensures portability across
+      databases: even across different persistence technologies.</para>
+
+      <para>It should be noted that this will also work fine without Spring
+      transaction management (transaction synchronization is optional), so you
+      can use it whether or not you are using Spring for transaction
+      management.</para>
+
+      <para>Of course, once you've used Spring's JDBC support or Hibernate
+      support, you will generally prefer not to use
+      <literal>DataSourceUtils</literal> or the other helper classes, because
+      you'll be much happier working via the Spring abstraction than directly
+      with the relevant APIs. For example, if you use the Spring JdbcTemplate
+      or jdbc.object package to simplify your use of JDBC, correct connection
+      retrieval happens behind the scenes and you won't need to write any
+      special code.</para>
+
+      <para>All these lower level resource access classes are detailed in
+      subsequent chapters of this manual.</para>
+    </sect2>
+
+    <sect2>
+      <title>TransactionAwareDataSourceProxy</title>
+
+      <para>At the very lowest level exists the
+      <literal>TransactionAwareDataSourceProxy</literal> class. This is a
+      proxy for a target <literal>DataSource</literal>, which wraps that
+      target <literal>DataSource</literal> to add awareness of Spring-managed
+      transactions. In this respect it is similar to a transactional JNDI
+      <literal>DataSource</literal> as provided by a J2EE server.</para>
+
+      <para>It should almost never be necessary or desireable to use this
+      class, except when existing code exists which must be called and passed
+      a standard JDBC <literal>DataSource</literal> interface implementation.
+      In this case, it's possible to still have this code be usable, but
+      participating in Spring managed transactions. It is preferable to write
+      your own new code using the higher level abstractions mentioned
+      above.</para>
+
+      <para>See the <literal>TransactionAwareDataSourceProxy</literal>
+      Javadocs for more details.</para>
+    </sect2>
   </sect1>
 
   <sect1>
@@ -867,7 +942,7 @@ interface TestService {
           <literal>Transactional</literal> annotation, a transactional proxy
           is automatically created to wrap it.</para>
 
-					<para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
+          <para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
 
 &lt;bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
   &lt;property name="transactionInterceptor" ref="transactionInterceptor"/&gt;
@@ -1092,6 +1167,8 @@ interface TestService {
     the box.) However, as of early 2004, high-end application servers provide
     more robust support for XA transactions.</para>
 
+    <para></para>
+
     <para>The most important point is that with Spring <emphasis>you can
     choose when to scale your application up to a full-blown application
     server</emphasis>. Gone are the days when the only alternative to using
@@ -1118,6 +1195,55 @@ interface TestService {
     for all your for all your transactional operations. Otherwise Spring will
     attempt to perform local transactions on resources such as container
     DataSources. Such local transactions don't make sense, and a good
-    application server will treat them as errors. <literal></literal></para>
+    application server will treat them as errors. </para>
+  </sect1>
+
+  <sect1>
+    <title>AppServer-specific integration</title>
+
+    <para>Spring's transaction abstraction is generally AppServer agnostic.
+    Additionally, Spring's <literal>JtaTransactionManager</literal> class,
+    which can optionally perform a JNDI lookup for the JTA
+    <literal>UserTransaction</literal> and
+    <literal>TransactionManager</literal> objects, can be set to autodetect
+    the location for the latter object, which varies by AppServer. Having
+    access to the <literal>TransactionManager</literal> instance does allow
+    enhanced transaction semantics. Please see the
+    <literal>JtaTransactionManager</literal> Javadocs for more details.</para>
+
+    <sect2>
+      <title>BEA WebLogic</title>
+
+      <para>In a WebLogic 7.0, 8.1 or higher environment, you will generally
+      prefer to use <literal>WebLogicJtaTransactionManager</literal> instead
+      of the stock <literal>JtaTransactionManager</literal> class. This
+      special WebLogic specific subclass of the normal
+      <literal>JtaTransactionManager</literal>. It supports the full power of
+      Spring's transaction definitions in a WebLogic managed transaction
+      environment, beyond standard JTA semantics: features include transaction
+      names, per-transaction isolation levels, and proper resuming of
+      transactions in all cases. </para>
+
+      <para>Please see the Javadocs for full details. </para>
+    </sect2>
+
+    <sect2>
+      <title>IBM WebSphere</title>
+
+      <para>In a WebSphere 5.1, 5.0 and 4 environment, you may wish to use
+      Spring's <literal>WebSphereTransactionManagerFactoryBean</literal>
+      class. This is a factory bean which retrieves the JTA
+      <literal>TransactionManager</literal> in a WebSphere environment, which
+      is done via WebSphere's static access methods. These methods are
+      different for each version of WebSphere.</para>
+
+      <para>Once the JTA <literal>TransactionManager</literal> instance has
+      been obtained via this factory bean, Spring's
+      <literal>JtaTransactionManager</literal> may be configured with a
+      reference to it, for enhanced transaction semantics over the use of only
+      the JTA <literal>UserTransaction</literal> object.</para>
+
+      <para>Please see the Javadocs for full details.</para>
+    </sect2>
   </sect1>
 </chapter>

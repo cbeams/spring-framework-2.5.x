@@ -7,11 +7,11 @@
 
     <para>The JDBC abstraction framework provided by Spring consists of four
     different packages <literal>core</literal>, <literal>datasource</literal>,
-		<literal>object</literal>, and <literal>support</literal>.</para>
+    <literal>object</literal>, and <literal>support</literal>.</para>
 
-    <para>The <literal>org.springframework.jdbc.core</literal> package contains
-		the JdbcTemplate class and its various callback interfaces, plus a variety
-		of related classes.</para>
+    <para>The <literal>org.springframework.jdbc.core</literal> package
+    contains the JdbcTemplate class and its various callback interfaces, plus
+    a variety of related classes.</para>
 
     <para>The <literal>org.springframework.jdbc.datasource</literal> package
     contains a utility class for easy DataSource access, and various simple
@@ -293,8 +293,9 @@ public class RunAQuery {
       <para>There are also a number of update methods that you can use. I will
       show an example where we update a column for a certain primary key. In
       this example I am using an SQL statement that has place holders for row
-      parameters. Most of the query and update methods have this functionality.
-			The parameter values are passed in as an array of objects.</para>
+      parameters. Most of the query and update methods have this
+      functionality. The parameter values are passed in as an array of
+      objects.</para>
 
       <programlisting>import javax.sql.DataSource;
 
@@ -328,12 +329,12 @@ public class ExecuteAnUpdate {
       <para>Helper class that provides static methods to obtain connections
       from JNDI and close connections if necessary. Has support for
       thread-bound connections, e.g. for use with
-      DataSourceTransactionManager.</para>
+      <literal>DataSourceTransactionManager</literal>.</para>
 
-      <para>Note: The getDataSourceFromJndi methods are targeted at
-      applications that do not use a BeanFactory resp. an ApplicationContext.
-      With the latter, it is preferable to preconfigure your beans or even
-      <literal><literal>JdbcTemplate</literal></literal> instances in the
+      <para>Note: The <literal>getDataSourceFromJndi</literal> methods are
+      targeted at applications that do not use a bean factory or application
+      context. With the latter, it is preferable to preconfigure your beans or
+      even <literal><literal>JdbcTemplate</literal></literal> instances in the
       factory: <literal>JndiObjectFactoryBean</literal> can be used to fetch a
       <literal><literal>DataSource</literal></literal> from JNDI and give the
       <literal><literal>DataSource</literal></literal> bean reference to other
@@ -393,12 +394,37 @@ public class ExecuteAnUpdate {
       configures a plain old JDBC Driver via bean properties, and returns a
       new connection every time.</para>
 
-      <para>Useful for test or standalone environments outside of a J2EE
-      container, either as a <literal>DataSource</literal> bean in a
-      respective ApplicationContext, or in conjunction with a simple JNDI
-      environment. Pool-assuming <literal>Connection.close()</literal> calls
-      will simply close the connection, so any DataSource-aware persistence
-      code should work.</para>
+      <para>This is Potentially useful for test or standalone environments
+      outside of a J2EE container, either as a <literal>DataSource</literal>
+      bean in a respective ApplicationContext, or in conjunction with a simple
+      JNDI environment. Pool-assuming <literal>Connection.close()</literal>
+      calls will simply close the connection, so any DataSource-aware
+      persistence code should work. However, using JavaBean style connection
+      pools such as commons-dbcp is so easy, even in a test environment, that
+      it is almost always preferable to use such a connection pool over
+      <literal>DriverManagerDataSource</literal>.</para>
+    </sect2>
+
+    <sect2 id="jdbc-DriverManagerDataSource">
+      <title>TransactionAwareDataSourceProxy</title>
+
+      <para>This is a proxy for a target <literal>DataSource</literal>, which
+      wraps that target <literal>DataSource</literal> to add awareness of
+      Spring-managed transactions. In this respect it is similar to a
+      transactional JNDI <literal>DataSource</literal> as provided by a J2EE
+      server.</para>
+
+      <para>It should almost never be necessary or desireable to use this
+      class, except when existing code exists which must be called and passed
+      a standard JDBC <literal>DataSource</literal> interface implementation.
+      In this case, it's possible to still have this code be usable, but
+      participating in Spring managed transactions. It is generally preferable
+      to write your own new code using the higher level abstractions for
+      resource management, such as <literal>JdbcTemplate</literal> or
+      <literal>DataSourceUtils</literal>.</para>
+
+      <para>See the <literal>TransactionAwareDataSourceProxy</literal>
+      Javadocs for more details.</para>
     </sect2>
 
     <sect2 id="jdbc-DataSourceTransactionManager">
@@ -423,7 +449,7 @@ public class ExecuteAnUpdate {
       appropriate JDBC statement query timeouts. To support the latter,
       application code must either use <literal>JdbcTemplate</literal> or call
       <literal>DataSourceUtils.applyTransactionTimeout</literal> method for
-			each created statement.</para>
+      each created statement.</para>
 
       <para>This implementation can be used instead of
       <literal>JtaTransactionManager</literal> in the single resource case, as
