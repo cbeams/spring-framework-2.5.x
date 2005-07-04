@@ -503,7 +503,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 	public void testAutowireBeanByTypeWithNoDependencyCheck() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		DependenciesBean bean = (DependenciesBean)
-				lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_NAME, false);
+				lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
 		assertNull(bean.getSpouse());
 	}
 
