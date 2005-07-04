@@ -20,8 +20,8 @@
 		- the properties defined in the "modelView" view.
 	  -->
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
-		<property name="basename"><value>views-countries</value></property>
-		<property name="defaultParentView"><value>modelView</value></property>
+		<property name="basename" value="views-countries"/>
+		<property name="defaultParentView" value="modelView"/>
 	</bean>
 
 	<!--
@@ -31,8 +31,8 @@
 	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/>
 
 	<bean id="themeResolver" class="org.springframework.web.servlet.theme.CookieThemeResolver">
-		<property name="defaultThemeName"><value>spring</value></property>
-      </bean>
+		<property name="defaultThemeName" value="spring"/>
+	</bean>
 
 	<!--
 	 - Explicit URL handler mapping instead of default BeanNameUrlHandlerMapping.
@@ -40,9 +40,8 @@
 	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
 		<property name="interceptors">
 			<list>
-				<ref local="localeChangeInterceptor"/>
-				<ref local="themeChangeInterceptor"/>
-				<ref local="copyInterceptor"/>
+				<ref bean="localeChangeInterceptor"/>
+				<ref bean="themeChangeInterceptor"/>
 			</list>
 		</property>
 		<property name="mappings">
@@ -75,61 +74,37 @@
 
 	<bean id="themeChangeInterceptor" class="org.springframework.web.servlet.theme.ThemeChangeInterceptor"/>
 
-	<bean id="copyInterceptor" class="org.springframework.samples.countries.web.CopyInterceptor">
-		<property name="countriesController"><ref local="countriesController"/></property>
-	</bean>
-
-	<!-- General use Multiaction controller for Errors -->
+	<!-- General use multi-action controller for errors -->
 	<bean id="errorsController" class="org.springframework.samples.countries.web.ErrorsController">
-		<property name="methodNameResolver"><ref local="errorsMethodNameResolver"/></property>
-	</bean>
-
-	<bean id="errorsMethodNameResolver" class="org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver">
-		<property name="mappings">
-			<props>
-				<prop key="/notfound.htm">handleHttp404</prop>
-			</props>
+		<property name="methodNameResolver">
+			<bean class="org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver">
+				<property name="mappings">
+					<props>
+						<prop key="/notfound.htm">handleHttp404</prop>
+					</props>
+				</property>
+			</bean>
 		</property>
 	</bean>
 
-	<!--
-	  - Application specific multi-action controller
-		- The controller will have to specify the "secondDaoCountry" property only in
-		- scenario 2 (MEMORY+DATABASE). The two others properties "methodNameResolver"
-		- and "countryDao" are always set, no matter of the scenario.
-		-
-		- NOTICE that parametrizing here has not to be changed when switching from scenario 1
-		- (Memory) to scenario 3 (Database). The "daoCountry" implementation is not the same,
-		- but it's only an affair of its own setting.
-	-->
+	<!-- Application specific multi-action controller -->
 	<bean id="countriesController" class="org.springframework.samples.countries.web.CountriesController">
-		<property name="methodNameResolver"><ref local="countriesMethodNameResolver"/></property>
-		<property name="daoCountry"><ref bean="daoCountry"/></property>
-		<!-- Uncomment for MEMORY+DATABASE IMPLEMENTATION scenario 2 -->
-		<!-- <property name="secondDaoCountry"><ref bean="secondDaoCountry"/></property> -->
-		<!-- Possibility to redefine the view names without changing java code
-		<property name="homeView"><value>homeView</value></property>
-		<property name="configView"><value>configView</value></property>
-		<property name="mainView"><value>countries_mainView</value></property>
-		<property name="detailView"><value>countries_detailView</value></property>
-		<property name="excelView"><value>countries_excelView</value></property>
-		<property name="pdfView"><value>countries_pdfView</value></property>
-		<property name="copyView"><value>copyView</value></property>
-		-->
-	</bean>
-
-	<bean id="countriesMethodNameResolver" class="org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver">
-		<property name="mappings">
-			<props>
-				<prop key="/home.htm">handleHome</prop>
-				<prop key="/config.htm">handleConfig</prop>
-				<prop key="/copy.htm">handleCopy</prop>
-				<prop key="/main/home.htm">handleMain</prop>
-				<prop key="/main/detail.htm">handleDetail</prop>
-				<prop key="/main/countries.xls">handleExcel</prop>
-				<prop key="/main/countries.pdf">handlePdf</prop>
-			</props>
+		<property name="methodNameResolver">
+			<bean class="org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver">
+				<property name="mappings">
+					<props>
+						<prop key="/home.htm">handleHome</prop>
+						<prop key="/config.htm">handleConfig</prop>
+						<prop key="/copy.htm">handleCopy</prop>
+						<prop key="/main/home.htm">handleMain</prop>
+						<prop key="/main/detail.htm">handleDetail</prop>
+						<prop key="/main/countries.xls">handleExcel</prop>
+						<prop key="/main/countries.pdf">handlePdf</prop>
+					</props>
+				</property>
+			</bean>
 		</property>
+		<property name="countryService" ref="countryService"/>
 	</bean>
 
 </beans>

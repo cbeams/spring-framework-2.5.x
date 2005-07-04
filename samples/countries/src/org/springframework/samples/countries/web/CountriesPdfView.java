@@ -1,4 +1,4 @@
-package org.springframework.samples.countries.web.views;
+package org.springframework.samples.countries.web;
 
 import java.awt.*;
 import java.io.IOException;
@@ -27,8 +27,7 @@ import org.springframework.beans.support.RefreshablePagedListHolder;
 import org.springframework.beans.support.SortDefinition;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.MessageSourceAccessor;
-import org.springframework.samples.countries.appli.ICountry;
-import org.springframework.samples.countries.web.CountriesFilter;
+import org.springframework.samples.countries.Country;
 import org.springframework.web.servlet.view.document.AbstractPdfView;
 
 /**
@@ -36,6 +35,7 @@ import org.springframework.web.servlet.view.document.AbstractPdfView;
  * using the iText PDF library.
  *
  * @author Jean-Pierre Pawlak
+ * @author Juergen Hoeller
  */
 public class CountriesPdfView extends AbstractPdfView {
 
@@ -175,7 +175,7 @@ public class CountriesPdfView extends AbstractPdfView {
 				table.getDefaultCell().setGrayFill(1.00f);
 				even = true;
 			}
-			ICountry country = (ICountry)it.next();
+			Country country = (Country)it.next();
 			table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
 			table.addCell(new Phrase(country.getCode(), BOLD_FONT));
 			table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_LEFT);

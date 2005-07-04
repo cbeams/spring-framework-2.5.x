@@ -20,62 +20,10 @@
 		- definition will simply be used by the next level (countries-servlet.xml).
 	  -->
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">	
-		<property name="basename"><value>messages</value></property>										
+		<property name="basename" value="messages"/>
 	</bean>
 
-	<!-- ========================= DATA LAYER DEFINITIONS ========================= -->
-	<!-- For the simplicity of configuration change, the three scenarios are done separately.
-	     But take a look to see the differences between the sections.
-	     By example: switching from inMemory(1) to database(3) has only these changes:
-	       - Modifying the class of the "daoCountry" bean.
-	       - Defining a "dataSource" bean.
-	       - Adding the previously defined bean "dataSource" as parameter of "daoCountry" bean.
-
-		By default, the scenario 1 is not commented. For testing another scenario, please
-		comment the current scenario and uncomment this you will run.
-	 -->
-
-
-	<!-- === SCENARIO 1 === -->
-	<!-- ====================== In memory only version ====================== -->
-	
-	<bean id="daoCountry" class="org.springframework.samples.countries.dao.DaoCountryMem"/>
-
-	
-	<!-- === SCENARIO 2 === -->
-	<!-- ============= In memory + database version for copying ============= -->
-
-	<!--
-		For database mapping, we rely on the JNDI location "(java:comp/env/)jdbc/countries".
-		So changing the real database used is only a matter of mapping this JNDI location.
-	-->
-
-	<!--
-	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName"><value>java:comp/env/jdbc/countries</value></property>
-	</bean>
-
-	<bean id="daoCountry" class="org.springframework.samples.countries.dao.DaoCountryMem"/>
-
-	<bean id="secondDaoCountry" class="org.springframework.samples.countries.dao.DaoCountryJdbc">
-		<property name="dataSource"><ref local="dataSource"/></property>
-		<property name="dropSql"><value>DROP TABLE countries</value></property>
-		<property name="createSql"><value>CREATE TABLE countries (lang CHAR(2), code CHAR(2), name VARCHAR(50))</value></property>
-	</bean>
-	-->
-
-
-	<!-- === SCENARIO 3 === -->
-	<!-- ======================= Database only version ====================== -->
-
-	<!--
-	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName"><value>java:comp/env/jdbc/countries</value></property>
-	</bean>
-
-	<bean id="daoCountry" class="org.springframework.samples.countries.dao.DaoCountryJdbc">
-		<property name="dataSource"><ref local="dataSource"/></property>
-	</bean>
-	-->
+	<!-- The central service facade of this application -->
+	<bean id="countryService" class="org.springframework.samples.countries.DefaultCountryService"/>
 
 </beans>

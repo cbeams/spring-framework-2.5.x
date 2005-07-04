@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.support.PagedListSourceProvider;
 import org.springframework.beans.support.RefreshablePagedListHolder;
-import org.springframework.samples.countries.appli.ICountry;
-import org.springframework.samples.countries.dao.IDaoCountry;
+import org.springframework.samples.countries.Country;
+import org.springframework.samples.countries.CountryService;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.BindUtils;
 import org.springframework.web.servlet.ModelAndView;
@@ -19,6 +19,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
  * @author Jean-Pierre Pawlak
+ * @author Juergen Hoeller
  */
 public class CountriesController extends MultiActionController {
 
@@ -30,8 +31,7 @@ public class CountriesController extends MultiActionController {
 	private static final String EXCEL_VIEW = "countries_excelView";
 	private static final String PDF_VIEW = "countries_pdfView";
 
-	private IDaoCountry daoCountry;
-	private IDaoCountry secondDaoCountry;
+	private CountryService countryService;
 
 	private String homeView = HOME_VIEW;
 	private String configView = CONFIG_VIEW;
@@ -40,10 +40,38 @@ public class CountriesController extends MultiActionController {
 	private String excelView = EXCEL_VIEW;
 	private String pdfView = PDF_VIEW;
 
-	// handlers
+
+	public void setCountryService(CountryService countryService) {
+		this.countryService = countryService;
+	}
+
+	public void setConfigView(String view) {
+		this.configView = view;
+	}
+
+	public void setDetailView(String view) {
+		this.detailView = view;
+	}
+
+	public void setExcelView(String view) {
+		this.excelView = view;
+	}
+
+	public void setHomeView(String view) {
+		this.homeView = view;
+	}
+
+	public void setMainView(String view) {
+		this.mainView = view;
+	}
+
+	public void setPdfView(String view) {
+		this.pdfView = view;
+	}
+
 
 	/**
-	 * Custom handler for home
+	 * Custom handler for home.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render the response
@@ -53,7 +81,7 @@ public class CountriesController extends MultiActionController {
 	}
 
 	/**
-	 * Custom handler for config
+	 * Custom handler for config.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render the response
@@ -63,13 +91,14 @@ public class CountriesController extends MultiActionController {
 	}
 
 	/**
-	 * Custom handler for countries main paged list
+	 * Custom handler for countries main paged list.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render the response
 	 */
 	public ModelAndView handleMain(HttpServletRequest request, HttpServletResponse response) throws ServletException {
-		RefreshablePagedListHolder listHolder = (RefreshablePagedListHolder) request.getSession(true).getAttribute(COUNTRIES_ATTR);
+		RefreshablePagedListHolder listHolder =
+				(RefreshablePagedListHolder) request.getSession(true).getAttribute(COUNTRIES_ATTR);
 		if (null == listHolder) {
 			listHolder = new RefreshablePagedListHolder();
 			listHolder.setSourceProvider(new CountriesProvider());
@@ -84,114 +113,53 @@ public class CountriesController extends MultiActionController {
 	}
 
 	/**
-	 * Custom handler for countries detail page
+	 * Custom handler for countries detail page.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render the response
 	 */
 	public ModelAndView handleDetail(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		Locale locale = RequestContextUtils.getLocale(request);
-		ICountry country = daoCountry.getCountry(request.getParameter("code"), locale);
-		return new ModelAndView(detailView, "country", country);
+		Country country = this.countryService.getCountry(request.getParameter("code"), locale);
+		return new ModelAndView(this.detailView, "country", country);
 	}
 
 	/**
-	 * Custom handler for countries Excel document
+	 * Custom handler for countries Excel document.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render the response
 	 */
 	public ModelAndView handleExcel(HttpServletRequest request, HttpServletResponse response) throws ServletException {
-		RefreshablePagedListHolder listHolder = (RefreshablePagedListHolder) request.getSession(true).getAttribute(COUNTRIES_ATTR);
-		if (null == listHolder) {
+		RefreshablePagedListHolder listHolder =
+				(RefreshablePagedListHolder) request.getSession(true).getAttribute(COUNTRIES_ATTR);
+		if (listHolder == null) {
 			throw new ServletException("No countries list found in session");
 		}
-		return new ModelAndView(excelView, "countries", listHolder);
+		return new ModelAndView(this.excelView, "countries", listHolder);
 	}
 
 	/**
-	 * Custom handler for countries PDF document
+	 * Custom handler for countries PDF document.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render the response
 	 */
 	public ModelAndView handlePdf(HttpServletRequest request, HttpServletResponse response) throws ServletException {
-		RefreshablePagedListHolder listHolder = (RefreshablePagedListHolder) request.getSession(true).getAttribute(COUNTRIES_ATTR);
-		if (null == listHolder) {
+		RefreshablePagedListHolder listHolder =
+				(RefreshablePagedListHolder) request.getSession(true).getAttribute(COUNTRIES_ATTR);
+		if (listHolder == null) {
 			throw new ServletException("No countries list found in session");
 		}
-		return new ModelAndView(pdfView, "countries", listHolder);
-	}
-
-	/**
-	 * Custom handler for copy countries from memory to database
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @return a ModelAndView to render the response
-	 */
-	public ModelAndView handleCopy(HttpServletRequest request, HttpServletResponse response) throws ServletException {
-		boolean copyMade = false;
-		if (null != secondDaoCountry) {
-			logger.info("A secondDao is configured");
-			secondDaoCountry.initBase();
-			logger.info("The database is initiallised");
-			Locale locs[] = {Locale.US, Locale.FRANCE, Locale.GERMANY};
-			for (int i = 0; i < locs.length; i++ ) {
-				secondDaoCountry.saveCountries(daoCountry.getAllCountries(locs[i]), locs[i]);
-			}
-			copyMade = true;
-			logger.info("The data is copied");
-		}
-		else {
-			logger.error("No secondDao is configured. You cannot copy in a database.");
-		}
-		return new ModelAndView("copyView", "copyMade", new Boolean(copyMade));
-	}
-
-	// Accessors
-	public IDaoCountry getSecondDaoCountry() {
-		return secondDaoCountry;
-	}
-
-	public void setDaoCountry(IDaoCountry daoCountry) {
-		this.daoCountry = daoCountry;
-	}
-
-	public void setSecondDaoCountry(IDaoCountry country) {
-		secondDaoCountry = country;
-	}
-
-	public void setConfigView(String string) {
-		configView = string;
-	}
-
-	public void setDetailView(String string) {
-		detailView = string;
-	}
-
-	public void setExcelView(String string) {
-		excelView = string;
-	}
-
-	public void setHomeView(String string) {
-		homeView = string;
-	}
-
-	public void setMainView(String string) {
-		mainView = string;
-	}
-
-	public void setPdfView(String string) {
-		pdfView = string;
+		return new ModelAndView(this.pdfView, "countries", listHolder);
 	}
 
 
-	// Inner class
 	private class CountriesProvider implements PagedListSourceProvider {
 
 		public List loadList(Locale loc, Object filter) {
 			CountriesFilter cf = (CountriesFilter) filter;
-			return daoCountry.getFilteredCountries(cf.getName(), cf.getCode(), loc);
+			return countryService.getFilteredCountries(cf.getName(), cf.getCode(), loc);
 		}
 	}
 

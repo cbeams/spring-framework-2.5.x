@@ -1,4 +1,4 @@
-package org.springframework.samples.countries.web.views;
+package org.springframework.samples.countries.web;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -16,8 +16,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.support.RefreshablePagedListHolder;
 import org.springframework.beans.support.SortDefinition;
 import org.springframework.context.NoSuchMessageException;
-import org.springframework.samples.countries.appli.ICountry;
-import org.springframework.samples.countries.web.CountriesFilter;
+import org.springframework.samples.countries.Country;
 import org.springframework.web.servlet.view.document.AbstractExcelView;
 
 /**
@@ -35,6 +34,7 @@ import org.springframework.web.servlet.view.document.AbstractExcelView;
  * and so on. Theses files will take precedence if the user's locale matches.
  *
  * @author Jean-Pierre Pawlak
+ * @author Juergen Hoeller
  */
 public class CountriesExcelView extends AbstractExcelView {
 
@@ -149,7 +149,7 @@ public class CountriesExcelView extends AbstractExcelView {
 		// We put now the countries from the list on the sheet
 		Iterator it = pgHolder.getSource().iterator();
 		while (it.hasNext()) {
-			ICountry country = (ICountry) it.next();
+			Country country = (Country) it.next();
 			getCell(sheet, row, 0).setCellValue(country.getCode());
 			getCell(sheet, row, 1).setCellValue(country.getName());
 			row++;
