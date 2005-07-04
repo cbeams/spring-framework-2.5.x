@@ -24,29 +24,39 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * This FactoryBean creates a local JCA connection factory in non-managed mode.
+ * This FactoryBean creates a local JCA connection factory in "non-managed" mode
+ * (as defined by the Java Connector Architecture specification).
  *
  * <p>The type of the connection factory is dependent on the actual connector:
  * the connector can either expose its native API or follow the standard
  * Common Client Interface (CCI), as defined by the JCA spec. In the latter case,
  * the exposed interface is <code>javax.resource.cci.ConnectionFactory</code>.
  *
- * <p>In such a scenario, the connector uses a local ConnectionManager
- * and you can't participate in global transactions because the connector
- * will never be enlist/delist in the current JTA transaction.
- *
- * <p>In non-managed mode, a connector is not deployed on an application
- * server. Consequently, it can't use the server's system contracts:
+ * <p><b>NOTE:</b> In non-managed mode, a connector is not deployed on an
+ * application server. Consequently, it can't use the server's system contracts:
  * connection management, transaction management, and security management.
  *
+ * <p>In particular, the connector uses a local ConnectionManager (either the
+ * connector's default or a locally specified one) and can't participate in global
+ * transactions, because the connector will never be enlisted/delisted in the
+ * current JTA transaction. You can either use the native local transaction
+ * facilities of the exposed API (e.g. CCI local transactions), or use a
+ * corresponding implementation of Spring's PlatformTransactionManager SPI
+ * (e.g. CciLocalTransactionManager) to drive local transactions.
+ *
  * <p>In order to use this FactoryBean, you must specify the connector's
- * "managerConnectionFactory" (usually configured as separate JavaBean),
- * which will be used to create the actual connection factory.
+ * "managedConnectionFactory" (usually configured as separate JavaBean),
+ * which will be used to create the actual connection factory. Optionally,
+ * you can also specify a "connectionManager", to use an explicit,
+ * JCA-compliant ConnectionManager instead of the connector's default.
  *
  * @author Juergen Hoeller
  * @since 1.2
  * @see #setManagedConnectionFactory
+ * @see #setConnectionManager
  * @see javax.resource.cci.ConnectionFactory
+ * @see javax.resource.cci.Connection#getLocalTransaction
+ * @see org.springframework.jca.cci.connection.CciLocalTransactionManager
  */
 public class LocalConnectionFactoryBean implements FactoryBean, InitializingBean {
 
