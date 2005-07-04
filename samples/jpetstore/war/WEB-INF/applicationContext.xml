@@ -24,7 +24,7 @@
 	<!-- MailSender used by EmailAdvice -->
 	<!--
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-		<property name="host"><value>${mail.host}</value></property>
+		<property name="host" value="${mail.host}"/>
 	</bean>
 	-->
 
@@ -39,15 +39,15 @@
 	<!-- AOP advice used to send confirmation email after order has been submitted -->
 	<!--
 	<bean id="emailAdvice" class="org.springframework.samples.jpetstore.domain.logic.SendOrderConfirmationEmailAdvice">
-		<property name="mailSender"><ref local="mailSender"/></property>
+		<property name="mailSender" ref="mailSender"/>
 	</bean>
 	-->
 
 	<!-- Advisor encapsulating email advice -->
 	<!--
 	<bean id="emailAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
-		<constructor-arg><ref local="emailAdvice"/></constructor-arg>
-		<property name="pattern"><value>.*insertOrder.*</value></property>
+		<constructor-arg ref="emailAdvice"/>
+		<property name="pattern" value=".*insertOrder.*"/>
 	</bean>
 	-->
 
@@ -77,18 +77,18 @@
 	<bean id="petStore" parent="baseTransactionProxy">
 		<property name="target">
 			<bean class="org.springframework.samples.jpetstore.domain.logic.PetStoreImpl">
-				<property name="accountDao"><ref bean="accountDao"/></property>
-				<property name="categoryDao"><ref bean="categoryDao"/></property>
-				<property name="productDao"><ref bean="productDao"/></property>
-				<property name="itemDao"><ref bean="itemDao"/></property>
-				<property name="orderDao"><ref bean="orderDao"/></property>
+				<property name="accountDao" ref="accountDao"/>
+				<property name="categoryDao" ref="categoryDao"/>
+				<property name="productDao" ref="productDao"/>
+				<property name="itemDao" ref="itemDao"/>
+				<property name="orderDao" ref="orderDao"/>
 			</bean>
 		</property>
 		<!-- Uncomment the following in order to enable mail sending aspect -->
 		<!--
 		<property name="postInterceptors">
 			<list>
-				<ref local="emailAdvisor"/>
+				<ref bean="emailAdvisor"/>
 			</list>
 		</property>
  		-->
@@ -100,12 +100,10 @@
 	<!-- Commented out by default to avoid conflicts with EJB containers -->
 	<!--
 	<bean id="order-rmi" class="org.springframework.remoting.rmi.RmiServiceExporter">
-		<property name="service"><ref local="petStore"/></property>
-		<property name="serviceInterface">
-			<value>org.springframework.samples.jpetstore.domain.logic.OrderService</value>
-		</property>
-		<property name="serviceName"><value>order</value></property>
-		<property name="registryPort"><value>1099</value></property>
+		<property name="service" ref="petStore"/>
+		<property name="serviceInterface" value="org.springframework.samples.jpetstore.domain.logic.OrderService"/>
+		<property name="serviceName" value="order"/>
+		<property name="registryPort" value="1099"/>
 	</bean>
 	-->
 

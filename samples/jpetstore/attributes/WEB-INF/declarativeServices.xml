@@ -32,7 +32,7 @@
 		as well, and they will also be evaluated and applied automatically.
 	-->
 	<bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor">
-		<property name="transactionInterceptor"><ref bean="transactionInterceptor"/></property>
+		<property name="transactionInterceptor" ref="transactionInterceptor"/>
 	</bean>
 
 	<!--
@@ -40,10 +40,10 @@
 		Transaction attributes will be read in from class-level metadata.
 	-->
 	<bean id="transactionInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
-		<property name="transactionManager"><ref bean="transactionManager"/></property>
+		<property name="transactionManager" ref="transactionManager"/>
 		<property name="transactionAttributeSource">
 			<bean class="org.springframework.transaction.interceptor.AttributesTransactionAttributeSource">
-				<property name="attributes"><ref bean="attributes"/></property>
+				<property name="attributes" ref="attributes"/>
 			</bean>
 		</property>
 	</bean>
