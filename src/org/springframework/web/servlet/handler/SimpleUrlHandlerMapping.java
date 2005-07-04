@@ -70,7 +70,7 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 
 	/**
 	 * Map URL paths to handler bean names.
-	 * This the typical way of configuring this HandlerMapping.
+	 * This is the typical way of configuring this HandlerMapping.
 	 * <p>Supports direct URL matches and Ant-style pattern matches.
 	 * For syntax details, see the PathMatcher class.
 	 * @param mappings properties with URLs as keys and bean names as values

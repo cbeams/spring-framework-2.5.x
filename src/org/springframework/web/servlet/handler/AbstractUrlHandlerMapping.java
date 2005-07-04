@@ -58,7 +58,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 
 	/**
-	 * Set if URL lookup should always use full path within current servlet
+	 * Set if URL lookup should always use the full path within the current servlet
 	 * context. Else, the path within the current servlet mapping is used
 	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
 	 * Default is false.
