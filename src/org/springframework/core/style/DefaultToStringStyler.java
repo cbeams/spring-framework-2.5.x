@@ -29,7 +29,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Keith Donald
  * @author Juergen Hoeller
- * @see 1.2.2
+ * @since 1.2.2
  */
 public class DefaultToStringStyler implements ToStringStyler {
 

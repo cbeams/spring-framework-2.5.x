@@ -52,7 +52,7 @@ public interface ResourcePatternResolver extends ResourceLoader {
 	/**
 	 * @deprecated as of Spring 1.2.2, in favor of CLASSPATH_ALL_URL_PREFIX
 	 * (to avoid shadowing the constant of the same name in ResourceLoader)
-	 * @see CLASSPATH_ALL_URL_PREFIX
+	 * @see #CLASSPATH_ALL_URL_PREFIX
 	 */
 	String CLASSPATH_URL_PREFIX = "classpath*:";
 
