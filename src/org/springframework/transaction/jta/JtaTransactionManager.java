@@ -99,12 +99,13 @@ import org.springframework.transaction.support.TransactionSynchronization;
  * <i>not</i> specified by J2EE; it is specific to each J2EE server, often kept
  * in JNDI like the JTA UserTransaction. Some well-known JNDI locations are:
  * <ul>
- * <li>"java:comp/UserTransaction" for Resin 2.x, Oracle OC4J (Orion), JOnAS (JOTM),
- * BEA WebLogic
- * <li>"java:/TransactionManager" for Resin 3.x, JBoss, JRun4
+ * <li>"java:comp/UserTransaction" for Resin 2.x, Oracle OC4J (Orion),
+ * JOnAS (JOTM), BEA WebLogic
+ * <li>"java:comp/TransactionManager" for Resin 3.x
+ * <li>"java:/TransactionManager" for JBoss
  * </ul>
  *
- * <p>Both of these cases are autodetected by JtaTransactionManager (since Spring 1.2),
+ * <p>All of these cases are autodetected by JtaTransactionManager (since Spring 1.2),
  * provided that the "autodetectTransactionManager" flag is set to "true" (which it is
  * by default). Consequently, JtaTransactionManager will support transaction suspension
  * out-of-the-box on many J2EE servers.
@@ -189,13 +190,14 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	public static final String DEFAULT_USER_TRANSACTION_NAME = "java:comp/UserTransaction";
 
 	/**
-	 * Fallback JNDI location for the JTA TransactionManager. Applied if
+	 * Fallback JNDI locations for the JTA TransactionManager. Applied if
 	 * the JTA UserTransaction does not implement the JTA TransactionManager
 	 * interface, provided that the "autodetectTransactionManager" flag is "true".
 	 * @see #setTransactionManagerName
 	 * @see #setAutodetectTransactionManager
 	 */
-	public static final String FALLBACK_TRANSACTION_MANAGER_NAME = "java:/TransactionManager";
+	public static final String[] FALLBACK_TRANSACTION_MANAGER_NAMES =
+			new String[] {"java:comp/TransactionManager", "java:/TransactionManager"};
 
 
 	private transient JndiTemplate jndiTemplate = new JndiTemplate();
@@ -357,11 +359,12 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * Set whether to autodetect a JTA UserTransaction object that implements
 	 * the JTA TransactionManager interface too (i.e. the JNDI location for the
 	 * TransactionManager is "java:comp/UserTransaction", same as for the UserTransaction).
-	 * Also checks the fallback JNDI location "java:/TransactionManager".
-	 * <p>Default is true. Can be turned off to deliberately ignore an available
+	 * Also checks the fallback JNDI locations "java:comp/TransactionManager" and
+	 * "java:/TransactionManager".
+	 * <p>Default is "true". Can be turned off to deliberately ignore an available
 	 * TransactionManager, for example when there are known issues with suspend/resume
 	 * and any attempt to use REQUIRES_NEW or NOT_SUPPORTED should fail fast.
-	 * @see #FALLBACK_TRANSACTION_MANAGER_NAME
+	 * @see #FALLBACK_TRANSACTION_MANAGER_NAMES
 	 */
 	public void setAutodetectTransactionManager(boolean autodetectTransactionManager) {
 		this.autodetectTransactionManager = autodetectTransactionManager;
@@ -390,24 +393,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		// Autodetect UserTransaction object that implements TransactionManager,
-		// and check fallback JNDI location else.
+		// and check fallback JNDI locations else.
 		if (this.transactionManager == null && this.autodetectTransactionManager) {
-			if (this.userTransaction instanceof TransactionManager) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("JTA UserTransaction object [" + this.userTransaction + "] implements TransactionManager");
-				}
-				this.transactionManager = (TransactionManager) this.userTransaction;
-			}
-			else {
-				// Check fallback JNDI location.
-				try {
-					this.transactionManager = lookupTransactionManager(FALLBACK_TRANSACTION_MANAGER_NAME);
-				}
-				catch (TransactionSystemException ex) {
-					logger.debug("No JTA TransactionManager found at fallback JNDI location", ex);
-					// OK, so no JTA TransactionManager is available...
-				}
-			}
+			this.transactionManager = findTransactionManager(this.userTransaction);
 		}
 
 		// If only JTA TransactionManager specified, create UserTransaction handle for it.
@@ -443,6 +431,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 					"transaction suspension and synchronization with existing JTA transactions not available");
 		}
 	}
+
 
 	/**
 	 * Look up the JTA UserTransaction in JNDI via the configured name.
@@ -519,6 +508,39 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #setTransactionManagerName
 	 */
 	protected TransactionManager retrieveTransactionManager() throws TransactionSystemException {
+		return null;
+	}
+
+	/**
+	 * Find the JTA TransactionManager through autodetection:
+	 * checking whether the UserTransaction object implements the
+	 * TransactionManager, and checking the fallback JNDI locations.
+	 * @param ut the JTA UserTransaction object
+	 * @return the JTA TransactionManager reference, or null if not found
+	 * @see #FALLBACK_TRANSACTION_MANAGER_NAMES
+	 */
+	protected TransactionManager findTransactionManager(UserTransaction ut) {
+		if (ut instanceof TransactionManager) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("JTA UserTransaction object [" + ut + "] implements TransactionManager");
+			}
+			return (TransactionManager) ut;
+		}
+
+		// Check fallback JNDI locations.
+		for (int i = 0; i < FALLBACK_TRANSACTION_MANAGER_NAMES.length; i++) {
+			String jndiName = FALLBACK_TRANSACTION_MANAGER_NAMES[i];
+			try {
+				TransactionManager tm = lookupTransactionManager(jndiName);
+				logger.debug("JTA TransactionManager found at fallback JNDI location [" + jndiName + "]");
+				return tm;
+			}
+			catch (TransactionSystemException ex) {
+				logger.debug("No JTA TransactionManager found at fallback JNDI location [" + jndiName + "]", ex);
+			}
+		}
+
+		// OK, so no JTA TransactionManager is available...
 		return null;
 	}
 
