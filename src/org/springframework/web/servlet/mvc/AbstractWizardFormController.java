@@ -277,6 +277,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 */
 	protected Map referenceData(HttpServletRequest request, Object command, Errors errors, int page)
 	    throws Exception {
+
 		return referenceData(request, page);
 	}
 
@@ -302,12 +303,13 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	protected final ModelAndView showForm(
 			HttpServletRequest request, HttpServletResponse response, BindException errors)
 	    throws Exception {
+
 		return showPage(request, errors, getInitialPage(request, errors.getTarget()));
 	}
 
 	/**
 	 * Prepare the form model and view, including reference and error data,
-	 * for the given page. Can be used in processFinish implementations,
+	 * for the given page. Can be used in <code>processFinish</code> implementations,
 	 * to show the corresponding page in case of validation errors.
 	 * @param request current HTTP request
 	 * @param errors validation errors holder
@@ -322,6 +324,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			if (logger.isDebugEnabled()) {
 				logger.debug("Showing wizard page " + page + " for form bean '" + getCommandName() + "'");
 			}
+
 			// Set page session attribute, expose overriding request attribute.
 			Integer pageInteger = new Integer(page);
 			String pageAttrName = getPageSessionAttributeName(request);
@@ -332,6 +335,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 				request.getSession().setAttribute(pageAttrName, pageInteger);
 			}
 			request.setAttribute(pageAttrName, pageInteger);
+
 			// Set page request attribute for evaluation by views.
 			Map controlModel = new HashMap();
 			if (this.pageAttribute != null) {
@@ -340,6 +344,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			String viewName = getViewName(request, errors.getTarget(), page);
 			return showForm(request, errors, viewName, controlModel);
 		}
+
 		else {
 			throw new ServletException("Invalid wizard page number: " + page);
 		}
@@ -440,6 +445,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 */
 	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
+
 		return showNewForm(request, response);
 	}
 
@@ -486,6 +492,10 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			validatePage(command, errors, currentPage, false);
 		}
 
+		// Give subclasses a change to perform custom post-procession
+		// of the current page and its command object.
+		postProcessPage(request, command, errors, currentPage);
+
 		int targetPage = getTargetPage(request, command, errors, currentPage);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Target page " + targetPage + " requested");
@@ -498,7 +508,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			}
 		}
 
-		// show current page again
+		// Show current page again.
 		return showPage(request, errors, currentPage);
 	}
 
@@ -656,6 +666,22 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see org.springframework.validation.Validator#validate
 	 */
 	protected void validatePage(Object command, Errors errors, int page) {
+	}
+
+	/**
+	 * Post-process the given page after binding and validation, potentially
+	 * updating its command object. The passed-in request might contain special
+	 * parameters sent by the page.
+	 * <p>Only invoked when displaying another page or the same page again,
+	 * not when finishing or cancelling.
+	 * @param request current HTTP request
+	 * @param command form object with request parameters bound onto it
+	 * @param errors validation errors holder
+	 * @param page number of page to post-process
+	 * @throws Exception in case of invalid state or arguments
+	 */
+	protected void postProcessPage(HttpServletRequest request, Object command, Errors errors, int page)
+			throws Exception {
 	}
 
 	/**
