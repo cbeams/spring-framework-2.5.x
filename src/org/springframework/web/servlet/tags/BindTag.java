@@ -171,4 +171,11 @@ public class BindTag extends HtmlEscapingAwareTag {
 		return this.status.getEditor();
 	}
 
+
+	public void doFinally() {
+		super.doFinally();
+		this.status = null;
+		this.previousStatus = null;
+	}
+
 }

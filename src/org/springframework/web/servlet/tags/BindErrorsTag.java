@@ -81,4 +81,10 @@ public class BindErrorsTag extends HtmlEscapingAwareTag {
 		return errors;
 	}
 
+
+	public void doFinally() {
+		super.doFinally();
+		this.errors = null;
+	}
+
 }
