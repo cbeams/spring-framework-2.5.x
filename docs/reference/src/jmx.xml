@@ -87,24 +87,20 @@ public class JmxTestBean implements IJmxTestBean {
     in the bean as shown below:</para>
 
     <programlisting>&lt;beans&gt;
+
   &lt;bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"&gt;
     &lt;property name="beans"&gt;
       &lt;map&gt;
-        &lt;entry key="bean:name=testBean1"&gt;
-          &lt;ref local="testBean"/&gt;
-        &lt;/entry&gt;
+        &lt;entry key="bean:name=testBean1" value-ref="testBean"/&gt;
       &lt;/map&gt;
     &lt;/property&gt;
   &lt;/bean&gt;
 
   &lt;bean id="testBean" class="org.springframework.jmx.JmxTestBean"&gt;
-    &lt;property name="name"&gt;
-      &lt;value&gt;TEST&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property name="age"&gt;
-      &lt;value&gt;100&lt;/value&gt;
-    &lt;/property&gt;
+    &lt;property name="name" value="TEST"/&gt;
+    &lt;property name="age" value="100"/&gt;
   &lt;/bean&gt;
+
 &lt;/beans&gt;</programlisting>
 
     <para>Here, the important definition is the <literal>exporter</literal>
@@ -148,29 +144,23 @@ public class JmxTestBean implements IJmxTestBean {
       the <literal>MBeanExporter</literal>. This is shown below:</para>
 
       <programlisting>&lt;beans&gt;
+
+  &lt;bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean"/&gt;
+
   &lt;bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"&gt;
     &lt;property name="beans"&gt;
       &lt;map&gt;
-        &lt;entry key="bean:name=testBean1"&gt;
-          &lt;ref local="testBean"/&gt;
-        &lt;/entry&gt;
+        &lt;entry key="bean:name=testBean1" value-ref="testBean"/&gt;
       &lt;/map&gt;
     &lt;/property&gt;
-    &lt;property name="server"&gt;
-      &lt;ref local="mbeanServer"/&gt;
-    &lt;/property&gt;
+    &lt;property name="server" ref="mbeanServer"/&gt;
   &lt;/bean&gt;
 
   &lt;bean id="testBean" class="org.springframework.jmx.JmxTestBean"&gt;
-    &lt;property name="name"&gt;
-      &lt;value&gt;TEST&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property name="age"&gt;
-      &lt;value&gt;100&lt;/value&gt;
-    &lt;/property&gt;
+    &lt;property name="name" value="TEST"/&gt;
+    &lt;property name="age" value="100"/&gt;
   &lt;/bean&gt;
 
-  &lt;bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean"/&gt;
 &lt;/beans&gt;</programlisting>
 
       <para>Here an instance of <literal>MBeanServer</literal> is created by
@@ -205,9 +195,7 @@ public class JmxTestBean implements IJmxTestBean {
       <literal>autodetect</literal> property to true:</para>
 
       <programlisting>&lt;bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"&gt;
-  &lt;property name="autodetect"&gt;
-    &lt;value&gt;true&lt;/value&gt;
-    &lt;/property&gt;
+  &lt;property name="autodetect" value="true"/&gt;
 &lt;/bean&gt;
 
 &lt;bean name="spring:mbean=true" class="org.springframework.jmx.export.TestDynamicMBean"/&gt;</programlisting>
@@ -360,10 +348,8 @@ public class JmxTestBean implements IJmxTestBean {
       <literal>MBeanExporter</literal> to use the
       <literal>MetadataMBeanInfoAssembler</literal>:</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
- "http://www.springframework.org/dtd/spring-beans.dtd"&gt;
-&lt;beans&gt;
+      <programlisting>&lt;beans&gt;
+
   &lt;bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"&gt;
     &lt;property name="beans"&gt;
       &lt;map&gt;
@@ -394,6 +380,7 @@ public class JmxTestBean implements IJmxTestBean {
       &lt;ref local="attributeSource"/&gt;
     &lt;/property&gt;
   &lt;/bean&gt;
+
 &lt;/beans&gt;</programlisting>
 
       <para>Here you can see that a
@@ -699,32 +686,25 @@ public class AnnotationTestBean implements IJmxTestBean {
       the <literal>ObjectName</literal> which results in a configuration like
       this:</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
- "http://www.springframework.org/dtd/spring-beans.dtd"&gt;
-&lt;beans&gt;
+      <programlisting>&lt;beans&gt;
+
   &lt;bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"&gt;
     &lt;property name="assembler" ref="assembler"/&gt;
-	&lt;property name="autodetect" value="true"/&gt;
+	  &lt;property name="autodetect" value="true"/&gt;
   &lt;/bean&gt;
 
   &lt;bean id="bean:name=testBean1" class="org.springframework.jmx.JmxTestBean"&gt;
-    &lt;property name="name"&gt;
-      &lt;value&gt;TEST&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property name="age"&gt;
-      &lt;value&gt;100&lt;/value&gt;
-    &lt;/property&gt;
+    &lt;property name="name" value="TEST"/&gt;
+    &lt;property name="age" value="100"/&gt;
   &lt;/bean&gt;
 
   &lt;bean id="attributeSource"
-        class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"/&gt;
+      class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"/&gt;
 
   &lt;bean id="assembler" class="org.springframework.jmx.assembler.MetadataMBeanInfoAssembler"&gt;
-    &lt;property name="attributeSource"&gt;
-      &lt;ref local="attributeSource"/&gt;
-    &lt;/property&gt;
+    &lt;property name="attributeSource" ref="attributeSource"/&gt;
   &lt;/bean&gt;
+
 &lt;/beans&gt;</programlisting>
 
       <para>Notice that in this configuration no beans are passed to the
@@ -736,7 +716,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <literal>JmxTestBean</literal> now has business meaning. You can solve
       this problem by changing the default behavior for
       <literal>ObjectName</literal> creation as defined in section <xref
-      linkend="jmx-naming" />.</para>
+      linkend="jmx-naming"/>.</para>
     </section>
 
     <section id="jmx-interface-java">
@@ -910,30 +890,20 @@ public class AnnotationTestBean implements IJmxTestBean {
       <para>The code below shows a sample configuration for the
       <literal>KeyNamingStrategy</literal>:</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
- "http://www.springframework.org/dtd/spring-beans.dtd"&gt;
-&lt;beans&gt;
+      <programlisting>&lt;beans&gt;
+
   &lt;bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"&gt;
     &lt;property name="beans"&gt;
       &lt;map&gt;
-        &lt;entry key="testBean"&gt;
-          &lt;ref local="testBean"/&gt;
-        &lt;/entry&gt;
+        &lt;entry key="testBean" value-ref="testBean"/&gt;
       &lt;/map&gt;
     &lt;/property&gt;
-    &lt;property name="namingStrategy"&gt;
-      &lt;ref local="namingStrategy"/&gt;
-    &lt;/property&gt;
+    &lt;property name="namingStrategy" ref="namingStrategy"/&gt;
   &lt;/bean&gt;
 
   &lt;bean id="testBean" class="org.springframework.jmx.JmxTestBean"&gt;
-    &lt;property name="name"&gt;
-      &lt;value&gt;TEST&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property name="age"&gt;
-      &lt;value&gt;100&lt;/value&gt;
-    &lt;/property&gt;
+    &lt;property name="name" value="TEST"/&gt;
+    &lt;property name="age" value="100"/&gt;
   &lt;/bean&gt;
 
   &lt;bean id="namingStrategy" class="org.springframework.jmx.export.naming.KeyNamingStrategy"&gt;
@@ -946,6 +916,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       &lt;value&gt;names1.properties,names2.properties&lt;/value&gt;
     &lt;/property&gt;
   &lt;/bean
+
 &lt;/beans&gt;</programlisting>
 
       <para>Here an instance of <literal>KeyNamingStrategy</literal> is
@@ -972,40 +943,29 @@ public class AnnotationTestBean implements IJmxTestBean {
       <literal>ObjectName</literal>. The code below shows the configuration
       for the <literal>MetadataNamingStrategy</literal>:</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
- "http://www.springframework.org/dtd/spring-beans.dtd"&gt;
-&lt;beans&gt;
+      <programlisting>&lt;beans&gt;
+
   &lt;bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"&gt;
     &lt;property name="beans"&gt;
       &lt;map&gt;
-        &lt;entry key="testBean"&gt;
-          &lt;ref local="testBean"/&gt;
-        &lt;/entry&gt;
+        &lt;entry key="testBean" value-ref="testBean"/&gt;
       &lt;/map&gt;
     &lt;/property&gt;
-    &lt;property name="namingStrategy"&gt;
-      &lt;ref local="namingStrategy"/&gt;
-    &lt;/property&gt;
+    &lt;property name="namingStrategy" ref="namingStrategy"/&gt;
   &lt;/bean&gt;
 
   &lt;bean id="testBean" class="org.springframework.jmx.JmxTestBean"&gt;
-    &lt;property name="name"&gt;
-      &lt;value&gt;TEST&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property name="age"&gt;
-      &lt;value&gt;100&lt;/value&gt;
-    &lt;/property&gt;
+    &lt;property name="name" value="TEST"/&gt;
+    &lt;property name="age" value="100"/&gt;
+  &lt;/bean&gt;
+
+  &lt;bean id="namingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy"&gt;
+    &lt;property name="attributeSource" ref="attributeSource"/&gt;
   &lt;/bean&gt;
 
   &lt;bean id="attributeSource"
-        class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"/&gt;
+      class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"/&gt;
 
-  &lt;bean id="namingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy"&gt;
-    &lt;property name="attributeSource"&gt;
-      &lt;ref local="attributeSource"/&gt;
-    &lt;/property&gt;
-  &lt;/bean&gt;
 &lt;/beans&gt;</programlisting>
     </section>
   </section>
@@ -1042,12 +1002,8 @@ public class AnnotationTestBean implements IJmxTestBean {
       <literal>objectName</literal> properties respectively:</para>
 
       <programlisting>&lt;bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean"&gt;
-    &lt;property name="objectName"&gt;
-      &lt;value&gt;connector:name=rmi&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property name="serviceUrl"&gt;
-      &lt;value&gt;service:jmx:rmi://localhost:9875&lt;/value&gt;
-    &lt;/property&gt;
+  &lt;property name="objectName" value="connector:name=rmi"/&gt;
+  &lt;property name="serviceUrl" value="service:jmx:rmi://localhost:9875"/&gt;
 &lt;/bean&gt;</programlisting>
 
       <para>If the <literal>objectName</literal> property is set Spring will
@@ -1058,29 +1014,18 @@ public class AnnotationTestBean implements IJmxTestBean {
       JMXConnector:</para>
 
       <programlisting>&lt;bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean"&gt;
-    &lt;property name="objectName"&gt;
-      &lt;value&gt;connector:name=iiop&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property name="serviceUrl"&gt;
-      &lt;value&gt;service:jmx:iiop://localhost:9875&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property name="threaded"&gt;
-      &lt;value&gt;true&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property name="daemon"&gt;
-      &lt;value&gt;true&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property name="environment"&gt;
-      &lt;map&gt;
-        &lt;entry key="someKey"&gt;
-         &lt;value&gt;someValue&lt;/value&gt;
-        &lt;/entry&gt;
-      &lt;/map&gt;
-    &lt;/property&gt;
+  &lt;property name="objectName" value="connector:name=iiop"/&gt;
+  &lt;property name="serviceUrl" value="service:jmx:iiop://localhost:9875"/&gt;
+  &lt;property name="threaded" value="true"/&gt;
+  &lt;property name="daemon" value="true"/&gt;
+  &lt;property name="environment"&gt;
+    &lt;map&gt;
+      &lt;entry key="someKey" value="someValue"/&gt;
+    &lt;/map&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;</programlisting>
 
-      <para>For more information on these properties consult the
-      JavaDoc.</para>
+      <para>For more information on these properties consult the JavaDoc.</para>
     </section>
 
     <section id="jmx-jsr160-client">
@@ -1092,9 +1037,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       below:</para>
 
       <programlisting>&lt;bean id="clientConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean"&gt;
-    &lt;property name="serviceUrl"&gt;
-      &lt;value&gt;service:jmx:rmi://localhost:9875&lt;/value&gt;
-    &lt;/property&gt;
+  &lt;property name="serviceUrl" value="service:jmx:rmi://localhost:9875"/&gt;
 &lt;/bean&gt;</programlisting>
     </section>
 
@@ -1111,15 +1054,11 @@ public class AnnotationTestBean implements IJmxTestBean {
       other:</para>
 
       <programlisting>&lt;bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean"&gt;
-  &lt;property name="objectName"&gt;
-    &lt;value&gt;connector:name=burlap&lt;/value&gt;
-  &lt;/property&gt;
-  &lt;property name="serviceUrl"&gt;
-    &lt;value&gt;service:jmx:burlap://localhost:9874&lt;/value&gt;
-  &lt;/property&gt;
+  &lt;property name="objectName" value="connector:name=burlap"/&gt;
+  &lt;property name="serviceUrl" value="service:jmx:burlap://localhost:9874"/&gt;
 &lt;/bean&gt;</programlisting>
 
-      <para>For this example MX4J 3.0.0 was used – see the official MX4J
+      <para>For this example, MX4J 3.0.0 was used. See the official MX4J
       documentation for more information.</para>
     </section>
   </section>
@@ -1161,18 +1100,12 @@ public class AnnotationTestBean implements IJmxTestBean {
     remote MBeans:</para>
 
     <programlisting>&lt;bean id="clientConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean"&gt;
-    &lt;property name="serviceUrl"&gt;
-      &lt;value&gt;service:jmx:rmi://remotehost:9875&lt;/value&gt;
-    &lt;/property&gt;
+  &lt;property name="serviceUrl" value="service:jmx:rmi://remotehost:9875"/&gt;
 &lt;/bean&gt;
 
 &lt;bean id="proxy" class="org.springframework.jmx.access.MBeanProxyFactoryBean"&gt;
-    &lt;property name="objectName"&gt;
-      &lt;value&gt;bean:name=testBean&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property name="proxyInterface"&gt;
-      &lt;value&gt;org.springframework.jmx.IJmxTestBean&lt;/value&gt;
-    &lt;/property&gt;
+  &lt;property name="objectName" value="bean:name=testBean"/&gt;
+  &lt;property name="proxyInterface" value="org.springframework.jmx.IJmxTestBean"/&gt;
 &lt;/bean&gt;</programlisting>
 
     <para>Here you can see that we create an

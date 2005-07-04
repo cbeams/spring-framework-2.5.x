@@ -135,20 +135,20 @@ public class AccountServiceImpl implements AccountService {
 <bean id="accountService" class="example.AccountServiceImpl">
     <!-- any additional properties, maybe a DAO? -->
 </bean>
-				]]></programlisting>				
+				]]></programlisting>
 			</para>
 			<para>
 				Next we'll have to expose our service using the <literal>RmiServiceExporter</literal>:
 				<programlisting><![CDATA[
 <bean class="org.springframework.remoting.rmi.RmiServiceExporter">
 	<!-- does not necessarily have to be the same name as the bean to be exported -->
-	<property name="serviceName"><value>AccountService</value></property>
-	<property name="service"><ref bean="accountService"/></property>
-	<property name="serviceInterface"><value>example.AccountService</value></property>
+	<property name="serviceName" value="AccountService"/>
+	<property name="service" ref="accountService"/>
+	<property name="serviceInterface" value="example.AccountService"/>
 	<!-- defaults to 1099 -->
-	<property name="registryPort"><value>1199</value></property>
+	<property name="registryPort" value="1199"/>
 </bean>
-				]]></programlisting>							
+				]]></programlisting>
 				As you can see, we're overriding the port for the RMI registry. Often,
 				your application server also maintains an RMI registry and it is wise
 				to not interfere with that one.
@@ -180,12 +180,12 @@ public class SimpleObject {
 				containing the simple object and the service linking configuration bits:
 				<programlisting><![CDATA[
 <bean class="example.SimpleObject">
-	<property name="accountService"><ref bean="accountService"/></property>
+	<property name="accountService" ref="accountService"/>
 </bean>
 
 <bean id="accountService" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
-	<property name="serviceUrl"><value>rmi://HOST:1199/AccountService</value></property>
-	<property name="serviceInterface"><value>example.AccountService</value></property>
+	<property name="serviceUrl" value="rmi://HOST:1199/AccountService"/>
+	<property name="serviceInterface" value="example.AccountService"/>
 </bean>
 				]]></programlisting>
 				That's all we need to do to support the remote account service on the client.
@@ -238,14 +238,12 @@ public class SimpleObject {
 				we'll create a HessianServiceExporter exporting your services:
 				<programlisting><![CDATA[
 <bean id="accountService" class="example.AccountServiceImpl">
-    <!-- any additional properties, maybe a DAO? -->
+  <!-- any additional properties, maybe a DAO? -->
 </bean>
 
 <bean name="/AccountService" class="org.springframework.remoting.caucho.HessianServiceExporter">
-    <property name="service"><ref bean="accountService"/></property>
-    <property name="serviceInterface">
-        <value>example.AccountService</value>
-    </property>
+  <property name="service" ref="accountService"/>
+  <property name="serviceInterface" value="example.AccountService"/>
 </bean>
 				]]></programlisting>
 				Now we're ready to link in the service at the client. No explicit handler mapping
@@ -263,12 +261,12 @@ public class SimpleObject {
 				where the SimpleObject is using the AccountService to manage accounts:
 				<programlisting><![CDATA[
 <bean class="example.SimpleObject">
-    <property name="accountService"><ref bean="accountService"/></property>
+  <property name="accountService" ref="accountService"/>
 </bean>
 
 <bean id="accountService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
-	<property name="serviceUrl"><value>http://remotehost:8080/AccountService</value></property>
-	<property name="ServiceInterface"><value>example.AccountService</value></property>
+	<property name="serviceUrl" value="http://remotehost:8080/AccountService"/>
+	<property name="serviceInterface" value="example.AccountService"/>
 </bean>
 				]]></programlisting>
 				That's all there is to it.
@@ -357,12 +355,10 @@ public class SimpleObject {
 				To expose the <literal>AccountService</literal> (mentioned above), the following
 				configuration needs to be in place:
 <programlisting><![CDATA[
-    <bean name="/AccountService" class="org.sprfr.remoting.httpinvoker.HttpInvokerServiceExporter">
-        <property name="service"><ref bean="accountService"/></property>
-        <property name="serviceInterface">
-            <value>example.AccountService</value>
-        </property>
-	</bean>
+<bean name="/AccountService" class="org.sprfr.remoting.httpinvoker.HttpInvokerServiceExporter">
+  <property name="service" ref="accountService"/>
+  <property name="serviceInterface" value="example.AccountService"/>
+</bean>
 ]]></programlisting>
 			</para>
 		</sect2>
@@ -373,15 +369,11 @@ public class SimpleObject {
 				do it when using Hessian or Burlap. Using a proxy, Spring will be able to
 				translate your calls to HTTP POST requests to the URL pointing to the exported
 				service.
-<programlisting><![CDATA[	
-	<bean id="httpInvokerProxy" class="org.sprfr.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
-		<property name="serviceUrl">
-			<value>http://remotehost:8080/AccountService</value>
-		</property>
-		<property name="serviceInterface">
-			<value>example.AccountService</value>
-		</property>
-	</bean>
+<programlisting><![CDATA[
+<bean id="httpInvokerProxy" class="org.sprfr.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+  <property name="serviceUrl" value="http://remotehost:8080/AccountService"/>
+  <property name="serviceInterface" value="example.AccountService"/>
+</bean>
 ]]></programlisting>
 			</para>
 			<para>
@@ -696,19 +688,11 @@ public class AccountHandlerJaxRpcPortProxyFactoryBean extends JaxRpcPortProxyFac
               <programlisting><![CDATA[
 <beans>
   <bean name="/Echo" class="org.codehaus.xfire.spring.XFireExporter">
-    <property name="service">
-      <ref bean="echo"/>
-    </property>
-    <property name="serviceInterface">
-      <value>org.codehaus.xfire.spring.Echo</value>
-    </property>
-    <property name="serviceBuilder">
-      <ref bean="xfire.serviceBuilder"/>
-    </property>
+    <property name="service" ref="echo">
+    <property name="serviceInterface" value="org.codehaus.xfire.spring.Echo"/>
+    <property name="serviceBuilder" ref="xfire.serviceBuilder"/>
     <!-- the XFire bean is wired up in the xfire.xml file you've linked in earlier
-    <property name="xfire">
-      <ref bean="xfire"/>
-    </property>
+    <property name="xfire" ref="xfire"/>
   </bean>
 
   <bean id="echo" class="org.codehaus.xfire.spring.EchoImpl"/>

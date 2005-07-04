@@ -171,21 +171,18 @@ public class OrderManagerImpl implements OrderManager {
 }</programlisting>Here is what the bean definitions for the code above would
     look like:</para>
 
-    <programlisting>&lt;bean id="mailSender"
-      class="org.springframework.mail.javamail.JavaMailSenderImpl"&gt;
-    &lt;property name="host"&gt;&lt;value&gt;mail.mycompany.com&lt;/value&gt;&lt;/property&gt;
+    <programlisting>&lt;bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl"&gt;
+  &lt;property name="host"&gt;&lt;value&gt;mail.mycompany.com&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="mailMessage"
-      class="org.springframework.mail.SimpleMailMessage"&gt;
-    &lt;property name="from"&gt;&lt;value&gt;customerservice@mycompany.com&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="subject"&gt;&lt;value&gt;Your order&lt;/value&gt;&lt;/property&gt;
+&lt;bean id="mailMessage" class="org.springframework.mail.SimpleMailMessage"&gt;
+  &lt;property name="from"&gt;&lt;value&gt;customerservice@mycompany.com&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="subject"&gt;&lt;value&gt;Your order&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="orderManager"
-      class="com.mycompany.businessapp.support.OrderManagerImpl"&gt;
-    &lt;property name="mailSender"&gt;&lt;ref bean="mailSender"/&gt;&lt;/property&gt;
-    &lt;property name="message"&gt;&lt;ref bean="mailMessage"/&gt;&lt;/property&gt;
+&lt;bean id="orderManager" class="com.mycompany.businessapp.support.OrderManagerImpl"&gt;
+  &lt;property name="mailSender"&gt;&lt;ref bean="mailSender"/&gt;&lt;/property&gt;
+  &lt;property name="message"&gt;&lt;ref bean="mailMessage"/&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting>
 
     <para>Here is the implementation of <literal>OrderManager</literal> using
@@ -203,6 +200,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 
 public class OrderManagerImpl implements OrderManager {
+
     private JavaMailSender mailSender;
     
     public void setMailSender(JavaMailSender mailSender) {
@@ -213,7 +211,6 @@ public class OrderManagerImpl implements OrderManager {
 
         //... * Do the business calculations....
         //... * Call the collaborators to persist the order
-        
         
         MimeMessagePreparator preparator = new MimeMessagePreparator() {
             public void prepare(MimeMessage mimeMessage) throws MessagingException {
@@ -231,7 +228,7 @@ public class OrderManagerImpl implements OrderManager {
         try{
             mailSender.send(preparator);
         }
-        catch(MailException ex) {
+        catch (MailException ex) {
             //log it and go on
             System.err.println(ex.getMessage());            
         }

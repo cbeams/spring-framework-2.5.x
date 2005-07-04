@@ -211,29 +211,28 @@
 
       <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
 
-    &lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-        &lt;property name="driverClassName" value="org.hsqldb.jdbcDriver"/&gt;
-        &lt;property name="url" value="jdbc:hsqldb:hsql://localhost:9001"/&gt;
-        &lt;property name="username" value="sa"/&gt;
-        &lt;property name="password" value=""/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+    &lt;property name="driverClassName" value="org.hsqldb.jdbcDriver"/&gt;
+    &lt;property name="url" value="jdbc:hsqldb:hsql://localhost:9001"/&gt;
+    &lt;property name="username" value="sa"/&gt;
+    &lt;property name="password" value=""/&gt;
+  &lt;/bean&gt;
 
-   &lt;bean id="mySessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
-       &lt;property name="dataSource" ref="myDataSource/&gt;
-       &lt;property name="mappingResources"&gt;
-           &lt;list&gt;
-               &lt;value&gt;product.hbm.xml&lt;/value&gt;
-           &lt;/list&gt;
-       &lt;/property&gt;
-       &lt;property name="hibernateProperties"&gt;
-           &lt;props&gt;
-               &lt;prop key="hibernate.dialect"&gt;net.sf.hibernate.dialect.MySQLDialect&lt;/prop&gt;
-           &lt;/props&gt;
-       &lt;/property&gt;
-   &lt;/bean&gt;
+  &lt;bean id="mySessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
+    &lt;property name="dataSource" ref="myDataSource/&gt;
+    &lt;property name="mappingResources"&gt;
+      &lt;list&gt;
+        &lt;value&gt;product.hbm.xml&lt;/value&gt;
+      &lt;/list&gt;
+    &lt;/property&gt;
+    &lt;property name="hibernateProperties"&gt;
+      &lt;props&gt;
+        &lt;prop key="hibernate.dialect"&gt;net.sf.hibernate.dialect.MySQLDialect&lt;/prop&gt;
+      &lt;/props&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
 
    ...
-
 &lt;/beans&gt;</programlisting>
 
       <para>Note that switching from a local Jakarta Commons DBCP
@@ -243,12 +242,11 @@
 
       <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
 
-    &lt;bean id="myDataSource" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
-        &lt;property name="jndiName" value="java:comp/env/jdbc/myds"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myDataSource" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
+    &lt;property name="jndiName" value="java:comp/env/jdbc/myds"/&gt;
+  &lt;/bean&gt;
 
-    ...
-
+  ...
 &lt;/beans&gt;</programlisting>
 
       <para>You can also access a JNDI-located
@@ -276,12 +274,11 @@
 
       <programlisting>&lt;beans&gt;
 
-    &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
-        &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
+    &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
+  &lt;/bean&gt;
 
-    ...
-
+  ...
 &lt;/beans&gt;</programlisting>
 
       <programlisting format="linespecific" xml:space="preserve">public class ProductDaoImpl implements ProductDao {
@@ -423,17 +420,16 @@
       implementation.</para>
 
       <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
+  ...
 
-    ...
+  &lt;bean id="myTxManager" class="org.springframework.orm.hibernate.HibernateTransactionManager"&gt;
+    &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myTransactionManager" class="org.springframework.orm.hibernate.HibernateTransactionManager"&gt;
-        &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
-    &lt;/bean&gt;
-
-    &lt;bean id="myProductService" class="product.ProductServiceImpl"&gt;
-        &lt;property name="transactionManager" ref="myTransactionManager"/&gt;
-        &lt;property name="productDao" ref="myProductDao"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductService" class="product.ProductServiceImpl"&gt;
+    &lt;property name="transactionManager" ref="myTxManager"/&gt;
+    &lt;property name="productDao" ref="myProductDao"/&gt;
+  &lt;/bean&gt;
 
 &lt;/beans&gt;</programlisting>
 
@@ -478,38 +474,38 @@
       implementations.</para>
 
       <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
-
     ...
 
-    &lt;bean id="myTransactionManager" class="org.springframework.orm.hibernate.HibernateTransactionManager"&gt;
-        &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myTxManager" class="org.springframework.orm.hibernate.HibernateTransactionManager"&gt;
+    &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myTransactionInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
-        &lt;property name="transactionManager" ref="myTransactionManager"/&gt;
-        &lt;property name="transactionAttributeSource"&gt;
-            &lt;value&gt;
-                product.ProductService.increasePrice*=PROPAGATION_REQUIRED
-                product.ProductService.someOtherBusinessMethod=PROPAGATION_MANDATORY
-            &lt;/value&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myTxInterceptor"
+	    class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
+    &lt;property name="transactionManager" ref="myTxManager"/&gt;
+    &lt;property name="transactionAttributeSource"&gt;
+      &lt;value&gt;
+        product.ProductService.increasePrice*=PROPAGATION_REQUIRED
+        product.ProductService.someOtherBusinessMethod=PROPAGATION_MANDATORY
+      &lt;/value&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
-        &lt;property name="productDao" ref="myProductDao"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
+    &lt;property name="productDao" ref="myProductDao"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myProductService" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
-        &lt;property name="proxyInterfaces"&gt;
-            &lt;value&gt;product.ProductService&lt;/value&gt;
-        &lt;/property&gt;
-        &lt;property name="interceptorNames"&gt;
-            &lt;list&gt;
-                &lt;value&gt;myTransactionInterceptor&lt;/value&gt;
-                &lt;value&gt;myProductServiceTarget&lt;/value&gt;
-            &lt;/list&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductService" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
+    &lt;property name="proxyInterfaces"&gt;
+      &lt;value&gt;product.ProductService&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property name="interceptorNames"&gt;
+      &lt;list&gt;
+        &lt;value&gt;myTxInterceptor&lt;/value&gt;
+        &lt;value&gt;myProductServiceTarget&lt;/value&gt;
+      &lt;/list&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
 
 &lt;/beans&gt;</programlisting>
 
@@ -527,7 +523,6 @@
     }
 
     ...
-
 }</programlisting>
 
       <para><classname>TransactionInterceptor</classname> allows any checked
@@ -550,28 +545,28 @@
       classes the transactional methods are defined in.</para>
 
       <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
+  ...
 
-    ...
+  &lt;bean id="myTxManager" class="org.springframework.orm.hibernate.HibernateTransactionManager"&gt;
+    &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myTransactionManager" class="org.springframework.orm.hibernate.HibernateTransactionManager"&gt;
-        &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
+    &lt;property name="productDao" ref="myProductDao"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
-        &lt;property name="productDao" ref="myProductDao"/&gt;
-    &lt;/bean&gt;
-
-    &lt;bean id="myProductService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
-        &lt;property name="transactionManager" ref="myTransactionManager"/&gt;
-        &lt;property name="target" ref="myProductServiceTarget"/&gt;
-        &lt;property name="transactionAttributes"&gt;
-            &lt;props&gt;
-                &lt;prop key="increasePrice*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
-                &lt;prop key="someOtherBusinessMethod"&gt;PROPAGATION_REQUIRES_NEW&lt;/prop&gt;
-                &lt;prop key="*"&gt;PROPAGATION_SUPPORTS,readOnly&lt;/prop&gt;
-            &lt;/props&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductService"
+	    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+    &lt;property name="transactionManager" ref="myTxManager"/&gt;
+    &lt;property name="target" ref="myProductServiceTarget"/&gt;
+    &lt;property name="transactionAttributes"&gt;
+      &lt;props&gt;
+        &lt;prop key="increasePrice*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+        &lt;prop key="someOtherBusinessMethod"&gt;PROPAGATION_REQUIRES_NEW&lt;/prop&gt;
+        &lt;prop key="*"&gt;PROPAGATION_SUPPORTS,readOnly&lt;/prop&gt;
+      &lt;/props&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
 
 &lt;/beans&gt;</programlisting>
     </sect2>
@@ -609,68 +604,69 @@
 
       <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
 
-    &lt;bean id="myDataSource1" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
-        &lt;property name="jndiName value="java:comp/env/jdbc/myds1"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myDataSource1" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
+    &lt;property name="jndiName value="java:comp/env/jdbc/myds1"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myDataSource2" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
-        &lt;property name="jndiName" value="java:comp/env/jdbc/myds2"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myDataSource2" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
+    &lt;property name="jndiName" value="java:comp/env/jdbc/myds2"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="mySessionFactory1" class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
-        &lt;property name="dataSource" ref="myDataSource1"/&gt;
-        &lt;property name="mappingResources"&gt;
-            &lt;list&gt;
-                &lt;value&gt;product.hbm.xml&lt;/value&gt;
-            &lt;/list&gt;
-        &lt;/property&gt;
-        &lt;property name="hibernateProperties"&gt;
-            &lt;props&gt;
-                &lt;prop key="hibernate.dialect"&gt;net.sf.hibernate.dialect.MySQLDialect&lt;/prop&gt;
-            &lt;/props&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
+  &lt;bean id="mySessionFactory1" class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
+    &lt;property name="dataSource" ref="myDataSource1"/&gt;
+    &lt;property name="mappingResources"&gt;
+      &lt;list&gt;
+        &lt;value&gt;product.hbm.xml&lt;/value&gt;
+      &lt;/list&gt;
+    &lt;/property&gt;
+    &lt;property name="hibernateProperties"&gt;
+      &lt;props&gt;
+        &lt;prop key="hibernate.dialect"&gt;net.sf.hibernate.dialect.MySQLDialect&lt;/prop&gt;
+      &lt;/props&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="mySessionFactory2" class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
-        &lt;property name="dataSource" ref="myDataSource2"/&gt;
-        &lt;property name="mappingResources"&gt;
-            &lt;list&gt;
-                &lt;value&gt;inventory.hbm.xml&lt;/value&gt;
-            &lt;/list&gt;
-        &lt;/property&gt;
-        &lt;property name="hibernateProperties"&gt;
-            &lt;props&gt;
-                &lt;prop key="hibernate.dialect"&gt;net.sf.hibernate.dialect.OracleDialect&lt;/prop&gt;
-            &lt;/props&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
+  &lt;bean id="mySessionFactory2" class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
+    &lt;property name="dataSource" ref="myDataSource2"/&gt;
+    &lt;property name="mappingResources"&gt;
+      &lt;list&gt;
+        &lt;value&gt;inventory.hbm.xml&lt;/value&gt;
+      &lt;/list&gt;
+    &lt;/property&gt;
+    &lt;property name="hibernateProperties"&gt;
+      &lt;props&gt;
+        &lt;prop key="hibernate.dialect"&gt;net.sf.hibernate.dialect.OracleDialect&lt;/prop&gt;
+      &lt;/props&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;
+  &lt;bean id="myTxManager" class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;
 
-    &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
-        &lt;property name="sessionFactory" ref="mySessionFactory1"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
+    &lt;property name="sessionFactory" ref="mySessionFactory1"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myInventoryDao" class="product.InventoryDaoImpl"&gt;
-        &lt;property name="sessionFactory" ref="mySessionFactory2"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myInventoryDao" class="product.InventoryDaoImpl"&gt;
+    &lt;property name="sessionFactory" ref="mySessionFactory2"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
-        &lt;property name="productDao" ref="myProductDao"/&gt;
-        &lt;property name="inventoryDao" ref="myInventoryDao"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
+    &lt;property name="productDao" ref="myProductDao"/&gt;
+    &lt;property name="inventoryDao" ref="myInventoryDao"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myProductService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
-        &lt;property name="transactionManager" ref="myTransactionManager"/&gt;
-        &lt;property name="target" ref="myProductServiceTarget"/&gt;
-        &lt;property name="transactionAttributes"&gt;
-            &lt;props&gt;
-                &lt;prop key="increasePrice*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
-                &lt;prop key="someOtherBusinessMethod"&gt;PROPAGATION_REQUIRES_NEW&lt;/prop&gt;
-                &lt;prop key="*"&gt;PROPAGATION_SUPPORTS,readOnly&lt;/prop&gt;
-            &lt;/props&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductService"
+	    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+    &lt;property name="transactionManager" ref="myTxManager"/&gt;
+    &lt;property name="target" ref="myProductServiceTarget"/&gt;
+    &lt;property name="transactionAttributes"&gt;
+      &lt;props&gt;
+        &lt;prop key="increasePrice*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+        &lt;prop key="someOtherBusinessMethod"&gt;PROPAGATION_REQUIRES_NEW&lt;/prop&gt;
+        &lt;prop key="*"&gt;PROPAGATION_SUPPORTS,readOnly&lt;/prop&gt;
+      &lt;/props&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
 
 &lt;/beans&gt;</programlisting>
 
@@ -771,12 +767,11 @@
 
       <para><programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
 
-    &lt;bean id="myPersistenceManagerFactory" class="org.springframework.orm.jdo.LocalPersistenceManagerFactoryBean"&gt;
-        &lt;property name="configLocation" value="classpath:kodo.properties"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myPmf" class="org.springframework.orm.jdo.LocalPersistenceManagerFactoryBean"&gt;
+    &lt;property name="configLocation" value="classpath:kodo.properties"/&gt;
+  &lt;/bean&gt;
     
-    ...
-
+  ...
 &lt;/beans&gt;</programlisting></para>
 
       <para>Alternatively, a <literal>PersistenceManagerFactory</literal> can
@@ -793,20 +788,19 @@
 
       <para><programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
 
-   &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-       &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
-       &lt;property name="url" value="${jdbc.url}"/&gt;
-       &lt;property name="username" value="${jdbc.username}"/&gt;
-       &lt;property name="password" value="${jdbc.password}"/&gt;
-   &lt;/bean&gt;
+ &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+   &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
+   &lt;property name="url" value="${jdbc.url}"/&gt;
+   &lt;property name="username" value="${jdbc.username}"/&gt;
+   &lt;property name="password" value="${jdbc.password}"/&gt;
+ &lt;/bean&gt;
 
-   &lt;bean id="myPersistenceManagerFactory" class="org.jpox.PersistenceManagerFactoryImpl" destroy-method="close"&gt;
-       &lt;property name="connectionFactory" ref="dataSource"/&gt;
-       &lt;property name="nontransactionalRead" value="true"/&gt;
-   &lt;/bean&gt;
+ &lt;bean id="myPmf" class="org.jpox.PersistenceManagerFactoryImpl" destroy-method="close"&gt;
+   &lt;property name="connectionFactory" ref="dataSource"/&gt;
+   &lt;property name="nontransactionalRead" value="true"/&gt;
+ &lt;/bean&gt;
    
-   ...
-
+ ...
 &lt;/beans&gt;</programlisting></para>
 
       <para>A JDO <literal>PersistenceManagerFactory</literal> can also be set
@@ -834,12 +828,11 @@
       <literal>JdoTemplate</literal>:</para>
 
       <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
-      
-    ...
+  ...
   
-    &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
-        &lt;property name="persistenceManagerFactory" ref="myPersistenceManagerFactory"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
+    &lt;property name="persistenceManagerFactory" ref="myPmf"/&gt;
+  &lt;/bean&gt;
   
 &lt;/beans&gt;</programlisting>
 
@@ -931,28 +924,28 @@
       participating in it.</para>
 
       <para><programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
+  ...
 
-    ...
+  &lt;bean id="myTxManager" class="org.springframework.orm.jdo.JdoTransactionManager"&gt;
+    &lt;property name="persistenceManagerFactory" ref="myPmf"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myTransactionManager" class="org.springframework.orm.jdo.JdoTransactionManager"&gt;
-        &lt;property name="persistenceManagerFactory" ref="myPersistenceManagerFactory"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
+    &lt;property name="productDao" ref="myProductDao"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
-        &lt;property name="productDao" ref="myProductDao"/&gt;
-    &lt;/bean&gt;
-
-    &lt;bean id="myProductService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
-        &lt;property name="transactionManager" ref="myTransactionManager"/&gt;
-        &lt;property name="target" ref="myProductServiceTarget"/&gt;
-        &lt;property name="transactionAttributes"&gt;
-            &lt;props&gt;
-                &lt;prop key="increasePrice*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
-                &lt;prop key="someOtherBusinessMethod"&gt;PROPAGATION_REQUIRES_NEW&lt;/prop&gt;
-                &lt;prop key="*"&gt;PROPAGATION_SUPPORTS,readOnly&lt;/prop&gt;
-            &lt;/props&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductService"
+	    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+    &lt;property name="transactionManager" ref="myTxManager"/&gt;
+    &lt;property name="target" ref="myProductServiceTarget"/&gt;
+    &lt;property name="transactionAttributes"&gt;
+      &lt;props&gt;
+        &lt;prop key="increasePrice*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+        &lt;prop key="someOtherBusinessMethod"&gt;PROPAGATION_REQUIRES_NEW&lt;/prop&gt;
+        &lt;prop key="*"&gt;PROPAGATION_SUPPORTS,readOnly&lt;/prop&gt;
+      &lt;/props&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
 
 &lt;/beans&gt;</programlisting></para>
 
@@ -1070,36 +1063,32 @@
 
       <para><programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
 
-    &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-        &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
-        &lt;property name="url" value="${jdbc.url}"/&gt;
-        &lt;property name="username" value="${jdbc.username}"/&gt;
-        &lt;property name="password" value="${jdbc.password}"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+    &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
+    &lt;property name="url" value="${jdbc.url}"/&gt;
+    &lt;property name="username" value="${jdbc.username}"/&gt;
+    &lt;property name="password" value="${jdbc.password}"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="mySessionFactory" class="org.springframework.orm.toplink.LocalSessionFactoryBean"&gt;
-        &lt;property name="configLocation" value="toplink-sessions.xml"/&gt;
-        &lt;property name="dataSource" ref="dataSource"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="mySessionFactory" class="org.springframework.orm.toplink.LocalSessionFactoryBean"&gt;
+    &lt;property name="configLocation" value="toplink-sessions.xml"/&gt;
+    &lt;property name="dataSource" ref="dataSource"/&gt;
+  &lt;/bean&gt;
     
-    ...
-
+  ...
 &lt;/beans&gt;</programlisting></para>
 
-      <para><programlisting format="linespecific" xml:space="preserve">&lt;?xml version='1.0' encoding='UTF-8'?&gt;
-&lt;!DOCTYPE toplink-configuration PUBLIC "-//Oracle Corp.//DTD TopLink Sessions 9.0.4//EN" "sessions_9_0_4.dtd"&gt;
+      <para><programlisting format="linespecific" xml:space="preserve">&lt;toplink-configuration&gt;
 
-&lt;toplink-configuration&gt;
-
-    &lt;session&gt;
-        &lt;name&gt;Session&lt;/name&gt;
-        &lt;project-xml&gt;toplink-mappings.xml&lt;/project-xml&gt;
-        &lt;session-type&gt;
-            &lt;server-session/&gt;
-        &lt;/session-type&gt;
-        &lt;enable-logging&gt;true&lt;/enable-logging&gt;
-        &lt;logging-options/&gt;
-    &lt;/session&gt;
+  &lt;session&gt;
+    &lt;name&gt;Session&lt;/name&gt;
+    &lt;project-xml&gt;toplink-mappings.xml&lt;/project-xml&gt;
+    &lt;session-type&gt;
+      &lt;server-session/&gt;
+    &lt;/session-type&gt;
+    &lt;enable-logging&gt;true&lt;/enable-logging&gt;
+    &lt;logging-options/&gt;
+  &lt;/session&gt;
 
 &lt;/toplink-configuration&gt;</programlisting>Usually,
       <literal>LocalSessionFactoryBean</literal> will hold a multi-threaded
@@ -1125,12 +1114,11 @@
       Spring's <literal>TopLinkTemplate</literal>:</para>
 
       <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
-      
-    ...
+  ...
   
-    &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
-        &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
+    &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
+  &lt;/bean&gt;
   
 &lt;/beans&gt;</programlisting>
 
@@ -1235,28 +1223,28 @@
       participating in it.</para>
 
       <para><programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
+  ...
 
-    ...
+  &lt;bean id="myTxManager" class="org.springframework.orm.toplink.TopLinkTransactionManager"&gt;
+    &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myTransactionManager" class="org.springframework.orm.toplink.TopLinkTransactionManager"&gt;
-        &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
+    &lt;property name="productDao" ref="myProductDao"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
-        &lt;property name="productDao" ref="myProductDao"/&gt;
-    &lt;/bean&gt;
-
-    &lt;bean id="myProductService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
-        &lt;property name="transactionManager" ref="myTransactionManager"/&gt;
-        &lt;property name="target" ref="myProductServiceTarget"/&gt;
-        &lt;property name="transactionAttributes"&gt;
-            &lt;props&gt;
-                &lt;prop key="increasePrice*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
-                &lt;prop key="someOtherBusinessMethod"&gt;PROPAGATION_REQUIRES_NEW&lt;/prop&gt;
-                &lt;prop key="*"&gt;PROPAGATION_SUPPORTS,readOnly&lt;/prop&gt;
-            &lt;/props&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductService"
+	    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+    &lt;property name="transactionManager" ref="myTxManager"/&gt;
+    &lt;property name="target" ref="myProductServiceTarget"/&gt;
+    &lt;property name="transactionAttributes"&gt;
+      &lt;props&gt;
+        &lt;prop key="increasePrice*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+        &lt;prop key="someOtherBusinessMethod"&gt;PROPAGATION_REQUIRES_NEW&lt;/prop&gt;
+        &lt;prop key="*"&gt;PROPAGATION_SUPPORTS,readOnly&lt;/prop&gt;
+      &lt;/props&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
 
 &lt;/beans&gt;</programlisting></para>
 
@@ -1323,27 +1311,25 @@
 
       <para><programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
 
-    &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-        &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
-        &lt;property name="url" value="${jdbc.url}"/&gt;
-        &lt;property name="username" value="${jdbc.username}"/&gt;
-        &lt;property name="password" value="${jdbc.password}"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+    &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
+    &lt;property name="url" value="${jdbc.url}"/&gt;
+    &lt;property name="username" value="${jdbc.username}"/&gt;
+    &lt;property name="password" value="${jdbc.password}"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="ojbConfigurer" class="org.springframework.orm.ojb.support.LocalOjbConfigurer"/&gt;
+  &lt;bean id="ojbConfigurer" class="org.springframework.orm.ojb.support.LocalOjbConfigurer"/&gt;
    
-    ...
-
+  ...
 &lt;/beans&gt;</programlisting></para>
 
       <para><programlisting format="linespecific" xml:space="preserve">&lt;descriptor-repository version="1.0"&gt;
 
-    &lt;jdbc-connection-descriptor jcd-alias="dataSource" default-connection="true" ...&gt;
+  &lt;jdbc-connection-descriptor jcd-alias="dataSource" default-connection="true" ...&gt;
         ...
-    &lt;/jdbc-connection-descriptor&gt;
+  &lt;/jdbc-connection-descriptor&gt;
 
-    ...
-    
+  ...
 &lt;/descriptor-repository&gt;</programlisting></para>
 
       <para>A PersistenceBroker can then be opened through standard OJB API,
@@ -1361,12 +1347,11 @@
       PersistenceBrokerTemplate:</para>
 
       <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
-      
-    ...
+  ...
   
-    &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
-        &lt;property name="jcdAlias" value="dataSource"/&gt;  &lt;!-- can be omitted, as it is the default connection key --&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
+    &lt;property name="jcdAlias" value="dataSource"/&gt;  &lt;!-- can be omitted (default) --&gt;
+  &lt;/bean&gt;
   
 &lt;/beans&gt;</programlisting>
 
@@ -1379,10 +1364,13 @@
     }
 
     public Collection loadProductsByCategory(final String category) {
-        PersistenceBrokerTemplate pbTemplate = new PersistenceBrokerTemplate(new PBKey(this.jcdAlias);
+        PersistenceBrokerTemplate pbTemplate =
+                new PersistenceBrokerTemplate(new PBKey(this.jcdAlias);
         return (Collection) pbTemplate.execute(
             new PersistenceBrokerCallback() {
-                public Object doInPersistenceBroker(PersistenceBroker pb) throws PersistenceBrokerException {
+                public Object doInPersistenceBroker(PersistenceBroker pb)
+                        throws PersistenceBrokerException {
+
                     Criteria criteria = new Criteria();
                     criteria.addLike("category", category + "%");
                     Query query = new QueryByCriteria(Product.class, criteria);
@@ -1449,28 +1437,28 @@
       participating in it.</para>
 
       <para><programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
+  ...
 
-    ...
+  &lt;bean id="myTxManager" class="org.springframework.orm.ojb.PersistenceBrokerTransactionManager"&gt;
+    &lt;property name="jcdAlias" value="dataSource"/&gt;  &lt;!-- can be omitted (default) --&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myTransactionManager" class="org.springframework.orm.ojb.PersistenceBrokerTransactionManager"&gt;
-        &lt;property name="jcdAlias" value="dataSource"/&gt;  &lt;!-- can be omitted, as it is the default connection key --&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
+    &lt;property name="productDao" ref="myProductDao"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
-        &lt;property name="productDao" ref="myProductDao"/&gt;
-    &lt;/bean&gt;
-
-    &lt;bean id="myProductService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
-        &lt;property name="transactionManager" ref="myTransactionManager"/&gt;
-        &lt;property name="target" ref="myProductServiceTarget"/&gt;
-        &lt;property name="transactionAttributes"&gt;
-            &lt;props&gt;
-                &lt;prop key="increasePrice*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
-                &lt;prop key="someOtherBusinessMethod"&gt;PROPAGATION_REQUIRES_NEW&lt;/prop&gt;
-                &lt;prop key="*"&gt;PROPAGATION_SUPPORTS,readOnly&lt;/prop&gt;
-            &lt;/props&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
+  &lt;bean id="myProductService"
+	    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+    &lt;property name="transactionManager" ref="myTxManager"/&gt;
+    &lt;property name="target" ref="myProductServiceTarget"/&gt;
+    &lt;property name="transactionAttributes"&gt;
+      &lt;props&gt;
+        &lt;prop key="increasePrice*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+        &lt;prop key="someOtherBusinessMethod"&gt;PROPAGATION_REQUIRES_NEW&lt;/prop&gt;
+        &lt;prop key="*"&gt;PROPAGATION_SUPPORTS,readOnly&lt;/prop&gt;
+      &lt;/props&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
 
 &lt;/beans&gt;</programlisting></para>
 
@@ -1609,26 +1597,26 @@
         through their email addresses. <literal>Account.xml</literal>:
         <programlisting>&lt;sql-map name="Account"&gt;
 
-    &lt;result-map name="result" class="examples.Account"&gt;
-        &lt;property name="name" column="NAME" columnIndex="1"/&gt;
-        &lt;property name="email" column="EMAIL" columnIndex="2"/&gt;
-    &lt;/result-map&gt;
+  &lt;result-map name="result" class="examples.Account"&gt;
+    &lt;property name="name" column="NAME" columnIndex="1"/&gt;
+    &lt;property name="email" column="EMAIL" columnIndex="2"/&gt;
+  &lt;/result-map&gt;
     
-    &lt;mapped-statement name="getAccountByEmail" result-map="result"&gt;
-        select ACCOUNT.NAME, ACCOUNT.EMAIL
-        from ACCOUNT
-        where ACCOUNT.EMAIL = #value#
-    &lt;/mapped-statement&gt;
+  &lt;mapped-statement name="getAccountByEmail" result-map="result"&gt;
+    select ACCOUNT.NAME, ACCOUNT.EMAIL
+    from ACCOUNT
+    where ACCOUNT.EMAIL = #value#
+  &lt;/mapped-statement&gt;
     
-    &lt;mapped-statement name="insertAccount"&gt;
-        insert into ACCOUNT (NAME, EMAIL) values (#name#, #email#)
-    &lt;/mapped-statement&gt;
+  &lt;mapped-statement name="insertAccount"&gt;
+    insert into ACCOUNT (NAME, EMAIL) values (#name#, #email#)
+  &lt;/mapped-statement&gt;
 
 &lt;/sql-map&gt;</programlisting> After having defined the Sql Map, we have to
         create a configuration file for iBATIS
         (<literal>sqlmap-config.xml</literal>): <programlisting>&lt;sql-map-config&gt;
 
-    &lt;sql-map resource="example/Account.xml"/&gt;
+  &lt;sql-map resource="example/Account.xml"/&gt;
 
 &lt;/sql-map-config&gt;</programlisting> iBATIS loads resources from the class
         path, so be sure to add the <literal>Account.xml</literal> file to the
@@ -1637,19 +1625,18 @@
         <para>Using Spring, we can now very easily set up the SqlMap, using
         the <literal>SqlMapFactoryBean</literal>: <programlisting>&lt;beans&gt;
 
-    &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-        &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
-        &lt;property name="url" value="${jdbc.url}"/&gt;
-        &lt;property name="username" value="${jdbc.username}"/&gt;
-        &lt;property name="password" value="${jdbc.password}"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+    &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
+    &lt;property name="url" value="${jdbc.url}"/&gt;
+    &lt;property name="username" value="${jdbc.username}"/&gt;
+    &lt;property name="password" value="${jdbc.password}"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="sqlMap" class="org.springframework.orm.ibatis.SqlMapFactoryBean"&gt;
-        &lt;property name="configLocation" value="WEB-INF/sqlmap-config.xml"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="sqlMap" class="org.springframework.orm.ibatis.SqlMapFactoryBean"&gt;
+    &lt;property name="configLocation" value="WEB-INF/sqlmap-config.xml"/&gt;
+  &lt;/bean&gt;
 
-    ...
-
+  ...
 &lt;/beans&gt;</programlisting></para>
       </sect3>
 
@@ -1674,13 +1661,12 @@
         setting up the SqlMapAccountDao as follows, you're all set to go. Note
         that with iBATIS SQL Maps 1.x, the JDBC <literal>DataSource</literal>
         is usually specified on the DAO.<programlisting>&lt;beans&gt;
+  ...
 
-    ...
-
-    &lt;bean id="accountDao" class="example.SqlMapAccountDao"&gt;
-        &lt;property name="dataSource" ref="dataSource"/&gt;
-        &lt;property name="sqlMap" ref="sqlMap"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="accountDao" class="example.SqlMapAccountDao"&gt;
+    &lt;property name="dataSource" ref="dataSource"/&gt;
+    &lt;property name="sqlMap" ref="sqlMap"/&gt;
+  &lt;/bean&gt;
 
 &lt;/beans&gt;</programlisting></para>
       </sect3>
@@ -1694,33 +1680,27 @@
 
         <para>If we want to map the previous Account class with iBATIS 2.x we
         need to create the following SQL map <literal>Account.xml</literal>:
-        <programlisting>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
-&lt;!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd"&gt;
+        <programlisting>&lt;sqlMap namespace="Account"&gt;
 
-&lt;sqlMap namespace="Account"&gt;
+  &lt;resultMap id="result" class="examples.Account"&gt;
+    &lt;result property="name" column="NAME" columnIndex="1"/&gt;
+    &lt;result property="email" column="EMAIL" columnIndex="2"/&gt;
+  &lt;/resultMap&gt;
 
-    &lt;resultMap id="result" class="examples.Account"&gt;
-        &lt;result property="name" column="NAME" columnIndex="1"/&gt;
-        &lt;result property="email" column="EMAIL" columnIndex="2"/&gt;
-    &lt;/resultMap&gt;
+  &lt;select id="getAccountByEmail" resultMap="result"&gt;
+    select ACCOUNT.NAME, ACCOUNT.EMAIL
+    from ACCOUNT
+    where ACCOUNT.EMAIL = #value#
+  &lt;/select&gt;
 
-    &lt;select id="getAccountByEmail" resultMap="result"&gt;
-        select ACCOUNT.NAME, ACCOUNT.EMAIL
-        from ACCOUNT
-        where ACCOUNT.EMAIL = #value#
-    &lt;/select&gt;
-
-    &lt;insert id="insertAccount"&gt;
-        insert into ACCOUNT (NAME, EMAIL) values (#name#, #email#)
-    &lt;/insert&gt;
+  &lt;insert id="insertAccount"&gt;
+    insert into ACCOUNT (NAME, EMAIL) values (#name#, #email#)
+  &lt;/insert&gt;
 
 &lt;/sqlMap&gt;</programlisting>The configuration file for iBATIS 2 changes a
-        bit (<literal>sqlmap-config.xml</literal>): <programlisting>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
-&lt;!DOCTYPE sqlMapConfig PUBLIC "-//iBATIS.com//DTD SQL Map Config 2.0//EN" "http://www.ibatis.com/dtd/sql-map-config-2.dtd"&gt;
+        bit (<literal>sqlmap-config.xml</literal>): <programlisting>&lt;sqlMapConfig&gt;
 
-&lt;sqlMapConfig&gt;
-
-    &lt;sqlMap resource="example/Account.xml"/&gt;
+  &lt;sqlMap resource="example/Account.xml"/&gt;
 
 &lt;/sqlMapConfig&gt;</programlisting>Remember that iBATIS loads resources
         from the class path, so be sure to add the
@@ -1732,20 +1712,19 @@
         <literal>SqlMapClientFactoryBean</literal>, which enables lazy
         loading.<programlisting>&lt;beans&gt;
 
-    &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-        &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
-        &lt;property name="url" value="${jdbc.url}"/&gt;
-        &lt;property name="username" value="${jdbc.username}"/&gt;
-        &lt;property name="password" value="${jdbc.password}"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+    &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
+    &lt;property name="url" value="${jdbc.url}"/&gt;
+    &lt;property name="username" value="${jdbc.username}"/&gt;
+    &lt;property name="password" value="${jdbc.password}"/&gt;
+  &lt;/bean&gt;
 
-    &lt;bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean"&gt;
-        &lt;property name="configLocation" value="WEB-INF/sqlmap-config.xml"/&gt;
-        &lt;property name="dataSource" ref="dataSource"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean"&gt;
+    &lt;property name="configLocation" value="WEB-INF/sqlmap-config.xml"/&gt;
+    &lt;property name="dataSource" ref="dataSource"/&gt;
+  &lt;/bean&gt;
 
-    ...
-
+  ...
 &lt;/beans&gt;</programlisting></para>
       </sect3>
 
@@ -1767,12 +1746,11 @@
         <literal>SqlMapClientTemplate</literal> to execute the queries, after
         setting up the SqlMapAccountDao in the application
         context:<programlisting>&lt;beans&gt;
+  ...
 
-    ...
-
-    &lt;bean id="accountDao" class="example.SqlMapAccountDao"&gt;
-        &lt;property name="sqlMap" ref="sqlMap"/&gt;
-    &lt;/bean&gt;
+  &lt;bean id="accountDao" class="example.SqlMapAccountDao"&gt;
+    &lt;property name="sqlMap" ref="sqlMap"/&gt;
+  &lt;/bean&gt;
 
 &lt;/beans&gt;</programlisting></para>
       </sect3>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.35 2005-03-17 00:41:13 davison Exp $-->
+<!--$Id: views.xml,v 1.36 2005-07-04 15:06:10 jhoeller Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -38,7 +38,7 @@
 
       <programlisting># The ResourceBundleViewResolver:
 &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver"&gt;
-    &lt;property name="basename"&gt;&lt;value&gt;views&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="basename" value="views"/&gt;
 &lt;/bean&gt;
 
 # And a sample properties file is uses (views.properties in WEB-INF/classes):
@@ -54,9 +54,9 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       only one resolver.</para>
 
       <programlisting>&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
-    &lt;property name="viewClass"&gt;&lt;value&gt;org.springframework.web.servlet.view.JstlView&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="prefix"&gt;&lt;value&gt;/WEB-INF/jsp/&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="suffix"&gt;&lt;value&gt;.jsp&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/&gt;
+  &lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
+  &lt;property name="suffix" value=".jsp"/&gt;
 &lt;/bean&gt;</programlisting>
 
       <para>The InternalResourceBundleViewResolver can be configured for using
@@ -140,18 +140,16 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       using the <literal>TilesConfigurer</literal>. Have a look at the
       following piece of example ApplicationContext configuration:
       <programlisting>&lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer"&gt;
-    &lt;property name="factoryClass"&gt;
-        &lt;value&gt;org.apache.struts.tiles.xmlDefinition.I18nFactorySet&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property name="definitions"&gt;
-        &lt;list&gt;
-            &lt;value&gt;/WEB-INF/defs/general.xml&lt;/value&gt;
-            &lt;value&gt;/WEB-INF/defs/widgets.xml&lt;/value&gt;
-            &lt;value&gt;/WEB-INF/defs/administrator.xml&lt;/value&gt;
-            &lt;value&gt;/WEB-INF/defs/customer.xml&lt;/value&gt;
-            &lt;value&gt;/WEB-INF/defs/templates.xml&lt;/value&gt;
-        &lt;/list&gt;
-    &lt;/property&gt;
+  &lt;property name="factoryClass" value="org.apache.struts.tiles.xmlDefinition.I18nFactorySet"/&gt;
+  &lt;property name="definitions"&gt;
+    &lt;list&gt;
+      &lt;value&gt;/WEB-INF/defs/general.xml&lt;/value&gt;
+      &lt;value&gt;/WEB-INF/defs/widgets.xml&lt;/value&gt;
+      &lt;value&gt;/WEB-INF/defs/administrator.xml&lt;/value&gt;
+      &lt;value&gt;/WEB-INF/defs/customer.xml&lt;/value&gt;
+      &lt;value&gt;/WEB-INF/defs/templates.xml&lt;/value&gt;
+    &lt;/list&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
       <para>As you can see, there are five files containing definitions, which
@@ -172,10 +170,8 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
         <para>The InternalResourceViewResolver instantiates the given
         <literal>viewClass</literal> for each view it has to resolve.
         <programlisting>&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
-    &lt;property name="requestContextAttribute"&gt;&lt;value&gt;requestContext&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="viewClass"&gt;
-        &lt;value&gt;org.springframework.web.servlet.view.tiles.TilesView&lt;/value&gt;
-    &lt;/property&gt;
+  &lt;property name="requestContextAttribute" value="requestContext"/&gt;
+  &lt;property name="viewClass" value="org.springframework.web.servlet.view.tiles.TilesView"/&gt;
 &lt;/bean&gt;</programlisting></para>
       </sect3>
 
@@ -185,19 +181,19 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
         <para>The ResourceBundleViewResolver has to be provided with a
         property file containing viewnames and viewclasses the resolver can
         use: <programlisting>&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver"&gt;
-    &lt;property name="basename"&gt;&lt;value&gt;views&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="basename" value="views"/&gt;
 &lt;/bean&gt;</programlisting></para>
 
         <para><programlisting>    ...
-    welcomeView.class=org.springframework.web.servlet.view.tiles.TilesView
-    welcomeView.url=welcome (&lt;b&gt;this is the name of a definition&lt;/b&gt;)
-        
-    vetsView.class=org.springframework.web.servlet.view.tiles.TilesView
-    vetsView.url=vetsView (&lt;b&gt;again, this is the name of a definition&lt;/b&gt;)
-        
-    findOwnersForm.class=org.springframework.web.servlet.view.JstlView
-    findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
-    ...</programlisting> As you can see, when using the
+welcomeView.class=org.springframework.web.servlet.view.tiles.TilesView
+welcomeView.url=welcome (&lt;b&gt;this is the name of a definition&lt;/b&gt;)
+
+vetsView.class=org.springframework.web.servlet.view.tiles.TilesView
+vetsView.url=vetsView (&lt;b&gt;again, this is the name of a definition&lt;/b&gt;)
+
+findOwnersForm.class=org.springframework.web.servlet.view.JstlView
+findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
+...</programlisting> As you can see, when using the
         ResourceBundleViewResolver, you can mix view using different view
         technologies.</para>
       </sect3>
@@ -246,41 +242,33 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
   Optionally, a properties file can be specified for more control over the Velocity
   environment, but the defaults are pretty sane for file based template loading.
 --&gt;
-&lt;bean 
-  id="velocityConfig" 
-  class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"&gt;
-  &lt;property name="resourceLoaderPath"&gt;&lt;value&gt;/WEB-INF/velocity/&lt;/value&gt;&lt;/property&gt;          
+&lt;bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"&gt;
+  &lt;property name="resourceLoaderPath" value="/WEB-INF/velocity/"/&gt;
 &lt;/bean&gt;
 
 &lt;!--
-  View resolvers can also be configured with ResourceBundles or XML files.  If you need
+  View resolvers can also be configured with ResourceBundles or XML files. If you need
   different view resolving based on Locale, you have to use the resource bundle resolver.
 --&gt;
-&lt;bean 
-  id="viewResolver" 
-  class="org.springframework.web.servlet.view.velocity.VelocityViewResolver"&gt;
-  &lt;property name="cache"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
-  &lt;property name="prefix"&gt;&lt;value&gt;&lt;/value&gt;&lt;/property&gt;
-  &lt;property name="suffix"&gt;&lt;value&gt;.vm&lt;/value&gt;&lt;/property&gt;
+&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.velocity.VelocityViewResolver"&gt;
+  &lt;property name="cache" value="true"/&gt;
+  &lt;property name="prefix" value=""/&gt;
+  &lt;property name="suffix" value=".vm"/&gt;
 &lt;/bean&gt;</programlisting></para>
 
       <programlisting>&lt;!-- freemarker config --&gt;
-&lt;bean 
-  id="freemarkerConfig" 
-  class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
-  &lt;property name="templateLoaderPath"&gt;&lt;value&gt;/WEB-INF/freemarker/&lt;/value&gt;&lt;/property&gt; 
+&lt;bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
+  &lt;property name="templateLoaderPath" value="/WEB-INF/freemarker/"/&gt;
 &lt;/bean&gt;
 
 &lt;!--
-  View resolvers can also be configured with ResourceBundles or XML files.  If you need
+  View resolvers can also be configured with ResourceBundles or XML files. If you need
   different view resolving based on Locale, you have to use the resource bundle resolver.
 --&gt;
-&lt;bean 
-  id="viewResolver" 
-  class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver"&gt;
-  &lt;property name="cache"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
-  &lt;property name="prefix"&gt;&lt;value&gt;&lt;/value&gt;&lt;/property&gt;
-  &lt;property name="suffix"&gt;&lt;value&gt;.ftl&lt;/value&gt;&lt;/property&gt;
+&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver"&gt;
+  &lt;property name="cache" value="true"/&gt;
+  &lt;property name="prefix" value=""/&gt;
+  &lt;property name="suffix" value=".ftl"/&gt;
 &lt;/bean&gt;</programlisting>
 
       <para><emphasis>NB: For non web-apps add a
@@ -323,21 +311,15 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
         need this file, specify its location on the
         <literal>VelocityConfigurer</literal> bean definition above.</para>
 
-        <programlisting>&lt;bean 
-  id="velocityConfig" 
-  class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"&gt;
-  &lt;property name="configLocation"&gt;
-    &lt;value&gt;/WEB-INF/velocity.properties&lt;/value&gt;
-  &lt;/property&gt;
+        <programlisting>&lt;bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"&gt;
+  &lt;property name="configLocation value="/WEB-INF/velocity.properties"/&gt;
 &lt;/bean&gt;</programlisting>
 
         <para>Alternatively, you can specify velocity properties directly in
         the bean definition for the Velocity config bean by replacing the
         "configLocation" property with the following inline properties.</para>
 
-        <programlisting>&lt;bean 
-  id="velocityConfig" 
-  class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"&gt;
+        <programlisting>&lt;bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"&gt;
   &lt;property name="velocityProperties"&gt;
     &lt;props&gt;
       &lt;prop key="resource.loader"&gt;file&lt;/prop&gt;
@@ -369,13 +351,11 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
         <literal>freemarkerVariables</literal> property requires a
         <literal>java.util.Map</literal>.</para>
 
-        <programlisting>&lt;bean 
-  id="freemarkerConfig" 
-  class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
-  &lt;property name="templateLoaderPath"&gt;&lt;value&gt;/WEB-INF/freemarker/&lt;/value&gt;&lt;/property&gt; 
+        <programlisting>&lt;bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
+  &lt;property name="templateLoaderPath" value="/WEB-INF/freemarker/"/&gt;
   &lt;property name="freemarkerVariables"&gt;
     &lt;map&gt;
-      &lt;entry key="xml_escape"&gt;&lt;ref local="fmXmlEscape"/&gt;&lt;/entry&gt;
+      &lt;entry key="xml_escape" ref="fmXmlEscape"/&gt;
     &lt;/map&gt;
   &lt;/property&gt;
 &lt;/bean&gt;
@@ -1346,9 +1326,7 @@ public class PDFPage extends AbstractPdfView {
         <para>Typically, you will use the
         <literal>ResourceBundleViewResolver</literal> to map view names to
         view classes and files in a properties file <programlisting>&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver"&gt;
-    &lt;property name="basename"&gt;
-        &lt;value&gt;views&lt;/value&gt;
-    &lt;/property&gt;
+    &lt;property name="basename" value="views"/&gt;
 &lt;/bean&gt;
                   </programlisting></para>
 
@@ -1631,9 +1609,7 @@ simpleReport.reportDataKey=myBeanData
         pass into the JasperReports engine as a sub-report using the
         <literal>subReportUrls</literal> property: <programlisting>&lt;property name="subReportUrls"&gt;
     &lt;map&gt;
-        &lt;entry key="ProductsSubReport"&gt;
-            &lt;value&gt;/WEB-INF/reports/subReportChild.jrxml&lt;/value&gt;
-        &lt;/entry&gt;
+        &lt;entry key="ProductsSubReport" value="/WEB-INF/reports/subReportChild.jrxml"/&gt;
     &lt;/map&gt;
 &lt;/property&gt;</programlisting> Here, the key of the <literal>Map</literal>
         corresponds to the name of the sub-report parameter in th report
@@ -1653,11 +1629,10 @@ simpleReport.reportDataKey=myBeanData
         which of the parameters in your <literal>ModelAndView</literal> Spring
         should convert. To do this configure the list of parameter names using
         the <literal>subReportDataKeys</literal> property of the your chosen
-        view class: <programlisting>&lt;property name="subReportDataKeys"&gt;
-    &lt;value&gt;SubReportData&lt;/value&gt;
-&lt;/property&gt;</programlisting> Here, the key you supply MUST correspond to
-        both the key used in your <literal>ModelAndView</literal> and the key
-        used in your report design file.</para>
+        view class: <programlisting>&lt;property name="subReportDataKeys"
+    value="SubReportData"/&gt;</programlisting> Here, the key you supply MUST
+        correspond to both the key used in your <literal>ModelAndView</literal>
+        and the key used in your report design file.</para>
       </sect3>
     </sect2>
 
@@ -1673,11 +1648,8 @@ simpleReport.reportDataKey=myBeanData
       the key of an entry should be the fully-qualified name of a static field
       that contains the exporter parameter definition and the value of an
       entry should be the value you want to assign to the parameter. An
-      example of this is shown below: <programlisting>&lt;bean id="htmlReport"
-          class="org.springframework.web.servlet.view.jasperreports.JasperReportsHtmlView"&gt;
-  &lt;property name="url"&gt;
-    &lt;value&gt;/WEB-INF/reports/simpleReport.jrxml&lt;/value&gt;
-  &lt;/property&gt;
+      example of this is shown below: <programlisting>&lt;bean id="htmlReport" class="org.springframework.web.servlet.view.jasperreports.JasperReportsHtmlView"&gt;
+  &lt;property name="url" value="/WEB-INF/reports/simpleReport.jrxml"/&gt;
   &lt;property name="exporterParameters"&gt;
     &lt;map&gt;
       &lt;entry key="net.sf.jasperreports.engine.export.JRHtmlExporterParameter.HTML_FOOTER"&gt;

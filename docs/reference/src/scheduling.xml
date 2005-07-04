@@ -34,12 +34,10 @@
   			Let's have a look at an example:
   			<programlisting><![CDATA[
 <bean name="exampleJob" class="org.springframework.scheduling.quartz.JobDetailBean">
-  <property name="jobClass">
-    <value>example.ExampleJob</value>
-  </property>
+  <property name="jobClass" value="example.ExampleJob"/>
   <property name="jobDataAsMap">
     <map>
-      <entry key="timeout"><value>5</value></entry>
+      <entry key="timeout" value="5"/>
     </map>
   </property>
 </bean>
@@ -89,10 +87,9 @@ public class ExampleJob extends QuartzJobBean {
 			Often you just need to invoke a method on a specific object. Using the
 			<literal>MethodInvokingJobDetailFactoryBean</literal> you can do exactly this:
 			<programlisting><![CDATA[
-<bean id="methodInvokingJobDetail" 
-  class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-    <property name="targetObject"><ref bean="exampleBusinessObject"/></property>
-    <property name="targetMethod"><value>doIt</value></property>
+<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+  <property name="targetObject" ref="exampleBusinessObject"/>
+  <property name="targetMethod" value="doIt"/>
 </bean>
 ]]></programlisting>
 			The above example will result in the <literal>doIt</literal> being called on the exampleBusinessObject
@@ -123,11 +120,10 @@ public class BusinessObject {
 			the first one has finished. To make jobs resulting from the MethodInvokingJobDetailFactoryBean
 			non-concurrent, set the <literal>concurrent</literal> flag to <literal>false</literal>.
 			<programlisting><![CDATA[
-<bean id="methodInvokingJobDetail"
-  class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-    <property name="targetObject"><ref bean="exampleBusinessObject"/></property>
-    <property name="targetMethod"><value>doIt</value></property>
-    <property name="concurrent"><value>false</value></property>
+<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+  <property name="targetObject" ref="exampleBusinessObject"/>
+  <property name="targetMethod" value="doIt"/>
+  <property name="concurrent" value="false"/>
 </bean>
 			]]></programlisting>
 			<emphasis>Note: By default, jobs will run in a concurrent fashion.</emphasis>
@@ -152,28 +148,18 @@ public class BusinessObject {
 			A couple of examples:
 			<programlisting><![CDATA[
 <bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
-  <property name="jobDetail">
-    <!-- see the example of method invoking job above -->    
-    <ref bean="methodInvokingJobDetail"/>
-  </property>
-  <property name="startDelay">
-    <!-- 10 seconds -->
-    <value>10000</value>
-  </property>
-  <property name="repeatInterval">
-    <!-- repeat every 50 seconds -->
-    <value>50000</value>
-  </property>
+  <!-- see the example of method invoking job above -->
+  <property name="jobDetail" ref="jobDetail"/>
+	<!-- 10 seconds -->
+  <property name="startDelay" value="10000"/>
+	<!-- repeat every 50 seconds -->
+  <property name="repeatInterval" value="50000"/>
 </bean>
 
 <bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
-  <property name="jobDetail">
-    <ref bean="exampleJob"/>
-  </property>
-  <property name="cronExpression">
-    <!-- run every morning at 6 AM -->
-    <value>0 0 6 * * ?</value>
-  </property>
+  <property name="jobDetail" ref="exampleJob"/>
+	<!-- run every morning at 6 AM -->
+  <property name="cronExpression" value="0 0 6 * * ?"/>
 </bean>
 			]]></programlisting>
 			OK, now we've set up two triggers, one running every 50 seconds with a starting delay of
@@ -183,8 +169,8 @@ public class BusinessObject {
 <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
   <property name="triggers">
     <list>
-      <ref local="cronTrigger"/>
-      <ref local="simpleTrigger"/>
+      <ref bean="cronTrigger"/>
+      <ref bean="simpleTrigger"/>
     </list>
   </property>
 </bean>
@@ -241,16 +227,10 @@ public class CheckEmailAddresses extends TimerTask {
 
 <bean id="scheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
   <!-- wait 10 seconds before starting repeated execution -->
-  <property name="delay">
-    <value>10000</value>
-  </property>
+  <property name="delay" value="10000"/>
   <!-- run every 50 seconds -->
-  <property name="period">
-    <value>50000</value>
-  </property>
-  <property name="timerTask">
-    <ref local="checkEmail"/>
-  </property>
+  <property name="period" value="50000"/>
+  <property name="timerTask" ref="checkEmail"/>
 </bean>
 			]]></programlisting>			
 		</para>
@@ -265,14 +245,13 @@ public class CheckEmailAddresses extends TimerTask {
 			Similar to the Quartz support, the Timer support also features a component that
 			allows you to periodically invoke a method:
 			<programlisting><![CDATA[
-<bean id="methodInvokingTask" 
-  class="org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean">
-    <property name="targetObject"><ref bean="exampleBusinessObject"/></property>
-    <property name="targetMethod"><value>doIt</value></property>
+<bean id="doIt" class="org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean">
+  <property name="targetObject" ref="exampleBusinessObject"/>
+  <property name="targetMethod" value="doIt"/>
 </bean>
 ]]></programlisting>
-			The above example will result in the <literal>doIt</literal> being called on the exampleBusinessObject
-			(see below):
+			The above example will result in the <literal>doIt</literal> being called on the
+      <literal>exampleBusinessObject</literal> (see below):
 			<programlisting><![CDATA[
 public class BusinessObject {
   
@@ -284,8 +263,8 @@ public class BusinessObject {
 }
 			]]></programlisting>
 			
-			Changing the reference of the above example in which the ScheduledTimerTask is mentioned to the
-			<literal>methodInvokingTask</literal> will result in this task being executed.
+			Changing the reference of the above example (in which the ScheduledTimerTask is mentioned)
+			to the <literal>doIt</literal> will result in this task being executed.
 		</para>
 	</sect2>
 	<sect2>
@@ -300,7 +279,7 @@ public class BusinessObject {
   <property name="scheduledTimerTasks">
     <list>
       <!-- see the example above -->
-      <ref local="scheduledTask"/>
+      <ref bean="scheduledTask"/>
     </list>
   </property>
 </bean>

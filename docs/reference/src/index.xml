@@ -39,41 +39,45 @@
         <pubdate>(Work in progress)</pubdate>
         
         <authorgroup>
-            <author>
-                <firstname>Rod</firstname>
-                <surname>Johnson</surname>
-            </author>
-            <author>
-                <firstname>Juergen</firstname>
-                <surname>Hoeller</surname>
-            </author>
-            <author>
-                <firstname>Alef</firstname>
-                <surname>Arendsen</surname>
-            </author>
-            <author>
-            	<firstname>Colin</firstname>
-            	<surname>Sampaleanu</surname>
-            </author>
-            <author>
-            	<firstname>Darren</firstname>
-            	<surname>Davison</surname>
-            </author>
-            <author>
-            	<firstname>Dmitriy</firstname>
-            	<surname>Kopylenko</surname>
-            </author>
-            <author>
-            	<firstname>Thomas</firstname>
-            	<surname>Risberg</surname>
-            </author>
-						<author>
-            	<firstname>Mark</firstname>
-            	<surname>Pollack</surname>
-            </author>
+					<author>
+						<firstname>Rod</firstname>
+						<surname>Johnson</surname>
+					</author>
+					<author>
+						<firstname>Juergen</firstname>
+						<surname>Hoeller</surname>
+					</author>
+					<author>
+						<firstname>Alef</firstname>
+						<surname>Arendsen</surname>
+					</author>
+					<author>
+						<firstname>Colin</firstname>
+						<surname>Sampaleanu</surname>
+					</author>
 					<author>
 						<firstname>Rob</firstname>
 						<surname>Harrop</surname>
+					</author>
+					<author>
+						<firstname>Thomas</firstname>
+						<surname>Risberg</surname>
+					</author>
+					<author>
+						<firstname>Darren</firstname>
+						<surname>Davison</surname>
+					</author>
+					<author>
+						<firstname>Dmitriy</firstname>
+						<surname>Kopylenko</surname>
+€					</author>
+					<author>
+						<firstname>Mark</firstname>
+						<surname>Pollack</surname>
+					</author>
+					<author>
+						<firstname>Thierry</firstname>
+						<surname>Templier</surname>
 					</author>
         </authorgroup>
 

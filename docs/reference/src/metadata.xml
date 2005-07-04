@@ -241,13 +241,11 @@ public void echoException(Exception ex) throws Exception {
     to a location specified by the destdir attribute. Here we show the use of
     a temporary directory:</para>
 
-    <para><programlisting>&lt;target name="compileAttributes" &gt;
+    <para><programlisting>&lt;target name="compileAttributes"&gt;
 
-    &lt;attribute-compiler 
-        destdir="${commons.attributes.tempdir}" 
-    &gt;
-        &lt;fileset dir="${src.dir}" includes="**/*.java"/&gt;
-    &lt;/attribute-compiler&gt;
+  &lt;attribute-compiler destdir="${commons.attributes.tempdir}"&gt;
+    &lt;fileset dir="${src.dir}" includes="**/*.java"/&gt;
+  &lt;/attribute-compiler&gt;
 
 &lt;/target&gt;</programlisting></para>
 
@@ -280,7 +278,7 @@ public void echoException(Exception ex) throws Exception {
 
     <para><programlisting>&lt;attribute-indexer jarFile="myCompiledSources.jar"&gt;
     
-    &lt;classpath refid="master-classpath"/&gt;
+  &lt;classpath refid="master-classpath"/&gt;
 
 &lt;/attribute-indexer&gt;</programlisting></para>
 
@@ -315,40 +313,33 @@ public void echoException(Exception ex) throws Exception {
       <para>This builds on the Spring AOP autoproxy functionality.
       Configuration might look like this:</para>
 
-      <para><programlisting>&lt;bean id="autoproxy" 
-    class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"&gt;
+			<para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
+
+&lt;bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
+  &lt;property name="transactionInterceptor" ref="txInterceptor"/&gt;
 &lt;/bean&gt;
 
-&lt;bean id="transactionAttributeSource"
-    class="org.springframework.transaction.interceptor.AttributesTransactionAttributeSource"
-    autowire="constructor"&gt;
+&lt;bean id="txInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
+  &lt;property name="transactionManager" ref="transactionManager"/&gt;
+  &lt;property name="transactionAttributeSource"&gt;
+    &lt;bean class="org.springframework.transaction.interceptor.AttributesTransactionAttributeSource"&gt;
+      &lt;property name="attributes" ref="attributes"/&gt;
+    &lt;/bean&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="transactionInterceptor"
-    class="org.springframework.transaction.interceptor.TransactionInterceptor"
-    autowire="byType"&gt;
-&lt;/bean&gt;
-
-&lt;bean id="transactionAdvisor"
-    class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"
-    autowire="constructor" &gt;
-&lt;/bean&gt;
-
-&lt;bean id="attributes"
-    class="org.springframework.metadata.commons.CommonsAttributes"
-/&gt;</programlisting></para>
+&lt;bean id="attributes" class="org.springframework.metadata.commons.CommonsAttributes"/&gt;</programlisting></para>
 
       <para>The basic concepts here should be familiar from the discussion of
       autoproxying in the AOP chapter.</para>
 
-      <para>The most important bean definitions are those named <emphasis
-      role="bold">autoproxy</emphasis> and <emphasis
-      role="bold">transactionAdvisor</emphasis>. Note that the actual bean
-      names are not important; what matters is their class.</para>
+      <para>The most important bean definitions are those the auto-proxy creator
+      and the advisor. Note that the actual bean names are not important;
+			what matters is their class.</para>
 
-      <para>The autoproxy bean definition of class
+      <para>The bean definition of class
       <literal>org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator</literal>
-      will automatically advise ("autoproxy") all bean instances in the
+      will automatically advise ("auto-proxy") all bean instances in the
       current factory based on matching Advisor implementations. This class
       knows nothing about attributes, but relies on Advisors' pointcuts
       matching. The pointcuts do know about attributes.</para>
@@ -393,8 +384,7 @@ public void echoException(Exception ex) throws Exception {
       object to be pooled:</para>
 
       <para><programlisting> /** 
- * @@org.springframework.aop.framework.autoproxy.target.PoolingAttribute (10)
- * 
+ * @@org.springframework.aop.framework.autoproxy.target.PoolingAttribute(10)
  * @author Rod Johnson
  */
 public class MyClass {</programlisting>You'll need the usual autoproxy
@@ -405,8 +395,8 @@ public class MyClass {</programlisting>You'll need the usual autoproxy
       class, if that class has a pooling attribute.</para>
 
       <para><programlisting>&lt;bean id="poolingTargetSourceCreator"
-    class="org.springframework.aop.framework.autoproxy.metadata.AttributesPoolingTargetSourceCreator"
-    autowire="constructor" &gt;
+  class="org.springframework.aop.framework.autoproxy.metadata.AttributesPoolingTargetSourceCreator"&gt;
+  &lt;property name="attributes" ref="attributes"/&gt;
 &lt;/bean&gt;</programlisting></para>
 
       <para>The relevant autoproxy bean definition needs to specify a list of
@@ -414,14 +404,12 @@ public class MyClass {</programlisting>You'll need the usual autoproxy
       creator. We could modify the example shown above to include this
       property as follows:</para>
 
-      <para><programlisting>&lt;bean id="autoproxy" 
-    class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"&gt;
-&gt;
-    &lt;property name="customTargetSourceCreators"&gt;
-        &lt;list&gt;
-            &lt;ref local="poolingTargetSourceCreator" /&gt;
-        &lt;/list&gt;
-    &lt;/property&gt;
+      <para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"&gt;
+  &lt;property name="customTargetSourceCreators"&gt;
+    &lt;list&gt;
+      &lt;ref bean="poolingTargetSourceCreator"/&gt;
+    &lt;/list&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
       <para>As with the use of metadata in Spring in general, this is a
@@ -559,7 +547,7 @@ public class BarController extends AbstractController {
     }
 
     protected ModelAndView handleRequestInternal(
-            HttpServletRequest arg0, HttpServletResponse arg1) 
+            HttpServletRequest request, HttpServletResponse response)
             throws Exception {
         System.out.println("Bar Crunching c and d =" + 
             cruncher.concatenate("c", "d"));
@@ -576,8 +564,7 @@ public class BarController extends AbstractController {
     matters:</para>
 
     <para><programlisting>&lt;bean id="commonsAttributesHandlerMapping"      
-    class="org.springframework.web.servlet.handler.metadata.CommonsPathMapHandlerMapping"
-/&gt;</programlisting></para>
+    class="org.springframework.web.servlet.handler.metadata.CommonsPathMapHandlerMapping"/&gt;</programlisting></para>
 
     <para>We <emphasis>do not </emphasis>currently need an Attributes bean
     definition, as in the above example, because this class works directly
@@ -611,7 +598,7 @@ public class FooController extends AbstractController {
     }
 
     protected ModelAndView handleRequestInternal(
-            HttpServletRequest arg0, HttpServletResponse arg1) 
+            HttpServletRequest request, HttpServletResponse response)
             throws Exception {
         return new ModelAndView("test");
     }

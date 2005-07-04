@@ -110,12 +110,12 @@ public void setMyComponent(MyComponent myComponent) {
 
       <programlisting>&lt;bean id="myComponent"
       class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean"&gt;
-    &lt;property name="jndiName"&gt;&lt;value&gt;myComponent&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="businessInterface"&gt;&lt;value&gt;com.mycom.MyComponent&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="jndiName" value="myComponent"/&gt;
+  &lt;property name="businessInterface" value="com.mycom.MyComponent"/&gt;
 &lt;/bean&gt;
 
-&lt;bean id="myController" class = "com.mycom.myController"&gt;
-    &lt;property name="myComponent"&gt;&lt;ref bean="myComponent"/&gt;&lt;/property&gt;
+&lt;bean id="myController" class="com.mycom.myController"&gt;
+  &lt;property name="myComponent" ref="myComponent"/&gt;
 &lt;/bean&gt;</programlisting>
 
       <para>There’s a lot of magic happening behind the scenes, courtesy of

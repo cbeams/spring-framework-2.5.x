@@ -213,6 +213,7 @@ su.update();</programlisting>The custom translator is passed a data source
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class ExecuteAStatement {
+
     private JdbcTemplate jt;
     private DataSource dataSource;
 
@@ -247,6 +248,7 @@ public class ExecuteAStatement {
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class RunAQuery {
+
     private JdbcTemplate jt;
     private DataSource dataSource;
   
@@ -258,7 +260,7 @@ public class RunAQuery {
 
     public String getName() {
         jt = new JdbcTemplate(dataSource);
-        String name = (String) jt.queryForObject("select name from mytable", java.lang.String.class);
+        String name = (String) jt.queryForObject("select name from mytable", String.class);
         return name;
     }
 
@@ -299,6 +301,7 @@ public class RunAQuery {
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class ExecuteAnUpdate {
+
     private JdbcTemplate jt;
     private DataSource dataSource;
 
@@ -470,17 +473,19 @@ public class ExecuteAnUpdate {
       <para>Here is a brief example of a custom query that maps the data from
       the customer table to a Java object called Customer.</para>
 
-      <programlisting>  private class CustomerMappingQuery extends MappingSqlQuery {
+      <programlisting>private class CustomerMappingQuery extends MappingSqlQuery {
+
     public CustomerMappingQuery(DataSource ds) {
-      super(ds, "SELECT id, name FROM customer WHERE id = ?");
-      super.declareParameter(new SqlParameter("id", Types.INTEGER));
-      compile();
+        super(ds, "SELECT id, name FROM customer WHERE id = ?");
+        super.declareParameter(new SqlParameter("id", Types.INTEGER));
+        compile();
     }
+
     public Object mapRow(ResultSet rs, int rowNumber) throws SQLException {
-      Customer cust = new Customer();
-      cust.setId((Integer) rs.getObject("id"));
-      cust.setName(rs.getString("name"));
-      return cust;
+        Customer cust = new Customer();
+        cust.setId((Integer) rs.getObject("id"));
+        cust.setName(rs.getString("name"));
+        return cust;
     } 
   }</programlisting>
 
@@ -545,7 +550,8 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.object.SqlUpdate;
 
-public class UpdateCreditRating  extends SqlUpdate {
+public class UpdateCreditRating extends SqlUpdate {
+
     public UpdateCreditRating(DataSource ds) {
         setDataSource(ds);
         setSql("update customer set credit_rating = ? where id = ?");

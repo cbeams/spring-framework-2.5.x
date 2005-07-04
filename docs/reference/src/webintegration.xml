@@ -79,15 +79,15 @@
 	    element and a <literal>&lt;variable-resolver&gt;</literal> element within it.  
 	    The value of the variable resolver should reference Spring's 
 	    <literal>DelegatingVariableResolver</literal>: <programlisting>&lt;faces-config&gt;
-	    &lt;application&gt;
-	        &lt;variable-resolver&gt;org.springframework.web.jsf.DelegatingVariableResolver&lt;/variable-resolver&gt;
-	        &lt;locale-config&gt;
-	            &lt;default-locale&gt;en&lt;/default-locale&gt;
-	            &lt;supported-locale&gt;en&lt;/supported-locale&gt;
-	            &lt;supported-locale&gt;es&lt;/supported-locale&gt;
-	        &lt;/locale-config&gt;
-	        &lt;message-bundle&gt;messages&lt;/message-bundle&gt;
-	    &lt;/application&gt;</programlisting></para>
+  &lt;application&gt;
+	  &lt;variable-resolver&gt;org.springframework.web.jsf.DelegatingVariableResolver&lt;/variable-resolver&gt;
+	  &lt;locale-config&gt;
+	    &lt;default-locale&gt;en&lt;/default-locale&gt;
+	    &lt;supported-locale&gt;en&lt;/supported-locale&gt;
+	    &lt;supported-locale&gt;es&lt;/supported-locale&gt;
+	  &lt;/locale-config&gt;
+	  &lt;message-bundle&gt;messages&lt;/message-bundle&gt;
+	&lt;/application&gt;</programlisting></para>
 			<para>By specifying Spring's variable resolver, you can configure Spring 
 	    beans as managed properties of your managed beans. The 
 	    <literal>DelegatingVariableResolver</literal> will first delegate value lookups 
@@ -97,14 +97,14 @@
 			<para>Managed beans are defined in your <literal>faces-config.xml</literal> 
 	    file. Below is an example where #{userManager} is a bean that's retrieved 
 	    from Spring's <literal>BeanFactory</literal>. <programlisting>&lt;managed-bean&gt;
-	    &lt;managed-bean-name&gt;userList&lt;/managed-bean-name&gt;
-	    &lt;managed-bean-class&gt;com.whatever.jsf.UserList&lt;/managed-bean-class&gt;
-	    &lt;managed-bean-scope&gt;request&lt;/managed-bean-scope&gt;
-	    &lt;managed-property&gt;
-	        &lt;property-name&gt;userManager&lt;/property-name&gt;
-	        &lt;value&gt;#{userManager}&lt;/value&gt;
-	    &lt;/managed-property&gt;
-	&lt;/managed-bean&gt;</programlisting></para>
+  &lt;managed-bean-name&gt;userList&lt;/managed-bean-name&gt;
+	&lt;managed-bean-class&gt;com.whatever.jsf.UserList&lt;/managed-bean-class&gt;
+  &lt;managed-bean-scope&gt;request&lt;/managed-bean-scope&gt;
+  &lt;managed-property&gt;
+    &lt;property-name&gt;userManager&lt;/property-name&gt;
+    &lt;value&gt;#{userManager}&lt;/value&gt;
+  &lt;/managed-property&gt;
+&lt;/managed-bean&gt;</programlisting></para>
 			<para>The <literal>DelegatingVariableResolver</literal> is the recommended 
 	    strategy for integrating JSF and Spring. If you're looking for more robust 
 	    integration features, you might take a look at the 
@@ -165,9 +165,8 @@
 			<para>The location of the context configuration files can be 
             customized using the "contextConfigLocation" property.
             <programlisting>&lt;plug-in className="org.springframework.web.struts.ContextLoaderPlugIn"&gt;
-    &lt;set-property property="contextConfigLocation"
-        value="/WEB-INF/action-servlet.xml.xml,
-               /WEB-INF/applicationContext.xml"/&gt;
+  &lt;set-property property="contextConfigLocation"
+      value="/WEB-INF/action-servlet.xml.xml,/WEB-INF/applicationContext.xml"/&gt;
 &lt;/plug-in&gt;</programlisting></para>
 			<para>It is possible to use this plugin to load all your context files, which can be useful when using testing tools
         like StrutsTestCase.  StrutsTestCase's <literal>MockStrutsTestCase</literal> won't initialize Listeners on startup
@@ -203,9 +202,9 @@
 	        <emphasis>struts-config.xml</emphasis> file, override the "processorClass" 
 	        property in the &lt;controller&gt; element. These lines follow the 
 	        &lt;action-mapping&gt; element. <programlisting>&lt;controller&gt;
-	    &lt;set-property property="processorClass" 
-	        value="org.springframework.web.struts.DelegatingRequestProcessor"/&gt;
-	&lt;/controller&gt;</programlisting></para>
+  &lt;set-property property="processorClass"
+      value="org.springframework.web.struts.DelegatingRequestProcessor"/&gt;
+&lt;/controller&gt;</programlisting></para>
 				<para>After adding this setting, your Action will automatically be 
 	        looked up in Spring's context file, no matter what the type. In fact, 
 	        you don't even need to specify a type. Both of the following snippets 
@@ -227,10 +226,10 @@
 	        use the <ulink url="http://www.springframework.org/docs/api/org/springframework/web/struts/DelegatingActionProxy.html">
 	        <literal>DelegatingActionProxy</literal></ulink> as the type in your 
 	        action-mapping. <programlisting>&lt;action path="/user" type="org.springframework.web.struts.DelegatingActionProxy"
-	    name="userForm" scope="request" validate="false" parameter="method"&gt;
-	        &lt;forward name="list" path="/userList.jsp"/&gt;
-	        &lt;forward name="edit" path="/userForm.jsp"/&gt;
-	&lt;/action&gt;</programlisting></para>
+    name="userForm" scope="request" validate="false" parameter="method"&gt;
+  &lt;forward name="list" path="/userList.jsp"/&gt;
+  &lt;forward name="edit" path="/userForm.jsp"/&gt;
+&lt;/action&gt;</programlisting></para>
 				<para>The bean definition in <emphasis>action-servlet.xml</emphasis> 
 	        remains the same, whether you use a custom <literal>RequestProcessor</literal>
 	        or the <literal>DelegatingActionProxy</literal>.</para>
@@ -239,7 +238,7 @@
           to instantiate a new Action instance for each request. To activate the latter,
           add <emphasis>singleton="false"</emphasis> to your Action's bean definition.
 		<programlisting>&lt;bean name="/user" <emphasis>singleton="false"</emphasis> autowire="byName"
-	    class="org.example.web.UserAction"/&gt;</programlisting></para>
+    class="org.example.web.UserAction"/&gt;</programlisting></para>
 			</sect3>
 		</sect2>
 		<sect2 id="struts-actionsupport">

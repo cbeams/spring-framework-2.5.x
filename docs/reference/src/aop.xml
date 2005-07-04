@@ -634,7 +634,9 @@
         method invocations:</para>
 
         <programlisting>public class CountingBeforeAdvice implements MethodBeforeAdvice {
+
     private int count;
+
     public void before(Method m, Object[] args, Object target) throws Throwable {
         ++count;
     }
@@ -669,7 +671,7 @@
         <literal>RemoteException</literal> is thrown (including
         subclasses):</para>
 
-        <programlisting>public  class RemoteThrowsAdvice implements ThrowsAdvice {
+        <programlisting>public class RemoteThrowsAdvice implements ThrowsAdvice {
 
     public void afterThrowing(RemoteException ex) throws Throwable {
         // Do something with remote exception
@@ -681,7 +683,7 @@
         advice, it declares 4 arguments, so that it has access to the invoked
         method, method arguments and target object:</para>
 
-        <programlisting>public static class ServletThrowsAdviceWithArguments implements ThrowsAdvice {
+        <programlisting>public class ServletThrowsAdviceWithArguments implements ThrowsAdvice {
 
     public void afterThrowing(Method m, Object[] args, Object target, ServletException ex) {
         // Do something will all arguments
@@ -729,9 +731,11 @@
         method invocations that have not thrown exceptions:</para>
 
         <programlisting>public class CountingAfterReturningAdvice implements AfterReturningAdvice {
+
     private int count;
 
-    public void afterReturning(Object returnValue, Method m, Object[] args, Object target) throws Throwable {
+    public void afterReturning(Object returnValue, Method m, Object[] args, Object target)
+            throws Throwable {
         ++count;
     }
 
@@ -1142,7 +1146,7 @@
       dependency on it, as with an ordinary Java object:</para>
 
       <para><programlisting>&lt;bean id="personUser" class="com.mycompany.PersonUser"&gt;
-    &lt;property name="person"&gt;&lt;ref local="person" /&gt;&lt;/property&gt;
+  &lt;property name="person"&gt;&lt;ref local="person" /&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
       <para>The <literal>PersonUser</literal> class in this example would
@@ -1158,30 +1162,26 @@
       is included only for completeness:</para>
 
       <para><programlisting>&lt;bean id="myAdvisor" class="com.mycompany.MyAdvisor"&gt;
-    &lt;property name="someProperty"&gt;&lt;value&gt;Custom string property value&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="someProperty"&gt;&lt;value&gt;Custom string property value&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"&gt;
-&lt;/bean&gt;
+&lt;bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"/&gt;
 
-&lt;bean id="person" 
-    class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
-    &lt;property name="proxyInterfaces"&gt;&lt;value&gt;com.mycompany.Person&lt;/value&gt;&lt;/property&gt;
-
-    &lt;!-- Use inner bean, not local reference to target --&gt;
-    &lt;property name="target"&gt;
-        &lt;bean class="com.mycompany.PersonImpl"&gt;
-            &lt;property name="name"&gt;&lt;value&gt;Tony&lt;/value&gt;&lt;/property&gt;
-            &lt;property name="age"&gt;&lt;value&gt;51&lt;/value&gt;&lt;/property&gt;
-        &lt;/bean&gt;
-   &lt;/property&gt;
-
-    &lt;property name="interceptorNames"&gt;
-        &lt;list&gt;
-            &lt;value&gt;myAdvisor&lt;/value&gt;
-            &lt;value&gt;debugInterceptor&lt;/value&gt;
-        &lt;/list&gt;
-    &lt;/property&gt;
+&lt;bean id="person" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
+  &lt;property name="proxyInterfaces"&gt;&lt;value&gt;com.mycompany.Person&lt;/value&gt;&lt;/property&gt;
+  &lt;!-- Use inner bean, not local reference to target --&gt;
+  &lt;property name="target"&gt;
+    &lt;bean class="com.mycompany.PersonImpl"&gt;
+      &lt;property name="name"&gt;&lt;value&gt;Tony&lt;/value&gt;&lt;/property&gt;
+      &lt;property name="age"&gt;&lt;value&gt;51&lt;/value&gt;&lt;/property&gt;
+    &lt;/bean&gt;
+  &lt;/property&gt;
+  &lt;property name="interceptorNames"&gt;
+    &lt;list&gt;
+      &lt;value&gt;myAdvisor&lt;/value&gt;
+      &lt;value&gt;debugInterceptor&lt;/value&gt;
+    &lt;/list&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
       <para>This has the advantage that there's only one object of type
@@ -1250,7 +1250,7 @@
             standard set of 'global' advisors:
 <programlisting><![CDATA[
 <bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
-  <property name="target"><ref bean="service"/></property>
+  <property name="target" ref="service"/>
   <property name="interceptorNames">
     <list>
       <value>global*</value>
@@ -1259,8 +1259,7 @@
 </bean>
 
 <bean id="global_debug" class="org.springframework.aop.interceptor.DebugInterceptor"/>
-<bean id="global_performance"
-  class="org.springframework.aop.interceptor.PerformanceMonitorInterceptor"/>
+<bean id="global_performance" class="org.springframework.aop.interceptor.PerformanceMonitorInterceptor"/>
 ]]></programlisting>
         </para>
     </sect2>
@@ -1281,7 +1280,7 @@
     <sect2>
       <title>TransactionProxyFactoryBean</title>
 
-      <para>The <emphasis role="bold">jPetStore</emphasis> sample application
+      <para>The <emphasis role="bold">JPetStore</emphasis> sample application
       shipped with Spring shows the use of the
       TransactionProxyFactoryBean.</para>
 
@@ -1290,7 +1289,7 @@
       <literal>ProxyFactoryBean</literal>. (See list of
       <literal>ProxyConfig</literal> properties above.)</para>
 
-      <para>The following example from the jPetStore illustrates how this
+      <para>The following example from the JPetStore illustrates how this
       works. As with a <literal>ProxyFactoryBean</literal>, there is a target
       bean definition. Dependencies should be expressed on the proxied factory
       bean definition ("petStore" here), rather than the target POJO
@@ -1302,21 +1301,20 @@
       settings:</para>
 
       <para><programlisting>&lt;bean id="petStoreTarget" class="org.springframework.samples.jpetstore.domain.logic.PetStoreImpl"&gt;
-    &lt;property name="accountDao"&gt;&lt;ref bean="accountDao"/&gt;&lt;/property&gt;
-    &lt;!-- Other dependencies omitted --&gt;
+  &lt;property name="accountDao"&gt;&lt;ref bean="accountDao"/&gt;&lt;/property&gt;
+  &lt;!-- Other dependencies omitted --&gt;
 &lt;/bean&gt;
 
-&lt;bean id="petStore" 
-    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
-    &lt;property name="transactionManager"&gt;&lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
-    &lt;property name="target"&gt;&lt;ref local="petStoreTarget"/&gt;&lt;/property&gt;
-    &lt;property name="transactionAttributes"&gt;
-        &lt;props&gt;
-            &lt;prop key="insert*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
-            &lt;prop key="update*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
-            &lt;prop key="*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
-        &lt;/props&gt;
-    &lt;/property&gt;
+&lt;bean id="petStore" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+  &lt;property name="transactionManager" ref="transactionManager"/&gt;
+  &lt;property name="target" ref="petStoreTarget"/&gt;
+  &lt;property name="transactionAttributes"&gt;
+    &lt;props&gt;
+      &lt;prop key="insert*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+      &lt;prop key="update*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+      &lt;prop key="*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
+    &lt;/props&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
       <para>As with the <literal>ProxyFactoryBean</literal>, we might choose
@@ -1336,15 +1334,15 @@
       &lt;list&gt; element in XML bean definitions, as follows:</para>
 
       <para><programlisting>&lt;property name="preInterceptors"&gt;
-    &lt;list&gt;
-        &lt;ref local="authorizationInterceptor"/&gt;
-        &lt;ref local="notificationBeforeAdvice"/&gt;
-    &lt;/list&gt;
+  &lt;list&gt;
+    &lt;ref bean="authorizationInterceptor"/&gt;
+    &lt;ref bean="notificationBeforeAdvice"/&gt;
+  &lt;/list&gt;
 &lt;/property&gt;
 &lt;property name="postInterceptors"&gt;
-    &lt;list&gt;
-        &lt;ref local="myAdvisor"/&gt;
-    &lt;/list&gt;
+  &lt;list&gt;
+    &lt;ref bean="myAdvisor"/&gt;
+  &lt;/list&gt;
 &lt;/property&gt;</programlisting></para>
 
       <para>These properties could be added to the "petStore" bean definition
@@ -1406,12 +1404,12 @@
 
     <para><programlisting>&lt;bean id="txProxyTemplate" abstract="true"
         class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
-    &lt;property name="transactionManager"&gt;&lt;ref local="transactionManager"/&gt;&lt;/ref&gt;&lt;/property&gt;
-    &lt;property name="transactionAttributes"&gt;
-      &lt;props&gt;
-        &lt;prop key="*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
-      &lt;/props&gt;
-    &lt;/property&gt;
+  &lt;property name="transactionManager" ref="transactionManager"/&gt;
+  &lt;property name="transactionAttributes"&gt;
+    &lt;props&gt;
+      &lt;prop key="*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+    &lt;/props&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
     <para>This will never be instantiated itself, so may actually be
@@ -1419,27 +1417,27 @@
     definition, which to wraps the target of the proxy as an inner bean
     definition, since the target will never be used on its own
     anyways.<programlisting>&lt;bean id="myService" parent="txProxyTemplate"&gt;
-    &lt;property name="target"&gt;
-      &lt;bean class="org.springframework.samples.MyServiceImpl"&gt;
-      &lt;/bean&gt;
-    &lt;/property&gt;
+  &lt;property name="target"&gt;
+    &lt;bean class="org.springframework.samples.MyServiceImpl"&gt;
+    &lt;/bean&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
     <para>It is of course possible to override properties from the parent
     template, such as in this case, the transaction propagation
     settings:<programlisting>&lt;bean id="mySpecialService" parent="txProxyTemplate"&gt;
-    &lt;property name="target"&gt;
-      &lt;bean class="org.springframework.samples.MySpecialServiceImpl"&gt;
-      &lt;/bean&gt;
-    &lt;/property&gt;
-    &lt;property name="transactionAttributes"&gt;
-      &lt;props&gt;
-        &lt;prop key="get*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
-        &lt;prop key="find*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
-        &lt;prop key="load*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
-        &lt;prop key="store*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
-      &lt;/props&gt;
-    &lt;/property&gt;
+  &lt;property name="target"&gt;
+    &lt;bean class="org.springframework.samples.MySpecialServiceImpl"&gt;
+    &lt;/bean&gt;
+  &lt;/property&gt;
+  &lt;property name="transactionAttributes"&gt;
+    &lt;props&gt;
+      &lt;prop key="get*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
+      &lt;prop key="find*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
+      &lt;prop key="load*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
+      &lt;prop key="store*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+    &lt;/props&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
     <para>Note that in the example above, we have explicitly marked the parent
@@ -1625,14 +1623,13 @@ assertEquals("Added two advisors",
         <para>The BeanNameAutoProxyCreator automatically creates AOP proxies
         for beans with names matching literal values or wildcards.</para>
 
-        <para><programlisting>&lt;bean id="jdkBeanNameProxyCreator" 
-    class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator"&gt;
-    &lt;property name="beanNames"&gt;&lt;value&gt;jdk*,onlyJdk&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="interceptorNames"&gt;
-        &lt;list&gt;
-            &lt;value&gt;myInterceptor&lt;/value&gt;
-        &lt;/list&gt;
-    &lt;/property&gt;
+        <para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator"&gt;
+  &lt;property name="beanNames"&gt;&lt;value&gt;jdk*,onlyJdk&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="interceptorNames"&gt;
+    &lt;list&gt;
+      &lt;value&gt;myInterceptor&lt;/value&gt;
+    &lt;/list&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
         <para>As with <literal>ProxyFactoryBean</literal>, there is an
@@ -1701,28 +1698,20 @@ assertEquals("Added two advisors",
         return an AOP proxy, not the target business object. (The "inner bean"
         idiom shown earlier also offers this benefit.)</para>
 
-        <para><programlisting>&lt;bean id="autoProxyCreator"
-    class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"&gt;
+        <para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
+
+&lt;bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
+  &lt;property name="transactionInterceptor" ref="transactionInterceptor"/&gt;
 &lt;/bean&gt;
 
-&lt;bean id="txAdvisor"
-    autowire="constructor"
-    class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
-    &lt;property name="order"&gt;&lt;value&gt;1&lt;/value&gt;&lt;/property&gt;
+&lt;bean id="customAdvisor" class="com.mycompany.MyAdvisor"/&gt;
+
+&lt;bean id="businessObject1" class="com.mycompany.BusinessObject1"&gt;
+  &lt;!-- Properties omitted --&gt;
 &lt;/bean&gt;
 
-&lt;bean id="customAdvisor"
-    class="com.mycompany.MyAdvisor"&gt;
-&lt;/bean&gt;
-
-&lt;bean id="businessObject1"
-    class="com.mycompany.BusinessObject1"&gt;
-    &lt;!-- Properties omitted --&gt;
-&lt;/bean&gt;
-
-&lt;bean id="businessObject2"
-    class="com.mycompany.BusinessObject2"&gt;
-&lt;/bean&gt;</programlisting></para>
+&lt;bean id="businessObject2" class="com.mycompany.BusinessObject2"/&gt;
+</programlisting></para>
 
         <para>The <literal>DefaultAdvisorAutoProxyCreator</literal> is very
         useful if you want to apply the same advice consistently to many
@@ -1773,43 +1762,37 @@ assertEquals("Added two advisors",
       consideration on its own. (The metadata-aware code is in the pointcuts
       contained in the advisors, not the AOP framework itself.)</para>
 
-      <para>The <literal>/attributes</literal> directory of the jPetStore
+      <para>The <literal>/attributes</literal> directory of the JPetStore
       sample application shows the use of attribute-driven autoproxying. In
       this case, there's no need to use the
       <literal>TransactionProxyFactoryBean</literal>. Simply defining
       transactional attributes on business objects is sufficient, because of
       the use of metadata-aware pointcuts. The bean definitions include the
       following code, in <literal>/WEB-INF/declarativeServices.xml</literal>.
-      Note that this is generic, and can be used outside the jPetStore:</para>
+      Note that this is generic, and can be used outside the JPetStore:</para>
 
-      <para><programlisting>&lt;bean id="autoProxyCreator" 
-    class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"&gt;
-&lt;/bean&gt;
+      <para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
 
-&lt;bean id="transactionAttributeSource"
-    class="org.springframework.transaction.interceptor.AttributesTransactionAttributeSource"
-    autowire="constructor"&gt;
+&lt;bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
+  &lt;property name="transactionInterceptor" ref="transactionInterceptor"/&gt;
 &lt;/bean&gt;
 
 &lt;bean id="transactionInterceptor"
-    class="org.springframework.transaction.interceptor.TransactionInterceptor"
-    autowire="byType"&gt;
+    class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
+  &lt;property name="transactionManager" ref="transactionManager"/&gt;
+  &lt;property name="transactionAttributeSource"&gt;
+    &lt;bean class="org.springframework.transaction.interceptor.AttributesTransactionAttributeSource"&gt;
+      &lt;property name="attributes" ref="attributes"/&gt;
+    &lt;/bean&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="transactionAdvisor"
-    class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"
-    autowire="constructor" &gt;
-&lt;/bean&gt;
-
-&lt;bean id="attributes"
-    class="org.springframework.metadata.commons.CommonsAttributes"
-/&gt;</programlisting></para>
+&lt;bean id="attributes" class="org.springframework.metadata.commons.CommonsAttributes"/&gt;</programlisting></para>
 
       <para>The <literal>DefaultAdvisorAutoProxyCreator</literal> bean
-      definition--called "autoProxyCreator" in this case, but the name is
-      not significant (it could even be omitted)--will pick up all eligible
-			pointcuts in the current application context. In this case, the
-			"transactionAdvisor" bean definition, of type
+      definition (the name is not significant, hence it can even be omitted)
+      will pick up all eligible pointcuts in the current application context.
+      In this case, the "transactionAdvisor" bean definition, of type
       <literal>TransactionAttributeSourceAdvisor</literal>, will apply to
       classes or methods carrying a transaction attribute. The
       TransactionAttributeSourceAdvisor depends on a TransactionInterceptor,
@@ -1821,6 +1804,27 @@ assertEquals("Added two advisors",
       Commons Attributes API to obtain attribute information. (The application
       code must have been compiled using the Commons Attributes compilation
       task.)</para>
+
+			<para>The <literal>/annotation</literal> directory of the JPetStore
+			sample application contains an analogous example for auto-proxying
+			driven by JDK 1.5+ annotations. The following configuration enables
+      automatic detection of Spring's <literal>Transactional</literal>
+      annotation, leading to implicit proxies for beans containing that
+      annotation:</para>
+
+			<para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
+
+&lt;bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
+  &lt;property name="transactionInterceptor" ref="transactionInterceptor"/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="transactionInterceptor"
+    class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
+  &lt;property name="transactionManager" ref="transactionManager"/&gt;
+  &lt;property name="transactionAttributeSource"&gt;
+    &lt;bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource"/&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
 
       <para>The <literal>TransactionInterceptor</literal> defined here depends
       on a <literal>PlatformTransactionManager</literal> definition, which is
@@ -1863,21 +1867,13 @@ assertEquals("Added two advisors",
       generic <literal>DefaultPointcutAdvisor</literal>, configured using
       JavaBean properties:</para>
 
-      <para><programlisting>&lt;bean id="lockMixin"
-    class="org.springframework.aop.LockMixin"
-    singleton="false"
-/&gt;
+      <para><programlisting>&lt;bean id="lockMixin" class="org.springframework.aop.LockMixin"
+    singleton="false"/&gt;
 
-&lt;bean id="lockableAdvisor"
-    class="org.springframework.aop.support.DefaultPointcutAdvisor"
-    singleton="false"
-&gt;
-    &lt;property name="pointcut"&gt;
-        &lt;ref local="myAttributeAwarePointcut"/&gt;
-    &lt;/property&gt;
-    &lt;property name="advice"&gt;
-        &lt;ref local="lockMixin"/&gt;
-    &lt;/property&gt;
+&lt;bean id="lockableAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor"
+    singleton="false"&gt;
+  &lt;property name="pointcut" ref="myAttributeAwarePointcut"/&gt;
+  &lt;property name="advice" ref="lockMixin"/&gt;
 &lt;/bean&gt;
 
 &lt;bean id="anyBean" class="anyclass" ...</programlisting></para>
@@ -1939,20 +1935,14 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
 
       <para>The XML definitions required look as follows:</para>
 
-      <para><programlisting>&lt;bean id="initialTarget" class="mycompany.OldTarget"&gt;
+      <para><programlisting>&lt;bean id="initialTarget" class="mycompany.OldTarget"/&gt;
+
+&lt;bean id="swapper" class="org.springframework.aop.target.HotSwappableTargetSource"&gt;
+  &lt;constructor-arg ref="initialTarget"/&gt;
 &lt;/bean&gt;
 
-&lt;bean id="swapper" 
-    class="org.springframework.aop.target.HotSwappableTargetSource"&gt;
-    &lt;constructor-arg&gt;&lt;ref local="initialTarget"/&gt;&lt;/constructor-arg&gt;
-&lt;/bean&gt;
-
-&lt;bean id="swappable" 
-    class="org.springframework.aop.framework.ProxyFactoryBean"
-&gt;
-    &lt;property name="targetSource"&gt;
-        &lt;ref local="swapper"/&gt;
-    &lt;/property&gt;
+&lt;bean id="swappable" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
+  &lt;property name="targetSource" ref="swapper"/&gt;
 &lt;/bean&gt;</programlisting></para>
 
       <para>The above <literal>swap()</literal> call changes the target of the
@@ -1989,20 +1979,17 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
 
       <para><programlisting>&lt;bean id="businessObjectTarget" class="com.mycompany.MyBusinessObject" 
     singleton="false"&gt;
-    ... properties omitted
+  ... properties omitted
 &lt;/bean&gt;
 
-&lt;bean id="poolTargetSource" 
-    class="org.springframework.aop.target.CommonsPoolTargetSource"&gt;
-    &lt;property name="targetBeanName"&gt;&lt;value&gt;businessObjectTarget&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="maxSize"&gt;&lt;value&gt;25&lt;/value&gt;&lt;/property&gt;
+&lt;bean id="poolTargetSource" class="org.springframework.aop.target.CommonsPoolTargetSource"&gt;
+  &lt;property name="targetBeanName" value="businessObjectTarget"/&gt;
+  &lt;property name="maxSize" value="25"/&gt;
 &lt;/bean&gt;
 
-&lt;bean id="businessObject" 
-    class="org.springframework.aop.framework.ProxyFactoryBean"
-&gt;
-    &lt;property name="targetSource"&gt;&lt;ref local="poolTargetSource"/&gt;&lt;/property&gt;
-    &lt;property name="interceptorNames"&gt;&lt;value&gt;myInterceptor&lt;/value&gt;&lt;/property&gt;
+&lt;bean id="businessObject" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
+  &lt;property name="targetSource" ref="poolTargetSource"/&gt;
+  &lt;property name="interceptorNames" value="myInterceptor"/&gt;
 &lt;/bean&gt;</programlisting></para>
 
       <para>Note that the target object--"businessObjectTarget" in the
@@ -2026,10 +2013,9 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
       size of the pool through an introduction. You'll need to define an
       advisor like this:</para>
 
-      <para><programlisting>&lt;bean id="poolConfigAdvisor" 
-    class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
-    &lt;property name="targetObject"&gt;&lt;ref local="poolTargetSource" /&gt;&lt;/property&gt;
-    &lt;property name="targetMethod"&gt;&lt;value&gt;getPoolingConfigMixin&lt;/value&gt;&lt;/property&gt;
+      <para><programlisting>&lt;bean id="poolConfig" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
+  &lt;property name="targetObject" ref="poolTargetSource"/&gt;
+  &lt;property name="targetMethod" value="getPoolingConfigMixin"/&gt;
 &lt;/bean&gt;</programlisting></para>
 
       <para>This advisor is obtained by calling a convenience method on the
@@ -2066,9 +2052,8 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
       <literal>poolTargetSource</literal> definition shown above as follows.
       (I've also changed the name, for clarity.)</para>
 
-      <para><programlisting>&lt;bean id="prototypeTargetSource" 
-    class="org.springframework.aop.target.PrototypeTargetSource"&gt;
-    &lt;property name="targetBeanName"&gt;&lt;value&gt;businessObjectTarget&lt;/value&gt;&lt;/property&gt;
+      <para><programlisting>&lt;bean id="prototypeTargetSource" class="org.springframework.aop.target.PrototypeTargetSource"&gt;
+  &lt;property name="targetBeanName" ref="businessObjectTarget"/&gt;
 &lt;/bean&gt;</programlisting></para>
 
       <para>There's only one property: the name of the target bean.
@@ -2082,17 +2067,14 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
         <para>
             ThreadLocal target sources are useful if you need an object to be created
             for each incoming request (per thread that is). The concept of a
-            <literal>ThreadLocal</literal> provide a JDK-wide
-            facility to transparently store resource alongside a thread. Setting up a ThreadLocalTargetSource
+            <literal>ThreadLocal</literal> provide a JDK-wide facility to transparently
+						store resource alongside a thread. Setting up a ThreadLocalTargetSource
             is pretty much the same as was explained for the other target sources:
         </para>
         <para>
-            <programlisting><![CDATA[
-<bean id="threadlocalTargetSource"
-  class="org.springframework.aop.target.ThreadLocalTargetSource">
-  <property name="targetBeanName"><value>businessObjectTarget</value></property>
-</bean>
-            ]]></programlisting>
+            <programlisting>&lt;bean id="threadlocalTargetSource" class="org.springframework.aop.target.ThreadLocalTargetSource"&gt;
+  &lt;property name="targetBeanName" value="businessObjectTarget"/&gt;
+&lt;/bean&gt;</programlisting>
         </para>
         <para>
             <emphasis>ThreadLocals come with serious issues (potentially resulting in memory leaks)
@@ -2170,11 +2152,7 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
         <para><emphasis>Performance improvements</emphasis>: The creation of
         AOP proxies is handled by a factory via a Strategy interface. Thus we
         can support additional AopProxy types without impacting user code or
-        the core implementation. Significant performance optimizations for
-        CGLIB proxying are scheduled for the 1.0.3 release, with further
-        optimizations by Spring 1.1 in cases where advice will not change at
-        runtime. This should produce a significant reduction in the overhead
-        of the AOP framework. Note, however, that the overhead of the AOP
+        the core implementation. Note, however, that the overhead of the AOP
         framework is not an issue in normal usage.</para>
       </listitem>
 
@@ -2208,7 +2186,5 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
         well thought out and well documented.</para>
       </listitem>
     </itemizedlist>
-
-    <para>Both these integrations should be available in Spring 1.1.</para>
   </sect1>
 </chapter>

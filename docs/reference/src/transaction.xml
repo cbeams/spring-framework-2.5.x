@@ -204,20 +204,18 @@
     DataSourceTransactionManager, giving it a reference to the
     DataSource.</para>
 
-    <para><programlisting>&lt;bean id="dataSource" 
-    class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-    &lt;property name="driverClassName"&gt;&lt;value&gt;${jdbc.driverClassName}&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="url"&gt;&lt;value&gt;${jdbc.url}&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="username"&gt;&lt;value&gt;${jdbc.username}&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="password"&gt;&lt;value&gt;${jdbc.password}&lt;/value&gt;&lt;/property&gt;
+    <para><programlisting>&lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+  &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
+  &lt;property name="url" value="${jdbc.url}"/&gt;
+  &lt;property name="username" value="${jdbc.username}"/&gt;
+  &lt;property name="password" value="${jdbc.password}"/&gt;
 &lt;/bean&gt;</programlisting></para>
 
     <para>The PlatformTransactionManager definition will look like
     this:</para>
 
-    <para><programlisting>&lt;bean id="transactionManager" 
-    class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
-    &lt;property name="dataSource"&gt;&lt;ref local="dataSource"/&gt;&lt;/property&gt;
+    <para><programlisting>&lt;bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
+  &lt;property name="dataSource" ref="dataSource"/&gt;
 &lt;/bean&gt;</programlisting></para>
 
     <para>If we use JTA, as in the <literal>dataAccessContext-jta.xml
@@ -228,12 +226,12 @@
     container's global transaction management.</para>
 
     <para><programlisting>&lt;bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
-    &lt;property name="jndiName"&gt;&lt;value&gt;jdbc/jpetstore&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="jndiName" value="jdbc/jpetstore"/>&gt;
 &lt;/bean&gt;
 
-&lt;bean id="transactionManager" 
-    class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;</programlisting>We
-    can use Hibernate local transactions easily, as shown in the following
+&lt;bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;</programlisting></para>
+
+    <para>We can use Hibernate local transactions easily, as shown in the following
     examples from the Spring <emphasis role="bold">PetClinic</emphasis> sample
     application.</para>
 
@@ -245,34 +243,33 @@
     non-transactional as Spring, rather than the container, will manage
     transactions.)</para>
 
-    <para>The "transactionManager" bean in this case is of class
+    <para>The "txManager" bean in this case is of class
     HibernateTransactionManager. In the same way as the
     DataSourceTransactionManager needs a reference to the DataSource, the
-    HibernateTransactionManager needs a reference to the session
-    factory.</para>
+    HibernateTransactionManager needs a reference to the SessionFactory.</para>
 
     <para><programlisting>&lt;bean id="sessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
-    &lt;property name="dataSource"&gt;&lt;ref local="dataSource"/&gt;&lt;/property&gt;
-    &lt;property name="mappingResources"&gt;
-        &lt;value&gt;org/springframework/samples/petclinic/hibernate/petclinic.hbm.xml&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property name="hibernateProperties"&gt;
-        &lt;props&gt;
-            &lt;prop key="hibernate.dialect"&gt;${hibernate.dialect}&lt;/prop&gt;
-        &lt;/props&gt;
-    &lt;/property&gt;
+  &lt;property name="dataSource" ref="dataSource"/&gt;
+  &lt;property name="mappingResources"&gt;
+    &lt;list&gt;
+      &lt;value&gt;org/springframework/samples/petclinic/hibernate/petclinic.hbm.xml&lt;/value&gt;
+    &lt;/list&gt;
+  &lt;/property&gt;
+  &lt;property name="hibernateProperties"&gt;
+    &lt;props&gt;
+      &lt;prop key="hibernate.dialect"&gt;${hibernate.dialect}&lt;/prop&gt;
+    &lt;/props&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;
 
-&lt;bean id="transactionManager" 
-    class="org.springframework.orm.hibernate.HibernateTransactionManager"&gt;
-    &lt;property name="sessionFactory"&gt;&lt;ref local="sessionFactory"/&gt;&lt;/property&gt;
+&lt;bean id="txManager" class="org.springframework.orm.hibernate.HibernateTransactionManager"&gt;
+  &lt;property name="sessionFactory" ref="sessionFactory"/&gt;
 &lt;/bean&gt;</programlisting></para>
 
     <para>With Hibernate and JTA transactions we could simply use the
     JtaTransactionManager as with JDBC or any other resource strategy.</para>
 
-    <para><programlisting>&lt;bean id="transactionManager" 
-    class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;</programlisting></para>
+    <para><programlisting>&lt;bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;</programlisting></para>
 
     <para>Note that this is identical to JTA configuration for any resource,
     as these are global transactions, which can enlist any transactional
@@ -402,15 +399,15 @@
       <para><programlisting>DefaultTransactionDefinition def = new DefaultTransactionDefinition();
 def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
-TransactionStatus status = transactionManager.getTransaction(def);
-
+TransactionStatus status = txManager.getTransaction(def);
 try {
     // execute your business logic here
-} catch (MyException ex) {
-    transactionManager.rollback(status);
+}
+catch (MyException ex) {
+    txManager.rollback(status);
     throw ex;
 }
-transactionManager.commit(status);</programlisting></para>
+txManager.commit(status);</programlisting></para>
     </sect2>
   </sect1>
 
@@ -517,23 +514,22 @@ transactionManager.commit(status);</programlisting></para>
     semantics we wish to use (as discussed above), as well as where they
     apply. Now let's consider the following sample:</para>
 
-    <para><programlisting>&lt;!-- this example is in verbose form, see note later about concise
-     for multiple proxies! --&gt;
+    <para><programlisting>&lt;!-- this example is in verbose form, see note later about concise for multiple proxies! --&gt;
 &lt;!-- the target bean to wrap transactionally --&gt;
 &lt;bean id="petStoreTarget"&gt;
   ...
 &lt;/bean&gt;
-&lt;bean id="petStore"
-    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
-    &lt;property name="transactionManager"&gt;&lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
-    &lt;property name="target"&gt;&lt;ref bean="petStoreTarget"/&gt;&lt;/property&gt;
-    &lt;property name="transactionAttributes"&gt;
-        &lt;props&gt;
-            &lt;prop key="insert*"&gt;PROPAGATION_REQUIRED,-MyCheckedException&lt;/prop&gt;
-            &lt;prop key="update*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
-            &lt;prop key="*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
-        &lt;/props&gt;
-    &lt;/property&gt;
+
+&lt;bean id="petStore" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+  &lt;property name="transactionManager" ref="txManager"/&gt;
+  &lt;property name="target" ref="petStoreTarget"/&gt;
+  &lt;property name="transactionAttributes"&gt;
+    &lt;props&gt;
+      &lt;prop key="insert*"&gt;PROPAGATION_REQUIRED,-MyCheckedException&lt;/prop&gt;
+      &lt;prop key="update*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+      &lt;prop key="*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
+    &lt;/props&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
     <para>The transactional proxy will implement the interfaces of the target:
@@ -707,8 +703,7 @@ List queryByCriteria(Order criteria);</programlisting>Used in bare form, this
                 <row>
                   <entry><literal>propagation</literal></entry>
 
-                  <entry>enum:
-                  org.springframework.transaction.annotation.Propagation</entry>
+                  <entry>enum: Propagation</entry>
 
                   <entry>optional propagation setting (defaults to
                   PROPAGATION_REQUIRED)</entry>
@@ -717,8 +712,7 @@ List queryByCriteria(Order criteria);</programlisting>Used in bare form, this
                 <row>
                   <entry><literal>isolation</literal></entry>
 
-                  <entry>enum:
-                  org.springframework.transaction.annotation.Isolation</entry>
+                  <entry>enum: Isolation</entry>
 
                   <entry>optional isolation level (defaults to
                   ISOLATION_DEFAULT)</entry>
@@ -837,13 +831,12 @@ interface TestService {
           of the <literal>TransactionAttribute</literal> property, specifying
           an <literal>AnnotationTransactionAttributeSource</literal>.</para>
 
-          <para><programlisting>&lt;bean id="petStore"
-    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
-    &lt;property name="transactionManager"&gt;&lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
-    &lt;property name="target"&gt;&lt;ref bean="petStoreTarget"/&gt;&lt;/property&gt;
-    &lt;property name="transactionAttributeSource"&gt;
-        &lt;bean class="...transaction.annotation.AnnotationTransactionAttributeSource"/&gt;
-    &lt;/property&gt;
+          <para><programlisting>&lt;bean id="petStore" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+  &lt;property name="transactionManager" ref="txManager"/&gt;
+  &lt;property name="target" ref="petStoreTarget"/&gt;
+  &lt;property name="transactionAttributeSource"&gt;
+    &lt;bean class="...transaction.annotation.AnnotationTransactionAttributeSource"/&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;</programlisting>Since the transactionAttributeSource property
           does not need to change at all for each proxy instance, when using
           parent and child bean definitions to avoid code duplication, the
@@ -874,27 +867,23 @@ interface TestService {
           <literal>BeanPostProcessor</literal>. Because it is a bean post
           processor, it gets a chance to look at every bean that is created as
           it is created. If the bean contains the
-          <literal>Transactional</literal> Annotations, a transactional proxy
+          <literal>Transactional</literal> annotation, a transactional proxy
           is automatically created to wrap it.</para>
 
-          <para><programlisting>&lt;bean
-class="org.springframework...DefaultAdvisorAutoProxyCreator"/&gt;
+					<para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
 
-&lt;bean class="org.springframework...TransactionAttributeSourceAdvisor"&gt;
-    &lt;property name="transactionInterceptor"&gt;
-        &lt;ref bean="transactionInterceptor"/&gt;&lt;/property&gt;
+&lt;bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
+  &lt;property name="transactionInterceptor" ref="transactionInterceptor"/&gt;
 &lt;/bean&gt;
 
-&lt;bean id="transactionInterceptor“
-      class="org.springframework...TransactionInterceptor"&gt;
-    &lt;property name="transactionManager"&gt;
-        &lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
-    &lt;property name="transactionAttributeSource"&gt;
-        &lt;bean class="org.springframework...AnnotationsTransactionAttributeSource"&gt;
-	      &lt;/bean&gt;
-    &lt;/property&gt;
-&lt;/bean&gt;
-</programlisting>A number of classes are involved here:</para>
+&lt;bean id="transactionInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
+  &lt;property name="transactionManager" ref="txManager"/&gt;
+  &lt;property name="transactionAttributeSource"&gt;
+    &lt;bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource"/&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+          <para>A number of classes are involved here:</para>
 
           <itemizedlist>
             <listitem>
@@ -957,15 +946,18 @@ class="org.springframework...DefaultAdvisorAutoProxyCreator"/&gt;
 
       <para>Let us consider a sample configuration:</para>
 
-      <para><programlisting>  &lt;!-- Transaction Interceptor set up to do PROPAGATION_REQUIRED on all methods --&gt;
+      <para><programlisting>&lt;beans&gt;
+
+	&lt;!-- Transaction Interceptor set up to do PROPAGATION_REQUIRED on all methods --&gt;
   &lt;bean id="matchAllWithPropReq" 
       class="org.springframework.transaction.interceptor.MatchAlwaysTransactionAttributeSource"&gt;
-    &lt;property name="transactionAttribute"&gt;&lt;value&gt;PROPAGATION_REQUIRED&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="transactionAttribute" value="PROPAGATION_REQUIRED"/&gt;
   &lt;/bean&gt;
-  &lt;bean id="matchAllTxInterceptor" 
+
+  &lt;bean id="matchAllTxInterceptor"
       class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
-    &lt;property name="transactionManager"&gt;&lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
-    &lt;property name="transactionAttributeSource"&gt;&lt;ref bean="matchAllWithPropReq"/&gt;&lt;/property&gt;
+    &lt;property name="transactionManager" ref="txManager"/&gt;
+    &lt;property name="transactionAttributeSource" ref="matchAllWithPropReq"/&gt;
   &lt;/bean&gt;
 
   &lt;!-- One BeanNameAutoProxyCreator handles all beans where we want all methods to use 
@@ -988,7 +980,9 @@ class="org.springframework...DefaultAdvisorAutoProxyCreator"/&gt;
         &lt;idref local="core-services-userService"/&gt;
       &lt;/list&gt;
     &lt;/property&gt;
-  &lt;/bean&gt;</programlisting></para>
+  &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting></para>
 
       <para>Assuming that we already have a
       <classname>TransactionManager</classname> instance in our

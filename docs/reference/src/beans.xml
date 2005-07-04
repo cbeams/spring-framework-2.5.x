@@ -606,9 +606,9 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       <literal>XmlBeanFactory</literal> configuration file specifying some
       bean definitions. Following is the code for the actual main bean itself,
       showing the appropriate setters declared. <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
-    &lt;property name="beanOne"&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/property&gt;
-    &lt;property name="beanTwo"&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/property&gt;
-    &lt;property name="integerProperty"&gt;&lt;value&gt;1&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="beanOne"&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/property&gt;
+  &lt;property name="beanTwo"&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/property&gt;
+  &lt;property name="integerProperty"&gt;&lt;value&gt;1&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
 &lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
@@ -639,9 +639,9 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       (constructor-based dependency injection). Below is a snippet from an XML
       configuration that specifies constructor arguments and the actual bean
       code, showing the constructor: <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
-    &lt;constructor-arg&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/constructor-arg&gt;
-    &lt;constructor-arg&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/constructor-arg&gt;
-    &lt;constructor-arg type="int"&gt;&lt;value&gt;1&lt;/value&gt;&lt;/constructor-arg&gt;
+  &lt;constructor-arg&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/constructor-arg&gt;
+  &lt;constructor-arg&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/constructor-arg&gt;
+  &lt;constructor-arg type="int"&gt;&lt;value&gt;1&lt;/value&gt;&lt;/constructor-arg&gt;
 &lt;/bean&gt;
 
 &lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
@@ -665,9 +665,9 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       constructor, Spring is told to call a static factory method to return an
       instance of the object.: <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"
       factory-method="createInstance"&gt;
-    &lt;constructor-arg&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/constructor-arg&gt;
-    &lt;constructor-arg&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/constructor-arg&gt;
-    &lt;constructor-arg&gt;&lt;value&gt;1&lt;/value&gt;&lt;/constructor-arg&gt;
+  &lt;constructor-arg&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/constructor-arg&gt;
+  &lt;constructor-arg&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/constructor-arg&gt;
+  &lt;constructor-arg&gt;&lt;value&gt;1&lt;/value&gt;&lt;/constructor-arg&gt;
 &lt;/bean&gt;
 
 &lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
@@ -735,8 +735,8 @@ public class ExampleBean {
         with simple types by explicitly specifying the type of the constructor
         argument using the <literal>type</literal> attribute. For example:
         <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
-     &lt;constructor-arg type="int"&gt;&lt;value&gt;7500000&lt;/value&gt;&lt;/constructor-arg&gt;
-     &lt;constructor-arg type="java.lang.String"&gt;&lt;value&gt;42&lt;/value&gt;&lt;/constructor-arg&gt;
+  &lt;constructor-arg type="int"&gt;&lt;value&gt;7500000&lt;/value&gt;&lt;/constructor-arg&gt;
+  &lt;constructor-arg type="java.lang.String"&gt;&lt;value&gt;42&lt;/value&gt;&lt;/constructor-arg&gt;
 &lt;/bean&gt; </programlisting></para>
       </sect3>
 
@@ -746,8 +746,8 @@ public class ExampleBean {
         <para>Constructor arguments can have their index specified explicitly
         by use of the <literal>index</literal> attribute. For example:
         <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
-     &lt;constructor-arg index="0"&gt;&lt;value&gt;7500000&lt;/value&gt;&lt;/constructor-arg&gt;
-     &lt;constructor-arg index="1"&gt;&lt;value&gt;42&lt;/value&gt;&lt;/constructor-arg&gt;
+  &lt;constructor-arg index="0"&gt;&lt;value&gt;7500000&lt;/value&gt;&lt;/constructor-arg&gt;
+  &lt;constructor-arg index="1"&gt;&lt;value&gt;42&lt;/value&gt;&lt;/constructor-arg&gt;
 &lt;/bean&gt; </programlisting> As well as solving the ambiguity problem of
         multiple simple values, specifying an index also solves the problem of
         ambiguity where a constructor may have two arguments of the same type.
@@ -777,20 +777,18 @@ public class ExampleBean {
         linkend="beans-factory-collaborators-propertyeditor">previously</link>,
         JavaBeans PropertyEditors are used to convert these string values from
         a <literal>java.lang.String</literal> to the actual property or
-        argument type.<programlisting>&lt;beans&gt;
-    &lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-        &lt;!-- results in a setDriverClassName(String) call --&gt;
-        &lt;property name="driverClassName"&gt;
-            &lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt;
-        &lt;/property&gt;
-        &lt;property name="url"&gt;
-            &lt;value&gt;jdbc:mysql://localhost:3306/mydb&lt;/value&gt;
-        &lt;/property&gt;
-        &lt;property name="username"&gt;
-            &lt;value&gt;root&lt;/value&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
-&lt;/beans&gt;</programlisting></para>
+        argument type.<programlisting>&lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+  &lt;!-- results in a setDriverClassName(String) call --&gt;
+  &lt;property name="driverClassName"&gt;
+    &lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt;
+  &lt;/property&gt;
+  &lt;property name="url"&gt;
+    &lt;value&gt;jdbc:mysql://localhost:3306/mydb&lt;/value&gt;
+  &lt;/property&gt;
+  &lt;property name="username"&gt;
+    &lt;value&gt;root&lt;/value&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
       </sect3>
 
       <sect3 id="beans-null-element">
@@ -800,13 +798,13 @@ public class ExampleBean {
         values. Spring treats empty arguments for properties and the like as
         empty Strings. The following XmlBeanFactory configuration:
         <programlisting>&lt;bean class="ExampleBean"&gt;
-    &lt;property name="email"&gt;&lt;value&gt;&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="email"&gt;&lt;value&gt;&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;        </programlisting>results in the email property being set
         to "", equivalent to the java code:
         <literal>exampleBean.setEmail("")</literal>. The special
         <literal>&lt;null&gt;</literal> element may be used to indicate a null
         value, so that: <programlisting>&lt;bean class="ExampleBean"&gt;
-    &lt;property name="email"&gt;&lt;null/&gt;&lt;/property&gt;
+  &lt;property name="email"&gt;&lt;null/&gt;&lt;/property&gt;
 &lt;/bean&gt;        </programlisting>is equivalent to the java code:
         <literal>exampleBean.setEmail(null)</literal>.</para>
       </sect3>
@@ -819,46 +817,44 @@ public class ExampleBean {
         properties and arguments of Java type <literal>List</literal>,
         <literal>Set</literal>, <literal>Map</literal>, and
         <literal>Properties</literal>, respectively, to be defined and
-        set.<programlisting>&lt;beans&gt;
-    ...
-    &lt;bean id="moreComplexObject" class="example.ComplexObject"&gt;
-        &lt;!-- results in a setPeople(java.util.Properties) call --&gt;
-        &lt;property name="people"&gt;
-            &lt;props&gt;
-                &lt;prop key="HarryPotter"&gt;The magic property&lt;/prop&gt;
-                &lt;prop key="JerrySeinfeld"&gt;The funny property&lt;/prop&gt;
-            &lt;/props&gt;
-        &lt;/property&gt;
-        &lt;!-- results in a setSomeList(java.util.List) call --&gt;
-        &lt;property name="someList"&gt;
-            &lt;list&gt;
-                &lt;value&gt;a list element followed by a reference&lt;/value&gt;
-                &lt;ref bean="myDataSource"/&gt;
-            &lt;/list&gt;
-        &lt;/property&gt;
-        &lt;!-- results in a setSomeMap(java.util.Map) call --&gt;
-        &lt;property name="someMap"&gt;
-            &lt;map&gt;
-                &lt;entry key="yup an entry"&gt;
-                    &lt;value&gt;just some string&lt;/value&gt;
-                &lt;/entry&gt;
-                &lt;entry key="yup a ref"&gt;
-                    &lt;ref bean="myDataSource"/&gt;
-                &lt;/entry&gt;
-            &lt;/map&gt;
-        &lt;/property&gt;
-        &lt;!-- results in a setSomeSet(java.util.Set) call --&gt;
-        &lt;property name="someSet"&gt;
-            &lt;set&gt;
-                &lt;value&gt;just some string&lt;/value&gt;
-                &lt;ref bean="myDataSource"/&gt;
-            &lt;/set&gt;
-        &lt;/property&gt;
+        set.<programlisting>&lt;bean id="moreComplexObject" class="example.ComplexObject"&gt;
+  &lt;!-- results in a setPeople(java.util.Properties) call --&gt;
+  &lt;property name="people"&gt;
+    &lt;props&gt;
+      &lt;prop key="HarryPotter"&gt;The magic property&lt;/prop&gt;
+      &lt;prop key="JerrySeinfeld"&gt;The funny property&lt;/prop&gt;
+    &lt;/props&gt;
+  &lt;/property&gt;
+  &lt;!-- results in a setSomeList(java.util.List) call --&gt;
+  &lt;property name="someList"&gt;
+    &lt;list&gt;
+      &lt;value&gt;a list element followed by a reference&lt;/value&gt;
+      &lt;ref bean="myDataSource"/&gt;
+    &lt;/list&gt;
+  &lt;/property&gt;
+  &lt;!-- results in a setSomeMap(java.util.Map) call --&gt;
+  &lt;property name="someMap"&gt;
+    &lt;map&gt;
+      &lt;entry&gt;
+        &lt;key&gt;&lt;value&gt;yup an entry&lt;/value&gt;&lt;/key&gt;
+        &lt;value&gt;just some string&lt;/value&gt;
+      &lt;/entry&gt;
+      &lt;entry&gt;
+        &lt;key&gt;&lt;value&gt;yup a ref&lt;/value&gt;&lt;/key&gt;
+        &lt;ref bean="myDataSource"/&gt;
+      &lt;/entry&gt;
+    &lt;/map&gt;
+  &lt;/property&gt;
+  &lt;!-- results in a setSomeSet(java.util.Set) call --&gt;
+  &lt;property name="someSet"&gt;
+    &lt;set&gt;
+      &lt;value&gt;just some string&lt;/value&gt;
+      &lt;ref bean="myDataSource"/&gt;
+    &lt;/set&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
 
-    &lt;/bean&gt;
-&lt;/beans&gt;</programlisting></para>
-
-        <para><emphasis>Note that the value of a Map entry, or a set value,
+        <para><emphasis>Note that the value of a map key or value, or a set value,
         can also again be any of the elements:</emphasis><programlisting>(bean | ref | idref | list | set | map | props | value | null)</programlisting></para>
       </sect3>
 
@@ -870,13 +866,13 @@ public class ExampleBean {
         inline, instead of referring to a bean defined elsewhere in the
         BeanFactory. The inline bean definition does not need to have any id
         defined. <programlisting>&lt;bean id="outer" class="..."&gt;
-    &lt;!-- Instead of using a reference to target, just use an inner bean --&gt;
-    &lt;property name="target"&gt;
-        &lt;bean class="com.mycompany.PersonImpl"&gt;
-            &lt;property name="name"&gt;&lt;value&gt;Tony&lt;/value&gt;&lt;/property&gt;
-            &lt;property name="age"&gt;&lt;value&gt;51&lt;/value&gt;&lt;/property&gt;
-        &lt;/bean&gt;
-   &lt;/property&gt;
+  &lt;!-- Instead of using a reference to target, just use an inner bean --&gt;
+  &lt;property name="target"&gt;
+    &lt;bean class="com.mycompany.PersonImpl"&gt;
+      &lt;property name="name"&gt;&lt;value&gt;Tony&lt;/value&gt;&lt;/property&gt;
+      &lt;property name="age"&gt;&lt;value&gt;51&lt;/value&gt;&lt;/property&gt;
+    &lt;/bean&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
         <para>Note that the <literal>singleton</literal> flag and any
@@ -890,19 +886,20 @@ public class ExampleBean {
         <para>An idref element is simply a shorthand and error-proof way to
         set a property to the String <emphasis>id</emphasis> or
         <emphasis>name</emphasis> of another bean in the
-        container.<programlisting>&lt;bean id="theTargetBean" class="..."&gt;
-&lt;/bean&gt;
+        container.<programlisting>&lt;bean id="theTargetBean" class="..."/&gt;
+
 &lt;bean id="theClientBean" class="..."&gt;
-    &lt;property name="targetName"&gt;
-        &lt;idref bean="theTargetBean"/&gt;
-    &lt;/property&gt;
+  &lt;property name="targetName"&gt;
+    &lt;idref bean="theTargetBean"/&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;</programlisting>This is exactly equivalent at runtime to the
         following fragment:<programlisting>&lt;bean id="theTargetBean" class="..."&gt;
 &lt;/bean&gt;
+
 &lt;bean id="theClientBean" class="..."&gt;
-    &lt;property name="targetName"&gt;
-        &lt;value&gt;theTargetBean&lt;/value&gt;
-    &lt;/property&gt;
+  &lt;property name="targetName"&gt;
+    &lt;value&gt;theTargetBean&lt;/value&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;</programlisting>The main reason the first form is preferable to
         the second is that using the <literal>idref</literal> tag will allow
         Spring to validate at deployment time that the other bean actually
@@ -916,9 +913,9 @@ public class ExampleBean {
         actual XML file, and the bean name is the bean
         <emphasis>id</emphasis>, the <literal>local</literal> attribute may be
         used, which will allow the XML parser itself to validate the bean name
-        even earlier, at XML document parse time.<programlisting>    &lt;property name="targetName"&gt;
-        &lt;idref local="theTargetBean"/&gt;
-    &lt;/property&gt;</programlisting></para>
+        even earlier, at XML document parse time.<programlisting>  &lt;property name="targetName"&gt;
+    &lt;idref local="theTargetBean"/&gt;
+  &lt;/property&gt;</programlisting></para>
       </sect3>
 
       <sect3 id="beans-ref-element">
@@ -945,7 +942,7 @@ public class ExampleBean {
         <literal>bean</literal> attribute may be the same as either the
         <literal>id</literal> attribute of the target bean, or one of the
         values in the <literal>name</literal> attribute of the target
-        bean.<programlisting>    &lt;ref bean="someBean"/&gt;</programlisting></para>
+        bean.<programlisting>  &lt;ref bean="someBean"/&gt;</programlisting></para>
 
         <para>Specifying the target bean by using the <literal>local</literal>
         attribute leverages the ability of the XML parser to validate XML id
@@ -955,7 +952,7 @@ public class ExampleBean {
         will issue an error if no matching element is found in the same file.
         As such, using the local variant is the best choice (in order to know
         about errors are early as possible) if the target bean is in the same
-        XML file.<programlisting>    &lt;ref local="someBean"/&gt;</programlisting></para>
+        XML file.<programlisting>  &lt;ref local="someBean"/&gt;</programlisting></para>
 
         <para>Specifying the target bean by using the
         <literal>parent</literal> attribute allows a reference to be created
@@ -971,7 +968,7 @@ public class ExampleBean {
         as the parent), and needs the original object so it may wrap
         it.</para>
 
-        <para><programlisting>    &lt;ref parent="someBean"/&gt;</programlisting></para>
+        <para><programlisting>  &lt;ref parent="someBean"/&gt;</programlisting></para>
       </sect3>
 
       <sect3>
@@ -988,11 +985,11 @@ public class ExampleBean {
         Therefore, the following:</para>
 
         <para><programlisting>&lt;property name="myProperty"&gt;
-    &lt;value&gt;hello&lt;/value&gt;
+  &lt;value&gt;hello&lt;/value&gt;
 &lt;/property</programlisting><programlisting>&lt;constructor-arg&gt;
-    &lt;value&gt;hello&lt;/value&gt;
+  &lt;value&gt;hello&lt;/value&gt;
 &lt;/constructor-arg&gt;</programlisting><programlisting>&lt;entry key="myKey"&gt;
-    &lt;value&gt;hello&lt;/value&gt;
+  &lt;value&gt;hello&lt;/value&gt;
 &lt;/entry&gt;</programlisting></para>
 
         <para>are equivalent to:</para>
@@ -1008,24 +1005,24 @@ public class ExampleBean {
         following:</para>
 
         <para><programlisting>&lt;property name="myProperty"&gt;
-    &lt;ref bean="myBean"&gt;
+  &lt;ref bean="myBean"&gt;
 &lt;/property</programlisting><programlisting>&lt;constructor-arg&gt;
-    &lt;ref bean="myBean"&gt;
+  &lt;ref bean="myBean"&gt;
 &lt;/constructor-arg&gt;</programlisting></para>
 
-        <para>is equivalent to:</para>
+        <para>are equivalent to:</para>
 
         <para><programlisting>&lt;property name="myProperty" ref="myBean"/&gt;</programlisting><programlisting>&lt;constructor-arg ref="myBean"/&gt;</programlisting></para>
 
         <para>Note however that the shortcut form is equivalent to a
         <literal>&lt;ref bean="xxx"&gt;</literal> element, there is no
-        shortcut for <literal>&lt;ref local="xxx"</literal>&gt;. For a local
-        ref you must use the long form.</para>
+        shortcut for <literal>&lt;ref local="xxx"</literal>&gt;. To enforce
+        a strict local ref, you must use the long form.</para>
 
         <para>Finally, the entry element allows a shortcut form to specify the
-        key and/or value of the map, in the form of the
-        <literal>key-ref</literal> and <literal>value-ref</literal>
-        attributes. Therefore, the following:</para>
+        key and/or value of the map, in the form of the <literal>key</literal> /
+        <literal>key-ref</literal> and <literal>value</literal> /
+				<literal>value-ref</literal> attributes. Therefore, the following:</para>
 
         <para><programlisting>&lt;entry&gt;
   &lt;key&gt;&lt;ref bean="myKeyBean"/&gt;&lt;/key&gt;
@@ -1037,7 +1034,7 @@ public class ExampleBean {
 
         <para><programlisting>&lt;entry key-ref="myKeyBean" value-ref="myValueBean"/&gt;
 </programlisting>Again, the shortcut form is equivalent to a <literal>&lt;ref
-        bean="xxx"&gt;</literal> element, there is no shortcut for
+        bean="xxx"&gt;</literal> element; there is no shortcut for
         <literal>&lt;ref local="xxx"</literal>&gt;.</para>
       </sect3>
 
@@ -1050,10 +1047,8 @@ public class ExampleBean {
         definition:</para>
 
         <para><programlisting>&lt;bean id="foo" class="foo.Bar"&gt;
-   &lt;property name="fred.bob.sammy"&gt;
-      &lt;value&gt;123&lt;/value&gt;
-   &lt;/property&gt;
- &lt;/bean&gt;</programlisting></para>
+  &lt;property name="fred.bob.sammy" value="123"/&gt;
+&lt;/bean&gt;</programlisting></para>
 
         <para>the foo bean has a <literal>fred</literal> property which has a
         <literal>bob</literal> property, which has a <literal>sammy</literal>
@@ -1124,8 +1119,7 @@ public class ExampleBean {
 
 &lt;!-- myBean uses singleShotHelper --&gt;
 &lt;bean id="myBean" class="..."&gt;
-  &lt;lookup-method name="createSingleShotHelper"
-                 bean="singleShotHelper"/&gt;
+  &lt;lookup-method name="createSingleShotHelper" bean="singleShotHelper"/&gt;
   &lt;property&gt;
     ...
   &lt;/property&gt;
@@ -1184,14 +1178,14 @@ public class ReplacementComputeValue implements MethodReplacer {
 
         <para>The BeanFactory deployment definition to deploy the original
         class and specify the method override would look like:<programlisting>&lt;bean id="myValueCalculator class="x.y.z.MyValueCalculator"&gt;
-    &lt;!-- arbitrary method replacement --&gt;
-    &lt;replaced-method name="computeValue" replacer="replacementComputeValue"&gt;
-        &lt;arg-type&gt;String&lt;/arg-type&gt;
-    &lt;/replaced-method&gt;
+  &lt;!-- arbitrary method replacement --&gt;
+  &lt;replaced-method name="computeValue" replacer="replacementComputeValue"&gt;
+    &lt;arg-type&gt;String&lt;/arg-type&gt;
+  &lt;/replaced-method&gt;
 &lt;/bean&gt;
 
-&lt;bean id="replacementComputeValue" class="a.b.c.ReplaceMentComputeValue"&gt;
-&lt;/bean&gt;</programlisting>One or more contained
+&lt;bean id="replacementComputeValue" class="a.b.c.ReplaceMentComputeValue"/&gt;
+</programlisting>One or more contained
         <literal>arg-type</literal> elements within the
         <literal>replaced-method</literal> element may be used to indicate the
         method signature of the method being overridden. Note that the
@@ -1231,7 +1225,7 @@ public class ReplacementComputeValue implements MethodReplacer {
       element is initialized.</para>
 
       <para>Following is an example configuration:<programlisting>&lt;bean id="beanOne" class="ExampleBean" depends-on="manager"&gt;
-    &lt;property name="manager"&gt;&lt;ref local="manager"/&gt;&lt;/property&gt;
+  &lt;property name="manager"&gt;&lt;ref local="manager"/&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
 &lt;bean id="manager" class="ManagerBean"/&gt;</programlisting></para>
@@ -1679,15 +1673,15 @@ public class AnotherExampleBean implements DisposableBean {
     attribute, specifying the parent bean as the value of this
     attribute.<programlisting>&lt;bean id="inheritedTestBean" abstract="true"
     class="org.springframework.beans.TestBean"&gt;
-    &lt;property name="name"&gt;&lt;value&gt;parent&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="age"&gt;&lt;value&gt;1&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="name" value="parent"/&gt;
+  &lt;property name="age" value="1"/&gt;
 &lt;/bean&gt;
 
 &lt;bean id="inheritsWithDifferentClass" class="org.springframework.beans.DerivedTestBean"
-      parent="inheritedTestBean" init-method="initialize"&gt;
-    &lt;property name="name"&gt;&lt;value&gt;override&lt;/value&gt;&lt;/property&gt;
-    &lt;!-- age should inherit value of 1 from parent --&gt;
-  &lt;/bean&gt;</programlisting></para>
+    parent="inheritedTestBean" init-method="initialize"&gt;
+  &lt;property name="name" value="override"/&gt;
+  &lt;!-- age should inherit value of 1 from parent --&gt;
+&lt;/bean&gt;</programlisting></para>
 
     <para>A child bean definition will use the bean class from the parent
     definition if none is specified, but can also override it. In the latter
@@ -1709,14 +1703,14 @@ public class AnotherExampleBean implements DisposableBean {
     bean definition as <emphasis>abstract</emphasis> by using the
     <emphasis>abstract</emphasis> attribute. In the case that the parent
     definition does not specify a class:<programlisting>&lt;bean id="inheritedTestBeanWithoutClass"&gt;
-    &lt;property name="name"&gt;&lt;value&gt;parent&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="age"&gt;&lt;value&gt;1&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="name" value="parent"/&gt;
+    &lt;property name="age" value="1"/&gt;
 &lt;/bean&gt;
 
 &lt;bean id="inheritsWithClass" class="org.springframework.beans.DerivedTestBean"
-      parent="inheritedTestBeanWithoutClass" init-method="initialize"&gt;
-    &lt;property name="name"&gt;&lt;value&gt;override&lt;/value&gt;&lt;/property&gt;
-    &lt;!-- age should inherit value of 1 from parent --&gt;
+    parent="inheritedTestBeanWithoutClass" init-method="initialize"&gt;
+  &lt;property name="name" value="override"/&gt;
+  &lt;!-- age should inherit value of 1 from parent --&gt;
 &lt;/bean&gt;</programlisting></para>
 
     <para>the parent bean cannot get instantiated on its own since it is
@@ -1915,10 +1909,10 @@ cfg.postProcessBeanFactory(factory);</programlisting></para>
       BeanFactory which will replace some properties of the datasource:</para>
 
       <programlisting>&lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-    &lt;property name="driverClassName"&gt;&lt;value&gt;${jdbc.driverClassName}&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="url"&gt;&lt;value&gt;${jdbc.url}&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="username"&gt;&lt;value&gt;${jdbc.username}&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="password"&gt;&lt;value&gt;${jdbc.password}&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
+  &lt;property name="url" value="${jdbc.url}"/&gt;
+  &lt;property name="username" value="${jdbc.username}"/&gt;
+  &lt;property name="password" value="${jdbc.password}"/&gt;
 &lt;/bean&gt;</programlisting>
 
       <para>The actual values come from another file in Properties
@@ -2200,16 +2194,16 @@ dataSource.url=jdbc:mysql:mydb</programlisting></para>
       ways to add messages to the source. The ResourceBundleMessageSource is
       more interesting and is the one we will provides an example for:
       <programlisting>&lt;beans&gt;
-    &lt;bean id="messageSource" 
-            class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
-        &lt;property name="basenames"&gt;
-            &lt;list&gt;
-                &lt;value&gt;format&lt;/value&gt;
-                &lt;value&gt;exceptions&lt;/value&gt;
-                &lt;value&gt;windows&lt;/value&gt;
-            &lt;/list&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
+  &lt;bean id="messageSource"
+        class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
+    &lt;property name="basenames"&gt;
+      &lt;list&gt;
+        &lt;value&gt;format&lt;/value&gt;
+        &lt;value&gt;exceptions&lt;/value&gt;
+        &lt;value&gt;windows&lt;/value&gt;
+      &lt;/list&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
 &lt;/beans&gt; </programlisting></para>
 
       <para>This assumes you have three resource bundles defined on your
@@ -2290,19 +2284,17 @@ dataSource.url=jdbc:mysql:mydb</programlisting></para>
 
       <para>Let's look at an example. First, the ApplicationContext:
       <programlisting>&lt;bean id="emailer" class="example.EmailBean"&gt;
-    &lt;property name="blackList"&gt;
-        &lt;list&gt;
-            &lt;value&gt;black@list.org&lt;/value&gt;
-            &lt;value&gt;white@list.org&lt;/value&gt;
-            &lt;value&gt;john@doe.org&lt;/value&gt;
-        &lt;/list&gt;
-    &lt;/property&gt;
+  &lt;property name="blackList"&gt;
+    &lt;list&gt;
+      &lt;value&gt;black@list.org&lt;/value&gt;
+      &lt;value&gt;white@list.org&lt;/value&gt;
+      &lt;value&gt;john@doe.org&lt;/value&gt;
+    &lt;/list&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;
 
 &lt;bean id="blackListListener" class="example.BlackListNotifier"&gt;
-    &lt;property name="notificationAddress"&gt;
-        &lt;value&gt;spam@list.org&lt;/value&gt;
-    &lt;/property&gt;
+  &lt;property name="notificationAddress" value="spam@list.org"/&gt;
 &lt;/bean&gt;</programlisting>and then, the actual beans: <programlisting>public class EmailBean implements ApplicationContextAware {
 
     /** the blacklist */
@@ -2489,7 +2481,7 @@ public class BlackListNotifier implement ApplicationListener {
       <programlisting>&lt;!-- property placeholder post-processor --&gt;
 &lt;bean id="placeholderConfig"
       class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
-    &lt;property name="location"&gt;&lt;value&gt;jdbc.properties&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="location" value="jdbc.properties"/&gt;
 &lt;/bean&gt;</programlisting>
     </sect2>
   </sect1>
@@ -2543,17 +2535,15 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     register the new PropertyEditor with the ApplicationContext, which will
     then be able to use it as needed.: <programlisting>&lt;bean id="customEditorConfigurer" 
     class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
-    &lt;property name="customEditors"&gt;
-        &lt;map&gt;
-            &lt;entry key="example.ExoticType"&gt;
-                &lt;bean class="example.ExoticTypeEditor"&gt;
-                    &lt;property name="format"&gt;
-                        &lt;value&gt;upperCase&lt;/value&gt;
-                    &lt;/property&gt;
-                &lt;/bean&gt;
-            &lt;/entry&gt;
-        &lt;/map&gt;
-    &lt;/property&gt;
+  &lt;property name="customEditors"&gt;
+    &lt;map&gt;
+      &lt;entry key="example.ExoticType"&gt;
+        &lt;bean class="example.ExoticTypeEditor"&gt;
+          &lt;property name="format" value="upperCase"/&gt;
+        &lt;/bean&gt;
+      &lt;/entry&gt;
+    &lt;/map&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
   </sect1>
 
@@ -2593,7 +2583,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
       &lt;property name="age"&gt;&lt;value&gt;12&lt;/value&gt;&lt;/property&gt;
     &lt;/bean&gt;
   &lt;/property&gt;
-   &lt;property name="propertyPath"&gt;&lt;value&gt;age&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="propertyPath"&gt;&lt;value&gt;age&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting> There is also a shortcut form, where the bean
     name is the property path.<programlisting>// will result in 10, which is the value of property 'age' of bean 'person'
 &lt;bean id="person.age" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/&gt;</programlisting></para>
@@ -2604,9 +2594,8 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     all:</para>
 
     <para><programlisting>&lt;bean id="..." class="..."&gt;
-  &lt;proprty name="age"&gt;
-    &lt;bean id="person.age"
-          class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/&gt;
+  &lt;property name="age"&gt;
+    &lt;bean id="person.age" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/&gt;
   &lt;/property&gt;
 &lt;/bean&gt;</programlisting>The result type may be specifically set in the
     actual definition. This is not necessary for most use cases, but can be of
@@ -2627,7 +2616,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     using the staticField property:</para>
 
     <para><programlisting>&lt;bean id="myField"
-      class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"&gt;
+        class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"&gt;
   &lt;property name="staticField"&gt;&lt;value&gt;java.sql.Connection.TRANSACTION_SERIALIZABLE&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
@@ -2642,9 +2631,9 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     but this form is very concise to define, and very convenient to use as an
     inner bean since the id doesn't have to be specified for the bean
     reference:<programlisting>&lt;bean id="..." class="..."&gt;
-  &lt;proprty name="isolation"&gt;
+  &lt;property name="isolation"&gt;
     &lt;bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
-      class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/&gt;
+        class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/&gt;
   &lt;/property&gt;
 &lt;/bean&gt;</programlisting>It's also possible to access a non-static field
     of another bean, as described in the JavaDocs.</para>
@@ -2700,6 +2689,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
   &lt;property name="targetClass"&gt;&lt;value&gt;java.lang.System&lt;/value&gt;&lt;/property&gt;
   &lt;property name="targetMethod"&gt;&lt;value&gt;getProperties&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
+
 &lt;bean id="javaVersion" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
   &lt;property name="targetObject"&gt;&lt;ref local="sysProps"/&gt;&lt;/property&gt;
   &lt;property name="targetMethod"&gt;&lt;value&gt;getProperty&lt;/value&gt;&lt;/property&gt;
@@ -2805,19 +2795,19 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
 
     <para>You can register an ApplicationContext using the
     <literal>ContextLoaderListener</literal> as follows: <programlisting>&lt;context-param&gt;
-    &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
-    &lt;param-value&gt;/WEB-INF/daoContext.xml /WEB-INF/applicationContext.xml&lt;/param-value&gt;
+  &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+  &lt;param-value&gt;/WEB-INF/daoContext.xml /WEB-INF/applicationContext.xml&lt;/param-value&gt;
 &lt;/context-param&gt;
 
 &lt;listener&gt;
-    &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
+  &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
 &lt;/listener&gt;
 
 &lt;!-- OR USE THE CONTEXTLOADERSERVLET INSTEAD OF THE LISTENER
 &lt;servlet&gt;
-    &lt;servlet-name&gt;context&lt;/servlet-name&gt;
-    &lt;servlet-class&gt;org.springframework.web.context.ContextLoaderServlet&lt;/servlet-class&gt;
-    &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+  &lt;servlet-name&gt;context&lt;/servlet-name&gt;
+  &lt;servlet-class&gt;org.springframework.web.context.ContextLoaderServlet&lt;/servlet-class&gt;
+  &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
 &lt;/servlet&gt;
 --&gt;</programlisting> The listener inspects the
     <literal>contextConfigLocation</literal> parameter. If it doesn't exist,

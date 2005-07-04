@@ -705,12 +705,12 @@ ModelAndView anyMeaningfulName(HttpServletRequest, HttpServletResponse, Exceptio
       <literal>ParameterMethodNameResolver</literal> and the delegate
       property, which will accept requests to urls with the parameter method
       included and set to <literal>retrieveIndex</literal>: <programlisting>&lt;bean id="paramResolver" class="org....mvc.multiaction.ParameterMethodNameResolver"&gt;
-    &lt;property name="paramName"&gt;&lt;value&gt;method&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="paramName"&gt;&lt;value&gt;method&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
 &lt;bean id="paramMultiController" class="org....mvc.multiaction.MultiActionController"&gt;
-    &lt;property name="methodNameResolver"&gt;&lt;ref bean="paramResolver"/&gt;&lt;/property&gt;
-    &lt;property name="delegate"&gt;&lt;ref bean="sampleDelegate"/&gt;&lt;/property&gt;
+  &lt;property name="methodNameResolver"&gt;&lt;ref bean="paramResolver"/&gt;&lt;/property&gt;
+  &lt;property name="delegate"&gt;&lt;ref bean="sampleDelegate"/&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
 &lt;bean id="sampleDelegate" class="samples.SampleDelegate"/&gt;
@@ -728,13 +728,13 @@ public class SampleDelegate {
 }</programlisting> When using the delegates shown above, we could also use the
       <literal>PropertiesMethodNameResolver</literal> to match a couple of
       URLs to the method we defined: <programlisting>&lt;bean id="propsResolver" class="org....mvc.multiaction.PropertiesMethodNameResolver"&gt;
-    &lt;property name="mappings"&gt;
-        &lt;props&gt;
-            &lt;prop key="/index/welcome.html"&gt;retrieveIndex&lt;/prop&gt;
-            &lt;prop key="/**/notwelcome.html"&gt;retrieveIndex&lt;/prop&gt;
-            &lt;prop key="/*/user?.html"&gt;retrieveIndex&lt;/prop&gt;
-        &lt;/props&gt;
-    &lt;/property&gt;
+  &lt;property name="mappings"&gt;
+    &lt;props&gt;
+      &lt;prop key="/index/welcome.html"&gt;retrieveIndex&lt;/prop&gt;
+      &lt;prop key="/**/notwelcome.html"&gt;retrieveIndex&lt;/prop&gt;
+      &lt;prop key="/*/user?.html"&gt;retrieveIndex&lt;/prop&gt;
+    &lt;/props&gt;
+  &lt;/property&gt;
 &lt;/bean&gt;
 
 &lt;bean id="paramMultiController" class="org....mvc.multiaction.MultiActionController"&gt;
@@ -935,16 +935,14 @@ public class SampleDelegate {
       form. When using the BeanNameUrlHandlerMapping, we could map the HTTP
       request with URL <literal>http://samples.com/editaccount.form</literal>
       to the appropriate FormController as follows: <programlisting>&lt;beans&gt;
-    &lt;bean id="handlerMapping"
-          class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/&gt;
+  &lt;bean id="handlerMapping" class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/&gt;
 
-    &lt;bean name="/editaccount.form"
-          class="org.springframework.web.servlet.mvc.SimpleFormController"&gt;
-        &lt;property name="formView"&gt;&lt;value&gt;account&lt;/value&gt;&lt;/property&gt;
-        &lt;property name="successView"&gt;&lt;value&gt;account-created&lt;/value&gt;&lt;/property&gt;
-        &lt;property name="commandName"&gt;&lt;value&gt;Account&lt;/value&gt;&lt;/property&gt;
-        &lt;property name="commandClass"&gt;&lt;value&gt;samples.Account&lt;/value&gt;&lt;/property&gt;
-    &lt;/bean&gt;
+  &lt;bean name="/editaccount.form" class="org.springframework.web.servlet.mvc.SimpleFormController"&gt;
+    &lt;property name="formView"&gt;&lt;value&gt;account&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="successView"&gt;&lt;value&gt;account-created&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="commandName"&gt;&lt;value&gt;Account&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="commandClass"&gt;&lt;value&gt;samples.Account&lt;/value&gt;&lt;/property&gt;
+  &lt;/bean&gt;
 &lt;beans&gt;    </programlisting> All incoming requests for the URL
       <literal>/editaccount.form</literal> will now be handled by the
       FormController in the source listing above. Of course we have to define
@@ -1279,20 +1277,16 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <literal>XmlViewResolver</literal> for specifying Excel
       views (which are not supported by the InternalResourceViewResolver):
 		<programlisting><![CDATA[
-<bean id="jspViewResolver"
-		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-	<property name="order"><value>2</value></property>
-	<property name="viewClass">
-		<value>org.springframework.web.servlet.view.JstlView</value>
-	</property>
-	<property name="prefix"><value>/WEB-INF/jsp/</value></property>
-	<property name="suffix"><value>.jsp</value></property>
+<bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	<property name="order" value="2"/>
+	<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+	<property name="prefix" value="/WEB-INF/jsp/"/>
+	<property name="suffix" value=".jsp"/>
 </bean>
 
-<bean id="excelViewResolver">
-		class="org.springframework.web.servlet.view.XmlViewResolver">
-	<property name="order"><value>1</value></property>
-	<property name="location"><value>/WEB-INF/views.xml</value></property>
+<bean id="excelViewResolver" class="org.springframework.web.servlet.view.XmlViewResolver">
+	<property name="order" value="1"/>
+	<property name="location" value="/WEB-INF/views.xml"/>
 </bean>
 
 ### views.xml
@@ -1454,7 +1448,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&gt;
     &lt;property name="interceptors"&gt;
         &lt;list&gt;
-            &lt;ref local="localeChangeInterceptor"/&gt;
+            &lt;ref bean="localeChangeInterceptor"/&gt;
         &lt;/list&gt;
     &lt;/property&gt;
     &lt;property name="mappings"&gt;

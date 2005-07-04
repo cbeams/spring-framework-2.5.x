@@ -104,9 +104,7 @@
    class=&#34;org.springframework.samples.aspectj.bank.BalanceChangeSecurityAspect&#34; 
    factory-method=&#34;aspectOf&#34;
 &#62;
-   &#60;property name=&#34;securityManager&#34;&#62;
-      &#60;ref local=&#34;securityManager&#34;/&#62;
-   &#60;/property&#62;
+   &#60;property name=&#34;securityManager&#34; ref=&#34;securityManager&#34;/&#62;
 &#60;/bean&#62;</programlisting></para>
 
         <para>We don&#39;t need to do anything in Spring configuration to
