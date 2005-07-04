@@ -11,7 +11,7 @@
 	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
 	<!-- (in this case, JDBC-related settings for the dataSource definition below) -->
 	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="location"><value>/WEB-INF/jdbc.properties</value></property>
+		<property name="location" value="/WEB-INF/jdbc.properties"/>
 	</bean>
 
 	<!-- Local DataSource that works in any environment -->
@@ -19,22 +19,22 @@
 	<!-- See JPetStore for an example of using Commons DBCP BasicDataSource as alternative -->
 	<!-- See Image Database for an example of using C3P0 ComboPooledDataSource as alternative -->
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName"><value>${jdbc.driverClassName}</value></property>
-		<property name="url"><value>${jdbc.url}</value></property>
-		<property name="username"><value>${jdbc.username}</value></property>
-		<property name="password"><value>${jdbc.password}</value></property>
+		<property name="driverClassName" value="${jdbc.driverClassName}"/>
+		<property name="url" value="${jdbc.url}"/>
+		<property name="username" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
 	</bean>
 
 	<!-- JNDI DataSource for J2EE environments -->
 	<!--
 	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName"><value>java:comp/env/jdbc/petclinic</value></property>
+		<property name="jndiName" value="java:comp/env/jdbc/petclinic"/>
 	</bean>
 	-->
 
 	<!-- Hibernate SessionFactory -->
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
-		<property name="dataSource"><ref local="dataSource"/></property>
+		<property name="dataSource" ref="dataSource"/>
 		<property name="mappingResources">
 			<value>petclinic.hbm.xml</value>
 		</property>
@@ -42,6 +42,7 @@
 			<props>
 				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
 				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.generate_statistics">true</prop>
 			</props>
 		</property>
 		<property name="eventListeners">
@@ -55,7 +56,7 @@
 
 	<!-- Transaction manager for a single Hibernate SessionFactory (alternative to JTA) -->
 	<bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
-		<property name="sessionFactory"><ref local="sessionFactory"/></property>
+		<property name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 
 	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
@@ -70,7 +71,7 @@
 	  - PetClinic's central data access object: Hibernate implementation.
     -->
 	<bean id="clinicTarget" class="org.springframework.samples.petclinic.hibernate.HibernateClinic">
-		<property name="sessionFactory"><ref local="sessionFactory"/></property>
+		<property name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 
 	<!--
@@ -85,8 +86,8 @@
 		- as described in the manual, to reduce duplication.
     -->
 	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref local="transactionManager"/></property>
-		<property name="target"><ref local="clinicTarget"/></property>
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target" ref="clinicTarget"/>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="get*">PROPAGATION_REQUIRED,readOnly</prop>
@@ -95,6 +96,41 @@
 				<prop key="store*">PROPAGATION_REQUIRED</prop>
 			</props>
 		</property>
+	</bean>
+
+	<!-- Hibernate 3.0's JMX statistics service -->
+	<!-- Implements the StatisticsServiceMBean management interface -->
+	<bean name="petclinic:service=hibernateStatistics" class="org.hibernate.jmx.StatisticsService">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+
+
+	<!-- ========================= JMX EXPORTER DEFINITION ========================= -->
+
+	<!--
+	  - Exporter that exposes Hibernate 3.0's statistics service via JMX.
+		- Autodetects the statistics service, which is a standard MBean,
+		- using its bean name as JMX object name.
+		-
+		- By default, the standard MBeanServerFactory.findMBeanServer method will be used
+		- to determine the MBeanServer. Unfortunately, this does not work on WebLogic <= 8.1:
+		- you need to comment in the WebLogicMBeanServerFactoryBean definition on WebLogic,
+		- specifying appropriate configuration values there.
+    -->
+	<bean id="jmxExporter" class="org.springframework.jmx.export.MBeanExporter">
+		<property name="autodetect" value="true"/>
+		<!-- Comment the following in on WebLogic <= 8.1, which doesn't support -->
+		<!-- the standard MBeanServerFactory.findMBeanServer lookup mechanism. -->
+		<!--
+		<property name="server">
+			<bean class="org.springframework.jmx.support.WebLogicMBeanServerFactoryBean">
+				<property name="username" value="weblogic"/>
+				<property name="password" value="weblogic"/>
+				<property name="serverUrl" value="t3://localhost:7001"/>
+				<property name="serverName" value="server"/>
+			</bean>
+		</property>
+		-->
 	</bean>
 
 </beans>
