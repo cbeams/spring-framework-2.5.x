@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -373,7 +374,9 @@ public class SchedulerFactoryBean
 	 * @see org.quartz.Trigger#setJobName
 	 */
 	public void setJobDetails(JobDetail[] jobDetails) {
-		this.jobDetails = Arrays.asList(jobDetails);
+		// Use modifiable ArrayList here, to allow for further adding of
+		// JobDetail objects during autodetection of JobDetailAwareTriggers.
+		this.jobDetails = new ArrayList(Arrays.asList(jobDetails));
 	}
 
 	/**

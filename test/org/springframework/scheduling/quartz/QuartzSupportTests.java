@@ -52,6 +52,14 @@ import org.springframework.scheduling.TestMethodInvokingTask;
 public class QuartzSupportTests extends TestCase {
 
 	public void testSchedulerFactoryBean() throws Exception {
+		doTestSchedulerFactoryBean(false);
+	}
+
+	public void testSchedulerFactoryBeanWithExplicitJobDetail() throws Exception {
+		doTestSchedulerFactoryBean(true);
+	}
+
+	private void doTestSchedulerFactoryBean(boolean explicitJobDetail) throws Exception {
 		TestBean tb = new TestBean("tb", 99);
 		JobDetailBean jobDetail0 = new JobDetailBean();
 		jobDetail0.setJobClass(Job.class);
@@ -117,7 +125,10 @@ public class QuartzSupportTests extends TestCase {
 		Map schedulerContext = new HashMap();
 		schedulerContext.put("otherTestBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
-		schedulerFactoryBean.setTriggers(new Trigger[]{trigger0, trigger1});
+		if (explicitJobDetail) {
+			schedulerFactoryBean.setJobDetails(new JobDetail[] {jobDetail0});
+		}
+		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
 		}
@@ -217,8 +228,8 @@ public class QuartzSupportTests extends TestCase {
 		trigger1.afterPropertiesSet();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
-		schedulerFactoryBean.setJobDetails(new JobDetail[]{jobDetail1});
-		schedulerFactoryBean.setTriggers(new Trigger[]{trigger1, trigger0});
+		schedulerFactoryBean.setJobDetails(new JobDetail[] {jobDetail1});
+		schedulerFactoryBean.setTriggers(new Trigger[] {trigger1, trigger0});
 		schedulerFactoryBean.afterPropertiesSet();
 		
 		// ok scheduler is set up... let's wait for like 4 seconds
@@ -321,8 +332,8 @@ public class QuartzSupportTests extends TestCase {
 				return scheduler;
 			}
 		};
-		schedulerFactoryBean.setJobDetails(new JobDetail[]{jobDetail0, jobDetail1});
-		schedulerFactoryBean.setTriggers(new Trigger[]{trigger0, trigger1});
+		schedulerFactoryBean.setJobDetails(new JobDetail[] {jobDetail0, jobDetail1});
+		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
 		}
