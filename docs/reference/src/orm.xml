@@ -122,16 +122,15 @@
 
     <para>Beyond the samples shipped with Spring, there is a variety of
     Spring-based O/R mapping samples provided by specific vendors: for
-    example, the JDO implementations JPOX (<link
-    linkend="???">http://www.jpox.org</link>) and Kodo (<link
-    linkend="???">http://www.solarmetric.com</link>).</para>
+    example, the JDO implementations JPOX (<ulink url="http://www.jpox.org"></ulink>)
+    and Kodo (<ulink url="http://www.solarmetric.com"></ulink>).</para>
   </sect1>
 
   <sect1 id="orm-hibernate">
     <title>Hibernate</title>
 
-    <para>We will start with a coverage of Hibernate (<link
-    linkend="???">http://www.hibernate.org</link>) in a Spring environment,
+    <para>We will start with a coverage of Hibernate
+		(<ulink url="http://www.hibernate.org"></ulink>) in a Spring environment,
     using it to demonstrate the approach that Spring takes towards integrating
     O/R mappers. This section will cover many issues in detail and show
     different variations of DAO implementations and transaction demarcations.
@@ -783,8 +782,7 @@
       fit for a Spring bean definition. This setup style usually supports a
       Spring-defined JDBC <literal>DataSource</literal>, passed into the
       "connectionFactory" property. For example, for the open source JDO
-      implementation JPOX (<link
-      linkend="???">http://www.jpox.org</link>):</para>
+      implementation JPOX (<ulink url="http://www.jpox.org"></ulink>):</para>
 
       <para><programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
 
@@ -1030,8 +1028,8 @@
   <sect1>
     <title>Oracle TopLink</title>
 
-    <para>Since Spring 1.2, Spring supports Oracle TopLink (<link
-    linkend="???">http://www.oracle.com/technology/products/ias/toplink</link>)
+    <para>Since Spring 1.2, Spring supports Oracle TopLink
+		(<ulink url="http://www.oracle.com/technology/products/ias/toplink"></ulink>)
     as data access strategy, following the same style as the Hibernate
     support. Both TopLink 9.0.4 (the production version as of Spring 1.2) and
     10.1.3 (still in beta as of Spring 1.2) are supported. The corresponding
@@ -1286,7 +1284,7 @@
   <sect1>
     <title>Apache OJB</title>
 
-    <para>Apache OJB (<link linkend="???">http://db.apache.org/ojb</link>)
+    <para>Apache OJB (<ulink url="http://db.apache.org/ojb"></ulink>)
     offers multiple API levels, such as ODMG and JDO. Aside from supporting
     OJB through JDO, Spring also supports OJB's lowe-level PersistenceBroker
     API as data access strategy. The corresponding integration classes reside
@@ -1482,8 +1480,8 @@
     <title>iBATIS SQL Maps</title>
 
     <para>Through the <literal>org.springframework.orm.ibatis</literal>
-    package, Spring supports iBATIS SQL Maps 1.x and 2.x (<link
-    linkend="???">http://www.ibatis.com</link>). The iBATIS support much
+    package, Spring supports iBATIS SQL Maps 1.x and 2.x
+		(<ulink url="http://www.ibatis.com"></ulink>). The iBATIS support much
     resembles the JDBC / Hibernate support in that it supports the same
     template style programming and just as with JDBC or Hibernate, the iBATIS
     support works with Spring's exception hierarchy and let's you enjoy the

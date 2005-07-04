@@ -694,10 +694,8 @@ ModelAndView anyMeaningfulName(HttpServletRequest, HttpServletResponse, Exceptio
             <literal>/index/welcome.html</literal> comes in, the
             <literal>doIt(HttpServletRequest, HttpServletResponse)</literal>
             method is called. This method name resolver works with the
-            <literal>PathMatcher</literal> (see <xref
-            linkend="mvc-utilities-pathmatching" />) so if the properties
-            contained <literal>/**/welcom?.html</literal> it would also have
-            worked!</para>
+            <literal>PathMatcher</literal>, so if the properties contained
+						<literal>/**/welcom?.html</literal>, it would also have worked!</para>
           </listitem>
         </itemizedlist></para>
 

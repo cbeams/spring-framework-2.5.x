@@ -778,9 +778,7 @@ List queryByCriteria(Order criteria);</programlisting>Used in bare form, this
         when evaluating the transaction semantics of a method.</para>
 
         <sect4>
-          <title
-          id="beannameautoproxycreator-for-transactions"><literal>Transactional</literal>
-          Annotation Examples</title>
+          <title><literal>Transactional</literal> annotation examples</title>
 
           <para>Annotating a class definition:</para>
 
@@ -813,8 +811,8 @@ interface TestService {
         </sect4>
 
         <sect4>
-          <title id="beannameautoproxycreator-for-transactions">Telling Spring
-          to Apply the <literal>Transactional</literal> Annotation</title>
+          <title>Telling Spring to apply the <literal>Transactional</literal>
+          annotation</title>
 
           <para>By itself, adding instances of this annotation to interface or
           class elements will not result in transactional wrapping of the
@@ -847,9 +845,8 @@ interface TestService {
         </sect4>
 
         <sect4>
-          <title id="beannameautoproxycreator-for-transactions">Using AOP to
-          ensure the <literal>Transactional</literal> Annotation is
-          applied</title>
+          <title>Using AOP to ensure the <literal>Transactional</literal>
+          annotation is applied</title>
 
           <para>The previous example is still more work than would be ideal.
           There is in principle no need for XML for each proxy (to point to
@@ -1039,8 +1036,7 @@ interface TestService {
     </sect2>
 
     <sect2>
-      <title id="beannameautoproxycreator-for-transactions">AOP and
-      Transactions</title>
+      <title>AOP and Transactions</title>
 
       <remark>As you've seen by reading this chapter, you don't really need to
       be an AOP expert--or indeed, to know much at all about AOP--to use
