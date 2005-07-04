@@ -36,8 +36,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when Spring's Hessian remoting support
 
-* cglib/cglib-nodep-2.1_1.jar
-- CGLIB 2.1_1 with ObjectWeb ASM 1.5.3 (http://cglib.sourceforge.net)
+* cglib/cglib-nodep-2.1_2.jar
+- CGLIB 2.1_2 with ObjectWeb ASM 1.5.3 (http://cglib.sourceforge.net)
 - required for building the framework
 - required at runtime when proxying full target classes via Spring AOP
 
@@ -197,7 +197,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's CommonsMultipartResolver
 
 * jakarta-commons/commons-httpclient.jar
-- Commons HttpClient 3.0 RC2 (http://jakarta.apache.org/commons/httpclient)
+- Commons HttpClient 3.0 RC3 (http://jakarta.apache.org/commons/httpclient)
 - required for building the framework
 - required at runtime when using Spring's CommonsHttpInvokerRequestExecutor
 
