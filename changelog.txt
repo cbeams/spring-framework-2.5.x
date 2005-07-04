@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.2 (4.7.2005)
+Changes in version 1.2.2 (5.7.2005)
 -----------------------------------
 
 Package org.springframework.aop
@@ -88,6 +88,7 @@ Package org.springframework.transaction
 * fixed AbstractPlatformTransactionManager to always execute all synchronizations, even on unexpected assertion failures
 * AbstractPlatformTransactionManager logs exceptions thrown by before/afterCompletion, keeping the original exception
 * added "registerAfterCompletionWithExistingTransaction" template method to AbstractPlatformTransactionManager
+* added further fallback JNDI location to JtaTransactionManager: "java:comp/TransactionManager" (for Resin 3.0)
 * JtaTransactionManager calls "afterCompletion" of Spring synchronizations at completion of outermost JTA transaction
 * JtaTransactionManager throws UnexpectedRollbackException in case of global rollback-only if not thrown by JTA commit
 
