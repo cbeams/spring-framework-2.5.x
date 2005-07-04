@@ -14,6 +14,7 @@ Package org.springframework.beans
 * added convenience constructor to PropertyComparator, passing in "property", "ignoreCase" and "ascending" directly
 * optimized PropertyComparator to reuse a single BeanWrapperImpl instance without default editors
 * factored out protected "copySortDefinition" and "doSort" hooks in PagedListHolder, allowing for custom comparators
+* added "beanNameSeparator" property to PropertyOverrideConfigurer, allowing to specify a separator other than a dot
 * MethodInvokingFactoryBean throws target exception in case of InvocationTargetException
 * fixed AbstractBeanFactory to apply custom property editors even for typed values as collection entries
 * fixed AbstractBeanFactory to hold names of dependent beans in Set rather than List, avoiding leak for prototype beans
