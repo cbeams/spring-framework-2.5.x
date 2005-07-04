@@ -62,11 +62,24 @@ import org.springframework.beans.factory.BeanInitializationException;
  */
 public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 
+	public static final String DEFAULT_BEAN_NAME_SEPARATOR = ".";
+
+
+	private String beanNameSeparator = DEFAULT_BEAN_NAME_SEPARATOR;
+
 	private boolean ignoreInvalidKeys = false;
 
 	/** Contains names of beans that have overrides */
 	private Set beanNames = Collections.synchronizedSet(new HashSet());
 
+
+	/**
+	 * Set the separator to expect between bean name and property path.
+	 * Default is a dot (".").
+	 */
+	public void setBeanNameSeparator(String beanNameSeparator) {
+		this.beanNameSeparator = beanNameSeparator;
+	}
 
 	/**
 	 * Set whether to ignore invalid keys. Default is false.
@@ -105,12 +118,12 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	protected void processKey(ConfigurableListableBeanFactory factory, String key, String value)
 			throws BeansException {
 
-		int dotIndex = key.indexOf('.');
-		if (dotIndex == -1) {
+		int separatorIndex = key.indexOf(this.beanNameSeparator);
+		if (separatorIndex == -1) {
 			throw new BeanInitializationException("Invalid key [" + key + "]: expected 'beanName.property'");
 		}
-		String beanName = key.substring(0, dotIndex);
-		String beanProperty = key.substring(dotIndex+1);
+		String beanName = key.substring(0, separatorIndex);
+		String beanProperty = key.substring(separatorIndex+1);
 		this.beanNames.add(beanName);
 		applyPropertyValue(factory, beanName, beanProperty, value);
 		if (logger.isDebugEnabled()) {

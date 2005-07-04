@@ -76,6 +76,19 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
 	}
 
+	public void testPropertyOverrideConfigurerWithNestedPropertyAndDotInBeanName() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerSingleton("my.tb", IndexedTestBean.class);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("properties", "my.tb_array[0].age=99\nmy.tb_list[1].name=test");
+		pvs.addPropertyValue("beanNameSeparator", "_");
+		ac.registerSingleton("configurer", PropertyOverrideConfigurer.class, pvs);
+		ac.refresh();
+		IndexedTestBean tb = (IndexedTestBean) ac.getBean("my.tb");
+		assertEquals(99, tb.getArray()[0].getAge());
+		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
+	}
+
 	public void testPropertyOverrideConfigurerWithPropertiesFile() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb", IndexedTestBean.class);
