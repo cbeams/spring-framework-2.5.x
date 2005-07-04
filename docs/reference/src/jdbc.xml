@@ -405,7 +405,7 @@ public class ExecuteAnUpdate {
       <literal>DriverManagerDataSource</literal>.</para>
     </sect2>
 
-    <sect2 id="jdbc-DriverManagerDataSource">
+    <sect2 id="jdbc-TransactionAwareDataSourceProxy">
       <title>TransactionAwareDataSourceProxy</title>
 
       <para>This is a proxy for a target <literal>DataSource</literal>, which
