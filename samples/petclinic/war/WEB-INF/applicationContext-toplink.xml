@@ -15,7 +15,7 @@
 	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
 	<!-- (in this case, JDBC-related settings for the dataSource definition below) -->
 	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="location"><value>/WEB-INF/jdbc.properties</value></property>
+		<property name="location" value="/WEB-INF/jdbc.properties"/>
 	</bean>
 
 	<!-- Local DataSource that works in any environment -->
@@ -23,16 +23,16 @@
 	<!-- See JPetStore for an example of using Commons DBCP BasicDataSource as alternative -->
 	<!-- See Image Database for an example of using C3P0 ComboPooledDataSource as alternative -->
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName"><value>${jdbc.driverClassName}</value></property>
-		<property name="url"><value>${jdbc.url}</value></property>
-		<property name="username"><value>${jdbc.username}</value></property>
-		<property name="password"><value>${jdbc.password}</value></property>
+		<property name="driverClassName" value="${jdbc.driverClassName}"/>
+		<property name="url" value="${jdbc.url}"/>
+		<property name="username" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
 	</bean>
 
 	<!-- JNDI DataSource for J2EE environments -->
 	<!--
 	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName"><value>java:comp/env/jdbc/petclinic</value></property>
+		<property name="jndiName" value="java:comp/env/jdbc/petclinic"/>
 	</bean>
 	-->
 
@@ -40,8 +40,8 @@
 	<!-- Will only work on TopLink 10.1.3 or higher, due to the use of -->
 	<!-- HSQLPlatformWithNativeSequence and CommonsLoggingSessionLog. -->
 	<bean id="sessionFactory" class="org.springframework.orm.toplink.LocalSessionFactoryBean">
-		<property name="configLocation"><value>toplink-sessions.xml</value></property>
-		<property name="dataSource"><ref local="dataSource"/></property>
+		<property name="configLocation" value="toplink-sessions.xml"/>
+		<property name="dataSource" ref="dataSource"/>
 		<property name="databasePlatform">
 			<bean class="org.springframework.samples.petclinic.toplink.HSQLPlatformWithNativeSequence"/>
 		</property>
@@ -52,7 +52,7 @@
 
 	<!-- Transaction manager for a single TopLink SessionFactory (alternative to JTA) -->
 	<bean id="transactionManager" class="org.springframework.orm.toplink.TopLinkTransactionManager">
-		<property name="sessionFactory"><ref local="sessionFactory"/></property>
+		<property name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
@@ -61,7 +61,7 @@
 	  - PetClinic's central data access object: TopLink implementation.
     -->
 	<bean id="clinicTarget" class="org.springframework.samples.petclinic.toplink.TopLinkClinic">
-		<property name="sessionFactory"><ref local="sessionFactory"/></property>
+		<property name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 
 	<!--
@@ -76,8 +76,8 @@
 		- as described in the manual, to reduce duplication.
     -->
 	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref local="transactionManager"/></property>
-		<property name="target"><ref local="clinicTarget"/></property>
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target" ref="clinicTarget"/>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="get*">PROPAGATION_REQUIRED,readOnly</prop>

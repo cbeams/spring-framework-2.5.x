@@ -21,15 +21,13 @@
 	<!-- Job definition for ListImagesQuartzJob -->
 	<!-- Lists the images in the image database and sends a corresponding mail -->
 	<bean id="listImagesJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
-		<property name="jobClass">
-			<value>org.springframework.samples.imagedb.scheduling.ListImagesQuartzJob</value>
-		</property>
+		<property name="jobClass" value="org.springframework.samples.imagedb.scheduling.ListImagesQuartzJob"/>
 		<property name="jobDataAsMap">
 			<map>
-				<entry key="imageDatabase"><ref bean="imageDatabase"/></entry>
-				<entry key="mailSender"><ref bean="mailSender"/></entry>
-				<entry key="mailFrom"><value>${mail.from}</value></entry>
-				<entry key="mailTo"><value>${mail.to}</value></entry>
+				<entry key="imageDatabase" value-ref="imageDatabase"/>
+				<entry key="mailSender" value-ref="mailSender"/>
+				<entry key="mailFrom" value="${mail.from}"/>
+				<entry key="mailTo" value="${mail.to}"/>
 			</map>
 		</property>
 	</bean>
@@ -37,23 +35,23 @@
 	<!-- Trigger for the job defined above -->
 	<!-- Registered by the 'scheduler' bean -->
 	<bean id="listImagesTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
-		<property name="jobDetail"><ref bean="listImagesJobDetail"/></property>
-		<property name="startDelay"><value>10000</value></property>
-		<property name="repeatInterval"><value>10000</value></property>
+		<property name="jobDetail" ref="listImagesJobDetail"/>
+		<property name="startDelay" value="10000"/>
+		<property name="repeatInterval" value="10000"/>
 	</bean>
 
 	<!-- Job definition that delegates to the specified 'imageDatabase' method -->
 	<!-- Convenient way of invoking existing business logic instead of writing a job -->
 	<bean id="checkImagesJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject"><ref bean="imageDatabase"/></property>
-		<property name="targetMethod"><value>checkImages</value></property>
+		<property name="targetObject" ref="imageDatabase"/>
+		<property name="targetMethod" value="checkImages"/>
 	</bean>
 
 	<!-- Trigger for the job defined above -->
 	<!-- Registered by the 'scheduler' bean -->
 	<bean id="checkImagesTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
-		<property name="jobDetail"><ref bean="checkImagesJobDetail"/></property>
-		<property name="cronExpression"><value>0/5 * * * * ?</value></property>
+		<property name="jobDetail" ref="checkImagesJobDetail"/>
+		<property name="cronExpression" value="0/5 * * * * ?"/>
 	</bean>
 
 </beans>

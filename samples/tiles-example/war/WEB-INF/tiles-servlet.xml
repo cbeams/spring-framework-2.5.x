@@ -4,17 +4,9 @@
 <beans>
 
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="viewClass">
-			<value>org.springframework.web.servlet.view.tiles.TilesJstlView</value>
-		</property>
+		<property name="viewClass" value="org.springframework.web.servlet.view.tiles.TilesJstlView"/>
 	</bean>
-	
 
-	<bean id="messageSource"
-		class="org.springframework.context.support.ResourceBundleMessageSource">
-        <property name="basename"><value>messages</value></property>                                                                           
-    </bean>
-	
 	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer">
 		<property name="definitions">
 			<list>

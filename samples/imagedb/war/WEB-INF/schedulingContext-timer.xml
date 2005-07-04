@@ -21,33 +21,33 @@
 	<!-- Task definition for ListImagesTimerTask -->
 	<!-- Lists the images in the image database and sends a corresponding mail -->
 	<bean id="listImagesTimerTask" class="org.springframework.samples.imagedb.scheduling.ListImagesTimerTask">
-		<property name="imageDatabase"><ref bean="imageDatabase"/></property>
-		<property name="mailSender"><ref bean="mailSender"/></property>
-		<property name="mailFrom"><value>${mail.from}</value></property>
-		<property name="mailTo"><value>${mail.to}</value></property>
+		<property name="imageDatabase" ref="imageDatabase"/>
+		<property name="mailSender" ref="mailSender"/>
+		<property name="mailFrom" value="${mail.from}"/>
+		<property name="mailTo" value="${mail.to}"/>
 	</bean>
 
 	<!-- ScheduledTimerTask for the task defined above -->
 	<!-- Registered by the 'timer' bean -->
 	<bean id="listImagesScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
-		<property name="timerTask"><ref bean="listImagesTimerTask"/></property>
-		<property name="delay"><value>10000</value></property>
-		<property name="period"><value>10000</value></property>
+		<property name="timerTask" ref="listImagesTimerTask"/>
+		<property name="delay" value="10000"/>
+		<property name="period" value="10000"/>
 	</bean>
 
 	<!-- Job definition that delegates to the specified 'imageDatabase' method -->
 	<!-- Convenient way of invoking existing business logic instead of writing a task -->
 	<bean id="checkImagesTimerTask" class="org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean">
-		<property name="targetObject"><ref bean="imageDatabase"/></property>
-		<property name="targetMethod"><value>checkImages</value></property>
+		<property name="targetObject" ref="imageDatabase"/>
+		<property name="targetMethod" value="checkImages"/>
 	</bean>
 
 	<!-- ScheduledTimerTask for the task defined above -->
 	<!-- Registered by the 'timer' bean -->
 	<bean id="checkImagesScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
-		<property name="timerTask"><ref bean="checkImagesTimerTask"/></property>
-		<property name="delay"><value>5000</value></property>
-		<property name="period"><value>5000</value></property>
+		<property name="timerTask" ref="checkImagesTimerTask"/>
+		<property name="delay" value="5000"/>
+		<property name="period" value="5000"/>
 	</bean>
 
 </beans>

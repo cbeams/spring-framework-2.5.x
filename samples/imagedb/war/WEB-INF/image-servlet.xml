@@ -17,24 +17,24 @@
 
 	<!-- Configurer that sets up a shared VelocityEngine for Velocity views -->
 	<bean id="velocityConfigurer" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
-		<property name="resourceLoaderPath"><value>WEB-INF/views/</value></property>
+		<property name="resourceLoaderPath" value="WEB-INF/views/"/>
 	</bean>
 
 	<!-- Configurer that sets up a shared FreeMarker Configuration for FreeMarker views -->
 	<bean id="freemarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
-		<property name="templateLoaderPath"><value>WEB-INF/views/</value></property>
+		<property name="templateLoaderPath" value="WEB-INF/views/"/>
 	</bean>
 
 	<!-- Simple ViewResolver for Velocity, appending ".vm" to logical view names -->
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
-		<property name="suffix"><value>.vm</value></property>
+		<property name="suffix" value=".vm"/>
 	</bean>
 
 	<!-- Simple ViewResolver for FreeMarker, appending ".ftl" to logical view names. -->
 	<!-- Uncomment this and comment out the above to switch to the FreeMarker view. -->
 	<!--
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
-		<property name="suffix"><value>.ftl</value></property>
+		<property name="suffix" value=".ftl"/>
 	</bean>
 	-->
 
@@ -42,14 +42,14 @@
 	<!-- Uncomment this and comment out the above to switch to the JSP view. -->
 	<!--
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix"><value>/WEB-INF/views/</value></property>
-		<property name="suffix"><value>.jsp</value></property>
+		<property name="prefix" value="/WEB-INF/views/"/>
+		<property name="suffix" value=".jsp"/>
 	</bean>
 	-->
 
 	<!-- HandlerMapping that dispatches all request to the MultiActionController below -->
 	<bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-		<property name="defaultHandler"><ref local="imageController"/></property>
+		<property name="defaultHandler" ref="imageController"/>
 	</bean>
 
 	<!-- MultiActionController that defines user interface actions as separate methods -->
@@ -66,7 +66,7 @@
 				</property>
 			</bean>
 		</property>
-		<property name="imageDatabase"><ref bean="imageDatabase"/></property>
+		<property name="imageDatabase" ref="imageDatabase"/>
 	</bean>
 
 </beans>

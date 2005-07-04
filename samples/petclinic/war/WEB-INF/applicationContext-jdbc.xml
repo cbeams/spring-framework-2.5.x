@@ -11,7 +11,7 @@
 	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
 	<!-- (in this case, JDBC-related settings for the dataSource definition below) -->
 	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="location"><value>/WEB-INF/jdbc.properties</value></property>
+		<property name="location" value="/WEB-INF/jdbc.properties"/>
 	</bean>
 
 	<!-- 
@@ -22,10 +22,10 @@
 		the JDK, but DriverManagerDataSource is not intended for production usage.
 	 -->
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName"><value>${jdbc.driverClassName}</value></property>
-		<property name="url"><value>${jdbc.url}</value></property>
-		<property name="username"><value>${jdbc.username}</value></property>
-		<property name="password"><value>${jdbc.password}</value></property>
+		<property name="driverClassName" value="${jdbc.driverClassName}"/>
+		<property name="url" value="${jdbc.url}"/>
+		<property name="username" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
 	</bean>
 	
 	<!-- 
@@ -41,23 +41,23 @@
 	 -->
 	<!--
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-		<property name="driverClassName"><value>${jdbc.driverClassName}</value></property>
-		<property name="url"><value>${jdbc.url}</value></property>
-		<property name="username"><value>${jdbc.username}</value></property>
-		<property name="password"><value>${jdbc.password}</value></property>
+		<property name="driverClassName" value="${jdbc.driverClassName}"/>
+		<property name="url" value="${jdbc.url}"/>
+		<property name="username" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
 	</bean>
 	-->
 
 	<!-- JNDI DataSource for J2EE environments -->
 	<!--
 	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName"><value>java:comp/env/jdbc/petclinic</value></property>
+		<property name="jndiName" value="java:comp/env/jdbc/petclinic"/>
 	</bean>
 	-->
 
 	<!-- Transaction manager for a single JDBC DataSource (alternative to JTA) -->
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource"><ref local="dataSource"/></property>
+		<property name="dataSource" ref="dataSource"/>
 	</bean>
 
 	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
@@ -71,13 +71,13 @@
 	<!-- PetClinic's central data access object: HSQL JDBC implementation -->
 	<!-- (only initialized when referenced by the "clinic" proxy) -->
 	<bean id="hsqlClinic" class="org.springframework.samples.petclinic.jdbc.HsqlJdbcClinic" lazy-init="true">
-		<property name="dataSource"><ref local="dataSource"/></property>
+		<property name="dataSource" ref="dataSource"/>
 	</bean>
 
 	<!-- PetClinic's central data access object: MySQL JDBC implementation -->
 	<!-- (only initialized when referenced by the "clinic" proxy) -->
 	<bean id="mysqlClinic" class="org.springframework.samples.petclinic.jdbc.MySQLJdbcClinic" lazy-init="true">
-		<property name="dataSource"><ref local="dataSource"/></property>
+		<property name="dataSource" ref="dataSource"/>
 	</bean>
 
 	<!--
@@ -89,14 +89,14 @@
 		- as described in the manual, to reduce duplication.
     -->
 	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref local="transactionManager"/></property>
-		<property name="target"><ref bean="${petclinic.jdbcImplBeanName}"/></property>
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target" ref="${petclinic.jdbcImplBeanName}"/>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="*">PROPAGATION_REQUIRED</prop>
 			</props>
 		</property>
-		<property name="preInterceptors"><ref bean="callMonitor"/></property>
+		<property name="preInterceptors" ref="callMonitor"/>
 	</bean>
 
 	<!-- Call monitoring interceptor that monitors call count and call invocation time -->
@@ -119,8 +119,8 @@
 	<bean id="jmxExporter" class="org.springframework.jmx.export.MBeanExporter">
 		<property name="beans">
 			<map>
-				<entry key="petclinic:service=clinic"><ref bean="clinic"/></entry>
-				<entry key="petclinic:service=callMonitor"><ref bean="callMonitor"/></entry>
+				<entry key="petclinic:service=clinic" value-ref="clinic"/>
+				<entry key="petclinic:service=callMonitor" value-ref="callMonitor"/>
 			</map>
 		</property>
 		<property name="assembler">
