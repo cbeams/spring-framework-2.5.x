@@ -120,7 +120,8 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 
 		int separatorIndex = key.indexOf(this.beanNameSeparator);
 		if (separatorIndex == -1) {
-			throw new BeanInitializationException("Invalid key [" + key + "]: expected 'beanName.property'");
+			throw new BeanInitializationException("Invalid key [" + key +
+					"]: expected 'beanName" + this.beanNameSeparator + "property'");
 		}
 		String beanName = key.substring(0, separatorIndex);
 		String beanProperty = key.substring(separatorIndex+1);
