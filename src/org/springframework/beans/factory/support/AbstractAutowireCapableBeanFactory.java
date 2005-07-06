@@ -489,6 +489,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// If we get here, we found a factory method.
 		Object beanInstance = this.instantiationStrategy.instantiate(
 				mergedBeanDefinition, beanName, this, factoryBean, factoryMethodToUse, argsToUse);
+		if (beanInstance == null) {
+			throw new BeanCreationException(
+					mergedBeanDefinition.getResourceDescription(), beanName,
+					"Factory method '" + mergedBeanDefinition.getFactoryMethodName() + "' on class [" +
+					factoryClass.getName() + "] returned null");
+		}
+
 		bw.setWrappedInstance(beanInstance);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Bean '" + beanName + "' instantiated via factory method '" + factoryMethodToUse + "'");
