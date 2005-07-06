@@ -166,8 +166,9 @@ public abstract class PropertiesLoaderSupport {
 				if (logger.isInfoEnabled()) {
 					logger.info("Loading properties file from " + location);
 				}
-				InputStream is = location.getInputStream();
+				InputStream is = null;
 				try {
+					is = location.getInputStream();
 					if (location.getFilename().endsWith(XML_FILE_EXTENSION)) {
 						this.propertiesPersister.loadFromXml(props, is);
 					}
@@ -191,7 +192,9 @@ public abstract class PropertiesLoaderSupport {
 					}
 				}
 				finally {
-					is.close();
+					if (is != null) {
+						is.close();
+					}
 				}
 			}
 		}
