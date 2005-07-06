@@ -3,6 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 1.2.3 (19.7.2005)
+------------------------------------
+
+Package org.springframework.core
+* fixed PropertiesLoaderSupport to correctly ignore a resource not found failure if "ignoreResourceNotFound" is "true"
+
+
 Changes in version 1.2.2 (5.7.2005)
 -----------------------------------
 
