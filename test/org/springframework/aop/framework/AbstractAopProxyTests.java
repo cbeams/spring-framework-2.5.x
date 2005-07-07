@@ -909,8 +909,8 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		ITestBean proxy2 = (ITestBean) createProxy(pf2);
 		
 		HashMap h = new HashMap();
-		Object value1 = new Object();
-		Object value2 = new Object();
+		Object value1 = "foo";
+		Object value2 = "bar";
 		assertNull(h.get(proxy1));
 		h.put(proxy1, value1);
 		h.put(proxy2, value2);
