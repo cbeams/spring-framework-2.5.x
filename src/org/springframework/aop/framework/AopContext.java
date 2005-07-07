@@ -75,7 +75,7 @@ public abstract class AopContext {
 	 * @param proxy the proxy to expose
 	 * @return the old proxy, which may be null if none was bound
 	 */
-	static Object setCurrentProxy(Object proxy) {
+	public static Object setCurrentProxy(Object proxy) {
 		Object old = currentProxy.get();
 		currentProxy.set(proxy);
 		return old;

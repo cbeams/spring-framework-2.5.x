@@ -1,14 +1,14 @@
 
 package org.springframework.aop.framework.asm;
 
+import java.lang.reflect.UndeclaredThrowableException;
+
 import org.objectweb.asm.CodeVisitor;
 import org.objectweb.asm.Constants;
 import org.objectweb.asm.Type;
 
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.AopContext;
-
-import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
  * @author robh
