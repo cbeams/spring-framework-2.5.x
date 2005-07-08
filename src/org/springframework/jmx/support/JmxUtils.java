@@ -18,17 +18,21 @@ package org.springframework.jmx.support;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 import java.util.List;
 
 import javax.management.DynamicMBean;
 import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
+import javax.management.JMException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jmx.MBeanServerNotFoundException;
+import org.springframework.jmx.JmxException;
+import org.springframework.jmx.UncategorizedJmxException;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -155,4 +159,28 @@ public class JmxUtils {
 		return false;
 	}
 
+	public static JmxException convertJMException(JMException ex) {
+		if (JMException.class.equals(ex.getClass().getSuperclass())) {
+			// All other exceptions in our Jms runtime exception hierarchy have the
+			// same unqualified names as their javax.jms counterparts, so just
+			// construct the converted exception dynamically based on name.
+			String shortName = ClassUtils.getShortName(ex.getClass().getName());
+
+			// all JmsException subclasses are in the same package:
+			String longName = JmxException.class.getPackage().getName() + "." + shortName;
+
+			try {
+				Class clazz = Class.forName(longName);
+				Constructor ctor = clazz.getConstructor(new Class[] {ex.getClass()});
+				Object counterpart = ctor.newInstance(new Object[]{ex});
+				return (JmxException) counterpart;
+			}
+			catch (Throwable ex2) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Couldn't resolve JmxException class [" + longName + "]", ex2);
+				}
+				return new UncategorizedJmxException(ex);
+			}
+		}
+	}
 }
