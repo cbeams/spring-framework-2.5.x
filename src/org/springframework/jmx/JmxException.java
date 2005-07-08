@@ -19,6 +19,8 @@ package org.springframework.jmx;
 import org.springframework.core.NestedRuntimeException;
 
 /**
+ * Root unchecked exception class for JMX-related failures.
+ * 
  * @author Rob Harrop
  */
 public class JmxException extends NestedRuntimeException {

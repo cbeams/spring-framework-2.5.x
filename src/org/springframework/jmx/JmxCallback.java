@@ -20,9 +20,17 @@ import javax.management.MBeanServer;
 import javax.management.JMException;
 
 /**
+ * A callback interface for encapsulating an operation against a JMX 
+ * MBeanServer.
  * @author Rob Harrop
  */
 public interface JmxCallback {
-
-	Object doWithMBeanServer(MBeanServer server) throws JMException;
+	
+	/**
+	 * Execute this callback on the provided MBeanServer.
+	 * @param server the server
+	 * @return an optional return value
+	 * @throws JMException A JMX management exception occured
+	 */
+	public Object doWithMBeanServer(MBeanServer server) throws JMException;
 }
