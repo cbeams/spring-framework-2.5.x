@@ -120,11 +120,15 @@ public class JmxTemplate {
 		}
 		catch (JMException ex) {
 			// todo: wrap with a real exception
-			throw new RuntimeException(ex);
+			throw new JmxException
 		}
 	}
 
 	protected MBeanServer getMBeanServer() {
 		return (this.server != null) ? server : JmxUtils.locateMBeanServer();
+	}
+
+	protected JmxException convertJMException(JMException ex) {
+		return JmxUtils.convertJMException(ex);
 	}
 }
