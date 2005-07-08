@@ -21,12 +21,16 @@ import java.beans.PropertyDescriptor;
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+import javax.management.JMException;
+import javax.management.MalformedObjectNameException;
 
 import junit.framework.TestCase;
 
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
+import org.springframework.jmx.JmxException;
+import org.springframework.jmx.UncategorizedJmxException;
 import org.springframework.jmx.export.TestDynamicMBean;
 
 /**
@@ -77,6 +81,21 @@ public class JmxUtilsTests extends TestCase {
 		PropertyDescriptor pd = new BeanWrapperImpl(AttributeTest.class).getPropertyDescriptor("name");
 		String attributeName = JmxUtils.getAttributeName(pd, false);
 		assertEquals("Incorrect casing on attribute name", "name", attributeName);
+	}
+
+	public void testConvertJMException() {
+		JMException originalException = new MalformedObjectNameException("foo");
+		JmxException convertedException = JmxUtils.convertJMException(originalException);
+
+		assertEquals("Exception not translated to appropriate class", convertedException.getClass(), org.springframework.jmx.MalformedObjectNameException.class);
+		assertEquals("Root exception not preserved", convertedException.getCause(), originalException);
+
+		// test uncategorized
+		originalException = new JMException() {};
+		convertedException = JmxUtils.convertJMException(originalException);
+
+		assertEquals(convertedException.getClass(), UncategorizedJmxException.class);
+		assertEquals("Root exception not presevered", convertedException.getCause(), originalException);
 	}
 
 
