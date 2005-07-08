@@ -19,6 +19,7 @@ package org.springframework.beans.factory.script;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sf.cglib.asm.Type;
 import net.sf.cglib.core.Signature;
 import net.sf.cglib.proxy.InterfaceMaker;
 
@@ -35,8 +36,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.ResourceLoader;
-
-import org.objectweb.asm.Type;
 
 /**
  * This superclass has the following responsibilities:
