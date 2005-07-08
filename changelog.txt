@@ -6,6 +6,10 @@ http://www.springframework.org
 Changes in version 1.2.3 (19.7.2005)
 ------------------------------------
 
+Package org.springframework.beans
+* AbstractAutowireCapableBeanFactory throws BeanCreationException if a factory method returned null
+* DefaultListableBeanFactory does not create beans with "factory-method" for type check if "includeFactoryBeans"=false
+
 Package org.springframework.core
 * fixed PropertiesLoaderSupport to correctly ignore a resource not found failure if "ignoreResourceNotFound" is "true"
 
