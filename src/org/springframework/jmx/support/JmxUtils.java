@@ -17,21 +17,21 @@
 package org.springframework.jmx.support;
 
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.management.DynamicMBean;
+import javax.management.JMException;
 import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
-import javax.management.JMException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.jmx.JmxException;
+import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.jmx.UncategorizedJmxException;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -45,7 +45,9 @@ import org.springframework.util.StringUtils;
  * @since 1.2
  */
 public class JmxUtils {
-
+	/**
+	 * Suffix used to identify an MBean interface
+	 */
 	private static final String MBEAN_SUFFIX = "MBean";
 
 	private static final Log logger = LogFactory.getLog(JmxUtils.class);
@@ -53,9 +55,9 @@ public class JmxUtils {
 	/**
 	 * Attempt to find a locally running <code>MBeanServer</code>. Fails if no
 	 * <code>MBeanServer</code> can be found, or if more than one is found.
+	 *
 	 * @return the <code>MBeanServer</code> if found
-	 * @throws org.springframework.jmx.MBeanServerNotFoundException
-	 * if no <code>MBeanServer</code> is found, or more than one is found
+	 * @throws org.springframework.jmx.MBeanServerNotFoundException if no <code>MBeanServer</code> is found, or more than one is found
 	 */
 	public static MBeanServer locateMBeanServer() throws MBeanServerNotFoundException {
 		List servers = MBeanServerFactory.findMBeanServer(null);
@@ -108,6 +110,7 @@ public class JmxUtils {
 	 * such as <code>getFoo()</code> translates to an attribute called
 	 * <code>Foo</code>. With strict casing disabled, <code>getFoo()</code>
 	 * would translate to just <code>foo</code>.
+	 *
 	 * @param property the JavaBeans property descriptor
 	 * @param useStrictCasing whether to use strict casing
 	 * @return the JMX attribute name to use
@@ -123,6 +126,7 @@ public class JmxUtils {
 
 	/**
 	 * Check whether the supplied <code>Class</code> is a valid MBean resource.
+	 *
 	 * @param beanClass the class of the bean to test
 	 */
 	public static boolean isMBean(Class beanClass) {
@@ -146,6 +150,7 @@ public class JmxUtils {
 	 * Return whether an MBean interface exists for the given class
 	 * (that is, an interface whose name matches the class name of
 	 * the given class but with suffix "MBean).
+	 *
 	 * @param clazz the class to check
 	 */
 	private static boolean hasMBeanInterface(Class clazz) {
@@ -159,28 +164,31 @@ public class JmxUtils {
 		return false;
 	}
 
+	/**
+	 * Converts a <code>javax.management.JMException</code> to a Spring runtime
+	 * <code>JmxException</code>.
+	 *
+	 * @param ex the <code>JMException</code> to covert.
+	 * @return the Spring runtime exception wrapping the converted <code>JMException</code>.
+	 */
 	public static JmxException convertJMException(JMException ex) {
-		if (JMException.class.equals(ex.getClass().getSuperclass())) {
-			// All other exceptions in our Jms runtime exception hierarchy have the
-			// same unqualified names as their javax.jms counterparts, so just
-			// construct the converted exception dynamically based on name.
-			String shortName = ClassUtils.getShortName(ex.getClass().getName());
+		String shortName = ClassUtils.getShortName(ex.getClass().getName());
 
-			// all JmsException subclasses are in the same package:
-			String longName = JmxException.class.getPackage().getName() + "." + shortName;
+		// all JmsException subclasses are in the same package:
+		String longName = JmxException.class.getPackage().getName() + "." + shortName;
 
-			try {
-				Class clazz = Class.forName(longName);
-				Constructor ctor = clazz.getConstructor(new Class[] {ex.getClass()});
-				Object counterpart = ctor.newInstance(new Object[]{ex});
-				return (JmxException) counterpart;
-			}
-			catch (Throwable ex2) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Couldn't resolve JmxException class [" + longName + "]", ex2);
-				}
-				return new UncategorizedJmxException(ex);
-			}
+		try {
+			Class clazz = Class.forName(longName);
+			Constructor ctor = clazz.getConstructor(new Class[]{ex.getClass()});
+			Object counterpart = ctor.newInstance(new Object[]{ex});
+			return (JmxException) counterpart;
 		}
+		catch (Throwable ex2) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Couldn't resolve JmxException class [" + longName + "]", ex2);
+			}
+			return new UncategorizedJmxException(ex);
+		}
+
 	}
 }
