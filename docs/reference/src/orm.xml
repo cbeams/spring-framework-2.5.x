@@ -8,13 +8,17 @@
     <para>Spring provides integration with <emphasis>Hibernate, JDO, Oracle
     TopLink, Apache OJB</emphasis> and <emphasis>iBATIS SQL Maps</emphasis>:
     in terms of resource management, DAO implementation support, and
-    transaction strategies. For Hibernate there is first-class support with
-    lots of IoC convenience features, addressing many typical Hibernate
-    integration issues. All of these comply with Spring's generic transaction
-    and DAO exception hierarchies.</para>
+    transaction strategies. For example for Hibernate, there is first-class
+    support with lots of IoC convenience features, addressing many typical
+    Hibernate integration issues. All of these support packages for O/R mappers
+    comply with Spring's generic transaction and DAO exception hierarchies.
+    There are usually two integration styles: either using Spring's DAO
+    'templates' or coding DAOs against plain Hibernate/JDO/TopLink/etc APIs.
+    In both cases, DAOs can be configured through Dependency Injection and
+    participate in Spring's resource and transaction management.</para>
 
     <para>Spring's adds significant support when using the O/R mapping layer
-    of your choice to create data-access applications. First of all you should
+    of your choice to create data access applications. First of all, you should
     know that once you started using Spring's support for O/R mapping, you
     don't have to go all the way. No matter to what extent, you're invited to
     review and leverage the Spring approach, before deciding to take the
@@ -26,11 +30,11 @@
     this section show configuration inside an ApplicationContext.</para>
 
     <para>Some of the the benefits of using Spring to create your O/R mapping
-    applications include:</para>
+    DAOs include:</para>
 
     <itemizedlist>
       <listitem>
-        <para><emphasis>Ease of testing</emphasis>. Spring's inversion of
+        <para><emphasis>Ease of testing.</emphasis> Spring's inversion of
         control approach makes it easy to swap the implementations and config
         locations of Hibernate SessionFactory instances, JDBC DataSources,
         transaction managers, and mapper object implementations (if needed).
@@ -39,23 +43,7 @@
       </listitem>
 
       <listitem>
-        <para><emphasis>General resource management.</emphasis> Spring
-        application contexts can handle the location and configuration of
-        Hibernate SessionFactory instances, JDBC DataSources, iBATIS SQL Maps
-        configuration objects, and other related resources. This makes these
-        values easy to manage and change. Spring offers efficient, easy and
-        safe handling of Hibernate Sessions. Related code using Hibernate
-        generally needs to use the same Hibernate Session object for
-        efficiency and proper transaction handling. Spring makes it easy to
-        transparently create and bind a Session to the current thread, using
-        either a declarative, AOP method interceptor approach, or by using an
-        explicit, template wrapper class at the Java code level. Thus Spring
-        solves many of the issues that repeatedly arise from typical Hibernate
-        usage.</para>
-      </listitem>
-
-      <listitem>
-        <para><emphasis>Common data access exceptions. </emphasis>Spring can
+        <para><emphasis>Common data access exceptions.</emphasis>Spring can
         wrap exceptions from you O/R mapping tool of choice, converting them
         from proprietary (potentially checked) exceptions to a common runtime
         DataAccessException hierarchy. This allows you to handle most
@@ -69,40 +57,60 @@
       </listitem>
 
       <listitem>
+        <para><emphasis>General resource management.</emphasis> Spring
+        application contexts can handle the location and configuration of
+        Hibernate SessionFactory instances, JDBC DataSources, iBATIS SQL Maps
+        configuration objects, and other related resources. This makes these
+        values easy to manage and change. Spring offers efficient, easy and
+        safe handling of persistence resources. For example: Related code
+        using Hibernate generally needs to use the same Hibernate Session for
+        efficiency and proper transaction handling. Spring makes it easy to
+        transparently create and bind a Session to the current thread, either
+        by using an explicit 'template' wrapper class at the Java code level
+        or by exposing a current Session through the Hibernate SessionFactory
+        (for DAOs based on plain Hibernate3 API). Thus Spring solves many
+        of the issues that repeatedly arise from typical Hibernate usage,
+        for any transaction environment (local or JTA).</para>
+      </listitem>
+
+      <listitem>
         <para><emphasis>Integrated transaction management.</emphasis> Spring
         allows you to wrap your O/R mapping code with either a declarative,
         AOP style method interceptor, or an explicit 'template' wrapper class
         at the Java code level. In either case, transaction semantics are
-        handled for you, and proper transaction handling (rollback, etc.) in
+        handled for you, and proper transaction handling (rollback, etc) in
         case of exceptions is taken care of. As discussed below, you also get
-        the benefit of being able to use and swap various transaction
-        managers, without your Hibernate/JDO related code being affected. As
-        an added benefit, JDBC-related code can fully integrate
-        transactionally with the code you use to do O/R mapping. This is
-        useful for handling functionality not implemented in, for example,
-        Hibernate or iBATIS.</para>
+        the benefit of being able to use and swap various transaction managers,
+        without your Hibernate/JDO related code being affected: for example,
+        between local transactions and JTA, with the same full services (such
+        as declarative transactions) available in both scenarios. As an
+        additional benefit, JDBC-related code can fully integrate transactionally
+        with the code you use to do O/R mapping. This is useful for data access
+        that's not suitable for O/R mapping, such as batch processing or
+        streaming of BLOBs, which still needs to share common transactions
+        with O/R mapping operations.</para>
       </listitem>
 
       <listitem>
         <para><emphasis>To avoid vendor lock-in, and allow mix-and-match
         implementation strategies.</emphasis> While Hibernate is powerful,
         flexible, open source and free, it still uses a proprietary API.
-        Furthermore one could argue that iBatis is a bit lightweight, although
+        Furthermore one could argue that iBATIS is a bit lightweight, although
         it's excellent for use in application that don't require complex O/R
         mapping strategies. Given the choice, it's usually desirable to
         implement major application functionality using standard or abstracted
         APIs, in case you need to switch to another implementation for reasons
         of functionality, performance, or any other concerns. For example,
-        Spring's abstraction of Hibernate Transactions and Exceptions, along
+        Spring's abstraction of Hibernate transactions and exceptions, along
         with its IoC approach which allows you to easily swap in mapper/DAO
         objects implementing data access functionality, makes it easy to
         isolate all Hibernate-specific code in one area of your application,
         without sacrificing any of the power of Hibernate. Higher level
         service code dealing with the DAOs has no need to know anything about
         their implementation. This approach has the additional benefit of
-        making it easy to intentionally implement data-access with a
+        making it easy to intentionally implement data access with a
         mix-and-match approach (i.e. some data access performed using
-        Hibernate, and some using JDBC, others using iBatis) in a
+        Hibernate, and some using JDBC, others using iBATIS) in a
         non-intrusive fashion, potentially providing great benefits in terms
         of continuing to use legacy code or leveraging the strength of each
         technology.</para>
@@ -272,12 +280,12 @@
       implementation.</para>
 
       <programlisting>&lt;beans&gt;
+  ...
 
   &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
     &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
   &lt;/bean&gt;
 
-  ...
 &lt;/beans&gt;</programlisting>
 
       <programlisting format="linespecific" xml:space="preserve">public class ProductDaoImpl implements ProductDao {
@@ -289,20 +297,16 @@
     }
 
     public Collection loadProductsByCategory(final String category) {
-        HibernateTemplate hibernateTemplate =
-            new HibernateTemplate(this.sessionFactory);
-
-        return (Collection) hibernateTemplate.execute(
-            new HibernateCallback() {
-                public Object doInHibernate(Session session) throws HibernateException {
-                    List result = session.find(
-                        "from test.Product product where product.category=?",
-                        category, Hibernate.STRING);
-                    // do some further stuff with the result list
-                    return result;
-                }
+        HibernateTemplate ht = new HibernateTemplate(this.sessionFactory);
+        return (Collection) ht.execute(new HibernateCallback() {
+            public Object doInHibernate(Session session) throws HibernateException {
+                List result = session.find(
+                    "from test.Product product where product.category=?",
+                    category, Hibernate.STRING);
+                // do some further stuff with the result list
+                return result;
             }
-        );
+        });
     }
 }</programlisting>
 
@@ -334,12 +338,13 @@
     </sect2>
 
     <sect2>
-      <title>Using the Hibernate API directly in DAO implementations</title>
+      <title>Implementing Spring-based DAOs without callbacks</title>
 
       <para>As alternative to using Spring's
       <classname>HibernateTemplate</classname> to implement DAOs, data access
-      code can also be written against plain Hibernate API, without wrapping
-      the Hibernate access code in a callback. Spring's
+      code can also be written in a more traditional fashion, without wrapping
+      the Hibernate access code in a callback, while still complying to Spring's
+      generic <literal>DataAccessException</literal> hierarchy. Spring's
       <literal>HibernateDaoSupport</literal> base class offers methods to
       access the current transactional Session and to convert exceptions in
       such a scenario; similar methods are also available as static helpers on
@@ -377,29 +382,96 @@
       <literal>HibernateTemplate</literal>. In general,
       <classname>HibernateTemplate</classname>'s convenience methods are
       simpler and more convenient for many scenarios.</para>
+    </sect2>
 
-      <para>In principle, a plain
-      <literal>SessionFactory.openSession()</literal> call can be used as well,
-      with a corresponding <literal>close</literal> call at the end of the
-      operation, and converting <literal>HibernateException</literal> to some
-      custom DAO exception. This does not involve any Spring-specific API, but
-      won't participate in Spring's transactional <literal>Session</literal>,
-      and won't conform to Spring's generic
-      <literal>DataAccessException</literal> hierarchy. Hence, this is not
-      recommended for newly written code (in general).</para>
+    <sect2>
+		  <title>Implementing DAOs based on plain Hibernate3 API</title>
 
-      <para>As a special feature, the <literal>getCurrentSession()</literal>
-      method that Hibernate 3.0.1 introduced on the
-      <literal>SessionFactory</literal> interface is supported by Spring's
-      <literal>LocalSessionFactoryBean</literal> as well, returning the
-      current Spring-managed transactional <literal>Session</literal> even
-      with <literal>HibernateTransactionManager</literal>. Of course, the
-      standard behavior of that method remains: returning the current
-      <literal>Session</literal> associated with the ongoing JTA transaction,
-      if any. This allows to write DAOs against plain Hibernate API, while
-      still participating in Spring-managed transactions. However, conversion
-      to Spring's <literal>DataAccessException</literal> would still have to
-      happen explicitly (if desired).</para>
+      <para>Hibernate 3.0.1 introduced a feature called "contextual Sessions",
+      where Hibernate itself manages one current Session per transaction.
+      This is roughly equivalent to Spring's synchronization of one Hibernate
+      Session per transaction. A corresponding DAO implementation looks like
+      as follows, based on plain Hibernate API:</para>
+      
+      <programlisting format="linespecific" xml:space="preserve">public class ProductDaoImpl implements ProductDao {
+
+    private SessionFactory sessionFactory;
+
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
+    public Collection loadProductsByCategory(String category) {
+        return this.sessionFactory.getCurrentSession()
+            .createQuery("from test.Product product where product.category=?")
+            .setParameter(0, category)
+            .list();
+    }
+}</programlisting>
+
+      <para>This Hibernate access style is very similar to what you will find
+      in the Hibernate documentation and examples, except for holding the
+      <literal>SessionFactory</literal> in an instance variable. We strongly
+      recommend such an instance-based setup over the old-school static
+      <literal>HibernateUtil</literal> class from Hibernate's CaveatEmptor
+      sample application! (In general, do not keep any resources in static
+      variables unless absolutely necessary!)</para>
+      
+      <para>Our DAO above follows the Dependency Injection pattern:
+      It still fits nicely into a Spring application context, just like
+      it would if coded against Spring's <literal>HibernateTemplate</literal>.
+      Concretely, it uses Setter Injection; if desired, it could use
+      Constructor Injection instead. Of course, such a DAO can also be set
+      up in plain Java (for example, in unit tests): simply instantiate it
+      and call <literal>setSessionFactory</literal> with the desired factory
+      reference. As a Spring bean definition, it would look as follows:</para>
+      
+      <programlisting>&lt;beans&gt;
+  ...
+
+  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
+    &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
+  &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting>
+
+      <para>The main advantage of this DAO style is that it depends on
+      Hibernate API only; no import of any Spring class is required.
+      This is of course appealing from a non-invasivenness perspective,
+      and might feel more natural to Hibernate developers.</para>
+      
+      <para>However, the DAO throws plain <literal>HibernateException</literal>
+      (which is unchecked, so does not have to be declared or caught),
+      which means that callers can only treat exceptions as generally fatal
+      - unless they want to depend on Hibernate's own exception hierarchy.
+      Catching specific causes such as an optimistic locking failure is not
+      possible without tying the caller to the implementation strategy.
+      This tradeoff might be acceptable to applications that are strongly
+      Hibernate-based and/or do not need any special exception treatment.</para>
+      
+      <para>A further disadvantage of that DAO style is that Hibernate's
+      <literal>getCurrentSession()</literal> feature just works within
+      JTA transactions. It does not work with any other transaction strategy
+      out-of-the-box, in particular not with local Hibernate transactions.
+      </para>
+      
+      <para>Fortunately, Spring's <literal>LocalSessionFactoryBean</literal>
+      supports Hibernate's <literal>SessionFactory.getCurrentSession()</literal>
+      method for any Spring transaction strategy, returning the current
+      Spring-managed transactional <literal>Session</literal> even with
+      <literal>HibernateTransactionManager</literal>. Of course, the standard
+      behavior of that method remains: returning the current <literal>Session</literal>
+      associated with the ongoing JTA transaction, if any (no matter whether
+      driven by Spring's <literal>JtaTransactionManager</literal>, by EJB CMT,
+      or by plain JTA).</para>
+      
+      <para>In summary: DAOs can be implemented based on plain Hibernate3 API,
+      while still being able to participate in Spring-managed transactions.
+      This might in particular appeal to people already familar with Hibernate,
+      feeling more natural to them. However, such DAOs will throw plain
+      <literal>HibernateException</literal>; conversion to Spring's
+      <literal>DataAccessException</literal> would have to happen explicitly
+      (if desired).</para>
     </sect2>
 
     <sect2>
@@ -447,7 +519,6 @@
 
     public void increasePriceOfAllProductsInCategory(final String category) {
         TransactionTemplate transactionTemplate = new TransactionTemplate(this.transactionManager);
-        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
         transactionTemplate.execute(
             new TransactionCallbackWithoutResult() {
                 public void doInTransactionWithoutResult(TransactionStatus status) {
@@ -480,7 +551,7 @@
   &lt;/bean&gt;
 
   &lt;bean id="myTxInterceptor"
-	    class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
+      class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
     &lt;property name="transactionManager" ref="myTxManager"/&gt;
     &lt;property name="transactionAttributeSource"&gt;
       &lt;value&gt;
@@ -524,8 +595,8 @@
     ...
 }</programlisting>
 
-      <para><classname>TransactionInterceptor</classname> allows any checked
-      application exception to be thrown with the callback code, while
+      <para>Spring's <classname>TransactionInterceptor</classname> allows any
+      checked application exception to be thrown with the callback code, while
       <classname>TransactionTemplate</classname> is restricted to unchecked
       exceptions within the callback.
       <classname>TransactionTemplate</classname> will trigger a rollback in
@@ -555,7 +626,7 @@
   &lt;/bean&gt;
 
   &lt;bean id="myProductService"
-	    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
     &lt;property name="transactionManager" ref="myTxManager"/&gt;
     &lt;property name="target" ref="myProductServiceTarget"/&gt;
     &lt;property name="transactionAttributes"&gt;
@@ -655,7 +726,7 @@
   &lt;/bean&gt;
 
   &lt;bean id="myProductService"
-	    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
     &lt;property name="transactionManager" ref="myTxManager"/&gt;
     &lt;property name="target" ref="myProductServiceTarget"/&gt;
     &lt;property name="transactionAttributes"&gt;
@@ -820,10 +891,9 @@
       <para>Each JDO-based DAO will then receive the
       <literal>PersistenceManagerFactory</literal> through dependency
       injection, i.e. through a bean property setter or through a constructor
-      argument. Such a DAO could be coded against the plain JDO API, working
-      with the given <literal>PersistenceManagerFactory</literal>, but will
-      usually rather be used with Spring's
-      <literal>JdoTemplate</literal>:</para>
+      argument. Such a DAO could be coded against plain JDO API, working with
+      the given <literal>PersistenceManagerFactory</literal>, but will usually
+      rather be used with Spring's <literal>JdoTemplate</literal>:</para>
 
       <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
   ...
@@ -844,17 +914,15 @@
 
     public Collection loadProductsByCategory(final String category) {
         JdoTemplate jdoTemplate = new JdoTemplate(this.persistenceManagerFactory);
-        return (Collection) jdoTemplate.execute(
-            new JdoCallback() {
-                public Object doInJdo(PersistenceManager pm) throws JDOException {
-                    Query query = pm.newQuery(Product.class, "category = pCategory");
-                    query.declareParameters("String pCategory"); 
-                    List result = query.execute(category);
-                    // do some further stuff with the result list
-                    return result;
-                }
+        return (Collection) jdoTemplate.execute(new JdoCallback() {
+            public Object doInJdo(PersistenceManager pm) throws JDOException {
+                Query query = pm.newQuery(Product.class, "category = pCategory");
+                query.declareParameters("String pCategory"); 
+                List result = query.execute(category);
+                // do some further stuff with the result list
+                return result;
             }
-        );
+        });
     }
 }</programlisting>
 
@@ -886,8 +954,8 @@
 }</programlisting></para>
 
       <para>As alternative to working with Spring's
-      <literal>JdoTemplate</literal>, you can also code your JDO data access
-      against the plain JDO API, explictly opening and closing a
+      <literal>JdoTemplate</literal>, you can also code Spring-based DAOs
+      at the JDO API level, explictly opening and closing a
       <literal>PersistenceManager</literal>. As elaborated in the
       corresponding Hibernate section, the main advantage of this approach is
       that your data access code is able to throw checked exceptions.
@@ -895,21 +963,151 @@
       this scenario, for fetching and releasing a transactional
       <literal>PersistenceManager</literal> as well as for converting
       exceptions.</para>
+    </sect2>
 
-      <para>DAOs can also be written against the plain JDO API, without any
-      Spring dependencies, directly using the injected
-      <literal>PersistenceManagerFactory</literal>. To still access a
-      Spring-managed transactional <literal>PersistenceManager</literal>,
+    <sect2>
+		  <title>Implementing DAOs based on plain JDO API</title>
+
+      <para>DAOs can also be written against plain JDO API, without any
+      Spring dependencies, directly using an injected
+      <literal>PersistenceManagerFactory</literal>. A corresponding DAO
+      implementation looks like as follows:</para>
+      
+      <programlisting format="linespecific" xml:space="preserve">public class ProductDaoImpl implements ProductDao {
+
+    private PersistenceManagerFactory persistenceManagerFactory;
+
+    public void setPersistenceManagerFactory(PersistenceManagerFactory pmf) {
+        this.persistenceManagerFactory = pmf;
+    }
+
+    public Collection loadProductsByCategory(String category) {
+        PersistenceManager pm = this.persistenceManagerFactory.getPersistenceManager();
+        try {
+            Query query = pm.newQuery(Product.class, "category = pCategory");
+            query.declareParameters("String pCategory"); 
+            return query.execute(category);
+        }
+        finally {
+          pm.close();
+        }
+    }
+}</programlisting>
+
+      <para>As the above DAO still follows the Dependency Injection pattern,
+      it still fits nicely into a Spring application context, just like
+      it would if coded against Spring's <literal>JdoTemplate</literal>:
+      </para>
+      
+      <programlisting>&lt;beans&gt;
+  ...
+
+  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
+    &lt;property name="persistenceManagerFactory" ref="myPmf"/&gt;
+  &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting>
+
+      <para>The main issue with such DAOs is that they always get a new
+      <literal>PersistenceManager</literal> from the factory. To still
+      access a Spring-managed transactional <literal>PersistenceManager</literal>,
       consider defining a
       <literal>TransactionAwarePersistenceManagerFactoryProxy</literal> (as
       included in Spring) in front of your target
       <literal>PersistenceManagerFactory</literal>, passing the proxy into
-      your DAOs. Your data access code will then receive a transactional
+      your DAOs.</para>
+      
+      <programlisting>&lt;beans&gt;
+  ...
+
+  &lt;bean id="myPmfProxy"
+      class="org.springframework.orm.jdo.TransactionAwarePersistenceManagerFactoryProxy"&gt;
+    &lt;property name="targetPersistenceManagerFactory" ref="myPmf"/&gt;
+  &lt;/bean&gt;
+
+  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
+    &lt;property name="persistenceManagerFactory" ref="myPmfProxy"/&gt;
+  &lt;/bean&gt;
+
+  ...
+&lt;/beans&gt;</programlisting>
+
+      <para>Your data access code will then receive a transactional
       <literal>PersistenceManager</literal> (if any) from the
       <literal>PersistenceManagerFactory.getPersistenceManager()</literal>
-      method.</para>
-    </sect2>
+      method that it calls. The latter method call goes through the proxy,
+      which will first check for a current transactional
+      <literal>PersistenceManager</literal> before getting a new one
+      from the factory. <literal>close</literal> calls on the
+      <literal>PersistenceManager</literal> will be ignored in case
+      of a transaction <literal>PersistenceManager</literal>.</para>
+      
+      <para>If your data access code will always run within an active
+      transaction (or at least within active transaction synchronization),
+      it is safe to omit the <literal>PersistenceManager.close()</literal>
+      call and thus the entire <literal>finally</literal> block, which
+      you might prefer to keep your DAO implementations concise:</para>
 
+      <programlisting format="linespecific" xml:space="preserve">public class ProductDaoImpl implements ProductDao {
+
+    private PersistenceManagerFactory persistenceManagerFactory;
+
+    public void setPersistenceManagerFactory(PersistenceManagerFactory pmf) {
+        this.persistenceManagerFactory = pmf;
+    }
+
+    public Collection loadProductsByCategory(String category) {
+        PersistenceManager pm = this.persistenceManagerFactory.getPersistenceManager();
+        Query query = pm.newQuery(Product.class, "category = pCategory");
+        query.declareParameters("String pCategory"); 
+        return query.execute(category);
+    }
+}</programlisting>
+
+      <para>With such DAOs that rely on active transactions, it is
+      recommended to enforce active transactions through turning
+      <literal>TransactionAwarePersistenceManagerFactoryProxy</literal>'s
+      "allowCreate" flag off:</para>
+
+      <programlisting>&lt;beans&gt;
+  ...
+
+  &lt;bean id="myPmfProxy"
+      class="org.springframework.orm.jdo.TransactionAwarePersistenceManagerFactoryProxy"&gt;
+    &lt;property name="targetPersistenceManagerFactory" ref="myPmf"/&gt;
+    &lt;property name="allowCreate" value="false"/&gt;
+  &lt;/bean&gt;
+
+  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
+    &lt;property name="persistenceManagerFactory" ref="myPmfProxy"/&gt;
+  &lt;/bean&gt;
+
+  ...
+&lt;/beans&gt;</programlisting>
+
+      <para>The main advantage of this DAO style is that it depends on
+      JDO API only; no import of any Spring class is required.
+      This is of course appealing from a non-invasivenness perspective,
+      and might feel more natural to JDO developers.</para>
+      
+      <para>However, the DAO throws plain <literal>JDOException</literal>
+      (which is unchecked, so does not have to be declared or caught),
+      which means that callers can only treat exceptions as generally fatal
+      - unless they want to depend on JDO's own exception structure.
+      Catching specific causes such as an optimistic locking failure is not
+      possible without tying the caller to the implementation strategy.
+      This tradeoff might be acceptable to applications that are strongly
+      JDO-based and/or do not need any special exception treatment.</para>
+      
+      <para>In summary: DAOs can be implemented based on plain JDO API,
+      while still being able to participate in Spring-managed transactions.
+      This might in particular appeal to people already familar with JDO,
+      feeling more natural to them. However, such DAOs will throw plain
+      <literal>JDOException</literal>; conversion to Spring's
+      <literal>DataAccessException</literal> would have to happen explicitly
+      (if desired).</para>
+    </sect2>
+    
     <sect2>
       <title>Transaction management</title>
 
@@ -933,7 +1131,7 @@
   &lt;/bean&gt;
 
   &lt;bean id="myProductService"
-	    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
     &lt;property name="transactionManager" ref="myTxManager"/&gt;
     &lt;property name="target" ref="myProductServiceTarget"/&gt;
     &lt;property name="transactionAttributes"&gt;
@@ -1106,7 +1304,7 @@
       <para>Each TopLink-based DAO will then receive the
       <literal>SessionFactory</literal> through dependency injection, i.e.
       through a bean property setter or through a constructor argument. Such a
-      DAO could be coded against the plain TopLink API, fetching a
+      DAO could be coded against plain TopLink API, fetching a
       <literal>Session</literal> from the given
       <literal>SessionFactory</literal>, but will usually rather be used with
       Spring's <literal>TopLinkTemplate</literal>:</para>
@@ -1130,23 +1328,21 @@
 
     public Collection loadProductsByCategory(final String category) {
         TopLinkTemplate tlTemplate = new TopLinkTemplate(this.sessionFactory);
-        return (Collection) tlTemplate.execute(
-            new TopLinkCallback() {
-                public Object doInTopLink(Session session) throws TopLinkException {
-                    ReadAllQuery findOwnersQuery = new ReadAllQuery(Product.class);
-                    findOwnersQuery.addArgument("Category");
-                    ExpressionBuilder builder = this.findOwnersQuery.getExpressionBuilder();
-                    findOwnersQuery.setSelectionCriteria(
-                        builder.get("category").like(builder.getParameter("Category")));
+        return (Collection) tlTemplate.execute(new TopLinkCallback() {
+            public Object doInTopLink(Session session) throws TopLinkException {
+                ReadAllQuery findOwnersQuery = new ReadAllQuery(Product.class);
+                findOwnersQuery.addArgument("Category");
+                ExpressionBuilder builder = this.findOwnersQuery.getExpressionBuilder();
+                findOwnersQuery.setSelectionCriteria(
+                    builder.get("category").like(builder.getParameter("Category")));
 
-                    Vector args = new Vector();
-                    args.add(category);
-                    List result = session.executeQuery(findOwnersQuery, args);
-                    // do some further stuff with the result list
-                    return result;
-                }
+                Vector args = new Vector();
+                args.add(category);
+                List result = session.executeQuery(findOwnersQuery, args);
+                // do some further stuff with the result list
+                return result;
             }
-        );
+        });
     }
 }</programlisting>
 
@@ -1188,25 +1384,120 @@
 
       <para>As alternative to working with Spring's
       <literal>TopLinkTemplate</literal>, you can also code your TopLink data
-      access against the plain TopLink API, explictly opening and closing a
+      access based on the raw TopLink API, explictly opening and closing a
       <literal>Session</literal>. As elaborated in the corresponding Hibernate
       section, the main advantage of this approach is that your data access
       code is able to throw checked exceptions.
       <literal>TopLinkDaoSupport</literal> offers a variety of support methods
       for this scenario, for fetching and releasing a transactional
       <literal>Session</literal> as well as for converting exceptions.</para>
+    </sect2>
 
-      <para>DAOs can also be written against the plain TopLik API, without any
-      Spring dependencies, directly using an injected TopLink
-      <literal>Session</literal>. The latter will usually be a
-      <literal>ServerSession</literal> that is aware of Spring-managed
-      transactions, defined by a <literal>LocalSessionFactoryBean</literal>
-      and exposed for bean references of type <literal>Session</literal>
-      through Spring's <literal>TransactionAwareSessionAdapter</literal>. The
-      <literal>getActiveSession()</literal> method defined on TopLink's
-      <literal>Session</literal> interface will return the current
-      transactional <literal>Session</literal> in such a scenario, both for
-      Spring-managed transactions and for JTA / EJB CMT transactions.</para>
+    <sect2>
+		  <title>Implementing DAOs based on plain TopLink API</title>
+
+      <para>DAOs can also be written against plain TopLink API, without any Spring
+      dependencies, directly using an injected TopLink <literal>Session</literal>.
+      The latter will usually be based on a <literal>SessionFactory</literal>
+      defined by a <literal>LocalSessionFactoryBean</literal>, exposed for bean
+      references of type <literal>Session</literal> through Spring's
+      <literal>TransactionAwareSessionAdapter</literal>.</para>
+      
+      <para>The <literal>getActiveSession()</literal> method defined on
+      TopLink's <literal>Session</literal> interface will return the current
+      transactional <literal>Session</literal> in such a scenario. If there
+      is no active transaction, it will return the shared TopLink
+      <literal>ServerSession</literal> as-is, which is only supposed to be
+      used directly for read-only access. There is also an analogous
+      <literal>getActiveUnitOfWork()</literal> method, returning the
+      TopLink <literal>UnitOfWork</literal> associated with the current
+      transaction, if any (returning null else).</para>
+      
+      <para>A corresponding DAO implementation looks like as follows:</para>
+      
+      <programlisting format="linespecific" xml:space="preserve">public class ProductDaoImpl implements ProductDao {
+
+    private Session session;
+
+    public void setSession(Session session) {
+        this.session = session;
+    }
+
+    public Collection loadProductsByCategory(String category) {
+        ReadAllQuery findOwnersQuery = new ReadAllQuery(Product.class);
+        findOwnersQuery.addArgument("Category");
+        ExpressionBuilder builder = this.findOwnersQuery.getExpressionBuilder();
+        findOwnersQuery.setSelectionCriteria(
+            builder.get("category").like(builder.getParameter("Category")));
+
+        Vector args = new Vector();
+        args.add(category);
+        return session.getActiveSession().executeQuery(findOwnersQuery, args);
+    }
+}</programlisting>
+
+      <para>As the above DAO still follows the Dependency Injection pattern,
+      it still fits nicely into a Spring application context, analogous to like
+      it would if coded against Spring's <literal>TopLinkTemplate</literal>.
+      Spring's <literal>TransactionAwareSessionAdapter</literal> is used to
+      expose a bean reference of type <literal>Session</literal>, to be passed
+      into the DAO:
+      </para>
+      
+      <programlisting>&lt;beans&gt;
+  ...
+
+  &lt;bean id="mySessionAdapter"
+      class="org.springframework.orm.toplink.support.TransactionAwareSessionAdapter"&gt;
+    &lt;property name="sessionFactory" ref="mySessionFactory"/&gt;
+  &lt;/bean&gt;
+
+  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
+    &lt;property name="session" ref="mySessionAdapter"/&gt;
+  &lt;/bean&gt;
+
+  ...
+&lt;/beans&gt;</programlisting>
+
+      <para>The main advantage of this DAO style is that it depends on
+      TopLink API only; no import of any Spring class is required.
+      This is of course appealing from a non-invasivenness perspective,
+      and might feel more natural to TopLink developers.</para>
+      
+      <para>However, the DAO throws plain <literal>TopLinkException</literal>
+      (which is unchecked, so does not have to be declared or caught),
+      which means that callers can only treat exceptions as generally fatal
+      - unless they want to depend on TopLink's own exception structure.
+      Catching specific causes such as an optimistic locking failure is not
+      possible without tying the caller to the implementation strategy.
+      This tradeoff might be acceptable to applications that are strongly
+      TopLink-based and/or do not need any special exception treatment.</para>
+      
+      <para>A further disadvantage of that DAO style is that TopLink's
+      standard <literal>getActiveSession()</literal> feature just works within
+      JTA transactions. It does not work with any other transaction strategy
+      out-of-the-box, in particular not with local TopLink transactions.
+      </para>
+      
+      <para>Fortunately, Spring's <literal>TransactionAwareSessionAdapter</literal>
+      exposes a corresponding proxy for the TopLink <literal>ServerSession</literal>
+      which supports TopLink's <literal>Session.getActiveSession()</literal>
+      and <literal>Session.getActiveUnitOfWork()</literal> methods for any
+      Spring transaction strategy, returning the current Spring-managed
+      transactional <literal>Session</literal> even with
+      <literal>TopLinkTransactionManager</literal>. Of course, the standard
+      behavior of that method remains: returning the current <literal>Session</literal>
+      associated with the ongoing JTA transaction, if any (no matter whether
+      driven by Spring's <literal>JtaTransactionManager</literal>, by EJB CMT,
+      or by plain JTA).</para>
+
+      <para>In summary: DAOs can be implemented based on plain TopLink API,
+      while still being able to participate in Spring-managed transactions.
+      This might in particular appeal to people already familar with TopLink,
+      feeling more natural to them. However, such DAOs will throw plain
+      <literal>TopLinkException</literal>; conversion to Spring's
+      <literal>DataAccessException</literal> would have to happen explicitly
+      (if desired).</para>
     </sect2>
 
     <sect2>
@@ -1232,7 +1523,7 @@
   &lt;/bean&gt;
 
   &lt;bean id="myProductService"
-	    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
     &lt;property name="transactionManager" ref="myTxManager"/&gt;
     &lt;property name="target" ref="myProductServiceTarget"/&gt;
     &lt;property name="transactionAttributes"&gt;
@@ -1267,9 +1558,9 @@
       current <literal>UnitOfWork</literal> and perform write operations
       through it. This will only work within an active transaction (both
       within Spring-managed transactions and plain JTA transactions). For
-      special needs, you can also acquire separate UnitOfWork instances that
-      won't participate in the current transaction; this is hardly needed,
-      though.</para>
+      special needs, you can also acquire separate <literal>UnitOfWork</literal>
+      instances that won't participate in the current transaction; this is
+      hardly needed, though.</para>
 
       <para><literal>TopLinkTransactionManager</literal> is capable of
       exposing a TopLink transaction to JDBC access code that accesses the
@@ -1340,9 +1631,9 @@
 
       <para>Each OJB-based DAO will be configured with a "PBKey" through
       bean-style configuration, i.e. through a bean property setter. Such a
-      DAO could be coded against the plain OJB API, working with OJB's static
-      PersistenceBrokerFactory, but will usually rather be used with Spring's
-      PersistenceBrokerTemplate:</para>
+      DAO could be coded against plain OJB API, working with OJB's static
+      <literal>PersistenceBrokerFactory</literal>, but will usually rather
+      be used with Spring's <literal>PersistenceBrokerTemplate</literal>:</para>
 
       <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
   ...
@@ -1364,21 +1655,19 @@
     public Collection loadProductsByCategory(final String category) {
         PersistenceBrokerTemplate pbTemplate =
                 new PersistenceBrokerTemplate(new PBKey(this.jcdAlias);
-        return (Collection) pbTemplate.execute(
-            new PersistenceBrokerCallback() {
-                public Object doInPersistenceBroker(PersistenceBroker pb)
-                        throws PersistenceBrokerException {
+        return (Collection) pbTemplate.execute(new PersistenceBrokerCallback() {
+            public Object doInPersistenceBroker(PersistenceBroker pb)
+                    throws PersistenceBrokerException {
 
-                    Criteria criteria = new Criteria();
-                    criteria.addLike("category", category + "%");
-                    Query query = new QueryByCriteria(Product.class, criteria);
+                Criteria criteria = new Criteria();
+                criteria.addLike("category", category + "%");
+                Query query = new QueryByCriteria(Product.class, criteria);
 
-                    List result = pb.getCollectionByQuery(query);
-                    // do some further stuff with the result list
-                    return result;
-                }
+                List result = pb.getCollectionByQuery(query);
+                // do some further stuff with the result list
+                return result;
             }
-        );
+        });
     }
 }</programlisting>
 
@@ -1413,7 +1702,7 @@
 
       <para>As alternative to working with Spring's
       <literal>PersistenceBrokerTemplate</literal>, you can also code your OJB
-      data access against the plain OJB API, explictly opening and closing a
+      data access against plain OJB API, explictly opening and closing a
       <literal>PersistenceBroker</literal>. As elaborated in the corresponding
       Hibernate section, the main advantage of this approach is that your data
       access code is able to throw checked exceptions.
@@ -1446,7 +1735,7 @@
   &lt;/bean&gt;
 
   &lt;bean id="myProductService"
-	    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
     &lt;property name="transactionManager" ref="myTxManager"/&gt;
     &lt;property name="target" ref="myProductServiceTarget"/&gt;
     &lt;property name="transactionAttributes"&gt;
@@ -1591,9 +1880,9 @@
         this.email = email;
     }
 }</programlisting>Suppose we would want to map this class. We'd have to create
-        the following SqlMap. Using the query, we can later on retrieve users
-        through their email addresses. <literal>Account.xml</literal>:
-        <programlisting>&lt;sql-map name="Account"&gt;
+        the following <literal>SqlMap</literal>. Using the query, we can later
+        on retrieve users through their email addresses.
+        <literal>Account.xml</literal>:<programlisting>&lt;sql-map name="Account"&gt;
 
   &lt;result-map name="result" class="examples.Account"&gt;
     &lt;property name="name" column="NAME" columnIndex="1"/&gt;
@@ -1620,8 +1909,8 @@
         path, so be sure to add the <literal>Account.xml</literal> file to the
         class path.</para>
 
-        <para>Using Spring, we can now very easily set up the SqlMap, using
-        the <literal>SqlMapFactoryBean</literal>: <programlisting>&lt;beans&gt;
+        <para>Using Spring, we can now very easily set up the <literal>SqlMap</literal>,
+        using the <literal>SqlMapFactoryBean</literal>: <programlisting>&lt;beans&gt;
 
   &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
     &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
@@ -1639,7 +1928,7 @@
       </sect3>
 
       <sect3>
-        <title>Using <literal>SqlMapDaoSupport</literal></title>
+        <title>Using <literal>SqlMapTemplate</literal> and <literal>SqlMapDaoSupport</literal></title>
 
         <para>The <literal>SqlMapDaoSupport</literal> class offers a
         supporting class similar to the <literal>HibernateDaoSupport</literal>
@@ -1653,11 +1942,12 @@
     public void insertAccount(Account account) throws DataAccessException {
         getSqlMapTemplate().executeUpdate("insertAccount", account);
     }
-}</programlisting> As you can see, we're using the
+}</programlisting> As you can see, we're using the pre-configured
         <literal>SqlMapTemplate</literal> to execute the query. Spring has
-        initialized the SqlMap for us using the SqlMapFactoryBean, and when
-        setting up the SqlMapAccountDao as follows, you're all set to go. Note
-        that with iBATIS SQL Maps 1.x, the JDBC <literal>DataSource</literal>
+        initialized the <literal>SqlMap</literal> for us using the
+        <literal>SqlMapFactoryBean</literal>, and when setting up the
+        <literal>SqlMapAccountDao</literal> as follows, you're all set to go.
+        Note that with iBATIS SQL Maps 1.x, the JDBC <literal>DataSource</literal>
         is usually specified on the DAO.<programlisting>&lt;beans&gt;
   ...
 
@@ -1667,6 +1957,12 @@
   &lt;/bean&gt;
 
 &lt;/beans&gt;</programlisting></para>
+
+        <para>Note that a <literal>SqlMapTemplate</literal> instance could
+        also be created manually, passing in the <literal>DataSource</literal>
+        and the <literal>SqlMap</literal> as constructor arguments. The
+        <literal>SqlMapDaoSupport</literal> base class simply pre-initializes
+        a <literal>SqlMapTemplate</literal> instance for us.</para>
       </sect3>
     </sect2>
 
@@ -1705,7 +2001,7 @@
         <literal>Account.xml</literal> file to the class path.</para>
 
         <para>We can use the <literal>SqlMapClientFactoryBean</literal> in the
-        Spring application context. Note that with iBATIS SQL Maps 2.0, the
+        Spring application context. Note that with iBATIS SQL Maps 2.x, the
         JDBC <literal>DataSource</literal> is usually specified on the
         <literal>SqlMapClientFactoryBean</literal>, which enables lazy
         loading.<programlisting>&lt;beans&gt;
@@ -1727,7 +2023,7 @@
       </sect3>
 
       <sect3>
-        <title>Using <literal>SqlMapClientDaoSupport</literal></title>
+        <title>Using <literal>SqlMapClientTemplate</literal> and <literal>SqlMapClientDaoSupport</literal></title>
 
         <para>The <literal>SqlMapClientDaoSupport</literal> class offers a
         supporting class similar to the <literal>SqlMapDaoSupport</literal>.
@@ -1740,18 +2036,94 @@
     public void insertAccount(Account account) throws DataAccessException {
         getSqlMapClientTemplate().update("insertAccount", account);
     }
-}</programlisting>In the DAO, we use the
+}</programlisting>In the DAO, we use the pre-configured
         <literal>SqlMapClientTemplate</literal> to execute the queries, after
-        setting up the SqlMapAccountDao in the application
-        context:<programlisting>&lt;beans&gt;
+        setting up the <literal>SqlMapAccountDao</literal> in the application
+        context and wiring it with our <literal>SqlMapClient</literal> instance:
+<programlisting>&lt;beans&gt;
   ...
 
   &lt;bean id="accountDao" class="example.SqlMapAccountDao"&gt;
-    &lt;property name="sqlMap" ref="sqlMap"/&gt;
+    &lt;property name="sqlMapClient" ref="sqlMapClient"/&gt;
+  &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting></para>
+
+        <para>Note that a <literal>SqlMapTemplate</literal> instance could
+        also be created manually, passing in the <literal>SqlMapClient</literal>
+        as constructor argument. The <literal>SqlMapClientDaoSupport</literal>
+        base class simply pre-initializes a <literal>SqlMapClientTemplate</literal>
+        instance for us.</para>
+        
+        <para>The <literal>SqlMapClientTemplate</literal> also offers a
+        generic <literal>execute</literal> method, taking a custom
+        <literal>SqlMapClientCallback</literal> implementation as argument.
+        This can, for example, be used for batching: <programlisting>public class SqlMapAccountDao extends SqlMapClientDaoSupport implements AccountDao {
+    ...
+
+    public void insertAccount(Account account) throws DataAccessException {
+        getSqlMapClientTemplate().execute(new SqlMapClientCallback() {
+            public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+                executor.startBatch();
+                executor.update("insertAccount", account);
+                executor.update("insertAddress", account.getAddress());
+                executor.executeBatch();
+            }
+        });
+    }
+}</programlisting>In general, any combination of operations offered by the
+        native <literal>SqlMapExecutor</literal> API can be used in such a
+        callback. Any <literal>SQLException</literal> thrown will automatically
+        get converted to Spring's generic <literal>DataAccessException</literal>
+        hierarchy.</para>
+      </sect3>
+      
+      <sect3>
+        <title>Implementing DAOs based on plain iBATIS API</title>
+        
+        <para>DAOs can also be written against plain iBATIS API, without any
+        Spring dependencies, directly using an injected
+        <literal>SqlMapClient</literal>. A corresponding DAO
+        implementation looks like as follows:<programlisting>public class SqlMapAccountDao implements AccountDao {
+        
+    private SqlMapClient sqlMapClient;
+    
+    public void setSqlMapClient(SqlMapClient sqlMapClient) {
+        this.sqlMapClient = sqlMapClient;
+    }
+
+    public Account getAccount(String email) {
+        try {
+            return (Account) this.sqlMapClient.queryForObject("getAccountByEmail", email);
+        }
+        catch (SQLException ex) {
+            throw new MyDaoException(ex);
+        }
+    }
+
+    public void insertAccount(Account account) throws DataAccessException {
+        try {
+            this.sqlMapClient.update("insertAccount", account);
+        }
+        catch (SQLException ex) {
+            throw new MyDaoException(ex);
+        }
+    }
+}</programlisting>In such a scenario, the <literal>SQLException</literal>
+        thrown by the iBATIS API needs to be handled in a custom fashion:
+        usually, wrapping it in your own application-specific DAO exception.
+        Wiring in the application context would still look like before,
+        due to the fact that the plain iBATIS-based DAO still follows the
+        Dependency Injection pattern: <programlisting>&lt;beans&gt;
+  ...
+
+  &lt;bean id="accountDao" class="example.SqlMapAccountDao"&gt;
+    &lt;property name="sqlMapClient" ref="sqlMapClient"/&gt;
   &lt;/bean&gt;
 
 &lt;/beans&gt;</programlisting></para>
       </sect3>
+
     </sect2>
   </sect1>
 </chapter>
