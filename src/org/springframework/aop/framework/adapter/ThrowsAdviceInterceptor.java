@@ -48,7 +48,7 @@ public final class ThrowsAdviceInterceptor implements MethodInterceptor {
 	
 	private static final String AFTER_THROWING = "afterThrowing";
 	
-	protected static Log logger = LogFactory.getLog(ThrowsAdviceInterceptor.class);
+	private static final Log logger = LogFactory.getLog(ThrowsAdviceInterceptor.class);
 
 
 	private final Object throwsAdvice;
