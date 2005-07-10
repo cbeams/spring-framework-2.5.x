@@ -26,11 +26,11 @@ import org.springframework.orm.toplink.SessionFactory;
  * corresponding transaction-aware TopLink Session as bean reference.
  *
  * <p>This adapter bean will usually be defined in front of a Spring
- * LocalSessionFactoryBean, to allow for passing Session references
- * to DAOs that expect to work on a raw TopLink Session. Your DAOs can
- * then, for example, access the currently active Session and UnitOfWork via
- * <code>Session.getActiveSession</code> and <code>Session.getActiveUnitOfWork</code>,
- * respectively.
+ * LocalSessionFactoryBean, to allow for passing Session references to DAOs
+ * that expect to work on a raw TopLink Session. Your DAOs can then,
+ * for example, access the currently active Session and UnitOfWork via
+ * <code>Session.getActiveSession()</code> and
+ * <code>Session.getActiveUnitOfWork()</code>, respectively.
  *
  * <p>The main advantage of this proxy is that it allows DAOs to work with a
  * plain TopLink Session reference, while still participating in Spring's
