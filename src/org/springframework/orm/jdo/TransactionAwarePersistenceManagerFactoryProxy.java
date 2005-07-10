@@ -71,7 +71,10 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 
 	private PersistenceManagerFactory target;
 
+	private boolean allowCreate = true;
+
 	private PersistenceManagerFactory proxy;
+
 
 	/**
 	 * Set the target JDO PersistenceManagerFactory that this proxy should
@@ -84,7 +87,7 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 		this.proxy = (PersistenceManagerFactory) Proxy.newProxyInstance(
 				PersistenceManagerFactory.class.getClassLoader(),
 				new Class[] {PersistenceManagerFactory.class},
-				new TransactionAwareFactoryInvocationHandler(target));
+				new TransactionAwareFactoryInvocationHandler());
 	}
 
 	/**
@@ -93,6 +96,26 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 	public PersistenceManagerFactory getTargetPersistenceManagerFactory() {
 		return this.target;
 	}
+
+	/**
+	 * Set whether the PersistenceManagerFactory proxy is allowed to create
+	 * a non-transactional PersistenceManager when no transactional
+	 * PersistenceManager can be found for the current thread.
+	 * <p>Default is "true". Can be turned off to enforce access to
+	 * transactional PersistenceManagers, which safely allows for DAOs
+	 * written to get a PersistenceManager without explicit closing
+	 * (i.e. a <code>PersistenceManagerFactory.getPersistenceManager()</code>
+	 * call without corresponding <code>PersistenceManager.close()</code> call).
+	 * @see PersistenceManagerFactoryUtils#getPersistenceManager(javax.jdo.PersistenceManagerFactory, boolean)
+	 */
+	public void setAllowCreate(boolean allowCreate) {
+		this.allowCreate = allowCreate;
+	}
+
+	public boolean isAllowCreate() {
+		return allowCreate;
+	}
+
 
 	public Object getObject() {
 		return this.proxy;
@@ -112,22 +135,18 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 	 * PersistenceManagerFactory proxy to PersistenceManagerFactoryUtils
 	 * for being aware of thread-bound transactions.
 	 */
-	private static class TransactionAwareFactoryInvocationHandler implements InvocationHandler {
-
-		private final PersistenceManagerFactory target;
-
-		public TransactionAwareFactoryInvocationHandler(PersistenceManagerFactory target) {
-			this.target = target;
-		}
+	private class TransactionAwareFactoryInvocationHandler implements InvocationHandler {
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on PersistenceManagerFactory interface coming in...
+			PersistenceManagerFactory target = getTargetPersistenceManagerFactory();
 
 			if (method.getName().equals("getPersistenceManager")) {
-				PersistenceManager pm = PersistenceManagerFactoryUtils.doGetPersistenceManager(this.target, true);
+				PersistenceManager pm =
+						PersistenceManagerFactoryUtils.doGetPersistenceManager(target, isAllowCreate());
 				Class[] ifcs = ClassUtils.getAllInterfaces(pm);
 				return (PersistenceManager) Proxy.newProxyInstance(
-						getClass().getClassLoader(), ifcs, new TransactionAwareInvocationHandler(pm, this.target));
+						getClass().getClassLoader(), ifcs, new TransactionAwareInvocationHandler(pm, target));
 			}
 			else if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.
@@ -140,7 +159,7 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 
 			// Invoke method on target PersistenceManagerFactory.
 			try {
-				return method.invoke(this.target, args);
+				return method.invoke(target, args);
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
