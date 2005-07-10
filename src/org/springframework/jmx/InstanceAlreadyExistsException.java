@@ -16,20 +16,14 @@
 
 package org.springframework.jmx;
 
-import javax.management.MBeanServer;
-import javax.management.JMException;
-
 /**
- * A callback interface for encapsulating an operation against a JMX <code>MBeanServer</code>.
+ * Runtime exception mirroring JMX <code>InstanceAlreadyExistsException</code>.
  *
  * @author Rob Harrop
  */
-public interface JmxCallback {
-	
-	/**
-	 * Execute this callback on the supplied <code>MBeanServer</code>.
-	 *
-	 * @throws JMException A JMX management exception occured
-	 */
-	public Object doWithMBeanServer(MBeanServer server) throws JMException;
+public class InstanceAlreadyExistsException extends JmxException {
+
+	public InstanceAlreadyExistsException(javax.management.InstanceAlreadyExistsException ex) {
+		super(ex);
+	}
 }

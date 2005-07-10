@@ -16,43 +16,90 @@
 
 package org.springframework.jmx.support;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import java.util.Hashtable;
 
 /**
- * Wraps the creation of <code>ObjectName</code> instances and caches instances
- * for reuse. Provides <code>ObjectName</code> caching to older JMX clients.
+ * Wraps the creation of <code>ObjectName</code> instances. <code>ObjectName</code> instances will be cached if your
+ * JMX implementation supports caching for <code>ObjectName</code>s.
  *
  * @author Rob Harrop
  * @since 1.2
  */
 public class ObjectNameManager {
+	/**
+	 * Flag that indicates whether the ObjectName.getInstance() methods are available.
+	 */
+	private static boolean canUseGetInstance;
 
 	/**
-	 * Cache for the <code>ObjectName</code> instance.
+	 * Detects whether or not the <code>getInstance</code> method on ObjectName is available and sets
+	 * the <code>canUseGetInstance</code> flag appropriately.
 	 */
-	private static Map objectNameCache = Collections.synchronizedMap(new HashMap());
 
-	/**
-	 * Retreive the <code>ObjectName</code> instance corresponding to the supplied
-	 * name.
-	 * @param objectName the <code>ObjectName</code> in <code>String</code> format.
-	 * @return the <code>ObjectName</code> instance.
-	 * @throws MalformedObjectNameException if the supplied name is invalid.
-	 */
-	public static ObjectName getInstance(String objectName) throws MalformedObjectNameException {
-		ObjectName name = (ObjectName) objectNameCache.get(objectName);
-		if (name == null) {
-			name = new ObjectName(objectName);
-			objectNameCache.put(objectName, name);
+	static {
+		try {
+			ObjectName.class.getMethod("getInstance", new Class[]{String.class});
+			canUseGetInstance = true;
 		}
-		return name;
+		catch (NoSuchMethodException ex) {
+			canUseGetInstance = false;
+		}
 	}
 
+	/**
+	 * Retreive the <code>ObjectName</code> instance corresponding to the supplied name.
+	 *
+	 * @param objectName the <code>ObjectName</code> in <code>String</code> format.
+	 * @return the <code>ObjectName</code> instance.
+	 * @see ObjectName#ObjectName(String)
+	 * @see ObjectName#getInstance(String)
+	 */
+	public static ObjectName getInstance(String objectName) throws MalformedObjectNameException {
+		if (canUseGetInstance) {
+			return ObjectName.getInstance(objectName);
+		}
+		else {
+			return new ObjectName(objectName);
+		}
+	}
 
+	/**
+	 * Gets an <code>ObjectName</code> instance for the specified domain and a single property with the supplied
+	 * key and value.
+	 *
+	 * @param domainName the domain name for the <code>ObjectName</code>
+	 * @param key the key for the single property in the <code>ObjectName</code>
+	 * @param value the value for the single property in the <code>ObjectName</code>
+	 * @return the <code>ObjectName</code> instance
+	 * @see ObjectName#ObjectName(String, String, String)
+	 * @see ObjectName#getInstance(String, String, String)
+	 */
+	public static ObjectName getInstance(String domainName, String key, String value) throws MalformedObjectNameException {
+		if (canUseGetInstance) {
+			return ObjectName.getInstance(domainName, key, value);
+		}
+		else {
+			return new ObjectName(domainName, key, value);
+		}
+	}
 
+	/**
+	 * Gets an <code>ObjectName</code> instance with the specified domain name and the supplied key/name properties.
+	 *
+	 * @param domainName the domain name for the <code>ObjectName</code>
+	 * @param properties the properties for the <code>ObjectName</code>
+	 * @return the <code>ObjectName</code> instance
+	 * @see ObjectName#ObjectName(String, java.util.Hashtable)
+	 * @see ObjectName#getInstance(String, java.util.Hashtable)
+	 */
+	public static ObjectName getInstance(String domainName, Hashtable properties) throws MalformedObjectNameException {
+		if (canUseGetInstance) {
+			return ObjectName.getInstance(domainName, properties);
+		}
+		else {
+			return new ObjectName(domainName, properties);
+		}
+	}
 }

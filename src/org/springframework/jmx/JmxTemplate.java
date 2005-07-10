@@ -30,47 +30,60 @@ import javax.management.QueryExp;
 import org.springframework.jmx.support.JmxUtils;
 
 /**
- * Helper class that simplifies JMX MBeanServer access code. 
+ * Helper class that simplifies interaction with a JMX <code>MBeanServer</code>. If no <code>MBeanServer</code> is
+ * specified, either in the constructor or via the <code>server</code> propery, then <code>JmxTemplate</code> will
+ * attempt to locate a running <code>MBeanServer</code> in the current VM when the first operation occurs.
+ * <p/>
+ * Operations are encapsulated as implementations of the <code>JmxCallback</code> interface and passed to the
+ * <code>execute</code> method for processing. User code in the <code>JmxCallback</code> can throw any
+ * <code>JMException</code> which will be wrapped by <code>JmxTemplate</code> in an unchecked <code>JmxException</code>.
+ * 
  * @author Rob Harrop
+ * @see #setServer(javax.management.MBeanServer)
+ * @see org.springframework.jmx.JmxTemplate#JmxTemplate(javax.management.MBeanServer)
+ * @see org.springframework.jmx.support.JmxUtils#locateMBeanServer()
+ * @see org.springframework.jmx.support.JmxUtils#convertJMException(javax.management.JMException)
+ * @see org.springframework.jmx.JmxException
  */
 public class JmxTemplate {
-	
+
 	/**
-	 * The MBeanServer wrapped by this template; the one this template will execute its
-	 * operations against. 
+	 * The <code>MBeanServer</code> wrapped by this template. All operations are executed against this
+	 * <code>MBeanServer</code> instance.
 	 */
 	private MBeanServer server;
 
 	/**
-	 * Default constructor for a JmxTemplate. Note: if the "server" property is not set
-	 * explicitly this template will attempt to obtain a reference to the first MBeanServer 
-	 * present in the running Java VM.
+	 * Creates a <code>JmxTemplate</code> with no explicit <code>MBeanServer</code> reference
 	 */
 	public JmxTemplate() {
 	}
 
 	/**
-	 * Create a template for executing operations against the specified MBeanServer.
-	 * @param server the MBeanServer to execute operations against.
+	 * Create a <code>JmxTemplate</code> for executing operations against the specified <code>MBeanServer</code>.
+	 *
+	 * @param server the <code>MBeanServer</code> to execute operations against.
 	 */
 	public JmxTemplate(MBeanServer server) {
 		this.server = server;
 	}
 
 	/**
-	 * Set the MBeanServer this template will execute operations against.
-	 * @param server the MBeanServer, may be null
+	 * Set the <code>MBeanServer</code> this template will execute operations against.
+	 *
+	 * @param server the <code>MBeanServer</code>, may be null
 	 */
 	public void setServer(MBeanServer server) {
 		this.server = server;
 	}
 
 	/**
-	 * Register the provided object as an MBean in the wrapped MBeanServer 
-	 * with the provided ObjectName.
+	 * Register the provided object as an MBean under the specified <code>ObjectName</code>.
+	 *
 	 * @param mbean the object to be registered
-	 * @param objectName the name the object will be identified by in the mbean server
-	 * @return the registered ObjectInstance
+	 * @param objectName the <code>ObjectName</code> to register the MBean under.
+	 * @return the registered <code>ObjectInstance</code>
+	 * @see MBeanServer#registerMBean(Object, javax.management.ObjectName)
 	 */
 	public ObjectInstance registerMBean(final Object mbean, final ObjectName objectName) {
 		return (ObjectInstance)execute(new JmxCallback() {
@@ -81,9 +94,10 @@ public class JmxTemplate {
 	}
 
 	/**
-	 * Unregister an MBean with the provided object name in the MBeanServer wrapped by this
-	 * template.
-	 * @param objectName the object name.
+	 * Unregister the MBean identified by the specified <code>ObjectName</code>.
+	 *
+	 * @param objectName the <code>ObjectName</code> of the MBean to unregister.
+	 * @see MBeanServer#unregisterMBean(javax.management.ObjectName)
 	 */
 	public void unregisterMBean(final ObjectName objectName) {
 		execute(new JmxCallback() {
@@ -95,9 +109,10 @@ public class JmxTemplate {
 	}
 
 	/**
-	 * Get the value of the attribute provided on the MBean identified by the provided object name.
-	 * @param objectName the object name
-	 * @param attribute the attribute name
+	 * Get the value of the attribute specified from the MBean identified by the given <code>ObjectName</code>.
+	 *
+	 * @param objectName the <code>ObjectName</code> of the MBean from which to read the attribute value
+	 * @param attribute the name of the attribute to read
 	 * @return the attribute value, typically of a pervasive type.
 	 */
 	public Object getAttribute(final ObjectName objectName, final String attribute) {
@@ -110,6 +125,8 @@ public class JmxTemplate {
 
 	/**
 	 * Get the list of attribute values on the MBean identified by the provided object name.
+	 *
+	 *
 	 * @param objectName the object name
 	 * @param attributes the attribute names
 	 * @return the attribute list
@@ -123,9 +140,10 @@ public class JmxTemplate {
 	}
 
 	/**
-	 * Sets a single attribute on the MBean with the provided object name to the value provided.
-	 * @param objectName the object name
-	 * @param attribute the attribute name
+	 * Sets a single attribute on the MBean identified by the given <code>ObjectName</code> to the value specified.
+	 *
+	 * @param objectName the <code>ObjectName</code> of the MBean to update
+	 * @param attribute the name of the attribute to update
 	 * @param value the attribute value
 	 */
 	public void setAttribute(final ObjectName objectName, final String attribute, final Object value) {
@@ -138,10 +156,11 @@ public class JmxTemplate {
 	}
 
 	/**
-	 * Sets a list of attributes on the MBean with the provided object name to the valujes provided.
-	 * @param objectName the object name
-	 * @param attributes the attribute list
-	 * @return the attribute list of those whose values were updated
+	 * Sets a list of attributes on the MBean identified by the given <code>ObjectName</code> to the values provided.
+	 *
+	 * @param objectName the <code>ObjectName</code> of the MBean to update
+	 * @param attributes the <code>AttributeList</code> containing the names and values of the attributes to update
+	 * @return an <code>AttributeList</code> containing the names and values of the attributes that were successfully updated
 	 */
 	public AttributeList setAttributes(final ObjectName objectName, final AttributeList attributes) {
 		return (AttributeList) execute(new JmxCallback() {
@@ -152,35 +171,37 @@ public class JmxTemplate {
 	}
 
 	/**
-	 * Returns the default domain of the wrapped MBeanServer.
+	 * Returns the default domain of the wrapped <code>MBeanServer</code>.
+	 *
 	 * @return the default domain name
 	 */
 	public String getDefaultDomain() {
 		return (String) execute(new JmxCallback() {
-			public Object doWithMBeanServer(MBeanServer server) throws JMException {
+			public Object doWithMBeanServer(MBeanServer server)  {
 				return server.getDefaultDomain();
 
 			}
 		});
 	}
-	
+
 	/**
-	 * Returns the number of MBeans registered in the wrapped MBeanServer.
+	 * Returns the number of MBeans registered in the wrapped <code>MBeanServer</code>.
+	 *
 	 * @return the number of MBeans
 	 */
 	public Integer getMBeanCount() {
 		return (Integer) execute(new JmxCallback() {
-			public Object doWithMBeanServer(MBeanServer server) throws JMException {
+			public Object doWithMBeanServer(MBeanServer server) {
 				return server.getMBeanCount();
 			}
 		});
 	}
 
 	/**
-	 * Returns the management metadata associated with the MBean registered in the wrapped 
-	 * MBeanServer with the provided object name.
-	 * @param objectName the MBean's object name
-	 * @return the MBean's management metadata descriptor (an MBeanInfo)
+	 * Returns the management metadata associated with the MBean specified by the supplied <code>ObjectName</code>.
+	 *
+	 * @param objectName the <code>ObjectName</code> of the MBean
+	 * @return the MBean's management metadata descriptor
 	 */
 	public MBeanInfo getMBeanInfo(final ObjectName objectName) {
 		return (MBeanInfo) execute(new JmxCallback() {
@@ -191,8 +212,9 @@ public class JmxTemplate {
 	}
 
 	/**
-	 * Returns the ObjectInstance for the MBean with the provided object name.
-	 * @param objectName the object name
+	 * Returns the <code>ObjectInstance</code> for the MBean with the provided <code>ObjectName</code>.
+	 *
+	 * @param objectName the <code>ObjectName</code> of the MBean
 	 * @return the object instance
 	 */
 	public ObjectInstance getObjectInstance(final ObjectName objectName) {
@@ -204,14 +226,15 @@ public class JmxTemplate {
 	}
 
 	/**
-	 * Queryies all MBeans that match the provided query expression.
-	 * @param objectName the object name pattern (may be null)
+	 * Returns all MBeans that match the provided <code>ObjectName</code> pattern and query expression.
+	 *
+	 * @param objectName the <code>ObjectName</code> pattern (may be null)
 	 * @param query the query expression
 	 * @return the set of matched MBeans
 	 */
 	public Set queryMBeans(final ObjectName objectName, final QueryExp query) {
 		return (Set)execute(new JmxCallback() {
-			public Object doWithMBeanServer(MBeanServer server) throws JMException {
+			public Object doWithMBeanServer(MBeanServer server) {
 				return server.queryMBeans(objectName, query);
 			}
 		});
@@ -219,24 +242,27 @@ public class JmxTemplate {
 
 	/**
 	 * Queries all MBeans that match the provided query expression, returning a set of matching
-	 * ObjectNames.
-	 * @param objectName the object name pattern (may be null)
+	 * <code>ObjectName</code>s.
+	 *
+	 * @param objectName the <code>ObjectName</code> pattern
 	 * @param query the query expression
-	 * @return the set of matched MBean ObjectNames
+	 * @return the set of matched MBean <code>ObjectName</code>s
 	 */
 	public Set queryNames(final ObjectName objectName, final QueryExp query) {
 		return (Set)execute(new JmxCallback() {
-			public Object doWithMBeanServer(MBeanServer server) throws JMException {
+			public Object doWithMBeanServer(MBeanServer server) {
 				return server.queryNames(objectName, query);
 			}
 		});
 	}
 
 	/**
-	 * Most generic template method, accepting a JmxCallback that is expected to execute
-	 * custom logic against MBeanServer wrapped by this template.
-	 * @param callback the callback
-	 * @return the object returned by the callback (may be null)
+	 * Execute the supplied <code>JmxCallback</code> using the wrapped <code>MBeanServer</code>. All
+	 * <code>JMException</code>s are wrapped in unchecked <code>JmxExceptions</code>.
+	 *
+	 * @param callback the <code>JmxCallback</code> to execute
+	 * @return the object returned by the supplied <code>JmxCallback</code>. May be <code>null</code>.
+	 * @see #convertJMException(javax.management.JMException)
 	 */
 	public Object execute(JmxCallback callback) {
 		MBeanServer server = getMBeanServer();
@@ -249,19 +275,28 @@ public class JmxTemplate {
 	}
 
 	/**
-	 * Returns the wrapped MBeanServer.
+	 * Returns the wrapped <code>MBeanServer</code>. If no <code>MBeanServer</code> has been configured
+	 * this method will attempt to locate one. If an <code>MBeanServer</code> is located, it will be cached
+	 * and used for all subsequent invocations on this <code>JmxTemplate</code> instance.
+	 *
 	 * @return the mbean server to execute against
 	 */
 	protected MBeanServer getMBeanServer() {
-		return (this.server != null) ? server : JmxUtils.locateMBeanServer();
+		if(this.server == null) {
+			this.server = JmxUtils.locateMBeanServer();
+		}
+		return this.server;
 	}
 
 	/**
-	 * Converts a checked JMException into a strongly-typed unchecked JmxException.
-	 * @param ex the JMException
-	 * @return the corresponding JmxException
+	 * Converts a checked <code>JMException</code> into a unchecked <code>JmxException</code>.
+	 *
+	 * @param ex the <code>JMException</code>
+	 * @return the corresponding <code>JmxException</code>
+	 * @see JmxUtils#convertJMException(JMException)
 	 */
 	protected JmxException convertJMException(JMException ex) {
 		return JmxUtils.convertJMException(ex);
 	}
 }
+
