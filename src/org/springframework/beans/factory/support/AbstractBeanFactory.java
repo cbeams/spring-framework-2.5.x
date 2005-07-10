@@ -324,12 +324,12 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				// OK, let's assume it's a bean definition.
 				RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
 
-				// Create bean in case of factory method, to find out actual type.
-				if (mergedBeanDefinition.getFactoryMethodName() != null && mergedBeanDefinition.isSingleton()) {
-					return getBean(name).getClass();
+				// Delegate to getTypeForFactoryMethod in case of factory method.
+				if (mergedBeanDefinition.getFactoryMethodName() != null) {
+					return getTypeForFactoryMethod(name, mergedBeanDefinition);
 				}
-				// Return "undeterminable" for beans without class and for non-singleton beans with factory method.
-				if (!mergedBeanDefinition.hasBeanClass() || mergedBeanDefinition.getFactoryMethodName() != null) {
+				// Return "undeterminable" for beans without class.
+				if (!mergedBeanDefinition.hasBeanClass()) {
 					return null;
 				}
 
@@ -1110,5 +1110,21 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	protected abstract Object createBean(
 			String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args) throws BeanCreationException;
+
+	/**
+	 * Determine the bean type for the given bean definition,
+	 * as far as possible.
+	 * <p>Default implementation returns <code>null</code> to indicate that the
+	 * type cannot be determined. Subclasses are encouraged to try to determine
+	 * the actual return type here, matching their strategy of resolving
+	 * factory methods in the <code>createBean</code> imüplementation.
+	 * @param beanName name of the bean
+	 * @param mergedBeanDefinition the bean definition for the bean
+	 * @return the type for the bean if determinable, or <code>null</code> else
+	 * @see #createBean
+	 */
+	protected Class getTypeForFactoryMethod(String beanName, RootBeanDefinition mergedBeanDefinition) {
+		return null;
+	}
 
 }

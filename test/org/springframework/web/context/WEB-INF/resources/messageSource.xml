@@ -17,4 +17,8 @@
 
 	<bean id="messageSourceString" factory-bean="messageSource" factory-method="toString"/>
 
+	<bean id="currentTimeMillis" class="javax.management.ObjectName" factory-method="getInstance">
+		<constructor-arg value="${objectName}"/>
+	</bean>
+
 </beans>

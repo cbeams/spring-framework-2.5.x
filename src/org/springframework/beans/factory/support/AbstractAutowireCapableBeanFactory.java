@@ -372,6 +372,38 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return bean;
 	}
 
+	protected Class getTypeForFactoryMethod(String beanName, RootBeanDefinition mergedBeanDefinition) {
+		// Create bean in case of factory method, to find out actual type.
+		if (mergedBeanDefinition.getFactoryBeanName() != null && mergedBeanDefinition.isSingleton()) {
+			return getBean(beanName).getClass();
+		}
+		// Return "undeterminable" for beans without class and for non-singleton beans with factory method.
+		if (!mergedBeanDefinition.hasBeanClass() || mergedBeanDefinition.getFactoryBeanName() != null) {
+			return null;
+		}
+
+		// Check static factory methods in case of bean with local factory method:
+		// If all of them have the same return type, return that type.
+		// Can't clearly figure out exact method due to type converting / autowiring!
+		int minNrOfArgs = mergedBeanDefinition.getConstructorArgumentValues().getArgumentCount();
+		Method[] candidates = mergedBeanDefinition.getBeanClass().getMethods();
+		Set returnTypes = new HashSet(1);
+		for (int i = 0; i < candidates.length; i++) {
+			Method factoryMethod = candidates[i];
+			if (Modifier.isStatic(factoryMethod.getModifiers()) &&
+					factoryMethod.getName().equals(mergedBeanDefinition.getFactoryMethodName()) &&
+					factoryMethod.getParameterTypes().length >= minNrOfArgs) {
+				returnTypes.add(factoryMethod.getReturnType());
+			}
+		}
+		if (returnTypes.size() == 1) {
+			return (Class) returnTypes.iterator().next();
+		}
+		else {
+			return null;
+		}
+	}
+
 
 	/**
 	 * Instantiate the bean using a named factory method. The method may be static, if the

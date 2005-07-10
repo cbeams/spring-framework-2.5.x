@@ -142,7 +142,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (!rbd.isAbstract()) {
 				// In case of FactoryBean, match object created by FactoryBean.
 				if ((rbd.hasBeanClass() && FactoryBean.class.isAssignableFrom(rbd.getBeanClass()) && !isFactoryType) ||
-						rbd.getFactoryMethodName() != null) {
+						rbd.getFactoryBeanName() != null) {
 					if (includeFactoryBeans && (includePrototypes || isSingleton(beanName)) &&
 							isBeanTypeMatch(beanName, type)) {
 						result.add(beanName);
