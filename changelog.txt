@@ -7,11 +7,16 @@ Changes in version 1.2.3 (19.7.2005)
 ------------------------------------
 
 Package org.springframework.beans
+* refactored AbstractBeanFactory's type determination for "factory-method" into "getTypeForFactoryMethod" template
+* AbstractBeanFactory does not create beans with "factory-method" if the type can clearly be determined statically
 * AbstractAutowireCapableBeanFactory throws BeanCreationException if a factory method returned null
-* DefaultListableBeanFactory does not create beans with "factory-method" for type check if "includeFactoryBeans"=false
+* DefaultListableBeanFactory does not create beans with "factory-bean" for type check if "includeFactoryBeans"=false
 
 Package org.springframework.core
 * fixed PropertiesLoaderSupport to correctly ignore a resource not found failure if "ignoreResourceNotFound" is "true"
+
+Package org.springframework.orm
+* added "allowCreate" flag to TransactionAwarePersistenceManagerFactoryProxy, allowing to enforce transactional PMs
 
 
 Changes in version 1.2.2 (5.7.2005)
