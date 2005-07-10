@@ -1810,7 +1810,7 @@ XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
   </sect1>
 
   <sect1 id="beans-factory-customizing">
-    <title>Customizing beans with BeanPostprocessors</title>
+    <title>Customizing beans with BeanPostProcessors</title>
 
     <para>A bean post-processor is a java class which implements the
     <literal>org.springframework.beans.factory.config.BeanPostProcessor</literal>
@@ -1850,7 +1850,7 @@ bf.addBeanPostProcessor(pp);
   </sect1>
 
   <sect1 id="beans-factory-customizing-factory-postprocessors">
-    <title>Customizing bean factories with BeanFactoryPostprocessors</title>
+    <title>Customizing bean factories with BeanFactoryPostProcessors</title>
 
     <para>A bean factory post-processor is a java class which implements the
     <literal>org.springframework.beans.factory.config.BeanFactoryPostProcessor</literal>
