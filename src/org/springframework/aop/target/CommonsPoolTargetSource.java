@@ -38,7 +38,7 @@ import org.springframework.beans.factory.DisposableBean;
  * The <code>testOnBorrow</code>, <code>testOnReturn</code> and <code>testWhileIdle</code> properties are explictly not
  * mirrored because the implementation of <code>PoolableObjectFactory</code> used by this class does not implement
  * meaningful validation.
- *
+ * 
  * @author Rod Johnson
  * @author Rob Harrop
  * @see GenericObjectPool
@@ -61,7 +61,6 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 	/**
 	 * Corresponds to the <code>maxIdle</code> flag of the underlying pool object.
-	 *
 	 * @see GenericObjectPool#setMaxIdle(int)
 	 * @see #setMinIdle(int)
 	 */
@@ -69,7 +68,6 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 	/**
 	 * Corresponds to the <code>minIdle</code> flag of the underlying pool object.
-	 *
 	 * @see GenericObjectPool#setMinIdle(int)
 	 * @see #setMinIdle(int)
 	 */
@@ -77,7 +75,6 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 	/**
 	 * Corresponds to the <code>maxWait</code> flag of the underlying pool object.
-	 *
 	 * @see GenericObjectPool#setMaxWait(long)
 	 * @see #setMaxWait(long)
 	 */
@@ -85,7 +82,6 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 	/**
 	 * Corresponds to the <code>minEvictableIdleTimeMillis</code> flag of the underlying pool object.
-	 *
 	 * @see GenericObjectPool#setMinEvictableIdleTimeMillis(long)
 	 * @see #setMinEvictableIdleTimeMillis(long)
 	 */
@@ -93,7 +89,6 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 	/**
 	 * Corresponds to the <code>numTestsPerEvictionRun</code> flag of the underlying pool object.
-	 *
 	 * @see GenericObjectPool#setNumTestsPerEvictionRun(int)
 	 * @see #setNumTestsPerEvictionRun(int)
 	 */
@@ -101,7 +96,6 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 	/**
 	 * Corresponds to the <code>timeBetweenEvictionRunsMillis</code> flag of the underlying pool object.
-	 *
 	 * @see GenericObjectPool#setTimeBetweenEvictionRunsMillis(long)
 	 * @see #setTimeBetweenEvictionRunsMillis(long)
 	 */
@@ -116,7 +110,6 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 	/**
 	 * Sets the value of the <code>maxIdle</code> property which is passed to the pool object when created.
-	 *
 	 * @see GenericObjectPool#setMaxIdle(int)
 	 */
 	public void setMaxIdle(int maxIdle) {
@@ -132,7 +125,6 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 	/**
 	 * Sets the value of the <code>minIdle</code> property which is passed to the pool object when created.
-	 *
 	 * @see GenericObjectPool#setMinIdle(int)
 	 */
 	public void setMinIdle(int minIdle) {
@@ -148,7 +140,6 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 	/**
 	 * Sets the value of the <code>maxWait</code> property which is passed to the pool object when created.
-	 *
 	 * @see GenericObjectPool#setMaxWait(long)
 	 */
 	public void setMaxWait(long maxWait) {
@@ -164,7 +155,6 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 	/**
 	 * Sets the value of the <code>minEvictableIdleTimeMillis</code> property which is passed to the pool object when created.
-	 *
 	 * @see GenericObjectPool#setMinEvictableIdleTimeMillis(long)
 	 */
 	public void setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
@@ -180,7 +170,6 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 	/**
 	 * Sets the value of the <code>numTestsPerEvictionRun</code> property which is passed to the pool object when created.
-	 *
 	 * @see GenericObjectPool#setNumTestsPerEvictionRun(int))
 	 */
 	public void setNumTestsPerEvictionRun(int numTestsPerEvictionRun) {
@@ -196,7 +185,6 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 	/**
 	 * Sets the value of the <code>timeBetweenEvictionRunsMillis</code> property which is passed to the pool object when created.
-	 *
 	 * @see GenericObjectPool#setTimeBetweenEvictionRunsMillis(long)
 	 */
 	public void setTimeBetweenEvictionRunsMillis(long timeBetweenEvictionRunsMillis) {
@@ -211,7 +199,6 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	/**
 	 * Subclasses can override this if they want to return a different Commons pool to GenericObject pool.
 	 * They should apply any configuration properties to the pool here.
-	 *
 	 * @return an empty Commons <code>ObjectPool</code>.
 	 */
 	protected ObjectPool createObjectPool() {
