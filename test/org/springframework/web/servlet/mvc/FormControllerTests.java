@@ -426,10 +426,17 @@ public class FormControllerTests extends TestCase {
 	public void testFormChangeRequest() throws Exception {
 		String formView = "fred";
 		String successView = "tony";
+    final Float myFloat = new Float("123.45");
 
 		TestController mc = new TestController() {
 			protected boolean isFormChangeRequest(HttpServletRequest request) {
 				return (request.getParameter("formChange") != null);
+			}
+
+			protected void processFormChangeRequest(HttpServletRequest request, HttpServletResponse response, Object command) {
+				assertNotNull("Command should not be null", command);
+				assertEquals("Incorrect command class", TestBean.class, command.getClass());
+				((TestBean)command).setMyFloat(myFloat);
 			}
 		};
 		mc.setFormView(formView);
@@ -448,6 +455,7 @@ public class FormControllerTests extends TestCase {
 		assertTrue("model is non null", person != null);
 		assertTrue("bean name bound ok", person.getName().equals("Rod"));
 		assertTrue("bean age is 99", person.getAge() == 99);
+		assertEquals("Command property myFloat not updated in processFormChangeRequest", myFloat, person.getMyFloat());
 		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getCommandName());
 		assertTrue("errors returned in model", errors != null);
 		assertTrue("No errors", errors.getErrorCount() == 0);
@@ -546,7 +554,7 @@ public class FormControllerTests extends TestCase {
 		static final int[] NUMBERS = { 1, 2, 3, 4 };
 		
 		int refDataCount;
-		
+
 		public RefController() {
 			setCommandClass(TestBean.class);
 		}
