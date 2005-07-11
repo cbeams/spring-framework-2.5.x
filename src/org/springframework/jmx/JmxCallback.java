@@ -16,19 +16,18 @@
 
 package org.springframework.jmx;
 
-import javax.management.MBeanServer;
 import javax.management.JMException;
+import javax.management.MBeanServer;
 
 /**
  * A callback interface for encapsulating an operation against a JMX <code>MBeanServer</code>.
- *
+ * 
  * @author Rob Harrop
  */
 public interface JmxCallback {
-	
+
 	/**
 	 * Execute this callback on the supplied <code>MBeanServer</code>.
-	 *
 	 * @throws JMException A JMX management exception occured
 	 */
 	public Object doWithMBeanServer(MBeanServer server) throws JMException;
