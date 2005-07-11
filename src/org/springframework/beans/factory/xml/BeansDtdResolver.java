@@ -43,8 +43,6 @@ public class BeansDtdResolver implements EntityResolver {
 
 	private static final String DTD_NAME = "spring-beans";
 
-	private static final String SEARCH_PACKAGE = "/org/springframework/beans/factory/xml/";
-
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
@@ -55,10 +53,10 @@ public class BeansDtdResolver implements EntityResolver {
 		if (systemId != null && systemId.indexOf(DTD_NAME) > systemId.lastIndexOf("/")) {
 			String dtdFile = systemId.substring(systemId.indexOf(DTD_NAME));
 			if (logger.isDebugEnabled()) {
-				logger.debug("Trying to locate [" + dtdFile + "] under [" + SEARCH_PACKAGE + "]");
+				logger.debug("Trying to locate [" + dtdFile + "] in Spring jar");
 			}
 			try {
-				Resource resource = new ClassPathResource(SEARCH_PACKAGE + dtdFile, getClass());
+				Resource resource = new ClassPathResource(dtdFile, getClass());
 				InputSource source = new InputSource(resource.getInputStream());
 				source.setPublicId(publicId);
 				source.setSystemId(systemId);
