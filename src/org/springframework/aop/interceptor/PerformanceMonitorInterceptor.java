@@ -24,9 +24,9 @@ import org.springframework.util.StopWatch;
 /**
  * Simple AOP Alliance <code>MethodInterceptor</code> for performance monitoring.
  * This interceptor has no effect on the intercepted method call.
- *
+ * <p/>
  * <p>Uses a <code>StopWatch</code> for the actual performance measuring.
- *
+ * 
  * @author Rod Johnson
  * @author Dmitriy Kopylenko
  * @author Rob Harrop
@@ -42,12 +42,11 @@ public class PerformanceMonitorInterceptor extends AbstractPerformanceMonitorInt
 	}
 
 	/**
-	 * Create a new PerformanceMonitorInterceptor with a dynamic or static logger,
-	 * according to the given flag.
-	 *
-	 * @param useDynamicLogger whether to use a dynamic logger or a static logger
-	 * @see #setUseDynamicLogger
-	 */
+		 * Create a new PerformanceMonitorInterceptor with a dynamic or static logger,
+		 * according to the given flag.
+		 * @param useDynamicLogger whether to use a dynamic logger or a static logger
+		 * @see #setUseDynamicLogger
+		 */
 	public PerformanceMonitorInterceptor(boolean useDynamicLogger) {
 		setUseDynamicLogger(useDynamicLogger);
 	}

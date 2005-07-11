@@ -25,7 +25,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * Sub-classes should call the <code>createInvocationTraceName(MethodInvocation)</code> method to create a name for the given
  * trace that includes information about the method invocation under trace along with the prefix and suffix added as
  * appropriate.
- *
+ * 
  * @author Rob Harrop
  * @see #setPrefix(String)
  * @see #setSuffix(String)
@@ -43,7 +43,6 @@ public abstract class AbstractPerformanceMonitorInterceptor extends AbstractTrac
 
 	/**
 	 * Sets the <code>String</code> value that gets appended to the trace data used by performance monitoring interceptors.
-	 *
 	 * @see #createInvocationTraceName(org.aopalliance.intercept.MethodInvocation)
 	 */
 	public void setPrefix(String prefix) {
@@ -56,7 +55,6 @@ public abstract class AbstractPerformanceMonitorInterceptor extends AbstractTrac
 
 	/**
 	 * Sets the <code>String</code> value that gets prepended to the trace data used by performance monitoring interceptors.
-	 *
 	 * @see #createInvocationTraceName(org.aopalliance.intercept.MethodInvocation)
 	 */
 	public void setSuffix(String suffix) {
@@ -67,7 +65,6 @@ public abstract class AbstractPerformanceMonitorInterceptor extends AbstractTrac
 	 * Creates a <code>String</code> name for the given <code>MethodInvocation</code> that can be used for trace/logging
 	 * purposes. This name is made up of the configured prefix, followed by the fully-qualified name of the method being invoked,
 	 * followed by the configured suffix.
-	 *
 	 * @see #setPrefix(String)
 	 * @see #setSuffix(String)
 	 */
