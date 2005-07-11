@@ -38,7 +38,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
 /**
- * Struts 1.1 PlugIn that loads a Spring application context for the Struts
+ * Struts 1.1+ PlugIn that loads a Spring application context for the Struts
  * ActionServlet. This context will automatically refer to the root
  * WebApplicationContext (loaded by ContextLoaderListener/Servlet) as parent.
  *

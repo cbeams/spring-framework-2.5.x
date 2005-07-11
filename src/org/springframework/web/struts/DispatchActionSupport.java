@@ -29,7 +29,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Convenience class for Spring-aware Struts 1.1/1.2 DispatchActions.
+ * Convenience class for Spring-aware Struts 1.1+ DispatchActions.
  *
  * <p>Provides a reference to the current Spring application context, e.g.
  * for bean lookup or resource loading. Auto-detects a ContextLoaderPlugIn

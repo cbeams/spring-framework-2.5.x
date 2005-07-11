@@ -30,7 +30,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Proxy for a Spring-managed Struts 1.1 Action that's defined in
+ * Proxy for a Spring-managed Struts Action that's defined in
  * ContextLoaderPlugIn's WebApplicationContext.
  *
  * <p>The proxy is defined in the Struts config file, specifying this

@@ -34,7 +34,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Subclass of Struts' TilesRequestProcessor that looks up Spring-managed
- * Struts 1.1 Actions defined in ContextLoaderPlugIn's WebApplicationContext.
+ * Struts Actions defined in ContextLoaderPlugIn's WebApplicationContext.
  *
  * <p>Behaves like
  * {@link DelegatingRequestProcessor DelegatingRequestProcessor},
