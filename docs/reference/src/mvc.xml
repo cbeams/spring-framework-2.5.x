@@ -1270,13 +1270,12 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       the higher the order property, the later the view resolver will be
       positioned in the chain.</para>
 		<para>In the following example, the chain of view resolvers consists of two
-      resolvers, a <literal>InternalResourceViewResolver</literal> (positioned
-      as the second and last resolver in the chain) and an
+      resolvers, a <literal>InternalResourceViewResolver</literal> (which is
+      always automatically positioned as the last resolver in the chain) and an
       <literal>XmlViewResolver</literal> for specifying Excel
       views (which are not supported by the InternalResourceViewResolver):
 		<programlisting><![CDATA[
 <bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-	<property name="order" value="2"/>
 	<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
 	<property name="prefix" value="/WEB-INF/jsp/"/>
 	<property name="suffix" value=".jsp"/>
