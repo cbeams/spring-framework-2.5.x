@@ -29,10 +29,11 @@ import org.springframework.util.StopWatch;
  *
  * @author Rod Johnson
  * @author Dmitriy Kopylenko
+ * @author Rob Harrop
  * @see org.springframework.util.StopWatch
  * @see JamonPerformanceMonitorInterceptor
  */
-public class PerformanceMonitorInterceptor extends AbstractTraceInterceptor {
+public class PerformanceMonitorInterceptor extends AbstractPerformanceMonitorInterceptor {
 
 	/**
 	 * Create a new PerformanceMonitorInterceptor with a static logger.
@@ -43,6 +44,7 @@ public class PerformanceMonitorInterceptor extends AbstractTraceInterceptor {
 	/**
 	 * Create a new PerformanceMonitorInterceptor with a dynamic or static logger,
 	 * according to the given flag.
+	 *
 	 * @param useDynamicLogger whether to use a dynamic logger or a static logger
 	 * @see #setUseDynamicLogger
 	 */
@@ -51,7 +53,7 @@ public class PerformanceMonitorInterceptor extends AbstractTraceInterceptor {
 	}
 
 	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
-		String name = invocation.getMethod().getDeclaringClass().getName() + "." + invocation.getMethod().getName();
+		String name = createInvocationTraceName(invocation);
 		StopWatch stopWatch = new StopWatch(name);
 		stopWatch.start(name);
 		try {

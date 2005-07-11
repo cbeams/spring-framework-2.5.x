@@ -30,11 +30,12 @@ import org.apache.commons.logging.Log;
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 1.1.3
  * @see com.jamonapi.MonitorFactory
  * @see PerformanceMonitorInterceptor
  */
-public class JamonPerformanceMonitorInterceptor extends AbstractTraceInterceptor {
+public class JamonPerformanceMonitorInterceptor extends AbstractPerformanceMonitorInterceptor {
 
 	/**
 	 * Create a new JamonPerformanceMonitorInterceptor with a static logger.
@@ -53,7 +54,7 @@ public class JamonPerformanceMonitorInterceptor extends AbstractTraceInterceptor
 	}
 
 	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
-		String name = invocation.getMethod().getDeclaringClass().getName() + "." + invocation.getMethod().getName();
+		String name = createInvocationTraceName(invocation);
 		Monitor monitor = MonitorFactory.start(name);
 		try {
 			return invocation.proceed();
