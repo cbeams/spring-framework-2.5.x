@@ -95,6 +95,7 @@ import org.springframework.web.servlet.ModelAndView;
  * </p>
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 05.05.2003
  */
 public class SimpleFormController extends AbstractFormController {
