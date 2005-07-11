@@ -38,4 +38,9 @@ public class LocaleEditor extends PropertyEditorSupport {
 		setValue(StringUtils.parseLocaleString(text));
 	}
 
+	public String getAsText() {
+		Object value = getValue();
+		return (value != null ? value.toString() : "");
+	}
+
 }

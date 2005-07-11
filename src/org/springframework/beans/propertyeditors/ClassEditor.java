@@ -52,7 +52,15 @@ public class ClassEditor extends PropertyEditorSupport {
 
 	public String getAsText() {
 		Class clazz = (Class) getValue();
-		return (clazz.isArray() ? clazz.getComponentType().getName() + ClassUtils.ARRAY_SUFFIX : clazz.getName());
+		if (clazz == null) {
+			return "";
+		}
+		if (clazz.isArray()) {
+			return clazz.getComponentType().getName() + ClassUtils.ARRAY_SUFFIX;
+		}
+		else {
+			return clazz.getName();
+		}
 	}
 
 }

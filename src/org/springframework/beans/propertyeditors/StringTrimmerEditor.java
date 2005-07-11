@@ -75,7 +75,8 @@ public class StringTrimmerEditor extends PropertyEditorSupport {
 	}
 
 	public String getAsText() {
-		return (getValue() == null ? "" : super.getAsText());
+		Object value = getValue();
+		return (value != null ? value.toString() : "");
 	}
 
 }

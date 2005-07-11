@@ -70,12 +70,8 @@ public class URLEditor extends PropertyEditorSupport {
 	}
 
 	public String getAsText() {
-		if (getValue() != null) {
-			return ((URL) getValue()).toExternalForm();
-		}
-		else {
-			return "";
-		}
+		URL value = (URL) getValue();
+		return (value != null ? value.toExternalForm() : "");
 	}
 
 }

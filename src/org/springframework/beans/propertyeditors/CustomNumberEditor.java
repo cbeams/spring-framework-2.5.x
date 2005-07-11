@@ -121,18 +121,16 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 */
 	public String getAsText() {
 		Object value = getValue();
-		if (value != null) {
-			if (this.numberFormat != null) {
-				// Use NumberFormat for rendering value.
-				return this.numberFormat.format(value);
-			}
-			else {
-				// Use toString method for rendering value.
-				return value.toString();
-			}
+		if (value == null) {
+			return "";
+		}
+		if (this.numberFormat != null) {
+			// Use NumberFormat for rendering value.
+			return this.numberFormat.format(value);
 		}
 		else {
-			return "";
+			// Use toString method for rendering value.
+			return value.toString();
 		}
 	}
 
