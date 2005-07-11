@@ -64,42 +64,42 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	 * @see GenericObjectPool#setMaxIdle(int)
 	 * @see #setMinIdle(int)
 	 */
-	private int maxIdle;
+	private int maxIdle = GenericObjectPool.DEFAULT_MAX_IDLE;
 
 	/**
 	 * Corresponds to the <code>minIdle</code> flag of the underlying pool object.
 	 * @see GenericObjectPool#setMinIdle(int)
 	 * @see #setMinIdle(int)
 	 */
-	private int minIdle;
+	private int minIdle = GenericObjectPool.DEFAULT_MIN_IDLE;
 
 	/**
 	 * Corresponds to the <code>maxWait</code> flag of the underlying pool object.
 	 * @see GenericObjectPool#setMaxWait(long)
 	 * @see #setMaxWait(long)
 	 */
-	private long maxWait;
+	private long maxWait = GenericObjectPool.DEFAULT_MAX_WAIT;
 
 	/**
 	 * Corresponds to the <code>minEvictableIdleTimeMillis</code> flag of the underlying pool object.
 	 * @see GenericObjectPool#setMinEvictableIdleTimeMillis(long)
 	 * @see #setMinEvictableIdleTimeMillis(long)
 	 */
-	private long minEvictableIdleTimeMillis;
+	private long minEvictableIdleTimeMillis = GenericObjectPool.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
 
 	/**
 	 * Corresponds to the <code>numTestsPerEvictionRun</code> flag of the underlying pool object.
 	 * @see GenericObjectPool#setNumTestsPerEvictionRun(int)
 	 * @see #setNumTestsPerEvictionRun(int)
 	 */
-	private int numTestsPerEvictionRun;
+	private int numTestsPerEvictionRun = GenericObjectPool.DEFAULT_NUM_TESTS_PER_EVICTION_RUN;
 
 	/**
 	 * Corresponds to the <code>timeBetweenEvictionRunsMillis</code> flag of the underlying pool object.
 	 * @see GenericObjectPool#setTimeBetweenEvictionRunsMillis(long)
 	 * @see #setTimeBetweenEvictionRunsMillis(long)
 	 */
-	private long timeBetweenEvictionRunsMillis;
+	private long timeBetweenEvictionRunsMillis = GenericObjectPool.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
 
 	/**
 	 * Gets the value of the <code>maxIdle</code> property used to configure the pool object when created.
