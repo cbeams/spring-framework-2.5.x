@@ -16,28 +16,11 @@
 
 package org.springframework.jmx.export;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.target.LazyInitTargetSource;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.jmx.JmxTemplate;
-import org.springframework.jmx.JmxException;
-import org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler;
-import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
-import org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler;
-import org.springframework.jmx.export.naming.KeyNamingStrategy;
-import org.springframework.jmx.export.naming.ObjectNamingStrategy;
-import org.springframework.jmx.export.naming.SelfNaming;
-import org.springframework.jmx.support.JmxUtils;
-import org.springframework.util.ObjectUtils;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import javax.management.JMException;
 import javax.management.MBeanException;
@@ -48,11 +31,30 @@ import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.management.modelmbean.ModelMBean;
 import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.RequiredModelMBean;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.target.LazyInitTargetSource;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.jmx.JmxException;
+import org.springframework.jmx.JmxTemplate;
+import org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler;
+import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
+import org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler;
+import org.springframework.jmx.export.naming.KeyNamingStrategy;
+import org.springframework.jmx.export.naming.ObjectNamingStrategy;
+import org.springframework.jmx.export.naming.SelfNaming;
+import org.springframework.jmx.support.JmxUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A bean that allows for any Spring-managed bean to be exposed to a JMX
@@ -70,7 +72,7 @@ import java.util.Set;
  * <p>A list of <code>MBeanExporterListener</code>s can be registered via the
  * <code>listeners</code> property, allowing application code to be notified
  * of MBean registration and unregistration events.
- *
+ * 
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @see #setBeans
@@ -155,7 +157,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * Bean instances are typically linked in through bean references.
 	 * Bean names will be resolved as beans in the current factory, respecting
 	 * lazy-init markers (that is, not triggering initialization of such beans).
-	 *
 	 * @param beans Map with bean instances or bean names as values
 	 * @see #setNamingStrategy
 	 * @see org.springframework.jmx.export.naming.KeyNamingStrategy
@@ -171,7 +172,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * if available.
 	 * <p>This feature is turned off by default. Explicitly specify "true" here
 	 * to enable autodetection.
-	 *
 	 * @see #setAssembler
 	 * @see AutodetectCapableMBeanInfoAssembler
 	 * @see org.springframework.jmx.support.JmxUtils#isMBean
@@ -186,7 +186,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * <p>The passed-in assembler can optionally implement the
 	 * <code>AutodetectCapableMBeanInfoAssembler</code> interface, which enables it
 	 * to particiapte in the exporter's MBean autodetection process.
-	 *
 	 * @see org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler
 	 * @see org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler
 	 * @see org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler
@@ -199,7 +198,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	/**
 	 * Set the implementation of the <code>ObjectNamingStrategy</code> interface
 	 * to use for this exporter. Default is a <code>KeyNamingStrategy</code>.
-	 *
 	 * @see org.springframework.jmx.export.naming.KeyNamingStrategy
 	 * @see org.springframework.jmx.export.naming.MetadataNamingStrategy
 	 */
@@ -210,7 +208,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	/**
 	 * Set the <code>MBeanExporterListener</code>s that should be notified
 	 * of MBean registration and unregistration events.
-	 *
 	 * @see MBeanExporterListener
 	 */
 	public void setListeners(MBeanExporterListener[] listeners) {
@@ -221,7 +218,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * This callback is only required for resolution of bean names in the "beans"
 	 * <code>Map</code> and for autodetection of MBeans (in the latter case,
 	 * a <code>ListableBeanFactory</code> is required).
-	 *
 	 * @see #setBeans
 	 * @see #setAutodetect
 	 * @see org.springframework.beans.factory.ListableBeanFactory
@@ -239,7 +235,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	/**
 	 * Start bean registration automatically when deployed in an
 	 * <code>ApplicationContext</code>.
-	 *
 	 * @see #registerBeans()
 	 */
 	public void afterPropertiesSet() throws JMException {
@@ -334,7 +329,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * MBean then it will be registered directly with the <code>MBeanServer</code>
 	 * without any intervention. For all other beans or bean names, the resource
 	 * itself is registered with the <code>MBeanServer</code> directly.
-	 *
 	 * @param beanKey the key associated with this bean in the beans map
 	 * @param mapValue the value configured for this bean in the beans map.
 	 * May be either the <code>String</code> name of a bean, or the bean itself.
@@ -381,7 +375,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	/**
 	 * Registers an existing MBean or an MBean adapter for a plain bean
 	 * with the <code>MBeanServer</code>.
-	 *
 	 * @param beanInstance the bean to register, either an MBean or a plain bean
 	 * @param beanKey the key associated with this bean in the beans map
 	 * @return the <code>ObjectName</code> under which the bean was registered
@@ -407,7 +400,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 
 	/**
 	 * Registers an existing MBean with the <code>MBeanServer</code>.
-	 *
 	 * @param mbean the bean instance to register
 	 * @param beanKey the key associated with this bean in the beans map
 	 * @return the <code>ObjectName</code> under which the bean was registered
@@ -434,7 +426,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * Registers a plain bean as MBean with the <code>MBeanServer</code>.
 	 * The management interface for the bean is created by the configured
 	 * <code>MBeanInfoAssembler</code>.
-	 *
 	 * @param bean the bean instance to register
 	 * @param beanKey the key associated with this bean in the beans map
 	 * @return the <code>ObjectName</code> under which the bean was registered
@@ -461,7 +452,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	/**
 	 * Registers beans that are configured for lazy initialization with the
 	 * <code>MBeanServer<code> indirectly through a proxy.
-	 *
 	 * @param beanName the name of the bean in the <code>BeanFactory</code>
 	 * @param beanKey the key associated with this bean in the beans map
 	 * @return the <code>ObjectName</code> under which the bean was registered
@@ -500,7 +490,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * <p>If the bean implements the <code>SelfNaming</code> interface, then the
 	 * <code>ObjectName</code> will be retrieved using <code>SelfNaming.getObjectName()</code>.
 	 * Otherwise, the configured <code>ObjectNamingStrategy</code> is used.
-	 *
 	 * @param bean the name of the bean in the <code>BeanFactory</code>
 	 * @param beanKey the key associated with the bean in the beans map
 	 * @return the <code>ObjectName</code> for the supplied bean
@@ -522,7 +511,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	private ModelMBeanInfo getMBeanInfo(Object managedBean, String beanKey) throws JMException {
 		ModelMBeanInfo info = this.assembler.getMBeanInfo(managedBean, beanKey);
 		if (logger.isWarnEnabled() && ObjectUtils.isEmpty(info.getAttributes()) &&
-				ObjectUtils.isEmpty(info.getOperations())) {
+						ObjectUtils.isEmpty(info.getOperations())) {
 			logger.warn("Bean with key [" + beanKey +
 					"] has been registed as an MBean but has no exposed attributes or operations");
 		}
@@ -561,7 +550,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	/**
 	 * Performs the actual autodetection process, delegating to an instance
 	 * <code>AutodetectCallback</code> to vote on the inclusion of a given bean.
-	 *
 	 * @param callback the <code>AutodetectCallback</code> to use when deciding
 	 * whether to include a bean or not
 	 */
@@ -574,7 +562,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 				boolean lazyInit = isBeanDefinitionLazyInit(this.beanFactory, beanName);
 				Object beanInstance = (!lazyInit ? this.beanFactory.getBean(beanName) : null);
 				if (!this.beans.containsValue(beanName) &&
-						(beanInstance == null || !this.beans.containsValue(beanInstance))) {
+								(beanInstance == null || !this.beans.containsValue(beanInstance))) {
 					// Not already registered for JMX exposure.
 					this.beans.put(beanName, (beanInstance != null ? beanInstance : beanName));
 					if (logger.isInfoEnabled()) {
@@ -593,7 +581,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 
 	/**
 	 * Return whether the specified bean definition should be considered as lazy-init.
-	 *
 	 * @param beanFactory the bean factory that is supposed to contain the bean definition
 	 * @param beanName the name of the bean to check
 	 * @see org.springframework.beans.factory.config.ConfigurableListableBeanFactory#getBeanDefinition
@@ -618,7 +605,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * <p>This method is called to obtain a <code>ModelMBean</code> instance to
 	 * use when registering a bean. This method is called once per bean during the
 	 * registration phase and must return a new instance of <code>ModelMBean</code>
-	 *
 	 * @return a new instance of a class that implements <code>ModelMBean</code>
 	 * @throws MBeanException if creation of the ModelMBean failed
 	 */
@@ -629,7 +615,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	/**
 	 * Notifies all registered <code>MBeanExporterListener</code> that an MBean
 	 * with the supplied <code>ObjectName</code> has been registered.
-	 *
 	 * @param objectName the <code>ObjectName</code> of the registered MBean
 	 * @see MBeanExporterListener
 	 */
@@ -645,7 +630,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	/**
 	 * Notifies all registered <code>MBeanExporterListener</code> that an MBean
 	 * with the supplied <code>ObjectName</code> has been unregistered.
-	 *
 	 * @param objectName the <code>ObjectName</code> of the registered MBean
 	 * @see MBeanExporterListener
 	 */
@@ -690,13 +674,13 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * Internal callback interface for the autodetection process.
 	 */
 	private static interface AutodetectCallback {
+
 		/**
-		 * Called during the autodetection process to decide whether
-		 * or not a bean should be include.
-		 *
-		 * @param beanClass the class of the bean
-		 * @param beanName the name of the bean
-		 */
+				 * Called during the autodetection process to decide whether
+				 * or not a bean should be include.
+				 * @param beanClass the class of the bean
+				 * @param beanName the name of the bean
+				 */
 		boolean include(Class beanClass, String beanName);
 	}
 
