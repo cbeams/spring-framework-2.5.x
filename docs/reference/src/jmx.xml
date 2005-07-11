@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?altova_sps C:\opt\docbook\DocBook.sps?>
 <chapter id="jmx">
 	<title>JMX Support</title>
 	<section id="jmx-introduction">
@@ -933,10 +932,9 @@ JMXConnector:</para>
 			<para>For more information on these properties consult the JavaDoc. For information of meaning of the environment variables, consult the JavaDoc for </para>
 			<para>Note that when using a RMI-based connector you need the lookup service (tnameserv or rmiregistry) to be started in order for the name registration to complete. If you are using Spring to export remote services for you via RMI, then Spring will already have constructed an RMI registry. If not, you can easily start a registry using the following snippet of configuration:</para>
 			<para>
-				<programlisting>&lt;bean id=&quot;registry&quot; class=&quot;java.rmi.registry.LocateRegistry&quot; factory-method=&quot;createRegistry&quot;&gt;
-  &lt;constructor-arg value=&quot;1099&quot;/&gt;      
-&lt;/bean&gt;</programlisting>
-			</para>
+			<programlisting>&lt;bean id=&quot;registry&quot; class=&quot;org.springframework.remoting.rmi.RmiRegistryFactoryBean&quot;&gt;
+  &lt;property name=&quot;port&quot; value=&quot;1099&quot;/&gt;
+&lt;/bean&gt;</programlisting></para>
 		</section>
 		<section id="jmx-jsr160-client">
 			<title>Client-side Connectors</title>
