@@ -205,7 +205,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 		GenericObjectPool gop = new GenericObjectPool(this);
 		gop.setMaxActive(getMaxSize());
 		gop.setMaxIdle(getMaxIdle());
-		gop.setMinIdle(getMaxIdle());
+		gop.setMinIdle(getMinIdle());
 		gop.setMaxWait(getMaxWait());
 		gop.setMinEvictableIdleTimeMillis(getMinEvictableIdleTimeMillis());
 		gop.setNumTestsPerEvictionRun(getNumTestsPerEvictionRun());
