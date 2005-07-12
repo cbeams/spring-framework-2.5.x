@@ -56,7 +56,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * <p>Supports custom isolation levels, and timeouts that get applied as appropriate
  * Hibernate query timeouts. To support the latter, application code must either use
- * one of the <code>HibernateTemplate.find</code> methods or call
+ * <code>HibernateTemplate</code> (which by default applies the timeouts) or call
  * <code>SessionFactoryUtils.applyTransactionTimeout</code> for each created
  * Hibernate Query object.
  *

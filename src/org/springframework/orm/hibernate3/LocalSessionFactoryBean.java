@@ -359,12 +359,10 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * that all operations performed by the SessionFactory will automatically
 	 * participate in Spring-managed transaction timeouts, not just queries.
 	 * This adds value even for HibernateTransactionManager.
-	 * <p><b>WARNING: When using a transaction-aware JDBC DataSource in combination
-	 * with OpenSessionInViewFilter/Interceptor, it is strongly recommended to
-	 * upgrade to Hibernate 3.0.3 or higher.</b> Spring will automatically use
-	 * Hibernate 3.0.3's aggressive release of JDBC Connections, i.e. switch
-	 * to Connection release mode "after_statement", which guarantees proper
-	 * Connection handling in all cases in such scenario.
+	 * <p><b>WARNING:</b> When using a transaction-aware JDBC DataSource in combination
+	 * with OpenSessionInViewFilter/Interceptor, it is strongly recommended to upgrade
+	 * to Hibernate 3.0.3 or higher and switch Hibernate's Connection release mode to
+	 * "after_statement", which guarantees proper Connection handling in such scenario.
 	 * <p>Note: If you want to use Hibernate's Connection release mode "after_statement"
 	 * with a DataSource specified on this LocalSessionFactoryBean, switch this setting
 	 * to "true". Else, the ConnectionProvider used underneath will vote against
