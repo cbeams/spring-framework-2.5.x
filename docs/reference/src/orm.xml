@@ -296,15 +296,14 @@
         this.sessionFactory = sessionFactory;
     }
 
-    public Collection loadProductsByCategory(final String category) {
+    public Collection loadProductsByCategory(final String category) throws DataAccessException {
         HibernateTemplate ht = new HibernateTemplate(this.sessionFactory);
         return (Collection) ht.execute(new HibernateCallback() {
             public Object doInHibernate(Session session) throws HibernateException {
-                List result = session.find(
-                    "from test.Product product where product.category=?",
-                    category, Hibernate.STRING);
-                // do some further stuff with the result list
-                return result;
+                Query query = session.createQuery(
+                    "from test.Product product where product.category=?");
+                query.setString(0, category);
+                return query.list();
             }
         });
     }
@@ -330,7 +329,7 @@
 
       <programlisting format="linespecific" xml:space="preserve">public class ProductDaoImpl extends HibernateDaoSupport implements ProductDao {
 
-    public Collection loadProductsByCategory(String category) {
+    public Collection loadProductsByCategory(String category) throws DataAccessException {
         return getHibernateTemplate().find(
             "from test.Product product where product.category=?", category);
     }
@@ -356,7 +355,9 @@
 
       <para><programlisting format="linespecific" xml:space="preserve">public class ProductDaoImpl extends HibernateDaoSupport implements ProductDao {
 
-    public Collection loadProductsByCategory(String category) throws MyException {
+    public Collection loadProductsByCategory(String category)
+            throws DataAccessException, MyException {
+
         Session session = getSession(getSessionFactory(), false);
         try {
             List result = session.find(
@@ -437,7 +438,7 @@
 
       <para>The main advantage of this DAO style is that it depends on
       Hibernate API only; no import of any Spring class is required.
-      This is of course appealing from a non-invasivenness perspective,
+      This is of course appealing from a non-invasiveness perspective,
       and might feel more natural to Hibernate developers.</para>
       
       <para>However, the DAO throws plain <literal>HibernateException</literal>
@@ -912,7 +913,7 @@
         this.persistenceManagerFactory = pmf;
     }
 
-    public Collection loadProductsByCategory(final String category) {
+    public Collection loadProductsByCategory(final String category) throws DataAccessException {
         JdoTemplate jdoTemplate = new JdoTemplate(this.persistenceManagerFactory);
         return (Collection) jdoTemplate.execute(new JdoCallback() {
             public Object doInJdo(PersistenceManager pm) throws JDOException {
@@ -947,7 +948,7 @@
 
       <para><programlisting format="linespecific" xml:space="preserve">public class ProductDaoImpl extends JdoDaoSupport implements ProductDao {
   
-    public Collection loadProductsByCategory(String category) {
+    public Collection loadProductsByCategory(String category) throws DataAccessException {
         return getJdoTemplate().find(
             Product.class, "category = pCategory", "String category", new Object[] {category});
     }
@@ -1087,7 +1088,7 @@
 
       <para>The main advantage of this DAO style is that it depends on
       JDO API only; no import of any Spring class is required.
-      This is of course appealing from a non-invasivenness perspective,
+      This is of course appealing from a non-invasiveness perspective,
       and might feel more natural to JDO developers.</para>
       
       <para>However, the DAO throws plain <literal>JDOException</literal>
@@ -1326,7 +1327,7 @@
         this.sessionFactory = sessionFactory;
     }
 
-    public Collection loadProductsByCategory(final String category) {
+    public Collection loadProductsByCategory(final String category) throws DataAccessException {
         TopLinkTemplate tlTemplate = new TopLinkTemplate(this.sessionFactory);
         return (Collection) tlTemplate.execute(new TopLinkCallback() {
             public Object doInTopLink(Session session) throws TopLinkException {
@@ -1367,7 +1368,7 @@
 
       <para><programlisting format="linespecific" xml:space="preserve">public class ProductDaoImpl extends TopLinkDaoSupport implements ProductDao {
   
-    public Collection loadProductsByCategory(String category) {
+    public Collection loadProductsByCategory(String category) throws DataAccessException {
         ReadAllQuery findOwnersQuery = new ReadAllQuery(Product.class);
         findOwnersQuery.addArgument("Category");
         ExpressionBuilder builder = this.findOwnersQuery.getExpressionBuilder();
@@ -1461,7 +1462,7 @@
 
       <para>The main advantage of this DAO style is that it depends on
       TopLink API only; no import of any Spring class is required.
-      This is of course appealing from a non-invasivenness perspective,
+      This is of course appealing from a non-invasiveness perspective,
       and might feel more natural to TopLink developers.</para>
       
       <para>However, the DAO throws plain <literal>TopLinkException</literal>
@@ -1652,7 +1653,7 @@
         this.jcdAlias = jcdAlias;
     }
 
-    public Collection loadProductsByCategory(final String category) {
+    public Collection loadProductsByCategory(final String category) throws DataAccessException {
         PersistenceBrokerTemplate pbTemplate =
                 new PersistenceBrokerTemplate(new PBKey(this.jcdAlias);
         return (Collection) pbTemplate.execute(new PersistenceBrokerCallback() {
@@ -1691,7 +1692,7 @@
 
       <para><programlisting format="linespecific" xml:space="preserve">public class ProductDaoImpl extends PersistenceBrokerDaoSupport implements ProductDao {
   
-    public Collection loadProductsByCategory(String category) {
+    public Collection loadProductsByCategory(String category) throws DataAccessException {
         Criteria criteria = new Criteria();
         criteria.addLike("category", category + "%");
         Query query = new QueryByCriteria(Product.class, criteria);
