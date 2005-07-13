@@ -18,6 +18,7 @@ package org.springframework.jmx.support;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Map;
 
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
@@ -50,12 +51,24 @@ public class MBeanServerConnectionFactoryBean implements FactoryBean, Initializi
 	 */
 	private MBeanServerConnection server;
 
+	/**
+	 * Stores the environment used to construct the <code>JMXConnector</code>.
+	 */
+	private Map environment;
+
 
 	/**
 	 * Set the service URL of the remote <code>MBeanServer</code>.
 	 */
 	public void setServiceUrl(String url) throws MalformedURLException {
 		this.serviceUrl = new JMXServiceURL(url);
+	}
+
+	/**
+	 * Sets the environment parameters used to construct the <code>JMXConnector</code>.
+	 */
+	public void setEnvironment(Map environment) {
+		this.environment = environment;
 	}
 
 	/**
@@ -66,7 +79,7 @@ public class MBeanServerConnectionFactoryBean implements FactoryBean, Initializi
 		if (this.serviceUrl == null) {
 			throw new IllegalArgumentException("serviceUrl is required");
 		}
-		JMXConnector connector = JMXConnectorFactory.connect(this.serviceUrl);
+		JMXConnector connector = JMXConnectorFactory.connect(this.serviceUrl, this.environment);
 		this.server = connector.getMBeanServerConnection();
 	}
 
