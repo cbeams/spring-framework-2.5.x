@@ -72,7 +72,8 @@ import org.springframework.web.servlet.ModelAndView;
  *      or non-String types) of the command class. This will render appropriate
  *      Strings for those property values, e.g. locale-specific date strings.</li>
  *  <li>The {@link org.springframework.web.bind.ServletRequestDataBinder ServletRequestDataBinder}
- *      gets applied to populate the new form object with initial request parameters.
+ *      gets applied to populate the new form object with initial request parameters and the
+ *      {@link #onBindOnNewForm(HttpServletRequest, Object, BindException)} callback method is invoked.
  *      (<i>only if <code>bindOnNewForm</code> is set to <code>true</code></i>)</li>
  *  <li>Call to {@link #showForm(HttpServletRequest, HttpServletResponse, BindException) showForm()}
  *      to return a View that should be rendered (typically the view that renders
@@ -150,6 +151,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Alef Arendsen
+ * @author Rob Harrop
  * @see #showForm(HttpServletRequest, HttpServletResponse, BindException)
  * @see #processFormSubmission
  * @see SimpleFormController
@@ -336,10 +338,42 @@ public abstract class AbstractFormController extends BaseCommandController {
 		if (isBindOnNewForm()) {
 			logger.debug("Binding to new form");
 			binder.bind(request);
+			onBindOnNewForm(request, command, binder.getErrors());
 		}
 
 		// Return BindException object that resulted from binding.
 		return binder.getErrors();
+	}
+
+	/**
+	 * Callback for custom post-processing in terms of binding.
+	 * Called on when rendering the form view if <code>bindOnNewForm</code> is </code> true.
+	 * <p>Default implementation delegates to <code>onBindOnNewForm(request, command)</code>.
+	 * @param request current HTTP request
+	 * @param command the command object to perform further binding on
+	 * @param errors validation errors holder, allowing for additional
+	 * custom registration of binding errors
+	 * @throws Exception in case of invalid state or arguments
+	 * @see #onBindOnNewForm(javax.servlet.http.HttpServletRequest, Object)
+	 * @see #setBindOnNewForm(boolean)
+	 */
+	protected void onBindOnNewForm(HttpServletRequest request, Object command, BindException errors) throws Exception {
+		onBindOnNewForm(request, command);
+	}
+
+	/**
+	 * Callback for custom post-processing in terms of binding.
+	 * Called by the default implementation of the onBindOnNewForm version with
+	 * all parameters, after standard binding when displaying the form view. Only called
+	 * if <code>bindOnNewForm</code> is set to <code>true</code>.
+	 * <p>Default implementation is empty.
+	 * @param request current HTTP request
+	 * @param command the command object to perform further binding on
+	 * @throws Exception in case of invalid state or arguments
+	 * @see #onBindOnNewForm(HttpServletRequest, Object, BindException)
+	 * @see #setBindOnNewForm(boolean)
+	 */
+	protected void onBindOnNewForm(HttpServletRequest request, Object command) throws Exception {
 	}
 
 	/**
