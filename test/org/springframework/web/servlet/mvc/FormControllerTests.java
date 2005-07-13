@@ -117,8 +117,14 @@ public class FormControllerTests extends TestCase {
 	public void testBindOnNewForm() throws Exception {
 		String formView = "f";
 		String successView = "s";
+		final Integer someNumber = new Integer(12);
 
-		TestController mc = new TestController();
+		TestController mc = new TestController() {
+			protected void onBindOnNewForm(HttpServletRequest request, Object command) throws Exception {
+				TestBean testBean = (TestBean)command;
+				testBean.setSomeNumber(new Integer(12));
+			}
+		};
 		mc.setFormView(formView);
 		mc.setSuccessView(successView);
 		mc.setBindOnNewForm(true);
@@ -127,12 +133,13 @@ public class FormControllerTests extends TestCase {
 		request.addParameter("name", "rod");
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
-		assertTrue("returned correct view name", mv.getViewName().equals(formView));
+		assertEquals("returned correct view name", formView, mv.getViewName());
 
 		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
-		assertTrue("model is non null", person != null);
-		assertTrue("bean age default ok", person.getAge() == TestController.DEFAULT_AGE);
-		assertTrue("name set", "rod".equals(person.getName()));
+		assertNotNull("model is non null", person);
+		assertEquals("bean age default ok", person.getAge(), TestController.DEFAULT_AGE);
+		assertEquals("name set", "rod", person.getName());
+		assertEquals("Property [someNumber] not set in onBindOnNewForm callback", someNumber, person.getSomeNumber());
 	}
 
 	public void testSubmitWithoutErrors() throws Exception {
@@ -433,7 +440,7 @@ public class FormControllerTests extends TestCase {
 				return (request.getParameter("formChange") != null);
 			}
 
-			protected void processFormChangeRequest(HttpServletRequest request, HttpServletResponse response, Object command) {
+			protected void onFormChange(HttpServletRequest request, HttpServletResponse response, Object command) {
 				assertNotNull("Command should not be null", command);
 				assertEquals("Incorrect command class", TestBean.class, command.getClass());
 				((TestBean)command).setMyFloat(myFloat);
@@ -455,7 +462,7 @@ public class FormControllerTests extends TestCase {
 		assertTrue("model is non null", person != null);
 		assertTrue("bean name bound ok", person.getName().equals("Rod"));
 		assertTrue("bean age is 99", person.getAge() == 99);
-		assertEquals("Command property myFloat not updated in processFormChangeRequest", myFloat, person.getMyFloat());
+		assertEquals("Command property myFloat not updated in onFormChange", myFloat, person.getMyFloat());
 		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getCommandName());
 		assertTrue("errors returned in model", errors != null);
 		assertTrue("No errors", errors.getErrorCount() == 0);
