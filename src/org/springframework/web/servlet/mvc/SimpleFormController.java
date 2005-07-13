@@ -49,7 +49,7 @@ import org.springframework.web.servlet.ModelAndView;
  *  <li>If {@link #isFormChangeRequest isFormChangeRequest} is overridden and returns
  *      true for the given request, the controller will return the formView too.
  *      In that case, the controller will also suppress validation. Before returning the formView,
- *      the controller will invoke {@link #processFormChangeRequest}, giving sub-classes a change
+ *      the controller will invoke {@link #onFormChange}, giving sub-classes a chance
  *      to make modification to the command object.
  *      This is intended for requests that change the structure of the form,
  *      which should not cause validation and show the form in any case.</li>
@@ -247,8 +247,8 @@ public class SimpleFormController extends AbstractFormController {
 			return showForm(request, response, errors);
 		}
 		else if (isFormChangeRequest(request)) {
-			logger.debug("Detected form change request - routing request to processFormChangeRequest");
-			processFormChangeRequest(request, response, command);
+			logger.debug("Detected form change request - routing request to onFormChange");
+			onFormChange(request, response, command);
 			return showForm(request, response, errors);
 		}
 		else {
@@ -278,7 +278,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * Allows sub-classes to implement custom logic to modify the command object to directly modify data in the form.
 	 * @see #isFormChangeRequest(javax.servlet.http.HttpServletRequest)
 	 */
-	protected void processFormChangeRequest(HttpServletRequest request, HttpServletResponse response, Object command) {
+	protected void onFormChange(HttpServletRequest request, HttpServletResponse response, Object command) {
 	}
 
 	/**
