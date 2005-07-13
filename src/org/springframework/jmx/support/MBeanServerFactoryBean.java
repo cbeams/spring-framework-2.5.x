@@ -22,6 +22,7 @@ import javax.management.MBeanServerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jmx.MBeanServerNotFoundException;
 
 /**
  * FactoryBean that obtains an <code>MBeanServer</code> instance
@@ -30,9 +31,16 @@ import org.springframework.beans.factory.InitializingBean;
  *
  * <p>Exposes the <code>MBeanServer</code> for bean references.
  *
+ * <p>By default, <code>MBeanServerFactoryBean</code> will always create
+ * a new <code>MBeanServer</code> even if one is already running. To have
+ * the <code>MBeanServerFactoryBean</code> attempt to locate a running
+ * <code>MBeanServer</code> first, set <code>locateExistingServerIfPossible</code>
+ * to <code>true</code>
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
+ * @see #setLocateExistingServerIfPossible(boolean)
  * @see javax.management.MBeanServerFactory#createMBeanServer
  * @see javax.management.MBeanServerFactory#newMBeanServer
  * @see MBeanServerConnectionFactoryBean
@@ -55,6 +63,12 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean, Di
 	 * The <code>MBeanServer</code> to expose.
 	 */
 	private MBeanServer server;
+
+	/**
+	 * Flag indicating whether or not the <code>MBeanServerFactoryBean</code> should attempt to locate
+	 * an existing <code>MBeanServer</code> before creating one.
+	 */
+	private boolean locateExistingServerIfPossible;
 
 
 	/**
@@ -80,11 +94,25 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean, Di
 		this.defaultDomain = defaultDomain;
 	}
 
+	/**
+	 * Sets the value of the <code>locateExistingServerIfPossible</code> flag, indicating whether or
+	 * not the <code>MBeanServerFactoryBean</code> should attempt to locate a running <code>MBeanServer</code>
+	 * before creating one.
+	 */
+	public void setLocateExistingServerIfPossible(boolean locateExistingServerIfPossible) {
+		this.locateExistingServerIfPossible = locateExistingServerIfPossible;
+	}
 
 	/**
 	 * Creates the <code>MBeanServer</code> instance.
 	 */
 	public void afterPropertiesSet() {
+
+		if(this.locateExistingServerIfPossible) {
+			this.server = locateMBeanServer();
+			if(this.server != null) return;
+		}
+
 		if (this.registerWithFactory) {
 			// Create an MBeanServer instance that is accessible
 			// using MBeanServerFactory.findMBeanServer().
@@ -107,6 +135,20 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean, Di
 		}
 	}
 
+	/**
+	 * Attempts to an existing <code>MBeanServer</code>. Called if <code>locateExistingServerIfPossible</code> is set to
+	 * <code>true</code>. Default implementation attempts to find an <code>MBeanServer</code> using a standard lookup.
+	 * Sub-classes may override to additional location logic.
+	 * @see #setLocateExistingServerIfPossible(boolean)
+	 * @see org.springframework.jmx.support.JmxUtils#locateMBeanServer()
+	 */
+	protected MBeanServer locateMBeanServer() {
+		try {
+			return JmxUtils.locateMBeanServer();
+		} catch(MBeanServerNotFoundException ex) {
+			return null;
+		}
+	}
 
 	public Object getObject() {
 		return this.server;
@@ -119,7 +161,6 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean, Di
 	public boolean isSingleton() {
 		return true;
 	}
-
 
 	/**
 	 * Unregisters the <code>MBeanServer</code> instance, if necessary.
