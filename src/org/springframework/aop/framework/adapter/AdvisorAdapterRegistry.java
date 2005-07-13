@@ -20,6 +20,7 @@ import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.Advisor;
 
+
 /**
  * Interface for registries of AdvisorAdapters.
  *
@@ -27,6 +28,7 @@ import org.springframework.aop.Advisor;
  * by any Spring user.</i>
  *
  * @author Rod Johnson
+ * @author Rob Harrop
  */
 public interface AdvisorAdapterRegistry {
 	
