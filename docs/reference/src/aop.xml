@@ -383,33 +383,40 @@
           <para>One obvious way to specific static pointcuts is regular
           expressions. Several AOP frameworks besides Spring make this
           possible.
-          <literal>org.springframework.aop.support.RegexpMethodPointcut</literal>
+          <literal>org.springframework.aop.support.Perl5RegexpMethodPointcut</literal>
           is a generic regular expression pointcut, using Perl 5 regular
-          expression syntax.</para>
+          expression syntax. the <literal>Perl5RegexpMethodPointcut</literal> class
+					depends on Jakarta ORO for regular expression matching. Spring also provides
+					the <literal>JdkRegexpMethodPointcut</literal> class that uses the regular
+					expression support in JDK 1.4+.</para>
 
-          <para>Using this class, you can provide a list of pattern Strings.
-          If any of these is a match, the pointcut will evaluate to true. (So
-          the result is effectively the union of these pointcuts.)</para>
+          <para>Using the <literal>Perl5RegexpMethodPointcut</literal> class,
+					you can provide a list of pattern Strings. If any of these is a match,
+					the pointcut will evaluate to true. (So the result is effectively the
+					union of these pointcuts.)</para>
 
           <para>The usage is shown below:</para>
 
           <para><programlisting>&lt;bean id="settersAndAbsquatulatePointcut" 
-    class="org.springframework.aop.support.RegexpMethodPointcut"&gt;
+    class="org.springframework.aop.support.Perl5RegexpMethodPointcut"&gt;
     &lt;property name="patterns"&gt;
         &lt;list&gt;
-            &lt;value&gt;.*get.*&lt;/value&gt;
+            &lt;value&gt;.*set.*&lt;/value&gt;
             &lt;value&gt;.*absquatulate&lt;/value&gt;
         &lt;/list&gt;
     &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
-          <para>A convenience subclass of
-          <literal>RegexpMethodPointcut</literal>,
-          <literal>RegexpMethodPointcutAdvisor</literal>, allows us to
-          reference an Advice also. (Remember that an Advice can be an
-          interceptor, before advice, throws advice etc.) This simplifies
-          wiring, as the one bean serves as both pointcut and advisor, as
-          shown below:</para>
+          <para>Spring provides a convenience class,
+          <literal>RegexpMethodPointcutAdvisor</literal>, that allows us to
+          reference an Advice also (Remember that an Advice can be an interceptor,
+					before advice, throws advice etc.). Behind the scenes, Spring will use the
+					<literal>JdkRegexpMethodPointcut</literal> on J2SE 1.4 or above, and will
+					fall back to <literal>Perl5RegexpMethodPointcut</literal> on older VMs.
+					The use of <literal>Perl5RegexpMethodPointcut</literal> can be forced
+				  by setting the <literal>perl5</literal> property to true.
+					Using <literal>RegexpMethodPointcutAdvisor</literal> simplifies wiring,
+					as the one bean serves as both pointcut and advisor, as shown below:</para>
 
           <para><programlisting>&lt;bean id="settersAndAbsquatulateAdvisor" 
     class="org.springframework.aop.support.RegexpMethodPointcutAdvisor"&gt;
@@ -418,7 +425,7 @@
     &lt;/property&gt;
     &lt;property name="patterns"&gt;
         &lt;list&gt;
-            &lt;value&gt;.*get.*&lt;/value&gt;
+            &lt;value&gt;.*set.*&lt;/value&gt;
             &lt;value&gt;.*absquatulate&lt;/value&gt;
         &lt;/list&gt;
     &lt;/property&gt;
@@ -426,9 +433,6 @@
 
           <para><emphasis>RegexpMethodPointcutAdvisor</emphasis> can be used
           with any Advice type.</para>
-
-          <remark>The RegexpMethodPointcut class requires the Jakarta ORO
-          regular expression package.</remark>
         </sect4>
 
         <sect4>
