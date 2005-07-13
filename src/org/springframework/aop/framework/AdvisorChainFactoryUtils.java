@@ -19,8 +19,10 @@ package org.springframework.aop.framework;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.IntroductionAdvisor;
@@ -64,7 +66,7 @@ public abstract class AdvisorChainFactoryUtils {
 	public static List calculateInterceptorsAndDynamicInterceptionAdvice(
 			Advised config, Object proxy, Method method, Class targetClass) {
 
-		List interceptors = new ArrayList(config.getAdvisors().length);
+		List interceptorList = new ArrayList(config.getAdvisors().length);
 		AdvisorAdapterRegistry registry = GlobalAdvisorAdapterRegistry.getInstance();
 		for (int i = 0; i < config.getAdvisors().length; i++) {
 			Advisor advisor = config.getAdvisors()[i];
@@ -72,16 +74,18 @@ public abstract class AdvisorChainFactoryUtils {
 				// add it conditionally
 				PointcutAdvisor pointcutAdvisor = (PointcutAdvisor) advisor;
 				if (pointcutAdvisor.getPointcut().getClassFilter().matches(targetClass)) {
-					MethodInterceptor interceptor = (MethodInterceptor) registry.getInterceptor(advisor);
+					Interceptor[] interceptors = registry.getInterceptors(advisor);
 					MethodMatcher mm = pointcutAdvisor.getPointcut().getMethodMatcher();
 					if (mm.matches(method, targetClass)) {
 						if (mm.isRuntime()) {
-							// Creating a new object instance in the getInterceptor() method
+							// Creating a new object instance in the getInterceptors() method
 							// isn't a problem as we normally cache created chains.
-							interceptors.add(new InterceptorAndDynamicMethodMatcher(interceptor, mm) );
+							for (int j = 0; j < interceptors.length; j++) {
+								interceptorList.add(new InterceptorAndDynamicMethodMatcher((MethodInterceptor) interceptors[j], mm));
+							}
 						}
-						else {							
-							interceptors.add(interceptor);
+						else {
+							interceptorList.addAll(Arrays.asList(interceptors));
 						}
 					}
 				}
@@ -89,12 +93,12 @@ public abstract class AdvisorChainFactoryUtils {
 			else if (advisor instanceof IntroductionAdvisor) {
 				IntroductionAdvisor ia = (IntroductionAdvisor) advisor;
 				if (ia.getClassFilter().matches(targetClass)) {
-					MethodInterceptor interceptor = (MethodInterceptor) registry.getInterceptor(advisor);
-					interceptors.add(interceptor);
+					Interceptor[] interceptors = registry.getInterceptors(advisor);
+					interceptorList.addAll(Arrays.asList(interceptors));
 				}
 			}
 		}
-		return interceptors;
+		return interceptorList;
 	}
 
 }

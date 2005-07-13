@@ -47,16 +47,16 @@ public interface AdvisorAdapterRegistry {
 	Advisor wrap(Object advice) throws UnknownAdviceTypeException;
 	
 	/**
-	 * Return an AOP Alliance Interceptor to allow use of the given
+	 * Return an array of AOP Alliance Interceptors to allow use of the given
 	 * Advisor in an interception-based framework. 
 	 * <p>Don't worry about the pointcut associated with the Advisor,
 	 * if it's a PointcutAdvisor: just return an interceptor.
 	 * @param advisor Advisor to find an interceptor for
-	 * @return an Interceptor to expose this Advisor's behavior
+	 * @return an array of Interceptors to expose this Advisor's behavior
 	 * @throws UnknownAdviceTypeException if the Advisor type is
 	 * not understood by any registered AdvisorAdapter.
 	 */
-	Interceptor getInterceptor(Advisor advisor) throws UnknownAdviceTypeException;
+	Interceptor[] getInterceptors(Advisor advisor) throws UnknownAdviceTypeException;
 	
 	/**
 	 * Register the given AdvisorAdapter. Note that it is not necessary to register

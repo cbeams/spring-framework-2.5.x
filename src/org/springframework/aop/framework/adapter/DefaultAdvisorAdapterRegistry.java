@@ -64,18 +64,25 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 		throw new UnknownAdviceTypeException(advice);
 	}
 
-	public Interceptor getInterceptor(Advisor advisor) throws UnknownAdviceTypeException {
+	public Interceptor[] getInterceptors(Advisor advisor) throws UnknownAdviceTypeException {
+		List interceptors = new ArrayList();
 		Advice advice = advisor.getAdvice();
 		if (advice instanceof Interceptor) {
-			return (Interceptor) advice;
+			return new Interceptor[]{(Interceptor) advice};
 		}
+		
 		for (int i = 0; i < this.adapters.size(); i++) {
 			AdvisorAdapter adapter = (AdvisorAdapter) this.adapters.get(i);
 			if (adapter.supportsAdvice(advice)) {
-				return adapter.getInterceptor(advisor);
+				interceptors.add(adapter.getInterceptor(advisor));
 			}
 		}
-		throw new UnknownAdviceTypeException(advisor.getAdvice());
+
+		if (interceptors.isEmpty()) {
+			throw new UnknownAdviceTypeException(advisor.getAdvice());
+		}
+
+		return (Interceptor[]) interceptors.toArray(new Interceptor[interceptors.size()]);
 	}
 
 	public void registerAdvisorAdapter(AdvisorAdapter adapter) {
