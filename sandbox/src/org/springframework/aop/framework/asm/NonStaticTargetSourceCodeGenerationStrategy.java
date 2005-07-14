@@ -150,7 +150,7 @@ public class NonStaticTargetSourceCodeGenerationStrategy extends AbstractMethodP
 		cv.visitLabel(endTry);
 
 		// load the return value and return
-		Class<?> returnType = method.getReturnType();
+		Class returnType = method.getReturnType();
 		cv.visitVarInsn(getLoadOpcodeForType(returnType), localsReturnValue);
 		cv.visitInsn(getReturnOpcodeForType(returnType));
 
