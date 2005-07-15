@@ -69,7 +69,7 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 		List interceptors = new ArrayList();
 		Advice advice = advisor.getAdvice();
 		if (advice instanceof Interceptor) {
-			return new Interceptor[] {(Interceptor) advice};
+			interceptors.add(advice);
 		}
 		for (int i = 0; i < this.adapters.size(); i++) {
 			AdvisorAdapter adapter = (AdvisorAdapter) this.adapters.get(i);
