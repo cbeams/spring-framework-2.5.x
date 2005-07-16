@@ -23,7 +23,6 @@ public class AdvisedCodeGenerationStrategy extends AbstractMethodProxyCodeGenera
 
 		String methodName = method.getName();
 
-		// TODO: need to calculate the size of the parameters
 		Class[] parameterTypes = method.getParameterTypes();
 		int localThis = 0;
 
@@ -50,6 +49,8 @@ public class AdvisedCodeGenerationStrategy extends AbstractMethodProxyCodeGenera
 		int localReturnValue = localCounter++;
 
 		// TODO: optimize local usage
+
+		// TODO: need to rework try/catch/finally to match JDT compiler output
 
 		// create a holder for the old proxy if needed
 		if (exposeProxy) {
