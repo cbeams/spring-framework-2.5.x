@@ -26,170 +26,147 @@ import org.springframework.beans.factory.DisposableBean;
 
 /**
  * Jakarta Commons pooling implementation extending <code>AbstractPoolingTargetSource</code>.
- * <p/>
- * By default, an instance of <code>GenericObjectPool</code> is created. Sub-classes may change the
- * type of <code>ObjectPool</code> used by overridding the <code>createObjectPool()</code> method.
- * <p/>
- * Provides many configuration properties mirroring those of the Commons Pool <code>GenericObjectPool</code> class.
- * This properties are passed to the <code>GenericObjectPool</code> during construction. If creating a sub-class of
- * this class to change the <code>ObjectPool</code> implementation type, you must remember to pass in the values of
- * configuration properties that are relevant to your chosen implementation.
- * <p/>
- * The <code>testOnBorrow</code>, <code>testOnReturn</code> and <code>testWhileIdle</code> properties are explictly not
- * mirrored because the implementation of <code>PoolableObjectFactory</code> used by this class does not implement
- * meaningful validation.
- * 
+ *
+ * <p>By default, an instance of <code>GenericObjectPool</code> is created.
+ * Subclasses may change the type of <code>ObjectPool</code> used by
+ * overriding the <code>createObjectPool()</code> method.
+ *
+ * <p>Provides many configuration properties mirroring those of the Commons Pool
+ * <code>GenericObjectPool</code> class; these properties are passed to the
+ * <code>GenericObjectPool</code> during construction. If creating a subclass of this
+ * class to change the <code>ObjectPool</code> implementation type, pass in the values
+ * of configuration properties that are relevant to your chosen implementation.
+ *
+ * <p>The <code>testOnBorrow</code>, <code>testOnReturn</code> and <code>testWhileIdle</code>
+ * properties are explictly not mirrored because the implementation of
+ * <code>PoolableObjectFactory</code> used by this class does not implement
+ * meaningful validation. All exposed Commons Pool properties use the corresponding
+ * Commons Pool defaults: for example, 
+ *
  * @author Rod Johnson
  * @author Rob Harrop
  * @see GenericObjectPool
  * @see #createObjectPool()
- * @see #setMaxIdle(int)
- * @see #setMaxSize(int)
- * @see #setMaxWait(long)
- * @see #setMinEvictableIdleTimeMillis(long)
- * @see #setMinIdle(int)
- * @see #setNumTestsPerEvictionRun(int)
- * @see #setTimeBetweenEvictionRunsMillis(long)
+ * @see #setMaxSize
+ * @see #setMaxIdle
+ * @see #setMinIdle
+ * @see #setMaxWait
+ * @see #setTimeBetweenEvictionRunsMillis
+ * @see #setMinEvictableIdleTimeMillis
  */
 public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 		implements PoolableObjectFactory {
+
+	private int maxIdle = GenericObjectPool.DEFAULT_MAX_IDLE;
+
+	private int minIdle = GenericObjectPool.DEFAULT_MIN_IDLE;
+
+	private long maxWait = GenericObjectPool.DEFAULT_MAX_WAIT;
+
+	private long timeBetweenEvictionRunsMillis = GenericObjectPool.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
+
+	private long minEvictableIdleTimeMillis = GenericObjectPool.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
 
 	/**
 	 * The Jakarta Commons <code>ObjectPool</code> used to pool target objects
 	 */
 	private ObjectPool pool;
 
-	/**
-	 * Corresponds to the <code>maxIdle</code> flag of the underlying pool object.
-	 * @see GenericObjectPool#setMaxIdle(int)
-	 * @see #setMinIdle(int)
-	 */
-	private int maxIdle = GenericObjectPool.DEFAULT_MAX_IDLE;
 
 	/**
-	 * Corresponds to the <code>minIdle</code> flag of the underlying pool object.
-	 * @see GenericObjectPool#setMinIdle(int)
-	 * @see #setMinIdle(int)
+	 * Create a CommonsPoolTargetSource with default settings.
+	 * Default maximum size of the pool is 8.
+	 * @see #setMaxSize
+	 * @see GenericObjectPool#setMaxActive
 	 */
-	private int minIdle = GenericObjectPool.DEFAULT_MIN_IDLE;
-
-	/**
-	 * Corresponds to the <code>maxWait</code> flag of the underlying pool object.
-	 * @see GenericObjectPool#setMaxWait(long)
-	 * @see #setMaxWait(long)
-	 */
-	private long maxWait = GenericObjectPool.DEFAULT_MAX_WAIT;
-
-	/**
-	 * Corresponds to the <code>minEvictableIdleTimeMillis</code> flag of the underlying pool object.
-	 * @see GenericObjectPool#setMinEvictableIdleTimeMillis(long)
-	 * @see #setMinEvictableIdleTimeMillis(long)
-	 */
-	private long minEvictableIdleTimeMillis = GenericObjectPool.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
-
-	/**
-	 * Corresponds to the <code>numTestsPerEvictionRun</code> flag of the underlying pool object.
-	 * @see GenericObjectPool#setNumTestsPerEvictionRun(int)
-	 * @see #setNumTestsPerEvictionRun(int)
-	 */
-	private int numTestsPerEvictionRun = GenericObjectPool.DEFAULT_NUM_TESTS_PER_EVICTION_RUN;
-
-	/**
-	 * Corresponds to the <code>timeBetweenEvictionRunsMillis</code> flag of the underlying pool object.
-	 * @see GenericObjectPool#setTimeBetweenEvictionRunsMillis(long)
-	 * @see #setTimeBetweenEvictionRunsMillis(long)
-	 */
-	private long timeBetweenEvictionRunsMillis = GenericObjectPool.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
-
-	/**
-	 * Gets the value of the <code>maxIdle</code> property used to configure the pool object when created.
-	 */
-	protected int getMaxIdle() {
-		return maxIdle;
+	public CommonsPoolTargetSource() {
+		setMaxSize(GenericObjectPool.DEFAULT_MAX_ACTIVE);
 	}
 
 	/**
-	 * Sets the value of the <code>maxIdle</code> property which is passed to the pool object when created.
-	 * @see GenericObjectPool#setMaxIdle(int)
+	 * Set the maximum number of idle objects in the pool.
+	 * Default is 8.
+	 * @see GenericObjectPool#setMaxIdle
 	 */
 	public void setMaxIdle(int maxIdle) {
 		this.maxIdle = maxIdle;
 	}
 
 	/**
-	 * Gets the value of the <code>minIdle</code> property used to configure the pool object when created.
+	 * Return the maximum number of idle objects in the pool.
 	 */
-	protected int getMinIdle() {
-		return minIdle;
+	public int getMaxIdle() {
+		return maxIdle;
 	}
 
 	/**
-	 * Sets the value of the <code>minIdle</code> property which is passed to the pool object when created.
-	 * @see GenericObjectPool#setMinIdle(int)
+	 * Set the minimum number of idle objects in the pool.
+	 * Default is 0.
+	 * @see GenericObjectPool#setMinIdle
 	 */
 	public void setMinIdle(int minIdle) {
 		this.minIdle = minIdle;
 	}
 
 	/**
-	 * Gets the value of the <code>maxWait</code> property used to configure the pool object when created.
+	 * Return the minimum number of idle objects in the pool.
 	 */
-	protected long getMaxWait() {
-		return maxWait;
+	public int getMinIdle() {
+		return minIdle;
 	}
 
 	/**
-	 * Sets the value of the <code>maxWait</code> property which is passed to the pool object when created.
-	 * @see GenericObjectPool#setMaxWait(long)
+	 * Set the maximum waiting time for fetching an object from the pool.
+	 * Default is -1, waiting forever.
+	 * @see GenericObjectPool#setMaxWait
 	 */
 	public void setMaxWait(long maxWait) {
 		this.maxWait = maxWait;
 	}
 
 	/**
-	 * Gets the value of the <code>minEvictableIdleTimeMillis</code> property used to configure the pool object when created.
+	 * Return the maximum waiting time for fetching an object from the pool.
 	 */
-	public long getMinEvictableIdleTimeMillis() {
-		return minEvictableIdleTimeMillis;
+	public long getMaxWait() {
+		return maxWait;
 	}
 
 	/**
-	 * Sets the value of the <code>minEvictableIdleTimeMillis</code> property which is passed to the pool object when created.
-	 * @see GenericObjectPool#setMinEvictableIdleTimeMillis(long)
+	 * Set the time between eviction runs that check idle objects whether
+	 * they have been idle for too long or have become invalid.
+	 * Default is -1, not performing any eviction.
+	 * @see GenericObjectPool#setTimeBetweenEvictionRunsMillis
 	 */
-	public void setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
-		this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
+	public void setTimeBetweenEvictionRunsMillis(long timeBetweenEvictionRunsMillis) {
+		this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
 	}
 
 	/**
-	 * Gets the value of the <code>numTestsPerEvictionRun</code> property used to configure the pool object when created.
-	 */
-	public int getNumTestsPerEvictionRun() {
-		return numTestsPerEvictionRun;
-	}
-
-	/**
-	 * Sets the value of the <code>numTestsPerEvictionRun</code> property which is passed to the pool object when created.
-	 * @see GenericObjectPool#setNumTestsPerEvictionRun(int))
-	 */
-	public void setNumTestsPerEvictionRun(int numTestsPerEvictionRun) {
-		this.numTestsPerEvictionRun = numTestsPerEvictionRun;
-	}
-
-	/**
-	 * Gets the value of the <code>timeBetweenEvictionRunsMillis</code> property used to configure the pool object when created.
+	 * Return the time between eviction runs that check idle objects.
 	 */
 	public long getTimeBetweenEvictionRunsMillis() {
 		return timeBetweenEvictionRunsMillis;
 	}
 
 	/**
-	 * Sets the value of the <code>timeBetweenEvictionRunsMillis</code> property which is passed to the pool object when created.
-	 * @see GenericObjectPool#setTimeBetweenEvictionRunsMillis(long)
+	 * Set the minimum time that an idle object can sit in the pool before
+	 * it becomes subject to eviction. Default is 1800000 (30 minutes).
+	 * <p>Note that eviction runs need to be performed to take this
+	 * setting into effect.
+	 * @see #setTimeBetweenEvictionRunsMillis
+	 * @see GenericObjectPool#setMinEvictableIdleTimeMillis
 	 */
-	public void setTimeBetweenEvictionRunsMillis(long timeBetweenEvictionRunsMillis) {
-		this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
+	public void setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
+		this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
 	}
+
+	/**
+	 * Return the minimum time that an idle object can sit in the pool.
+	 */
+	public long getMinEvictableIdleTimeMillis() {
+		return minEvictableIdleTimeMillis;
+	}
+
 
 	protected final void createPool(BeanFactory beanFactory) {
 		logger.info("Creating Commons object pool");
@@ -197,9 +174,12 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	}
 
 	/**
-	 * Subclasses can override this if they want to return a different Commons pool to GenericObject pool.
+	 * Subclasses can override this if they want to return a specific Commons pool.
 	 * They should apply any configuration properties to the pool here.
+	 * <p>Default is a GenericObjectPool instance with the given pool size.
 	 * @return an empty Commons <code>ObjectPool</code>.
+	 * @see org.apache.commons.pool.impl.GenericObjectPool
+	 * @see #setMaxSize
 	 */
 	protected ObjectPool createObjectPool() {
 		GenericObjectPool gop = new GenericObjectPool(this);
@@ -207,14 +187,14 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 		gop.setMaxIdle(getMaxIdle());
 		gop.setMinIdle(getMinIdle());
 		gop.setMaxWait(getMaxWait());
-		gop.setMinEvictableIdleTimeMillis(getMinEvictableIdleTimeMillis());
-		gop.setNumTestsPerEvictionRun(getNumTestsPerEvictionRun());
 		gop.setTimeBetweenEvictionRunsMillis(getTimeBetweenEvictionRunsMillis());
+		gop.setMinEvictableIdleTimeMillis(getMinEvictableIdleTimeMillis());
 		return gop;
 	}
 
+
 	/**
-	 * An object leased from the pool.
+	 * Borrow an object from the <code>ObjectPool</code>.
 	 */
 	public Object getTarget() throws Exception {
 		return this.pool.borrowObject();
