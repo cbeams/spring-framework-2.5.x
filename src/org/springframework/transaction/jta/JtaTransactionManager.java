@@ -782,8 +782,10 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 				doRegisterAfterCompletionWithJtaTransaction(synchronizations);
 			}
 			catch (RollbackException ex) {
-				throw new UnexpectedRollbackException(
-						"JTA transaction unexpectedly rolled back (maybe due to a timeout)", ex);
+				logger.debug("Participating in existing JTA transaction that has been marked rollback-only: " +
+						"cannot register Spring afterCompletion callbacks with outer JTA transaction - " +
+						"immediately performing Spring afterCompletion callbacks with outcome status 'rollback'");
+				invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_ROLLED_BACK);
 			}
 			catch (IllegalStateException ex) {
 				throw new NoTransactionException("No active JTA transaction");
@@ -796,8 +798,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		else {
 			// No JTA TransactionManager available.
 			logger.warn("Participating in existing JTA transaction, but no JTA TransactionManager available: " +
-					"cannot register Spring afterCompletion callbacks with outer JTA transaction");
-			super.registerAfterCompletionWithExistingTransaction(synchronizations);
+					"cannot register Spring afterCompletion callbacks with outer JTA transaction - " +
+					"performing Spring afterCompletion callbacks with outcome status 'unknown'");
+			invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
 		}
 	}
 
