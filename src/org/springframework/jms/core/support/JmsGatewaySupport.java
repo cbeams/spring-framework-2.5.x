@@ -45,7 +45,8 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	protected final Log logger = LogFactory.getLog(getClass());
 	
 	private JmsTemplate jmsTemplate;
-	
+
+
 	/**
 	 * Set the JMS connection factory to be used by the gateway.
 	 * Will automatically create a JmsTemplate for the given ConnectionFactory.

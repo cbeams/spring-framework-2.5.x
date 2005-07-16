@@ -38,7 +38,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * Helper class that simplifies JMS access code. This class requires a
- * JMS >= 1.1 provider, because it builds on the domain-independent API.
+ * JMS 1.1+ provider, because it builds on the domain-independent API.
  * <b>Use the {@link JmsTemplate102 JmsTemplate102} subclass for
  * JMS 1.0.2 providers.</b>
  *
@@ -524,6 +524,11 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 		}
 	}
 
+	/**
+	 * Commit the Session if not within a JTA transaction.
+	 * @param session the JMS Session to commit
+	 * @throws JMSException if committing failed
+	 */
 	private void commitIfNecessary(Session session) throws JMSException {
 		try {
 			session.commit();
@@ -604,7 +609,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 					JmsUtils.closeMessageProducer(producer);
 				}
 			}
-		});
+		}, false);
 	}
 
 
@@ -624,7 +629,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 				doSend(session, destination, messageCreator);
 				return null;
 			}
-		});
+		}, false);
 	}
 
 	public void send(final String destinationName, final MessageCreator messageCreator) throws JmsException {
@@ -634,7 +639,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 				doSend(session, destination, messageCreator);
 				return null;
 			}
-		});
+		}, false);
 	}
 
 	protected void doSend(Session session, Destination destination, MessageCreator messageCreator)

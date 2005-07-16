@@ -460,7 +460,7 @@ public class SchedulerFactoryBean
 
 	/**
 	 * Set whether to automatically start the scheduler after initialization.
-	 * Default is true; set this to false to allow for manual startup.
+	 * Default is "true"; set this to false to allow for manual startup.
 	 */
 	public void setAutoStartup(boolean autoStartup) {
 		this.autoStartup = autoStartup;
@@ -479,7 +479,7 @@ public class SchedulerFactoryBean
 
 	/**
 	 * Set whether to wait for running jobs to complete on shutdown.
-	 * Default is false.
+	 * Default is "false".
 	 * @see org.quartz.Scheduler#shutdown(boolean)
 	 */
 	public void setWaitForJobsToCompleteOnShutdown(boolean waitForJobsToCompleteOnShutdown) {
