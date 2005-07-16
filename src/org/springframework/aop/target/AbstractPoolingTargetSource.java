@@ -28,16 +28,20 @@ import org.springframework.beans.factory.DisposableBean;
  * target instances, acquiring and releasing a target object from the pool
  * for each method invocation. This class is independent of pooling technology.
  *
- * <p>Subclasses must implement the getTarget() and releaseTarget() methods
- * to work with their chosen pool. The newPrototypeInstance() method inherited
- * from AbstractPrototypeBasedTargetSource can be used to create objects to put
- * in the pool. Subclasses must also implement some of the monitoring methods from
- * the PoolingConfig interface. This class provides the getPoolingConfigMixin()
- * method to return an IntroductionAdvisor making these stats available on proxied
- * objects.
+ * <p>Subclasses must implement the <code>getTarget()</code> and
+ * <code_releaseTarget()</code> methods to work with their chosen pool.
+ * The <code>newPrototypeInstance()</code> method inherited from
+ * AbstractPrototypeBasedTargetSource can be used to create objects to put
+ * in the pool.
+ *
+ * <p>Subclasses must also implement some of the monitoring methods from
+ * the PoolingConfig interface.
+ *
+ * <p>This class provides the <code>getPoolingConfigMixin()</code> method to
+ * return an IntroductionAdvisor making these stats available on proxied objects.
  *
  * <p>This class implements DisposableBean to force subclasses to implement
- * a destroy() method to close down their pool.
+ * a <code>destroy()</code> method to close down their pool.
  *
  * @author Rod Johnson
  * @see #getTarget
@@ -47,11 +51,13 @@ import org.springframework.beans.factory.DisposableBean;
 public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBasedTargetSource
 		implements PoolingConfig, DisposableBean {
 	
-	/** The size of the pool */
-	private int maxSize;
+	/** The maximum size of the pool */
+	private int maxSize = -1;
+
 
 	/**
 	 * Set the maximum size of the pool.
+	 * Default is -1, indicating no size limit.
 	 */
 	public void setMaxSize(int maxSize) {
 		this.maxSize = maxSize;
@@ -63,6 +69,7 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBased
 	public int getMaxSize() {
 		return this.maxSize;
 	}
+
 
 	public final void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		super.setBeanFactory(beanFactory);
@@ -76,6 +83,7 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBased
 			throw new BeanInitializationException("Could not create instance pool", ex);
 		}
 	}
+
 
 	/**
 	 * Create the pool.
@@ -100,7 +108,8 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBased
 	 * @throws Exception to allow pooling APIs to throw exception
 	 * @see #getTarget
 	 */
-	public abstract void releaseTarget(Object target) throws Exception; 
+	public abstract void releaseTarget(Object target) throws Exception;
+
 
 	/**
 	 * Return an IntroductionAdvisor that providing a mixin
