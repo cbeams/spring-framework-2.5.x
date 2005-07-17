@@ -29,6 +29,31 @@ import java.util.Iterator;
 public abstract class CollectionUtils {
 
 	/**
+	 * Determine whether the given collection only contains a
+	 * single unique object.
+	 * @param coll the collection to check
+	 * @return <code>true</code> if the collection contains a
+	 * single reference or multiple references to the same
+	 * instance, <code>false</code> else
+	 */
+	public static boolean hasUniqueObject(Collection coll) {
+		if (coll.isEmpty()) {
+			return false;
+		}
+		Object candidate = null;
+		for (Iterator it = coll.iterator(); it.hasNext();) {
+			Object elem = it.next();
+			if (candidate == null) {
+				candidate = elem;
+			}
+			else if (candidate != elem) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Find a value of the given type in the given collection.
 	 * @param coll the collection to search
 	 * @param type the type to look for

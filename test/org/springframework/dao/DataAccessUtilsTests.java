@@ -16,6 +16,7 @@
 
 package org.springframework.dao;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -91,7 +92,6 @@ public class DataAccessUtilsTests extends TestCase {
 			assertEquals(2, ex.getActualSize());
 		}
 
-
 		try {
 			DataAccessUtils.requiredUniqueResult(col);
 			fail("Should have thrown IncorrectResultSizeDataAccessException");
@@ -143,6 +143,36 @@ public class DataAccessUtilsTests extends TestCase {
 		assertEquals("5", DataAccessUtils.objectResult(col, String.class));
 		assertEquals(5, DataAccessUtils.intResult(col));
 		assertEquals(5, DataAccessUtils.longResult(col));
+	}
+
+	public void testWithSameIntegerInstanceTwice() {
+		Integer i = new Integer(5);
+		Collection col = new ArrayList();
+		col.add(i);
+		col.add(i);
+
+		assertEquals(new Integer(5), DataAccessUtils.uniqueResult(col));
+		assertEquals(new Integer(5), DataAccessUtils.requiredUniqueResult(col));
+		assertEquals(new Integer(5), DataAccessUtils.objectResult(col, Integer.class));
+		assertEquals("5", DataAccessUtils.objectResult(col, String.class));
+		assertEquals(5, DataAccessUtils.intResult(col));
+		assertEquals(5, DataAccessUtils.longResult(col));
+	}
+
+	public void testWithEquivalentIntegerInstanceTwice() {
+		Collection col = new ArrayList();
+		col.add(new Integer(5));
+		col.add(new Integer(5));
+
+		try {
+			DataAccessUtils.uniqueResult(col);
+			fail("Should have thrown IncorrectResultSizeDataAccessException");
+		}
+		catch (IncorrectResultSizeDataAccessException ex) {
+			// expected
+			assertEquals(1, ex.getExpectedSize());
+			assertEquals(2, ex.getActualSize());
+		}
 	}
 
 	public void testWithLong() {

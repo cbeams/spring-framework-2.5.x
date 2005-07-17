@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.TypeMismatchDataAccessException;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.NumberUtils;
 
 /**
@@ -45,7 +46,7 @@ public abstract class DataAccessUtils {
 		if (size == 0) {
 			return null;
 		}
-		if (size > 1) {
+		if (!CollectionUtils.hasUniqueObject(results)) {
 			throw new IncorrectResultSizeDataAccessException(1, size);
 		}
 		return results.iterator().next();
@@ -61,7 +62,7 @@ public abstract class DataAccessUtils {
 	 */
 	public static Object requiredUniqueResult(Collection results) throws IncorrectResultSizeDataAccessException {
 		int size = (results != null ? results.size() : 0);
-		if (results.size() != 1) {
+		if (!CollectionUtils.hasUniqueObject(results)) {
 			throw new IncorrectResultSizeDataAccessException(1, size);
 		}
 		return results.iterator().next();
