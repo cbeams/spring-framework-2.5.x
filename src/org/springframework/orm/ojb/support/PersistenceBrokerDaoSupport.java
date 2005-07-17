@@ -123,6 +123,7 @@ public abstract class PersistenceBrokerDaoSupport extends DaoSupport {
 	 */
 	protected final PersistenceBroker getPersistenceBroker(boolean allowCreate)
 	    throws DataAccessResourceFailureException, IllegalStateException {
+
 		return OjbFactoryUtils.getPersistenceBroker(this.persistenceBrokerTemplate.getPbKey(), allowCreate);
 	}
 
