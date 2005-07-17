@@ -157,6 +157,14 @@ public class StatementCreatorUtils {
 					ps.setObject(paramIndex, inValue, Types.TIMESTAMP);
 				}
 			}
+			else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC) {
+				if (inValue instanceof java.math.BigDecimal) {
+					ps.setBigDecimal(paramIndex, (java.math.BigDecimal)inValue);
+				}
+				else {
+					ps.setObject(paramIndex, inValue, sqlType);
+				}
+			}
 			else if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
 				if ((inValue instanceof java.util.Date) && !(inValue instanceof java.sql.Date ||
 						inValue instanceof java.sql.Time || inValue instanceof java.sql.Timestamp)) {

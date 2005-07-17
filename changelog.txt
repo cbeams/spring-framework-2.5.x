@@ -15,6 +15,9 @@ Package org.springframework.beans
 Package org.springframework.core
 * fixed PropertiesLoaderSupport to correctly ignore a resource not found failure if "ignoreResourceNotFound" is "true"
 
+Package org.springframework.jdbc
+* fixed bug in StatementCreatorUtils where NUMERIC and DECIMAL types could lose decimals when passing in BigDecimal as a value for a preparedStatement
+
 Package org.springframework.orm
 * added "allowCreate" flag to TransactionAwarePersistenceManagerFactoryProxy, allowing to enforce transactional PMs
 
