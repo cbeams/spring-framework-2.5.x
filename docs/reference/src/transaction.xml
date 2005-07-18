@@ -910,7 +910,7 @@ interface TestService {
   &lt;property name="transactionAttributeSource"&gt;
     &lt;bean class="...transaction.annotation.AnnotationTransactionAttributeSource"/&gt;
   &lt;/property&gt;
-&lt;/bean&gt;</programlisting>Since the transactionAttributeSource property
+&lt;/bean&gt;</programlisting>Since the TransactionAttributeSource property
           does not need to change at all for each proxy instance, when using
           parent and child bean definitions to avoid code duplication, the
           property may just be set on the base, parent definition and
