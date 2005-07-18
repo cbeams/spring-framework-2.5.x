@@ -901,7 +901,7 @@ interface TestService {
           TransactionProxyFactoryBean, the
           <literal>TransactionAttributes</literal> property which specified
           transaction attributes in text form is replaced by the direct usage
-          of the <literal>TransactionAttribute</literal> property, specifying
+          of the <literal>TransactionAttributeSource</literal> property, specifying
           an <literal>AnnotationTransactionAttributeSource</literal>.</para>
 
           <para><programlisting>&lt;bean id="petStore" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
@@ -972,7 +972,7 @@ interface TestService {
             </listitem>
 
             <listitem>
-              <para><literal>AnnotationsTransactionAttributeSource</literal>:
+              <para><literal>AnnotationTransactionAttributeSource</literal>:
               TransactionAttributeSource implementation which provides
               transaction attributes read from class files</para>
             </listitem>
