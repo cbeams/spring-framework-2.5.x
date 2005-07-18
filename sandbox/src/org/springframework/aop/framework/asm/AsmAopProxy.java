@@ -127,11 +127,11 @@ public class AsmAopProxy implements AopProxy {
 
 		try {
 			ClassReader cr = new ClassReader(bytes);
-			FileOutputStream fos = new FileOutputStream("d:/tmp/Test.java");
+			FileOutputStream fos = new FileOutputStream("c:/tmp/Test.java");
 			ClassVisitor cv = new ASMifierClassVisitor(new PrintWriter(fos));
 			cr.accept(cv, true);
 
-			FileOutputStream fos2 = new FileOutputStream("d:/tmp/Test.class");
+			FileOutputStream fos2 = new FileOutputStream("c:/tmp/Test.class");
 			fos2.write(bytes);
 			fos2.close();
 		}
