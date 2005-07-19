@@ -95,12 +95,18 @@ public class BeanDefinitionReaderUtils {
 			throws BeanDefinitionStoreException {
 
 		String generatedId = beanDefinition.getBeanClassName();
-		if (generatedId == null && beanDefinition instanceof ChildBeanDefinition) {
-			generatedId = ((ChildBeanDefinition) beanDefinition).getParentName();
+		if (generatedId == null) {
+			if (beanDefinition instanceof ChildBeanDefinition) {
+				generatedId = ((ChildBeanDefinition) beanDefinition).getParentName() + "$child";
+			}
+			else if (beanDefinition.getFactoryBeanName() != null) {
+				generatedId = beanDefinition.getFactoryBeanName() + "$created";
+			}
 		}
 		if (!StringUtils.hasText(generatedId)) {
 			throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), "",
-					"Unnamed bean definition specifies neither 'class' nor 'parent' - can't generate name");
+					"Unnamed bean definition specifies neither 'class' nor 'parent' nor 'factory-bean'" +
+					" - can't generate bean name");
 		}
 		int counter = 1;
 		String id = generatedId;
