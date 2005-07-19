@@ -59,7 +59,7 @@
     -->
 	<bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
 		  abstract="true">
-		<property name="transactionManager"><ref bean="transactionManager"/></property>
+		<property name="transactionManager" ref="transactionManager"/>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="insert*">PROPAGATION_REQUIRED</prop>
