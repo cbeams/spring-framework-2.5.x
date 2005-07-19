@@ -18,6 +18,7 @@ package org.springframework.jmx.support;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.management.JMException;
 import javax.management.MBeanServer;
@@ -63,42 +64,18 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/**
-	 * Stores a reference to the <code>MBeanServer</code> that the connector is exposing.
-	 */
 	private MBeanServer server;
 
-	/**
-	 * Stores the actual service URL used for the connector.
-	 */
 	private String serviceUrl = DEFAULT_SERVICE_URL;
 
-	/**
-	 * Stores the JSR-160 environment parameters to pass to the <code>JMXConnectorServerFactory</code>.
-	 */
 	private Map environment;
 
-	/**
-	 * The <code>String</code> representation of the <code>ObjectName</code> for the
-	 * <code>JMXConnectorServer</code>.
-	 */
 	private ObjectName objectName;
 
-	/**
-	 * Indicates whether or not the <code>JMXConnectorServer</code> should be started in a
-	 * separate thread.
-	 */
 	private boolean threaded = false;
 
-	/**
-	 * Indicates whether or not the <code>JMXConnectorServer</code> should be started in a
-	 * daemon thread. Only applicable if <code>threaded</code> is set to <code>true</code>.
-	 */
 	private boolean daemon = false;
 
-	/**
-	 * Stores the <code>JMXConnectoreServer</code> instance.
-	 */
 	private JMXConnectorServer connectorServer;
 
 
@@ -118,9 +95,18 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 	}
 
 	/**
-	 * Set the environment properties used to construct the <code>JMXConnectorServer</code>.
+	 * Set the environment properties used to construct the <code>JMXConnectorServer</code>
+	 * as <code>java.util.Properties</code> (String key/value pairs).
 	 */
-	public void setEnvironment(Map environment) {
+	public void setEnvironment(Properties environment) {
+		this.environment = environment;
+	}
+
+	/**
+	 * Set the environment properties used to construct the <code>JMXConnector</code>
+	 * as a <code>Map</code> of String keys and arbitrary Object values.
+	 */
+	public void setEnvironmentMap(Map environment) {
 		this.environment = environment;
 	}
 
@@ -134,16 +120,15 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 	}
 
 	/**
-	 * Set the <code>threaded</code> flag, indicating whether the <code>JMXConnectorServer</code>
-	 * should be started in a separate thread.
+	 * Set whether the <code>JMXConnectorServer</code> should be started in a separate thread.
 	 */
 	public void setThreaded(boolean threaded) {
 		this.threaded = threaded;
 	}
 
 	/**
-	 * Set the <code>daemon</code> flag, indicating whether any threads started for the
-	 * <code>JMXConnectorServer</code> should be started daemon threads.
+	 * Set whether any threads started for the <code>JMXConnectorServer</code> should be
+	 * started as daemon threads.
 	 */
 	public void setDaemon(boolean daemon) {
 		this.daemon = daemon;
@@ -151,7 +136,7 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 
 
 	/**
-	 * Start the connector server If the <code>threaded</code> flag is set to <code>true</code>,
+	 * Start the connector server. If the <code>threaded</code> flag is set to <code>true</code>,
 	 * the <code>JMXConnectorServer</code> will be started in a separate thread.
 	 * If the <code>daemon</code> flag is set to <code>true</code>, that thread will be
 	 * started as a daemon thread.
