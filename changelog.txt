@@ -3,8 +3,12 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.3 (19.7.2005)
+Changes in version 1.2.3 (20.7.2005)
 ------------------------------------
+
+Package org.springframework.aop
+* changed AbstractPoolingTargetSource's "maxSize" default to -1, clearly indicating no size limit
+* mirrored "maxIdle", "minIdle", "maxWait" and other Commons Pool properties in CommonsPoolTargetSource
 
 Package org.springframework.beans
 * refactored AbstractBeanFactory's type determination for "factory-method" into "getTypeForFactoryMethod" template
@@ -15,11 +19,36 @@ Package org.springframework.beans
 Package org.springframework.core
 * fixed PropertiesLoaderSupport to correctly ignore a resource not found failure if "ignoreResourceNotFound" is "true"
 
+Package org.springframework.dao
+* refined DataAccessUtils to consider a Collection with multiple references to same instance as having a unique result
+
 Package org.springframework.jdbc
-* fixed bug in StatementCreatorUtils where NUMERIC and DECIMAL types could lose decimals when passing in BigDecimal as a value for a preparedStatement
+* fixed bug in StatementCreatorUtils where NUMERIC and DECIMAL types could lose decimals when passing in BigDecimal
+
+Package org.springframework.jmx
+* revised ObjectNameManager to delegate to JMX 1.2's "ObjectName.getInstance()" methods (when available) for caching
+* MBeanServerConnectionFactoryBean closes its JMX Connector on shutdown
+* added "environment" and "environmentMap" properties to MBeanServerConnectionFactoryBean, for JMX connector parameters
+* changed ConnectorServerFactoryBean's "environment" bean property to type Properties, with separate "environmentMap"
+* added "locateExistingServerIfPossible"/"agentId" properties to MBeanServerFactoryBean, for retrieving existing servers
+
+Package org.springframework.mail
+* added InternetAddressEditor to JavaMail support package, to be registered as custom editor (e.g. for form objects)
 
 Package org.springframework.orm
+* extended doc coverage regarding plain DAO implementations: based on plain Hibernate3/JDO/TopLink/OJB/iBATIS API
 * added "allowCreate" flag to TransactionAwarePersistenceManagerFactoryProxy, allowing to enforce transactional PMs
+
+Package org.springframework.remoting
+* added RmiRegistryFactoryBean to RMI support package, for explicit setup of an RMI registry (existing or newly created)
+* added "registry" bean property to RmiServiceExporter, for explicitly referring to an existing RMI registry instance
+
+Package org.springframework.transaction
+* JtaTransactionManager calls "afterCompletion" of Spring synchronizations immediately if JTA tx is marked rollback-only
+
+Package org.springframework.web
+* fixed SpringBindingActionForm adapter to correctly work for nested properties (suppressing Struts binding completely)
+* added "onFormChange" callback to AbstractFormController, to allow for post-processing in case of a form change request
 
 
 Changes in version 1.2.2 (5.7.2005)
