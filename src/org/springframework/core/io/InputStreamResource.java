@@ -84,4 +84,13 @@ public class InputStreamResource extends AbstractResource {
 		return description;
 	}
 
+	public boolean equals(Object obj) {
+		return (obj == this ||
+		    (obj instanceof InputStreamResource && ((InputStreamResource) obj).inputStream.equals(this.inputStream)));
+	}
+
+	public int hashCode() {
+		return this.inputStream.hashCode();
+	}
+
 }
