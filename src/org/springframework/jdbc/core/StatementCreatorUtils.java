@@ -16,10 +16,12 @@
 
 package org.springframework.jdbc.core;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -60,6 +62,7 @@ public class StatementCreatorUtils {
 	public static void setParameterValue(
 	    PreparedStatement ps, int paramIndex, SqlParameter declaredParam, Object inValue)
 	    throws SQLException {
+
 		setParameterValue(ps, paramIndex, declaredParam.getSqlType(), declaredParam.getTypeName(), inValue);
 	}
 
@@ -80,10 +83,10 @@ public class StatementCreatorUtils {
 	    throws SQLException {
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Setting SQL statement parameter value: columnIndex " + paramIndex +
+			logger.debug("Setting SQL statement parameter value: column index " + paramIndex +
 					", parameter value [" + inValue +
-					"], valueClass [" + (inValue != null ? inValue.getClass().getName() : "null") +
-					"], sqlType " + (sqlType == SqlTypeValue.TYPE_UNKNOWN ? "unknown" : Integer.toString(sqlType)));
+					"], value class [" + (inValue != null ? inValue.getClass().getName() : "null") +
+					"], SQL type " + (sqlType == SqlTypeValue.TYPE_UNKNOWN ? "unknown" : Integer.toString(sqlType)));
 		}
 
 		if (inValue == null) {
@@ -115,8 +118,8 @@ public class StatementCreatorUtils {
 						ps.setDate(paramIndex, new java.sql.Date(((java.util.Date) inValue).getTime()));
 					}
 				}
-				else if (inValue instanceof java.util.Calendar) {
-					java.util.Calendar cal = (java.util.Calendar) inValue;
+				else if (inValue instanceof Calendar) {
+					java.util.Calendar cal = (Calendar) inValue;
 					ps.setDate(paramIndex, new java.sql.Date(cal.getTime().getTime()), cal);
 				}
 				else {
@@ -149,8 +152,8 @@ public class StatementCreatorUtils {
 						ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) inValue).getTime()));
 					}
 				}
-				else if (inValue instanceof java.util.Calendar) {
-					java.util.Calendar cal = (java.util.Calendar) inValue;
+				else if (inValue instanceof Calendar) {
+					java.util.Calendar cal = (Calendar) inValue;
 					ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()), cal);
 				}
 				else {
@@ -158,8 +161,8 @@ public class StatementCreatorUtils {
 				}
 			}
 			else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC) {
-				if (inValue instanceof java.math.BigDecimal) {
-					ps.setBigDecimal(paramIndex, (java.math.BigDecimal)inValue);
+				if (inValue instanceof BigDecimal) {
+					ps.setBigDecimal(paramIndex, (BigDecimal) inValue);
 				}
 				else {
 					ps.setObject(paramIndex, inValue, sqlType);

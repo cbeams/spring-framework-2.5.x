@@ -53,6 +53,7 @@ public abstract class RequestContextUtils {
 	 */
 	public static WebApplicationContext getWebApplicationContext(ServletRequest request)
 	    throws IllegalStateException {
+
 		return getWebApplicationContext(request, null);
 	}
 
@@ -71,6 +72,7 @@ public abstract class RequestContextUtils {
 	 */
 	public static WebApplicationContext getWebApplicationContext(
 			ServletRequest request, ServletContext servletContext) throws IllegalStateException {
+
 		WebApplicationContext webApplicationContext = (WebApplicationContext) request.getAttribute(
 				DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		if (webApplicationContext == null) {

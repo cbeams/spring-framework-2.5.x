@@ -168,6 +168,7 @@ public class SimpleFormController extends AbstractFormController {
 	protected ModelAndView showForm(
 			HttpServletRequest request, HttpServletResponse response, BindException errors)
 			throws Exception {
+
 		return showForm(request, response, errors, null);
 	}
 
@@ -188,6 +189,7 @@ public class SimpleFormController extends AbstractFormController {
 	protected ModelAndView showForm(
 			HttpServletRequest request, HttpServletResponse response, BindException errors, Map controlModel)
 			throws Exception {
+
 		return showForm(request, errors, getFormView(), controlModel);
 	}
 
@@ -247,7 +249,7 @@ public class SimpleFormController extends AbstractFormController {
 			return showForm(request, response, errors);
 		}
 		else if (isFormChangeRequest(request)) {
-			logger.debug("Detected form change request - routing request to onFormChange");
+			logger.debug("Detected form change request -> routing request to onFormChange");
 			onFormChange(request, response, command);
 			return showForm(request, response, errors);
 		}
@@ -255,6 +257,16 @@ public class SimpleFormController extends AbstractFormController {
 			logger.debug("No errors -> processing submit");
 			return onSubmit(request, response, command, errors);
 		}
+	}
+
+	/**
+	 * This implementation delegates to <code>isFormChangeRequest</code>:
+	 * A form change request changes the appearance of the form
+	 * and should not get validated but just show the new form.
+	 * @see #isFormChangeRequest
+	 */
+	protected boolean suppressValidation(HttpServletRequest request) {
+		return isFormChangeRequest(request);
 	}
 
 	/**
@@ -274,21 +286,19 @@ public class SimpleFormController extends AbstractFormController {
 	}
 
 	/**
-	 * Called during form submission if {@link #isFormChangeRequest(javax.servlet.http.HttpServletRequest)} returns <code>true</code>.
-	 * Allows sub-classes to implement custom logic to modify the command object to directly modify data in the form.
+	 * Called during form submission if
+	 * {@link #isFormChangeRequest(javax.servlet.http.HttpServletRequest)}
+	 * returns <code>true</code>. Allows subclasses to implement custom logic
+	 * to modify the command object to directly modify data in the form.
+	 * <p>Default implementation is empty.
+	 * @param request current servlet request
+	 * @param response current servlet response
+	 * @param command form object with request parameters bound onto it
+	 * @throws Exception in case of errors
 	 * @see #isFormChangeRequest(javax.servlet.http.HttpServletRequest)
 	 */
-	protected void onFormChange(HttpServletRequest request, HttpServletResponse response, Object command) {
-	}
-
-	/**
-	 * This implementation delegates to <code>isFormChangeRequest</code>:
-	 * A form change request changes the appearance of the form
-	 * and should not get validated but just show the new form.
-	 * @see #isFormChangeRequest
-	 */
-	protected boolean suppressValidation(HttpServletRequest request) {
-		return isFormChangeRequest(request);
+	protected void onFormChange(HttpServletRequest request, HttpServletResponse response, Object command)
+			throws Exception {
 	}
 
 
@@ -320,6 +330,7 @@ public class SimpleFormController extends AbstractFormController {
 	protected ModelAndView onSubmit(
 			HttpServletRequest request,	HttpServletResponse response, Object command,	BindException errors)
 			throws Exception {
+
 		return onSubmit(command, errors);
 	}
 

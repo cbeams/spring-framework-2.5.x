@@ -293,6 +293,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 		return getClass().getName() + ".FORM." + getCommandName();
 	}
 
+
 	/**
 	 * Show a new form. Prepares a backing object for the current form
 	 * and the given request, including checking its validity.
@@ -304,6 +305,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 */
 	protected final ModelAndView showNewForm(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
+
 		logger.debug("Displaying new form");
 		return showForm(request, response, getErrorsForNewForm(request));
 	}
@@ -346,8 +348,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 	}
 
 	/**
-	 * Callback for custom post-processing in terms of binding.
-	 * Called on when rendering the form view if <code>bindOnNewForm</code> is </code> true.
+	 * Callback for custom post-processing in terms of binding for a new form.
+	 * Called when preparing a new form if <code>bindOnNewForm</code> is <code>true</code>.
 	 * <p>Default implementation delegates to <code>onBindOnNewForm(request, command)</code>.
 	 * @param request current HTTP request
 	 * @param command the command object to perform further binding on
@@ -357,15 +359,17 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see #onBindOnNewForm(javax.servlet.http.HttpServletRequest, Object)
 	 * @see #setBindOnNewForm(boolean)
 	 */
-	protected void onBindOnNewForm(HttpServletRequest request, Object command, BindException errors) throws Exception {
+	protected void onBindOnNewForm(HttpServletRequest request, Object command, BindException errors)
+			throws Exception {
+
 		onBindOnNewForm(request, command);
 	}
 
 	/**
-	 * Callback for custom post-processing in terms of binding.
-	 * Called by the default implementation of the onBindOnNewForm version with
-	 * all parameters, after standard binding when displaying the form view. Only called
-	 * if <code>bindOnNewForm</code> is set to <code>true</code>.
+	 * Callback for custom post-processing in terms of binding for a new form.
+	 * Called by the default implementation of the <code>onBindOnNewForm</code> version
+	 * with all parameters, after standard binding when displaying the form view.
+	 * Only called if <code>bindOnNewForm</code> is set to <code>true</code>.
 	 * <p>Default implementation is empty.
 	 * @param request current HTTP request
 	 * @param command the command object to perform further binding on
@@ -375,6 +379,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 */
 	protected void onBindOnNewForm(HttpServletRequest request, Object command) throws Exception {
 	}
+
 
 	/**
 	 * Return the form object for the given request.
@@ -481,6 +486,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 */
 	protected final ModelAndView showForm(HttpServletRequest request, BindException errors, String viewName)
 			throws Exception {
+
 		return showForm(request, errors, viewName, null);
 	}
 
@@ -499,7 +505,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @throws Exception in case of invalid state or arguments
 	 */
 	protected final ModelAndView showForm(
-			HttpServletRequest request, BindException errors, String viewName, Map controlModel) throws Exception {
+			HttpServletRequest request, BindException errors, String viewName, Map controlModel)
+			throws Exception {
 
 		// In session form mode, re-expose form object as HTTP session attribute.
 		// Re-binding is necessary for proper state handling in a cluster,
@@ -608,6 +615,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 */
 	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
+
 		Object command = formBackingObject(request);
 		ServletRequestDataBinder binder = bindAndValidate(request, command);
 		return processFormSubmission(request, response, command, binder.getErrors());

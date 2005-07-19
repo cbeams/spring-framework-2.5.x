@@ -178,14 +178,13 @@ public class MultiActionController extends AbstractController implements LastMod
 	}
 	
 	/**
-	 * Set the delegate used by this class. The default is
-	 * "this", assuming that handler methods have been added
-	 * by a subclass. This method is rarely invoked once
-	 * the class is configured.
-	 * @param delegate class containing methods, which may
-	 * be the present class, the handler methods being in a subclass
-	 * @throws ApplicationContextException if there aren't
-	 * any valid request handling methods in the subclass.
+	 * Set the delegate used by this class. The default is <code>this</code>,
+	 * assuming that handler methods have been added by a subclass.
+	 * This method is rarely invoked once the class is configured.
+	 * @param delegate class containing methods, which may be the present
+	 * class, the handler methods being in a subclass
+	 * @throws ApplicationContextException if there aren't any valid request
+	 * handling methods in the subclass.
 	 */
 	public final void setDelegate(Object delegate) throws ApplicationContextException {
 		if (delegate == null) {
@@ -199,25 +198,26 @@ public class MultiActionController extends AbstractController implements LastMod
 		// methods that are validators according to our criteria
 		Method[] methods = delegate.getClass().getMethods();
 		for (int i = 0; i < methods.length; i++) {
-			// we're looking for methods with given parameters
+			// We're looking for methods with given parameters.
 			if (methods[i].getReturnType().equals(ModelAndView.class)) {
-				// we have a potential handler method, with the correct return type
+				// We have a potential handler method, with the correct return type.
 				Class[] params = methods[i].getParameterTypes();
 				
 				// Check that the number and types of methods is correct.
-				// We don't care about the declared exceptions
+				// We don't care about the declared exceptions.
 				if (params.length >= 2 && params[0].equals(HttpServletRequest.class) &&
 						params[1].equals(HttpServletResponse.class)) {
-					// we're in business
+					// We're in business.
 					if (logger.isDebugEnabled()) {
 						logger.debug("Found action method [" + methods[i] + "]");
 					}
 					this.handlerMethodMap.put(methods[i].getName(), methods[i]);
 					
-					// look for corresponding LastModified method
+					// Look for corresponding LastModified method.
 					try {
-						Method lastModifiedMethod = delegate.getClass().getMethod(methods[i].getName() + LAST_MODIFIED_METHOD_SUFFIX,
-																																			new Class[] { HttpServletRequest.class } );
+						Method lastModifiedMethod = delegate.getClass().getMethod(
+								methods[i].getName() + LAST_MODIFIED_METHOD_SUFFIX,
+								new Class[] { HttpServletRequest.class } );
 						// put in cache, keyed by handler method name
 						this.lastModifiedMethodMap.put(methods[i].getName(), lastModifiedMethod);
 						if (logger.isDebugEnabled()) {
@@ -237,7 +237,7 @@ public class MultiActionController extends AbstractController implements LastMod
 			throw new ApplicationContextException("No handler methods in class [" + getClass().getName() + "]");
 		}
 		
-		// now look for exception handlers
+		// Now look for exception handlers.
 		this.exceptionHandlerMap = new HashMap();
 		for (int i = 0; i < methods.length; i++) {
 			if (methods[i].getReturnType().equals(ModelAndView.class) &&
@@ -317,11 +317,11 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * unchecked exception; wrap a checked exception or Throwable.
 	 */
 	protected final ModelAndView invokeNamedMethod(
-			String method, HttpServletRequest request, HttpServletResponse response) throws Exception {
+			String methodName, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
-		Method m = (Method) this.handlerMethodMap.get(method);
-		if (m == null) {
-			throw new NoSuchRequestHandlingMethodException(method, getClass());
+		Method method = (Method) this.handlerMethodMap.get(methodName);
+		if (method == null) {
+			throw new NoSuchRequestHandlingMethodException(methodName, getClass());
 		}
 
 		try {
@@ -330,25 +330,25 @@ public class MultiActionController extends AbstractController implements LastMod
 			params.add(request);
 			params.add(response);
 				
-			if (m.getParameterTypes().length >= 3 && m.getParameterTypes()[2].equals(HttpSession.class) ){
+			if (method.getParameterTypes().length >= 3 && method.getParameterTypes()[2].equals(HttpSession.class) ){
 				HttpSession session = request.getSession(false);
 				if (session == null) {
 					return handleException(request, response,
 							new SessionRequiredException(
-									"Pre-existing session required for handler method '" + method + "'"));
+									"Pre-existing session required for handler method '" + methodName + "'"));
 				}
 				params.add(session);
 			}
 			
 			// If last parameter isn't of HttpSession type, it's a command.
-			if (m.getParameterTypes().length >= 3 &&
-					!m.getParameterTypes()[m.getParameterTypes().length - 1].equals(HttpSession.class)) {
-				Object command = newCommandObject(m.getParameterTypes()[m.getParameterTypes().length - 1]);
+			if (method.getParameterTypes().length >= 3 &&
+					!method.getParameterTypes()[method.getParameterTypes().length - 1].equals(HttpSession.class)) {
+				Object command = newCommandObject(method.getParameterTypes()[method.getParameterTypes().length - 1]);
 				params.add(command);
 				bind(request, command);
 			}
 			
-			return (ModelAndView) m.invoke(this.delegate, params.toArray(new Object[params.size()]));
+			return (ModelAndView) method.invoke(this.delegate, params.toArray(new Object[params.size()]));
 		}
 		catch (InvocationTargetException ex) {
 			// This is what we're looking for: the handler method threw an exception
@@ -358,9 +358,9 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	/**
 	 * Create a new command object of the given class.
-	 * <p>This implementation uses class.newInstance(), so commands need to
-	 * have public no arg constructors. Subclasses can override this
-	 * implementation if they want.
+	 * <p>This implementation uses <code>Class.newInstance()</code>,
+	 * so commands need to have public no-arg constructors.
+	 * Subclasses can override this implementation if they want.
 	 */
 	protected Object newCommandObject(Class clazz) throws Exception {
 		if (logger.isDebugEnabled()) {

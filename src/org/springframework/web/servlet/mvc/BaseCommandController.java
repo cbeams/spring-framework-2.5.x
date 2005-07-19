@@ -247,7 +247,8 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Retrieve a command object for the given request.
-	 * <p>Default implementation calls createCommand. Subclasses can override this.
+	 * <p>Default implementation calls <code>createCommand</code>.
+	 * Subclasses can override this.
 	 * @param request current HTTP request
 	 * @return object command to bind onto
 	 * @see #createCommand
@@ -354,7 +355,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Callback for custom post-processing in terms of binding.
 	 * Called on each submit, after standard binding but before validation.
-	 * <p>Default implementation delegates to onBind(request, command).
+	 * <p>Default implementation delegates to <code>onBind(request, command)</code>.
 	 * @param request current HTTP request
 	 * @param command the command object to perform further binding on
 	 * @param errors validation errors holder, allowing for additional
@@ -365,13 +366,14 @@ public abstract class BaseCommandController extends AbstractController {
 	 */
 	protected void onBind(HttpServletRequest request, Object command, BindException errors)
 			throws Exception {
+
 		onBind(request, command);
 	}
 
 	/**
 	 * Callback for custom post-processing in terms of binding.
-	 * Called by the default implementation of the onBind version with
-	 * all parameters, after standard binding but before validation.
+	 * Called by the default implementation of the <code>onBind</code> version
+	 * with all parameters, after standard binding but before validation.
 	 * <p>Default implementation is empty.
 	 * @param request current HTTP request
 	 * @param command the command object to perform further binding on
@@ -409,4 +411,5 @@ public abstract class BaseCommandController extends AbstractController {
 	protected void onBindAndValidate(HttpServletRequest request, Object command, BindException errors)
 			throws Exception {
 	}
+
 }
