@@ -471,7 +471,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				if (resolvedValues != null) {
 					// Resolved contructor arguments: type conversion and/or autowiring necessary.
 					try {
-						args = createArgumentArray(beanName, mergedBeanDefinition, resolvedValues, bw, argTypes);
+						args = createArgumentArray(
+								beanName, mergedBeanDefinition, resolvedValues, bw, argTypes, "factory method");
 					}
 					catch (UnsatisfiedDependencyException ex) {
 						if (logger.isDebugEnabled()) {
@@ -581,7 +582,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// Try to resolve arguments for current constructor.
 			try {
 				Class[] argTypes = constructor.getParameterTypes();
-				Object[] args = createArgumentArray(beanName, mergedBeanDefinition, resolvedValues, bw, argTypes);
+				Object[] args = createArgumentArray(
+						beanName, mergedBeanDefinition, resolvedValues, bw, argTypes, "constructor");
 
 				// If valid arguments found, determine type difference weight.
 				// Choose this factory method if it represents the closest match.
@@ -663,13 +665,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Create an array of arguments to invoke a Constructor or static factory method,
-	 * given the resolved constructor arguments values.
+	 * Create an array of arguments to invoke a constructor or factory method,
+	 * given the resolved constructor argument values.
 	 */
 	private Object[] createArgumentArray(
-			String beanName, RootBeanDefinition mergedBeanDefinition,
-			ConstructorArgumentValues resolvedValues, BeanWrapperImpl bw, Class[] argTypes)
-	    throws UnsatisfiedDependencyException {
+			String beanName, RootBeanDefinition mergedBeanDefinition, ConstructorArgumentValues resolvedValues,
+			BeanWrapperImpl bw, Class[] argTypes, String methodType)
+			throws UnsatisfiedDependencyException {
 
 		Object[] args = new Object[argTypes.length];
 		Set usedValueHolders = new HashSet(argTypes.length);
@@ -695,7 +697,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				catch (TypeMismatchException ex) {
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
-							"Could not convert constructor argument value [" + valueHolder.getValue() +
+							"Could not convert " + methodType + " argument value [" + valueHolder.getValue() +
 							"] to required type [" + argTypes[j].getName() + "]: " + ex.getMessage());
 				}
 			}
@@ -705,8 +707,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				if (mergedBeanDefinition.getResolvedAutowireMode() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
-							"Ambiguous constructor argument types - " +
-							"did you specify the correct bean references as generic constructor arguments?");
+							"Ambiguous " + methodType + " argument types - " +
+							"did you specify the correct bean references as generic " + methodType + " arguments?");
 				}
 				Map matchingBeans = findMatchingBeans(argTypes[j]);
 				if (matchingBeans == null || matchingBeans.size() != 1) {
@@ -714,8 +716,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
 							"There are " + matchingBeansCount + " beans of type [" + argTypes[j] +
-							"] for autowiring constructor. There should have been 1 to be able to " +
-							"autowire constructor of bean '" + beanName + "'.");
+							"] for autowiring " + methodType + ". There should have been 1 to be able to " +
+							"autowire " + methodType + " of bean '" + beanName + "'.");
 				}
 				String autowiredBeanName = (String) matchingBeans.keySet().iterator().next();
 				Object autowiredBean = matchingBeans.values().iterator().next();
@@ -725,7 +727,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Autowiring by type from bean name '" + beanName +
-							"' via constructor to bean named '" + autowiredBeanName + "'");
+							"' via " + methodType + " to bean named '" + autowiredBeanName + "'");
 				}
 			}
 		}
