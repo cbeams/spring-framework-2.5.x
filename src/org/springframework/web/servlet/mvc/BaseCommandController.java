@@ -296,15 +296,30 @@ public abstract class BaseCommandController extends AbstractController {
 			throws Exception {
 
 		ServletRequestDataBinder binder = createBinder(request, command);
-		binder.bind(request);
-		onBind(request, command, binder.getErrors());
-		if (this.validators != null && isValidateOnBinding() && !suppressValidation(request)) {
-			for (int i = 0; i < this.validators.length; i++) {
-				ValidationUtils.invokeValidator(this.validators[i], command, binder.getErrors());
+		if (!suppressBinding(request)) {
+			binder.bind(request);
+			onBind(request, command, binder.getErrors());
+			if (this.validators != null && isValidateOnBinding() && !suppressValidation(request)) {
+				for (int i = 0; i < this.validators.length; i++) {
+					ValidationUtils.invokeValidator(this.validators[i], command, binder.getErrors());
+				}
 			}
+			onBindAndValidate(request, command, binder.getErrors());
 		}
-		onBindAndValidate(request, command, binder.getErrors());
 		return binder;
+	}
+
+	/**
+	 * Return whether to suppress binding for the given request.
+	 * <p>Default implementation always returns "false". Can be overridden
+	 * in subclasses to suppress validation, for example, if a special
+	 * request parameter is set.
+	 * @param request current HTTP request
+	 * @return whether to suppress binding for the given request
+	 * @see #suppressValidation
+	 */
+	protected boolean suppressBinding(HttpServletRequest request) {
+		return false;
 	}
 
 	/**
@@ -385,7 +400,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Return whether to suppress validation for the given request.
-	 * <p>Default implementation always returns false. Can be overridden
+	 * <p>Default implementation always returns "false". Can be overridden
 	 * in subclasses to suppress validation, for example, if a special
 	 * request parameter is set.
 	 * @param request current HTTP request
