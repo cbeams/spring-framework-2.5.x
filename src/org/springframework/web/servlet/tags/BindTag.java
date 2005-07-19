@@ -61,7 +61,7 @@ public class BindTag extends HtmlEscapingAwareTag {
 
 	private BindStatus status;
 
-	private BindStatus previousStatus;
+	private Object previousStatus;
 
 
 	/**
@@ -119,7 +119,7 @@ public class BindTag extends HtmlEscapingAwareTag {
 		}
 
 		// Save previous status value, for re-exposure at the end of this tag.
-		this.previousStatus = (BindStatus) pageContext.getAttribute(STATUS_VARIABLE_NAME);
+		this.previousStatus = pageContext.getAttribute(STATUS_VARIABLE_NAME);
 
 		// Expose this tag's status object as PageContext attribute,
 		// making it available for JSP EL.
