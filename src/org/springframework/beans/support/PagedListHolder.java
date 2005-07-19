@@ -277,14 +277,14 @@ public class PagedListHolder implements Serializable {
 	 * Return the first page to which create a link around the current page.
 	 */
 	public int getFirstLinkedPage() {
-		return Math.max(0, this.getPage() - (getMaxLinkedPages() /2));
+		return Math.max(0, getPage() - (getMaxLinkedPages() /2));
 	}
 
 	/**
 	 * Return the last page to which create a link around the current page.
 	 */
 	public int getLastLinkedPage() {
-		return Math.min(getFirstLinkedPage() + getMaxLinkedPages() -1, this.getPageCount() -1);
+		return Math.min(getFirstLinkedPage() + getMaxLinkedPages() -1, getPageCount() -1);
 	}
 
 
