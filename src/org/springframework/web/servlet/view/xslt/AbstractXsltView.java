@@ -328,7 +328,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @return the XML node to transform
 	 * @throws Exception we let this method throw any exception; the
 	 * AbstractXlstView superclass will catch exceptions
-	 * @deprecated in favour of createXsltSource(Map, String, HttpServletRequest, HttpServletResponse)
+	 * @deprecated in favor of <code>createXsltSource(Map, String, HttpServletRequest, HttpServletResponse)</code>
 	 */
 	protected Node createDomNode(Map model, String root, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {

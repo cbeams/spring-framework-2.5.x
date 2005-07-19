@@ -58,7 +58,7 @@ import org.springframework.web.servlet.ModelAndView;
  *      using all parameters, which in case of the default implementation delegates to
  *      {@link #onSubmit(Object, BindException) onSubmit} with just the command object.
  *      The default implementation of the latter method will return the configured
- *      successView. Consider implementing {@link #doSubmitAction} doSubmitAction
+ *      <code>successView</code>. Consider implementing {@link #doSubmitAction} doSubmitAction
  *      for simply performing a submit action and rendering the success view.</li>
  *  </ol>
  * </p>
@@ -305,9 +305,10 @@ public class SimpleFormController extends AbstractFormController {
 	/**
 	 * Submit callback with all parameters. Called in case of submit without errors
 	 * reported by the registered validator, or on every submit if no validator.
-	 * <p>Default implementation delegates to onSubmit(Object, BindException).
-	 * For simply performing a submit action and rendering the specified success view,
-	 * consider implementing doSubmitAction rather than an onSubmit version.
+	 * <p>Default implementation delegates to <code>onSubmit(Object, BindException)</code>.
+	 * For simply performing a submit action and rendering the specified success
+	 * view, consider implementing <code>doSubmitAction</code> rather than an
+	 * <code>onSubmit</code> version.
 	 * <p>Subclasses can override this to provide custom submission handling like storing
 	 * the object to the database. Implementations can also perform custom validation and
 	 * call showForm to return to the form. Do <i>not</i> implement multiple onSubmit
@@ -335,11 +336,12 @@ public class SimpleFormController extends AbstractFormController {
 	}
 
 	/**
-	 * Simpler onSubmit version. Called by the default implementation of the onSubmit
-	 * version with all parameters.
-	 * <p>Default implementation calls onSubmit(command), using the returned ModelAndView
-	 * if actually implemented in a subclass. Else, the default behavior is applied:
-	 * rendering the success view with the command and Errors instance as model.
+	 * Simpler <code>onSubmit</code> version. Called by the default implementation
+	 * of the <code>onSubmit</code> version with all parameters.
+	 * <p>Default implementation calls <code>onSubmit(command)</code>, using the
+	 * returned ModelAndView if actually implemented in a subclass. Else, the
+	 * default behavior will apply: rendering the success view with the command
+	 * and Errors instance as model.
 	 * <p>Subclasses can override this to provide custom submission handling that
 	 * does not need request and response.
 	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
@@ -347,7 +349,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * as expected by the "spring:bind" tag.
 	 * @param command form object with request parameters bound onto it
 	 * @param errors Errors instance without errors
-	 * @return the prepared model and view, or null
+	 * @return the prepared model and view
 	 * @throws Exception in case of errors
 	 * @see #onSubmit(HttpServletRequest, HttpServletResponse, Object, BindException)
 	 * @see #onSubmit(Object)
@@ -371,8 +373,8 @@ public class SimpleFormController extends AbstractFormController {
 	}
 
 	/**
-	 * Simplest onSubmit version. Called by the default implementation of the
-	 * onSubmit version with command and BindException parameters.
+	 * Simplest <code>onSubmit</code> version. Called by the default implementation
+	 * of the <code>onSubmit</code> version with command and BindException parameters.
 	 * <p>This implementation calls <code>doSubmitAction</code> and returns null
 	 * as ModelAndView, making the calling onSubmit method perform its default
 	 * rendering of the success view.
