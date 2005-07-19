@@ -223,6 +223,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 */
 	protected final void onBindAndValidate(HttpServletRequest request, Object command, BindException errors)
 	    throws Exception {
+
 		onBindAndValidate(request, command, errors, getCurrentPage(request));
 	}
 
@@ -248,9 +249,11 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Consider an explicit finish or cancel request as a form submission too.
+	 * @see #isFinishRequest(javax.servlet.http.HttpServletRequest)
+	 * @see #isCancelRequest(javax.servlet.http.HttpServletRequest)
 	 */
 	protected boolean isFormSubmission(HttpServletRequest request) {
-		return super.isFormSubmission(request) || isFinish(request) || isCancel(request);
+		return super.isFormSubmission(request) || isFinishRequest(request) || isCancelRequest(request);
 	}
 
 	/**
@@ -258,6 +261,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 */
 	protected final Map referenceData(HttpServletRequest request, Object command, Errors errors)
 	    throws Exception {
+
 		return referenceData(request, command, errors, getCurrentPage(request));
 	}
 
@@ -469,7 +473,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		request.setAttribute(pageAttrName, new Integer(currentPage));
 
 		// cancel?
-		if (isCancel(request)) {
+		if (isCancelRequest(request)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cancelling wizard for form bean '" + getCommandName() + "'");
 			}
@@ -477,7 +481,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		}
 
 		// finish?
-		if (isFinish(request)) {
+		if (isFinishRequest(request)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Finishing wizard for form bean '" + getCommandName() + "'");
 			}
@@ -543,20 +547,48 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
-	 * Return if finish action is specified in the request.
-	 * <p>Default implementation looks for "_finish" parameter in the request.
+	 * Determine whether the incoming request is a request to finish the
+	 * processing of the current form.
+	 * <p>By default, this method returns <code>true</code> if a parameter
+	 * matching the "_finish" key is present in the request, otherwise it
+	 * returns <code>false</code>. Subclasses may override this method
+	 * to provide custom logic to detect a finish request.
+	 * <p>The parameter is recognized both when sent as a plain parameter
+	 * ("_finish") or when triggered by an image button ("_finish.x").
 	 * @param request current HTTP request
 	 * @see #PARAM_FINISH
+	 */
+	protected boolean isFinishRequest(HttpServletRequest request) {
+		return isFinish(request);
+	}
+
+	/**
+	 * @deprecated in favor of <code>isFinishRequest</code>
+	 * @see #isFinishRequest(javax.servlet.http.HttpServletRequest)
 	 */
 	protected boolean isFinish(HttpServletRequest request) {
 		return WebUtils.hasSubmitParameter(request, PARAM_FINISH);
 	}
 
 	/**
-	 * Return if cancel action is specified in the request.
-	 * <p>Default implementation looks for "_cancel" parameter in the request.
+	 * Determine whether the incoming request is a request to cancel the
+	 * processing of the current form.
+	 * <p>By default, this method returns <code>true</code> if a parameter
+	 * matching the "_cancel" key is present in the request, otherwise it
+	 * returns <code>false</code>. Subclasses may override this method
+	 * to provide custom logic to detect a cancel request.
+	 * <p>The parameter is recognized both when sent as a plain parameter
+	 * ("_cancel") or when triggered by an image button ("_cancel.x").
 	 * @param request current HTTP request
 	 * @see #PARAM_CANCEL
+	 */
+	protected boolean isCancelRequest(HttpServletRequest request) {
+		return isCancel(request);
+	}
+
+	/**
+	 * @deprecated in favor of <code>isCancelRequest</code>
+	 * @see #isCancelRequest(javax.servlet.http.HttpServletRequest)
 	 */
 	protected boolean isCancel(HttpServletRequest request) {
 		return WebUtils.hasSubmitParameter(request, PARAM_CANCEL);
