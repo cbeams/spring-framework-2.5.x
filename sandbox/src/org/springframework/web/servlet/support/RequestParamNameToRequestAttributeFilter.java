@@ -131,7 +131,7 @@ public class RequestParamNameToRequestAttributeFilter extends GenericFilterBean 
         while (e.hasMoreElements()) {
             String nameIn = (String) e.nextElement();
             if (nameIn.startsWith(inputNamePrefix) && nameIn.endsWith(inputSuffixToStrip)) {
-                int pvaluePrefixIndex = nameIn.indexOf(inputValuePrefix);
+            	int pvaluePrefixIndex = nameIn.indexOf(inputValuePrefix, inputNamePrefix.length());
                 if (pvaluePrefixIndex == -1)
                     continue;
                 String name = outputAttributeNamePrefix
