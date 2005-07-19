@@ -44,6 +44,23 @@ import org.springframework.core.io.ClassPathResource;
  */
 public class XmlBeanCollectionTests extends TestCase {
 
+	public void testCollectionFactoryDefaults() throws Exception {
+		ListFactoryBean listFactory = new ListFactoryBean();
+		listFactory.setSourceList(new LinkedList());
+		listFactory.afterPropertiesSet();
+		assertTrue(listFactory.getObject() instanceof ArrayList);
+
+		SetFactoryBean setFactory = new SetFactoryBean();
+		setFactory.setSourceSet(new TreeSet());
+		setFactory.afterPropertiesSet();
+		assertTrue(setFactory.getObject() instanceof HashSet);
+
+		MapFactoryBean mapFactory = new MapFactoryBean();
+		mapFactory.setSourceMap(new TreeMap());
+		mapFactory.afterPropertiesSet();
+		assertTrue(mapFactory.getObject() instanceof HashMap);
+	}
+
 	public void testRefSubelement() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		//assertTrue("5 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 5);
@@ -343,21 +360,33 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertEquals("jenny", map.get("jen"));
 	}
 
-	public void testCollectionFactoryDefaults() throws Exception {
-		ListFactoryBean listFactory = new ListFactoryBean();
-		listFactory.setSourceList(new LinkedList());
-		listFactory.afterPropertiesSet();
-		assertTrue(listFactory.getObject() instanceof ArrayList);
+	public void testChoiceBetweenSetAndMap() {
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
+		MapAndSet sam = (MapAndSet) xbf.getBean("setAndMap");
+		assertTrue("Didn't choose constructor with Map argument", sam.getObject() instanceof Map);
+		Map map = (Map) sam.getObject();
+		assertEquals(3, map.size());
+		assertEquals("val1", map.get("key1"));
+		assertEquals("val2", map.get("key2"));
+		assertEquals("val3", map.get("key3"));
+	}
 
-		SetFactoryBean setFactory = new SetFactoryBean();
-		setFactory.setSourceSet(new TreeSet());
-		setFactory.afterPropertiesSet();
-		assertTrue(setFactory.getObject() instanceof HashSet);
 
-		MapFactoryBean mapFactory = new MapFactoryBean();
-		mapFactory.setSourceMap(new TreeMap());
-		mapFactory.afterPropertiesSet();
-		assertTrue(mapFactory.getObject() instanceof HashMap);
+	public static class MapAndSet {
+
+		private Object obj;
+
+		public MapAndSet(Map map) {
+			this.obj = map;
+		}
+
+		public MapAndSet(Set set) {
+			this.obj = set;
+		}
+
+		public Object getObject() {
+			return obj;
+		}
 	}
 
 }

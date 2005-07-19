@@ -466,7 +466,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					factoryMethod.getParameterTypes().length >= minNrOfArgs) {
 
 				Class[] argTypes = factoryMethod.getParameterTypes();
-				Object[] args = null;
+				ArgumentsHolder args = null;
 
 				if (resolvedValues != null) {
 					// Resolved contructor arguments: type conversion and/or autowiring necessary.
@@ -494,15 +494,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					if (argTypes.length != explicitArgs.length) {
 						continue;
 					}
-					args = explicitArgs;
+					args = new ArgumentsHolder(explicitArgs);
 				}
 
-				// If valid arguments found, determine type difference weight.
-				// Choose this factory method if it represents the closest match.
-				int typeDiffWeight = AutowireUtils.getTypeDifferenceWeight(argTypes, args);
+				int typeDiffWeight = args.getTypeDifferenceWeight(argTypes);
+				// Choose this constructor if it represents the closest match.
 				if (typeDiffWeight < minTypeDiffWeight) {
 					factoryMethodToUse = factoryMethod;
-					argsToUse = args;
+					argsToUse = args.arguments;
 					minTypeDiffWeight = typeDiffWeight;
 				}
 			}
@@ -582,15 +581,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// Try to resolve arguments for current constructor.
 			try {
 				Class[] argTypes = constructor.getParameterTypes();
-				Object[] args = createArgumentArray(
+				ArgumentsHolder args = createArgumentArray(
 						beanName, mergedBeanDefinition, resolvedValues, bw, argTypes, "constructor");
 
-				// If valid arguments found, determine type difference weight.
-				// Choose this factory method if it represents the closest match.
-				int typeDiffWeight = AutowireUtils.getTypeDifferenceWeight(argTypes, args);
+				int typeDiffWeight = args.getTypeDifferenceWeight(argTypes);
+				// Choose this constructor if it represents the closest match.
 				if (typeDiffWeight < minTypeDiffWeight) {
 					constructorToUse = constructor;
-					argsToUse = args;
+					argsToUse = args.arguments;
 					minTypeDiffWeight = typeDiffWeight;
 				}
 			}
@@ -668,12 +666,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Create an array of arguments to invoke a constructor or factory method,
 	 * given the resolved constructor argument values.
 	 */
-	private Object[] createArgumentArray(
+	private ArgumentsHolder createArgumentArray(
 			String beanName, RootBeanDefinition mergedBeanDefinition, ConstructorArgumentValues resolvedValues,
 			BeanWrapperImpl bw, Class[] argTypes, String methodType)
 			throws UnsatisfiedDependencyException {
 
-		Object[] args = new Object[argTypes.length];
+		ArgumentsHolder args = new ArgumentsHolder(argTypes.length);
 		Set usedValueHolders = new HashSet(argTypes.length);
 
 		for (int j = 0; j < argTypes.length; j++) {
@@ -691,8 +689,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// We found a potential match - let's give it a try.
 				// Do not consider the same value definition multiple times!
 				usedValueHolders.add(valueHolder);
+				args.rawArguments[j] = valueHolder.getValue();
 				try {
-					args[j] = doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j], bw);
+					args.arguments[j] = doTypeConversionIfNecessary(args.rawArguments[j], argTypes[j], bw);
 				}
 				catch (TypeMismatchException ex) {
 					throw new UnsatisfiedDependencyException(
@@ -721,7 +720,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 				String autowiredBeanName = (String) matchingBeans.keySet().iterator().next();
 				Object autowiredBean = matchingBeans.values().iterator().next();
-				args[j] = autowiredBean;
+				args.rawArguments[j] = autowiredBean;
+				args.arguments[j] = autowiredBean;
 				if (mergedBeanDefinition.isSingleton()) {
 					registerDependentBean(autowiredBeanName, beanName);
 				}
@@ -1058,5 +1058,37 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #autowireConstructor
 	 */
 	protected abstract Map findMatchingBeans(Class requiredType) throws BeansException;
+
+
+	//---------------------------------------------------------------------
+	// Private inner class for internal use
+	//---------------------------------------------------------------------
+
+	private static class ArgumentsHolder {
+
+		public Object rawArguments[];
+
+		public Object arguments[];
+
+		public ArgumentsHolder(int size) {
+			this.rawArguments = new Object[size];
+			this.arguments = new Object[size];
+		}
+
+		public ArgumentsHolder(Object[] args) {
+			this.rawArguments = args;
+			this.arguments = args;
+		}
+
+		public int getTypeDifferenceWeight(Class[] argTypes) {
+			// If valid arguments found, determine type difference weight.
+			// Try type difference weight on both the converted arguments and
+			// the raw arguments. If the raw weight is better, use it.
+			// Decrease raw weight by 1 to prefer it over equal converted weight.
+			int typeDiffWeight = AutowireUtils.getTypeDifferenceWeight(argTypes, this.arguments);
+			int rawTypeDiffWeight = AutowireUtils.getTypeDifferenceWeight(argTypes, this.rawArguments) - 1;
+			return (rawTypeDiffWeight < typeDiffWeight ? rawTypeDiffWeight : typeDiffWeight);
+		}
+	}
 
 }
