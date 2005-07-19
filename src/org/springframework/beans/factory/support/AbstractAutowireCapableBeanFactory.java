@@ -268,19 +268,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	//---------------------------------------------------------------------
-	// Implementation of AbstractBeanFactory's createBean method
+	// Implementation of relevant AbstractBeanFactory template methods
 	//---------------------------------------------------------------------
 
-	/**
-	 * Create a bean instance for the given bean definition.
-	 * @param beanName name of the bean
-	 * @param mergedBeanDefinition the bean definition for the bean
-	 * @param args arguments to use if this is a prototype constructed by a factory method.
-	 * In this case, this will override any args specified in the bean definitions.
-	 * This parameter should be null otherwise.
-	 * @return a new instance of the bean
-	 * @throws BeanCreationException if the bean could not be created
-	 */
 	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args)
 			throws BeanCreationException {
 
@@ -373,11 +363,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	protected Class getTypeForFactoryMethod(String beanName, RootBeanDefinition mergedBeanDefinition) {
-		// Create bean in case of factory method, to find out actual type.
+		// Create bean in case of "factory-bean" declaration, to find out actual type.
+		// Essentially, this is treated like an implementation of the FactoryBean interface.
 		if (mergedBeanDefinition.getFactoryBeanName() != null && mergedBeanDefinition.isSingleton()) {
 			return getBean(beanName).getClass();
 		}
-		// Return "undeterminable" for beans without class and for non-singleton beans with factory method.
+		// Return "undeterminable" for beans without class, and for non-singleton beans
+		// with "factory-bean" declaration.
 		if (!mergedBeanDefinition.hasBeanClass() || mergedBeanDefinition.getFactoryBeanName() != null) {
 			return null;
 		}
@@ -404,6 +396,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 	}
 
+
+	//---------------------------------------------------------------------
+	// Implementation methods
+	//---------------------------------------------------------------------
 
 	/**
 	 * Instantiate the bean using a named factory method. The method may be static, if the
@@ -1045,7 +1041,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	//---------------------------------------------------------------------
-	// Abstract methods to be implemented by concrete subclasses
+	// Abstract method to be implemented by subclasses
 	//---------------------------------------------------------------------
 
 	/**

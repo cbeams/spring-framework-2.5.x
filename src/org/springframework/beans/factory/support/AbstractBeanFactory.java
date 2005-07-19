@@ -1053,7 +1053,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 
 	//---------------------------------------------------------------------
-	// Abstract methods to be implemented by concrete subclasses
+	// Abstract methods to be implemented by subclasses
 	//---------------------------------------------------------------------
 
 	/**
