@@ -19,55 +19,78 @@ package org.springframework.web.servlet.mvc;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.validation.BindException;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.WebUtils;
 
 /**
- * <p>Extension of <code>SimpleFormController</code> that supports &quot;cancellation&quot; of form processing. By default,
- * this controller looks for a given parameter in the request, identified by the <code>cancelParameterKey<code>. If this
- * parameter is present then the controller will return the configured <code>cancelView</code>, otherwise processing is
- * passed back to the superclass.</p>
+ * <p>Extension of <code>SimpleFormController</code> that supports "cancellation"
+ * of form processing. By default, this controller looks for a given parameter in the
+ * request, identified by the <code>cancelParamKey<code>. If this parameter is present,
+ * then the controller will return the configured <code>cancelView</code>, otherwise
+ * processing is passed back to the superclass.</p>
  *
  * <p><b><a name="workflow">Workflow
  * (<a href="SimpleFormController.html#workflow">in addition to the superclass</a>):</b><br>
  *  <ol>
- *   <li>Call to {@link #processFormSubmission processFormSubmission} which calls {@link #isCancelRequest} to see if
- *       the incoming request is to cancel the current form entry. By default, {@link #isCancelRequest} returns
- *       <code>true</code> if the configured <code>cancelParameterKey</code> exists in the request. This behavior can
- *       be overridden in sub-classes.</li>
- *   <li>If {@link #isCancelRequest} returns <code>false</code> then the controller will delegate all processing back to
- *       {@link SimpleFormController SimpleFormController}, otherwise it will call {@link #onCancel}. By default,
- *       {@link #onCancel} will simply return the configured <code>cancelView</code> - this behavior can be overridden
- *       in sub-classes.</li>
+ *   <li>Call to {@link #processFormSubmission processFormSubmission} which calls
+ *       {@link #isCancelRequest} to see if the incoming request is to cancel the
+ *       current form entry. By default, {@link #isCancelRequest} returns <code>true</code>
+ *       if the configured <code>cancelParamKey</code> exists in the request.
+ *       This behavior can be overridden in subclasses.</li>
+ *   <li>If {@link #isCancelRequest} returns <code>false</code>, then the controller
+ *       will delegate all processing back to {@link SimpleFormController SimpleFormController},
+ *       otherwise it will call the {@link #onCancel} version with all parameters.
+ *       By default, that method will delegate to the {@link #onCancel} version with just
+ *       the command object, which will in turn simply return the configured
+ *       <code>cancelView</code>. This behavior can be overridden in subclasses.</li>
  *  </ol>
  * </p>
  *
  * @author Rob Harrop
- * @see #setCancelParameterKey(String)
+ * @author Juergen Hoeller
+ * @since 1.2.3
+ * @see #setCancelParamKey(String)
  * @see #setCancelView(String)
  * @see #isCancelRequest(javax.servlet.http.HttpServletRequest)
  * @see #onCancel(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, Object)
  */
 public class CancellableFormController extends SimpleFormController {
 
-	private static final String DEFAULT_CANCEL_PARAMETER_KEY = "_cancel";
+	/**
+	 * Default parameter triggering the cancel action.
+	 * Can be called even with validation errors on the form.
+	 */
+	private static final String PARAM_CANCEL = "_cancel";
 
-	private String cancelParameterKey = DEFAULT_CANCEL_PARAMETER_KEY;
+
+	private String cancelParamKey = PARAM_CANCEL;
 
 	private String cancelView;
 
+
 	/**
-	 * Gets the key of the request parameter used to identify a cancel request.
-	 */
-	public final String getCancelParameterKey() {
-		return cancelParameterKey;
+	 * Set the key of the request parameter used to identify a cancel request.
+	 * Default is "_cancel".
+	 * <p>The parameter is recognized both when sent as a plain parameter
+	 * ("_cancel") or when triggered by an image button ("_cancel.x").
+   */
+	public final void setCancelParamKey(String cancelParamKey) {
+		this.cancelParamKey = cancelParamKey;
 	}
 
 	/**
-	 * Sets the key of the request parameter used to identify a cancel request.
+	 * Return the key of the request parameter used to identify a cancel request.
 	 */
-	public final void setCancelParameterKey(String cancelParameterKey) {
-		this.cancelParameterKey = cancelParameterKey;
+	public final String getCancelParamKey() {
+		return cancelParamKey;
+	}
+
+	/**
+	 * Sets the name of the cancel view.
+	 */
+	public final void setCancelView(String cancelView) {
+		this.cancelView = cancelView;
 	}
 
 	/**
@@ -77,52 +100,94 @@ public class CancellableFormController extends SimpleFormController {
 		return cancelView;
 	}
 
+
 	/**
-	 * Sets the name of the cancel view.
-	 */ 
-	public final void setCancelView(String cancelView) {
-		this.cancelView = cancelView;
+	 * Consider an explicit cancel request as a form submission too.
+	 * @see #isCancelRequest(javax.servlet.http.HttpServletRequest)
+	 */
+	protected boolean isFormSubmission(HttpServletRequest request) {
+		return super.isFormSubmission(request) || isCancelRequest(request);
 	}
 
 	/**
-	 * This implementation first checks to see if the incoming is a cancel request with a call to {@link #isCancelRequest}.
-	 * If so, control is passed to {@link #onCancel} otherwise control is passed up to {@link SimpleFormController#processFormSubmission}.
-	 * @see #isCancelRequest(javax.servlet.http.HttpServletRequest)
+	 * This implementation first checks to see if the incoming is a cancel request,
+	 * through a call to {@link #isCancelRequest}. If so, control is passed to
+	 * {@link #onCancel}; otherwise, control is passed up to
+	 * {@link SimpleFormController#processFormSubmission}.
+	 * @see #isCancelRequest
 	 * @see #onCancel(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, Object)
-	 * @see SimpleFormController#processFormSubmission(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, Object, org.springframework.validation.BindException)
+	 * @see SimpleFormController#processFormSubmission
 	 */
 	protected ModelAndView processFormSubmission(
 			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
 			throws Exception {
 
-		if(isCancelRequest(request)) {
+		if (isCancelRequest(request)) {
 			return onCancel(request, response, command);
-		} else {
+		}
+		else {
 			return super.processFormSubmission(request, response, command, errors);
 		}
 	}
 
 	/**
-	 * Determines whether or not the incoming request is a request to cancel the processing of the current form. By default,
-	 * this method returns <code>true</code> if a parameter matching the configured <code>cancelParameterKey</code> is
-	 * present in the request, otherwise it returns <code>false</code>. Sub-classes may override this method to provide
-	 * custom logic to detect a cancel request.
-	 * @see #setCancelParameterKey(String)
+	 * Determine whether the incoming request is a request to cancel the
+	 * processing of the current form.
+	 * <p>By default, this method returns <code>true</code> if a parameter
+	 * matching the configured <code>cancelParamKey</code> is present in
+	 * the request, otherwise it returns <code>false</code>. Subclasses may
+	 * override this method to provide custom logic to detect a cancel request.
+	 * <p>The parameter is recognized both when sent as a plain parameter
+	 * ("_cancel") or when triggered by an image button ("_cancel.x").
+	 * @param request current HTTP request
+	 * @see #setCancelParamKey
+	 * @see #PARAM_CANCEL
 	 */
 	protected boolean isCancelRequest(HttpServletRequest request) {
-		return (request.getParameterMap().containsKey(getCancelParameterKey()));
+		return WebUtils.hasSubmitParameter(request, getCancelParamKey());
 	}
 
 	/**
-	 * Called if {@link #isCancelRequest} returns <code>true</code>. By default, returns the configured
-	 * <code>cancelView</code>. Sub-classes may override this method to construct a custom {@link ModelAndView ModelAndView}
-	 * that may contain model parameters used in the cancel. If you want to simply move the user to a new view and you
-	 * don't want to add additional model parameters, use {@link #setCancelView(String)} rather than overriding this method.
-	 *
+	 * Callback method for handling a cancel request. Called if {@link #isCancelRequest}
+	 * returns <code>true</code>.
+	 * <p>Default implementation delegates to <code>onCancel(Object)</code> to return
+	 * the configured <code>cancelView</code>. Subclasses may override either of the two
+	 * methods to build a custom {@link ModelAndView ModelAndView} that may contain model
+	 * parameters used in the cancel view.
+	 * <p>If you simply want to move the user to a new view and you don't want to add
+	 * additional model parameters, use {@link #setCancelView(String)} rather than
+	 * overriding an <code>onCancel</code> method.
+	 * @param request current servlet request
+	 * @param response current servlet response
+	 * @param command form object with request parameters bound onto it
+	 * @return the prepared model and view, or null
+	 * @throws Exception in case of errors
 	 * @see #isCancelRequest(javax.servlet.http.HttpServletRequest)
-	 * @see #setCancelView(String)
+	 * @see #onCancel(Object)
+	 * @see #setCancelView
 	 */
-	protected ModelAndView onCancel(HttpServletRequest request, HttpServletResponse response, Object command) {
+	protected ModelAndView onCancel(HttpServletRequest request, HttpServletResponse response, Object command)
+			throws Exception {
+
+		return onCancel(command);
+	}
+
+	/**
+	 * Simple <code>onCancel</code> version. Called by the default implementation
+	 * of the <code>onCancel</code> version with all parameters.
+	 * <p>Default implementation returns eturns the configured <code>cancelView</code>.
+	 * Subclasses may override this method to build a custom {@link ModelAndView ModelAndView}
+	 * that may contain model parameters used in the cancel view.
+	 * <p>If you simply want to move the user to a new view and you don't want to add
+	 * additional model parameters, use {@link #setCancelView(String)} rather than
+	 * overriding an <code>onCancel</code> method.
+	 * @param command form object with request parameters bound onto it
+	 * @return the prepared model and view, or null
+	 * @throws Exception in case of errors
+	 * @see #setCancelView
+	 */
+	protected ModelAndView onCancel(Object command) throws Exception {
 		return new ModelAndView(getCancelView());
 	}
+
 }
