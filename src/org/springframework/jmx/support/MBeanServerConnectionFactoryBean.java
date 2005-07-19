@@ -19,12 +19,14 @@ package org.springframework.jmx.support;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -39,22 +41,15 @@ import org.springframework.beans.factory.InitializingBean;
  * @see MBeanServerFactoryBean
  * @see ConnectorServerFactoryBean
  */
-public class MBeanServerConnectionFactoryBean implements FactoryBean, InitializingBean {
+public class MBeanServerConnectionFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
-	/**
-	 * The service URL of the remote <code>MBeanServer</code>.
-	 */
 	private JMXServiceURL serviceUrl;
 
-	/**
-	 * The <code>MBeanServerConnection</code> to expose.
-	 */
-	private MBeanServerConnection server;
-
-	/**
-	 * Stores the environment used to construct the <code>JMXConnector</code>.
-	 */
 	private Map environment;
+
+	private JMXConnector connector;
+
+	private MBeanServerConnection connection;
 
 
 	/**
@@ -65,35 +60,53 @@ public class MBeanServerConnectionFactoryBean implements FactoryBean, Initializi
 	}
 
 	/**
-	 * Sets the environment parameters used to construct the <code>JMXConnector</code>.
+	 * Set the environment properties used to construct the <code>JMXConnector</code>
+	 * as <code>java.util.Properties</code> (String key/value pairs).
 	 */
-	public void setEnvironment(Map environment) {
+	public void setEnvironment(Properties environment) {
 		this.environment = environment;
 	}
 
 	/**
-	 * Parses the <code>String</code> representation of the service URL into a
-	 * <code>JMXServiceURL</code> instance.
+	 * Set the environment properties used to construct the <code>JMXConnector</code>
+	 * as a <code>Map</code> of String keys and arbitrary Object values.
+	 */
+	public void setEnvironmentMap(Map environment) {
+		this.environment = environment;
+	}
+
+
+	/**
+	 * Creates a <code>JMXConnector</code> for the given settings
+	 * and exposes the associated <code>MBeanServerConnection</code>.
 	 */
 	public void afterPropertiesSet() throws IOException {
 		if (this.serviceUrl == null) {
 			throw new IllegalArgumentException("serviceUrl is required");
 		}
-		JMXConnector connector = JMXConnectorFactory.connect(this.serviceUrl, this.environment);
-		this.server = connector.getMBeanServerConnection();
+		this.connector = JMXConnectorFactory.connect(this.serviceUrl, this.environment);
+		this.connection = this.connector.getMBeanServerConnection();
 	}
 
 
 	public Object getObject() {
-		return this.server;
+		return this.connection;
 	}
 
 	public Class getObjectType() {
-		return (this.server != null ? this.server.getClass() : MBeanServerConnection.class);
+		return (this.connection != null ? this.connection.getClass() : MBeanServerConnection.class);
 	}
 
 	public boolean isSingleton() {
 		return true;
+	}
+
+
+	/**
+	 * Closes the underlying <code>JMXConnector</code>.
+	 */
+	public void destroy() throws IOException {
+		this.connector.close();
 	}
 
 }

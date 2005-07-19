@@ -50,15 +50,25 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractJmxTests {
 		JMXConnectorServer connectorServer = getConnectorServer();
 		connectorServer.start();
 
-		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
-		bean.setServiceUrl(SERVICE_URL);
-		bean.afterPropertiesSet();
+		try {
+			MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
+			bean.setServiceUrl(SERVICE_URL);
+			bean.afterPropertiesSet();
 
-		MBeanServerConnection connection = (MBeanServerConnection) bean.getObject();
-		assertNotNull("Connection should not be null", connection);
+			try {
+				MBeanServerConnection connection = (MBeanServerConnection) bean.getObject();
+				assertNotNull("Connection should not be null", connection);
 
-		// perform simple mbean count test
-		assertEquals("MBean count should be the same", server.getMBeanCount(), connection.getMBeanCount());
+				// perform simple MBean count test
+				assertEquals("MBean count should be the same", server.getMBeanCount(), connection.getMBeanCount());
+			}
+			finally {
+				bean.destroy();
+			}
+		}
+		finally {
+			connectorServer.stop();
+		}
 	}
 
 	public void testWithNoServiceUrl() throws Exception {
