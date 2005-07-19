@@ -226,12 +226,16 @@ public class SpringBindingActionForm extends ActionForm {
 	 * via a registered property editor.
 	 * @param propertyPath the property path
 	 * @return the formatted property value
+	 * @throws NoSuchMethodException if called during Struts binding
+	 * (without Spring Errors object being exposed), to indicate no
+	 * available property to Struts
 	 */
-	private Object getFieldValue(String propertyPath) {
-		if (this.errors != null) {
-			return this.errors.getFieldValue(propertyPath);
+	private Object getFieldValue(String propertyPath) throws NoSuchMethodException {
+		if (this.errors == null) {
+			throw new NoSuchMethodException(
+					"No bean properties exposed to Struts binding - performing Spring binding later on");
 		}
-		return null;
+		return this.errors.getFieldValue(propertyPath);
 	}
 
 
@@ -242,23 +246,16 @@ public class SpringBindingActionForm extends ActionForm {
 	 */
 	private static class SpringBindingAwarePropertyUtilsBean extends PropertyUtilsBean {
 
-		public Object getProperty(Object bean, String propertyPath)
-				throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-
-			if (bean instanceof SpringBindingActionForm) {
-				SpringBindingActionForm form = (SpringBindingActionForm) bean;
-				return form.getFieldValue(propertyPath);
-			}
-			return super.getProperty(bean, propertyPath);
-		}
-
 		public Object getNestedProperty(Object bean, String propertyPath)
 				throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 
+			// Extract Spring-managed field value in case of SpringBindingActionForm.
 			if (bean instanceof SpringBindingActionForm) {
 				SpringBindingActionForm form = (SpringBindingActionForm) bean;
 				return form.getFieldValue(propertyPath);
 			}
+
+			// Else fall back to default PropertyUtils behavior.
 			return super.getNestedProperty(bean, propertyPath);
 		}
 	}
