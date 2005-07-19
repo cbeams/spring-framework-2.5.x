@@ -89,6 +89,13 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	}
 
 
+	/**
+	 * This implementation creates a transaction before test execution.
+	 * Override <code>onSetUpBeforeTransaction</code> and/or
+	 * <code>onSetUpInTransaction</code> to add custom set-up behavior.
+	 * @see #onSetUpBeforeTransaction()
+	 * @see #onSetUpInTransaction()
+	 */
 	protected final void onSetUp() throws Exception {
 		this.complete = !this.defaultRollback;
 
@@ -110,24 +117,33 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	}
 
 	/**
-	 * Subclasses can override this method to perform any setup operations, such as
-	 * populating a database table, <i>before</i> the transaction created by this class.
+	 * Subclasses can override this method to perform any setup operations,
+	 * such as populating a database table, <i>before</i> the transaction
+	 * created by this class.
 	 * @throws Exception simply let any exception propagate
 	 */
 	protected void onSetUpBeforeTransaction() throws Exception {
 	}
 
 	/**
-	 * Subclasses can override this method to perform any setup operations, such as
-	 * populating a database table, <code>within</code> the transaction created by this class.
-	 * <p><b>NB:</b> Not called if there is no transaction management, due to no transaction
-	 * manager being provided in the context.
+	 * Subclasses can override this method to perform any setup operations,
+	 * such as populating a database table, <i>within</i> the transaction
+	 * created by this class.
+	 * <p><b>NB:</b> Not called if there is no transaction management, due to no
+	 * transaction manager being provided in the context.
 	 * @throws Exception simply let any exception propagate
 	 */
 	protected void onSetUpInTransaction() throws Exception {
 	}
 
 
+	/**
+	 * This implementation ends the transaction after test execution.
+	 * Override <code>onTearDownInTransaction</code> and/or
+	 * <code>onTearDownAfterTransaction</code> to add custom tear-down behavior.
+	 * @see #onTearDownInTransaction()
+	 * @see #onTearDownAfterTransaction()
+	 */
 	protected final void onTearDown() {
 		try {
 			onTearDownInTransaction();
@@ -144,8 +160,8 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * The transaction is <i>still open</i>, so any changes made in the
 	 * transaction will still be visible.
 	 * There is no need to clean up the database, as rollback will follow automatically.
-	 * <p><b>NB:</b> Not called if there is no transaction management, due to no transaction
-	 * manager being provided in the context.
+	 * <p><b>NB:</b> Not called if there is no transaction management, due to no
+	 * transaction manager being provided in the context.
 	 */
 	protected void onTearDownInTransaction() {
 	}
@@ -161,8 +177,8 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	/**
 	 * Cause the transaction to commit for this test method,
 	 * even if default is set to rollback.
-	 * @throws UnsupportedOperationException if the operation cannot be set to complete
-	 * as no transaction manager was provided
+	 * @throws UnsupportedOperationException if the operation cannot be set to
+	 * complete as no transaction manager was provided
 	 */
 	protected void setComplete() throws UnsupportedOperationException {
 		if (this.transactionManager == null) {
