@@ -20,11 +20,8 @@ import java.util.List;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
-import javax.management.ObjectName;
 
 import junit.framework.TestCase;
-
-import org.springframework.jmx.export.MBeanExporter;
 
 /**
  * @author Rob Harrop
@@ -60,13 +57,15 @@ public class MBeanServerFactoryBeanTests extends TestCase {
 		MBeanServer server = MBeanServerFactory.createMBeanServer();
 		try {
 			MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
-
 			bean.setLocateExistingServerIfPossible(true);
 			bean.afterPropertiesSet();
-
-			MBeanServer otherServer = (MBeanServer) bean.getObject();
-
-			assertSame("Existing MBeanServer not located", server, otherServer);
+			try {
+				MBeanServer otherServer = (MBeanServer) bean.getObject();
+				assertSame("Existing MBeanServer not located", server, otherServer);
+			}
+			finally {
+				bean.destroy();
+			}
 		}
 		finally {
 			MBeanServerFactory.releaseMBeanServer(server);
@@ -77,7 +76,12 @@ public class MBeanServerFactoryBeanTests extends TestCase {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
 		bean.setLocateExistingServerIfPossible(true);
 		bean.afterPropertiesSet();
-		assertNotNull("MBeanServer not created", bean.getObject());
+		try {
+			assertNotNull("MBeanServer not created", bean.getObject());
+		}
+		finally {
+			bean.destroy();
+		}
 	}
 
 	public void testCreateMBeanServer() throws Exception {
