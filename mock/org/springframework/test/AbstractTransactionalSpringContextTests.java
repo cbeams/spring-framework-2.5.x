@@ -92,7 +92,9 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	protected final void onSetUp() throws Exception {
 		this.complete = !this.defaultRollback;
 
-		if (transactionManager != null) {
+		onSetUpBeforeTransaction();
+
+		if (this.transactionManager != null) {
 			// start a transaction
 			this.transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
 				if (logger.isInfoEnabled()) {
@@ -103,37 +105,56 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 		else {
 			logger.info("No transaction manager set: tests will NOT run within a transaction");
 		}
+
 		onSetUpInTransaction();
 	}
 
 	/**
-	 * Subclasses can override this method to perform any setup operations, such
-	 * as populating a database table, in the transaction created by this class.
-	 * <b>NB:</b> Not called if there is no transaction management, due to no transaction
+	 * Subclasses can override this method to perform any setup operations, such as
+	 * populating a database table, <i>before</i> the transaction created by this class.
+	 * @throws Exception simply let any exception propagate
+	 */
+	protected void onSetUpBeforeTransaction() throws Exception {
+	}
+
+	/**
+	 * Subclasses can override this method to perform any setup operations, such as
+	 * populating a database table, <code>within</code> the transaction created by this class.
+	 * <p><b>NB:</b> Not called if there is no transaction management, due to no transaction
 	 * manager being provided in the context.
 	 * @throws Exception simply let any exception propagate
 	 */
 	protected void onSetUpInTransaction() throws Exception {
 	}
 
-	protected final void onTearDown() throws Exception {
+
+	protected final void onTearDown() {
 		try {
 			onTearDownInTransaction();
 		}
 		finally {
 			endTransaction();
 		}
+
+		onTearDownAfterTransaction();
 	}
 
 	/**
 	 * Subclasses can override this method to run invariant tests here.
-	 * The transaction is still open, so any changes made in the transaction will
-	 * still be visible.
+	 * The transaction is <i>still open</i>, so any changes made in the
+	 * transaction will still be visible.
 	 * There is no need to clean up the database, as rollback will follow automatically.
-	 * <b>NB:</b> Not called if there is no transaction management, due to no transaction
+	 * <p><b>NB:</b> Not called if there is no transaction management, due to no transaction
 	 * manager being provided in the context.
 	 */
 	protected void onTearDownInTransaction() {
+	}
+
+	/**
+	 * Subclasses can override this method to perform cleanup here.
+	 * The transaction is <i>not open anymore</i> at this point.
+	 */
+	protected void onTearDownAfterTransaction() {
 	}
 
 
