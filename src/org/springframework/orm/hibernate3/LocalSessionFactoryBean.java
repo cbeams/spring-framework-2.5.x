@@ -182,11 +182,11 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	private NamingStrategy namingStrategy;
 
-	private TypeDefinitionBean[] typeDefinitions;
-
 	private Properties entityCacheStrategies;
 
 	private Properties collectionCacheStrategies;
+
+	private TypeDefinitionBean[] typeDefinitions;
 
 	private FilterDefinition[] filterDefinitions;
 
@@ -452,19 +452,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	}
 
 	/**
-	 * Specify the Hibernate type definitions to register with the SessionFactory,
-	 * as Spring TypeDefinitionBean instances. This is an alternative to specifying
-	 * <&lt;typedef&gt; elements in Hibernate mapping files.
-	 * <p>Unfortunately, Hibernate itself does not define a complete object that
-	 * represents a type definition, hence the need for Spring's TypeDefinitionBean.
-	 * @see TypeDefinitionBean
-	 * @see org.hibernate.cfg.Mappings#addTypeDef(String, String, java.util.Properties)
-	 */
-	public void setTypeDefinitions(TypeDefinitionBean[] typeDefinitions) {
-		this.typeDefinitions = typeDefinitions;
-	}
-
-	/**
 	 * Specify the cache strategies for entities (persistent classes or named entities).
 	 * This configuration setting corresponds to the &lt;class-cache> entry
 	 * in the "hibernate.cfg.xml" configuration format.
@@ -501,6 +488,19 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 */
 	public void setCollectionCacheStrategies(Properties collectionCacheStrategies) {
 		this.collectionCacheStrategies = collectionCacheStrategies;
+	}
+
+	/**
+	 * Specify the Hibernate type definitions to register with the SessionFactory,
+	 * as Spring TypeDefinitionBean instances. This is an alternative to specifying
+	 * <&lt;typedef&gt; elements in Hibernate mapping files.
+	 * <p>Unfortunately, Hibernate itself does not define a complete object that
+	 * represents a type definition, hence the need for Spring's TypeDefinitionBean.
+	 * @see TypeDefinitionBean
+	 * @see org.hibernate.cfg.Mappings#addTypeDef(String, String, java.util.Properties)
+	 */
+	public void setTypeDefinitions(TypeDefinitionBean[] typeDefinitions) {
+		this.typeDefinitions = typeDefinitions;
 	}
 
 	/**
