@@ -315,10 +315,10 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 				matcher.appendReplacement(output, targetClassName);
 			}
 			else if (PLACEHOLDER_TARGET_CLASS_SHORT_NAME.equals(match)) {
-				matcher.appendReplacement(output, ClassUtils.getShortName(methodInvocation.getThis().getClass()));
+				matcher.appendReplacement(output, escape(ClassUtils.getShortName(methodInvocation.getThis().getClass())));
 			}
 			else if (PLACEHOLDER_ARGUMENTS.equals(match)) {
-				matcher.appendReplacement(output, StringUtils.arrayToCommaDelimitedString(methodInvocation.getArguments()));
+				matcher.appendReplacement(output, escape(StringUtils.arrayToCommaDelimitedString(methodInvocation.getArguments())));
 			}
 			else if (PLACEHOLDER_ARGUMENT_TYPES.equals(match)) {
 				appendArgumentTypes(methodInvocation, matcher, output);
@@ -361,7 +361,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 			matcher.appendReplacement(output, "null");
 		}
 		else {
-			matcher.appendReplacement(output, returnValue.toString());
+			matcher.appendReplacement(output, escape(returnValue.toString()));
 		}
 	}
 
@@ -381,7 +381,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 		for (int i = 0; i < argumentTypeShortNames.length; i++) {
 			argumentTypeShortNames[i] = ClassUtils.getShortName(argumentTypes[i]);
 		}
-		matcher.appendReplacement(output, StringUtils.arrayToCommaDelimitedString(argumentTypeShortNames));
+		matcher.appendReplacement(output, escape(StringUtils.arrayToCommaDelimitedString(argumentTypeShortNames)));
 	}
 
 	/**
