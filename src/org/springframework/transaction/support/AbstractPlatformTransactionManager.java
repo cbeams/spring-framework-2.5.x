@@ -441,7 +441,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					status.releaseHeldSavepoint();
 				}
 				else if (status.isNewTransaction()) {
-					logger.debug("Initiating transaction commit");
+					if (status.isDebug()) {
+						logger.debug("Initiating transaction commit");
+					}
 					boolean globalRollbackOnly = status.isGlobalRollbackOnly();
 					doCommit(status);
 					// Throw UnexpectedRollbackException if we have a global rollback-only
@@ -523,7 +525,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					status.rollbackToHeldSavepoint();
 				}
 				else if (status.isNewTransaction()) {
-					logger.debug("Initiating transaction rollback");
+					if (status.isDebug()) {
+						logger.debug("Initiating transaction rollback");
+					}
 					doRollback(status);
 				}
 				else if (status.getTransaction() != null) {
@@ -588,7 +592,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	private void triggerBeforeCommit(DefaultTransactionStatus status) {
 		if (status.isNewSynchronization()) {
-			logger.debug("Triggering beforeCommit synchronization");
+			if (status.isDebug()) {
+				logger.debug("Triggering beforeCommit synchronization");
+			}
 			for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
 				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
 				synchronization.beforeCommit(status.isReadOnly());
@@ -602,7 +608,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	private void triggerBeforeCompletion(DefaultTransactionStatus status) {
 		if (status.isNewSynchronization()) {
-			logger.debug("Triggering beforeCompletion synchronization");
+			if (status.isDebug()) {
+				logger.debug("Triggering beforeCompletion synchronization");
+			}
 			for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
 				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
 				try {
@@ -624,6 +632,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		if (status.isNewSynchronization()) {
 			List synchronizations = TransactionSynchronizationManager.getSynchronizations();
 			if (!status.hasTransaction() || status.isNewTransaction()) {
+				if (status.isDebug()) {
+					logger.debug("Triggering afterCompletion synchronization");
+				}
 				// No transaction or new transaction for the current scope ->
 				// invoke the afterCompletion callbacks immediately
 				invokeAfterCompletion(synchronizations, completionStatus);
@@ -651,7 +662,6 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see TransactionSynchronization#STATUS_UNKNOWN
 	 */
 	protected final void invokeAfterCompletion(List synchronizations, int completionStatus) {
-		logger.debug("Triggering afterCompletion synchronization");
 		for (Iterator it = synchronizations.iterator(); it.hasNext();) {
 			TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
 			try {
@@ -925,6 +935,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	protected void registerAfterCompletionWithExistingTransaction(List synchronizations)
 			throws TransactionException {
 
+		logger.debug("Cannot register Spring after-completion synchronization with existing transaction - " +
+				"performing Spring after-completion callbacks immediately, with outcome status 'unknown'");
 		invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
 	}
 
