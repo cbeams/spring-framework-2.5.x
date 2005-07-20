@@ -18,6 +18,8 @@ package org.springframework.jdbc.support;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -102,19 +104,31 @@ public abstract class JdbcUtils {
 	}
 
 	/**
-	 * Retrieve a JDBC object value from a ResultSet. Uses the <code>getObject</code>
-	 * method, but includes an additional "hack" to get around Oracle returning a
-	 * non-standard object for their TIMESTAMP datatype: This will explicitly be
-	 * extracted as standard <code>java.sql.Timestamp</code> object.
+	 * Retrieve a JDBC column value from a ResultSet. The returned value
+	 * should be a detached value object, not having any ties to the
+	 * active ResultSet: in particular, it should not be a Blob or Clob
+	 * object but rather a byte array respectively String representation.
+	 * <p>Uses the <code>getObject</code> method, but includes an additional
+	 * "hack" to get around Oracle 9i returning a non-standard object for its
+	 * TIMESTAMP datatype: This will explicitly be extracted as standard
+	 * <code>java.sql.Timestamp</code> object.
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
-	 * @return the Object returned
-	 * @see oracle.sql.TIMESTAMP
+	 * @return the value object
+	 * @see java.sql.Blob
+	 * @see java.sql.Clob
 	 * @see java.sql.Timestamp
+	 * @see oracle.sql.TIMESTAMP
 	 */
 	public static Object getResultSetValue(ResultSet rs, int index) throws SQLException {
 		Object obj = rs.getObject(index);
-		if (obj != null && obj.getClass().getName().startsWith("oracle.sql.TIMESTAMP")) {
+		if (obj instanceof Blob) {
+			obj = rs.getBytes(index);
+		}
+		else if (obj instanceof Clob) {
+			obj = rs.getString(index);
+		}
+		else if (obj != null && obj.getClass().getName().startsWith("oracle.sql.TIMESTAMP")) {
 			obj = rs.getTimestamp(index);
 		}
 		return obj;
