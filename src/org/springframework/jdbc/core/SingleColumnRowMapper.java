@@ -90,7 +90,7 @@ public class SingleColumnRowMapper implements RowMapper {
 			else {
 				throw new TypeMismatchDataAccessException(
 						"Result object with column type '" + rsmd.getColumnTypeName(1) +
-						"' and value [" + result + "] is of type [" + rsmd.getColumnClassName(1) +
+						"' and value [" + result + "] is of type [" + result.getClass().getName() +
 						"] and could not be converted to required type [" + this.requiredType.getName() + "]");
 			}
 		}
