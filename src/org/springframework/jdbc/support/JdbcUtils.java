@@ -108,9 +108,10 @@ public abstract class JdbcUtils {
 	 * should be a detached value object, not having any ties to the
 	 * active ResultSet: in particular, it should not be a Blob or Clob
 	 * object but rather a byte array respectively String representation.
-	 * <p>Uses the <code>getObject</code> method, but includes an additional
-	 * "hack" to get around Oracle 9i returning a non-standard object for its
-	 * TIMESTAMP datatype: This will explicitly be extracted as standard
+	 * <p>Uses the <code>getObject</code> method, but includes additional
+	 * "hacks" to get around Oracle 10g returning a non-standard object for its
+	 * TIMESTAMP datatype and a java.sql.Date for DATE columns leaving out the
+	 * time portion: These columns will explicitly be extracted as standard
 	 * <code>java.sql.Timestamp</code> object.
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
