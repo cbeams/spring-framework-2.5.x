@@ -78,6 +78,7 @@ public class XmlWebApplicationContext extends AbstractRefreshableWebApplicationC
 	 */
 	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws IOException {
 		XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
+		beanDefinitionReader.setResourceLoader(this);
 		beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
 		initBeanDefinitionReader(beanDefinitionReader);
 		loadBeanDefinitions(beanDefinitionReader);
@@ -112,7 +113,7 @@ public class XmlWebApplicationContext extends AbstractRefreshableWebApplicationC
 		String[] configLocations = getConfigLocations();
 		if (configLocations != null) {
 			for (int i = 0; i < configLocations.length; i++) {
-				reader.loadBeanDefinitions(getResources(configLocations[i]));
+				reader.loadBeanDefinitions(configLocations[i]);
 			}
 		}
 	}
