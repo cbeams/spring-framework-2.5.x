@@ -27,12 +27,15 @@ import org.springframework.beans.BeanUtils;
  *
  * @author Juergen Hoeller
  * @since 09.12.2003
+ * @see SetFactoryBean
+ * @see MapFactoryBean
  */
 public class ListFactoryBean extends AbstractFactoryBean {
 
 	private List sourceList;
 
 	private Class targetListClass = ArrayList.class;
+
 
 	/**
 	 * Set the source List, typically populated via XML "list" elements.
@@ -42,8 +45,9 @@ public class ListFactoryBean extends AbstractFactoryBean {
 	}
 
 	/**
-	 * Set the class to use for the target List.
-	 * Default is <code>java.util.ArrayList</code>.
+	 * Set the class to use for the target List. Can be populated with a fully
+	 * qualified class name when defined in a Spring application context.
+	 * <p>Default is a <code>java.util.ArrayList</code>.
 	 * @see java.util.ArrayList
 	 */
 	public void setTargetListClass(Class targetListClass) {
@@ -51,10 +55,11 @@ public class ListFactoryBean extends AbstractFactoryBean {
 			throw new IllegalArgumentException("targetListClass must not be null");
 		}
 		if (!List.class.isAssignableFrom(targetListClass)) {
-			throw new IllegalArgumentException("targetListClass must implement java.util.List");
+			throw new IllegalArgumentException("targetListClass must implement [java.util.List]");
 		}
 		this.targetListClass = targetListClass;
 	}
+
 
 	public Class getObjectType() {
 		return List.class;
