@@ -274,18 +274,15 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see #retrieveMatchingFiles
 	 */
 	protected String determineRootDir(String location) {
-		int patternStart = location.length();
-		int prefixEnd = location.indexOf(":");
-		int asteriskIndex = location.indexOf('*', prefixEnd);
-		int questionMarkIndex = location.indexOf('?', prefixEnd);
-		if (asteriskIndex != -1 || questionMarkIndex != -1) {
-			patternStart = (asteriskIndex > questionMarkIndex ? asteriskIndex : questionMarkIndex);
+		int prefixEnd = location.indexOf(":") + 1;
+		int rootDirEnd = location.length();
+		while (rootDirEnd > prefixEnd && getPathMatcher().isPattern(location.substring(prefixEnd, rootDirEnd))) {
+			rootDirEnd = location.lastIndexOf('/', rootDirEnd - 1);
 		}
-		int rootDirEnd = location.lastIndexOf('/', patternStart);
 		if (rootDirEnd == -1) {
-			rootDirEnd = location.lastIndexOf(":", patternStart) + 1;
+			rootDirEnd = prefixEnd;
 		}
-		return (rootDirEnd != -1 ? location.substring(0, rootDirEnd) : "");
+		return location.substring(0, rootDirEnd);
 	}
 
 	/**
