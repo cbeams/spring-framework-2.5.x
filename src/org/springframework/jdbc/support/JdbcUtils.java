@@ -131,6 +131,11 @@ public abstract class JdbcUtils {
 		else if (obj != null && obj.getClass().getName().startsWith("oracle.sql.TIMESTAMP")) {
 			obj = rs.getTimestamp(index);
 		}
+		else if (obj != null && obj instanceof java.sql.Date) {
+			if ("java.sql.Timestamp".equals(rs.getMetaData().getColumnClassName(index))) {
+				obj = rs.getTimestamp(index);
+			}
+		}
 		return obj;
 	}
 
