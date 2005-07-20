@@ -20,9 +20,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
-import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 /**
  * Abstract base class for bean definition readers which implement
@@ -43,15 +43,35 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 	private ClassLoader beanClassLoader = Thread.currentThread().getContextClassLoader();
 
-	private ResourceLoader resourceLoader = new DefaultResourceLoader();
+	private ResourceLoader resourceLoader = null;
 
 
 	/**
-	 * Create a new AbstractBeanDefinitionReader for the given factory.
+	 * Create a new AbstractBeanDefinitionReader for the given bean factory.
+	 * <p>If the passed-in bean factory does not only implement the
+	 * BeanDefinitionRegistry interface but also the ResourceLoader interface,
+	 * it will be used as default ResourceLoader as well. This will usually
+	 * be the case for ApplicationContext implementations.
+	 * <p>If given a plain BeanDefinitionRegistry, the default ResourceLoader
+	 * will be a PathMatchingResourcePatternResolver, also capable of resource
+	 * pattern resolving through the ResourcePatternResolver interface.
 	 * @param beanFactory the bean factory to work on
+	 * @see #setResourceLoader
+	 * @see org.springframework.context.ApplicationContext
+	 * @see org.springframework.core.io.ResourceLoader
+	 * @see org.springframework.core.io.support.ResourcePatternResolver
+	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
 	 */
 	protected AbstractBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
 		this.beanFactory = beanFactory;
+
+		// Determine ResourceLoader to use.
+		if (this.beanFactory instanceof ResourceLoader) {
+			this.resourceLoader = (ResourceLoader) this.beanFactory;
+		}
+		else {
+			this.resourceLoader = new PathMatchingResourcePatternResolver();
+		}
 	}
 
 	public BeanDefinitionRegistry getBeanFactory() {
@@ -76,13 +96,14 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 	/**
 	 * Set the ResourceLoader to use for resource locations.
-	 * Default is DefaultResourceLoader.
-	 * <p>Can also be a ResourcePatternResolver, additionally capable
-	 * of resolving resource patterns to Resource arrays.
+	 * If specifying a ResourcePatternResolver, the bean definition reader
+	 * will be capable of resolving resource patterns to Resource arrays.
+	 * <p>Default is PathMatchingResourcePatternResolver, also capable of
+	 * resource pattern resolving through the ResourcePatternResolver interface.
 	 * <p>Setting this to null suggests that absolute resource loading
 	 * is not available for this bean definition reader.
-	 * @see org.springframework.core.io.DefaultResourceLoader
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
+	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
 	 */
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
