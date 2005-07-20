@@ -50,8 +50,9 @@ import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
@@ -276,25 +277,40 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 */
 	protected void importBeanDefinitionResource(Element ele) throws BeanDefinitionStoreException {
 		String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
-		Resource relativeResource = null;
-		if (ResourceUtils.isUrl(location)) {
+		if (ResourcePatternUtils.isUrl(location)) {
 			ResourceLoader resourceLoader = getBeanDefinitionReader().getResourceLoader();
 			if (resourceLoader == null) {
 				throw new BeanDefinitionStoreException(
 						"Cannot import bean definitions from location [" + location + "]: no resource loader available");
 			}
-			relativeResource = resourceLoader.getResource(location);
+			if (resourceLoader instanceof ResourcePatternResolver) {
+				// Resource pattern matching available.
+				try {
+					Resource[] absoluteResources = ((ResourcePatternResolver) resourceLoader).getResources(location);
+					getBeanDefinitionReader().loadBeanDefinitions(absoluteResources);
+				}
+				catch (IOException ex) {
+					throw new BeanDefinitionStoreException(
+							"Could not resolve bean definition resource pattern [" + location + "]", ex);
+				}
+			}
+			else {
+				// Can only load single resources by absolute URL.
+				Resource absoluteResource = resourceLoader.getResource(location);
+				getBeanDefinitionReader().loadBeanDefinitions(absoluteResource);
+			}
 		}
 		else {
+			// No URL -> considering resource location as relative to the current file.
 			try {
-				relativeResource = getResource().createRelative(location);
+				Resource relativeResource = getResource().createRelative(location);
+				getBeanDefinitionReader().loadBeanDefinitions(relativeResource);
 			}
 			catch (IOException ex) {
 				throw new BeanDefinitionStoreException(
 						"Invalid relative resource location [" + location + "] to import bean definitions from", ex);
 			}
 		}
-		getBeanDefinitionReader().loadBeanDefinitions(relativeResource);
 	}
 
 

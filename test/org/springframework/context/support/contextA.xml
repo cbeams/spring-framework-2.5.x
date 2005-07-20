@@ -4,7 +4,7 @@
 <beans>
 
 	<import resource="import1.xml"/>
-	<import resource="classpath:org/springframework/context/support/import2.xml"/>
+	<import resource="classpath:org/springframework/context/*/import2.xml"/>
 
 	<bean id="messageSource" class="org.springframework.context.support.StaticMessageSource"/>
 

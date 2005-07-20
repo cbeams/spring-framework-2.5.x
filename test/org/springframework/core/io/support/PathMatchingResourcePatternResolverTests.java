@@ -33,7 +33,7 @@ public class PathMatchingResourcePatternResolverTests extends TestCase {
 
 	private static final String[] CLASSES_IN_CORE_IO_SUPPORT =
 			new String[] {"PathMatchingResourcePatternResolver.class", "PropertiesLoaderSupport.class",
-					"ResourceArrayPropertyEditor.class", "ResourcePatternResolver.class"};
+					"ResourceArrayPropertyEditor.class", "ResourcePatternResolver.class", "ResourcePatternUtils.class"};
 
 	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT =
 			new String[] {"PathMatchingResourcePatternResolverTests.class"};
@@ -86,6 +86,7 @@ public class PathMatchingResourcePatternResolverTests extends TestCase {
 
 	private void assertProtocolAndFilenames(Resource[] resources, String urlProtocol, String[] fileNames)
 			throws IOException {
+
 		assertEquals("Correct number of files found", fileNames.length, resources.length);
 		for (int i = 0; i < resources.length; i++) {
 			Resource resource = resources[i];
