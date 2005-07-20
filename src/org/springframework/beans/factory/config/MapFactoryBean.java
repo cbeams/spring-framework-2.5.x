@@ -16,10 +16,10 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.CollectionFactory;
 
 /**
  * Simple factory for shared Map instances. Allows for central setup
@@ -27,12 +27,15 @@ import org.springframework.beans.BeanUtils;
  *
  * @author Juergen Hoeller
  * @since 09.12.2003
+ * @see SetFactoryBean
+ * @see ListFactoryBean
  */
 public class MapFactoryBean extends AbstractFactoryBean {
 
 	private Map sourceMap;
 
-	private Class targetMapClass = HashMap.class;
+	private Class targetMapClass;
+
 
 	/**
 	 * Set the source Map, typically populated via XML "map" elements.
@@ -42,19 +45,23 @@ public class MapFactoryBean extends AbstractFactoryBean {
 	}
 
 	/**
-	 * Set the class to use for the target Map.
-	 * Default is <code>java.util.HashMap</code>.
-	 * @see java.util.HashMap
+	 * Set the class to use for the target Map. Can be populated with a fully
+	 * qualified class name when defined in a Spring application context.
+	 * <p>Default is a linked HashMap, keeping the registration order.
+	 * If no linked Map implementation is available, a plain HashMap will
+	 * be used as fallback (not keeping the registration order).
+	 * @see org.springframework.core.CollectionFactory#createLinkedMapIfPossible
 	 */
 	public void setTargetMapClass(Class targetMapClass) {
 		if (targetMapClass == null) {
 			throw new IllegalArgumentException("targetMapClass must not be null");
 		}
 		if (!Map.class.isAssignableFrom(targetMapClass)) {
-			throw new IllegalArgumentException("targetMapClass must implement java.util.Map");
+			throw new IllegalArgumentException("targetMapClass must implement [java.util.Map]");
 		}
 		this.targetMapClass = targetMapClass;
 	}
+
 
 	public Class getObjectType() {
 		return Map.class;
@@ -64,7 +71,13 @@ public class MapFactoryBean extends AbstractFactoryBean {
 		if (this.sourceMap == null) {
 			throw new IllegalArgumentException("sourceMap is required");
 		}
-		Map result = (Map) BeanUtils.instantiateClass(this.targetMapClass);
+		Map result = null;
+		if (this.targetMapClass != null) {
+			result = (Map) BeanUtils.instantiateClass(this.targetMapClass);
+		}
+		else {
+			result = CollectionFactory.createLinkedMapIfPossible(this.sourceMap.size());
+		}
 		result.putAll(this.sourceMap);
 		return result;
 	}

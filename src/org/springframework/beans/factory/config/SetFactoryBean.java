@@ -16,10 +16,10 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.CollectionFactory;
 
 /**
  * Simple factory for shared Set instances. Allows for central setup
@@ -27,12 +27,15 @@ import org.springframework.beans.BeanUtils;
  *
  * @author Juergen Hoeller
  * @since 21.01.2003
+ * @see ListFactoryBean
+ * @see MapFactoryBean
  */
 public class SetFactoryBean extends AbstractFactoryBean {
 
 	private Set sourceSet;
 
-	private Class targetSetClass = HashSet.class;
+	private Class targetSetClass;
+
 
 	/**
 	 * Set the source Set, typically populated via XML "set" elements.
@@ -42,19 +45,23 @@ public class SetFactoryBean extends AbstractFactoryBean {
 	}
 
 	/**
-	 * Set the class to use for the target Set.
-	 * Default is <code>java.util.HashSet</code>.
-	 * @see java.util.HashSet
+	 * Set the class to use for the target Set. Can be populated with a fully
+	 * qualified class name when defined in a Spring application context.
+	 * <p>Default is a linked HashSet, keeping the registration order.
+	 * If no linked Set implementation is available, a plain HashSet will
+	 * be used as fallback (not keeping the registration order).
+	 * @see org.springframework.core.CollectionFactory#createLinkedSetIfPossible
 	 */
 	public void setTargetSetClass(Class targetSetClass) {
 		if (targetSetClass == null) {
 			throw new IllegalArgumentException("targetSetClass must not be null");
 		}
 		if (!Set.class.isAssignableFrom(targetSetClass)) {
-			throw new IllegalArgumentException("targetSetClass must implement java.util.Set");
+			throw new IllegalArgumentException("targetSetClass must implement [java.util.Set]");
 		}
 		this.targetSetClass = targetSetClass;
 	}
+
 
 	public Class getObjectType() {
 		return Set.class;
@@ -64,7 +71,13 @@ public class SetFactoryBean extends AbstractFactoryBean {
 		if (this.sourceSet == null) {
 			throw new IllegalArgumentException("sourceSet is required");
 		}
-		Set result = (Set) BeanUtils.instantiateClass(this.targetSetClass);
+		Set result = null;
+		if (this.targetSetClass != null) {
+			result = (Set) BeanUtils.instantiateClass(this.targetSetClass);
+		}
+		else {
+			result = CollectionFactory.createLinkedSetIfPossible(this.sourceSet.size());
+		}
 		result.addAll(this.sourceSet);
 		return result;
 	}
