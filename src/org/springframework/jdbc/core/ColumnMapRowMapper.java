@@ -56,12 +56,12 @@ public class ColumnMapRowMapper implements RowMapper {
 
 	/**
 	 * Create a Map instance to be used as column map.
-	 * <p>By default, a linked Map will be created if possible,
+	 * <p>By default, a linked case-insensitive Map will be created if possible,
 	 * else a plain HashMap (see Spring's CollectionFactory).
 	 * @param columnCount the column count, to be used as initial
 	 * capacity for the Map
 	 * @return the new Map instance
-	 * @see org.springframework.core.CollectionFactory#createLinkedMapIfPossible
+	 * @see org.springframework.core.CollectionFactory#createLinkedCaseInsensitiveMapIfPossible
 	 */
 	protected Map createColumnMap(int columnCount) {
 		return CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(columnCount);
