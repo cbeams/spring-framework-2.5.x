@@ -100,7 +100,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableA
 		String[] configLocations = getConfigLocations();
 		if (configLocations != null) {
 			for (int i = 0; i < configLocations.length; i++) {
-				reader.loadBeanDefinitions(getResources(configLocations[i]));
+				reader.loadBeanDefinitions(configLocations[i]);
 			}
 		}
 	}
