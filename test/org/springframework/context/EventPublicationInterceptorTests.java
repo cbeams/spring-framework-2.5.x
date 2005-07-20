@@ -23,6 +23,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.event.EventPublicationInterceptor;
 import org.springframework.context.support.StaticApplicationContext;
 
@@ -65,12 +66,15 @@ public class EventPublicationInterceptorTests extends TestCase {
 			}
 		}
 
+		StaticApplicationContext ctx = new TestContext();
+
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("applicationEventClass", TestEvent.class.getName());
 		// should automatically receive applicationEventPublisher reference
-
-		StaticApplicationContext ctx = new TestContext();
 		ctx.registerSingleton("publisher", EventPublicationInterceptor.class, pvs);
+
+		ctx.registerSingleton("otherListener", FactoryBeanTestListener.class);
+
 		ctx.refresh();
 
 		EventPublicationInterceptor interceptor =
@@ -82,8 +86,11 @@ public class EventPublicationInterceptorTests extends TestCase {
 
 		// invoke any method on the advised proxy to see if the interceptor has been invoked
 		testBean.getAge();
+
 		// two events: ContextRefreshedEvent and TestEvent
-		assertTrue("Interceptor published 1 event", listener.getEventCount() == 2);
+		assertTrue("Interceptor should have published 2 events", listener.getEventCount() == 2);
+		TestListener otherListener = (TestListener) ctx.getBean("&otherListener");
+		assertTrue("Interceptor should have published 2 events", otherListener.getEventCount() == 2);
 	}
 
 
@@ -91,6 +98,22 @@ public class EventPublicationInterceptorTests extends TestCase {
 
 		public TestEvent(Object source) {
 			super(source);
+		}
+	}
+
+
+	public static class FactoryBeanTestListener extends TestListener implements FactoryBean {
+
+		public Object getObject() throws Exception {
+			return "test";
+		}
+
+		public Class getObjectType() {
+			return String.class;
+		}
+
+		public boolean isSingleton() {
+			return true;
 		}
 	}
 

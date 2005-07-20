@@ -67,7 +67,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"/org/springframework/context/support/context*.xml");
 		ctx.getBeanFactory().registerSingleton("manualFBAAL", new FactoryBeanAndApplicationListener());
-		assertEquals(0, ctx.getBeansOfType(ApplicationListener.class).size());
+		assertEquals(2, ctx.getBeansOfType(ApplicationListener.class).size());
 	}
 
 	public void testMessageSourceAware() {

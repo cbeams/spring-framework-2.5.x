@@ -62,6 +62,7 @@ public abstract class BeanFactoryUtils {
 		return beanName;
 	}
 
+
 	/**
 	 * Count all bean definitions in any hierarchy in which this factory
 	 * participates. Includes counts of ancestor bean factories.
@@ -77,7 +78,7 @@ public abstract class BeanFactoryUtils {
 	/**
 	 * Return all bean names in the factory, including ancestor factories.
 	 * @param lbf the bean factory
-	 * @return the array of bean names, or an empty array if none
+	 * @return the array of matching bean names, or an empty array if none
 	 */
 	public static String[] beanNamesIncludingAncestors(ListableBeanFactory lbf) {
 		Set result = new HashSet();
@@ -102,7 +103,7 @@ public abstract class BeanFactoryUtils {
 	 * FactoryBeans.
 	 * @param lbf the bean factory
 	 * @param type the type that beans must match
-	 * @return the array of bean names, or an empty array if none
+	 * @return the array of matching bean names, or an empty array if none
 	 * @deprecated in favor of beanNamesForTypeIncludingAncestors.
 	 * This method will be removed as of Spring 1.3.
 	 * @see #beanNamesForTypeIncludingAncestors
@@ -121,14 +122,18 @@ public abstract class BeanFactoryUtils {
 		return (String[]) result.toArray(new String[result.size()]);
 	}
 
+
 	/**
 	 * Get all bean names for the given type, including those defined in ancestor
 	 * factories. Will return unique names in case of overridden bean definitions.
-	 * <p>Does consider objects created by FactoryBeans but rather the FactoryBean
-	 * classes themselves, which means that FactoryBeans will get instantiated.
+	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
+	 * will get initialized. If the object created by the FactoryBean doesn't match,
+	 * the raw FactoryBean itself will be matched against the type.
+	 * <p>This version of <code>beanNamesForTypeIncludingAncestors</code> automatically
+	 * includes prototypes and FactoryBeans.
 	 * @param lbf the bean factory
 	 * @param type the type that beans must match
-	 * @return the array of bean names, or an empty array if none
+	 * @return the array of matching bean names, or an empty array if none
 	 */
 	public static String[] beanNamesForTypeIncludingAncestors(ListableBeanFactory lbf, Class type) {
 		Set result = new HashSet();
@@ -147,15 +152,22 @@ public abstract class BeanFactoryUtils {
 	/**
 	 * Get all bean names for the given type, including those defined in ancestor
 	 * factories. Will return unique names in case of overridden bean definitions.
-	 * <p>Does consider objects created by FactoryBeans but rather the FactoryBean
-	 * classes themselves, which means that FactoryBeans will get instantiated.
+	 * <p>Does consider objects created by FactoryBeans if the "includeFactoryBeans"
+	 * flag is set, which means that FactoryBeans will get initialized. If the
+	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
+	 * will be matched against the type. If "includeFactoryBeans" is not set,
+	 * only raw FactoryBeans will be checked (which doesn't require initialization
+	 * of each FactoryBean).
 	 * @param lbf the bean factory
 	 * @param includePrototypes whether to include prototype beans too or just singletons
 	 * (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include objects created FactoryBeans too
-	 * or just conventional beans
+	 * @param includeFactoryBeans whether to include <i>objects created by
+	 * FactoryBeans</i> (or by factory methods with a "factory-bean" reference)
+	 * too, or just conventional beans. Note that FactoryBeans need to be
+	 * initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans (and "factory-bean" references).
 	 * @param type the type that beans must match
-	 * @return the array of bean names, or an empty array if none
+	 * @return the array of matching bean names, or an empty array if none
 	 */
 	public static String[] beanNamesForTypeIncludingAncestors(
 			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean includeFactoryBeans) {
@@ -176,10 +188,13 @@ public abstract class BeanFactoryUtils {
 	/**
 	 * Return all beans of the given type or subtypes, also picking up beans defined in
 	 * ancestor bean factories if the current bean factory is a HierarchicalBeanFactory.
-	 * The return list will only contain beans of this type.
+	 * The returned Map will only contain beans of this type.
+	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
+	 * will get initialized. If the object created by the FactoryBean doesn't match,
+	 * the raw FactoryBean itself will be matched against the type.
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
-	 * @return the Map of bean instances, or an empty Map if none
+	 * @return the Map of matching bean instances, or an empty Map if none
 	 * @throws BeansException if a bean could not be created
 	 */
 	public static Map beansOfTypeIncludingAncestors(ListableBeanFactory lbf, Class type)
@@ -206,14 +221,23 @@ public abstract class BeanFactoryUtils {
 	/**
 	 * Return all beans of the given type or subtypes, also picking up beans defined in
 	 * ancestor bean factories if the current bean factory is a HierarchicalBeanFactory.
-	 * The return list will only contain beans of this type.
+	 * The returned Map will only contain beans of this type.
+	 * <p>Does consider objects created by FactoryBeans if the "includeFactoryBeans"
+	 * flag is set, which means that FactoryBeans will get initialized. If the
+	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
+	 * will be matched against the type. If "includeFactoryBeans" is not set,
+	 * only raw FactoryBeans will be checked (which doesn't require initialization
+	 * of each FactoryBean).
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
 	 * @param includePrototypes whether to include prototype beans too or just singletons
 	 * (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include objects created FactoryBeans too
-	 * or just conventional beans
-	 * @return the Map of bean instances, or an empty Map if none
+	 * @param includeFactoryBeans whether to include <i>objects created by
+	 * FactoryBeans</i> (or by factory methods with a "factory-bean" reference)
+	 * too, or just conventional beans. Note that FactoryBeans need to be
+	 * initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans (and "factory-bean" references).
+	 * @return the Map of matching bean instances, or an empty Map if none
 	 * @throws BeansException if a bean could not be created
 	 */
 	public static Map beansOfTypeIncludingAncestors(
@@ -238,14 +262,20 @@ public abstract class BeanFactoryUtils {
 		return result;
 	}
 
+
 	/**
-	 * Return a single bean of the given type or subtypes, also picking up beans defined
-	 * in ancestor bean factories if the current bean factory is a HierarchicalBeanFactory.
-	 * Useful convenience method when we expect a single bean and don't care about the bean name.
-	 * <p>This version of beanOfType automatically includes prototypes and FactoryBeans.
+	 * Return a single bean of the given type or subtypes, also picking up beans
+	 * defined in ancestor bean factories if the current bean factory is a
+	 * HierarchicalBeanFactory. Useful convenience method when we expect a
+	 * single bean and don't care about the bean name.
+	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
+	 * will get initialized. If the object created by the FactoryBean doesn't match,
+	 * the raw FactoryBean itself will be matched against the type.
+	 * <p>This version of <code>beanOfTypeIncludingAncestors</code> automatically includes
+	 * prototypes and FactoryBeans.
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
-	 * @return the Map of bean instances, or an empty Map if none
+	 * @return the matching bean instance
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
@@ -265,16 +295,26 @@ public abstract class BeanFactoryUtils {
 	}
 
 	/**
-	 * Return a single bean of the given type or subtypes, also picking up beans defined
-	 * in ancestor bean factories if the current bean factory is a HierarchicalBeanFactory.
-	 * Useful convenience method when we expect a single bean and don't care about the bean name.
+	 * Return a single bean of the given type or subtypes, also picking up beans
+	 * defined in ancestor bean factories if the current bean factory is a
+	 * HierarchicalBeanFactory. Useful convenience method when we expect a
+	 * single bean and don't care about the bean name.
+	 * <p>Does consider objects created by FactoryBeans if the "includeFactoryBeans"
+	 * flag is set, which means that FactoryBeans will get initialized. If the
+	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
+	 * will be matched against the type. If "includeFactoryBeans" is not set,
+	 * only raw FactoryBeans will be checked (which doesn't require initialization
+	 * of each FactoryBean).
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
 	 * @param includePrototypes whether to include prototype beans too or just singletons
 	 * (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include objects created FactoryBeans too
-	 * or just conventional beans
-	 * @return the Map of bean instances, or an empty Map if none
+	 * @param includeFactoryBeans whether to include <i>objects created by
+	 * FactoryBeans</i> (or by factory methods with a "factory-bean" reference)
+	 * too, or just conventional beans. Note that FactoryBeans need to be
+	 * initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans (and "factory-bean" references).
+	 * @return the matching bean instance
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
@@ -295,12 +335,17 @@ public abstract class BeanFactoryUtils {
 	}
 
 	/**
-	 * Return a single bean of the given type or subtypes, not looking in ancestor factories.
-	 * Useful convenience method when we expect a single bean and don't care about the bean name.
-	 * <p>This version of beanOfType automatically includes prototypes and FactoryBeans.
+	 * Return a single bean of the given type or subtypes, not looking in ancestor
+	 * factories. Useful convenience method when we expect a single bean and
+	 * don't care about the bean name.
+	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
+	 * will get initialized. If the object created by the FactoryBean doesn't match,
+	 * the raw FactoryBean itself will be matched against the type.
+	 * <p>This version of <code>beanOfType</code> automatically includes
+	 * prototypes and FactoryBeans.
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
-	 * @return the Map of bean instances, or an empty Map if none
+	 * @return the matching bean instance
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
@@ -318,15 +363,25 @@ public abstract class BeanFactoryUtils {
 	}
 
 	/**
-	 * Return a single bean of the given type or subtypes, not looking in ancestor factories.
-	 * Useful convenience method when we expect a single bean and don't care about the bean name.
+	 * Return a single bean of the given type or subtypes, not looking in ancestor
+	 * factories. Useful convenience method when we expect a single bean and
+	 * don't care about the bean name.
+	 * <p>Does consider objects created by FactoryBeans if the "includeFactoryBeans"
+	 * flag is set, which means that FactoryBeans will get initialized. If the
+	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
+	 * will be matched against the type. If "includeFactoryBeans" is not set,
+	 * only raw FactoryBeans will be checked (which doesn't require initialization
+	 * of each FactoryBean).
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
 	 * @param includePrototypes whether to include prototype beans too or just singletons
 	 * (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include objects created FactoryBeans too
-	 * or just conventional beans
-	 * @return the Map of bean instances, or an empty Map if none
+	 * @param includeFactoryBeans whether to include <i>objects created by
+	 * FactoryBeans</i> (or by factory methods with a "factory-bean" reference)
+	 * too, or just conventional beans. Note that FactoryBeans need to be
+	 * initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans (and "factory-bean" references).
+	 * @return the matching bean instance
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException

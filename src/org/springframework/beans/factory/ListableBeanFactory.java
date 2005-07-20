@@ -116,8 +116,9 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Return the names of beans matching the given type (including subclasses),
 	 * judging from either bean definitions or the value of <code>getObjectType</code>
 	 * in the case of FactoryBeans.
-	 * <p>Does consider objects created by FactoryBeans but rather the FactoryBean
-	 * classes themselves, which means that FactoryBeans will get instantiated.
+	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
+	 * will get initialized. If the object created by the FactoryBean doesn't match,
+	 * the raw FactoryBean itself will be matched against the type.
 	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' <code>beanNamesForTypeIncludingAncestors</code>
 	 * to include beans in ancestor factories too.
@@ -138,9 +139,13 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Return the names of beans matching the given type (including subclasses),
 	 * judging from either bean definitions or the value of <code>getObjectType</code>
 	 * in the case of FactoryBeans.
-	 * <p>Does consider objects created by FactoryBeans but rather the FactoryBean
-	 * classes themselves, which means that FactoryBeans will get instantiated.
-	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * <p>Does consider objects created by FactoryBeans if the "includeFactoryBeans"
+	 * flag is set, which means that FactoryBeans will get initialized. If the
+	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
+	 * will be matched against the type. If "includeFactoryBeans" is not set,
+	 * only raw FactoryBeans will be checked (which doesn't require initialization
+	 * of each FactoryBean).
+$	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' <code>beanNamesForTypeIncludingAncestors</code>
 	 * to include beans in ancestor factories too.
 	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
@@ -148,8 +153,11 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @param type the class or interface to match, or null for all bean names
 	 * @param includePrototypes whether to include prototype beans too
 	 * or just singletons (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include objects created FactoryBeans too
-	 * or just conventional beans
+	 * @param includeFactoryBeans whether to include <i>objects created by
+	 * FactoryBeans</i> (or by factory methods with a "factory-bean" reference)
+	 * too, or just conventional beans. Note that FactoryBeans need to be
+	 * initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans (and "factory-bean" references).
 	 * @return the names of beans (or objects created by FactoryBeans) matching
 	 * the given object type (including subclasses), or an empty array if none
 	 * @see FactoryBean#getObjectType
@@ -161,8 +169,9 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Return the bean instances that match the given object type (including
 	 * subclasses), judging from either bean definitions or the value of
 	 * <code>getObjectType</code> in the case of FactoryBeans.
-	 * <p>Does consider objects created by FactoryBeans but rather the FactoryBean
-	 * classes themselves, which means that FactoryBeans will get instantiated.
+	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
+	 * will get initialized. If the object created by the FactoryBean doesn't match,
+	 * the raw FactoryBean itself will be matched against the type.
 	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' <code>beansOfTypeIncludingAncestors</code>
 	 * to include beans in ancestor factories too.
@@ -185,8 +194,12 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Return the bean instances that match the given object type (including
 	 * subclasses), judging from either bean definitions or the value of
 	 * <code>getObjectType</code> in the case of FactoryBeans.
-	 * <p>Does consider objects created by FactoryBeans but rather the FactoryBean
-	 * classes themselves, which means that FactoryBeans will get instantiated.
+	 * <p>Does consider objects created by FactoryBeans if the "includeFactoryBeans"
+	 * flag is set, which means that FactoryBeans will get initialized. If the
+	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
+	 * will be matched against the type. If "includeFactoryBeans" is not set,
+	 * only raw FactoryBeans will be checked (which doesn't require initialization
+	 * of each FactoryBean).
 	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' <code>beansOfTypeIncludingAncestors</code>
 	 * to include beans in ancestor factories too.
@@ -195,8 +208,11 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @param type the class or interface to match, or null for all concrete beans
 	 * @param includePrototypes whether to include prototype beans too
 	 * or just singletons (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include objects created FactoryBeans too
-	 * or just conventional beans
+	 * @param includeFactoryBeans whether to include <i>objects created by
+	 * FactoryBeans</i> (or by factory methods with a "factory-bean" reference)
+	 * too, or just conventional beans. Note that FactoryBeans need to be
+	 * initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans (and "factory-bean" references).
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values
 	 * @throws BeansException if a bean could not be created

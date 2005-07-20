@@ -130,33 +130,33 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	public String[] getBeanNamesForType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {
-		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
 		List result = new ArrayList();
 
 		// Check all bean definitions.
-		Iterator it = this.beanDefinitionNames.iterator();
-		while (it.hasNext()) {
+		for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
 			String beanName = (String) it.next();
 			RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
 			// Only check bean definition if it is complete.
 			if (!rbd.isAbstract()) {
 				// In case of FactoryBean, match object created by FactoryBean.
-				if ((rbd.hasBeanClass() && FactoryBean.class.isAssignableFrom(rbd.getBeanClass()) && !isFactoryType) ||
-						rbd.getFactoryBeanName() != null) {
+				boolean isFactoryBean = rbd.hasBeanClass() && FactoryBean.class.isAssignableFrom(rbd.getBeanClass());
+				if (isFactoryBean || rbd.getFactoryBeanName() != null) {
 					if (includeFactoryBeans && (includePrototypes || isSingleton(beanName)) &&
 							isBeanTypeMatch(beanName, type)) {
 						result.add(beanName);
+						// Match found for this bean: do not match FactoryBean itself anymore.
+						continue;
 					}
+					// We're done for anything but a full FactoryBean.
+					if (!isFactoryBean) {
+						continue;
+					}
+					// In case of FactoryBean, try to match FactoryBean itself next.
+					beanName = FACTORY_BEAN_PREFIX + beanName;
 				}
-				else {
-					// If type to match is FactoryBean, match FactoryBean itself.
-					// Else, match bean instance.
-					if (isFactoryType) {
-						beanName = FACTORY_BEAN_PREFIX + beanName;
-					}
-					if ((includePrototypes || rbd.isSingleton()) && isBeanTypeMatch(beanName, type)) {
-						result.add(beanName);
-					}
+				// Match raw bean instance (might be raw FactoryBean).
+				if ((includePrototypes || rbd.isSingleton()) && isBeanTypeMatch(beanName, type)) {
+					result.add(beanName);
 				}
 			}
 		}
@@ -168,21 +168,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			// Only check if manually registered.
 			if (!containsBeanDefinition(beanName)) {
 				// In case of FactoryBean, match object created by FactoryBean.
-				if (isFactoryBean(beanName) && !isFactoryType) {
+				if (isFactoryBean(beanName)) {
 					if (includeFactoryBeans && (includePrototypes || isSingleton(beanName)) &&
 							isBeanTypeMatch(beanName, type)) {
 						result.add(beanName);
+						// Match found for this bean: do not match FactoryBean itself anymore.
+						continue;
 					}
+					// In case of FactoryBean, try to match FactoryBean itself next.
+					beanName = FACTORY_BEAN_PREFIX + beanName;
 				}
-				else {
-					// If type to match is FactoryBean, match FactoryBean itself.
-					// Else, match bean instance.
-					if (isFactoryType) {
-						beanName = FACTORY_BEAN_PREFIX + beanName;
-					}
-					if (isBeanTypeMatch(beanName, type)) {
-						result.add(beanName);
-					}
+				// Match raw bean instance (might be raw FactoryBean).
+				if (isBeanTypeMatch(beanName, type)) {
+					result.add(beanName);
 				}
 			}
 		}
