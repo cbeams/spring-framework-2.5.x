@@ -40,16 +40,10 @@ public interface BeanDefinitionReader {
 
 	/**
 	 * Return the bean factory to register the bean definitions with.
+	 * <p>The factory is exposed through the BeanDefinitionRegistry interface,
+	 * encapsulating the methods that are relevant for bean definition handling.
 	 */
 	BeanDefinitionRegistry getBeanFactory();
-
-	/**
-	 * Return the class loader to use for bean classes.
-	 * <p>Null suggests to not load bean classes but just register bean definitions
-	 * with class names, for example when just registering beans in a registry
-	 * but not actually instantiating them in a factory.
-	 */
-	ClassLoader getBeanClassLoader();
 
 	/**
 	 * Return the resource loader to use for resource locations.
@@ -62,9 +56,21 @@ public interface BeanDefinitionReader {
 	 * tag in XML bean definitions. It is recommended, however, to apply
 	 * such imports relative to the defining resource; only explicit full
 	 * resource locations will trigger absolute resource loading.
+	 * <p>There is also a <code>loadBeanDefinitions</code> method available,
+	 * for loading bean definitions from a resource location (or location pattern).
+	 * This is a convenience to avoid explicit ResourceLoader handling.
+	 * @see #loadBeanDefinitions(String)
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 */
 	ResourceLoader getResourceLoader();
+
+	/**
+	 * Return the class loader to use for bean classes.
+	 * <p>Null suggests to not load bean classes but just register bean definitions
+	 * with class names, for example when just registering beans in a registry
+	 * but not actually instantiating them in a factory.
+	 */
+	ClassLoader getBeanClassLoader();
 
 
 	/**
@@ -82,5 +88,19 @@ public interface BeanDefinitionReader {
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
 	int loadBeanDefinitions(Resource[] resources) throws BeanDefinitionStoreException;
+
+	/**
+	 * Load bean definitions from the specified resource location.
+	 * <p>The location can also be a location pattern, provided that the
+	 * ResourceLoader of this bean definition reader is a ResourcePatternResolver.
+	 * @param location the resource location, to be loaded with the ResourceLoader
+	 * (or ResourcePatternResolver) of this bean definition reader
+	 * @return the number of bean definitions found
+	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
+	 * @see #getResourceLoader()
+	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource)
+	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource[])
+	 */
+	int loadBeanDefinitions(String location) throws BeanDefinitionStoreException;
 
 }

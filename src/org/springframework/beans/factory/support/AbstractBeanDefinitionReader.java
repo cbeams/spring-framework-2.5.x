@@ -16,13 +16,17 @@
 
 package org.springframework.beans.factory.support;
 
+import java.io.IOException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * Abstract base class for bean definition readers which implement
@@ -41,9 +45,9 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 	private final BeanDefinitionRegistry beanFactory;
 
-	private ClassLoader beanClassLoader = Thread.currentThread().getContextClassLoader();
+	private ResourceLoader resourceLoader;
 
-	private ResourceLoader resourceLoader = null;
+	private ClassLoader beanClassLoader = Thread.currentThread().getContextClassLoader();
 
 
 	/**
@@ -79,22 +83,6 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	}
 
 	/**
-	 * Set the ClassLoader to use for bean classes.
-	 * Default is the thread context class loader.
-	 * <p>Setting this to null suggests to not load bean classes but just register
-	 * bean definitions with class names, for example when just registering beans
-	 * in a registry but not actually instantiating them in a factory.
-	 * @see java.lang.Thread#getContextClassLoader
-	 */
-	public void setBeanClassLoader(ClassLoader beanClassLoader) {
-		this.beanClassLoader = beanClassLoader;
-	}
-
-	public ClassLoader getBeanClassLoader() {
-		return beanClassLoader;
-	}
-
-	/**
 	 * Set the ResourceLoader to use for resource locations.
 	 * If specifying a ResourcePatternResolver, the bean definition reader
 	 * will be capable of resolving resource patterns to Resource arrays.
@@ -113,6 +101,22 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 		return resourceLoader;
 	}
 
+	/**
+	 * Set the ClassLoader to use for bean classes.
+	 * Default is the thread context class loader.
+	 * <p>Setting this to null suggests to not load bean classes but just register
+	 * bean definitions with class names, for example when just registering beans
+	 * in a registry but not actually instantiating them in a factory.
+	 * @see java.lang.Thread#getContextClassLoader
+	 */
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+		this.beanClassLoader = beanClassLoader;
+	}
+
+	public ClassLoader getBeanClassLoader() {
+		return beanClassLoader;
+	}
+
 
 	public int loadBeanDefinitions(Resource[] resources) throws BeansException {
 		int counter = 0;
@@ -120,6 +124,39 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 			counter += loadBeanDefinitions(resources[i]);
 		}
 		return counter;
+	}
+
+	public int loadBeanDefinitions(String location) throws BeanDefinitionStoreException {
+		ResourceLoader resourceLoader = getResourceLoader();
+		if (resourceLoader == null) {
+			throw new BeanDefinitionStoreException(
+					"Cannot import bean definitions from location [" + location + "]: no ResourceLoader available");
+		}
+
+		if (resourceLoader instanceof ResourcePatternResolver) {
+			// Resource pattern matching available.
+			try {
+				Resource[] resources = ((ResourcePatternResolver) resourceLoader).getResources(location);
+				int loadCount = loadBeanDefinitions(resources);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Loaded " + loadCount + " bean definitions from location pattern [" + location + "]");
+				}
+				return loadCount;
+			}
+			catch (IOException ex) {
+				throw new BeanDefinitionStoreException(
+						"Could not resolve bean definition resource pattern [" + location + "]", ex);
+			}
+		}
+		else {
+			// Can only load single resources by absolute URL.
+			Resource resource = resourceLoader.getResource(location);
+			int loadCount = loadBeanDefinitions(resource);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loaded " + loadCount + " bean definitions from location [" + location + "]");
+			}
+			return loadCount;
+		}
 	}
 
 }

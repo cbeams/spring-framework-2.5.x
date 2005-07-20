@@ -49,8 +49,6 @@ import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -185,7 +183,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 		int beanDefinitionCount = parseBeanDefinitions(root);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Found " + beanDefinitionCount + " <bean> elements defining beans");
+			logger.debug("Found " + beanDefinitionCount + " <bean> elements in " + resource);
 		}
 		return beanDefinitionCount;
 	}
@@ -248,7 +246,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 */
 	protected int parseBeanDefinitions(Element root) throws BeanDefinitionStoreException {
 		NodeList nl = root.getChildNodes();
-		int beanDefinitionCounter = 0;
+		int beanDefinitionCount = 0;
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element) {
@@ -262,13 +260,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 					this.beanDefinitionReader.getBeanFactory().registerAlias(name, alias);
 				}
 				else if (BEAN_ELEMENT.equals(node.getNodeName())) {
-					beanDefinitionCounter++;
+					beanDefinitionCount++;
 					BeanDefinitionHolder bdHolder = parseBeanDefinitionElement(ele);
 					BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, this.beanDefinitionReader.getBeanFactory());
 				}
 			}
 		}
-		return beanDefinitionCounter;
+		return beanDefinitionCount;
 	}
 
 	/**
@@ -277,34 +275,21 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 */
 	protected void importBeanDefinitionResource(Element ele) throws BeanDefinitionStoreException {
 		String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
+
 		if (ResourcePatternUtils.isUrl(location)) {
-			ResourceLoader resourceLoader = getBeanDefinitionReader().getResourceLoader();
-			if (resourceLoader == null) {
-				throw new BeanDefinitionStoreException(
-						"Cannot import bean definitions from location [" + location + "]: no resource loader available");
-			}
-			if (resourceLoader instanceof ResourcePatternResolver) {
-				// Resource pattern matching available.
-				try {
-					Resource[] absoluteResources = ((ResourcePatternResolver) resourceLoader).getResources(location);
-					getBeanDefinitionReader().loadBeanDefinitions(absoluteResources);
-				}
-				catch (IOException ex) {
-					throw new BeanDefinitionStoreException(
-							"Could not resolve bean definition resource pattern [" + location + "]", ex);
-				}
-			}
-			else {
-				// Can only load single resources by absolute URL.
-				Resource absoluteResource = resourceLoader.getResource(location);
-				getBeanDefinitionReader().loadBeanDefinitions(absoluteResource);
+			int importCount = getBeanDefinitionReader().loadBeanDefinitions(location);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Imported " + importCount + " bean definitions from URL location [" + location + "]");
 			}
 		}
 		else {
 			// No URL -> considering resource location as relative to the current file.
 			try {
 				Resource relativeResource = getResource().createRelative(location);
-				getBeanDefinitionReader().loadBeanDefinitions(relativeResource);
+				int importCount = getBeanDefinitionReader().loadBeanDefinitions(relativeResource);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Imported " + importCount + " bean definitions from relative location [" + location + "]");
+				}
 			}
 			catch (IOException ex) {
 				throw new BeanDefinitionStoreException(
