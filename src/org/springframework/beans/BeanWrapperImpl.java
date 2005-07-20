@@ -734,7 +734,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		nestedBw.setPropertyValue(tokens, value);
 	}
 
-	protected void setPropertyValue(PropertyTokenHolder tokens, Object value) throws BeansException {
+	protected void setPropertyValue(PropertyTokenHolder tokens, Object newValue) throws BeansException {
 		String propertyName = tokens.canonicalName;
 
 		if (tokens.keys != null) {
@@ -762,13 +762,17 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 			else if (propValue.getClass().isArray()) {
 				Class requiredType = propValue.getClass().getComponentType();
-				Object newValue = doTypeConversionIfNecessary(propertyName, propertyName, null, value, requiredType);
+				int arrayIndex = Integer.parseInt(key);
+				Object oldValue = null;
 				try {
-					Array.set(propValue, Integer.parseInt(key), newValue);
+					oldValue = Array.get(propValue, arrayIndex);
+					Object convertedValue =
+							doTypeConversionIfNecessary(propertyName, propertyName, oldValue, newValue, requiredType);
+					Array.set(propValue, Integer.parseInt(key), convertedValue);
 				}
 				catch (IllegalArgumentException ex) {
 					PropertyChangeEvent pce =
-							new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, null, newValue);
+							new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
 					throw new TypeMismatchException(pce, requiredType, ex);
 				}
 				catch (IndexOutOfBoundsException ex) {
@@ -777,11 +781,16 @@ public class BeanWrapperImpl implements BeanWrapper {
 				}
 			}
 			else if (propValue instanceof List) {
-				Object newValue = doTypeConversionIfNecessary(propertyName, propertyName, null, value, null);
 				List list = (List) propValue;
 				int index = Integer.parseInt(key);
+				Object oldValue = null;
 				if (index < list.size()) {
-					list.set(index, newValue);
+					oldValue = list.get(index);
+				}
+				Object convertedValue =
+						doTypeConversionIfNecessary(propertyName, propertyName, oldValue, newValue, null);
+				if (index < list.size()) {
+					list.set(index, convertedValue);
 				}
 				else if (index >= list.size()) {
 					for (int i = list.size(); i < index; i++) {
@@ -795,33 +804,48 @@ public class BeanWrapperImpl implements BeanWrapper {
 									"': List does not support filling up gaps with null elements");
 						}
 					}
-					list.add(newValue);
+					list.add(convertedValue);
 				}
 			}
 			else if (propValue instanceof Map) {
-				Object newValue = doTypeConversionIfNecessary(propertyName, propertyName, null, value, null);
 				Map map = (Map) propValue;
-				map.put(key, newValue);
+				Object oldValue = map.get(key);
+				Object convertedValue =
+						doTypeConversionIfNecessary(propertyName, propertyName, oldValue, newValue, null);
+				map.put(key, convertedValue);
 			}
 			else {
 				throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 						"Property referenced in indexed property path '" + propertyName +
-						"' is neither an array nor a List nor a Map; returned value was [" + value + "]");
+						"' is neither an array nor a List nor a Map; returned value was [" + newValue + "]");
 			}
 		}
+
 		else {
-			if (!isWritableProperty(propertyName)) {
+			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+			if (pd == null || pd.getWriteMethod() == null) {
 				throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName);
 			}
-			PropertyDescriptor pd = getPropertyDescriptor(propertyName);
-			Method writeMethod = pd.getWriteMethod();
-			Object newValue = null;
-			try {
-				// old value may still be null
-				newValue = doTypeConversionIfNecessary(propertyName, propertyName, null, value, pd.getPropertyType());
 
-				if (pd.getPropertyType().isPrimitive() && (newValue == null || "".equals(newValue))) {
-					throw new IllegalArgumentException("Invalid value [" + value + "] for property '" +
+			Method readMethod = pd.getReadMethod();
+			Method writeMethod = pd.getWriteMethod();
+			Object oldValue = null;
+
+			if (readMethod != null) {
+				try {
+					oldValue = readMethod.invoke(this.object, new Object[0]);
+				}
+				catch (Exception ex) {
+					logger.debug("Could not read previous value of property '" + this.nestedPath + propertyName, ex);
+				}
+			}
+
+			try {
+				Object convertedValue =
+						doTypeConversionIfNecessary(propertyName, propertyName, oldValue, newValue, pd.getPropertyType());
+
+				if (pd.getPropertyType().isPrimitive() && (convertedValue == null || "".equals(convertedValue))) {
+					throw new IllegalArgumentException("Invalid value [" + newValue + "] for property '" +
 							pd.getName() + "' of primitive type [" + pd.getPropertyType() + "]");
 				}
 
@@ -829,7 +853,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 					logger.debug("About to invoke write method [" + writeMethod + "] on object of class [" +
 							this.object.getClass().getName() + "]");
 				}
-				writeMethod.invoke(this.object, new Object[] {newValue});
+				writeMethod.invoke(this.object, new Object[] {convertedValue});
 				if (logger.isDebugEnabled()) {
 					logger.debug("Invoked write method [" + writeMethod + "] with value of type [" +
 							pd.getPropertyType().getName() + "]");
@@ -837,7 +861,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 			catch (InvocationTargetException ex) {
 				PropertyChangeEvent propertyChangeEvent =
-						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, null, value);
+						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
 				if (ex.getTargetException() instanceof ClassCastException) {
 					throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex.getTargetException());
 				}
@@ -847,12 +871,12 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 			catch (IllegalArgumentException ex) {
 				PropertyChangeEvent pce =
-						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, null, value);
+						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
 				throw new TypeMismatchException(pce, pd.getPropertyType(), ex);
 			}
 			catch (IllegalAccessException ex) {
 				PropertyChangeEvent pce =
-						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, null, value);
+						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
 				throw new MethodInvocationException(pce, ex);
 			}
 		}
@@ -973,7 +997,13 @@ public class BeanWrapperImpl implements BeanWrapper {
 					// for type conversion from non-String values to the required type.
 					try {
 						pe.setValue(convertedValue);
-						convertedValue = pe.getValue();
+						Object newConvertedValue = pe.getValue();
+						if (newConvertedValue != convertedValue) {
+							convertedValue = newConvertedValue;
+							// Reset PropertyEditor: It already did a proper conversion.
+							// Don't use it again for a setAsText call.
+							pe = null;
+						}
 					}
 					catch (IllegalArgumentException ex) {
 						throw new TypeMismatchException(
@@ -997,6 +1027,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 						logger.debug("Converting String to [" + requiredType + "] using property editor [" + pe + "]");
 					}
 					try {
+						pe.setValue(oldValue);
 						pe.setAsText((String) convertedValue);
 						convertedValue = pe.getValue();
 					}
@@ -1038,10 +1069,10 @@ public class BeanWrapperImpl implements BeanWrapper {
 						else {
 							// A plain value: convert it to an array with a single component.
 							Object result = Array.newInstance(componentType, 1);
-							Object val = doTypeConversionIfNecessary(
+							Object value = doTypeConversionIfNecessary(
 									propertyName, propertyName + PROPERTY_KEY_PREFIX + 0 + PROPERTY_KEY_SUFFIX,
 									null, convertedValue, componentType);
-							Array.set(result, 0, val);
+							Array.set(result, 0, value);
 							return result;
 						}
 					}
