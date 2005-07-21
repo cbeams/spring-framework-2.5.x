@@ -309,7 +309,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * <p>If no "id" specified, uses the first name in the "name" attribute
 	 * as canonical name, registering all others as aliases.
 	 * <p>Callers should specify whether this element represents an inner bean
-	 * definition or not by setting the <code>innerBean</code> argument appropriately
+	 * definition or not by setting the <code>isInnerBean</code> argument appropriately
 	 */
 	protected BeanDefinitionHolder parseBeanDefinitionElement(Element ele, boolean isInnerBean)
 			throws BeanDefinitionStoreException {
@@ -667,7 +667,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			return parseBeanDefinitionElement(ele, true);
 		}
 		else if (ele.getTagName().equals(REF_ELEMENT)) {
-			// A generic reference to any name of any bean.
+			// A generic reference to any name of any bean.			            
 			String beanRef = ele.getAttribute(BEAN_REF_ATTRIBUTE);
 			if (!StringUtils.hasLength(beanRef)) {
 				// A reference to the id of another bean in the same XML file.
