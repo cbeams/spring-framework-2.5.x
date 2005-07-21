@@ -228,8 +228,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's JamonPerformanceMonitorInterceptor
 
-* jasperreports/jasperreports-0.6.6.jar
-- JasperReports 0.6.6 (http://jasperreports.sourceforge.net)
+* jasperreports/jasperreports-1.0.0.jar
+- JasperReports 1.0.0 (http://jasperreports.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
