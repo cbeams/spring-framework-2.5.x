@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.3 (20.7.2005)
+Changes in version 1.2.3 (22.7.2005)
 ------------------------------------
 
 Package org.springframework.aop
@@ -11,19 +11,40 @@ Package org.springframework.aop
 * mirrored "maxIdle", "minIdle", "maxWait" and other Commons Pool properties in CommonsPoolTargetSource
 
 Package org.springframework.beans
+* BeanWrapperImpl passes the old value to each applied PropertyEditor before calling "setAsText", as far as possible
+* fixed PagedListHolder to always go through the "getPageCount()" method when determining the current number of pages
 * refactored AbstractBeanFactory's type determination for "factory-method" into "getTypeForFactoryMethod" template
 * AbstractBeanFactory does not create beans with "factory-method" if the type can clearly be determined statically
+* AbstractAutowireCapableBeanFactory correctly indicates "constructor" or "factory method" in debug log messages
+* AbstractAutowireCapableBeanFactory prefers raw arg matches over converted arg matches when choosing a constructor
 * AbstractAutowireCapableBeanFactory throws BeanCreationException if a factory method returned null
 * DefaultListableBeanFactory does not create beans with "factory-bean" for type check if "includeFactoryBeans"=false
+* DefaultListableBeanFactory matches raw FactoryBean classes against specified type when "includeFactoryBeans"=false
+* fixed BeanDefinitionReaderUtils to be able to generate a bean name for anonymous beans with "factory-bean" declaration
+* AbstractBeanDefinitionReader autodetects BeanDefinitionRegistry that implements ResourceLoader (-> ApplicationContext)
+* added "loadBeanDefinitions(location)" method to BeanDefinitionReader interface, given resource location/pattern String
+* DefaultXmlBeanDefinitionParser supports resource patterns for XML "import" tag (requires a ResourcePatternResolver)
+* DefaultXmlBeanDefinitionParser registers unique bean names for inner beans as well, with identity hashcode as suffix
+
+Package org.springframework.context
+* factored out AbstractApplicationEventMulticaster base class from SimpleApplicationEventMulticaster
+* AbstractApplicationEventMulticaster allows for specifying the collection class to use (e.g. CopyOnWriteArraySet)
+* AbstractApplicationContext registers raw FactoryBean instances that implement ApplicationListener as listeners
 
 Package org.springframework.core
+* fixed InputStreamResource's "equals"/"hashCode" to only consider InputStreamResources with same InputStream as equal
+* PathMatchingResourcePatternResolver always uses PathMatcher's pattern detection instead of hardcoded asterisk checks
 * fixed PropertiesLoaderSupport to correctly ignore a resource not found failure if "ignoreResourceNotFound" is "true"
 
 Package org.springframework.dao
 * refined DataAccessUtils to consider a Collection with multiple references to same instance as having a unique result
 
 Package org.springframework.jdbc
+* added check to JdbcUtils's "getResultSetValue" method: turning Blob/Clob object into byte array respectively String
+* JdbcUtils's "getResultSetValue" explicitly extracts Timestamp if metadata indicate Timestamp (Oracle 10g workaround)
 * fixed bug in StatementCreatorUtils where NUMERIC and DECIMAL types could lose decimals when passing in BigDecimal
+* refined StatementCreatorUtils to use straight "setTimestamp" calls instead of "setObject" where possible
+* refined StatementCreatorUtils to treat StringBuffer and StringWriter as the resulting String
 
 Package org.springframework.jmx
 * revised ObjectNameManager to delegate to JMX 1.2's "ObjectName.getInstance()" methods (when available) for caching
@@ -38,17 +59,27 @@ Package org.springframework.mail
 Package org.springframework.orm
 * extended doc coverage regarding plain DAO implementations: based on plain Hibernate3/JDO/TopLink/OJB/iBATIS API
 * added "allowCreate" flag to TransactionAwarePersistenceManagerFactoryProxy, allowing to enforce transactional PMs
+* added "FLUSH_COMMIT" support to HibernateTemplate/Interceptor for H2.1/H3, and "FLUSH_ALWAYS" support for H3
+* HibernateTemplate/Interceptor also apply their flush mode to transactional Sessions, as far as feasible
 
 Package org.springframework.remoting
 * added RmiRegistryFactoryBean to RMI support package, for explicit setup of an RMI registry (existing or newly created)
 * added "registry" bean property to RmiServiceExporter, for explicitly referring to an existing RMI registry instance
 
+Package org.springframework.test
+* added "onSetUpBeforeTransaction" and "onTearDownAfterTransaction" callbacks to AbstractTransactionalSpringContextTests
+
 Package org.springframework.transaction
 * JtaTransactionManager calls "afterCompletion" of Spring synchronizations immediately if JTA tx is marked rollback-only
 
 Package org.springframework.web
+* fixed XmlWebApplicationContext to set itself as ResourceLoader on the underlying XmlBeanDefinitionReader that it uses
 * fixed SpringBindingActionForm adapter to correctly work for nested properties (suppressing Struts binding completely)
+* added "suppressBinding(request)" callback method to BaseCommandController, to suppress binding for specific requests
 * added "onFormChange" callback to AbstractFormController, to allow for post-processing in case of a form change request
+* added CancellableFormController, supporting cancel requests and a corresponding "onCancel" callbck plus "cancelView"
+* deprecated AbstractWizardFormController's "isFinish"/"isCancel" in favor of "isFinishRequest"/"isCancelRequest"
+* fixed BindTag to be able to handle existing attributes named "status" of any type, simply storing and re-exposing them
 
 
 Changes in version 1.2.2 (5.7.2005)
