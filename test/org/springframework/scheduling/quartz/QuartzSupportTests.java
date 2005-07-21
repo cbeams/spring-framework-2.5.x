@@ -47,6 +47,7 @@ import org.springframework.scheduling.TestMethodInvokingTask;
 /**
  * @author Juergen Hoeller
  * @author Alef Arendsen
+ * @author Rob Harrop
  * @since 20.02.2004
  */
 public class QuartzSupportTests extends TestCase {
@@ -437,6 +438,24 @@ public class QuartzSupportTests extends TestCase {
 
 			assertNotSame(scheduler1, scheduler2);
 			assertFalse(scheduler1.getSchedulerName().equals(scheduler2.getSchedulerName()));
+		}
+		finally {
+			ctx.close();
+		}
+	}
+
+	public void testWithTwoAnonymousMethodInvokingJobDetailFactoryBeans() throws InterruptedException {
+		ClassPathXmlApplicationContext ctx =
+				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleAnonymousMethodInvokingJobDetailFB.xml");
+		Thread.sleep(3000);
+		try {
+			QuartzTestBean exportService = (QuartzTestBean) ctx.getBean("exportService");
+			QuartzTestBean importService = (QuartzTestBean) ctx.getBean("importService");
+
+			assertEquals("doImport called exportService", 0, exportService.getImportCount());
+			assertEquals("doExport not called on exportService", 2, exportService.getExportCount());
+			assertEquals("doImport not called on importService", 2, importService.getImportCount());
+			assertEquals("doExport called on importService", 0, importService.getExportCount());
 		}
 		finally {
 			ctx.close();
