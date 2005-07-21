@@ -778,16 +778,19 @@
 
         <para>Introduction advice cannot be used with any pointcut, as it
         applies only at class, rather than method, level. You can only use
-        introduction advice with the InterceptionIntroductionAdvisor, which
+        introduction advice with the <literal>IntroductionAdvisor</literal>, which
         has the following methods:</para>
 
-        <programlisting>public interface InterceptionIntroductionAdvisor extends InterceptionAdvisor {
+        <programlisting>public interface IntroductionAdvisor extends Advisor, IntroductionInfo {
 
-    ClassFilter getClassFilter();
+	ClassFilter getClassFilter();
 
-    IntroductionInterceptor getIntroductionInterceptor();
+	void validateInterfaces() throws IllegalArgumentException;
+}
 
-    Class[] getInterfaces();
+public interface IntroductionInfo {
+
+	Class[] getInterfaces();
 }</programlisting>
 
         <para>There is no <literal>MethodMatcher</literal>, and hence no
@@ -795,9 +798,11 @@
         class filtering is logical.</para>
 
         <para>The <literal>getInterfaces()</literal> method returns the
-        interfaces introduced by this advisor.</para>
+        interfaces introduced by this advisor.</para> The <literal>validateInterfaces()</literal>
+		method is used internally to see whether or not the advised interfaces can be
+		implemented by the configured <literal>IntroductionInterceptor</literal>.
 
-        <para>Let's look at a simple example from the Spring test suite. Let's
+		<para>Let's look at a simple example from the Spring test suite. Let's
         suppose we want to introduce the following interface to one or more
         objects:</para>
 
