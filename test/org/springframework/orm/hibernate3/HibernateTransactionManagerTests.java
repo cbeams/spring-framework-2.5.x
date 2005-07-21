@@ -222,6 +222,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO, 1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -275,6 +277,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO, 1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -339,6 +343,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO, 1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		tx.rollback();
@@ -459,6 +465,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		session1Control.setReturnValue(tx, 1);
 		session2.beginTransaction();
 		session2Control.setReturnValue(tx, 1);
+		session2.getFlushMode();
+		session2Control.setReturnValue(FlushMode.AUTO, 1);
 		session2.flush();
 		session2Control.setVoidCallable(1);
 		session1.close();
@@ -537,7 +545,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.AUTO, 1);
+		sessionControl.setReturnValue(FlushMode.AUTO, 2);
 		session.flush();
 		sessionControl.setVoidCallable(2);
 		session.close();
@@ -604,8 +612,14 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(sf, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.NEVER, 1);
+		session.setFlushMode(FlushMode.AUTO);
+		sessionControl.setVoidCallable(1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
+		session.setFlushMode(FlushMode.NEVER);
+		sessionControl.setVoidCallable(1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.NEVER, 1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();

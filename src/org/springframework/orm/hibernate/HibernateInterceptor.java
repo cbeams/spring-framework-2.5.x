@@ -82,21 +82,19 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class HibernateInterceptor extends HibernateAccessor implements MethodInterceptor {
 
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-		boolean existingTransaction = false;
-		Session session = SessionFactoryUtils.getSession(
-				getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator());
-		if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
-			logger.debug("Found thread-bound Session for Hibernate interceptor");
-			existingTransaction = true;
+		Session session = getSession();
+		boolean existingTransaction = SessionFactoryUtils.isSessionTransactional(session, getSessionFactory());
+
+		if (existingTransaction) {
+			logger.debug("Found thread-bound Session for HibernateInterceptor");
 		}
 		else {
-			logger.debug("Using new Session for Hibernate interceptor");
-			if (getFlushMode() == FLUSH_NEVER) {
-				session.setFlushMode(FlushMode.NEVER);
-			}
 			TransactionSynchronizationManager.bindResource(getSessionFactory(), new SessionHolder(session));
 		}
+
+		FlushMode previousFlushMode = null;
 		try {
+			previousFlushMode = applyFlushMode(session, existingTransaction);
 			Object retVal = methodInvocation.proceed();
 			flushIfNecessary(session, existingTransaction);
 			return retVal;
@@ -106,13 +104,25 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 		}
 		finally {
 			if (existingTransaction) {
-				logger.debug("Not closing pre-bound Hibernate Session after interceptor");
+				logger.debug("Not closing pre-bound Hibernate Session after HibernateInterceptor");
+				if (previousFlushMode != null) {
+					session.setFlushMode(previousFlushMode);
+				}
 			}
 			else {
 				TransactionSynchronizationManager.unbindResource(getSessionFactory());
 				SessionFactoryUtils.releaseSession(session, getSessionFactory());
 			}
 		}
+	}
+
+	/**
+	 * Return a Session for use by this interceptor.
+	 * @see SessionFactoryUtils#getSession
+	 */
+	protected Session getSession() {
+		return SessionFactoryUtils.getSession(
+				getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator());
 	}
 
 }

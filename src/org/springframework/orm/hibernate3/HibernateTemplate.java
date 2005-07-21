@@ -303,10 +303,13 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public Object execute(HibernateCallback action, boolean exposeNativeSession) throws DataAccessException {
 		Session session = getSession();
 		boolean existingTransaction = SessionFactoryUtils.isSessionTransactional(session, getSessionFactory());
-		if (!existingTransaction && getFlushMode() == FLUSH_NEVER) {
-			session.setFlushMode(FlushMode.NEVER);
+		if (existingTransaction) {
+			logger.debug("Found thread-bound Session for HibernateTemplate");
 		}
+
+		FlushMode previousFlushMode = null;
 		try {
+			previousFlushMode = applyFlushMode(session, existingTransaction);
 			enableFilters(session);
 			Session sessionToExpose = (exposeNativeSession ? session : createSessionProxy(session));
 			Object result = action.doInHibernate(sessionToExpose);
@@ -324,8 +327,16 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			throw ex;
 		}
 		finally {
-			disableFilters(session);
-			SessionFactoryUtils.releaseSession(session, getSessionFactory());
+			if (existingTransaction) {
+				logger.debug("Not closing pre-bound Hibernate Session after HibernateTemplate");
+				disableFilters(session);
+				if (previousFlushMode != null) {
+					session.setFlushMode(previousFlushMode);
+				}
+			}
+			else {
+				SessionFactoryUtils.releaseSession(session, getSessionFactory());
+			}
 		}
 	}
 
@@ -398,6 +409,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public Object get(final String entityName, final Serializable id, final LockMode lockMode)
 			throws DataAccessException {
+
 		return execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
@@ -416,6 +428,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public Object load(final Class entityClass, final Serializable id, final LockMode lockMode)
 			throws DataAccessException {
+
 		return execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
@@ -434,6 +447,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public Object load(final String entityName, final Serializable id, final LockMode lockMode)
 			throws DataAccessException {
+
 		return execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
@@ -596,6 +610,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public void update(final String entityName, final Object entity, final LockMode lockMode)
 			throws DataAccessException {
+
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
@@ -755,11 +770,13 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public List findByNamedParam(String queryString, String paramName, Object value)
 			throws DataAccessException {
+
 		return findByNamedParam(queryString, new String[] {paramName}, new Object[] {value});
 	}
 
 	public List findByNamedParam(final String queryString, final String[] paramNames, final Object[] values)
 			throws DataAccessException {
+
 		if (paramNames.length != values.length) {
 			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
 		}
@@ -779,6 +796,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public List findByValueBean(final String queryString, final Object valueBean)
 			throws DataAccessException {
+
 		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
@@ -819,12 +837,14 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public List findByNamedQueryAndNamedParam(String queryName, String paramName, Object value)
 			throws DataAccessException {
+
 		return findByNamedQueryAndNamedParam(queryName, new String[] {paramName}, new Object[] {value});
 	}
 
 	public List findByNamedQueryAndNamedParam(
 			final String queryName, final String[] paramNames, final Object[] values)
 			throws DataAccessException {
+
 		if (paramNames != null && values != null && paramNames.length != values.length) {
 			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
 		}
@@ -844,6 +864,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public List findByNamedQueryAndValueBean(final String queryName, final Object valueBean)
 			throws DataAccessException {
+
 		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.getNamedQuery(queryName);

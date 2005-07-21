@@ -119,6 +119,32 @@ public class HibernateTemplateTests extends TestCase {
 		assertTrue("Correct result list", result == l);
 	}
 
+	public void testExecuteWithNewSessionAndFlushCommit() throws HibernateException {
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.setFlushMode(FlushMode.COMMIT);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setFlushMode(HibernateTemplate.FLUSH_COMMIT);
+		final List l = new ArrayList();
+		l.add("test");
+		List result = ht.executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				return l;
+			}
+		});
+		assertTrue("Correct result list", result == l);
+	}
+
 	public void testExecuteWithNotAllowCreate() {
 		HibernateTemplate ht = new HibernateTemplate();
 		ht.setSessionFactory(sf);
@@ -161,10 +187,48 @@ public class HibernateTemplateTests extends TestCase {
 		}
 	}
 
+	public void testExecuteWithThreadBoundAndFlushCommit() {
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
+		session.setFlushMode(FlushMode.COMMIT);
+		sessionControl.setVoidCallable(1);
+		session.setFlushMode(FlushMode.AUTO);
+		sessionControl.setVoidCallable(1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setAllowCreate(false);
+		ht.setFlushMode(HibernateTemplate.FLUSH_COMMIT);
+
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
+		try {
+			final List l = new ArrayList();
+			l.add("test");
+			List result = ht.executeFind(new HibernateCallback() {
+				public Object doInHibernate(Session session) throws HibernateException {
+					return l;
+				}
+			});
+			assertTrue("Correct result list", result == l);
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
+		}
+	}
+
 	public void testExecuteWithThreadBoundAndFlushEager() throws HibernateException {
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.NEVER);
+		session.setFlushMode(FlushMode.AUTO);
+		sessionControl.setVoidCallable(1);
 		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.setFlushMode(FlushMode.NEVER);
 		sessionControl.setVoidCallable(1);
 		sfControl.replay();
 		sessionControl.replay();

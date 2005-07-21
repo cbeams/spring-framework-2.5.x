@@ -20,6 +20,7 @@ import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.JDBCException;
@@ -52,15 +53,22 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * Never flush is a good strategy for read-only units of work.
 	 * Hibernate will not track and look for changes in this case,
 	 * avoiding any overhead of modification detection.
+	 * <p>In case of an existing Session, FLUSH_NEVER will turn the flush mode
+	 * to NEVER for the scope of the current operation, resetting the previous
+	 * flush mode afterwards.
 	 * @see #setFlushMode
 	 */
 	public static final int FLUSH_NEVER = 0;
 
 	/**
-	 * Automatic flushing is the default mode for a Hibernate session.
-	 * A session will get flushed on transaction commit or session closing,
-	 * and on certain find operations that might involve already modified
-	 * instances, but not after each unit of work like with eager flushing.
+	 * Automatic flushing is the default mode for a Hibernate Session.
+	 * A session will get flushed on transaction commit, and on certain find
+	 * operations that might involve already modified instances, but not
+	 * after each unit of work like with eager flushing.
+	 * <p>In case of an existing Session, FLUSH_AUTO will participate in the
+	 * existing flush mode, not modifying it for the current operation.
+	 * This in particular means that this setting will not modify an existing
+	 * flush mode NEVER, in contrast to FLUSH_EAGER.
 	 * @see #setFlushMode
 	 */
 	public static final int FLUSH_AUTO = 1;
@@ -77,9 +85,34 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * <li>the fact that an actual database rollback is needed if the Hibernate
 	 * transaction rolls back (due to already submitted SQL statements).
 	 * </ul>
+	 * <p>In case of an existing Session, FLUSH_EAGER will turn the flush mode
+	 * to AUTO for the scope of the current operation and issue a flush at the
+	 * end, resetting the previous flush mode afterwards.
 	 * @see #setFlushMode
 	 */
 	public static final int FLUSH_EAGER = 2;
+
+	/**
+	 * Flushing at commit only is intended for units of work where no
+	 * intermediate flushing is desired, not even for find operations
+	 * that might involve already modified instances.
+	 * <p>In case of an existing Session, FLUSH_COMMIT will turn the flush mode
+	 * to COMMIT for the scope of the current operation, resetting the previous
+	 * flush mode afterwards. The only exception is an existing flush mode
+	 * NEVER, which will not be modified through this setting.
+	 * @see #setFlushMode
+	 */
+	public static final int FLUSH_COMMIT = 3;
+
+	/**
+	 * Flushing before every query statement is rarely necessary.
+	 * It is only available for special needs.
+	 * <p>In case of an existing Session, FLUSH_ALWAYS will turn the flush mode
+	 * to ALWAYS for the scope of the current operation, resetting the previous
+	 * flush mode afterwards.
+	 * @see #setFlushMode
+	 */
+	public static final int FLUSH_ALWAYS = 4;
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -288,13 +321,75 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 
 
 	/**
+	 * Apply the flush mode that's been specified for this accessor
+	 * to the given Session.
+	 * @param session the current Hibernate Session
+	 * @param existingTransaction if executing within an existing transaction
+	 * @return the previous flush mode to restore after the operation,
+	 * or null if none
+	 * @see #setFlushMode
+	 * @see org.hibernate.Session#setFlushMode
+	 */
+	protected FlushMode applyFlushMode(Session session, boolean existingTransaction) {
+		if (getFlushMode() == FLUSH_NEVER) {
+			if (existingTransaction) {
+				FlushMode previousFlushMode = session.getFlushMode();
+				if (!previousFlushMode.equals(FlushMode.NEVER)) {
+					session.setFlushMode(FlushMode.NEVER);
+					return previousFlushMode;
+				}
+			}
+			else {
+				session.setFlushMode(FlushMode.NEVER);
+			}
+		}
+		else if (getFlushMode() == FLUSH_EAGER) {
+			if (existingTransaction) {
+				FlushMode previousFlushMode = session.getFlushMode();
+				if (!previousFlushMode.equals(FlushMode.AUTO)) {
+					session.setFlushMode(FlushMode.AUTO);
+					return previousFlushMode;
+				}
+			}
+			else {
+				// rely on default FlushMode.AUTO
+			}
+		}
+		else if (getFlushMode() == FLUSH_COMMIT) {
+			if (existingTransaction) {
+				FlushMode previousFlushMode = session.getFlushMode();
+				if (previousFlushMode.equals(FlushMode.AUTO) || previousFlushMode.equals(FlushMode.ALWAYS)) {
+					session.setFlushMode(FlushMode.COMMIT);
+					return previousFlushMode;
+				}
+			}
+			else {
+				session.setFlushMode(FlushMode.COMMIT);
+			}
+		}
+		else if (getFlushMode() == FLUSH_ALWAYS) {
+			if (existingTransaction) {
+				FlushMode previousFlushMode = session.getFlushMode();
+				if (!previousFlushMode.equals(FlushMode.ALWAYS)) {
+					session.setFlushMode(FlushMode.ALWAYS);
+					return previousFlushMode;
+				}
+			}
+			else {
+				session.setFlushMode(FlushMode.ALWAYS);
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Flush the given Hibernate Session if necessary.
 	 * @param session the current Hibernate Session
 	 * @param existingTransaction if executing within an existing transaction
 	 * @throws HibernateException in case of Hibernate flushing errors
 	 */
 	protected void flushIfNecessary(Session session, boolean existingTransaction) throws HibernateException {
-		if (getFlushMode() == FLUSH_EAGER || (!existingTransaction && getFlushMode() == FLUSH_AUTO)) {
+		if (getFlushMode() == FLUSH_EAGER || (!existingTransaction && getFlushMode() != FLUSH_NEVER)) {
 			logger.debug("Eagerly flushing Hibernate session");
 			session.flush();
 		}

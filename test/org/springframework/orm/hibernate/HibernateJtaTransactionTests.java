@@ -89,7 +89,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		session1.getFlushMode();
 		session1Control.setReturnValue(FlushMode.AUTO, 1);
 		session2.getFlushMode();
-		session2Control.setReturnValue(FlushMode.AUTO, 1);
+		session2Control.setReturnValue(FlushMode.AUTO, 2);
 		session1.flush();
 		session1Control.setVoidCallable(1);
 		session2.flush();

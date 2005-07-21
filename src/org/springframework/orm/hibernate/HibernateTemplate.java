@@ -306,10 +306,13 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public Object execute(HibernateCallback action, boolean exposeNativeSession) throws DataAccessException {
 		Session session = getSession();
 		boolean existingTransaction = SessionFactoryUtils.isSessionTransactional(session, getSessionFactory());
-		if (!existingTransaction && getFlushMode() == FLUSH_NEVER) {
-			session.setFlushMode(FlushMode.NEVER);
+		if (existingTransaction) {
+			logger.debug("Found thread-bound Session for HibernateTemplate");
 		}
+
+		FlushMode previousFlushMode = null;
 		try {
+			previousFlushMode = applyFlushMode(session, existingTransaction);
 			Session sessionToExpose = (exposeNativeSession ? session : createSessionProxy(session));
 			Object result = action.doInHibernate(sessionToExpose);
 			flushIfNecessary(session, existingTransaction);
@@ -326,7 +329,15 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			throw ex;
 		}
 		finally {
-			SessionFactoryUtils.releaseSession(session, getSessionFactory());
+			if (existingTransaction) {
+				logger.debug("Not closing pre-bound Hibernate Session after HibernateTemplate");
+				if (previousFlushMode != null) {
+					session.setFlushMode(previousFlushMode);
+				}
+			}
+			else {
+				SessionFactoryUtils.releaseSession(session, getSessionFactory());
+			}
 		}
 	}
 
@@ -616,8 +627,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		return find(queryString, new Object[] {value}, (Type[]) null);
 	}
 
-	public List find(String queryString, Object value, Type type)
-			throws DataAccessException {
+	public List find(String queryString, Object value, Type type) throws DataAccessException {
 		return find(queryString, new Object[] {value}, new Type[] {type});
 	}
 
@@ -627,6 +637,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public List find(final String queryString, final Object[] values, final Type[] types)
 			throws DataAccessException {
+
 		if (values != null && types != null && values.length != types.length) {
 			throw new IllegalArgumentException("Length of values array must match length of types array");
 		}
@@ -651,22 +662,26 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public List findByNamedParam(String queryString, String paramName, Object value)
 			throws DataAccessException {
+
 		return findByNamedParam(queryString, paramName, value, null);
 	}
 
 	public List findByNamedParam(String queryString, String paramName, Object value, Type type)
 			throws DataAccessException {
+
 		return findByNamedParam(queryString, new String[] {paramName}, new Object[] {value}, new Type[] {type});
 	}
 
 	public List findByNamedParam(String queryString, String[] paramNames, Object[] values)
 			throws DataAccessException {
+
 		return findByNamedParam(queryString, paramNames, values, null);
 	}
 
 	public List findByNamedParam(
 	    final String queryString, final String[] paramNames, final Object[] values, final Type[] types)
 	    throws DataAccessException {
+
 		if (paramNames.length != values.length) {
 			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
 		}
@@ -689,6 +704,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public List findByValueBean(final String queryString, final Object valueBean)
 			throws DataAccessException {
+
 		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
@@ -722,6 +738,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public List findByNamedQuery(final String queryName, final Object[] values, final Type[] types)
 			throws DataAccessException {
+
 		if (values != null && types != null && values.length != types.length) {
 			throw new IllegalArgumentException("Length of values array must match length of types array");
 		}
@@ -746,23 +763,27 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public List findByNamedQueryAndNamedParam(String queryName, String paramName, Object value)
 			throws DataAccessException {
+
 		return findByNamedQueryAndNamedParam(queryName, paramName, value, null);
 	}
 
 	public List findByNamedQueryAndNamedParam(String queryName, String paramName, Object value, Type type)
 			throws DataAccessException {
+
 		return findByNamedQueryAndNamedParam(
 				queryName, new String[] {paramName}, new Object[] {value}, new Type[] {type});
 	}
 
 	public List findByNamedQueryAndNamedParam(String queryName, String[] paramNames, Object[] values)
 			throws DataAccessException {
+
 		return findByNamedQueryAndNamedParam(queryName, paramNames, values, null);
 	}
 
 	public List findByNamedQueryAndNamedParam(
 	    final String queryName, final String[] paramNames, final Object[] values, final Type[] types)
 	    throws DataAccessException {
+
 		if (paramNames != null && values != null && paramNames.length != values.length) {
 			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
 		}
@@ -785,6 +806,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public List findByNamedQueryAndValueBean(final String queryName, final Object valueBean)
 			throws DataAccessException {
+
 		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.getNamedQuery(queryName);
@@ -810,6 +832,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public Iterator iterate(String queryString, Object value, Type type)
 			throws DataAccessException {
+
 		return iterate(queryString, new Object[] {value}, new Type[] {type});
 	}
 
@@ -819,6 +842,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public Iterator iterate(final String queryString, final Object[] values, final Type[] types)
 			throws DataAccessException {
+
 		if (values != null && types != null && values.length != types.length) {
 			throw new IllegalArgumentException("Length of values array must match length of types array");
 		}
@@ -856,11 +880,13 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public int delete(String queryString, Object value, Type type)
 			throws DataAccessException {
+
 		return delete(queryString, new Object[] {value}, new Type[] {type});
 	}
 
 	public int delete(final String queryString, final Object[] values, final Type[] types)
 			throws DataAccessException {
+
 		if (values != null && types != null && values.length != types.length) {
 			throw new IllegalArgumentException("Length of values array must match length of types array");
 		}

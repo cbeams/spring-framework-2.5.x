@@ -133,6 +133,8 @@ public class HibernateInterceptorTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO, 1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		sfControl.replay();
@@ -142,6 +144,76 @@ public class HibernateInterceptorTests extends TestCase {
 		HibernateInterceptor interceptor = new HibernateInterceptor();
 		interceptor.setFlushMode(HibernateInterceptor.FLUSH_EAGER);
 		interceptor.setSessionFactory(sf);
+		try {
+			interceptor.invoke(new TestInvocation(sf));
+		}
+		catch (Throwable t) {
+			fail("Should not have thrown Throwable: " + t.getMessage());
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
+		}
+
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testInterceptorWithThreadBoundAndFlushEagerSwitch() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.NEVER, 1);
+		session.setFlushMode(FlushMode.AUTO);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.setFlushMode(FlushMode.NEVER);
+		sessionControl.setVoidCallable(1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
+		HibernateInterceptor interceptor = new HibernateInterceptor();
+		interceptor.setFlushMode(HibernateInterceptor.FLUSH_EAGER);
+		interceptor.setSessionFactory(sf);
+		try {
+			interceptor.invoke(new TestInvocation(sf));
+		}
+		catch (Throwable t) {
+			fail("Should not have thrown Throwable: " + t.getMessage());
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
+		}
+
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testInterceptorWithThreadBoundAndFlushCommit() {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO, 1);
+		session.setFlushMode(FlushMode.COMMIT);
+		sessionControl.setVoidCallable(1);
+		session.setFlushMode(FlushMode.AUTO);
+		sessionControl.setVoidCallable(1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
+		HibernateInterceptor interceptor = new HibernateInterceptor();
+		interceptor.setSessionFactory(sf);
+		interceptor.setFlushMode(HibernateInterceptor.FLUSH_COMMIT);
 		try {
 			interceptor.invoke(new TestInvocation(sf));
 		}

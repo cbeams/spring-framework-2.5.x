@@ -122,8 +122,6 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.setReturnValue(sf, 1);
 		session.enableFilter("myFilter");
 		sessionControl.setReturnValue(null, 1);
-		session.disableFilter("myFilter");
-		sessionControl.setVoidCallable(1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -152,10 +150,6 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.setReturnValue(null, 1);
 		session.enableFilter("yourFilter");
 		sessionControl.setReturnValue(null, 1);
-		session.disableFilter("myFilter");
-		sessionControl.setVoidCallable(1);
-		session.disableFilter("yourFilter");
-		sessionControl.setVoidCallable(1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -220,6 +214,8 @@ public class HibernateTemplateTests extends TestCase {
 	public void testExecuteWithThreadBoundAndFlushEager() throws HibernateException {
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		sfControl.replay();
@@ -258,6 +254,40 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.setAllowCreate(false);
 		ht.setFilterName("myFilter");
+
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
+		try {
+			final List l = new ArrayList();
+			l.add("test");
+			List result = ht.executeFind(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					return l;
+				}
+			});
+			assertTrue("Correct result list", result == l);
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
+		}
+	}
+
+	public void testExecuteWithThreadBoundAndFilters() {
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.enableFilter("myFilter");
+		sessionControl.setReturnValue(null, 1);
+		session.enableFilter("yourFilter");
+		sessionControl.setReturnValue(null, 1);
+		session.disableFilter("myFilter");
+		sessionControl.setVoidCallable(1);
+		session.disableFilter("yourFilter");
+		sessionControl.setVoidCallable(1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setAllowCreate(false);
+		ht.setFilterNames(new String[] {"myFilter", "yourFilter"});
 
 		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
 		try {
