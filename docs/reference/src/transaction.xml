@@ -901,8 +901,9 @@ interface TestService {
           TransactionProxyFactoryBean, the
           <literal>TransactionAttributes</literal> property which specified
           transaction attributes in text form is replaced by the direct usage
-          of the <literal>TransactionAttributeSource</literal> property, specifying
-          an <literal>AnnotationTransactionAttributeSource</literal>.</para>
+          of the <literal>TransactionAttributeSource</literal> property,
+          specifying an
+          <literal>AnnotationTransactionAttributeSource</literal>.</para>
 
           <para><programlisting>&lt;bean id="petStore" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
   &lt;property name="transactionManager" ref="txManager"/&gt;
@@ -1179,26 +1180,6 @@ interface TestService {
   </sect1>
 
   <sect1>
-    <title>Common problems</title>
-
-    <para>Developers should take care to use the correct
-    <emphasis><literal>PlatformTransactionManager</literal></emphasis>
-    implementation for their requirements.</para>
-
-    <para>It's important to understand how the Spring transaction abstraction
-    works with JTA global transactions. Used properly, there is no conflict
-    here: Spring merely provides a simplifying, portable abstraction.</para>
-
-    <para>If you are using global transactions, you <emphasis>must</emphasis>
-    use the Spring
-    <literal>org.springframework.transaction.jta.JtaTransactionManager</literal>
-    for all your for all your transactional operations. Otherwise Spring will
-    attempt to perform local transactions on resources such as container
-    DataSources. Such local transactions don't make sense, and a good
-    application server will treat them as errors. </para>
-  </sect1>
-
-  <sect1>
     <title>AppServer-specific integration</title>
 
     <para>Spring's transaction abstraction is generally AppServer agnostic.
@@ -1222,9 +1203,9 @@ interface TestService {
       Spring's transaction definitions in a WebLogic managed transaction
       environment, beyond standard JTA semantics: features include transaction
       names, per-transaction isolation levels, and proper resuming of
-      transactions in all cases. </para>
+      transactions in all cases.</para>
 
-      <para>Please see the Javadocs for full details. </para>
+      <para>Please see the Javadocs for full details.</para>
     </sect2>
 
     <sect2>
@@ -1244,6 +1225,54 @@ interface TestService {
       the JTA <literal>UserTransaction</literal> object.</para>
 
       <para>Please see the Javadocs for full details.</para>
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>Common problems</title>
+
+    <sect2>
+      <title>Use of the wrong transaction manager for a specific
+      DataSource</title>
+
+      <para>Developers should take care to use the correct
+      <emphasis><literal>PlatformTransactionManager</literal></emphasis>
+      implementation for their requirements.</para>
+
+      <para>It's important to understand how the Spring transaction
+      abstraction works with JTA global transactions. Used properly, there is
+      no conflict here: Spring merely provides a simplifying, portable
+      abstraction.</para>
+
+      <para>If you are using global transactions, you
+      <emphasis>must</emphasis> use the Spring
+      <literal>org.springframework.transaction.jta.JtaTransactionManager</literal>
+      for all your for all your transactional operations. Otherwise Spring
+      will attempt to perform local transactions on resources such as
+      container DataSources. Such local transactions don't make sense, and a
+      good application server will treat them as errors.</para>
+    </sect2>
+
+    <sect2>
+      <title>Spurious warnings about transaction no longer being
+      active</title>
+
+      <para>Developers should take care to use the correct
+      <emphasis><literal>PlatformTransactionManager</literal></emphasis>
+      implementation for their requirements.</para>
+
+      <para>It's important to understand how the Spring transaction
+      abstraction works with JTA global transactions. Used properly, there is
+      no conflict here: Spring merely provides a simplifying, portable
+      abstraction.</para>
+
+      <para>If you are using global transactions, you
+      <emphasis>must</emphasis> use the Spring
+      <literal>org.springframework.transaction.jta.JtaTransactionManager</literal>
+      for all your for all your transactional operations. Otherwise Spring
+      will attempt to perform local transactions on resources such as
+      container DataSources. Such local transactions don't make sense, and a
+      good application server will treat them as errors.</para>
     </sect2>
   </sect1>
 </chapter>
