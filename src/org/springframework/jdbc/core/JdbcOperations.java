@@ -85,9 +85,9 @@ public interface JdbcOperations {
 	/**
 	 * Execute a query given static SQL, reading the ResultSet with a
 	 * ResultSetExtractor.
-	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
-	 * a static query with a PreparedStatement, use the overloaded query method
-	 * with a null PreparedStatementSetter as a parameter.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
+	 * execute a static query with a PreparedStatement, use the overloaded
+	 * <code>query</code> method with null as argument array.
 	 * @param sql SQL query to execute
 	 * @param rse object that will extract all rows of results
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
@@ -100,9 +100,9 @@ public interface JdbcOperations {
 	 * Execute a query given static SQL, reading the ResultSet on a per-row
 	 * basis with a RowCallbackHandler (potentially implementing the ResultReader
 	 * sub-interface that provides a result List).
-	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
-	 * a static query with a PreparedStatement, use the overloaded query method
-	 * with null as PreparedStatementSetter argument.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
+	 * execute a static query with a PreparedStatement, use the overloaded
+	 * <code>query</code> method with null as argument array.
 	 * @param sql SQL query to execute
 	 * @param rch object that will extract results (potentially a ResultReader),
 	 * one row at a time
@@ -116,9 +116,9 @@ public interface JdbcOperations {
 	/**
 	 * Execute a query given static SQL, mapping each row to a Java object
 	 * via a RowMapper.
-	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
-	 * a static query with a PreparedStatement, use the overloaded query method
-	 * with null as PreparedStatementSetter argument.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
+	 * execute a static query with a PreparedStatement, use the overloaded
+	 * <code>query</code> method with null as argument array.
 	 * @param sql SQL query to execute
 	 * @param rowMapper object that will map one object per row
 	 * @return the result List, containing mapped objects
@@ -130,9 +130,9 @@ public interface JdbcOperations {
 	/**
 	 * Execute a query given static SQL, mapping a single result row to a Java
 	 * object via a RowMapper.
-	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
-	 * a static query with a PreparedStatement, use the overloaded query method
-	 * with null as PreparedStatementSetter argument.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
+	 * execute a static query with a PreparedStatement, use the overloaded
+	 * <code>queryForObject</code> method with null as argument array.
 	 * @param sql SQL query to execute
 	 * @param rowMapper object that will map one object per row
 	 * @return the single mapped object
@@ -145,9 +145,9 @@ public interface JdbcOperations {
 
 	/**
 	 * Execute a query for a result object, given static SQL.
-	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
-	 * a static query with a PreparedStatement, use the overloaded queryForObject
-	 * method with null as argument array.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
+	 * execute a static query with a PreparedStatement, use the overloaded
+	 * <code>queryForObject</code> method with null as argument array.
 	 * <p>This method is useful for running static SQL with a known outcome.
 	 * The query is expected to be a single row/single column query; the returned
 	 * result will be directly mapped to the corresponding object type.
@@ -163,9 +163,9 @@ public interface JdbcOperations {
 
 	/**
 	 * Execute a query for a result Map, given static SQL.
-	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
-	 * a static query with a PreparedStatement, use the overloaded queryForObject
-	 * method with null as argument array.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
+	 * execute a static query with a PreparedStatement, use the overloaded
+	 * <code>queryForMap</code> method with null as argument array.
 	 * <p>The query is expected to be a single row query; the result row will be
 	 * mapped to a Map (one entry for each column, using the column name as the key).
 	 * @param sql SQL query to execute
@@ -181,9 +181,9 @@ public interface JdbcOperations {
 
 	/**
 	 * Execute a query that results in a long value, given static SQL.
-	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
-	 * a static query with a PreparedStatement, use the overloaded queryForLong
-	 * method with null as argument array.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
+	 * execute a static query with a PreparedStatement, use the overloaded
+	 * <code>queryForLong</code> method with null as argument array.
 	 * <p>This method is useful for running static SQL with a known outcome.
 	 * The query is expected to be a single row/single column query that results
 	 * in a long value.
@@ -198,9 +198,9 @@ public interface JdbcOperations {
 
 	/**
 	 * Execute a query that results in an int value, given static SQL.
-	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
-	 * a static query with a PreparedStatement, use the overloaded queryForInt
-	 * method with null as argument array.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
+	 * execute a static query with a PreparedStatement, use the overloaded
+	 * <code>queryForInt</code> method with null as argument array.
 	 * <p>This method is useful for running static SQL with a known outcome.
 	 * The query is expected to be a single row/single column query that results
 	 * in an int value.
@@ -215,9 +215,9 @@ public interface JdbcOperations {
 
 	/**
 	 * Execute a query for a result list, given static SQL.
-	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
-	 * a static query with a PreparedStatement, use the overloaded queryForList
-	 * method with null as argument array.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
+	 * execute a static query with a PreparedStatement, use the overloaded
+	 * <code>queryForList</code> method with null as argument array.
 	 * <p>The results will be mapped to a List (one entry for each row) of
 	 * result objects, each of them matching the specified element type.
 	 * @param sql SQL query to execute
@@ -232,13 +232,13 @@ public interface JdbcOperations {
 
 	/**
 	 * Execute a query for a result list, given static SQL.
-	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
-	 * a static query with a PreparedStatement, use the overloaded queryForList
-	 * method with null as argument array.
-	 * <p>The results will be mapped to an ArrayList (one entry for each row) of
-	 * HashMaps (one entry for each column using the column name as the key).
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
+	 * execute a static query with a PreparedStatement, use the overloaded
+	 * <code>queryForList</code> method with null as argument array.
+	 * <p>The results will be mapped to a List (one entry for each row) of
+	 * Maps (one entry for each column using the column name as the key).
 	 * @param sql SQL query to execute
-	 * @return an ArrayList that contains a HashMap per row
+	 * @return an List that contains a Map per row
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #queryForList(String, Object[])
 	 */
@@ -246,9 +246,9 @@ public interface JdbcOperations {
 
 	/**
 	 * Execute a query for a SqlRowSet, given static SQL.
-	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
-	 * a static query with a PreparedStatement, use the overloaded queryForRowSet
-	 * method with null as argument array.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
+	 * execute a static query with a PreparedStatement, use the overloaded
+	 * <code>queryForRowSet</code> method with null as argument array.
 	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
 	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
 	 * <p>Note that that, for the default implementation, JDBC RowSet support needs to
