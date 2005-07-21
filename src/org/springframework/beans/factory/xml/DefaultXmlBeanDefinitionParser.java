@@ -66,6 +66,7 @@ import org.springframework.util.xml.DomUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 18.12.2003
  */
 public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
@@ -160,6 +161,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	private String defaultAutowire;
 
 	private String defaultDependencyCheck;
+
 
 
 	public int registerBeanDefinitions(BeanDefinitionReader reader, Document doc, Resource resource)
@@ -261,7 +263,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				}
 				else if (BEAN_ELEMENT.equals(node.getNodeName())) {
 					beanDefinitionCount++;
-					BeanDefinitionHolder bdHolder = parseBeanDefinitionElement(ele);
+					BeanDefinitionHolder bdHolder = parseBeanDefinitionElement(ele, false);
 					BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, this.beanDefinitionReader.getBeanFactory());
 				}
 			}
@@ -306,8 +308,10 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * and their aliases as a delimited "name" attribute.
 	 * <p>If no "id" specified, uses the first name in the "name" attribute
 	 * as canonical name, registering all others as aliases.
+	 * <p>Callers should specify whether this element represents an inner bean
+	 * definition or not by setting the <code>innerBean</code> argument appropriately
 	 */
-	protected BeanDefinitionHolder parseBeanDefinitionElement(Element ele) throws BeanDefinitionStoreException {
+	protected BeanDefinitionHolder parseBeanDefinitionElement(Element ele, boolean innerBean) throws BeanDefinitionStoreException {
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
@@ -330,7 +334,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 		if (!StringUtils.hasText(beanName) && beanDefinition instanceof AbstractBeanDefinition) {
 			beanName = BeanDefinitionReaderUtils.generateBeanName(
-					(AbstractBeanDefinition) beanDefinition, this.beanDefinitionReader.getBeanFactory());
+					(AbstractBeanDefinition) beanDefinition, this.beanDefinitionReader.getBeanFactory(), innerBean);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Neither XML 'id' nor 'name' specified - " +
 						"using generated bean name [" + beanName + "]");
@@ -658,7 +662,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 */
 	protected Object parsePropertySubElement(Element ele, String beanName) throws BeanDefinitionStoreException {
 		if (ele.getTagName().equals(BEAN_ELEMENT)) {
-			return parseBeanDefinitionElement(ele);
+			return parseBeanDefinitionElement(ele, true);
 		}
 		else if (ele.getTagName().equals(REF_ELEMENT)) {
 			// A generic reference to any name of any bean.
@@ -884,5 +888,4 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		}
 		return props;
 	}
-
 }

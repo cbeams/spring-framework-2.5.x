@@ -119,7 +119,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals(3, friends.size());
 		DerivedTestBean inner2 = (DerivedTestBean) friends.get(0);
 		assertEquals("inner2", inner2.getName());
-		assertEquals(DerivedTestBean.class.getName(), inner2.getBeanName());
+		assertTrue(inner2.getBeanName().startsWith(DerivedTestBean.class.getName()));
 		assertFalse(xbf.containsBean("innerBean"));
 		assertNotNull(inner2);
 		assertEquals(7, inner2.getAge());

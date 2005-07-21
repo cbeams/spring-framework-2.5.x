@@ -149,8 +149,8 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		Map drs = getListableBeanFactory().getBeansOfType(DummyReferencer.class, false, false);
 		assertEquals(5, drs.size());
 		assertTrue(drs.containsKey(DummyReferencer.class.getName()));
+		assertTrue(drs.containsKey(DummyReferencer.class.getName() + "#1"));
 		assertTrue(drs.containsKey(DummyReferencer.class.getName() + "#2"));
-		assertTrue(drs.containsKey(DummyReferencer.class.getName() + "#3"));
 	}
 
 	public void testFactoryNesting() {

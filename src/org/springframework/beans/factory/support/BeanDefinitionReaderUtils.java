@@ -23,11 +23,13 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Utility methods that are useful for bean definition readers implementations.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 1.1
  * @see PropertiesBeanDefinitionReader
  * @see org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser
@@ -53,9 +55,9 @@ public class BeanDefinitionReaderUtils {
 	 * @throws ClassNotFoundException if the bean class could not be loaded
 	 */
 	public static AbstractBeanDefinition createBeanDefinition(
-	    String className, String parent, ConstructorArgumentValues cargs,
-	    MutablePropertyValues pvs, ClassLoader classLoader)
-	    throws ClassNotFoundException {
+		String className, String parent, ConstructorArgumentValues cargs,
+		MutablePropertyValues pvs, ClassLoader classLoader)
+		throws ClassNotFoundException {
 
 		Class beanClass = null;
 		if (className != null && classLoader != null) {
@@ -91,7 +93,7 @@ public class BeanDefinitionReaderUtils {
 	 * for the given bean definition
 	 */
 	public static String generateBeanName(
-			AbstractBeanDefinition beanDefinition, BeanDefinitionRegistry beanFactory)
+			AbstractBeanDefinition beanDefinition, BeanDefinitionRegistry beanFactory, boolean isInnerBean)
 			throws BeanDefinitionStoreException {
 
 		String generatedId = beanDefinition.getBeanClassName();
@@ -108,11 +110,18 @@ public class BeanDefinitionReaderUtils {
 					"Unnamed bean definition specifies neither 'class' nor 'parent' nor 'factory-bean'" +
 					" - can't generate bean name");
 		}
-		int counter = 1;
+
 		String id = generatedId;
-		while (beanFactory.containsBeanDefinition(id)) {
-			counter++;
-			id = generatedId + GENERATED_BEAN_NAME_SEPARATOR + counter;
+
+		if (isInnerBean) {
+		   id = generatedId + GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(beanDefinition);
+		}
+		else {
+			int counter = 0;
+			while (beanFactory.containsBeanDefinition(id)) {
+				counter++;
+				id = generatedId + GENERATED_BEAN_NAME_SEPARATOR + counter;
+			}
 		}
 		return id;
 	}
@@ -136,5 +145,4 @@ public class BeanDefinitionReaderUtils {
 			}
 		}
 	}
-
 }
