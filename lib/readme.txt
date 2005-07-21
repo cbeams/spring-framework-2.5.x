@@ -52,7 +52,7 @@ distribution/website before using any of them in your own applications.
 - required for building and running Tiles Example
 
 * easymock/easymock.jar, easymock/easymockclassextension.jar
-- EasyMock 1.1 (http://www.easymock.org)
+- EasyMock 1.2RC2 (JDK 1.3 version) (http://www.easymock.org)
 - required for building and running the framework test suite
 
 * ehcache/ehcache-1.1.jar
