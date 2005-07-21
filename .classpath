@@ -102,12 +102,12 @@
 	<classpathentry kind="lib" path="lib/ognl/ognl.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/rowset.jar"/>
 	<classpathentry kind="lib" path="samples/jca-1.0/lib/spring-cciblackbox-tx.jar"/>
-	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.6.jar"/>
 	<classpathentry kind="lib" path="lib/ojb/db-ojb-1.0.3.jar"/>
 	<classpathentry kind="lib" path="lib/toplink/toplink-api.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/hibernate-annotations.jar"/>
 	<classpathentry kind="lib" path="lib/asm/asm-1.5.3.jar"/>
 	<classpathentry kind="lib" path="lib/asm/asm-util-1.5.3.jar"/>
 	<classpathentry kind="lib" path="lib/aspectj/aspectjweaver.jar"/>
+	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-1.0.0.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
