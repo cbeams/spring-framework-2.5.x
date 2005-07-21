@@ -22,8 +22,8 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Utility methods that are useful for bean definition readers implementations.
@@ -88,6 +88,9 @@ public class BeanDefinitionReaderUtils {
 	 * @param beanDefinition the bean definition to generate a bean name for
 	 * @param beanFactory the bean factory that the definition is going to be
 	 * registered with (to check for existing bean names)
+	 * @param isInnerBean whether the given bean definition will be registered
+	 * as inner bean or as top-level bean (allowing for special name generation
+	 * for inner beans vs. top-level beans)
 	 * @return the bean name to use
 	 * @throws BeanDefinitionStoreException if no unique name can be generated
 	 * for the given bean definition
@@ -112,11 +115,13 @@ public class BeanDefinitionReaderUtils {
 		}
 
 		String id = generatedId;
-
 		if (isInnerBean) {
-		   id = generatedId + GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(beanDefinition);
+			// Inner bean: generate identity hashcode suffix.
+			id = generatedId + GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(beanDefinition);
 		}
 		else {
+			// Top-level bean: use plain class name. If not already unique,
+			// add counter - increasing the counter until the name is unique.
 			int counter = 0;
 			while (beanFactory.containsBeanDefinition(id)) {
 				counter++;

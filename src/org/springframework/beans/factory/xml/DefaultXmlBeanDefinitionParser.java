@@ -311,7 +311,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * <p>Callers should specify whether this element represents an inner bean
 	 * definition or not by setting the <code>innerBean</code> argument appropriately
 	 */
-	protected BeanDefinitionHolder parseBeanDefinitionElement(Element ele, boolean innerBean) throws BeanDefinitionStoreException {
+	protected BeanDefinitionHolder parseBeanDefinitionElement(Element ele, boolean isInnerBean)
+			throws BeanDefinitionStoreException {
+
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
@@ -334,7 +336,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 		if (!StringUtils.hasText(beanName) && beanDefinition instanceof AbstractBeanDefinition) {
 			beanName = BeanDefinitionReaderUtils.generateBeanName(
-					(AbstractBeanDefinition) beanDefinition, this.beanDefinitionReader.getBeanFactory(), innerBean);
+					(AbstractBeanDefinition) beanDefinition, this.beanDefinitionReader.getBeanFactory(), isInnerBean);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Neither XML 'id' nor 'name' specified - " +
 						"using generated bean name [" + beanName + "]");

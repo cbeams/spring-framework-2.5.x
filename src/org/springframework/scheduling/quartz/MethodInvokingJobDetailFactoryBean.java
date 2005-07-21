@@ -33,21 +33,20 @@ import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 import org.springframework.util.MethodInvoker;
 
 /**
- * FactoryBean that exposes a JobDetail object that delegates
- * job execution to a specified (static or non-static) method.
- * Avoids the need to implement a one-line Quartz Job that just
- * invokes an existing business method.
+ * FactoryBean that exposes a JobDetail object that delegates job execution
+ * to a specified (static or non-static) method. Avoids the need to implement
+ * a one-line Quartz Job that just invokes an existing service method.
  *
- * <p>Derived from MethodInvoker to share common properties and
- * behavior with MethodInvokingFactoryBean.
+ * <p>Derived from MethodInvoker to share common properties and behavior
+ * with MethodInvokingFactoryBean.
  * 
- * <p>Supports both concurrently running jobs and non-currently
- * running ones through the "concurrent" property.
+ * <p>Supports both concurrently running jobs and non-currently running
+ * ones through the "concurrent" property.
  *
  * <p><b>Note: JobDetails created via this FactoryBean are <i>not</i>
  * serializable and thus not suitable for persistent job stores.</b>
- * You need to implement your own Quartz Job as a thin wrapper for
- * each case where you want to delegate to an external method.
+ * You need to implement your own Quartz Job as a thin wrapper for each case
+ * where you want a persistent job to delegate to a specific service method.
  *
  * @author Juergen Hoeller
  * @author Alef Arendsen
@@ -116,7 +115,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		String name = (this.name != null ? this.name : this.beanName);
 
 		// Consider the concurrent flag to choose between stateful and stateless job.
-		Class jobClass = (this.concurrent ? MethodInvokingJob.class : StatefulMethodInvokingJob.class);
+		Class jobClass = (this.concurrent ? (Class) MethodInvokingJob.class : StatefulMethodInvokingJob.class);
 
 		this.jobDetail = new JobDetail(name, this.group, jobClass);
 		this.jobDetail.getJobDataMap().put("methodInvoker", this);

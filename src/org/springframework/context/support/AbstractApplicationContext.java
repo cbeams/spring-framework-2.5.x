@@ -66,9 +66,9 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * common context functionality. Uses the Template Method design pattern,
  * requiring concrete subclasses to implement abstract methods.
  *
- * <p>In contrast to a plain bean factory, an ApplicationContext is supposed
- * to detect special beans defined in its bean factory: Therefore, this class
- * automatically registers BeanFactoryPostProcessors, BeanPostProcessors
+ * <p>In contrast to a plain BeanFactory, an ApplicationContext is supposed to
+ * detect special beans defined in its internal bean factory: Therefore, this
+ * class automatically registers BeanFactoryPostProcessors, BeanPostProcessors
  * and ApplicationListeners that are defined as beans in the context.
  *
  * <p>A MessageSource may also be supplied as a bean in the context, with
@@ -89,9 +89,12 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * @see #getBeanFactory
  * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
  * @see org.springframework.beans.factory.config.BeanPostProcessor
- * @see ApplicationListener
+ * @see org.springframework.context.ApplicationListener
  * @see #MESSAGE_SOURCE_BEAN_NAME
+ * @see org.springframework.context.MessageSource
+ * @see DelegatingMessageSource
  * @see #APPLICATION_EVENT_MULTICASTER_BEAN_NAME
+ * @see org.springframework.context.event.ApplicationEventMulticaster
  * @see org.springframework.context.event.SimpleApplicationEventMulticaster
  */
 public abstract class AbstractApplicationContext extends DefaultResourceLoader
@@ -591,6 +594,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
 			throws BeansException {
+
 		return getBeanFactory().getBeansOfType(type, includePrototypes, includeFactoryBeans);
 	}
 
