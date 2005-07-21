@@ -799,7 +799,7 @@ public interface IntroductionInfo {
 
         <para>The <literal>getInterfaces()</literal> method returns the
         interfaces introduced by this advisor.</para> The <literal>validateInterfaces()</literal>
-		method is used internally to see whether or not the advised interfaces can be
+		method is used internally to see whether or not the introduced interfaces can be
 		implemented by the configured <literal>IntroductionInterceptor</literal>.
 
 		<para>Let's look at a simple example from the Spring test suite. Let's
