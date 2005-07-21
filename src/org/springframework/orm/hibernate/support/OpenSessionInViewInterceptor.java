@@ -149,9 +149,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 				logger.debug("Opening single Hibernate Session in OpenSessionInViewInterceptor");
 				Session session = SessionFactoryUtils.getSession(
 						getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator());
-				if (getFlushMode() == FLUSH_NEVER) {
-					session.setFlushMode(FlushMode.NEVER);
-				}
+				applyFlushMode(session, false);
 				TransactionSynchronizationManager.bindResource(getSessionFactory(), new SessionHolder(session));
 			}
 			else {
