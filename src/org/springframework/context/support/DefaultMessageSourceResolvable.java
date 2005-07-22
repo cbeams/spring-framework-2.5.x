@@ -41,6 +41,14 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 
 	/**
 	 * Create a new DefaultMessageSourceResolvable.
+	 * @param code the code to be used to resolve this message
+	 */
+	public DefaultMessageSourceResolvable(String code) {
+		this(new String[] {code}, null, null);
+	}
+
+	/**
+	 * Create a new DefaultMessageSourceResolvable.
 	 * @param codes the codes to be used to resolve this message
 	 */
 	public DefaultMessageSourceResolvable(String[] codes) {
