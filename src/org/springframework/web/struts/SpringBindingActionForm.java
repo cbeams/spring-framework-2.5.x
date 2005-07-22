@@ -75,6 +75,12 @@ import org.springframework.validation.ObjectError;
  *   return actionMapping.findForward("success");
  * }</pre>
  *
+ * This class is compatible with both Struts 1.2.x and Struts 1.1.
+ * On Struts 1.2, default messages registered with Spring binding errors
+ * are exposed when none of the error codes could be resolved.
+ * On Struts 1.1, this is not possible due to a limitation in the Struts
+ * message facility; hence, we expose the plain default error code there.
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 1.2.2
@@ -101,7 +107,7 @@ public class SpringBindingActionForm extends ActionForm {
 		// is available on ActionMessage: ActionMessage(String, boolean)
 		// with "false" to be passed into the boolean flag.
 		try {
-			ActionMessage.class.getConstructor(String.class, boolean.class);
+			ActionMessage.class.getConstructor(new Class[] {String.class, boolean.class});
 		}
 		catch (NoSuchMethodException ex) {
 			defaultActionMessageAvailable = false;
