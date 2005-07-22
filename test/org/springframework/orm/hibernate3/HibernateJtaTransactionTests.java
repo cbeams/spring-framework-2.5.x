@@ -295,8 +295,8 @@ public class HibernateJtaTransactionTests extends TestCase {
 
 		MockControl sfControl = MockControl.createControl(SessionFactoryImplementor.class);
 		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
-		final MockControl sessionControl = MockControl.createControl(SessionImplementor.class);
-		final SessionImplementor session = (SessionImplementor) sessionControl.getMock();
+		final MockControl sessionControl = MockControl.createControl(Session.class);
+		final Session session = (Session) sessionControl.getMock();
 		sf.getConnectionProvider();
 		sfControl.setReturnValue(null, 2);
 		sf.getTransactionManager();
@@ -583,8 +583,8 @@ public class HibernateJtaTransactionTests extends TestCase {
 
 		MockControl sfControl = MockControl.createControl(SessionFactoryImplementor.class);
 		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
-		final MockControl sessionControl = MockControl.createControl(SessionImplementor.class);
-		final SessionImplementor session = (SessionImplementor) sessionControl.getMock();
+		final MockControl sessionControl = MockControl.createControl(ExtendedSession.class);
+		final ExtendedSession session = (ExtendedSession) sessionControl.getMock();
 		sf.getConnectionProvider();
 		sfControl.setReturnValue(null, 1);
 		sf.getTransactionManager();
@@ -1402,6 +1402,16 @@ public class HibernateJtaTransactionTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
+	}
+
+
+	/**
+	 * Interface that combines Hibernate's Session and SessionImplementor interface.
+	 * Necessary for creating a mock that implements both interfaces.
+	 * Note: Hibernate 3.1's SessionImplementor interface does not extend Session anymore.
+	 */
+	private static interface ExtendedSession extends Session, SessionImplementor {
+
 	}
 
 }
