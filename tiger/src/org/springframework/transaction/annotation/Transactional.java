@@ -62,7 +62,7 @@ public @interface Transactional {
 	boolean readOnly() default false;
 	
 	/**
-	 * 0 or more exception Classes, which must be a subclas of Throwable, indicating
+	 * 0 or more exception Classes, which must be a subclass of Throwable, indicating
 	 * which exception types should cause a transaction rollback. This is the preferred
 	 * way to construct a rollback rule, matching the exception class and subclasses.
 	 * <p>Similar to {@link
