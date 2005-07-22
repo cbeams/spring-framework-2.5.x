@@ -23,7 +23,6 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
 public class AnnotationTransactionAttributeSourceTests extends TestCase {
 	
 	public void testNullOrEmpty() throws Exception {
-		
 		Method method = Empty.class.getMethod("getAge", (Class[]) null);
 		
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
@@ -65,7 +64,6 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 	 * Test that when an attribute exists on both class and interface, class takes precedence
 	 */
 	public void testTransactionAttributeOnTargetClassMethodOverridesAttributeOnInterfaceMethod() throws Exception {
-		Method classMethod = TestBean3.class.getMethod("getAge", (Class[]) null);
 		Method interfaceMethod = ITestBean3.class.getMethod("getAge", (Class[]) null);
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
@@ -106,7 +104,7 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 
 	/**
 	 * Test that transaction attribute is inherited from class
-	 * if not specified on method
+	 * if not specified on method.
 	 */
 	public void testDefaultsToClassTransactionAttribute() throws Exception {
 		Method method = TestBean4.class.getMethod("getAge", (Class[]) null);
