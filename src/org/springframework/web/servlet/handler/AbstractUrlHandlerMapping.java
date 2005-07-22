@@ -40,6 +40,10 @@ import org.springframework.web.util.UrlPathHelper;
  * "/test" directory, "/test/**" matches all paths below "/test".
  * For details, see the AntPathMatcher javadoc.
  *
+ * <p>Will search all path patterns to find the most exact match for
+ * a request path. The most exact match is defined as the longest path
+ * pattern that matches the request path.
+ *
  * @author Juergen Hoeller
  * @since 16.04.2003
  * @see #setAlwaysUseFullPath
@@ -136,10 +140,12 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * Look up a handler instance for the given URL path.
 	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
 	 * and various Ant-style pattern matches, e.g. a registered "/t*" matches
-	 * both "/test" and "/team". For details, see the PathMatcher class.
-	 * @param urlPath URL the bean is mapped to
+	 * both "/test" and "/team". For details, see the AntPathMatcher class.
+	 * <p>Looks for the most exact pattern, where most exact is defined as
+	 * the longest path pattern.
+ 	 * @param urlPath URL the bean is mapped to
 	 * @return the associated handler instance, or null if not found
-	 * @see org.springframework.util.PathMatcher
+	 * @see org.springframework.util.AntPathMatcher
 	 */
 	protected Object lookupHandler(String urlPath) {
 		// direct match?

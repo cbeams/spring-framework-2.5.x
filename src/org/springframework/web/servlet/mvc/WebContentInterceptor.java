@@ -161,10 +161,10 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * Look up a cache seconds value for the given URL path.
 	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
 	 * and various Ant-style pattern matches, e.g. a registered "/t*" matches
-	 * both "/test" and "/team". For details, see the PathMatcher class.
+	 * both "/test" and "/team". For details, see the AntPathMatcher class.
 	 * @param urlPath URL the bean is mapped to
 	 * @return the associated cache seconds, or null if not found
-	 * @see org.springframework.util.PathMatcher
+	 * @see org.springframework.util.AntPathMatcher
 	 */
 	protected Integer lookupCacheSeconds(String urlPath) {
 		// direct match?
