@@ -1084,9 +1084,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// If valid arguments found, determine type difference weight.
 			// Try type difference weight on both the converted arguments and
 			// the raw arguments. If the raw weight is better, use it.
-			// Decrease raw weight by 1 to prefer it over equal converted weight.
+			// Decrease raw weight by 1024 to prefer it over equal converted weight.
 			int typeDiffWeight = AutowireUtils.getTypeDifferenceWeight(argTypes, this.arguments);
-			int rawTypeDiffWeight = AutowireUtils.getTypeDifferenceWeight(argTypes, this.rawArguments) - 1;
+			int rawTypeDiffWeight = AutowireUtils.getTypeDifferenceWeight(argTypes, this.rawArguments) - 1024;
 			return (rawTypeDiffWeight < typeDiffWeight ? rawTypeDiffWeight : typeDiffWeight);
 		}
 	}
