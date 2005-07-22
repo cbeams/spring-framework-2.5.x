@@ -84,6 +84,9 @@ public class SpringBindingActionForm extends ActionForm {
 
 	private static final Log logger = LogFactory.getLog(SpringBindingActionForm.class);
 
+	private static boolean defaultActionMessageAvailable = true;
+
+
 	static {
 		// Register special PropertyUtilsBean subclass that knows how to
 		// extract field values from a SpringBindingActionForm.
@@ -93,6 +96,16 @@ public class SpringBindingActionForm extends ActionForm {
 		PropertyUtilsBean propUtils = new SpringBindingAwarePropertyUtilsBean();
 		BeanUtilsBean beanUtils = new BeanUtilsBean(convUtils, propUtils);
 		BeanUtilsBean.setInstance(beanUtils);
+
+		// Determine whether the Struts 1.2 support for default messages
+		// is available on ActionMessage: ActionMessage(String, boolean)
+		// with "false" to be passed into the boolean flag.
+		try {
+			ActionMessage.class.getConstructor(String.class, boolean.class);
+		}
+		catch (NoSuchMethodException ex) {
+			defaultActionMessageAvailable = false;
+		}
 	}
 
 
@@ -145,8 +158,13 @@ public class SpringBindingActionForm extends ActionForm {
 		ActionMessages actionMessages = new ActionMessages();
 		Iterator it = this.errors.getAllErrors().iterator();
 		while (it.hasNext()) {
-			ObjectError objectError = (ObjectError)it.next();
+			ObjectError objectError = (ObjectError) it.next();
 			String effectiveMessageKey = findEffectiveMessageKey(objectError);
+			if (effectiveMessageKey == null && !defaultActionMessageAvailable) {
+				// Need to specify default code despite it not beign resolvable:
+				// Struts 1.1 ActionMessage doesn't support default messages.
+				effectiveMessageKey = objectError.getCode();
+			}
 			ActionMessage message = (effectiveMessageKey != null) ?
 					new ActionMessage(effectiveMessageKey, resolveArguments(objectError.getArguments())) :
 					new ActionMessage(objectError.getDefaultMessage(), false);
