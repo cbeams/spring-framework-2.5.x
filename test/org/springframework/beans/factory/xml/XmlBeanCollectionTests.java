@@ -17,9 +17,9 @@
 package org.springframework.beans.factory.xml;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,12 +28,15 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import junit.framework.TestCase;
+import org.apache.commons.collections.map.LinkedMap;
+import org.apache.commons.collections.set.ListOrderedSet;
 
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.HasMap;
 import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.beans.factory.config.MapFactoryBean;
 import org.springframework.beans.factory.config.SetFactoryBean;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -53,12 +56,22 @@ public class XmlBeanCollectionTests extends TestCase {
 		SetFactoryBean setFactory = new SetFactoryBean();
 		setFactory.setSourceSet(new TreeSet());
 		setFactory.afterPropertiesSet();
-		assertTrue(setFactory.getObject() instanceof HashSet);
+		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+			assertTrue(setFactory.getObject() instanceof LinkedHashSet);
+		}
+		else {
+			assertTrue(setFactory.getObject() instanceof ListOrderedSet);
+		}
 
 		MapFactoryBean mapFactory = new MapFactoryBean();
 		mapFactory.setSourceMap(new TreeMap());
 		mapFactory.afterPropertiesSet();
-		assertTrue(mapFactory.getObject() instanceof HashMap);
+		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+			assertTrue(mapFactory.getObject() instanceof LinkedHashMap);
+		}
+		else {
+			assertTrue(mapFactory.getObject() instanceof LinkedMap);
+		}
 	}
 
 	public void testRefSubelement() throws Exception {
