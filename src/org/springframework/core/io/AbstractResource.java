@@ -59,7 +59,7 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementations always returns false.
+	 * This implementation always returns <code>false</code>.
 	 */
 	public boolean isOpen() {
 		return false;
@@ -105,6 +105,7 @@ public abstract class AbstractResource implements Resource {
 	 * @see Resource#getDescription()
 	 */
 	public abstract String getDescription();
+
 
 	/**
 	 * This implementation returns the description of this resource.

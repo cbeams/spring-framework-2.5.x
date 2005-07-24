@@ -22,7 +22,7 @@ import java.net.URL;
 
 /**
  * Interface for a resource descriptor that abstracts from the actual
- * type of resource, like file or class path resource.
+ * type of underlying resource, such as a file or class path resource.
  *
  * <p>An InputStream can be opened for every resource if it exists in
  * physical form, but a URL or File handle can just be returned for
@@ -30,6 +30,15 @@ import java.net.URL;
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
+ * @see #getInputStream()
+ * @see #getURL()
+ * @see #getFile()
+ * @see FileSystemResource
+ * @see ClassPathResource
+ * @see UrlResource
+ * @see ByteArrayResource
+ * @see InputStreamResource
+ * @see org.springframework.web.context.support.ServletContextResource
  */
 public interface Resource extends InputStreamSource {
 
@@ -78,7 +87,7 @@ public interface Resource extends InputStreamSource {
 	 * Return a description for this resource,
 	 * to be used for error output when working with the resource.
 	 * <p>Implementations are also encouraged to return this value
-	 * from their toString method.
+	 * from their <code>toString</code> method.
 	 * @see java.lang.Object#toString
 	 */
 	String getDescription();

@@ -32,15 +32,16 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Resource implementation for ServletContext resources,
- * interpreting relative paths within the web application root.
+ * interpreting relative paths within the web application root directory.
  *
- * <p>Always supports stream access, but only allows java.io.File
- * access when the web application archive is expanded.
- * Always supports resolution as URL.
+ * <p>Always supports stream access and URL access, but only allows
+ * <code>java.io.File</code> access when the web application archive
+ * is expanded.
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
  * @see javax.servlet.ServletContext#getResourceAsStream
+ * @see javax.servlet.ServletContext#getResource
  * @see javax.servlet.ServletContext#getRealPath
  */
 public class ServletContextResource extends AbstractResource {
@@ -48,6 +49,7 @@ public class ServletContextResource extends AbstractResource {
 	private final ServletContext servletContext;
 
 	private final String path;
+
 
 	/**
 	 * Create a new ServletContextResource.
@@ -74,21 +76,22 @@ public class ServletContextResource extends AbstractResource {
 	/**
 	 * Return the ServletContext for this resource.
 	 */
-	public ServletContext getServletContext() {
+	public final ServletContext getServletContext() {
 		return servletContext;
 	}
 
 	/**
 	 * Return the path for this resource.
 	 */
-	public String getPath() {
+	public final String getPath() {
 		return path;
 	}
 
+
 	/**
-	 * This implementation delegates to ServletContext.getResourceAsStream,
-	 * but throws a FileNotFoundException if not found.
-	 * @see javax.servlet.ServletContext#getResourceAsStream
+	 * This implementation delegates to <code>ServletContext.getResourceAsStream</code>,
+	 * but throws a FileNotFoundException if no resource found.
+	 * @see javax.servlet.ServletContext#getResourceAsStream(String)
 	 */
 	public InputStream getInputStream() throws IOException {
 		InputStream is = this.servletContext.getResourceAsStream(this.path);
@@ -98,6 +101,11 @@ public class ServletContextResource extends AbstractResource {
 		return is;
 	}
 
+	/**
+	 * This implementation delegates to <code>ServletContext.getResource</code>,
+	 * but throws a FileNotFoundException if no resource found.
+	 * @see javax.servlet.ServletContext#getResource(String)
+	 */
 	public URL getURL() throws IOException {
 		URL url = this.servletContext.getResource(this.path);
 		if (url == null) {
@@ -108,28 +116,46 @@ public class ServletContextResource extends AbstractResource {
 	}
 
 	/**
-	 * This implementation delegates to ServletContext.getRealPath,
+	 * This implementation delegates to <code>ServletContext.getRealPath</code>,
 	 * but throws a FileNotFoundException if not found or not resolvable.
-	 * @see javax.servlet.ServletContext#getRealPath
+	 * @see javax.servlet.ServletContext#getRealPath(String)
 	 */
 	public File getFile() throws IOException {
 		String realPath = WebUtils.getRealPath(this.servletContext, this.path);
 		return new File(realPath);
 	}
 
+	/**
+	 * This implementation creates a ServletContextResource, applying the given path
+	 * relative to the path of the underlying file of this resource descriptor.
+	 * @see org.springframework.util.StringUtils#applyRelativePath(String, String)
+	 */
 	public Resource createRelative(String relativePath) throws IOException {
 		String pathToUse = StringUtils.applyRelativePath(this.path, relativePath);
 		return new ServletContextResource(this.servletContext, pathToUse);
 	}
 
+	/**
+	 * This implementation returns the name of the file that this ServletContext
+	 * resource refers to.
+	 * @see org.springframework.util.StringUtils#getFilename(String)
+	 */
 	public String getFilename() {
 		return StringUtils.getFilename(this.path);
 	}
 
+	/**
+	 * This implementation returns a description that includes the ServletContext
+	 * resource location.
+	 */
 	public String getDescription() {
 		return "ServletContext resource [" + this.path + "]";
 	}
 
+
+	/**
+	 * This implementation compares the underlying ServletContext resource locations.
+	 */
 	public boolean equals(Object obj) {
 		if (obj == this) {
 			return true;
@@ -141,6 +167,10 @@ public class ServletContextResource extends AbstractResource {
 		return false;
 	}
 
+	/**
+	 * This implementation returns the hash code of the underlying
+	 * ServletContext resource location.
+	 */
 	public int hashCode() {
 		return this.path.hashCode();
 	}

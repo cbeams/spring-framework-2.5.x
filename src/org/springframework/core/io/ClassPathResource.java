@@ -112,6 +112,13 @@ public class ClassPathResource extends AbstractResource {
 	}
 
 	/**
+	 * Return the path for this resource.
+	 */
+	public final String getPath() {
+		return path;
+	}
+
+	/**
 	 * Return the ClassLoader to use for loading resources.
 	 * Only called if no Class has been specified.
 	 * <p>Returns the explicitly specified ClassLoader, if any, or the thread context
@@ -136,6 +143,11 @@ public class ClassPathResource extends AbstractResource {
 	}
 
 
+	/**
+	 * This implementation opens an InputStream for the given class path resource.
+	 * @see java.lang.ClassLoader#getResourceAsStream(String)
+	 * @see java.lang.Class#getResourceAsStream(String)
+	 */
 	public InputStream getInputStream() throws IOException {
 		InputStream is = null;
 		if (this.clazz != null) {
@@ -151,6 +163,11 @@ public class ClassPathResource extends AbstractResource {
 		return is;
 	}
 
+	/**
+	 * This implementation returns a URL for the underlying class path resource.
+	 * @see java.lang.ClassLoader#getResource(String)
+	 * @see java.lang.Class#getResource(String)
+	 */
 	public URL getURL() throws IOException {
 		URL url = null;
 		if (this.clazz != null) {
@@ -166,35 +183,62 @@ public class ClassPathResource extends AbstractResource {
 		return url;
 	}
 
+	/**
+	 * This implementation returns a File reference for the underlying class path
+	 * resource, provided that it refers to a file in the file system.
+	 * @see org.springframework.util.ResourceUtils#getFile(java.net.URL, String)
+	 */
 	public File getFile() throws IOException {
 		return ResourceUtils.getFile(getURL(), getDescription());
 	}
 
+	/**
+	 * This implementation creates a ClassPathResource, applying the given path
+	 * relative to the path of the underlying resource of this descriptor.
+	 * @see org.springframework.util.StringUtils#applyRelativePath(String, String)
+	 */
 	public Resource createRelative(String relativePath) {
 		String pathToUse = StringUtils.applyRelativePath(this.path, relativePath);
 		return new ClassPathResource(pathToUse, this.classLoader, this.clazz);
 	}
 
+	/**
+	 * This implementation returns the name of the file that this class path
+	 * resource refers to.
+	 * @see org.springframework.util.StringUtils#getFilename(String)
+	 */
 	public String getFilename() {
 		return StringUtils.getFilename(this.path);
 	}
 
+	/**
+	 * This implementation returns a description that includes the class path location.
+	 */
 	public String getDescription() {
 		return "class path resource [" + this.path + "]";
 	}
 
 
+	/**
+	 * This implementation compares the underlying class path locations.
+	 */
 	public boolean equals(Object obj) {
 		if (obj == this) {
 			return true;
 		}
 		if (obj instanceof ClassPathResource) {
 			ClassPathResource otherRes = (ClassPathResource) obj;
-			return (this.path.equals(otherRes.path) && ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));
+			return (this.path.equals(otherRes.path) &&
+					ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) &&
+					ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));
 		}
 		return false;
 	}
 
+	/**
+	 * This implementation returns the hash code of the underlying
+	 * class path location.
+	 */
 	public int hashCode() {
 		return this.path.hashCode();
 	}

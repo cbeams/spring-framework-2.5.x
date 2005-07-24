@@ -40,6 +40,7 @@ public class FileSystemResource extends AbstractResource {
 
 	private final String path;
 
+
 	/**
 	 * Create a new FileSystemResource.
 	 * @param file a File handle
@@ -60,40 +61,84 @@ public class FileSystemResource extends AbstractResource {
 		this.path = path;
 	}
 
+	/**
+	 * Return the path for this resource.
+	 */
+	public final String getPath() {
+		return path;
+	}
+
+
+	/**
+	 * This implementation returns whether the underlying file exists.
+	 * @see java.io.File#exists()
+	 */
 	public boolean exists() {
 		return this.file.exists();
 	}
 
+	/**
+	 * This implementation opens a FileInputStream for the underlying file.
+	 * @see java.io.FileInputStream
+	 */
 	public InputStream getInputStream() throws IOException {
 		return new FileInputStream(this.file);
 	}
 
+	/**
+	 * This implementation returns a URL for the underlying file.
+	 * @see java.io.File#getAbsolutePath()
+	 */
 	public URL getURL() throws IOException {
 		return new URL(ResourceUtils.URL_PROTOCOL_FILE + ":" + this.file.getAbsolutePath());
 	}
 
+	/**
+	 * This implementation returns the underlying File reference.
+	 */
 	public File getFile() {
 		return file;
 	}
 
+	/**
+	 * This implementation creates a FileSystemResource, applying the given path
+	 * relative to the path of the underlying file of this resource descriptor.
+	 * @see org.springframework.util.StringUtils#applyRelativePath(String, String)
+	 */
 	public Resource createRelative(String relativePath) {
 		String pathToUse = StringUtils.applyRelativePath(this.path, relativePath);
 		return new FileSystemResource(pathToUse);
 	}
 
+	/**
+	 * This implementation returns the name of the file.
+	 * @see java.io.File#getName()
+	 */
 	public String getFilename() {
 		return this.file.getName();
 	}
 
+	/**
+	 * This implementation returns a description that includes the absolute
+	 * path of the file.
+	 * @see java.io.File#getAbsolutePath()
+	 */
 	public String getDescription() {
 		return "file [" + this.file.getAbsolutePath() + "]";
 	}
 
+
+	/**
+	 * This implementation compares the underlying File references.
+	 */
 	public boolean equals(Object obj) {
 		return (obj == this ||
 		    (obj instanceof FileSystemResource && this.file.equals(((FileSystemResource) obj).file)));
 	}
 
+	/**
+	 * This implementation returns the hash code of the underlying File reference.
+	 */
 	public int hashCode() {
 		return this.file.hashCode();
 	}

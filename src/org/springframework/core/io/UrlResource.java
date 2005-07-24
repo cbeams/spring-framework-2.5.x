@@ -38,6 +38,7 @@ public class UrlResource extends AbstractResource {
 
 	private final URL url;
 
+
 	/**
 	 * Create a new UrlResource.
 	 * @param url a URL
@@ -56,18 +57,36 @@ public class UrlResource extends AbstractResource {
 		this.url = new URL(path);
 	}
 
+
+	/**
+	 * This implementation opens an InputStream for the given URL.
+	 * @see java.net.URL#openStream()
+	 */
 	public InputStream getInputStream() throws IOException {
 		return this.url.openStream();
 	}
 
+	/**
+	 * This implementation returns the underlying URL reference.
+	 */
 	public URL getURL() throws IOException {
 		return this.url;
 	}
 
+	/**
+	 * This implementation returns a File reference for the underlying URL,
+	 * provided that it refers to a file in the file system.
+	 * @see org.springframework.util.ResourceUtils#getFile(java.net.URL, String)
+	 */
 	public File getFile() throws IOException {
 		return ResourceUtils.getFile(this.url, getDescription());
 	}
 
+	/**
+	 * This implementation creates a UrlResource, applying the given path
+	 * relative to the path of the underlying URL of this resource descriptor.
+	 * @see java.net.URL#URL(java.net.URL, String)
+	 */
 	public Resource createRelative(String relativePath) throws MalformedURLException {
 		if (relativePath.startsWith("/")) {
 			relativePath = relativePath.substring(1);
@@ -75,19 +94,34 @@ public class UrlResource extends AbstractResource {
 		return new UrlResource(new URL(this.url, relativePath));
 	}
 
+	/**
+	 * This implementation returns the name of the file that this URL refers to.
+	 * @see java.net.URL#getFile()
+	 * @see java.io.File#getName()
+	 */
 	public String getFilename() {
 		return new File(this.url.getFile()).getName();
 	}
 
+	/**
+	 * This implementation returns a description that includes the URL.
+	 */
 	public String getDescription() {
 		return "URL [" + this.url + "]";
 	}
 
+
+	/**
+	 * This implementation compares the underlying URL references.
+	 */
 	public boolean equals(Object obj) {
 		return (obj == this ||
 		    (obj instanceof UrlResource && this.url.equals(((UrlResource) obj).url)));
 	}
 
+	/**
+	 * This implementation returns the hash code of the underlying URL reference.
+	 */
 	public int hashCode() {
 		return this.url.hashCode();
 	}

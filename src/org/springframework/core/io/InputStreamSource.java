@@ -20,19 +20,31 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Simple interface for objects that are sources for java.io.InputStreams.
- * Base interface for Spring's Resource interface.
+ * Simple interface for objects that are sources for a <code>java.io.InputStream</code>.
+ * Base interface for Spring's more extensive Resource interface.
+ *
+ * <p>Useful as an abstract content source for mail attachments, for example.
+ * Spring's ByteArrayResource or any file-based Resource implementation can be used
+ * as concrete instance, allowing to read the underlying content stream multiple times.
+ * For single-use streams, InputStreamResource can be used for any given InputStream.
  *
  * @author Juergen Hoeller
  * @since 20.01.2004
+ * @see java.io.InputStream
  * @see Resource
+ * @see InputStreamResource
+ * @see ByteArrayResource
  */
 public interface InputStreamSource {
 
 	/**
 	 * Return an InputStream.
 	 * It is expected that each call creates a <i>fresh</i> stream.
+	 * <p>For creating mail attachments, note that JavaMail needs to be able to
+	 * read the stream multiple times. For such a use case, it is <i>required</i>
+	 * that each <code>getInputStream()</code> call returns a fresh stream.
 	 * @throws IOException if the stream could not be opened
+	 * @see org.springframework.mail.javamail.MimeMessageHelper#addAttachment(String, InputStreamSource)
 	 */
 	InputStream getInputStream() throws IOException;
 

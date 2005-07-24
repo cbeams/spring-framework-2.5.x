@@ -22,20 +22,29 @@ import java.io.InputStream;
 /**
  * Resource implementation for a given InputStream. Should only
  * be used if no specific Resource implementation is applicable.
+ * In particular, prefer ByteArrayResource or any of the
+ * file-based Resource implementations where possible.
  *
  * <p>In contrast to other Resource implementations, this is a descriptor
- * for an <i>already opened</i> resource - therefore returning true on
- * isOpen(). Do not use it if you need to keep the resource descriptor
- * somewhere, or if you need to read a stream multiple times.
+ * for an <i>already opened</i> resource - therefore returning "true" from
+ * <code>isOpen()</code>. Do not use it if you need to keep the resource
+ * descriptor somewhere, or if you need to read a stream multiple times.
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
+ * @see ByteArrayResource
+ * @see ClassPathResource
+ * @see FileSystemResource
+ * @see UrlResource
  */
 public class InputStreamResource extends AbstractResource {
 
-	private InputStream inputStream;
+	private final InputStream inputStream;
 
 	private final String description;
+
+	private boolean read = false;
+
 
 	/**
 	 * Create a new InputStreamResource.
@@ -58,10 +67,17 @@ public class InputStreamResource extends AbstractResource {
 		this.description = description;
 	}
 
+
+	/**
+	 * This implementation always returns <code>true</code>.
+	 */
 	public boolean exists() {
 		return true;
 	}
 
+	/**
+	 * This implementation always returns <code>true</code>.
+	 */
 	public boolean isOpen() {
 		return true;
 	}
@@ -71,24 +87,33 @@ public class InputStreamResource extends AbstractResource {
 	 * read the underlying stream multiple times.
 	 */
 	public InputStream getInputStream() throws IOException, IllegalStateException {
-		if (this.inputStream == null) {
+		if (this.read) {
 			throw new IllegalStateException("InputStream has already been read - " +
 					"do not use InputStreamResource if a stream needs to be read multiple times");
 		}
-		InputStream result = this.inputStream;
-		this.inputStream = null;
-		return result;
+		this.read = true;
+		return inputStream;
 	}
 
+	/**
+	 * This implementation returns the passed-in description, if any.
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+
+	/**
+	 * This implementation compares the underlying InputStream.
+	 */
 	public boolean equals(Object obj) {
 		return (obj == this ||
 		    (obj instanceof InputStreamResource && ((InputStreamResource) obj).inputStream.equals(this.inputStream)));
 	}
 
+	/**
+	 * This implementation returns the hash code of the underlying InputStream.
+	 */
 	public int hashCode() {
 		return this.inputStream.hashCode();
 	}
