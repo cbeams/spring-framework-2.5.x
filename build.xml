@@ -776,8 +776,12 @@
 
 		<copy todir="${target.clover.dir}" preservelastmodified="true">
 			<fileset dir="${src.dir}">
+				<include name="**/*.properties"/>
 				<include name="**/*.xml"/>
 				<include name="**/*.dtd"/>
+				<include name="**/*.vm"/>
+				<include name="**/*.ftl"/>
+				<include name="**/*.types"/>
 			</fileset>
 		</copy>
 
