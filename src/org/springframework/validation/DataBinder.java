@@ -334,8 +334,8 @@ public class DataBinder {
 			String field = pvArray[i].getName();
 			if (!((allowedFieldsList != null && allowedFieldsList.contains(field)) || isAllowed(field))) {
 				mpvs.removePropertyValue(pvArray[i]);
-				if (logger.isWarnEnabled()) {
-					logger.warn("Field [" + pvArray[i] + "] has been removed from PropertyValues " +
+				if (logger.isDebugEnabled()) {
+					logger.debug("Field [" + pvArray[i] + "] has been removed from PropertyValues " +
 							"and will not be bound, because it has not been found in the list of allowed fields " +
 							allowedFieldsList);
 				}
