@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.view.velocity;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -27,8 +26,8 @@ import junit.framework.TestCase;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.VelocityException;
 
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.ui.velocity.VelocityEngineFactoryBean;
@@ -88,7 +87,7 @@ public class VelocityConfigurerTests extends TestCase {
 				if (!("file:/mydir".equals(location) || "file:/mydir/test".equals(location))) {
 					throw new IllegalArgumentException(location);
 				}
-				return new InputStreamResource(new ByteArrayInputStream("test".getBytes()), "test");
+				return new ByteArrayResource("test".getBytes(), "test");
 			}
 		});
 		vefb.afterPropertiesSet();

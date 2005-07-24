@@ -16,11 +16,14 @@
 
 package org.springframework.core.io;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import junit.framework.TestCase;
 
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.context.support.ServletContextResource;
 
 /**
@@ -28,6 +31,41 @@ import org.springframework.web.context.support.ServletContextResource;
  * @since 09.09.2004
  */
 public class ResourceTests extends TestCase {
+
+	public void testByteArrayResource() throws IOException {
+		Resource resource = new ByteArrayResource("testString".getBytes());
+		assertTrue(resource.exists());
+		assertFalse(resource.isOpen());
+		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
+		assertEquals("testString", content);
+	}
+
+	public void testByteArrayResourceWithDescription() throws IOException {
+		Resource resource = new ByteArrayResource("testString".getBytes(), "my description");
+		assertTrue(resource.exists());
+		assertFalse(resource.isOpen());
+		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
+		assertEquals("testString", content);
+		assertEquals("my description", resource.getDescription());
+	}
+
+	public void testInputStreamResource() throws IOException {
+		Resource resource = new InputStreamResource(new ByteArrayInputStream("testString".getBytes()));
+		assertTrue(resource.exists());
+		assertTrue(resource.isOpen());
+		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
+		assertEquals("testString", content);
+	}
+
+	public void testInputStreamResourceWithDescription() throws IOException {
+		Resource resource = new InputStreamResource(
+				new ByteArrayInputStream("testString".getBytes()), "my description");
+		assertTrue(resource.exists());
+		assertTrue(resource.isOpen());
+		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
+		assertEquals("testString", content);
+		assertEquals("my description", resource.getDescription());
+	}
 
 	public void testClassPathResource() throws IOException {
 		Resource resource = new ClassPathResource("org/springframework/core/io/Resource.class");
