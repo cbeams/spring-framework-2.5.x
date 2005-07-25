@@ -101,9 +101,11 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 					"Cannot use DefaultAdvisorAutoProxyCreator without a ListableBeanFactory");
 		}
 		ListableBeanFactory owningFactory = (ListableBeanFactory) getBeanFactory();
-		
+
+		// Do not initialize FactoryBeans here: We need to leave all regular beans
+		// uninitialized to let the auto-proxy creator apply to them!
 		String[] adviceNames =
-				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(owningFactory, Advisor.class);
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(owningFactory, Advisor.class, true, false);
 		List candidateAdvisors = new LinkedList();
 		for (int i = 0; i < adviceNames.length; i++) {
 			String name = adviceNames[i];
