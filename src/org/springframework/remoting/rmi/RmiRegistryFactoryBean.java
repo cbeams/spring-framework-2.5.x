@@ -21,10 +21,12 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
+import java.rmi.server.UnicastRemoteObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -56,7 +58,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @see java.rmi.registry.Registry
  * @see java.rmi.registry.LocateRegistry
  */
-public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean {
+public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -69,6 +71,8 @@ public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean {
 	private RMIServerSocketFactory serverSocketFactory;
 
 	private Registry registry;
+
+	private boolean created = false;
 
 
 	/**
@@ -187,6 +191,7 @@ public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean {
 				logger.debug("RMI registry access threw exception", ex);
 				logger.warn("Could not detect RMI registry - creating new one");
 				// Assume no registry found -> create new one.
+				this.created = true;
 				return LocateRegistry.createRegistry(registryPort, clientSocketFactory, serverSocketFactory);
 			}
 		}
@@ -216,6 +221,7 @@ public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean {
 			logger.debug("RMI registry access threw exception", ex);
 			logger.warn("Could not detect RMI registry - creating new one");
 			// Assume no registry found -> create new one.
+			this.created = true;
 			return LocateRegistry.createRegistry(registryPort);
 		}
 	}
@@ -243,6 +249,18 @@ public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean {
 
 	public boolean isSingleton() {
 		return true;
+	}
+
+
+	/**
+	 * Unexport the RMI registry on bean factory shutdown,
+	 * provided that this bean actually created a registry.
+	 */
+	public void destroy() throws RemoteException {
+		if (this.created) {
+			logger.info("Unexporting RMI registry");
+			UnicastRemoteObject.unexportObject(this.registry, true);
+		}
 	}
 
 }
