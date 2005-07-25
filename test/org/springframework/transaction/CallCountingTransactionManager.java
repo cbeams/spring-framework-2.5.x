@@ -21,9 +21,11 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
-public class CountingTxManager extends AbstractPlatformTransactionManager {
-	
+public class CallCountingTransactionManager extends AbstractPlatformTransactionManager {
+
+	public int begun;
 	public int commits;
 	public int rollbacks;
 	public int inflight;
@@ -33,6 +35,7 @@ public class CountingTxManager extends AbstractPlatformTransactionManager {
 	}
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
+		++begun;
 		++inflight;
 	}
 

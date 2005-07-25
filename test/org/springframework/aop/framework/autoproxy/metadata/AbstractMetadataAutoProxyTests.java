@@ -30,7 +30,7 @@ import org.springframework.aop.target.ThreadLocalTargetSource;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.transaction.CountingTxManager;
+import org.springframework.transaction.CallCountingTransactionManager;
 
 /**
  * Abstract tests for auto-proxying. Subclasses must load the appropriate
@@ -78,7 +78,7 @@ public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 		BeanFactory bf = getBeanFactory();
 		TxClass txClass = (TxClass) bf.getBean("txClass");
 		
-		CountingTxManager txMan = (CountingTxManager) bf.getBean(TXMANAGER_BEAN_NAME);
+		CallCountingTransactionManager txMan = (CallCountingTransactionManager) bf.getBean(TXMANAGER_BEAN_NAME);
 		
 		assertEquals(0, txMan.commits);
 		int count = txClass.defaultTxAttribute();
@@ -96,7 +96,7 @@ public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 		TxClass txClass = (TxClass) bf.getBean("txClass");
 		assertTrue(AopUtils.isAopProxy(txClass));
 	
-		CountingTxManager txMan = (CountingTxManager) bf.getBean(TXMANAGER_BEAN_NAME);
+		CallCountingTransactionManager txMan = (CallCountingTransactionManager) bf.getBean(TXMANAGER_BEAN_NAME);
 	
 		assertEquals(0, txMan.commits);
 		txClass.echoException(null);
@@ -117,7 +117,7 @@ public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 		BeanFactory bf = getBeanFactory();
 		TxClass txClass = (TxClass) bf.getBean("txClass");
 
-		CountingTxManager txMan = (CountingTxManager) bf.getBean(TXMANAGER_BEAN_NAME);
+		CallCountingTransactionManager txMan = (CallCountingTransactionManager) bf.getBean(TXMANAGER_BEAN_NAME);
 
 		assertEquals(0, txMan.commits);
 		// Should NOT roll back on ServletException 
@@ -133,7 +133,7 @@ public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 	public void testProgrammaticRollback() throws Exception {
 		BeanFactory bf = getBeanFactory();
 
-		CountingTxManager txMan = (CountingTxManager) bf.getBean(TXMANAGER_BEAN_NAME);
+		CallCountingTransactionManager txMan = (CallCountingTransactionManager) bf.getBean(TXMANAGER_BEAN_NAME);
 		
 		TxClassWithClassAttribute txClass = (TxClassWithClassAttribute) bf.getBean("txClassWithClassAttribute");
 		// No interface, so must be a CGLIB proxy
@@ -151,7 +151,7 @@ public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 		BeanFactory bf = getBeanFactory();
 		TxClassWithClassAttribute txClass = (TxClassWithClassAttribute) bf.getBean("txClassWithClassAttribute");
 	
-		CountingTxManager txMan = (CountingTxManager) bf.getBean(TXMANAGER_BEAN_NAME);
+		CallCountingTransactionManager txMan = (CallCountingTransactionManager) bf.getBean(TXMANAGER_BEAN_NAME);
 	
 		assertEquals(0, txMan.commits);
 		int ret = txClass.inheritClassTxAttribute(25);

@@ -34,12 +34,11 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.transaction.CountingTxManager;
+import org.springframework.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionStatus;
 
 /**
  * Test cases for AOP transaction management.
@@ -87,8 +86,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 		String newName = "Gordon";
 		
 		// Install facade
-		final TransactionStatus ts = new DefaultTransactionStatus(null, true, false, false, false, null);
-		CountingTxManager ptm = new CountingTxManager();
+		CallCountingTransactionManager ptm = new CallCountingTransactionManager();
 		PlatformTransactionManagerFacade.delegate = ptm;
 		
 		ini.setName(newName);
@@ -125,11 +123,11 @@ public class BeanFactoryTransactionTests extends TestCase {
 		ptmControl.verify();
 
 		// Install facade expecting a call
-		final TransactionStatus ts = new DefaultTransactionStatus(null, true, false, false, false, null);
+		MockControl statusControl = MockControl.createControl(TransactionStatus.class);
+		final TransactionStatus ts = (TransactionStatus) statusControl.getMock();
 		ptm = new PlatformTransactionManager() {
 			private boolean invoked;
-			public TransactionStatus getTransaction(TransactionDefinition definition)
-					throws TransactionException {
+			public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
 				if (invoked) {
 					throw new IllegalStateException("getTransaction should not get invoked more than once");
 				}
@@ -159,7 +157,6 @@ public class BeanFactoryTransactionTests extends TestCase {
 
 	public void testGetBeansOfTypeWithAbstract() {
 		Map beansOfType = factory.getBeansOfType(ITestBean.class, true, true);
-		//System.out.println(beansOfType.size());
 	}
 
 	/**
@@ -181,7 +178,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 	 */
 	public void testDynamicTargetSource() throws NoSuchMethodException {
 		// Install facade
-		CountingTxManager txMan = new CountingTxManager();
+		CallCountingTransactionManager txMan = new CallCountingTransactionManager();
 		PlatformTransactionManagerFacade.delegate = txMan;
 		
 		TestBean tb = (TestBean) factory.getBean("hotSwapped");

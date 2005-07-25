@@ -31,7 +31,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.interceptor.TransactionAspectSupport.TransactionInfo;
-import org.springframework.transaction.support.DefaultTransactionStatus;
 
 /**
  * Mock object based tests for transaction aspects.
@@ -142,7 +141,8 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
-		TransactionStatus status = new DefaultTransactionStatus(new Object(), false, false, false, false, null);
+		MockControl statusControl = MockControl.createControl(TransactionStatus.class);
+		TransactionStatus status = (TransactionStatus) statusControl.getMock();
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 		// expect a transaction
@@ -329,13 +329,14 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
-		TransactionStatus status = new DefaultTransactionStatus(null, false, false, false, false, null);
-		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
-		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
+		MockControl statusControl = MockControl.createControl(TransactionStatus.class);
+		TransactionStatus status = (TransactionStatus) statusControl.getMock();
+		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
 		// Gets additional call(s) from TransactionControl
 
 		ptm.getTransaction(txatt);
-		ptxControl.setReturnValue(status, 1);
+		ptmControl.setReturnValue(status, 1);
 
 		if (shouldRollback) {
 			ptm.rollback(status);
@@ -345,12 +346,12 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		}
 		TransactionSystemException tex = new TransactionSystemException("system exception");
 		if (rollbackException) {
-			ptxControl.setThrowable(tex, 1);
+			ptmControl.setThrowable(tex, 1);
 		}
 		else {
-			ptxControl.setVoidCallable(1);
+			ptmControl.setVoidCallable(1);
 		}
-		ptxControl.replay();
+		ptmControl.replay();
 
 		TestBean tb = new TestBean();		
 		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
@@ -368,12 +369,11 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 			}
 		}
 
-		ptxControl.verify();
+		ptmControl.verify();
 	}
 	
 	/**
-	 * Test that TransactionControl.setRollbackOnly works
-	 * @throws java.lang.Exception
+	 * Test that TransactionStatus.setRollbackOnly works.
 	 */
 	public void testProgrammaticRollback() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
@@ -383,7 +383,6 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		tas.register(m, txatt);
 
 		TransactionStatus status = transactionStatusForNewTransaction();
-		assertTrue(status.isNewTransaction());
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 
@@ -414,7 +413,8 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	 * @return a TransactionStatus object configured for a new transaction
 	 */
 	private TransactionStatus transactionStatusForNewTransaction() {
-		return new DefaultTransactionStatus(new Object(), true, false, false, false, null);
+		MockControl statusControl = MockControl.createControl(TransactionStatus.class);
+		return (TransactionStatus) statusControl.getMock();
 	}
 
 	/**

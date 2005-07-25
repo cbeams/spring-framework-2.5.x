@@ -34,7 +34,7 @@ import org.springframework.aop.target.ThreadLocalTargetSource;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.transaction.CountingTxManager;
+import org.springframework.transaction.CallCountingTransactionManager;
 
 /**
  * Tests for auto proxy creation by advisor recognition.
@@ -223,7 +223,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		BeanFactory bf = getBeanFactory();
 		ITestBean test = (ITestBean) bf.getBean("test");
 
-		CountingTxManager txMan = (CountingTxManager) bf.getBean(TXMANAGER_BEAN_NAME);
+		CallCountingTransactionManager txMan = (CallCountingTransactionManager) bf.getBean(TXMANAGER_BEAN_NAME);
 		OrderedTxCheckAdvisor txc = (OrderedTxCheckAdvisor) bf.getBean("orderedBeforeTransaction");
 		assertEquals(0, txc.getCountingBeforeAdvice().getCalls());
 
@@ -244,7 +244,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		BeanFactory bf = getBeanFactory();
 		Rollback rb = (Rollback) bf.getBean("rollback");
 
-		CountingTxManager txMan = (CountingTxManager) bf.getBean(TXMANAGER_BEAN_NAME);
+		CallCountingTransactionManager txMan = (CallCountingTransactionManager) bf.getBean(TXMANAGER_BEAN_NAME);
 		OrderedTxCheckAdvisor txc = (OrderedTxCheckAdvisor) bf.getBean("orderedBeforeTransaction");
 		assertEquals(0, txc.getCountingBeforeAdvice().getCalls());
 
@@ -269,7 +269,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		BeanFactory bf = getBeanFactory();
 		Rollback rb = (Rollback) bf.getBean("rollback");
 
-		CountingTxManager txMan = (CountingTxManager) bf.getBean(TXMANAGER_BEAN_NAME);
+		CallCountingTransactionManager txMan = (CallCountingTransactionManager) bf.getBean(TXMANAGER_BEAN_NAME);
 
 		assertEquals(0, txMan.commits);
 		// Should NOT roll back on ServletException 
@@ -285,8 +285,8 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	public void testProgrammaticRollback() throws Exception {
 		BeanFactory bf = getBeanFactory();
 
-		assertTrue(bf.getBean(TXMANAGER_BEAN_NAME) instanceof CountingTxManager);
-		CountingTxManager txMan = (CountingTxManager) bf.getBean(TXMANAGER_BEAN_NAME);
+		assertTrue(bf.getBean(TXMANAGER_BEAN_NAME) instanceof CallCountingTransactionManager);
+		CallCountingTransactionManager txMan = (CallCountingTransactionManager) bf.getBean(TXMANAGER_BEAN_NAME);
 
 		Rollback rb = (Rollback) bf.getBean("rollback");
 		assertEquals(0, txMan.commits);

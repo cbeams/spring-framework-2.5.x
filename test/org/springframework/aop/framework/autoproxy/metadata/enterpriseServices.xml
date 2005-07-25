@@ -27,7 +27,7 @@
 		autowire="constructor">
 	</bean>
 
-	<bean id="es.txManager" class="org.springframework.transaction.CountingTxManager"/>
+	<bean id="es.txManager" class="org.springframework.transaction.CallCountingTransactionManager"/>
 
 	<bean id="es.TAS" class="org.springframework.transaction.interceptor.AttributesTransactionAttributeSource"
 		autowire="constructor"/>
