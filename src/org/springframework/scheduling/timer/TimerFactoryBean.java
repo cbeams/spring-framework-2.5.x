@@ -126,9 +126,10 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 		return true;
 	}
 
+
 	/**
-	 * This implementation cancels the Timer, stopping all scheduled tasks.
-	 * @see java.util.Timer#cancel
+	 * Cancel the Timer on bean factory shutdown, stopping all scheduled tasks.
+	 * @see java.util.Timer#cancel()
 	 */
 	public void destroy() {
 		logger.info("Cancelling Timer");

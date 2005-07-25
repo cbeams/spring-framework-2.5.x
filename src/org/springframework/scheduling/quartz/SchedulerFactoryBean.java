@@ -841,8 +841,9 @@ public class SchedulerFactoryBean
 		return true;
 	}
 
+
 	/**
-	 * This implementation shuts down the Quartz scheduler,
+	 * Shut down the Quartz scheduler on bean factory shutdown,
 	 * stopping all scheduled jobs.
 	 */
 	public void destroy() throws SchedulerException {

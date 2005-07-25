@@ -386,7 +386,7 @@ public class RmiServiceExporter extends RemoteInvocationBasedExporter
 
 
 	/**
-	 * Unbind the RMI service from the registry at bean factory shutdown.
+	 * Unbind the RMI service from the registry on bean factory shutdown.
 	 */
 	public void destroy() throws RemoteException, NotBoundException {
 		if (logger.isInfoEnabled()) {

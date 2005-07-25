@@ -63,6 +63,7 @@ public class JndiRmiServiceExporter extends JndiAccessor implements Initializing
 
 	private String jndiName;
 
+
 	/**
 	 * Set the RMI service to export.
 	 * Typically populated via a bean reference.
@@ -77,6 +78,7 @@ public class JndiRmiServiceExporter extends JndiAccessor implements Initializing
 	public void setJndiName(String jndiName) {
 		this.jndiName = jndiName;
 	}
+
 
 	/**
 	 * Register the service as RMI object.
@@ -94,7 +96,7 @@ public class JndiRmiServiceExporter extends JndiAccessor implements Initializing
 	}
 
 	/**
-	 * Unbind the RMI service from JNDI at bean factory shutdown.
+	 * Unbind the RMI service from JNDI on bean factory shutdown.
 	 */
 	public void destroy() throws NamingException, NoSuchObjectException {
 		if (logger.isInfoEnabled()) {

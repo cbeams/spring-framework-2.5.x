@@ -194,7 +194,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 
 
 	/**
-	 * Close the PersistenceManagerFactory on context shutdown.
+	 * Close the PersistenceManagerFactory on bean factory shutdown.
 	 */
 	public void destroy() {
 		logger.info("Closing JDO PersistenceManagerFactory");
