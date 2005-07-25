@@ -78,9 +78,10 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * a SimpleApplicationEventMulticaster is used.
  *
  * <p>Implements resource loading through extending DefaultResourceLoader.
- * Therefore, treats plain resource paths as class path resources (only
- * supporting full class path resource names that include the package path,
- * e.g. "mypackage/myresource.dat").
+ * Consequently, treats non-URL resource paths as class path resources
+ * (supporting full class path resource names that include the package path,
+ * e.g. "mypackage/myresource.dat"), unless the <code>getResourceByPath</code>
+ * method is overwritten in a subclass.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -96,6 +97,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * @see #APPLICATION_EVENT_MULTICASTER_BEAN_NAME
  * @see org.springframework.context.event.ApplicationEventMulticaster
  * @see org.springframework.context.event.SimpleApplicationEventMulticaster
+ * @see #getResourceByPath(String)
  */
 public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		implements ConfigurableApplicationContext, DisposableBean {
@@ -351,9 +353,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Must be called before singleton instantiation.
 	 */
 	private void invokeBeanFactoryPostProcessors() throws BeansException {
+		// Do not initialize FactoryBeans here: We need to leave all regular beans
+		// uninitialized to let the bean factory post-processors apply to them!
+		String[] factoryProcessorNames = getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
+
 		// Separate between BeanFactoryPostProcessor that implement the Ordered
 		// interface and those that do not.
-		String[] factoryProcessorNames = getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
 		List orderedFactoryProcessors = new ArrayList();
 		List nonOrderedFactoryProcessorNames = new ArrayList();
 		for (int i = 0; i < factoryProcessorNames.length; i++) {
@@ -392,6 +397,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		getBeanFactory().addBeanPostProcessor(new BeanPostProcessorChecker(beanProcessorTargetCount));
 
 		// Actually fetch and register the BeanPostProcessor beans.
+		// Do not initialize FactoryBeans here: We need to leave all regular beans
+		// uninitialized to let the bean post-processors apply to them!
 		Map beanProcessorMap = getBeansOfType(BeanPostProcessor.class, true, false);
 		List beanProcessors = new ArrayList(beanProcessorMap.values());
 		Collections.sort(beanProcessors, new OrderComparator());
@@ -477,6 +484,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Doesn't affect other listeners, which can be added without being beans.
 	 */
 	private void registerListeners() throws BeansException {
+		// Do not initialize FactoryBeans here: We need to leave all regular beans
+		// uninitialized to let post-processors apply to them!
 		Collection listeners = getBeansOfType(ApplicationListener.class, true, false).values();
 		for (Iterator it = listeners.iterator(); it.hasNext();) {
 			addListener((ApplicationListener) it.next());
@@ -734,7 +743,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			if (getBeanFactory().getBeanPostProcessorCount() < this.beanPostProcessorTargetCount) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Bean '" + beanName + "' is not eligible for getting processed by all " +
-							"BeanPostProcessors (for example: not eligible for auto-proxying");
+							"BeanPostProcessors (for example: not eligible for auto-proxying)");
 				}
 			}
 			return bean;
