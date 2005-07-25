@@ -3,12 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.3 (22.7.2005)
+Changes in version 1.2.3 (26.7.2005)
 ------------------------------------
 
 Package org.springframework.aop
 * changed AbstractPoolingTargetSource's "maxSize" default to -1, clearly indicating no size limit
 * mirrored "maxIdle", "minIdle", "maxWait" and other Commons Pool properties in CommonsPoolTargetSource
+* fixed DefaultAdvisorAutoProxyCreator's Advisor lookup to ignore FactoryBeans (avoiding potential for unproxied beans)
 
 Package org.springframework.beans
 * BeanWrapperImpl passes the old value to each applied PropertyEditor before calling "setAsText", as far as possible
@@ -30,8 +31,10 @@ Package org.springframework.context
 * factored out AbstractApplicationEventMulticaster base class from SimpleApplicationEventMulticaster
 * AbstractApplicationEventMulticaster allows for specifying the collection class to use (e.g. CopyOnWriteArraySet)
 * AbstractApplicationContext registers raw FactoryBean instances that implement ApplicationListener as listeners
+* added overloaded DefaultMessageSourceResolvable constructor that accepts a single code String
 
 Package org.springframework.core
+* added ByteArrayResource adapter, useful for example to create mail attachments from local content
 * fixed InputStreamResource's "equals"/"hashCode" to only consider InputStreamResources with same InputStream as equal
 * PathMatchingResourcePatternResolver always uses PathMatcher's pattern detection instead of hardcoded asterisk checks
 * fixed PropertiesLoaderSupport to correctly ignore a resource not found failure if "ignoreResourceNotFound" is "true"
@@ -70,11 +73,19 @@ Package org.springframework.test
 * added "onSetUpBeforeTransaction" and "onTearDownAfterTransaction" callbacks to AbstractTransactionalSpringContextTests
 
 Package org.springframework.transaction
+* factored out AbstractTransactionStatus class from AbstractPlatformTransactionManager's DefaultTransactionStatus
+* added SimpleTransactionStatus class, provided as start for custom transaction managers and as static mock for testing
+* added "globalRollbackOnParticipationFailure" flag to AbstractPlatformTransactionManager, with default "true"
 * JtaTransactionManager calls "afterCompletion" of Spring synchronizations immediately if JTA tx is marked rollback-only
+* added convenience constructors to TransactionInterceptor, passing in tx manager and tx attributes through constructor
+
+Package org.springframework.validation
+* DataBinder logs warnings about non-allowed binding fields at "debug" instead of "warn" level now
 
 Package org.springframework.web
 * fixed XmlWebApplicationContext to set itself as ResourceLoader on the underlying XmlBeanDefinitionReader that it uses
 * fixed SpringBindingActionForm adapter to correctly work for nested properties (suppressing Struts binding completely)
+* refined SpringBindingActionForm to be compatible with Struts 1.1 (which doesn't support default ActionMessages)
 * added "suppressBinding(request)" callback method to BaseCommandController, to suppress binding for specific requests
 * added "onFormChange" callback to AbstractFormController, to allow for post-processing in case of a form change request
 * added CancellableFormController, supporting cancel requests and a corresponding "onCancel" callbck plus "cancelView"
