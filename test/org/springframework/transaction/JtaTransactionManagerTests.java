@@ -272,7 +272,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.verify();
 	}
 
-	public void testJtaTransactionManagerWithExistingTransaction() throws Exception {
+	public void testJtaTransactionManagerWithExistingTransactionAndRollbackOnly() throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
@@ -299,6 +299,117 @@ public class JtaTransactionManagerTests extends TestCase {
 				status.setRollbackOnly();
 			}
 		});
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		utControl.verify();
+		synchControl.verify();
+	}
+
+	public void testJtaTransactionManagerWithExistingTransactionAndException() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		ut.setRollbackOnly();
+		utControl.setVoidCallable(1);
+		utControl.replay();
+
+		MockControl synchControl = MockControl.createControl(TransactionSynchronization.class);
+		final TransactionSynchronization synch = (TransactionSynchronization) synchControl.getMock();
+		synch.beforeCompletion();
+		synchControl.setVoidCallable(1);
+		synch.afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
+		synchControl.setVoidCallable(1);
+		synchControl.replay();
+
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		try {
+			tt.execute(new TransactionCallbackWithoutResult() {
+				protected void doInTransactionWithoutResult(TransactionStatus status) {
+					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+					TransactionSynchronizationManager.registerSynchronization(synch);
+					throw new IllegalStateException("I want a rollback");
+				}
+			});
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		utControl.verify();
+		synchControl.verify();
+	}
+
+	public void testJtaTransactionManagerWithExistingTransactionAndRollbackOnlyAndNoGlobalRollback() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		ut.setRollbackOnly();
+		utControl.setVoidCallable(1);
+		utControl.replay();
+
+		MockControl synchControl = MockControl.createControl(TransactionSynchronization.class);
+		final TransactionSynchronization synch = (TransactionSynchronization) synchControl.getMock();
+		synch.beforeCompletion();
+		synchControl.setVoidCallable(1);
+		synch.afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
+		synchControl.setVoidCallable(1);
+		synchControl.replay();
+
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		ptm.setGlobalRollbackOnParticipationFailure(false);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+				TransactionSynchronizationManager.registerSynchronization(synch);
+				status.setRollbackOnly();
+			}
+		});
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		utControl.verify();
+		synchControl.verify();
+	}
+
+	public void testJtaTransactionManagerWithExistingTransactionAndExceptionAndNoGlobalRollback() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.replay();
+
+		MockControl synchControl = MockControl.createControl(TransactionSynchronization.class);
+		final TransactionSynchronization synch = (TransactionSynchronization) synchControl.getMock();
+		synch.beforeCompletion();
+		synchControl.setVoidCallable(1);
+		synch.afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
+		synchControl.setVoidCallable(1);
+		synchControl.replay();
+
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		ptm.setGlobalRollbackOnParticipationFailure(false);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		try {
+			tt.execute(new TransactionCallbackWithoutResult() {
+				protected void doInTransactionWithoutResult(TransactionStatus status) {
+					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+					TransactionSynchronizationManager.registerSynchronization(synch);
+					throw new IllegalStateException("I want a rollback");
+				}
+			});
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();

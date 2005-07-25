@@ -112,6 +112,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	private boolean nestedTransactionAllowed = false;
 
+	private boolean globalRollbackOnParticipationFailure = true;
+
 	private boolean rollbackOnCommitFailure = false;
 
 
@@ -150,7 +152,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Set whether nested transactions are allowed. Default is false.
+	 * Set whether nested transactions are allowed. Default is "false".
 	 * <p>Typically initialized with an appropriate default by the
 	 * concrete transaction manager subclass.
 	 */
@@ -163,6 +165,51 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	public boolean isNestedTransactionAllowed() {
 		return nestedTransactionAllowed;
+	}
+
+	/**
+	 * Set whether to globally mark an existing transaction as rollback-only
+	 * after a participating transaction failed.
+	 * <p>Default is "true": If a participating transaction (e.g. with
+	 * PROPAGATION_REQUIRES or PROPAGATION_SUPPORTS encountering an existing
+	 * transaction) fails, the transaction will be globally marked as rollback-only.
+	 * The only possible outcome of such a transaction is a rollback: The
+	 * transaction originator <i>cannot</i> make the transaction commit anymore.
+	 * <p>Switch this to "false" to let the transaction originator make the rollback
+	 * decision. If a participating transaction fails with an exception, the caller
+	 * can still decide to continue with a different path within the transaction.
+	 * However, note that this will only work as long as all participating resources
+	 * are capable of contiuing towards a transaction commit even after a data access
+	 * failure: This is generally not the case for a Hibernate Session, for example;
+	 * neither is it for a sequence of JDBC insert/update/delete operations.
+	 * <p><b>Note:</b>This flag only applies to an explicit rollback attempt for a
+	 * subtransaction, typically caused by an exception thrown by a data access operation
+	 * (where TransactionInterceptor will trigger a <code>PlatformTransactionManager.rollback()</code>
+	 * call according to a rollback rule). If the flag is off, the caller can handle the exception
+	 * and decide on a rollback, independent of the rollback rules of the subtransaction.
+	 * This flag does, however, <i>not</i> apply to explicit <code>setRollbackOnly</code>
+	 * calls on a <code>TransactionStatus</code>, which will always cause an eventual
+	 * global rollback (as it might not throw an exception after the rollback-only call).
+	 * <p>The recommended solution for handling failure of a subtransaction
+	 * is a "nested transaction", where the global transaction can be rolled
+	 * back to a savepoint taken at the beginning of the subtransaction.
+	 * PROPAGATION_NESTED provides exactly those semantics; however, it will
+	 * only work when nested transaction support is available. This is the case
+	 * with DataSourceTransactionManager, but not with JtaTransactionManager.
+	 * @see #setNestedTransactionAllowed
+	 * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
+	 * @see org.springframework.transaction.jta.JtaTransactionManager
+	 */
+	public void setGlobalRollbackOnParticipationFailure(boolean globalRollbackOnParticipationFailure) {
+		this.globalRollbackOnParticipationFailure = globalRollbackOnParticipationFailure;
+	}
+
+	/**
+	 * Return whether to globally mark an existing transaction as rollback-only
+	 * after a participating transaction failed.
+	 */
+	public boolean isGlobalRollbackOnParticipationFailure() {
+		return globalRollbackOnParticipationFailure;
 	}
 
 	/**
@@ -391,7 +438,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * transactions and programmatic rollback requests.
 	 * Delegates to <code>isRollbackOnly</code>, <code>doCommit</code>
 	 * and <code>rollback</code>.
-	 * @see org.springframework.transaction.TransactionStatus#isRollbackOnly
+	 * @see org.springframework.transaction.TransactionStatus#isRollbackOnly()
 	 * @see #doCommit
 	 * @see #rollback
 	 */
@@ -531,10 +578,19 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					doRollback(status);
 				}
 				else if (status.getTransaction() != null) {
-					if (status.isDebug()) {
-						logger.debug("Setting existing transaction rollback-only");
+					if (status.isLocalRollbackOnly() || isGlobalRollbackOnParticipationFailure()) {
+						if (status.isDebug()) {
+							logger.debug(
+									"Participating transaction failed - marking existing transaction as rollback-only");
+						}
+						doSetRollbackOnly(status);
 					}
-					doSetRollbackOnly(status);
+					else {
+						if (status.isDebug()) {
+							logger.debug(
+									"Participating transaction failed - letting transaction originator decide on rollback");
+						}
+					}
 				}
 				else {
 					logger.warn("Should roll back transaction but cannot - no transaction available");
@@ -556,7 +612,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Invoke doRollback, handling rollback exceptions properly.
+	 * Invoke <code>doRollback</code>, handling rollback exceptions properly.
 	 * @param status object representing the transaction
 	 * @param ex the thrown application exception or error
 	 * @throws TransactionException in case of rollback failure
