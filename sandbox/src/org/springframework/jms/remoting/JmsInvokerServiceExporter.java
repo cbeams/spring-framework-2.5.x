@@ -18,13 +18,14 @@ package org.springframework.jms.remoting;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageListener;
+import javax.jms.MessageFormatException;
+import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessageCreator;
+import org.springframework.jms.listener.SessionAwareMessageListener;
+import org.springframework.jms.support.JmsUtils;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationBasedExporter;
 import org.springframework.remoting.support.RemoteInvocationResult;
@@ -37,40 +38,33 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * any JMS client, as there isn't any special handling involved.
  *
  * @author James Strachan
- * @see org.springframework.jms.remoting.JmsInvokerProxyFactoryBean
+ * @author Juergen Hoeller
+ * @since 1.3
+ * @see JmsInvokerClientInterceptor
+ * @see JmsInvokerProxyFactoryBean
  */
 public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
-		implements MessageListener, InitializingBean {
-
-	private Object proxy;
-
-	private JmsTemplate jmsTemplate;
+		implements SessionAwareMessageListener, InitializingBean {
 
 	private boolean ignoreFailures;
 
 	private boolean ignoreInvalidMessages;
 
+	private Object proxy;
 
-	/**
-	 * Sets the JMS template used to send replies back for the request
-	 * @param jmsTemplate the JMS template to use
-	 */
-	public void setJmsTemplate(JmsTemplate jmsTemplate) {
-		this.jmsTemplate = jmsTemplate;
-	}
-
-	public JmsTemplate getJmsTemplate() {
-		return jmsTemplate;
-	}
 
 	/**
 	 * Set whether or not failures should be ignored (and just logged) or thrown as
-	 * runtime exceptions into the JMS provider
+	 * runtime exceptions into the JMS provider.
 	 */
 	public void setIgnoreFailures(boolean ignoreFailures) {
 		this.ignoreFailures = ignoreFailures;
 	}
 
+	/**
+	 * Return whether or not failures should be ignored (and just logged) or thrown as
+	 * runtime exceptions into the JMS provider.
+	 */
 	public boolean isIgnoreFailures() {
 		return ignoreFailures;
 	}
@@ -82,24 +76,25 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 		this.ignoreInvalidMessages = ignoreInvalidMessages;
 	}
 
+	/**
+	 * Return whether invalidly formatted messages should be silently ignored or not
+	 */
 	public boolean isIgnoreInvalidMessages() {
 		return ignoreInvalidMessages;
 	}
 
+
 	public void afterPropertiesSet() {
-		if (this.jmsTemplate == null) {
-			throw new IllegalArgumentException("template is required");
-		}
 		this.proxy = getProxyForService();
 	}
 
 
-	public void onMessage(Message message) {
+	public void onMessage(Message message, Session session) throws JMSException {
 		try {
 			RemoteInvocation invocation = readRemoteInvocation(message);
 			if (invocation != null) {
 				RemoteInvocationResult result = invokeAndCreateResult(invocation, this.proxy);
-				writeRemoteInvocationResult(message, result);
+				writeRemoteInvocationResult(message, session, result);
 			}
 		}
 		catch (JMSException ex) {
@@ -126,17 +121,22 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 
 	/**
 	 * Send the given RemoteInvocationResult as a JMS message to the originator.
-	 * @param message current HTTP message
-	 * @param result  the RemoteInvocationResult object
+	 * @param message current JMS message
+	 * @param session the JMS session to use
+	 * @param result the RemoteInvocationResult object
 	 * @throws javax.jms.JMSException if thrown by trying to send the message
 	 */
-	protected void writeRemoteInvocationResult(final Message message, final RemoteInvocationResult result)
+	protected void writeRemoteInvocationResult(Message message, Session session, RemoteInvocationResult result)
 			throws JMSException {
-		jmsTemplate.send(message.getJMSReplyTo(), new MessageCreator() {
-			public Message createMessage(Session session) throws JMSException {
-				return createResponseMessage(session, message, result);
-			}
-		});
+
+		Message response = createResponseMessage(session, message, result);
+		MessageProducer producer = session.createProducer(message.getJMSReplyTo());
+		try {
+			producer.send(response);
+		}
+		finally {
+			JmsUtils.closeMessageProducer(producer);
+		}
 	}
 
 	/**
@@ -149,12 +149,14 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 */
 	protected Message createResponseMessage(Session session, Message message, RemoteInvocationResult result)
 			throws JMSException {
-		// an alternative strategy could be to use XStream and text messages
-		// though some JMS providers, like ActiveMQ, might do this kind of thing for us under the covers
+
+		// An alternative strategy could be to use XStream and text messages.
+		// Though some JMS providers, like ActiveMQ, might do this kind of thing for us under the covers.
 		ObjectMessage answer = session.createObjectMessage(result);
 
 		// lets preserve the correlation ID
 		answer.setJMSCorrelationID(message.getJMSCorrelationID());
+
 		return answer;
 	}
 
@@ -162,11 +164,13 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * Handle invalid messages by just logging, though a different implementation
 	 * may wish to throw exceptions.
 	 */
-	protected RemoteInvocation onInvalidMessage(Message message) throws JmsInvokerProcessingException {
-		String text = "Invalid message will be discarded: " + message;
-		logger.warn(text);
+	protected RemoteInvocation onInvalidMessage(Message message) throws MessageFormatException {
+		String text = "Invalid message will be discarded: ";
+		if (logger.isWarnEnabled()) {
+			logger.warn(text + message);
+		}
 		if (!this.ignoreInvalidMessages) {
-			throw new JmsInvokerProcessingException(text);
+			throw new MessageFormatException(text + message);
 		}
 		return null;
 	}
@@ -174,12 +178,14 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	/**
 	 * Handle the processing of an exception when processing an inbound message.
 	 */
-	protected void onException(Message message, JMSException ex) throws JmsInvokerProcessingException {
-		String text = "Failed to process inbound message due to: " + ex.getMessage() +
-				". Message will be discarded: " + message;
-		logger.warn(text, ex);
+	protected void onException(Message message, JMSException ex) throws JMSException {
+		if (logger.isWarnEnabled()) {
+			logger.warn("Failed to process inbound message due to: " + ex.getMessage() +
+					". Message will be discarded: " + message, ex);
+		}
 		if (!this.ignoreFailures) {
-			throw new JmsInvokerProcessingException(text, ex);
+			throw ex;
 		}
 	}
+
 }
