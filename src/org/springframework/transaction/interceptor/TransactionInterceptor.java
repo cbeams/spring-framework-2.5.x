@@ -16,8 +16,12 @@
 
 package org.springframework.transaction.interceptor;
 
+import java.util.Properties;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * AOP Alliance MethodInterceptor providing declarative transaction
@@ -39,6 +43,41 @@ import org.aopalliance.intercept.MethodInvocation;
  * @see org.springframework.transaction.PlatformTransactionManager
  */
 public class TransactionInterceptor extends TransactionAspectSupport implements MethodInterceptor {
+
+	/**
+	 * Create a new TransactionInterceptor.
+	 * Transaction manager and transaction attributes still need to be set.
+	 * @see #setTransactionManager
+	 * @see #setTransactionAttributes(java.util.Properties)
+	 * @see #setTransactionAttributeSource(TransactionAttributeSource)
+	 */
+	public TransactionInterceptor() {
+	}
+
+	/**
+	 * Create a new TransactionInterceptor.
+	 * @param ptm the transaction manager to perform the actual transaction management
+	 * @param attributes the transaction attributes in properties format
+	 * @see #setTransactionManager
+	 * @see #setTransactionAttributes(java.util.Properties)
+	 */
+	public TransactionInterceptor(PlatformTransactionManager ptm, Properties attributes) {
+		setTransactionManager(ptm);
+		setTransactionAttributes(attributes);
+	}
+
+	/**
+	 * Create a new TransactionInterceptor.
+	 * @param ptm the transaction manager to perform the actual transaction management
+	 * @param tas the attribute source to be used to find transaction attributes
+	 * @see #setTransactionManager
+	 * @see #setTransactionAttributeSource(TransactionAttributeSource)
+	 */
+	public TransactionInterceptor(PlatformTransactionManager ptm, TransactionAttributeSource tas) {
+		setTransactionManager(ptm);
+		setTransactionAttributeSource(tas);
+	}
+
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		// Work out the target class: may be null.
