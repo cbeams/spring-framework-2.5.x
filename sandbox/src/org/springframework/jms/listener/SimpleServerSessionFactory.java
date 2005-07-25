@@ -31,7 +31,7 @@ import org.springframework.jms.support.JmsUtils;
 
 /**
  * @author Juergen Hoeller
- * @since 26.05.2005
+ * @since 1.3
  */
 public class SimpleServerSessionFactory implements ServerSessionFactory {
 
@@ -43,7 +43,7 @@ public class SimpleServerSessionFactory implements ServerSessionFactory {
 
 	private int concurrencyCount = 0;
 
-	private Map concurrencyCountMap = Collections.synchronizedMap(new HashMap());
+	private Map concurrencyCountMap = Collections.synchronizedMap(new HashMap(1));
 
 
 	/**

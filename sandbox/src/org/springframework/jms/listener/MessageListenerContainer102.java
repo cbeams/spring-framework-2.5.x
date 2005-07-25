@@ -30,11 +30,12 @@ import javax.jms.TopicConnectionFactory;
 
 /**
  * @author Juergen Hoeller
- * @since 26.05.2005
+ * @since 1.3
  */
 public class MessageListenerContainer102 extends MessageListenerContainer {
 
 	private boolean pubSubDomain = false;
+
 
 	/**
 	 * Configure the MessageListenerContainer with knowledge of the
@@ -55,6 +56,7 @@ public class MessageListenerContainer102 extends MessageListenerContainer {
 	public boolean isPubSubDomain() {
 		return pubSubDomain;
 	}
+
 
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.

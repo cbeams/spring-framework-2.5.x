@@ -27,14 +27,15 @@ import javax.jms.ServerSessionPool;
 import javax.jms.Session;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.jms.JmsException;
 import org.springframework.jms.support.JmsAccessor;
 import org.springframework.jms.support.JmsUtils;
 
 /**
  * @author Juergen Hoeller
- * @since 25.05.2005
+ * @since 1.3
  */
-public class MessageListenerContainer extends JmsAccessor implements DisposableBean {
+public class MessageListenerContainer extends JmsAccessor implements DisposableBean, ListenerSessionManager {
 
 	private Destination destination;
 
@@ -46,11 +47,11 @@ public class MessageListenerContainer extends JmsAccessor implements DisposableB
 
 	private int maxMessages = 1;
 
+	private boolean autoStartup = true;
+
 	private Connection connection;
 
 	private ConnectionConsumer consumer;
-
-	private ListenerSessionManager sessionManager;
 
 
 	public void setDestination(Destination destination) {
@@ -104,28 +105,47 @@ public class MessageListenerContainer extends JmsAccessor implements DisposableB
 		return maxMessages;
 	}
 
+	/**
+	 * Set whether to automatically start the scheduler after initialization.
+	 * Default is "true"; set this to false to allow for manual startup.
+	 */
+	public void setAutoStartup(boolean autoStartup) {
+		this.autoStartup = autoStartup;
+	}
+
 
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 
-		if (getDestination() == null) {
+		if (this.destination == null) {
 			throw new IllegalArgumentException("destination is required");
 		}
-		if (getMessageListener() == null && getSessionAwareMessageListener() == null) {
+		if (this.messageListener == null) {
 			throw new IllegalArgumentException("messageListener is required");
 		}
 
 		// Create JMS Connection and ConnectionConsumer.
 		try {
 			this.connection = createConnection();
-			ServerSessionPool pool = createServerSessionPool(this.connection);
+			ServerSessionPool pool = createServerSessionPool();
 			this.consumer = createConnectionConsumer(this.connection, pool);
-			this.connection.start();
+
+			if (this.autoStartup) {
+				this.connection.start();
+			}
 		}
 		catch (JMSException ex) {
 			JmsUtils.closeConnection(this.connection);
 			throw convertJmsAccessException(ex);
 		}
+	}
+
+	protected final Connection getConnection() {
+		return this.connection;
+	}
+
+	protected final ConnectionConsumer getConsumer() {
+		return consumer;
 	}
 
 
@@ -164,25 +184,18 @@ public class MessageListenerContainer extends JmsAccessor implements DisposableB
 	}
 
 
-	protected ServerSessionPool createServerSessionPool(final Connection con) throws JMSException {
-		this.sessionManager = new ListenerSessionManager() {
-			public Session createListenerSession() throws JMSException {
-				return MessageListenerContainer.this.createListenerSession(con);
-			}
-			public void executeListenerSession(Session session) {
-				MessageListenerContainer.this.executeListenerSession(session);
-			}
-		};
+	protected ServerSessionPool createServerSessionPool() throws JMSException {
 		return new ServerSessionPool() {
 			public ServerSession getServerSession() throws JMSException {
 				logger.debug("JMS ConnectionConsumer requests ServerSession");
-				return serverSessionFactory.getServerSession(sessionManager);
+				return serverSessionFactory.getServerSession(MessageListenerContainer.this);
 			}
 		};
 	}
 
-	protected Session createListenerSession(Connection con) throws JMSException {
-		final Session session = createSession(con);
+	public Session createListenerSession() throws JMSException {
+		final Session session = createSession(getConnection());
+		// TODO: perform commit/rollback in case of transacted Session
 		if (getMessageListener() != null) {
 			session.setMessageListener(getMessageListener());
 		}
@@ -202,23 +215,33 @@ public class MessageListenerContainer extends JmsAccessor implements DisposableB
 		return session;
 	}
 
-	protected void executeListenerSession(Session session) {
+	public void executeListenerSession(Session session) {
 		session.run();
 	}
 
 
-	public void start() throws JMSException {
-		this.connection.start();
+	public void start() throws JmsException {
+		try {
+			this.connection.start();
+		}
+		catch (JMSException ex) {
+			throw convertJmsAccessException(ex);
+		}
 	}
 
-	public void stop() throws JMSException {
-		this.connection.stop();
+	public void stop() throws JmsException {
+		try {
+			this.connection.stop();
+		}
+		catch (JMSException ex) {
+			throw convertJmsAccessException(ex);
+		}
 	}
 
 
 	public void destroy() throws JMSException {
 		logger.debug("Closing ServerSessionFactory");
-		this.serverSessionFactory.close(this.sessionManager);
+		this.serverSessionFactory.close(this);
 		logger.debug("Closing JMS ConnectionConsumer and Connection");
 		this.consumer.close();
 		this.connection.close();

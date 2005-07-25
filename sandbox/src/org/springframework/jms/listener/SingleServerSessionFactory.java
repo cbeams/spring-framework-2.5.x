@@ -28,20 +28,23 @@ import org.springframework.jms.support.JmsUtils;
 
 /**
  * @author Juergen Hoeller
- * @since 26.05.2005
+ * @since 1.3
  */
 public class SingleServerSessionFactory implements ServerSessionFactory {
 
 	private final Map singleServerSessionCache = Collections.synchronizedMap(new HashMap());
 
+
 	public ServerSession getServerSession(ListenerSessionManager sessionManager) throws JMSException {
-		SingleServerSession serverSession =
-				(SingleServerSession) this.singleServerSessionCache.get(sessionManager);
-		if (serverSession == null) {
-			serverSession = new SingleServerSession(sessionManager);
-			this.singleServerSessionCache.put(sessionManager, serverSession);
+		synchronized (this.singleServerSessionCache) {
+			SingleServerSession serverSession =
+					(SingleServerSession) this.singleServerSessionCache.get(sessionManager);
+			if (serverSession == null) {
+				serverSession = new SingleServerSession(sessionManager);
+				this.singleServerSessionCache.put(sessionManager, serverSession);
+			}
+			return serverSession;
 		}
-		return serverSession;
 	}
 
 	public void close(ListenerSessionManager sessionManager) {
@@ -53,7 +56,7 @@ public class SingleServerSessionFactory implements ServerSessionFactory {
 	}
 
 
-	private class SingleServerSession implements ServerSession {
+	private static class SingleServerSession implements ServerSession {
 
 		private final ListenerSessionManager sessionManager;
 
