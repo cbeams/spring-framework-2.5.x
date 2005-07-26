@@ -136,18 +136,18 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			}
 
 			Object retVal = null;
+			
+			if (this.advised.exposeProxy) {
+				// make invocation available if necessary
+				oldProxy = AopContext.setCurrentProxy(proxy);
+				setProxyContext = true;
+			}
 
 			// May be null. Get as late as possible to minimize the time we "own" the target,
 			// in case it comes from a pool.
 			target = targetSource.getTarget();
 			if (target != null) {
 				targetClass = target.getClass();
-			}
-
-			if (this.advised.exposeProxy) {
-				// make invocation available if necessary
-				oldProxy = AopContext.setCurrentProxy(proxy);
-				setProxyContext = true;
 			}
 
 			// get the interception chain for this method

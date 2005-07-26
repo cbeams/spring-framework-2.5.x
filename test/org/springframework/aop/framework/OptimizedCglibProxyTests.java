@@ -77,6 +77,17 @@ public class OptimizedCglibProxyTests extends CglibProxyTests {
 		// Just not relevant here so we optimize it to get the suite to pass
 	}
 	
+	public void testProxyIsBoundBeforeTargetSourceInvoked() {
+		// Override, can't test this with an optimized proxy
+		try {
+			super.testProxyIsBoundBeforeTargetSourceInvoked();
+			fail("Shouldn't be able to change TargetSource on optimized proxy");
+		}
+		catch (AopConfigException ex) {
+			// OK
+		}
+	}
+	
 	/**
 	 * We override this to get rid of the dynamic TargetSource
 	 * @see org.springframework.aop.framework.AbstractAopProxyTests#testDeclaredException()

@@ -18,25 +18,27 @@ package org.springframework.aop.framework;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 import javax.transaction.TransactionRequiredException;
 
 import junit.framework.TestCase;
+
 import org.aopalliance.aop.Advice;
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
+import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
+import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.interceptor.SerializableNopInterceptor;
@@ -55,10 +57,9 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.Person;
 import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.TestBean;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.CannotGetJdbcConnectionException;
 
 /**
  * @author Rod Johnson
@@ -1299,6 +1300,36 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		assertEquals(1, overLoadVoids.getCount());
 	}
 
+	public void testProxyIsBoundBeforeTargetSourceInvoked() {
+		final TestBean target = new TestBean();
+		ProxyFactory pf = new ProxyFactory(target);
+		pf.addAdvice(new DebugInterceptor());
+		pf.setExposeProxy(true);
+		final ITestBean proxy = (ITestBean) createProxy(pf);
+		Advised config = (Advised) proxy;
+		// This class just checks proxy is bound before getTarget() call
+		config.setTargetSource(new TargetSource() {
+			public Class getTargetClass() {
+				return TestBean.class;
+			}
+
+			public boolean isStatic() {
+				return false;
+			}
+
+			public Object getTarget() throws Exception {
+				assertEquals(proxy, AopContext.currentProxy());
+				return target;
+			}
+
+			public void releaseTarget(Object target) throws Exception {				
+			}			
+		});
+		
+		// Just test anything: it will fail if context wasn't found
+		assertEquals(0, proxy.getAge());
+	}
+	
 	public void testEquals() {
 		IOther a = new AllInstancesAreEqual();
 		IOther b = new AllInstancesAreEqual();
