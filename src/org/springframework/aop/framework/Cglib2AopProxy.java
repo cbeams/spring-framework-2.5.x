@@ -571,18 +571,18 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 			try {
 				Object retVal = null;
+				
+				if (advised.exposeProxy) {
+					// Make invocation available if necessary.
+					oldProxy = AopContext.setCurrentProxy(proxy);
+					setProxyContext = true;
+				}
 
 				// May be null. Get as late as possible to minimize the time we
 				// "own" the target, in case it comes from a pool.
 				target = getTarget();
 				if (target != null) {
 					targetClass = target.getClass();
-				}
-
-				if (advised.exposeProxy) {
-					// Make invocation available if necessary.
-					oldProxy = AopContext.setCurrentProxy(proxy);
-					setProxyContext = true;
 				}
 
 				List chain = advised.getAdvisorChainFactory()
