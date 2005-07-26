@@ -92,11 +92,11 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~215 KB)
+* "spring-beans" (~220 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
-* "spring-aop" (~150 KB)
+* "spring-aop" (~155 KB)
 - Contents: AOP framework, source-level metadata support, AOP Alliance interfaces
 - Dependencies: spring-core, (spring-beans, CGLIB, Commons Attributes)
 
@@ -104,7 +104,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: application context, validation, JNDI, UI context support
 - Dependencies: spring-beans, (spring-aop, Velocity, FreeMarker, JasperReports)
 
-* "spring-dao" (~90 KB)
+* "spring-dao" (~95 KB)
 - Contents: DAO support, transaction infrastructure
 - Dependencies: spring-core, (spring-beans, spring-aop, spring-context, JTA)
 
@@ -112,11 +112,11 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: JDBC support
 - Dependencies: spring-dao, spring-beans
 
-* "spring-support" (~150 KB)
+* "spring-support" (~155 KB)
 - Contents: JMX support, JCA support, scheduling support, mail support, caching support
 - Dependencies: spring-beans, (spring-dao, spring-context, spring-jdbc, JMX, Quartz, JavaMail, EHCache)
 
-* "spring-web" (~130 KB)
+* "spring-web" (~125 KB)
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
 - Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts, JSF)
 
@@ -136,7 +136,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: Hibernate 2.1 support, Hibernate 3.x support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, Hibernate2, Hibernate3)
 
-* "spring" (~1770 KB)
+* "spring" (~1790 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
