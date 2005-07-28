@@ -22,7 +22,6 @@ import java.io.Serializable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -64,6 +63,17 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 
 	/** Class of the target */
 	private Class targetClass;
+	
+	/**
+	 * Copy configuration from the other AbstractBeanFactoryBasedTargetSource object.
+	 * Subclasses should override this if they wish to expose it
+	 * @param other object to copy configuration from
+	 */
+	protected void copyFrom(AbstractBeanFactoryBasedTargetSource other) {
+		this.beanFactory = other.beanFactory;
+		this.targetClass = other.targetClass;
+		this.targetBeanName = other.targetBeanName;
+	}
 
 
 	/**
