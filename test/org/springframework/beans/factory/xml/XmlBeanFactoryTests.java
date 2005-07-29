@@ -546,7 +546,7 @@ public class XmlBeanFactoryTests extends TestCase {
 
 		try {
 			ConstructorDependenciesBean rod4 = (ConstructorDependenciesBean) xbf.getBean("rod4");
-			fail("Should not have thrown FatalBeanException");
+			fail("Should have thrown FatalBeanException");
 		}
 		catch (FatalBeanException ex) {
 			// expected
