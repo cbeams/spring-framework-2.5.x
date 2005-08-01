@@ -64,6 +64,13 @@ public class PropertyComparator implements Comparator {
 		this.sortDefinition = new MutableSortDefinition(property, ignoreCase, ascending);
 	}
 
+	/**
+	 * Return the SortDefinition that this comparator uses.
+	 */
+	public final SortDefinition getSortDefinition() {
+		return sortDefinition;
+	}
+
 
 	public int compare(Object o1, Object o2) {
 		Object v1 = getPropertyValue(o1);
