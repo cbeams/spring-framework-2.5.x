@@ -21,9 +21,9 @@ package org.springframework.web.util;
  * Escapes based on the JavaScript 1.5 recommendation.
  *
  * <p>Reference:
- * <a href="http://devedge.netscape.com/library/manuals/2000/javascript/1.5/guide/ident.html">
- * http://devedge.netscape.com/library/manuals/2000/javascript/1.5/guide/ident.html
- * </a> (Table 2.1)
+ * <a href="http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Guide:Literals#String_Literals">
+ * Core JavaScript 1.5 Guide
+ * </a>
  *
  * @author Juergen Hoeller
  * @since 1.1.1
