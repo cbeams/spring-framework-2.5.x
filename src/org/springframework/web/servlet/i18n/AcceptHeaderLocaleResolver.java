@@ -40,7 +40,8 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 	}
 
 	public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
-		throw new IllegalArgumentException("Cannot change HTTP accept header - use a different locale resolution strategy");
+		throw new UnsupportedOperationException(
+				"Cannot change HTTP accept header - use a different locale resolution strategy");
 	}
 	
 }

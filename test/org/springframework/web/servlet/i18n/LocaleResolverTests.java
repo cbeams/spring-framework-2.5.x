@@ -23,9 +23,6 @@ import junit.framework.TestCase;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
-import org.springframework.web.servlet.i18n.CookieLocaleResolver;
-import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.LocaleResolver;
 
 /**
@@ -51,7 +48,8 @@ public class LocaleResolverTests extends TestCase {
 			// check new locale
 			locale = localeResolver.resolveLocale(request);
 			assertEquals(locale, Locale.GERMANY);
-		} catch (IllegalArgumentException ex) {
+		}
+		catch (UnsupportedOperationException ex) {
 			if (shouldSet)
 				fail("should be able to set Locale");
 		}

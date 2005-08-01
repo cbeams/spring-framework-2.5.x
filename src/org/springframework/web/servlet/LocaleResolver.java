@@ -52,7 +52,9 @@ public interface LocaleResolver {
    * Set the current locale to the given one.
    * @param request request to be used for locale modification
    * @param response response to be used for locale modification
-   * @param locale the new locale
+   * @param locale the new locale, or <code>null</code> to clear the locale
+	 * @throws UnsupportedOperationException if the LocaleResolver implementation
+	 * does not support dynamic changing of the theme
    */
 	void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale);
 

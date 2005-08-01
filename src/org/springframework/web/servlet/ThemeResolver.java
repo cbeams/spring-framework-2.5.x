@@ -59,6 +59,8 @@ public interface ThemeResolver {
    * @param request request to be used for theme name modification
    * @param response response to be used for theme name modification
    * @param themeName the new theme name
+	 * @throws UnsupportedOperationException if the ThemeResolver implementation
+	 * does not support dynamic changing of the theme
    */
 	void setThemeName(HttpServletRequest request, HttpServletResponse response, String themeName);
 

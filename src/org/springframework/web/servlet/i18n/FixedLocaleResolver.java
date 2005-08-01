@@ -47,7 +47,8 @@ public class FixedLocaleResolver implements LocaleResolver {
 	}
 
 	public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
-		throw new IllegalArgumentException("Cannot change fixed locale - use a different locale resolution strategy");
+		throw new UnsupportedOperationException(
+				"Cannot change fixed locale - use a different locale resolution strategy");
 	}
 
 }

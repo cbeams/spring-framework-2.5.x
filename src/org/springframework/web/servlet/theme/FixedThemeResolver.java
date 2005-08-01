@@ -38,7 +38,7 @@ public class FixedThemeResolver extends AbstractThemeResolver {
 	}
 
 	public void setThemeName(HttpServletRequest request, HttpServletResponse response, String themeName) {
-		throw new IllegalArgumentException("Cannot change theme - use a different theme resolution strategy");
+		throw new UnsupportedOperationException("Cannot change theme - use a different theme resolution strategy");
 	}
 
 }

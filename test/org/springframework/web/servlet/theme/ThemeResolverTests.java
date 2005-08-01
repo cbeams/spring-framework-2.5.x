@@ -52,7 +52,8 @@ public class ThemeResolverTests extends TestCase {
 			themeResolver.setThemeName(request, response, null);
 			themeName = themeResolver.resolveThemeName(request);
 			assertEquals(themeName, defaultName);
-		} catch (IllegalArgumentException ex) {
+		}
+		catch (UnsupportedOperationException ex) {
 			if (shouldSet)
 				fail("should be able to set Theme name");
 		}
