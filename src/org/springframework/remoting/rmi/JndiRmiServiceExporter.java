@@ -35,8 +35,8 @@ import org.springframework.jndi.JndiAccessor;
  * You need to run "rmic" with the "-iiop" option to generate corresponding
  * stubs and skeletons for each exported service.
  *
- * <p>The JNDI environment can be specified as jndiEnvironment property,
- * or be configured in a jndi.properties file or as system properties.
+ * <p>The JNDI environment can be specified as "jndiEnvironment" bean property,
+ * or be configured in a <code>jndi.properties</code> file or as system properties.
  * For example:
  *
  * <pre>
