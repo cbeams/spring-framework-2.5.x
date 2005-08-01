@@ -168,7 +168,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's Commons Attributes support
 
 * jakarta-commons/commons-beanutils.jar
-- Commons BeanUtils 1.6 (http://jakarta.apache.org/commons/beanutils)
+- Commons BeanUtils 1.7 (http://jakarta.apache.org/commons/beanutils)
 - required for running JPetStore's Struts web tier
 
 * jakarta-commons/commons-collections.jar
