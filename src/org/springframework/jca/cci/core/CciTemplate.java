@@ -40,6 +40,7 @@ import org.springframework.jca.cci.CciOperationNotSupportedException;
 import org.springframework.jca.cci.InvalidResultSetAccessException;
 import org.springframework.jca.cci.RecordTypeNotSupportedException;
 import org.springframework.jca.cci.connection.ConnectionFactoryUtils;
+import org.springframework.jca.cci.connection.NotSupportedRecordFactory;
 
 /**
  * <b>This is the central class in the CCI core package.</b>
@@ -231,7 +232,7 @@ public class CciTemplate implements CciOperations {
 					if (outputRecord != null || getOutputRecordCreator() != null) {
 						// Use the CCI execute method with output record as parameter.
 						if (outputRecord == null) {
-							RecordFactory recordFactory = getConnectionFactory().getRecordFactory();
+							RecordFactory recordFactory = getRecordFactory(connectionFactory);
 							outputRecordToUse = getOutputRecordCreator().createRecord(recordFactory);
 						}
 						interaction.execute(spec, inputRecord, outputRecordToUse);
@@ -253,6 +254,26 @@ public class CciTemplate implements CciOperations {
 				}
 			}
 		});
+	}
+
+	/**
+	 * Return a RecordFactory for the given ConnectionFactory.
+	 * <p>Default implementation returns the connector's RecordFactory if
+	 * available, falling back to a NotSupportedRecordFactory placeholder.
+	 * This allows to invoke a RecordCreator callback with a non-null
+	 * RecordFactory reference in any case.
+	 * @param connectionFactory the CCI ConnectionFactory
+	 * @return the CCI RecordFactory for the ConnectionFactory
+	 * @throws ResourceException if thrown by CCI methods
+	 * @see org.springframework.jca.cci.connection.NotSupportedRecordFactory
+	 */
+	protected RecordFactory getRecordFactory(ConnectionFactory connectionFactory) throws ResourceException {
+		try {
+			return getConnectionFactory().getRecordFactory();
+		}
+		catch (NotSupportedException ex) {
+			return new NotSupportedRecordFactory();
+		}
 	}
 
 

@@ -18,6 +18,7 @@ package org.springframework.jca.cci;
 
 import java.sql.SQLException;
 
+import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
@@ -34,6 +35,7 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter;
+import org.springframework.jca.cci.connection.NotSupportedRecordFactory;
 import org.springframework.jca.cci.core.CciTemplate;
 import org.springframework.jca.cci.core.ConnectionCallback;
 import org.springframework.jca.cci.core.InteractionCallback;
@@ -131,6 +133,58 @@ public class CciTemplateTests extends TestCase {
 
 		CciTemplate ct = new CciTemplate(connectionFactory);
 		ct.execute(interactionSpec, inputRecord, outputRecord);
+
+		connectionFactoryControl.verify();
+		connectionControl.verify();
+		interactionControl.verify();
+	}
+
+	public void testTemplateExecuteWithCreatorAndRecordFactoryNotSupported() throws ResourceException {
+		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
+		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
+		MockControl connectionControl = MockControl.createStrictControl(Connection.class);
+		Connection connection = (Connection) connectionControl.getMock();
+		MockControl interactionControl = MockControl.createStrictControl(Interaction.class);
+		Interaction interaction = (Interaction) interactionControl.getMock();
+
+		MockControl inputRecordControl = MockControl.createStrictControl(Record.class);
+		Record inputRecord = (Record) inputRecordControl.getMock();
+		MockControl outputRecordControl = MockControl.createStrictControl(Record.class);
+		final Record outputRecord = (Record) outputRecordControl.getMock();
+
+		MockControl interactionSpecControl = MockControl.createStrictControl(InteractionSpec.class);
+		InteractionSpec interactionSpec = (InteractionSpec) interactionSpecControl.getMock();
+
+		connectionFactory.getConnection();
+		connectionFactoryControl.setReturnValue(connection);
+
+		connectionFactory.getRecordFactory();
+		connectionFactoryControl.setThrowable(new NotSupportedException("not supported"), 1);
+
+		connection.createInteraction();
+		connectionControl.setReturnValue(interaction);
+
+		interaction.execute(interactionSpec, inputRecord, outputRecord);
+		interactionControl.setReturnValue(true, 1);
+
+		interaction.close();
+		interactionControl.setVoidCallable(1);
+
+		connection.close();
+		connectionControl.setVoidCallable(1);
+
+		connectionFactoryControl.replay();
+		connectionControl.replay();
+		interactionControl.replay();
+
+		CciTemplate ct = new CciTemplate(connectionFactory);
+		ct.setOutputRecordCreator(new RecordCreator() {
+			public Record createRecord(RecordFactory recordFactory) {
+				assertTrue(recordFactory instanceof NotSupportedRecordFactory);
+				return outputRecord;
+			}
+		});
+		ct.execute(interactionSpec, inputRecord);
 
 		connectionFactoryControl.verify();
 		connectionControl.verify();
