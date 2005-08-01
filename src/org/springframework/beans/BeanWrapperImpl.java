@@ -127,21 +127,14 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 */
 	private Object object;
 
-	/**
-	 * The nested path of the object
-	 */
 	private String nestedPath = "";
 
 	private Object rootObject;
 
-	/**
-	 * Registry for default PropertyEditors
-	 */
+	private boolean extractOldValueForEditor = false;
+
 	private final Map defaultEditors;
 
-	/**
-	 * Map with custom PropertyEditor instances
-	 */
 	private Map customEditors;
 
 	/**
@@ -150,7 +143,9 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 */
 	private CachedIntrospectionResults cachedIntrospectionResults;
 
-	/* Map with cached nested BeanWrappers */
+	/**
+	 * Map with cached nested BeanWrappers: nested path -> BeanWrapper instance.
+	 */
 	private Map nestedBeanWrappers;
 
 
@@ -371,6 +366,10 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 	}
 
+
+	public void setExtractOldValueForEditor(boolean extractOldValueForEditor) {
+		this.extractOldValueForEditor = extractOldValueForEditor;
+	}
 
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
 		registerCustomEditor(requiredType, null, propertyEditor);
@@ -765,7 +764,9 @@ public class BeanWrapperImpl implements BeanWrapper {
 				int arrayIndex = Integer.parseInt(key);
 				Object oldValue = null;
 				try {
-					oldValue = Array.get(propValue, arrayIndex);
+					if (this.extractOldValueForEditor) {
+						oldValue = Array.get(propValue, arrayIndex);
+					}
 					Object convertedValue =
 							doTypeConversionIfNecessary(propertyName, propertyName, oldValue, newValue, requiredType);
 					Array.set(propValue, Integer.parseInt(key), convertedValue);
@@ -784,7 +785,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 				List list = (List) propValue;
 				int index = Integer.parseInt(key);
 				Object oldValue = null;
-				if (index < list.size()) {
+				if (this.extractOldValueForEditor && index < list.size()) {
 					oldValue = list.get(index);
 				}
 				Object convertedValue =
@@ -809,7 +810,10 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 			else if (propValue instanceof Map) {
 				Map map = (Map) propValue;
-				Object oldValue = map.get(key);
+				Object oldValue = null;
+				if (this.extractOldValueForEditor) {
+					oldValue = map.get(key);
+				}
 				Object convertedValue =
 						doTypeConversionIfNecessary(propertyName, propertyName, oldValue, newValue, null);
 				map.put(key, convertedValue);
@@ -831,7 +835,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			Method writeMethod = pd.getWriteMethod();
 			Object oldValue = null;
 
-			if (readMethod != null) {
+			if (this.extractOldValueForEditor && readMethod != null) {
 				try {
 					oldValue = readMethod.invoke(this.object, new Object[0]);
 				}
@@ -916,7 +920,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 				if (!ignoreUnknown) {
 					throw ex;
 				}
-				// otherwise, just ignore it and continue...
+				// Otherwise, just ignore it and continue...
 			}
 			catch (PropertyAccessException ex) {
 				propertyAccessExceptions.add(ex);

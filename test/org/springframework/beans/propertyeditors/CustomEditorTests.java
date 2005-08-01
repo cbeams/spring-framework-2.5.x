@@ -48,11 +48,11 @@ import org.springframework.beans.TestBean;
 public class CustomEditorTests extends TestCase {
 
 	public void testComplexObject() {
-		TestBean t = new TestBean();
+		TestBean tb = new TestBean();
 		String newName = "Rod";
 		String tbString = "Kerry_34";
 
-		BeanWrapper bw = new BeanWrapperImpl(t);
+		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(ITestBean.class, new TestBeanEditor());
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("age", new Integer(55)));
@@ -60,9 +60,33 @@ public class CustomEditorTests extends TestCase {
 		pvs.addPropertyValue(new PropertyValue("touchy", "valid"));
 		pvs.addPropertyValue(new PropertyValue("spouse", tbString));
 		bw.setPropertyValues(pvs);
-		assertTrue("spouse is non-null", t.getSpouse() != null);
+		assertTrue("spouse is non-null", tb.getSpouse() != null);
 		assertTrue("spouse name is Kerry and age is 34",
-				t.getSpouse().getName().equals("Kerry") && t.getSpouse().getAge() == 34);
+				tb.getSpouse().getName().equals("Kerry") && tb.getSpouse().getAge() == 34);
+	}
+
+	public void testComplexObjectWithOldValueAccess() {
+		TestBean tb = new TestBean();
+		String newName = "Rod";
+		String tbString = "Kerry_34";
+
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		bw.setExtractOldValueForEditor(true);
+		bw.registerCustomEditor(ITestBean.class, new OldValueAccessingTestBeanEditor());
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("age", new Integer(55)));
+		pvs.addPropertyValue(new PropertyValue("name", newName));
+		pvs.addPropertyValue(new PropertyValue("touchy", "valid"));
+		pvs.addPropertyValue(new PropertyValue("spouse", tbString));
+
+		bw.setPropertyValues(pvs);
+		assertTrue("spouse is non-null", tb.getSpouse() != null);
+		assertTrue("spouse name is Kerry and age is 34",
+				tb.getSpouse().getName().equals("Kerry") && tb.getSpouse().getAge() == 34);
+		ITestBean spouse = tb.getSpouse();
+
+		bw.setPropertyValues(pvs);
+		assertSame("Should have remained same object", spouse, tb.getSpouse());
 	}
 
 	public void testCustomEditorForSingleProperty() {
@@ -1047,6 +1071,20 @@ public class CustomEditorTests extends TestCase {
 			tb.setName(st.nextToken());
 			tb.setAge(Integer.parseInt(st.nextToken()));
 			setValue(tb);
+		}
+	}
+
+
+	private static class OldValueAccessingTestBeanEditor extends PropertyEditorSupport {
+
+		public void setAsText(String text) {
+			TestBean tb = new TestBean();
+			StringTokenizer st = new StringTokenizer(text, "_");
+			tb.setName(st.nextToken());
+			tb.setAge(Integer.parseInt(st.nextToken()));
+			if (!tb.equals(getValue())) {
+				setValue(tb);
+			}
 		}
 	}
 

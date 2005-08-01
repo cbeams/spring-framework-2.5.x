@@ -110,6 +110,7 @@ public class DataBinder {
 	 */
 	public DataBinder(Object target, String objectName) {
 		this.errors = createErrors(target, objectName);
+		setExtractOldValueForEditor(true);
 	}
 
 	/**
@@ -222,6 +223,16 @@ public class DataBinder {
 	 */
 	public String[] getRequiredFields() {
 		return requiredFields;
+	}
+
+	/**
+	 * Set whether to extract the old field value when applying a
+	 * property editor to a new value for a field.
+	 * <p>Default is "true", exposing previous field values to custom editors.
+	 * Turn this to "false" to avoid side effects caused by getters.
+	 */
+	public void setExtractOldValueForEditor(boolean extractOldValueForEditor) {
+		this.errors.getBeanWrapper().setExtractOldValueForEditor(extractOldValueForEditor);
 	}
 
 	/**

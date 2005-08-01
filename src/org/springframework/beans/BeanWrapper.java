@@ -67,6 +67,15 @@ public interface BeanWrapper extends PropertyAccessor {
 	 */
 	Class getWrappedClass();
 
+
+	/**
+	 * Set whether to extract the old property value when applying a
+	 * property editor to a new value for a property.
+	 * <p>Default is "false", avoiding side effects caused by getters.
+	 * Turn this to "true" to expose previous property values to custom editors.
+	 */
+	void setExtractOldValueForEditor(boolean extractOldValueForEditor);
+
 	/**
 	 * Register the given custom property editor for all properties
 	 * of the given type.

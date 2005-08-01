@@ -382,6 +382,29 @@ public class DataBinderTests extends TestCase {
 		assertEquals("prefixvalue", tb.getTouchy());
 	}
 
+	public void testCustomEditorWithOldValueAccess() {
+		TestBean tb = new TestBean();
+		DataBinder binder = new DataBinder(tb, "tb");
+
+		binder.registerCustomEditor(String.class, null, new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				if (getValue() == null || !text.equalsIgnoreCase(getValue().toString())) {
+					setValue(text);
+				}
+			}
+		});
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("name", "value"));
+		binder.bind(pvs);
+		assertEquals("value", tb.getName());
+
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("name", "vaLue"));
+		binder.bind(pvs);
+		assertEquals("value", tb.getName());
+	}
+
 	public void testValidatorNoErrors() {
 		TestBean tb = new TestBean();
 		tb.setAge(33);
