@@ -249,7 +249,7 @@
                 <dependency>
                         <groupId>c3p0</groupId>
                         <artifactId>c3p0</artifactId>
-                        <version>0.8.4.5</version>
+                        <version>0.9.0</version>
                 </dependency>
 		<dependency>
 			<id>concurrent</id>
@@ -265,8 +265,8 @@
 		</dependency>
 		<dependency>
 			<groupId>cglib</groupId>
-			<artifactId>cglib-full</artifactId>
-			<version>2.1-dev</version>
+			<artifactId>cglib-nodep</artifactId>
+			<version>2.1_2</version>
 		</dependency>
 		<dependency>
 			<id>dom4j</id>
@@ -284,7 +284,7 @@
 		</dependency>
 		<dependency>
 			<id>commons-beanutils</id>
-			<version>1.6</version>
+			<version>1.7.0</version>
 		</dependency>
 		<dependency>
 			<id>commons-digester</id>
@@ -383,7 +383,7 @@
 		<dependency>
 			<groupId>jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
-			<version>0.6.4</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<id>jdom</id>
