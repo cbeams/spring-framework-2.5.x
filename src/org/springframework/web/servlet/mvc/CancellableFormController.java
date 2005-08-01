@@ -49,9 +49,10 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Erwin Bolwidt
  * @since 1.2.3
- * @see #setCancelParamKey(String)
- * @see #setCancelView(String)
+ * @see #setCancelParamKey
+ * @see #setCancelView
  * @see #isCancelRequest(javax.servlet.http.HttpServletRequest)
  * @see #onCancel(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, Object)
  */
@@ -184,6 +185,7 @@ public class CancellableFormController extends SimpleFormController {
 	 * @param command form object with request parameters bound onto it
 	 * @return the prepared model and view, or null
 	 * @throws Exception in case of errors
+	 * @see #onCancel(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, Object)
 	 * @see #setCancelView
 	 */
 	protected ModelAndView onCancel(Object command) throws Exception {
