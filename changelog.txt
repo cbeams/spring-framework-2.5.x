@@ -3,6 +3,28 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 1.2.4 (9.8.2005)
+-----------------------------------
+
+* changed BeanWrapperImpl's default behavior to not extract old property values, avoiding side effects caused by getters
+* added "setExtractOldValueForEditor" method to BeanWrapper and BeanWrapperImpl, allowing to control getter invocation
+* added public "getSortDefinition()" method to PropertyComparator, giving access to the sort definition for unit tests
+
+Package org.springframework.jca
+* CciTemplate exposes RecordFactory placeholder to RecordCreator callbacks if connector doesn't provide a RecordFactory
+
+Package org.springframework.orm
+* upgraded to the most recently published version of the Hibernate 3.0.5 jar (there seem to be multiple versions around)
+
+Package org.springframework.validation
+* DataBinder keeps extracting old field values for property editors by default (as introduced in Spring 1.2.3)
+* added "setExtractOldValueForEditor" method to DataBinder, allowing to control getter invocation
+
+Package org.springframework.web
+* AcceptHeaderLocaleResolver/FixedLocaleResolver throw UnsupportedOperationException from "setLocale" (rather than IAE)
+* FixedThemeResolver throw UnsupportedOperationException from "setThemeName" (rather than IllegalArgumentException)
+
+
 Changes in version 1.2.3 (26.7.2005)
 ------------------------------------
 
