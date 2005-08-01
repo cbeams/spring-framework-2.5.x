@@ -43,6 +43,7 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.ObjectNameManager;
 
@@ -59,12 +60,19 @@ import org.springframework.jmx.support.ObjectNameManager;
  * @since 1.2
  * @see MBeanProxyFactoryBean
  */
-public class MBeanClientInterceptor implements MethodInterceptor, InitializingBean {
+public class MBeanClientInterceptor implements MethodInterceptor, InitializingBean, DisposableBean {
 
 	/**
 	 * The <code>MBeanServer</code> hosting the MBean which calls are forwarded to.
 	 */
 	private MBeanServerConnection server;
+
+	/**
+	 * The <code>JMXConnector</code> used when connecting to a remote JMX server using an
+	 * internally configured connection.
+	 * @see #setServiceUrl(String)
+	 */
+	private JMXConnector connector;
 
 	/**
 	 * The <code>ObjectName</code> of the MBean to forward calls to.
@@ -74,7 +82,7 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	/**
 	 * Indicates whether or not strict casing is being used for attributes.
 	 */
-  private boolean useStrictCasing = true;
+	private boolean useStrictCasing = true;
 
 	/**
 	 * Caches the list of attributes exposed on the management interface of
@@ -106,7 +114,7 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 * Set the service URL of the remote <code>MBeanServer</code>.
 	 */
 	public void setServiceUrl(String url) throws IOException {
-		JMXConnector connector = JMXConnectorFactory.connect(new JMXServiceURL(url));
+		this.connector = JMXConnectorFactory.connect(new JMXServiceURL(url));
 		this.server = connector.getMBeanServerConnection();
 	}
 
@@ -285,6 +293,15 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 				}
 			}
 			return this.server.invoke(this.objectName, method.getName(), args, signature);
+		}
+	}
+
+	/**
+	 * Closes any <code>JMXConnector</code> that may be managed by this interceptor.
+	 */
+	public void destroy() throws Exception {
+		if(this.connector != null) {
+			this.connector.close();
 		}
 	}
 
