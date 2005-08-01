@@ -44,7 +44,7 @@ import org.springframework.beans.BeansException;
  * and various Ant-style pattern matches, e.g. a registered "/t*" pattern
  * matches both "/test" and "/team", "/test/*" matches all paths in the
  * "/test" directory, "/test/**" matches all paths below "/test".
- * For syntax details, see the AbtPathMatcher class.
+ * For syntax details, see the AntPathMatcher class.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
