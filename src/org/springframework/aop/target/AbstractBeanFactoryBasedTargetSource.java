@@ -64,16 +64,6 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	/** Class of the target */
 	private Class targetClass;
 	
-	/**
-	 * Copy configuration from the other AbstractBeanFactoryBasedTargetSource object.
-	 * Subclasses should override this if they wish to expose it
-	 * @param other object to copy configuration from
-	 */
-	protected void copyFrom(AbstractBeanFactoryBasedTargetSource other) {
-		this.beanFactory = other.beanFactory;
-		this.targetClass = other.targetClass;
-		this.targetBeanName = other.targetBeanName;
-	}
 
 
 	/**
@@ -123,6 +113,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 		return beanFactory;
 	}
 
+
 	public Class getTargetClass() {
 		return this.targetClass;
 	}
@@ -135,6 +126,17 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 		// do nothing
 	}
 
+
+	/**
+	 * Copy configuration from the other AbstractBeanFactoryBasedTargetSource object.
+	 * Subclasses should override this if they wish to expose it.
+	 * @param other object to copy configuration from
+	 */
+	protected void copyFrom(AbstractBeanFactoryBasedTargetSource other) {
+		this.beanFactory = other.beanFactory;
+		this.targetClass = other.targetClass;
+		this.targetBeanName = other.targetBeanName;
+	}
 
 	/**
 	 * Replaces this object with a SingletonTargetSource on serialization.

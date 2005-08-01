@@ -76,7 +76,7 @@ public class PathMatchingResourcePatternResolverTests extends TestCase {
 	}
 
 	private void assertProtocolAndFilename(Resource resource, String urlProtocol, String fileName) throws IOException {
-		assertProtocolAndFilenames(new Resource[]{resource}, urlProtocol, new String[] {fileName});
+		assertProtocolAndFilenames(new Resource[] {resource}, urlProtocol, new String[] {fileName});
 	}
 
 	private void assertProtocolAndFilenames(
@@ -111,11 +111,11 @@ public class PathMatchingResourcePatternResolverTests extends TestCase {
 		for (int i = 0; i < resources.length; i++) {
 			Resource resource = resources[i];
 			assertEquals(urlProtocol, resource.getURL().getProtocol());
-			assertFileNameIn(resource, fileNames);
+			assertFilenameIn(resource, fileNames);
 		}
 	}
 
-	private void assertFileNameIn(Resource resource, String[] fileNames) {
+	private void assertFilenameIn(Resource resource, String[] fileNames) {
 		for (int i = 0; i < fileNames.length; i++) {
 			if (resource.getFilename().endsWith(fileNames[i])) {
 				return;
