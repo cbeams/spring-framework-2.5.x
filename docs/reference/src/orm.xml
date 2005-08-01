@@ -947,7 +947,7 @@
     </sect2>
   </sect1>
 
-  <sect1>
+  <sect1 id="orm-jdo">
     <title>JDO</title>
 
     <para>Spring supports the standard JDO 1.0/2.0 API as data access
@@ -1350,7 +1350,7 @@
     </sect2>
   </sect1>
 
-  <sect1>
+  <sect1 id="orm-toplink">
     <title>Oracle TopLink</title>
 
     <para>Since Spring 1.2, Spring supports Oracle TopLink (<ulink
@@ -1702,7 +1702,7 @@
     </sect2>
   </sect1>
 
-  <sect1>
+  <sect1 id="orm-ojb">
     <title>Apache OJB</title>
 
     <para>Apache OJB (<ulink url="http://db.apache.org/ojb"></ulink>) offers
@@ -1895,7 +1895,7 @@
     </sect2>
   </sect1>
 
-  <sect1>
+  <sect1 id="orm-ibatis">
     <title>iBATIS SQL Maps</title>
 
     <para>Through the <literal>org.springframework.orm.ibatis</literal>
