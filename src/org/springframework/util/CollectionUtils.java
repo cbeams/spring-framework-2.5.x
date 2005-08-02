@@ -18,12 +18,14 @@ package org.springframework.util;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Miscellaneous collection utility methods.
  * Mainly for internal use within the framework.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 1.1.3
  */
 public abstract class CollectionUtils {
@@ -93,6 +95,24 @@ public abstract class CollectionUtils {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns <code>true</code> if the supplied <code>Collection</code> is null or empty.
+	 * Otherwise, returns <code>false</code>.
+	 * @param collection the <code>Collection</code> to check
+	 */
+	public static boolean isEmpty(Collection collection) {
+		return ((collection == null) || (collection.isEmpty()));
+	}
+
+	/**
+	 * Returns <code>true</code> if the supplied <code>Map</code> is null or empty.
+	 * Otherwise, returns <code>false</code>.
+	 * @param map the <code>Map</code> to check
+	 */
+	public static boolean isEmpty(Map map) {
+		return ((map == null) || (map.isEmpty()));
 	}
 
 }
