@@ -34,12 +34,14 @@ import org.springframework.web.context.ServletContextAware;
  *
  * @author Juergen Hoeller
  * @since 1.1.4
+ * @see ServletContextParameterFactoryBean
  */
 public class ServletContextAttributeFactoryBean implements FactoryBean, ServletContextAware {
 
 	private String attributeName;
 
 	private Object attribute;
+
 
 	/**
 	 * Set the name of the ServletContext attribute to expose.
@@ -58,8 +60,9 @@ public class ServletContextAttributeFactoryBean implements FactoryBean, ServletC
 		}
 	}
 
+
 	public Object getObject() throws Exception {
-		return attribute;
+		return this.attribute;
 	}
 
 	public Class getObjectType() {

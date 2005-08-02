@@ -92,6 +92,41 @@ public class ServletContextSupportTests extends TestCase {
 		}
 	}
 
+	public void testServletContextParameterFactoryBean() {
+		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter("myParam", "myValue");
+
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.setServletContext(sc);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("initParamName", "myParam");
+		wac.registerSingleton("importedParam", ServletContextParameterFactoryBean.class, pvs);
+		wac.refresh();
+
+		Object value = wac.getBean("importedParam");
+		assertEquals("myValue", value);
+	}
+
+	public void testServletContextParameterFactoryBeanWithAttributeNotFound() {
+		MockServletContext sc = new MockServletContext();
+
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.setServletContext(sc);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("initParamName", "myParam");
+		wac.registerSingleton("importedParam", ServletContextParameterFactoryBean.class, pvs);
+
+		try {
+			wac.refresh();
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+			assertTrue(ex.getCause() instanceof IllegalStateException);
+			assertTrue(ex.getCause().getMessage().indexOf("myParam") != -1);
+		}
+	}
+
 	public void testServletContextAttributeExporter() {
 		TestBean tb = new TestBean();
 		Map attributes = new HashMap();
