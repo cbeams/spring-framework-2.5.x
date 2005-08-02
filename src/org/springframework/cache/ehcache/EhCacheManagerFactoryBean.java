@@ -55,6 +55,7 @@ public class EhCacheManagerFactoryBean implements FactoryBean, InitializingBean,
 
 	private CacheManager cacheManager;
 
+
 	/**
 	 * Set the location of the EHCache config file. A typical value is "/WEB-INF/ehcache.xml".
 	 * <p>Default is "ehcache.xml" in the root of the class path, or if not found,
@@ -74,6 +75,7 @@ public class EhCacheManagerFactoryBean implements FactoryBean, InitializingBean,
 		}
 	}
 
+
 	public Object getObject() {
 		return this.cacheManager;
 	}
@@ -85,6 +87,7 @@ public class EhCacheManagerFactoryBean implements FactoryBean, InitializingBean,
 	public boolean isSingleton() {
 		return true;
 	}
+
 
 	public void destroy() {
 		logger.info("Shutting down EHCache CacheManager");

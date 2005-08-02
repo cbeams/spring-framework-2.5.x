@@ -42,8 +42,8 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.ObjectNameManager;
 
@@ -115,7 +115,7 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 */
 	public void setServiceUrl(String url) throws IOException {
 		this.connector = JMXConnectorFactory.connect(new JMXServiceURL(url));
-		this.server = connector.getMBeanServerConnection();
+		this.server = this.connector.getMBeanServerConnection();
 	}
 
 	/**
@@ -300,7 +300,7 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 * Closes any <code>JMXConnector</code> that may be managed by this interceptor.
 	 */
 	public void destroy() throws Exception {
-		if(this.connector != null) {
+		if (this.connector != null) {
 			this.connector.close();
 		}
 	}

@@ -60,6 +60,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	/** Bean factory for this context */
 	private DefaultListableBeanFactory beanFactory;
 
+
 	/**
 	 * Create a new AbstractRefreshableApplicationContext with no parent.
 	 */
@@ -73,6 +74,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	public AbstractRefreshableApplicationContext(ApplicationContext parent) {
 		super(parent);
 	}
+
 
 	protected final void refreshBeanFactory() throws BeansException {
 		// Shut down previous bean factory, if any.

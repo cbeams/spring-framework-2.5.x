@@ -49,6 +49,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 
 	private String[] configLocations;
 
+
 	/**
 	 * Create a new FileSystemXmlApplicationContext, loading the definitions
 	 * from the given XML file and automatically refreshing the context.
@@ -74,7 +75,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * @param refresh whether to automatically refresh the context,
 	 * loading all bean definitions and creating all singletons.
 	 * Alternatively, call refresh manually after further configuring the context.
-	 * @see #refresh
+	 * @see #refresh()
 	 */
 	public FileSystemXmlApplicationContext(String[] configLocations, boolean refresh) throws BeansException {
 		this.configLocations = configLocations;
@@ -92,6 +93,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 */
 	public FileSystemXmlApplicationContext(String[] configLocations, ApplicationContext parent)
 			throws BeansException {
+
 		this(configLocations, true, parent);
 	}
 
@@ -103,7 +105,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * loading all bean definitions and creating all singletons.
 	 * Alternatively, call refresh manually after further configuring the context.
 	 * @param parent the parent context
-	 * @see #refresh
+	 * @see #refresh()
 	 */
 	public FileSystemXmlApplicationContext(String[] configLocations, boolean refresh, ApplicationContext parent)
 			throws BeansException {
@@ -113,6 +115,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 			refresh();
 		}
 	}
+
 
 	protected String[] getConfigLocations() {
 		return this.configLocations;
