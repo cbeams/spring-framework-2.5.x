@@ -6,26 +6,41 @@ http://www.springframework.org
 Changes in version 1.2.4 (9.8.2005)
 -----------------------------------
 
+Package org.springframework.beans
 * changed BeanWrapperImpl's default behavior to not extract old property values, avoiding side effects caused by getters
 * added "setExtractOldValueForEditor" method to BeanWrapper and BeanWrapperImpl, allowing to control getter invocation
 * added public "getSortDefinition()" method to PropertyComparator, giving access to the sort definition for unit tests
+* added overloaded constructor to CustomDateEditor, accepting an exact date length to check (to avoid misinterpretation)
+* XmlBeanDefinitionReader uses ResourceEntityResolver if the passed-in BeanFactory was autodetected as ResourceLoader
+
+Package org.springframework.context
+* AbstractXmlApplicationContext applies its class loader, if any, as bean class loader to the XmlBeanDefinitionReader
+
+Package org.springframework.core
+* added "setClassLoader" method to DefaultResourceLoader, also exposed on AbstractApplicationContext and its subclasses
 
 Package org.springframework.jca
 * CciTemplate exposes RecordFactory placeholder to RecordCreator callbacks if connector doesn't provide a RecordFactory
+
+Package org.springframework.jmx
+* MBeanClientInterceptor closes a JMX Connector opened through the "serviceUrl" bean property on shutdown
 
 Package org.springframework.orm
 * upgraded to the most recently published version of the Hibernate 3.0.5 jar (there seem to be multiple versions around)
 
 Package org.springframework.validation
+* added sections on validation and error messages and content on data binding to reference documentation
 * DataBinder keeps extracting old field values for property editors by default (as introduced in Spring 1.2.3)
 * added "setExtractOldValueForEditor" method to DataBinder, allowing to control getter invocation
 
 Package org.springframework.web
+* XmlWebApplicationContext applies its class loader, if any, as bean class loader to the XmlBeanDefinitionReader
+* added ServletContextParameterFactoryBean, explicitly retrieving and exposing a "context-param" defined in web.xml
 * AcceptHeaderLocaleResolver/FixedLocaleResolver throw UnsupportedOperationException from "setLocale" (rather than IAE)
 * FixedThemeResolver throw UnsupportedOperationException from "setThemeName" (rather than IllegalArgumentException)
+* AbstractJasperReportsView holds a default "exporterParameters" Map, to allow for property-driven population of it
+* AbstractJasperReportsSingleFormatView applies the configured exporter encoding as HTTP response encoding
 
-Documentation
-* Added sections on validation, error messages. Improved content on data binding.
 
 Changes in version 1.2.3 (26.7.2005)
 ------------------------------------
