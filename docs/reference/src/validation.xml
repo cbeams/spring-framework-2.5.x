@@ -409,4 +409,105 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
         </itemizedlist></para>
     </sect2>
   </sect1>
+	
+	<sect1 id="validator">
+		<title>Validation using Spring's Validator interface</title>
+		<para>
+			Spring's features a Validator interface you can use to validate objects.
+			The Validator interface, is pretty straightforward and works using with
+			a so-called Errors object. In other words, while validating, validators
+			will report validation failures to the Errors object.
+		</para>
+		<para>
+			As said already, the Validator interface is pretty straightforward, just
+			as implementing one yourself. Let's consider a small data object:
+			<programlisting><![CDATA[
+public class Person {
+  private String name;
+  private int age;
+
+  // the usual suspects: getters and setters
+}]]></programlisting>
+		</para>
+		<para>
+			Using the <literal>org.springframework.validation.Validator</literal>
+			interface we're going to provide validation behavior for the <literal>Person</literal>
+			class. This is the Validator interface:
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para><literal>supports(Class)</literal> - indicates whether or not this validator
+					supports the given object</para>
+					<para><literal>validate(Object, org.springframework.validation.Errors)</literal> - 
+					validates the given object and in case of validation errors, put registers
+					those with the given Errors object</para>					
+				</listitem>				
+			</itemizedlist>
+		</para>
+		<para>
+			Implementing a validator is fairly straightforward, especially when you know of the 
+			<literal>ValidationUtils</literal> Spring also provides. Let's review 
+			how a validator is created:
+			<programlisting><![CDATA[
+			public class PersonValidator implements Validator {
+				
+				public boolean supports(Class clzz) {
+					return Person.class.equals(clzz);
+				}
+				
+				public void validate(Object obj, Errors e) {
+					ValidationUtils.rejectIfEmpty(e, "name", "name.empty");
+					Person p = (Person)obj;
+					if (p.getAge() < 0) {
+						e.rejectValue("age", "negativevalue");
+					} else if (p.getAge() > 110) {
+						e.rejectValue("age", "tooold");
+					}
+				}
+			}]]></programlisting>
+			As you can see, the ValidationUtils is used to reject the name
+			property. Have a look at the JavaDoc for ValidationUtils to see
+			what functionality it provides besides the example we gave just now.
+		</para>
+	</sect1>
+	<sect1 id="validation-errors">
+		<title>The Errors interface</title>
+		<para>
+			Validation errors are reported to the Errors object passed to the validator.
+			In case of Spring Web MVC you can use <literal>spring:bind</literal> tags to
+			inspect the error messages, but of course you can also inspect the errors
+			object yourself. The methods it offers are pretty straightforward. More information
+			can be found in the JavaDoc.
+		</para>
+	</sect1>
+	<sect1 id="validation-conversion">
+		<title>Resolving codes to error messages</title>
+		<para>
+			We've talked about databinding and validation. Outputting messages corresponding to 
+			validation errors is the last thing we need to discuss. In the example we've shown
+			above, we rejected the <literal>name</literal> and the <literal>age</literal> field.
+			If, using a <literal>MessageSource</literal>, we're going to output the error messages
+			we will do so using the error code we've given when rejecting the field ('name' and 'age'
+			in this case). When you call (either directly, or indirectly, using for example the 
+			<literal>ValidationUtils</literal> class) <literal>rejectValue</literal> or one of
+			the other <literal>reject</literal> method from the Errors interface, the underlying 
+			implementation will not only register the code, you've passed in, but also a number of
+			additional error codes. What error codes it registers is determined by the
+			<literal>MessageCodesResolver</literal> that is used.
+			By default, the <literal>DefaultMessageCodesResolver</literal> is used, which for example
+			not only register a message with the code you gave, but also messages that include the 
+			field name you passed to the reject method. So in case you reject a field using
+			<literal>rejectValue("age", "tooold")</literal>, apart from the <literal>tooold</literal> code,
+			Spring will also register <literal>tooold.age</literal> and <literal>tooold.age.int</literal>
+			(so the first will include the field name and the second will include the type of the field).
+		</para>
+		<para>
+			More information on the MessageCodesResolver and the default strategy can be found online with the JavaDocs for
+			<ulink url="http://www.springframework.org/docs/api/org/springframework/validation/MessageCodesResolver.html">
+				MessageCodesResolver
+			</ulink> and 
+			<ulink url="http://www.springframework.org/docs/api/org/springframework/validation/DefaultMessageCodesResolver.html">
+				DefaultMessageCodesResolver
+			</ulink> respectively. 
+		</para>		
+	</sect1>
 </chapter>
