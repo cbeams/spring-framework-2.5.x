@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,32 +12,38 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
+
 package org.springframework.web.portlet.context.support;
 
 import javax.portlet.PortletContext;
 
 import org.springframework.web.context.WebApplicationContext;
 
-
 /**
  * Convenience methods to retrieve the root WebApplicationContext for a given
  * PortletContext. This is e.g. useful for accessing a Spring context from
  * within custom web views or Struts actions.
- * 
+ *
+ * <p>Note that there are more convenient ways of accessing the root context for
+ * many web frameworks, either part of Spring or available as external library.
+ * This helper class is just the most generic way to access the root context.
+ *
  * @author Juergen Hoeller
- * @author William G. Thompson, Jr.
- * @see org.springframework.web.servlet.context.ContextLoader
+ * @author John A. Lewis
+ * @see org.springframework.web.context.ContextLoader
+ * @see org.springframework.web.servlet.FrameworkPortlet
+ * @see org.springframework.web.servlet.DispatcherPortlet
  */
-public abstract class PortletWebApplicationContextUtils {
-
+public abstract class PortletApplicationContextUtils {
 	
 	/**
 	 * Find the root WebApplicationContext for this portlet app, which is
 	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
-	 * 
+	 * <p>Will rethrow an exception that happened on root context startup,
+	 * to differentiate between a failed context startup and no context at all.
 	 * @param pc PortletContext to find the web application context for
-	 * @return the root WebApplicationContext for this portlet app, or null if none
+	 * @return the root WebApplicationContext for this web app, or null if none
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public static WebApplicationContext getWebApplicationContext(PortletContext pc) {
@@ -60,20 +66,20 @@ public abstract class PortletWebApplicationContextUtils {
 	/**
 	 * Find the root WebApplicationContext for this portlet app, which is
 	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
-	 * 
-	 * @param pc PortletContext to find the root web application context for
-	 * @return the root WebApplicationContext for this portlet app
+	 * <p>Will rethrow an exception that happened on root context startup,
+	 * to differentiate between a failed context startup and no context at all.
+	 * @param pc PortletContext to find the web application context for
+	 * @return the root WebApplicationContext for this web app
 	 * @throws IllegalStateException if the root WebApplicationContext could not be found
-	 * @see org.springframework.web.context.WebApplicationContext#WEB_APPLICATION_CONTEXT_ATTRIBUTE
+	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
-	public static WebApplicationContext getRequiredWebApplicationContext(PortletContext sc)
+	public static WebApplicationContext getRequiredWebApplicationContext(PortletContext pc)
 	    throws IllegalStateException {
-		WebApplicationContext wac = getWebApplicationContext(sc);
+		WebApplicationContext wac = getWebApplicationContext(pc);
 		if (wac == null) {
 			throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
 		}
 		return wac;
 	}
-
 
 }

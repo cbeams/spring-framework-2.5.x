@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.portlet.context;
 
 import javax.portlet.PortletContext;
+import javax.servlet.ServletContext;
 
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -30,17 +31,20 @@ import org.springframework.context.ConfigurableApplicationContext;
  *
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
+ * @author John A. Lewis
+ * @see #refresh
+ * @see org.springframework.web.context.ContextLoader#createWebApplicationContext
  * @see org.springframework.web.portlet.FrameworkPortlet#createPortletApplicationContext
+ * @see org.springframework.web.context.ConfigurableWebApplicationContext
  */
 public interface ConfigurablePortletApplicationContext extends PortletApplicationContext, ConfigurableApplicationContext {
 
 	/**
-	 * Any number of these characters are considered delimiters
-	 * between multiple context paths in a single-String config location.
-	 * @see ContextLoader#CONFIG_LOCATION_PARAM
+	 * Any number of these characters are considered delimiters between
+	 * multiple context paths in a single String value.
 	 * @see org.springframework.web.portlet.FrameworkPortlet#setContextConfigLocation
 	 */
-	String CONFIG_LOCATION_DELIMITERS = ",; ";
+	String CONFIG_LOCATION_DELIMITERS = ",; \t\n";
 
 
 	/**
@@ -50,6 +54,14 @@ public interface ConfigurablePortletApplicationContext extends PortletApplicatio
 	 * @see #refresh
 	 */
 	void setPortletContext(PortletContext portletContext);
+
+	/**
+	 * Set the ServletContext for this portlet application context.
+	 * <p>Does not cause an initialization of the context: refresh needs to be
+	 * called after the setting of all configuration properties.
+	 * @see #refresh
+	 */
+	void setServletContext(ServletContext servletContext);
 
 	/**
 	 * Set the namespace for this portlet application context,

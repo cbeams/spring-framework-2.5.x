@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,9 @@ import javax.portlet.PortletContext;
 
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.portlet.util.PortletUtils;
 
 /**
  * Resource implementation for PortletContext resources,
@@ -37,7 +39,7 @@ import org.springframework.util.StringUtils;
  * Always supports resolution as URL.
  *
  * @author Juergen Hoeller
- * @since 28.12.2003
+ * @author John A. Lewis
  * @see javax.portlet.PortletContext#getResourceAsStream
  * @see javax.portlet.PortletContext#getRealPath
  */
@@ -49,12 +51,38 @@ public class PortletContextResource extends AbstractResource {
 
 	/**
 	 * Create a new PortletContextResource.
+	 * <p>The Portlet spec requires that resource paths start with a slash,
+	 * even if many containers accept paths without leading slash too.
+	 * Consequently, the given path will be prepended with a slash if it
+	 * doesn't already start with one.
 	 * @param portletContext the PortletContext to load from
 	 * @param path the path of the resource
 	 */
 	public PortletContextResource(PortletContext portletContext, String path) {
+		// check PortletContext
+		Assert.notNull(portletContext, "Cannot resolve PortletContextResource without PortletContext");
 		this.portletContext = portletContext;
+
+		// check path
+		Assert.notNull(path, "path is required");
+		if (!path.startsWith("/")) {
+			path = "/" + path;
+		}
 		this.path = path;
+	}
+
+	/**
+	 * Return the PortletContext for this resource.
+	 */
+	public PortletContext getPortletContext() {
+		return portletContext;
+	}
+
+	/**
+	 * Return the path for this resource.
+	 */
+	public String getPath() {
+		return path;
 	}
 
 	/**
@@ -85,11 +113,7 @@ public class PortletContextResource extends AbstractResource {
 	 * @see javax.portlet.PortletContext#getRealPath
 	 */
 	public File getFile() throws IOException {
-		String realPath = this.portletContext.getRealPath(this.path);
-		if (realPath == null) {
-			throw new FileNotFoundException(
-					getDescription() + " cannot be resolved to absolute file path - portlet application archive not expanded?");
-		}
+		String realPath = PortletUtils.getRealPath(this.portletContext, this.path);
 		return new File(realPath);
 	}
 
@@ -103,7 +127,22 @@ public class PortletContextResource extends AbstractResource {
 	}
 
 	public String getDescription() {
-		return "resource [" + this.path + "] of PortletContext";
+		return "PortletContext resource [" + this.path + "]";
+	}
+
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (obj instanceof PortletContextResource) {
+			PortletContextResource otherRes = (PortletContextResource) obj;
+			return (this.portletContext.equals(otherRes.portletContext) && this.path.equals(otherRes.path));
+		}
+		return false;
+	}
+
+	public int hashCode() {
+		return this.path.hashCode();
 	}
 
 }

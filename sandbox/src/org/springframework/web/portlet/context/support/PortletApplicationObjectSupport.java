@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,17 +31,33 @@ import org.springframework.web.portlet.util.PortletUtils;
  * 
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
+ * @author John A. Lewis
  */
 public abstract class PortletApplicationObjectSupport extends ApplicationObjectSupport {
 
 	/**
-	 * Return the current application context as PortletApplicationContext.
+	 * Overrides the base class behavior to enforce running in an ApplicationContext.
+	 * All accessors will throw IllegalStateException if not running in a context.
+	 * @see #getApplicationContext
+	 * @see #getMessageSourceAccessor
+	 * @see #getPortletApplicationContext
+	 * @see #getPortletContext
+	 * @see #getTempDir
 	 */
-	protected final PortletApplicationContext getPortletApplicationContext() {
+	protected boolean isContextRequired() {
+		return true;
+	}
+
+	/**
+	 * Return the current application context as PortletApplicationContext.
+ 	 * @throws IllegalStateException if not running in a PortletApplicationContext
+	 */
+	protected final PortletApplicationContext getPortletApplicationContext() throws IllegalStateException {
 		ApplicationContext ctx = getApplicationContext();
 		if (!(ctx instanceof PortletApplicationContext)) {
-			throw new IllegalStateException("PortletApplicationObjectSupport instance [" + this +
-																			"] does not run in a PortletApplicationContext but in: " + ctx);
+			throw new IllegalStateException(
+					"PortletApplicationObjectSupport instance [" + this +
+					"] does not run in a PortletApplicationContext but in: " + ctx);
 		}
 		return (PortletApplicationContext) getApplicationContext();
 	}
@@ -55,8 +71,9 @@ public abstract class PortletApplicationObjectSupport extends ApplicationObjectS
 
 	/**
 	 * Return the temporary directory for the current web application,
-	 * as provided by the servlet container.
+	 * as provided by the portlet container.
 	 * @return the File representing the temporary directory
+	 * @throws IllegalStateException if not running in a WebApplicationContext
 	 */
 	protected final File getTempDir() {
 		return PortletUtils.getTempDir(getPortletContext());

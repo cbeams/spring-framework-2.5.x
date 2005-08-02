@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package org.springframework.web.portlet.util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.portlet.PortletContext;
 import javax.portlet.PortletRequest;
@@ -31,19 +33,9 @@ import javax.portlet.PortletSession;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
+ * @author John A. Lewis
  */
-public abstract class PortletUtils {
-
-	/**
-	 * Standard Servlet spec context attribute that specifies a temporary
-	 * directory for the current web application, of type java.io.File
-	 */
-	public static final String TEMP_DIR_CONTEXT_ATTRIBUTE = "javax.servlet.context.tempdir";
-
-	
-	/** Name suffixes in case of image buttons */
-	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
-
+public abstract class PortletUtils extends org.springframework.web.util.WebUtils {
 
 	/**
 	 * Return the temporary directory for the current web application,
@@ -56,58 +48,126 @@ public abstract class PortletUtils {
 	}
 
 	/**
-	 * Check the given request for a session attribute of the given name.
-	 * Returns null if there is no session or if the session has no such attribute.
+	 * Return the real path of the given path within the web application,
+	 * as provided by the portlet container.
+	 * <p>Prepends a slash if the path does not already start with a slash,
+	 * and throws a FileNotFoundException if the path cannot be resolved to
+	 * a resource (in contrast to PortletContext's <code>getRealPath</code>,
+	 * which returns null).
+	 * @param portletContext the portlet context of the web application
+	 * @param path the relative path within the web application
+	 * @return the corresponding real path
+	 * @throws FileNotFoundException if the path cannot be resolved to a resource
+	 * @see javax.portlet.PortletContext#getRealPath
+	 */
+	public static String getRealPath(PortletContext portletContext, String path) throws FileNotFoundException {
+		// Interpret location as relative to the web application root directory.
+		if (!path.startsWith("/")) {
+			path = "/" + path;
+		}
+		String realPath = portletContext.getRealPath(path);
+		if (realPath == null) {
+			throw new FileNotFoundException(
+					"PortletContext resource [" + path + "] cannot be resolved to absolute file path - " +
+					"web application archive not expanded?");
+		}
+		return realPath;
+	}
+
+	/**
+	 * Check the given request for a session attribute of the given name under the <code>PORTLET_SCOPE</code>.
+	 * Returns null if there is no session or if the session has no such attribute in that scope.
 	 * Does not create a new session if none has existed before!
 	 * @param request current portlet request
 	 * @param name the name of the session attribute
 	 * @return the value of the session attribute, or null if not found
 	 */
-	public static Object getPortletSessionAttribute(PortletRequest request, String name) {
-		PortletSession session = request.getPortletSession(false);
-		return (session != null ? session.getAttribute(name) : null);
+	public static Object getSessionAttribute(PortletRequest request, String name) {
+		return getSessionAttribute(request, name, PortletSession.PORTLET_SCOPE);
 	}
 
 	/**
-	 * Check the given request for a session attribute of the given name.
-	 * Throws an exception if there is no session or if the session has no such
-	 * attribute. Does not create a new session if none has existed before!
+	 * Check the given request for a session attribute of the given name in the given scope.
+	 * Returns null if there is no session or if the session has no such attribute in that scope.
+	 * Does not create a new session if none has existed before!
 	 * @param request current portlet request
 	 * @param name the name of the session attribute
+	 * @param scope session scope of this attribute
 	 * @return the value of the session attribute, or null if not found
+	 */
+	public static Object getSessionAttribute(PortletRequest request, String name, int scope) {
+		PortletSession session = request.getPortletSession(false);
+		return (session != null ? session.getAttribute(name, scope) : null);
+	}
+
+	/**
+	 * Check the given request for a session attribute of the given name under the <code>PORTLET_SCOPE</code>.
+	 * Throws an exception if there is no session or if the session has no such attribute in that scope.
+	 * Does not create a new session if none has existed before!
+	 * @param request current portlet request
+	 * @param name the name of the session attribute
+	 * @return the value of the session attribute
 	 * @throws IllegalStateException if the session attribute could not be found
 	 */
 	public static Object getRequiredSessionAttribute(PortletRequest request, String name)
-	    throws IllegalStateException {
-		Object attr = getPortletSessionAttribute(request, name);
-		if (attr == null) {
+			throws IllegalStateException {
+		return getRequiredSessionAttribute(request, name, PortletSession.PORTLET_SCOPE);
+	}
+
+	/**
+	 * Check the given request for a session attribute of the given name in the given scope.
+	 * Throws an exception if there is no session or if the session has no such attribute in that scope.
+	 * Does not create a new session if none has existed before!
+	 * @param request current portlet request
+	 * @param name the name of the session attribute
+	 * @param scope session scope of this attribute
+	 * @return the value of the session attribute
+	 * @throws IllegalStateException if the session attribute could not be found
+	 */
+	public static Object getRequiredSessionAttribute(PortletRequest request, String name, int scope)
+	    	throws IllegalStateException {
+		Object attr = getSessionAttribute(request, name, scope);
+		if (attr == null)
 			throw new IllegalStateException("No session attribute '" + name + "' found");
-		}
 		return attr;
 	}
 
 	/**
-	 * Set the session attribute with the given name to the given value.
+	 * Set the session attribute with the given name to the given value under the <code>PORTLET_SCOPE</code>.
 	 * Removes the session attribute if value is null, if a session existed at all.
 	 * Does not create a new session if not necessary!
 	 * @param request current portlet request
 	 * @param name the name of the session attribute
+	 * @param value the value of the session attribute
 	 */
 	public static void setSessionAttribute(PortletRequest request, String name, Object value) {
+	    setSessionAttribute(request, name, value, PortletSession.PORTLET_SCOPE);
+	}
+
+	/**
+	 * Set the session attribute with the given name to the given value in the given scope.
+	 * Removes the session attribute if value is null, if a session existed at all.
+	 * Does not create a new session if not necessary!
+	 * @param request current portlet request
+	 * @param name the name of the session attribute
+	 * @param value the value of the session attribute
+	 * @param scope session scope of this attribute
+	 */
+	public static void setSessionAttribute(PortletRequest request, String name, Object value, int scope) {
 		if (value != null) {
-			request.getPortletSession().setAttribute(name, value);
+			request.getPortletSession().setAttribute(name, value, scope);
 		}
 		else {
 			PortletSession session = request.getPortletSession(false);
-			if (session != null) {
-				session.removeAttribute(name);
-			}
+			if (session != null)
+				session.removeAttribute(name, scope);
 		}
 	}
 
 	/**
-	 * Get the specified session attribute, creating and setting a new attribute if
-	 * no existing found. The given class needs to have a public no-arg constructor.
+	 * Get the specified session attribute under the <code>PORTLET_SCOPE</code>,
+	 * creating and setting a new attribute if no existing found. The given class 
+	 * needs to have a public no-arg constructor.
 	 * Useful for on-demand state objects in a web tier, like shopping carts.
 	 * @param session current portlet session
 	 * @param name the name of the session attribute
@@ -117,7 +177,24 @@ public abstract class PortletUtils {
 	 */
 	public static Object getOrCreateSessionAttribute(PortletSession session, String name, Class clazz)
 			throws IllegalArgumentException {
-		Object sessionObject = session.getAttribute(name);
+		return getOrCreateSessionAttribute(session, name, clazz, PortletSession.PORTLET_SCOPE);
+	}
+
+	/**
+	 * Get the specified session attribute in the given scope,
+	 * creating and setting a new attribute if no existing found. The given class 
+	 * needs to have a public no-arg constructor.
+	 * Useful for on-demand state objects in a web tier, like shopping carts.
+	 * @param session current portlet session
+	 * @param name the name of the session attribute
+	 * @param clazz the class to instantiate for a new attribute
+	 * @param scope session scope of this attribute
+	 * @return the value of the session attribute, newly created if not found
+	 * @throws IllegalArgumentException if the session attribute could not be instantiated
+	 */
+	public static Object getOrCreateSessionAttribute(PortletSession session, String name, Class clazz, int scope)
+			throws IllegalArgumentException {
+		Object sessionObject = session.getAttribute(name, scope);
 		if (sessionObject == null) {
 			try {
 				sessionObject = clazz.newInstance();
@@ -130,49 +207,33 @@ public abstract class PortletUtils {
 				throw new IllegalArgumentException("Could not access default constructor of class [" + clazz.getName() +
 				                                   "] for session attribute '" + name + "': " + ex.getMessage());
 			}
-			session.setAttribute(name, sessionObject);
+			session.setAttribute(name, sessionObject, scope);
 		}
 		return sessionObject;
 	}
 
 	/**
-	 * Convenience method to return a map from un-prefixed property names
-	 * to values. E.g. with a prefix of price, price_1, price_2 produce
-	 * a properties object with mappings for 1, 2 to the same values.
-	 * Maps single values to String and multiple values to String array.
-	 * @param request portlet request in which to look for parameters
-	 * @param base beginning of parameter name
-	 * (if this is null or the empty string, all parameters will match)
-	 * @return map containing request parameters <b>without the prefix</b>,
-	 * containing either a String or a String[] as values
+	 * Expose the given Map as request attributes, using the keys as attribute names
+	 * and the values as corresponding attribute values. Keys need to be Strings.
+	 * @param request current portlet request
+	 * @param attributes the attributes Map
+	 * @throws IllegalArgumentException if an invalid key is found in the Map
 	 */
-	public static Map getParametersStartingWith(PortletRequest request, String base) {
-		Enumeration paramNames = request.getParameterNames();
-		Map params = new HashMap();
-		if (base == null) {
-			base = "";
-		}
-		while (paramNames != null && paramNames.hasMoreElements()) {
-			String paramName = (String) paramNames.nextElement();
-			if (base == null || "".equals(base) || paramName.startsWith(base)) {
-				String unprefixed = paramName.substring(base.length());
-				String[] values = request.getParameterValues(paramName);
-				if (values == null) {
-					// do nothing, no values found at all
-				}
-				else if (values.length > 1) {
-					params.put(unprefixed, values);
-				}
-				else {
-					params.put(unprefixed, values[0]);
-				}
+	public static void exposeRequestAttributes(PortletRequest request, Map attributes)
+			throws IllegalArgumentException {
+		Iterator it = attributes.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry entry = (Map.Entry) it.next();
+			if (!(entry.getKey() instanceof String)) {
+				throw new IllegalArgumentException(
+						"Invalid key [" + entry.getKey() + "] in attributes Map - only Strings allowed as attribute keys");
 			}
+			request.setAttribute((String) entry.getKey(), entry.getValue());
 		}
-		return params;
 	}
 
 	/**
-	 * Checks if a specific input type="submit" parameter was sent in the request,
+	 * Check if a specific input type="submit" parameter was sent in the request,
 	 * either via a button (directly with name) or via an image (name + ".x" or
 	 * name + ".y").
 	 * @param request current portlet request
@@ -191,6 +252,47 @@ public abstract class PortletUtils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Return a map containing all parameters with the given prefix.
+	 * Maps single values to String and multiple values to String array.
+	 * <p>For example, with a prefix of "spring_", "spring_param1" and
+	 * "spring_param2" result in a Map with "param1" and "param2" as keys.
+	 * <p>Similar to portlet <code>PortletRequest.getParameterMap</code>,
+	 * but more flexible.
+	 * @param request portlet request in which to look for parameters
+	 * @param prefix the beginning of parameter names
+	 * (if this is null or the empty string, all parameters will match)
+	 * @return map containing request parameters <b>without the prefix</b>,
+	 * containing either a String or a String array as values
+	 * @see javax.portlet.PortletRequest#getParameterNames
+	 * @see javax.portlet.PortletRequest#getParameterValues
+	 * @see javax.portlet.PortletRequest#getParameterMap
+	 */
+	public static Map getParametersStartingWith(PortletRequest request, String prefix) {
+		Enumeration paramNames = request.getParameterNames();
+		Map params = new TreeMap();
+		if (prefix == null) {
+			prefix = "";
+		}
+		while (paramNames != null && paramNames.hasMoreElements()) {
+			String paramName = (String) paramNames.nextElement();
+			if ("".equals(prefix) || paramName.startsWith(prefix)) {
+				String unprefixed = paramName.substring(prefix.length());
+				String[] values = request.getParameterValues(paramName);
+				if (values == null) {
+					// do nothing, no values found at all
+				}
+				else if (values.length > 1) {
+					params.put(unprefixed, values);
+				}
+				else {
+					params.put(unprefixed, values[0]);
+				}
+			}
+		}
+		return params;
 	}
 
 }

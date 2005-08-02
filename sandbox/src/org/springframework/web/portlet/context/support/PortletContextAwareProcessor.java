@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,15 @@ import org.springframework.web.portlet.context.PortletContextAware;
 
 /**
  * BeanPostProcessor implementation that passes the PortletContext to
- * beans that implement the ApplicationContextAware or ResourceLoaderAware
- * interfaces. If both are implemented, the latter is satisfied first.
+ * beans that implement the PortletContextAware interface.
  *
  * <p>Portlet application contexts will automatically register this with their
  * underlying bean factory. Applications do not use this directly.
  *
  * @author Juergen Hoeller
- * @since 12.03.2004
- * @see org.springframework.web.context.PortletContextAware
- * @see org.springframework.web.context.support.XmlWebApplicationContext#postProcessBeanFactory
+ * @author John A. Lewis
+ * @see org.springframework.web.portlet.context.PortletContextAware
+ * @see org.springframework.web.portlet.context.support.XmlPortletApplicationContext#postProcessBeanFactory
  */
 public class PortletContextAwareProcessor implements BeanPostProcessor {
 
@@ -50,17 +49,21 @@ public class PortletContextAwareProcessor implements BeanPostProcessor {
 		this.portletContext = portletContext;
 	}
 
-	public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
+	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		if (bean instanceof PortletContextAware) {
+			if (this.portletContext == null) {
+				throw new IllegalStateException("Cannot satisfy PortletContextAware for bean '" +
+						beanName + "' without PortletContext");
+			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking setPortletContext on PortletContextAware bean '" + name + "'");
+				logger.debug("Invoking setPortletContext on PortletContextAware bean '" + beanName + "'");
 			}
 			((PortletContextAware) bean).setPortletContext(this.portletContext);
 		}
 		return bean;
 	}
 
-	public Object postProcessAfterInitialization(Object bean, String name) {
+	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		return bean;
 	}
 

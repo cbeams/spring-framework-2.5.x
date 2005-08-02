@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.portlet.context;
 
 import javax.portlet.PortletContext;
-import javax.servlet.ServletContext;
 
 import org.springframework.web.context.WebApplicationContext;
 
@@ -25,8 +24,8 @@ import org.springframework.web.context.WebApplicationContext;
  * Interface to provide configuration for a portlet application. This is read-only while
  * the application is running, but may be reloaded if the implementation supports this.
  *
- * <p>This interface adds a getPortletContext method to the generic ApplicationContext
- * interface.  Portlet applications also leverage WebApplicationContext which defines a 
+ * <p>This interface adds a getPortletContext method to the WebApplicationContext
+ * interface.  Portlet applications leverage WebApplicationContext which defines a 
  * well-known application attribute name that the root context must be bound to in
  * the bootstrap process.
  *
@@ -41,23 +40,15 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
- * @author Nick Lothian
+ * @author John A. Lewis
  * @see PortletContextAware#setPortletContext
+ * @see PortletContext
  */
 public interface PortletApplicationContext extends WebApplicationContext {
 
 	/**
-	 * Return the standard Portlet API PorletContext for this application.
+	 * Return the standard PortletContext for this application.
 	 */
 	PortletContext getPortletContext();
-	
-	/**
-	 * <p>Set the servlet context of this portlet application</p>
-	 *
-	 * <p>This is required to use the Spring tag library</p>
-	 */
-	void setServletContext(ServletContext servletContext);
-
-	ServletContext getServletContext();
 	
 }

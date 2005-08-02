@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,39 +32,51 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceEditor;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
+import org.springframework.web.portlet.context.support.PortletContextResourceLoader;
 
 /**
- * Simple extension of javax.servlet.portlet.GenericPortlet that treats its config
- * parameters as bean properties. A very handy superclass for any type of portlet.
- * Type conversion is automatic. It is also possible for subclasses to specify
- * required properties.
+ * Simple extension of <code>javax.portlet.GenericPortlet</code> that treats
+ * its config parameters as bean properties.
  *
- * <p>This portlet leaves request handling to subclasses, inheriting the
- * default behaviour of GenericPortlet.
+ * <p>A very handy superclass for any type of portlet. Type conversion is automatic.
+ * It is also possible for subclasses to specify required properties.
  *
- * <p>This portlet superclass has no dependency on a Spring application context.
+ * <p>This portlet leaves request handling to subclasses, inheriting the default
+ * behaviour of GenericPortlet (<code>doDispatch</code>, <code>processAction</code>, etc).
+ *
+ * <p>This portlet superclass has no dependency on a Spring application context,
+ * in contrast to the FrameworkPortlet class which loads its own context.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
+ * @author John A. Lewis
  * @see #addRequiredProperty
  * @see #initPortletBean
+ * @see #doDispatch
+ * @see #processAction
+ * @see FrameworkPortlet
  */
 public abstract class PortletBean extends GenericPortlet {
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** 
 	 * Set of required properties (Strings) that must be supplied as
 	 * config parameters to this portlet.
 	 */
-	private Set requiredProperties = new HashSet();
+	private final Set requiredProperties = new HashSet();
 
 	/**
 	 * Subclasses can invoke this method to specify that this property
 	 * (which must match a JavaBean property they expose) is mandatory,
-	 * and must be supplied as a config parameter.
+	 * and must be supplied as a config parameter. This method would
+	 * normally be called from a subclass constructor.
 	 * @param property name of the required property
 	 */
 	protected final void addRequiredProperty(String property) {
@@ -78,12 +90,17 @@ public abstract class PortletBean extends GenericPortlet {
 	 * properties are missing), or if subclass initialization fails.
 	 */
 	public final void init() throws PortletException {
-		logger.info("Initializing portlet '" + getPortletName() + "'");
-
-		// set bean properties
+		if (logger.isInfoEnabled()) {
+			logger.info("Initializing portlet '" + getPortletName() + "'");
+		}
+		
+		// Set bean properties from init parameters.
 		try {
 			PropertyValues pvs = new PortletConfigPropertyValues(getPortletConfig(), this.requiredProperties);
 			BeanWrapper bw = new BeanWrapperImpl(this);
+			ResourceLoader resourceLoader = new PortletContextResourceLoader(getPortletContext());
+			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader));
+			initBeanWrapper(bw);
 			bw.setPropertyValues(pvs);
 		}
 		catch (BeansException ex) {
@@ -93,9 +110,22 @@ public abstract class PortletBean extends GenericPortlet {
 
 		// let subclasses do whatever initialization they like
 		initPortletBean();
-		logger.info("Portlet '" + getPortletName() + "' configured successfully");
+
+		if (logger.isInfoEnabled()) {
+			logger.info("Portlet '" + getPortletName() + "' configured successfully");
+		}
 	}
 	
+	/**
+	 * Initialize the BeanWrapper for this PortletBean,
+	 * possibly with custom editors.
+	 * @param bw the BeanWrapper to initialize
+	 * @throws BeansException if thrown by BeanWrapper methods
+	 * @see org.springframework.beans.BeanWrapper#registerCustomEditor
+	 */
+	protected void initBeanWrapper(BeanWrapper bw) throws BeansException {
+	}
+
 	/**
 	 * Subclasses may override this to perform custom initialization.
 	 * All bean properties of this portlet will have been set before this
@@ -118,13 +148,15 @@ public abstract class PortletBean extends GenericPortlet {
 		 * we can't accept default values
 		 * @throws PortletException if any required properties are missing
 		 */
-		private PortletConfigPropertyValues(PortletConfig config, Set requiredProperties) throws PortletException {
+		private PortletConfigPropertyValues(PortletConfig config, Set requiredProperties)
+			throws PortletException {
+				
 			Set missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
 					new HashSet(requiredProperties) : null;
 
-			Enumeration paramNames = config.getInitParameterNames();
-			while (paramNames.hasMoreElements()) {
-				String property = (String) paramNames.nextElement();
+			Enumeration en = config.getInitParameterNames();
+			while (en.hasMoreElements()) {
+				String property = (String) en.nextElement();
 				Object value = config.getInitParameter(property);
 				addPropertyValue(new PropertyValue(property, value));
 				if (missingProps != null) {
@@ -135,9 +167,9 @@ public abstract class PortletBean extends GenericPortlet {
 			// fail if we are still missing properties
 			if (missingProps != null && missingProps.size() > 0) {
 				throw new PortletException(
-						"Initialization from PortletConfig for portlet '" + config.getPortletName() +
-						"' failed; the following required properties were missing: " +
-						StringUtils.collectionToDelimitedString(missingProps, ", "));
+					"Initialization from PortletConfig for portlet '" + config.getPortletName() +
+					"' failed; the following required properties were missing: " +
+					StringUtils.collectionToDelimitedString(missingProps, ", "));
 			}
 		}
 	}

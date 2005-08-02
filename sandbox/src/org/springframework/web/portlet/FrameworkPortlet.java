@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 package org.springframework.web.portlet;
 
 import java.io.IOException;
+import java.security.Principal;
+import java.util.Map;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
-import javax.portlet.PortletContext;
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
@@ -34,10 +35,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
 import org.springframework.web.portlet.context.PortletApplicationContext;
-import org.springframework.web.portlet.context.support.PortletRequestHandledEvent;
-import org.springframework.web.portlet.context.support.PortletWebApplicationContextUtils;
+import org.springframework.web.portlet.context.support.RequestHandledEvent;
+import org.springframework.web.portlet.context.support.PortletApplicationContextUtils;
 import org.springframework.web.portlet.context.support.XmlPortletApplicationContext;
-
 
 /**
  * Base portlet for portlets within the portlet framework. Allows integration
@@ -51,9 +51,9 @@ import org.springframework.web.portlet.context.support.XmlPortletApplicationCont
  * successfully handled.
  * </ul>
  *
- * <p>Subclasses must implement doActionService() and doRenderService() to handle
- * action and render requests. Because this extends PortletBean rather than Portlet
- * directly, bean properties are mapped onto it. Subclasses can override
+ * <p>Subclasses must implement <code>doActionService</code> and <code>doRenderService</code>
+ * to handle action and render requests. Because this extends PortletBean rather
+ * than Portlet directly, bean properties are mapped onto it. Subclasses can override
  * initFrameworkPortlet() for custom initialization.
  *
  * <p>Regards a "contextClass" parameter at the portlet init-param level,
@@ -81,7 +81,9 @@ import org.springframework.web.portlet.context.support.XmlPortletApplicationCont
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
  * @author Nick Lothian
- * @see #doService
+ * @author John A. Lewis
+ * @see #doActionService
+ * @see #doRenderService
  * @see #initFrameworkPortlet
  * @see #setContextClass
  * @see #setContextConfigLocation
@@ -100,7 +102,7 @@ public abstract class FrameworkPortlet extends PortletBean {
 
 	/**
 	 * Default context class for FrameworkPortlet.
-	 * @see org.springframework.web.context.support.XmlPortletApplicationContext
+	 * @see org.springframework.web.portlet.context.support.XmlPortletApplicationContext
 	 */
 	public static final Class DEFAULT_CONTEXT_CLASS = XmlPortletApplicationContext.class;
 
@@ -117,7 +119,13 @@ public abstract class FrameworkPortlet extends PortletBean {
 	 */
 	public static final String DEFAULT_VIEW_RENDERER_SERVLET = "/WEB-INF/servlet/view";
 
-	/** Custom PortletApplicationContext implementation class */
+	/**
+	 * Commonly used key value in Portal user info map for the name of the user
+	 */
+	private static final String PORTLET_USER_INFO_USER_NAME = "user.name";
+
+	
+	/** PortletApplicationContext implementation class to use */
 	private Class contextClass = DEFAULT_CONTEXT_CLASS;
 
 	/** Namespace for this portlet */
@@ -129,27 +137,16 @@ public abstract class FrameworkPortlet extends PortletBean {
 	/** Should we publish the context as a PortletContext attribute? */
 	private boolean publishContext = true;
 
+	/** Should we publish a RequestHandledEvent at the end of each request? */
+	private boolean publishEvents = true;
+
 	/** PortletApplicationContext for this portlet */
 	private PortletApplicationContext portletApplicationContext;
 
-	/** ViewRendererServlet **/
+	/** ViewRendererServlet */
 	private String viewRendererServlet;
 
-    /**
-     * Return the ViewRendererServlet.
-     */
-    public String getViewRendererServlet() {
-        return (viewRendererServlet != null ? viewRendererServlet : DEFAULT_VIEW_RENDERER_SERVLET);
-    }
-    
-    /**
-     * Set the ViewRendererServlet.  This servlet is used to ultimately render
-     * all views in the portlet application.
-     */
-    public void setViewRendererServlet(String viewRendererServlet) {
-        this.viewRendererServlet = viewRendererServlet;
-    }
-
+	
 	/**
 	 * Set a custom context class. This class must be of type PortletApplicationContext;
 	 * when using the default FrameworkPortlet implementation, the context class
@@ -177,10 +174,10 @@ public abstract class FrameworkPortlet extends PortletBean {
 
 	/**
 	 * Return the namespace for this portlet, falling back to default scheme if
-	 * no custom namespace was set: e.g. "test-portlet" for a portlet named "test".
+	 * no custom namespace was set. (e.g. "test-portlet" for a portlet named "test")
 	 */
 	public String getNamespace() {
-		return (namespace != null) ? namespace : getPortletName() + DEFAULT_NAMESPACE_SUFFIX;
+		return (this.namespace != null) ? this.namespace : getPortletName() + DEFAULT_NAMESPACE_SUFFIX;
 	}
 
 	/**
@@ -217,13 +214,46 @@ public abstract class FrameworkPortlet extends PortletBean {
 	}
 
 	/**
+	 * Set whether this portlet should publish a RequestHandledEvent at the end
+	 * of each request. Default is true; can be turned off for a slight performance
+	 * improvement, provided that no ApplicationListeners rely on such events.
+	 */
+	public void setPublishEvents(boolean publishEvents) {
+		this.publishEvents = publishEvents;
+	}
+
+	/**
+	 * Return whether this portlet should publish a RequestHandledEvent at the end
+	 * of each request.
+	 */
+	public boolean isPublishEvents() {
+		return publishEvents;
+	}
+
+    /**
+     * Set the ViewRendererServlet.  This servlet is used to ultimately render
+     * all views in the portlet application.
+     */
+    public void setViewRendererServlet(String viewRendererServlet) {
+        this.viewRendererServlet = viewRendererServlet;
+    }
+
+    /**
+     * Return the ViewRendererServlet.
+     */
+    public String getViewRendererServlet() {
+        return (viewRendererServlet != null ? viewRendererServlet : DEFAULT_VIEW_RENDERER_SERVLET);
+    }
+
+    
+	/**
 	 * Overridden method of PortletBean, invoked after any bean properties
 	 * have been set. Creates this portlet's PortletApplicationContext.
 	 */
 	protected final void initPortletBean() throws PortletException, BeansException {
 		long startTime = System.currentTimeMillis();
 		if (logger.isInfoEnabled()) {
-			logger.info("Framework portlet '" + getPortletName() + "' init");
+			logger.info("FrameworkPortlet '" + getPortletName() + "': initialization started");
 		}
 
 		try {
@@ -241,7 +271,7 @@ public abstract class FrameworkPortlet extends PortletBean {
 
 		if (logger.isInfoEnabled()) {
 			long elapsedTime = System.currentTimeMillis() - startTime;
-			logger.info("Framework portlet '" + getPortletName() + "' init completed in " + elapsedTime + " ms");
+			logger.info("FrameworkPortlet '" + getPortletName() + "': initialization completed in " + elapsedTime + " ms");
 		}
 	}
 
@@ -249,28 +279,27 @@ public abstract class FrameworkPortlet extends PortletBean {
 	 * Initialize and publish the PortletApplicationContext for this portlet.
 	 * Delegates to createPortletApplicationContext for actual creation.
 	 * Can be overridden in subclasses.
+	 * @return the PortletApplicationContext for this portlet
 	 * @throws BeansException if the context couldn't be initialized
 	 * @see #createPortletApplicationContext
 	 */
 	protected PortletApplicationContext initPortletApplicationContext() throws BeansException {
-	    PortletContext portletContext = getPortletContext();
-		portletContext.log("Initializing PortletApplicationContext for portlet '" + getPortletName() + "'");
-		WebApplicationContext parent = PortletWebApplicationContextUtils.getWebApplicationContext(portletContext);
-
+	    getPortletContext().log(
+	            "Loading PortletApplicationContext for Spring FrameworkPortlet '" + getPortletName() + "'");
+	    
+		WebApplicationContext parent = PortletApplicationContextUtils.getWebApplicationContext(getPortletContext());
 		PortletApplicationContext pac = createPortletApplicationContext(parent);
-		// Set the Servlet Context. This is required by the Spring Tag Libraries
-		pac.setServletContext(parent.getServletContext());
-				
 		if (logger.isInfoEnabled()) {
-			logger.info("Using context class '" + pac.getClass().getName() + "' for portlet '" + getPortletName() + "'");
+			logger.info("Using context class '" + pac.getClass().getName() + "' for portlet '" +
+			        getPortletName() + "'");
 		}
 
 		if (this.publishContext) {
 			// publish the context as a portlet context attribute
 			String attName = getPortletContextAttributeName();
-			portletContext.setAttribute(attName, pac);
-			if (logger.isInfoEnabled()) {
-				logger.info("Published PortletApplicationContext of portlet '" + getPortletName() +
+			getPortletContext().setAttribute(attName, pac);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Published PortletApplicationContext of portlet '" + getPortletName() +
 										"' as PortletContext attribute with name [" + attName + "]");
 			}
 		}
@@ -282,6 +311,8 @@ public abstract class FrameworkPortlet extends PortletBean {
 	 * XmlPortletApplicationContext or a custom context class if set. This implementation
 	 * expects custom contexts to implement ConfigurablePortletApplicationContext.
 	 * Can be overridden in subclasses.
+	 * @param parent the parent ApplicationContext to use, or null if none
+	 * @return the PortletApplicationContext for this portlet
 	 * @throws BeansException if the context couldn't be initialized
 	 * @see #setContextClass
 	 * @see org.springframework.web.portlet.context.support.XmlPortletApplicationContext
@@ -289,37 +320,38 @@ public abstract class FrameworkPortlet extends PortletBean {
 	protected PortletApplicationContext createPortletApplicationContext(WebApplicationContext parent)
 			throws BeansException {
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Portlet with name '" + getPortletName() +
-									"' will try to create custom PortletApplicationContext context of class '" +
-									getContextClass().getName() + "'" + " using parent context [" + parent + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Portlet with name '" + getPortletName() +
+			        "' will try to create custom PortletApplicationContext context of class '" +
+			        getContextClass().getName() + "'" + ", using parent context [" + parent + "]");
 		}
 		if (!ConfigurablePortletApplicationContext.class.isAssignableFrom(getContextClass())) {
-			throw new ApplicationContextException("Fatal initialization error in portlet with name '" +
-																						getPortletName() + "': custom PortletApplicationContext class [" +
-																						getContextClass().getName() +
-																						"] is not of type ConfigurablePortletApplicationContext");
+			throw new ApplicationContextException(
+			        "Fatal initialization error in portlet with name '" + getPortletName() +
+			        "': custom PortletApplicationContext class [" +	getContextClass().getName() +
+					"] is not of type ConfigurablePortletApplicationContext");
 		}
 
-		ConfigurablePortletApplicationContext cpac =
+		ConfigurablePortletApplicationContext pac =
 				(ConfigurablePortletApplicationContext) BeanUtils.instantiateClass(getContextClass());
-		cpac.setParent(parent);
-		cpac.setPortletContext(getPortletContext());
-		cpac.setNamespace(getNamespace());
-		if (this.contextConfigLocation != null) {
-			cpac.setConfigLocations(
-			    StringUtils.tokenizeToStringArray(this.contextConfigLocation,
-			                                      ConfigurablePortletApplicationContext.CONFIG_LOCATION_DELIMITERS,
-			                                      true, true));
+		pac.setParent(parent);
+		pac.setPortletContext(getPortletContext());
+		pac.setServletContext(parent.getServletContext());
+		pac.setNamespace(getNamespace());
+		if (getContextConfigLocation() != null) {
+			pac.setConfigLocations(
+			    StringUtils.tokenizeToStringArray(getContextConfigLocation(),
+			                                      ConfigurablePortletApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		}
-		cpac.refresh();
-		return cpac;
+		pac.refresh();
+		return pac;
 	}
 
 	/**
-	 * Return the PortletContext attribute name for this portlet's
-	 * PortletApplicationContext.
-	 */
+	 * Return the PortletContext attribute name for this portlets's PortletApplicationContext.
+	 * Default implementation returns PORTLET_CONTEXT_PREFIX + portlet name.
+	 * @see #PORTLET_CONTEXT_PREFIX
+	 * @see #getPortletName	 */
 	public String getPortletContextAttributeName() {
 		return PORTLET_CONTEXT_PREFIX + getPortletName();
 	}
@@ -393,29 +425,61 @@ public abstract class FrameworkPortlet extends PortletBean {
 			throw new PortletException(ex.getMessage(), ex);
 		}
 		finally {
-			long processingTime = System.currentTimeMillis() - startTime;
-			// whether or not we succeeded, publish an event
 			if (failureCause != null) {
 				logger.error("Could not complete request", failureCause);
-				this.portletApplicationContext.publishEvent(
-				    new PortletRequestHandledEvent(this, request.getRemoteUser(), processingTime, 
-				            getPortletConfig().getPortletName(), failureCause));
 			}
 			else {
 				logger.debug("Successfully completed request");
+			}
+			if (isPublishEvents()) {
+				// Whether or not we succeeded, publish an event.
+				long processingTime = System.currentTimeMillis() - startTime;
 				this.portletApplicationContext.publishEvent(
-				    new PortletRequestHandledEvent(this, request.getRemoteUser(), processingTime,
-				            getPortletConfig().getPortletName()));
+						new RequestHandledEvent(this, processingTime, 
+								getPortletConfig().getPortletName(),
+								request.getPortletMode().toString(),
+								(request instanceof ActionRequest ? "action" : "render"),
+								request.getRequestedSessionId(),
+								getUsernameForRequest(request), failureCause));
 			}
 		}
+	}
+
+	/**
+	 * Determine the username for the given request.
+	 * Default implementation first tries the UserPrincipal.
+	 * If that does not exist, then it checks the USER_INFO map.
+	 * Can be overridden in subclasses.
+	 * @param request current portlet request
+	 * @return the username, or null if none
+	 * @see javax.portlet.PortletRequest#getUserPrincipal
+	 * @see javax.portlet.PortletRequest#USER_INFO
+	 */
+	protected String getUsernameForRequest(PortletRequest request) {
+	    
+	    // Try the Principal first
+		Principal userPrincipal = request.getUserPrincipal();
+		if (userPrincipal != null) return userPrincipal.getName();
+		
+		// Try the user info map next
+		Map userInfo = (Map)request.getAttribute(PortletRequest.USER_INFO);
+		if (userInfo != null) {
+		    String userName = (String)userInfo.get(PORTLET_USER_INFO_USER_NAME);		
+			if (userName != null) return userName;
+		}
+		
+		// Nothing worked
+		return null;
 	}
 
 	/**
 	 * Subclasses must implement this method to do the work of Action request handling.
 	 * The contract is the same as that for the processAction method of Portlet.
 	 * This class intercepts calls to ensure that event publication takes place.
-	 * @see javax.portlet.Portlet#processAction
+	 * @param request current portlet action request
+	 * @param response current portlet action response
 	 * @throws Exception in case of any kind of processing failure
+	 * @see javax.portlet.Portlet#processAction
 	 */
 	protected abstract void doActionService(ActionRequest request, ActionResponse response)
 		throws Exception;
@@ -424,8 +488,10 @@ public abstract class FrameworkPortlet extends PortletBean {
 	 * Subclasses must implement this method to do the work of Render request handling.
 	 * The contract is the same as that for the render method of Portlet.
 	 * This class intercepts calls to ensure that event publication takes place.
-	 * @see javax.portlet.Portlet#render
+	 * @param request current portlet render request
+	 * @param response current portlet render response
 	 * @throws Exception in case of any kind of processing failure
+	 * @see javax.portlet.Portlet#render
 	 */
 	protected abstract void doRenderService(RenderRequest request, RenderResponse response)
 		throws Exception;
@@ -436,7 +502,8 @@ public abstract class FrameworkPortlet extends PortletBean {
 	 */
 	public void destroy() {
 		// Close the portlet application context of this portlet.
-		getPortletContext().log("Closing PortletApplicationContext of portlet '" + getPortletName() + "'");
+		getPortletContext().log(
+		        "Closing PortletApplicationContext of Spring FrameworkPortlet '" + getPortletName() + "'");
 		if (this.portletApplicationContext instanceof ConfigurableApplicationContext) {
 			((ConfigurableApplicationContext) this.portletApplicationContext).close();
 		}
