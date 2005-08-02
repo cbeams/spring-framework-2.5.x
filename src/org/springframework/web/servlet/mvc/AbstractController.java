@@ -43,7 +43,8 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  *      is not support)</li>
  *  <li>If session is required, try to get it (ServletException if not found)</li>
  *  <li>Set caching headers if needed according to cacheSeconds propery</li>
- *  <li>Call abstract method {@link #handleRequestInternal(HttpServletRequest,HttpServletResponse) handleRequestInternal()},
+ *  <li>Call abstract method {@link #handleRequestInternal(HttpServletRequest,HttpServletResponse) handleRequestInternal()}
+ *      (optionally synchronizing around the call on the HttpSession),
  *      which should be implemented by extending classes to provide actual
  *      functionality to return {@link org.springframework.web.servlet.ModelAndView ModelAndView} objects.</li>
  * </ol>
@@ -81,6 +82,14 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  *          <i>any headers</i> and any positive number will generate headers
  *          that state the amount indicated as seconds to cache the content</td>
  *  </tr>
+ *  <tr>
+ *      <td>synchronizeOnSession</td>
+ *      <td>false</td>
+ *      <td>whether the call to <code>handleRequestInternal</code> should be
+ *          synchronized around the HttpSession, to serialize invocations
+ *          from the same client. No effect if there is no HttpSession.
+ *      </td>
+ *  </tr>
  * </table>
  *
  * @author Rod Johnson
@@ -90,6 +99,7 @@ import org.springframework.web.servlet.support.WebContentGenerator;
 public abstract class AbstractController extends WebContentGenerator implements Controller {
 
 	private boolean synchronizeOnSession = false;
+
 
 	/**
 	 * Set if controller execution should be synchronized on the session,
@@ -108,6 +118,7 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	public final boolean isSynchronizeOnSession() {
 		return synchronizeOnSession;
 	}
+
 
 	public final ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
@@ -130,7 +141,7 @@ public abstract class AbstractController extends WebContentGenerator implements 
 
 	/**
 	 * Template method. Subclasses must implement this.
-	 * The contract is the same as for handleRequest.
+	 * The contract is the same as for <code>handleRequest</code>.
 	 * @see #handleRequest
 	 */
 	protected abstract ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
