@@ -164,7 +164,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * Stores the exporter parameters passed in by the user as passed in by the user. May be keyed as
 	 * <code>String</code>s with the fully qualified name of the exporter parameter field.
 	 */
-	private Map exporterParameters;
+	private Map exporterParameters = new HashMap();
 
 	/**
 	 * Stores the converted exporter parameters - keyed by <code>JRExporterParameter</code>.
@@ -354,7 +354,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @see #getExporterParameter(Object)
 	 */
 	protected final void convertExporterParameters() {
-		if (this.exporterParameters != null) {
+		if (this.exporterParameters != null && !this.exporterParameters.isEmpty()) {
 			this.convertedExporterParameters = new HashMap(this.exporterParameters.size());
 			for (Iterator it = this.exporterParameters.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();

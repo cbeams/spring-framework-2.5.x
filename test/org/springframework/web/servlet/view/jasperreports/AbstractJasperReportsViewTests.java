@@ -16,24 +16,24 @@
 
 package org.springframework.web.servlet.view.jasperreports;
 
-import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.sql.DataSource;
-
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRAbstractBeanDataSourceProvider;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.easymock.MockControl;
-
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.ui.jasperreports.PersonBean;
+
+import javax.sql.DataSource;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author Rob Harrop
@@ -341,6 +341,26 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		catch (SQLException ex) {
 			fail("javax.sql.DataSource was used when JRDataSource should have overriden it");
 		}
+	}
+
+	public void testWithCharacterEncoding() throws Exception {
+		AbstractJasperReportsView view = getView(COMPILED_REPORT);
+
+		if (!(view instanceof AbstractJasperReportsSingleFormatView) || !((AbstractJasperReportsSingleFormatView) view).useWriter()) {
+			return;
+		}
+
+		String characterEncoding = "UTF-8";
+
+		Map parameters = new HashMap();
+		parameters.put(JRExporterParameter.CHARACTER_ENCODING, characterEncoding);
+
+		view.setExporterParameters(parameters);
+		view.convertExporterParameters();
+
+		view.render(getModel(), this.request, this.response);
+
+		assertEquals(characterEncoding, this.response.getCharacterEncoding());
 	}
 
 	private DataSource getMockSqlDataSource() throws SQLException {

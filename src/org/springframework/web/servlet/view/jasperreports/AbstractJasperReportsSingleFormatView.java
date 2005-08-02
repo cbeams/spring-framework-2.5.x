@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JRAbstractExporter;
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JRExporterParameter;
 
 import org.springframework.ui.jasperreports.JasperReportsUtils;
 
@@ -64,6 +65,13 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 		}
 
 		if (useWriter()) {
+			// copy the encoding configured for the report into the response
+			String encoding = (String)exporter.getParameter(JRExporterParameter.CHARACTER_ENCODING);
+
+			if(encoding != null) {
+				response.setCharacterEncoding(encoding);
+			}
+			
 			// Render report into HttpServletResponse's Writer.
 			JasperReportsUtils.render(exporter, populatedReport, response.getWriter());
 		}
