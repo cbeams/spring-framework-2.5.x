@@ -62,7 +62,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private ErrorHandler errorHandler = new SimpleSaxErrorHandler(logger);
 
-	private EntityResolver entityResolver = new BeansDtdResolver();
+	private EntityResolver entityResolver = null;
 
 	private Class parserClass = DefaultXmlBeanDefinitionParser.class;
 
@@ -72,6 +72,14 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public XmlBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
 		super(beanFactory);
+
+		// Determine EntityResolver to use.
+		if (getResourceLoader() != null) {
+			this.entityResolver = new ResourceEntityResolver(getResourceLoader());
+		}
+		else {
+			this.entityResolver = new BeansDtdResolver();
+		}
 	}
 
 	/**
