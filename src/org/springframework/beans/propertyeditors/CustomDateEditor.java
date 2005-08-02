@@ -24,7 +24,8 @@ import java.util.Date;
 import org.springframework.util.StringUtils;
 
 /**
- * PropertyEditor for java.util.Date, supporting a custom DateFormat.
+ * PropertyEditor for <code>java.util.Date</code>, supporting a custom
+ * <code>java.text.DateFormat</code>.
  *
  * <p>This is not meant to be used as system PropertyEditor but rather as
  * locale-specific date editor within custom controller code, to parse
@@ -37,6 +38,8 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @since 28.04.2003
+ * @see java.util.Date
+ * @see java.text.DateFormat
  * @see org.springframework.validation.DataBinder#registerCustomEditor
  * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
  * @see org.springframework.web.bind.BindInitializer#initBinder
@@ -46,6 +49,9 @@ public class CustomDateEditor extends PropertyEditorSupport {
 	private final DateFormat dateFormat;
 
 	private final boolean allowEmpty;
+
+	private final int exactDateLength;
+
 
 	/**
 	 * Create a new CustomDateEditor instance, using the given DateFormat
@@ -59,15 +65,42 @@ public class CustomDateEditor extends PropertyEditorSupport {
 	public CustomDateEditor(DateFormat dateFormat, boolean allowEmpty) {
 		this.dateFormat = dateFormat;
 		this.allowEmpty = allowEmpty;
+		this.exactDateLength = -1;
 	}
+
+	/**
+	 * Create a new CustomDateEditor instance, using the given DateFormat
+	 * for parsing and rendering.
+	 * <p>The "allowEmpty" parameter states if an empty String should
+	 * be allowed for parsing, i.e. get interpreted as null value.
+	 * Otherwise, an IllegalArgumentException gets thrown in that case.
+	 * <p>The "exactDateLength" parameter states that IllegalArgumentException gets
+	 * thrown if the String does not exactly match the length specified. This is useful
+	 * because SimpleDateFormat does not enforce strict parsing of the year part,
+	 * not even with <code>setLenient(false)</code>. Without an "exactDateLength"
+	 * specified, the "01/01/05" would get parsed to "01/01/0005".
+	 * @param dateFormat DateFormat to use for parsing and rendering
+	 * @param allowEmpty if empty strings should be allowed
+	 * @param exactDateLength the exact expected length of the date String
+	 */
+	public CustomDateEditor(DateFormat dateFormat, boolean allowEmpty, int exactDateLength) {
+		this.dateFormat = dateFormat;
+		this.allowEmpty = allowEmpty;
+		this.exactDateLength = exactDateLength;
+	}
+
 
 	/**
 	 * Parse the Date from the given text, using the specified DateFormat.
 	 */
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (this.allowEmpty && !StringUtils.hasText(text)) {
-			// treat empty String as null value
+			// Treat empty String as null value.
 			setValue(null);
+		}
+		else if (text != null && this.exactDateLength >= 0 && text.length() != this.exactDateLength) {
+			throw new IllegalArgumentException(
+					"Could not parse date: it is not exactly" + this.exactDateLength + "characters long");
 		}
 		else {
 			try {
