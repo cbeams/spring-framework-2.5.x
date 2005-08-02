@@ -834,7 +834,7 @@
       -- when using Hibernate configured without any awareness of the JTA
       <literal>TransactionManager</literal> object for that environment, it is
       is possible for spurious warning or exceptions to show up in the
-      application server log. These warings or exceptions will say something
+      application server log. These warnings or exceptions will say something
       to the effect that the connection being accessed is no longer valid, or
       JDBC access is no longer valid, possibly because the transaction is no
       longer active. As an example, here is an actual exception from
@@ -843,7 +843,7 @@
       <para><programlisting>java.sql.SQLException: The transaction is no longer active - status: 'Committed'.
    No further JDBC access is allowed within this transaction. </programlisting></para>
 
-      <para>This waring or error is easy to resolve by simply making Hibernate
+      <para>This warning is easy to resolve by simply making Hibernate
       aware of the JTA <literal>TransactionManager</literal> instance, to
       which it will also synchronize (along with Spring). This may be done in
       two ways:</para>
