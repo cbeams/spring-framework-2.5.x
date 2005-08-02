@@ -200,11 +200,13 @@ public class CciTemplate implements CciOperations {
 
 	public Object execute(InteractionSpec spec, Record inputRecord, RecordExtractor outputExtractor)
 			throws DataAccessException {
+
 		return doExecute(spec, inputRecord, null, outputExtractor);
 	}
 
 	public Object execute(InteractionSpec spec, RecordCreator inputCreator, RecordExtractor outputExtractor)
 			throws DataAccessException {
+
 		return doExecute(spec, createRecord(inputCreator), null, outputExtractor);
 	}
 
@@ -256,6 +258,72 @@ public class CciTemplate implements CciOperations {
 		});
 	}
 
+
+	/**
+	 * Create an indexed Record through the ConnectionFactory's RecordFactory.
+	 * @param name the name of the record
+	 * @return the Record
+	 * @throws DataAccessException if creation of the Record failed
+	 * @see #getRecordFactory(javax.resource.cci.ConnectionFactory)
+	 * @see javax.resource.cci.RecordFactory#createIndexedRecord(String)
+	 */
+	public IndexedRecord createIndexedRecord(String name) throws DataAccessException {
+		try {
+			RecordFactory recordFactory = getRecordFactory(getConnectionFactory());
+			return recordFactory.createIndexedRecord(name);
+		}
+		catch (NotSupportedException ex) {
+			throw new RecordTypeNotSupportedException("Creation of indexed Record not supported by connector", ex);
+		}
+		catch (ResourceException ex) {
+			throw new CannotCreateRecordException("Creation of indexed Record failed", ex);
+		}
+	}
+
+	/**
+	 * Create a mapped Record from the ConnectionFactory's RecordFactory.
+	 * @param name record name
+	 * @return the Record
+	 * @throws DataAccessException if creation of the Record failed
+	 * @see #getRecordFactory(javax.resource.cci.ConnectionFactory)
+	 * @see javax.resource.cci.RecordFactory#createMappedRecord(String)
+	 */
+	public MappedRecord createMappedRecord(String name) throws DataAccessException {
+		try {
+			RecordFactory recordFactory = getRecordFactory(getConnectionFactory());
+			return recordFactory.createMappedRecord(name);
+		}
+		catch (NotSupportedException ex) {
+			throw new RecordTypeNotSupportedException("Creation of mapped Record not supported by connector", ex);
+		}
+		catch (ResourceException ex) {
+			throw new CannotCreateRecordException("Creation of mapped Record failed", ex);
+		}
+	}
+
+	/**
+	 * Invoke the given RecordCreator, converting JCA ResourceExceptions
+	 * to Spring's DataAccessException hierarchy.
+	 * @param recordCreator the RecordCreator to invoke
+	 * @return the created Record
+	 * @throws DataAccessException if creation of the Record failed
+	 * @see #getRecordFactory(javax.resource.cci.ConnectionFactory)
+	 * @see RecordCreator#createRecord(javax.resource.cci.RecordFactory)
+	 */
+	protected Record createRecord(RecordCreator recordCreator) throws DataAccessException {
+		try {
+			RecordFactory recordFactory = getRecordFactory(getConnectionFactory());
+			return recordCreator.createRecord(recordFactory);
+		}
+		catch (NotSupportedException ex) {
+			throw new RecordTypeNotSupportedException(
+					"Creation of the desired Record type not supported by connector", ex);
+		}
+		catch (ResourceException ex) {
+			throw new CannotCreateRecordException("Creation of the desired Record failed", ex);
+		}
+	}
+
 	/**
 	 * Return a RecordFactory for the given ConnectionFactory.
 	 * <p>Default implementation returns the connector's RecordFactory if
@@ -273,71 +341,6 @@ public class CciTemplate implements CciOperations {
 		}
 		catch (NotSupportedException ex) {
 			return new NotSupportedRecordFactory();
-		}
-	}
-
-
-	/**
-	 * Create an indexed Record through the ConnectionFactory's RecordFactory.
-	 * @param name the name of the record
-	 * @return the Record
-	 * @throws DataAccessException if creation of the Record failed
-	 * @see javax.resource.cci.ConnectionFactory#getRecordFactory()
-	 * @see javax.resource.cci.RecordFactory#createIndexedRecord(String)
-	 */
-	public IndexedRecord createIndexedRecord(String name) throws DataAccessException {
-		try {
-			RecordFactory factory = getConnectionFactory().getRecordFactory();
-			return factory.createIndexedRecord(name);
-		}
-		catch (NotSupportedException ex) {
-			throw new RecordTypeNotSupportedException("Creation of indexed Record not supported by connector", ex);
-		}
-		catch (ResourceException ex) {
-			throw new CannotCreateRecordException("Creation of indexed Record failed", ex);
-		}
-	}
-
-	/**
-	 * Create a mapped Record from the ConnectionFactory's RecordFactory.
-	 * @param name record name
-	 * @return the Record
-	 * @throws DataAccessException if creation of the Record failed
-	 * @see javax.resource.cci.ConnectionFactory#getRecordFactory()
-	 * @see javax.resource.cci.RecordFactory#createMappedRecord(String)
-	 */
-	public MappedRecord createMappedRecord(String name) throws DataAccessException {
-		try {
-			RecordFactory factory = getConnectionFactory().getRecordFactory();
-			return factory.createMappedRecord(name);
-		}
-		catch (NotSupportedException ex) {
-			throw new RecordTypeNotSupportedException("Creation of mapped Record not supported by connector", ex);
-		}
-		catch (ResourceException ex) {
-			throw new CannotCreateRecordException("Creation of mapped Record failed", ex);
-		}
-	}
-
-	/**
-	 * Invoke the given RecordCreator, converting JCA ResourceExceptions
-	 * to Spring's DataAccessException hierarchy.
-	 * @param recordCreator the RecordCreator to invoke
-	 * @return the created Record
-	 * @throws DataAccessException if creation of the Record failed
-	 * @see RecordCreator#createRecord(javax.resource.cci.RecordFactory)
-	 */
-	protected Record createRecord(RecordCreator recordCreator) throws DataAccessException {
-		try {
-			RecordFactory recordFactory = getConnectionFactory().getRecordFactory();
-			return recordCreator.createRecord(recordFactory);
-		}
-		catch (NotSupportedException ex) {
-			throw new RecordTypeNotSupportedException(
-					"Creation of the desired Record type not supported by connector", ex);
-		}
-		catch (ResourceException ex) {
-			throw new CannotCreateRecordException("Creation of the desired Record failed", ex);
 		}
 	}
 
