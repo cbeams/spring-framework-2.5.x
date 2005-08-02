@@ -96,7 +96,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	 * Return the maximum number of idle objects in the pool.
 	 */
 	public int getMaxIdle() {
-		return maxIdle;
+		return this.maxIdle;
 	}
 
 	/**
@@ -112,7 +112,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	 * Return the minimum number of idle objects in the pool.
 	 */
 	public int getMinIdle() {
-		return minIdle;
+		return this.minIdle;
 	}
 
 	/**
@@ -128,7 +128,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	 * Return the maximum waiting time for fetching an object from the pool.
 	 */
 	public long getMaxWait() {
-		return maxWait;
+		return this.maxWait;
 	}
 
 	/**
@@ -145,7 +145,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	 * Return the time between eviction runs that check idle objects.
 	 */
 	public long getTimeBetweenEvictionRunsMillis() {
-		return timeBetweenEvictionRunsMillis;
+		return this.timeBetweenEvictionRunsMillis;
 	}
 
 	/**
@@ -164,7 +164,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	 * Return the minimum time that an idle object can sit in the pool.
 	 */
 	public long getMinEvictableIdleTimeMillis() {
-		return minEvictableIdleTimeMillis;
+		return this.minEvictableIdleTimeMillis;
 	}
 
 
