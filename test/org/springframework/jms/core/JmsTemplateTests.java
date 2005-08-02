@@ -169,9 +169,9 @@ public class JmsTemplateTests extends TestCase {
 		connectionControl.replay();
 
 		template.execute(new ProducerCallback() {
-			public Object doInJms(Session session, MessageProducer msgProducer) throws JMSException {
+			public Object doInJms(Session session, MessageProducer producer) throws JMSException {
 				boolean b = session.getTransacted();
-				int i = msgProducer.getPriority();
+				int i = producer.getPriority();
 				return null;
 			}
 		});
@@ -212,9 +212,9 @@ public class JmsTemplateTests extends TestCase {
 		connectionControl.replay();
 
 		template.execute(new ProducerCallback() {
-			public Object doInJms(Session session, MessageProducer msgProducer) throws JMSException {
+			public Object doInJms(Session session, MessageProducer producer) throws JMSException {
 				boolean b = session.getTransacted();
-				int i = msgProducer.getPriority();
+				int i = producer.getPriority();
 				return null;
 			}
 		});

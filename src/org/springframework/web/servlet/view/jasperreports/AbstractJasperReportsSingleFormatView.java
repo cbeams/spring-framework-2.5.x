@@ -49,6 +49,7 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 */
 	private static final int OUTPUT_BYTE_ARRAY_INITIAL_SIZE = 4096;
 
+
 	/**
 	 * Perform rendering for a single Jasper Reports exporter,
 	 * i.e. a pre-defined output format.
@@ -65,10 +66,9 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 		}
 
 		if (useWriter()) {
-			// copy the encoding configured for the report into the response
-			String encoding = (String)exporter.getParameter(JRExporterParameter.CHARACTER_ENCODING);
-
-			if(encoding != null) {
+			// Copy the encoding configured for the report into the response-
+			String encoding = (String) exporter.getParameter(JRExporterParameter.CHARACTER_ENCODING);
+			if (encoding != null) {
 				response.setCharacterEncoding(encoding);
 			}
 			

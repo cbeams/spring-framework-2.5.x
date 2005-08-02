@@ -107,12 +107,12 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * @author Juergen Hoeller
  * @since 1.1.3
  * @see #setUrl
- * @see #getReportData
- * @see #setJdbcDataSource(javax.sql.DataSource)
- * @see #setSubReportDataKeys(String[])
- * @see #setSubReportUrls(java.util.Properties)
- * @see #setExporterParameters(java.util.Map)
- * @see #setHeaders(java.util.Properties)
+ * @see #setReportDataKey
+ * @see #setSubReportUrls
+ * @see #setSubReportDataKeys
+ * @see #setHeaders
+ * @see #setExporterParameters
+ * @see #setJdbcDataSource
  */
 public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
@@ -122,9 +122,9 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	protected static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 
 	/**
-	 * Stores the default Content-Disposition header. Used to make IE play nice.
+	 * The default Content-Disposition header. Used to make IE play nice.
 	 */
-	private static final String CONTENT_DISPOSITION_INLINE = "inline";
+	protected static final String CONTENT_DISPOSITION_INLINE = "inline";
 
 
 	/**
@@ -144,16 +144,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * to be passed on to a sub-report.
 	 */
 	private String[] subReportDataKeys;
-
-	/**
-	 * The <code>JasperReport</code> that is used to render the view.
-	 */
-	private JasperReport report;
-
-	/**
-	 * Holds mappings between sub-report keys and <code>JasperReport</code> objects.
-	 */
-	private Map subReports;
 
 	/**
 	 * Stores the headers to written with each response
@@ -180,6 +170,16 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * Holds the JRCompiler implementation to use for compiling reports on-the-fly.
 	 */
 	private JRCompiler reportCompiler = new JRDefaultCompiler();
+
+	/**
+	 * The <code>JasperReport</code> that is used to render the view.
+	 */
+	private JasperReport report;
+
+	/**
+	 * Holds mappings between sub-report keys and <code>JasperReport</code> objects.
+	 */
+	private Map subReports;
 
 
 	/**
@@ -321,8 +321,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
 		// Load sub reports if required, and check data source parameters.
 		if (this.subReportUrls != null) {
-			if (this.subReportDataKeys != null && this.subReportDataKeys.length > 0 &&
-							this.reportDataKey == null) {
+			if (this.subReportDataKeys != null && this.subReportDataKeys.length > 0 && this.reportDataKey == null) {
 				throw new ApplicationContextException(
 						"'reportDataKey' for main report is required when specifying a value for 'subReportDataKeys'");
 			}

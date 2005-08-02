@@ -31,6 +31,24 @@ import java.util.Map;
 public abstract class CollectionUtils {
 
 	/**
+	 * Return <code>true</code> if the supplied <code>Collection</code> is null or empty.
+	 * Otherwise, return <code>false</code>.
+	 * @param collection the <code>Collection</code> to check
+	 */
+	public static boolean isEmpty(Collection collection) {
+		return (collection == null || collection.isEmpty());
+	}
+
+	/**
+	 * Return <code>true</code> if the supplied <code>Map</code> is null or empty.
+	 * Otherwise, return <code>false</code>.
+	 * @param map the <code>Map</code> to check
+	 */
+	public static boolean isEmpty(Map map) {
+		return (map == null || map.isEmpty());
+	}
+
+	/**
 	 * Determine whether the given collection only contains a
 	 * single unique object.
 	 * @param coll the collection to check
@@ -95,24 +113,6 @@ public abstract class CollectionUtils {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Returns <code>true</code> if the supplied <code>Collection</code> is null or empty.
-	 * Otherwise, returns <code>false</code>.
-	 * @param collection the <code>Collection</code> to check
-	 */
-	public static boolean isEmpty(Collection collection) {
-		return ((collection == null) || (collection.isEmpty()));
-	}
-
-	/**
-	 * Returns <code>true</code> if the supplied <code>Map</code> is null or empty.
-	 * Otherwise, returns <code>false</code>.
-	 * @param map the <code>Map</code> to check
-	 */
-	public static boolean isEmpty(Map map) {
-		return ((map == null) || (map.isEmpty()));
 	}
 
 }
