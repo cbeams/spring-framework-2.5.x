@@ -40,6 +40,7 @@ public class InputStreamEditor extends PropertyEditorSupport {
 
 	private final ResourceEditor resourceEditor;
 
+
 	/**
 	 * Create a new InputStreamEditor,
 	 * using the default ResourceEditor underneath.
@@ -56,6 +57,7 @@ public class InputStreamEditor extends PropertyEditorSupport {
 	public InputStreamEditor(ResourceEditor resourceEditor) {
 		this.resourceEditor = resourceEditor;
 	}
+
 
 	public void setAsText(String text) throws IllegalArgumentException {
 		this.resourceEditor.setAsText(text);

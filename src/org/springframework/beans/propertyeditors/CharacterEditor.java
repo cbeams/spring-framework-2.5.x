@@ -36,6 +36,7 @@ public class CharacterEditor extends PropertyEditorSupport {
 
 	private final boolean allowEmpty;
 
+
 	/**
 	 * Create a new CharacterEditor instance.
 	 * <p>The "allowEmpty" parameter states if an empty String should
@@ -46,9 +47,11 @@ public class CharacterEditor extends PropertyEditorSupport {
 	public CharacterEditor(boolean allowEmpty) {
 		this.allowEmpty = allowEmpty;
 	}
+	
 
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (this.allowEmpty && !StringUtils.hasText(text)) {
+			// Treat empty String as null value.
 			setValue(null);
 		}
 		else if (text.length() != 1) {

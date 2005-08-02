@@ -21,28 +21,35 @@ import javax.servlet.ServletRequest;
 
 /**
  * Callback that allows for initialization of a binder with
- * custom editors before the binding. Used by BindUtils.
+ * custom editors before kicking off the binding process.
  *
- * @author Jean-Pierre PAWLAK
+ * <p>This is effectively a way to factor binder initialization out into
+ * a dedicated object, to be invoked through BindUtils. In all other
+ * respects, it is equivalent to the <code>initBinder</code> template
+ * method defined by the BaseCommandController class.
+ *
+ * @author Jean-Pierre Pawlak
  * @since 08.05.2003
- * @see BindUtils#bind(ServletRequest,Object,String,BindInitializer)
- * @see BindUtils#bindAndValidate(ServletRequest,Object,String,org.springframework.validation.Validator,BindInitializer)
+ * @see BindUtils#bind(ServletRequest, Object, String, BindInitializer)
+ * @see BindUtils#bindAndValidate(ServletRequest, Object, String, org.springframework.validation.Validator, BindInitializer)
+ * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder(javax.servlet.http.HttpServletRequest, ServletRequestDataBinder)
  */
 public interface BindInitializer {
 
 	/**
 	 * Initialize the given binder instance, e.g. with custom editors.
-	 * Called by BindUtils#bind. This method allows you to register custom
-	 * editors for certain fields of your command class. For instance, you will
-	 * be able to transform Date objects into a String pattern and back, in order
-	 * to allow your JavaBeans to have Date properties and still be able to
-	 * set and display them in for instance an HTML interface.
+	 * Called by <code>BindUtils.bind</code>.
+	 * <p>This method allows you to register custom editors for certain fields
+	 * of your command class. For instance, you will be able to transform Date
+	 * objects into a String pattern and back, in order to allow your JavaBeans
+	 * to have Date properties and still be able to set and display them in,
+	 * for instance, an HTML interface.
 	 * @param request current request
 	 * @param binder new binder instance
 	 * @throws ServletException in case of invalid state or arguments
 	 * @see org.springframework.validation.DataBinder#registerCustomEditor
 	 * @see BindUtils#bind(ServletRequest,Object,String,BindInitializer)
 	 */
-	public void initBinder(ServletRequest request, ServletRequestDataBinder binder)
-			throws ServletException ;
+	void initBinder(ServletRequest request, ServletRequestDataBinder binder) throws ServletException;
+
 }

@@ -36,6 +36,7 @@ public class StringTrimmerEditor extends PropertyEditorSupport {
 
 	private final boolean emptyAsNull;
 
+
 	/**
 	 * Create a new StringTrimmerEditor instance.
 	 * @param emptyAsNull whether to transform an empty string to null
@@ -55,6 +56,7 @@ public class StringTrimmerEditor extends PropertyEditorSupport {
 		this.charsToDelete = charsToDelete;
 		this.emptyAsNull = emptyAsNull;
 	}
+
 
 	public void setAsText(String text) {
 		if (text == null) {

@@ -39,6 +39,8 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @since 06.06.2003
+ * @see java.lang.Number
+ * @see java.text.NumberFormat
  * @see org.springframework.validation.DataBinder#registerCustomEditor
  * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
  * @see org.springframework.web.bind.BindInitializer#initBinder
@@ -50,6 +52,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	private final NumberFormat numberFormat;
 
 	private final boolean allowEmpty;
+
 
 	/**
 	 * Create a new CustomNumberEditor instance, using the default
@@ -91,6 +94,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 */
 	public CustomNumberEditor(Class numberClass, NumberFormat numberFormat, boolean allowEmpty)
 	    throws IllegalArgumentException {
+
 		if (numberClass == null || !Number.class.isAssignableFrom(numberClass)) {
 			throw new IllegalArgumentException("Property class must be a subclass of Number");
 		}
@@ -99,11 +103,13 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 		this.allowEmpty = allowEmpty;
 	}
 
+
 	/**
 	 * Parse the Number from the given text, using the specified NumberFormat.
 	 */
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (this.allowEmpty && !StringUtils.hasText(text)) {
+			// Treat empty String as null value.
 			setValue(null);
 		}
 		else if (this.numberFormat != null) {

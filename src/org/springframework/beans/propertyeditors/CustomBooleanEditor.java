@@ -100,6 +100,7 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (this.allowEmpty && !StringUtils.hasText(text)) {
+			// Treat empty String as null value.
 			setValue(null);
 		}
 		else if (this.trueString != null && text.equalsIgnoreCase(this.trueString)) {

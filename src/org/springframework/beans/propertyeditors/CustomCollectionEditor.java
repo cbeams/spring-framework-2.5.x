@@ -46,6 +46,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 
 	private final Class collectionType;
 
+
 	/**
 	 * Create a new CustomCollectionEditor for the given target type.
 	 * <p>If the incoming value is of the given type, it will be used as-is.
@@ -72,6 +73,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 		}
 		this.collectionType = collectionType;
 	}
+
 
 	/**
 	 * Convert the given text value to a Collection with a single element.
@@ -170,6 +172,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	protected Object convertElement(Object element) {
 		return element;
 	}
+
 
 	/**
 	 * This implementation returns null to indicate that there is no

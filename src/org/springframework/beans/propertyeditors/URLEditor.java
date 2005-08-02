@@ -40,6 +40,7 @@ public class URLEditor extends PropertyEditorSupport {
 
 	private final ResourceEditor resourceEditor;
 
+
 	/**
 	 * Create a new URLEditor,
 	 * using the default ResourceEditor underneath.
@@ -56,6 +57,7 @@ public class URLEditor extends PropertyEditorSupport {
 	public URLEditor(ResourceEditor resourceEditor) {
 		this.resourceEditor = resourceEditor;
 	}
+
 
 	public void setAsText(String text) throws IllegalArgumentException {
 		this.resourceEditor.setAsText(text);
