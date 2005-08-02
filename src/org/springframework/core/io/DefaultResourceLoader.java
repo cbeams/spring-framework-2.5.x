@@ -37,21 +37,21 @@ import org.springframework.util.Assert;
  */
 public class DefaultResourceLoader implements ResourceLoader {
 
-	private final ClassLoader classLoader;
+	private ClassLoader classLoader;
 
 
 	/**
 	 * Create a new DefaultResourceLoader.
 	 * <p>ClassLoader access will happen via the thread context class loader on actual
 	 * access (applying to the thread that does ClassPathResource calls).
+	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	public DefaultResourceLoader() {
-		this(null);
 	}
 
 	/**
 	 * Create a new DefaultResourceLoader.
-	 * @param classLoader the ClassLoader to load classpath resources with,
+	 * @param classLoader the ClassLoader to load class path resources with,
 	 * or null if using the thread context class loader on actual access
 	 * (applying to the thread that does ClassPathResource calls)
 	 */
@@ -59,8 +59,21 @@ public class DefaultResourceLoader implements ResourceLoader {
 		this.classLoader = classLoader;
 	}
 
+
 	/**
-	 * Return the ClassLoader to load classpath resources with,
+	 * Specify the ClassLoader to load class path resources with,
+	 * or null if using the thread context class loader on actual access
+	 * (applying to the thread that does ClassPathResource calls).
+	 * <p>The default is that ClassLoader access will happen via the thread
+	 * context class loader on actual access (applying to the thread that
+	 * does ClassPathResource calls).
+	 */
+	public void setClassLoader(ClassLoader classLoader) {
+		this.classLoader = classLoader;
+	}
+
+	/**
+	 * Return the ClassLoader to load class path resources with,
 	 * or null if using the thread context class loader on actual access
 	 * (applying to the thread that does ClassPathResource calls).
 	 * <p>Will get passed to ClassPathResource's constructor for all
