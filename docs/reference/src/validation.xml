@@ -448,22 +448,22 @@ public class Person {
 			<literal>ValidationUtils</literal> Spring also provides. Let's review 
 			how a validator is created:
 			<programlisting><![CDATA[
-			public class PersonValidator implements Validator {
-				
-				public boolean supports(Class clzz) {
-					return Person.class.equals(clzz);
-				}
-				
-				public void validate(Object obj, Errors e) {
-					ValidationUtils.rejectIfEmpty(e, "name", "name.empty");
-					Person p = (Person)obj;
-					if (p.getAge() < 0) {
-						e.rejectValue("age", "negativevalue");
-					} else if (p.getAge() > 110) {
-						e.rejectValue("age", "tooold");
-					}
-				}
-			}]]></programlisting>
+public class PersonValidator implements Validator {
+	
+	public boolean supports(Class clzz) {
+		return Person.class.equals(clzz);
+	}
+	
+	public void validate(Object obj, Errors e) {
+		ValidationUtils.rejectIfEmpty(e, "name", "name.empty");
+		Person p = (Person)obj;
+		if (p.getAge() < 0) {
+			e.rejectValue("age", "negativevalue");
+		} else if (p.getAge() > 110) {
+			e.rejectValue("age", "tooold");
+		}
+	}
+}]]></programlisting>
 			As you can see, the ValidationUtils is used to reject the name
 			property. Have a look at the JavaDoc for ValidationUtils to see
 			what functionality it provides besides the example we gave just now.
