@@ -55,4 +55,15 @@
 		
 	</bean>
 
+	<bean id="maxSizePooledPerson" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="targetSource">
+			<bean class="org.springframework.aop.target.CommonsPoolTargetSource">
+				<property name="targetBeanName" value="prototypePerson"/>
+				<property name="maxSize" value="10"/>
+				<property name="maxWait" value="1"/>
+			</bean>
+		</property>
+		<property name="interceptorNames"><value>serializableNop</value></property>
+	</bean>
+
 </beans>		
