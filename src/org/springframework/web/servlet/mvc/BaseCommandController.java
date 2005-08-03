@@ -103,12 +103,17 @@ import org.springframework.web.bind.ServletRequestDataBinder;
  *          and their configuration properties and methods.</td>
  *  </tr>
  *  <tr>
+ *      <td>validators</td>
+ *      <td><i>null</i></td>
+ *      <td>Array of Validator beans. The validator will be called at appropriate
+ *          places in the workflow of subclasses (have a look at those for more info)
+ *          to validate the command object.</td>
+ *  </tr>
+ *  <tr>
  *      <td>validator</td>
  *      <td><i>null</i></td>
- *      <td>Validator bean (usually passed in using a &lt;ref bean="beanId"/&gt;
- *          property. The validator will be called at appropriate places in the
- *          workflow of subclasses (have a look at those for more info) to
- *          validate the command object.</td>
+ *      <td>Short-form property for setting only one Validator bean (usually passed in
+ *          using a &lt;ref bean="beanId"/&gt; property.</td>
  *  </tr>
  *  <tr>
  *      <td>validateOnBinding</td>
