@@ -32,6 +32,7 @@ class CDATA #REQUIRED
 property CDATA #REQUIRED
 javaType CDATA #IMPLIED
 jdbcType CDATA #IMPLIED
+typeName CDATA #IMPLIED
 nullValue CDATA #IMPLIED
 mode (IN | OUT | INOUT) #IMPLIED
 typeHandler CDATA #IMPLIED
