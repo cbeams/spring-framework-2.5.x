@@ -1,5 +1,16 @@
-
 package org.springframework.aop.framework.asm;
+
+import org.aopalliance.aop.AspectException;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Constants;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.util.ASMifierClassVisitor;
+import org.springframework.aop.framework.AdvisedSupport;
+import org.springframework.aop.framework.AopConfigException;
+import org.springframework.aop.framework.AopProxy;
+import org.springframework.aop.framework.AopProxyUtils;
 
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
@@ -14,20 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.HashMap;
-
-import org.aopalliance.aop.AspectException;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Constants;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.util.ASMifierClassVisitor;
-
-import org.springframework.aop.framework.AdvisedSupport;
-import org.springframework.aop.framework.AopConfigException;
-import org.springframework.aop.framework.AopProxy;
-import org.springframework.aop.framework.AopProxyUtils;
 
 /**
  * @author robh
@@ -60,7 +57,7 @@ public class AsmAopProxy implements AopProxy {
 	}
 
 	public Object getProxy(ClassLoader classLoader) {
-		Class proxyClass = getProxyClass();
+		Class proxyClass = getProxyClass(classLoader);
 
 		try {
 			Constructor ctor = proxyClass.getConstructor(new Class[]{AdvisedSupport.class});
@@ -80,7 +77,7 @@ public class AsmAopProxy implements AopProxy {
 		}
 	}
 
-	private Class getProxyClass() {
+	private Class getProxyClass(ClassLoader classLoader) {
 		Class targetClass = (emptyTargetSource) ? null : this.advised.getTargetSource().getTargetClass();
 		Class[] proxyInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised);
 
@@ -88,7 +85,7 @@ public class AsmAopProxy implements AopProxy {
 		Reference classReference = (Reference) cache.get(cacheKey);
 
 		if (classReference == null) {
-			Class proxyClass = generateProxyClass(targetClass, proxyInterfaces);
+			Class proxyClass = generateProxyClass(targetClass, proxyInterfaces, classLoader);
 			synchronized (cache) {
 				cache.put(cacheKey, new WeakReference(proxyClass));
 			}
@@ -104,7 +101,7 @@ public class AsmAopProxy implements AopProxy {
 		return getProxy(Thread.currentThread().getContextClassLoader());
 	}
 
-	private Class generateProxyClass(Class targetClass, Class[] proxyInterfaces) {
+	private Class generateProxyClass(Class targetClass, Class[] proxyInterfaces, ClassLoader classLoader) {
 		// load target information
 
 		String targetDescriptor = (emptyTargetSource) ? null : Type.getDescriptor(targetClass);
@@ -139,13 +136,36 @@ public class AsmAopProxy implements AopProxy {
 			e.printStackTrace();
 		}
 
-		SpringProxyClassLoader cl = new SpringProxyClassLoader();
-		return cl.loadFromBytes(bytes);
+		return defineClass(bytes, classLoader);
 	}
 
+	private Class defineClass(byte[] bytes, ClassLoader classLoader) {
+		// todo: extract into helper class
+		try {
+			Method defineClass = ClassLoader.class.getDeclaredMethod("defineClass", new Class[]{String.class, byte[].class, int.class, int.class});
+			defineClass.setAccessible(true);
 
-	private void proxyMethods(ClassWriter cw, Class targetClass, Class[] proxyInterfaces,
-																					String proxyInternalName, String targetInternalName, String targetDescriptor) {
+			try {
+				Object[] args = new Object[]{null, bytes, new Integer(0), new Integer(bytes.length)};
+				return (Class) defineClass.invoke(classLoader, args);
+			}
+			catch (IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+			catch (InvocationTargetException e) {
+				throw new RuntimeException(e);
+			}
+			finally {
+				defineClass.setAccessible(false);
+			}
+		}
+		catch (NoSuchMethodException e) {
+			// todo: add real exception here
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void proxyMethods(ClassWriter cw, Class targetClass, Class[] proxyInterfaces, String proxyInternalName, String targetInternalName, String targetDescriptor) {
 		Method[] methods = getMethodsToProxy(targetClass, proxyInterfaces);
 
 		for (int i = 0; i < methods.length; i++) {
@@ -155,7 +175,6 @@ public class AsmAopProxy implements AopProxy {
 			}
 		}
 	}
-
 
 	private void proxyMethod(ClassWriter cw, Method method, String proxyInternalName, String targetInternalName, String targetDescriptor, Class targetClass) {
 		CodeGenerationStrategy strategy = this.strategySelector.select(this.advised, method, targetClass);
@@ -198,13 +217,6 @@ public class AsmAopProxy implements AopProxy {
 		return (Modifier.isPublic(modifiers) && !(Modifier.isFinal(modifiers)));
 	}
 
-	private static class SpringProxyClassLoader extends ClassLoader {
-
-		private Class loadFromBytes(byte[] bytes) {
-			return defineClass(null, bytes, 0, bytes.length);
-		}
-	}
-
 	private Method[] getMethodsToProxy(Class targetClass, Class[] proxyInterfaces) {
 		List methods = new ArrayList();
 
@@ -243,7 +255,7 @@ public class AsmAopProxy implements AopProxy {
 			int code = 17;
 			code = 37 * code + advised.hashCode();
 
-			if(targetClass != null) {
+			if (targetClass != null) {
 				code = 37 * code + targetClass.getName().hashCode();
 			}
 
@@ -262,8 +274,8 @@ public class AsmAopProxy implements AopProxy {
 			if (obj instanceof CacheKey) {
 				CacheKey other = (CacheKey) obj;
 				return ((other.advised.equals(advised)) &&
-									 (other.targetClass == targetClass) &&
-									 (Arrays.equals(other.proxyInterfaces, proxyInterfaces)));
+						(other.targetClass == targetClass) &&
+						(Arrays.equals(other.proxyInterfaces, proxyInterfaces)));
 			}
 			else {
 				return false;
