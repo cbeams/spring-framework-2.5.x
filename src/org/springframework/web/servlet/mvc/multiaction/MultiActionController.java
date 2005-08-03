@@ -33,6 +33,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContextException;
+import org.springframework.validation.MessageCodesResolver;
+import org.springframework.validation.ValidationUtils;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
@@ -83,9 +86,43 @@ import org.springframework.web.servlet.support.SessionRequiredException;
  * is -1, meaning that the content must always be regenerated.
  *
  * <p>Note that method overloading isn't allowed.
+ * 
+ * See also description of workflow performed by superclasses
+ * <a href="AbstractController.html#workflow">here</a>.</p>
+ * 
+ * <p><b><a name="config">Exposed configuration properties</a>
+ * (<a href="AbstractController.html#config">and those defined by superclass</a>):</b><br>
+ * <table border="1">
+ *  <tr>
+ *      <td><b>name</b></th>
+ *      <td><b>default</b></td>
+ *      <td><b>description</b></td>
+ *  </tr>
+ *  <tr>
+ *      <td>commandName</td>
+ *      <td>command</td>
+ *      <td>the name to use when binding the instantiated command class
+ *          to the request</td>
+ *  </tr>
+ *  <tr>
+ *      <td>validators</td>
+ *      <td><i>null</i></td>
+ *      <td>Array of Validator beans. The validator will be called at appropriate
+ *          places in the workflow of subclasses (have a look at those for more info)
+ *          to validate the command object.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>validator</td>
+ *      <td><i>null</i></td>
+ *      <td>Short-form property for setting only one Validator bean (usually passed in
+ *          using a &lt;ref bean="beanId"/&gt; property.</td>
+ *  </tr>
+ * </table>
+ * </p>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Colin Sampaleanu
  * @see MethodNameResolver
  * @see InternalPathMethodNameResolver
  * @see PropertiesMethodNameResolver
@@ -94,6 +131,10 @@ import org.springframework.web.servlet.support.SessionRequiredException;
  */
 public class MultiActionController extends AbstractController implements LastModified  {
 		
+	public static final String DEFAULT_COMMAND_NAME = "command";
+
+	private String commandName = DEFAULT_COMMAND_NAME;
+	
 	/** Suffix for last-modified methods */
 	public static final String LAST_MODIFIED_METHOD_SUFFIX = "LastModified";
 	
@@ -129,6 +170,11 @@ public class MultiActionController extends AbstractController implements LastMod
 	
 	/** Methods, keyed by exception class */
 	private Map exceptionHandlerMap;
+	
+	private Validator[] validators;
+
+	private MessageCodesResolver messageCodesResolver;
+	
 
 
 	//---------------------------------------------------------------------
@@ -175,6 +221,72 @@ public class MultiActionController extends AbstractController implements LastMod
 	 */
 	public final MethodNameResolver getMethodNameResolver() {
 		return this.methodNameResolver;
+	}
+	
+	/**
+	 * Set the name of the command in the model.
+	 * The command object will be included in the model under this name.
+	 */
+	public final void setCommandName(String commandName) {
+		this.commandName = commandName;
+	}
+
+	/**
+	 * Return the name of the command in the model.
+	 */
+	public final String getCommandName() {
+		return this.commandName;
+	}
+	
+	/**
+	 * Set the Validators for this controller.
+	 * The Validator must support the specified command class.
+	 */
+	public final void setValidators(Validator[] validators) {
+		this.validators = validators;
+	}
+
+	/**
+	 * @return the Validators for this controller.
+	 */
+	public final Validator[] getValidators() {
+		return validators;
+	}
+	
+	/**
+	 * Set the primary Validator for this controller. The Validator
+	 * must support the specified command class. If there are one
+	 * or more existing validators set already when this method is
+	 * called, only the specified validator will be kept. Use
+	 * {@link #setValidators(Validator[])} to set multiple validators.
+	 */
+	public final void setValidator(Validator validator) {
+		this.validators = new Validator[] {validator};
+	}
+
+	/**
+	 * @return the primary Validator for this controller.
+	 */
+	public final Validator getValidator() {
+		return (validators != null && validators.length > 0 ? validators[0] : null);
+	}
+	
+	/**
+	 * Set the strategy to use for resolving errors into message codes.
+	 * Applies the given strategy to all data binders used by this controller.
+	 * <p>Default is null, i.e. using the default strategy of the data binder.
+	 * @see #createBinder
+	 * @see org.springframework.validation.DataBinder#setMessageCodesResolver
+	 */
+	public final void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
+		this.messageCodesResolver = messageCodesResolver;
+	}
+
+	/**
+	 * Return the strategy to use for resolving errors into message codes.
+	 */
+	public final MessageCodesResolver getMessageCodesResolver() {
+		return messageCodesResolver;
 	}
 	
 	/**
@@ -382,10 +494,19 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @param command command object, that must be a JavaBean
 	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected void bind(ServletRequest request, Object command) throws Exception {
+	protected void bind(ServletRequest servletRequest, Object command) throws Exception {
+		// nasty but safe code to maintain backwards compatiblity with method signature
+		// which uses ServletRequest not HttpServletRequest as it should
+		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		logger.debug("Binding request parameters onto MultiActionController command");
 		ServletRequestDataBinder binder = createBinder(request, command);
 		binder.bind(request);
+		if (this.validators != null /*&& isValidateOnBinding()*/ && !suppressValidation(request)) {
+			for (int i = 0; i < this.validators.length; i++) {
+				if (this.validators[i].supports(command.getClass()))
+					ValidationUtils.invokeValidator(this.validators[i], command, binder.getErrors());
+			}
+		}
 		binder.closeNoCatch();
 	}
 	
@@ -405,7 +526,10 @@ public class MultiActionController extends AbstractController implements LastMod
 	 */
 	protected ServletRequestDataBinder createBinder(ServletRequest request, Object command)
 	    throws Exception {
-		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, "command");
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName());
+		if (this.messageCodesResolver != null) {
+			binder.setMessageCodesResolver(this.messageCodesResolver);
+		}
 		initBinder(request, binder);
 		return binder;
 	}
@@ -418,6 +542,8 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * String pattern and back, in order to allow your JavaBeans to have Date properties
 	 * and still be able to set and display them in an HTML interface.
 	 * <p>Default implementation is empty.
+	 * <p>Note: the command object is not directly passed to this method, but it's available
+	 * via {@link org.springframework.validation.DataBinder#getTarget()}
 	 * @param request current HTTP request
 	 * @param binder new binder instance
 	 * @throws Exception in case of invalid state or arguments
@@ -427,6 +553,18 @@ public class MultiActionController extends AbstractController implements LastMod
 	 */
 	protected void initBinder(ServletRequest request, ServletRequestDataBinder binder)
 	    throws Exception {
+	}
+	
+	/**
+	 * Return whether to suppress validation for the given request.
+	 * <p>Default implementation always returns "false". Can be overridden
+	 * in subclasses to suppress validation, for example, if a special
+	 * request parameter is set.
+	 * @param request current HTTP request
+	 * @return whether to suppress validation for the given request
+	 */
+	protected boolean suppressValidation(ServletRequest request) {
+		return false;
 	}
 	
 	/**
