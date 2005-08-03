@@ -74,7 +74,7 @@ public class RmiProxyFactoryBean extends RmiClientInterceptor implements Factory
 	}
 
 	public Class getObjectType() {
-		return (this.serviceProxy != null) ? this.serviceProxy.getClass() : getServiceInterface();
+		return getServiceInterface();
 	}
 
 	public boolean isSingleton() {

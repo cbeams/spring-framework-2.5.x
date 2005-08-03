@@ -46,20 +46,17 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class MBeanProxyFactoryBean extends MBeanClientInterceptor implements FactoryBean, InitializingBean {
 
-	/**
-	 * The interface to proxy.
-	 */
 	private Class proxyInterface;
 
-	/**
-	 * The generated proxy.
-	 */
 	private Object mbeanProxy;
 
+
 	/**
-	 * Sets the interface that the generated proxy will implement.
-	 *
-	 * @param managementInterface
+	 * Set the interface that the generated proxy will implement.
+	 * <p>This will usually be a management interface that matches the target MBean,
+	 * exposing bean property setters and getters for MBean attributes and
+	 * conventional Java methods for MBean operations.
+	 * @see #setObjectName
 	 */
 	public void setProxyInterface(Class managementInterface) {
 		this.proxyInterface = managementInterface;
@@ -67,7 +64,7 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor implements Fac
 
 	/**
 	 * Checks that the <code>proxyInterface</code> has been specified and then
-	 * generate the proxy.
+	 * generates the proxy for the target MBean.
 	 */
 	public void afterPropertiesSet() throws JMException {
 		super.afterPropertiesSet();
@@ -84,7 +81,7 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor implements Fac
 	}
 
 	public Class getObjectType() {
-		return (this.mbeanProxy != null ? this.mbeanProxy.getClass() : null);
+		return this.proxyInterface;
 	}
 
 	public boolean isSingleton() {

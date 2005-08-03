@@ -56,7 +56,7 @@ public class BurlapProxyFactoryBean extends BurlapClientInterceptor implements F
 	}
 
 	public Class getObjectType() {
-		return (this.serviceProxy != null) ? this.serviceProxy.getClass() : getServiceInterface();
+		return getServiceInterface();
 	}
 
 	public boolean isSingleton() {

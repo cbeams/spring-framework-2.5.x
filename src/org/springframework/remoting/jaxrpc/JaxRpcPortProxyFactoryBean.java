@@ -61,7 +61,7 @@ public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor impl
 	}
 
 	public Class getObjectType() {
-		return (this.serviceProxy != null) ? this.serviceProxy.getClass() : getServiceInterface();
+		return getServiceInterface();
 	}
 
 	public boolean isSingleton() {
