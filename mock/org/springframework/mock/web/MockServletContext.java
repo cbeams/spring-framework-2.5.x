@@ -42,15 +42,34 @@ import org.springframework.web.util.WebUtils;
 /**
  * Mock implementation of the ServletContext interface.
  *
- * <p>Used for testing the web framework; only rarely necessary for
- * testing application controllers, as long as they don't explicitly access
- * the ServletContext. In the latter case, ClassPathXmlApplicationContext
- * can be used to load them; else, XmlWebApplicationContext needs to be
- * used, possibly with this MockServletContext class.
+ * <p>Used for testing the Spring web framework; only rarely necessary for testing
+ * application controllers. As long as application components don't explicitly
+ * access the ServletContext, ClassPathXmlApplicationContext or
+ * FileSystemXmlApplicationContext can be used to load the context files for testing,
+ * even for DispatcherServlet context definitions.
+ *
+ * <p>For setting up a full WebApplicationContext in a test environment, you can
+ * use XmlWebApplicationContext (or GenericWebApplicationContext), passing in an
+ * appropriate MockServletContext instance. You might want to configure your
+ * MockServletContext with a FileSystemResourceLoader in that case, to make your
+ * resource paths interpreted as relative file system locations.
+ *
+ * <p>A common setup is to point your JVM working directory to the root of your
+ * web application directory, in combination with filesystem-based resource loading.
+ * This allows to load the context files as used in the web application, with
+ * relative paths getting interpreted correctly. Such a setup will work with both
+ * FileSystemXmlApplicationContext (which will load straight from the file system)
+ * and XmlWebApplicationContext with an underlying MockServletContext (as long as
+ * the MockServletContext has been configured with a FileSystemResourceLoader).
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 1.0.2
+ * @see #MockServletContext(org.springframework.core.io.ResourceLoader)
+ * @see org.springframework.web.context.support.XmlWebApplicationContext
+ * @see org.springframework.web.context.support.GenericWebApplicationContext
+ * @see org.springframework.context.support.ClassPathXmlApplicationContext
+ * @see org.springframework.context.support.FileSystemXmlApplicationContext
  */
 public class MockServletContext implements ServletContext {
 
@@ -74,28 +93,37 @@ public class MockServletContext implements ServletContext {
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public MockServletContext() {
-		this("");
+		this("", null);
 	}
 
 	/**
 	 * Create a new MockServletContext, using a DefaultResourceLoader.
-	 * @param resourceBasePath the WAR root directory (should not end with a /)
+	 * @param resourceBasePath the WAR root directory (should not end with a slash)
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public MockServletContext(String resourceBasePath) {
-		this(resourceBasePath, new DefaultResourceLoader());
+		this(resourceBasePath, null);
+	}
+
+	/**
+	 * Create a new MockServletContext, using the specified ResourceLoader
+	 * and no base path.
+	 * @param resourceLoader the ResourceLoader to use (or null for the default)
+	 */
+	public MockServletContext(ResourceLoader resourceLoader) {
+		this("", resourceLoader);
 	}
 
 	/**
 	 * Create a new MockServletContext.
-	 * @param resourceBasePath the WAR root directory (should not end with a /)
-	 * @param resourceLoader the ResourceLoader to use
+	 * @param resourceBasePath the WAR root directory (should not end with a slash)
+	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 */
 	public MockServletContext(String resourceBasePath, ResourceLoader resourceLoader) {
-		this.resourceBasePath = resourceBasePath;
-		this.resourceLoader = resourceLoader;
+		this.resourceBasePath = (resourceBasePath != null ? resourceBasePath : "");
+		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
 
-		// use JVM temp dir as ServletContext temp dir
+		// Use JVM temp dir as ServletContext temp dir.
 		String tempDir = System.getProperty(TEMP_DIR_SYSTEM_PROPERTY);
 		if (tempDir != null) {
 			this.attributes.put(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File(tempDir));
