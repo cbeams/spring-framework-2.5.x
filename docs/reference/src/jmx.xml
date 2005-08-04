@@ -314,7 +314,7 @@ public class JmxTestBean implements IJmxTestBean {
   &lt;bean id="attributeSource"
         class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"/&gt;
 
-  &lt;bean id="assembler" class="org.springframework.jmx.assembler.MetadataMBeanInfoAssembler"&gt;
+  &lt;bean id="assembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler"&gt;
     &lt;property name="attributeSource"&gt;
       &lt;ref local="attributeSource"/&gt;
     &lt;/property&gt;
@@ -637,7 +637,7 @@ public class AnnotationTestBean implements IJmxTestBean {
   &lt;bean id="attributeSource"
       class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"/&gt;
 
-  &lt;bean id="assembler" class="org.springframework.jmx.assembler.MetadataMBeanInfoAssembler"&gt;
+  &lt;bean id="assembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler"&gt;
     &lt;property name="attributeSource" ref="attributeSource"/&gt;
   &lt;/bean&gt;
 
