@@ -6,6 +6,9 @@ http://www.springframework.org
 Changes in version 1.2.4 (9.8.2005)
 -----------------------------------
 
+Package org.springframework.aop
+* added "loggerName" bean property to AbstractTraceInterceptor, allowing to log into a specified log category
+
 Package org.springframework.beans
 * changed BeanWrapperImpl's default behavior to not extract old property values, avoiding side effects caused by getters
 * added "setExtractOldValueForEditor" method to BeanWrapper and BeanWrapperImpl, allowing to control getter invocation
@@ -22,8 +25,17 @@ Package org.springframework.core
 Package org.springframework.jca
 * CciTemplate exposes RecordFactory placeholder to RecordCreator callbacks if connector doesn't provide a RecordFactory
 
+Package org.springframework.jdbc
+* fixed SqlFunction's default constructor to set "rowsExpected" to 1, like all other SqlFunction constructors
+* reworked SqlFunction to use SingleColumnRowMapper underneath, exposing a "resultType" bean property of type Class
+* deprecated SqlFunction's constructors that expect a SQL return type, in favor of specifying a result type Class
+* added overloaded constructor to SqlCall, with DataSource and SQL arguments (for consistency with SqlFunction and co)
+
 Package org.springframework.jmx
 * MBeanClientInterceptor closes a JMX Connector opened through the "serviceUrl" bean property on shutdown
+
+Package org.springframework.mock
+* added overloaded constructor to MockServletContext, with just a ResourceLoader as argument
 
 Package org.springframework.orm
 * upgraded to the most recently published version of the Hibernate 3.0.5 jar (there seem to be multiple versions around)
