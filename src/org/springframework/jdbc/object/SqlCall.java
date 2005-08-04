@@ -19,6 +19,8 @@ package org.springframework.jdbc.object;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.CallableStatementCreatorFactory;
 import org.springframework.jdbc.core.ParameterMapper;
@@ -66,6 +68,29 @@ public abstract class SqlCall extends RdbmsOperation {
 
 
 	/**
+	 * Constructor to allow use as a JavaBean.
+	 * A DataSource, SQL and any parameters must be supplied before
+	 * invoking the <code>compile</code> method and using this object.
+	 * @see #setDataSource
+	 * @see #setSql
+	 * @see #compile
+	 */
+	public SqlCall() {
+	}
+
+	/**
+	 * Create a new SqlCall object with SQL, but without parameters.
+	 * Must add parameters or settle with none.
+	 * @param ds DataSource to obtain connections from
+	 * @param sql SQL to execute
+	 */
+	public SqlCall(DataSource ds, String sql) {
+		setDataSource(ds);
+		setSql(sql);
+	}
+
+
+	/**
 	 * Set whether this call is for a function.
 	 */
 	public void setFunction(boolean function) {
@@ -73,7 +98,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	}
 
 	/**
-	 * Get whether this call is for a function.
+	 * Return whether this call is for a function.
 	 */
 	public boolean isFunction() {
 		return function;
