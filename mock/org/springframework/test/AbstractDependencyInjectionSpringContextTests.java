@@ -57,6 +57,10 @@ import org.springframework.context.ConfigurableApplicationContext;
  * probably override the <code>getContext</code> method, which by default loads
  * the locations specified in the <code>getConfigLocations()</code> method.
  *
+ * <p><b>WARNING:</b> When doing integration tests from within Eclipse, only use
+ * classpath resource URLs. Else, you may see misleading failures when changing
+ * context locations.
+ *
  * @author Rod Johnson
  * @since 1.1.1
  * @see #setDirty
@@ -70,9 +74,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	
 	private boolean dependencyCheck = true;
 
-	/**
-	 * Application context this test will run against.
-	 */
+	/** Application context this test will run against */
 	protected ConfigurableApplicationContext applicationContext;
 
 	protected String[] managedVariableNames;
