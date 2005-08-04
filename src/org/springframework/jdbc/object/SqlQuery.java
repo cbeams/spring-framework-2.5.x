@@ -110,7 +110,7 @@ public abstract class SqlQuery extends SqlOperation {
 	 */
 	public List execute(final Object[] parameters, Map context) throws DataAccessException {
 		validateParameters(parameters);
-		ResultReader rr = newResultReader(this.rowsExpected, parameters, context);
+		ResultReader rr = newResultReader(getRowsExpected(), parameters, context);
 		return getJdbcTemplate().query(newPreparedStatementCreator(parameters), rr);
 	}
 

@@ -343,9 +343,9 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 		int declaredInParameters = 0;
 		if (this.declaredParameters != null) {
-			Iterator iter = this.declaredParameters.iterator();
-			while (iter.hasNext()) {
-				Object param = iter.next();
+			Iterator it = this.declaredParameters.iterator();
+			while (it.hasNext()) {
+				Object param = it.next();
 				if (!(param instanceof SqlOutParameter) && !(param instanceof SqlReturnResultSet)) {
 					if (!supportsLobParameters() &&
 							(((SqlParameter)param).getSqlType() == Types.BLOB ||

@@ -77,7 +77,9 @@ public class SqlUpdate extends SqlOperation {
 	 * and anonymous parameters.
 	 * @param ds DataSource to use to obtain connections
 	 * @param sql SQL statement to execute
-	 * @param types anonymous parameter declarations
+	 * @param types SQL types of the parameters, as defined in the
+	 * <code>java.sql.Types</code> class
+	 * @see java.sql.Types
 	 */
 	public SqlUpdate(DataSource ds, String sql, int[] types) {
 		setDataSource(ds);
@@ -91,9 +93,11 @@ public class SqlUpdate extends SqlOperation {
 	 * that may be affected.
 	 * @param ds DataSource to use to obtain connections
 	 * @param sql SQL statement to execute
-	 * @param types anonymous parameter declarations.
+	 * @param types SQL types of the parameters, as defined in the
+	 * <code>java.sql.Types</code> class
 	 * @param maxRowsAffected the maximum number of rows that may
 	 * be affected by the update
+	 * @see java.sql.Types
 	 */
 	public SqlUpdate(DataSource ds, String sql, int[] types, int maxRowsAffected) {
 		setDataSource(ds);

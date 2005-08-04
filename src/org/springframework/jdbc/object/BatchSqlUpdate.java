@@ -83,7 +83,9 @@ public class BatchSqlUpdate extends SqlUpdate {
 	 * and anonymous parameters.
 	 * @param ds DataSource to use to obtain connections
 	 * @param sql SQL statement to execute
-	 * @param types anonymous parameter declarations
+	 * @param types SQL types of the parameters, as defined in the
+	 * <code>java.sql.Types</code> class
+	 * @see java.sql.Types
 	 */
 	public BatchSqlUpdate(DataSource ds, String sql, int[] types) {
 		super(ds, sql, types);
@@ -95,13 +97,16 @@ public class BatchSqlUpdate extends SqlUpdate {
 	 * that may be affected.
 	 * @param ds DataSource to use to obtain connections
 	 * @param sql SQL statement to execute
-	 * @param types anonymous parameter declarations.
+	 * @param types SQL types of the parameters, as defined in the
+	 * <code>java.sql.Types</code> class
 	 * @param batchSize the number of statements that will trigger
 	 * an automatic intermediate flush
+	 * @see java.sql.Types
 	 */
 	public BatchSqlUpdate(DataSource ds, String sql, int[] types, int batchSize) {
 		super(ds, sql, types, batchSize);
 	}
+
 
 	/**
 	 * Set the number of statements that will trigger an automatic intermediate

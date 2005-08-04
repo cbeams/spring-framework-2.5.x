@@ -58,7 +58,9 @@ public abstract class MappingSqlQuery extends MappingSqlQueryWithParameters {
 	 * template method, ignoring parameters.
 	 * @see #mapRow(ResultSet, int)
 	 */
-	protected final Object mapRow(ResultSet rs, int rowNum, Object[] parameters, Map context) throws SQLException {
+	protected final Object mapRow(ResultSet rs, int rowNum, Object[] parameters, Map context)
+			throws SQLException {
+
 		return mapRow(rs, rowNum);
 	}
 

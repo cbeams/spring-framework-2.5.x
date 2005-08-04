@@ -68,6 +68,7 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 		super(ds, sql);
 	}
 
+
 	/**
 	 * Implementation of protected abstract method. This invokes the subclass's
 	 * implementation of the mapRow() method.

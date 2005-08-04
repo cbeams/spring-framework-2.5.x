@@ -43,6 +43,7 @@ public class SingleColumnRowMapper implements RowMapper {
 
 	private Class requiredType;
 
+
 	/**
 	 * Create a new SingleColumnRowMapper.
 	 * @see #setRequiredType
@@ -67,6 +68,7 @@ public class SingleColumnRowMapper implements RowMapper {
 		this.requiredType = requiredType;
 	}
 
+
 	public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int nrOfColumns = rsmd.getColumnCount();
@@ -89,7 +91,7 @@ public class SingleColumnRowMapper implements RowMapper {
 			}
 			else {
 				throw new TypeMismatchDataAccessException(
-						"Result object with column type '" + rsmd.getColumnTypeName(1) +
+						"Result object for row number " + rowNum + " and column type '" + rsmd.getColumnTypeName(1) +
 						"' and value [" + result + "] is of type [" + result.getClass().getName() +
 						"] and could not be converted to required type [" + this.requiredType.getName() + "]");
 			}
