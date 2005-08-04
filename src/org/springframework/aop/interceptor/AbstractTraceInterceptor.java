@@ -57,11 +57,28 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 * log messages for a particular method invocation: a dynamic one for the
 	 * <code>Class</code> getting called, or a static one for the <code>Class</code>
 	 * of the trace interceptor.
+	 * <p><b>NOTE:</b> Specify either this property or "loggerName", not both.
 	 * @see #getLoggerForInvocation(org.aopalliance.intercept.MethodInvocation)
 	 */
-	public void setUseDynamicLogger(boolean useDynamicLog) {
+	public void setUseDynamicLogger(boolean useDynamicLogger) {
 		// Release default logger if it is not being used.
-		this.defaultLogger = (useDynamicLog ? null : LogFactory.getLog(getClass()));
+		this.defaultLogger = (useDynamicLogger ? null : LogFactory.getLog(getClass()));
+	}
+
+	/**
+	 * Set the name of the logger to use. The name will be passed to the
+	 * underlying logger implementation through Commons Logging, getting
+	 * interpreted as log category according to the logger's configuration.
+	 * <p>This can be specified to not log into the category of a class
+	 * (whether this interceptor's class or the class getting called)
+	 * but rather into a specific named category.
+	 * <p><b>NOTE:</b> Specify either this property or "useDynamicLogger", not both.
+	 * @see org.apache.commons.logging.LogFactory#getLog(String)
+	 * @see org.apache.log4j.Logger#getLogger(String)
+	 * @see java.util.logging.Logger#getLogger(String)
+	 */
+	public void setLoggerName(String loggerName) {
+		this.defaultLogger = LogFactory.getLog(loggerName);
 	}
 
 
