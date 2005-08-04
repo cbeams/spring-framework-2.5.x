@@ -46,6 +46,7 @@ Package org.springframework.validation
 * added "setExtractOldValueForEditor" method to DataBinder, allowing to control getter invocation
 
 Package org.springframework.web
+* MultiActionController now allows Validators to be specified and used (for the optional command object(s))
 * XmlWebApplicationContext applies its class loader, if any, as bean class loader to the XmlBeanDefinitionReader
 * added ServletContextParameterFactoryBean, explicitly retrieving and exposing a "context-param" defined in web.xml
 * AcceptHeaderLocaleResolver/FixedLocaleResolver throw UnsupportedOperationException from "setLocale" (rather than IAE)
