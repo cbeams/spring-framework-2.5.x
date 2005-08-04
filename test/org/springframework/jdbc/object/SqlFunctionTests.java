@@ -18,12 +18,13 @@ package org.springframework.jdbc.object;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 
 import org.easymock.MockControl;
 
-import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.AbstractJdbcTests;
 
 /**
@@ -41,34 +42,44 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 	private PreparedStatement mockPreparedStatement;
 	private MockControl ctrlResultSet;
 	private ResultSet mockResultSet;
+	private MockControl ctrlResultSetMetaData;
+	private ResultSetMetaData mockResultSetMetaData;
 
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		ctrlPreparedStatement =
-			MockControl.createControl(PreparedStatement.class);
-		mockPreparedStatement =
-			(PreparedStatement) ctrlPreparedStatement.getMock();
+		ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
+		mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
 		ctrlResultSet = MockControl.createControl(ResultSet.class);
 		mockResultSet = (ResultSet) ctrlResultSet.getMock();
-	}
-
-	protected void tearDown() throws Exception {
-		super.tearDown();
-
-		if (shouldVerify()) {
-			ctrlPreparedStatement.verify();
-			ctrlResultSet.verify();
-		}
+		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
 	}
 
 	protected void replay() {
 		super.replay();
 		ctrlPreparedStatement.replay();
 		ctrlResultSet.replay();
+		ctrlResultSetMetaData.replay();
+	}
+
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		if (shouldVerify()) {
+			ctrlPreparedStatement.verify();
+			ctrlResultSet.verify();
+			ctrlResultSetMetaData.verify();
+		}
 	}
 
 	public void testFunction() throws SQLException {
+		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData, 1);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getObject(1);
@@ -100,17 +111,30 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 	}
 
 	public void testTooManyRows() throws SQLException {
+		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1, 2);
+
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData, 2);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getInt(1);
-		ctrlResultSet.setReturnValue(14);
+		mockResultSet.getObject(1);
+		ctrlResultSet.setReturnValue(new Integer(14), 1);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getObject(1);
+		ctrlResultSet.setReturnValue(new Integer(15), 1);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
 		ctrlResultSet.setVoidCallable();
 
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -126,16 +150,23 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 			int count = function.run();
 			fail("Shouldn't continue when too many rows returned");
 		}
-		catch (InvalidDataAccessApiUsageException idaauex) {
+		catch (IncorrectResultSizeDataAccessException idaauex) {
 			// OK 
 		}
 	}
 
 	public void testFunctionInt() throws SQLException {
+		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData, 1);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getInt(1);
-		ctrlResultSet.setReturnValue(14);
+		mockResultSet.getObject(1);
+		ctrlResultSet.setReturnValue(new Integer(14));
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
@@ -155,11 +186,8 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 
 		replay();
 
-		SqlFunction function =
-			new SqlFunction(
-				mockDataSource,
-				FUNCTION_INT,
-				new int[] { Types.INTEGER });
+		SqlFunction function = new SqlFunction(mockDataSource, FUNCTION_INT);
+		function.setTypes(new int[] { Types.INTEGER });
 		function.compile();
 
 		int count = function.run(1);
@@ -167,10 +195,17 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 	}
 
 	public void testFunctionMixed() throws SQLException {
+		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData, 1);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getInt(1);
-		ctrlResultSet.setReturnValue(14);
+		mockResultSet.getObject(1);
+		ctrlResultSet.setReturnValue(new Integer(14));
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
@@ -192,15 +227,95 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 
 		replay();
 
-		SqlFunction function =
-			new SqlFunction(
-				mockDataSource,
-				FUNCTION_MIXED,
-				new int[] { Types.INTEGER, Types.VARCHAR });
+		SqlFunction function = new SqlFunction(
+				mockDataSource, FUNCTION_MIXED, new int[] { Types.INTEGER, Types.VARCHAR });
 		function.compile();
 
 		int count = function.run(new Object[] { new Integer(1), "rod" });
 		assertTrue("Function returned value 14", count == 14);
+	}
+
+	public void testFunctionWithStringResult() throws SQLException {
+		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData, 1);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getObject(1);
+		ctrlResultSet.setReturnValue("14");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		mockPreparedStatement.setObject(1, new Integer(1), Types.INTEGER);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setString(2, "rod");
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(FUNCTION_MIXED);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+
+		replay();
+
+		SqlFunction function = new SqlFunction( mockDataSource, FUNCTION_MIXED);
+		function.setTypes(new int[] { Types.INTEGER, Types.VARCHAR });
+		function.compile();
+
+		String result = (String) function.runGeneric(new Object[] { new Integer(1), "rod" });
+		assertTrue("Function returned value 14", "14".equals(result));
+	}
+
+	public void testFunctionWithStringConvertedResult() throws SQLException {
+		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData, 1);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getObject(1);
+		ctrlResultSet.setReturnValue(new Integer(14));
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		mockPreparedStatement.setObject(1, new Integer(1), Types.INTEGER);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setString(2, "rod");
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(FUNCTION_MIXED);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+
+		replay();
+
+		SqlFunction function = new SqlFunction( mockDataSource, FUNCTION_MIXED);
+		function.setTypes(new int[] { Types.INTEGER, Types.VARCHAR });
+		function.setResultType(String.class);
+		function.compile();
+
+		String result = (String) function.runGeneric(new Object[] { new Integer(1), "rod" });
+		assertTrue("Function returned value 14", "14".equals(result));
 	}
 
 }
