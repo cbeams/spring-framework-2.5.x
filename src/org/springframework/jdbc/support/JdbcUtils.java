@@ -333,21 +333,24 @@ public abstract class JdbcUtils {
 
 	/**
 	 * Translate a SQL type into one of a few values:
+	 * All string types are translated to String.
 	 * All integer types are translated to Integer.
 	 * All real types are translated to Double.
-	 * All string types are translated to String.
 	 * All other types are left untouched.
 	 * @param sqlType the type to be translated into a simpler type
 	 * @return the new SQL type
+	 * @deprecated This is only used by deprecated constructors in
+	 * SqlFunction and will be removed alongside those constructors.
+	 * @see org.springframework.jdbc.object.SqlFunction#SqlFunction(javax.sql.DataSource, String, int)
 	 */
 	public static int translateType(int sqlType) {
 		int retType = sqlType;
-		if (Types.BIT == sqlType || Types.TINYINT == sqlType || Types.SMALLINT == sqlType ||
+		if (Types.CHAR == sqlType || Types.VARCHAR == sqlType) {
+			retType = Types.VARCHAR;
+		}
+		else if (Types.BIT == sqlType || Types.TINYINT == sqlType || Types.SMALLINT == sqlType ||
 				Types.INTEGER == sqlType) {
 			retType = Types.INTEGER;
-		}
-		else if (Types.CHAR == sqlType || Types.VARCHAR == sqlType) {
-			retType = Types.VARCHAR;
 		}
 		else if (Types.DECIMAL == sqlType || Types.DOUBLE == sqlType || Types.FLOAT == sqlType ||
 				Types.NUMERIC == sqlType || Types.REAL == sqlType) {
