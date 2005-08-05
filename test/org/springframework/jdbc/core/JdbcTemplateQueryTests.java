@@ -66,8 +66,8 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 	}
 
 	protected void tearDown() throws Exception {
-		//super.tearDown();
-		if (false && shouldVerify()) {
+		super.tearDown();
+		if (shouldVerify()) {
 			ctrlStatement.verify();
 			ctrlPreparedStatement.verify();
 			ctrlResultSet.verify();
