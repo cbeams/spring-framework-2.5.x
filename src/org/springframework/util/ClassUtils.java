@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.beans.Introspector;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -109,12 +110,14 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Return the uncaptilized short string name of a Java class.
+	 * Return the short string name of a Java class in decapitalized
+	 * JavaBeans property format.
 	 * @param clazz the class
 	 * @return the short name rendered in a standard JavaBeans property format
+	 * @see java.beans.Introspector#decapitalize(String)
 	 */
 	public static String getShortNameAsProperty(Class clazz) {
-		return StringUtils.uncapitalize(getShortName(clazz));
+		return Introspector.decapitalize(getShortName(clazz));
 	}
 
 	/**
