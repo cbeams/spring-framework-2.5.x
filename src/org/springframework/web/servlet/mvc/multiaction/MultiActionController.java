@@ -33,7 +33,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContextException;
-import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -131,21 +130,16 @@ import org.springframework.web.servlet.support.SessionRequiredException;
  */
 public class MultiActionController extends AbstractController implements LastModified  {
 		
-	public static final String DEFAULT_COMMAND_NAME = "command";
-
-	private String commandName = DEFAULT_COMMAND_NAME;
-	
 	/** Suffix for last-modified methods */
 	public static final String LAST_MODIFIED_METHOD_SUFFIX = "LastModified";
-	
-	/**
-	 * Log category to use when no mapped handler is found for a request.
-	 */
+
+	/** Default command name used for binding command objects */
+	public static final String DEFAULT_COMMAND_NAME = "command";
+
+	/** Log category to use when no mapped handler is found for a request */
 	public static final String PAGE_NOT_FOUND_LOG_CATEGORY = "org.springframework.web.servlet.PageNotFound";
 
-	/**
-	 * Additional logger to use when no mapped handler is found for a request.
-	 */
+	/** Additional logger to use when no mapped handler is found for a request */
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
 
 
@@ -159,6 +153,8 @@ public class MultiActionController extends AbstractController implements LastMod
 	 */
 	private MethodNameResolver methodNameResolver = new InternalPathMethodNameResolver();
 
+	private Validator[] validators;
+
 	/** Object we'll invoke methods on. Defaults to this. */
 	private Object delegate;
 
@@ -170,11 +166,6 @@ public class MultiActionController extends AbstractController implements LastMod
 	
 	/** Methods, keyed by exception class */
 	private Map exceptionHandlerMap;
-	
-	private Validator[] validators;
-
-	private MessageCodesResolver messageCodesResolver;
-	
 
 
 	//---------------------------------------------------------------------
@@ -224,21 +215,6 @@ public class MultiActionController extends AbstractController implements LastMod
 	}
 	
 	/**
-	 * Set the name of the command in the model.
-	 * The command object will be included in the model under this name.
-	 */
-	public final void setCommandName(String commandName) {
-		this.commandName = commandName;
-	}
-
-	/**
-	 * Return the name of the command in the model.
-	 */
-	public final String getCommandName() {
-		return this.commandName;
-	}
-	
-	/**
 	 * Set the Validators for this controller.
 	 * The Validator must support the specified command class.
 	 */
@@ -247,48 +223,13 @@ public class MultiActionController extends AbstractController implements LastMod
 	}
 
 	/**
-	 * @return the Validators for this controller.
+	 * Return the Validators for this controller.
 	 */
 	public final Validator[] getValidators() {
 		return validators;
 	}
-	
-	/**
-	 * Set the primary Validator for this controller. The Validator
-	 * must support the specified command class. If there are one
-	 * or more existing validators set already when this method is
-	 * called, only the specified validator will be kept. Use
-	 * {@link #setValidators(Validator[])} to set multiple validators.
-	 */
-	public final void setValidator(Validator validator) {
-		this.validators = new Validator[] {validator};
-	}
 
-	/**
-	 * @return the primary Validator for this controller.
-	 */
-	public final Validator getValidator() {
-		return (validators != null && validators.length > 0 ? validators[0] : null);
-	}
-	
-	/**
-	 * Set the strategy to use for resolving errors into message codes.
-	 * Applies the given strategy to all data binders used by this controller.
-	 * <p>Default is null, i.e. using the default strategy of the data binder.
-	 * @see #createBinder
-	 * @see org.springframework.validation.DataBinder#setMessageCodesResolver
-	 */
-	public final void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
-		this.messageCodesResolver = messageCodesResolver;
-	}
 
-	/**
-	 * Return the strategy to use for resolving errors into message codes.
-	 */
-	public final MessageCodesResolver getMessageCodesResolver() {
-		return messageCodesResolver;
-	}
-	
 	/**
 	 * Set the delegate used by this class. The default is <code>this</code>,
 	 * assuming that handler methods have been added by a subclass.
@@ -425,7 +366,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	
 	/**
 	 * Invoke the named method.
-	 * <p>Usse a custom exception handler if possible; otherwise, throw an
+	 * <p>Use a custom exception handler if possible; otherwise, throw an
 	 * unchecked exception; wrap a checked exception or Throwable.
 	 */
 	protected final ModelAndView invokeNamedMethod(
@@ -437,7 +378,6 @@ public class MultiActionController extends AbstractController implements LastMod
 		}
 
 		try {
-			// A real generic Collection! Parameters to method.
 			List params = new ArrayList(4);
 			params.add(request);
 			params.add(response);
@@ -468,6 +408,7 @@ public class MultiActionController extends AbstractController implements LastMod
 		}
 	}
 
+
 	/**
 	 * Create a new command object of the given class.
 	 * <p>This implementation uses <code>Class.newInstance()</code>,
@@ -487,21 +428,18 @@ public class MultiActionController extends AbstractController implements LastMod
 					"]: Does it have a public no arg constructor?", ex);
 		}
 	}
-	
+
 	/**
 	 * Bind request parameters onto the given command bean
 	 * @param request request from which parameters will be bound
 	 * @param command command object, that must be a JavaBean
 	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected void bind(ServletRequest servletRequest, Object command) throws Exception {
-		// nasty but safe code to maintain backwards compatiblity with method signature
-		// which uses ServletRequest not HttpServletRequest as it should
-		HttpServletRequest request = (HttpServletRequest) servletRequest;
+	protected void bind(ServletRequest request, Object command) throws Exception {
 		logger.debug("Binding request parameters onto MultiActionController command");
 		ServletRequestDataBinder binder = createBinder(request, command);
 		binder.bind(request);
-		if (this.validators != null /*&& isValidateOnBinding()*/ && !suppressValidation(request)) {
+		if (this.validators != null) {
 			for (int i = 0; i < this.validators.length; i++) {
 				if (this.validators[i].supports(command.getClass()))
 					ValidationUtils.invokeValidator(this.validators[i], command, binder.getErrors());
@@ -526,10 +464,8 @@ public class MultiActionController extends AbstractController implements LastMod
 	 */
 	protected ServletRequestDataBinder createBinder(ServletRequest request, Object command)
 	    throws Exception {
-		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName());
-		if (this.messageCodesResolver != null) {
-			binder.setMessageCodesResolver(this.messageCodesResolver);
-		}
+
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, DEFAULT_COMMAND_NAME);
 		initBinder(request, binder);
 		return binder;
 	}
@@ -554,19 +490,8 @@ public class MultiActionController extends AbstractController implements LastMod
 	protected void initBinder(ServletRequest request, ServletRequestDataBinder binder)
 	    throws Exception {
 	}
-	
-	/**
-	 * Return whether to suppress validation for the given request.
-	 * <p>Default implementation always returns "false". Can be overridden
-	 * in subclasses to suppress validation, for example, if a special
-	 * request parameter is set.
-	 * @param request current HTTP request
-	 * @return whether to suppress validation for the given request
-	 */
-	protected boolean suppressValidation(ServletRequest request) {
-		return false;
-	}
-	
+
+
 	/**
 	 * Determine the exception handler method for the given exception.
 	 * Can return null if not found.
