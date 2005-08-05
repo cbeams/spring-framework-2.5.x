@@ -19,6 +19,7 @@ package org.springframework.aop.framework;
 import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.util.ClassUtils;
+import org.springframework.aop.TargetSource;
 
 /**
  * Factory for AOP proxies for programmatic use, rather than via a bean
@@ -26,6 +27,7 @@ import org.springframework.util.ClassUtils;
  * AOP proxies in code.
  *
  * @author Rod Johnson
+ * @author Rob Harrop
  * @since 14.03.2003
  */
 public class ProxyFactory extends AdvisedSupport {
@@ -47,7 +49,7 @@ public class ProxyFactory extends AdvisedSupport {
 		setInterfaces(ClassUtils.getAllInterfaces(target));
 		setTarget(target);
 	}
-	
+
 	/**
 	 * Create a new ProxyFactory.
 	 * No target, only interfaces. Must add interceptors.
@@ -83,4 +85,30 @@ public class ProxyFactory extends AdvisedSupport {
 		return proxyFactory.getProxy();
 	}
 
+	/**
+	 * Creates a proxy for the specified <code>TargetSource</code> that implements the
+	 * specified interface.
+	 */
+	public static Object getProxy(Class proxyInterface, TargetSource targetSource) {
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.addInterface(proxyInterface);
+		proxyFactory.setTargetSource(targetSource);
+		return proxyFactory.getProxy();
+	}
+
+	/**
+	 * Create a proxy for the specified <code>TargetSource</code> that extends the
+	 * target class of the <code>TargetSource</code>.
+	 */
+	public static Object getProxy(TargetSource targetSource) {
+
+		if(targetSource.getTargetClass() == null) {
+			throw new IllegalArgumentException("Cannot create class proxy for TargetSource with null target class");
+		}
+		
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTargetSource(targetSource);
+		proxyFactory.setProxyTargetClass(true);
+		return proxyFactory.getProxy();
+	}
 }

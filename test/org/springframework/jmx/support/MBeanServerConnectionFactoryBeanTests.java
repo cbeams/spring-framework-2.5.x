@@ -16,15 +16,15 @@
 
 package org.springframework.jmx.support;
 
-import java.net.MalformedURLException;
+import org.springframework.core.JdkVersion;
+import org.springframework.jmx.AbstractJmxTests;
+import org.springframework.aop.support.AopUtils;
 
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
-
-import org.springframework.core.JdkVersion;
-import org.springframework.jmx.AbstractJmxTests;
+import java.net.MalformedURLException;
 
 /**
  * @author Rob Harrop
@@ -79,6 +79,34 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractJmxTests {
 		}
 		catch (IllegalArgumentException ex) {
 			// expected
+		}
+	}
+
+	public void testWithLazyConnection() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			// to avoid NoClassDefFoundError for JSSE
+			return;
+		}
+
+		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
+		bean.setServiceUrl(SERVICE_URL);
+		bean.setConnectOnStartup(false);
+		bean.afterPropertiesSet();
+
+		MBeanServerConnection connection = (MBeanServerConnection) bean.getObject();
+		assertTrue(AopUtils.isAopProxy(connection));
+
+		JMXConnectorServer connector = null;
+
+		try {
+			connector = getConnectorServer();
+			connector.start();
+
+			assertEquals("Incorrect MBean count", server.getMBeanCount(), connection.getMBeanCount());
+		} finally {
+			if(connector != null) {
+				connector.stop();
+			}
 		}
 	}
 

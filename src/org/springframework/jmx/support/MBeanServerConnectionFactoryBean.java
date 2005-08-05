@@ -16,19 +16,24 @@
 
 package org.springframework.jmx.support;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.Map;
-import java.util.Properties;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.TargetSource;
+import org.springframework.aop.target.AbstractLazyInitTargetSource;
 
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * <code>FactoryBean</code> implementation that creates an <code>MBeanServerConnection</code>
@@ -37,20 +42,37 @@ import org.springframework.beans.factory.InitializingBean;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @since 1.2
  * @see MBeanServerFactoryBean
  * @see ConnectorServerFactoryBean
+ * @since 1.2
  */
 public class MBeanServerConnectionFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
+	/**
+	 * The service URL of the remote <code>MBeanServer</code>.
+	 */
 	private JMXServiceURL serviceUrl;
 
+	/**
+	 * Environment parameters to pass to the <code>JMXConnector</code> during construction.
+	 */
 	private Map environment;
 
+	/**
+	 * The <code>JMXConnector</code> connected to the remote <code>MBeanServer</code>.
+	 */
 	private JMXConnector connector;
 
+	/**
+	 * The <code>MBeanServerConnection</code> to the remote <code>MBeanServer</code>.
+	 */
 	private MBeanServerConnection connection;
 
+	/**
+	 * Indicates whether or not the connection to the remote <code>MBeanServer</code> should be established
+	 * on startup or when the connection is first accessed.
+	 */
+	private boolean connectOnStartup = true;
 
 	/**
 	 * Set the service URL of the remote <code>MBeanServer</code>.
@@ -75,6 +97,9 @@ public class MBeanServerConnectionFactoryBean implements FactoryBean, Initializi
 		this.environment = environment;
 	}
 
+	public void setConnectOnStartup(boolean connectOnStartup) {
+		this.connectOnStartup = connectOnStartup;
+	}
 
 	/**
 	 * Creates a <code>JMXConnector</code> for the given settings
@@ -84,8 +109,13 @@ public class MBeanServerConnectionFactoryBean implements FactoryBean, Initializi
 		if (this.serviceUrl == null) {
 			throw new IllegalArgumentException("serviceUrl is required");
 		}
-		this.connector = JMXConnectorFactory.connect(this.serviceUrl, this.environment);
-		this.connection = this.connector.getMBeanServerConnection();
+
+		if (this.connectOnStartup) {
+			connect();
+		}
+		else {
+			createLazyConnection();
+		}
 	}
 
 
@@ -101,7 +131,6 @@ public class MBeanServerConnectionFactoryBean implements FactoryBean, Initializi
 		return true;
 	}
 
-
 	/**
 	 * Closes the underlying <code>JMXConnector</code>.
 	 */
@@ -109,4 +138,54 @@ public class MBeanServerConnectionFactoryBean implements FactoryBean, Initializi
 		this.connector.close();
 	}
 
+	/**
+	 * Connects to the remote <code>MBeanServer</code> using the configured service URL and
+	 * environment properties.
+	 */
+	private void connect() throws IOException {
+		this.connector = JMXConnectorFactory.connect(this.serviceUrl, this.environment);
+		this.connection = this.connector.getMBeanServerConnection();
+	}
+
+	/**
+	 * Creates lazy proxies for the <code>JMXConnector</code> and <code>MBeanServerConnection</code>
+	 */
+	private void createLazyConnection() {
+		TargetSource lazyConnectorSource = new JMXConnectorLazyInitTargetSource();
+		TargetSource lazyConnectionSource = new MBeanServerConnectionLazyInitTargetSource();
+
+		this.connector = (JMXConnector) ProxyFactory.getProxy(JMXConnector.class, lazyConnectorSource);
+		this.connection = (MBeanServerConnection) ProxyFactory.getProxy(MBeanServerConnection.class, lazyConnectionSource);
+	}
+
+	/**
+	 * Lazily creates an <code>MBeanServerConnection</code>.
+	 */
+	private class MBeanServerConnectionLazyInitTargetSource extends AbstractLazyInitTargetSource {
+
+		protected Object createObject() throws Exception {
+			return connector.getMBeanServerConnection();
+		}
+
+		public Class getTargetClass() {
+			return getObjectType();
+		}
+	}
+
+	/**
+	 * Lazily creates a <code>JMXConnector</code> using the configured service URL and
+	 * environment properties
+	 * @see MBeanServerConnectionFactoryBean#setServiceUrl(String)
+	 * @see MBeanServerConnectionFactoryBean#setEnvironment(java.util.Properties)
+	 */
+	private class JMXConnectorLazyInitTargetSource extends AbstractLazyInitTargetSource {
+
+		protected Object createObject() throws Exception {
+			return JMXConnectorFactory.connect(serviceUrl, environment);
+		}
+
+		public Class getTargetClass() {
+			return (connector == null) ? JMXConnector.class : connector.getClass();
+		}
+	}
 }

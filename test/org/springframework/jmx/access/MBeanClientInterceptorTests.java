@@ -16,19 +16,22 @@
 
 package org.springframework.jmx.access;
 
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.management.Descriptor;
-import javax.management.MBeanServerConnection;
-
+import org.springframework.core.JdkVersion;
 import org.springframework.jmx.AbstractJmxTests;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.assembler.AbstractReflectiveMBeanInfoAssembler;
+
+import javax.management.Descriptor;
+import javax.management.MBeanServerConnection;
+import javax.management.remote.JMXConnectorServer;
+import javax.management.remote.JMXConnectorServerFactory;
+import javax.management.remote.JMXServiceURL;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Rob Harrop
@@ -126,6 +129,40 @@ public class MBeanClientInterceptorTests extends AbstractJmxTests {
 		catch (InvalidInvocationException desired) {
 			// success
 		}
+	}
+
+	public void testWithLazyConnectionToRemote() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			// to avoid NoClassDefFoundError for JSSE
+			return;
+		}
+
+		JMXServiceURL url = new JMXServiceURL("service:jmx:jmxmp://localhost:9876");
+
+
+		JMXConnectorServer connector = JMXConnectorServerFactory.newJMXConnectorServer(url, null, server);
+		try {
+			MBeanProxyFactoryBean factory = new MBeanProxyFactoryBean();
+			factory.setServiceUrl(url.toString());
+			factory.setProxyInterface(IJmxTestBean.class);
+			factory.setObjectName(OBJECT_NAME);
+			factory.setConnectOnStartup(false);
+
+			// should skip connection to the server
+			factory.afterPropertiesSet();
+
+			// now start the connector
+			connector.start();
+
+			// should now be able to access data via the lazy proxy
+			IJmxTestBean bean = (IJmxTestBean) factory.getObject();
+			assertEquals("Rob Harrop", bean.getName());
+			assertEquals(100, bean.getAge());
+		}
+		finally {
+			connector.stop();
+		}
+
 	}
 
 
