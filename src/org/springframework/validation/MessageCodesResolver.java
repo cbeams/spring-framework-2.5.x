@@ -18,17 +18,17 @@ package org.springframework.validation;
 
 /**
  * Strategy interface for building message codes from validation error codes.
- * Used by BindException/DataBinder to build the codes list for ObjectErrors
- * and FieldErrors.
+ * Used by DataBinder to build the codes list for ObjectErrors and FieldErrors.
  *
  * <p>The resulting message codes correspond to the codes of a
  * MessageSourceResolvable (as implemented by ObjectError and FieldError).
  *
  * @author Juergen Hoeller
  * @since 1.0.1
+ * @see DataBinder#setMessageCodesResolver
  * @see ObjectError
  * @see FieldError
- * @see org.springframework.context.MessageSourceResolvable#getCodes
+ * @see org.springframework.context.MessageSourceResolvable#getCodes()
  */
 public interface MessageCodesResolver {
 

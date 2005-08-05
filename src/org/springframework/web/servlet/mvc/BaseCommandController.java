@@ -182,7 +182,7 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * @return the Validators for this controller.
+	 * Return the Validators for this controller.
 	 */
 	public final Validator[] getValidators() {
 		return validators;
@@ -200,7 +200,7 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * @return the primary Validator for this controller.
+	 * Return the primary Validator for this controller.
 	 */
 	public final Validator getValidator() {
 		return (validators != null && validators.length > 0 ? validators[0] : null);

@@ -74,12 +74,12 @@ public class BindException extends Exception implements Errors {
 	/**
 	 * Create a new BindException instance.
 	 * @param target target object to bind onto
-	 * @param name name of the target object
+	 * @param objectName the name of the target object
 	 * @see DefaultMessageCodesResolver
 	 */
-	public BindException(Object target, String name) {
+	public BindException(Object target, String objectName) {
 		this.target = target;
-		this.objectName = name;
+		this.objectName = objectName;
 	}
 
 	/**
