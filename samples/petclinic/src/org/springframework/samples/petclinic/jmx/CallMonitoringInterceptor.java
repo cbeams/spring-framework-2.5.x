@@ -46,16 +46,19 @@ public class CallMonitoringInterceptor implements CallMonitor, MethodInterceptor
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		if (this.isEnabled) {
-			this.callCount++;
-
 			StopWatch sw = new StopWatch(invocation.getMethod().getName());
 
 			sw.start("invoke");
-			Object retVal = invocation.proceed();
-			sw.stop();
-
-			this.accumulatedCallTime += sw.getTotalTimeMillis();
-			return retVal;
+			try {
+				return invocation.proceed();
+			}
+			finally {
+				sw.stop();
+				synchronized (this) {
+					this.callCount++;
+					this.accumulatedCallTime += sw.getTotalTimeMillis();
+				}
+			}
 		}
 
 		else {
