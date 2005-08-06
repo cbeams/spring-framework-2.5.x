@@ -30,6 +30,7 @@ public abstract class RemoteInvocationBasedExporter extends RemoteExporter {
 
 	private RemoteInvocationExecutor remoteInvocationExecutor = new DefaultRemoteInvocationExecutor();
 
+
 	/**
 	 * Set the RemoteInvocationExecutor to use for this exporter.
 	 * Default is a DefaultRemoteInvocationExecutor.
@@ -47,6 +48,7 @@ public abstract class RemoteInvocationBasedExporter extends RemoteExporter {
 		return remoteInvocationExecutor;
 	}
 
+
 	/**
 	 * Apply the given remote invocation to the given target object.
 	 * The default implementation delegates to the RemoteInvocationExecutor.
@@ -63,7 +65,8 @@ public abstract class RemoteInvocationBasedExporter extends RemoteExporter {
 	 * @see RemoteInvocationExecutor#invoke
 	 */
 	protected Object invoke(RemoteInvocation invocation, Object targetObject)
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException{
+			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Applying " + invocation);
 		}

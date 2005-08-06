@@ -141,10 +141,10 @@ public class SqlMapClientFactoryBean implements FactoryBean, InitializingBean {
 	 * Set whether to use a transaction-aware DataSource for the SqlMapClient,
 	 * i.e. whether to automatically wrap the passed-in DataSource with Spring's
 	 * TransactionAwareDataSourceProxy.
-	 * <p>Default is true: If the SqlMapClient performs direct database operations
-	 * outside of Spring's SqlMapClientTemplate -- for example, lazy loading or
-	 * direct SqlMapClient access --, it will still participate in active
-	 * Spring-managed transactions.
+	 * <p>Default is "true": When the SqlMapClient performs direct database operations
+	 * outside of Spring's SqlMapClientTemplate (for example, lazy loading or direct
+	 * SqlMapClient access), it will still participate in active Spring-managed
+	 * transactions.
 	 * <p>As a further effect, using a transaction-aware DataSource will apply
 	 * remaining transaction timeouts to all created JDBC Statements. This means
 	 * that all operations performed by the SqlMapClient will automatically
