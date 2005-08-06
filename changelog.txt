@@ -33,12 +33,26 @@ Package org.springframework.jdbc
 
 Package org.springframework.jmx
 * MBeanClientInterceptor closes a JMX Connector opened through the "serviceUrl" bean property on shutdown
+* added "connectOnStartup" flag to MBeanClientInterceptor, to be turned off for lazily connecting on first access
 
 Package org.springframework.mock
+* reworked ExpectedLookupTemplate to support multiple JNDI name/object pairs
 * added overloaded constructor to MockServletContext, with just a ResourceLoader as argument
 
 Package org.springframework.orm
 * upgraded to the most recently published version of the Hibernate 3.0.5 jar (there seem to be multiple versions around)
+
+Package org.springframework.transaction
+* added "cacheUserTransaction" flag to JtaTransactionManager, to be turned off for a fresh lookup for every transaction
+* reworked JtaTransactionManager to always access the UserTransaction through the current JtaTransactionObject
+* reworked JtaTransactionManager's "applyIsolationLevel" and "applyTimeout" signatures to include JtaTransactionObject
+* reworked JtaTransactionManager's "doJtaSuspend" and "doResume" signatures to include JtaTransactionObject
+
+Package org.springframework.ui
+* deprecated JasperReportsUtils methods with JRAbstractExporter parameter in favor of versions with JRExporter parameter
+
+Package org.springframework.util
+* fixed ClassUtils's "getShortNameAsProperty" to use correct JavaBeans decapitalization (through JavaBeans Introspector)
 
 Package org.springframework.validation
 * added sections on validation and error messages and content on data binding to reference documentation
@@ -46,11 +60,11 @@ Package org.springframework.validation
 * added "setExtractOldValueForEditor" method to DataBinder, allowing to control getter invocation
 
 Package org.springframework.web
-* MultiActionController now allows Validators to be specified and used (for the optional command object(s))
 * XmlWebApplicationContext applies its class loader, if any, as bean class loader to the XmlBeanDefinitionReader
 * added ServletContextParameterFactoryBean, explicitly retrieving and exposing a "context-param" defined in web.xml
 * AcceptHeaderLocaleResolver/FixedLocaleResolver throw UnsupportedOperationException from "setLocale" (rather than IAE)
 * FixedThemeResolver throw UnsupportedOperationException from "setThemeName" (rather than IllegalArgumentException)
+* MultiActionController now allows Validators to be specified and used for the optional command object(s)
 * AbstractJasperReportsView holds a default "exporterParameters" Map, to allow for property-driven population of it
 * AbstractJasperReportsSingleFormatView applies the configured exporter encoding as HTTP response encoding
 
