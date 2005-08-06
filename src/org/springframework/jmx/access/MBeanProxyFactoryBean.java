@@ -16,11 +16,10 @@
 
 package org.springframework.jmx.access;
 
-import javax.management.JMException;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jmx.MBeanServerNotFoundException;
 
 /**
  * Creates a proxy to a managed resource running either locally or remotely.
@@ -66,7 +65,7 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor implements Fac
 	 * Checks that the <code>proxyInterface</code> has been specified and then
 	 * generates the proxy for the target MBean.
 	 */
-	public void afterPropertiesSet() throws JMException {
+	public void afterPropertiesSet() throws MBeanServerNotFoundException, MBeanInfoRetrievalException {
 		super.afterPropertiesSet();
 
 		if (this.proxyInterface == null) {

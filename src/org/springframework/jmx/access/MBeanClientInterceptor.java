@@ -16,15 +16,13 @@
 
 package org.springframework.jmx.access;
 
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jmx.support.JmxUtils;
-import org.springframework.jmx.support.ObjectNameManager;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.management.Attribute;
 import javax.management.InstanceNotFoundException;
@@ -40,34 +38,38 @@ import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import java.beans.PropertyDescriptor;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.net.MalformedURLException;
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jmx.MBeanServerNotFoundException;
+import org.springframework.jmx.support.JmxUtils;
+import org.springframework.jmx.support.ObjectNameManager;
 
 /**
  * <code>MethodInterceptor</code> implementation that routes calls to an MBean
  * running on the supplied <code>MBeanServerConnection</code>. Works for both
  * local and remote <code>MBeanServerConnection</code>s.
- * <p/>
- * By default, the <code>MBeanClientInterceptor</code> will connect to the
+ *
+ * <p>By default, the <code>MBeanClientInterceptor</code> will connect to the
  * <code>MBeanServer</code> and cache MBean metadata at startup. This can
  * be undesirable when running against a remote <code>MBeanServer</code>
- * that may not be running when the application starts. By setting the
- * {@link #setConnectOnStartup(boolean) connectOnStartup} property to
- * <code>false</code> you can defer this process until the first invocation
- * against the proxy.
- * <p/>
+ * that may not be running when the application starts. Through setting the
+ * {@link #setConnectOnStartup(boolean) connectOnStartup} property to "false",
+ * you can defer this process until the first invocation against the proxy.
+ *
  * <p>This functionality is usually used through <code>MBeanProxyFactoryBean</code>.
  * See the javadoc of that class for more information.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @see MBeanProxyFactoryBean
- * @see #setConnectOnStartup(boolean)
+ * @see #setConnectOnStartup
  * @since 1.2
  */
 public class MBeanClientInterceptor implements MethodInterceptor, InitializingBean, DisposableBean {
@@ -80,11 +82,17 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	private MBeanServerConnection server;
 
 	/**
-	 * The <code>JMXConnector</code> used when connecting to a remote JMX server using an
-	 * internally configured connection.
+	 * The <code>JMXServiceURL</code> of the remote <code>MBeanServer</code> to connect to.
+	 * Optional.
 	 * @see #setServiceUrl(String)
 	 */
-	private JMXConnector connector;
+	private JMXServiceURL serviceUrl;
+
+	/**
+	 * Indicates whether the proxy should connect to the <code>MBeanServer</code> at startup.
+	 * @see #setConnectOnStartup(boolean)
+	 */
+	private boolean connectOnStartup = true;
 
 	/**
 	 * The <code>ObjectName</code> of the MBean to forward calls to.
@@ -95,6 +103,14 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 * Indicates whether or not strict casing is being used for attributes.
 	 */
 	private boolean useStrictCasing = true;
+
+
+	/**
+	 * The <code>JMXConnector</code> used when connecting to a remote JMX server using an
+	 * internally configured connection.
+	 * @see #setServiceUrl(String)
+	 */
+	private JMXConnector connector;
 
 	/**
 	 * Caches the list of attributes exposed on the management interface of
@@ -113,19 +129,6 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 */
 	private final Map signatureCache = new HashMap();
 
-	/**
-	 * Indicates whether the proxy should connect to the <code>MBeanServer</code> at startup.
-	 * @see #setConnectOnStartup(boolean)
-	 */
-	private boolean connectOnStartup = true;
-
-	/**
-	 * The <code>JMXServiceURL</code> of the remote <code>MBeanServer</code> to connect to.
-	 * Optional.
-	 * @see #setServiceUrl(String)
-	 */
-	private JMXServiceURL serviceUrl;
-
 
 	/**
 	 * Set the <code>MBeanServerConnection</code> used to connect to the
@@ -140,10 +143,15 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 */
 	public void setServiceUrl(String url) throws MalformedURLException {
 		this.serviceUrl = new JMXServiceURL(url);
+	}
 
-		// note: cannot eagerly instantiate the connector here because we cannot
-		// know what value the connectOnStartup flag may be set to when
-		// afterPropertiesSet() is called.
+	/**
+	 * Set whether or not the proxy should connect to the <code>MBeanServer</code>
+	 * at creation time ("true") or the first time it is invoked ("false").
+	 * Default is "true".
+	 */
+	public void setConnectOnStartup(boolean connectOnStartup) {
+		this.connectOnStartup = connectOnStartup;
 	}
 
 	/**
@@ -165,25 +173,42 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 		this.useStrictCasing = useStrictCasing;
 	}
 
-	/**
-	 * Indicates whether or not the proxy should connect to the <code>MBeanServer</code> at
-	 * creation time (<code>true</code>) or the first time it is invoked (<code>false</code>).
-	 * Default value is <code>true</code>.
-	 */
-	public void setConnectOnStartup(boolean connectOnStartup) {
-		this.connectOnStartup = connectOnStartup;
-	}
 
 	/**
 	 * Ensures that an <code>MBeanServerConnection</code> is configured and attempts to
 	 * detect a local connection if one is not supplied.
 	 */
-	public void afterPropertiesSet() throws JMException, IOException {
+	public void afterPropertiesSet() throws MBeanServerNotFoundException, MBeanInfoRetrievalException {
 		if (this.connectOnStartup) {
-			if(this.server == null) {
+			if (this.server == null) {
 				connect();
 			}
 			retrieveMBeanInfo();
+		}
+	}
+
+	/**
+	 * Connects to the remote <code>MBeanServer</code> using the configured <code>JMXServiceURL</code>.
+	 * @see #setServiceUrl(String)
+	 * @see #setConnectOnStartup(boolean)
+	 */
+	private void connect() throws MBeanServerNotFoundException {
+		if (this.serviceUrl != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Connecting to remote MBeanServer at URL [" + this.serviceUrl + "]");
+			}
+			try {
+				this.connector = JMXConnectorFactory.connect(this.serviceUrl);
+				this.server = this.connector.getMBeanServerConnection();
+			}
+			catch (IOException ex) {
+				throw new MBeanServerNotFoundException(
+						"Could not connect to remote MBeanServer at URL [" + this.serviceUrl + "]", ex);
+			}
+		}
+		else {
+			logger.debug("Attempting to locate local MBeanServer");
+			this.server = JmxUtils.locateMBeanServer();
 		}
 	}
 
@@ -192,7 +217,7 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 * This information is used by the proxy when determining whether an invocation matches
 	 * a valid operation or attribute on the management interface of the managed resource.
 	 */
-	private void retrieveMBeanInfo() throws MBeanInfoRetrievalException {
+	private void retrieveMBeanInfo() throws MBeanServerNotFoundException, MBeanInfoRetrievalException {
 		try {
 			MBeanInfo info = this.server.getMBeanInfo(this.objectName);
 
@@ -238,24 +263,6 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 		}
 	}
 
-	/**
-	 * Connects to the remote <code>MBeanServer</code> using the configured <code>JMXServiceURL</code>.
-	 * @see #setServiceUrl(String)
-	 * @see #setConnectOnStartup(boolean)
-	 */
-	private void connect() throws IOException {
-		if (this.serviceUrl != null) {
-			if(logger.isDebugEnabled()) {
-			    logger.debug("Connecting to remote MBeanServer on URL [" + this.serviceUrl + "].");
-			}
-			this.connector = JMXConnectorFactory.connect(this.serviceUrl);
-			this.server = this.connector.getMBeanServerConnection();
-		}
-		else {
-			logger.debug("Attempting to locate local MBeanServer");
-			this.server = JmxUtils.locateMBeanServer();
-		}
-	}
 
 	/**
 	 * Route the invocation to the configured managed resource. Correctly routes JavaBean property
@@ -270,11 +277,11 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 * @throws Throwable typically as the result of an error during invocation
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-
-		synchronized (this) {
-			if (!this.connectOnStartup) {
+		// Lazily connect to MBeanServer?
+		if (!this.connectOnStartup) {
+			synchronized (this) {
 				if (this.server == null) {
-					logger.debug("Lazily initializing MBeanServer connection");
+					logger.debug("Lazily establishing MBeanServer connection");
 					connect();
 				}
 
