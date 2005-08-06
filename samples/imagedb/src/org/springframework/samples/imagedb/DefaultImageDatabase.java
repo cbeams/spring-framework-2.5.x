@@ -23,8 +23,9 @@ import org.springframework.util.FileCopyUtils;
  * Default implementation of the central image database business interface.
  *
  * <p>Uses JDBC with a LobHandler to retrieve and store image data.
- * Illustrates direct use of the jdbc.core package, i.e. JdbcTemplate,
- * rather than operation objects from the jdbc.object package.
+ * Illustrates direct use of the <code>jdbc.core</code> package,
+ * i.e. JdbcTemplate, rather than operation objects from the
+ * <code>jdbc.object</code> package.
  *
  * @author Juergen Hoeller
  * @since 07.01.2004
