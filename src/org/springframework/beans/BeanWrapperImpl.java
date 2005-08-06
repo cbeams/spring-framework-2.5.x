@@ -395,7 +395,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			return null;
 		}
 		if (propertyPath != null) {
-			// check property-specific editor first
+			// Check property-specific editor first.
 			PropertyEditor editor = getCustomEditor(propertyPath, requiredType);
 			if (editor == null) {
 				List strippedPaths = new LinkedList();
@@ -412,7 +412,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 				requiredType = getPropertyType(propertyPath);
 			}
 		}
-		// no property-specific editor -> check type-specific editor
+		// No property-specific editor -> check type-specific editor.
 		return getCustomEditor(requiredType);
 	}
 
@@ -1146,15 +1146,29 @@ public class BeanWrapperImpl implements BeanWrapper {
 				return pd.getPropertyType();
 			}
 			else {
-				// maybe an indexed/mapped property
+				// Maybe an indexed/mapped property...
 				Object value = getPropertyValue(propertyName);
 				if (value != null) {
 					return value.getClass();
 				}
+				// Check to see if there is a custom editor,
+				// which might give an indication on the desired target type.
+				CustomEditorHolder editorHolder = (CustomEditorHolder) this.customEditors.get(propertyName);
+				if (editorHolder == null) {
+					List strippedPaths = new LinkedList();
+					addStrippedPropertyPaths(strippedPaths, "", propertyName);
+					for (Iterator it = strippedPaths.iterator(); it.hasNext() && editorHolder == null;) {
+						String strippedName = (String) it.next();
+						editorHolder = (CustomEditorHolder) this.customEditors.get(strippedName);
+					}
+				}
+				if (editorHolder != null) {
+					return editorHolder.getRegisteredType();
+				}
 			}
 		}
 		catch (InvalidPropertyException ex) {
-			// consider as not determinable
+			// Consider as not determinable.
 		}
 		return null;
 	}
