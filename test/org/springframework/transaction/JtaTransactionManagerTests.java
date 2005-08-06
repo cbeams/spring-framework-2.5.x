@@ -29,6 +29,7 @@ import javax.transaction.UserTransaction;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;

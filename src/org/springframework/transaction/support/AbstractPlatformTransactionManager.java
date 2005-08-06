@@ -699,7 +699,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				// Existing transaction that we participate in, controlled outside
 				// of the scope of this Spring transaction manager -> try to register
 				// an afterCompletion callback with the existing (JTA) transaction.
-				registerAfterCompletionWithExistingTransaction(synchronizations);
+				registerAfterCompletionWithExistingTransaction(status.getTransaction(), synchronizations);
 			}
 		}
 	}
@@ -712,7 +712,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @param synchronizations List of TransactionSynchronization objects
 	 * @param completionStatus the completion status according to the
 	 * constants in the TransactionSynchronization interface
-	 * @see #registerAfterCompletionWithExistingTransaction(java.util.List)
+	 * @see #registerAfterCompletionWithExistingTransaction(Object, java.util.List)
 	 * @see TransactionSynchronization#STATUS_COMMITTED
 	 * @see TransactionSynchronization#STATUS_ROLLED_BACK
 	 * @see TransactionSynchronization#STATUS_UNKNOWN
@@ -982,13 +982,14 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * methods immediately, passing in "STATUS_UNKNOWN". This is the best we
 	 * can do if there's no chance to determine the actual outcome of the
 	 * outer transaction.
+	 * @param transaction transaction object returned by <code>doGetTransaction</code>
 	 * @param synchronizations List of TransactionSynchronization objects
 	 * @throws TransactionException in case of system errors
 	 * @see #invokeAfterCompletion(java.util.List, int)
 	 * @see TransactionSynchronization#afterCompletion(int)
 	 * @see TransactionSynchronization#STATUS_UNKNOWN
 	 */
-	protected void registerAfterCompletionWithExistingTransaction(List synchronizations)
+	protected void registerAfterCompletionWithExistingTransaction(Object transaction, List synchronizations)
 			throws TransactionException {
 
 		logger.debug("Cannot register Spring after-completion synchronization with existing transaction - " +

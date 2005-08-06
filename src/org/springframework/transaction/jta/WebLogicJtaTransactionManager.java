@@ -233,7 +233,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 	}
 
 
-	protected void doJtaBegin(TransactionDefinition definition)
+	protected void doJtaBegin(JtaTransactionObject txObject, TransactionDefinition definition)
 			throws NotSupportedException, SystemException {
 
 		// Apply transaction name (if any) to WebLogic transaction.
@@ -244,7 +244,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 					weblogic.transaction.UserTransaction ut = (weblogic.transaction.UserTransaction) ut;
 					ut.begin(definition.getName(), definition.getTimeout());
 					*/
-					this.beginWithNameAndTimeoutMethod.invoke(getUserTransaction(),
+					this.beginWithNameAndTimeoutMethod.invoke(txObject.getUserTransaction(),
 							new Object[] {definition.getName(), new Integer(definition.getTimeout())});
 				}
 				else {
@@ -252,7 +252,8 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 					weblogic.transaction.UserTransaction ut = (weblogic.transaction.UserTransaction) ut;
 					ut.begin(definition.getName());
 					*/
-					this.beginWithNameMethod.invoke(getUserTransaction(), new Object[] {definition.getName()});
+					this.beginWithNameMethod.invoke(txObject.getUserTransaction(),
+							new Object[] {definition.getName()});
 				}
 			}
 			catch (InvocationTargetException ex) {
@@ -267,8 +268,8 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		else {
 			// No WebLogic UserTransaction available or no transaction name specified
 			// -> standard JTA begin call.
-			applyTimeout(definition.getTimeout());
-			getUserTransaction().begin();
+			applyTimeout(txObject, definition.getTimeout());
+			txObject.getUserTransaction().begin();
 		}
 
 		// Specify isolation level, if any, through corresponding WebLogic transaction property.
@@ -294,15 +295,15 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			}
 		}
 		else {
-			applyIsolationLevel(definition.getIsolationLevel());
+			applyIsolationLevel(txObject, definition.getIsolationLevel());
 		}
 	}
 
-	protected void doJtaResume(Transaction suspendedTransaction)
+	protected void doJtaResume(JtaTransactionObject txObject, Object suspendedTransaction)
 			throws InvalidTransactionException, SystemException {
 
 		try {
-			getTransactionManager().resume(suspendedTransaction);
+			getTransactionManager().resume((Transaction) suspendedTransaction);
 		}
 		catch (InvalidTransactionException ex) {
 			if (!this.weblogicTransactionManagerAvailable) {
