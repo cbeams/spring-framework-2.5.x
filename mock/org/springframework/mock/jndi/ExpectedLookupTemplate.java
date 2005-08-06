@@ -16,6 +16,10 @@
 
 package org.springframework.mock.jndi;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.naming.NamingException;
 
 import org.springframework.jndi.JndiTemplate;
@@ -25,13 +29,20 @@ import org.springframework.jndi.JndiTemplate;
  * a given object. Very useful for testing. Effectively a mock object.
  *
  * @author Rod Johnson
- * @see org.springframework.jdbc.datasource.DriverManagerDataSource
+ * @author Juergen Hoeller
  */
 public class ExpectedLookupTemplate extends JndiTemplate {
 
-	private final String name;
+	private final Map jndiObjects = Collections.synchronizedMap(new HashMap());
 
-	private final Object object;
+
+	/**
+	 * Construct a new JndiTemplate that will always return given objects
+	 * for given names. To be populated through <code>addObject</code> calls.
+	 * @see #addObject(String, Object)
+	 */
+	public ExpectedLookupTemplate() {
+	}
 
 	/**
 	 * Construct a new JndiTemplate that will always return the
@@ -40,9 +51,19 @@ public class ExpectedLookupTemplate extends JndiTemplate {
 	 * @param object the object that will be returned
 	 */
 	public ExpectedLookupTemplate(String name, Object object) {
-		this.name = name;
-		this.object = object;
+		addObject(name, object);
 	}
+
+	/**
+	 * Add the given object to the list of JNDI objects that this
+	 * template will expose.
+	 * @param name the name the client is expected to look up
+	 * @param object the object that will be returned
+	 */
+	public void addObject(String name, Object object) {
+		this.jndiObjects.put(name, object);
+	}
+
 
 	/**
 	 * If the name is the expected name specified in the constructor,
@@ -50,10 +71,11 @@ public class ExpectedLookupTemplate extends JndiTemplate {
 	 * unexpected, a respective NamingException gets thrown.
 	 */
 	public Object lookup(String name) throws NamingException {
-		if (!name.equals(this.name)) {
-			throw new NamingException("Unexpected JNDI name '" + name + "' - expecting '" + this.name + "'");
+		Object object = this.jndiObjects.get(name);
+		if (object == null) {
+			throw new NamingException("Unexpected JNDI name '" + name + "': expecting " + this.jndiObjects.keySet());
 		}
-		return this.object;
+		return object;
 	}
 
 }
