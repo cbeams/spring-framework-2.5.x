@@ -383,16 +383,26 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	/**
 	 * Set whether to expose a transaction-aware proxy for the SessionFactory,
 	 * returning the Session that's associated with the current Spring-managed
-	 * transaction on <code>getCurrentSession</code>, if any.
+	 * transaction on <code>getCurrentSession()</code>, if any.
 	 * <p>Default is "true", letting data access code work with the plain
-	 * Hibernate SessionFactory and still be able to participate in current
-	 * Spring-managed transactions (with any transaction management strategy,
-	 * even plain JTA / EJB CMT). Turn this off to expose the plain Hibernate
-	 * SessionFactory, with Hibernate's default <code>getCurrentSession</code>
-	 * behavior (which only supports plain JTA synchronization).
-	 * <p><b>NOTE:</b> The <code>SessionFactory.getCurrentSession</code> is
-	 * only available in Hibernate 3.0.1 and later.
+	 * Hibernate SessionFactory and its <code>getCurrentSession()</code> method,
+	 * while still being able to participate in current Spring-managed transactions:
+	 * with any transaction management strategy, either local or JTA / EJB CMT,
+	 * and any transaction synchronization mechanism, either Spring or JTA.
+	 * Furthermore, <code>getCurrentSession()</code> will also seamlessly work with
+	 * a request-scoped Session managed by OpenSessionInViewFilter/Interceptor.
+	 * <p>Turn this flag off to expose the plain Hibernate SessionFactory with
+	 * Hibernate's default <code>getCurrentSession()</code> behavior, which only
+	 * supports plain JTA synchronization through the JTA TransactionManager.
+	 * <p><b>NOTE:</b> The <code>SessionFactory.getCurrentSession</code> method
+	 * is only available in Hibernate 3.0.1 and later. Before its introduction,
+	 * DAOs coded against the plain Hibernate API had to manually open and close
+	 * Sessions and care for transaction/request scoping.
 	 * @see org.hibernate.SessionFactory#getCurrentSession()
+	 * @see org.springframework.transaction.jta.JtaTransactionManager
+	 * @see org.springframework.orm.hibernate3.HibernateTransactionManager
+	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewFilter
+	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor
 	 */
 	public void setExposeTransactionAwareSessionFactory(boolean exposeTransactionAwareSessionFactory) {
 		this.exposeTransactionAwareSessionFactory = exposeTransactionAwareSessionFactory;
