@@ -103,6 +103,15 @@
 	<!-- Unnamed bean with factory-bean declaration -->
 	<bean factory-bean="instanceFactory" factory-method="defaultInstance"/>
 
+	<bean id="testBeanWithInnerFactoryMethod" class="org.springframework.beans.TestBean">
+		<property name="friends">
+			<list>
+				<!-- Unnamed bean with factory-bean declaration -->
+				<bean factory-bean="instanceFactory" factory-method="defaultInstance"/>
+			</list>
+		</property>
+	</bean>
+
 	<bean id="instanceFactory" class="org.springframework.beans.factory.xml.InstanceFactory" singleton="true">
 		<property name="factoryBeanProperty"><value>instanceFactory</value></property>
 	</bean>
