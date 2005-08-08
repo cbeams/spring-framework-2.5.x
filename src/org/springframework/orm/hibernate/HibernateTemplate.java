@@ -175,7 +175,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	/**
 	 * Set whether to always use a new Hibernate Session for this template.
-	 * Default is false; if activated, all operations on this template will
+	 * Default is "false"; if activated, all operations on this template will
 	 * work on a new Hibernate Session even in case of a pre-bound Session
 	 * (for example, within a transaction or OpenSessionInViewFilter).
 	 * <p>Within a transaction, a new Hibernate Session used by this template
@@ -183,8 +183,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * Connection. In such a scenario, multiple Sessions will participate
 	 * in the same database transaction.
 	 * <p>Turn this on for operations that are supposed to always execute
-	 * independently, without side effects caused by a shared Hibernate
-	 * Session.
+	 * independently, without side effects caused by a shared Hibernate Session.
 	 */
 	public void setAlwaysUseNewSession(boolean alwaysUseNewSession) {
 		this.alwaysUseNewSession = alwaysUseNewSession;
@@ -325,7 +324,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			throw convertJdbcAccessException(ex);
 		}
 		catch (RuntimeException ex) {
-			// callback code threw application exception
+			// Callback code threw application exception...
 			throw ex;
 		}
 		finally {
@@ -972,6 +971,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 */
 	protected void applyNamedParameterToQuery(Query queryObject, String paramName, Object value, Type type)
 			throws HibernateException {
+
 		if (value instanceof Collection) {
 			if (type != null) {
 				queryObject.setParameterList(paramName, (Collection) value, type);
