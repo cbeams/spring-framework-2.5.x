@@ -51,11 +51,18 @@ import org.springframework.util.ClassUtils;
  * <p>Also supports "java.lang.String[]"-style array class names and primitive
  * class names (e.g. "boolean"). Delegates to ClassUtils for actual class name
  * resolution.
+ *
+ * <p><b>NOTE:</b> Custom property editors registered with this configurer do
+ * <i>not</i> apply to data binding. Custom editors for data binding need to
+ * be registered on the DataBinder: Use a common base class or delegate to
+ * common DataBinder initialization code to reuse editor registration there.
  * 
  * @author Juergen Hoeller
  * @since 27.02.2004
  * @see ConfigurableBeanFactory#registerCustomEditor
  * @see org.springframework.util.ClassUtils#forName
+ * @see org.springframework.validation.DataBinder#registerCustomEditor
+ * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
  */
 public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered {
 
