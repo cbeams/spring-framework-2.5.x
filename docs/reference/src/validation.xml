@@ -65,7 +65,7 @@
     properties to determine if they are readable or writable. Also, the
     BeanWrapper offers support for nested properties, enabling the setting of
     properties on sub-properties to an unlimited depth. Then, the BeanWrapper
-    support the ability to add standard JavaBeans
+    supports the ability to add standard JavaBeans
     <literal>PropertyChangeListeners</literal> and
     <literal>VetoableChangeListeners</literal>, without the need for
     supporting code in the target class. Last but not least, the BeanWrapper
@@ -180,8 +180,8 @@
 }</programlisting></para>
 
       <para>The following code snippets show some examples of how to retrieve
-      and manipulate some of the properties of instantiated:
-      <literal>Companies</literal> and <literal>Employees</literal>
+      and manipulate some of the properties of instantiated
+      <literal>Companies</literal> and <literal>Employees</literal>:
       <programlisting>Company c = new Company();
 BeanWrapper bwComp = BeanWrapperImpl(c);
 // setting the company name...
@@ -288,7 +288,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
                 editor.</entry>
               </row>
               <row>
-                <entry><literal>CustomCollectionEdit</literal></entry>
+                <entry><literal>CustomCollectionEditor</literal></entry>
                 <entry>Property editor for Collections, converting any source Collection
                 to a given target Collection type.</entry>
               </row>
@@ -325,7 +325,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
                 Resource) an InputStream, so InputStream properties may be
                 directly setCapable of resolving Strings to
                 <literal>File</literal>-objects. Note that the default usage
-                will not close the InputStream for you!. Registered by default
+                will not close the InputStream for you! Registered by default
                 by BeanWrapperImpl.</entry>
               </row>
 
@@ -335,7 +335,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
                 <entry>Capable of resolving Strings to
                 <literal>Locale</literal>-objects and vice versa (the String
                 format is [language]_[country]_[variant], which is the same
-                thing the toString() method of Locale provides. Registered by
+                thing the toString() method of Locale provides). Registered by
                 default by BeanWrapperImpl.</entry>
               </row>
 
