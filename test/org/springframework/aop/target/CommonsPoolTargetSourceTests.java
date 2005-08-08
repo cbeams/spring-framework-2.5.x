@@ -28,6 +28,8 @@ import org.springframework.util.SerializationTestUtils;
 
 import java.util.NoSuchElementException;
 
+import org.apache.commons.pool.impl.GenericObjectPool;
+
 /**
  * Tests for pooling invoker interceptor
  * TODO need to make these tests stronger: it's hard to
@@ -154,7 +156,7 @@ public class CommonsPoolTargetSourceTests extends TestCase {
 		CommonsPoolTargetSource targetSource = (CommonsPoolTargetSource) person.getTargetSource();
 
 		int maxSize = targetSource.getMaxSize();
-		
+
 		Object[] pooledInstances = new Object[maxSize];
 
 		for (int x = 0; x < maxSize; x++) {
@@ -180,6 +182,12 @@ public class CommonsPoolTargetSourceTests extends TestCase {
 		for (int i = 0; i < pooledInstances.length; i++) {
 			targetSource.releaseTarget(pooledInstances[i]);
 		}
+	}
+
+	public void testSetWhenExhaustedAction() {
+		CommonsPoolTargetSource targetSource = new CommonsPoolTargetSource();
+		targetSource.setWhenExhaustedActionName("WHEN_EXHAUSTED_BLOCK");
+		assertEquals(GenericObjectPool.WHEN_EXHAUSTED_BLOCK, targetSource.getWhenExhaustedAction());
 	}
 
 	private void prepareTargetSource(CommonsPoolTargetSource targetSource) {
