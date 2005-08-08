@@ -755,7 +755,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			boolean isStatic = this.advised.getTargetSource().isStatic();
 			boolean isFrozen = this.advised.isFrozen();
 
-			if (haveAdvice) {
+			if (haveAdvice || !(isFrozen)) {
 				// If exposing the proxy, then AOP_PROXY must be used.
 				if (exposeProxy) {
 					if (logger.isDebugEnabled()) {
