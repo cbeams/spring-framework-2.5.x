@@ -44,18 +44,18 @@ import org.springframework.aop.support.AopUtils;
 /**
  * CGLIB2-based AopProxy implementation for the Spring AOP framework.
  * Requires CGLIB2 on the class path.
- * <p/>
+ *
  * <p>Objects of this type should be obtained through proxy factories,
  * configured by an AdvisedSupport object. This class is internal to the
  * Spring AOP framework and need not be used directly by client code.
- * <p/>
+ *
  * <p>DefaultAopProxyFactory will automatically create CGLIB2-based proxies
  * if necessary, for example in case of proxying a target class. See
  * DefaultAopProxyFactory's javadoc for details.
- * <p/>
+ *
  * <p>Proxies created using this class are thread-safe if the underlying
  * (target) class is thread-safe.
- * <p/>
+ *
  * <p>Built and tested against CGLIB 2.0.2, as of Spring 1.1.
  * Basic functionality will still work on CGLIB 2.0.1, but it is
  * generally recommended to use CGLIB 2.0.2 or later.
@@ -755,7 +755,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			boolean isStatic = this.advised.getTargetSource().isStatic();
 			boolean isFrozen = this.advised.isFrozen();
 
-			if (haveAdvice || !(isFrozen)) {
+			if (haveAdvice || !isFrozen) {
 				// If exposing the proxy, then AOP_PROXY must be used.
 				if (exposeProxy) {
 					if (logger.isDebugEnabled()) {

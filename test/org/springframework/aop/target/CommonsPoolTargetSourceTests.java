@@ -16,7 +16,11 @@
 
 package org.springframework.aop.target;
 
+import java.util.NoSuchElementException;
+
 import junit.framework.TestCase;
+import org.apache.commons.pool.impl.GenericObjectPool;
+
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.Person;
@@ -26,14 +30,10 @@ import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.SerializationTestUtils;
 
-import java.util.NoSuchElementException;
-
-import org.apache.commons.pool.impl.GenericObjectPool;
-
 /**
- * Tests for pooling invoker interceptor
- * TODO need to make these tests stronger: it's hard to
- * make too many assumptions about a pool
+ * Tests for pooling invoker interceptor.
+ * TODO: need to make these tests stronger: it's hard to
+ * make too many assumptions about a pool.
  *
  * @author Rod Johnson
  * @author Rob Harrop
@@ -151,12 +151,10 @@ public class CommonsPoolTargetSourceTests extends TestCase {
 	}
 
 	public void testHitMaxSizeLoadedFromContext() throws Exception {
-
-		Advised person = (Advised)beanFactory.getBean("maxSizePooledPerson");
+		Advised person = (Advised) beanFactory.getBean("maxSizePooledPerson");
 		CommonsPoolTargetSource targetSource = (CommonsPoolTargetSource) person.getTargetSource();
 
 		int maxSize = targetSource.getMaxSize();
-
 		Object[] pooledInstances = new Object[maxSize];
 
 		for (int x = 0; x < maxSize; x++) {
@@ -199,4 +197,5 @@ public class CommonsPoolTargetSourceTests extends TestCase {
 		targetSource.setTargetBeanName(beanName);
 		targetSource.setBeanFactory(applicationContext);
 	}
+
 }

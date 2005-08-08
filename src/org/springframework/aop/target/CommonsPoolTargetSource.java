@@ -60,6 +60,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 	private static final Constants constants = new Constants(GenericObjectPool.class);
 
+
 	private int maxIdle = GenericObjectPool.DEFAULT_MAX_IDLE;
 
 	private int minIdle = GenericObjectPool.DEFAULT_MIN_IDLE;
@@ -76,6 +77,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	 * The Jakarta Commons <code>ObjectPool</code> used to pool target objects
 	 */
 	private ObjectPool pool;
+
 
 	/**
 	 * Create a CommonsPoolTargetSource with default settings.
@@ -172,28 +174,34 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	}
 
 	/**
-	 * Sets the action to take when the pool is exhaustsed. Uses the contant names defined in
-	 * {@link GenericObjectPool}.
-	 * @see GenericObjectPool#setWhenExhaustedAction(byte)
+	 * Set the action to take when the pool is exhausted. Uses the
+	 * constant names defined in Commons Pool's GenericObjectPool class:
+	 * "WHEN_EXHAUSTED_BLOCK", "WHEN_EXHAUSTED_FAIL", "WHEN_EXHAUSTED_GROW".
+	 * @see #setWhenExhaustedAction(byte)
 	 */
 	public void setWhenExhaustedActionName(String whenExhaustedActionName) {
 		setWhenExhaustedAction(constants.asNumber(whenExhaustedActionName).byteValue());
 	}
 
 	/**
-	 * Sets the action to take when the pool is exhausted.
+	 * Set the action to take when the pool is exhausted. Uses the
+	 * constant values defined in Commons Pool's GenericObjectPool class.
 	 * @see GenericObjectPool#setWhenExhaustedAction(byte)
+	 * @see GenericObjectPool#WHEN_EXHAUSTED_BLOCK
+	 * @see GenericObjectPool#WHEN_EXHAUSTED_FAIL
+	 * @see GenericObjectPool#WHEN_EXHAUSTED_GROW
 	 */
 	public void setWhenExhaustedAction(byte whenExhaustedAction) {
 		this.whenExhaustedAction = whenExhaustedAction;
 	}
 
 	/**
-	 * Gets the action to take when the pool is exhausted.
+	 * Return the action to take when the pool is exhausted.
 	 */
 	public byte getWhenExhaustedAction() {
 		return whenExhaustedAction;
 	}
+
 
 	protected final void createPool(BeanFactory beanFactory) {
 		logger.info("Creating Commons object pool");
