@@ -39,7 +39,8 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Proxy factory bean for simplified declarative transaction handling.
- * Alternative to the standard AOP ProxyFactoryBean with a TransactionInterceptor.
+ * Alternative to a standard AOP ProxyFactoryBean with a separate
+ * TransactionInterceptor definition.
  *
  * <p>This class is intended to cover the <i>typical</i> case of declarative
  * transaction demarcation: namely, wrapping a singleton target object with a
@@ -50,7 +51,7 @@ import org.springframework.util.ClassUtils;
  * <ul>
  * <li>"transactionManager": the PlatformTransactionManager implementation to use
  * (for example, a JtaTransactionManager instance)
- * <li>"target": the target object that a transactional proxy shouls be created for
+ * <li>"target": the target object that a transactional proxy should be created for
  * <li>"transactionAttributes": the transaction attributes (for example, propagation
  * behavior and "readOnly" flag) per target method name (or method name pattern)
  * </ul>
@@ -70,6 +71,33 @@ import org.springframework.util.ClassUtils;
  * <p>The "preInterceptors" and "postInterceptors" properties can be set to add
  * additional interceptors to the mix, like PerformanceMonitorInterceptor or
  * HibernateInterceptor/JdoInterceptor.
+ *
+ * <p><b>HINT:</b> This class is often used with parent/child bean definitions.
+ * Typically, you will define the transaction manager and default transaction
+ * attributes (for method name patterns) in an abstract parent bean definition,
+ * deriving concrete child bean definitions for specific target objects.
+ * This reduces the per-bean definition effort to a minimum.
+ *
+ * <pre>
+ * &lt;bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+ *     abstract="true"&gt;
+ *   &lt;property name="transactionManager" ref="transactionManager"/&gt;
+ *   &lt;property name="transactionAttributes"&gt;
+ *     &lt;props&gt;
+ *       &lt;prop key="insert*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+ *       &lt;prop key="update*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+ *       &lt;prop key="*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
+ *     &lt;/props&gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;
+ *
+ * &lt;bean id="myProxy" parent="baseTransactionProxy"&gt;
+ *   &lt;property name="target" ref="myTarget"/&gt;
+ * &lt;/bean&gt;
+ *
+ * &lt;bean id="yourProxy" parent="baseTransactionProxy"&gt;
+ *   &lt;property name="target" ref="yourTarget"/&gt;
+ * &lt;/bean&gt;</pre>
  *
  * @author Juergen Hoeller
  * @author Dmitriy Kopylenko
@@ -236,7 +264,10 @@ public class TransactionProxyFactoryBean extends ProxyConfig
 		if (this.target == null) {
 			throw new IllegalArgumentException("'target' is required");
 		}
-		
+		if (this.target instanceof String) {
+			throw new IllegalArgumentException("'target' needs to be a bean reference, not a bean name as value");
+		}
+
 		ProxyFactory proxyFactory = new ProxyFactory();
 
 		if (this.preInterceptors != null) {
@@ -250,10 +281,10 @@ public class TransactionProxyFactoryBean extends ProxyConfig
 			proxyFactory.addAdvisor(advice);
 		}
 		else {
-			// rely on default pointcut
+			// Rely on default pointcut.
 			proxyFactory.addAdvisor(new TransactionAttributeSourceAdvisor(this.transactionInterceptor));
 			// Could just do the following, but it's usually less efficient because of AOP advice chain caching.
-			// proxyFactory.addInterceptor(transactionInterceptor);
+			// proxyFactory.addAdvice(transactionInterceptor);
 		}
 
 		if (this.postInterceptors != null) {
