@@ -21,12 +21,20 @@ import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import org.springframework.aop.interceptor.NopInterceptor;
+import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Additional and overridden tests for the CGLIB proxy.
@@ -256,6 +264,12 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		assertTrue("Finally was not invoked", proxy.isFinallyInvoked());
 	}
 
+	public void testWithDependencyChecking() {
+		ApplicationContext ctx =
+				new ClassPathXmlApplicationContext("org/springframework/aop/framework/withDependencyChecking.xml");
+		ctx.getBean("testBean");
+	}
+
 	public void testAddAdviceAtRuntime() {
 		TestBean bean = new TestBean();
 
@@ -267,7 +281,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		pf.setOpaque(false);
 		pf.setProxyTargetClass(true);
 
-			TestBean proxy = (TestBean)pf.getProxy();
+		TestBean proxy = (TestBean)pf.getProxy();
 
 		assertTrue(AopUtils.isCglibProxy(proxy));
 
@@ -283,10 +297,22 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 
 	}
 
-	public void testWithDependencyChecking() {
-		ApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/aop/framework/withDependencyChecking.xml");
-		ctx.getBean("testBean");
+
+
+	public void testSPR1211() throws Exception {
+		MyController controller = new MyController();
+		controller.setDelegate(new MyDelegate());
+
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTarget(controller);
+		proxyFactory.setProxyTargetClass(true);
+		proxyFactory.addAdvice(new DebugInterceptor());
+
+		MyController proxy = (MyController) proxyFactory.getProxy();
+
+		ModelAndView mv = proxy.handleRequest(new MockHttpServletRequest(), new MockHttpServletResponse());
+		assertEquals("myView", mv.getViewName());
+		assertEquals(new Integer(2), mv.getModel().get("result"));
 	}
 
 
@@ -315,6 +341,25 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 			finally {
 				finallyInvoked = true;
 			}
+		}
+	}
+
+	public static class MyController implements Controller {
+
+		private MyDelegate delegate;
+
+		public void setDelegate(MyDelegate delegate) {
+			this.delegate = delegate;
+		}
+
+		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+			return new ModelAndView("myView", "result", new Integer(this.delegate.add(1, 1)));
+		}
+	}
+
+	private static class MyDelegate {
+		public int add(int x, int y) {
+			return x + y;
 		}
 	}
 
