@@ -23,6 +23,7 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.core.Constants;
 
 /**
  * Jakarta Commons pooling implementation extending <code>AbstractPoolingTargetSource</code>.
@@ -57,6 +58,8 @@ import org.springframework.beans.factory.DisposableBean;
 public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 		implements PoolableObjectFactory {
 
+	private static final Constants constants = new Constants(GenericObjectPool.class);
+
 	private int maxIdle = GenericObjectPool.DEFAULT_MAX_IDLE;
 
 	private int minIdle = GenericObjectPool.DEFAULT_MIN_IDLE;
@@ -67,11 +70,12 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 	private long minEvictableIdleTimeMillis = GenericObjectPool.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
 
+	private byte whenExhaustedAction = GenericObjectPool.DEFAULT_WHEN_EXHAUSTED_ACTION;
+
 	/**
 	 * The Jakarta Commons <code>ObjectPool</code> used to pool target objects
 	 */
 	private ObjectPool pool;
-
 
 	/**
 	 * Create a CommonsPoolTargetSource with default settings.
@@ -167,6 +171,29 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 		return this.minEvictableIdleTimeMillis;
 	}
 
+	/**
+	 * Sets the action to take when the pool is exhaustsed. Uses the contant names defined in
+	 * {@link GenericObjectPool}.
+	 * @see GenericObjectPool#setWhenExhaustedAction(byte)
+	 */
+	public void setWhenExhaustedActionName(String whenExhaustedActionName) {
+		setWhenExhaustedAction(constants.asNumber(whenExhaustedActionName).byteValue());
+	}
+
+	/**
+	 * Sets the action to take when the pool is exhausted.
+	 * @see GenericObjectPool#setWhenExhaustedAction(byte)
+	 */
+	public void setWhenExhaustedAction(byte whenExhaustedAction) {
+		this.whenExhaustedAction = whenExhaustedAction;
+	}
+
+	/**
+	 * Gets the action to take when the pool is exhausted.
+	 */
+	public byte getWhenExhaustedAction() {
+		return whenExhaustedAction;
+	}
 
 	protected final void createPool(BeanFactory beanFactory) {
 		logger.info("Creating Commons object pool");
@@ -189,6 +216,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 		gop.setMaxWait(getMaxWait());
 		gop.setTimeBetweenEvictionRunsMillis(getTimeBetweenEvictionRunsMillis());
 		gop.setMinEvictableIdleTimeMillis(getMinEvictableIdleTimeMillis());
+		gop.setWhenExhaustedAction(getWhenExhaustedAction());
 		return gop;
 	}
 
