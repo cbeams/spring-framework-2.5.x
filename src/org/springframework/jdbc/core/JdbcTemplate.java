@@ -719,12 +719,17 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				generatedKeys.clear();
 				ResultSet keys = ps.getGeneratedKeys();
 				if (keys != null) {
-					ColumnMapRowMapper rowMapper = new ColumnMapRowMapper();
-					RowMapperResultReader resultReader = new RowMapperResultReader(rowMapper, 1);
-					while (keys.next()) {
-						resultReader.processRow(keys);
+					try {
+						ColumnMapRowMapper rowMapper = new ColumnMapRowMapper();
+						RowMapperResultReader resultReader = new RowMapperResultReader(rowMapper, 1);
+						while (keys.next()) {
+							resultReader.processRow(keys);
+						}
+						generatedKeys.addAll(resultReader.getResults());
 					}
-					generatedKeys.addAll(resultReader.getResults());
+					finally {
+						JdbcUtils.closeResultSet(keys);
+					}
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("SQL update affected " + rows + " rows and returned " + generatedKeys.size() + " keys");
