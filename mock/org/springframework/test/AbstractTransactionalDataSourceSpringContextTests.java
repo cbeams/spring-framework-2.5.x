@@ -62,8 +62,8 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 	 */
 	protected void deleteFromTables(String[] names) {
 		for (int i = 0; i < names.length; i++) {
+			int rowCount = this.jdbcTemplate.update("DELETE FROM " + names[i]);
 			if (logger.isInfoEnabled()) {
-				int rowCount = this.jdbcTemplate.update("DELETE FROM " + names[i]);
 				logger.info("Deleted " + rowCount + " rows from table " + names[i]);
 			}
 		}
