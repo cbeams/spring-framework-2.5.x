@@ -765,6 +765,7 @@ public class MimeMessageHelper {
 	 */
 	public void addInline(String contentId, InputStreamSource inputStreamSource, String contentType)
 	    throws MessagingException {
+
 		Assert.notNull(inputStreamSource, "InputStreamSource must not be null");
 		if (inputStreamSource instanceof Resource && ((Resource) inputStreamSource).isOpen()) {
 			throw new IllegalArgumentException(
@@ -839,13 +840,36 @@ public class MimeMessageHelper {
 	public void addAttachment(String attachmentFilename, InputStreamSource inputStreamSource)
 	    throws MessagingException {
 
+		String contentType = getFileTypeMap().getContentType(attachmentFilename);
+		addAttachment(attachmentFilename, inputStreamSource, contentType);
+	}
+
+	/**
+	 * Add an attachment to the MimeMessage, taking the content from an
+	 * <code>org.springframework.core.io.InputStreamResource</code>.
+	 * <p>Note that the InputStream returned by the InputStreamSource implementation
+	 * needs to be a <i>fresh one on each call</i>, as JavaMail will invoke
+	 * <code>getInputStream()</code> multiple times.
+	 * @param attachmentFilename the name of the attachment as it will
+	 * appear in the mail
+	 * @param inputStreamSource the resource to take the content from
+	 * (all of Spring's Resource implementations can be passed in here)
+	 * @param contentType the content type to use for the element
+	 * @throws MessagingException in case of errors
+	 * @see #addAttachment(String, java.io.File)
+	 * @see #addAttachment(String, javax.activation.DataSource)
+	 * @see org.springframework.core.io.Resource
+	 */
+	public void addAttachment(
+			String attachmentFilename, InputStreamSource inputStreamSource, String contentType)
+	    throws MessagingException {
+
 		Assert.notNull(inputStreamSource, "InputStreamSource must not be null");
 		if (inputStreamSource instanceof Resource && ((Resource) inputStreamSource).isOpen()) {
 			throw new IllegalArgumentException(
 					"Passed-in Resource contains an open stream: invalid argument. " +
 					"JavaMail requires an InputStreamSource that creates a fresh stream for every call.");
 		}
-		String contentType = getFileTypeMap().getContentType(attachmentFilename);
 		DataSource dataSource = createDataSource(inputStreamSource, contentType, attachmentFilename);
 		addAttachment(attachmentFilename, dataSource);
 	}
