@@ -909,7 +909,7 @@ interface TestService {
   &lt;property name="transactionManager" ref="txManager"/&gt;
   &lt;property name="target" ref="petStoreTarget"/&gt;
   &lt;property name="transactionAttributeSource"&gt;
-    &lt;bean class="...transaction.annotation.AnnotationTransactionAttributeSource"/&gt;
+    &lt;bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource"/&gt;
   &lt;/property&gt;
 &lt;/bean&gt;</programlisting>Since the TransactionAttributeSource property
           does not need to change at all for each proxy instance, when using
@@ -946,10 +946,10 @@ interface TestService {
           <para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
 
 &lt;bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
-  &lt;property name="transactionInterceptor" ref="transactionInterceptor"/&gt;
+  &lt;property name="transactionInterceptor" ref="txInterceptor"/&gt;
 &lt;/bean&gt;
 
-&lt;bean id="transactionInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
+&lt;bean id="txInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
   &lt;property name="transactionManager" ref="txManager"/&gt;
   &lt;property name="transactionAttributeSource"&gt;
     &lt;bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource"/&gt;
@@ -961,8 +961,7 @@ interface TestService {
           <itemizedlist>
             <listitem>
               <para><literal>TransactionInterceptor</literal>: the AOP Advice,
-              actually intercepts method call and wraps it with a
-              transaction</para>
+              actually intercepts method call and wraps it with a transaction</para>
             </listitem>
 
             <listitem>
@@ -1272,7 +1271,7 @@ interface TestService {
    No further JDBC access is allowed within this transaction. </programlisting></para>
 
       <para>This warning is easy to resolve as described in <xref
-      linkend="orm-hibernate-invalid-jdbc-access-error" />.</para>
+      linkend="orm-hibernate-invalid-jdbc-access-error"/>.</para>
     </sect2>
   </sect1>
 </chapter>

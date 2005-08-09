@@ -43,6 +43,7 @@ public class AttributesTransactionAttributeSource extends AbstractFallbackTransa
 	 */
 	private Attributes attributes;
 
+
 	/**
 	 * Create a new AttributesTransactionAttributeSource.
 	 * @see #setAttributes
@@ -75,6 +76,7 @@ public class AttributesTransactionAttributeSource extends AbstractFallbackTransa
 			throw new IllegalArgumentException("'attributes' is required");
 		}
 	}
+
 
 	protected Collection findAllAttributes(Class clazz) {
 		Assert.notNull(this.attributes, "'attributes' is required");
