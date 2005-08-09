@@ -188,15 +188,15 @@ source level metadata or any arbitrary interface.</para>
       metadata. The reading of metadata is encapsulated by the
       <literal>org.springframework.jmx.export.metadata.JmxAttributeSource
       </literal>interface. Out of the box, Spring JMX provides support for two
-      implementations of this interface –
-      <literal>AttributesJmxAttributeSource</literal> for Commons Attributes
-      and <literal>AnnotationsAttributeSource</literal> for JDK 5.0
-      annotations. The <literal>MetadataMBeanInfoAssembler</literal> MUST be
-      configured with an implementation of
-      <literal>JmxAttributeSource</literal> for it to function correctly. For
-      this example we will use the Commons Attributes metadata
-      approach.</para>
-			<para>To mark a bean for export to JMX, you should annotate the bean’s
+      implementations of this interface:
+      <literal>org.springframework.jmx.export.metadata.AttributesJmxAttributeSource</literal>
+      for Commons Attributes and
+      <literal>org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource</literal>
+      for JDK 5.0 annotations. The <literal>MetadataMBeanInfoAssembler</literal>
+      MUST be configured with an implementation of <literal>JmxAttributeSource</literal>
+      for it to function correctly. For this example, we will use the Commons
+      Attributes metadata approach.</para>
+			<para>To mark a bean for export to JMX, you should annotate the bean
       class with the <literal>ManagedResource</literal> attribute. In the case
       of the Commons Attributes metadata approach this class can be found in
       the org.springframework.jmx.metadata package. Each method you wish to
@@ -312,7 +312,11 @@ public class JmxTestBean implements IJmxTestBean {
   &lt;/bean&gt;
 
   &lt;bean id="attributeSource"
-        class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"/&gt;
+        class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"&gt;
+    &lt;property name="attributes"&gt;
+      &lt;bean class="org.springframework.metadata.commons.CommonsAttributes"/&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
 
   &lt;bean id="assembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler"&gt;
     &lt;property name="attributeSource"&gt;
@@ -393,7 +397,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       checking.</para>
 		</section>
 		<section id="jmx-interface-metadata-types">
-			<title>Source Level Metadata Types</title>
+			<title>Source-Level Metadata Types</title>
 			<para>The following source level metadata types are available for use in
       Spring JMX:</para>
 			<para>
@@ -409,7 +413,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 								<entry align="center">Purpose</entry>
 								<entry align="center">Commons Attributes Attribute</entry>
 								<entry align="center">JDK 5.0 Annotation</entry>
-								<entry align="center">Annotation/Attribute Type</entry>
+								<entry align="center">Attribute / Annotation Type</entry>
 							</row>
 						</thead>
 						<tbody>
@@ -614,7 +618,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       support for autodetection of MBean resources. If you configure the
       <literal>MBeanExporter</literal> with an instance of
       <literal>AutodetectCapableMBeanInfoAssembler</literal> then it is
-      allowed to ‘vote’ on the inclusion of beans for exposure to JMX.</para>
+      allowed to "vote" on the inclusion of beans for exposure to JMX.</para>
 			<para>Out of the box, the only implementation of
       <literal>AutodetectCapableMBeanInfo</literal> is the
       <literal>MetadataMBeanInfoAssembler</literal> which will vote to include
@@ -897,12 +901,11 @@ configuration:</para>
 			<programlisting>&lt;bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean"/&gt;</programlisting>
 			<para>By default <literal>ConnectorServerFactoryBean</literal> creates a
  <literal>JMXConnectorServer</literal> bound to
-“service:jmx:jmxmp://localhost:9875. The <literal>serverConnector </literal>bean thus
-exposes the local <literal>MBeanServer</literal> to clients through the
-jmxmp protocol on localhost, port 9875. Note that JMXMP protocol is
-marked as optional by the JSR 160 – currently the popular open-source
-JMX implementation, MX4J and the one provided with J2SE 5.0 do not support
-JMXMP.</para>
+"service:jmx:jmxmp://localhost:9875". The <literal>serverConnector</literal> bean thus
+exposes the local <literal>MBeanServer</literal> to clients through the JMXMP
+protocol on localhost, port 9875. Note that the JMXMP protocol is marked as
+optional by the JSR 160: Currently, the main open-source JMX implementation,
+MX4J, and the one provided with J2SE 5.0 do not support JMXMP.</para>
 			<para>To specify another URL and register the
 <literal>JMXConnectorServer</literal> itself with the <literal>MBeanServer</literal> use the <literal>serviceUrl</literal> and
  <literal>objectName</literal> properties respectively:</para>
