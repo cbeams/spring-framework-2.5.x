@@ -24,6 +24,7 @@ import java.util.Iterator;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.metadata.Attributes;
+import org.springframework.util.Assert;
 
 /**
  * Implementation of the <code>JmxAttributeSource</code> interface that
@@ -87,6 +88,7 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 	 * @throws InvalidMetadataException if more than one attribute exists
 	 */
 	public ManagedResource getManagedResource(Class clazz) {
+		Assert.notNull(this.attributes, "'attributes' is required");
 		Collection attrs = this.attributes.getAttributes(clazz, ManagedResource.class);
 		if (attrs.isEmpty()) {
 			return null;
@@ -108,6 +110,7 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 	 * or if the supplied method does not represent a JavaBean property
 	 */
 	public ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException {
+		Assert.notNull(this.attributes, "'attributes' is required");
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 		if (pd == null) {
 			throw new InvalidMetadataException(
@@ -135,6 +138,7 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 	 * or if the supplied method represents a JavaBean property
 	 */
 	public ManagedOperation getManagedOperation(Method method) {
+		Assert.notNull(this.attributes, "'attributes' is required");
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 		if (pd != null) {
 			throw new InvalidMetadataException(
@@ -164,6 +168,7 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 	public ManagedOperationParameter[] getManagedOperationParameters(Method method)
 			throws InvalidMetadataException {
 
+		Assert.notNull(this.attributes, "'attributes' is required");
 		Collection attrs = this.attributes.getAttributes(method, ManagedOperationParameter.class);
 		if (attrs.size() == 0) {
 			return new ManagedOperationParameter[0];
