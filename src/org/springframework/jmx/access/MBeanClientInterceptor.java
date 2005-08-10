@@ -358,19 +358,16 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 			throw new InvalidInvocationException("Operation '" + method.getName() +
 					"' is not exposed on the management interface");
 		}
-		else {
-			String[] signature = null;
-			synchronized (this.signatureCache) {
-				signature = (String[]) this.signatureCache.get(method);
-				if (signature == null) {
-					signature = JmxUtils.getMethodSignature(method);
-					synchronized (this.signatureCache) {
-						this.signatureCache.put(method, signature);
-					}
-				}
+
+		String[] signature = null;
+		synchronized (this.signatureCache) {
+			signature = (String[]) this.signatureCache.get(method);
+			if (signature == null) {
+				signature = JmxUtils.getMethodSignature(method);
+				this.signatureCache.put(method, signature);
 			}
-			return this.server.invoke(this.objectName, method.getName(), args, signature);
 		}
+		return this.server.invoke(this.objectName, method.getName(), args, signature);
 	}
 
 	/**
