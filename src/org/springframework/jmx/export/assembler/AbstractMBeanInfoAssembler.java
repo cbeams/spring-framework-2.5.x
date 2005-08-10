@@ -27,6 +27,7 @@ import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.jmx.support.JmxUtils;
 
 /**
  * Abstract implementation of the <code>MBeanInfoAssembler</code> interface
@@ -101,38 +102,24 @@ public abstract class AbstractMBeanInfoAssembler implements MBeanInfoAssembler {
 	 * Return the class or interface to expose for the given bean.
 	 * This is the class that will be searched for attributes and operations
 	 * (for example, checked for annotations).
-	 * <p>Default implementation returns the target class for a CGLIB proxy,
-	 * and the class of the given bean else (for a JDK proxy or a plain bean class).
 	 * @param managedBean the bean instance (might be an AOP proxy)
 	 * @return the bean class to expose
-	 * @see org.springframework.aop.support.AopUtils#isCglibProxy(Object)
-	 * @see org.springframework.aop.framework.Advised#getTargetSource()
-	 * @see org.springframework.aop.TargetSource#getTargetClass()
+	 * @see JmxUtils#getClassToExpose(Object) 
 	 */
 	protected Class getClassToExpose(Object managedBean) {
-		if (AopUtils.isCglibProxy(managedBean)) {
-			return managedBean.getClass().getSuperclass();
-		}
-		return managedBean.getClass();
+		return JmxUtils.getClassToExpose(managedBean);
 	}
 
 	/**
 	 * Return the class or interface to expose for the given bean class.
 	 * This is the class that will be searched for attributes and operations
-	 * (for example, checked for annotations).
-	 * <p>Default implementation returns the superclass for a CGLIB proxy,
-	 * and the given bean class else (for a JDK proxy or a plain bean class).
 	 * @param beanClass the bean class (might be an AOP proxy class)
 	 * @return the bean class to expose
-	 * @see org.springframework.aop.support.AopUtils#isCglibProxyClass(Class)
+	 * @see JmxUtils#getClassToExpose(Class)
 	 */
 	protected Class getClassToExpose(Class beanClass) {
-		if (AopUtils.isCglibProxyClass(beanClass)) {
-			return beanClass.getSuperclass();
-		}
-		return beanClass;
+		return JmxUtils.getClassToExpose(beanClass);
 	}
-
 
 	/**
 	 * Get the class name of the MBean resource.

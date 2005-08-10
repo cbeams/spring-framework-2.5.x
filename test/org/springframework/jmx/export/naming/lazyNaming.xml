@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="jmxAdapter" class="org.springframework.jmx.export.MBeanExporter">
+		<property name="autodetect" value="true"/>
+		<property name="assembler" ref="metadataAssembler"/>
+		<property name="namingStrategy" ref="metadataNamingStrategy"/>
+		<property name="server" ref="server"/>
+	</bean>
+
+
+	<bean id="testBean" class="org.springframework.jmx.export.annotation.AnnotationTestBean" lazy-init="true">
+		<property name="name" value="TEST"/>
+		<property name="age" value="100"/>
+	</bean>
+
+	<bean id="attributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+
+	<bean id="metadataNamingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+		<property name="attributeSource" ref="attributeSource"/>
+
+	</bean>
+
+	<bean id="metadataAssembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+		<property name="attributeSource" ref="attributeSource"/>
+	</bean>
+
+	<bean id="server" class="org.springframework.jmx.support.MBeanServerFactoryBean"/>
+</beans>

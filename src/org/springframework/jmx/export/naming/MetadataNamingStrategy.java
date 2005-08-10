@@ -22,6 +22,7 @@ import javax.management.ObjectName;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.export.metadata.ManagedResource;
 import org.springframework.jmx.support.ObjectNameManager;
+import org.springframework.jmx.support.JmxUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -52,7 +53,8 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy {
 	 * with the managed resource's <code>Class</code>.
 	 */
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
-		ManagedResource mr = this.attributeSource.getManagedResource(managedBean.getClass());
+		Class managedClass = JmxUtils.getClassToExpose(managedBean);
+		ManagedResource mr = this.attributeSource.getManagedResource(managedClass);
 
 		// Check that the managed resource attribute has been specified.
 		if (mr == null) {

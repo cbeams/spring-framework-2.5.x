@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.aop.support.AopUtils;
 
 /**
  * Collection of generic utility methods to support Spring JMX.
@@ -163,6 +164,42 @@ public class JmxUtils {
 	}
 
 	/**
+	 * Return the class or interface to expose for the given bean.
+	 * This is the class that will be searched for attributes and operations
+	 * (for example, checked for annotations).
+	 * <p>Default implementation returns the target class for a CGLIB proxy,
+	 * and the class of the given bean else (for a JDK proxy or a plain bean class).
+	 * @param managedBean the bean instance (might be an AOP proxy)
+	 * @return the bean class to expose
+	 * @see org.springframework.aop.support.AopUtils#isCglibProxy(Object)
+	 * @see org.springframework.aop.framework.Advised#getTargetSource()
+	 * @see org.springframework.aop.TargetSource#getTargetClass()
+	 */
+	public static Class getClassToExpose(Object managedBean) {
+		if (AopUtils.isCglibProxy(managedBean)) {
+			return managedBean.getClass().getSuperclass();
+		}
+		return managedBean.getClass();
+	}
+
+	/**
+	 * Return the class or interface to expose for the given bean class.
+	 * This is the class that will be searched for attributes and operations
+	 * (for example, checked for annotations).
+	 * <p>Default implementation returns the superclass for a CGLIB proxy,
+	 * and the given bean class else (for a JDK proxy or a plain bean class).
+	 * @param beanClass the bean class (might be an AOP proxy class)
+	 * @return the bean class to expose
+	 * @see org.springframework.aop.support.AopUtils#isCglibProxyClass(Class)
+	 */
+	public static Class getClassToExpose(Class beanClass) {
+		if (AopUtils.isCglibProxyClass(beanClass)) {
+			return beanClass.getSuperclass();
+		}
+		return beanClass;
+	}
+
+	/**
 	 * Return whether an MBean interface exists for the given class
 	 * (that is, an interface whose name matches the class name of
 	 * the given class but with suffix "MBean).
@@ -178,5 +215,4 @@ public class JmxUtils {
 		}
 		return false;
 	}
-
 }
