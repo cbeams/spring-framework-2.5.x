@@ -3,15 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.4 (9.8.2005)
------------------------------------
+Changes in version 1.2.4 (13.8.2005)
+------------------------------------
 
 Package org.springframework.aop
 * added "loggerName" bean property to AbstractTraceInterceptor, allowing to log into a specified log category
+* added "whenExhaustedAction" and "whenExhaustedActionName" bean properties to CommonsPoolTargetSource
 
 Package org.springframework.beans
 * changed BeanWrapperImpl's default behavior to not extract old property values, avoiding side effects caused by getters
 * added "setExtractOldValueForEditor" method to BeanWrapper and BeanWrapperImpl, allowing to control getter invocation
+* BeanWrapperImpl's "getPropertyType" checks custom editors and takes registered type as hint for expected property type
 * added public "getSortDefinition()" method to PropertyComparator, giving access to the sort definition for unit tests
 * added overloaded constructor to CustomDateEditor, accepting an exact date length to check (to avoid misinterpretation)
 * XmlBeanDefinitionReader uses ResourceEntityResolver if the passed-in BeanFactory was autodetected as ResourceLoader
@@ -26,6 +28,7 @@ Package org.springframework.jca
 * CciTemplate exposes RecordFactory placeholder to RecordCreator callbacks if connector doesn't provide a RecordFactory
 
 Package org.springframework.jdbc
+* JdbcTemplate's "update" version with a KeyHolder argument explicitly closes the generated keys ResultSet, if any
 * fixed SqlFunction's default constructor to set "rowsExpected" to 1, like all other SqlFunction constructors
 * reworked SqlFunction to use SingleColumnRowMapper underneath, exposing a "resultType" bean property of type Class
 * deprecated SqlFunction's constructors that expect a SQL return type, in favor of specifying a result type Class
@@ -35,9 +38,13 @@ Package org.springframework.jmx
 * MBeanClientInterceptor closes a JMX Connector opened through the "serviceUrl" bean property on shutdown
 * added "connectOnStartup" flag to MBeanClientInterceptor, to be turned off for lazily connecting on first access
 
+Package org.springframework.mail
+* added overloaded "addAttachment(attachmentFilename, inputStreamSource, contentType)" method to MimeMessageHelper
+
 Package org.springframework.mock
 * reworked ExpectedLookupTemplate to support multiple JNDI name/object pairs
 * added overloaded constructor to MockServletContext, with just a ResourceLoader as argument
+* fixed AbstractTransactionalDataSourceSpringContextTests to delete from tables even if info logging is turned off
 
 Package org.springframework.orm
 * upgraded to the most recently published version of the Hibernate 3.0.5 jar (there seem to be multiple versions around)
