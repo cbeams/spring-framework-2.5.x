@@ -10,7 +10,6 @@
 		<property name="server" ref="server"/>
 	</bean>
 
-
 	<bean id="testBean" class="org.springframework.jmx.export.annotation.AnnotationTestBean" lazy-init="true">
 		<property name="name" value="TEST"/>
 		<property name="age" value="100"/>
@@ -20,7 +19,6 @@
 
 	<bean id="metadataNamingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
 		<property name="attributeSource" ref="attributeSource"/>
-
 	</bean>
 
 	<bean id="metadataAssembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
@@ -28,4 +26,5 @@
 	</bean>
 
 	<bean id="server" class="org.springframework.jmx.support.MBeanServerFactoryBean"/>
+
 </beans>

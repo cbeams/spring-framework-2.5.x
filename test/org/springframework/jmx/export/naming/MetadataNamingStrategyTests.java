@@ -16,17 +16,9 @@
 
 package org.springframework.jmx.export.naming;
 
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jmx.JmxTestBean;
-import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.jmx.export.metadata.AttributesJmxAttributeSource;
 import org.springframework.metadata.commons.CommonsAttributes;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectInstance;
-import javax.management.InstanceNotFoundException;
-import javax.management.MalformedObjectNameException;
 
 /**
  * @author Rob Harrop
@@ -51,21 +43,6 @@ public class MetadataNamingStrategyTests extends AbstractNamingStrategyTests {
 
 	protected String getCorrectObjectName() {
 		return OBJECT_NAME;
-	}
-
-	public void testWithLazyInit() throws InstanceNotFoundException, MalformedObjectNameException {
-		ConfigurableApplicationContext ctx = null;
-		try {
-			ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/naming/lazyNaming.xml");
-			MBeanServer server = (MBeanServer)ctx.getBean("server");
-			ObjectInstance objectInstance = server.getObjectInstance(ObjectNameManager.getInstance("bean:name=testBean4"));
-			assertNotNull(objectInstance);
-		}
-		finally {
-			if (ctx != null) {
-				ctx.close();
-			}
-		}
 	}
 
 }
