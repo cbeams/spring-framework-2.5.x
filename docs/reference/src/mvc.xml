@@ -1464,7 +1464,107 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
   <sect1 id="mvc-themeresolver">
     <title>Using themes</title>
 
-    <para>Dummy paragraph</para>
+    <sect2 id="mvc-themeresolver-introduction">
+      <title>Introduction</title>
+
+       <para>The <emphasis>theme</emphasis> support provided by the Spring web MVC
+       framework enables you to further enhance the user experience by allowing the look and
+       feel of your application to be <emphasis>themed</emphasis>. A theme is
+       basically a collection of static resources affecting the visual style of the
+       application, typically style sheets and images.</para>
+    </sect2>
+    
+    <sect2 id="mvc-themeresolver-defining">
+       <title>Defining themes</title>
+       <para>When you want to use themes in your web application you'll have to setup
+       a <literal>org.springframework.ui.context.ThemeSource</literal>. The
+       <literal>WebApplicationContext</literal> interface extends <literal>ThemeSource</literal>
+       but delegates it's responsabilities to a dedicated implementation. By default the
+       delegate will be a <literal>org.springframework.ui.context.support.ResourceBundleThemeSource</literal>
+       that loads properties files from the root of the classpath. If you want to use
+       a custom <literal>ThemeSource</literal> implementation or if you need to configure
+       the basename prefix of the <literal>ResourceBundleThemeSource</literal>, you can
+       register a bean in the application context with the reserved name "themeSource".
+       The web application context will automatically detect that bean and start using it.</para>
+       
+       <para>When using the <literal>ResourceBundleThemeSource</literal>, a theme is defined
+       in a simple properties file. The properties file lists the resources that make up the theme.
+       Here's an example:
+<programlisting>styleSheet=/themes/cool/style.css
+background=/themes/cool/img/coolBg.jpg
+</programlisting>
+       The keys of the properties are the names used to refer to the themed elements
+       from view code. For a JSP this would typically be done using the
+       <literal>spring:theme</literal> custom tag, which is very similar to the
+       <literal>spring:message</literal> tag. The following JSP fragment uses
+       the theme defined above to customize the look and feel:
+<programlisting>&lt;taglib prefix="spring" uri="http://www.springframework.org/tags"%&gt;
+&lt;html&gt;
+   &lt;head&gt;
+      &lt;link rel="stylesheet" href="&lt;spring:theme code="styleSheet"/&gt;" type="text/css"/&gt;
+   &lt;/head&gt;
+   &lt;body background="&lt;spring:theme code="background"/&gt;"&gt;
+      ...
+   &lt;/body&gt;
+&lt;/html&gt;
+</programlisting>
+       </para>
+       
+       <para>By default, the <literal>ResourceBundleThemeSource</literal> uses an empty basename
+       prefix. As a result the properties files will be loaded from the root of the classpath,
+       so we'll have to put our <literal>cool.properties</literal> theme definition in a directory
+       at the root of the classpath, e.g. in <literal>/WEB-INF/classes</literal>. Note that
+       the <literal>ResourceBundleThemeSource</literal> uses the standard Java resource bundle
+       loading mechanism, allowing for full internationalisation of themes. For instance, we could
+       have a <literal>/WEB-INF/classes/cool_nl.properties</literal> that references a special
+       background image, e.g. with Dutch text on it.</para>
+    </sect2>
+    
+    <sect2 id="mvc-themeresolver-resolving">
+       <title>Theme resolvers</title>
+       
+       <para>Now that we have our themes defined, the only thing left to do is decide which theme
+       to use. The <literal>DispatcherServlet</literal> will look for a bean named "themeResolver"
+       to find out which <literal>ThemeResolver</literal> implementation to use. A theme resolver
+       works in much the same way as a <literal>LocalResolver</literal>. It can detect the
+       theme that should be used for a particular request and can also alter the request's
+       theme. The following theme resolvers are provided by Spring:</para>
+       
+       <table frame="all">
+        <title>ThemeResolver implementations</title>
+
+        <tgroup cols="2">
+          <colspec colname="c1" colwidth="1*" />
+          <colspec colname="c3" colwidth="3*" />
+
+          <thead>
+            <row>
+              <entry>Class</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>FixedThemeResolver</entry>
+              <entry>Selects a fixed theme, set using the "defaultThemeName" property.</entry>
+            </row>
+            <row>
+              <entry>SessionThemeResolver</entry>
+              <entry>The theme is maintained in the users HTTP session. It only needs
+              to be set once for each session, but is not persisted between sessions.</entry>
+            </row>
+            <row>
+              <entry>CookieThemeResolver</entry>
+              <entry>The selected theme is stored in a cookie on the client's machine.</entry>
+            </row>
+          </tbody>
+         </tgroup>
+       </table>
+       
+       <para>Spring also provides a <literal>ThemeChangeInterceptor</literal>, which allows changing
+       the theme on every request by including a simple request parameter.</para>
+    </sect2>
   </sect1>
 
   <sect1 id="mvc-multipart">
