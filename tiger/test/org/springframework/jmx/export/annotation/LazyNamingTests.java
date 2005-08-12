@@ -26,6 +26,7 @@ import junit.framework.TestCase;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jmx.support.ObjectNameManager;
+import org.springframework.core.JdkVersion;
 
 /**
  * @author Rob Harrop
@@ -33,6 +34,10 @@ import org.springframework.jmx.support.ObjectNameManager;
 public class LazyNamingTests extends TestCase {
 
 	public void testWithLazyInit() throws InstanceNotFoundException, MalformedObjectNameException {
+		if(JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+			return;
+		}
+		
 		ConfigurableApplicationContext ctx = null;
 		try {
 			ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyNaming.xml");
