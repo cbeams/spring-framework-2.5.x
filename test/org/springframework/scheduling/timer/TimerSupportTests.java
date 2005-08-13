@@ -41,7 +41,7 @@ public class TimerSupportTests extends TestCase {
 		mittfb.afterPropertiesSet();
 		final TimerTask timerTask1 = (TimerTask) mittfb.getObject();
 
-		final TestTimerTask timerTask2 = new TestTimerTask();
+		final TestRunnable timerTask2 = new TestRunnable();
 
 		ScheduledTimerTask[] tasks = new ScheduledTimerTask[3];
 		tasks[0] = new ScheduledTimerTask(timerTask0, 0, 10, false);
@@ -61,7 +61,7 @@ public class TimerSupportTests extends TestCase {
 				}
 			}
 			public void schedule(TimerTask task, long delay) {
-				if (task == timerTask2 && delay == 20) {
+				if (task instanceof DelegatingTimerTask && delay == 20) {
 					success.add(Boolean.TRUE);
 				}
 			}
@@ -95,6 +95,16 @@ public class TimerSupportTests extends TestCase {
 
 
 	private static class TestTimerTask extends TimerTask {
+
+		private int counter = 0;
+
+		public void run() {
+			counter++;
+		}
+	}
+
+
+	private static class TestRunnable implements Runnable {
 
 		private int counter = 0;
 

@@ -20,8 +20,9 @@ import java.util.TimerTask;
 
 /**
  * JavaBean that describes a scheduled TimerTask, consisting of
- * the TimerTask itself and a delay plus period. Period needs to
- * be specified; there is no point in a default for it.
+ * the TimerTask itself (or a Runnable to create a TimerTask for)
+ * and a delay plus period. Period needs to be specified;
+ * there is no point in a default for it.
  *
  * <p>The J2SE Timer does not offer more sophisticated scheduling
  * options like cron expressions. Consider using Quartz for such
@@ -93,6 +94,48 @@ public class ScheduledTimerTask {
 		this.fixedRate = fixedRate;
 	}
 
+	/**
+	 * Create a new ScheduledTimerTask, with default
+	 * one-time execution without delay.
+	 * @param timerTask the Runnable to schedule as TimerTask
+	 */
+	public ScheduledTimerTask(Runnable timerTask) {
+		setRunnable(timerTask);
+	}
+
+	/**
+	 * Create a new ScheduledTimerTask, with default
+	 * one-time execution with the given delay.
+	 * @param timerTask the Runnable to schedule as TimerTask
+	 * @param delay the delay before starting the task for the first time (ms)
+	 */
+	public ScheduledTimerTask(Runnable timerTask, long delay) {
+		setRunnable(timerTask);
+		this.delay = delay;
+	}
+
+	/**
+	 * Create a new ScheduledTimerTask.
+	 * @param timerTask the Runnable to schedule as TimerTask
+	 * @param delay the delay before starting the task for the first time (ms)
+	 * @param period the period between repeated task executions (ms)
+	 * @param fixedRate whether to schedule as fixed-rate execution
+	 */
+	public ScheduledTimerTask(Runnable timerTask, long delay, long period, boolean fixedRate) {
+		setRunnable(timerTask);
+		this.delay = delay;
+		this.period = period;
+		this.fixedRate = fixedRate;
+	}
+
+
+	/**
+	 * Set the Runnable to schedule as TimerTask.
+	 * @see DelegatingTimerTask
+	 */
+	public void setRunnable(Runnable timerTask) {
+		this.timerTask = new DelegatingTimerTask(timerTask);
+	}
 
 	/**
 	 * Set the TimerTask to schedule.
