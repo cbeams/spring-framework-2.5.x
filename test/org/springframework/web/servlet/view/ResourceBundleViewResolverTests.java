@@ -110,6 +110,14 @@ public class ResourceBundleViewResolverTests extends TestCase {
 			jv.getContentType().equals("text/xml; charset=ISO-8859-1"));
 	}
 
+	public void testSameBundleOnlyCachedOnce() throws Exception {
+		if (rb.isCache()) {
+			View v1 = rb.resolveViewName("debugView", Locale.ENGLISH);
+			View v2 = rb.resolveViewName("debugView", Locale.UK);
+			assertSame(v1, v2);
+		}
+	}
+
 	public void testNoSuchViewEnglish() throws Exception {
 		View v = rb.resolveViewName("xxxxxxweorqiwuopeir", Locale.ENGLISH);
 		assertTrue(v == null);

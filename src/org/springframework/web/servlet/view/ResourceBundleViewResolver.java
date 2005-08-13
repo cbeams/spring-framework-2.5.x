@@ -18,8 +18,11 @@ package org.springframework.web.servlet.view;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.springframework.beans.BeansException;
@@ -40,6 +43,9 @@ import org.springframework.web.servlet.View;
  *
  * <p>This ViewResolver supports localized view definitions, using the
  * default support of <code>java.util.PropertyResourceBundle</code>.
+ * For example, the basename "views" will be resolved as class path resources
+ * "views_de_AT.properties", "views_de.properties", "views.properties" -
+ * for a given Locale "de_AT".
  *
  * <p>Note: This ViewResolver implements the Ordered interface to allow for
  * flexible participation in ViewResolver chaining. For example, some special
@@ -65,7 +71,10 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	private String defaultParentView;
 
 	/* Locale -> BeanFactory */
-	private final Map cachedFactories = new HashMap();
+	private final Map localeCache = new HashMap();
+
+	/* List of ResourceBundle -> BeanFactory */
+	private final Map bundleCache = new HashMap();
 
 
 	public void setOrder(int order) {
@@ -132,9 +141,30 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	 * Synchronized because of access by parallel threads.
 	 */
 	protected synchronized BeanFactory initFactory(Locale locale) throws Exception {
-		BeanFactory parsedBundle = isCache() ? (BeanFactory) this.cachedFactories.get(locale) : null;
-		if (parsedBundle != null) {
-			return parsedBundle;
+		// Try to find cached factory for Locale:
+		// Have we already encountered that Locale before?
+		if (isCache()) {
+			BeanFactory cachedFactory = (BeanFactory) this.localeCache.get(locale);
+			if (cachedFactory != null) {
+				return cachedFactory;
+			}
+		}
+
+		// Build list of ResourceBundle references for Locale.
+		List bundles = new LinkedList();
+		for (int i = 0; i < this.basenames.length; i++) {
+			ResourceBundle bundle = getBundle(this.basenames[i], locale);
+			bundles.add(bundle);
+		}
+
+		// Try to find cached factory for ResourceBundle list:
+		// even if Locale was different, same bundles might have been found.
+		if (isCache()) {
+			BeanFactory cachedFactory = (BeanFactory) this.bundleCache.get(bundles);
+			if (cachedFactory != null) {
+				this.localeCache.put(locale, cachedFactory);
+				return cachedFactory;
+			}
 		}
 
 		// Create child ApplicationContext for views.
@@ -145,26 +175,52 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 		// Load bean definitions from resource bundle.
 		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(factory);
 		reader.setDefaultParentBean(this.defaultParentView);
-		for (int i = 0; i < this.basenames.length; i++) {
-			ResourceBundle bundle = ResourceBundle.getBundle(
-					this.basenames[i], locale, Thread.currentThread().getContextClassLoader());
+		for (int i = 0; i < bundles.size(); i++) {
+			ResourceBundle bundle = (ResourceBundle) bundles.get(i);
 			reader.registerBeanDefinitions(bundle);
 		}
 
 		factory.refresh();
 
+		// Cache factory for both Locale and ResourceBundle list.
 		if (isCache()) {
-			this.cachedFactories.put(locale, factory);
+			this.localeCache.put(locale, factory);
+			this.bundleCache.put(bundles, factory);
 		}
+
 		return factory;
 	}
 
+	/**€
+	 * Return the resource bundle for the given basename and Locale.
+	 * @param basename the basename to look for
+	 * @param locale the Locale to look for
+	 * @return the corresponding ResourceBundle
+	 * @throws MissingResourceException if no matching bundle could be found
+	 * @see java.util.ResourceBundle#getBundle(String, java.util.Locale, ClassLoader)
+	 */
+	protected ResourceBundle getBundle(String basename, Locale locale) throws MissingResourceException {
+		return ResourceBundle.getBundle(basename, locale, getBundleClassLoader());
+	}
+
+	/**
+	 * Return the ClassLoader to use for loading resource bundles.
+	 * Default is the current Thread's context class loader.
+	 * @see Thread#currentThread()
+	 * @see Thread#getContextClassLoader()
+	 */
+	protected ClassLoader getBundleClassLoader() {
+		return Thread.currentThread().getContextClassLoader();
+	}
+
+
 	public void destroy() throws BeansException {
-		for (Iterator it = this.cachedFactories.values().iterator(); it.hasNext();) {
+		for (Iterator it = this.bundleCache.values().iterator(); it.hasNext();) {
 			ConfigurableApplicationContext factory = (ConfigurableApplicationContext) it.next();
 			factory.close();
 		}
-		this.cachedFactories.clear();
+		this.localeCache.clear();
+		this.bundleCache.clear();
 	}
 
 }
