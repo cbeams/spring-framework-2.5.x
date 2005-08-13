@@ -214,7 +214,7 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 			HttpServletRequest request, HttpServletResponse response, RemoteInvocationResult result, OutputStream os)
 			throws IOException {
 
-		ObjectOutputStream oos = new ObjectOutputStream(decorateOutputStream(request, response, os));
+		ObjectOutputStream oos = createObjectOutputStream(decorateOutputStream(request, response, os));
 		try {
 			doWriteRemoteInvocationResult(result, oos);
 			oos.flush();
@@ -238,6 +238,17 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 			HttpServletRequest request, HttpServletResponse response, OutputStream os) throws IOException {
 
 		return os;
+	}
+
+	/**
+	 * Create an ObjectOutputStream for the given OutputStream.
+	 * The default implementation creates a plain ObjectOutputStream.
+	 * @param os the OutputStream to write to
+	 * @return the new ObjectOutputStream instance to use
+	 * @throws IOException if creation of the ObjectOutputStream failed
+	 */
+	protected ObjectOutputStream createObjectOutputStream(OutputStream os) throws IOException {
+		return new ObjectOutputStream(os);
 	}
 
 	/**
