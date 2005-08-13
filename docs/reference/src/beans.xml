@@ -1627,7 +1627,7 @@ public class AnotherExampleBean implements DisposableBean {
       <para>The
       <literal>org.springframework.beans.factory.FactoryBean</literal>
       interface is to be implemented by objects that <emphasis>are themselves
-      factories</emphasis>. The BeanFactory interface provides three method:
+      factories</emphasis>. The FactoryBean interface provides three methods:
       <itemizedlist spacing="compact">
           <listitem>
             <para><literal>Object getObject()</literal>: has to return an
