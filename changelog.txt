@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.4 (13.8.2005)
+Changes in version 1.2.4 (15.8.2005)
 ------------------------------------
 
 Package org.springframework.aop
@@ -49,6 +49,15 @@ Package org.springframework.mock
 Package org.springframework.orm
 * upgraded to the most recently published version of the Hibernate 3.0.5 jar (there seem to be multiple versions around)
 
+Package org.springframework.remoting
+* factored out protected "createObjectOutputStream(OutputStream)" template method in HttpInvokerServiceExporter
+
+Package org.springframework.scheduling
+* added MethodInvokingRunnable adapter to support package
+* added DelegatingTimerTask adapter for java.util.Timer, wrapping a given Runnable implementation
+* added "setRunnable" method to SchedulerTimerTask, plus corresponding overloaded constructors
+* reworked MethodInvokingTimerTaskFactoryBean to derive from MethodInvokingRunnable and create a DelegatingTimerTask
+
 Package org.springframework.transaction
 * added "cacheUserTransaction" flag to JtaTransactionManager, to be turned off for a fresh lookup for every transaction
 * reworked JtaTransactionManager to always access the UserTransaction through the current JtaTransactionObject
@@ -71,6 +80,7 @@ Package org.springframework.web
 * added ServletContextParameterFactoryBean, explicitly retrieving and exposing a "context-param" defined in web.xml
 * AcceptHeaderLocaleResolver/FixedLocaleResolver throw UnsupportedOperationException from "setLocale" (rather than IAE)
 * FixedThemeResolver throw UnsupportedOperationException from "setThemeName" (rather than IllegalArgumentException)
+* ResourceBundleViewResolver caches factories per actual bundle found, even if Locale differs (to avoid factory copies)
 * MultiActionController now allows Validators to be specified and used for the optional command object(s)
 * AbstractJasperReportsView holds a default "exporterParameters" Map, to allow for property-driven population of it
 * AbstractJasperReportsSingleFormatView applies the configured exporter encoding as HTTP response encoding
