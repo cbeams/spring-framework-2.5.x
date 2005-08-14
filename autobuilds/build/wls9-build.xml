@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+
+<!--
+	autobuilds-wls9 project build file
+	
+	Targets to compile and build the sample apps and test server
+	environments and run various HttpUnit tests against them.
+
+-->
+<project name="autobuilds-wls9" basedir="." default="usage">
+
+	<!--<property name="appserver.distname" value="wls-${resin3.version}" />-->
+	<property name="deploy.dir" value="webapps" />
+	
+
+	<path id="server-classpath">
+		<fileset dir="${servers.install.dir}/${appserver.distname}/lib">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${java.home}/../lib">
+			<include name="**/tools.jar" />
+		</fileset>
+		<fileset dir="${spring.root.dir}/lib/hsqldb">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	
+
+
+	<!--
+		usage
+	-->
+	<target name="usage">        
+        <echo>
+Spring Framework
+=============================================================================
+
+${ant.file} 
+
+This file should not be called directly.  See the documentation in the
+autobuilds directory for information.
+=============================================================================
+        </echo>
+
+	</target>
+		
+	
+	<!--
+		get-server
+		
+		d/l from url if we don't already have it
+	-->
+	<target name="get-server"/>
+		
+		
+		
+	<!--
+		extract-server
+		
+		extract server to installs area and configure from
+		local config files
+	-->
+	<target name="extract-server"/>
+	
+	<!--
+		deploy
+		
+		based on a system or other property (often set in the batch file / shell script
+		calling this target) deploy to the target server
+	-->
+	<target name="deploy" depends="check-server">
+		<copy todir="${bea.domaindir}/${bea.domain}/autodeploy">
+			<fileset dir="${autobuilds.samples.dir}/${target.app}/dist">
+				<include name="*" />
+				<exclude name="**/autobuild*" />
+			</fileset>
+		</copy>		
+	</target>
+	
+	
+	<!--
+		start-server
+		
+		start wls if it's a current target appserver
+	-->
+	
+	<taskdef name="wlserver" classname="weblogic.ant.taskdefs.management.WLServer">
+		<classpath>
+			<fileset dir="${bea.home}/weblogic90/server/lib">
+				<include name="*.jar"/>				
+			</fileset>
+			<fileset dir="${bea.home}/weblogic90/common/lib">
+				<include name="*.jar"/>
+			</fileset>
+		</classpath>
+	</taskdef>	
+	
+	<target name="check-server">
+		<available file="${bea.domaindir}/${bea.domain}/bin/startWebLogic.cmd" property="server.present"/>
+		<antcall target="check-server2"/>
+	</target>
+	
+	<target name="check-server2" unless="server.present">
+		<fail>WLS9.0 doesn't seem to be present in ${bea.home}</fail>
+	</target>
+	
+	<target name="start-server">
+		<echo message="##  ----------------------------------------------------------------" />
+		<echo message="##  Starting server ${target.server}" />
+		<echo message="##  ----------------------------------------------------------------" />
+		<exec os="Windows 2000, Windows XP" executable="${bea.domaindir}/${bea.domain}/bin/startWebLogic.cmd"/>		
+		<exec os="Linux" executable="${bea.domaindir}/${bea.domain}/bin/startWebLogic.sh"/>
+	</target>
+	
+	
+	<!--
+		stop-server
+		
+		stop the target server
+	-->
+	<target name="stop-server">
+		<echo message="##  ----------------------------------------------------------------" />
+		<echo message="##  Stopping server ${target.server}" />
+		<echo message="##  ----------------------------------------------------------------" />
+		
+		<exec os="Windows 2000, Windows XP" executable="${bea.domaindir}/${bea.domain}/bin/stopWebLogic.cmd"/>	
+		<exec os="Windows 2000, Windows XP" executable="${bea.domaindir}/${bea.domain}/bin/stopWebLogic.sh"/>	
+	</target>
+	
+</project>

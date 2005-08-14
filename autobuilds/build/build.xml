@@ -9,7 +9,7 @@
     This script should normally be managed from a shell script or 
     batch file (supplied).
     
-    $Id: build.xml,v 1.13 2004-09-29 15:50:50 davison Exp $
+    $Id: build.xml,v 1.14 2005-08-14 00:26:29 aarendsen Exp $
 -->
 <project name="autobuilds" basedir="." default="usage">
 
@@ -58,7 +58,7 @@
         tomcat, resin, jetty are ok with about 15s on my 2.4Ghz P4
         jboss needs about 60 on the same machine.
     -->
-    <property name="autobuilds.server.timewait" value="75" />
+    <property name="autobuilds.server.timewait" value="180" />
     
     <!-- 
         directory where the server tarballs are stored locally.  If the relevant 
@@ -177,7 +177,7 @@ realclean       --> delete ALL build products and sandbox.
         
         workflow task for autobuilds
     -->
-    <target name="main" depends="setup,spring-build,taskdefs,init">
+    <target name="main" depends="setup,taskdefs,init">
 
         <!--<record name="${reports.dir}/${autobuilds.buildlog}"/>-->
         

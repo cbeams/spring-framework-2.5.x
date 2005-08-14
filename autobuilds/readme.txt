@@ -6,7 +6,7 @@
  *
  * @author Darren Davison
  * @since Dec 2003
- * @version $Id: readme.txt,v 1.8 2004-06-07 23:35:34 davison Exp $
+ * @version $Id: readme.txt,v 1.9 2005-08-14 00:26:31 aarendsen Exp $
  */
 
 
@@ -274,6 +274,26 @@ makes sense to do so - the only requirement is the AllTests class with the
 'testXXXX' method names.  The source directory for this code is /autobuilds/src
 with classes output to /target/autobuilds/classes.  Refer to one of the 
 existing AllTests classes for more information.
+
+Notes for WLS9.0
+------------------------------------------------------------------------------
+WebLogic 9.0 is supported as well through the autobuilds system, although
+there are some special things you need to know and do.
+
+Prerequisites to run the autobuilds applications on WebLogic 9
+- Install WebLogic
+- In build.properties (in autobuilds/build dir), enter the following properties
+  and modify if needed
+    bea.home=c:/bea
+	bea.domaindir=c:/bea/user_projects/domains
+	bea.domain=spring
+	bea.user=weblogic
+	bea.password=weblogic	
+	autobuilds.server.http.port=7001
+	
+The WebLogic server is started using the wls9.xml build file. It starts up 
+the server, deploys the appropriate application and stops the server after
+the tests have been run.
 
 
 

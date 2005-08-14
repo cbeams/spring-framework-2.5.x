@@ -10,7 +10,7 @@
     maxExecutePerConnection="0"
 		statementCacheSize="175"
     cacheModelsEnabled="true"
-    useBeansMetaClasses="false"
+    useBeansMetaClasses="true"
   />
 
   <sql-map resource="org/springframework/autobuilds/jpetstore/dao/ibatis/maps/Account.xml"/>

@@ -2,7 +2,7 @@
 
 <!--
 	Author:  Darren Davison
-	Version: $Id: build.xml,v 1.1 2004-01-08 01:30:52 davison Exp $
+	Version: $Id: build.xml,v 1.2 2005-08-14 00:26:30 aarendsen Exp $
 -->
 
 <project name="buildtest" basedir="." default="usage">
@@ -45,7 +45,7 @@
 		<copy todir="${lib.dir}" file="${spring.dir}/dist/spring.jar" />
 		<copy todir="${lib.dir}" file="${spring.dir}/lib/jakarta-commons/commons-logging.jar" />
 		
-		<javac destdir="${build.dir}" target="1.3" debug="true"
+		<javac destdir="${build.dir}" target="1.5" debug="true"
 			deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
 			<classpath refid="master-classpath"/>
