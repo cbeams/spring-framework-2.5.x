@@ -234,7 +234,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's JasperReports support
 
 * jdo/jdo2.jar
-- JDO API 2.0 beta (http://www.jpox.org)
+- JDO API 2.0 beta (http://www.jpox.org, "snapshot-4")
 - required for building the framework
 - required at runtime when using Spring's JDO support
 

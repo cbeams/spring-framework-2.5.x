@@ -18,6 +18,8 @@ package org.springframework.orm.jdo;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -32,6 +34,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 /**
  * FactoryBean that creates a local JDO PersistenceManager instance.
@@ -93,6 +96,21 @@ import org.springframework.core.io.Resource;
  * @see javax.jdo.PersistenceManagerFactory#close
  */
 public class LocalPersistenceManagerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+
+	private static Method getPersistenceManagerFactoryMethod;
+
+	static {
+		// Determine whether the JDO 1.0 getPersistenceManagerFactory(Properties) method
+		// is available, for use in the "newPersistenceManagerFactory" implementation.
+		try {
+			getPersistenceManagerFactoryMethod = JDOHelper.class.getMethod(
+					"getPersistenceManagerFactory", new Class[] {Properties.class});
+		}
+		catch (NoSuchMethodException ex) {
+			getPersistenceManagerFactoryMethod = null;
+		}
+	}
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -164,14 +182,36 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	 * Subclasses can override this to perform custom initialization of the
 	 * PersistenceManagerFactory instance, creating it via the given Properties
 	 * that got prepared by this LocalPersistenceManagerFactoryBean.
-	 * <p>The default implementation invokes JDOHelper's <code>getPersistenceManagerFactory</code>.
-	 * A custom implementation could prepare the instance in a specific way, or use a custom
-	 * PersistenceManagerFactory implementation.
+	 * <p>The default implementation invokes JDOHelper's
+	 * <code>getPersistenceManagerFactory</code> method.
+	 * A custom implementation could prepare the instance in a specific way,
+	 * or use a custom PersistenceManagerFactory implementation.
+	 * <p>Implemented to work with either the JDO 1.0
+	 * <code>getPersistenceManagerFactory(java.util.Properties)</code> method or
+	 * the JDO 2.0 <code>getPersistenceManagerFactory(java.util.Map)</code> method,
+	 * detected through reflection.
 	 * @param props the merged Properties prepared by this LocalPersistenceManagerFactoryBean
 	 * @return the PersistenceManagerFactory instance
-	 * @see javax.jdo.JDOHelper#getPersistenceManagerFactory
+	 * @see javax.jdo.JDOHelper#getPersistenceManagerFactory(java.util.Properties)
+	 * @see javax.jdo.JDOHelper#getPersistenceManagerFactory(java.util.Map)
 	 */
 	protected PersistenceManagerFactory newPersistenceManagerFactory(Properties props) {
+		// Use JDO 1.0 getPersistenceManagerFactory(Properties) method, if available.
+		if (getPersistenceManagerFactoryMethod != null) {
+			try {
+				return (PersistenceManagerFactory)
+						getPersistenceManagerFactoryMethod.invoke(null, new Object[] {props});
+			}
+			catch (InvocationTargetException ex) {
+				throw new InvalidDataAccessResourceUsageException(
+						"Could not invoke JDO 1.0 getPersistenceManagerFactory(Properties) method", ex.getTargetException());
+			}
+			catch (Exception ex) {
+				throw new InvalidDataAccessResourceUsageException(
+						"Could not invoke JDO 1.0 getPersistenceManagerFactory(Properties) method", ex);
+			}
+		}
+		// Use JDO 2.0 getPersistenceManagerFactory(Map) method else.
 		return JDOHelper.getPersistenceManagerFactory(props);
 	}
 
