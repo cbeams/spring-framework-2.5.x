@@ -477,7 +477,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					catch (UnsatisfiedDependencyException ex) {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Ignoring factory method [" + factoryMethod + "] of bean '" + beanName +
-									"': could not satisfy dependencies", ex);
+									"': " + ex.getMessage());
 						}
 						if (i == candidates.length - 1 && factoryMethodToUse == null) {
 							throw ex;
@@ -707,7 +707,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
 							"Ambiguous " + methodType + " argument types - " +
-							"did you specify the correct bean references as generic " + methodType + " arguments?");
+							"did you specify the correct bean references as " + methodType + " arguments?");
 				}
 				Map matchingBeans = findMatchingBeans(argTypes[j]);
 				if (matchingBeans == null || matchingBeans.size() != 1) {
