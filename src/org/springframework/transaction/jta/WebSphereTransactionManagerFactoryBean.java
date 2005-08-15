@@ -29,20 +29,30 @@ import org.springframework.transaction.TransactionSystemException;
 
 /**
  * FactoryBean that retrieves the JTA TransactionManager for IBM's
- * WebSphere application servers (versions 5.1, 5.0 and 4).
+ * WebSphere application servers (versions 6, 5.1, 5.0 and 4).
  *
- * <p>Uses WebSphere's static access methods to obtain the JTA
- * TransactionManager, which is different for WebSphere 5.1, 5.0 and 4.
- * (Please, dear WebSphere team, stop changing your TransactionManager
- * access methods from version to version!)
+ * <p>Uses WebSphere's static access methods to obtain the JTA TransactionManager,
+ * which is different for WebSphere 5.1+, 5.0 and 4.
  *
- * <p>The strategy has been kindly borrowed from Hibernate's
- * WebSphereTransactionManagerLookup class.
+ * <p>In combination with Spring's JtaTransactionManager, this FactoryBean
+ * can be used to enable transaction suspension (PROPAGATION_REQUIRES_NEW,
+ * PROPAGATION_NOT_SUPPORTED) on WebSphere:
+ *
+ * <pre>
+ * &lt;bean id="wsJtaTm" class="org.springframework.transaction.jta.WebSphereTransactionManagerFactoryBean"/&gt;
+ *
+ * &lt;bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"&gt;
+ *   &lt;property name="transactionManager ref="wsJtaTm"/&gt;
+ * &lt;/bean&gt;</pre>
+ *
+ * Note that Spring's JtaTransactionManager will continue to use the JTA
+ * UserTransaction for standard transaction demarcation, as defined by
+ * standard J2EE. It will only use the provided WebSphere TransactionManager
+ * in case of actual transaction suspension needs.
  *
  * @author Juergen Hoeller
  * @since 21.01.2004
  * @see JtaTransactionManager#setTransactionManager
- * @see net.sf.hibernate.transaction.WebSphereTransactionManagerLookup
  * @see com.ibm.ws.Transaction.TransactionManagerFactory#getTransactionManager
  * @see com.ibm.ejs.jts.jta.JTSXA#getTransactionManager
  * @see com.ibm.ejs.jts.jta.TransactionManagerFactory#getTransactionManager
@@ -68,12 +78,12 @@ public class WebSphereTransactionManagerFactoryBean implements FactoryBean {
 	public WebSphereTransactionManagerFactoryBean() throws TransactionSystemException {
 		Class clazz;
 		try {
-			logger.debug("Trying WebSphere 5.1: " + FACTORY_CLASS_5_1);
+			logger.debug("Trying WebSphere 5.1+: " + FACTORY_CLASS_5_1);
 			clazz = Class.forName(FACTORY_CLASS_5_1);
-			logger.info("Found WebSphere 5.1: " + FACTORY_CLASS_5_1);
+			logger.info("Found WebSphere 5.1+: " + FACTORY_CLASS_5_1);
 		}
 		catch (ClassNotFoundException ex) {
-			logger.debug("Could not find WebSphere 5.1 TransactionManager factory class", ex);
+			logger.debug("Could not find WebSphere 5.1/6.0 TransactionManager factory class", ex);
 			try {
 				logger.debug("Trying WebSphere 5.0: " + FACTORY_CLASS_5_0);
 				clazz = Class.forName(FACTORY_CLASS_5_0);
@@ -90,7 +100,7 @@ public class WebSphereTransactionManagerFactoryBean implements FactoryBean {
 					logger.debug("Could not find WebSphere 4 TransactionManager factory class", ex3);
 					throw new TransactionSystemException(
 							"Could not find any WebSphere TransactionManager factory class, " +
-							"neither for WebSphere version 5.1 nor 5.0 nor 4");
+							"neither for WebSphere version 5.1+ nor 5.0 nor 4");
 				}
 			}
 		}
