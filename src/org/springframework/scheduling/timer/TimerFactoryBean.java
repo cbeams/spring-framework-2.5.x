@@ -77,6 +77,7 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 		this.daemon = daemon;
 	}
 
+
 	public void afterPropertiesSet() {
 		logger.info("Initializing Timer");
 		this.timer = createTimer(this.daemon);

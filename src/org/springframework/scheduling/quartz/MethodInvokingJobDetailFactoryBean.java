@@ -122,6 +122,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		this.jobDetail.setVolatility(true);		
 	}
 
+
 	public Object getObject() {
 		return this.jobDetail;
 	}

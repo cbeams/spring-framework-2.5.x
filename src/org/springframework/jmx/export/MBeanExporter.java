@@ -415,7 +415,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 		}
 		catch (MalformedObjectNameException ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Unable to auto-register MBean [" + mbean + "] with key [" + beanKey + "]");
+				logger.debug("Unable to register MBean [" + mbean + "] with key [" + beanKey + "]");
 			}
 			return null;
 		}

@@ -71,6 +71,7 @@ public abstract class HttpServletBean extends HttpServlet {
 	 */
 	private final Set requiredProperties = new HashSet();
 
+
 	/**
 	 * Subclasses can invoke this method to specify that this property
 	 * (which must match a JavaBean property they expose) is mandatory,
