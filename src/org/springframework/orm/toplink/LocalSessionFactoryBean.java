@@ -33,7 +33,7 @@ import org.springframework.beans.factory.InitializingBean;
  * TransactionAwareSessionAdapter in front of this bean. This adapter will provide
  * a TopLink Session rather than a SessionFactory as bean reference. Your DAOs can
  * then, for example, access the currently active Session and UnitOfWork via
- * <code>Session.getActiveSession</code> and <code>Session.getActiveUnitOfWork</code>,
+ * <code>Session.getActiveSession()</code> and <code>Session.getActiveUnitOfWork()</code>,
  * respectively. Note that you can still access the SessionFactory too, by defining
  * a bean reference that points directly at the LocalSessionFactoryBean.
  *
@@ -47,9 +47,11 @@ public class LocalSessionFactoryBean extends LocalSessionFactory
 
 	private SessionFactory sessionFactory;
 
+
 	public void afterPropertiesSet() throws TopLinkException {
 		this.sessionFactory = createSessionFactory();
 	}
+
 
 	public Object getObject() {
 		return this.sessionFactory;
@@ -62,6 +64,7 @@ public class LocalSessionFactoryBean extends LocalSessionFactory
 	public boolean isSingleton() {
 		return true;
 	}
+
 
 	public void destroy() {
 		logger.info("Closing TopLink SessionFactory");
