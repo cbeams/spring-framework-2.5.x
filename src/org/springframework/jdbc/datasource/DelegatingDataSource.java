@@ -27,14 +27,17 @@ import org.springframework.beans.factory.InitializingBean;
 /**
  * DataSource implementation that delegates all calls to a given target DataSource.
  * Abstract because it is meant to be to be subclasses, overriding specific methods
- * that should not simply delegate to the target.
+ * (such as <code>getConnection()</code> that should not simply delegate to the target.
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see #getConnection()
+ * @see #getConnection(String, String)
  */
 public abstract class DelegatingDataSource implements DataSource, InitializingBean {
 
 	private DataSource targetDataSource;
+
 
 	/**
 	 * Set the target DataSource that this DataSource should delegate to.
@@ -66,19 +69,19 @@ public abstract class DelegatingDataSource implements DataSource, InitializingBe
 	}
 
 	public int getLoginTimeout() throws SQLException {
-		return this.targetDataSource.getLoginTimeout();
+		return getTargetDataSource().getLoginTimeout();
 	}
 
 	public void setLoginTimeout(int seconds) throws SQLException {
-		this.targetDataSource.setLoginTimeout(seconds);
+		getTargetDataSource().setLoginTimeout(seconds);
 	}
 
 	public PrintWriter getLogWriter() throws SQLException {
-		return this.targetDataSource.getLogWriter();
+		return getTargetDataSource().getLogWriter();
 	}
 
 	public void setLogWriter(PrintWriter out) throws SQLException {
-		this.targetDataSource.setLogWriter(out);
+		getTargetDataSource().setLogWriter(out);
 	}
 
 }
