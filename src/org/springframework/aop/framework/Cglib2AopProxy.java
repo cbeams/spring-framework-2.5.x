@@ -23,6 +23,8 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 import net.sf.cglib.core.CodeGenerationException;
 import net.sf.cglib.proxy.Callback;
@@ -88,6 +90,11 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	protected final static Log logger = LogFactory.getLog(Cglib2AopProxy.class);
 
 	/**
+	 * Keeps track of the <code>Class</code>es that we have validated for final methods
+	 */
+	private static Set VALIDATED_CLASSES = new HashSet();
+
+	/**
 	 * Config used to configure this proxy
 	 */
 	protected final AdvisedSupport advised;
@@ -104,7 +111,6 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	private transient int fixedInterceptorOffset;
 
 	private transient Map fixedInterceptorMap;
-
 
 	/**
 	 * Create a new Cglib2AopProxy for the given config.
@@ -160,13 +166,12 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		Enhancer enhancer = new Enhancer();
 		try {
 			Class rootClass = this.advised.getTargetSource().getTargetClass();
+			Class proxySuperClass = (AopUtils.isCglibProxyClass(rootClass)) ? rootClass.getSuperclass() : rootClass;
 
-			if (AopUtils.isCglibProxyClass(rootClass)) {
-				enhancer.setSuperclass(rootClass.getSuperclass());
-			}
-			else {
-				enhancer.setSuperclass(rootClass);
-			}
+			// validate the class, writing log messages as necessary
+			validateClassIfNecessary(proxySuperClass);
+
+			enhancer.setSuperclass(proxySuperClass);
 
 			enhancer.setCallbackFilter(new ProxyCallbackFilter(this.advised));
 			enhancer.setStrategy(new UndeclaredThrowableStrategy(UndeclaredThrowableException.class));
@@ -211,6 +216,34 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		catch (Exception ex) {
 			// TargetSource.getTarget failed
 			throw new AspectException("Unexpected AOP exception", ex);
+		}
+	}
+
+	/**
+	 * Checks to see whether the supplied <code>Class</code> has already been validated and
+	 * validates it if not.
+	 */
+	private void validateClassIfNecessary(Class proxySuperClass) {
+		synchronized (VALIDATED_CLASSES) {
+			if (logger.isWarnEnabled() && !(VALIDATED_CLASSES.contains(proxySuperClass))) {
+				validateClass(proxySuperClass);
+				VALIDATED_CLASSES.add(proxySuperClass);
+			}
+		}
+	}
+
+	/**
+	 * Checks for final methods on the <code>Class</code> and writes warnings to the log
+	 * for each one found.
+	 */
+	private void validateClass(Class proxySuperClass) {
+		Method[] methods = proxySuperClass.getMethods();
+		for (int i = 0; i < methods.length; i++) {
+			Method method = methods[i];
+			if((Object.class != method.getDeclaringClass()) && Modifier.isFinal(method.getModifiers())) {
+				logger.warn("Unable to proxy method [" + method +
+						"] because it is final. All calls to this method via a proxy will be routed directly to the proxy.");
+			}
 		}
 	}
 
