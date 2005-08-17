@@ -241,6 +241,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 * Subclasses can override this method in place of the
 	 * <code>setUp()</code> method, which is final in this class.
 	 * This implementation does nothing.
+	 * @throws Exception simply let any exception propagate
 	 */
 	protected void onSetUp() throws Exception {
 	}
@@ -261,6 +262,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 
 	/**
 	 * Subclasses can override this to add custom behavior on teardown.
+	 * @throws Exception simply let any exception propagate
 	 */
 	protected void onTearDown() throws Exception {
 	}

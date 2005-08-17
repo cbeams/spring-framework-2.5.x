@@ -141,10 +141,11 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * This implementation ends the transaction after test execution.
 	 * Override <code>onTearDownInTransaction</code> and/or
 	 * <code>onTearDownAfterTransaction</code> to add custom tear-down behavior.
+	 * @throws Exception simply let any exception propagate
 	 * @see #onTearDownInTransaction()
 	 * @see #onTearDownAfterTransaction()
 	 */
-	protected final void onTearDown() {
+	protected final void onTearDown() throws Exception {
 		try {
 			onTearDownInTransaction();
 		}
@@ -162,15 +163,17 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * There is no need to clean up the database, as rollback will follow automatically.
 	 * <p><b>NB:</b> Not called if there is no transaction management, due to no
 	 * transaction manager being provided in the context.
+	 * @throws Exception simply let any exception propagate
 	 */
-	protected void onTearDownInTransaction() {
+	protected void onTearDownInTransaction() throws Exception {
 	}
 
 	/**
 	 * Subclasses can override this method to perform cleanup here.
 	 * The transaction is <i>not open anymore</i> at this point.
+	 * @throws Exception simply let any exception propagate
 	 */
-	protected void onTearDownAfterTransaction() {
+	protected void onTearDownAfterTransaction() throws Exception {
 	}
 
 
