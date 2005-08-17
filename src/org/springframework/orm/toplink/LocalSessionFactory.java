@@ -30,9 +30,9 @@ import oracle.toplink.sessions.SessionLog;
 import oracle.toplink.threetier.ServerSession;
 import oracle.toplink.tools.sessionconfiguration.XMLLoader;
 import oracle.toplink.tools.sessionmanagement.SessionManager;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -257,14 +257,14 @@ public class LocalSessionFactory {
 		// Initialize the TopLink Session, using the configuration file
 		// and the session name.
 		DatabaseSession session = loadDatabaseSession(this.configLocation, this.sessionName, classLoader);
-        
-        // it is possible for SessionManager to return a null Session
-        if (session==null)
-        {
-            logger.info("A session named "+this.sessionName+" could not be loaded from resource "+this.configLocation+" using ClassLoader "+classLoader);
-            logger.info("This is most likely a deployment issue.  Can the sessionClassLoader load the "+this.configLocation+" with a getResourceAsStream call?");           
-            throw new RuntimeException("A session named "+this.sessionName+" could not be loaded from resource "+this.configLocation+" using ClassLoader "+classLoader);
-        }
+
+		// It is possible for SessionManager to return a null Session!
+		if (session == null) {
+			throw new IllegalStateException(
+					"A session named " + this.sessionName + " could not be loaded from resource [" +
+					this.configLocation + "] using ClassLoader [" + classLoader + "]. " +
+					"This is most likely a deployment issue: Can the class loader access the resource?");
+		}
 
 		// Override default DatabaseLogin instance with specified one, if any.
 		if (this.databaseLogin != null) {
@@ -306,7 +306,7 @@ public class LocalSessionFactory {
 			String configLocation, String sessionName, ClassLoader sessionClassLoader)
 			throws TopLinkException {
 
-		SessionManager manager = SessionManager.getManager();
+		SessionManager manager = getSessionManager();
 
 		// Try to find TopLink 10.1.3 XMLSessionConfigLoader.
 		Class loaderClass = null;
@@ -341,6 +341,16 @@ public class LocalSessionFactory {
 			ReflectionUtils.handleReflectionException(ex);
 			throw new IllegalStateException("Should never get here");
 		}
+	}
+
+	/**
+	 * Return the TopLink SessionManager to use for loading DatabaseSessions.
+	 * <p>The default implementation creates a new plain SessionManager instance,
+	 * leading to completely independent TopLink Session instances. Could be
+	 * overridden to return a shared or pre-configured SessionManager.
+	 */
+	protected SessionManager getSessionManager() {
+		return new SessionManager();
 	}
 
 	/**
