@@ -33,6 +33,7 @@ Package org.springframework.jdbc
 * reworked SqlFunction to use SingleColumnRowMapper underneath, exposing a "resultType" bean property of type Class
 * deprecated SqlFunction's constructors that expect a SQL return type, in favor of specifying a result type Class
 * added overloaded constructor to SqlCall, with DataSource and SQL arguments (for consistency with SqlFunction and co)
+* changed StatementCreatorUtils to use setNull with Types.NULL when the value is null and type is unknown
 
 Package org.springframework.jmx
 * MBeanClientInterceptor closes a JMX Connector opened through the "serviceUrl" bean property on shutdown
