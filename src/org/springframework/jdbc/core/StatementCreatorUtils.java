@@ -92,8 +92,7 @@ public class StatementCreatorUtils {
 
 		if (inValue == null) {
 			if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
-				// possible alternative: ps.setNull(paramIndex, Types.NULL);
-				ps.setObject(paramIndex, null);
+				ps.setNull(paramIndex, Types.NULL);
 			}
 			else if (typeName != null) {
 				ps.setNull(paramIndex, sqlType, typeName);
