@@ -108,6 +108,19 @@ public class BeanUtilsTests extends TestCase {
 		assertEquals("Invalid number of descriptors returned", actual.length, descriptors.length);
 	}
 
+	public void testSPR1237() {
+		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(ContainerBean.class);
+
+		for (int i = 0; i < descriptors.length; i++) {
+			PropertyDescriptor descriptor = descriptors[i];
+
+			if("containedBeans".equals(descriptor.getName())) {
+				assertTrue("Property should be an array", descriptor.getPropertyType().isArray());
+				assertEquals(descriptor.getPropertyType().getComponentType(), ContainedBean.class);
+			}
+		}
+	}
+
 
 	private static class NameAndSpecialProperty {
 
@@ -129,6 +142,31 @@ public class BeanUtilsTests extends TestCase {
 
 		public int getSpecialProperty() {
 			return specialProperty;
+		}
+	}
+
+	private static class ContainerBean {
+
+		private ContainedBean[] containedBeans;
+
+		public ContainedBean[] getContainedBeans() {
+			return containedBeans;
+		}
+
+		public void setContainedBeans(ContainedBean[] containedBeans) {
+			this.containedBeans = containedBeans;
+		}
+	}
+
+	private static class ContainedBean {
+		private String name;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
 		}
 	}
 
