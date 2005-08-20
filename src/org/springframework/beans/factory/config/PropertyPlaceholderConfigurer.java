@@ -121,6 +121,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 	private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
 
+	private boolean searchSystemEnvironment = false;
+
 	private boolean ignoreUnresolvablePlaceholders = false;
 
 	private String beanName;
@@ -171,6 +173,23 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 */
 	public void setSystemPropertiesMode(int systemPropertiesMode) {
 		this.systemPropertiesMode = systemPropertiesMode;
+	}
+
+	/**
+	 * Set whether to search for a matching system environment variable
+	 * if no matching system property has been found. Only applied when
+	 * "systemPropertyMode" is active (i.e. "fallback" or "override"), right
+	 * after checking JVM system properties.
+	 * <p>Default is "false". Switch this setting on to resolve placeholders
+	 * as system environment variables as well. However, it is recommended to
+	 * pass external values in as JVM system properties: This can easily be
+	 * achieved in a startup script, even for existing environment variables.
+	 * @see #setSystemPropertiesMode
+	 * @see java.lang.System#getProperty(String)
+	 * @see java.lang.System#getenv(String)
+	 */
+	public void setSearchSystemEnvironment(boolean searchSystemEnvironment) {
+		this.searchSystemEnvironment = searchSystemEnvironment;
 	}
 
 	/**
@@ -309,13 +328,13 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	protected String resolvePlaceholder(String placeholder, Properties props, int systemPropertiesMode) {
 		String propVal = null;
 		if (systemPropertiesMode == SYSTEM_PROPERTIES_MODE_OVERRIDE) {
-			propVal = System.getProperty(placeholder);
+			propVal = resolveSystemProperty(placeholder);
 		}
 		if (propVal == null) {
 			propVal = resolvePlaceholder(placeholder, props);
 		}
 		if (propVal == null && systemPropertiesMode == SYSTEM_PROPERTIES_MODE_FALLBACK) {
-			propVal = System.getProperty(placeholder);
+			propVal = resolveSystemProperty(placeholder);
 		}
 		return propVal;
 	}
@@ -330,11 +349,28 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 * after this method is invoked, according to the system properties mode.
 	 * @param placeholder the placeholder to resolve
 	 * @param props the merged properties of this configurer
-	 * @return the resolved value, of null if none
+	 * @return the resolved value, of <code>null</code> if none
 	 * @see #setSystemPropertiesMode
 	 */
 	protected String resolvePlaceholder(String placeholder, Properties props) {
 		return props.getProperty(placeholder);
+	}
+
+	/**
+	 * Resolve the given key as JVM system property, and optionally also as
+	 * system environment variable if no matching system property has been found.
+	 * @param key the placeholder to resolve as system property key
+	 * @return the system property value, or <code>null</code> if not found
+	 * @see #setSearchSystemEnvironment
+	 * @see java.lang.System#getProperty(String)
+	 * @see java.lang.System#getenv(String)
+	 */
+	protected String resolveSystemProperty(String key) {
+		String value = System.getProperty(key);
+		if (value == null && this.searchSystemEnvironment) {
+			value = System.getenv(key);
+		}
+		return value;
 	}
 
 
