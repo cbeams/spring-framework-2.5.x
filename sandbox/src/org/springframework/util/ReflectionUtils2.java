@@ -37,7 +37,7 @@ public abstract class ReflectionUtils2 {
 	 * @param dest
 	 * @throws java.lang.IllegalArgumentException if arguments are incompatible or either is null
 	 */
-	public static void shallowCopyFieldState(Object src, Object dest) throws IllegalArgumentException {
+	public static void shallowCopyFieldState(final Object src, final Object dest) throws IllegalArgumentException {
 		if (src == null)
 			throw new IllegalArgumentException("Source for field copy cannot be null");
 		if (dest == null)
@@ -47,9 +47,24 @@ public abstract class ReflectionUtils2 {
 						"' must be same or subclass as source class '" + src.getClass().getName() + "'");
 		
 		log.debug("Copying fields from instance of " + src.getClass() + " to instance of " + dest.getClass());
-		
+		doWithFields(src.getClass(), new FieldCallback() {
+			public void doWith(Field f) throws IllegalArgumentException ,IllegalAccessException {
+				Object srcValue = f.get(src);
+				//System.out.println("Copying field " + fields[i].getName());
+				f.set(dest, srcValue);
+			}
+		});
+	}
+	
+	/**
+	 * Invoke the given callback on all private fields in the target class, going
+	 * up the class hierarchy to get all declared fields.
+	 * @param targetClass
+	 * @param fc
+	 * @throws IllegalArgumentException
+	 */
+	public static void doWithFields(Class targetClass, FieldCallback fc) throws IllegalArgumentException {		
 		// Keep backing up the inheritance hierarchy
-		Class targetClass = src.getClass();
 		do {
 			// Copy each field declared on this class unless it's static or file
 			Field[] fields = targetClass.getDeclaredFields();
@@ -63,9 +78,7 @@ public abstract class ReflectionUtils2 {
 						 
 				try {
 					fields[i].setAccessible(true);
-					Object srcValue = fields[i].get(src);
-					//System.out.println("Copying field " + fields[i].getName());
-					fields[i].set(dest, srcValue);
+					fc.doWith(fields[i]);
 				}
 				catch (IllegalAccessException ex) {
 					throw new IllegalStateException("Shouldn't be illegal to access field '" + fields[i].getName() + "': " + ex);
@@ -75,6 +88,20 @@ public abstract class ReflectionUtils2 {
 			targetClass = targetClass.getSuperclass();
 		} while (targetClass != null && targetClass != Object.class);
 		
+	}
+	
+	/**
+	 * Callback interface invoked on each field in the hierarchy.
+	 */
+	public interface FieldCallback {
+		
+		/**
+		 * Perform an operation using the given field.
+		 * @param f Field, which will have been made accessible before this invocation
+		 * @throws IllegalArgumentException
+		 * @throws IllegalAccessException
+		 */
+		public void doWith(Field f) throws IllegalArgumentException, IllegalAccessException;
 	}
 
 }
