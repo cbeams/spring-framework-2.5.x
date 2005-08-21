@@ -50,10 +50,13 @@ public abstract class ReflectionUtils2 {
 		doWithFields(src.getClass(), new FieldCallback() {
 			public void doWith(Field f) throws IllegalArgumentException ,IllegalAccessException {
 				Object srcValue = f.get(src);
-				//System.out.println("Copying field " + fields[i].getName());
 				f.set(dest, srcValue);
 			}
-		});
+		}, COPYABLE_FIELDS);
+	}
+	
+	public static void doWithFields(Class targetClass, FieldCallback fc) throws IllegalArgumentException {		
+		doWithFields(targetClass, fc, null);
 	}
 	
 	/**
@@ -63,7 +66,7 @@ public abstract class ReflectionUtils2 {
 	 * @param fc
 	 * @throws IllegalArgumentException
 	 */
-	public static void doWithFields(Class targetClass, FieldCallback fc) throws IllegalArgumentException {		
+	public static void doWithFields(Class targetClass, FieldCallback fc, FieldFilter ff) throws IllegalArgumentException {		
 		// Keep backing up the inheritance hierarchy
 		do {
 			// Copy each field declared on this class unless it's static or file
@@ -72,8 +75,7 @@ public abstract class ReflectionUtils2 {
 			log.debug("Found " + fields.length + " fields on " + targetClass);
 			for (int i = 0; i < fields.length; i++) {
 				//	Skip static and final fields
-				 if (Modifier.isStatic(fields[i].getModifiers()) ||
-				 		Modifier.isFinal(fields[i].getModifiers())	)
+				 if (ff != null && !ff.matches(fields[i]))
 					 continue;
 						 
 				try {
@@ -101,7 +103,22 @@ public abstract class ReflectionUtils2 {
 		 * @throws IllegalArgumentException
 		 * @throws IllegalAccessException
 		 */
-		public void doWith(Field f) throws IllegalArgumentException, IllegalAccessException;
+		void doWith(Field f) throws IllegalArgumentException, IllegalAccessException;
 	}
+	
+	/**
+	 * Callback optionally used to filter fields to be
+	 * operated on by field callback.
+	 */
+	public interface FieldFilter {
+		boolean matches(Field f);
+	}
+	
+	public static FieldFilter COPYABLE_FIELDS = new FieldFilter() {
+		public boolean matches(Field f) {
+			return !(Modifier.isStatic(f.getModifiers()) ||
+	 				Modifier.isFinal(f.getModifiers())	);
+		}
+	};
 
 }
