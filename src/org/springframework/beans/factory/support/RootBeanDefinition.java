@@ -157,10 +157,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer("Root bean with class [");
-		sb.append(getBeanClassName()).append(']');
-		if (getResourceDescription() != null) {
-			sb.append(" defined in ").append(getResourceDescription());
-		}
+		sb.append(getBeanClassName()).append("]; ").		
+			append(super.toString());
 		return sb.toString();
 	}
 

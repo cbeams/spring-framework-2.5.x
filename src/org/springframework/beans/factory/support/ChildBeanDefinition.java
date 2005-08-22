@@ -112,10 +112,8 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer("Child bean with parent '");
-		sb.append(getParentName()).append("'");
-		if (getResourceDescription() != null) {
-			sb.append(" defined in ").append(getResourceDescription());
-		}
+		sb.append(getParentName()).append("'; ").
+			append(super.toString());
 		return sb.toString();
 	}
 

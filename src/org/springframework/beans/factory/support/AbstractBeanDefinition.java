@@ -543,4 +543,20 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		}
 	}
 
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("singleton=").append(singleton).
+			append("; abstract=").append(abstractFlag).
+			append("; autowire=").append(autowireMode).
+			append("; dependencyCheck=").append(dependencyCheck).
+			append("; lazyInit=").append(lazyInit).
+			append("; initMethodName=").append(initMethodName).
+			append("; destroyMethodName=").append(destroyMethodName).
+			append("; factoryMethodName=").append(factoryMethodName).
+			append("; factoryBeanName=").append(factoryBeanName);
+		if (getResourceDescription() != null) {
+			sb.append("; defined in ").append(getResourceDescription());
+		}
+		return sb.toString();
+	}
 }
