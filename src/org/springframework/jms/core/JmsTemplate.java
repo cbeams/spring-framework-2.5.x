@@ -18,13 +18,13 @@ package org.springframework.jms.core;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
-import javax.jms.TransactionInProgressException;
 
 import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionHolder;
@@ -47,7 +47,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * For other operations, this is not necessary, in contrast to when working
  * with JmsTemplate102. Point-to-Point (Queues) is the default domain.
  *
- * <p>Default settings for JMS sessions are not transacted and auto-acknowledge.
+ * <p>Default settings for JMS Sessions are "not transacted" and "auto-acknowledge".
  * As defined by the J2EE specification, the transaction and acknowledgement
  * parameters are ignored when a JMS Session is created inside an active
  * transaction, no matter if a JTA transaction or a Spring-managed transaction.
@@ -331,7 +331,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 	}
 
 	/**
-	 * If true, then the values of deliveryMode, priority, and timeToLive
+	 * If "true", then the values of deliveryMode, priority, and timeToLive
 	 * will be used when sending a message. Otherwise, the default values,
 	 * that may be set administratively, will be used.
 	 * @return true if overriding default values of QOS parameters
@@ -345,11 +345,27 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 	}
 
 	/**
+	 * Set whether message delivery should be persistent or non-persistent,
+	 * specified as boolean value ("true" or "false"). This will set the delivery
+	 * mode accordingly, to either "PERSISTENT" (1) or "NON_PERSISTENT" (2).
+	 * <p>Default it "true" aka delivery mode "PERSISTENT".
+	 * @see #setDeliveryMode(int)
+	 * @see javax.jms.DeliveryMode#PERSISTENT
+	 * @see javax.jms.DeliveryMode#NON_PERSISTENT
+	 */
+	public void setDeliveryPersistent(boolean deliveryPersistent) {
+		this.deliveryMode = (deliveryPersistent ? DeliveryMode.PERSISTENT : DeliveryMode.NON_PERSISTENT);
+	}
+
+	/**
 	 * Set the delivery mode to use when sending a message.
+	 * Default is the Message default: "PERSISTENT".
 	 * <p>Since a default value may be defined administratively,
-	 * this is only used when isExplicitQosEnabled equals true.
+	 * this is only used when "isExplicitQosEnabled" equals "true".
 	 * @param deliveryMode the delivery mode to use
 	 * @see #isExplicitQosEnabled
+	 * @see javax.jms.DeliveryMode#PERSISTENT
+	 * @see javax.jms.DeliveryMode#NON_PERSISTENT
 	 * @see javax.jms.Message#DEFAULT_DELIVERY_MODE
 	 * @see javax.jms.MessageProducer#send(javax.jms.Message, int, int, long)
 	 */
@@ -367,7 +383,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 	/**
 	 * Set the priority of a message when sending.
 	 * <p>Since a default value may be defined administratively,
-	 * this is only used when isExplicitQosEnabled equals true.
+	 * this is only used when "isExplicitQosEnabled" equals "true".
 	 * @see #isExplicitQosEnabled
 	 * @see javax.jms.Message#DEFAULT_PRIORITY
 	 * @see javax.jms.MessageProducer#send(javax.jms.Message, int, int, long)
@@ -386,7 +402,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 	/**
 	 * Set the time-to-live of the message when sending.
 	 * <p>Since a default value may be defined administratively,
-	 * this is only used when isExplicitQosEnabled equals true.
+	 * this is only used when "isExplicitQosEnabled" equals "true".
 	 * @param timeToLive the message's lifetime (in milliseconds)
 	 * @see #isExplicitQosEnabled
 	 * @see javax.jms.Message#DEFAULT_TIME_TO_LIVE
@@ -524,23 +540,6 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 		}
 	}
 
-	/**
-	 * Commit the Session if not within a JTA transaction.
-	 * @param session the JMS Session to commit
-	 * @throws JMSException if committing failed
-	 */
-	private void commitIfNecessary(Session session) throws JMSException {
-		try {
-			session.commit();
-		}
-		catch (TransactionInProgressException ex) {
-			// Ignore -> can only happen in case of a JTA transaction.
-		}
-		catch (javax.jms.IllegalStateException ex) {
-			// Ignore -> can only happen in case of a JTA transaction.
-		}
-	}
-
 
 	/**
 	 * Execute the action specified by the given action object within a
@@ -580,7 +579,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 				sessionToUse = session;
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Executing callback on JMS session [" + sessionToUse +
+				logger.debug("Executing callback on JMS Session [" + sessionToUse +
 						"] from connection [" + conToUse + "]");
 			}
 			return action.doInJms(sessionToUse);
@@ -656,7 +655,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 			if (session.getTransacted() && isSessionTransacted() &&
 					!TransactionSynchronizationManager.hasResource(getConnectionFactory())) {
 				// Transacted session created by this template -> commit.
-				commitIfNecessary(session);
+				JmsUtils.commitIfNecessary(session);
 			}
 		}
 		finally {
@@ -799,6 +798,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 
 	protected Message doReceiveSelected(Session session, Destination destination, String messageSelector)
 			throws JMSException {
+
 		return doReceive(session, createConsumer(session, destination, messageSelector));
 	}
 
@@ -817,7 +817,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 				// Commit necessary - but avoid commit call within a JTA transaction.
 				if (isSessionTransacted() && conHolder == null) {
 					// Transacted session created by this template -> commit.
-					commitIfNecessary(session);
+					JmsUtils.commitIfNecessary(session);
 				}
 			}
 			else if (isClientAcknowledge(session)) {
@@ -833,6 +833,12 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 		}
 	}
 
+	/**
+	 * Return whether the Session is in client acknowledge mode.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @param session the JMS Session to check
+	 * @throws JMSException if thrown by JMS API methods
+	 */
 	protected boolean isClientAcknowledge(Session session) throws JMSException {
 		return (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
 	}

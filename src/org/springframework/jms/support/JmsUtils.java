@@ -24,6 +24,7 @@ import javax.jms.JMSSecurityException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
+import javax.jms.TransactionInProgressException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,6 +44,7 @@ import org.springframework.util.ClassUtils;
 public abstract class JmsUtils {
 
 	private static final Log logger = LogFactory.getLog(JmsUtils.class);
+
 
 	/**
 	 * Close the given JMS Connection and ignore any thrown exception.
@@ -105,6 +107,40 @@ public abstract class JmsUtils {
 			catch (JMSException ex) {
 				logger.warn("Could not close JMS MessageConsumer", ex);
 			}
+		}
+	}
+
+	/**
+	 * Commit the Session if not within a JTA transaction.
+	 * @param session the JMS Session to commit
+	 * @throws JMSException if committing failed
+	 */
+	public static void commitIfNecessary(Session session) throws JMSException {
+		try {
+			session.commit();
+		}
+		catch (TransactionInProgressException ex) {
+			// Ignore -> can only happen in case of a JTA transaction.
+		}
+		catch (javax.jms.IllegalStateException ex) {
+			// Ignore -> can only happen in case of a JTA transaction.
+		}
+	}
+
+	/**
+	 * Rollback the Session if not within a JTA transaction.
+	 * @param session the JMS Session to rollback
+	 * @throws JMSException if committing failed
+	 */
+	public static void rollbackIfNecessary(Session session) throws JMSException {
+		try {
+			session.rollback();
+		}
+		catch (TransactionInProgressException ex) {
+			// Ignore -> can only happen in case of a JTA transaction.
+		}
+		catch (javax.jms.IllegalStateException ex) {
+			// Ignore -> can only happen in case of a JTA transaction.
 		}
 	}
 
