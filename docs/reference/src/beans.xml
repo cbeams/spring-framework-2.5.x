@@ -46,7 +46,7 @@
 
     <para>This chapter covers material related to both the BeanFactory and the
     ApplicationContext. When mention is made only of the BeanFactory, you may
-    always assume the text also applies to the ApplicaitonContext. When
+    always assume the text also applies to the ApplicationContext. When
     functionality is only available in the ApplicationContext, explicit
     mention is made of this.</para>
   </sect1>
@@ -240,17 +240,20 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
 
       <para>Note that a bean definition is represented by the real interface
       <literal>org.springframework.beans.factory.config.BeanDefinition</literal>,
-      and its various sub-interfaces and implementations. However, it is very
-      unlikely that most user code would ever work with a
-      BeanDefinition.</para>
+      and its various implementations (Root/ChildBeanDefinition). However, it is
+      rare that user code works directly with BeanDefinition objects: Usually,
+      bean definitions will be expressed in a metadata format (such as XML),
+      which will be loaded on startup. The internal representation of such
+      bean definitions are BeanDefinition objects in the factory.</para>
 
       <para>Besides bean definitions which contain information on how to
-      create a bean, a bean factory can also allow to register existing bean
-      instances. DefaultListableBeanFactory supports this through the
+      create a specific bean, a BeanFactory can also allow to register existing
+      bean objects that have been created outside the factory (by custom code).
+      DefaultListableBeanFactory supports this through the
       <literal>registerSingleton</literal> method, as defined by the
       <literal>org.springframework.beans.factory.config.ConfigurableBeanFactory</literal>
-      interface. Typical applications purely work with bean definitions,
-      though.</para>
+      interface. Typical applications solely work with beans defined through
+      metadata bean definitions, though.</para>
     </sect2>
 
     <sect2 id="beans-factory-class">
