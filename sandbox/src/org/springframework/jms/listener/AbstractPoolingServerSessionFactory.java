@@ -68,17 +68,20 @@ public abstract class AbstractPoolingServerSessionFactory implements ServerSessi
 
 		private final Object monitor = new Object();
 
-		private boolean active = true;
+		private boolean active = false;
 
 		public PooledServerSession(final ListenerSessionManager sessionManager) throws JMSException {
 			this.session = sessionManager.createListenerSession();
 
 			new Thread() {
 				public void run() {
+					active = true;
 					synchronized (monitor) {
 						while (active) {
 							try {
+								logger.debug("Waiting for PooledServerSession monitor");
 								monitor.wait();
+								logger.debug("Notified by PooledServerSession monitor");
 							}
 							catch (InterruptedException ex) {
 							}
@@ -94,6 +97,9 @@ public abstract class AbstractPoolingServerSessionFactory implements ServerSessi
 					}
 				}
 			}.start();
+
+			while (!this.active) {
+			}
 		}
 
 		public Session getSession() {
@@ -102,7 +108,9 @@ public abstract class AbstractPoolingServerSessionFactory implements ServerSessi
 
 		public void start() {
 			synchronized (this.monitor) {
+				logger.debug("Notifying PooledServerSession monitor");
 				this.monitor.notify();
+				logger.debug("Notified PooledServerSession monitor");
 			}
 		}
 
