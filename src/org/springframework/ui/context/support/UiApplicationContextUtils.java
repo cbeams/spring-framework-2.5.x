@@ -16,13 +16,11 @@
 
 package org.springframework.ui.context.support;
 
-import java.util.Arrays;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.ui.context.HierarchicalThemeSource;
 import org.springframework.ui.context.ThemeSource;
 
@@ -42,34 +40,66 @@ public abstract class UiApplicationContextUtils {
 	 */
 	public static final String THEME_SOURCE_BEAN_NAME = "themeSource";
 
+
 	private static final Log logger = LogFactory.getLog(UiApplicationContextUtils.class);
+
 
 	/**
 	 * Initialize the ThemeSource for the given application context,
-	 * auto-detecting a bean with the name "themeSource". If no such
+	 * autodetecting a bean with the name "themeSource". If no such
 	 * bean is found, a default (empty) ThemeSource will be used.
 	 * @param context current application context
 	 * @return the initialized theme source (will never be null)
 	 * @see #THEME_SOURCE_BEAN_NAME
 	 */
 	public static ThemeSource initThemeSource(ApplicationContext context) {
-		ThemeSource themeSource;
-		try {
-			themeSource = (ThemeSource) context.getBean(THEME_SOURCE_BEAN_NAME);
-			// set parent theme source if applicable,
-			// and if the theme source is defined in this context, not in a parent
-			if (context.getParent() instanceof ThemeSource &&
-					themeSource instanceof HierarchicalThemeSource &&
-					Arrays.asList(context.getBeanDefinitionNames()).contains(THEME_SOURCE_BEAN_NAME)) {
-				((HierarchicalThemeSource) themeSource).setParentThemeSource((ThemeSource) context.getParent());
+		if (containsLocalBean(context, THEME_SOURCE_BEAN_NAME)) {
+			ThemeSource themeSource = (ThemeSource) context.getBean(THEME_SOURCE_BEAN_NAME, ThemeSource.class);
+			// Make ThemeSource aware of parent ThemeSource.
+			if (context.getParent() instanceof ThemeSource && themeSource instanceof HierarchicalThemeSource) {
+				HierarchicalThemeSource hts = (HierarchicalThemeSource) themeSource;
+				if (hts.getParentThemeSource() == null) {
+					// Only set parent context as parent ThemeSource if no parent ThemeSource
+					// registered already.
+					hts.setParentThemeSource((ThemeSource) context.getParent());
+				}
 			}
+			if (logger.isInfoEnabled()) {
+				logger.info("Using ThemeSource [" + themeSource + "]");
+			}
+			return themeSource;
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			logger.info("No ThemeSource found for [" + context.getDisplayName() +
-					"]: using ResourceBundleThemeSource");
-			themeSource = new ResourceBundleThemeSource();
+		else {
+			// Use default ThemeSource to be able to accept getTheme calls, either
+			// delegating to parent context's default or to local ResourceBundleThemeSource.
+			HierarchicalThemeSource themeSource = null;
+			if (context.getParent() instanceof ThemeSource) {
+				themeSource = new DelegatingThemeSource();
+				themeSource.setParentThemeSource((ThemeSource) context.getParent());
+			}
+			else {
+				themeSource = new ResourceBundleThemeSource();
+			}
+			if (logger.isInfoEnabled()) {
+				logger.info("Unable to locate ThemeSource with name '" + THEME_SOURCE_BEAN_NAME +
+						"': using default [" + themeSource + "]");
+			}
+			return themeSource;
 		}
-		return themeSource;
+	}
+
+	/**
+	 * Return whether the local bean factory of this context contains a bean
+	 * of the given name, ignoring beans defined in ancestor contexts.
+	 * <p>Needs to check both bean definitions and manually registered singletons.
+	 * We cannot use <code>containsBean</code> here, as we do not want a bean
+	 * from an ancestor bean factory.
+	 */
+	private static boolean containsLocalBean(ApplicationContext context, String beanName) {
+		return (context.containsBeanDefinition(beanName) ||
+				(context instanceof ConfigurableApplicationContext &&
+				((ConfigurableApplicationContext) context).getBeanFactory().containsSingleton(beanName)));
 	}
 
 }
+

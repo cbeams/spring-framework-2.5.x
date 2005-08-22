@@ -26,6 +26,7 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.ui.context.Theme;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
 
@@ -45,7 +46,6 @@ import org.springframework.web.servlet.theme.AbstractThemeResolver;
  * and it was copied from org.springframework.web.context.XmlWebApplicationContextTests.
  *
  * @author Rod Johnson
- * @author Tony Falabella
  * @author Jean-Pierre Pawlak
  */
 public class ResourceBundleMessageSourceTests extends AbstractApplicationContextTests {
@@ -62,7 +62,7 @@ public class ResourceBundleMessageSourceTests extends AbstractApplicationContext
 
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		root = new XmlWebApplicationContext();
-		MockServletContext sc = new MockServletContext("");
+		MockServletContext sc = new MockServletContext();
 		root.setServletContext(sc);
 		root.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/applicationContext.xml"});
 		root.refresh();
@@ -139,7 +139,7 @@ public class ResourceBundleMessageSourceTests extends AbstractApplicationContext
 	 * The underlying implementation uses a hashMap to cache messageFormats
 	 * once a message has been asked for.  This test is an attempt to
 	 * make sure the cache is being used properly.
-	 * NOTE:  Messages are contained within the "test/org/springframework/web/context/WEB-INF/messagesXXX.properties" files.
+	 * NOTE: Messages are contained within the "test/org/springframework/web/context/WEB-INF/messagesXXX.properties" files.
 	 * @see org.springframework.context.support.AbstractMessageSource for more details.
 	 */
 	public void testGetMessageWithMessageAlreadyLookedFor() throws Exception {
@@ -171,16 +171,14 @@ public class ResourceBundleMessageSourceTests extends AbstractApplicationContext
 
 	/**
 	 * @see org.springframework.context.support.AbstractMessageSource for more details.
-	 * NOTE:  Messages are contained within the "test/org/springframework/web/context/WEB-INF/messagesXXX.properties" files.
+	 * NOTE: Messages are contained within the "test/org/springframework/web/context/WEB-INF/messagesXXX.properties" files.
 	 * Example taken from the javadocs for the java.text.MessageFormat class
 	 */
-	public void testGetMessageWithNoDefaultPassedInAndFoundInMsgCatalog()
-			throws Exception {
+	public void testGetMessageWithNoDefaultPassedInAndFoundInMsgCatalog() throws Exception {
 		Object[] arguments = {
 			new Integer(7), new Date(System.currentTimeMillis()),
 			"a disturbance in the Force"
 		};
-
 
 		/*
 		 Try with Locale.US
@@ -209,7 +207,7 @@ public class ResourceBundleMessageSourceTests extends AbstractApplicationContext
 
 	/**
 	 * @see org.springframework.context.support.AbstractMessageSource for more details.
-	 * NOTE:  Messages are contained within the "test/org/springframework/web/context/WEB-INF/messagesXXX.properties" files.
+	 * NOTE: Messages are contained within the "test/org/springframework/web/context/WEB-INF/messagesXXX.properties" files.
 	 */
 	public void testGetMessageWithNoDefaultPassedInAndNotFoundInMsgCatalog() {
 		// Expecting an exception
@@ -231,7 +229,7 @@ public class ResourceBundleMessageSourceTests extends AbstractApplicationContext
 
 	/**
 	 * @see org.springframework.context.support.AbstractMessageSource for more details.
-	 * NOTE:  Messages are contained within the "test/org/springframework/web/context/WEB-INF/themeXXX.properties" files.
+	 * NOTE: Messages are contained within the "test/org/springframework/web/context/WEB-INF/themeXXX.properties" files.
 	 */
 	public void testGetMessageWithDefaultPassedInAndFoundInThemeCatalog() {
 		// Try with Locale.US
@@ -246,7 +244,7 @@ public class ResourceBundleMessageSourceTests extends AbstractApplicationContext
 
 	/**
 	 * @see org.springframework.context.support.AbstractMessageSource for more details.
-	 * NOTE:  Messages are contained within the "test/org/springframework/web/context/WEB-INF/themeXXX.properties" files.
+	 * NOTE: Messages are contained within the "test/org/springframework/web/context/WEB-INF/themeXXX.properties" files.
 	 */
 	public void testGetMessageWithDefaultPassedInAndNotFoundInThemeCatalog() {
 		assertTrue("bogus msg from theme resourcebundle with default msg passed in returned default msg",
@@ -257,9 +255,20 @@ public class ResourceBundleMessageSourceTests extends AbstractApplicationContext
 
 	public void testThemeSourceNesting() throws NoSuchMessageException {
 		String overriddenMsg = getThemeMessage("theme.example2", null, null, Locale.UK);
-		String originalMsg = root.getTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME).getMessageSource().getMessage("theme.example2", null, Locale.UK);
+		MessageSource ms = root.getTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME).getMessageSource();
+		String originalMsg = ms.getMessage("theme.example2", null, Locale.UK);
 		assertTrue("correct overridden msg", "test-message2".equals(overriddenMsg));
 		assertTrue("correct original msg", "message2".equals(originalMsg));
+	}
+
+	public void testThemeSourceNestingWithParentDefault() throws NoSuchMessageException {
+		StaticWebApplicationContext leaf = new StaticWebApplicationContext();
+		leaf.setParent(getApplicationContext());
+		leaf.refresh();
+		assertNotNull("theme still found", leaf.getTheme("theme"));
+		MessageSource ms = leaf.getTheme("theme").getMessageSource();
+		String msg = ms.getMessage("theme.example2", null, null, Locale.UK);
+		assertEquals("correct overridden msg", "test-message2", msg);
 	}
 
 	private String getThemeMessage(String code, Object args[], String defaultMessage, Locale locale) {
