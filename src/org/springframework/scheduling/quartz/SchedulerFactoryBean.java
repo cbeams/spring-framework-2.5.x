@@ -460,7 +460,7 @@ public class SchedulerFactoryBean
 
 	/**
 	 * Set whether to automatically start the scheduler after initialization.
-	 * Default is "true"; set this to false to allow for manual startup.
+	 * Default is "true"; set this to "false" to allow for manual startup.
 	 */
 	public void setAutoStartup(boolean autoStartup) {
 		this.autoStartup = autoStartup;

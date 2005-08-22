@@ -21,7 +21,7 @@ import javax.jms.ServerSession;
 
 /**
  * @author Juergen Hoeller
- * @since 26.05.2005
+ * @since 1.3
  */
 public interface ServerSessionFactory {
 

@@ -46,6 +46,7 @@ public abstract class JdbcUtils {
 
 	private static final Log logger = LogFactory.getLog(JdbcUtils.class);
 
+
 	/**
 	 * Close the given JDBC Connection and ignore any thrown exception.
 	 * This is useful for typical finally blocks in manual JDBC code.
@@ -108,9 +109,9 @@ public abstract class JdbcUtils {
 	 * should be a detached value object, not having any ties to the
 	 * active ResultSet: in particular, it should not be a Blob or Clob
 	 * object but rather a byte array respectively String representation.
-	 * <p>Uses the <code>getObject</code> method, but includes additional
-	 * "hacks" to get around Oracle 10g returning a non-standard object for its
-	 * TIMESTAMP datatype and a java.sql.Date for DATE columns leaving out the
+	 * <p>Uses the <code>getObject</code> method, but includes additional "hacks"
+	 * to get around Oracle 10g returning a non-standard object for its TIMESTAMP
+	 * datatype and a <code>java.sql.Date</code> for DATE columns leaving out the
 	 * time portion: These columns will explicitly be extracted as standard
 	 * <code>java.sql.Timestamp</code> object.
 	 * @param rs is the ResultSet holding the data

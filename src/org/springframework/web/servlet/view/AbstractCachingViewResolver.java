@@ -39,11 +39,12 @@ import org.springframework.web.servlet.ViewResolver;
  */
 public abstract class AbstractCachingViewResolver extends WebApplicationObjectSupport implements ViewResolver {
 
+	/** Whether we should cache views, once resolved */
+	private boolean cache = true;
+
 	/** View name --> View instance */
 	private final Map viewMap = Collections.synchronizedMap(new HashMap());
 
-	/** Whether we should cache views, once resolved */
-	private boolean cache = true;
 
 	/**
 	 * Enable or disable caching. Disable this only for debugging and development.
@@ -62,6 +63,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	public boolean isCache() {
 		return cache;
 	}
+
 
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		if (!this.cache) {

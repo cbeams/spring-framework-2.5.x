@@ -233,8 +233,9 @@ public class JmsTemplate102 extends JmsTemplate {
 
 	/**
 	 * This implementation overrides the superclass method to avoid using
-	 * JMS 1.1's Session <code>getAcknowledgeMode</code> method.
+	 * JMS 1.1's Session <code>getAcknowledgeMode()</code> method.
 	 * The best we can do here is to check the setting on the template.
+	 * @see #getSessionAcknowledgeMode()
 	 */
 	protected boolean isClientAcknowledge(Session session) throws JMSException {
 		return getSessionAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE;

@@ -117,6 +117,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
 
+
 	static {
 		// Eagerly load the ContextClosedEvent class to avoid weird classloader issues
 		// on application shutdown in WebLogic 8.1. (Reported by Dustin Woods.)
@@ -413,11 +414,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	private void initMessageSource() throws BeansException {
 		if (containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
-			this.messageSource = (MessageSource) getBean(MESSAGE_SOURCE_BEAN_NAME);
+			this.messageSource = (MessageSource) getBean(MESSAGE_SOURCE_BEAN_NAME, MessageSource.class);
 			// Make MessageSource aware of parent MessageSource.
 			if (this.parent != null && this.messageSource instanceof HierarchicalMessageSource) {
-				MessageSource parentMessageSource = getInternalParentMessageSource();
-				((HierarchicalMessageSource) this.messageSource).setParentMessageSource(parentMessageSource);
+				HierarchicalMessageSource hms = (HierarchicalMessageSource) this.messageSource;
+				if (hms.getParentMessageSource() == null) {
+					// Only set parent context as parent MessageSource if no parent MessageSource
+					// registered already.
+					hms.setParentMessageSource(getInternalParentMessageSource());
+				}
 			}
 			if (logger.isInfoEnabled()) {
 				logger.info("Using MessageSource [" + this.messageSource + "]");
@@ -442,8 +447,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	private void initApplicationEventMulticaster() throws BeansException {
 		if (containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
-			this.applicationEventMulticaster =
-					(ApplicationEventMulticaster) getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME);
+			this.applicationEventMulticaster = (ApplicationEventMulticaster)
+					getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
 			}

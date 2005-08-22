@@ -38,6 +38,7 @@ public class DelegatingMessageSource implements HierarchicalMessageSource {
 
 	private MessageSource parentMessageSource;
 
+
 	public void setParentMessageSource(MessageSource parent) {
 		this.parentMessageSource = parent;
 	}
@@ -45,6 +46,7 @@ public class DelegatingMessageSource implements HierarchicalMessageSource {
 	public MessageSource getParentMessageSource() {
 		return parentMessageSource;
 	}
+
 
 	public String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
 		if (this.parentMessageSource != null) {

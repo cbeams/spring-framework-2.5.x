@@ -124,12 +124,12 @@ public abstract class JmsAccessor implements InitializingBean {
 		return sessionAcknowledgeMode;
 	}
 
-
 	public void afterPropertiesSet() {
 		if (this.connectionFactory == null) {
 			throw new IllegalArgumentException("connectionFactory is required");
 		}
 	}
+
 
 	/**
 	 * Convert the specified checked {@link javax.jms.JMSException JMSException} to

@@ -32,7 +32,7 @@ public interface ThemeSource {
 	 * The returned Theme will resolve theme-specific messages, codes,
 	 * file paths, etc (e.g. CSS and image files in a web environment).
 	 * @param themeName name of the theme
-	 * @return the respective Theme, or null if none defined
+	 * @return the respective Theme, or <code>null</code> if none defined
 	 */
 	Theme getTheme(String themeName);
 

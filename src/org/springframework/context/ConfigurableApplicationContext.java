@@ -68,7 +68,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
 	 * to intercept the bean factory setup process before beans get touched.
 	 * @throws IllegalStateException if the context does not hold an internal
 	 * bean factory yet (usually if <code>refresh</code> has never been called)
-	 * @see #refresh
+	 * @see #refresh()
 	 * @see #addBeanFactoryPostProcessor
 	 */
 	ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException;
