@@ -365,12 +365,31 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Class getTypeForFactoryMethod(String beanName, RootBeanDefinition mergedBeanDefinition) {
 		// Create bean in case of "factory-bean" declaration, to find out actual type.
 		// Essentially, this is treated like an implementation of the FactoryBean interface.
-		if (mergedBeanDefinition.getFactoryBeanName() != null && mergedBeanDefinition.isSingleton()) {
-			return getBean(beanName).getClass();
+		if (mergedBeanDefinition.getFactoryBeanName() != null) {
+			if (mergedBeanDefinition.isSingleton()) {
+				return getBean(beanName).getClass();
+			}
+			else {
+				// Non-singleton factory bean: don't ask for the bean to be created, 
+				// but look at the return type of the factory method if possible
+				RootBeanDefinition factoryBeanDef = getMergedBeanDefinition(mergedBeanDefinition.getFactoryBeanName());
+				if (factoryBeanDef.hasBeanClass()) {
+					int minNrOfArgs = mergedBeanDefinition.getConstructorArgumentValues().getArgumentCount();
+					Method[] candidates = factoryBeanDef.getBeanClass().getMethods();
+					for (int i = 0; i < candidates.length; i++) {
+						Method factoryMethod = candidates[i];
+						if (factoryMethod.getName().equals(mergedBeanDefinition.getFactoryMethodName()) &&
+								factoryMethod.getParameterTypes().length >= minNrOfArgs) {
+							return factoryMethod.getReturnType();
+						}
+					}								
+				}
+				return null;
+			}
 		}
-		// Return "undeterminable" for beans without class, and for non-singleton beans
-		// with "factory-bean" declaration.
-		if (!mergedBeanDefinition.hasBeanClass() || mergedBeanDefinition.getFactoryBeanName() != null) {
+
+		// Return "undeterminable" for beans without class
+		if (!mergedBeanDefinition.hasBeanClass()) {
 			return null;
 		}
 

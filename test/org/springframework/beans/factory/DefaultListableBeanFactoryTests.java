@@ -32,6 +32,7 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -42,7 +43,7 @@ import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 
 /**
- * This largely tests properties population.
+ * Tests properties population and autowire behaviour.
  *
  * @author Rod Johnson
  */
@@ -195,7 +196,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 			(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p, PREFIX);
 
-			Object kerry = lbf.getBean("kerry");
+			lbf.getBean("kerry");
 			fail ("Unresolved reference should have been detected");
 		}
 		catch (BeansException ex) {
@@ -773,6 +774,95 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.destroySingletons();
 		assertTrue("Destroy method invoked", BeanWithDestroyMethod.closed);
 	}
+	
+	public void testFindTypeOfSingletonFactoryMethodOnBeanInstance() {
+		findTypeOfPrototypeFactoryMethodOnBeanInstance(true);
+	}
+	
+	public void testFindTypeOfPrototypeFactoryMethodOnBeanInstance() {
+		findTypeOfPrototypeFactoryMethodOnBeanInstance(false);
+	}
+	
+	/**
+	 * 
+	 * @param singleton whether the bean created from the factory method on
+	 * the bean instance should be a singleton or prototype. This flag is
+	 * used to allow checking of the new ability in 1.2.4 to determine the type
+	 * of a prototype created from invoking a factory method on a bean instance
+	 * in the factory.
+	 */
+	private void findTypeOfPrototypeFactoryMethodOnBeanInstance(boolean singleton) {
+		String expectedNameFromProperties = "tony";
+		String expectedNameFromArgs = "gordon";
+		
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition instanceFactoryDefinition = new RootBeanDefinition(BeanWithFactoryMethod.class, true);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("name", expectedNameFromProperties);
+		instanceFactoryDefinition.setPropertyValues(pvs);
+		lbf.registerBeanDefinition("factoryBeanInstance", instanceFactoryDefinition);
+		
+		RootBeanDefinition factoryMethodDefinitionWithProperties = new RootBeanDefinition((Class) null);
+		factoryMethodDefinitionWithProperties.setFactoryBeanName("factoryBeanInstance");
+		factoryMethodDefinitionWithProperties.setFactoryMethodName("create");
+		factoryMethodDefinitionWithProperties.setSingleton(singleton);
+		lbf.registerBeanDefinition("fmWithProperties", factoryMethodDefinitionWithProperties);
+		
+		RootBeanDefinition factoryMethodDefinitionWithArgs = new RootBeanDefinition((Class) null);
+		factoryMethodDefinitionWithArgs.setFactoryBeanName("factoryBeanInstance");
+		factoryMethodDefinitionWithArgs.setFactoryMethodName("createWithArgs");
+		ConstructorArgumentValues cvals = new ConstructorArgumentValues();
+		cvals.addGenericArgumentValue(expectedNameFromArgs);
+		factoryMethodDefinitionWithArgs.setConstructorArgumentValues(cvals);
+		factoryMethodDefinitionWithArgs.setSingleton(singleton);
+		lbf.registerBeanDefinition("fmWithArgs", factoryMethodDefinitionWithArgs);
+		
+		TestBean tb = (TestBean) lbf.getBean("fmWithProperties");
+		TestBean second = (TestBean) lbf.getBean("fmWithProperties");
+		if (singleton) {
+			assertSame(tb, second);
+		}
+		else {
+			assertNotSame(tb, second);
+		}
+		
+		assertEquals(expectedNameFromProperties, tb.getName());
+		assertEquals(3, lbf.getBeanDefinitionCount());
+		assertEquals(2, lbf.getBeanNamesForType(TestBean.class).length);
+		
+		TestBean tb2 = (TestBean) lbf.getBean("fmWithArgs");
+		second = (TestBean) lbf.getBean("fmWithArgs");
+		if (singleton) {
+			assertSame(tb2, second);
+		}
+		else {
+			assertNotSame(tb2, second);
+		}
+		assertEquals(expectedNameFromArgs, tb2.getName());
+		assertEquals(3, lbf.getBeanDefinitionCount());
+		assertEquals(2, lbf.getBeanNamesForType(TestBean.class).length);
+	}
+	
+	public static class BeanWithFactoryMethod {
+		private String name;
+		
+		public void setName(String name) {
+			this.name = name;
+		}
+		
+		public TestBean create() {
+			TestBean tb = new TestBean();
+			tb.setName(name);
+			return tb;
+		}
+		
+		public TestBean createWithArgs(String arg) {
+			TestBean tb = new TestBean();
+			tb.setName(arg);
+			return tb;
+		}
+	}
+	
 
 
 	public static class NoDependencies {
