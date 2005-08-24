@@ -1479,7 +1479,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
        <para>When you want to use themes in your web application you'll have to setup
        a <literal>org.springframework.ui.context.ThemeSource</literal>. The
        <literal>WebApplicationContext</literal> interface extends <literal>ThemeSource</literal>
-       but delegates it's responsabilities to a dedicated implementation. By default the
+       but delegates its responsabilities to a dedicated implementation. By default the
        delegate will be a <literal>org.springframework.ui.context.support.ResourceBundleThemeSource</literal>
        that loads properties files from the root of the classpath. If you want to use
        a custom <literal>ThemeSource</literal> implementation or if you need to configure
