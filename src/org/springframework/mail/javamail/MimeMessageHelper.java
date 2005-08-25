@@ -30,7 +30,6 @@ import javax.activation.FileTypeMap;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
@@ -90,15 +89,55 @@ import org.springframework.util.Assert;
  */
 public class MimeMessageHelper {
 
+	/**
+	 * Constant indicating a non-multipart message.
+	 */
+	public static final int MULTIPART_MODE_NO = 0;
+
+	/**
+	 * Constant indicating a multipart message with a single root multipart
+	 * element of type "mixed". Texts, inline elements and attachements
+	 * will all get added to that root element.
+	 * <p>This was Spring 1.0's default behavior. It is known to work properly
+	 * on Outlook. However, other mail clients tend to misinterpret inline
+	 * elements as attachments and/or show attachments inline as well.
+	 */
+	public static final int MULTIPART_MODE_MIXED = 1;
+
+	/**
+	 * Constant indicating a multipart message with a single root multipart
+	 * element of type "related". Texts, inline elements and attachements
+	 * will all get added to that root element.
+	 * <p>This was the default behavior from Spring 1.1 up to 1.2 final.
+	 * It is known to work properly on Outlook, Outlook Express, Yahoo Mail, and
+	 * to a large degree also on Mac Mail (with an additional attachment listed
+	 * for an inline element, despite the inline element also shown inline).
+	 * Does not work properly on Lotus Notes.
+	 */
+	public static final int MULTIPART_MODE_RELATED = 2;
+
+	/**
+	 * Constant indicating a multipart message with a root multipart element
+	 * "mixed" plus a nested multipart element of type "related". Texts and
+	 * inline elements will get added to the nested "related" element,
+	 * while attachments will get added to the "mixed" root element.
+	 * <p>This is the default since Spring 1.2.1. It is known to work properly
+	 * on Outlook, Outlook Express, Yahoo Mail, and Lotus Notes. Does not work
+	 * properly on Mac Mail. If you target Mac Mail or experience issues with
+	 * specific mails on Outlook, consider using MULTIPART_MODE_RELATED instead.
+	 */
+	public static final int MULTIPART_MODE_MIXED_RELATED = 3;
+
+
 	private static final String MULTIPART_SUBTYPE_MIXED = "mixed";
 
 	private static final String MULTIPART_SUBTYPE_RELATED = "related";
 
 	private static final String MULTIPART_SUBTYPE_ALTERNATIVE = "alternative";
 
-	private static final String CONTENT_TYPE_HTML = "text/html";
-
 	private static final String CONTENT_TYPE_ALTERNATIVE = "text/alternative";
+
+	private static final String CONTENT_TYPE_HTML = "text/html";
 
 	private static final String CONTENT_TYPE_CHARSET_SUFFIX = ";charset=";
 
@@ -152,12 +191,18 @@ public class MimeMessageHelper {
 	 * Create a new MimeMessageHelper for the given MimeMessage,
 	 * in multipart mode (supporting alternative texts, inline
 	 * elements and attachments) if requested.
+	 * <p>Consider using the MimeMessageHelper constructor that
+	 * takes a multipartMode argument to choose a specific multipart
+	 * mode other than MULTIPART_MODE_MIXED_RELATED.
 	 * <p>The character encoding for the message will be taken from
 	 * the passed-in MimeMessage object, if carried there. Else,
 	 * JavaMail's default encoding will be used.
 	 * @param mimeMessage MimeMessage to work on
 	 * @param multipart whether to create a multipart message that
 	 * supports alternative texts, inline elements and attachments
+	 * (corresponds to MULTIPART_MODE_MIXED_RELATED)
+	 * @throws MessagingException if multipart creation failed
+	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, int)
 	 * @see #getDefaultEncoding(javax.mail.internet.MimeMessage)
 	 * @see JavaMailSenderImpl#setDefaultEncoding
 	 */
@@ -169,23 +214,64 @@ public class MimeMessageHelper {
 	 * Create a new MimeMessageHelper for the given MimeMessage,
 	 * in multipart mode (supporting alternative texts, inline
 	 * elements and attachments) if requested.
+	 * <p>Consider using the MimeMessageHelper constructor that
+	 * takes a multipartMode argument to choose a specific multipart
+	 * mode other than MULTIPART_MODE_MIXED_RELATED.
 	 * @param mimeMessage MimeMessage to work on
 	 * @param multipart whether to create a multipart message that
 	 * supports alternative texts, inline elements and attachments
+	 * (corresponds to MULTIPART_MODE_MIXED_RELATED)
 	 * @param encoding the character encoding to use for the message
+	 * @throws MessagingException if multipart creation failed
+	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, int, String)
 	 */
 	public MimeMessageHelper(MimeMessage mimeMessage, boolean multipart, String encoding)
 	    throws MessagingException {
 
+		this(mimeMessage, (multipart ? MULTIPART_MODE_MIXED_RELATED : MULTIPART_MODE_NO), encoding);
+	}
+
+	/**
+	 * Create a new MimeMessageHelper for the given MimeMessage,
+	 * in multipart mode (supporting alternative texts, inline
+	 * elements and attachments) if requested.
+	 * <p>The character encoding for the message will be taken from
+	 * the passed-in MimeMessage object, if carried there. Else,
+	 * JavaMail's default encoding will be used.
+	 * @param mimeMessage MimeMessage to work on
+	 * @param multipartMode which kind of multipart message to create
+	 * (MIXED, RELATED, MIXED_RELATED, or NO)
+	 * @throws MessagingException if multipart creation failed
+	 * @see #MULTIPART_MODE_NO
+	 * @see #MULTIPART_MODE_MIXED
+	 * @see #MULTIPART_MODE_RELATED
+	 * @see #MULTIPART_MODE_MIXED_RELATED
+	 * @see #getDefaultEncoding(javax.mail.internet.MimeMessage)
+	 * @see JavaMailSenderImpl#setDefaultEncoding
+	 */
+	public MimeMessageHelper(MimeMessage mimeMessage, int multipartMode) throws MessagingException {
+		this(mimeMessage, multipartMode, null);
+	}
+
+	/**
+	 * Create a new MimeMessageHelper for the given MimeMessage,
+	 * in multipart mode (supporting alternative texts, inline
+	 * elements and attachments) if requested.
+	 * @param mimeMessage MimeMessage to work on
+	 * @param multipartMode which kind of multipart message to create
+	 * (MIXED, RELATED, MIXED_RELATED, or NO)
+	 * @param encoding the character encoding to use for the message
+	 * @throws MessagingException if multipart creation failed
+	 * @see #MULTIPART_MODE_NO
+	 * @see #MULTIPART_MODE_MIXED
+	 * @see #MULTIPART_MODE_RELATED
+	 * @see #MULTIPART_MODE_MIXED_RELATED
+	 */
+	public MimeMessageHelper(MimeMessage mimeMessage, int multipartMode, String encoding)
+	    throws MessagingException {
+
 		this.mimeMessage = mimeMessage;
-		if (multipart) {
-			this.rootMimeMultipart = new MimeMultipart(MULTIPART_SUBTYPE_MIXED);
-			this.mimeMultipart = new MimeMultipart(MULTIPART_SUBTYPE_RELATED);
-			MimeBodyPart rootBodyPart = new MimeBodyPart();
-			rootBodyPart.setContent(this.mimeMultipart);
-			this.rootMimeMultipart.addBodyPart(rootBodyPart);
-			this.mimeMessage.setContent(this.rootMimeMultipart);
-		}
+		createMimeMultiparts(mimeMessage, multipartMode);
 		this.encoding = (encoding != null ? encoding : getDefaultEncoding(mimeMessage));
 		this.fileTypeMap = getDefaultFileTypeMap(mimeMessage);
 	}
@@ -196,6 +282,72 @@ public class MimeMessageHelper {
 	 */
 	public final MimeMessage getMimeMessage() {
 		return mimeMessage;
+	}
+
+
+	/**
+	 * Determine the MimeMultipart objects to use, which will be used
+	 * to store attachments on the one hand and text(s) and inline elements
+	 * on the other hand.
+	 * <p>Texts and inline elements can either be stored in the root element
+	 * itself (MULTIPART_MODE_MIXED, MULTIPART_MODE_RELATED) or in a nested element
+	 * rather than the root element directly (MULTIPART_MODE_MIXED_RELATED).
+	 * <p>By default, the root MimeMultipart element will be of type "mixed"
+	 * (MULTIPART_MODE_MIXED) or "related" (MULTIPART_MODE_RELATED).
+	 * The main multipart element will either be added as nested element of
+	 * type "related" (MULTIPART_MODE_MIXED_RELATED) or be identical to the root
+	 * element itself (MULTIPART_MODE_MIXED, MULTIPART_MODE_RELATED).
+	 * @param mimeMessage the MimeMessage object to add the root MimeMultipart
+	 * object to
+	 * @param multipartMode the multipart mode, as passed into the constructor
+	 * (MIXED, RELATED, MIXED_RELATED, or NO)
+	 * @throws MessagingException if multipart creation failed
+	 * @see #setMimeMultiparts
+	 * @see #MULTIPART_MODE_NO
+	 * @see #MULTIPART_MODE_MIXED
+	 * @see #MULTIPART_MODE_RELATED
+	 * @see #MULTIPART_MODE_MIXED_RELATED
+	 */
+	protected void createMimeMultiparts(MimeMessage mimeMessage, int multipartMode) throws MessagingException {
+		switch (multipartMode) {
+			case MULTIPART_MODE_NO:
+				setMimeMultiparts(null, null);
+				break;
+			case MULTIPART_MODE_MIXED:
+				MimeMultipart mixedMultipart = new MimeMultipart(MULTIPART_SUBTYPE_MIXED);
+				mimeMessage.setContent(mixedMultipart);
+				setMimeMultiparts(mixedMultipart, mixedMultipart);
+				break;
+			case MULTIPART_MODE_RELATED:
+				MimeMultipart relatedMultipart = new MimeMultipart(MULTIPART_SUBTYPE_RELATED);
+				mimeMessage.setContent(relatedMultipart);
+				setMimeMultiparts(relatedMultipart, relatedMultipart);
+				break;
+			case MULTIPART_MODE_MIXED_RELATED:
+				MimeMultipart rootMixedMultipart = new MimeMultipart(MULTIPART_SUBTYPE_MIXED);
+				mimeMessage.setContent(rootMixedMultipart);
+				MimeMultipart nestedRelatedMultipart = new MimeMultipart(MULTIPART_SUBTYPE_RELATED);
+				MimeBodyPart relatedBodyPart = new MimeBodyPart();
+				relatedBodyPart.setContent(nestedRelatedMultipart);
+				rootMixedMultipart.addBodyPart(relatedBodyPart);
+				setMimeMultiparts(rootMixedMultipart, nestedRelatedMultipart);
+				break;
+			default:
+				throw new IllegalArgumentException("Only multipart modes MIXED_RELATED, RELATED and NO supported");
+		}
+	}
+
+	/**
+	 * Set the given MimeMultipart objects for use by this MimeMessageHelper.
+	 * @param root the root MimeMultipart object, which attachments will be added to;
+	 * or <code>null</code> to indicate no multipart at all
+	 * @param main the main MimeMultipart object, which text(s) and inline elements
+	 * will be added to (can be the same as the root multipart object, or an element
+	 * nested underneath the root multipart element)
+	 */
+	protected final void setMimeMultiparts(MimeMultipart root, MimeMultipart main) {
+		this.rootMimeMultipart = root;
+		this.mimeMultipart = main;
 	}
 
 	/**
@@ -247,6 +399,7 @@ public class MimeMessageHelper {
 		checkMultipart();
 		return this.mimeMultipart;
 	}
+
 
 	/**
 	 * Determine the default encoding for the given MimeMessage.
@@ -580,7 +733,7 @@ public class MimeMessageHelper {
 	public void setText(String text, boolean html) throws MessagingException {
 		Assert.notNull(text, "Text must not be null");
 		MimePart partToUse = null;
-		if (this.mimeMultipart != null) {
+		if (isMultipart()) {
 			partToUse = getMainPart();
 		}
 		else {
@@ -607,20 +760,18 @@ public class MimeMessageHelper {
 		Assert.notNull(plainText, "Plain text must not be null");
 		Assert.notNull(htmlText, "HTML text must not be null");
 
-		Multipart messageBody = new MimeMultipart(MULTIPART_SUBTYPE_ALTERNATIVE);
-		MimeBodyPart mimeBodyPart;
-
-		// create the plain text part of the message
-		mimeBodyPart = new MimeBodyPart();
-		setPlainTextToMimePart(mimeBodyPart, plainText);
-		messageBody.addBodyPart(mimeBodyPart);
-
-		// create the HTML text part of the message
-		mimeBodyPart = new MimeBodyPart();
-		setHtmlTextToMimePart(mimeBodyPart, htmlText);
-		messageBody.addBodyPart(mimeBodyPart);
-
+		MimeMultipart messageBody = new MimeMultipart(MULTIPART_SUBTYPE_ALTERNATIVE);
 		getMainPart().setContent(messageBody, CONTENT_TYPE_ALTERNATIVE);
+
+		// Create the plain text part of the message.
+		MimeBodyPart plainTextPart = new MimeBodyPart();
+		setPlainTextToMimePart(plainTextPart, plainText);
+		messageBody.addBodyPart(plainTextPart);
+
+		// Create the HTML text part of the message.
+		MimeBodyPart htmlTextPart = new MimeBodyPart();
+		setHtmlTextToMimePart(htmlTextPart, htmlText);
+		messageBody.addBodyPart(htmlTextPart);
 	}
 
 	private MimeBodyPart getMainPart() throws MessagingException {
@@ -640,8 +791,7 @@ public class MimeMessageHelper {
 		return bodyPart;
 	}
 
-	private void setPlainTextToMimePart(MimePart mimePart, String text)
-	    throws MessagingException {
+	private void setPlainTextToMimePart(MimePart mimePart, String text) throws MessagingException {
 		if (getEncoding() != null) {
 			mimePart.setText(text, getEncoding());
 		}
@@ -650,8 +800,7 @@ public class MimeMessageHelper {
 		}
 	}
 
-	private void setHtmlTextToMimePart(MimePart mimePart, String text)
-	    throws MessagingException {
+	private void setHtmlTextToMimePart(MimePart mimePart, String text) throws MessagingException {
 		if (getEncoding() != null) {
 			mimePart.setContent(text, CONTENT_TYPE_HTML + CONTENT_TYPE_CHARSET_SUFFIX + getEncoding());
 		}
