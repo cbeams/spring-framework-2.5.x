@@ -61,15 +61,15 @@ public class MimeMailMessage implements MailMessage {
 	/**
 	 * Return the MimeMessageHelper that this MimeMailMessage is based on.
 	 */
-	public MimeMessageHelper getMimeMessageHelper() {
-		return helper;
+	public final MimeMessageHelper getMimeMessageHelper() {
+		return this.helper;
 	}
 
 	/**
 	 * Return the JavaMail MimeMessage that this MimeMailMessage is based on.
 	 */
-	public MimeMessage getMimeMessage() {
-		return helper.getMimeMessage();
+	public final MimeMessage getMimeMessage() {
+		return this.helper.getMimeMessage();
 	}
 
 
