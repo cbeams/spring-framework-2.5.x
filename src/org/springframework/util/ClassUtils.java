@@ -82,7 +82,7 @@ public abstract class ClassUtils {
 		if (name.endsWith(ARRAY_SUFFIX)) {
 			// special handling for array class names
 			String elementClassName = name.substring(0, name.length() - ARRAY_SUFFIX.length());
-			Class elementClass = Class.forName(elementClassName, true, classLoader);
+			Class elementClass = ClassUtils.forName(elementClassName, classLoader);
 			return Array.newInstance(elementClass, 0).getClass();
 		}
 		return Class.forName(name, true, classLoader);

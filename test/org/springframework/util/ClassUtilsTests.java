@@ -19,6 +19,7 @@ import org.springframework.beans.TestBean;
  * Tests the various functionality of the ClassUtils class.
  *
  * @author Colin Sampaleanu
+ * @author Juergen Hoeller
  */
 public class ClassUtilsTests extends TestCase {
 
@@ -26,6 +27,35 @@ public class ClassUtilsTests extends TestCase {
 		InnerClass.noArgCalled = false;
 		InnerClass.argCalled = false;
 		InnerClass.overloadedCalled = false;
+	}
+
+	public void testForName() throws ClassNotFoundException {
+		assertEquals(String.class, ClassUtils.forName("java.lang.String"));
+		assertEquals(String[].class, ClassUtils.forName("java.lang.String[]"));
+		assertEquals(TestBean.class, ClassUtils.forName("org.springframework.beans.TestBean"));
+		assertEquals(TestBean[].class, ClassUtils.forName("org.springframework.beans.TestBean[]"));
+	}
+
+	public void testForNameWithPrimitiveClasses() throws ClassNotFoundException {
+		assertEquals(boolean.class, ClassUtils.forName("boolean"));
+		assertEquals(byte.class, ClassUtils.forName("byte"));
+		assertEquals(char.class, ClassUtils.forName("char"));
+		assertEquals(short.class, ClassUtils.forName("short"));
+		assertEquals(int.class, ClassUtils.forName("int"));
+		assertEquals(long.class, ClassUtils.forName("long"));
+		assertEquals(float.class, ClassUtils.forName("float"));
+		assertEquals(double.class, ClassUtils.forName("double"));
+	}
+
+	public void testForNameWithPrimitiveArrays() throws ClassNotFoundException {
+		assertEquals(boolean[].class, ClassUtils.forName("boolean[]"));
+		assertEquals(byte[].class, ClassUtils.forName("byte[]"));
+		assertEquals(char[].class, ClassUtils.forName("char[]"));
+		assertEquals(short[].class, ClassUtils.forName("short[]"));
+		assertEquals(int[].class, ClassUtils.forName("int[]"));
+		assertEquals(long[].class, ClassUtils.forName("long[]"));
+		assertEquals(float[].class, ClassUtils.forName("float[]"));
+		assertEquals(double[].class, ClassUtils.forName("double[]"));
 	}
 
 	public void testGetShortName() {
