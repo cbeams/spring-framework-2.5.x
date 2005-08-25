@@ -164,7 +164,7 @@ public interface InputStreamSource {
       path. For the latter case, a JavaBeans <literal>PropertyEditor</literal>
       will recognize the special prefix <literal>classpath:</literal>on the
       string path, and create a <literal>ClassPathResource</literal> in that
-      case. </para>
+      case.</para>
     </sect2>
 
     <sect2>
@@ -429,9 +429,10 @@ ctx.getResource("/some/resource/path/myTemplate.txt");</programlisting>Even
       and just force the use of a UrlResource, by using the
       <literal>file:</literal> URL prefix.</para>
 
-      <para><programlisting>ApplicationContext ctx =
-    new FileSystemClassPathXmlApplicationContext("file:/conf/context.xml");</programlisting><programlisting>// actual context type doesn't matter
-ctx.getResource("file:/some/resource/path/myTemplate.txt");</programlisting></para>
+      <para><programlisting>// actual context type doesn't matter, the Resource will always be UrlResource
+ctx.getResource("file:/some/resource/path/myTemplate.txt");</programlisting><programlisting>// force this FileSystemXmlApplicationContext to load it's definition via a UrlResource
+ApplicationContext ctx =
+    new FileSystemXmlApplicationContext("file:/conf/context.xml");</programlisting></para>
     </sect2>
   </sect1>
 </chapter>
