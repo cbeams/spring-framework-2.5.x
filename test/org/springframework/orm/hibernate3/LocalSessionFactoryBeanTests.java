@@ -291,7 +291,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		sfb.setDataSource(new DriverManagerDataSource());
 		sfb.setExposeTransactionAwareSessionFactory(false);
 		sfb.afterPropertiesSet();
-		assertTrue(sessionFactory.equals(sfb.getObject()));
+		assertTrue(sessionFactory == sfb.getObject());
 		sfb.destroy();
 		factoryControl.verify();
 	}
