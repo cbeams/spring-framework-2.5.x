@@ -150,7 +150,7 @@ public abstract class JasperReportsUtils {
 			throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
-		render(new JRCsvExporter(), print, writer);
+		render((JRExporter) new JRCsvExporter(), print, writer);
 	}
 
 	/**
@@ -169,7 +169,7 @@ public abstract class JasperReportsUtils {
 			throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
-		render(new JRHtmlExporter(), print, writer);
+		render((JRExporter) new JRHtmlExporter(), print, writer);
 	}
 
 	/**
@@ -188,7 +188,7 @@ public abstract class JasperReportsUtils {
 			throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
-		render(new JRPdfExporter(), print, stream);
+		render((JRExporter) new JRPdfExporter(), print, stream);
 	}
 
 	/**
@@ -207,7 +207,7 @@ public abstract class JasperReportsUtils {
 			throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
-		render(new JRXlsExporter(), print, stream);
+		render((JRExporter) new JRXlsExporter(), print, stream);
 	}
 
 }
