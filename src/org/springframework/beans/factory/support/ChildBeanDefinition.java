@@ -37,10 +37,29 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see RootBeanDefinition
  */
 public class ChildBeanDefinition extends AbstractBeanDefinition {
 
 	private final String parentName;
+
+
+	/**
+	 * Create a new ChildBeanDefinition for the given parent, to be
+	 * configured through its bean properties and cofiguration methods.
+	 * @param parentName the name of the parent bean
+	 * @see #setBeanClass
+	 * @see #setBeanClassName
+	 * @see #setSingleton
+	 * @see #setAutowireMode
+	 * @see #setDependencyCheck
+	 * @see #setConstructorArgumentValues
+	 * @see #setPropertyValues
+	 */
+	public ChildBeanDefinition(String parentName) {
+		super();
+		this.parentName = parentName;
+	}
 
 	/**
 	 * Create a new ChildBeanDefinition for the given parent.
@@ -60,6 +79,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public ChildBeanDefinition(
 			String parentName, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
+
 		super(cargs, pvs);
 		this.parentName = parentName;
 	}
@@ -74,6 +94,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public ChildBeanDefinition(
 			String parentName, Class beanClass, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
+
 		super(cargs, pvs);
 		this.parentName = parentName;
 		setBeanClass(beanClass);
@@ -90,6 +111,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public ChildBeanDefinition(
 			String parentName, String beanClassName, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
+
 		super(cargs, pvs);
 		this.parentName = parentName;
 		setBeanClassName(beanClassName);
@@ -112,8 +134,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer("Child bean with parent '");
-		sb.append(getParentName()).append("'; ").
-			append(super.toString());
+		sb.append(this.parentName).append("': ").append(super.toString());
 		return sb.toString();
 	}
 

@@ -31,9 +31,24 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
+ * @see ChildBeanDefinition
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
+
+	/**
+	 * Create a new RootBeanDefinition, to be configured through its bean
+	 * properties and cofiguration methods.
+	 * @see #setBeanClass
+	 * @see #setBeanClassName
+	 * @see #setSingleton
+	 * @see #setAutowireMode
+	 * @see #setDependencyCheck
+	 * @see #setConstructorArgumentValues
+	 * @see #setPropertyValues
+	 */
+	public RootBeanDefinition() {
+		super();
+	}
 
 	/**
 	 * Create a new RootBeanDefinition for a singleton.
@@ -156,10 +171,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer("Root bean with class [");
-		sb.append(getBeanClassName()).append("]; ").		
-			append(super.toString());
-		return sb.toString();
+		return "Root bean: " + super.toString();
 	}
 
 }

@@ -73,6 +73,10 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	private MethodOverrides methodOverrides = new MethodOverrides();
 
+	private int autowireMode = AUTOWIRE_NO;
+
+	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
+
 	private String initMethodName;
 
 	private String destroyMethodName;
@@ -80,10 +84,6 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	private String factoryMethodName;
 	
 	private String factoryBeanName;
-
-	private int autowireMode = AUTOWIRE_NO;
-
-	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
 
 	private String[] dependsOn;
 
@@ -122,15 +122,15 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		setPropertyValues(new MutablePropertyValues(original.getPropertyValues()));
 		setMethodOverrides(new MethodOverrides(original.getMethodOverrides()));
 
+		setAutowireMode(original.getAutowireMode());
+		setDependencyCheck(original.getDependencyCheck());
+
 		setInitMethodName(original.getInitMethodName());
 		setDestroyMethodName(original.getDestroyMethodName());
 		setFactoryMethodName(original.getFactoryMethodName());
 		setFactoryBeanName(original.getFactoryBeanName());
 
 		setDependsOn(original.getDependsOn());
-		setAutowireMode(original.getAutowireMode());
-		setDependencyCheck(original.getDependencyCheck());
-
 		setResourceDescription(original.getResourceDescription());
 	}
 
@@ -334,69 +334,6 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Set the name of the initializer method. The default is null
-	 * in which case there is no initializer method.
-	 */
-	public void setInitMethodName(String initMethodName) {
-		this.initMethodName = initMethodName;
-	}
-
-	/**
-	 * Return the name of the initializer method.
-	 */
-	public String getInitMethodName() {
-		return this.initMethodName;
-	}
-
-	/**
-	 * Set the name of the destroy method. The default is null
-	 * in which case there is no destroy method.
-	 */
-	public void setDestroyMethodName(String destroyMethodName) {
-		this.destroyMethodName = destroyMethodName;
-	}
-
-	/**
-	 * Return the name of the destroy method.
-	 */
-	public String getDestroyMethodName() {
-		return this.destroyMethodName;
-	}
-
-	/**
-	 * Specify a factory method, if any. This method will be invoked with
-	 * constructor arguments, or with no arguments if none are specified.
-	 * The static method will be invoked on the specifed beanClass.
-	 * @param factoryMethodName static factory method name, or null if
-	 * normal constructor creation should be used
-	 * @see #getBeanClass
-	 */
-	public void setFactoryMethodName(String factoryMethodName) {
-		this.factoryMethodName = factoryMethodName;
-	}
-
-	/**
-	 * Return a factory method, if any.
-	 */
-	public String getFactoryMethodName() {
-		return this.factoryMethodName;
-	}
-
-	/**
-	 * Specify the factory bean to use, if any.
-	 */
-	public void setFactoryBeanName(String factoryBeanName) {
-		this.factoryBeanName = factoryBeanName;
-	}
-
-	/**
-	 * Returns the factory bean name, if any.
-	 */
-	public String getFactoryBeanName() {
-		return factoryBeanName;
-	}
-
-	/**
 	 * Set the autowire mode. This determines whether any automagical detection
 	 * and setting of bean references will happen. Default is AUTOWIRE_NO,
 	 * which means there's no autowire.
@@ -462,6 +399,69 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 */
 	public int getDependencyCheck() {
 		return dependencyCheck;
+	}
+
+	/**
+	 * Set the name of the initializer method. The default is null
+	 * in which case there is no initializer method.
+	 */
+	public void setInitMethodName(String initMethodName) {
+		this.initMethodName = initMethodName;
+	}
+
+	/**
+	 * Return the name of the initializer method.
+	 */
+	public String getInitMethodName() {
+		return this.initMethodName;
+	}
+
+	/**
+	 * Set the name of the destroy method. The default is null
+	 * in which case there is no destroy method.
+	 */
+	public void setDestroyMethodName(String destroyMethodName) {
+		this.destroyMethodName = destroyMethodName;
+	}
+
+	/**
+	 * Return the name of the destroy method.
+	 */
+	public String getDestroyMethodName() {
+		return this.destroyMethodName;
+	}
+
+	/**
+	 * Specify a factory method, if any. This method will be invoked with
+	 * constructor arguments, or with no arguments if none are specified.
+	 * The static method will be invoked on the specifed beanClass.
+	 * @param factoryMethodName static factory method name, or null if
+	 * normal constructor creation should be used
+	 * @see #getBeanClass
+	 */
+	public void setFactoryMethodName(String factoryMethodName) {
+		this.factoryMethodName = factoryMethodName;
+	}
+
+	/**
+	 * Return a factory method, if any.
+	 */
+	public String getFactoryMethodName() {
+		return this.factoryMethodName;
+	}
+
+	/**
+	 * Specify the factory bean to use, if any.
+	 */
+	public void setFactoryBeanName(String factoryBeanName) {
+		this.factoryBeanName = factoryBeanName;
+	}
+
+	/**
+	 * Returns the factory bean name, if any.
+	 */
+	public String getFactoryBeanName() {
+		return factoryBeanName;
 	}
 
 	/**
@@ -544,16 +544,17 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("singleton=").append(singleton).
-			append("; abstract=").append(abstractFlag).
-			append("; autowire=").append(autowireMode).
-			append("; dependencyCheck=").append(dependencyCheck).
-			append("; lazyInit=").append(lazyInit).
-			append("; initMethodName=").append(initMethodName).
-			append("; destroyMethodName=").append(destroyMethodName).
-			append("; factoryMethodName=").append(factoryMethodName).
-			append("; factoryBeanName=").append(factoryBeanName);
+		StringBuffer sb = new StringBuffer("class [");
+		sb.append(getBeanClassName()).append("]");
+		sb.append("; abstract=").append(this.abstractFlag);
+		sb.append("; singleton=").append(this.singleton);
+		sb.append("; lazyInit=").append(this.lazyInit);
+		sb.append("; autowire=").append(this.autowireMode);
+		sb.append("; dependencyCheck=").append(this.dependencyCheck);
+		sb.append("; initMethodName=").append(this.initMethodName);
+		sb.append("; destroyMethodName=").append(this.destroyMethodName);
+		sb.append("; factoryMethodName=").append(this.factoryMethodName);
+		sb.append("; factoryBeanName=").append(this.factoryBeanName);
 		if (getResourceDescription() != null) {
 			sb.append("; defined in ").append(getResourceDescription());
 		}
