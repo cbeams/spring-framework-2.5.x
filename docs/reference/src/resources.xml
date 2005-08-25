@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter id="aspectj">
+<chapter id="resources">
   <title>Abstracting Access to Low-Level Resources</title>
 
   <sect1>
@@ -48,11 +48,42 @@ public interface InputStreamSource {
 
 }</programlisting>
 
-    <para>The most important method is probably getInputStream(), which may be
-    used to locate and open the resource, returning an InputStream for reading
-    it. You may also verify the existence of the resource, or try to get an
-    actual URL or File object representing the resource, if the underlaying
-    implementation is compatible, and supports that functionality.</para>
+    <para>Some of the most important methods are:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><literal>getInputStream()</literal>: locates and opens the
+        resource, returning an <literal>InputStream</literal> for reading it.
+        It is expected that each invocation returns a fresh
+        <literal>InputStream</literal>. It is the responsibility of the caller
+        to close the stream.</para>
+      </listitem>
+
+      <listitem>
+        <para><literal>exists()</literal>: returns a boolean indicating
+        whether this resource actually exists in physical form</para>
+      </listitem>
+
+      <listitem>
+        <para><literal>isOpen()</literal>: returns a boolean indicating
+        whether this resource represents a handle with an open stream. If
+        true, the <literal>InputStream</literal> cannot be read multiple
+        times, and must be read once only and then closed to avoid resource
+        leaks. Will be false for all usual resource implementations, with the
+        exception of <literal>InputStreamResource</literal>.</para>
+      </listitem>
+
+      <listitem>
+        <para><literal>getDescription()</literal>: returns a description for
+        this resource, to be used for error output when working with the
+        resource. This is often the fully qualified file name or the actual
+        URL</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Other methods allow you to obtain an actual URL or File object
+    representing the resource, if the underlaying implementation is
+    compatible, and supports that functionality.</para>
 
     <para><literal>Resource</literal> is used extensively in Spring itself, as
     an argument type in many method signatures when a resource is needed.
