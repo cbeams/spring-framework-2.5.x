@@ -17,6 +17,8 @@
 package org.springframework.beans.factory;
 
 import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -802,13 +804,19 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		instanceFactoryDefinition.setPropertyValues(pvs);
 		lbf.registerBeanDefinition("factoryBeanInstance", instanceFactoryDefinition);
 		
-		RootBeanDefinition factoryMethodDefinitionWithProperties = new RootBeanDefinition((Class) null);
+		RootBeanDefinition factoryMethodDefinitionWithProperties = new RootBeanDefinition();
 		factoryMethodDefinitionWithProperties.setFactoryBeanName("factoryBeanInstance");
 		factoryMethodDefinitionWithProperties.setFactoryMethodName("create");
 		factoryMethodDefinitionWithProperties.setSingleton(singleton);
 		lbf.registerBeanDefinition("fmWithProperties", factoryMethodDefinitionWithProperties);
 		
-		RootBeanDefinition factoryMethodDefinitionWithArgs = new RootBeanDefinition((Class) null);
+		RootBeanDefinition factoryMethodDefinitionGeneric = new RootBeanDefinition();
+		factoryMethodDefinitionGeneric.setFactoryBeanName("factoryBeanInstance");
+		factoryMethodDefinitionGeneric.setFactoryMethodName("createGeneric");
+		factoryMethodDefinitionGeneric.setSingleton(singleton);
+		lbf.registerBeanDefinition("fmGeneric", factoryMethodDefinitionGeneric);
+
+		RootBeanDefinition factoryMethodDefinitionWithArgs = new RootBeanDefinition();
 		factoryMethodDefinitionWithArgs.setFactoryBeanName("factoryBeanInstance");
 		factoryMethodDefinitionWithArgs.setFactoryMethodName("createWithArgs");
 		ConstructorArgumentValues cvals = new ConstructorArgumentValues();
@@ -816,7 +824,19 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		factoryMethodDefinitionWithArgs.setConstructorArgumentValues(cvals);
 		factoryMethodDefinitionWithArgs.setSingleton(singleton);
 		lbf.registerBeanDefinition("fmWithArgs", factoryMethodDefinitionWithArgs);
-		
+
+		assertEquals(4, lbf.getBeanDefinitionCount());
+		List tbNames = Arrays.asList(lbf.getBeanNamesForType(TestBean.class));
+		assertTrue(tbNames.contains("fmWithProperties"));
+		assertTrue(tbNames.contains("fmWithArgs"));
+		if (singleton) {
+			assertEquals(3, tbNames.size());
+			assertTrue(tbNames.contains("fmGeneric"));
+		}
+		else {
+			assertEquals(2, tbNames.size());
+		}
+
 		TestBean tb = (TestBean) lbf.getBean("fmWithProperties");
 		TestBean second = (TestBean) lbf.getBean("fmWithProperties");
 		if (singleton) {
@@ -825,11 +845,18 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		else {
 			assertNotSame(tb, second);
 		}
-		
 		assertEquals(expectedNameFromProperties, tb.getName());
-		assertEquals(3, lbf.getBeanDefinitionCount());
-		assertEquals(2, lbf.getBeanNamesForType(TestBean.class).length);
-		
+
+		tb = (TestBean) lbf.getBean("fmGeneric");
+		second = (TestBean) lbf.getBean("fmGeneric");
+		if (singleton) {
+			assertSame(tb, second);
+		}
+		else {
+			assertNotSame(tb, second);
+		}
+		assertEquals(expectedNameFromProperties, tb.getName());
+
 		TestBean tb2 = (TestBean) lbf.getBean("fmWithArgs");
 		second = (TestBean) lbf.getBean("fmWithArgs");
 		if (singleton) {
@@ -839,30 +866,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			assertNotSame(tb2, second);
 		}
 		assertEquals(expectedNameFromArgs, tb2.getName());
-		assertEquals(3, lbf.getBeanDefinitionCount());
-		assertEquals(2, lbf.getBeanNamesForType(TestBean.class).length);
 	}
-	
-	public static class BeanWithFactoryMethod {
-		private String name;
-		
-		public void setName(String name) {
-			this.name = name;
-		}
-		
-		public TestBean create() {
-			TestBean tb = new TestBean();
-			tb.setName(name);
-			return tb;
-		}
-		
-		public TestBean createWithArgs(String arg) {
-			TestBean tb = new TestBean();
-			tb.setName(arg);
-			return tb;
-		}
-	}
-	
 
 
 	public static class NoDependencies {
@@ -935,6 +939,32 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 		public void close() {
 			closed = true;
+		}
+	}
+
+
+	public static class BeanWithFactoryMethod {
+
+		private String name;
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public TestBean create() {
+			TestBean tb = new TestBean();
+			tb.setName(name);
+			return tb;
+		}
+
+		public TestBean createWithArgs(String arg) {
+			TestBean tb = new TestBean();
+			tb.setName(arg);
+			return tb;
+		}
+
+		public Object createGeneric() {
+			return create();
 		}
 	}
 

@@ -124,6 +124,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
+	 * Return the current instantiation strategy.
+	 */
+	public InstantiationStrategy getInstantiationStrategy() {
+		return instantiationStrategy;
+	}
+
+	/**
 	 * Ignore the given dependency type for autowiring:
 	 * for example, String. Default is none.
 	 */
@@ -133,6 +140,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * Return the set of dependency types that will get ignored for autowiring.
+	 * @return Set of Class objects
 	 */
 	public Set getIgnoredDependencyTypes() {
 		return ignoredDependencyTypes;
@@ -271,6 +279,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	// Implementation of relevant AbstractBeanFactory template methods
 	//---------------------------------------------------------------------
 
+	/**
+	 * Central method of this class: creates a bean instance,
+	 * populates the bean instance, applies post-processors, etc.
+	 * <p>Differentiates between default bean instantiation, use of a
+	 * factory method, and autowiring a constructor.
+	 * @see #instantiateBean
+	 * @see #instantiateUsingFactoryMethod
+	 * @see #autowireConstructor
+	 */
 	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args)
 			throws BeanCreationException {
 
@@ -313,9 +330,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 			else {
 				// No special handling: simply use no-arg constructor.
-				Object beanInstance = this.instantiationStrategy.instantiate(mergedBeanDefinition, beanName, this);
-				instanceWrapper = new BeanWrapperImpl(beanInstance);
-				initBeanWrapper(instanceWrapper);
+				instanceWrapper = instantiateBean(beanName, mergedBeanDefinition);
 			}
 			bean = instanceWrapper.getWrappedInstance();
 
@@ -362,55 +377,61 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return bean;
 	}
 
+	/**
+	 * This implementation determines the type matching <code>createBean</code>'s
+	 * different creation strategies.
+	 * <p>As far as possible, we'll perform static type checking to avoid creation
+	 * of the target bean. However, in case of a non-lazy-init singleton with a
+	 * "factory-bean" reference, checking the actual return type is preferable:
+	 * For example, a generic service factory might be declared with return type
+	 * "Object" or a generic service marker interface, where static type checking
+	 * wouldn't reveal any actual type.
+	 */
 	protected Class getTypeForFactoryMethod(String beanName, RootBeanDefinition mergedBeanDefinition) {
 		// Create bean in case of "factory-bean" declaration, to find out actual type.
 		// Essentially, this is treated like an implementation of the FactoryBean interface.
+		// If not a singleton or marked as lazy-init, we'll resort to static type checking.
+		if (mergedBeanDefinition.getFactoryBeanName() != null &&
+				mergedBeanDefinition.isSingleton() && !mergedBeanDefinition.isLazyInit()) {
+			return getBean(beanName).getClass();
+		}
+
+		Class factoryClass = null;
+		boolean isStatic = true;
+
 		if (mergedBeanDefinition.getFactoryBeanName() != null) {
-			if (mergedBeanDefinition.isSingleton()) {
-				return getBean(beanName).getClass();
-			}
-			else {
-				// Non-singleton factory bean: don't ask for the bean to be created, 
-				// but look at the return type of the factory method if possible
-				RootBeanDefinition factoryBeanDef = getMergedBeanDefinition(mergedBeanDefinition.getFactoryBeanName());
-				if (factoryBeanDef.hasBeanClass()) {
-					int minNrOfArgs = mergedBeanDefinition.getConstructorArgumentValues().getArgumentCount();
-					Method[] candidates = factoryBeanDef.getBeanClass().getMethods();
-					for (int i = 0; i < candidates.length; i++) {
-						Method factoryMethod = candidates[i];
-						if (factoryMethod.getName().equals(mergedBeanDefinition.getFactoryMethodName()) &&
-								factoryMethod.getParameterTypes().length >= minNrOfArgs) {
-							return factoryMethod.getReturnType();
-						}
-					}								
-				}
+			// Check declared factory method return type on factory class.
+			factoryClass = getType(mergedBeanDefinition.getFactoryBeanName());
+			isStatic = false;
+		}
+		else {
+			// Check declared factory method return type on bean class.
+			if (!mergedBeanDefinition.hasBeanClass()) {
 				return null;
 			}
+			factoryClass = mergedBeanDefinition.getBeanClass();
 		}
 
-		// Return "undeterminable" for beans without class
-		if (!mergedBeanDefinition.hasBeanClass()) {
-			return null;
-		}
-
-		// Check static factory methods in case of bean with local factory method:
-		// If all of them have the same return type, return that type.
+		// If all factory methods have the same return type, return that type.
 		// Can't clearly figure out exact method due to type converting / autowiring!
 		int minNrOfArgs = mergedBeanDefinition.getConstructorArgumentValues().getArgumentCount();
-		Method[] candidates = mergedBeanDefinition.getBeanClass().getMethods();
+		Method[] candidates = factoryClass.getMethods();
 		Set returnTypes = new HashSet(1);
 		for (int i = 0; i < candidates.length; i++) {
 			Method factoryMethod = candidates[i];
-			if (Modifier.isStatic(factoryMethod.getModifiers()) &&
+			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic &&
 					factoryMethod.getName().equals(mergedBeanDefinition.getFactoryMethodName()) &&
 					factoryMethod.getParameterTypes().length >= minNrOfArgs) {
 				returnTypes.add(factoryMethod.getReturnType());
 			}
 		}
+
 		if (returnTypes.size() == 1) {
+			// Clear return type found: all factory methods return same type.
 			return (Class) returnTypes.iterator().next();
 		}
 		else {
+			// Ambiguous return types found: return null to indicate "not determinable".
 			return null;
 		}
 	}
@@ -421,6 +442,21 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	//---------------------------------------------------------------------
 
 	/**
+	 * Instantiate the given bean using its default constructor.
+	 * @param beanName name of the bean
+	 * @param mergedBeanDefinition the bean definition for the bean
+	 * @return BeanWrapper for the new instance
+	 */
+	protected BeanWrapper instantiateBean(String beanName, RootBeanDefinition mergedBeanDefinition)
+			throws BeansException {
+
+		Object beanInstance = getInstantiationStrategy().instantiate(mergedBeanDefinition, beanName, this);
+		BeanWrapper bw = new BeanWrapperImpl(beanInstance);
+		initBeanWrapper(bw);
+		return bw;
+	}
+
+	/**
 	 * Instantiate the bean using a named factory method. The method may be static, if the
 	 * mergedBeanDefinition parameter specifies a class, rather than a factoryBean, or
 	 * an instance variable on a factory object itself configured using Dependency Injection.
@@ -429,8 +465,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * to match with the parameters. We don't have the types attached to constructor args,
 	 * so trial and error is the only way to go here. The explicitArgs array may contain
 	 * argument values passed in programmatically via the corresponding getBean method.
-	 * @param beanName name of the bean to autowire by type
-	 * @param mergedBeanDefinition bean definition to update through autowiring
+	 * @param beanName name of the bean
+	 * @param mergedBeanDefinition the bean definition for the bean
 	 * @param explicitArgs argument values passed in programmatically via the getBean
 	 * method, or null if none (-> use constructor argument values from bean definition)
 	 * @return BeanWrapper for the new instance
@@ -557,8 +593,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * <p>This corresponds to constructor injection: In this mode, a Spring
 	 * bean factory is able to host components that expect constructor-based
 	 * dependency resolution.
-	 * @param beanName name of the bean to autowire by type
-	 * @param mergedBeanDefinition bean definition to update through autowiring
+	 * @param beanName name of the bean
+	 * @param mergedBeanDefinition the bean definition for the bean
 	 * @return BeanWrapper for the new instance
 	 */
 	protected BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mergedBeanDefinition)
