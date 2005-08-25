@@ -5,6 +5,7 @@
 <!ENTITY overview			SYSTEM "overview.xml">
 <!ENTITY background			SYSTEM "background.xml">
 <!ENTITY beans				SYSTEM "beans.xml">
+<!ENTITY resources			SYSTEM "resources.xml">
 <!ENTITY validation			SYSTEM "validation.xml">
 <!ENTITY aop				SYSTEM "aop.xml">
 <!ENTITY aspectj			SYSTEM "aspectj.xml">
@@ -95,6 +96,8 @@
 	    &background;
 
 	    &beans;
+	    
+	    &resources;
 	    
 	    &validation;
 	    

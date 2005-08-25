@@ -313,7 +313,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
                 <entry><literal>FileEditor</literal></entry>
 
                 <entry>Capable of resolving Strings to
-                <literal>File</literal>-objects. Registered by default by
+                <literal>java.io.File</literal> objects. Registered by default by
                 BeanWrapperImpl. </entry>
               </row>
 
@@ -323,8 +323,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
                 <entry>One-way property editor, capable of taking a text
                 string and producing (via an intermediate ResourceEditor and
                 Resource) an InputStream, so InputStream properties may be
-                directly setCapable of resolving Strings to
-                <literal>File</literal>-objects. Note that the default usage
+                directly set as Strings. Note that the default usage
                 will not close the InputStream for you! Registered by default
                 by BeanWrapperImpl.</entry>
               </row>
@@ -333,7 +332,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
                 <entry><literal>LocaleEditor</literal></entry>
 
                 <entry>Capable of resolving Strings to
-                <literal>Locale</literal>-objects and vice versa (the String
+                <literal>Locale</literal> objects and vice versa (the String
                 format is [language]_[country]_[variant], which is the same
                 thing the toString() method of Locale provides). Registered by
                 default by BeanWrapperImpl.</entry>
@@ -344,7 +343,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
 
                 <entry>Capable of converting Strings (formatted using the
                 format as defined in the Javadoc for the java.lang.Properties
-                class) to <literal>Properties</literal>-objects. Registered by
+                class) to <literal>Properties</literal> objects. Registered by
                 default by BeanWrapperImpl.</entry>
               </row>
 
@@ -368,7 +367,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
                 <entry><literal>URLEditor</literal></entry>
 
                 <entry>Capable of resolving a String representation of a URL
-                to an actual <literal>URL</literal>-object. Registered by
+                to an actual <literal>URL</literal> object. Registered by
                 default by BeanWrapperImpl.</entry>
               </row>
             </tbody>
