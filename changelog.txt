@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.4 (15.8.2005)
+Changes in version 1.2.4 (26.8.2005)
 ------------------------------------
 
 Package org.springframework.aop
@@ -16,9 +16,16 @@ Package org.springframework.beans
 * BeanWrapperImpl's "getPropertyType" checks custom editors and takes registered type as hint for expected property type
 * added public "getSortDefinition()" method to PropertyComparator, giving access to the sort definition for unit tests
 * added overloaded constructor to CustomDateEditor, accepting an exact date length to check (to avoid misinterpretation)
+* added "searchSystemEnvironment" bean property to PropertyPlaceholderConfigurer, for checking "System.getenv()" too
+* refined "toString()" implementations of Root/ChildBeanDefinition to expose more state (such as factory method, etc)
+* added no-arg constructor to RootBeanDefinition and constructor with parent name only to ChildBeanDefinition
+* AbstractAutowireCapableBeanFactory performs static type checking for prototype factory methods on "factory-bean" too
+* AbstractAutowireCapableBeanFactory only fetches target bean for type checking on "factory-bean" when not lazy-init
+* refined AbstractAutowireCapableBeanFactory to not log debug exception stacktraces during factory method resolution
 * XmlBeanDefinitionReader uses ResourceEntityResolver if the passed-in BeanFactory was autodetected as ResourceLoader
 
 Package org.springframework.context
+* AbstractApplicationContext does not set the parent MessageSource if local MessageSource object already has a parent
 * AbstractXmlApplicationContext applies its class loader, if any, as bean class loader to the XmlBeanDefinitionReader
 
 Package org.springframework.core
@@ -28,18 +35,22 @@ Package org.springframework.jca
 * CciTemplate exposes RecordFactory placeholder to RecordCreator callbacks if connector doesn't provide a RecordFactory
 
 Package org.springframework.jdbc
+* changed StatementCreatorUtils to use "PreparedStatement.setNull" with Types.NULL when value is null and type unknown
 * JdbcTemplate's "update" version with a KeyHolder argument explicitly closes the generated keys ResultSet, if any
 * fixed SqlFunction's default constructor to set "rowsExpected" to 1, like all other SqlFunction constructors
 * reworked SqlFunction to use SingleColumnRowMapper underneath, exposing a "resultType" bean property of type Class
 * deprecated SqlFunction's constructors that expect a SQL return type, in favor of specifying a result type Class
 * added overloaded constructor to SqlCall, with DataSource and SQL arguments (for consistency with SqlFunction and co)
-* changed StatementCreatorUtils to use setNull with Types.NULL when the value is null and type is unknown
+
+Package org.springframework.jms
+* added "deliveryPersistent" bean property to JmsTemplate, for setting the delivery mode through a boolean flag
 
 Package org.springframework.jmx
 * MBeanClientInterceptor closes a JMX Connector opened through the "serviceUrl" bean property on shutdown
 * added "connectOnStartup" flag to MBeanClientInterceptor, to be turned off for lazily connecting on first access
 
 Package org.springframework.mail
+* MimeMessageHelper supports 3 multipart modes: MIXED, RELATED (1.2 final default), and MIXED_RELATED (1.2.1+ default)
 * added overloaded "addAttachment(attachmentFilename, inputStreamSource, contentType)" method to MimeMessageHelper
 
 Package org.springframework.mock
@@ -49,6 +60,8 @@ Package org.springframework.mock
 
 Package org.springframework.orm
 * upgraded to the most recently published version of the Hibernate 3.0.5 jar (there seem to be multiple versions around)
+* refined LocalPersistenceManagerFactoryBean to work with JDO 1.0 API as well as with the latest JDO 2.0 API snapshot
+* refined LocalSessionFactory for TopLink to use a new TopLink SessionManager instance rather than the shared singleton
 
 Package org.springframework.remoting
 * factored out protected "createObjectOutputStream(OutputStream)" template method in HttpInvokerServiceExporter
@@ -59,6 +72,9 @@ Package org.springframework.scheduling
 * added "setRunnable" method to SchedulerTimerTask, plus corresponding overloaded constructors
 * reworked MethodInvokingTimerTaskFactoryBean to derive from MethodInvokingRunnable and create a DelegatingTimerTask
 
+Package org.springframework.test
+* refined AbstractTransactionalSpringContextTests to allow any Exception to be thrown on onTearDownIn/AfterTransaction
+
 Package org.springframework.transaction
 * added "cacheUserTransaction" flag to JtaTransactionManager, to be turned off for a fresh lookup for every transaction
 * reworked JtaTransactionManager to always access the UserTransaction through the current JtaTransactionObject
@@ -66,9 +82,14 @@ Package org.springframework.transaction
 * reworked JtaTransactionManager's "doJtaSuspend" and "doResume" signatures to include JtaTransactionObject
 
 Package org.springframework.ui
+* UiApplicationContextUtils does not set the parent ThemeSource if local ThemeSource object already has a parent
+* UiApplicationContextUtils registers a DelegatingThemeSource when no local ThemeSource found but parent available
+* ResourceBundleThemeSource uses a synchronized Map for holding already loaded themes
+* added "createMessageSource(basename)" template method to ResourceBundleThemeSource, for using custom MessageSources
 * deprecated JasperReportsUtils methods with JRAbstractExporter parameter in favor of versions with JRExporter parameter
 
 Package org.springframework.util
+* ClassUtils's "forName" supports primitive array names ("boolean[]", "int[]", etc) too, e.g. for constructor type hints
 * fixed ClassUtils's "getShortNameAsProperty" to use correct JavaBeans decapitalization (through JavaBeans Introspector)
 
 Package org.springframework.validation
