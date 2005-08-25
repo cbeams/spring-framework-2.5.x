@@ -38,9 +38,10 @@ public class BeanDefinitionReaderUtils {
 
 	/**
 	 * Separator for generated bean names. If a class name or parent name is not
-	 * unique, "#2", "#3" etc will be appended, until the name becomes unique.
+	 * unique, "#1", "#2" etc will be appended, until the name becomes unique.
 	 */
 	public static final String GENERATED_BEAN_NAME_SEPARATOR = "#";
+
 
 	/**
 	 * Create a new RootBeanDefinition or ChildBeanDefinition for the given
@@ -55,9 +56,9 @@ public class BeanDefinitionReaderUtils {
 	 * @throws ClassNotFoundException if the bean class could not be loaded
 	 */
 	public static AbstractBeanDefinition createBeanDefinition(
-		String className, String parent, ConstructorArgumentValues cargs,
-		MutablePropertyValues pvs, ClassLoader classLoader)
-		throws ClassNotFoundException {
+			String className, String parent, ConstructorArgumentValues cargs,
+			MutablePropertyValues pvs, ClassLoader classLoader)
+			throws ClassNotFoundException {
 
 		Class beanClass = null;
 		if (className != null && classLoader != null) {
@@ -140,14 +141,15 @@ public class BeanDefinitionReaderUtils {
 	public static void registerBeanDefinition(
 			BeanDefinitionHolder bdHolder, BeanDefinitionRegistry beanFactory) throws BeansException {
 
-		// register bean definition under primary name
+		// Register bean definition under primary name.
 		beanFactory.registerBeanDefinition(bdHolder.getBeanName(), bdHolder.getBeanDefinition());
 
-		// register aliases for bean name, if any
+		// Register aliases for bean name, if any.
 		if (bdHolder.getAliases() != null) {
 			for (int i = 0; i < bdHolder.getAliases().length; i++) {
 				beanFactory.registerAlias(bdHolder.getBeanName(), bdHolder.getAliases()[i]);
 			}
 		}
 	}
+
 }
