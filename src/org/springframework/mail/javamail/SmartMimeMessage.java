@@ -26,7 +26,7 @@ import javax.mail.internet.MimeMessage;
  * Java Activation FileTypeMap to be used for resolving attachment types.
  *
  * <p>Created by JavaMailSenderImpl in case of a specified default encoding
- * and/or default FileTypeMap. Auto-detected by MimeMessageHelper, which will
+ * and/or default FileTypeMap. Autodetected by MimeMessageHelper, which will
  * use the carried encoding and FileTypeMap unless explicitly overridden.
  *
  * @author Juergen Hoeller
@@ -41,16 +41,29 @@ class SmartMimeMessage extends MimeMessage {
 
 	private final FileTypeMap defaultFileTypeMap;
 
+
+	/**
+	 * Create a new SmartMimeMessage.
+	 * @param session the JavaMail Session to create the message for
+	 * @param defaultEncoding the default encoding, or <code>null</code> if none
+	 * @param defaultFileTypeMap the default FileTypeMap, or <code>null</code> if none
+	 */
 	public SmartMimeMessage(Session session, String defaultEncoding, FileTypeMap defaultFileTypeMap) {
 		super(session);
 		this.defaultEncoding = defaultEncoding;
 		this.defaultFileTypeMap = defaultFileTypeMap;
 	}
 
+	/**
+	 * Return the default encoding of this message, or <code>null</code> if none.
+	 */
 	public String getDefaultEncoding() {
 		return defaultEncoding;
 	}
 
+	/**
+	 * Return the default FileTypeMap of this message, or <code>null</code> if none.
+	 */
 	public FileTypeMap getDefaultFileTypeMap() {
 		return defaultFileTypeMap;
 	}
