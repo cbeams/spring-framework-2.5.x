@@ -318,7 +318,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	/**
-	 * Return the maximum number of rows specified for this JdbcTemplate.
+	 * Return the maximum number of rows specified for this HibernateTemplate.
 	 */
 	public int getMaxResults() {
 		return maxResults;
