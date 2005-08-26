@@ -57,8 +57,8 @@ J2EE 1.2 (Servlet 2.2, JSP 1.1) is sufficient when not using Spring's JSP tag li
 
 Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1, JMX 1.0/1.2,
 JCA 1.0, Hibernate 2.1/3.0, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, Apache OJB 1.0, iBATIS SQL Maps 1.3/2.0,
-Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.4, EHCache 1.1, JSTL 1.0, Velocity 1.4,
-FreeMarker 2.3, JasperReports 0.6, Struts/Tiles 1.2, JSF 1.1, Jakarta Commons FileUpload 1.0, etc.
+Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.4/1.5, EHCache 1.1, JSTL 1.0, Velocity 1.4,
+FreeMarker 2.3, JasperReports 0.6/1.0, Struts/Tiles 1.2, JSF 1.1, Jakarta Commons FileUpload 1.0, etc.
 
 Release contents:
 * "src" contains the Java source files for the framework
@@ -112,11 +112,11 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: JDBC support
 - Dependencies: spring-dao, spring-beans
 
-* "spring-support" (~155 KB)
+* "spring-support" (~160 KB)
 - Contents: JMX support, JCA support, scheduling support, mail support, caching support
 - Dependencies: spring-beans, (spring-dao, spring-context, spring-jdbc, JMX, Quartz, JavaMail, EHCache)
 
-* "spring-web" (~125 KB)
+* "spring-web" (~130 KB)
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
 - Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts, JSF)
 
@@ -136,7 +136,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: Hibernate 2.1 support, Hibernate 3.x support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, Hibernate2, Hibernate3)
 
-* "spring" (~1790 KB)
+* "spring" (~1805 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
