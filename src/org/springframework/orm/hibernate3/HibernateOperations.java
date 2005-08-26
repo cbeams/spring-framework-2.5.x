@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.LockMode;
+import org.hibernate.criterion.DetachedCriteria;
 
 import org.springframework.dao.DataAccessException;
 
@@ -524,7 +525,7 @@ public interface HibernateOperations {
 
 
 	//-------------------------------------------------------------------------
-	// Convenience finder methods for HQL strings
+	// Convenience finder methods for HQL strings and detached criteria
 	//-------------------------------------------------------------------------
 
 	/**
@@ -595,6 +596,16 @@ public interface HibernateOperations {
 	 * @see org.hibernate.Session#createQuery
 	 */
 	List findByValueBean(String queryString, Object valueBean) throws DataAccessException;
+
+	/**
+	 * Execute a query based on a given Hibernate criteria object.
+	 * @param criteria the detached Hibernate criteria object,
+	 * which can for example be held in an instance variable of a DAO
+	 * @return a List containing 0 or more persistent instances
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.criterion.DetachedCriteria#getExecutableCriteria(org.hibernate.Session)
+	 */
+	List findByCriteria(DetachedCriteria criteria) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
@@ -678,7 +689,7 @@ public interface HibernateOperations {
 
 
 	//-------------------------------------------------------------------------
-	// Convenience query methods for iteratation
+	// Convenience query methods for iteration
 	//-------------------------------------------------------------------------
 
 	/**
