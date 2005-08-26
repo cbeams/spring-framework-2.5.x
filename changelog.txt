@@ -37,6 +37,7 @@ Package org.springframework.jca
 Package org.springframework.jdbc
 * changed StatementCreatorUtils to use "PreparedStatement.setNull" with Types.NULL when value is null and type unknown
 * JdbcTemplate's "update" version with a KeyHolder argument explicitly closes the generated keys ResultSet, if any
+* removed JdbcTemplate's fetchSize/maxRows check to allow for specifying only one and leaving the other at default (0)
 * fixed SqlFunction's default constructor to set "rowsExpected" to 1, like all other SqlFunction constructors
 * reworked SqlFunction to use SingleColumnRowMapper underneath, exposing a "resultType" bean property of type Class
 * deprecated SqlFunction's constructors that expect a SQL return type, in favor of specifying a result type Class
@@ -60,11 +61,15 @@ Package org.springframework.mock
 
 Package org.springframework.orm
 * upgraded to the most recently published version of the Hibernate 3.0.5 jar (there seem to be multiple versions around)
+* added "findByCriteria" methods to HibernateOperations/Template for Hibernate3, for executing DetachedCriteria objects
+* added "fetchSize" and "maxResults" bean properties to HibernateTemplate, applied to Query and Criteria objects
 * refined LocalPersistenceManagerFactoryBean to work with JDO 1.0 API as well as with the latest JDO 2.0 API snapshot
 * refined LocalSessionFactory for TopLink to use a new TopLink SessionManager instance rather than the shared singleton
 
 Package org.springframework.remoting
 * factored out protected "createObjectOutputStream(OutputStream)" template method in HttpInvokerServiceExporter
+* factored out protected "setRequestBody" and "getResponseBody" template methods in CommonsHttpInvokerRequestExecutor
+* factored out protected "writeRequestBody" and "readResponseBody" template methods in SimpleHttpInvokerRequestExecutor
 
 Package org.springframework.scheduling
 * added MethodInvokingRunnable adapter to support package
