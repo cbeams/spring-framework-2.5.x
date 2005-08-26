@@ -37,7 +37,7 @@ package org.springframework.util;
  * <li>com/&#42;&#42;/test.jsp - matches all test.jsp path underneath the com path</li>
  * <li>org/springframework/&#42;&#42;/*.jsp - matches all .jsp files underneath the
  * org/springframework path</li>
- * <li>com/&#42;&#42;/servlet/bla.jsp - matches org/springframework/servlet/bla.jsp
+ * <li>org/&#42;&#42;/servlet/bla.jsp - matches org/springframework/servlet/bla.jsp
  * but also org/springframework/testing/servlet/bla.jsp and com/servlet/bla.jsp</li>
  * </ul>
  *
