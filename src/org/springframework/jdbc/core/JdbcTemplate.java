@@ -173,7 +173,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * large result sets: Setting this higher than the default value will increase
 	 * processing speed at the cost of memory consumption; setting this lower can
 	 * avoid transferring row data that will never be read by the application.
-	 * <p>Default is 0, indicating to use the driver's default.
+	 * <p>Default is 0, indicating to use the JDBC driver's default.
 	 */
 	public void setFetchSize(int fetchSize) {
 		this.fetchSize = fetchSize;
@@ -189,8 +189,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * Set the maximum number of rows for this JdbcTemplate. This is important
 	 * for processing subsets of large result sets, avoiding to read and hold
-	 * the entire result set in the database or in the JDBC driver.
-	 * <p>Default is 0, indicating to use the driver's default.
+	 * the entire result set in the database or in the JDBC driver if we're
+	 * never interested in the entire result in the first place (for example,
+	 * when performing searches that might return a large number of matches).
+	 * <p>Default is 0, indicating to use the JDBC driver's default.
 	 */
 	public void setMaxRows(int maxRows) {
 		this.maxRows = maxRows;
@@ -201,14 +203,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 */
 	public int getMaxRows() {
 		return maxRows;
-	}
-
-	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
-
-		if (getFetchSize() > getMaxRows()) {
-			throw new IllegalArgumentException("fetchSize must not be higher than maxRows");
-		}
 	}
 
 
