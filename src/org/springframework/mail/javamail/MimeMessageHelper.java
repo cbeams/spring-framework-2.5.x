@@ -48,9 +48,9 @@ import org.springframework.util.Assert;
  * to the underlying MimeMessage. Allows to define a character encoding for the
  * entire message, automatically applied by all methods of this helper.
  *
- * <p>Also offers support for typical mail attachments, and for personal names
- * that accompany mail addresses. Note that advanced settings can still be applied
- * directly to the underlying MimeMessage object!
+ * <p>Offers support for HTML text content, inline elements such as images, and typical
+ * mail attachments. Also supports personal names that accompany mail addresses. Note that
+ * advanced settings can still be applied directly to the underlying MimeMessage object!
  *
  * <p>Typically used in MimeMessagePreparator implementations or JavaMailSender
  * client code: simply instantiating it as a MimeMessage wrapper, invoking
@@ -77,12 +77,28 @@ import org.springframework.util.Assert;
  * to let message population code interact with a simple message or a MIME
  * message through a common interface.
  *
+ * <p><b>Warning regarding multipart mails:</b> Simple MIME messages that
+ * just contain HTML text but no inline elements or attachments will work on
+ * more or less any email client that is capable of HTML rendering. However,
+ * inline elements and attachments are still a major compatibility issue
+ * between email clients: It's virtually impossible to get inline elements
+ * and attachments working across Microsoft Outlook, Lotus Notes and Mac Mail.
+ * Consider choosing a specific multipart mode for your needs: The javadoc
+ * on the MULTIPART_MODE constants contains more detailed information.
+ *
  * @author Juergen Hoeller
  * @since 19.01.2004
+ * @see #setText(String, boolean)
+ * @see #setText(String, String)
+ * @see #addInline(String, org.springframework.core.io.Resource)
+ * @see #addAttachment(String, org.springframework.core.io.InputStreamSource)
+ * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, int)
+ * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, int, String)
+ * @see #MULTIPART_MODE_MIXED_RELATED
+ * @see #MULTIPART_MODE_RELATED
  * @see #getMimeMessage
  * @see MimeMessagePreparator
  * @see JavaMailSender
- * @see JavaMailSenderImpl
  * @see javax.mail.internet.MimeMessage
  * @see org.springframework.mail.SimpleMailMessage
  * @see MimeMailMessage
@@ -109,10 +125,11 @@ public class MimeMessageHelper {
 	 * element of type "related". Texts, inline elements and attachements
 	 * will all get added to that root element.
 	 * <p>This was the default behavior from Spring 1.1 up to 1.2 final.
+	 * This is the "Microsoft multipart mode", as natively sent by Outlook.
 	 * It is known to work properly on Outlook, Outlook Express, Yahoo Mail, and
 	 * to a large degree also on Mac Mail (with an additional attachment listed
 	 * for an inline element, despite the inline element also shown inline).
-	 * Does not work properly on Lotus Notes.
+	 * Does not work properly on Lotus Notes (attachments won't be shown there).
 	 */
 	public static final int MULTIPART_MODE_RELATED = 2;
 
@@ -121,7 +138,8 @@ public class MimeMessageHelper {
 	 * "mixed" plus a nested multipart element of type "related". Texts and
 	 * inline elements will get added to the nested "related" element,
 	 * while attachments will get added to the "mixed" root element.
-	 * <p>This is the default since Spring 1.2.1. It is known to work properly
+	 * <p>This is the default since Spring 1.2.1. This is arguably the most correct
+	 * MIME structure, according to the MIME spec: It is known to work properly
 	 * on Outlook, Outlook Express, Yahoo Mail, and Lotus Notes. Does not work
 	 * properly on Mac Mail. If you target Mac Mail or experience issues with
 	 * specific mails on Outlook, consider using MULTIPART_MODE_RELATED instead.
@@ -832,11 +850,11 @@ public class MimeMessageHelper {
 		Assert.notNull(contentId, "Content ID must not be null");
 		Assert.notNull(dataSource, "DataSource must not be null");
 		MimeBodyPart mimeBodyPart = new MimeBodyPart();
-		mimeBodyPart.setDataHandler(new DataHandler(dataSource));
+		mimeBodyPart.setDisposition(MimeBodyPart.INLINE);
 		// We're using setHeader here to stay compatible with JavaMail 1.2,
 		// rather than JavaMail 1.3's setContentID.
 		mimeBodyPart.setHeader(HEADER_CONTENT_ID, "<" + contentId + ">");
-		mimeBodyPart.setDisposition(MimeBodyPart.INLINE);
+		mimeBodyPart.setDataHandler(new DataHandler(dataSource));
 		getMimeMultipart().addBodyPart(mimeBodyPart);
 	}
 
@@ -943,6 +961,7 @@ public class MimeMessageHelper {
 		Assert.notNull(attachmentFilename, "Attachment filename must not be null");
 		Assert.notNull(dataSource, "DataSource must not be null");
 		MimeBodyPart mimeBodyPart = new MimeBodyPart();
+		mimeBodyPart.setDisposition(MimeBodyPart.ATTACHMENT);
 		mimeBodyPart.setFileName(attachmentFilename);
 		mimeBodyPart.setDataHandler(new DataHandler(dataSource));
 		getRootMimeMultipart().addBodyPart(mimeBodyPart);
