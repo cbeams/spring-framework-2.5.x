@@ -783,7 +783,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 
 	//-------------------------------------------------------------------------
-	// Convenience finder methods for HQL strings and detached criteria
+	// Convenience finder methods for HQL strings
 	//-------------------------------------------------------------------------
 
 	public List find(String queryString) throws DataAccessException {
@@ -844,16 +844,6 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				prepareQuery(queryObject);
 				queryObject.setProperties(valueBean);
 				return queryObject.list();
-			}
-		}, true);
-	}
-
-	public List findByCriteria(final DetachedCriteria criteria) throws DataAccessException {
-		return (List) execute(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				Criteria executableCriteria = criteria.getExecutableCriteria(session);
-				prepareCriteria(executableCriteria);
-				return executableCriteria.list();
 			}
 		}, true);
 	}
@@ -922,6 +912,33 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				prepareQuery(queryObject);
 				queryObject.setProperties(valueBean);
 				return queryObject.list();
+			}
+		}, true);
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Convenience finder methods for detached criteria
+	//-------------------------------------------------------------------------
+
+	public List findByCriteria(final DetachedCriteria criteria) throws DataAccessException {
+		return findByCriteria(criteria, 0, 0);
+	}
+
+	public List findByCriteria(final DetachedCriteria criteria, final int firstResult, final int maxResults)
+			throws DataAccessException {
+
+		return (List) execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Criteria executableCriteria = criteria.getExecutableCriteria(session);
+				prepareCriteria(executableCriteria);
+				if (firstResult > 0) {
+					executableCriteria.setFirstResult(firstResult);
+				}
+				if (maxResults > 0) {
+					executableCriteria.setMaxResults(maxResults);
+				}
+				return executableCriteria.list();
 			}
 		}, true);
 	}

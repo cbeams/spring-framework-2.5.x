@@ -525,7 +525,7 @@ public interface HibernateOperations {
 
 
 	//-------------------------------------------------------------------------
-	// Convenience finder methods for HQL strings and detached criteria
+	// Convenience finder methods for HQL strings
 	//-------------------------------------------------------------------------
 
 	/**
@@ -596,16 +596,6 @@ public interface HibernateOperations {
 	 * @see org.hibernate.Session#createQuery
 	 */
 	List findByValueBean(String queryString, Object valueBean) throws DataAccessException;
-
-	/**
-	 * Execute a query based on a given Hibernate criteria object.
-	 * @param criteria the detached Hibernate criteria object,
-	 * which can for example be held in an instance variable of a DAO
-	 * @return a List containing 0 or more persistent instances
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.criterion.DetachedCriteria#getExecutableCriteria(org.hibernate.Session)
-	 */
-	List findByCriteria(DetachedCriteria criteria) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
@@ -686,6 +676,37 @@ public interface HibernateOperations {
 	 */
 	List findByNamedQueryAndValueBean(String queryName, Object valueBean)
 			throws DataAccessException;
+
+
+	//-------------------------------------------------------------------------
+	// Convenience finder methods for detached criteria
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Execute a query based on a given Hibernate criteria object.
+	 * @param criteria the detached Hibernate criteria object,
+	 * which can for example be held in an instance variable of a DAO
+	 * @return a List containing 0 or more persistent instances
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.criterion.DetachedCriteria#getExecutableCriteria(org.hibernate.Session)
+	 */
+	List findByCriteria(DetachedCriteria criteria) throws DataAccessException;
+
+	/**
+	 * Execute a query based on a given Hibernate criteria object.
+	 * @param criteria the detached Hibernate criteria object,
+	 * which can for example be held in an instance variable of a DAO
+	 * @param firstResult the index of the first result object to be retrieved
+	 * (numbered from 0)
+	 * @param maxResults the maximum number of result objects to retrieve
+	 * (or 0 for no limit)
+	 * @return a List containing 0 or more persistent instances
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.criterion.DetachedCriteria#getExecutableCriteria(org.hibernate.Session)
+	 * @see org.hibernate.Criteria#setFirstResult(int)
+	 * @see org.hibernate.Criteria#setMaxResults(int)
+	 */
+	List findByCriteria(DetachedCriteria criteria, int firstResult, int maxResults) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
