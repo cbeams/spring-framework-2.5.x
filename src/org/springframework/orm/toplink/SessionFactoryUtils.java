@@ -58,6 +58,7 @@ public abstract class SessionFactoryUtils {
 
 	private static final Log logger = LogFactory.getLog(SessionFactoryUtils.class);
 
+
 	/**
 	 * Get a TopLink Session for the given SessionFactory. Is aware of and will
 	 * return any existing corresponding Session bound to the current thread, for
@@ -136,6 +137,23 @@ public abstract class SessionFactoryUtils {
 	}
 
 	/**
+	 * Return whether the given TopLink Session is transactional, that is,
+	 * bound to the current thread by Spring's transaction facilities.
+	 * @param session the TopLink Session to check
+	 * @param sessionFactory TopLink SessionFactory that the Session was created with
+	 * (can be null)
+	 * @return whether the Session is transactional
+	 */
+	public static boolean isSessionTransactional(Session session, SessionFactory sessionFactory) {
+		if (sessionFactory == null) {
+			return false;
+		}
+		SessionHolder sessionHolder =
+				(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+		return (sessionHolder != null && session == sessionHolder.getSession());
+	}
+
+	/**
 	 * Convert the given TopLinkException to an appropriate exception from the
 	 * <code>org.springframework.dao</code> hierarchy.
 	 * @param ex TopLinkException that occured
@@ -174,25 +192,28 @@ public abstract class SessionFactoryUtils {
 		if (session == null) {
 			return;
 		}
+		// Only release non-transactional Sessions.
+		if (!isSessionTransactional(session, sessionFactory)) {
+			doRelease(session);
+		}
+	}
 
-		if (sessionFactory != null) {
-			SessionHolder sessionHolder =
-					(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-			if (sessionHolder != null && session == sessionHolder.getSession()) {
-				// It's the transactional Session: Don't close it.
-				return;
+	/**
+	 * Perform the actual releasing of the TopLink Session.
+	 * @param session the TopLink Session to release
+	 */
+	private static void doRelease(Session session) {
+		if (session != null) {
+			logger.debug("Closing TopLink Session");
+			try {
+				session.release();
 			}
-		}
-
-		logger.debug("Closing TopLink Session");
-		try {
-			session.release();
-		}
-		catch (TopLinkException ex) {
-			logger.error("Could not close TopLink Session", ex);
-		}
-		catch (RuntimeException ex) {
-			logger.error("Unexpected exception on closing TopLink Session", ex);
+			catch (TopLinkException ex) {
+				logger.error("Could not close TopLink Session", ex);
+			}
+			catch (RuntimeException ex) {
+				logger.error("Unexpected exception on closing TopLink Session", ex);
+			}
 		}
 	}
 
