@@ -572,6 +572,63 @@ public class HibernateTemplateTests extends TestCase {
 		criteriaControl.verify();
 	}
 
+	public void testExecuteWithFetchSizeAndMaxResults() throws HibernateException {
+		MockControl query1Control = MockControl.createControl(Query.class);
+		Query query1 = (Query) query1Control.getMock();
+		MockControl query2Control = MockControl.createControl(Query.class);
+		Query query2 = (Query) query2Control.getMock();
+		MockControl criteriaControl = MockControl.createControl(Criteria.class);
+		Criteria criteria = (Criteria) criteriaControl.getMock();
+
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.createQuery("some query");
+		sessionControl.setReturnValue(query1);
+		query1.setFetchSize(10);
+		query1Control.setReturnValue(query1, 1);
+		query1.setMaxResults(20);
+		query1Control.setReturnValue(query1, 1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query2);
+		query2.setFetchSize(10);
+		query2Control.setReturnValue(query2, 1);
+		query2.setMaxResults(20);
+		query2Control.setReturnValue(query2, 1);
+		session.createCriteria(TestBean.class);
+		sessionControl.setReturnValue(criteria, 1);
+		criteria.setFetchSize(10);
+		criteriaControl.setReturnValue(criteria, 1);
+		criteria.setMaxResults(20);
+		criteriaControl.setReturnValue(criteria, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		query1Control.replay();
+		query2Control.replay();
+		criteriaControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setFetchSize(10);
+		ht.setMaxResults(20);
+		ht.execute(new HibernateCallback() {
+			public Object doInHibernate(org.hibernate.Session sess) throws HibernateException {
+				sess.createQuery("some query");
+				sess.getNamedQuery("some query name");
+				sess.createCriteria(TestBean.class);
+				return null;
+			}
+		});
+
+		query1Control.verify();
+		query2Control.verify();
+		criteriaControl.verify();
+	}
+
 	public void testGet() throws HibernateException {
 		TestBean tb = new TestBean();
 		sf.openSession();
