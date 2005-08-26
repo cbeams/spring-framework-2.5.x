@@ -19,6 +19,7 @@ package org.springframework.remoting.httpinvoker;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -29,10 +30,11 @@ import org.springframework.remoting.support.RemoteInvocationResult;
 /**
  * HttpInvokerRequestExecutor implementation that uses
  * <a href="http://jakarta.apache.org/commons/httpclient">Jakarta Commons HttpClient</a>
- * to execute POST requests.
+ * to execute POST requests. Compatible with Commons HttpClient 2.0 and 3.0.
  *
  * <p>Allows to use a preconfigured HttpClient instance, potentially
- * with authentication, HTTP connection pooling, etc.
+ * with authentication, HTTP connection pooling, etc. Also designed
+ * for easy subclassing, customizing specific template methods.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -77,24 +79,36 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	}
 
 
+	/**
+	 * Execute the given request through Commons HttpClient.
+	 * <p>This method implements the basic processing workflow:
+	 * The actual work happens in this class's template methods.
+	 * @see #createPostMethod
+	 * @see #setRequestBody
+	 * @see #executePostMethod
+	 * @see #getResponseBody
+	 */
 	protected RemoteInvocationResult doExecuteRequest(
 			HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
 			throws IOException, ClassNotFoundException {
 
 		PostMethod postMethod = createPostMethod(config);
 		try {
-			postMethod.setRequestBody(new ByteArrayInputStream(baos.toByteArray()));
-			executePostMethod(config, this.httpClient, postMethod);
-			return readRemoteInvocationResult(postMethod.getResponseBodyAsStream(), config.getCodebaseUrl());
+			setRequestBody(config, postMethod, baos);
+			executePostMethod(config, getHttpClient(), postMethod);
+			InputStream responseBody = getResponseBody(config, postMethod);
+			return readRemoteInvocationResult(responseBody, config.getCodebaseUrl());
 		}
 		finally {
-			// need to explicitly release because it might be pooled
+			// Need to explicitly release because it might be pooled.
 			postMethod.releaseConnection();
 		}
 	}
 
 	/**
 	 * Create a PostMethod for the given configuration.
+	 * <p>The default implementation creates a standard PostMethod with
+	 * "application/x-java-serialized-object" as "Content-Type" header.
 	 * @param config the HTTP invoker configuration that specifies the
 	 * target service
 	 * @return the PostMethod instance
@@ -107,17 +121,63 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	}
 
 	/**
+	 * Set the given serialized remote invocation as request body.
+	 * <p>The default implementation simply sets the serialized invocation
+	 * as the PostMethod's request body. This can be overridden, for example,
+	 * to write a specific encoding and potentially set appropriate HTTP
+	 * request headers.
+	 * @param config the HTTP invoker configuration that specifies the
+	 * target service
+	 * @param postMethod the PostMethod to set the request body on
+	 * @param baos the ByteArrayOutputStream that contains the serialized
+	 * RemoteInvocation object
+	 * @throws IOException if thrown by I/O methods
+	 * @see org.apache.commons.httpclient.methods.PostMethod#setRequestBody(java.io.InputStream)
+	 * @see org.apache.commons.httpclient.methods.PostMethod#setRequestEntity
+	 * @see org.apache.commons.httpclient.methods.InputStreamRequestEntity
+	 */
+	protected void setRequestBody(
+			HttpInvokerClientConfiguration config, PostMethod postMethod, ByteArrayOutputStream baos)
+			throws IOException {
+
+		// Need to call setRequestBody for compatibility with Commons HttpClient 2.0
+		postMethod.setRequestBody(new ByteArrayInputStream(baos.toByteArray()));
+	}
+
+	/**
 	 * Execute the given PostMethod instance.
 	 * @param config the HTTP invoker configuration that specifies the
 	 * target service
 	 * @param httpClient the HttpClient to execute on
 	 * @param postMethod the PostMethod to execute
 	 * @throws IOException if thrown by I/O methods
+	 * @see org.apache.commons.httpclient.HttpClient#executeMethod(org.apache.commons.httpclient.HttpMethod)
 	 */
 	protected void executePostMethod(
 			HttpInvokerClientConfiguration config, HttpClient httpClient, PostMethod postMethod)
 			throws IOException {
-		this.httpClient.executeMethod(postMethod);
+
+		httpClient.executeMethod(postMethod);
+	}
+
+	/**
+	 * Extract the response body from the given executed remote invocation
+	 * request.
+	 * <p>The default implementation simply fetches the PostMethod's response
+	 * body stream. This can be overridden, for example, to check for GZIP
+	 * response encoding and wrap the returned InputStream in a GZIPInputStream.
+	 * @param config the HTTP invoker configuration that specifies the
+	 * target service
+	 * @param postMethod the PostMethod to read the response body from
+	 * @return an InputStream for the response body
+	 * @throws IOException if thrown by I/O methods
+	 * @see org.apache.commons.httpclient.methods.PostMethod#getResponseBodyAsStream()
+	 * @see org.apache.commons.httpclient.methods.PostMethod#getResponseHeader(String)
+	 */
+	protected InputStream getResponseBody(HttpInvokerClientConfiguration config, PostMethod postMethod)
+			throws IOException {
+
+		return postMethod.getResponseBodyAsStream();
 	}
 
 }
