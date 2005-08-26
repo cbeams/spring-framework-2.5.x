@@ -738,7 +738,6 @@ public abstract class SessionFactoryUtils {
 		if (session == null) {
 			return;
 		}
-
 		// Only close non-transactional Sessions.
 		if (!isSessionTransactional(session, sessionFactory)) {
 			closeSessionOrRegisterDeferredClose(session, sessionFactory);
@@ -767,22 +766,24 @@ public abstract class SessionFactoryUtils {
 
 	/**
 	 * Perform the actual closing of the Hibernate Session.
-	 * @param session Session to close
+	 * @param session the Hibernate Session to close
 	 */
 	private static void doClose(Session session) {
-		logger.debug("Closing Hibernate Session");
-		try {
-			session.close();
-		}
-		catch (JDBCException ex) {
-			// SQLException underneath
-			logger.error("Could not close Hibernate Session", ex.getSQLException());
-		}
-		catch (HibernateException ex) {
-			logger.error("Could not close Hibernate Session", ex);
-		}
-		catch (RuntimeException ex) {
-			logger.error("Unexpected exception on closing Hibernate Session", ex);
+		if (session != null) {
+			logger.debug("Closing Hibernate Session");
+			try {
+				session.close();
+			}
+			catch (JDBCException ex) {
+				// SQLException underneath
+				logger.error("Could not close Hibernate Session", ex.getSQLException());
+			}
+			catch (HibernateException ex) {
+				logger.error("Could not close Hibernate Session", ex);
+			}
+			catch (RuntimeException ex) {
+				logger.error("Unexpected exception on closing Hibernate Session", ex);
+			}
 		}
 	}
 
