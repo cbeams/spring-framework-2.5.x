@@ -160,6 +160,25 @@ public abstract class PersistenceManagerFactoryUtils {
 	}
 
 	/**
+	 * Return whether the given JDO PersistenceManager is transactional, that is,
+	 * bound to the current thread by Spring's transaction facilities.
+	 * @param pm the JDO PersistenceManager to check
+	 * @param pmf JDO PersistenceManagerFactory that the PersistenceManager
+	 * was created with (can be null)
+	 * @return whether the PersistenceManager is transactional
+	 */
+	public static boolean isPersistenceManagerTransactional(
+			PersistenceManager pm, PersistenceManagerFactory pmf) {
+
+		if (pmf == null) {
+			return false;
+		}
+		PersistenceManagerHolder pmHolder =
+				(PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
+		return (pmHolder != null && pm == pmHolder.getPersistenceManager());
+	}
+
+	/**
 	 * Apply the current transaction timeout, if any, to the given JDO Query object.
 	 * @param query the JDO Query object
 	 * @param pmf JDO PersistenceManagerFactory that the Query was created for
@@ -259,18 +278,11 @@ public abstract class PersistenceManagerFactoryUtils {
 		if (pm == null) {
 			return;
 		}
-
-		if (pmf != null) {
-			PersistenceManagerHolder pmHolder =
-					(PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
-			if (pmHolder != null && pm == pmHolder.getPersistenceManager()) {
-				// It's the transactional PersistenceManager: Don't close it.
-				return;
-			}
+		// Only release non-transactional PersistenceManagers.
+		if (!isPersistenceManagerTransactional(pm, pmf)) {
+			logger.debug("Closing JDO PersistenceManager");
+			pm.close();
 		}
-
-		logger.debug("Closing JDO PersistenceManager");
-		pm.close();
 	}
 
 
