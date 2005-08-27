@@ -25,12 +25,16 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
- * Interface that specifies a basic set of JDBC operations.
- * Implemented by JdbcTemplate. Not often used, but a useful option
+ * Interface specifying a basic set of JDBC operations.
+ * Implemented by JdbcTemplate. Not often used directly, but a useful option
  * to enhance testability, as it can easily be mocked or stubbed.
  *
  * <p>Alternatively, the standard JDBC infrastructure can be mocked.
  * However, mocking this interface constitutes significantly less work.
+ * As an alternative to a mock objects approach to testing
+ * data access code, consider the powerful integration
+ * testing support provided in the org.springframework.test
+ * package, shipped in spring-mock.jar.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -237,6 +241,8 @@ public interface JdbcOperations {
 	 * <code>queryForList</code> method with null as argument array.
 	 * <p>The results will be mapped to a List (one entry for each row) of
 	 * Maps (one entry for each column using the column name as the key).
+	 * Each element in the list will be of the form returned by this interface's
+	 * queryForMap() methods.
 	 * @param sql SQL query to execute
 	 * @return an List that contains a Map per row
 	 * @throws DataAccessException if there is any problem executing the query
@@ -593,6 +599,9 @@ public interface JdbcOperations {
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
 	 * list of arguments to bind to the query, expecting a result Map.
+	 * The queryForMap() methods defined by this interface are appropriate
+	 * when you don't have a domain model. Otherwise, consider using
+	 * one of the queryForObject() methods.
 	 * <p>The query is expected to be a single row query; the result row will be
 	 * mapped to a Map (one entry for each column, using the column name as the key).
 	 * @param sql SQL query to execute
@@ -718,6 +727,8 @@ public interface JdbcOperations {
 	 * list of arguments to bind to the query, expecting a result list.
 	 * <p>The results will be mapped to a List (one entry for each row) of
 	 * Maps (one entry for each column, using the column name as the key).
+	 * Thus  Each element in the list will be of the form returned by this interface's
+	 * queryForMap() methods.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
@@ -726,6 +737,7 @@ public interface JdbcOperations {
 	 * @return a List that contains a Map per row
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForList(String)
+	 * @see java.sql.Types
 	 */
 	List queryForList(String sql, Object[] args, int[] argTypes) throws DataAccessException;
 
@@ -734,6 +746,8 @@ public interface JdbcOperations {
 	 * list of arguments to bind to the query, expecting a result list.
 	 * <p>The results will be mapped to a List (one entry for each row) of
 	 * Maps (one entry for each column, using the column name as the key).
+	 * Each element in the list will be of the form returned by this interface's
+	 * queryForMap() methods.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
