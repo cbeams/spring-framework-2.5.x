@@ -2,6 +2,12 @@ SPRING FRAMEWORK CHANGELOG
 ==========================
 http://www.springframework.org
 
+Changes in version 1.3 RC1
+------------------------------------
+
+Package org.springframework.web.servlet.view.document
+* added AbstractJExcelView for generating Excel files using JExcelApi (http://jexcelapi.sourceforge.net)
+
 
 Changes in version 1.2.4 (26.8.2005)
 ------------------------------------

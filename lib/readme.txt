@@ -272,6 +272,11 @@ distribution/website before using any of them in your own applications.
 - JUnit 3.8.1 (http://www.junit.org)
 - required for building the test suite
 
+* jexcelapi/jxl.jar
+- JExcelApi 2.5.7 (http://jexcelapi.sourceforge.net)
+- required for building the framework
+- required at runtime when using Spring's AbstractJExcelView
+
 * log4j/log4j-1.2.9.jar
 - Log4J 1.2.9 (http://logging.apache.org/log4j)
 - required for building the framework
