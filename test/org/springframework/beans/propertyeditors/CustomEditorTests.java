@@ -418,6 +418,21 @@ public class CustomEditorTests extends TestCase {
 		assertEquals('c', cb.getMyChar());
 	}
 
+	public void testCharacterEditorWithAllowEmpty() {
+		CharBean cb = new CharBean();
+		BeanWrapper bw = new BeanWrapperImpl(cb);
+		bw.registerCustomEditor(Character.class, new CharacterEditor(true));
+
+		bw.setPropertyValue("myCharacter", new Character('c'));
+		assertEquals(new Character('c'), cb.getMyCharacter());
+
+		bw.setPropertyValue("myCharacter", "c");
+		assertEquals(new Character('c'), cb.getMyCharacter());
+
+		bw.setPropertyValue("myCharacter", "");
+		assertNull(cb.getMyCharacter());
+	}
+
 	public void testClassEditor() {
 		PropertyEditor classEditor = new ClassEditor();
 		classEditor.setAsText("org.springframework.beans.TestBean");
@@ -1135,12 +1150,22 @@ public class CustomEditorTests extends TestCase {
 
 		private char myChar;
 
+		private Character myCharacter;
+
 		public char getMyChar() {
 			return myChar;
 		}
 
 		public void setMyChar(char myChar) {
 			this.myChar = myChar;
+		}
+
+		public Character getMyCharacter() {
+			return myCharacter;
+		}
+
+		public void setMyCharacter(Character myCharacter) {
+			this.myCharacter = myCharacter;
 		}
 	}
 
