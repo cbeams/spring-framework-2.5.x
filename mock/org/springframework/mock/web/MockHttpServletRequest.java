@@ -21,7 +21,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.security.Principal;
@@ -60,7 +59,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 1.0.2
  */
-public class MockHttpServletRequest implements HttpServletRequest, Serializable {
+public class MockHttpServletRequest implements HttpServletRequest {
 
 	public static final String DEFAULT_PROTOCOL = "http";
 
