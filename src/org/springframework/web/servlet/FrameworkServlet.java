@@ -335,7 +335,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 
 	/**
-	 * Delegate GET requests to serviceWrapper/doService.
+	 * Delegate GET requests to processRequest/doService.
 	 * <p>Will also be invoked by HttpServlet's default implementation of doHead,
 	 * with a NoBodyResponse that just captures the content length.
 	 * @see #doService
@@ -343,41 +343,47 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 */
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
-		serviceWrapper(request, response);
+
+		processRequest(request, response);
 	}
 
 	/**
-	 * Delegate POST requests to serviceWrapper/doService.
+	 * Delegate POST requests to processRequest/doService.
 	 * @see #doService
 	 */
 	protected final void doPost(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
-		serviceWrapper(request, response);
+
+		processRequest(request, response);
 	}
 
 	/**
-	 * Delegate PUT requests to serviceWrapper/doService.
+	 * Delegate PUT requests to processRequest/doService.
 	 * @see #doService
 	 */
 	protected final void doPut(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
-		serviceWrapper(request, response);
+
+		processRequest(request, response);
 	}
 
 	/**
-	 * Delegate DELETE requests to serviceWrapper/doService.
+	 * Delegate DELETE requests to processRequest/doService.
 	 * @see #doService
 	 */
 	protected final void doDelete(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
-		serviceWrapper(request, response);
+
+		processRequest(request, response);
 	}
 
 	/**
-	 * Handle this request, publishing an event regardless of the outcome.
-	 * The actually event handling is performed by the abstract doService() method.
+	 * Process this request, publishing an event regardless of the outcome.
+	 * The actually event handling is performed by the abstract
+	 * <code>doService()</code> template method.
+	 * @see #doService
 	 */
-	private void serviceWrapper(HttpServletRequest request, HttpServletResponse response)
+	protected final void processRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
 		long startTime = System.currentTimeMillis();
@@ -433,9 +439,12 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Subclasses must implement this method to do the work of request handling.
-	 * The contract is the same as that for the doGet or doPost methods of HttpServlet.
-	 * This class intercepts calls to ensure that event publication takes place.
+	 * Subclasses must implement this method to do the work of request handling,
+	 * receiving a centralized callback for GET, POST, PUT and DELETE.
+	 * <p>The contract is essentially the same as that for the commonly overridden
+	 * <code>doGet</code> or <code>doPost</code> methods of HttpServlet.
+	 * <p>This class intercepts calls to ensure that exception handling and
+	 * event publication takes place.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @throws Exception in case of any kind of processing failure
