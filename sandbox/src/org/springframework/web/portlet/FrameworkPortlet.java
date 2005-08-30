@@ -374,20 +374,19 @@ public abstract class FrameworkPortlet extends PortletBean {
 	}
 
 	/**
-	 * Overide GenericPortlet's doDispatch method to route all Render requests
-	 * to the serviceWrapper. 
+	 * Delegate render requests to processRequest/doRenderService.
 	 */
     protected final void doDispatch(RenderRequest request, RenderResponse response) 
     	throws PortletException, IOException {
-        serviceWrapper(request, response);
+        processRequest(request, response);
     }
 
     /**
-     * Route all Action requests to serviceWrapper.
+	 * Delegate action requests to processRequest/doActionService.
      */
     public final void processAction(ActionRequest request, ActionResponse response) 
     	throws PortletException, IOException {
-        serviceWrapper(request, response);
+        processRequest(request, response);
     }
 	
 	/**
@@ -396,7 +395,14 @@ public abstract class FrameworkPortlet extends PortletBean {
 	 * and doRenderService() methods for Action requests and Render requests
 	 * respectively.
 	 */
-	private void serviceWrapper(PortletRequest request, PortletResponse response)
+	/**
+	 * Process this request, publishing an event regardless of the outcome.
+	 * The actual event handling is performed by the abstract
+	 * <code>doActionService()</code> and <code>doRenderService()</code> template methods.
+	 * @see #doActionService
+	 * @see #doRenderService
+	 */
+	protected final void processRequest(PortletRequest request, PortletResponse response)
 	    throws PortletException, IOException {
 
 		long startTime = System.currentTimeMillis();
@@ -473,27 +479,31 @@ public abstract class FrameworkPortlet extends PortletBean {
 	}
 
 	/**
-	 * Subclasses must implement this method to do the work of Action request handling.
-	 * The contract is the same as that for the processAction method of Portlet.
-	 * This class intercepts calls to ensure that event publication takes place.
-	 * @param request current portlet action request
-	 * @param response current portlet action response
+	 * Subclasses must implement this method to do the work of render request handling.
+	 * <p>The contract is essentially the same as that for the <code>doDispatch</code>
+	 * method of GenericPortlet.
+	 * <p>This class intercepts calls to ensure that exception handling and
+	 * event publication takes place.
+	 * @param request current render request
+	 * @param response current render response
 	 * @throws Exception in case of any kind of processing failure
-	 * @see javax.portlet.Portlet#processAction
+	 * @see javax.portlet.GenericPortlet#doDispatch
 	 */
-	protected abstract void doActionService(ActionRequest request, ActionResponse response)
+	protected abstract void doRenderService(RenderRequest request, RenderResponse response)
 		throws Exception;
 	
 	/**
-	 * Subclasses must implement this method to do the work of Render request handling.
-	 * The contract is the same as that for the render method of Portlet.
-	 * This class intercepts calls to ensure that event publication takes place.
-	 * @param request current portlet render request
-	 * @param response current portlet render response
+	 * Subclasses must implement this method to do the work of action request handling.
+	 * <p>The contract is essentially the same as that for the <code>processAction</code>
+	 * method of GenericPortlet.
+	 * <p>This class intercepts calls to ensure that exception handling and
+	 * event publication takes place.
+	 * @param request current action request
+	 * @param response current action response
 	 * @throws Exception in case of any kind of processing failure
-	 * @see javax.portlet.Portlet#render
+	 * @see javax.portlet.GenericPortlet#processAction
 	 */
-	protected abstract void doRenderService(RenderRequest request, RenderResponse response)
+	protected abstract void doActionService(ActionRequest request, ActionResponse response)
 		throws Exception;
 	
 	/**

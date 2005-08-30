@@ -255,6 +255,28 @@ public abstract class PortletUtils extends org.springframework.web.util.WebUtils
 	}
 
 	/**
+	 * Return the full name of a specific input type="submit" parameter 
+	 * if it was sent in the request, either via a button (directly with name)
+	 * or via an image (name + ".x" or name + ".y").
+	 * @param request current portlet request
+	 * @param name name of the parameter
+	 * @return the actual parameter name with suffix if needed - null if not present
+	 * @see #SUBMIT_IMAGE_SUFFIXES
+	 */
+	public static String getSubmitParameter(PortletRequest request, String name) {
+		if (request.getParameter(name) != null) {
+			return name;
+		}
+		for (int i = 0; i < SUBMIT_IMAGE_SUFFIXES.length; i++) {
+			String suffix = SUBMIT_IMAGE_SUFFIXES[i];
+			if (request.getParameter(name + suffix) != null) {
+				return name + suffix;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Return a map containing all parameters with the given prefix.
 	 * Maps single values to String and multiple values to String array.
 	 * <p>For example, with a prefix of "spring_", "spring_param1" and

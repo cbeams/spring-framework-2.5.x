@@ -37,7 +37,7 @@ import org.springframework.web.servlet.ModelAndView;
  * AbstractFormController} and its corresponding implementations.</p>
  *
  * <p><b><a name="config">Exposed configuration properties</a>
- * (<a href="AbstractController.html#config">and those defined by superclass</a>):</b><br>
+ * (<a href="BaseCommandController.html#config">and those defined by superclass</a>):</b><br>
  * <i>none</i> (so only those available in superclass).</p>
  *
  * <p><b><a name="workflow">Workflow

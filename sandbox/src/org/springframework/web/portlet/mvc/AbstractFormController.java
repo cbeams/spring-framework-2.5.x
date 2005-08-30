@@ -16,7 +16,6 @@
 
 package org.springframework.web.portlet.mvc;
 
-import java.util.Enumeration;
 import java.util.Map;
 
 import javax.portlet.ActionRequest;
@@ -91,10 +90,11 @@ import org.springframework.web.servlet.ModelAndView;
  *      appropriate Strings for those property values, e.g. locale-specific 
  *      date strings. </li>
  *  <li>The {@link PortletRequestDataBinder PortletRequestDataBinder} 
- *      gets applied to populate the new form object with initial request 
- *      parameters. (<i>only if <code>bindOnNewForm</code> is set to 
- *      <code>true</code></i>)  Make sure that the initial parameters do 
- *      not include the parameter that indicates a form submission has occurred.</li>
+ *      gets applied to populate the new form object with initial request parameters and the
+ *      {@link #onBindOnNewForm(RenderRequest, Object, BindException)} callback method is invoked.
+ *      (<i>only if <code>bindOnNewForm</code> is set to <code>true</code></i>)
+ *      Make sure that the initial parameters do not include the parameter that indicates a
+ *      form submission has occurred.</li>
  *  <li>Call to {@link #showForm(RenderRequest, RenderResponse, 
  *      BindException) showForm} to return a View that should be rendered 
  *      (typically the view that renders the form). This method has to be 
@@ -210,7 +210,7 @@ import org.springframework.web.servlet.ModelAndView;
  *			parameters that it normally needs for the render phase.
  *		    If this is set true and <code>sendRedirect</code> is not called, then 
  *		    <code>processFormSubmission</code> must call
- *		    {@link #passFormSubmitToRenderPhase passFormSubmitToRenderPhase}.
+ *		    {@link #setFormSubmit setFormSubmit}.
  *		    Otherwise, the render phase will not realize the form was submitted 
  *		    and will simply display a new blank form.
  *	</tr>
@@ -220,6 +220,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Alef Arendsen
+ * @author Rob Harrop
  * @author Nick Lothian
  * @author Rainer Schmitz
  * @author John A. Lewis
@@ -382,7 +383,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 		// if it is not a submit then just exit
 		if (!isFormSubmission(request)) {
 			if (logger.isDebugEnabled()) logger.debug("not a form submit - passing parameters to render phase");
-		    passParametersToRenderPhase(request, response);
+		    passAllParametersToRenderPhase(request, response);
 			return;
 		}
 		
@@ -404,7 +405,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 		// cannot submit a session form if no valid command object is in session
 		if (!validSubmit) {
 			if (logger.isDebugEnabled()) logger.debug("invalid form submission - cannot get valid command object");
-			passFormSubmitToRenderPhase(request, response);
+			setFormSubmit(response);
 			setInvalidSubmit(response);
 			command = formBackingObject(request);
 			BindException errors = bindAndValidate(request, command).getErrors();
@@ -418,7 +419,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 		    logger.debug("processing a valid submit" + 
 		            "(redirectAction = " + isRedirectAction() + ")");
 		if (!isRedirectAction())
-		    passFormSubmitToRenderPhase(request, response);
+		    setFormSubmit(response);
 		BindException errors = bindAndValidate(request, command).getErrors();
 		processFormSubmission(request, response, command, errors);
 		setRenderCommandAndErrors(request, command, errors);
@@ -450,45 +451,6 @@ public abstract class AbstractFormController extends BaseCommandController {
 	protected boolean isInvalidSubmission(PortletRequest request) {
 		return TRUE.equals(request.getParameter(getInvalidSubmitParameterName()));
 	}
-
-    /**
-     * Pass the action request parameters to the render phase by putting them into
-     * the action response object. This may not be called when the action will call
-     * will call {@link ActionResponse#sendRedirect sendRedirect}.
-     * @param request the current action request
-     * @param response the current action response
-     * @see ActionResponse#setRenderParameter
-     */
-    protected void passParametersToRenderPhase(ActionRequest request, ActionResponse response) {
-		if (logger.isDebugEnabled())
-			logger.debug("Passing all action request parameters to render phase");
-		try {
-		    //response.setRenderParameters(request.getParameterMap());
-		    Enumeration en = request.getParameterNames();
-		    while (en.hasMoreElements()) {
-		        String param = (String)en.nextElement();
-		        String values[] = request.getParameterValues(param);
-		        response.setRenderParameter(param, values);
-		    }	        
-		} catch (IllegalStateException ex) {
-		    // ignore in case sendRedirect was already set
-		}
-    }
-
-    /**
-     * Pass all the action request parameters to the render phase by putting them into
-     * the action response object and also set the parameter indicating the form
-     * was submitted. This method may not be called when the action will call
-     * {@link ActionResponse#sendRedirect sendRedirect}.
-     * @param request the current action request
-     * @param response the current action response
-     * @see #passParametersToRenderPhase
-     * @see #setFormSubmit
-     */
-    protected void passFormSubmitToRenderPhase(ActionRequest request, ActionResponse response) {
-        passParametersToRenderPhase(request, response);
-		setFormSubmit(response);
-    }
 
 	/** 
 	 * Return the name of the session attribute that holds
@@ -630,10 +592,43 @@ public abstract class AbstractFormController extends BaseCommandController {
 		if (isBindOnNewForm()) {
 			if (logger.isDebugEnabled()) logger.debug("Binding to new form");
 			binder.bind(request);
+			onBindOnNewForm(request, command, binder.getErrors());
 		}
 		
 		// Return BindException object that resulted from binding.
 		return binder.getErrors();
+	}
+
+	/**
+	 * Callback for custom post-processing in terms of binding for a new form.
+	 * Called when preparing a new form if <code>bindOnNewForm</code> is <code>true</code>.
+	 * <p>Default implementation delegates to <code>onBindOnNewForm(request, command)</code>.
+	 * @param request current render request
+	 * @param command the command object to perform further binding on
+	 * @param errors validation errors holder, allowing for additional
+	 * custom registration of binding errors
+	 * @throws Exception in case of invalid state or arguments
+	 * @see #onBindOnNewForm(RenderRequest, Object)
+	 * @see #setBindOnNewForm(boolean)
+	 */
+	protected void onBindOnNewForm(RenderRequest request, Object command, BindException errors)
+			throws Exception {
+		onBindOnNewForm(request, command);
+	}
+
+	/**
+	 * Callback for custom post-processing in terms of binding for a new form.
+	 * Called by the default implementation of the <code>onBindOnNewForm</code> version
+	 * with all parameters, after standard binding when displaying the form view.
+	 * Only called if <code>bindOnNewForm</code> is set to <code>true</code>.
+	 * <p>Default implementation is empty.
+	 * @param request current render request
+	 * @param command the command object to perform further binding on
+	 * @throws Exception in case of invalid state or arguments
+	 * @see #onBindOnNewForm(RenderRequest, Object, BindException)
+	 * @see #setBindOnNewForm(boolean)
+	 */
+	protected void onBindOnNewForm(RenderRequest request, Object command) throws Exception {
 	}
 
 	/**

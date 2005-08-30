@@ -102,12 +102,17 @@ import org.springframework.web.portlet.bind.PortletRequestDataBinder;
  *          and their configuration properties and methods.</td>
  *  </tr>
  *  <tr>
+ *      <td>validators</td>
+ *      <td><i>null</i></td>
+ *      <td>Array of Validator beans. The validator will be called at appropriate
+ *          places in the workflow of subclasses (have a look at those for more info)
+ *          to validate the command object.</td>
+ *  </tr>
+ *  <tr>
  *      <td>validator</td>
  *      <td><i>null</i></td>
- *      <td>Validator bean (usually passed in using a &lt;ref bean="beanId"/&gt;
- *          property. The validator will be called at appropriate places in the
- *          workflow of subclasses (have a look at those for more info) to
- *          validate the command object.</td>
+ *      <td>Short-form property for setting only one Validator bean (usually passed in
+ *          using a &lt;ref bean="beanId"/&gt; property.</td>
  *  </tr>
  *  <tr>
  *      <td>validateOnBinding</td>
@@ -177,7 +182,7 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * @return the primary Validator for this controller.
+	 * @return the Validators for this controller.
 	 */
 	public final Validator[] getValidators() {
 		return validators;
@@ -195,7 +200,7 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * @return the Validators for this controller.
+	 * @return the primary Validator for this controller.
 	 */
 	public final Validator getValidator() {
 		return (validators != null && validators.length > 0 ? validators[0] : null);
@@ -247,7 +252,8 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Retrieve a command object for the given request.
-	 * <p>Default implementation calls createCommand. Subclasses can override this.
+	 * <p>Default implementation calls <code>createCommand</code>.
+	 * Subclasses can override this.
 	 * @param request current portlet request
 	 * @return object command to bind onto
 	 * @see #createCommand
@@ -295,15 +301,30 @@ public abstract class BaseCommandController extends AbstractController {
 			throws Exception {
 				
 		PortletRequestDataBinder binder = createBinder(request, command);
-		binder.bind(request);
-		onBind(request, command, binder.getErrors());
-		if (this.validators != null && isValidateOnBinding() && !suppressValidation(request)) {
-			for (int i = 0; i < this.validators.length; i++) {
-				ValidationUtils.invokeValidator(this.validators[i], command, binder.getErrors());
+		if (!suppressBinding(request)) {
+			binder.bind(request);
+			onBind(request, command, binder.getErrors());
+			if (this.validators != null && isValidateOnBinding() && !suppressValidation(request)) {
+				for (int i = 0; i < this.validators.length; i++) {
+					ValidationUtils.invokeValidator(this.validators[i], command, binder.getErrors());
+				}
 			}
+			onBindAndValidate(request, command, binder.getErrors());
 		}
-		onBindAndValidate(request, command, binder.getErrors());
 		return binder;
+	}
+
+	/**
+	 * Return whether to suppress binding for the given request.
+	 * <p>Default implementation always returns "false". Can be overridden
+	 * in subclasses to suppress validation, for example, if a special
+	 * request parameter is set.
+	 * @param request current portlet request
+	 * @return whether to suppress binding for the given request
+	 * @see #suppressValidation
+	 */
+	protected boolean suppressBinding(PortletRequest request) {
+		return false;
 	}
 
 	/**
@@ -354,7 +375,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Callback for custom post-processing in terms of binding.
 	 * Called on each submit, after standard binding but before validation.
-	 * <p>Default implementation delegates to onBind(request, command).
+	 * <p>Default implementation delegates to <code>onBind(request, command)</code>.
 	 * @param request current portlet request
 	 * @param command the command object to perform further binding on
 	 * @param errors validation errors holder, allowing for additional
@@ -365,12 +386,13 @@ public abstract class BaseCommandController extends AbstractController {
 	 */
 	protected void onBind(PortletRequest request, Object command, BindException errors)
 			throws Exception {
+	    
 		onBind(request, command);
 	}
 
 	/**
 	 * Callback for custom post-processing in terms of binding.
-	 * Called by the default implementation of the onBind version with
+	 * Called by the default implementation of the <code>onBind</code> version with
 	 * all parameters, after standard binding but before validation.
 	 * <p>Default implementation is empty.
 	 * @param request current portlet request
@@ -383,7 +405,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Return whether to suppress validation for the given request.
-	 * <p>Default implementation always returns false. Can be overridden
+	 * <p>Default implementation always returns "false". Can be overridden
 	 * in subclasses to suppress validation, for example, if a special
 	 * request parameter is set.
 	 * @param request current portlet request

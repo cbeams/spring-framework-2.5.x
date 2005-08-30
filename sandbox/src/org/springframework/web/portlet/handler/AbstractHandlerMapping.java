@@ -59,7 +59,7 @@ public abstract class AbstractHandlerMapping extends PortletApplicationObjectSup
 	/**
 	 * Set the default handler for this handler mapping.
 	 * This handler will be returned if no specific mapping was found.
-	 * Default is null.
+	 * <p>Default is <code>null</code>, indicating no default handler.
 	 * @param defaultHandler default handler instance, or null if none
 	 */
 	public final void setDefaultHandler(Object defaultHandler) {

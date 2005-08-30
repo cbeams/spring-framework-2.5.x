@@ -68,6 +68,7 @@ public class PortletLocaleResolver implements org.springframework.web.portlet.Lo
      */
 	public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
 	    // cannot set the locale in the portal -- the portal controls this
+	    throw new UnsupportedOperationException("locale is controlled by the portal");
 	}
 
     /* (non-Javadoc)
@@ -76,5 +77,6 @@ public class PortletLocaleResolver implements org.springframework.web.portlet.Lo
     public void setLocale(PortletRequest request, PortletResponse response,
             Locale locale) {
 	    // cannot set the locale in the portal -- the portal controls this
+	    throw new UnsupportedOperationException("locale is controlled by the portal");
     }
 }

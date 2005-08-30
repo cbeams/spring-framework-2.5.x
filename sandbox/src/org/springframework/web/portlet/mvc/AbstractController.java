@@ -16,6 +16,8 @@
 
 package org.springframework.web.portlet.mvc;
 
+import java.util.Enumeration;
+
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletException;
@@ -45,6 +47,7 @@ import org.springframework.web.servlet.ModelAndView;
  *      controller.</li>
  *  <li>If a session is required, try to get it (PortletException if not found).</li>
  *  <li>Call method {@link #handleActionRequestInternal handleActionRequestInternal},
+ *      (optionally synchronizing around the call on the PortletSession),
  *      which should be overridden by extending classes to provide actual functionality to 
  *      perform the desired action of the controller.  This will be executed only once.</li>
  *  <li>For a straight render request, or the render phase of an action request (assuming the
@@ -54,6 +57,7 @@ import org.springframework.web.servlet.ModelAndView;
  *  <li>If a session is required, try to get it (PortletException if none found).</li>
  *  <li>It will control caching as defined by the cacheSeconds property.</li>
  *  <li>Call method {@link #handleRenderRequestInternal handleRenderRequestInternal},
+ *      (optionally synchronizing around the call on the PortletSession),
  *      which should be overridden by extending classes to provide actual functionality to 
  *      return {@link org.springframework.web.servlet.ModelAndView ModelAndView} objects.
  *      This will be executed repeatedly as the portal updates the current displayed page.</li>
@@ -80,8 +84,11 @@ import org.springframework.web.servlet.ModelAndView;
  *  <tr>
  *      <td>synchronizeOnSession</td>
  *      <td>false</td>
- *      <td>whether controller execution should be synchronized on the session,
- *          to serialize parallel invocations from the same client</td>
+ *      <td>whether the calls to <code>handleRenderRequestInternal</code> and
+ *          <code>handleRenderRequestInternal</code> should be
+ *          synchronized around the PortletSession, to serialize invocations
+ *          from the same client. No effect if there is no PortletSession.
+ *      </td>
  *  </tr>
  *  <tr>
  *      <td>cacheSeconds</td>
@@ -118,6 +125,7 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 	private boolean synchronizeOnSession = false;
 	
 	private boolean renderWhenMinimized = false;
+
 	
 	/**
 	 * Set if controller execution should be synchronized on the session,
@@ -199,18 +207,20 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 			if (session != null) {
 				synchronized (session) {
 					handleActionRequestInternal(request, response);
+					return;
 				}
 			}
 		}
 
 		handleActionRequestInternal(request, response);
+		return;
 	}
 
 	/**
 	 * <p>Subclasses are meant to override this method if the controller 
 	 * is expected to handle render requests.</p>
 	 * <p>Default implementation throws a PortletException.</p>
-	 * <p>The contract is the same as for handleRenderRequest.</p>
+	 * <p>The contract is the same as for <code>handleRenderRequest</code>.</p>
 	 * @see #handleRenderRequest
 	 * @see #handleActionRequestInternal
 	 */
@@ -223,7 +233,7 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 	 * <p>Subclasses are meant to override this method if the controller 
 	 * is expected to handle action requests.</p>
 	 * <p>Default implementation throws a PortletException.</p>
-	 * <p>The contract is the same as for handleActionRequest.</p>
+	 * <p>The contract is the same as for <code>handleActionRequest</code>.</p>
 	 * @see #handleActionRequest
 	 * @see #handleRenderRequestInternal
 	 */
@@ -232,4 +242,27 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 	    throw new PortletException(this.getClass().getName() + " does not handle action requests");
 	}
 	
+    /**
+     * Pass all the action request parameters to the render phase by putting them into
+     * the action response object. This may not be called when the action will call
+     * will call {@link ActionResponse#sendRedirect sendRedirect}.
+     * @param request the current action request
+     * @param response the current action response
+     * @see ActionResponse#setRenderParameter
+     */
+    protected void passAllParametersToRenderPhase(ActionRequest request, ActionResponse response) {
+		if (logger.isDebugEnabled())
+			logger.debug("Passing all action request parameters to render phase");
+		try {
+		    Enumeration en = request.getParameterNames();
+		    while (en.hasMoreElements()) {
+		        String param = (String)en.nextElement();
+		        String values[] = request.getParameterValues(param);
+		        response.setRenderParameter(param, values);
+		    }	        
+		} catch (IllegalStateException ex) {
+		    // ignore in case sendRedirect was already set
+		}
+    }
+
 }

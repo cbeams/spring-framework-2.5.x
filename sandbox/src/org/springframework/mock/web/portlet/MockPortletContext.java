@@ -63,26 +63,35 @@ public class MockPortletContext implements PortletContext {
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public MockPortletContext() {
-		this("");
+		this("", null);
 	}
 
 	/**
 	 * Create a new MockPortletContext using a DefaultResourceLoader.
-	 * @param resourceBasePath the WAR root directory (should not end with a /)
+	 * @param resourceBasePath the WAR root directory (should not end with a slash)
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public MockPortletContext(String resourceBasePath) {
-		this(resourceBasePath, new DefaultResourceLoader());
+		this(resourceBasePath, null);
+	}
+
+	/**
+	 * Create a new MockPortletContext, using the specified ResourceLoader
+	 * and no base path.
+	 * @param resourceLoader the ResourceLoader to use (or null for the default)
+	 */
+	public MockPortletContext(ResourceLoader resourceLoader) {
+		this("", resourceLoader);
 	}
 
 	/**
 	 * Create a new MockPortletContext.
-	 * @param resourceBasePath the WAR root directory (should not end with a /)
-	 * @param resourceLoader the ResourceLoader to use
+	 * @param resourceBasePath the WAR root directory (should not end with a slash)
+	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 */
 	public MockPortletContext(String resourceBasePath, ResourceLoader resourceLoader) {
-	    this.resourceBasePath = resourceBasePath;
-		this.resourceLoader = resourceLoader;
+		this.resourceBasePath = (resourceBasePath != null ? resourceBasePath : "");
+		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
 
 		// use JVM temp dir as PortletContext temp dir
 		String tempDir = System.getProperty(TEMP_DIR_SYSTEM_PROPERTY);
