@@ -27,6 +27,7 @@ import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
+import javax.management.InstanceNotFoundException;
 import javax.management.modelmbean.ModelMBeanInfo;
 
 import junit.framework.TestCase;
@@ -108,6 +109,26 @@ public class MBeanExporterTests extends TestCase {
 			MBeanServer server = (MBeanServer) bf.getBean("server");
 			ObjectInstance instance = server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=true"));
 			assertNotNull(instance);
+		}
+		finally {
+			bf.destroySingletons();
+		}
+	}
+
+	public void testAutodetectWithExclude() throws Exception {
+		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("autodetectMBeans.xml", getClass()));
+		try {
+			bf.getBean("exporter");
+			MBeanServer server = (MBeanServer) bf.getBean("server");
+			ObjectInstance instance = server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=true"));
+			assertNotNull(instance);
+
+			try {
+				server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=false"));
+				fail("MBean with name spring:mbean=false should have been excluded");
+			} catch(InstanceNotFoundException ex) {
+				// success
+			}
 		}
 		finally {
 			bf.destroySingletons();
