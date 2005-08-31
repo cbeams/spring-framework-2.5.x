@@ -928,29 +928,14 @@ public class JmsTemplate102Tests extends TestCase {
 			messageConsumerControl = MockControl.createControl(TopicSubscriber.class);
 			TopicSubscriber mockTopicSubscriber = (TopicSubscriber) messageConsumerControl.getMock();
 			mockMessageConsumer = mockTopicSubscriber;
-			if (messageSelector) {
-				mockTopicSession.createSubscriber(mockTopic, selectorString, noLocal);
-			}
-			else {
-				if (noLocal) {
-					mockTopicSession.createSubscriber(mockTopic, null, true);
-				}
-				else {
-					mockTopicSession.createSubscriber(mockTopic);
-				}
-			}
+			mockTopicSession.createSubscriber(mockTopic, messageSelector ? selectorString : null, noLocal);
 			topicSessionControl.setReturnValue(mockTopicSubscriber);
 		}
 		else {
 			messageConsumerControl = MockControl.createControl(QueueReceiver.class);
 			QueueReceiver mockQueueReceiver = (QueueReceiver) messageConsumerControl.getMock();
 			mockMessageConsumer = mockQueueReceiver;
-			if (messageSelector) {
-				mockQueueSession.createReceiver(mockQueue, selectorString);
-			}
-			else {
-				mockQueueSession.createReceiver(mockQueue);
-			}
+			mockQueueSession.createReceiver(mockQueue, messageSelector ? selectorString : null);
 			queueSessionControl.setReturnValue(mockQueueReceiver);
 		}
 

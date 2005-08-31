@@ -28,12 +28,11 @@ import javax.jms.Session;
 
 import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionHolder;
-import org.springframework.jms.support.JmsAccessor;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
-import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
+import org.springframework.jms.support.destination.JmsDestinationAccessor;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -71,7 +70,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see javax.jms.MessageProducer
  * @see javax.jms.MessageConsumer
  */
-public class JmsTemplate extends JmsAccessor implements JmsOperations {
+public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations {
 
 	/**
 	 * Default timeout for receive operations:
@@ -80,11 +79,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 	public static final long DEFAULT_RECEIVE_TIMEOUT = -1;
 
 
-	private boolean pubSubDomain = false;
-
 	private Object defaultDestination;
-
-	private DestinationResolver destinationResolver;
 
 	private MessageConverter messageConverter;
 
@@ -143,29 +138,6 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 
 
 	/**
-	 * Configure the JmsTemplate with knowledge of the JMS domain used.
-	 * Default is Point-to-Point (Queues).
-	 * <p>For JmsTemplate102, this tells the JMS provider which class hierarchy to use
-	 * in the implementation of the various execute methods. For JmsTemplate itself,
-	 * it does not affect execute methods. In both implementations, it tells what type
-	 * of destination to create if dynamic destinations are enabled.
-	 * @param pubSubDomain true for Publish/Subscribe domain (Topics),
-	 * false for Point-to-Point domain (Queues)
-	 * @see #setDestinationResolver
-	 */
-	public void setPubSubDomain(boolean pubSubDomain) {
-		this.pubSubDomain = pubSubDomain;
-	}
-
-	/**
-	 * Return whether the Publish/Subscribe domain (Topics) is used.
-	 * Otherwise, the Point-to-Point domain (Queues) is used.
-	 */
-	public boolean isPubSubDomain() {
-		return pubSubDomain;
-	}
-
-	/**
 	 * Set the destination to be used on send operations that do not
 	 * have a destination parameter.
 	 * <p>Alternatively, specify a "defaultDestinationName", to be
@@ -211,25 +183,6 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 	}
 
 	/**
-	 * Set the destination resolver for this template. Used to resolve
-	 * destination names and to support dynamic destination functionality.
-	 * <p>The default resolver is a DynamicDestinationResolver. Specify a
-	 * JndiDestinationResolver for resolving destination names as JNDI locations.
-	 * @see org.springframework.jms.support.destination.DynamicDestinationResolver
-	 * @see org.springframework.jms.support.destination.JndiDestinationResolver
-	 */
-	public void setDestinationResolver(DestinationResolver destinationResolver) {
-		this.destinationResolver = destinationResolver;
-	}
-
-	/**
-	 * Get the destination resolver for this template.
-	 */
-	public DestinationResolver getDestinationResolver() {
-		return destinationResolver;
-	}
-
-	/**
 	 * Set the message converter for this template. Used to resolve
 	 * Object parameters to convertAndSend methods and Object results
 	 * from receiveAndConvert methods.
@@ -252,7 +205,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 
 
 	/**
-	 * Set whether message IDs are enabled. Default is true.
+	 * Set whether message IDs are enabled. Default is "true".
 	 * <p>This is only a hint to the JMS producer.
 	 * See the JMS javadocs for details.
 	 * @see javax.jms.MessageProducer#setDisableMessageID
@@ -269,7 +222,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 	}
 
 	/**
-	 * Set whether message timestamps are enabled. Default is true.
+	 * Set whether message timestamps are enabled. Default is "true".
 	 * <p>This is only a hint to the JMS producer.
 	 * See the JMS javadocs for details.
 	 * @see javax.jms.MessageProducer#setDisableMessageTimestamp
@@ -287,7 +240,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 
 	/**
 	 * Set whether to inhibit the delivery of messages published by its own connection.
-	 * Default is false.
+	 * Default is "false".
 	 * @see javax.jms.TopicSession#createSubscriber(javax.jms.Topic, String, boolean)
 	 */
 	public void setPubSubNoLocal(boolean pubSubNoLocal) {
@@ -433,19 +386,6 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 		}
 	}
 
-	/**
-	 * Resolve the given destination name into a JMS Destination,
-	 * via this template's DestinationResolver.
-	 * @param session the current JMS Session
-	 * @param destinationName the name of the destination
-	 * @return the located Destination
-	 * @throws JMSException if resolution failed
-	 * @see #setDestinationResolver
-	 */
-	protected Destination resolveDestinationName(Session session, String destinationName) throws JMSException {
-		return getDestinationResolver().resolveDestinationName(session, destinationName, isPubSubDomain());
-	}
-
 
 	/**
 	 * Create a JMS Connection via this template's ConnectionFactory.
@@ -509,35 +449,14 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 	 * <p>This implementation uses JMS 1.1 API.
 	 * @param session the JMS Session to create a MessageConsumer for
 	 * @param destination the JMS Destination to create a MessageConsumer for
-	 * @return the new JMS MessageConsumer
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
-		if (isPubSubNoLocal()) {
-			return session.createConsumer(destination, null, true);
-		}
-		else {
-			return session.createConsumer(destination);
-		}
-	}
-
-	/**
-	 * Create a JMS MessageConsumer for the given Session and Destination.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param session the JMS Session to create a MessageConsumer for
-	 * @param destination the JMS Destination to create a MessageConsumer for
+	 * @param messageSelector the message selector for this consumer (can be null)
 	 * @return the new JMS MessageConsumer
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	protected MessageConsumer createConsumer(Session session, Destination destination, String messageSelector)
 			throws JMSException {
 
-		if (isPubSubNoLocal()) {
-			return session.createConsumer(destination, messageSelector, true);
-		}
-		else {
-			return session.createConsumer(destination, messageSelector);
-		}
+		return session.createConsumer(destination, messageSelector, isPubSubNoLocal());
 	}
 
 
@@ -751,7 +670,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 	public Message receive(final Destination destination) throws JmsException {
 		return (Message) execute(new SessionCallback() {
 			public Object doInJms(Session session) throws JMSException {
-				return doReceive(session, destination);
+				return doReceive(session, destination, null);
 			}
 		}, true);
 	}
@@ -760,7 +679,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 		return (Message) execute(new SessionCallback() {
 			public Object doInJms(Session session) throws JMSException {
 				Destination destination = resolveDestinationName(session, destinationName);
-				return doReceive(session, destination);
+				return doReceive(session, destination, null);
 			}
 		}, true);
 	}
@@ -778,7 +697,7 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 	public Message receiveSelected(final Destination destination, final String messageSelector) throws JmsException {
 		return (Message) execute(new SessionCallback() {
 			public Object doInJms(Session session) throws JMSException {
-				return doReceiveSelected(session, destination, messageSelector);
+				return doReceive(session, destination, messageSelector);
 			}
 		}, true);
 	}
@@ -787,16 +706,12 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 		return (Message) execute(new SessionCallback() {
 			public Object doInJms(Session session) throws JMSException {
 				Destination destination = resolveDestinationName(session, destinationName);
-				return doReceiveSelected(session, destination, messageSelector);
+				return doReceive(session, destination, messageSelector);
 			}
 		}, true);
 	}
 
-	protected Message doReceive(Session session, Destination destination) throws JMSException {
-		return doReceive(session, createConsumer(session, destination));
-	}
-
-	protected Message doReceiveSelected(Session session, Destination destination, String messageSelector)
+	protected Message doReceive(Session session, Destination destination, String messageSelector)
 			throws JMSException {
 
 		return doReceive(session, createConsumer(session, destination, messageSelector));

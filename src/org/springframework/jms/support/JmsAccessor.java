@@ -29,12 +29,15 @@ import org.springframework.jms.JmsException;
 
 /**
  * Base class for JmsTemplate and other JMS-accessing gateway helpers,
- * defining common properties like the ConnectionFactory.
+ * defining common properties like the ConnectionFactory. The subclass
+ * JmsDestinationAccessor adds further, destination-related properties.
  *
  * <p>Not intended to be used directly. See JmsTemplate.
  *
  * @author Juergen Hoeller
  * @since 1.2
+ * @see org.springframework.jms.support.destination.JmsDestinationAccessor
+ * @see org.springframework.jms.core.JmsTemplate
  */
 public abstract class JmsAccessor implements InitializingBean {
 

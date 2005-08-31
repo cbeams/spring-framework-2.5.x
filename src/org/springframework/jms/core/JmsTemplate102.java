@@ -182,25 +182,9 @@ public class JmsTemplate102 extends JmsTemplate {
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
 	 */
-	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
-		if (isPubSubDomain()) {
-			if (isPubSubNoLocal()) {
-				return ((TopicSession) session).createSubscriber((Topic) destination, null, true);
-			}
-			else {
-				return ((TopicSession) session).createSubscriber((Topic) destination);
-			}
-		}
-		else {
-			return ((QueueSession) session).createReceiver((Queue) destination);
-		}
-	}
-
-	/**
-	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
-	 */
 	protected MessageConsumer createConsumer(Session session, Destination destination, String messageSelector)
 			throws JMSException {
+
 		if (isPubSubDomain()) {
 			return ((TopicSession) session).createSubscriber((Topic) destination, messageSelector, isPubSubNoLocal());
 		}

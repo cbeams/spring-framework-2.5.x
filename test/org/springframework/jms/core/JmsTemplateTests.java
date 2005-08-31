@@ -563,22 +563,7 @@ public class JmsTemplateTests extends TestCase {
 		MessageConsumer mockMessageConsumer = (MessageConsumer) messageConsumerControl.getMock();
 
 		String selectorString = "selector";
-		if (messageSelector) {
-			if (noLocal) {
-				mockSession.createConsumer(mockQueue, selectorString, true);
-			}
-			else {
-				mockSession.createConsumer(mockQueue, selectorString);
-			}
-		}
-		else {
-			if (noLocal) {
-				mockSession.createConsumer(mockQueue, null, true);
-			}
-			else {
-				mockSession.createConsumer(mockQueue);
-			}
-		}
+		mockSession.createConsumer(mockQueue, messageSelector ? selectorString : null, noLocal);
 		sessionControl.setReturnValue(mockMessageConsumer);
 
 		if (useTransactedTemplate()) {
