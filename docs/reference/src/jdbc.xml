@@ -66,7 +66,7 @@
       <literal>PreparedStatementCreator</literal> callback interface creates a
       prepared statement given a Connection provided by this class, providing
       SQL and any necessary parameters. The same is true for the
-      <literal>CallableStatementCreateor</literal> interface which creates
+      <literal>CallableStatementCreator</literal> interface which creates
       callable statement. The <literal>RowCallbackHandler</literal> interface
       extracts values from each row of a ResultSet.</para>
 
@@ -269,7 +269,7 @@ public class RunAQuery {
     }
 }</programlisting>
 
-      <para>In addition to the singe results query methods there are several
+      <para>In addition to the single results query methods there are several
       methods that return a List with an entry for each row that the query
       returned. The most generic one is <literal>queryForList</literal> which
       returns a <literal>List</literal> where each entry is a

@@ -1708,7 +1708,7 @@ background=/themes/cool/img/coolBg.jpg
 
       <para>Spring has built-in multipart support to handle fileuploads in web
       applications. The design for the multipart support is done with
-      pluggable <literal>MultipartResovler</literal> objects, defined in the
+      pluggable <literal>MultipartResolver</literal> objects, defined in the
       <literal>org.springframework.web.multipart</literal> package. Out of the
       box, Spring provides <literal>MultipartResolver</literal>s for use with
       <emphasis>Commons FileUpload</emphasis> (<ulink

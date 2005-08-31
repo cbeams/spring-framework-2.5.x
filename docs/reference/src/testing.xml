@@ -125,7 +125,7 @@
 
       <para>When <literal>AbstractDependencyInjectionSpringContextTests</literal>
       (and subclasses) load your application context, they can optionally
-      configure instances of yourr test classes by Setter Injection. All you
+      configure instances of your test classes by Setter Injection. All you
       need to do is to define instance variables and the corresponding
       setters. <literal>AbstractDependencyInjectionSpringContextTests</literal>
       will automatically locate the corresponding object in the set of

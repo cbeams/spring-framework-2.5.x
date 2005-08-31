@@ -311,7 +311,7 @@
       Generally, the same<emphasis> template</emphasis> approach is followed
       for all persistence APIs, with classes such as
       <literal>JdbcTemplate</literal>, <literal>HibernateTemplate</literal>,
-      <literal>JdoTemplate</literal>, etc.. These integrationA classes are
+      <literal>JdoTemplate</literal>, etc.. These integration classes are
       detailed in subsequent chapters of this manual.</para>
     </sect2>
 
