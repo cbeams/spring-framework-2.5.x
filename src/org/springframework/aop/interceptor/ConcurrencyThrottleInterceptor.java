@@ -20,8 +20,8 @@ import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.springframework.util.ConcurrencyThrottleSupport;
 
 /**
  * Interceptor that throttles concurrent access, blocking invocations
@@ -34,56 +34,18 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Juergen Hoeller
  * @since 11.02.2004
+ * @see #setConcurrencyLimit
  */
-public class ConcurrencyThrottleInterceptor implements MethodInterceptor, Serializable {
-
-	/** Static to avoid serializing the logger */
-	protected static final Log logger = LogFactory.getLog(ConcurrencyThrottleInterceptor.class);
-
-	private transient final Object monitor = new Object();
-
-	private int concurrencyLimit = 1;
-
-	private int concurrencyCount = 0;
-
-	/**
-	 * Set the maximum number of parallel invocations that this interceptor
-	 * allows. Default is 1 (having the same effect as a synchronized block).
-	 */
-	public void setConcurrencyLimit(int concurrencyLimit) {
-		this.concurrencyLimit = concurrencyLimit;
-	}
+public class ConcurrencyThrottleInterceptor extends ConcurrencyThrottleSupport
+		implements MethodInterceptor, Serializable {
 
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-		boolean debug = logger.isDebugEnabled();
-		synchronized (this.monitor) {
-			while (this.concurrencyCount >= this.concurrencyLimit) {
-				if (debug) {
-					logger.debug("Concurrency count " + this.concurrencyCount +
-							" has reached limit " + this.concurrencyLimit + " - blocking");
-				}
-				try {
-					this.monitor.wait();
-				}
-				catch (InterruptedException ex) {
-				}
-			}
-			if (debug) {
-				logger.debug("Entering method at concurrency count " + this.concurrencyCount);
-			}
-			this.concurrencyCount++;
-		}
+		beforeAccess();
 		try {
 			return methodInvocation.proceed();
 		}
 		finally {
-			synchronized (this.monitor) {
-				this.concurrencyCount--;
-				if (debug) {
-					logger.debug("Returning from method at concurrency count " + this.concurrencyCount);
-				}
-				this.monitor.notify();
-			}
+			afterAccess();
 		}
 	}
 
