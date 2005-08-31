@@ -468,9 +468,11 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			Iterator it = PortletUtils.getParametersStartingWith(request, PARAM_TARGET).entrySet().iterator();
 			while (it.hasNext()) {
 			    Map.Entry entry = (Map.Entry)it.next();
-				if (logger.isDebugEnabled())
-					logger.debug("Setting target render parameter [" + PARAM_TARGET + (String)entry.getKey() + "]");
-		        response.setRenderParameter(PARAM_TARGET + (String)entry.getKey(), (String[])entry.getValue());
+			    String param = PARAM_TARGET + (String)entry.getKey();
+			    Object value = entry.getValue();
+				if (logger.isDebugEnabled()) logger.debug("Setting target render parameter [" + param + "]");
+		        if (value instanceof String) response.setRenderParameter(param, (String)value);
+		        if (value instanceof String[]) response.setRenderParameter(param, (String[])value);
 			}
 		} catch (IllegalStateException ex) {
 		    // ignore in case sendRedirect was already set
@@ -878,7 +880,10 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
-	 * Template method for the render phase of the final action of this wizard.
+	 * Template method for the render phase of the finish action of this wizard.
+	 * <p>Default implementation throws a PortletException, saying that a finish
+	 * render request is not supported by this controller. Thus, you do not need to
+	 * implement this template method if you do not need to render after a finish.
 	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
 	 * with the command and the Errors instance, under the specified command name,
 	 * as expected by the "spring:bind" tag.
@@ -892,12 +897,18 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see org.springframework.validation.Errors
 	 * @see org.springframework.validation.BindException#getModel
 	 */
-	protected abstract ModelAndView renderFinish(
+	protected ModelAndView renderFinish(
 			RenderRequest request, RenderResponse response, Object command, BindException errors)
-			throws Exception;
+			throws Exception {
+		throw new PortletException(
+				"Wizard form controller class [" + getClass().getName() + "] does not support a finish render request");
+	}
 
 	/**
-	 * Template method for the action phase of the final action of this wizard.
+	 * Template method for the action phase of the finish action of this wizard.
+	 * <p>Default implementation throws a PortletException, saying that a finish
+	 * action request is not supported by this controller. You will almost certainly
+	 * need to override this method.
 	 * @param request current portlet action request
 	 * @param response current portlet action response
 	 * @param command form object with the current wizard state
@@ -906,14 +917,17 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see #renderFinish
 	 * @see org.springframework.validation.Errors
 	 */
-	protected abstract void processFinish(
+	protected void processFinish(
 			ActionRequest request, ActionResponse response, Object command, BindException errors)
-			throws Exception;
+			throws Exception {
+		throw new PortletException(
+				"Wizard form controller class [" + getClass().getName() + "] does not support a finish action request");
+	}
 
 	/**
 	 * Template method for the render phase of the cancel action of this wizard.
-	 * <p>Default implementation throws a ServletException, saying that a cancel
-	 * operation is not supported by this controller. Thus, you do not need to
+	 * <p>Default implementation throws a PortletException, saying that a cancel
+	 * render request is not supported by this controller. Thus, you do not need to
 	 * implement this template method if you do not support a cancel operation.
 	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
 	 * with the command and the Errors instance, under the specified command name,
@@ -931,17 +945,15 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	protected ModelAndView renderCancel(
 			RenderRequest request, RenderResponse response, Object command, BindException errors)
 			throws Exception {
-	    
 		throw new PortletException(
-				"Wizard form controller class [" + getClass().getName() + "] does not support a cancel operation");
+				"Wizard form controller class [" + getClass().getName() + "] does not support a cancel render request");
 	}
 
 	/**
 	 * Template method for the action phase of the cancel action of this wizard.
-	 * <p>Default implementation does nothing in the action phase and then throws 
-	 * a PortletException in the render phase , saying that a cancel
-	 * operation is not supported by this controller. Thus, you do not need to
-	 * implement these template method if you do not support a cancel operation.
+	 * <p>Default implementation throws a PortletException, saying that a cancel
+	 * action request is not supported by this controller. Thus, you do not need to
+	 * implement this template method if you do not support a cancel operation.
 	 * @param request current portlet action request
 	 * @param response current portlet action response
 	 * @param command form object with the current wizard state
@@ -953,6 +965,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	protected void processCancel(
 			ActionRequest request, ActionResponse response, Object command, BindException errors)
 			throws Exception {
+	    throw new PortletException(
+				"Wizard form controller class [" + getClass().getName() + "] does not support a cancel action request");
 	}
 
 }
