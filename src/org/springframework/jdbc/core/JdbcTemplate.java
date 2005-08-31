@@ -16,19 +16,6 @@
 
 package org.springframework.jdbc.core;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.sql.DataSource;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.support.DataAccessUtils;
@@ -37,8 +24,15 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.ParsedSql;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <b>This is the central class in the JDBC core package.</b>
@@ -291,7 +285,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (sql == null) {
 			throw new InvalidDataAccessApiUsageException("SQL must not be null");
 		}
-		if (JdbcUtils.countParameterPlaceholders(sql, '?', "'\"") > 0) {
+		if (JdbcUtils.countParameterPlaceholders(sql) > 0) {
 			throw new InvalidDataAccessApiUsageException(
 					"Cannot execute [" + sql + "] as a static query: it contains bind variables");
 		}
@@ -568,9 +562,23 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(sql, new ArgTypePreparedStatementSetter(args, argTypes), rch);
 	}
 
+	public List query(String sql, Map argMap, int[] argTypes, RowCallbackHandler rch)
+			throws DataAccessException {
+		ArgMapPreparedStatementCreator ampsc = new ArgMapPreparedStatementCreator(sql, argMap, argTypes);
+		// ToDo
+		return (List) query(ampsc, ampsc, new RowCallbackHandlerResultSetExtractor(rch));
+	}
+
 	public List query(String sql, Object[] args, RowCallbackHandler rch)
 			throws DataAccessException {
 		return query(sql, new ArgPreparedStatementSetter(args), rch);
+	}
+
+	public List query(String sql, Map argMap, RowCallbackHandler rch)
+			throws DataAccessException {
+		ArgMapPreparedStatementCreator ampsc = new ArgMapPreparedStatementCreator(sql, argMap);
+		// ToDo
+		return (List) query(ampsc, ampsc, new RowCallbackHandlerResultSetExtractor(rch));
 	}
 
 	public List query(PreparedStatementCreator psc, RowMapper rowMapper)
@@ -588,9 +596,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(sql, args, argTypes, new RowMapperResultReader(rowMapper));
 	}
 
+	public List query(String sql, Map argMap, int[] argTypes, RowMapper rowMapper)
+			throws DataAccessException {
+		return query(sql, argMap, argTypes, new RowMapperResultReader(rowMapper));
+	}
+
 	public List query(String sql, Object[] args, RowMapper rowMapper)
 			throws DataAccessException {
 		return query(sql, args, new RowMapperResultReader(rowMapper));
+	}
+
+	public List query(String sql, Map argMap, RowMapper rowMapper)
+			throws DataAccessException {
+		return query(sql, argMap, new RowMapperResultReader(rowMapper));
 	}
 
 	public Object queryForObject(String sql, Object[] args, int[] argTypes, RowMapper rowMapper)
@@ -599,8 +617,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return DataAccessUtils.requiredUniqueResult(results);
 	}
 
+	public Object queryForObject(String sql, Map argMap, int[] argTypes, RowMapper rowMapper)
+			throws DataAccessException {
+		List results = query(sql, argMap, argTypes, new RowMapperResultReader(rowMapper, 1));
+		return DataAccessUtils.requiredUniqueResult(results);
+	}
+
 	public Object queryForObject(String sql, Object[] args, RowMapper rowMapper) throws DataAccessException {
 		List results = query(sql, args, new RowMapperResultReader(rowMapper, 1));
+		return DataAccessUtils.requiredUniqueResult(results);
+	}
+
+	public Object queryForObject(String sql, Map argMap, RowMapper rowMapper) throws DataAccessException {
+		List results = query(sql, argMap, new RowMapperResultReader(rowMapper, 1));
 		return DataAccessUtils.requiredUniqueResult(results);
 	}
 
@@ -609,20 +638,42 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return queryForObject(sql, args, argTypes, new SingleColumnRowMapper(requiredType));
 	}
 
+	public Object queryForObject(String sql, Map argMap, int[] argTypes, Class requiredType)
+			throws DataAccessException {
+		return queryForObject(sql, argMap, argTypes, new SingleColumnRowMapper(requiredType));
+	}
+
 	public Object queryForObject(String sql, Object[] args, Class requiredType) throws DataAccessException {
 		return queryForObject(sql, args, new SingleColumnRowMapper(requiredType));
+	}
+
+	public Object queryForObject(String sql, Map argMap, Class requiredType) throws DataAccessException {
+		return queryForObject(sql, argMap, new SingleColumnRowMapper(requiredType));
 	}
 
 	public Map queryForMap(String sql, Object[] args, int[] argTypes) throws DataAccessException {
 		return (Map) queryForObject(sql, args, argTypes, new ColumnMapRowMapper());
 	}
 
+	public Map queryForMap(String sql, Map argMap, int[] argTypes) throws DataAccessException {
+		return (Map) queryForObject(sql, argMap, argTypes, new ColumnMapRowMapper());
+	}
+
 	public Map queryForMap(String sql, Object[] args) throws DataAccessException {
 		return (Map) queryForObject(sql, args, new ColumnMapRowMapper());
 	}
 
+	public Map queryForMap(String sql, Map argMap) throws DataAccessException {
+		return (Map) queryForObject(sql, argMap, new ColumnMapRowMapper());
+	}
+
 	public long queryForLong(String sql, Object[] args, int[] argTypes) throws DataAccessException {
 		Number number = (Number) queryForObject(sql, args, argTypes, Number.class);
+		return (number != null ? number.longValue() : 0);
+	}
+
+	public long queryForLong(String sql, Map argMap, int[] argTypes) throws DataAccessException {
+		Number number = (Number) queryForObject(sql, argMap, argTypes, Number.class);
 		return (number != null ? number.longValue() : 0);
 	}
 
@@ -631,8 +682,18 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return (number != null ? number.longValue() : 0);
 	}
 
+	public long queryForLong(String sql, Map argMap) throws DataAccessException {
+		Number number = (Number) queryForObject(sql, argMap, Number.class);
+		return (number != null ? number.longValue() : 0);
+	}
+
 	public int queryForInt(String sql, Object[] args, int[] argTypes) throws DataAccessException {
 		Number number = (Number) queryForObject(sql, args, argTypes, Number.class);
+		return (number != null ? number.intValue() : 0);
+	}
+
+	public int queryForInt(String sql, Map argMap, int[] argTypes) throws DataAccessException {
+		Number number = (Number) queryForObject(sql, argMap, argTypes, Number.class);
 		return (number != null ? number.intValue() : 0);
 	}
 
@@ -641,29 +702,63 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return (number != null ? number.intValue() : 0);
 	}
 
+	public int queryForInt(String sql, Map argMap) throws DataAccessException {
+		Number number = (Number) queryForObject(sql, argMap, Number.class);
+		return (number != null ? number.intValue() : 0);
+	}
+
 	public List queryForList(String sql, Object[] args, int[] argTypes, Class elementType)
 			throws DataAccessException {
 		return query(sql, args, argTypes, new SingleColumnRowMapper(elementType));
+	}
+
+	public List queryForList(String sql, Map argMap, int[] argTypes, Class elementType)
+			throws DataAccessException {
+		return query(sql, argMap, argTypes, new SingleColumnRowMapper(elementType));
 	}
 
 	public List queryForList(String sql, final Object[] args, Class elementType) throws DataAccessException {
 		return query(sql, args, new SingleColumnRowMapper(elementType));
 	}
 
+	public List queryForList(String sql, Map argMap, Class elementType) throws DataAccessException {
+		return query(sql, argMap, new SingleColumnRowMapper(elementType));
+	}
+
 	public List queryForList(String sql, Object[] args, int[] argTypes) throws DataAccessException {
 		return query(sql, args, argTypes, new ColumnMapRowMapper());
+	}
+
+	public List queryForList(String sql, Map argMap, int[] argTypes) throws DataAccessException {
+		return query(sql, argMap, argTypes, new ColumnMapRowMapper());
 	}
 
 	public List queryForList(String sql, final Object[] args) throws DataAccessException {
 		return query(sql, args, new ColumnMapRowMapper());
 	}
 
+	public List queryForList(String sql, final Map argMap) throws DataAccessException {
+		return query(sql, argMap, new ColumnMapRowMapper());
+	}
+
 	public SqlRowSet queryForRowSet(String sql, final Object[] args, int[] argTypes) throws DataAccessException {
 		return (SqlRowSet) query(sql, args, argTypes, new SqlRowSetResultSetExtractor());
 	}
 
+	public SqlRowSet queryForRowSet(String sql, final Map argMap, int[] argTypes) throws DataAccessException {
+		ArgMapPreparedStatementCreator ampsc = new ArgMapPreparedStatementCreator(sql, argMap, argTypes);
+		// ToDo
+		return (SqlRowSet) query(ampsc, ampsc, new SqlRowSetResultSetExtractor());
+	}
+
 	public SqlRowSet queryForRowSet(String sql, final Object[] args) throws DataAccessException {
 		return (SqlRowSet) query(sql, args, new SqlRowSetResultSetExtractor());
+	}
+
+	public SqlRowSet queryForRowSet(String sql, final Map argMap) throws DataAccessException {
+		ArgMapPreparedStatementCreator ampsc = new ArgMapPreparedStatementCreator(sql, argMap);
+		// ToDo
+		return (SqlRowSet) query(ampsc, ampsc, new SqlRowSetResultSetExtractor());
 	}
 
 	protected int update(final PreparedStatementCreator psc, final PreparedStatementSetter pss)
@@ -742,8 +837,18 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return update(sql, new ArgTypePreparedStatementSetter(args, argTypes));
 	}
 
+	public int update(String sql, final Map argMap, final int[] argTypes) throws DataAccessException {
+		ArgMapPreparedStatementCreator ampsc = new ArgMapPreparedStatementCreator(sql, argMap, argTypes);
+		return update(ampsc, ampsc);
+	}
+
 	public int update(String sql, final Object[] args) throws DataAccessException {
 		return update(sql, new ArgPreparedStatementSetter(args));
+	}
+
+	public int update(String sql, final Map argMap) throws DataAccessException {
+		ArgMapPreparedStatementCreator ampsc = new ArgMapPreparedStatementCreator(sql, argMap);
+		return update(ampsc, ampsc);
 	}
 
 	public int[] batchUpdate(String sql, final BatchPreparedStatementSetter pss) throws DataAccessException {
@@ -1020,7 +1125,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 
 		public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-			return con.prepareStatement(this.sql);
+			return con.prepareStatement(JdbcUtils.parseSqlStatement(this.sql).getNewSql());
 		}
 
 		public String getSql() {
@@ -1074,6 +1179,66 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 		public void cleanupParameters() {
 			StatementCreatorUtils.cleanupParameters(this.args);
+		}
+	}
+
+	/**
+	 * Simple adapter for PreparedStatementSetter that applies
+	 * a given map of arguments.
+	 */
+	private static class ArgMapPreparedStatementCreator implements PreparedStatementCreator, PreparedStatementSetter, ParameterDisposer {
+
+		private final Object[] args;
+		private final String sql;
+		private final ParsedSql parsedSql;
+		private final int[] argTypes;
+
+		public ArgMapPreparedStatementCreator(String sql, Map argMap) {
+			this(sql, argMap, null);
+		}
+
+		public ArgMapPreparedStatementCreator(String sql, Map argMap, int[] argTypes) {
+			this.sql = sql;
+			parsedSql = JdbcUtils.parseSqlStatement(sql, argMap);
+			this.args = JdbcUtils.convertArgMapToArray(sql, argMap, parsedSql);
+			if (argTypes == null) {
+				this.argTypes = new int[parsedSql.getParameterCount()];
+				for (int i = 0; i < this.argTypes.length; i++) {
+					this.argTypes[i] = SqlTypeValue.TYPE_UNKNOWN;
+				}
+			}
+			else {
+				this.argTypes = argTypes;
+			}
+		}
+
+		public void setValues(PreparedStatement ps) throws SQLException {
+			if (this.args != null) {
+				int placeholder = 1;
+				for (int i = 0; i < this.args.length; i++) {
+					Object o = this.args[i];
+					if (o instanceof List) {
+						for (int j = 0; j < ((List)o).size(); j++) {
+							StatementCreatorUtils.setParameterValue(ps, placeholder++, this.argTypes[i], null, ((List)o).get(j));
+						}
+					}
+					else {
+						StatementCreatorUtils.setParameterValue(ps, placeholder++, this.argTypes[i], null, this.args[i]);
+					}
+				}
+			}
+		}
+
+		public void cleanupParameters() {
+			StatementCreatorUtils.cleanupParameters(this.args);
+		}
+
+		public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+			return con.prepareStatement(parsedSql.getNewSql());
+		}
+
+		public String getSql() {
+			return sql;
 		}
 	}
 

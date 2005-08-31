@@ -24,6 +24,8 @@ import javax.sql.DataSource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.ResultReader;
+import org.springframework.jdbc.core.SqlParameterMap;
+import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * Reusable object to represent a SQL query. Like all RdbsOperation
@@ -98,7 +100,7 @@ public abstract class SqlQuery extends SqlOperation {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Central execution method. All execution goes through this method.
+	 * Central executi on method. All execution goes through this method.
 	 * @param parameters parameters, similar to JDO query parameters.
 	 * Primitive parameters must be represented by their Object wrapper type.
 	 * The ordering of parameters is significant.
@@ -114,6 +116,13 @@ public abstract class SqlQuery extends SqlOperation {
 		return getJdbcTemplate().query(newPreparedStatementCreator(parameters), rr);
 	}
 
+	public List execute(final SqlParameterMap parameterMap, Map context) throws DataAccessException {
+		//ToDo: validateParameters(parameters);
+		Object[] parameters = JdbcUtils.convertArgMapToArray(getSql(), parameterMap);
+		ResultReader rr = newResultReader(getRowsExpected(), parameters, context);
+		return getJdbcTemplate().query(newPreparedStatementCreator(parameterMap), rr);
+	}
+
 	/**
 	 * Convenient method to execute without context.
 	 * @param parameters parameters, as to JDO queries. Primitive parameters must
@@ -122,6 +131,10 @@ public abstract class SqlQuery extends SqlOperation {
 	 */
 	public List execute(final Object[] parameters) throws DataAccessException {
 		return execute(parameters, null);
+	}
+
+	public List execute(final SqlParameterMap parameterMap) throws DataAccessException {
+		return execute(parameterMap, null);
 	}
 
 	/**
@@ -223,10 +236,31 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 	/**
+	 * Generic findObject method, used by all other findObject() methods.
+	 * findObject() methods are like EJB entity bean finders, in that it is
+	 * considered an error if they return more than one result.
+	 * @return null if not found. Subclasses may choose to treat this
+	 * as an error and throw an exception.
+	 * @see org.springframework.dao.support.DataAccessUtils#uniqueResult
+	 */
+	public Object findObject(SqlParameterMap parameterMap, Map context) throws DataAccessException {
+		List results = execute(parameterMap, context);
+		return DataAccessUtils.uniqueResult(results);
+	}
+
+	/**
 	 * Convenient method to find a single object without context.
 	 */
 	public Object findObject(Object[] parameters) throws DataAccessException {
 		return findObject(parameters, null);
+	}
+
+	/**
+	 * Convenient method to find a single object without context.  This call requires
+	 * named parameters specified in the SQL statement.
+	 */
+	public Object findObject(SqlParameterMap parameterMap) throws DataAccessException {
+		return findObject(parameterMap, null);
 	}
 
 	/**

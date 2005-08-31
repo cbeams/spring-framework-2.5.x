@@ -20,6 +20,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.PreparedStatementSetter;
+import org.springframework.jdbc.core.SqlParameterMap;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
@@ -49,7 +50,8 @@ public abstract class SqlOperation extends RdbmsOperation {
 	protected final void compileInternal() {
 		// validate parameter count
 		try {
-			int bindVarCount = JdbcUtils.countParameterPlaceholders(getSql(), '?', "'\"");
+			//int bindVarCount = JdbcUtils.countParameterPlaceholders(getSql(), '?', "'\"");
+			int bindVarCount = JdbcUtils.countParameterPlaceholders(getSql());
 			if (bindVarCount != getDeclaredParameters().size()) {
 				throw new InvalidDataAccessApiUsageException(
 						"SQL '" + getSql() + "' requires " + bindVarCount + " bind variables, but " +
@@ -87,7 +89,18 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * @param params parameter array. May be null.
 	 */
 	protected final PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
+		preparedStatementFactory.setParsedSql(JdbcUtils.parseSqlStatement(getSql()));
 		return this.preparedStatementFactory.newPreparedStatementCreator(params);
+	}
+
+	/**
+	 * Return a PreparedStatementCreator to perform an operation
+	 * with the given parameters.
+	 * @param paramMap parameter map. May be empty.
+	 */
+	protected final PreparedStatementCreator newPreparedStatementCreator(SqlParameterMap paramMap) {
+		preparedStatementFactory.setParsedSql(JdbcUtils.parseSqlStatement(getSql(), paramMap));
+		return this.preparedStatementFactory.newPreparedStatementCreator(JdbcUtils.convertArgMapToArray(getSql(), paramMap));
 	}
 
 	/**
