@@ -19,7 +19,6 @@ package org.springframework.orm.hibernate3.support;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
