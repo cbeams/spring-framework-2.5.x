@@ -35,6 +35,7 @@ public class StaticMessageSource extends AbstractMessageSource {
 
 	private final Map messages = new HashMap();
 
+
 	protected MessageFormat resolveCode(String code, Locale locale) {
 		return (MessageFormat) this.messages.get(code + "_" + locale.toString());
 	}
@@ -43,14 +44,15 @@ public class StaticMessageSource extends AbstractMessageSource {
 	 * Associate the given message with the given code.
 	 * @param code the lookup code
    * @param locale the locale that the message should be found within
-	 * @param message the message associated with this lookup code
+	 * @param msg the message associated with this lookup code
 	 */
-	public void addMessage(String code, Locale locale, String message) {
-		this.messages.put(code + "_" + locale.toString(), new MessageFormat(message));
+	public void addMessage(String code, Locale locale, String msg) {
+		this.messages.put(code + "_" + locale.toString(), createMessageFormat(msg, locale));
 		if (logger.isInfoEnabled()) {
-			logger.info("Added message [" + message + "] for code [" + code + "] and Locale [" + locale + "]");
+			logger.info("Added message [" + msg + "] for code [" + code + "] and Locale [" + locale + "]");
 		}
 	}
+
 
 	public String toString() {
 		return getClass().getName() + ": " + this.messages;
