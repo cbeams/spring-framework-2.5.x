@@ -85,7 +85,7 @@ public abstract class CciDaoSupport extends DaoSupport {
 	 * pre-initialized with the ConnectionFactory or set explicitly.
 	 */
 	public final CciTemplate getCciTemplate() {
-	  return cciTemplate;
+	  return this.cciTemplate;
 	}
 
 	protected final void checkDaoConfig() {

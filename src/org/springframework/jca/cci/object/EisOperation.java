@@ -57,7 +57,7 @@ public abstract class EisOperation implements InitializingBean {
 	 * Return the CciTemplate used by this operation.
 	 */
 	public CciTemplate getCciTemplate() {
-		return cciTemplate;
+		return this.cciTemplate;
 	}
 
 	/**
@@ -78,7 +78,7 @@ public abstract class EisOperation implements InitializingBean {
 	 * Return the CCI InteractionSpec for this operation.
 	 */
 	public InteractionSpec getInteractionSpec() {
-		return interactionSpec;
+		return this.interactionSpec;
 	}
 
 

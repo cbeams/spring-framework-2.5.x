@@ -114,7 +114,7 @@ public class CciTemplate implements CciOperations {
 	 * Return the CCI ConnectionFactory used by this template.
 	 */
 	public ConnectionFactory getConnectionFactory() {
-		return connectionFactory;
+		return this.connectionFactory;
 	}
 
 	/**
@@ -137,7 +137,7 @@ public class CciTemplate implements CciOperations {
 	 * Return a RecordCreator that should be used for creating default output Records.
 	 */
 	public RecordCreator getOutputRecordCreator() {
-		return outputRecordCreator;
+		return this.outputRecordCreator;
 	}
 
 	/**
