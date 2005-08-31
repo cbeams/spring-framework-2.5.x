@@ -69,7 +69,7 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 	/**
 	 * Set whether the timer should use a daemon thread,
 	 * just executing as long as the application itself is running.
-	 * <p>Default is true: In a J2EE environment, the container is in
+	 * <p>Default is "true": In a J2EE environment, the container is in
 	 * control of the application lifecycle.
 	 * @see java.util.Timer#Timer(boolean)
 	 */
@@ -106,6 +106,7 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 	/**
 	 * Create a new Timer instance. Called by afterPropertiesSet.
 	 * Can be overridden in subclasses to provide custom Timer subclasses.
+	 * @param daemon whether to create a Timer that runs as daemon thread
 	 * @return a new Timer instance
 	 * @see #afterPropertiesSet
 	 * @see java.util.Timer#Timer(boolean)

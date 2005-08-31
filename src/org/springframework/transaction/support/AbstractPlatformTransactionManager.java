@@ -771,7 +771,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					"check that Spring transaction libraries are available on the client side: " + ex.getMessage());
 		}
 
-		// initialize transient fields
+		// Initialize transient fields.
 		this.logger = LogFactory.getLog(getClass());
 	}
 

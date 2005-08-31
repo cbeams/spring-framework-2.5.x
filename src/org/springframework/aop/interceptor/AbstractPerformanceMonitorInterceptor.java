@@ -19,17 +19,18 @@ package org.springframework.aop.interceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * Base class for performance monitoring interceptors. Provide <code>prefix</code> and <code>suffix</code> properties
+ * Base class for performance monitoring interceptors.
+ * Provides <code>prefix</code> and <code>suffix</code> properties
  * that help to classify/group performance monitoring results.
- * <p/>
- * Sub-classes should call the <code>createInvocationTraceName(MethodInvocation)</code> method to create a name for the given
- * trace that includes information about the method invocation under trace along with the prefix and suffix added as
- * appropriate.
+ *
+ * <p>Subclasses should call the <code>createInvocationTraceName(MethodInvocation)</code>
+ * method to create a name for the given trace that includes information about the
+ * method invocation under trace along with the prefix and suffix added as appropriate.
  * 
  * @author Rob Harrop
- * @see #setPrefix(String)
- * @see #setSuffix(String)
- * @see #createInvocationTraceName(org.aopalliance.intercept.MethodInvocation)
+ * @see #setPrefix
+ * @see #setSuffix
+ * @see #createInvocationTraceName
  */
 public abstract class AbstractPerformanceMonitorInterceptor extends AbstractTraceInterceptor {
 
@@ -37,39 +38,50 @@ public abstract class AbstractPerformanceMonitorInterceptor extends AbstractTrac
 
 	private String suffix;
 
-	protected String getPrefix() {
-		return prefix;
-	}
 
 	/**
-	 * Sets the <code>String</code> value that gets appended to the trace data used by performance monitoring interceptors.
-	 * @see #createInvocationTraceName(org.aopalliance.intercept.MethodInvocation)
+	 * Set the text that will get appended to the trace data.
 	 */
 	public void setPrefix(String prefix) {
 		this.prefix = prefix;
 	}
 
-	protected String getSuffix() {
-		return suffix;
+	/**
+	 * Return the text that will get appended to the trace data.
+	 */
+	protected String getPrefix() {
+		return prefix;
 	}
 
 	/**
-	 * Sets the <code>String</code> value that gets prepended to the trace data used by performance monitoring interceptors.
-	 * @see #createInvocationTraceName(org.aopalliance.intercept.MethodInvocation)
+	 * Set the text that will get prepended to the trace data.
 	 */
 	public void setSuffix(String suffix) {
 		this.suffix = suffix;
 	}
 
 	/**
-	 * Creates a <code>String</code> name for the given <code>MethodInvocation</code> that can be used for trace/logging
-	 * purposes. This name is made up of the configured prefix, followed by the fully-qualified name of the method being invoked,
-	 * followed by the configured suffix.
-	 * @see #setPrefix(String)
-	 * @see #setSuffix(String)
+	 * Return the text that will get prepended to the trace data.
+	 */
+	protected String getSuffix() {
+		return suffix;
+	}
+
+
+	/**
+	 * Create a <code>String</code> name for the given <code>MethodInvocation</code>
+	 * that can be used for trace/logging purposes. This name is made up of the
+	 * configured prefix, followed by the fully-qualified name of the method being
+	 * invoked, followed by the configured suffix.
+	 * @see #setPrefix
+	 * @see #setSuffix
 	 */
 	protected String createInvocationTraceName(MethodInvocation invocation) {
-		String invocationData = invocation.getMethod().getDeclaringClass().getName() + "." + invocation.getMethod().getName();
-		return getPrefix() + invocationData + getSuffix();
+		StringBuffer sb = new StringBuffer(getPrefix());
+		sb.append(invocation.getMethod().getDeclaringClass().getName());
+		sb.append('.').append(invocation.getMethod().getName());
+		sb.append(getSuffix());
+		return sb.toString();
 	}
+
 }
