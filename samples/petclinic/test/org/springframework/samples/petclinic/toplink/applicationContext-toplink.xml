@@ -4,17 +4,17 @@
 <beans>
 
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName"><value>org.hsqldb.jdbcDriver</value></property>
-		<property name="url"><value>jdbc:hsqldb:hsql://localhost:9001</value></property>
-		<property name="username"><value>sa</value></property>
-		<property name="password"><value></value></property>
+		<property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+		<property name="url" value="jdbc:hsqldb:hsql://localhost:9001" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
 	</bean>
 
 	<!-- Will only work on TopLink 10.1.3 or higher, due to the use of -->
 	<!-- HSQLPlatformWithNativeSequence and CommonsLoggingSessionLog. -->
 	<bean id="sessionFactory" class="org.springframework.orm.toplink.LocalSessionFactoryBean">
-		<property name="configLocation"><value>toplink-sessions.xml</value></property>
-		<property name="dataSource"><ref local="dataSource"/></property>
+		<property name="configLocation" value="toplink-sessions.xml" />
+		<property name="dataSource" ref="dataSource"/>
 		<property name="databasePlatform">
 			<bean class="org.springframework.samples.petclinic.toplink.HSQLPlatformWithNativeSequence"/>
 		</property>
@@ -24,7 +24,7 @@
 	</bean>
 
 	<bean id="transactionManager" class="org.springframework.orm.toplink.TopLinkTransactionManager">
-		<property name="sessionFactory"><ref local="sessionFactory"/></property>
+		<property name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 
 	<!--
@@ -33,10 +33,10 @@
 		factory, allowing us to use autowire by type if necessary.
 	-->
 	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.springframework.samples.petclinic.toplink.TopLinkClinic">
-				<property name="sessionFactory"><ref local="sessionFactory"/></property>
+				<property name="sessionFactory" ref="sessionFactory"/>
 			</bean>
 		</property>
 		<property name="transactionAttributes">
