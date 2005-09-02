@@ -271,7 +271,7 @@ public abstract class BaseCommandController extends AbstractController {
 	protected final Object createCommand() throws InstantiationException, IllegalAccessException {
 		if (this.commandClass == null) {
 			throw new IllegalStateException("Cannot create command without commandClass being set - " +
-					"either set commandClass or override formBackingObject");
+					"either set commandClass or (in a form controller) override formBackingObject");
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating new command of class [" + this.commandClass.getName() + "]");
