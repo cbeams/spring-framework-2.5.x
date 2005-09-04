@@ -558,10 +558,12 @@ public class SampleController extends AbstractController {
         HttpServletRequest request,
         HttpServletResponse response)
     throws Exception {
-        ModelAndView mav = new ModelAndView("foo", new HashMap());
+        ModelAndView mav = new ModelAndView("foo");
+        mav.addObject("message", "Hello World!");
+        return mav;        
     }
 }</programlisting> <programlisting>&lt;bean id="sampleController" class="samples.SampleController"&gt;
-    &lt;property name="cacheSeconds"&gt;&lt;value&gt;120&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="cacheSeconds" value="120"/&gt;
 &lt;/bean&gt;</programlisting> The class above and the declaration in the web
       application context is all you need besides setting up a handler mapping
       (see <xref linkend="mvc-handlermapping" />) to get this very simple
