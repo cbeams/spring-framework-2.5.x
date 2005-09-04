@@ -17,7 +17,9 @@
 package org.springframework.core.io;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import junit.framework.TestCase;
@@ -39,7 +41,7 @@ public class ResourceTests extends TestCase {
 		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
 		assertEquals("testString", content);
 	}
-
+	
 	public void testByteArrayResourceWithDescription() throws IOException {
 		Resource resource = new ByteArrayResource("testString".getBytes(), "my description");
 		assertTrue(resource.exists());
@@ -142,6 +144,50 @@ public class ResourceTests extends TestCase {
 		Resource resource = new ServletContextResource(sc, "dir/");
 		Resource relative = resource.createRelative("subdir");
 		assertEquals(new ServletContextResource(sc, "dir/subdir"), relative);
+	}
+	
+	public void testNonFileResourceExists() throws Exception {
+		Resource resource = new UrlResource("http://www.springframework.org");
+		assertTrue(resource.exists());		
+	}
+	
+	public void testAbstractResourceExceptions() throws Exception {
+		
+		final String name = "test-resource";
+		
+		Resource resource = new AbstractResource() {
+			public String getDescription() {
+				return name;
+			}
+			public InputStream getInputStream() throws IOException {
+				return null;
+			}
+		};
+		
+		try {
+			resource.getURL();
+			fail("FileNotFoundException should have been thrown");
+		} catch (FileNotFoundException e) {
+			assertTrue(e.getMessage().indexOf(name) != -1);
+		}
+		try {
+			resource.getFile();
+			fail("FileNotFoundException should have been thrown");
+		} catch (FileNotFoundException e) {
+			assertTrue(e.getMessage().indexOf(name) != -1);
+		}
+		try {
+			resource.createRelative("/testing");
+			fail("FileNotFoundException should have been thrown");
+		} catch (FileNotFoundException e) {
+			assertTrue(e.getMessage().indexOf(name) != -1);
+		}
+		try {
+			resource.getFilename();
+			fail("IllegalStateException should have been thrown");
+		} catch (IllegalStateException e) {
+			assertTrue(e.getMessage().indexOf(name) != -1);
+		}
 	}
 
 }
