@@ -58,27 +58,44 @@ public class EhCacheSupportTests extends TestCase {
 			cacheManagerFb.destroy();
 		}
 	}
+	
+	public void testEhCacheFactoryBeanWithDefaultCacheManager()
+	throws Exception {
+		doTestEhCacheFactoryBean(false);
+	}
+	
+	public void testEhCacheFactory() 
+	throws Exception {
+		doTestEhCacheFactoryBean(true);
+	}
 
-	public void testEhCacheFactoryBean() throws Exception {
+	public void doTestEhCacheFactoryBean(boolean useCacheManagerFb) throws Exception {
 		Cache cache = null;
-
-		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
-		cacheManagerFb.setConfigLocation(new ClassPathResource("testEhcache.xml", getClass()));
-		cacheManagerFb.afterPropertiesSet();
+		
+		EhCacheManagerFactoryBean cacheManagerFb = null;		
 
 		try {
-			EhCacheFactoryBean cacheFb = new EhCacheFactoryBean();
-			cacheFb.setCacheManager((CacheManager) cacheManagerFb.getObject());
+			EhCacheFactoryBean cacheFb = new EhCacheFactoryBean();			
+			
+			if (useCacheManagerFb) {
+				cacheManagerFb = new EhCacheManagerFactoryBean();
+				cacheManagerFb.setConfigLocation(new ClassPathResource("testEhcache.xml", getClass()));
+				cacheManagerFb.afterPropertiesSet();
+				cacheFb.setCacheManager((CacheManager) cacheManagerFb.getObject());
+			}		
+			
 			cacheFb.setCacheName("myCache1");
 			cacheFb.afterPropertiesSet();
 			cache = (Cache) cacheFb.getObject();
 			assertEquals("myCache1", cache.getName());
 			assertFalse("myCache1 is not eternal", cache.isEternal());
-			assertTrue("myCache1.maxElements == 300", cache.getMaxElementsInMemory() == 300);
+			assertEquals("myCach1.maxElements", 10000, cache.getMaxElementsInMemory());
 
 			// Cache region is not defined. Should create one with default properties.
 			cacheFb = new EhCacheFactoryBean();
-			cacheFb.setCacheManager((CacheManager) cacheManagerFb.getObject());
+			if (useCacheManagerFb) {
+				cacheFb.setCacheManager((CacheManager) cacheManagerFb.getObject());
+			}
 			cacheFb.setCacheName("undefinedCache");
 			cacheFb.afterPropertiesSet();
 			cache = (Cache) cacheFb.getObject();
@@ -93,7 +110,9 @@ public class EhCacheSupportTests extends TestCase {
 
 			// overriding the default properties
 			cacheFb = new EhCacheFactoryBean();
-			cacheFb.setCacheManager((CacheManager) cacheManagerFb.getObject());
+			if (useCacheManagerFb) {
+				cacheFb.setCacheManager((CacheManager) cacheManagerFb.getObject());
+			}
 			cacheFb.setBeanName("undefinedCache2");
 			cacheFb.setMaxElementsInMemory(5);
 			cacheFb.setOverflowToDisk(false);
@@ -114,8 +133,35 @@ public class EhCacheSupportTests extends TestCase {
 			assertTrue("overridden diskExpiryThreadIntervalSeconds is correct", cache.getDiskExpiryThreadIntervalSeconds() == 10);
 		}
 		finally {
-			cacheManagerFb.destroy();
+			if (useCacheManagerFb) {
+				cacheManagerFb.destroy();
+			}
 		}
+	}
+	
+	public void testFactoryBeans() 
+	throws Exception {
+		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
+		
+		assertEquals(CacheManager.class, cacheManagerFb.getObjectType());
+		
+		cacheManagerFb.afterPropertiesSet();
+		
+		assertEquals(CacheManager.getInstance().getClass(), cacheManagerFb.getObjectType());		
+		assertTrue("Singleton property", cacheManagerFb.isSingleton());
+		
+		cacheManagerFb.destroy();
+		
+		EhCacheFactoryBean cacheFb = new EhCacheFactoryBean();
+		cacheFb.setCacheName("myCache");
+		
+		assertEquals(Cache.class, cacheFb.getObjectType());	
+		
+		cacheFb.afterPropertiesSet();
+		
+		assertEquals(CacheManager.getInstance().getCache("myCache").getClass(), cacheFb.getObjectType());		
+		assertTrue("Singleton property", cacheFb.isSingleton());
+		
 	}
 
 }
