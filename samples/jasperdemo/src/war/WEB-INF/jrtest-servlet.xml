@@ -20,12 +20,12 @@
 			 sub-report inside the master report file. -->
 	<bean id="subReport" class="org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView">
 		<property name="url">
-			<value>/WEB-INF/reports/subReportParent.jrxml</value>
+			<value>/WEB-INF/reports/subReportParent.jasper</value>
 		</property>
 		<property name="subReportUrls">
 			<map>
 				<entry key="ProductsSubReport">
-					<value>/WEB-INF/reports/subReportChild.jrxml</value>
+					<value>/WEB-INF/reports/subReportChild.jasper</value>
 				</entry>
 			</map>
 		</property>
@@ -39,7 +39,7 @@
 
 	<bean id="htmlReport" class="org.springframework.web.servlet.view.jasperreports.JasperReportsHtmlView">
 		<property name="url">
-			<value>/WEB-INF/reports/simpleReport.jrxml</value>
+			<value>/WEB-INF/reports/simpleReport.jasper</value>
 		</property>
 		<property name="exporterParameters">
 			<map>
