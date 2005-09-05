@@ -13,12 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ui.jasperreports;
 
-import java.io.OutputStream;
-import java.io.Writer;
-import java.util.Collection;
-import java.util.Map;
+package org.springframework.ui.jasperreports;
 
 import net.sf.jasperreports.engine.JRAbstractExporter;
 import net.sf.jasperreports.engine.JRDataSource;
@@ -31,10 +27,17 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.design.JRCompiler;
+import net.sf.jasperreports.engine.design.JRDefaultCompiler;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
 import net.sf.jasperreports.engine.export.JRHtmlExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
+
+import java.io.OutputStream;
+import java.io.Writer;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Utility methods for working with JasperReports. Provides a set of convenience
@@ -52,6 +55,7 @@ public abstract class JasperReportsUtils {
 	 * <code>java.util.Collection</code> or object array is detected.
 	 * The latter are converted to <code>JRBeanCollectionDataSource</code>
 	 * or <code>JRBeanArrayDataSource</code>, respectively.
+	 *
 	 * @param value the report data value to convert
 	 * @return the JRDataSource
 	 * @throws IllegalArgumentException if the value could not be converted
@@ -68,8 +72,9 @@ public abstract class JasperReportsUtils {
 		}
 		else if (value instanceof Object[]) {
 			return new JRBeanArrayDataSource((Object[]) value);
-		} else if(value instanceof JRDataSourceProvider) {
-			return null;			
+		}
+		else if (value instanceof JRDataSourceProvider) {
+			return null;
 		}
 		else {
 			throw new IllegalArgumentException("Value [" + value + "] cannot be converted to a JRDataSource");
@@ -77,8 +82,8 @@ public abstract class JasperReportsUtils {
 	}
 
 	/**
-	 * @deprecated in favor of the <code>render</render> version with JRExporter parameter
 	 * @see #render(net.sf.jasperreports.engine.JRExporter, net.sf.jasperreports.engine.JasperPrint, java.io.Writer)
+	 * @deprecated in favor of the <code>render</render> version with JRExporter parameter
 	 */
 	public static void render(JRAbstractExporter exporter, JasperPrint print, Writer writer)
 			throws JRException {
@@ -92,6 +97,7 @@ public abstract class JasperReportsUtils {
 	 * to the supplied <code>Writer</code>.
 	 * <p>Make sure that the <code>JRAbstractExporter</code> implementation
 	 * you supply is capable of writing to a <code>Writer</code>.
+	 *
 	 * @param exporter the <code>JRAbstractExporter</code> to use to render the report
 	 * @param print the <code>JasperPrint</code> instance to render
 	 * @param writer the <code>Writer</code> to write the result to
@@ -106,8 +112,8 @@ public abstract class JasperReportsUtils {
 	}
 
 	/**
-	 * @deprecated in favor of the <code>render</render> version with JRExporter parameter
 	 * @see #render(net.sf.jasperreports.engine.JRExporter, net.sf.jasperreports.engine.JasperPrint, java.io.OutputStream)
+	 * @deprecated in favor of the <code>render</render> version with JRExporter parameter
 	 */
 	public static void render(JRAbstractExporter exporter, JasperPrint print, OutputStream outputStream)
 			throws JRException {
@@ -121,6 +127,7 @@ public abstract class JasperReportsUtils {
 	 * to the supplied <code>OutputStream</code>.
 	 * <p>Make sure that the <code>JRAbstractExporter</code> implementation you
 	 * supply is capable of writing to a <code>OutputStream</code>.
+	 *
 	 * @param exporter the <code>JRAbstractExporter</code> to use to render the report
 	 * @param print the <code>JasperPrint</code> instance to render
 	 * @param outputStream the <code>OutputStream</code> to write the result to
@@ -137,6 +144,7 @@ public abstract class JasperReportsUtils {
 	/**
 	 * Render a report in CSV format using the supplied report data.
 	 * Writes the results to the supplied <code>Writer</code>.
+	 *
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param writer the <code>Writer</code> to write the rendered report to
@@ -156,6 +164,7 @@ public abstract class JasperReportsUtils {
 	/**
 	 * Render a report in HTML format using the supplied report data.
 	 * Writes the results to the supplied <code>Writer</code>.
+	 *
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param writer the <code>Writer</code> to write the rendered report to
@@ -175,6 +184,7 @@ public abstract class JasperReportsUtils {
 	/**
 	 * Render a report in PDF format using the supplied report data.
 	 * Writes the results to the supplied <code>OutputStream</code>.
+	 *
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param stream the <code>OutputStream</code> to write the rendered report to
@@ -194,6 +204,7 @@ public abstract class JasperReportsUtils {
 	/**
 	 * Render a report in PDF format using the supplied report data.
 	 * Writes the results to the supplied <code>OutputStream</code>.
+	 *
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param stream the <code>OutputStream</code> to write the rendered report to
@@ -208,6 +219,10 @@ public abstract class JasperReportsUtils {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		render((JRExporter) new JRXlsExporter(), print, stream);
+	}
+
+	public static JRCompiler getDefaultCompiler() {
+		return JRDefaultCompiler.getInstance();
 	}
 
 }

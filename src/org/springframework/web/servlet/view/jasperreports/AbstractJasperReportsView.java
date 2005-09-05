@@ -169,7 +169,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Holds the JRCompiler implementation to use for compiling reports on-the-fly.
 	 */
-	private JRCompiler reportCompiler = new JRDefaultCompiler();
+	private JRCompiler reportCompiler = JasperReportsUtils.getDefaultCompiler();
 
 	/**
 	 * The <code>JasperReport</code> that is used to render the view.
