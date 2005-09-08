@@ -16,6 +16,11 @@
 
 package org.springframework.ui.jasperreports;
 
+import java.io.OutputStream;
+import java.io.Writer;
+import java.util.Collection;
+import java.util.Map;
+
 import net.sf.jasperreports.engine.JRAbstractExporter;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRDataSourceProvider;
@@ -27,17 +32,10 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import net.sf.jasperreports.engine.design.JRCompiler;
-import net.sf.jasperreports.engine.design.JRDefaultCompiler;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
 import net.sf.jasperreports.engine.export.JRHtmlExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
-
-import java.io.OutputStream;
-import java.io.Writer;
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * Utility methods for working with JasperReports. Provides a set of convenience
@@ -219,10 +217,6 @@ public abstract class JasperReportsUtils {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		render((JRExporter) new JRXlsExporter(), print, stream);
-	}
-
-	public static JRCompiler getDefaultCompiler() {
-		return JRDefaultCompiler.getInstance();
 	}
 
 }

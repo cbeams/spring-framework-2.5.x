@@ -42,10 +42,12 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.design.JRCompiler;
+import net.sf.jasperreports.engine.design.JRDefaultCompiler;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.core.io.Resource;
@@ -125,6 +127,21 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	protected static final String CONTENT_DISPOSITION_INLINE = "inline";
 
+	private static JRCompiler defaultReportCompiler;
+
+
+	static {
+		// Check whether JR 1.0.1 JRDefaultCompiler.getInstance() method is available.
+		try {
+			JRDefaultCompiler.class.getMethod("getInstance", new Class[0]);
+			defaultReportCompiler = JRDefaultCompiler.getInstance();
+		}
+		catch (NoSuchMethodException ex) {
+			// Fall back to public JRDefaultCompiler no-arg constructor (<= JR 1.0.0)
+			defaultReportCompiler = null;
+		}
+	}
+
 
 	/**
 	 * A String key used to lookup the <code>JRDataSource</code> in the model.
@@ -168,7 +185,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Holds the JRCompiler implementation to use for compiling reports on-the-fly.
 	 */
-	private JRCompiler reportCompiler = JasperReportsUtils.getDefaultCompiler();
+	private JRCompiler reportCompiler = defaultReportCompiler;
 
 	/**
 	 * The <code>JasperReport</code> that is used to render the view.
@@ -306,6 +323,11 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * Return the JRCompiler instance to use for compiling ".jrxml" report files.
 	 */
 	protected JRCompiler getReportCompiler() {
+		if (this.reportCompiler == null) {
+			// No JR 1.0.1 JRDefaultCompiler.getInstance() method available -
+			// assuming public JRDefaultCompiler no-arg constructor (<= JR 1.0.0)
+			this.reportCompiler = (JRCompiler) BeanUtils.instantiateClass(JRDefaultCompiler.class);
+		}
 		return reportCompiler;
 	}
 
@@ -647,7 +669,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	protected JRDataSource convertReportData(Object value) throws IllegalArgumentException {
 		if (value instanceof JRDataSourceProvider) {
 			try {
-				return ((JRDataSourceProvider) value).create(report);
+				return ((JRDataSourceProvider) value).create(this.report);
 			}
 			catch (JRException ex) {
 				throw new IllegalArgumentException("Supplied JRDataSourceProvider is invalid: " + ex);
