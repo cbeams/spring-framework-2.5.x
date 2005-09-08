@@ -33,6 +33,7 @@ import java.util.TreeSet;
 import junit.framework.TestCase;
 import org.hibernate.FlushMode;
 
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
 import org.springframework.util.StringUtils;
 
@@ -139,6 +140,19 @@ public class BeanWrapperTests extends TestCase {
 		assertFalse(bw.isWritableProperty("array[key1]"));
 	}
 
+	public void testTypeDeterminationForIndexedProperty() {
+		BeanWrapper bw = new BeanWrapperImpl(IndexedTestBean.class);
+		assertEquals(null, bw.getPropertyType("map[key0]"));
+
+		bw = new BeanWrapperImpl(IndexedTestBean.class);
+		bw.setPropertyValue("map[key0]", "my String");
+		assertEquals(String.class, bw.getPropertyType("map[key0]"));
+
+		bw = new BeanWrapperImpl(IndexedTestBean.class);
+		bw.registerCustomEditor(String.class, "map[key0]", new StringTrimmerEditor(false));
+		assertEquals(String.class, bw.getPropertyType("map[key0]"));
+	}
+
 	public void testSetWrappedInstanceOfDifferentClass() {
 		ThrowsException tex = new ThrowsException();
 		BeanWrapper bw = new BeanWrapperImpl(tex);
@@ -188,6 +202,7 @@ public class BeanWrapperTests extends TestCase {
 			MutablePropertyValues pvs = new MutablePropertyValues();
 			pvs.addPropertyValue(new PropertyValue("age", new Integer(newAge)));
 			pvs.addPropertyValue(new PropertyValue("name", newName));
+
 			pvs.addPropertyValue(new PropertyValue("touchy", newTouchy));
 			bw.setPropertyValues(pvs);
 			assertTrue("Validly set property must stick", t.getName().equals(newName));

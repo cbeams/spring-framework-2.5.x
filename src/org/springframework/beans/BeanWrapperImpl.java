@@ -1153,17 +1153,19 @@ public class BeanWrapperImpl implements BeanWrapper {
 				}
 				// Check to see if there is a custom editor,
 				// which might give an indication on the desired target type.
-				CustomEditorHolder editorHolder = (CustomEditorHolder) this.customEditors.get(propertyName);
-				if (editorHolder == null) {
-					List strippedPaths = new LinkedList();
-					addStrippedPropertyPaths(strippedPaths, "", propertyName);
-					for (Iterator it = strippedPaths.iterator(); it.hasNext() && editorHolder == null;) {
-						String strippedName = (String) it.next();
-						editorHolder = (CustomEditorHolder) this.customEditors.get(strippedName);
+				if (this.customEditors != null) {
+					CustomEditorHolder editorHolder = (CustomEditorHolder) this.customEditors.get(propertyName);
+					if (editorHolder == null) {
+						List strippedPaths = new LinkedList();
+						addStrippedPropertyPaths(strippedPaths, "", propertyName);
+						for (Iterator it = strippedPaths.iterator(); it.hasNext() && editorHolder == null;) {
+							String strippedName = (String) it.next();
+							editorHolder = (CustomEditorHolder) this.customEditors.get(strippedName);
+						}
 					}
-				}
-				if (editorHolder != null) {
-					return editorHolder.getRegisteredType();
+					if (editorHolder != null) {
+						return editorHolder.getRegisteredType();
+					}
 				}
 			}
 		}
