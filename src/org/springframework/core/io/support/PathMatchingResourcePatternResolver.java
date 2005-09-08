@@ -39,6 +39,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -83,6 +84,18 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.core.io.ResourceLoader#getResource
  */
 public class PathMatchingResourcePatternResolver implements ResourcePatternResolver {
+
+	/** URL protocol for an entry from a jar file: "jar" */
+	private static final String URL_PROTOCOL_JAR = "jar";
+
+	/** URL protocol for an entry from a zip file: "zip" */
+	private static final String URL_PROTOCOL_ZIP = "zip";
+
+	/** URL prefix for referencing an entry from a jar file: "jar:" */
+	private static final String JAR_URL_PREFIX = "jar:";
+
+	private static final String JAR_URL_SEPARATOR = "!/";
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -203,6 +216,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 	}
 
+
 	/**
 	 * Find all class location resources with the given location via the ClassLoader.
 	 * @param location the absolute path within the classpath
@@ -232,7 +246,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	/**
 	 * Find all resources that match the given location pattern via the
-	 * Ant-style PathMatcher utility. Supports resources in jar files
+	 * Ant-style PathMatcher. Supports resources in jar files and zip files
 	 * and in the file system.
 	 * @param locationPattern the location pattern to match
 	 * @return the result as Resource array
@@ -248,7 +262,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		Set result = new HashSet();
 		for (int i = 0; i < rootDirResources.length; i++) {
 			Resource rootDirResource = rootDirResources[i];
-			if ("jar".equals(rootDirResource.getURL().getProtocol())) {
+			if (isJarResource(rootDirResource)) {
 				result.addAll(doFindPathMatchingJarResources(rootDirResource, subPattern));
 			}
 			else {
@@ -286,8 +300,20 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	/**
+	 * Return whether the given resource handle indicates a jar resource
+	 * that the <code>doFindPathMatchingJarResources</code> method can handle.
+	 * @param resource the resource handle to check
+	 * (usually the root directory to start path matching from)
+	 * @see #doFindPathMatchingJarResources
+	 */
+	protected boolean isJarResource(Resource resource) throws IOException {
+		String protocol = resource.getURL().getProtocol();
+		return (URL_PROTOCOL_JAR.equals(protocol) || URL_PROTOCOL_ZIP.equals(protocol));
+	}
+
+	/**
 	 * Find all resources in jar files that match the given location pattern
-	 * via the Ant-style PathMatcher utility.
+	 * via the Ant-style PathMatcher.
 	 * @param rootDirResource the root directory as Resource
 	 * @param subPattern the sub pattern to match (below the root directory)
 	 * @return the Set of matching Resource instances
@@ -297,30 +323,49 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 */
 	protected Set doFindPathMatchingJarResources(Resource rootDirResource, String subPattern) throws IOException {
 		URLConnection con = rootDirResource.getURL().openConnection();
-		if (!(con instanceof JarURLConnection)) {
-			throw new IOException("Cannot perform jar file search for [" + rootDirResource +
-					"]: connection [" + con + "] is not an instance of [java.net.JarURLConnection]");
+		JarFile jarFile = null;
+		String jarFileUrl = null;
+		String rootEntryPath = null;
+
+		if (con instanceof JarURLConnection) {
+			// Should usually be the case for traditional JAR files.
+			JarURLConnection jarCon = (JarURLConnection) con;
+			jarFile = jarCon.getJarFile();
+			jarFileUrl = jarCon.getJarFileURL().toExternalForm();
+			rootEntryPath = jarCon.getJarEntry().getName();
 		}
-		JarURLConnection jarCon = (JarURLConnection) con;
-		JarFile jarFile = jarCon.getJarFile();
-		URL jarFileUrl = jarCon.getJarFileURL();
+		else {
+			// No JarURLConnection -> need to resort to URL file parsing.
+			// We'll assume URLs of the format "jar:path!/entry", with the protocol
+			// being arbitrary as long as following the entry format.
+			// We'll also handle paths with and without leading "file:" prefix.
+			String urlFile = rootDirResource.getURL().getFile();
+			int separatorIndex = urlFile.indexOf(JAR_URL_SEPARATOR);
+			jarFileUrl = urlFile.substring(0, separatorIndex);
+			if (jarFileUrl.startsWith(ResourceUtils.FILE_URL_PREFIX)) {
+				jarFileUrl = jarFileUrl.substring(ResourceUtils.FILE_URL_PREFIX.length());
+			}
+			jarFile = new JarFile(jarFileUrl);
+			jarFileUrl = ResourceUtils.FILE_URL_PREFIX + jarFileUrl;
+			rootEntryPath = urlFile.substring(separatorIndex + JAR_URL_SEPARATOR.length());
+		}
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for matching resources in jar file [" + jarFileUrl + "]");
 		}
-		String rootEntryPath = jarCon.getJarEntry().getName();
 		if (rootEntryPath.endsWith("/")) {
 			// Root entry path must not end with slash to allow for proper matching.
 			// The Sun JRE does not return a slash here, but BEA JRockit does.
 			rootEntryPath = rootEntryPath.substring(0, rootEntryPath.length() - 1);
 		}
-		String jarFileUrlPrefix = "jar:" + jarFileUrl.toExternalForm() + "!/";
+		String jarFileUrlPrefix = JAR_URL_PREFIX + jarFileUrl + JAR_URL_SEPARATOR;
 		Set result = new HashSet();
 		for (Enumeration entries = jarFile.entries(); entries.hasMoreElements();) {
 			JarEntry entry = (JarEntry) entries.nextElement();
 			String entryPath = entry.getName();
 			if (entryPath.startsWith(rootEntryPath) &&
 					getPathMatcher().match(subPattern, entryPath.substring(rootEntryPath.length()))) {
-				result.add(new UrlResource(new URL(jarFileUrlPrefix + entryPath)));
+				result.add(new UrlResource(jarFileUrlPrefix + entryPath));
 			}
 		}
 		return result;
@@ -328,7 +373,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	/**
 	 * Find all resources in the file system that match the given location pattern
-	 * via the Ant-style PathMatcher utility.
+	 * via the Ant-style PathMatcher.
 	 * @param rootDirResource the root directory as Resource
 	 * @param subPattern the sub pattern to match (below the root directory)
 	 * @return the Set of matching Resource instances
