@@ -108,9 +108,19 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 			boolean dirDepthNotFixed = (fullPattern.indexOf("**") != -1);
 			for (Iterator it = candidates.iterator(); it.hasNext();) {
 				String currPath = (String) it.next();
+				if (!currPath.startsWith(dir)) {
+					// Returned resource path does not start with relative directory:
+					// assuming absolute path returned -> strip absolute path.
+					int dirIndex = currPath.indexOf(dir);
+					if (dirIndex != -1) {
+						currPath = currPath.substring(dirIndex);
+					}
+				}
 				if (currPath.endsWith("/") &&
 						(dirDepthNotFixed ||
 						StringUtils.countOccurrencesOf(currPath, "/") < StringUtils.countOccurrencesOf(fullPattern, "/"))) {
+					// Search subdirectories recursively: ServletContext.getResourcePaths
+					// only returns entries for one directory level.
 					doRetrieveMatchingServletContextResources(servletContext, fullPattern, currPath, result);
 				}
 				if (getPathMatcher().match(fullPattern, currPath)) {

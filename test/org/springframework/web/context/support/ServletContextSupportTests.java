@@ -16,7 +16,9 @@
 
 package org.springframework.web.context.support;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +36,7 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockServletContext;
 
 /**
@@ -335,6 +338,59 @@ public class ServletContextSupportTests extends TestCase {
 		assertEquals(98, inner2.getAge());
 		assertEquals("namemyvarmyvar${", inner2.getName());
 		assertEquals(System.getProperty("os.name"), inner2.getTouchy());
+	}
+
+	public void testServletContextResourcePatternResolver() throws IOException {
+		final Set paths = new HashSet();
+		paths.add("/WEB-INF/context1.xml");
+		paths.add("/WEB-INF/context2.xml");
+
+		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context") {
+			public Set getResourcePaths(String path) {
+				if ("/WEB-INF".equals(path)) {
+					return paths;
+				}
+				return null;
+			}
+		};
+
+		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
+
+		Resource[] found = rpr.getResources("/WEB-INF/*.xml");
+		Set foundPaths = new HashSet();
+		for (int i = 0; i < found.length; i++) {
+			foundPaths.add(((ServletContextResource) found[i]).getPath());
+		}
+		assertEquals(2, foundPaths.size());
+		assertTrue(foundPaths.contains("/WEB-INF/context1.xml"));
+		assertTrue(foundPaths.contains("/WEB-INF/context2.xml"));
+	}
+
+	public void testServletContextResourcePatternResolverWithAbsolutePaths() throws IOException {
+		final Set paths = new HashSet();
+		paths.add("C:/webroot/WEB-INF/context1.xml");
+		paths.add("C:/webroot/WEB-INF/context2.xml");
+		paths.add("C:/webroot/someOtherDirThatDoesntContainPath");
+
+		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context") {
+			public Set getResourcePaths(String path) {
+				if ("/WEB-INF".equals(path)) {
+					return paths;
+				}
+				return null;
+			}
+		};
+
+		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
+
+		Resource[] found = rpr.getResources("/WEB-INF/*.xml");
+		Set foundPaths = new HashSet();
+		for (int i = 0; i < found.length; i++) {
+			foundPaths.add(((ServletContextResource) found[i]).getPath());
+		}
+		assertEquals(2, foundPaths.size());
+		assertTrue(foundPaths.contains("/WEB-INF/context1.xml"));
+		assertTrue(foundPaths.contains("/WEB-INF/context2.xml"));
 	}
 
 }
