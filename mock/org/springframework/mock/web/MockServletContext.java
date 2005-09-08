@@ -153,7 +153,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public int getMinorVersion() {
-		return 3;
+		return 4;
 	}
 
 	public String getMimeType(String filePath) {
