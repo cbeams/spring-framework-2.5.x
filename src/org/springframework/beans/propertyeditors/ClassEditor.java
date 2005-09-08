@@ -42,7 +42,7 @@ public class ClassEditor extends PropertyEditorSupport {
 				setValue(ClassUtils.forName(text.trim()));
 			}
 			catch (ClassNotFoundException ex) {
-				throw new IllegalArgumentException("Invalid class name: " + ex.getMessage());
+				throw new IllegalArgumentException("Class not found: " + ex.getMessage());
 			}
 		}
 		else {
