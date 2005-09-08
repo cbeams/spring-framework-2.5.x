@@ -503,6 +503,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
 		// Fill and render the report.
 		JasperPrint filledReport = fillReport(model);
+		postProcessReport(filledReport, model);
 		renderReport(filledReport, model, response);
 	}
 
@@ -682,13 +683,24 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
 
 	/**
+	 * Template method to be overridden for custom post-processing of the
+	 * populated report. Invoked after filling but before rendering.
+	 * <p>This implementation is empty.
+	 * @param populatedReport the populated <code>JasperPrint</code>
+	 * @param model the map containing report parameters
+	 * @throws Exception if post-processing failed
+	 */
+	protected void postProcessReport(JasperPrint populatedReport, Map model) throws Exception {
+	}
+
+	/**
 	 * Subclasses should implement this method to perform the actual rendering process.
 	 * @param populatedReport the populated <code>JasperPrint</code> to render
-	 * @param parameters the map containing report parameters
+	 * @param model the map containing report parameters
 	 * @param response the HTTP response the report should be rendered to
 	 * @throws Exception if rendering failed
 	 */
-	protected abstract void renderReport(JasperPrint populatedReport, Map parameters, HttpServletResponse response)
+	protected abstract void renderReport(JasperPrint populatedReport, Map model, HttpServletResponse response)
 			throws Exception;
 
 }
