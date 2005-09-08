@@ -90,7 +90,7 @@ public class FileSystemResource extends AbstractResource {
 	 * @see java.io.File#getAbsolutePath()
 	 */
 	public URL getURL() throws IOException {
-		return new URL(ResourceUtils.URL_PROTOCOL_FILE + ":" + this.file.getAbsolutePath());
+		return new URL(ResourceUtils.FILE_URL_PREFIX + this.file.getAbsolutePath());
 	}
 
 	/**
