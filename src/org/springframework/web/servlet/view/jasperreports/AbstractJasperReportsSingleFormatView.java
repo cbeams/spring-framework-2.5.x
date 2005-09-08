@@ -22,9 +22,9 @@ import java.util.Map;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.jasperreports.engine.JRAbstractExporter;
-import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JRExporter;
 import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JasperPrint;
 
 import org.springframework.ui.jasperreports.JasperReportsUtils;
 
@@ -54,12 +54,11 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 * Perform rendering for a single Jasper Reports exporter,
 	 * i.e. a pre-defined output format.
 	 */
-	protected void renderReport(
-			JasperPrint populatedReport, Map parameters, HttpServletResponse response)
+	protected void renderReport(JasperPrint populatedReport, Map model, HttpServletResponse response)
 			throws Exception {
 
 		// Prepare report for rendering.
-		JRAbstractExporter exporter = createExporter();
+		JRExporter exporter = createExporter();
 
 		if (getConvertedExporterParameters() != null) {
 			exporter.setParameters(getConvertedExporterParameters());
@@ -98,7 +97,7 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 * output will be written as text or as binary content.
 	 * @see #useWriter
 	 */
-	protected abstract JRAbstractExporter createExporter();
+	protected abstract JRExporter createExporter();
 
 	/**
 	 * Return whether to use a <code>java.io.Writer</code> to write text content

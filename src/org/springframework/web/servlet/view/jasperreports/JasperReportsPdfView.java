@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.view.jasperreports;
 
-import net.sf.jasperreports.engine.JRAbstractExporter;
+import net.sf.jasperreports.engine.JRExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 
 /**
@@ -33,7 +33,7 @@ public class JasperReportsPdfView extends AbstractJasperReportsSingleFormatView 
 		setContentType("application/pdf");
 	}
 
-	protected JRAbstractExporter createExporter() {
+	protected JRExporter createExporter() {
 		return new JRPdfExporter();
 	}
 
