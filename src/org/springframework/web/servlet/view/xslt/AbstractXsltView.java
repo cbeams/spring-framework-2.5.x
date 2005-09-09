@@ -243,14 +243,14 @@ public abstract class AbstractXsltView extends AbstractView {
 		}
 
 		/*
-		 * the preferred method has subclasses creating a Source rather than a Node for
-		 * transformation.  Support for Nodes is retained for compatibility
+		 * The preferred method has subclasses creating a Source rather than a Node for
+		 * transformation. Support for Nodes is retained for backwards compatibility.
 		 */
 		Source source = null;
 		Node dom = null;
 		String docRoot = null;
 
-		// value of a single element in the map, if there is one
+		// Value of a single element in the map, if there is one.
 		Object singleModel = null;
 
 		if (model.size() == 1) {
@@ -261,7 +261,7 @@ public abstract class AbstractXsltView extends AbstractView {
 			singleModel = model.get(docRoot);
 		}
 
-		// handle special case when we have a single node
+		// Handle special case when we have a single node.
 		if (singleModel != null && (singleModel instanceof Node || singleModel instanceof Source)) {
 			// Don't domify if the model is already an XML node/source.
 			// We don't need to worry about model name, either:
@@ -272,10 +272,12 @@ public abstract class AbstractXsltView extends AbstractView {
 		else {
 			// docRoot local variable takes precedence
 			dom = createDomNode(model, (docRoot == null) ? this.root : docRoot, request, response);
-			if (dom != null)
+			if (dom != null) {
 				source = new DOMSource(dom);
-			else
+			}
+			else {
 				source = createXsltSource(model, (docRoot == null) ? this.root : docRoot, request, response);
+			}
 		}
 
 		doTransform(model, source, request, response);
@@ -419,10 +421,15 @@ public abstract class AbstractXsltView extends AbstractView {
 					this.templates.newTransformer() : // we have a stylesheet
 					this.transformerFactory.newTransformer(); // just a copy
 
-			// apply any subclass supplied parameters to the transformer
+			// Explicitly apply URIResolver to every created Transformer.
+			if (this.uriResolver != null) {
+				trans.setURIResolver(this.uriResolver);
+			}
+
+			// Apply any subclass supplied parameters to the transformer.
 			if (parameters != null) {
-				for (Iterator iter = parameters.entrySet().iterator(); iter.hasNext();) {
-					Map.Entry entry = (Map.Entry) iter.next();
+				for (Iterator it = parameters.entrySet().iterator(); it.hasNext();) {
+					Map.Entry entry = (Map.Entry) it.next();
 					trans.setParameter(entry.getKey().toString(), entry.getValue());
 				}
 				if (logger.isDebugEnabled()) {
@@ -435,7 +442,7 @@ public abstract class AbstractXsltView extends AbstractView {
 				trans.setOutputProperty(OutputKeys.INDENT, "yes");
 			}
 
-			// Xalan-specific, but won't do any harm in other XSLT engines
+			// Xalan-specific, but won't do any harm in other XSLT engines.
 			trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 
 			trans.transform(source, result);
