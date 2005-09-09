@@ -95,8 +95,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.0 support
 
-* itext/itext-1.1.4.jar
-- iText PDF 1.1.4 (http://www.lowagie.com/itext)
+* itext/itext-1.3.jar
+- iText PDF 1.3 (http://www.lowagie.com/itext)
 - required for building the framework
 - required at runtime when using Spring's AbstractPdfView
 
@@ -228,8 +228,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's JamonPerformanceMonitorInterceptor
 
-* jasperreports/jasperreports-1.0.0.jar
-- JasperReports 1.0.0 (http://jasperreports.sourceforge.net)
+* jasperreports/jasperreports-1.0.2.jar
+- JasperReports 1.0.2 (http://jasperreports.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
@@ -237,6 +237,11 @@ distribution/website before using any of them in your own applications.
 - JDO API 2.0 beta (http://www.jpox.org, "snapshot-4")
 - required for building the framework
 - required at runtime when using Spring's JDO support
+
+* jexcelapi/jxl.jar
+- JExcelApi 2.5.7 (http://jexcelapi.sourceforge.net)
+- required for building the framework
+- required at runtime when using Spring's AbstractJExcelView
 
 * jmx/jmxri.jar
 - JMX 1.2.1 reference implementation
@@ -271,11 +276,6 @@ distribution/website before using any of them in your own applications.
 * junit/junit.jar
 - JUnit 3.8.1 (http://www.junit.org)
 - required for building the test suite
-
-* jexcelapi/jxl.jar
-- JExcelApi 2.5.7 (http://jexcelapi.sourceforge.net)
-- required for building the framework
-- required at runtime when using Spring's AbstractJExcelView
 
 * log4j/log4j-1.2.9.jar
 - Log4J 1.2.9 (http://logging.apache.org/log4j)
