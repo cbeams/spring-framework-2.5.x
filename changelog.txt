@@ -12,7 +12,9 @@ Package org.springframework.beans
 * AbstractBeanFactory logs singleton creation at debug level rather than info level
 
 Package org.springframework.core
+* refactored AbstractPathResolvingPropertyEditor into SystemPropertyUtils.resolvePlaceholders(text) helper method
 * refined PathMatchingResourcePatternResolver's jar entry matching to handle the zip protocol as well
+* added LocalizedResourceHelper class, factored out from AbstractExcelView and AbstractJExcelView
 
 Package org.springframework.context
 * fixed StaticMessageSource to use locale-specific MessageFormat for programmatically added messages
@@ -22,6 +24,7 @@ Package org.springframework.jms
 * merged all of JmsTemplate/JmsTemplate102's "createConsumer" template methods into one
 
 Package org.springframework.util
+* Log4jConfigurer resolves ${...} placeholders in Log4J config locations as system properties
 * factored out ConcurrencyThrottleSupport base class from ConcurrencyThrottleInterceptor
 
 Package org.springframework.web
@@ -33,6 +36,7 @@ Package org.springframework.web
 * AbstractJasperReportsView supports JasperReports 1.0.1+ (which introduces an incompatible JR API change)
 * added protected "postProcessReport" hook to AbstractJasperReportsView, for modifying the populated JasperPrint object
 * AbstractJasperReportsSingleFormatView's "createExporter()" method returns JRExporter instead of JRAbstractExporter
+* added WebApplicationContextVariableResolver for JSF, exposing the root context as JSF variable "webApplicationContext"
 
 
 Changes in version 1.2.4 (26.8.2005)
