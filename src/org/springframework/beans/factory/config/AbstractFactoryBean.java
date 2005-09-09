@@ -19,6 +19,7 @@ package org.springframework.beans.factory.config;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -38,7 +39,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @see #setSingleton(boolean)
  * @see #createInstance()
  */
-public abstract class AbstractFactoryBean implements FactoryBean, InitializingBean {
+public abstract class AbstractFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -47,23 +48,25 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 
 	private Object singletonInstance;
 
+
 	/**
 	 * Set if a singleton should be created, or a new object
 	 * on each request else. Default is true (a singleton).
 	 */
-	public final void setSingleton(boolean singleton) {
+	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;
 	}
 
-	public final boolean isSingleton() {
+	public boolean isSingleton() {
 		return singleton;
 	}
 
-	public final void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() throws Exception {
 		if (this.singleton) {
 			this.singletonInstance = createInstance();
 		}
 	}
+
 
 	public final Object getObject() throws Exception {
 		if (this.singleton) {
@@ -73,6 +76,13 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 			return createInstance();
 		}
 	}
+
+	public void destroy() throws Exception {
+		if (this.singleton) {
+			destroyInstance(this.singletonInstance);
+		}
+	}
+
 
 	/**
 	 * Template method that subclasses must override to construct
@@ -84,5 +94,17 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 	 * @see #getObject()
 	 */
 	protected abstract Object createInstance() throws Exception;
+
+	/**
+	 * Callback for destroying a singleton instance. Subclasses may
+	 * override this to destroy the previously created instance.
+	 * <p>The default implementation is empty.
+	 * @param instance the singleton instance, as returned by
+	 * <code>createInstance()</code>
+	 * @throws Exception in case of shutdown errors
+	 * @see #createInstance()
+	 */
+	protected void destroyInstance(Object instance) throws Exception {
+	}
 
 }
