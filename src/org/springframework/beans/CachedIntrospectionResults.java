@@ -36,20 +36,21 @@ import org.apache.commons.logging.LogFactory;
  * Class to cache PropertyDescriptor information for a Java class.
  * Package-visible; not for use by application code.
  *
- * <p>Necessary as Introspector.getBeanInfo() in JDK 1.3 will return a new
- * deep copy of the BeanInfo every time we ask for it. We take the opportunity
- * to hash property descriptors by method name for fast lookup. Furthermore,
+ * <p>Necessary as <code>Introspector.getBeanInfo()</code> in JDK 1.3 will return a
+ * new deep copy of the BeanInfo every time we ask for it. We take the opportunity
+ * to cache property descriptors by method name for fast lookup. Furthermore,
  * we do our own caching of descriptors here, rather than rely on the JDK's
  * system-wide BeanInfo cache (to avoid leaks on class loader shutdown).
  *
  * <p>Information is cached statically, so we don't need to create new
- * objects of this class for every JavaBean we manipulate. Thus this class
+ * objects of this class for every JavaBean we manipulate. Hence, this class
  * implements the factory design pattern, using a private constructor
  * and a static <code>forClass</code> method to obtain instances.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 05 May 2001
+ * @see #forClass(Class)
  */
 final class CachedIntrospectionResults {
 
@@ -58,9 +59,10 @@ final class CachedIntrospectionResults {
 	/**
 	 * Map keyed by class containing CachedIntrospectionResults.
 	 * Needs to be a WeakHashMap with WeakReferences as values to allow
-	 * for proper garbage collection in case of multiple classloaders.
+	 * for proper garbage collection in case of multiple class loaders.
 	 */
 	private static final Map classCache = Collections.synchronizedMap(new WeakHashMap());
+
 
 	/**
 	 * We might use this from the EJB tier, so we don't want to use synchronization.
@@ -128,6 +130,7 @@ final class CachedIntrospectionResults {
 
 	/** Property descriptors keyed by property name */
 	private final Map propertyDescriptorCache;
+
 
 	/**
 	 * Create new CachedIntrospectionResults instance fot the given class.
