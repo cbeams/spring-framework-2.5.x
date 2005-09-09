@@ -71,10 +71,20 @@ import org.springframework.web.servlet.ModelAndView;
  *      custom editors for certain fields (often properties of non-primitive
  *      or non-String types) of the command class. This will render appropriate
  *      Strings for those property values, e.g. locale-specific date strings.</li>
- *  <li>The {@link org.springframework.web.bind.ServletRequestDataBinder ServletRequestDataBinder}
+ *  <li><em>Only if <code>bindOnNewForm</code> is set to <code>true</code></em>, then
+ *      {@link org.springframework.web.bind.ServletRequestDataBinder ServletRequestDataBinder}
  *      gets applied to populate the new form object with initial request parameters and the
- *      {@link #onBindOnNewForm(HttpServletRequest, Object, BindException)} callback method is invoked.
- *      (<i>only if <code>bindOnNewForm</code> is set to <code>true</code></i>)</li>
+ *      {@link #onBindOnNewForm(HttpServletRequest, Object, BindException)} callback method is
+ *      called. <em>Note:</em> any defined Validators are not applied at this point, to allow
+ *      partial binding. However be aware that any Binder customizations applied via 
+ *      initBinder() (such as
+ *      {@link org.springframework.validation.DataBinder#setRequiredFields(String[])} will
+ *      still apply. As such, if using bindOnNewForm=true and initBinder() customizations are
+ *      used to validate fields instead of using Validators, in the case that only some fields
+ *      will be populated for the new form, there will potentially be some bind errors for
+ *      missing fields in the errors object. Any view (JSP, etc.) that displays binder errors
+ *      needs to be intelligent and for this case take into account whether it is displaying the
+ *      initial form view or subsequent post results, skipping error display for the former.</li>
  *  <li>Call to {@link #showForm(HttpServletRequest, HttpServletResponse, BindException) showForm()}
  *      to return a View that should be rendered (typically the view that renders
  *      the form). This method has to be implemented in subclasses.</li>
@@ -152,6 +162,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Juergen Hoeller
  * @author Alef Arendsen
  * @author Rob Harrop
+ * @author Colin Sampaleanu
  * @see #showForm(HttpServletRequest, HttpServletResponse, BindException)
  * @see #processFormSubmission
  * @see SimpleFormController
