@@ -52,6 +52,7 @@ public abstract class NestedCheckedException extends Exception {
 	/** Root cause of this nested exception */
 	private Throwable cause;
 
+
 	/**
 	 * Construct a <code>NestedCheckedException</code> with the specified detail message.
 	 * @param msg the detail message
@@ -72,9 +73,13 @@ public abstract class NestedCheckedException extends Exception {
 	}
 
 	/**
-	 * Return the nested cause, or null if none.
+	 * Return the nested cause, or <code>null</code> if none.
 	 */
 	public Throwable getCause() {
+		// Even if you cannot set the cause of this exception other than through
+		// the constructor, we check for the cause being "this" here, as the cause
+		// could still be set to "this" via reflection: for example, by a remoting
+		// deserializer like Hessian's.
 		return (this.cause == this ? null : this.cause);
 	}
 
@@ -83,16 +88,12 @@ public abstract class NestedCheckedException extends Exception {
 	 * if there is one.
 	 */
 	public String getMessage() {
-		// Even if you cannot set the cause of this exception other than through
-		// the constructor, we check for the cause being "this" here, as the cause
-		// could still be set to "this" via reflection: for example, by a remoting
-		// deserializer like Hessian's.
-		if (this.cause == null || this.cause == this) {
+		if (getCause() == null) {
 			return super.getMessage();
 		}
 		else {
-			return super.getMessage() + "; nested exception is " + this.cause.getClass().getName() +
-					": " + this.cause.getMessage();
+			return super.getMessage() + "; nested exception is " + getCause().getClass().getName() +
+					": " + getCause().getMessage();
 		}
 	}
 
@@ -101,12 +102,12 @@ public abstract class NestedCheckedException extends Exception {
 	 * @param ps the print stream
 	 */
 	public void printStackTrace(PrintStream ps) {
-		if (this.cause == null || this.cause == this) {
+		if (getCause() == null) {
 			super.printStackTrace(ps);
 		}
 		else {
 			ps.println(this);
-			this.cause.printStackTrace(ps);
+			getCause().printStackTrace(ps);
 		}
 	}
 
@@ -115,12 +116,12 @@ public abstract class NestedCheckedException extends Exception {
 	 * @param pw the print writer
 	 */
 	public void printStackTrace(PrintWriter pw) {
-		if (this.cause == null || this.cause == this) {
+		if (getCause() == null) {
 			super.printStackTrace(pw);
 		}
 		else {
 			pw.println(this);
-			this.cause.printStackTrace(pw);
+			getCause().printStackTrace(pw);
 		}
 	}
 
