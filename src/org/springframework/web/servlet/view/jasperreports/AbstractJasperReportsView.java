@@ -707,7 +707,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Template method to be overridden for custom post-processing of the
 	 * populated report. Invoked after filling but before rendering.
-	 * <p>This implementation is empty.
+	 * <p>The default implementation is empty.
 	 * @param populatedReport the populated <code>JasperPrint</code>
 	 * @param model the map containing report parameters
 	 * @throws Exception if post-processing failed
