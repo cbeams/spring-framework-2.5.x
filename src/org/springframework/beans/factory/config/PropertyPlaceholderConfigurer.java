@@ -92,8 +92,10 @@ import org.springframework.core.Constants;
 public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
     implements BeanNameAware, BeanFactoryAware {
 
+	/** Default placeholder prefix: "${" */
 	public static final String DEFAULT_PLACEHOLDER_PREFIX = "${";
 
+	/** Default placeholder suffix: "}" */
 	public static final String DEFAULT_PLACEHOLDER_SUFFIX = "}";
 
 
