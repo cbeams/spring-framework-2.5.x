@@ -2,11 +2,37 @@ SPRING FRAMEWORK CHANGELOG
 ==========================
 http://www.springframework.org
 
-Changes in version 1.3 RC1
+
+Changes in version 1.2.5 (19.9.2005)
 ------------------------------------
 
-Package org.springframework.web.servlet.view.document
+Package org.springframework.beans
+* fixed BeanWrapperImpl's "getPropertyType" implementation to avoid potential NPE in case of no custom editors
+* AbstractFactoryBean implements DisposableBean and calls the "destroyInstance(Object)" template method for a singleton
+* AbstractBeanFactory logs singleton creation at debug level rather than info level
+
+Package org.springframework.core
+* refined PathMatchingResourcePatternResolver's jar entry matching to handle the zip protocol as well
+
+Package org.springframework.context
+* fixed StaticMessageSource to use locale-specific MessageFormat for programmatically added messages
+
+Package org.springframework.jms
+* factored out JmsDestinationAccessor from JmsTemplate, as a more specialized subclass of JmsAccessor
+* merged all of JmsTemplate/JmsTemplate102's "createConsumer" template methods into one
+
+Package org.springframework.util
+* factored out ConcurrencyThrottleSupport base class from ConcurrencyThrottleInterceptor
+
+Package org.springframework.web
+* introduced NestedServletException for proper root cause handling, extended by Spring's MultipartException
+* refined ServletContextResourcePatternResolver to handle absolute paths returned by servlet container too (-> OC4J)
+* FrameworkServlet exposes protected "processRequest" method, to be called for special HTTP methods (from "doXxx")
+* AbstractXsltView applies a specified "uriResolver" to every created Transformer, not just to the TransformerFactory
 * added AbstractJExcelView for generating Excel files using JExcelApi (http://jexcelapi.sourceforge.net)
+* AbstractJasperReportsView supports JasperReports 1.0.1+ (which introduces an incompatible JR API change)
+* added protected "postProcessReport" hook to AbstractJasperReportsView, for modifying the populated JasperPrint object
+* AbstractJasperReportsSingleFormatView's "createExporter()" method returns JRExporter instead of JRAbstractExporter
 
 
 Changes in version 1.2.4 (26.8.2005)
