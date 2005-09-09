@@ -29,6 +29,7 @@ public abstract class AbstractUrlBasedView extends AbstractView implements Initi
 
 	private String url;
 
+
 	/**
 	 * Set the URL of the resource that this view wraps.
 	 * The URL must be appropriate for the concrete View implementation.
@@ -49,6 +50,7 @@ public abstract class AbstractUrlBasedView extends AbstractView implements Initi
 			throw new IllegalArgumentException("url is required");
 		}
 	}
+
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer(super.toString());
