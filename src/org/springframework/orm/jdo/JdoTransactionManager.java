@@ -275,7 +275,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 
 		if (definition.isReadOnly()) {
-			logger.info("JdoTransactionManager does not support read-only transactions: ignoring 'readOnly' hint");
+			logger.debug("JdoTransactionManager does not support read-only transactions: ignoring 'readOnly' hint");
 		}
 
 		PersistenceManager pm = null;
