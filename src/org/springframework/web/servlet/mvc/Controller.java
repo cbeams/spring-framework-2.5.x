@@ -29,7 +29,7 @@ import org.springframework.web.servlet.ModelAndView;
  * <p>Any implementation of the Controller interface should be a
  * <i>reusable, thread-safe</i> class, capable of handling multiple
  * HTTP requests throughout the lifecycle of an application. To be able to
- * configure Controller in an easy, Controllers are usually JavaBeans.</p>
+ * configure Controller in an easy way, Controllers are usually JavaBeans.</p>
  *
  * <p><b><a name="workflow">Workflow</a></b></p>
  *
