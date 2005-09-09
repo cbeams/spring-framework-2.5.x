@@ -218,8 +218,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 					// re-check singleton cache within synchronized block
 					sharedInstance = this.singletonCache.get(beanName);
 					if (sharedInstance == null) {
-						if (logger.isInfoEnabled()) {
-							logger.info("Creating shared instance of singleton bean '" + beanName + "'");
+						if (logger.isDebugEnabled()) {
+							logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 						}
 						this.singletonCache.put(beanName, CURRENTLY_IN_CREATION);
 						try {
