@@ -47,6 +47,7 @@ public abstract class Log4jConfigurer {
 	/** Pseudo URL prefix for loading from the class path: "classpath:" */
 	public static final String CLASSPATH_URL_PREFIX = "classpath:";
 
+	/** Extension that indicates a Log4J XML config file: ".xml" */
 	public static final String XML_FILE_EXTENSION = ".xml";
 
 
@@ -60,8 +61,9 @@ public abstract class Log4jConfigurer {
 	 * @throws FileNotFoundException if the location specifies an invalid file path
 	 */
 	public static void initLogging(String location) throws FileNotFoundException {
-		URL url = ResourceUtils.getURL(location);
-		if (location.toLowerCase().endsWith(XML_FILE_EXTENSION)) {
+		String resolvedLocation = SystemPropertyUtils.resolvePlaceholders(location);
+		URL url = ResourceUtils.getURL(resolvedLocation);
+		if (resolvedLocation.toLowerCase().endsWith(XML_FILE_EXTENSION)) {
 			DOMConfigurator.configure(url);
 		}
 		else {
@@ -89,11 +91,12 @@ public abstract class Log4jConfigurer {
 	 * @throws FileNotFoundException if the location specifies an invalid file path
 	 */
 	public static void initLogging(String location, long refreshInterval) throws FileNotFoundException {
-		File file = ResourceUtils.getFile(location);
+		String resolvedLocation = SystemPropertyUtils.resolvePlaceholders(location);
+		File file = ResourceUtils.getFile(resolvedLocation);
 		if (!file.exists()) {
-			throw new FileNotFoundException("Log4J config file [" + location + "] not found");
+			throw new FileNotFoundException("Log4J config file [" + resolvedLocation + "] not found");
 		}
-		if (location.toLowerCase().endsWith(XML_FILE_EXTENSION)) {
+		if (resolvedLocation.toLowerCase().endsWith(XML_FILE_EXTENSION)) {
 			DOMConfigurator.configureAndWatch(file.getAbsolutePath(), refreshInterval);
 		}
 		else {

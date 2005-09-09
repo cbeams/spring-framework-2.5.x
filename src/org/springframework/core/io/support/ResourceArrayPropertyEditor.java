@@ -16,9 +16,10 @@
 
 package org.springframework.core.io.support;
 
+import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 
-import org.springframework.core.io.AbstractPathResolvingPropertyEditor;
+import org.springframework.util.SystemPropertyUtils;
 
 /**
  * Editor for Resource descriptor arrays, to automatically convert String
@@ -33,16 +34,16 @@ import org.springframework.core.io.AbstractPathResolvingPropertyEditor;
  *
  * @author Juergen Hoeller
  * @since 1.1.2
- * @see #PLACEHOLDER_PREFIX
- * @see #PLACEHOLDER_SUFFIX
  * @see org.springframework.core.io.Resource
  * @see ResourcePatternResolver
  * @see PathMatchingResourcePatternResolver
+ * @see org.springframework.util.SystemPropertyUtils#resolvePlaceholders
  * @see System#getProperty(String)
  */
-public class ResourceArrayPropertyEditor extends AbstractPathResolvingPropertyEditor {
+public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 	private final ResourcePatternResolver resourcePatternResolver;
+
 
 	/**
 	 * Create a new ResourceArrayPropertyEditor with a default
@@ -61,6 +62,7 @@ public class ResourceArrayPropertyEditor extends AbstractPathResolvingPropertyEd
 		this.resourcePatternResolver = resourcePatternResolver;
 	}
 
+
 	public void setAsText(String text) {
 		String locationPatternToUse = resolvePath(text).trim();
 		try {
@@ -70,6 +72,17 @@ public class ResourceArrayPropertyEditor extends AbstractPathResolvingPropertyEd
 			throw new IllegalArgumentException(
 			    "Could not convert location pattern [" + locationPatternToUse + "] to Resource array");
 		}
+	}
+
+	/**
+	 * Resolve the given path, replacing placeholders with
+	 * corresponding system property values if necessary.
+	 * @param path the original file path
+	 * @return the resolved file path
+	 * @see org.springframework.util.SystemPropertyUtils#resolvePlaceholders
+	 */
+	protected String resolvePath(String path) {
+		return SystemPropertyUtils.resolvePlaceholders(path);
 	}
 
 }

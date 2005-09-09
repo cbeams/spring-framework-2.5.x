@@ -16,6 +16,10 @@
 
 package org.springframework.core.io;
 
+import java.beans.PropertyEditorSupport;
+
+import org.springframework.util.SystemPropertyUtils;
+
 /**
  * Editor for Resource descriptors, to automatically convert String locations
  * (e.g. "file:C:/myfile.txt" or "classpath:myfile.txt") to Resource properties
@@ -28,16 +32,16 @@ package org.springframework.core.io;
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
- * @see #PLACEHOLDER_PREFIX
- * @see #PLACEHOLDER_SUFFIX
  * @see Resource
  * @see ResourceLoader
  * @see DefaultResourceLoader
+ * @see org.springframework.util.SystemPropertyUtils#resolvePlaceholders
  * @see System#getProperty(String)
  */
-public class ResourceEditor extends AbstractPathResolvingPropertyEditor {
+public class ResourceEditor extends PropertyEditorSupport {
 
 	private final ResourceLoader resourceLoader;
+
 
 	/**
 	 * Create a new ResourceEditor with a DefaultResourceLoader.
@@ -55,9 +59,21 @@ public class ResourceEditor extends AbstractPathResolvingPropertyEditor {
 		this.resourceLoader = resourceLoader;
 	}
 
+
 	public void setAsText(String text) {
 		String locationToUse = resolvePath(text).trim();
 		setValue(this.resourceLoader.getResource(locationToUse));
+	}
+
+	/**
+	 * Resolve the given path, replacing placeholders with
+	 * corresponding system property values if necessary.
+	 * @param path the original file path
+	 * @return the resolved file path
+	 * @see org.springframework.util.SystemPropertyUtils#resolvePlaceholders
+	 */
+	protected String resolvePath(String path) {
+		return SystemPropertyUtils.resolvePlaceholders(path);
 	}
 
 }

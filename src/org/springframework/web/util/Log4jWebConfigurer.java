@@ -22,6 +22,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.util.Log4jConfigurer;
 import org.springframework.util.ResourceUtils;
+import org.springframework.util.SystemPropertyUtils;
 
 /**
  * Convenience class that performs custom Log4J initialization for web environments,
@@ -119,17 +120,18 @@ public abstract class Log4jWebConfigurer {
 		// Only perform custom Log4J initialization in case of a config file.
 		String location = servletContext.getInitParameter(CONFIG_LOCATION_PARAM);
 		if (location != null) {
-
-			// Write log message to server log.
-			servletContext.log("Initializing Log4J from [" + location + "]");
-
-			// Perform actual Log4J initialization.
+			// Perform actual Log4J initialization; else rely on Log4J's default initialization.
 			try {
 				// Return a URL (e.g. "classpath:" or "file:") as-is;
 				// consider a plain file path as relative to the web application root directory.
 				if (!ResourceUtils.isUrl(location)) {
+					// Resolve system property placeholders before resolving real path.
+					location = SystemPropertyUtils.resolvePlaceholders(location);
 					location = WebUtils.getRealPath(servletContext, location);
 				}
+
+				// Write log message to server log.
+				servletContext.log("Initializing Log4J from [" + location + "]");
 
 				// Check whether refresh interval was specified.
 				String intervalString = servletContext.getInitParameter(REFRESH_INTERVAL_PARAM);

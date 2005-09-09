@@ -14,50 +14,51 @@
  * limitations under the License.
  */
 
-package org.springframework.core.io;
-
-import java.beans.PropertyEditorSupport;
+package org.springframework.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Abstract base class for PropertyEditors that need
- * to resolve placeholders in paths.
+ * Helper class for resolving placeholders in texts.
+ * Usually applied to file paths.
  *
- * <p>A path may contain ${...} placeholders, to be resolved as
+ * <p>A text may contain ${...} placeholders, to be resolved as
  * system properties: e.g. ${user.dir}.
  *
  * @author Juergen Hoeller
- * @since 1.1.2
+ * @since 1.2.5
  * @see #PLACEHOLDER_PREFIX
  * @see #PLACEHOLDER_SUFFIX
  * @see System#getProperty(String)
  */
-public class AbstractPathResolvingPropertyEditor extends PropertyEditorSupport {
+public abstract class SystemPropertyUtils {
 
+	/** Prefix for system property placeholders: "${" */
 	public static final String PLACEHOLDER_PREFIX = "${";
 
+	/** Suffix for system property placeholders: "}" */
 	public static final String PLACEHOLDER_SUFFIX = "}";
 
-	protected static final Log logger = LogFactory.getLog(AbstractPathResolvingPropertyEditor.class);
+	private static final Log logger = LogFactory.getLog(SystemPropertyUtils.class);
+
 
 	/**
-	 * Resolve the given path, replacing ${...} placeholders with
-	 * corresponding system property values if necessary.
-	 * @param path the original file path
-	 * @return the resolved file path
+	 * Resolve ${...} placeholders in the given text,
+	 * replacing them with corresponding system property values.
+	 * @param text the String to resolve
+	 * @return the resolved String
 	 * @see #PLACEHOLDER_PREFIX
 	 * @see #PLACEHOLDER_SUFFIX
 	 */
-	protected String resolvePath(String path) {
-		StringBuffer buf = new StringBuffer(path);
+	public static String resolvePlaceholders(String text) {
+		StringBuffer buf = new StringBuffer(text);
 
 		// The following code does not use JDK 1.4's StringBuffer.indexOf(String)
 		// method to retain JDK 1.3 compatibility. The slight loss in performance
 		// is not really relevant, as this code will typically just run on startup.
 
-		int startIndex = path.indexOf(PLACEHOLDER_PREFIX);
+		int startIndex = text.indexOf(PLACEHOLDER_PREFIX);
 		while (startIndex != -1) {
 			int endIndex = buf.toString().indexOf(PLACEHOLDER_SUFFIX, startIndex + PLACEHOLDER_PREFIX.length());
 			if (endIndex != -1) {
@@ -68,8 +69,9 @@ public class AbstractPathResolvingPropertyEditor extends PropertyEditorSupport {
 					startIndex = buf.toString().indexOf(PLACEHOLDER_PREFIX, startIndex + propVal.length());
 				}
 				else {
-					logger.warn("Could not resolve placeholder '" + placeholder +
-					    "' in resource path [" + path + "] as system property");
+					if (logger.isWarnEnabled()) {
+						logger.warn("Could not resolve placeholder '" + placeholder + "' in [" + text + "] as system property");
+					}
 					startIndex = buf.toString().indexOf(PLACEHOLDER_PREFIX, endIndex + PLACEHOLDER_SUFFIX.length());
 				}
 			}
