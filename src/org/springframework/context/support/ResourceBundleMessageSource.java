@@ -26,10 +26,11 @@ import java.util.ResourceBundle;
 import org.springframework.util.StringUtils;
 
 /**
- * MessageSource that accesses the ResourceBundles with the specified basenames.
- * This class relies on the underlying JDK's java.util.ResourceBundle implementation.
+ * MessageSource that accesses the resource bundles with the specified basenames.
+ * This class relies on the underlying JDK's <code>java.util.ResourceBundle</code>
+ * implementation.
  *
- * <p>Unfortunately, java.util.ResourceBundle caches loaded bundles indefinitely.
+ * <p>Unfortunately, <code>java.util.ResourceBundle</code> caches loaded bundles forever:
  * Reloading a bundle during VM execution is <i>not</i> possible by any means.
  * As this MessageSource relies on ResourceBundle, it faces the same limitation.
  * Consider ReloadableResourceBundleMessageSource for an alternative.
@@ -42,7 +43,7 @@ import org.springframework.util.StringUtils;
  */
 public class ResourceBundleMessageSource extends AbstractMessageSource {
 
-	private String[] basenames;
+	private String[] basenames = new String[0];
 
 	private ClassLoader classLoader;
 
@@ -82,7 +83,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 	 * @see java.util.ResourceBundle
 	 */
 	public void setBasenames(String[] basenames)  {
-		this.basenames = basenames;
+		this.basenames = (basenames != null ? basenames : new String[0]);
 	}
 
 	/**

@@ -92,7 +92,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	private static final String XML_SUFFIX = ".xml";
 
 
-	private String[] basenames;
+	private String[] basenames = new String[0];
 
 	private String defaultEncoding;
 
@@ -132,7 +132,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * @see java.util.ResourceBundle
 	 */
 	public void setBasename(String basename) {
-		setBasenames(new String[]{basename});
+		setBasenames(new String[] {basename});
 	}
 
 	/**
@@ -146,7 +146,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * @see java.util.ResourceBundle
 	 */
 	public void setBasenames(String[] basenames) {
-		this.basenames = basenames;
+		this.basenames = (basenames != null ? basenames : new String[0]);
 	}
 
 	/**
