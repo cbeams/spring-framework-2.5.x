@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.listener;
+package org.springframework.jms.listener.server;
 
 import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
+import javax.jms.ServerSession;
+
+import org.springframework.jms.listener.server.ListenerSessionManager;
 
 /**
  * @author Juergen Hoeller
  * @since 1.3
  */
-public interface SessionAwareMessageListener {
+public interface ServerSessionFactory {
 
-	void onMessage(Message message, Session session) throws JMSException;
+	ServerSession getServerSession(ListenerSessionManager sessionManager) throws JMSException;
+
+	void close(ListenerSessionManager sessionManager);
 
 }

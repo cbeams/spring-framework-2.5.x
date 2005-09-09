@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.listener;
+package org.springframework.jms.listener.server;
 
 import javax.jms.JMSException;
 import javax.jms.ServerSession;
@@ -23,7 +23,9 @@ import javax.jms.Session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.scheduling.timer.TimerTaskExecutor;
 
 /**
  * @author Juergen Hoeller
@@ -33,8 +35,18 @@ public abstract class AbstractPoolingServerSessionFactory implements ServerSessi
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private TaskExecutor taskExecutor;
+
 	private int maxSize;
 
+
+	public void setTaskExecutor(TaskExecutor taskExecutor) {
+		this.taskExecutor = taskExecutor;
+	}
+
+	protected TaskExecutor getTaskExecutor() {
+		return this.taskExecutor;
+	}
 
 	/**
 	 * Set the maximum size of the pool.
@@ -51,54 +63,38 @@ public abstract class AbstractPoolingServerSessionFactory implements ServerSessi
 	}
 
 
-	protected ServerSession createServerSession(ListenerSessionManager sessionManager) throws JMSException {
+	protected final ServerSession createServerSession(ListenerSessionManager sessionManager) throws JMSException {
 		return new PooledServerSession(sessionManager);
 	}
 
-	protected void destroyServerSession(ServerSession serverSession) {
-		((PooledServerSession) serverSession).close();
+	protected final void destroyServerSession(ServerSession serverSession) {
+		if (serverSession != null) {
+			((PooledServerSession) serverSession).close();
+		}
 	}
+
 
 	protected abstract void serverSessionFinished(ServerSession serverSession, ListenerSessionManager sessionManager);
 
 
 	private class PooledServerSession implements ServerSession {
 
+		private final ListenerSessionManager sessionManager;
+
 		private final Session session;
 
-		private final Object monitor = new Object();
+		private TaskExecutor taskExecutor;
 
-		private boolean active = false;
+		private TimerTaskExecutor internalExecutor;
 
 		public PooledServerSession(final ListenerSessionManager sessionManager) throws JMSException {
+			this.sessionManager = sessionManager;
 			this.session = sessionManager.createListenerSession();
-
-			new Thread() {
-				public void run() {
-					active = true;
-					synchronized (monitor) {
-						while (active) {
-							try {
-								logger.debug("Waiting for PooledServerSession monitor");
-								monitor.wait();
-								logger.debug("Notified by PooledServerSession monitor");
-							}
-							catch (InterruptedException ex) {
-							}
-							if (active) {
-								try {
-									sessionManager.executeListenerSession(session);
-								}
-								finally {
-									serverSessionFinished(PooledServerSession.this, sessionManager);
-								}
-							}
-						}
-					}
-				}
-			}.start();
-
-			while (!this.active) {
+			this.taskExecutor = getTaskExecutor();
+			if (this.taskExecutor == null) {
+				this.internalExecutor = new TimerTaskExecutor();
+				this.internalExecutor.afterPropertiesSet();
+				this.taskExecutor = this.internalExecutor;
 			}
 		}
 
@@ -107,17 +103,21 @@ public abstract class AbstractPoolingServerSessionFactory implements ServerSessi
 		}
 
 		public void start() {
-			synchronized (this.monitor) {
-				logger.debug("Notifying PooledServerSession monitor");
-				this.monitor.notify();
-				logger.debug("Notified PooledServerSession monitor");
-			}
+			this.taskExecutor.execute(new Runnable() {
+				public void run() {
+					try {
+						sessionManager.executeListenerSession(session);
+					}
+					finally {
+						serverSessionFinished(PooledServerSession.this, sessionManager);
+					}
+				}
+			});
 		}
 
 		public void close() {
-			this.active = false;
-			synchronized (this.monitor) {
-				this.monitor.notify();
+			if (this.internalExecutor != null) {
+				this.internalExecutor.destroy();
 			}
 			JmsUtils.closeSession(this.session);
 		}

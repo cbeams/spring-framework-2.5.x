@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.listener;
-
-import javax.jms.JMSException;
-import javax.jms.ServerSession;
+package org.springframework.core.task;
 
 /**
  * @author Juergen Hoeller
  * @since 1.3
  */
-public interface ServerSessionFactory {
+public interface TaskExecutor {
 
-	ServerSession getServerSession(ListenerSessionManager sessionManager) throws JMSException;
-
-	void close(ListenerSessionManager sessionManager);
+	void execute(Runnable task);
 
 }

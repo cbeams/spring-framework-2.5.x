@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.listener;
+package org.springframework.jms.listener.server;
 
 import javax.jms.JMSException;
 import javax.jms.Session;
 
 /**
  * @author Juergen Hoeller
- * @since 26.05.2005
+ * @since 1.3
  */
 public interface ListenerSessionManager {
 

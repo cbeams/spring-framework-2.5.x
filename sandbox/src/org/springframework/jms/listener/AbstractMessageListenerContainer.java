@@ -17,49 +17,78 @@
 package org.springframework.jms.listener;
 
 import javax.jms.Connection;
-import javax.jms.ConnectionConsumer;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import javax.jms.ServerSession;
-import javax.jms.ServerSessionPool;
 import javax.jms.Session;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.jms.JmsException;
-import org.springframework.jms.support.JmsAccessor;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.jms.support.destination.DynamicDestinationResolver;
+import org.springframework.jms.support.destination.JmsDestinationAccessor;
 
 /**
  * @author Juergen Hoeller
  * @since 1.3
  */
-public class MessageListenerContainer extends JmsAccessor implements DisposableBean, ListenerSessionManager {
+public abstract class AbstractMessageListenerContainer extends JmsDestinationAccessor implements DisposableBean {
 
-	private Destination destination;
+	private Object destination;
 
 	private String messageSelector;
 
 	private Object messageListener;
 
-	private ServerSessionFactory serverSessionFactory = new SimpleServerSessionFactory();
-
-	private int maxMessages = 1;
+	private boolean exposeListenerSession = true;
 
 	private boolean autoStartup = true;
 
 	private Connection connection;
 
-	private ConnectionConsumer consumer;
+
+	protected AbstractMessageListenerContainer() {
+		setDestinationResolver(new DynamicDestinationResolver());
+	}
 
 
+	/**
+	 * Set the destination to be used on send operations that do not
+	 * have a destination parameter.
+	 * <p>Alternatively, specify a "destinationName", to be dynamically
+	 * resolved via the DestinationResolver.
+	 * @see #setDestinationName(String)
+	 */
 	public void setDestination(Destination destination) {
 		this.destination = destination;
 	}
 
+	/**
+	 * Return the destination to be used on send operations that do not
+	 * have a destination parameter.
+	 */
 	protected Destination getDestination() {
-		return destination;
+		return (this.destination instanceof Destination ? (Destination) this.destination : null);
+	}
+
+	/**
+	 * Set the destination name to be used on send operations that do not
+	 * have a destination parameter. The specified name will be dynamically
+	 * resolved via the DestinationResolver.
+	 * <p>Alternatively, specify a JMS Destination object as "destination".
+	 * @see #setDestination(javax.jms.Destination)
+	 */
+	public void setDestinationName(String destinationName) {
+		this.destination = destinationName;
+	}
+
+	/**
+	 * Return the destination name to be used on send operations that do not
+	 * have a destination parameter.
+	 */
+	protected String getDestinationName() {
+		return (this.destination instanceof String ? (String) this.destination : null);
 	}
 
 	public void setMessageSelector(String messageSelector) {
@@ -69,6 +98,7 @@ public class MessageListenerContainer extends JmsAccessor implements DisposableB
 	protected String getMessageSelector() {
 		return messageSelector;
 	}
+
 
 	public void setMessageListener(Object messageListener) {
 		checkMessageListener(messageListener);
@@ -88,20 +118,12 @@ public class MessageListenerContainer extends JmsAccessor implements DisposableB
 		return messageListener;
 	}
 
-	public void setServerSessionFactory(ServerSessionFactory serverSessionFactory) {
-		this.serverSessionFactory = serverSessionFactory;
+	public void setExposeListenerSession(boolean exposeListenerSession) {
+		this.exposeListenerSession = exposeListenerSession;
 	}
 
-	protected ServerSessionFactory getServerSessionFactory() {
-		return serverSessionFactory;
-	}
-
-	public void setMaxMessages(int maxMessages) {
-		this.maxMessages = maxMessages;
-	}
-
-	protected int getMaxMessages() {
-		return maxMessages;
+	protected boolean isExposeListenerSession() {
+		return exposeListenerSession;
 	}
 
 	/**
@@ -113,21 +135,20 @@ public class MessageListenerContainer extends JmsAccessor implements DisposableB
 	}
 
 
-	public void afterPropertiesSet() {
+	public final void afterPropertiesSet() {
 		super.afterPropertiesSet();
 
 		if (this.destination == null) {
-			throw new IllegalArgumentException("destination is required");
+			throw new IllegalArgumentException("destination or destinationName is required");
 		}
 		if (this.messageListener == null) {
 			throw new IllegalArgumentException("messageListener is required");
 		}
 
-		// Create JMS Connection and ConnectionConsumer.
+		// Create JMS Connection and Sessions with MessageConsumers.
 		try {
 			this.connection = createConnection();
-			ServerSessionPool pool = createServerSessionPool();
-			this.consumer = createConnectionConsumer(this.connection, pool);
+			registerListener(this.connection);
 
 			if (this.autoStartup) {
 				this.connection.start();
@@ -143,79 +164,30 @@ public class MessageListenerContainer extends JmsAccessor implements DisposableB
 		return this.connection;
 	}
 
-	protected final ConnectionConsumer getConsumer() {
-		return consumer;
+
+	public void start() throws JmsException {
+		try {
+			this.connection.start();
+		}
+		catch (JMSException ex) {
+			throw convertJmsAccessException(ex);
+		}
+	}
+
+	public void stop() throws JmsException {
+		try {
+			this.connection.stop();
+		}
+		catch (JMSException ex) {
+			throw convertJmsAccessException(ex);
+		}
 	}
 
 
-	/**
-	 * Create a JMS Connection via this template's ConnectionFactory.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @return the new JMS Connection
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected Connection createConnection() throws JMSException {
-		return getConnectionFactory().createConnection();
-	}
-
-	/**
-	 * Create a JMS ConnectionConsumer for the given Connection.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param con the JMS Connection to create a Session for
-	 * @return the new JMS Session
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected ConnectionConsumer createConnectionConsumer(Connection con, ServerSessionPool pool)
-			throws JMSException {
-
-		return con.createConnectionConsumer(getDestination(), getMessageSelector(), pool, getMaxMessages());
-	}
-
-	/**
-	 * Create a JMS Session for the given Connection.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param con the JMS Connection to create a Session for
-	 * @return the new JMS Session
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected Session createSession(Connection con) throws JMSException {
-		return con.createSession(isSessionTransacted(), getSessionAcknowledgeMode());
-	}
-
-	/**
-	 * Return whether the Session is in client acknowledge mode.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param session the JMS Session to check
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected boolean isClientAcknowledge(Session session) throws JMSException {
-		return (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
-	}
-
-
-	protected ServerSessionPool createServerSessionPool() throws JMSException {
-		return new ServerSessionPool() {
-			public ServerSession getServerSession() throws JMSException {
-				logger.debug("JMS ConnectionConsumer requests ServerSession");
-				return serverSessionFactory.getServerSession(MessageListenerContainer.this);
-			}
-		};
-	}
-
-	public Session createListenerSession() throws JMSException {
-		final Session session = createSession(getConnection());
-
-		session.setMessageListener(new MessageListener() {
-			public void onMessage(Message message) {
-				executeListener(session, message);
-			}
-		});
-
-		return session;
-	}
-
-	public void executeListenerSession(Session session) {
-		session.run();
+	public final void destroy() throws JMSException {
+		destroyListener();
+		logger.debug("Closing JMS Connection");
+		this.connection.close();
 	}
 
 
@@ -243,10 +215,34 @@ public class MessageListenerContainer extends JmsAccessor implements DisposableB
 			((MessageListener) getMessageListener()).onMessage(message);
 		}
 		else if (getMessageListener() instanceof SessionAwareMessageListener) {
-			((SessionAwareMessageListener) getMessageListener()).onMessage(message, session);
+			invokeSessionAwareListener(session, message);
 		}
 		else {
 			throw new IllegalArgumentException("Only MessageListener and SessionAwareMessageListener supported");
+		}
+	}
+
+	protected void invokeSessionAwareListener(Session session, Message message) throws JMSException {
+		Session sessionToExpose = session;
+		Connection con = null;
+		try {
+			if (!isExposeListenerSession()) {
+				con = createConnection();
+				sessionToExpose = createSession(con);
+			}
+			((SessionAwareMessageListener) getMessageListener()).onMessage(message, sessionToExpose);
+			if (con != null) {
+				if (session.getTransacted() && isSessionTransacted()) {
+					// Transacted session created by this container -> commit.
+					JmsUtils.commitIfNecessary(session);
+				}
+			}
+		}
+		finally {
+			if (con != null) {
+				JmsUtils.closeSession(sessionToExpose);
+				JmsUtils.closeConnection(con);
+			}
 		}
 	}
 
@@ -254,7 +250,7 @@ public class MessageListenerContainer extends JmsAccessor implements DisposableB
 	 * Perform a commit or message acknowledgement, as appropriate.
 	 * @param session the JMS Session to commit
 	 * @param message the Message to acknowledge
-	 * @throws JmsException in case of commit failure
+	 * @throws org.springframework.jms.JmsException in case of commit failure
 	 */
 	protected void commitIfNecessary(Session session, Message message) throws JmsException {
 		try {
@@ -279,7 +275,7 @@ public class MessageListenerContainer extends JmsAccessor implements DisposableB
 	 * Perform a rollback, handling rollback exceptions properly.
 	 * @param session the JMS Session to rollback
 	 * @param ex the thrown application exception or error
-	 * @throws JmsException in case of a rollback error
+	 * @throws org.springframework.jms.JmsException in case of a rollback error
 	 */
 	protected void rollbackOnExceptionIfNecessary(Session session, Throwable ex) throws JmsException {
 		// Transacted session created by this container -> rollback.
@@ -306,31 +302,40 @@ public class MessageListenerContainer extends JmsAccessor implements DisposableB
 	}
 
 
-	public void start() throws JmsException {
-		try {
-			this.connection.start();
-		}
-		catch (JMSException ex) {
-			throw convertJmsAccessException(ex);
-		}
+	/**
+	 * Create a JMS Connection via this template's ConnectionFactory.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @return the new JMS Connection
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 */
+	protected Connection createConnection() throws JMSException {
+		return getConnectionFactory().createConnection();
 	}
 
-	public void stop() throws JmsException {
-		try {
-			this.connection.stop();
-		}
-		catch (JMSException ex) {
-			throw convertJmsAccessException(ex);
-		}
+	/**
+	 * Create a JMS Session for the given Connection.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @param con the JMS Connection to create a Session for
+	 * @return the new JMS Session
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 */
+	protected Session createSession(Connection con) throws JMSException {
+		return con.createSession(isSessionTransacted(), getSessionAcknowledgeMode());
+	}
+
+	/**
+	 * Return whether the Session is in client acknowledge mode.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @param session the JMS Session to check
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 */
+	protected boolean isClientAcknowledge(Session session) throws JMSException {
+		return (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
 	}
 
 
-	public void destroy() throws JMSException {
-		logger.debug("Closing ServerSessionFactory");
-		this.serverSessionFactory.close(this);
-		logger.debug("Closing JMS ConnectionConsumer and Connection");
-		this.consumer.close();
-		this.connection.close();
-	}
+	protected abstract void registerListener(Connection con) throws JMSException;
+
+	protected abstract void destroyListener() throws JMSException;
 
 }

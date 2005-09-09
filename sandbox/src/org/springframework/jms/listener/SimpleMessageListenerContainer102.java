@@ -17,46 +17,24 @@
 package org.springframework.jms.listener;
 
 import javax.jms.Connection;
-import javax.jms.ConnectionConsumer;
 import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
-import javax.jms.ServerSessionPool;
+import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
+import javax.jms.TopicSession;
+import javax.jms.Destination;
 
 /**
  * @author Juergen Hoeller
  * @since 1.3
  */
-public class MessageListenerContainer102 extends MessageListenerContainer {
-
-	private boolean pubSubDomain = false;
-
-
-	/**
-	 * Configure the MessageListenerContainer with knowledge of the
-	 * JMS domain used. Default is Point-to-Point (Queues).
-	 * <p>This tells the JMS provider which class hierarchy to use
-	 * for Connections, ConnectionConsumers, and Sessions.
-	 * @param pubSubDomain true for Publish/Subscribe domain (Topics),
-	 * false for Point-to-Point domain (Queues)
-	 */
-	public void setPubSubDomain(boolean pubSubDomain) {
-		this.pubSubDomain = pubSubDomain;
-	}
-
-	/**
-	 * Return whether the Publish/Subscribe domain (Topics) is used.
-	 * Otherwise, the Point-to-Point domain (Queues) is used.
-	 */
-	public boolean isPubSubDomain() {
-		return pubSubDomain;
-	}
-
+public class SimpleMessageListenerContainer102 extends SimpleMessageListenerContainer {
 
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
@@ -73,26 +51,25 @@ public class MessageListenerContainer102 extends MessageListenerContainer {
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
 	 */
-	protected ConnectionConsumer createConnectionConsumer(Connection con, ServerSessionPool pool) throws JMSException {
-		if (isPubSubDomain()) {
-			return ((TopicConnection) con).createConnectionConsumer(
-					(Topic) getDestination(), getMessageSelector(), pool, getMaxMessages());
-		}
-		else {
-			return ((QueueConnection) con).createConnectionConsumer(
-					(Queue) getDestination(), getMessageSelector(), pool, getMaxMessages());
-		}
-	}
-
-	/**
-	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
-	 */
 	protected Session createSession(Connection con) throws JMSException {
 		if (isPubSubDomain()) {
 			return ((TopicConnection) con).createTopicSession(isSessionTransacted(), getSessionAcknowledgeMode());
 		}
 		else {
 			return ((QueueConnection) con).createQueueSession(isSessionTransacted(), getSessionAcknowledgeMode());
+		}
+	}
+
+	/**
+	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
+	 */
+	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
+		if (isPubSubDomain()) {
+			return ((TopicSession) session).createSubscriber(
+					(Topic) destination, getMessageSelector(), isPubSubNoLocal());
+		}
+		else {
+			return ((QueueSession) session).createReceiver((Queue) destination, getMessageSelector());
 		}
 	}
 
