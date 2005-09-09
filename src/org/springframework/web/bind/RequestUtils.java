@@ -64,11 +64,12 @@ public abstract class RequestUtils {
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @return the Integer value, or null if not present
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static Integer getIntParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		if (request.getParameter(name) == null) {
 			return null;
 		}
@@ -109,11 +110,12 @@ public abstract class RequestUtils {
 	 * Get an int parameter, throwing an exception if it isn't found or isn't a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static int getRequiredIntParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		return INT_PARSER.parseInt(name, request.getParameter(name));
 	}
 
@@ -121,11 +123,12 @@ public abstract class RequestUtils {
 	 * Get an array of int parameters, throwing an exception if not found or one is not a number..
 	 * @param request current HTTP request
 	 * @param name the name of the parameter with multiple possible values
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static int[] getRequiredIntParameters(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		return INT_PARSER.parseInts(name, request.getParameterValues(name));
 	}
 
@@ -136,11 +139,12 @@ public abstract class RequestUtils {
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @return the Long value, or null if not present
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static Long getLongParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		if (request.getParameter(name) == null) {
 			return null;
 		}
@@ -181,11 +185,12 @@ public abstract class RequestUtils {
 	 * Get a long parameter, throwing an exception if it isn't found or isn't a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static long getRequiredLongParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		return LONG_PARSER.parseLong(name, request.getParameter(name));
 	}
 
@@ -193,11 +198,12 @@ public abstract class RequestUtils {
 	 * Get an array of long parameters, throwing an exception if not found or one is not a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter with multiple possible values
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static long[] getRequiredLongParameters(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		return LONG_PARSER.parseLongs(name, request.getParameterValues(name));
 	}
 
@@ -208,11 +214,12 @@ public abstract class RequestUtils {
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @return the Float value, or null if not present
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static Float getFloatParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		if (request.getParameter(name) == null) {
 			return null;
 		}
@@ -253,11 +260,12 @@ public abstract class RequestUtils {
 	 * Get a double parameter, throwing an exception if it isn't found or isn't a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static float getRequiredFloatParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		return FLOAT_PARSER.parseFloat(name, request.getParameter(name));
 	}
 
@@ -265,11 +273,12 @@ public abstract class RequestUtils {
 	 * Get an array of float parameters, throwing an exception if not found or one is not a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter with multiple possible values
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static float[] getRequiredFloatParameters(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		return FLOAT_PARSER.parseFloats(name, request.getParameterValues(name));
 	}
 
@@ -280,11 +289,12 @@ public abstract class RequestUtils {
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @return the Double value, or null if not present
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static Double getDoubleParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		if (request.getParameter(name) == null) {
 			return null;
 		}
@@ -325,11 +335,12 @@ public abstract class RequestUtils {
 	 * Get a double parameter, throwing an exception if it isn't found or isn't a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static double getRequiredDoubleParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		return DOUBLE_PARSER.parseDouble(name, request.getParameter(name));
 	}
 
@@ -337,11 +348,12 @@ public abstract class RequestUtils {
 	 * Get an array of double parameters, throwing an exception if not found or one is not a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter with multiple possible values
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static double[] getRequiredDoubleParameters(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		return DOUBLE_PARSER.parseDoubles(name, request.getParameterValues(name));
 	}
 
@@ -354,11 +366,12 @@ public abstract class RequestUtils {
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @return the Boolean value, or null if not present
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static Boolean getBooleanParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		if (request.getParameter(name) == null) {
 			return null;
 		}
@@ -406,11 +419,12 @@ public abstract class RequestUtils {
 	 * treats every other non-empty value as false (i.e. parses leniently).
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static boolean getRequiredBooleanParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		return BOOLEAN_PARSER.parseBoolean(name, request.getParameter(name));
 	}
 
@@ -421,11 +435,12 @@ public abstract class RequestUtils {
 	 * treats every other non-empty value as false (i.e. parses leniently).
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static boolean[] getRequiredBooleanParameters(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		return BOOLEAN_PARSER.parseBooleans(name, request.getParameterValues(name));
 	}
 
@@ -436,11 +451,12 @@ public abstract class RequestUtils {
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @return the String value, or null if not present
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static String getStringParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		if (request.getParameter(name) == null) {
 			return null;
 		}
@@ -481,11 +497,12 @@ public abstract class RequestUtils {
 	 * Get a string parameter, throwing an exception if it isn't found or is empty.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static String getRequiredStringParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		return STRING_PARSER.validateRequiredString(name, request.getParameter(name));
 	}
 
@@ -493,11 +510,12 @@ public abstract class RequestUtils {
 	 * Get an array of string parameters, throwing an exception if not found or one is empty.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
-	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
 	public static String[] getRequiredStringParameters(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
+
 		return STRING_PARSER.validateRequiredStrings(name, request.getParameterValues(name));
 	}
 
@@ -517,6 +535,7 @@ public abstract class RequestUtils {
 
 		protected final void validateRequiredParameter(String name, Object parameter)
 				throws ServletRequestBindingException {
+
 			if (parameter == null) {
 				throw new ServletRequestBindingException("Required " + getType() + " parameter '" + name
 						+ "' is not present");
@@ -669,14 +688,12 @@ public abstract class RequestUtils {
 			return parameter;
 		}
 
-		public String validateRequiredString(String name, String value)
-				throws ServletRequestBindingException {
+		public String validateRequiredString(String name, String value) throws ServletRequestBindingException {
 			validateRequiredParameter(name, value);
 			return value;
 		}
 
-		public String[] validateRequiredStrings(String name, String[] values)
-				throws ServletRequestBindingException {
+		public String[] validateRequiredStrings(String name, String[] values) throws ServletRequestBindingException {
 			validateRequiredParameter(name, values);
 			for (int i = 0; i < values.length; i++) {
 				validateRequiredParameter(name, values[i]);
