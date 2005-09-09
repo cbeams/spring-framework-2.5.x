@@ -26,26 +26,30 @@ import junit.framework.TestCase;
 import org.springframework.core.io.Resource;
 
 /**
- * If this test case fails, uncomment diagnostics in assertProtocolAndFilenames()
- * method.
+ * If this test case fails, uncomment diagnostics in
+ * <code>assertProtocolAndFilenames</code> method.
+ *
  * @author Oliver Hutchison
+ * @author Juergen Hoeller
  * @since 17.11.2004
  */
 public class PathMatchingResourcePatternResolverTests extends TestCase {
 
 	private static final String[] CLASSES_IN_CORE_IO_SUPPORT =
-			new String[] {"PathMatchingResourcePatternResolver.class", "PropertiesLoaderSupport.class",
-					"ResourceArrayPropertyEditor.class", "ResourcePatternResolver.class", "ResourcePatternUtils.class"};
+			new String[] {"LocalizedResourceHelper.class", "PathMatchingResourcePatternResolver.class",
+										"PropertiesLoaderSupport.class", "ResourceArrayPropertyEditor.class",
+										"ResourcePatternResolver.class", "ResourcePatternUtils.class"};
 
 	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT =
 			new String[] {"PathMatchingResourcePatternResolverTests.class"};
 
 	private static final String[] CLASSES_IN_AOPALLIANCE =
 			new String[] {"Advice.class", "AspectException.class", "ConstructorInterceptor.class",
-					"ConstructorInvocation.class", "Interceptor.class", "Invocation.class",
-					"Joinpoint.class", "MethodInterceptor.class", "MethodInvocation.class"};
+										"ConstructorInvocation.class", "Interceptor.class", "Invocation.class",
+										"Joinpoint.class", "MethodInterceptor.class", "MethodInvocation.class"};
 
 	private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+
 
 	public void testSingleResourceOnFileSystem() throws IOException {
 		Resource[] resources =

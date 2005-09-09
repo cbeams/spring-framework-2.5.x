@@ -16,11 +16,9 @@
 
 package org.springframework.web.servlet.view.document;
 
-import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +30,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.LocalizedResourceHelper;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractView;
 
@@ -44,7 +43,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * It is done without localization part nor the ".xls" extension.
  * </ul>
  *
- * <p>The file will be searched with names in the following order:
+ * <p>The file will be searched with locations in the following order:
  * <ul>
  * <li>[url]_[language]_[country].xls
  * <li>[url]_[language].xls
@@ -96,20 +95,26 @@ import org.springframework.web.servlet.view.AbstractView;
  */
 public abstract class AbstractExcelView extends AbstractView {
 
-	private static final String EXTENSION = ".xls";
+	/** The content type for an Excel response */
+	private static final String CONTENT_TYPE = "application/vnd.ms-excel";
 
-	private static final String SEPARATOR = "_";
+	/** The extension to look for existing templates */
+	private static final String EXTENSION = ".xls";
 
 
 	private String url;
 
 
+	/**
+	 * Default Constructor.
+	 * Sets the content type of the view to "application/vnd.ms-excel".
+	 */
 	public AbstractExcelView() {
-		setContentType("application/vnd.ms-excel");
+		setContentType(CONTENT_TYPE);
 	}
 
 	/**
-	 * Sets the url of the Excel workbook source without localization part nor extension.
+	 * Set the URL of the Excel workbook source, without localization part nor extension.
 	 */
 	public void setUrl(String url) {
 		this.url = url;
@@ -117,7 +122,7 @@ public abstract class AbstractExcelView extends AbstractView {
 
 
 	/**
-	 * Renders the view given the specified model.
+	 * Renders the Excel view, given the specified model.
 	 */
 	protected final void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -142,44 +147,22 @@ public abstract class AbstractExcelView extends AbstractView {
 
 	/**
 	 * Creates the workbook from an existing XLS document.
-	 * @param url URL of the Excel template without localization part nor extension
+	 * @param url the URL of the Excel template without localization part nor extension
 	 * @param request current HTTP request
 	 * @return the HSSFWorkbook
+	 * @throws Exception in case of failure
 	 */
-	protected HSSFWorkbook getTemplateSource(String url, HttpServletRequest request)
-			throws ServletException, IOException {
-
-		String source = null;
-		Resource inputFile = null;
-
+	protected HSSFWorkbook getTemplateSource(String url, HttpServletRequest request) throws Exception {
+		LocalizedResourceHelper helper = new LocalizedResourceHelper(getApplicationContext());
 		Locale userLocale = RequestContextUtils.getLocale(request);
-		String lang = userLocale.getLanguage();
-		String country = userLocale.getCountry();
+		Resource inputFile = helper.findLocalizedResource(url, EXTENSION, userLocale);
 
-		// check for document with language and country localisation
-		if (country.length() > 1) {
-			source = url + SEPARATOR + lang + SEPARATOR + country + EXTENSION;
-			inputFile = getApplicationContext().getResource(source);
+		// Create the Excel document from the source.
+		if (logger.isDebugEnabled()) {
+			logger.debug("Loading Excel workbook from " + inputFile);
 		}
-
-		// check for document with language localisation
-		if ((inputFile == null || !inputFile.exists()) && lang.length() > 1) {
-			source = url + SEPARATOR + lang + EXTENSION;
-			inputFile = getApplicationContext().getResource(source);
-		}
-
-		// check for document without localisation
-		if (inputFile == null || !inputFile.exists()) {
-			source = url + EXTENSION;
-			inputFile = getApplicationContext().getResource(source);
-		}
-
-		// create the Excel document from source
 		POIFSFileSystem fs = new POIFSFileSystem(inputFile.getInputStream());
 		HSSFWorkbook workBook = new HSSFWorkbook(fs);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Loaded Excel workbook '" + source + "'");
-		}
 		return workBook;
 	}
 
@@ -194,6 +177,7 @@ public abstract class AbstractExcelView extends AbstractView {
 	protected abstract void buildExcelDocument(
 			Map model, HSSFWorkbook workbook, HttpServletRequest request, HttpServletResponse response)
 			throws Exception;
+
 
 	/**
 	 * Convenient method to obtain the cell in the given sheet, row and column.
