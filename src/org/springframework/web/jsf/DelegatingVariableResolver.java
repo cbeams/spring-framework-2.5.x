@@ -29,7 +29,7 @@ import org.springframework.web.context.WebApplicationContext;
  * JSF VariableResolver that first delegates to the original resolver of the
  * underlying JSF implementation, then to the Spring root WebApplicationContext.
  *
- * <p>Configure this resolver in your faces-config.xml file as follows:
+ * <p>Configure this resolver in your <code>faces-config.xml</code> file as follows:
  *
  * <pre>
  * &lt;application>
@@ -69,6 +69,7 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see WebApplicationContextVariableResolver
  * @see FacesContextUtils#getRequiredWebApplicationContext
  */
 public class DelegatingVariableResolver extends VariableResolver {
@@ -76,6 +77,7 @@ public class DelegatingVariableResolver extends VariableResolver {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	protected final VariableResolver originalVariableResolver;
+
 
 	/**
 	 * Create a new DelegatingVariableResolver, using the given original VariableResolver.
@@ -95,17 +97,22 @@ public class DelegatingVariableResolver extends VariableResolver {
 		return originalVariableResolver;
 	}
 
+
+	/**
+	 * Delegate to the original VariableResolver first, then try to
+	 * resolve the variable as Spring bean in the root WebApplicationContext.
+	 */
 	public Object resolveVariable(FacesContext facesContext, String name) throws EvaluationException {
-		// ask original resolver
+		// Ask original resolver.
 		if (logger.isDebugEnabled()) {
 			logger.debug("Attempting to resolve variable '" + name + "' in via original VariableResolver");
 		}
-		Object originalResult = this.originalVariableResolver.resolveVariable(facesContext, name);
+		Object originalResult = getOriginalVariableResolver().resolveVariable(facesContext, name);
 		if (originalResult != null) {
 			return originalResult;
 		}
 
-		// ask Spring root context
+		// Ask Spring root context.
 		if (logger.isDebugEnabled()) {
 			logger.debug("Attempting to resolve variable '" + name + "' in root WebApplicationContext");
 		}
@@ -125,9 +132,9 @@ public class DelegatingVariableResolver extends VariableResolver {
 
 	/**
 	 * Retrieve the web application context to delegate bean name resolution to.
-	 * Default implementation delegates to FacesContextUtils.
+	 * <p>Default implementation delegates to FacesContextUtils.
 	 * @param facesContext the current JSF context
-	 * @return the Spring web application context
+	 * @return the Spring web application context (never null)
 	 * @see FacesContextUtils#getRequiredWebApplicationContext
 	 */
 	protected WebApplicationContext getWebApplicationContext(FacesContext facesContext) {
