@@ -1056,6 +1056,7 @@
 				<include name="lib/jakarta-taglibs/**"/>
 				<include name="lib/jamon/**"/>
 				<include name="lib/jasperreports/**"/>
+				<include name="lib/jexcelapi/**"/>
 				<include name="lib/jdo/**"/>
 				<include name="lib/jmx/**"/>
 				<include name="lib/jotm/**"/>
