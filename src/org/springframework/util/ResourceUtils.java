@@ -78,15 +78,13 @@ public abstract class ResourceUtils {
 	}
 
 	/**
-	 * Resolve the given resource location to a <code>java.io.File</code>,
-	 * i.e. to a file in the file system.
-	 * <p>Does not check whether the file actually exists; simply returns
-	 * the File that the given location would correspond to.
+	 * Resolve the given resource location to a <code>java.net.URL</code>.
+	 * <p>Does not check whether the URL actually exists; simply returns
+	 * the URL that the given location would correspond to.
 	 * @param resourceLocation the resource location to resolve: either a
 	 * "classpath:" pseudo URL, a "file:" URL, or a plain file path
-	 * @return a corresponding File object
-	 * @throws FileNotFoundException if the resource cannot be resolved to
-	 * a file in the file system
+	 * @return a corresponding URL object
+	 * @throws FileNotFoundException if the resource cannot be resolved to a URL
 	 */
 	public static URL getURL(String resourceLocation) throws FileNotFoundException {
 		if (resourceLocation.startsWith(CLASSPATH_URL_PREFIX)) {
