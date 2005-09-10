@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.web.util;
+package org.springframework.web.filter;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
- * Simple request logging filter that writes the request URI, and optionally the querystring to a
- * Commons <code>Log</code>.
+ * Simple request logging filter that writes the request URI
+ * (and optionally the query string) to the Commons Log.
  *
  * @author Rob Harrop
- * @see #setIncludeQueryString(boolean)
- * @see #setBeforeMessagePrefix(String)
- * @see #setBeforeMessageSuffix(String)
- * @see #setAfterMessagePrefix(String)
- * @see #setAfterMessageSuffix(String)
+ * @since 1.2.5
+ * @see #setIncludeQueryString
+ * @see #setBeforeMessagePrefix
+ * @see #setBeforeMessageSuffix
+ * @see #setAfterMessagePrefix
+ * @see #setAfterMessageSuffix
+ * @see org.apache.commons.logging.Log#debug(Object)
  */
-public class RequestLoggingFilter extends AbstractRequestLoggingFilter {
-
-	/**
-	 * The <code>Log</code> to write the log messages to.
-	 */
-	private static final Log logger = LogFactory.getLog(RequestLoggingFilter.class);
+public class CommonsRequestLoggingFilter extends AbstractRequestLoggingFilter {
 
 	/**
 	 * Writes a log message before the request is processed.
@@ -56,4 +50,5 @@ public class RequestLoggingFilter extends AbstractRequestLoggingFilter {
 			logger.debug(message);
 		}
 	}
+
 }
