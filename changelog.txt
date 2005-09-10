@@ -6,6 +6,10 @@ http://www.springframework.org
 Changes in version 1.2.5 (19.9.2005)
 ------------------------------------
 
+Package org.springframework.aop
+* added overloaded "getProxy" method with an explicit ClassLoader argument to ProxyFactory
+* added protected "Object getProxy(AopProxy)" hook to ProxyFactoryBean, for specifying a custom class loader
+
 Package org.springframework.beans
 * fixed BeanWrapperImpl's "getPropertyType" implementation to avoid potential NPE in case of no custom editors
 * AbstractFactoryBean implements DisposableBean and calls the "destroyInstance(Object)" template method for a singleton
@@ -23,6 +27,9 @@ Package org.springframework.jms
 * factored out JmsDestinationAccessor from JmsTemplate, as a more specialized subclass of JmsAccessor
 * merged all of JmsTemplate/JmsTemplate102's "createConsumer" template methods into one
 
+Package org.springframework.transaction
+* added protected "Object getProxy(AopProxy)" hook to TransactionProxyFactoryBean, for specifying a custom class loader
+
 Package org.springframework.util
 * Log4jConfigurer resolves ${...} placeholders in Log4J config locations as system properties
 * factored out ConcurrencyThrottleSupport base class from ConcurrencyThrottleInterceptor
@@ -30,7 +37,10 @@ Package org.springframework.util
 Package org.springframework.web
 * introduced NestedServletException for proper root cause handling, extended by Spring's MultipartException
 * refined ServletContextResourcePatternResolver to handle absolute paths returned by servlet container too (-> OC4J)
+* fixed CommonsMultipartResolver to freshly check standard GET request parameters even after a forward/include
 * FrameworkServlet exposes protected "processRequest" method, to be called for special HTTP methods (from "doXxx")
+* BindStatus resolves error messages lazily, to allow for custom error code resolution (avoid NoSuchMessageException)
+* refined RedirectView to use scheme-specific URL encoding on JDK 1.4+, only falling back to default encoding on JDK 1.3
 * AbstractXsltView applies a specified "uriResolver" to every created Transformer, not just to the TransformerFactory
 * added AbstractJExcelView for generating Excel files using JExcelApi (http://jexcelapi.sourceforge.net)
 * AbstractJasperReportsView supports JasperReports 1.0.1+ (which introduces an incompatible JR API change)
