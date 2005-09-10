@@ -77,7 +77,7 @@ public class UrlPathHelper {
 	 * in contrast to the servlet path.
 	 * <p>Uses either the request encoding or the default encoding according
 	 * to the Servlet spec (ISO-8859-1).
-	 * <p>Note: Setting this to true requires JDK 1.4 if the encoding differs
+	 * <p>Note: Setting this to "true" requires JDK 1.4 if the encoding differs
 	 * from the VM's platform default encoding, as JDK 1.3's URLDecoder class
 	 * does not offer a way to specify the encoding.
 	 * @see #getServletPath
@@ -240,21 +240,25 @@ public class UrlPathHelper {
 	}
 
 	/**
-	 * Decode the given source string with a URLEncoder. The encoding will be taken
+	 * Decode the given source string with a URLDecoder. The encoding will be taken
 	 * from the request, falling back to the default "ISO-8859-1".
+	 * <p>Default implementation uses <code>URLDecoder.decode(input, enc)</code>
+	 * on JDK 1.4+, falling back to <code>URLDecoder.decode(input)</code>
+	 * (which uses the platform default encoding) on JDK 1.3.
 	 * @param request current HTTP request
 	 * @param source the String to decode
 	 * @return the decoded String
 	 * @see WebUtils#DEFAULT_CHARACTER_ENCODING
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding
-	 * @see java.net.URLDecoder
+	 * @see java.net.URLDecoder#decode(String, String)
+	 * @see java.net.URLDecoder#decode(String)
 	 */
 	public String decodeRequestString(HttpServletRequest request, String source) {
 		if (this.urlDecode) {
 			String enc = determineEncoding(request);
 			try {
 				if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-					throw new UnsupportedEncodingException("JDK URLDecoder does not support custom encoding");
+					throw new UnsupportedEncodingException("JDK 1.3 URLDecoder does not support custom encoding");
 				}
 				return URLDecoder.decode(source, enc);
 			}
@@ -282,7 +286,7 @@ public class UrlPathHelper {
 	protected String determineEncoding(HttpServletRequest request) {
 		String enc = request.getCharacterEncoding();
 		if (enc == null) {
-			enc = this.defaultEncoding;
+			enc = getDefaultEncoding();
 		}
 		return enc;
 	}

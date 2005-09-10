@@ -28,6 +28,7 @@ public class XsltViewTests extends TestCase {
 
 	private int fatal = 0;
 
+
 	public void setUp() {
 		view = new TestXsltView();
 	}

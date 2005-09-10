@@ -40,6 +40,7 @@ public abstract class AbstractUrlMethodNameResolver implements MethodNameResolve
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
+
 	/**
 	 * Set if URL lookup should always use full path within current servlet
 	 * context. Else, the path within the current servlet mapping is used
@@ -57,7 +58,7 @@ public abstract class AbstractUrlMethodNameResolver implements MethodNameResolve
 	 * in contrast to the servlet path.
 	 * <p>Uses either the request encoding or the default encoding according
 	 * to the Servlet spec (ISO-8859-1).
-	 * <p>Note: Setting this to true requires JDK 1.4 if the encoding differs
+	 * <p>Note: Setting this to "true" requires JDK 1.4 if the encoding differs
 	 * from the VM's platform default encoding, as JDK 1.3's URLDecoder class
 	 * does not offer a way to specify the encoding.
 	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
@@ -76,6 +77,7 @@ public abstract class AbstractUrlMethodNameResolver implements MethodNameResolve
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
+
 
 	/**
 	 * This implementation of getHandlerMethodName retrieves the URL path
