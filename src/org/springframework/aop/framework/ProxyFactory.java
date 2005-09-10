@@ -18,8 +18,8 @@ package org.springframework.aop.framework;
 
 import org.aopalliance.intercept.Interceptor;
 
-import org.springframework.util.ClassUtils;
 import org.springframework.aop.TargetSource;
+import org.springframework.util.ClassUtils;
 
 /**
  * Factory for AOP proxies for programmatic use, rather than via a bean
@@ -30,7 +30,7 @@ import org.springframework.aop.TargetSource;
  * @author Rob Harrop
  * @since 14.03.2003
  */
-public class ProxyFactory extends AdvisedSupport {
+public class ProxyFactory extends AdvisedSupport implements AopProxy {
 
 	/**
 	 * Create a new ProxyFactory.
@@ -62,12 +62,26 @@ public class ProxyFactory extends AdvisedSupport {
 	 * Create a new proxy according to the settings in this factory.
 	 * Can be called repeatedly. Effect will vary if we've added
 	 * or removed interfaces. Can add and remove interceptors.
+	 * <p>Uses a default class loader: Usually, the thread context class loader
+	 * (if necessary for proxy creation).
 	 * @return the new proxy
 	 */
 	public Object getProxy() {
-		AopProxy proxy = createAopProxy();
-		return proxy.getProxy();
+		return createAopProxy().getProxy();
 	}
+
+	/**
+	 * Create a new proxy according to the settings in this factory.
+	 * Can be called repeatedly. Effect will vary if we've added
+	 * or removed interfaces. Can add and remove interceptors.
+	 * <p>Uses the given class loader (if necessary for proxy creation).
+	 * @param classLoader the class loader to create the proxy with
+	 * @return the new proxy
+	 */
+	public Object getProxy(ClassLoader classLoader) {
+		return createAopProxy().getProxy(classLoader);
+	}
+
 
 	/**
 	 * Create a new proxy for the given interface and interceptor.
@@ -86,7 +100,7 @@ public class ProxyFactory extends AdvisedSupport {
 	}
 
 	/**
-	 * Creates a proxy for the specified <code>TargetSource</code> that implements the
+	 * Create a proxy for the specified <code>TargetSource</code> that implements the
 	 * specified interface.
 	 */
 	public static Object getProxy(Class proxyInterface, TargetSource targetSource) {
@@ -101,14 +115,13 @@ public class ProxyFactory extends AdvisedSupport {
 	 * target class of the <code>TargetSource</code>.
 	 */
 	public static Object getProxy(TargetSource targetSource) {
-
-		if(targetSource.getTargetClass() == null) {
+		if (targetSource.getTargetClass() == null) {
 			throw new IllegalArgumentException("Cannot create class proxy for TargetSource with null target class");
 		}
-		
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTargetSource(targetSource);
 		proxyFactory.setProxyTargetClass(true);
 		return proxyFactory.getProxy();
 	}
+
 }

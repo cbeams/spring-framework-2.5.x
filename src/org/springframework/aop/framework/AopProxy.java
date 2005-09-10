@@ -28,16 +28,21 @@ package org.springframework.aop.framework;
 public interface AopProxy {
 
 	/**
-	 * Create a new Proxy object for the given object. Uses the thread
-	 * context class loader (if necessary for proxy creation).
-	 * @see java.lang.Thread#getContextClassLoader
+	 * Create a new proxy object.
+	 * <p>Uses the most optimal default class loader (if necessary for proxy creation):
+	 * usually, the thread context class loader.
+	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	Object getProxy();
 
 	/**
-	 * Create a new Proxy object for the given object.
-	 * Uses the given class loader (if necessary for proxy creation).
-	 * @param classLoader the class loader to use
+	 * Create a new proxy object.
+	 * <p>Uses the given class loader (if necessary for proxy creation).
+	 * <code>null</code> will simply be passed down and thus lead to the low-level
+	 * proxy facility's default, which is usually different from the default chosen
+	 * by the AopProxy implementation's <code>getProxy</code> method.
+	 * @param classLoader the class loader to create the proxy with
+	 * (or null for the low-level proxy facility's default)
 	 */
 	Object getProxy(ClassLoader classLoader);
 

@@ -228,7 +228,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * Return a proxy. Invoked when clients obtain beans from this factory bean.
 	 * Create an instance of the AOP proxy to be returned by this factory.
 	 * The instance will be cached for a singleton, and create on each call to
-	 * getObject() for a proxy.
+	 * <code>getObject()</code> for a proxy.
 	 * @return a fresh AOP proxy reflecting the current state of this factory
 	 */
 	public Object getObject() throws BeansException {
@@ -253,7 +253,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 	private Object getSingletonInstance() {
 		if (this.singletonInstance == null) {
 			super.setFrozen(this.freezeProxy);
-			this.singletonInstance = createAopProxy().getProxy();
+			this.singletonInstance = getProxy(createAopProxy());
 		}
 		return this.singletonInstance;
 	}
@@ -266,7 +266,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 	private synchronized Object newPrototypeInstance() {
 		// In the case of a prototype, we need to give the proxy
 		// an independent instance of the configuration.
-		// In this case, no poxy will have an instance of this object's configuration,
+		// In this case, no proxy will have an instance of this object's configuration,
 		// but will have an independent copy.
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating copy of prototype ProxyFactoryBean config: " + this);
@@ -274,12 +274,25 @@ public class ProxyFactoryBean extends AdvisedSupport
 		AdvisedSupport copy = new AdvisedSupport();
 		// The copy needs a fresh advisor chain, and a fresh TargetSource.
 		copy.copyConfigurationFrom(this, freshTargetSource(), freshAdvisorChain());
-        copy.setFrozen(this.freezeProxy);
-        
+		copy.setFrozen(this.freezeProxy);
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Copy has config: " + copy);
 		}
-		return copy.createAopProxy().getProxy();
+		return getProxy(copy.createAopProxy());
+	}
+
+	/**
+	 * Return the proxy object to expose.
+	 * <p>Default implementation uses a plain <code>getProxy()</code> call.
+	 * Can be overridden to specify a custom class loader.
+	 * @param aopProxy the prepared AopProxy instance to get the proxy from
+	 * @return the proxy object to expose
+	 * @see AopProxy#getProxy()
+	 * @see AopProxy#getProxy(ClassLoader)
+	 */
+	protected Object getProxy(AopProxy aopProxy) {
+		return aopProxy.getProxy();
 	}
 
 	/**

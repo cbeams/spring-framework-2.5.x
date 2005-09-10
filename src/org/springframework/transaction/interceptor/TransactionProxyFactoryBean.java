@@ -23,6 +23,7 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.framework.AopProxy;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.support.AopUtils;
@@ -306,7 +307,7 @@ public class TransactionProxyFactoryBean extends ProxyConfig
 			proxyFactory.setInterfaces(ClassUtils.getAllInterfacesForClass(targetSource.getTargetClass()));
 		}
 		
-		this.proxy = proxyFactory.getProxy();
+		this.proxy = getProxy(proxyFactory);
 	}
 
 	/**
@@ -323,6 +324,20 @@ public class TransactionProxyFactoryBean extends ProxyConfig
 			return new SingletonTargetSource(target);
 		}
 	}
+
+	/**
+	 * Return the proxy object to expose.
+	 * <p>Default implementation uses a plain <code>getProxy()</code> call.
+	 * Can be overridden to specify a custom class loader.
+	 * @param aopProxy the prepared AopProxy instance to get the proxy from
+	 * @return the proxy object to expose
+	 * @see org.springframework.aop.framework.AopProxy#getProxy()
+	 * @see org.springframework.aop.framework.AopProxy#getProxy(ClassLoader)
+	 */
+	protected Object getProxy(AopProxy aopProxy) {
+		return aopProxy.getProxy();
+	}
+
 
 	public Object getObject() {
 		return this.proxy;
