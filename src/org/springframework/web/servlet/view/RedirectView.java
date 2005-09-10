@@ -25,6 +25,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.core.JdkVersion;
+
 /**
  * <p>View that redirects to an absolute, context relative, or current request
  * relative URL, exposing all model attributes as HTTP query parameters.
@@ -188,12 +190,34 @@ public class RedirectView extends AbstractUrlBasedView {
 				targetUrl.append('&');
 			}
 			Map.Entry entry = (Map.Entry) entries.next();
-			String encodedKey = URLEncoder.encode(entry.getKey().toString());
-			String encodedValue = (entry.getValue() != null ? URLEncoder.encode(entry.getValue().toString()) : "");
-			targetUrl.append(new String(encodedKey.getBytes(encodingScheme), encodingScheme));
-			targetUrl.append("=");
-			targetUrl.append(new String(encodedValue.getBytes(encodingScheme), encodingScheme));
+			String encodedKey = urlEncode(entry.getKey().toString(), encodingScheme);
+			String encodedValue =
+					(entry.getValue() != null ? urlEncode(entry.getValue().toString(), encodingScheme) : "");
+			targetUrl.append(encodedKey).append('=').append(encodedValue);
 		}
+	}
+
+	/**
+	 * URL-encode the given input String with the given encoding scheme.
+	 * <p>Default implementation uses <code>URLEncoder.encode(input, enc)</code>
+	 * on JDK 1.4+, falling back to <code>URLEncoder.encode(input)</code>
+	 * (which uses the platform default encoding) on JDK 1.3.
+	 * @param input the unencoded input String
+	 * @param encodingScheme the encoding scheme
+	 * @return the encoded output String
+	 * @throws UnsupportedEncodingException if thrown by the JDK URLEncoder
+	 * @see java.net.URLEncoder#encode(String, String)
+	 * @see java.net.URLEncoder#encode(String)
+	 */
+	protected String urlEncode(String input, String encodingScheme) throws UnsupportedEncodingException {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Only JDK 1.3 URLEncoder available: using platform default encoding " +
+						"instead of the requested scheme '" + encodingScheme + "'");
+			}
+			return URLEncoder.encode(input);
+		}
+		return URLEncoder.encode(input, encodingScheme);
 	}
 
 	/**
@@ -217,6 +241,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	protected void sendRedirect(
 			HttpServletRequest request, HttpServletResponse response, String targetUrl, boolean http10Compatible)
 			throws IOException {
+
 		if (http10Compatible) {
 			// always send status code 302
 			response.sendRedirect(response.encodeRedirectURL(targetUrl));
