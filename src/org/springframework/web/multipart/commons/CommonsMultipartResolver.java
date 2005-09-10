@@ -19,7 +19,6 @@ package org.springframework.web.multipart.commons;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -195,15 +194,8 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 		}
 
 		try {
-			Map parameters = new HashMap();
 			Map multipartFiles = new HashMap();
-
-			// Pre-populate parameters Map with query parameters.
-			Enumeration paramNames = request.getParameterNames();
-			while (paramNames.hasMoreElements()) {
-				String paramName = (String) paramNames.nextElement();
-				parameters.put(paramName, request.getParameterValues(paramName));
-			}
+			Map multipartParams = new HashMap();
 
 			// Extract multipart files and multipart parameters.
 			List fileItems = fileUpload.parseRequest(request);
@@ -219,15 +211,15 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 						    "' with encoding '" + enc + "': using platform default");
 						value = fileItem.getString();
 					}
-					String[] curParam = (String[]) parameters.get(fileItem.getFieldName());
+					String[] curParam = (String[]) multipartParams.get(fileItem.getFieldName());
 					if (curParam == null) {
 						// simple form field
-						parameters.put(fileItem.getFieldName(), new String[] { value });
+						multipartParams.put(fileItem.getFieldName(), new String[] { value });
 					}
 					else {
 						// array of simple form fields
 						String[] newParam = StringUtils.addStringToArray(curParam, value);
-						parameters.put(fileItem.getFieldName(), newParam);
+						multipartParams.put(fileItem.getFieldName(), newParam);
 					}
 				}
 				else {
@@ -241,7 +233,7 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 					}
 				}
 			}
-			return new DefaultMultipartHttpServletRequest(request, multipartFiles, parameters);
+			return new DefaultMultipartHttpServletRequest(request, multipartFiles, multipartParams);
 		}
 		catch (FileUploadBase.SizeLimitExceededException ex) {
 			throw new MaxUploadSizeExceededException(this.fileUpload.getSizeMax(), ex);

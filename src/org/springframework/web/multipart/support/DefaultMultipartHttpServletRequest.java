@@ -18,7 +18,10 @@ package org.springframework.web.multipart.support;
 
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -33,36 +36,54 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
 
-	private final Map parameters;
+	private final Map multipartParams;
+
 
 	/**
 	 * Wrap the given HttpServletRequest in a MultipartHttpServletRequest.
 	 * @param request the servlet request to wrap
 	 * @param multipartFiles a map of the multipart files
-	 * @param parameters a map of the parameters to expose,
+	 * @param multipartParams a map of the parameters to expose,
 	 * with Strings as keys and String arrays as values
 	 */
-	public DefaultMultipartHttpServletRequest(HttpServletRequest request, Map multipartFiles, Map parameters) {
+	public DefaultMultipartHttpServletRequest(HttpServletRequest request, Map multipartFiles, Map multipartParams) {
 		super(request);
 		setMultipartFiles(multipartFiles);
-		this.parameters = Collections.unmodifiableMap(parameters);
+		this.multipartParams = multipartParams;
 	}
 
+
 	public Enumeration getParameterNames() {
-		return Collections.enumeration(this.parameters.keySet());
+		Set paramNames = new HashSet();
+		Enumeration paramEnum = getRequest().getParameterNames();
+		while (paramEnum.hasMoreElements()) {
+			paramNames.add(paramEnum.nextElement());
+		}
+		paramNames.addAll(this.multipartParams.keySet());
+		return Collections.enumeration(paramNames);
 	}
 
 	public String getParameter(String name) {
-		String[] values = (String[]) this.parameters.get(name);
-		return (values != null && values.length > 0 ? values[0] : null);
+		String[] values = (String[]) this.multipartParams.get(name);
+		if (values != null) {
+			return (values.length > 0 ? values[0] : null);
+		}
+		return getRequest().getParameter(name);
 	}
 
 	public String[] getParameterValues(String name) {
-		return (String[]) this.parameters.get(name);
+		String[] values = (String[]) this.multipartParams.get(name);
+		if (values != null) {
+			return values;
+		}
+		return getRequest().getParameterValues(name);
 	}
 
 	public Map getParameterMap() {
-		return this.parameters;
+		Map paramMap = new HashMap();
+		paramMap.putAll(getRequest().getParameterMap());
+		paramMap.putAll(this.multipartParams);
+		return paramMap;
 	}
 
 }
