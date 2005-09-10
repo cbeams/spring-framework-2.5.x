@@ -55,6 +55,7 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 
 	private final MultipartRequest multipartRequest;
 
+
 	/**
 	 * Wrap the given HttpServletRequest in a MultipartHttpServletRequest.
 	 * @param request the servlet request to wrap
@@ -90,6 +91,7 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 		}
 		return files;
 	}
+
 
 	public Enumeration getParameterNames() {
 		return this.multipartRequest.getParameterNames();
