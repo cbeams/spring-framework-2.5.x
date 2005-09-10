@@ -60,9 +60,11 @@ public class BindStatus {
 
 	private Object value;
 
-	private final String[] errorCodes;
+	private List objectErrors;
 
-	private final String[] errorMessages;
+	private String[] errorCodes;
+
+	private String[] errorMessages;
 
 
 	/**
@@ -100,17 +102,15 @@ public class BindStatus {
 			// Can determine error codes and messages for the given expression.
 			// Can use a custom PropertyEditor, as registered by a form controller.
 
-			List objectErrors = null;
-
 			if (this.expression != null) {
 				if ("*".equals(this.expression)) {
-					objectErrors = this.errors.getAllErrors();
+					this.objectErrors = this.errors.getAllErrors();
 				}
 				else if (this.expression.endsWith("*")) {
-					objectErrors = this.errors.getFieldErrors(this.expression);
+					this.objectErrors = this.errors.getFieldErrors(this.expression);
 				}
 				else {
-					objectErrors = this.errors.getFieldErrors(this.expression);
+					this.objectErrors = this.errors.getFieldErrors(this.expression);
 					if (this.errors instanceof BindException) {
 						this.editor = ((BindException) this.errors).getCustomEditor(this.expression);
 					}
@@ -118,11 +118,10 @@ public class BindStatus {
 				}
 			}
 			else {
-				objectErrors = this.errors.getGlobalErrors();
+				this.objectErrors = this.errors.getGlobalErrors();
 			}
 
-			this.errorCodes = getErrorCodes(objectErrors);
-			this.errorMessages = getErrorMessages(objectErrors);
+			initErrorCodes();
 		}
 
 		else {
@@ -151,27 +150,27 @@ public class BindStatus {
 	}
 
 	/**
-	 * Extract the error codes from the given ObjectError list.
+	 * Extract the error codes from the ObjectError list.
 	 */
-	private String[] getErrorCodes(List objectErrors) {
-		String[] codes = new String[objectErrors.size()];
-		for (int i = 0; i < objectErrors.size(); i++) {
-			ObjectError error = (ObjectError) objectErrors.get(i);
-			codes[i] = error.getCode();
+	private void initErrorCodes() {
+		this.errorCodes = new String[this.objectErrors.size()];
+		for (int i = 0; i < this.objectErrors.size(); i++) {
+			ObjectError error = (ObjectError) this.objectErrors.get(i);
+			this.errorCodes[i] = error.getCode();
 		}
-		return codes;
 	}
 
 	/**
-	 * Extract the error messages from the given ObjectError list.
+	 * Extract the error messages from the ObjectError list.
 	 */
-	private String[] getErrorMessages(List objectErrors) throws NoSuchMessageException {
-		String[] messages = new String[objectErrors.size()];
-		for (int i = 0; i < objectErrors.size(); i++) {
-			ObjectError error = (ObjectError) objectErrors.get(i);
-			messages[i] = this.requestContext.getMessage(error, this.htmlEscape);
+	private void initErrorMessages() throws NoSuchMessageException {
+		if (this.errorMessages == null) {
+			this.errorMessages = new String[this.objectErrors.size()];
+			for (int i = 0; i < this.objectErrors.size(); i++) {
+				ObjectError error = (ObjectError) this.objectErrors.get(i);
+				this.errorMessages[i] = this.requestContext.getMessage(error, this.htmlEscape);
+			}
 		}
-		return messages;
 	}
 
 
@@ -248,13 +247,15 @@ public class BindStatus {
 	 * if any. Returns an empty array instead of null if none.
 	 */
 	public String[] getErrorMessages() {
-		return errorMessages;
+		initErrorMessages();
+		return this.errorMessages;
 	}
 
 	/**
 	 * Return the first error message for the field or object, if any.
 	 */
 	public String getErrorMessage() {
+		initErrorMessages();
 		return (this.errorMessages.length > 0 ? this.errorMessages[0] : "");
 	}
 
@@ -265,6 +266,7 @@ public class BindStatus {
 	 * @return the error message string
 	 */
 	public String getErrorMessagesAsString(String delimiter) {
+		initErrorMessages();
 		return StringUtils.arrayToDelimitedString(this.errorMessages, delimiter);
 	}
 
@@ -291,8 +293,7 @@ public class BindStatus {
 		sb.append("expression=[").append(this.expression).append("]; ");
 		sb.append("value=[").append(this.value).append("]");
 		if (isError()) {
-			sb.append("; errorCodes='" + Arrays.asList(this.errorCodes) + "'; ");
-			sb.append("errorMessages='" + Arrays.asList(this.errorMessages));
+			sb.append("; errorCodes=" + Arrays.asList(this.errorCodes));
 		}
 		return sb.toString();
 	}

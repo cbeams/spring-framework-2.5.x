@@ -65,7 +65,7 @@ public class BindTagTests extends AbstractTagTests {
 	public void testBindTagWithGlobalErrors() throws JspException {
 		PageContext pc = createPageContext();
 		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
-		errors.reject("code1", null, "message1");
+		errors.reject("code1", "message1");
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
 
 		BindTag tag = new BindTag();
@@ -97,6 +97,74 @@ public class BindTagTests extends AbstractTagTests {
 		assertTrue("Correct errorCodes", status.getErrorCodes().length == 1);
 		assertTrue("Correct errorMessages", status.getErrorMessages().length == 1);
 		assertTrue("Correct errorCode", "code1".equals(status.getErrorCode()));
+		assertTrue("Correct errorMessage", "message1".equals(status.getErrorMessage()));
+		assertTrue("Correct errorMessagesAsString", "message1".equals(status.getErrorMessagesAsString(",")));
+	}
+
+	public void testBindTagWithGlobalErrorsAndNoDefaultMessage() throws JspException {
+		PageContext pc = createPageContext();
+		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
+		errors.reject("code1");
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+
+		BindTag tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status != null);
+		assertTrue("Correct expression", status.getExpression() == null);
+		assertTrue("Correct value", status.getValue() == null);
+		assertTrue("Correct displayValue", "".equals(status.getDisplayValue()));
+		assertTrue("Correct isError", status.isError());
+		assertTrue("Correct errorCodes", status.getErrorCodes().length == 1);
+		assertTrue("Correct errorCode", "code1".equals(status.getErrorCode()));
+
+		tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb.*");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status != null);
+		assertTrue("Correct expression", "*".equals(status.getExpression()));
+		assertTrue("Correct value", status.getValue() == null);
+		assertTrue("Correct displayValue", "".equals(status.getDisplayValue()));
+		assertTrue("Correct isError", status.isError());
+		assertTrue("Correct errorCodes", status.getErrorCodes().length == 1);
+		assertTrue("Correct errorCode", "code1".equals(status.getErrorCode()));
+	}
+
+	public void testBindTagWithGlobalErrorsAndDefaultMessageOnly() throws JspException {
+		PageContext pc = createPageContext();
+		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
+		errors.reject(null, "message1");
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+
+		BindTag tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status != null);
+		assertTrue("Correct expression", status.getExpression() == null);
+		assertTrue("Correct value", status.getValue() == null);
+		assertTrue("Correct displayValue", "".equals(status.getDisplayValue()));
+		assertTrue("Correct isError", status.isError());
+		assertTrue("Correct errorMessages", status.getErrorMessages().length == 1);
+		assertTrue("Correct errorMessage", "message1".equals(status.getErrorMessage()));
+		assertTrue("Correct errorMessagesAsString", "message1".equals(status.getErrorMessagesAsString(",")));
+
+		tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb.*");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status != null);
+		assertTrue("Correct expression", "*".equals(status.getExpression()));
+		assertTrue("Correct value", status.getValue() == null);
+		assertTrue("Correct displayValue", "".equals(status.getDisplayValue()));
+		assertTrue("Correct isError", status.isError());
+		assertTrue("Correct errorMessages", status.getErrorMessages().length == 1);
 		assertTrue("Correct errorMessage", "message1".equals(status.getErrorMessage()));
 		assertTrue("Correct errorMessagesAsString", "message1".equals(status.getErrorMessagesAsString(",")));
 	}
@@ -205,6 +273,121 @@ public class BindTagTests extends AbstractTagTests {
 		assertTrue("Correct errorCode", "code1".equals(status.getErrorCodes()[0]));
 		assertTrue("Correct errorCode", "code2".equals(status.getErrorCodes()[1]));
 		assertTrue("Correct errorCode", "code2".equals(status.getErrorCodes()[2]));
+		assertTrue("Correct errorMessage", "message & 1".equals(status.getErrorMessage()));
+		assertTrue("Correct errorMessage", "message & 1".equals(status.getErrorMessages()[0]));
+		assertTrue("Correct errorMessage", "message2".equals(status.getErrorMessages()[1]));
+		assertTrue("Correct errorMessage", "message2".equals(status.getErrorMessages()[2]));
+	}
+
+	public void testBindTagWithFieldErrorsAndNoDefaultMessage() throws JspException {
+		PageContext pc = createPageContext();
+		TestBean tb = new TestBean();
+		tb.setName("name1");
+		BindException errors = new ServletRequestDataBinder(tb, "tb").getErrors();
+		errors.rejectValue("name", "code1");
+		errors.rejectValue("name", "code2");
+		errors.rejectValue("age", "code2");
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+
+		BindTag tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb.name");
+		tag.setHtmlEscape("true");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status != null);
+		assertTrue("Correct expression", "name".equals(status.getExpression()));
+		assertTrue("Correct value", "name1".equals(status.getValue()));
+		assertTrue("Correct displayValue", "name1".equals(status.getDisplayValue()));
+		assertTrue("Correct isError", status.isError());
+		assertTrue("Correct errorCodes", status.getErrorCodes().length == 2);
+		assertTrue("Correct errorCode", "code1".equals(status.getErrorCode()));
+		assertTrue("Correct errorCode", "code1".equals(status.getErrorCodes()[0]));
+		assertTrue("Correct errorCode", "code2".equals(status.getErrorCodes()[1]));
+
+		tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb.age");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status != null);
+		assertTrue("Correct expression", "age".equals(status.getExpression()));
+		assertTrue("Correct value", new Integer(0).equals(status.getValue()));
+		assertTrue("Correct displayValue", "0".equals(status.getDisplayValue()));
+		assertTrue("Correct isError", status.isError());
+		assertTrue("Correct errorCodes", status.getErrorCodes().length == 1);
+		assertTrue("Correct errorCode", "code2".equals(status.getErrorCode()));
+
+		tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb.*");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status != null);
+		assertTrue("Correct expression", "*".equals(status.getExpression()));
+		assertTrue("Correct value", status.getValue() == null);
+		assertTrue("Correct displayValue", "".equals(status.getDisplayValue()));
+		assertTrue("Correct isError", status.isError());
+		assertTrue("Correct errorCodes", status.getErrorCodes().length == 3);
+		assertTrue("Correct errorCode", "code1".equals(status.getErrorCode()));
+		assertTrue("Correct errorCode", "code1".equals(status.getErrorCodes()[0]));
+		assertTrue("Correct errorCode", "code2".equals(status.getErrorCodes()[1]));
+		assertTrue("Correct errorCode", "code2".equals(status.getErrorCodes()[2]));
+	}
+
+	public void testBindTagWithFieldErrorsAndDefaultMessageOnly() throws JspException {
+		PageContext pc = createPageContext();
+		TestBean tb = new TestBean();
+		tb.setName("name1");
+		BindException errors = new ServletRequestDataBinder(tb, "tb").getErrors();
+		errors.rejectValue("name", null, "message & 1");
+		errors.rejectValue("name", null, "message2");
+		errors.rejectValue("age", null, "message2");
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+
+		BindTag tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb.name");
+		tag.setHtmlEscape("true");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status != null);
+		assertTrue("Correct expression", "name".equals(status.getExpression()));
+		assertTrue("Correct value", "name1".equals(status.getValue()));
+		assertTrue("Correct displayValue", "name1".equals(status.getDisplayValue()));
+		assertTrue("Correct isError", status.isError());
+		assertTrue("Correct errorMessages", status.getErrorMessages().length == 2);
+		assertTrue("Correct errorMessage", "message &amp; 1".equals(status.getErrorMessage()));
+		assertTrue("Correct errorMessage", "message &amp; 1".equals(status.getErrorMessages()[0]));
+		assertTrue("Correct errorMessage", "message2".equals(status.getErrorMessages()[1]));
+		assertTrue("Correct errorMessagesAsString",
+				"message &amp; 1 - message2".equals(status.getErrorMessagesAsString(" - ")));
+
+		tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb.age");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status != null);
+		assertTrue("Correct expression", "age".equals(status.getExpression()));
+		assertTrue("Correct value", new Integer(0).equals(status.getValue()));
+		assertTrue("Correct displayValue", "0".equals(status.getDisplayValue()));
+		assertTrue("Correct isError", status.isError());
+		assertTrue("Correct errorMessages", status.getErrorMessages().length == 1);
+		assertTrue("Correct errorMessage", "message2".equals(status.getErrorMessage()));
+		assertTrue("Correct errorMessagesAsString", "message2".equals(status.getErrorMessagesAsString(" - ")));
+
+		tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb.*");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status != null);
+		assertTrue("Correct expression", "*".equals(status.getExpression()));
+		assertTrue("Correct value", status.getValue() == null);
+		assertTrue("Correct displayValue", "".equals(status.getDisplayValue()));
+		assertTrue("Correct isError", status.isError());
+		assertTrue("Correct errorMessages", status.getErrorMessages().length == 3);
 		assertTrue("Correct errorMessage", "message & 1".equals(status.getErrorMessage()));
 		assertTrue("Correct errorMessage", "message & 1".equals(status.getErrorMessages()[0]));
 		assertTrue("Correct errorMessage", "message2".equals(status.getErrorMessages()[1]));
