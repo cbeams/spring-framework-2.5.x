@@ -26,9 +26,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -37,7 +34,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 /**
  * Generic utility methods for working with JDBC. Mainly for internal use
@@ -49,7 +45,6 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 public abstract class JdbcUtils {
 
 	private static final Log logger = LogFactory.getLog(JdbcUtils.class);
-	private static final int MAX_SELECT_LIST_ENTRIES = 100;
 
 
 	/**
@@ -277,7 +272,6 @@ public abstract class JdbcUtils {
 	 * @param str string to search in. Returns 0 if this is null.
 	 * @param placeholder the character to search for and count
 	 * @param delim the delimiter for character literals
-	 * @deprecated Use countParameterPlaceholders(String sql) method instead.
 	 */
 	public static int countParameterPlaceholders(String str, char placeholder, char delim) {
 		return countParameterPlaceholders(str, placeholder, "" + delim);
@@ -298,7 +292,6 @@ public abstract class JdbcUtils {
 	 * @param str string to search in. Returns 0 if this is null
 	 * @param placeholder the character to search for and count.
 	 * @param delimiters the delimiters for character literals.
-	 * @deprecated Use countParameterPlaceholders(String sql) method instead.
 	 */
 	public static int countParameterPlaceholders(String str, char placeholder, String delimiters) {
 		int count = 0;
@@ -309,7 +302,7 @@ public abstract class JdbcUtils {
 				if (!insideLiteral)
 					count++;
 			}
-			 else {
+ 			else {
 				if (delimiters.indexOf(str.charAt(i)) > -1) {
 					if (!insideLiteral) {
 						insideLiteral = true;
@@ -365,176 +358,6 @@ public abstract class JdbcUtils {
 			retType = Types.NUMERIC;
 		}
 		return retType;
-	}
-
-
-	/**
-	 * Count the occurrences of the character <code>placeholder</code> in an SQL string
-	 * <code>sql</code>. The character <code>placeholder</code> is not counted if it
-	 * appears within a literal -- surrounded by single or double quotes.  This method will
-	 * count traditional placeholders in the form of a question mark ('?') as well as
-	 * named parameters indicated with a leading ':' or '&'.
-	 * @param sql string to search in. Returns 0 if this is null
-	 */
-	public static int countParameterPlaceholders(String sql) {
-		byte[] statement = (sql == null) ? new byte[0] : sql.getBytes();
-		boolean withinQuotes = false;
-		char currentQuote = '-';
-		int parameterCount = 0;
-		int i = 0;
-		while (i < statement.length) {
-			if (withinQuotes) {
-				if (statement[i] == currentQuote) {
-					withinQuotes = false;
-					currentQuote = '-';
-				}
-			}
-			else {
-				if (statement[i] == '"' || statement[i] == '\'') {
-					withinQuotes = true;
-					currentQuote = (char)statement[i];
-				}
-				else {
-					if (statement[i] == ':' || statement[i] == '&') {
-						int j = i + 1;
-						while (j < statement.length &&
-								parameterNameIsContinued(statement, j)) {
-							j++;
-						}
-						if (j - i > 1) {
-							parameterCount++;
-						}
-						i = j - 1;
-					}
-					else {
-						if (statement[i] == '?')
-							parameterCount++;
-					}
-				}
-			}
-			i++;
-		}
-		return parameterCount;
-	}
-
-	public static ParsedSql parseSqlStatement(String sql) {
-		return parseSqlStatement(sql, null);
-	}
-
-	public static ParsedSql parseSqlStatement(String sql, Map argMap) {
-		ArrayList namedParameters = new ArrayList();
-		ParsedSql parsedSql = new ParsedSql(sql);
-
-		byte[] statement = (sql == null) ? new byte[0] : sql.getBytes();
-		StringBuffer newSql = new StringBuffer();
-		boolean withinQuotes = false;
-		char currentQuote = '-';
-		int parameterCount = 0;
-		int namedParameterCount = 0;
-
-		int i = 0;
-		while (i < statement.length) {
-			if (withinQuotes) {
-				if (statement[i] == currentQuote) {
-					withinQuotes = false;
-					currentQuote = '-';
-				}
-				newSql.append((char)statement[i]);
-			}
-			else {
-				if (statement[i] == '"' || statement[i] == '\'') {
-					withinQuotes = true;
-					currentQuote = (char)statement[i];
-					newSql.append((char)statement[i]);
-				}
-				else {
-					if (statement[i] == ':' || statement[i] == '&') {
-						int j = i + 1;
-						while (j < statement.length &&
-								parameterNameIsContinued(statement, j)) {
-							j++;
-						}
-						if (j - i > 1) {
-							String parameter = sql.substring(i+1, j);
-							namedParameters.add(parameter);
-							if (argMap != null) {
-								Object o = argMap.get(parameter);
-								if (o instanceof List) {
-									if (((List)o).size() > MAX_SELECT_LIST_ENTRIES) {
-										logger.warn("The number of entries in a select should not exceed " + MAX_SELECT_LIST_ENTRIES + ".");
-									}
-									for (int k = 0; k < ((List)o).size(); k++) {
-										if (k > 0)
-											newSql.append(", ");
-										newSql.append("?");
-									}
-								}
-								else {
-									newSql.append("?");
-								}
-							}
-							else {
-								newSql.append("?");
-							}
-							parameterCount++;
-							namedParameterCount++;
-						}
-						i = j - 1;
-					}
-					else {
-						newSql.append((char)statement[i]);
-						if (statement[i] == '?')
-							parameterCount++;
-					}
-				}
-			}
-			i++;
-		}
-		parsedSql.setNamedParameterCount(namedParameterCount);
-		parsedSql.setParameterCount(parameterCount);
-		parsedSql.setNewSql(newSql.toString());
-		parsedSql.setNamedParameters(namedParameters);
-		return parsedSql;
-	}
-
-	private static boolean parameterNameIsContinued(byte[] statement, int j) {
-		return (statement[j] != ' ' && statement[j] != ',' && statement[j] != ')' &&
-				statement[j] != '"' && statement[j] != '\'' && statement[j] != '|' &&
-				statement[j] != ';' && statement[j] != '\n' && statement[j] != '\r');
-	}
-
-	public static Object[] convertArgMapToArray(String sql, Map argMap) {
-		ParsedSql parsedSql = JdbcUtils.parseSqlStatement(sql);
-		return convertArgMapToArray(sql, argMap, parsedSql);
-	}
-
-	public static Object[] convertArgMapToArray(String sql, Map argMap, ParsedSql parsedSql) {
-		Object[] args = new Object[parsedSql.getNamedParameterCount()];
-		if (parsedSql.getNamedParameterCount() != parsedSql.getParameterCount()) {
-			throw new InvalidDataAccessApiUsageException("You must supply named parameter placeholders for all " +
-					"parameters when using a Map for the parameter values.");
-		}
-		if (parsedSql.getNamedParameterCount() != argMap.size()) {
-			if (parsedSql.getNamedParameterCount() > argMap.size()) {
-			throw new InvalidDataAccessApiUsageException("Wrong number of parameters/values supplied.  You have " +
-					parsedSql.getNamedParameterCount() + " named parameter(s) and supplied " + argMap.size() +
-					" parameter value(s).");
-			}
-			else {
-				logger.warn("You have additional entries in the parameter map supplied.  There are " +
-					parsedSql.getNamedParameterCount() + " named parameter(s) and " + argMap.size() +
-					" parameter value(s).");
-			}
-		}
-		for (int i = 0; i < parsedSql.getNamedParameters().size(); i++) {
-			if (!argMap.containsKey(parsedSql.getNamedParameters().get(i))) {
-				throw new InvalidDataAccessApiUsageException("No entry supplied for the '" +
-						parsedSql.getNamedParameters().get(i) + "' parameter.");
-
-			}
-			args[i] = argMap.get(parsedSql.getNamedParameters().get(i));
-		}
-		return args;
 	}
 
 }

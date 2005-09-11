@@ -20,7 +20,6 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
-import org.springframework.jdbc.core.SqlParameterMap;
 import org.springframework.jdbc.support.KeyHolder;
 
 /**
@@ -162,19 +161,6 @@ public class SqlUpdate extends SqlOperation {
 	}
 
 	/**
-	 * Generic method to execute the update given arguments.
-	 * All other update methods invoke this method.
-	 * @param argMap Map of object arguments matching named parameters specified in SQL statement
-	 * @return the number of rows affected by the update
-	 */
-	public int update(SqlParameterMap argMap) throws DataAccessException {
-		//ToDo: validateParameters(argMap);
-		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(argMap));
-		checkRowsAffected(rowsAffected);
-		return rowsAffected;
-	}
-
-	/**
 	 * Method to execute the update given arguments and 
 	 * retrieve the generated keys using a KeyHolder.
 	 * @param args array of object arguments
@@ -184,20 +170,6 @@ public class SqlUpdate extends SqlOperation {
 	public int update(Object[] args, KeyHolder generatedKeyHolder) throws DataAccessException {
 		validateParameters(args);
 		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(args), generatedKeyHolder);
-		checkRowsAffected(rowsAffected);
-		return rowsAffected;
-	}
-
-	/**
-	 * Method to execute the update given arguments and
-	 * retrieve the generated keys using a KeyHolder.
-	 * @param argMap Map of object arguments matching named parameters specified in SQL statement
-	 * @param generatedKeyHolder KeyHolder that will hold the generated keys
-	 * @return the number of rows affected by the update
-	 */
-	public int update(SqlParameterMap argMap, KeyHolder generatedKeyHolder) throws DataAccessException {
-		//ToDo: validateParameters(args);
-		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(argMap), generatedKeyHolder);
 		checkRowsAffected(rowsAffected);
 		return rowsAffected;
 	}
