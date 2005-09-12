@@ -27,6 +27,9 @@ Package org.springframework.jms
 * factored out JmsDestinationAccessor from JmsTemplate, as a more specialized subclass of JmsAccessor
 * merged all of JmsTemplate/JmsTemplate102's "createConsumer" template methods into one
 
+Package org.springframework.jmx
+* added excludedBeans property to MBeanExporter to allow for some beans to be explicitly excluded from autodetection
+
 Package org.springframework.transaction
 * added protected "Object getProxy(AopProxy)" hook to TransactionProxyFactoryBean, for specifying a custom class loader
 
