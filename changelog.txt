@@ -9,6 +9,7 @@ Changes in version 1.2.5 (19.9.2005)
 Package org.springframework.aop
 * added overloaded "getProxy" method with an explicit ClassLoader argument to ProxyFactory
 * added protected "Object getProxy(AopProxy)" hook to ProxyFactoryBean, for specifying a custom class loader
+* modified AbstractAutoProxyCreator to defer setting of the frozen flag until *after* advice has been applied (SPR-1250)
 
 Package org.springframework.beans
 * fixed BeanWrapperImpl's "getPropertyType" implementation to avoid potential NPE in case of no custom editors
