@@ -25,6 +25,7 @@ import junit.framework.TestCase;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.framework.MethodCounter;
+import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.CommonsPoolTargetSource;
@@ -296,6 +297,20 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		// Will cause rollback only
 		rb.rollbackOnly(true);
 		assertEquals(1, txMan.rollbacks);
+	}
+
+	public void testWithOptimizedProxy() throws Exception {
+		BeanFactory beanFactory = new ClassPathXmlApplicationContext("org/springframework/aop/framework/autoproxy/optimizedAutoProxyCreator.xml");
+
+		ITestBean testBean = (ITestBean)beanFactory.getBean("optimizedTestBean");
+		assertTrue(AopUtils.isAopProxy(testBean));
+
+		CountingBeforeAdvice beforeAdvice = (CountingBeforeAdvice) beanFactory.getBean("countingAdvice");
+
+		testBean.setAge(23);
+		testBean.getAge();
+
+		assertEquals("Incorrect number of calls to proxy", 2, beforeAdvice.getCalls());
 	}
 
 	
