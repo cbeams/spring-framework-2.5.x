@@ -70,6 +70,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Rob Harrop
  * @since 13.10.2003
  * @see #setInterceptorNames
  * @see BeanNameAutoProxyCreator
@@ -98,6 +99,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
 	/**
+	 * Indicates whether or not the proxy should be frozen. Overridden from super to prevent the
+	 * configuration from becoming frozen too early.
+	 */
+	private boolean freezeProxy;
+	/**
 	 * Names of common interceptors. We must use bean name rather than object references
 	 * to handle prototype advisors/interceptors.
 	 * Default is the empty array: no common interceptors.
@@ -123,6 +129,19 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	public final int getOrder() {
 	  return order;
+	}
+
+	public boolean isFrozen() {
+		return this.freezeProxy;
+	}
+
+	/**
+	 * Sets whether or not the proxy should be frozen, preventing advice from being added to it
+	 * once it is created. Overridden from the super class to prevent the proxy configuration from
+	 * being frozen before the proxy is created.
+	 */
+	public void setFrozen(boolean frozen) {
+		this.freezeProxy = frozen;
 	}
 
 	/**
@@ -357,6 +376,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		proxyFactory.setTargetSource(targetSource);
 		customizeProxyFactory(proxyFactory);
 
+		proxyFactory.setFrozen(this.freezeProxy);
 		return proxyFactory.getProxy();
 	}
 

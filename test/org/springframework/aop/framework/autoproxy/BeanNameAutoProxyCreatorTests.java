@@ -25,6 +25,7 @@ import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.framework.LockedException;
 import org.springframework.aop.framework.TimeStamped;
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
@@ -36,6 +37,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * EnterpriseServices test that ources attributes from source-level metadata.
  *
  * @author Rod Johnson
+ * @author Rob Harrop
  */
 public class BeanNameAutoProxyCreatorTests extends TestCase {
 
@@ -160,6 +162,11 @@ public class BeanNameAutoProxyCreatorTests extends TestCase {
 		TestBean tb = (TestBean) bf.getBean("cglib1");
 		cglibAssertions(tb);
 		assertEquals("cglib1", tb.getName());
+	}
+
+	public void testWithFrozenProxy() {
+		ITestBean testBean = (ITestBean) this.bf.getBean("frozenBean");
+		assertTrue(((Advised)testBean).isFrozen());
 	}
 	
 	private void jdkAssertions(ITestBean tb)  {

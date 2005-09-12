@@ -3,6 +3,12 @@
 
 <beans>
 
+	<bean id="frozenProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+		<property name="beanNames" value="frozenBean"/>
+		<property name="frozen" value="true"/>
+		<property name="interceptorNames" value="nopInterceptor"/>
+	</bean>
+
 	<bean id="_jdkBeanNameProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
 		<description>
 			Automatically proxies using JDK dynamic proxies
@@ -89,6 +95,10 @@
 	
 	<bean id="jdk1" class="org.springframework.beans.TestBean">	
 		<property name="name"><value>jdk1</value></property>
+	</bean>
+
+	<bean id="frozenBean" class="org.springframework.beans.TestBean">
+		<property name="name" value="frozenBean"/>
 	</bean>
 	
 	<bean id="cglib1" class="org.springframework.beans.TestBean">	
