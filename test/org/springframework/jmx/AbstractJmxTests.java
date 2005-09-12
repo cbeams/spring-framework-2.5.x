@@ -4,25 +4,18 @@
 
 package org.springframework.jmx;
 
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-
-import junit.framework.TestCase;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Rob Harrop
  */
-public abstract class AbstractJmxTests extends TestCase {
+public abstract class AbstractJmxTests extends AbstractMBeanServerTests {
 
 	private ClassPathXmlApplicationContext ctx;
 
-	protected MBeanServer server;
 
-	public void setUp() throws Exception {
-		server = MBeanServerFactory.createMBeanServer();
+	protected void onSetUp() throws Exception {
 		ctx = new ClassPathXmlApplicationContext(getApplicationContextPath());
 	}
 
@@ -33,11 +26,4 @@ public abstract class AbstractJmxTests extends TestCase {
 	protected ApplicationContext getContext() {
 		return this.ctx;
 	}
-
-	public void tearDown() throws Exception {
-		ctx.close();
-		MBeanServerFactory.releaseMBeanServer(server);
-		assertTrue("MBeanServers not fully cleaned up", MBeanServerFactory.findMBeanServer(null).isEmpty());
-	}
-
 }
