@@ -33,6 +33,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut {
 	public AspectJExpressionPointcut() {
 		pointcutParser = new PointcutParser(getSupportedPrimitives());
 	}
+	
+	public AspectJExpressionPointcut(PointcutParser pointcutParser) {
+		this.pointcutParser = pointcutParser;
+	}
 
 	public ClassFilter getClassFilter() {
 		checkReadyToMatch();
@@ -50,6 +54,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut {
 
 		this.classFilter = new AspectJExpressionClassFilter(this.pointcutExpression, expression);
 		this.methodMatcher = new AspectJExpressionMethodMatcher(this.pointcutExpression, expression);
+	}
+	
+	public PointcutExpression getPointcutExpression() {
+		return this.pointcutExpression;
 	}
 
 	protected Set getSupportedPrimitives() {
