@@ -29,7 +29,13 @@ Package org.springframework.jms
 * merged all of JmsTemplate/JmsTemplate102's "createConsumer" template methods into one
 
 Package org.springframework.jmx
-* added excludedBeans property to MBeanExporter to allow for some beans to be explicitly excluded from autodetection
+* added "excludedBeans" property to MBeanExporter to allow for some beans to be explicitly excluded from autodetection
+
+Package org.springframework.mock
+* fixed MockServletContext's "getResource" and "getInputStream" implementations to return null for non-existing resource
+
+Package org.springframework.orm
+* added "findByExample" methods to HibernateOperations/Template for Hibernate3, for querying by example entity object
 
 Package org.springframework.transaction
 * added protected "Object getProxy(AopProxy)" hook to TransactionProxyFactoryBean, for specifying a custom class loader
@@ -42,6 +48,7 @@ Package org.springframework.web
 * introduced NestedServletException for proper root cause handling, extended by Spring's MultipartException
 * refined ServletContextResourcePatternResolver to handle absolute paths returned by servlet container too (-> OC4J)
 * fixed CommonsMultipartResolver to freshly check standard GET request parameters even after a forward/include
+* added various RequestLoggingFilters: for Commons Logging, the ServletContext log, and Log4J including NDC support
 * FrameworkServlet exposes protected "processRequest" method, to be called for special HTTP methods (from "doXxx")
 * BindStatus resolves error messages lazily, to allow for custom error code resolution (avoid NoSuchMessageException)
 * refined RedirectView to use scheme-specific URL encoding on JDK 1.4+, only falling back to default encoding on JDK 1.3
