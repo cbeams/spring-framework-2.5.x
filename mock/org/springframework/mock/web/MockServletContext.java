@@ -180,8 +180,14 @@ public class MockServletContext implements ServletContext {
 
 	public URL getResource(String path) throws MalformedURLException {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
+		if (!resource.exists()) {
+			return null;
+		}
 		try {
 			return resource.getURL();
+		}
+		catch (MalformedURLException ex) {
+			throw ex;
 		}
 		catch (IOException ex) {
 			logger.info("Couldn't get URL for " + resource, ex);
@@ -191,6 +197,9 @@ public class MockServletContext implements ServletContext {
 
 	public InputStream getResourceAsStream(String path) {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
+		if (!resource.exists()) {
+			return null;
+		}
 		try {
 			return resource.getInputStream();
 		}
