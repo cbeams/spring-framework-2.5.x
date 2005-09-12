@@ -70,7 +70,7 @@ public interface HibernateOperations {
 	 * Generally, callback code must not touch any Session lifecycle methods,
 	 * like close, disconnect, or reconnect, to let the template do its work.
 	 * @param action callback object that specifies the Hibernate action
-	 * @return a result object returned by the action, or null
+	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see HibernateTransactionManager
 	 * @see org.springframework.dao
@@ -84,7 +84,7 @@ public interface HibernateOperations {
 	 * This is a convenience method for executing Hibernate find calls or
 	 * queries within an action.
 	 * @param action calback object that specifies the Hibernate action
-	 * @return a List result returned by the action, or null
+	 * @return a List result returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 */
 	List executeFind(HibernateCallback action) throws DataAccessException;
@@ -96,10 +96,10 @@ public interface HibernateOperations {
 
 	/**
 	 * Return the persistent instance of the given entity class
-	 * with the given identifier, or null if not found.
+	 * with the given identifier, or <code>null</code> if not found.
 	 * @param entityClass a persistent class
 	 * @param id an identifier of the persistent instance
-	 * @return the persistent instance, or null if not found
+	 * @return the persistent instance, or <code>null</code> if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#get(Class, java.io.Serializable)
 	 */
@@ -107,12 +107,12 @@ public interface HibernateOperations {
 
 	/**
 	 * Return the persistent instance of the given entity class
-	 * with the given identifier, or null if not found.
+	 * with the given identifier, or <code>null</code> if not found.
 	 * Obtains the specified lock mode if the instance exists.
 	 * @param entityClass a persistent class
 	 * @param id an identifier of the persistent instance
 	 * @param lockMode the lock mode to obtain
-	 * @return the persistent instance, or null if not found
+	 * @return the persistent instance, or <code>null</code> if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#get(Class, java.io.Serializable, org.hibernate.LockMode)
 	 */
@@ -121,10 +121,10 @@ public interface HibernateOperations {
 
 	/**
 	 * Return the persistent instance of the given entity class
-	 * with the given identifier, or null if not found.
+	 * with the given identifier, or <code>null</code> if not found.
 	 * @param entityName the name of a persistent entity
 	 * @param id an identifier of the persistent instance
-	 * @return the persistent instance, or null if not found
+	 * @return the persistent instance, or <code>null</code> if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#get(Class, java.io.Serializable)
 	 */
@@ -132,12 +132,12 @@ public interface HibernateOperations {
 
 	/**
 	 * Return the persistent instance of the given entity class
-	 * with the given identifier, or null if not found.
+	 * with the given identifier, or <code>null</code> if not found.
 	 * Obtains the specified lock mode if the instance exists.
 	 * @param entityName the name of a persistent entity
 	 * @param id an identifier of the persistent instance
 	 * @param lockMode the lock mode to obtain
-	 * @return the persistent instance, or null if not found
+	 * @return the persistent instance, or <code>null</code> if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#get(Class, java.io.Serializable, org.hibernate.LockMode)
 	 */
@@ -707,6 +707,32 @@ public interface HibernateOperations {
 	 * @see org.hibernate.Criteria#setMaxResults(int)
 	 */
 	List findByCriteria(DetachedCriteria criteria, int firstResult, int maxResults) throws DataAccessException;
+
+	/**
+	 * Execute a query based on a given example entity object.
+	 * @param exampleEntity an instance of the desired entity,
+	 * serving as example for "query-by-example"
+	 * @return a List containing 0 or more persistent instances
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.criterion.Example#create(Object)
+	 */
+	List findByExample(Object exampleEntity) throws DataAccessException;
+
+	/**
+	 * Execute a query based on a given example entity object.
+	 * @param exampleEntity an instance of the desired entity,
+	 * serving as example for "query-by-example"
+	 * @param firstResult the index of the first result object to be retrieved
+	 * (numbered from 0)
+	 * @param maxResults the maximum number of result objects to retrieve
+	 * (or 0 for no limit)
+	 * @return a List containing 0 or more persistent instances
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.criterion.Example#create(Object)
+	 * @see org.hibernate.Criteria#setFirstResult(int)
+	 * @see org.hibernate.Criteria#setMaxResults(int)
+	 */
+	List findByExample(Object exampleEntity, int firstResult, int maxResults) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------

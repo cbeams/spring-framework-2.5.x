@@ -35,9 +35,11 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Example;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.util.Assert;
 
 /**
  * Helper class that simplifies Hibernate data access code, and converts
@@ -338,7 +340,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @param action callback object that specifies the Hibernate action
 	 * @param exposeNativeSession whether to expose the native Hibernate Session
 	 * to callback code
-	 * @return a result object returned by the action, or null
+	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 */
 	public Object execute(HibernateCallback action, boolean exposeNativeSession) throws DataAccessException {
@@ -921,16 +923,41 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	// Convenience finder methods for detached criteria
 	//-------------------------------------------------------------------------
 
-	public List findByCriteria(final DetachedCriteria criteria) throws DataAccessException {
+	public List findByCriteria(DetachedCriteria criteria) throws DataAccessException {
 		return findByCriteria(criteria, 0, 0);
 	}
 
 	public List findByCriteria(final DetachedCriteria criteria, final int firstResult, final int maxResults)
 			throws DataAccessException {
 
+		Assert.notNull(criteria, "DetachedCriteria must not be null");
 		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Criteria executableCriteria = criteria.getExecutableCriteria(session);
+				prepareCriteria(executableCriteria);
+				if (firstResult > 0) {
+					executableCriteria.setFirstResult(firstResult);
+				}
+				if (maxResults > 0) {
+					executableCriteria.setMaxResults(maxResults);
+				}
+				return executableCriteria.list();
+			}
+		}, true);
+	}
+
+	public List findByExample(Object exampleEntity) throws DataAccessException {
+		return findByExample(exampleEntity, 0, 0);
+	}
+
+	public List findByExample(final Object exampleEntity, final int firstResult, final int maxResults)
+			throws DataAccessException {
+
+		Assert.notNull(exampleEntity, "Example entity must not be null");
+		return (List) execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Criteria executableCriteria = session.createCriteria(exampleEntity.getClass());
+				executableCriteria.add(Example.create(exampleEntity));
 				prepareCriteria(executableCriteria);
 				if (firstResult > 0) {
 					executableCriteria.setFirstResult(firstResult);
