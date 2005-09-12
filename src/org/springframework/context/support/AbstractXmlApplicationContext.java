@@ -120,7 +120,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableA
 	 * definition files that this context should be built with.
 	 * <p>Can also include location patterns, which will get resolved
 	 * via a ResourcePatternResolver.
-	 * @return an array of resource locations, or null if none
+	 * @return an array of resource locations, or <code>null</code> if none
 	 * @see #getResources
 	 * @see #getResourcePatternResolver
 	 */

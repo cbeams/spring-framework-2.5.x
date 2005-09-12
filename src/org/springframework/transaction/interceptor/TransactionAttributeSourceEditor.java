@@ -55,7 +55,7 @@ public class TransactionAttributeSourceEditor extends PropertyEditorSupport {
 	public void setAsText(String s) throws IllegalArgumentException {
 		MethodMapTransactionAttributeSource source = new MethodMapTransactionAttributeSource();
 		if (s == null || "".equals(s)) {
-			// Leave value in property editor null
+			// Leave value in property editor <code>null</code>
 		}
 		else {
 			// Use properties editor to tokenize the hold string

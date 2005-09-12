@@ -152,7 +152,7 @@ public class SQLErrorCodesFactory {
 	 * SQL_ERROR_CODE_OVERRIDE_PATH.
 	 * <b>Not to be overridden by application developers, who should obtain instances
 	 * of this class from the static <code>getInstance()</code> method.</b>
-	 * @return the resource, or null if the resource wasn't found
+	 * @return the resource, or <code>null</code> if the resource wasn't found
 	 * @see #getInstance
 	 */
 	protected Resource loadResource(String path) {

@@ -60,7 +60,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * Set the default handler for this handler mapping.
 	 * This handler will be returned if no specific mapping was found.
 	 * <p>Default is <code>null</code>, indicating no default handler.
-	 * @param defaultHandler default handler instance, or null if none
+	 * @param defaultHandler default handler instance, or <code>null</code> if none
 	 */
 	public final void setDefaultHandler(Object defaultHandler) {
 		this.defaultHandler = defaultHandler;
@@ -69,7 +69,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Return the default handler for this handler mapping.
-	 * @return the default handler instance, or null if none
+	 * @return the default handler instance, or <code>null</code> if none
 	 */
 	protected final Object getDefaultHandler() {
 		return defaultHandler;
@@ -78,7 +78,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	/**
 	 * Set the handler interceptors to apply for all handlers mapped by
 	 * this handler mapping.
-	 * @param interceptors array of handler interceptors, or null if none
+	 * @param interceptors array of handler interceptors, or <code>null</code> if none
 	 */
 	public final void setInterceptors(HandlerInterceptor[] interceptors) {
 		this.interceptors = interceptors;
@@ -113,7 +113,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * one is found. This method is called by getHandler, a null return value
 	 * will lead to the default handler, if one is set.
 	 * @param request current HTTP request
-	 * @return the looked up handler instance, or null
+	 * @return the looked up handler instance, or <code>null</code>
 	 * @throws Exception if there is an internal error
 	 */
 	protected abstract Object getHandlerInternal(HttpServletRequest request) throws Exception;

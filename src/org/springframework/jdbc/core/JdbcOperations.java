@@ -55,7 +55,7 @@ public interface JdbcOperations {
 	 * <p>The callback action can return a result object, for example a
 	 * domain object or a collection of domain objects.
 	 * @param action the callback object that specifies the action
-	 * @return a result object returned by the action, or null
+	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws DataAccessException if there is any problem
 	 */
 	Object execute(ConnectionCallback action) throws DataAccessException;
@@ -74,7 +74,7 @@ public interface JdbcOperations {
 	 * <p>The callback action can return a result object, for example a
 	 * domain object or a collection of domain objects.
 	 * @param action callback object that specifies the action
-	 * @return a result object returned by the action, or null
+	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws DataAccessException if there is any problem
 	 */
 	Object execute(StatementCallback action) throws DataAccessException;
@@ -110,7 +110,7 @@ public interface JdbcOperations {
 	 * @param sql SQL query to execute
 	 * @param rch object that will extract results (potentially a ResultReader),
 	 * one row at a time
-	 * @return the result List in case of a ResultReader, or null else
+	 * @return the result List in case of a ResultReader, or <code>null</code> else
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #query(String, PreparedStatementSetter, RowCallbackHandler)
 	 * @see ResultReader
@@ -157,7 +157,7 @@ public interface JdbcOperations {
 	 * result will be directly mapped to the corresponding object type.
 	 * @param sql SQL query to execute
 	 * @param requiredType the type that the result object is expected to match
-	 * @return the result object of the required type, or null in case of SQL NULL
+	 * @return the result object of the required type, or <code>null</code> in case of SQL NULL
 	 * @throws IncorrectResultSizeDataAccessException if the query does not return
 	 * exactly one row, or does not return exactly one column in that row
 	 * @throws DataAccessException if there is any problem executing the query
@@ -304,7 +304,7 @@ public interface JdbcOperations {
 	 * domain object or a collection of domain objects.
 	 * @param psc object that can create a PreparedStatement given a Connection
 	 * @param action callback object that specifies the action
-	 * @return a result object returned by the action, or null
+	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws DataAccessException if there is any problem
 	 */
 	Object execute(PreparedStatementCreator psc, PreparedStatementCallback action)
@@ -320,7 +320,7 @@ public interface JdbcOperations {
 	 * domain object or a collection of domain objects.
 	 * @param sql SQL to execute
 	 * @param action callback object that specifies the action
-	 * @return a result object returned by the action, or null
+	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws DataAccessException if there is any problem
 	 */
 	Object execute(String sql, PreparedStatementCallback action)
@@ -388,7 +388,7 @@ public interface JdbcOperations {
 	 * @param psc object that can create a PreparedStatement given a Connection
 	 * @param rch object that will extract results (potentially a ResultReader),
 	 * one row at a time
-	 * @return the result List in case of a ResultReader, or null else
+	 * @return the result List in case of a ResultReader, or <code>null</code> else
 	 * @throws DataAccessException if there is any problem
 	 * @see ResultReader
 	 */
@@ -407,7 +407,7 @@ public interface JdbcOperations {
 	 * set fetch size and other performance options.
 	 * @param rch object that will extract results (potentially a ResultReader),
 	 * one row at a time
-	 * @return the result List in case of a ResultReader, or null else
+	 * @return the result List in case of a ResultReader, or <code>null</code> else
 	 * @throws DataAccessException if the query fails
 	 * @see ResultReader
 	 */
@@ -425,7 +425,7 @@ public interface JdbcOperations {
 	 * (constants from <code>java.sql.Types</code>)
 	 * @param rch object that will extract results (potentially a ResultReader),
 	 * one row at a time
-	 * @return the result List in case of a ResultReader, or null else
+	 * @return the result List in case of a ResultReader, or <code>null</code> else
 	 * @throws DataAccessException if the query fails
 	 * @see ResultReader
 	 * @see java.sql.Types
@@ -443,7 +443,7 @@ public interface JdbcOperations {
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param rch object that will extract results (potentially a ResultReader),
 	 * one row at a time
-	 * @return the result List in case of a ResultReader, or null else
+	 * @return the result List in case of a ResultReader, or <code>null</code> else
 	 * @throws DataAccessException if the query fails
 	 * @see ResultReader
 	 */
@@ -548,7 +548,7 @@ public interface JdbcOperations {
 	 * @param argTypes SQL types of the arguments
 	 * (constants from <code>java.sql.Types</code>)
 	 * @param requiredType the type that the result object is expected to match
-	 * @return the result object of the required type, or null in case of SQL NULL
+	 * @return the result object of the required type, or <code>null</code> in case of SQL NULL
 	 * @throws IncorrectResultSizeDataAccessException if the query does not return
 	 * exactly one row, or does not return exactly one column in that row
 	 * @throws DataAccessException if the query fails
@@ -567,7 +567,7 @@ public interface JdbcOperations {
 	 * @param args arguments to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param requiredType the type that the result object is expected to match
-	 * @return the result object of the required type, or null in case of SQL NULL
+	 * @return the result object of the required type, or <code>null</code> in case of SQL NULL
 	 * @throws IncorrectResultSizeDataAccessException if the query does not return
 	 * exactly one row, or does not return exactly one column in that row
 	 * @throws DataAccessException if the query fails
@@ -885,7 +885,7 @@ public interface JdbcOperations {
 	 * domain object or a collection of domain objects.
 	 * @param csc object that can create a CallableStatement given a Connection
 	 * @param action callback object that specifies the action
-	 * @return a result object returned by the action, or null
+	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws DataAccessException if there is any problem
 	 */
 	Object execute(CallableStatementCreator csc, CallableStatementCallback action)
@@ -901,7 +901,7 @@ public interface JdbcOperations {
 	 * domain object or a collection of domain objects.
 	 * @param callString the SQL call string to execute
 	 * @param action callback object that specifies the action
-	 * @return a result object returned by the action, or null
+	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws DataAccessException if there is any problem
 	 */
 	Object execute(String callString, CallableStatementCallback action)

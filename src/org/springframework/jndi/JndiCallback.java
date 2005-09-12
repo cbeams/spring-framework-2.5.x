@@ -41,7 +41,7 @@ public interface JndiCallback {
 	 * or cleanup, as the JndiTemplate class will handle this.
 	 * @param ctx the current JNDI context
 	 * @throws NamingException if thrown by JNDI methods
-	 * @return a result object, or null
+	 * @return a result object, or <code>null</code>
 	 */
   Object doInContext(Context ctx) throws NamingException;
 

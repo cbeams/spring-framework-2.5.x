@@ -148,7 +148,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	/**
 	 * Execute the given data access action on a SqlMapSession.
 	 * @param action callback object that specifies the data access action
-	 * @return a result object returned by the action, or null
+	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws DataAccessException in case of SQL Maps errors
 	 */
 	public Object execute(SqlMapClientCallback action) throws DataAccessException {

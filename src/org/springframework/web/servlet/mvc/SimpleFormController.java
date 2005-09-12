@@ -201,7 +201,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @param request current HTTP request
 	 * @param command form object with request parameters bound onto it
 	 * @param errors validation errors holder
-	 * @return a Map with reference data entries, or null if none
+	 * @return a Map with reference data entries, or <code>null</code> if none
 	 * @throws Exception in case of invalid state or arguments
 	 * @see ModelAndView
 	 */
@@ -215,7 +215,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * <p>Default implementation returns null.
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current HTTP request
-	 * @return a Map with reference data entries, or null if none
+	 * @return a Map with reference data entries, or <code>null</code> if none
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #referenceData(HttpServletRequest, Object, Errors)
 	 * @see ModelAndView
@@ -320,7 +320,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @param response current servlet response
 	 * @param command form object with request parameters bound onto it
 	 * @param errors Errors instance without errors (subclass can add errors if it wants to)
-	 * @return the prepared model and view, or null
+	 * @return the prepared model and view, or <code>null</code>
 	 * @throws Exception in case of errors
 	 * @see #onSubmit(Object, BindException)
 	 * @see #doSubmitAction
@@ -384,7 +384,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * though: Use the former when you want to build your own ModelAndView; use the
 	 * latter when you want to perform an action and forward to the successView.
 	 * @param command form object with request parameters bound onto it
-	 * @return the prepared model and view, or null for default (i.e. successView)
+	 * @return the prepared model and view, or <code>null</code> for default (i.e. successView)
 	 * @throws Exception in case of errors
 	 * @see #onSubmit(Object, BindException)
 	 * @see #doSubmitAction

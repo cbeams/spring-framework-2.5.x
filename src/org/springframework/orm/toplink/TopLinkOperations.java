@@ -49,7 +49,7 @@ public interface TopLinkOperations {
 	 * <p>Note: Callback code is not supposed to handle transactions itself!
 	 * Use an appropriate transaction manager like TopLinkTransactionManager.
 	 * @param action callback object that specifies the TopLink action
-	 * @return a result object returned by the action, or null
+	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of TopLink errors
 	 * @see TopLinkTransactionManager
 	 * @see org.springframework.dao
@@ -63,7 +63,7 @@ public interface TopLinkOperations {
 	 * Collection. This is a convenience method for executing TopLink queries
 	 * within an action.
 	 * @param action callback object that specifies the TopLink action
-	 * @return a Collection result returned by the action, or null
+	 * @return a Collection result returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of TopLink errors
 	 */
 	List executeFind(TopLinkCallback action) throws DataAccessException;
@@ -282,7 +282,7 @@ public interface TopLinkOperations {
 	 * @param entityClass the entity class
 	 * @param expression the TopLink expression to match,
 	 * usually built through the TopLink ExpressionBuilder
-	 * @return the matching entity instance, or null if none found
+	 * @return the matching entity instance, or <code>null</code> if none found
 	 * @throws org.springframework.dao.DataAccessException in case of TopLink errors
 	 * @see oracle.toplink.sessions.Session#readAllObjects(Class, oracle.toplink.expressions.Expression)
 	 * @see oracle.toplink.expressions.ExpressionBuilder
@@ -297,7 +297,7 @@ public interface TopLinkOperations {
 	 * @param enforceReadOnly whether to always retrieve read-only objects from
 	 * the plain TopLink Session (else, read-write objects will be retrieved
 	 * from the TopLink UnitOfWork in case of a non-read-only transaction)
-	 * @return a matching entity instance, or null if none found
+	 * @return a matching entity instance, or <code>null</code> if none found
 	 * @throws org.springframework.dao.DataAccessException in case of TopLink errors
 	 * @see oracle.toplink.sessions.Session#readAllObjects(Class, oracle.toplink.expressions.Expression)
 	 * @see oracle.toplink.expressions.ExpressionBuilder
@@ -311,7 +311,7 @@ public interface TopLinkOperations {
 	 * non-read-only transaction, and read-only objects else.
 	 * @param entityClass the entity class
 	 * @param call the TopLink Call object to apply (either a SQLCall or an EJBQLCall)
-	 * @return a matching entity instance, or null if none found
+	 * @return a matching entity instance, or <code>null</code> if none found
 	 * @throws org.springframework.dao.DataAccessException in case of TopLink errors
 	 * @see oracle.toplink.sessions.Session#readAllObjects(Class, oracle.toplink.queryframework.Call)
 	 * @see oracle.toplink.queryframework.SQLCall
@@ -326,7 +326,7 @@ public interface TopLinkOperations {
 	 * @param enforceReadOnly whether to always retrieve read-only objects from
 	 * the plain TopLink Session (else, read-write objects will be retrieved
 	 * from the TopLink UnitOfWork in case of a non-read-only transaction)
-	 * @return a matching entity instance, or null if none found
+	 * @return a matching entity instance, or <code>null</code> if none found
 	 * @throws org.springframework.dao.DataAccessException in case of TopLink errors
 	 * @see oracle.toplink.sessions.Session#readAllObjects(Class, oracle.toplink.expressions.Expression)
 	 * @see oracle.toplink.queryframework.SQLCall

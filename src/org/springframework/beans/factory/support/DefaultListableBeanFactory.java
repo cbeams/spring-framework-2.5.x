@@ -222,7 +222,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Determine whether the bean definition with the given name matches
 	 * the given type.
 	 * @param beanName the name of the bean to check
-	 * @param type class or interface to match, or null for all bean names
+	 * @param type class or interface to match, or <code>null</code> for all bean names
 	 * @return whether the type matches
 	 * @see RootBeanDefinition#hasBeanClass
 	 * @see RootBeanDefinition#getBeanClass

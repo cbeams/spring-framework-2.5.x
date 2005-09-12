@@ -38,10 +38,10 @@ public interface HandlerExceptionResolver {
 	 * returning a ModelAndView that represents a specific error page if appropriate.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler the executed handler, or null if none chosen at the time of
+	 * @param handler the executed handler, or <code>null</code> if none chosen at the time of
 	 * the exception (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
-	 * @return a corresponding ModelAndView to forward to, or null for default processing
+	 * @return a corresponding ModelAndView to forward to, or <code>null</code> for default processing
 	 */
 	ModelAndView resolveException(
 			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex);

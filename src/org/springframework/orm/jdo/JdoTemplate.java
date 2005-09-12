@@ -207,7 +207,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * @param action callback object that specifies the JDO action
 	 * @param exposeNativePersistenceManager whether to expose the native
 	 * JDO persistence manager to callback code
-	 * @return a result object returned by the action, or null
+	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 */
 	public Object execute(JdoCallback action, boolean exposeNativePersistenceManager) throws DataAccessException {
@@ -512,12 +512,56 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		}, true);
 	}
 
+	public Collection find(final String queryString, final Object[] values) throws DataAccessException {
+		return (Collection) execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				Query query = pm.newQuery(queryString);
+				prepareQuery(query);
+				return query.executeWithArray(values);
+			}
+		}, true);
+	}
+
+	public Collection find(final String queryString, final Map values) throws DataAccessException {
+		return (Collection) execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				Query query = pm.newQuery(queryString);
+				prepareQuery(query);
+				return query.executeWithMap(values);
+			}
+		}, true);
+	}
+
 	public Collection findByNamedQuery(final Class entityClass, final String queryName) throws DataAccessException {
 		return (Collection) execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = getJdoDialect().newNamedQuery(pm, entityClass, queryName);
 				prepareQuery(query);
 				return query.execute();
+			}
+		}, true);
+	}
+
+	public Collection findByNamedQuery(final Class entityClass, final String queryName, final Object[] values)
+			throws DataAccessException {
+
+		return (Collection) execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				Query query = getJdoDialect().newNamedQuery(pm, entityClass, queryName);
+				prepareQuery(query);
+				return query.executeWithArray(values);
+			}
+		}, true);
+	}
+
+	public Collection findByNamedQuery(final Class entityClass, final String queryName, final Map values)
+			throws DataAccessException {
+
+		return (Collection) execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				Query query = getJdoDialect().newNamedQuery(pm, entityClass, queryName);
+				prepareQuery(query);
+				return query.executeWithMap(values);
 			}
 		}, true);
 	}

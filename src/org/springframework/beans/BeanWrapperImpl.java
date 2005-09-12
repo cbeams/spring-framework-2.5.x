@@ -418,7 +418,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	/**
 	 * Get custom editor that has been registered for the given property.
-	 * @return the custom editor, or null if none specific for this property
+	 * @return the custom editor, or <code>null</code> if none specific for this property
 	 */
 	private PropertyEditor getCustomEditor(String propertyName, Class requiredType) {
 		CustomEditorHolder holder = (CustomEditorHolder) this.customEditors.get(propertyName);
@@ -429,7 +429,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * Get custom editor for the given type. If no direct match found,
 	 * try custom editor for superclass (which will in any case be able
 	 * to render a value as String via <code>getAsText</code>).
-	 * @return the custom editor, or null if none found for this type
+	 * @return the custom editor, or <code>null</code> if none found for this type
 	 * @see java.beans.PropertyEditor#getAsText
 	 */
 	private PropertyEditor getCustomEditor(Class requiredType) {
@@ -965,7 +965,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @param oldValue previous value, if available (may be null)
 	 * @param newValue proposed change value
 	 * @param requiredType the type we must convert to
-	 * (or null if not known, for example in case of a collection element)
+	 * (or <code>null</code> if not known, for example in case of a collection element)
 	 * @return the new value, possibly the result of type conversion
 	 * @throws TypeMismatchException if type conversion failed
 	 */
@@ -1117,7 +1117,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	public PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
 		if (propertyName == null) {
-			throw new IllegalArgumentException("Can't find property descriptor for null property");
+			throw new IllegalArgumentException("Can't find property descriptor for <code>null</code> property");
 		}
 		PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
 		if (pd != null) {
@@ -1179,7 +1179,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		// This is a programming error, although asking for a property
 		// that doesn't exist is not.
 		if (propertyName == null) {
-			throw new IllegalArgumentException("Can't find readability status for null property");
+			throw new IllegalArgumentException("Can't find readability status for <code>null</code> property");
 		}
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
@@ -1204,7 +1204,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		// This is a programming error, although asking for a property
 		// that doesn't exist is not.
 		if (propertyName == null) {
-			throw new IllegalArgumentException("Can't find writability status for null property");
+			throw new IllegalArgumentException("Can't find writability status for <code>null</code> property");
 		}
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);

@@ -34,7 +34,7 @@ public interface JmxAttributeSource {
 	 * if the supplied <code>Class</code> has the appropriate metadata.
 	 * Otherwise should return <code>null</code>.
 	 * @param clazz the class to read the attribute data from
-	 * @return the attribute, or null if not found
+	 * @return the attribute, or <code>null</code> if not found
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
 	ManagedResource getManagedResource(Class clazz) throws InvalidMetadataException;
@@ -44,7 +44,7 @@ public interface JmxAttributeSource {
 	 * if the supplied <code>Method</code> has the corresponding metadata.
 	 * Otherwise should return <code>null</code>.
 	 * @param method the method to read the attribute data from
-	 * @return the attribute, or null if not found
+	 * @return the attribute, or <code>null</code> if not found
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
 	ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException;
@@ -54,7 +54,7 @@ public interface JmxAttributeSource {
 	 * if the supplied <code>Method</code> has the corresponding metadata.
 	 * Otherwise should return <code>null</code>.
 	 * @param method the method to read the attribute data from
-	 * @return the attribute, or null if not found
+	 * @return the attribute, or <code>null</code> if not found
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
 	ManagedOperation getManagedOperation(Method method) throws InvalidMetadataException;

@@ -109,14 +109,14 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 	/**
 	 * Subclasses must implement this method to return a new AbstractPrototypeBasedTargetSource
-	 * if they wish to create a custom TargetSource for this bean, or null if they are
+	 * if they wish to create a custom TargetSource for this bean, or <code>null</code> if they are
 	 * not interested it in, in which case no special target source will be created.
 	 * Subclasses should not call <code>setTargetBeanName</code> or <code>setBeanFactory</code>
 	 * on the AbstractPrototypeBasedTargetSource: This class' implementation of
 	 * <code>getTargetSource()</code> will do that.
 	 * @param beanClass the class of the bean to create a TargetSource for
 	 * @param beanName the name of the bean
-	 * @return the AbstractPrototypeBasedTargetSource, or null if we don't match this
+	 * @return the AbstractPrototypeBasedTargetSource, or <code>null</code> if we don't match this
 	 */
 	protected abstract AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
 			Class beanClass, String beanName);

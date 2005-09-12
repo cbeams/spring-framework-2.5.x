@@ -119,7 +119,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	/**
 	 * Create a new PathMatchingResourcePatternResolver with a DefaultResourceLoader.
 	 * @param classLoader the ClassLoader to load classpath resources with,
-	 * or null for using the thread context class loader on actual access
+	 * or <code>null</code> for using the thread context class loader on actual access
 	 * (applying to the thread that does the "getResources" call)
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
@@ -144,7 +144,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @param resourceLoader the ResourceLoader to load root directories and
 	 * actual resources with
 	 * @param classLoader the ClassLoader to load classpath resources with,
-	 * or null for using the thread context class loader on actual access
+	 * or <code>null</code> for using the thread context class loader on actual access
 	 * (applying to the thread that does the "getResources" call)
 	 */
 	public PathMatchingResourcePatternResolver(ResourceLoader resourceLoader, ClassLoader classLoader) {
@@ -162,7 +162,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	/**
 	 * Return the ClassLoader that this pattern resolver works with,
-	 * or null if using the thread context class loader on actual access
+	 * or <code>null</code> if using the thread context class loader on actual access
 	 * (applying to the thread that does the "getResources" call).
 	 */
 	public ClassLoader getClassLoader() {

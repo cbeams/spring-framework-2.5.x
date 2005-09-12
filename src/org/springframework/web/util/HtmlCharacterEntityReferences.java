@@ -111,7 +111,7 @@ class HtmlCharacterEntityReferences {
 	}
 
 	/**
-	 * Return the reference mapped to the given character or null.
+	 * Return the reference mapped to the given character or <code>null</code>.
 	 */
 	public String convertToReference(char character) {
 		if (character < 1000 || (character >= 8000 && character < 10000)) {

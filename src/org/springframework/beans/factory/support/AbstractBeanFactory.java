@@ -131,7 +131,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 	/**
 	 * Create a new AbstractBeanFactory with the given parent.
-	 * @param parentBeanFactory parent bean factory, or null if none
+	 * @param parentBeanFactory parent bean factory, or <code>null</code> if none
 	 * @see #getBean
 	 */
 	public AbstractBeanFactory(BeanFactory parentBeanFactory) {

@@ -136,7 +136,7 @@ public class MultipartFilter extends OncePerRequestFilter {
 	 * bean name is "filterMultipartResolver".
 	 * <p>This can be overridden to use a custom MultipartResolver instance,
 	 * for example if not using a Spring web application context.
-	 * @return the MultipartResolver instance, or null if none found
+	 * @return the MultipartResolver instance, or <code>null</code> if none found
 	 */
 	protected MultipartResolver lookupMultipartResolver() {
 		if (logger.isDebugEnabled()) {

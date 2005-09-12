@@ -53,7 +53,7 @@ public interface MultipartHttpServletRequest extends HttpServletRequest {
 
 	/**
 	 * Return the contents plus description of an uploaded file in this request,
-	 * or null if it does not exist.
+	 * or <code>null</code> if it does not exist.
 	 * @param name a String specifying the parameter name of the multipart file
 	 * @return the uploaded content in the form of a MultipartFile object
 	 */

@@ -104,7 +104,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition implements
 	 * by the callback is treated as application exception that enforces a rollback.
 	 * An exception gets propagated to the caller of the template.
 	 * @param action callback object that specifies the transactional action
-	 * @return a result object returned by the callback, or null
+	 * @return a result object returned by the callback, or <code>null</code>
 	 * @throws TransactionException in case of initialization, rollback, or system errors
 	 */
 	public Object execute(TransactionCallback action) throws TransactionException {

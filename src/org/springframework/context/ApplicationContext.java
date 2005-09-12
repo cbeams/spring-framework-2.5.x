@@ -53,9 +53,9 @@ public interface ApplicationContext extends ListableBeanFactory, HierarchicalBea
 		MessageSource, ApplicationEventPublisher, ResourcePatternResolver {
 	
 	/**
-	 * Return the parent context, or null if there is no parent,
+	 * Return the parent context, or <code>null</code> if there is no parent,
 	 * and this is the root of the context hierarchy.
-	 * @return the parent context, or null if there is no parent
+	 * @return the parent context, or <code>null</code> if there is no parent
 	 */
 	ApplicationContext getParent();
 	

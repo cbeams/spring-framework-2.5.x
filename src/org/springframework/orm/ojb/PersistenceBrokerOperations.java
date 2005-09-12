@@ -60,7 +60,7 @@ public interface PersistenceBrokerOperations {
 	 * <p>Note: Callback code is not supposed to handle transactions itself!
 	 * Use an appropriate transaction manager like PersistenceBrokerTransactionManager.
 	 * @param action action object that specifies the OJB action
-	 * @return a result object returned by the action, or null
+	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
 	 * @see PersistenceBrokerTransactionManager
 	 * @see org.springframework.dao
@@ -73,7 +73,7 @@ public interface PersistenceBrokerOperations {
 	 * Collection. This is a convenience method for executing OJB queries
 	 * within an action.
 	 * @param action action object that specifies the OJB action
-	 * @return a result object returned by the action, or null
+	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
 	 */
 	Collection executeFind(PersistenceBrokerCallback action) throws DataAccessException;

@@ -64,7 +64,7 @@ public interface HandlerMapping {
 	 * a match, and only decide there is an error if none can find a handler.
 	 * @param request current HTTP request
 	 * @return a HandlerExecutionChain instance containing handler object and
-	 * any interceptors, or null if no mapping found
+	 * any interceptors, or <code>null</code> if no mapping found
 	 * @throws Exception if there is an internal error
 	 */
 	HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception;

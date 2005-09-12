@@ -191,7 +191,7 @@ public class ContextLoader {
 	 * <p>This implementation expects custom contexts to implement
 	 * ConfigurableWebApplicationContext. Can be overridden in subclasses.
 	 * @param servletContext current servlet context
-	 * @param parent the parent ApplicationContext to use, or null if none
+	 * @param parent the parent ApplicationContext to use, or <code>null</code> if none
 	 * @return the root WebApplicationContext
 	 * @throws BeansException if the context couldn't be initialized
 	 * @see #CONTEXT_CLASS_PARAM
@@ -247,7 +247,7 @@ public class ContextLoader {
 	 * which will be shared by all other users of ContextsingletonBeanFactoryLocator
 	 * which also use the same configuration parameters.
 	 * @param servletContext current servlet context
-	 * @return the parent application context, or null if none
+	 * @return the parent application context, or <code>null</code> if none
 	 * @throws BeansException if the context couldn't be initialized
 	 * @see org.springframework.beans.factory.access.BeanFactoryLocator
 	 * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator

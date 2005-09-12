@@ -180,7 +180,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	/**
-	 * Return the parent context, or null if there is no parent
+	 * Return the parent context, or <code>null</code> if there is no parent
 	 * (that is, this context is the root of the context hierarchy).
 	 */
 	public ApplicationContext getParent() {

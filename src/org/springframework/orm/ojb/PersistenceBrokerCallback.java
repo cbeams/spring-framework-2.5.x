@@ -47,7 +47,7 @@ public interface PersistenceBrokerCallback {
 	 * it gets propagated to the caller of the template.
 	 *
 	 * @param pb active PersistenceBroker
-	 * @return a result object, or null if none
+	 * @return a result object, or <code>null</code> if none
 	 * @throws PersistenceBrokerException in case of OJB errors
 	 * @throws LookupException if thrown by OJB lookup methods
 	 * @throws SQLException in case of errors on direct JDBC access

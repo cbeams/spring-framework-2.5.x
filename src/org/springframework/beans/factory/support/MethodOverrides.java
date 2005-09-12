@@ -86,7 +86,7 @@ public class MethodOverrides {
 	/**
 	 * Return the override for the given method, if any.
 	 * @param method method to check for overrides for
-	 * @return the method override, or null if none
+	 * @return the method override, or <code>null</code> if none
 	 */
 	public MethodOverride getOverride(Method method) {
 		for (Iterator it = this.overrides.iterator(); it.hasNext();) {

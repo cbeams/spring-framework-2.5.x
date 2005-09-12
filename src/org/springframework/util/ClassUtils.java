@@ -91,7 +91,7 @@ public abstract class ClassUtils {
 	/**
 	 * Resolve the given class name as primitive class, if appropriate.
 	 * @param name the name of the potentially primitive class
-	 * @return the primitive class, or null if the name does not denote
+	 * @return the primitive class, or <code>null</code> if the name does not denote
 	 * a primitive class
 	 */
 	public static Class resolvePrimitiveClassName(String name) {
@@ -224,7 +224,7 @@ public abstract class ClassUtils {
 	 * @param methodName the static method name
 	 * @param clazz the class which defines the method
 	 * @param args the parameter types to the method
-	 * @return the static method, or null if no static method was found
+	 * @return the static method, or <code>null</code> if no static method was found
 	 * @throws IllegalArgumentException if the method name is blank or the clazz is null
 	 */
 	public static Method getStaticMethod(Class clazz, String methodName, Class[] args) {

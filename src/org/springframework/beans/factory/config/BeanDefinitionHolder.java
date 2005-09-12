@@ -54,7 +54,7 @@ public class BeanDefinitionHolder {
 	 * Create a new BeanDefinitionHolder.
 	 * @param beanDefinition the BeanDefinition
 	 * @param beanName the name of the bean
-	 * @param aliases alias names of the bean, or null if none
+	 * @param aliases alias names of the bean, or <code>null</code> if none
 	 */
 	public BeanDefinitionHolder(BeanDefinition beanDefinition, String beanName, String[] aliases) {
 		this.beanDefinition = beanDefinition;

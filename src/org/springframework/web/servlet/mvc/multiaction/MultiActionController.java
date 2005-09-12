@@ -495,7 +495,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	/**
 	 * Determine the exception handler method for the given exception.
 	 * Can return null if not found.
-	 * @return a handler for the given exception type, or null
+	 * @return a handler for the given exception type, or <code>null</code>
 	 * @param exception the exception to handle
 	 */
 	protected Method getExceptionHandler(Throwable exception) {

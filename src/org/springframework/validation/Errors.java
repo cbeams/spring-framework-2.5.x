@@ -187,7 +187,7 @@ public interface Errors {
 
 	/**
 	 * Get the first global error, if any.
-	 * @return the global error, or null
+	 * @return the global error, or <code>null</code>
 	 */
 	ObjectError getGlobalError();
 
@@ -216,7 +216,7 @@ public interface Errors {
 
 	/**
 	 * Get the first error associated with the given field, if any.
-	 * @return the field-specific error, or null
+	 * @return the field-specific error, or <code>null</code>
 	 */
 	FieldError getFieldError(String field);
 

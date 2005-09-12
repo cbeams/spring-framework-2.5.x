@@ -132,7 +132,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * provided by the subclass.
 	 * @param viewName the name of the view to retrieve
 	 * @param locale the Locale to retrieve the view for
-	 * @return the View instance, or null if not found
+	 * @return the View instance, or <code>null</code> if not found
 	 * (optional, to allow for ViewResolver chaining)
 	 * @throws Exception if the view couldn't be resolved
 	 * @see #loadView
@@ -151,7 +151,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * also applying bean container initialization callbacks.
 	 * @param viewName the name of the view to retrieve
 	 * @param locale the Locale to retrieve the view for
-	 * @return the View instance, or null if not found
+	 * @return the View instance, or <code>null</code> if not found
 	 * (optional, to allow for ViewResolver chaining)
 	 * @throws Exception if the view couldn't be resolved
 	 * @see #resolveViewName

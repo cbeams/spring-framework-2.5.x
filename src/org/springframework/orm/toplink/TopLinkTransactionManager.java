@@ -347,7 +347,7 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 	 * <p>Default implementation casts to <code>oracle.toplink.publicinterface.Session</code>
 	 * and fetches the Connection from the DatabaseAccessor exposed there.
 	 * @param session the current TopLink Session
-	 * @return the underlying JDBC Connection, or null if none found
+	 * @return the underlying JDBC Connection, or <code>null</code> if none found
 	 * @see oracle.toplink.publicinterface.Session#getAccessor()
 	 * @see oracle.toplink.internal.databaseaccess.DatabaseAccessor#getConnection()
 	 */

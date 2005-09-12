@@ -117,7 +117,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 	 * Set mappings between service ids (passed into the service locator)
 	 * and bean names (in the bean factory). Service ids that are not defined
 	 * here will be treated as bean names as-is.
-	 * <p>The empty string as service id key defines the mapping for null and
+	 * <p>The empty string as service id key defines the mapping for <code>null</code> and
 	 * empty string, and for factory methods without parameter. If not defined,
 	 * a single matching bean will be retrieved from the bean factory.
 	 * @param serviceMappings mappings between service ids and bean names,

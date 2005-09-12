@@ -71,7 +71,7 @@ public class ClassPathResource extends AbstractResource {
 	 * resource access methods will not accept it.
 	 * @param path the absolute path within the classpath
 	 * @param classLoader the class loader to load the resource with,
-	 * or null for the thread context class loader
+	 * or <code>null</code> for the thread context class loader
 	 * @see java.lang.ClassLoader#getResourceAsStream
 	 */
 	public ClassPathResource(String path, ClassLoader classLoader) {

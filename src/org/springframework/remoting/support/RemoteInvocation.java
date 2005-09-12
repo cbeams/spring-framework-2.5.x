@@ -131,7 +131,7 @@ public class RemoteInvocation implements Serializable {
 	 * <p>The implementation avoids to unnecessarily create the attributes
 	 * Map, to minimize serialization size.
 	 * @param key the attribute key
-	 * @return the attribute value, or null if not defined
+	 * @return the attribute value, or <code>null</code> if not defined
 	 */
 	public Serializable getAttribute(String key) {
 		if (this.attributes == null) {
@@ -154,7 +154,7 @@ public class RemoteInvocation implements Serializable {
 	/**
 	 * Return the attributes Map. Mainly here for debugging purposes:
 	 * Preferably, use addAttribute and getAttribute.
-	 * @return the attributes Map, or null if none created
+	 * @return the attributes Map, or <code>null</code> if none created
 	 * @see #addAttribute
 	 * @see #getAttribute
 	 */

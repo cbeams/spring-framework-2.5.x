@@ -40,7 +40,7 @@ public interface JobDetailAwareTrigger {
 
 	/**
 	 * Return the JobDetail that this Trigger is associated with.
-	 * @return the associated JobDetail, or null if none
+	 * @return the associated JobDetail, or <code>null</code> if none
 	 */
 	JobDetail getJobDetail();
 

@@ -86,7 +86,7 @@ public class ConstructorArgumentValues {
 	/**
 	 * Get argument value for the given index in the constructor argument list.
 	 * @param index the index in the constructor argument list
-	 * @return the ValueHolder for the argument, or null if none set
+	 * @return the ValueHolder for the argument, or <code>null</code> if none set
 	 */
 	public ValueHolder getIndexedArgumentValue(int index, Class requiredType) {
 		ValueHolder valueHolder = (ValueHolder) this.indexedArgumentValues.get(new Integer(index));
@@ -131,7 +131,7 @@ public class ConstructorArgumentValues {
 	 * Look for a generic argument value that matches the given type.
 	 * @param requiredType the type to match (can be null to find an
 	 * arbitrary next generic argument value, as fallback)
-	 * @return the ValueHolder for the argument, or null if none set
+	 * @return the ValueHolder for the argument, or <code>null</code> if none set
 	 */
 	public ValueHolder getGenericArgumentValue(Class requiredType) {
 		return getGenericArgumentValue(requiredType, null);
@@ -146,7 +146,7 @@ public class ConstructorArgumentValues {
 	 * @param usedValueHolders a Set of ValueHolder objects that have already
 	 * been used in the current resolution process and should therefore not
 	 * be returned again
-	 * @return the ValueHolder for the argument, or null if none found
+	 * @return the ValueHolder for the argument, or <code>null</code> if none found
 	 */
 	public ValueHolder getGenericArgumentValue(Class requiredType, Set usedValueHolders) {
 		for (Iterator it = this.genericArgumentValues.iterator(); it.hasNext();) {
@@ -188,7 +188,7 @@ public class ConstructorArgumentValues {
 	 * in the constructor argument list or generically matches by type.
 	 * @param index the index in the constructor argument list
 	 * @param requiredType the type to match
-	 * @return the ValueHolder for the argument, or null if none set
+	 * @return the ValueHolder for the argument, or <code>null</code> if none set
 	 */
 	public ValueHolder getArgumentValue(int index, Class requiredType) {
 		return getArgumentValue(index, requiredType, null);
@@ -203,7 +203,7 @@ public class ConstructorArgumentValues {
 	 * been used in the current resolution process and should therefore not
 	 * be returned again (allowing to return the next generic argument match
 	 * in case of multiple generic argument values of the same type)
-	 * @return the ValueHolder for the argument, or null if none set
+	 * @return the ValueHolder for the argument, or <code>null</code> if none set
 	 */
 	public ValueHolder getArgumentValue(int index, Class requiredType, Set usedValueHolders) {
 		ValueHolder valueHolder = getIndexedArgumentValue(index, requiredType);

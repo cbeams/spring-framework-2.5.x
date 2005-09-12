@@ -271,7 +271,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * XmlWebApplicationContext or a custom context class if set. This implementation
 	 * expects custom contexts to implement ConfigurableWebApplicationContext.
 	 * Can be overridden in subclasses.
-	 * @param parent the parent ApplicationContext to use, or null if none
+	 * @param parent the parent ApplicationContext to use, or <code>null</code> if none
 	 * @return the WebApplicationContext for this servlet
 	 * @throws BeansException if the context couldn't be initialized
 	 * @see #setContextClass
@@ -430,7 +430,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Default implementation takes the name of the UserPrincipal, if any.
 	 * Can be overridden in subclasses.
 	 * @param request current HTTP request
-	 * @return the username, or null if none
+	 * @return the username, or <code>null</code> if none
 	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal
 	 */
 	protected String getUsernameForRequest(HttpServletRequest request) {

@@ -57,14 +57,14 @@ public interface BeanDefinition {
 	/**
 	 * Return the PropertyValues to be applied to a new instance of the bean, if any.
 	 * Can be modified during bean factory post-processing.
-	 * @return the PropertyValues object, or null
+	 * @return the PropertyValues object, or <code>null</code>
 	 */
 	MutablePropertyValues getPropertyValues();
 
 	/**
 	 * Return the constructor argument values for this bean, if any.
 	 * Can be modified during bean factory post-processing.
-	 * @return the ConstructorArgumentValues object, or null
+	 * @return the ConstructorArgumentValues object, or <code>null</code>
 	 */
 	ConstructorArgumentValues getConstructorArgumentValues();
 

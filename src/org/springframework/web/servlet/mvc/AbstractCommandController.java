@@ -89,7 +89,7 @@ public abstract class AbstractCommandController extends BaseCommandController {
 	 * @param response current HTTP response
 	 * @param command the populated command object
 	 * @param errors validation errors holder
-	 * @return a ModelAndView to render, or null if handled directly
+	 * @return a ModelAndView to render, or <code>null</code> if handled directly
 	 * @see org.springframework.validation.Errors
 	 * @see org.springframework.validation.BindException#getModel
 	 */

@@ -58,7 +58,7 @@ public interface FactoryBean {
 	Object getObject() throws Exception;
 
 	/**
-	 * Return the type of object that this FactoryBean creates, or null
+	 * Return the type of object that this FactoryBean creates, or <code>null</code>
 	 * if not known in advance. This allows to check for specific types
 	 * of beans without instantiating objects, for example on autowiring.
 	 * <p>For a singleton, this should try to avoid singleton creation
@@ -71,7 +71,7 @@ public interface FactoryBean {
 	 * return null here. Therefore it is highly recommended to implement
 	 * this method properly, using the current state of the FactoryBean.
 	 * @return the type of object that this FactoryBean creates,
-	 * or null if not known at the time of the call
+	 * or <code>null</code> if not known at the time of the call
 	 * @see ListableBeanFactory#getBeansOfType
 	 */
 	Class getObjectType();

@@ -45,7 +45,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	/**
 	 * Create a new TypeMismatchException.
 	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
-	 * @param requiredType the required target type (or null if not known)
+	 * @param requiredType the required target type (or <code>null</code> if not known)
 	 * @param ex the root cause
 	 */
 	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, Class requiredType, Throwable ex) {

@@ -88,7 +88,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 
 	/**
 	 * Set the ClassLoader to load resource bundles with,
-	 * or null for using the thread context class loader on actual access
+	 * or <code>null</code> for using the thread context class loader on actual access
 	 * (applying to the thread that does the "getMessage" call).
 	 */
 	public void setClassLoader(ClassLoader classLoader) {
@@ -123,7 +123,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 	 * fetching already generated MessageFormats from the cache.
 	 * @param basename the basename of the ResourceBundle
 	 * @param locale the Locale to find the ResourceBundle for
-	 * @return the resulting ResourceBundle, or null if none
+	 * @return the resulting ResourceBundle, or <code>null</code> if none
 	 * found for the given basename and Locale
 	 */
 	protected ResourceBundle getResourceBundle(String basename, Locale locale) {
@@ -166,7 +166,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 	 * @param bundle the ResourceBundle to work on
 	 * @param code the message code to retrieve
 	 * @param locale the Locale to use to build the MessageFormat
-	 * @return the resulting MessageFormat, or null if no message
+	 * @return the resulting MessageFormat, or <code>null</code> if no message
 	 * defined for the given code
 	 */
 	protected MessageFormat getMessageFormat(ResourceBundle bundle, String code, Locale locale)

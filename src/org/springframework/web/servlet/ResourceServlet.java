@@ -230,7 +230,7 @@ public class ResourceServlet extends HttpServletBean {
 	 * <p>Default implementation returns the value of the "resource" parameter.
 	 * Can be overridden in subclasses.
 	 * @param request current HTTP request
-	 * @return the URL of the target resource, or null if none found
+	 * @return the URL of the target resource, or <code>null</code> if none found
 	 * @see #RESOURCE_PARAM_NAME
 	 */
 	protected String determineResourceUrl(HttpServletRequest request) {

@@ -73,7 +73,7 @@ public abstract class BindUtils {
 	 * @param request request containing the parameters
 	 * @param object object to bind the parameters to
 	 * @param objectName name of the bind object
-	 * @param validator validator to be invoked, or null if no validation
+	 * @param validator validator to be invoked, or <code>null</code> if no validation
 	 * @return the binder used (can be treated as Errors instance)
 	 */
 	public static BindException bindAndValidate(ServletRequest request, Object object, String objectName,
@@ -90,7 +90,7 @@ public abstract class BindUtils {
 	 * @param request request containing the parameters
 	 * @param object object to bind the parameters to
 	 * @param objectName name of the bind object
-	 * @param validator validator to be invoked, or null if no validation
+	 * @param validator validator to be invoked, or <code>null</code> if no validation
 	 * @param initializer Implementation of the BindInitializer interface which will be able to set custom editors
 	 * @return the binder used (can be treated as Errors instance)
 	 * @throws ServletException if thrown by the BindInitializer

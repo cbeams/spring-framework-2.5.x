@@ -127,7 +127,7 @@ public abstract class BeanUtils {
 	 * @param clazz the class to check
 	 * @param methodName the name of the method to find
 	 * @param paramTypes the parameter types of the method to find
-	 * @return the method object, or null if not found
+	 * @return the method object, or <code>null</code> if not found
 	 * @see java.lang.Class#getMethod
 	 * @see #findDeclaredMethod
 	 */
@@ -148,7 +148,7 @@ public abstract class BeanUtils {
 	 * @param clazz the class to check
 	 * @param methodName the name of the method to find
 	 * @param paramTypes the parameter types of the method to find
-	 * @return the method object, or null if not found
+	 * @return the method object, or <code>null</code> if not found
 	 * @see java.lang.Class#getDeclaredMethod
 	 */
 	public static Method findDeclaredMethod(Class clazz, String methodName, Class[] paramTypes) {
@@ -172,7 +172,7 @@ public abstract class BeanUtils {
 	 * methods without issues even in environments with restricted Java security settings.
 	 * @param clazz the class to check
 	 * @param methodName the name of the method to find
-	 * @return the method object, or null if not found
+	 * @return the method object, or <code>null</code> if not found
 	 * @see java.lang.Class#getMethods
 	 * @see #findDeclaredMethodWithMinimalParameters
 	 */
@@ -202,7 +202,7 @@ public abstract class BeanUtils {
 	 * <p>Checks <code>Class.getDeclaredMethods</code>, cascading upwards to all superclasses.
 	 * @param clazz the class to check
 	 * @param methodName the name of the method to find
-	 * @return the method object, or null if not found
+	 * @return the method object, or <code>null</code> if not found
 	 * @see java.lang.Class#getDeclaredMethods
 	 */
 	public static Method findDeclaredMethodWithMinimalParameters(Class clazz, String methodName) {
@@ -352,7 +352,7 @@ public abstract class BeanUtils {
 	 * with the method either being the read method or the write method for
 	 * that bean property.
 	 * @param method the method to find a corresponding PropertyDescriptor for
-	 * @return the corresponding PropertyDescriptor, or null if none
+	 * @return the corresponding PropertyDescriptor, or <code>null</code> if none
 	 * @throws BeansException if PropertyDescriptor look fails
 	 */
 	public static PropertyDescriptor findPropertyForMethod(Method method) throws BeansException {

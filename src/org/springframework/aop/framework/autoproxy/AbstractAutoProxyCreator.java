@@ -420,7 +420,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * may be ignored. Will be null unless a custom target source is in use.
 	 * @return an array of additional interceptors for the particular bean;
 	 * or an empty array if no additional interceptors but just the common ones;
-	 * or null if no proxy at all, not even with the common interceptors.
+	 * or <code>null</code> if no proxy at all, not even with the common interceptors.
 	 * See constants DO_NOT_PROXY and PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS.
 	 * @throws BeansException in case of errors
 	 * @see #postProcessAfterInitialization

@@ -237,7 +237,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	/**
-	 * Return the default encoding for MimeMessages, or null if none.
+	 * Return the default encoding for MimeMessages, or <code>null</code> if none.
 	 */
 	public String getDefaultEncoding() {
 		return defaultEncoding;
@@ -262,7 +262,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	/**
 	 * Return the default Java Activation FileTypeMap for MimeMessages,
-	 * or null if none.
+	 * or <code>null</code> if none.
 	 */
 	public FileTypeMap getDefaultFileTypeMap() {
 		return defaultFileTypeMap;

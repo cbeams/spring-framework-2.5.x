@@ -102,7 +102,7 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Determine the DataSource of the given SessionFactory.
 	 * @param sessionFactory the SessionFactory to check
-	 * @return the DataSource, or null if none found
+	 * @return the DataSource, or <code>null</code> if none found
 	 * @see org.hibernate.engine.SessionFactoryImplementor#getConnectionProvider
 	 * @see LocalDataSourceConnectionProvider
 	 */
@@ -218,7 +218,7 @@ public abstract class SessionFactoryUtils {
 	 * (i.e. on LocalSessionFactoryBean), on HibernateTransactionManager, or on
 	 * HibernateInterceptor/HibernateTemplate.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
-	 * @param entityInterceptor Hibernate entity interceptor, or null if none
+	 * @param entityInterceptor Hibernate entity interceptor, or <code>null</code> if none
 	 * @param jdbcExceptionTranslator SQLExcepionTranslator to use for flushing the
 	 * Session on transaction synchronization (can be null; only used when actually
 	 * registering a transaction synchronization)
@@ -276,7 +276,7 @@ public abstract class SessionFactoryUtils {
 	 * otherwise, if allowCreate is true.
 	 * <p>Same as <code>getSession</code>, but throwing the original HibernateException.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
-	 * @param entityInterceptor Hibernate entity interceptor, or null if none
+	 * @param entityInterceptor Hibernate entity interceptor, or <code>null</code> if none
 	 * @param jdbcExceptionTranslator SQLExcepionTranslator to use for flushing the
 	 * Session on transaction synchronization (can be null)
 	 * @param allowCreate if a non-transactional Session should be created when no
@@ -509,7 +509,7 @@ public abstract class SessionFactoryUtils {
 	 * that shares the transaction's JDBC Connection. More specifically,
 	 * it will use the same JDBC Connection as the pre-bound Hibernate Session.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
-	 * @param entityInterceptor Hibernate entity interceptor, or null if none
+	 * @param entityInterceptor Hibernate entity interceptor, or <code>null</code> if none
 	 * @return the new Session
 	 */
 	public static Session getNewSession(SessionFactory sessionFactory, Interceptor entityInterceptor) {

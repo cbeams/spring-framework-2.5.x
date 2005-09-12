@@ -59,7 +59,7 @@ public interface JdoCallback {
 	 * it gets propagated to the caller of the template.
 	 *
 	 * @param pm active PersistenceManager
-	 * @return a result object, or null if none
+	 * @return a result object, or <code>null</code> if none
 	 * @throws JDOException in case of JDO errors
 	 * @see JdoTemplate#execute
 	 * @see JdoTransactionManager

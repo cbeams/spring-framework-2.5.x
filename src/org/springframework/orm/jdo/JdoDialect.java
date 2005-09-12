@@ -125,7 +125,8 @@ public interface JdoDialect {
 	 * an implementation should use a special handle that references that other object.
 	 * @param pm the current JDO PersistenceManager
 	 * @return a handle for the JDBC Connection, to be passed into
-	 * <code>releaseJdbcConnection</code>, or null if no JDBC Connection can be retrieved
+	 * <code>releaseJdbcConnection</code>, or <code>null</code>
+	 * if no JDBC Connection can be retrieved
 	 * @throws JDOException if thrown by JDO methods
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #releaseJdbcConnection
@@ -251,7 +252,7 @@ public interface JdoDialect {
 	 * <p>Can use a SQLExceptionTranslator for translating underlying SQLExceptions
 	 * in a database-specific fashion.
 	 * @param ex the JDOException thrown
-	 * @return the corresponding DataAccessException (must not be null)
+	 * @return the corresponding DataAccessException (must not be <code>null</code>)
 	 * @see JdoAccessor#convertJdoAccessException
 	 * @see JdoTransactionManager#convertJdoAccessException
 	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException

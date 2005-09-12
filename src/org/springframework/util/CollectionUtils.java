@@ -77,7 +77,7 @@ public abstract class CollectionUtils {
 	 * Find a value of the given type in the given collection.
 	 * @param coll the collection to search
 	 * @param type the type to look for
-	 * @return a value of the given type found, or null if none
+	 * @return a value of the given type found, or <code>null</code> if none
 	 * @throws IllegalArgumentException if more than one value
 	 * of the given type found
 	 */
@@ -101,7 +101,7 @@ public abstract class CollectionUtils {
 	 * searching for a value of the second type, etc.
 	 * @param coll the collection to search
 	 * @param types the types to look for, in prioritized order
-	 * @return a of one of the given types found, or null if none
+	 * @return a of one of the given types found, or <code>null</code> if none
 	 * @throws IllegalArgumentException if more than one value
 	 * of the given type found
 	 */

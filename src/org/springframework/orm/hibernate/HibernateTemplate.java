@@ -340,7 +340,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @param action callback object that specifies the Hibernate action
 	 * @param exposeNativeSession whether to expose the native Hibernate Session
 	 * to callback code
-	 * @return a result object returned by the action, or null
+	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 */
 	public Object execute(HibernateCallback action, boolean exposeNativeSession) throws DataAccessException {
@@ -1019,7 +1019,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @param queryObject the Query object
 	 * @param paramName the name of the parameter
 	 * @param value the value of the parameter
-	 * @param type Hibernate type of the parameter (or null if none specified)
+	 * @param type Hibernate type of the parameter (or <code>null</code> if none specified)
 	 * @throws HibernateException if thrown by the Query object
 	 */
 	protected void applyNamedParameterToQuery(Query queryObject, String paramName, Object value, Type type)

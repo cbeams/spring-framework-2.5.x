@@ -33,7 +33,7 @@ public interface PropertyValues {
 	/**
 	 * Return the property value with the given name, if any.
 	 * @param propertyName the name to search for
-	 * @return the property value, or null
+	 * @return the property value, or <code>null</code>
 	 */
 	PropertyValue getPropertyValue(String propertyName);
 

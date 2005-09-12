@@ -120,7 +120,7 @@ public class RefreshablePagedListHolder extends PagedListHolder {
 	 * Set the Locale that the source provider should use for loading the list.
 	 * This can either be populated programmatically (e.g. with the request locale),
 	 * or via binding (using Locale's toString syntax, e.g. "locale=en_US").
-	 * @param locale the current Locale, or null
+	 * @param locale the current Locale, or <code>null</code>
 	 */
 	public void setLocale(Locale locale) {
 		this.locale = locale;
@@ -128,7 +128,7 @@ public class RefreshablePagedListHolder extends PagedListHolder {
 
 	/**
 	 * Return the Locale that the source provider should use for loading the list.
-	 * @return the current Locale, or null
+	 * @return the current Locale, or <code>null</code>
 	 */
 	public Locale getLocale() {
 		return locale;
@@ -137,7 +137,7 @@ public class RefreshablePagedListHolder extends PagedListHolder {
 	/**
 	 * Set the filter object that the source provider should use for loading the list.
 	 * This will typically be a bean, for easy data binding.
-	 * @param filter the filter object, or null
+	 * @param filter the filter object, or <code>null</code>
 	 */
 	public void setFilter(Object filter) {
 		this.filter = filter;
@@ -145,7 +145,7 @@ public class RefreshablePagedListHolder extends PagedListHolder {
 
 	/**
 	 * Return the filter that the source provider should use for loading the list.
-	 * @return the current filter, or null
+	 * @return the current filter, or <code>null</code>
 	 */
 	public Object getFilter() {
 		return filter;

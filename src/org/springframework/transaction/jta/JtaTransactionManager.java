@@ -508,7 +508,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * Allows subclasses to retrieve the JTA UserTransaction in a vendor-specific manner.
 	 * Only called if no "userTransaction" or "userTransactionName" specified.
 	 * <p>Default implementation simply returns null.
-	 * @return the JTA UserTransaction handle to use, or null if none found
+	 * @return the JTA UserTransaction handle to use, or <code>null</code> if none found
 	 * @throws TransactionSystemException in case of errors
 	 * @see #setUserTransaction
 	 * @see #setUserTransactionName
@@ -521,7 +521,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * Allows subclasses to retrieve the JTA TransactionManager in a vendor-specific manner.
 	 * Only called if no "transactionManager" or "transactionManagerName" specified.
 	 * <p>Default implementation simply returns null.
-	 * @return the JTA TransactionManager handle to use, or null if none found
+	 * @return the JTA TransactionManager handle to use, or <code>null</code> if none found
 	 * @throws TransactionSystemException in case of errors
 	 * @see #setTransactionManager
 	 * @see #setTransactionManagerName
@@ -535,7 +535,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * checking whether the UserTransaction object implements the
 	 * TransactionManager, and checking the fallback JNDI locations.
 	 * @param ut the JTA UserTransaction object
-	 * @return the JTA TransactionManager reference, or null if not found
+	 * @return the JTA TransactionManager reference, or <code>null</code> if not found
 	 * @see #FALLBACK_TRANSACTION_MANAGER_NAMES
 	 */
 	protected TransactionManager findTransactionManager(UserTransaction ut) {

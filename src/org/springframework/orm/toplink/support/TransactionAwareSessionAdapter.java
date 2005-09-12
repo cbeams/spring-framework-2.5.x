@@ -62,6 +62,7 @@ public class TransactionAwareSessionAdapter implements FactoryBean {
 
 	private Session session;
 
+
 	/**
 	 * Set the SessionFactory that this adapter is supposed to expose a
 	 * transaction-aware TopLink Session for. This should be the raw
@@ -71,6 +72,7 @@ public class TransactionAwareSessionAdapter implements FactoryBean {
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.session = sessionFactory.createTransactionAwareSession();
 	}
+
 
 	public Object getObject() {
 		return this.session;

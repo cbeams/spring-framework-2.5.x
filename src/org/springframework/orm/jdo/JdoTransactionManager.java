@@ -96,7 +96,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 	private boolean autodetectDataSource = true;
 
-	private JdoDialect jdoDialect = new DefaultJdoDialect();
+	private JdoDialect jdoDialect;
 
 
 	/**

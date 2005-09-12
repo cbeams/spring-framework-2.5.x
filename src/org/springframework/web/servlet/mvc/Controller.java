@@ -113,7 +113,7 @@ public interface Controller {
 	 * completed request processing itself, thus there is no ModelAndView to render.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @return a ModelAndView to render, or null if handled directly
+	 * @return a ModelAndView to render, or <code>null</code> if handled directly
 	 * @throws Exception in case of errors
 	 */
 	ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception;

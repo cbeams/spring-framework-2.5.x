@@ -37,7 +37,7 @@ public abstract class DataAccessUtils {
 	 * Returns null if 0 result objects found; throws an exception
 	 * if more than 1 found.
 	 * @param results the result Collection (can be null)
-	 * @return the unique result object, or null if none
+	 * @return the unique result object, or <code>null</code> if none
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object has been found in the given Collection
 	 */

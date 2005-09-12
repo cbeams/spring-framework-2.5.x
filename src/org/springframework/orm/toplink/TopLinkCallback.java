@@ -63,7 +63,7 @@ public interface TopLinkCallback {
 	 * it gets propagated to the caller of the template.
 	 *
 	 * @param session active TopLink Session
-	 * @return a result object, or null if none
+	 * @return a result object, or <code>null</code> if none
 	 * @throws TopLinkException in case of TopLink errors
 	 * @see oracle.toplink.sessions.Session#getActiveUnitOfWork()
 	 * @see oracle.toplink.sessions.Session#acquireUnitOfWork()

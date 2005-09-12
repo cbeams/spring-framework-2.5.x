@@ -96,8 +96,7 @@ public class ServerSessionFactory implements SessionFactory {
 	 */
 	public Session createTransactionAwareSession(SessionFactory sessionFactory) throws TopLinkException {
 		return (Session) Proxy.newProxyInstance(
-				Session.class.getClassLoader(),
-				new Class[] {Session.class},
+				getClass().getClassLoader(), new Class[] {Session.class},
 				new TransactionAwareInvocationHandler(sessionFactory, this.serverSession));
 	}
 

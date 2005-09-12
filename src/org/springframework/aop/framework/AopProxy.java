@@ -42,7 +42,7 @@ public interface AopProxy {
 	 * proxy facility's default, which is usually different from the default chosen
 	 * by the AopProxy implementation's <code>getProxy</code> method.
 	 * @param classLoader the class loader to create the proxy with
-	 * (or null for the low-level proxy facility's default)
+	 * (or <code>null</code> for the low-level proxy facility's default)
 	 */
 	Object getProxy(ClassLoader classLoader);
 

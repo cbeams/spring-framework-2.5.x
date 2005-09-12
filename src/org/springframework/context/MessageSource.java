@@ -43,7 +43,7 @@ public interface MessageSource {
 	 * qualified class name, thus avoiding conflict and ensuring maximum clarity.
 	 * @param args array of arguments that will be filled in for params within
 	 * the message (params look like "{0}", "{1,date}", "{2,time}" within a message),
-	 * or null if none.
+	 * or <code>null</code> if none.
 	 * @param locale the Locale in which to do the lookup
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the resolved message if the lookup was successful;
@@ -57,7 +57,7 @@ public interface MessageSource {
 	 * @param code the code to lookup up, such as 'calculator.noRateSet'
 	 * @param args Array of arguments that will be filled in for params within
 	 * the message (params look like "{0}", "{1,date}", "{2,time}" within a message),
-	 * or null if none.
+	 * or <code>null</code> if none.
 	 * @param locale the Locale in which to do the lookup
 	 * @return the resolved message
 	 * @throws NoSuchMessageException if the message wasn't found

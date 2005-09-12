@@ -185,7 +185,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * @param args array of arguments that will be filled in for params
 	 * within the message
 	 * @param locale the Locale in which to do the lookup
-	 * @return the resolved message, or null if not found
+	 * @return the resolved message, or <code>null</code> if not found
 	 * @see #getMessage(String, Object[], String, Locale)
 	 * @see #getMessage(String, Object[], Locale)
 	 * @see #getMessage(MessageSourceResolvable, Locale)
@@ -226,7 +226,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * @param args array of arguments that will be filled in for params
 	 * within the message
 	 * @param locale the Locale in which to do the lookup
-	 * @return the resolved message, or null if not found
+	 * @return the resolved message, or <code>null</code> if not found
 	 * @see #getParentMessageSource()
 	 */
 	protected String getMessageFromParent(String code, Object[] args, Locale locale) {
@@ -253,7 +253,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * placeholders found in them.
 	 * @param msg the message to format
 	 * @param args array of arguments that will be filled in for params within
-	 * the message, or null if none.
+	 * the message, or <code>null</code> if none.
 	 * @param locale the Locale used for formatting
 	 * @return the formatted message (with resolved arguments)
 	 */
@@ -331,7 +331,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * @param code the code of the message to resolve
 	 * @param locale the Locale to resolve the code for
 	 * (subclasses are encouraged to support internationalization)
-	 * @return the message String, or null if not found
+	 * @return the message String, or <code>null</code> if not found
 	 * @see #resolveCode
 	 * @see java.text.MessageFormat
 	 */
@@ -353,7 +353,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * @param code the code of the message to resolve
 	 * @param locale the Locale to resolve the code for
 	 * (subclasses are encouraged to support internationalization)
-	 * @return the MessageFormat for the message, or null if not found
+	 * @return the MessageFormat for the message, or <code>null</code> if not found
 	 * @see #resolveCodeWithoutArguments(String, java.util.Locale)
 	 */
 	protected abstract MessageFormat resolveCode(String code, Locale locale);

@@ -79,7 +79,7 @@ public abstract class SessionReadCallback implements TopLinkCallback {
 	 * Called with a Session to work on, either the active UnitOfWork
 	 * or the plain Session (as determined by the transaction status).
 	 * @param session the TopLink Session to perform read operations on
-	 * @return a result object, or null if none
+	 * @return a result object, or <code>null</code> if none
 	 * @throws TopLinkException in case of TopLink errors
 	 */
 	protected abstract Object readFromSession(Session session) throws TopLinkException;

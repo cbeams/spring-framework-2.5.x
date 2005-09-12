@@ -54,13 +54,13 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  * the encoding of the Velocity template file
  * <li><b>velocityFormatterAttribute</b> (optional, default=null): the name of
  * the VelocityFormatter helper object to expose in the Velocity context of this
- * view, or null if not needed. VelocityFormatter is part of standard Velocity.
+ * view, or <code>null</code> if not needed. VelocityFormatter is part of standard Velocity.
  * <li><b>dateToolAttribute</b> (optional, default=null): the name of the
  * DateTool helper object to expose in the Velocity context of this view,
- * or null if not needed. DateTool is part of Velocity Tools 1.0.
+ * or <code>null</code> if not needed. DateTool is part of Velocity Tools 1.0.
  * <li><b>numberToolAttribute</b> (optional, default=null): the name of the
  * NumberTool helper object to expose in the Velocity context of this view,
- * or null if not needed. NumberTool is part of Velocity Tools 1.1.
+ * or <code>null</code> if not needed. NumberTool is part of Velocity Tools 1.1.
  * <li><b>cacheTemplate</b> (optional, default=false): whether or not the Velocity
  * template should be cached. It should normally be true in production, but setting
  * this to false enables us to modify Velocity templates without restarting the
@@ -152,7 +152,7 @@ public class VelocityView extends AbstractTemplateView {
 
 	/**
 	 * Set the name of the VelocityFormatter helper object to expose in the
-	 * Velocity context of this view, or null if not needed.
+	 * Velocity context of this view, or <code>null</code> if not needed.
 	 * <p>VelocityFormatter is part of the standard Velocity distribution.
 	 * @see org.apache.velocity.app.tools.VelocityFormatter
 	 */
@@ -162,7 +162,7 @@ public class VelocityView extends AbstractTemplateView {
 
 	/**
 	 * Set the name of the DateTool helper object to expose in the Velocity context
-	 * of this view, or null if not needed. The exposed DateTool will be aware of
+	 * of this view, or <code>null</code> if not needed. The exposed DateTool will be aware of
 	 * the current locale, as determined by Spring's LocaleResolver.
 	 * <p>DateTool is part of the generic package of Velocity Tools 1.0.
 	 * Spring uses a special locale-aware subclass of DateTool.
@@ -176,7 +176,7 @@ public class VelocityView extends AbstractTemplateView {
 
 	/**
 	 * Set the name of the NumberTool helper object to expose in the Velocity context
-	 * of this view, or null if not needed. The exposed NumberTool will be aware of
+	 * of this view, or <code>null</code> if not needed. The exposed NumberTool will be aware of
 	 * the current locale, as determined by Spring's LocaleResolver.
 	 * <p>NumberTool is part of the generic package of Velocity Tools 1.1.
 	 * Spring uses a special locale-aware subclass of NumberTool.

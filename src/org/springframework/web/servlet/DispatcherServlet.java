@@ -792,7 +792,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Try all handler mappings in order.
 	 * @param request current HTTP request
 	 * @param cache whether to cache the HandlerExecutionChain in a request attribute
-	 * @return the HandlerExceutionChain, or null if no handler could be found
+	 * @return the HandlerExceutionChain, or <code>null</code> if no handler could be found
 	 */
 	protected HandlerExecutionChain getHandler(HttpServletRequest request, boolean cache) throws Exception {
 		HandlerExecutionChain handler =
@@ -861,7 +861,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Determine an error ModelAndView via the registered HandlerExceptionResolvers.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler the executed handler, or null if none chosen at the time of
+	 * @param handler the executed handler, or <code>null</code> if none chosen at the time of
 	 * the exception (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
 	 * @return a corresponding ModelAndView to forward to
@@ -937,7 +937,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param model the model to be passed to the view
 	 * @param locale the current locale
 	 * @param request current HTTP servlet request
-	 * @return the View object, or null if none found
+	 * @return the View object, or <code>null</code> if none found
 	 * @throws Exception if the view cannot be resolved
 	 * (typically in case of problems creating an actual View object)
 	 * @see ViewResolver#resolveViewName
@@ -961,7 +961,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * invocation has successfully completed and returned true.
 	 * @param mappedHandler the mapped HandlerExecutionChain
 	 * @param interceptorIndex index of last interceptor that successfully completed
-	 * @param ex Exception thrown on handler execution, or null if none
+	 * @param ex Exception thrown on handler execution, or <code>null</code> if none
 	 * @see HandlerInterceptor#afterCompletion
 	 */
 	private void triggerAfterCompletion(

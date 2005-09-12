@@ -124,7 +124,7 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Retrieve a resource for the given key that is bound to the current thread.
 	 * @param key key to check
-	 * @return a value bound to the current thread, or null if none
+	 * @return a value bound to the current thread, or <code>null</code> if none
 	 */
 	public static Object getResource(Object key) {
 		Map map = (Map) resources.get();
@@ -268,14 +268,14 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Expose the name of the current transaction, if any.
 	 * Called by transaction manager on transaction begin and on cleanup.
-	 * @param name the name of the transaction, or null to reset it
+	 * @param name the name of the transaction, or <code>null</code> to reset it
 	 */
 	public static void setCurrentTransactionName(String name) {
 		currentTransactionName.set(name);
 	}
 
 	/**
-	 * Return the name of the current transaction, or null if none set.
+	 * Return the name of the current transaction, or <code>null</code> if none set.
 	 * To be called by resource management code for optimizations per use case,
 	 * for example to optimize fetch strategies for specific named transactions.
 	 */

@@ -430,7 +430,7 @@ public abstract class StringUtils {
 	 * @param delimiter to split the string up with
 	 * @return a two element array with index 0 being before the delimiter, and
 	 * index 1 being after the delimiter (neither element includes the delimiter);
-	 * or null if the delimiter wasn't found in the given input String
+	 * or <code>null</code> if the delimiter wasn't found in the given input String
 	 */
 	public static String[] split(String toSplit, String delimiter) {
 		Assert.hasLength(toSplit, "Cannot split a null or empty string");

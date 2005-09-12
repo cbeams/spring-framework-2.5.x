@@ -994,7 +994,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * Determine SQL from potential provider object.
 	 * @param sqlProvider object that's potentially a SqlProvider
-	 * @return the SQL string, or null
+	 * @return the SQL string, or <code>null</code>
 	 * @see SqlProvider
 	 */
 	private static String getSql(Object sqlProvider) {

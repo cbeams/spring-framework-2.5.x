@@ -84,10 +84,9 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 	 */
 	public void setTargetPersistenceManagerFactory(PersistenceManagerFactory target) {
 		this.target = target;
+		Class[] ifcs = ClassUtils.getAllInterfaces(target);
 		this.proxy = (PersistenceManagerFactory) Proxy.newProxyInstance(
-				PersistenceManagerFactory.class.getClassLoader(),
-				new Class[] {PersistenceManagerFactory.class},
-				new TransactionAwareFactoryInvocationHandler());
+				getClass().getClassLoader(), ifcs, new TransactionAwareFactoryInvocationHandler());
 	}
 
 	/**

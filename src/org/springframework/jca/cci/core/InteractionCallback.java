@@ -64,7 +64,7 @@ public interface InteractionCallback {
 	 * @param interaction active CCI Interaction
 	 * @param connectionFactory the CCI ConnectionFactory that the Connection was
 	 * created with (gives access to RecordFactory and ResourceAdapterMetaData)
-	 * @return a result object, or null if none
+	 * @return a result object, or <code>null</code> if none
 	 * @throws ResourceException if thrown by a CCI method, to be auto-converted
 	 * to a DataAccessException
 	 * @throws SQLException if thrown by a ResultSet method, to be auto-converted

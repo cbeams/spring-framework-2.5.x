@@ -126,7 +126,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	/**
 	 * Look up a handler for the URL path of the given request.
 	 * @param request current HTTP request
-	 * @return the looked up handler instance, or null
+	 * @return the looked up handler instance, or <code>null</code>
 	 */
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
@@ -144,7 +144,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * <p>Looks for the most exact pattern, where most exact is defined as
 	 * the longest path pattern.
  	 * @param urlPath URL the bean is mapped to
-	 * @return the associated handler instance, or null if not found
+	 * @return the associated handler instance, or <code>null</code> if not found
 	 * @see org.springframework.util.AntPathMatcher
 	 */
 	protected Object lookupHandler(String urlPath) {

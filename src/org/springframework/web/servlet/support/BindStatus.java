@@ -184,7 +184,7 @@ public class BindStatus {
 
 	/**
 	 * Return a bind expression that can be used in HTML forms as input name
-	 * for the respective field, or null if not field-specific.
+	 * for the respective field, or <code>null</code> if not field-specific.
 	 * <p>Returns a bind path appropriate for resubmission, e.g. "address.street".
 	 * Note that the complete bind path as required by the bind tag is
 	 * "customer.address.street", if bound to a "customer" bean.
@@ -195,7 +195,7 @@ public class BindStatus {
 
 	/**
 	 * Return the current value of the field, i.e. either the property value
-	 * or a rejected update, or null if not field-specific.
+	 * or a rejected update, or <code>null</code> if not field-specific.
 	 * <p>This value will be an HTML-escaped String if the original value
 	 * already was a String.
 	 */
@@ -272,7 +272,7 @@ public class BindStatus {
 
 	/**
 	 * Return the Errors instance that this bind status is currently bound to.
-	 * @return the current Errors instance, or null if none
+	 * @return the current Errors instance, or <code>null</code> if none
 	 */
 	public Errors getErrors() {
 		return errors;
@@ -281,7 +281,7 @@ public class BindStatus {
 	/**
 	 * Return the PropertyEditor for the property that this bind status
 	 * is currently bound to.
-	 * @return the current PropertyEditor, or null if none
+	 * @return the current PropertyEditor, or <code>null</code> if none
 	 */
 	public PropertyEditor getEditor() {
 		return editor;

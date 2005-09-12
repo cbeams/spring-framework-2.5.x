@@ -47,7 +47,7 @@ public interface TransactionCallback {
 	 * want transaction support.
 	 *
 	 * @param status associated transaction status
-	 * @return a result object, or null
+	 * @return a result object, or <code>null</code>
 	 * @see TransactionTemplate#execute
 	 */
 	Object doInTransaction(TransactionStatus status);

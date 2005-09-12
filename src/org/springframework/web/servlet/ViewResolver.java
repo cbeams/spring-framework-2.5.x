@@ -45,7 +45,7 @@ public interface ViewResolver {
 	 * @param viewName name of the view to resolve
 	 * @param locale Locale in which to resolve the view.
 	 * ViewResolvers that support internationalization should respect this.
-	 * @return the View object, or null if not found
+	 * @return the View object, or <code>null</code> if not found
 	 * (optional, to allow for ViewResolver chaining)
 	 * @throws Exception if the view cannot be resolved
 	 * (typically in case of problems creating an actual View object)

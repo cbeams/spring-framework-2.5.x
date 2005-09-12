@@ -41,7 +41,7 @@ public abstract class ValidationUtils {
 
 	/**
 	 * Invoke the given validator for the given object and Errors instance.
-	 * @param validator validator to be invoked, or null if no validation
+	 * @param validator validator to be invoked, or <code>null</code> if no validation
 	 * @param object object to bind the parameters to
 	 * @param errors Errors instance that should store the errors
 	 */

@@ -194,7 +194,7 @@ public class MethodInvoker {
 
 	/**
 	 * Find a matching method with the specified name for the specified arguments.
-	 * @return a matching method, or null if none
+	 * @return a matching method, or <code>null</code> if none
 	 * @see #getTargetClass()
 	 * @see #getTargetMethod()
 	 * @see #getArguments()
@@ -237,7 +237,7 @@ public class MethodInvoker {
 	 * Invoke the specified method.
 	 * The invoker needs to have been prepared before.
 	 * @return the object (possibly null) returned by the method invocation,
-	 * or null if the method has a void return type
+	 * or <code>null</code> if the method has a void return type
 	 * @see #prepare
 	 */
 	public Object invoke() throws InvocationTargetException, IllegalAccessException {

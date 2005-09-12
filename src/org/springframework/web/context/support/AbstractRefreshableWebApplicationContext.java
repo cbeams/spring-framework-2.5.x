@@ -79,7 +79,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	/** Servlet context that this context runs in */
 	private ServletContext servletContext;
 
-	/** Namespace of this context, or null if root */
+	/** Namespace of this context, or <code>null</code> if root */
 	private String namespace;
 
 	/** Paths to XML configuration files */

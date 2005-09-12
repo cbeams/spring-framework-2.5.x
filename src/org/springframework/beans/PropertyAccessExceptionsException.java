@@ -82,7 +82,7 @@ public class PropertyAccessExceptionsException extends BeansException {
 	}
 
 	/**
-	 * Return the exception for this field, or null if there isn't one.
+	 * Return the exception for this field, or <code>null</code> if there isn't one.
 	 */
 	public PropertyAccessException getPropertyAccessException(String propertyName) {
 		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {

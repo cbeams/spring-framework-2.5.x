@@ -168,7 +168,7 @@ public abstract class WebUtils {
 	/**
 	 * Determine the session id of the given request, if any.
 	 * @param request current HTTP request
-	 * @return the session id, or null if none
+	 * @return the session id, or <code>null</code> if none
 	 */
 	public static String getSessionId(HttpServletRequest request) {
 		HttpSession session = request.getSession(false);
@@ -181,7 +181,7 @@ public abstract class WebUtils {
 	 * Does not create a new session if none has existed before!
 	 * @param request current HTTP request
 	 * @param name the name of the session attribute
-	 * @return the value of the session attribute, or null if not found
+	 * @return the value of the session attribute, or <code>null</code> if not found
 	 */
 	public static Object getSessionAttribute(HttpServletRequest request, String name) {
 		HttpSession session = request.getSession(false);
@@ -194,7 +194,7 @@ public abstract class WebUtils {
 	 * attribute. Does not create a new session if none has existed before!
 	 * @param request current HTTP request
 	 * @param name the name of the session attribute
-	 * @return the value of the session attribute, or null if not found
+	 * @return the value of the session attribute, or <code>null</code> if not found
 	 * @throws IllegalStateException if the session attribute could not be found
 	 */
 	public static Object getRequiredSessionAttribute(HttpServletRequest request, String name)
@@ -282,7 +282,7 @@ public abstract class WebUtils {
 	 * Retrieve the first cookie with the given name. Note that multiple
 	 * cookies can have the same name but different paths or domains.
 	 * @param name cookie name
-	 * @return the first cookie with the given name, or null if none is found
+	 * @return the first cookie with the given name, or <code>null</code> if none is found
 	 */
 	public static Cookie getCookie(HttpServletRequest request, String name) {
 		Cookie cookies[] = request.getCookies();

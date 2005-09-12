@@ -85,7 +85,7 @@ public class BeanDefinitionValueResolver {
 	 * Collections that will need to be resolved.
 	 * <li>A ManagedMap. In this case the value may be a RuntimeBeanReference
 	 * or Collection that will need to be resolved.
-	 * <li>An ordinary object or null, in which case it's left alone.
+	 * <li>An ordinary object or <code>null</code>, in which case it's left alone.
 	 */
 	public Object resolveValueIfNecessary(String argName, Object value) throws BeansException {
 		// We must check each value to see whether it requires a runtime reference

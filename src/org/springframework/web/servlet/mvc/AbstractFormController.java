@@ -282,7 +282,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * <p>Default implementation delegates to the <code>getFormSessionAttributeName</code>
 	 * version without arguments.
 	 * @param request current HTTP request
-	 * @return the name of the form session attribute, or null if not in session form mode
+	 * @return the name of the form session attribute, or <code>null</code> if not in session form mode
 	 * @see #getFormSessionAttributeName
 	 * @see javax.servlet.http.HttpSession#getAttribute
 	 */
@@ -472,7 +472,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param errors validation errors holder
-	 * @return the prepared form view, or null if handled directly
+	 * @return the prepared form view, or <code>null</code> if handled directly
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #showForm(HttpServletRequest, BindException, String)
 	 * @see org.springframework.validation.Errors
@@ -557,7 +557,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @param request current HTTP request
 	 * @param command form object with request parameters bound onto it
 	 * @param errors validation errors holder
-	 * @return a Map with reference data entries, or null if none
+	 * @return a Map with reference data entries, or <code>null</code> if none
 	 * @throws Exception in case of invalid state or arguments
 	 * @see ModelAndView
 	 */
@@ -582,7 +582,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @param response current servlet response
 	 * @param command form object with request parameters bound onto it
 	 * @param errors holder without errors (subclass can add errors if it wants to)
-	 * @return the prepared model and view, or null
+	 * @return the prepared model and view, or <code>null</code>
 	 * @throws Exception in case of errors
 	 * @see #handleRequestInternal
 	 * @see #isFormSubmission
@@ -617,7 +617,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * }</pre>
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @return a prepared view, or null if handled directly
+	 * @return a prepared view, or <code>null</code> if handled directly
 	 * @throws Exception in case of errors
 	 * @see #showNewForm
 	 * @see #getErrorsForNewForm

@@ -54,7 +54,7 @@ public interface SqlMapCallback {
 	 *
 	 * @param stmt the iBATIS Database Layer mapped statement
 	 * @param con the JDBC Connection to work on
-	 * @return a result object, or null if none
+	 * @return a result object, or <code>null</code> if none
 	 * @throws SQLException if thrown by MappedStatement methods
 	 * @see SqlMapTemplate#executeQueryForList
 	 * @see SqlMapTemplate#executeQueryForMap

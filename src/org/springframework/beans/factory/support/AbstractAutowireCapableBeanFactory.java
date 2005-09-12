@@ -107,7 +107,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * Create a new AbstractAutowireCapableBeanFactory with the given parent.
-	 * @param parentBeanFactory parent bean factory, or null if none
+	 * @param parentBeanFactory parent bean factory, or <code>null</code> if none
 	 */
 	public AbstractAutowireCapableBeanFactory(BeanFactory parentBeanFactory) {
 		this();
@@ -468,7 +468,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param beanName name of the bean
 	 * @param mergedBeanDefinition the bean definition for the bean
 	 * @param explicitArgs argument values passed in programmatically via the getBean
-	 * method, or null if none (-> use constructor argument values from bean definition)
+	 * method, or <code>null</code> if none (-> use constructor argument values from bean definition)
 	 * @return BeanWrapper for the new instance
 	 * @see #getBean(String, Object[])
 	 */
@@ -1107,7 +1107,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * a corresponding exception should be thrown.
 	 * @param requiredType the type of the beans to look up
 	 * @return a Map of bean names and bean instances that match the required type,
-	 * or null if none found
+	 * or <code>null</code> if none found
 	 * @throws BeansException in case of errors
 	 * @see #autowireByType
 	 * @see #autowireConstructor

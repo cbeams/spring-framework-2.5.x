@@ -75,7 +75,7 @@ public class JndiTemplate {
 	/**
 	 * Execute the given JNDI context callback implementation.
 	 * @param contextCallback JndiCallback implementation
-	 * @return a result object returned by the callback, or null
+	 * @return a result object returned by the callback, or <code>null</code>
 	 * @throws NamingException thrown by the callback implementation
 	 * @see #createInitialContext
 	 */
@@ -134,7 +134,7 @@ public class JndiTemplate {
 	 * Look up the object with the given name in the current JNDI context.
 	 * @param name the JNDI name of the object
 	 * @param requiredType type the JNDI object must match. Can be an interface or
-	 * superclass of the actual class, or null for any match. For example, if the
+	 * superclass of the actual class, or <code>null</code> for any match. For example, if the
 	 * value is Object.class, this method will succeed whatever the class of the
 	 * returned instance.
 	 * @return object found (cannot be null; if a not so well-behaved

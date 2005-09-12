@@ -53,13 +53,13 @@ public interface MultipartFile {
 	 * Return the original filename in the client's filesystem.
 	 * This may contain path information depending on the browser used,
 	 * but it typically will not with any other than Opera.
-	 * @return the original filename, or null if empty
+	 * @return the original filename, or <code>null</code> if empty
 	 */
 	String getOriginalFilename();
 
 	/**
 	 * Return the content type of the file.
-	 * @return the content type, or null if empty or not defined
+	 * @return the content type, or <code>null</code> if empty or not defined
 	 */
 	String getContentType();
 

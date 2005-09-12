@@ -84,7 +84,7 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 	 * If the specified class has a <code>ManagedResource</code> attribute,
 	 * then it is returned. Otherwise returns null.
 	 * @param clazz the class to read the attribute data from
-	 * @return the attribute, or null if not found
+	 * @return the attribute, or <code>null</code> if not found
 	 * @throws InvalidMetadataException if more than one attribute exists
 	 */
 	public ManagedResource getManagedResource(Class clazz) {
@@ -105,7 +105,7 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 	 * If the specified method has a <code>ManagedAttribute</code> attribute,
 	 * then it is returned. Otherwise returns null.
 	 * @param method the method to read the attribute data from
-	 * @return the attribute, or null if not found
+	 * @return the attribute, or <code>null</code> if not found
 	 * @throws InvalidMetadataException if more than one attribute exists,
 	 * or if the supplied method does not represent a JavaBean property
 	 */
@@ -133,7 +133,7 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 	 * If the specified method has a <code>ManagedOperation</code> attribute,
 	 * then it is returned. Otherwise return null.
 	 * @param method the method to read the attribute data from
-	 * @return the attribute, or null if not found
+	 * @return the attribute, or <code>null</code> if not found
 	 * @throws InvalidMetadataException if more than one attribute exists,
 	 * or if the supplied method represents a JavaBean property
 	 */

@@ -109,7 +109,7 @@ public interface BeanWrapper extends PropertyAccessor {
 	 * given but should be specified in any case for consistency checking)
 	 * @param propertyPath path of the property (name or nested path), or
 	 * null if looking for an editor for all properties of the given type
-	 * @return the registered editor, or null if none
+	 * @return the registered editor, or <code>null</code> if none
 	 */
 	PropertyEditor findCustomEditor(Class requiredType, String propertyPath);
 
@@ -134,7 +134,7 @@ public interface BeanWrapper extends PropertyAccessor {
 	 * the property descriptor or checking the value in case of an indexed or
 	 * mapped element.
 	 * @param propertyName property to check status for
-	 * @return the property type for the particular property, or null if not
+	 * @return the property type for the particular property, or <code>null</code> if not
 	 * determinable (can only happen with an indexed or mapped element)
 	 * @throws InvalidPropertyException if there is no such property
 	 */

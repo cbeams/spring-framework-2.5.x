@@ -435,7 +435,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 * Specify a factory method, if any. This method will be invoked with
 	 * constructor arguments, or with no arguments if none are specified.
 	 * The static method will be invoked on the specifed beanClass.
-	 * @param factoryMethodName static factory method name, or null if
+	 * @param factoryMethodName static factory method name, or <code>null</code> if
 	 * normal constructor creation should be used
 	 * @see #getBeanClass
 	 */

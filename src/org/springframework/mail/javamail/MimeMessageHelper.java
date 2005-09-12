@@ -423,7 +423,7 @@ public class MimeMessageHelper {
 	 * Determine the default encoding for the given MimeMessage.
 	 * @param mimeMessage the passed-in MimeMessage
 	 * @return the default encoding associated with the MimeMessage,
-	 * or null if none found
+	 * or <code>null</code> if none found
 	 */
 	protected String getDefaultEncoding(MimeMessage mimeMessage) {
 		if (mimeMessage instanceof SmartMimeMessage) {

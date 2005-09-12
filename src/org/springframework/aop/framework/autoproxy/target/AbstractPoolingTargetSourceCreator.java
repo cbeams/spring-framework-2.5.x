@@ -61,7 +61,7 @@ public abstract class AbstractPoolingTargetSourceCreator extends AbstractBeanFac
 	 * Create a PoolingAttribute for the given bean, if any.
 	 * @param beanClass the class of the bean to create a TargetSource for
 	 * @param beanName the name of the bean
-	 * @return the PoolingAttribute, or null for no pooling
+	 * @return the PoolingAttribute, or <code>null</code> for no pooling
 	 */
 	protected abstract PoolingAttribute getPoolingAttribute(Class beanClass, String beanName);
 

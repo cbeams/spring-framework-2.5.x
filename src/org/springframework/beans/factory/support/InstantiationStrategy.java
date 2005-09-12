@@ -66,7 +66,7 @@ public interface InstantiationStrategy {
 	 * The name can be null if we're autowiring a bean that doesn't belong to the factory.
 	 * @param owner owning BeanFactory
 	 * @param factoryBean the factory bean instance to call the factory method on,
-	 * or null in case of a static factory method
+	 * or <code>null</code> in case of a static factory method
 	 * @param factoryMethod the factory method to use
 	 * @param args the factory method arguments to apply
 	 * @return a bean instance for this bean definition

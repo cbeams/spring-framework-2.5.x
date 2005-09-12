@@ -70,7 +70,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * attribute is found
 	 * @param method method for the current invocation. Can't be null
 	 * @param targetClass target class for this invocation. May be null.
-	 * @return TransactionAttribute for this method, or null if the method is non-transactional
+	 * @return TransactionAttribute for this method, or <code>null</code> if the method is non-transactional
 	 */
 	public final TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
 		// First, see if we have a cached value
@@ -177,7 +177,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * Return null if it's not transactional. 
 	 * @param atts attributes attached to a method or class. May
 	 * be null, in which case a null TransactionAttribute will be returned.
-	 * @return TransactionAttribute configured transaction attribute, or null
+	 * @return TransactionAttribute configured transaction attribute, or <code>null</code>
 	 * if none was found
 	 */
 	protected TransactionAttribute findTransactionAttribute(Collection atts) {

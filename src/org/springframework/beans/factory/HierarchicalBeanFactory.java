@@ -31,7 +31,7 @@ package org.springframework.beans.factory;
 public interface HierarchicalBeanFactory extends BeanFactory {
 	
 	/**
-	 * Return the parent bean factory, or null if there is none.
+	 * Return the parent bean factory, or <code>null</code> if there is none.
 	 */
 	BeanFactory getParentBeanFactory();
 

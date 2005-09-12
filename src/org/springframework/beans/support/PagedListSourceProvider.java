@@ -35,9 +35,9 @@ public interface PagedListSourceProvider {
 	 * for easy data binding from a request. An instance will simply
 	 * get passed through to this callback method.
 	 * @param locale Locale that the List should be loaded for,
-	 * or null if not locale-specific
+	 * or <code>null</code> if not locale-specific
 	 * @param filter object representing filter settings,
-	 * or null if no filter options are used
+	 * or <code>null</code> if no filter options are used
 	 * @return the loaded List
 	 * @see org.springframework.beans.support.RefreshablePagedListHolder#setLocale
 	 * @see org.springframework.beans.support.RefreshablePagedListHolder#setFilter

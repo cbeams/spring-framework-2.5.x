@@ -178,7 +178,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	}
 
 	/**
-	 * Return the current Hibernate entity interceptor, or null if none.
+	 * Return the current Hibernate entity interceptor, or <code>null</code> if none.
 	 * Resolves an entity interceptor bean name via the bean factory,
 	 * if necessary.
 	 * @throws IllegalStateException if bean name specified but no bean factory set
@@ -278,7 +278,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * @param session the current Hibernate Session
 	 * @param existingTransaction if executing within an existing transaction
 	 * @return the previous flush mode to restore after the operation,
-	 * or null if none
+	 * or <code>null</code> if none
 	 * @see #setFlushMode
 	 * @see net.sf.hibernate.Session#setFlushMode
 	 */

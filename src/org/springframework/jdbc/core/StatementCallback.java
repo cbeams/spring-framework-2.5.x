@@ -61,7 +61,7 @@ public interface StatementCallback {
 	 * propagated to the caller of the template.
 	 *
 	 * @param stmt active JDBC Statement
-	 * @return a result object, or null if none
+	 * @return a result object, or <code>null</code> if none
 	 * @throws SQLException if thrown by a JDBC method, to be auto-converted
 	 * to a DataAccessException by a SQLExceptionTranslator
 	 * @throws DataAccessException in case of custom exceptions

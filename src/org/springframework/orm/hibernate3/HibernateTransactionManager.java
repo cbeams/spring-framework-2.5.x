@@ -259,7 +259,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	/**
-	 * Return the current Hibernate entity interceptor, or null if none.
+	 * Return the current Hibernate entity interceptor, or <code>null</code> if none.
 	 * Resolves an entity interceptor bean name via the bean factory,
 	 * if necessary.
 	 * @throws IllegalStateException if bean name specified but no bean factory set

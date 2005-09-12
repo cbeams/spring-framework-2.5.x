@@ -46,7 +46,7 @@ public abstract class WebApplicationContextUtils {
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param sc ServletContext to find the web application context for
-	 * @return the root WebApplicationContext for this web app, or null if none
+	 * @return the root WebApplicationContext for this web app, or <code>null</code> if none
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public static WebApplicationContext getWebApplicationContext(ServletContext sc) {

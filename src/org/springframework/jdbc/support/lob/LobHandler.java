@@ -70,7 +70,7 @@ public interface LobHandler {
 	 * <code>ResultSet.getBlob</code>, depending on the database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnName the column name to use
-	 * @return the content as byte array, or null in case of SQL NULL
+	 * @return the content as byte array, or <code>null</code> in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getBytes
 	 */
@@ -82,7 +82,7 @@ public interface LobHandler {
 	 * <code>ResultSet.getBlob</code>, depending on the database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
-	 * @return the content as byte array, or null in case of SQL NULL
+	 * @return the content as byte array, or <code>null</code> in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getBytes
 	 */
@@ -94,7 +94,7 @@ public interface LobHandler {
 	 * <code>ResultSet.getBlob</code>, depending on the database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnName the column name to use
-	 * @return the content as binary stream, or null in case of SQL NULL
+	 * @return the content as binary stream, or <code>null</code> in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getBinaryStream
 	 */
@@ -106,7 +106,7 @@ public interface LobHandler {
 	 * <code>ResultSet.getBlob</code>, depending on the database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
-	 * @return the content as binary stream, or null in case of SQL NULL
+	 * @return the content as binary stream, or <code>null</code> in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getBinaryStream
 	 */
@@ -118,7 +118,7 @@ public interface LobHandler {
 	 * <code>ResultSet.getClob</code>, depending on the database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnName the column name to use
-	 * @return the content as String, or null in case of SQL NULL
+	 * @return the content as String, or <code>null</code> in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getString
 	 */
@@ -130,7 +130,7 @@ public interface LobHandler {
 	 * <code>ResultSet.getClob</code>, depending on the database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
-	 * @return the content as String, or null in case of SQL NULL
+	 * @return the content as String, or <code>null</code> in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getString
 	 */
@@ -142,7 +142,7 @@ public interface LobHandler {
 	 * <code>ResultSet.getClob</code>, depending on the database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnName the column name to use
-	 * @return the content as ASCII stream, or null in case of SQL NULL
+	 * @return the content as ASCII stream, or <code>null</code> in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getAsciiStream
 	 */
@@ -154,7 +154,7 @@ public interface LobHandler {
 	 * <code>ResultSet.getClob</code>, depending on the database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
-	 * @return the content as ASCII stream, or null in case of SQL NULL
+	 * @return the content as ASCII stream, or <code>null</code> in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getAsciiStream
 	 */

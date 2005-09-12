@@ -166,7 +166,7 @@ public class DefaultJdoDialect implements JdoDialect {
 	 * This implementation returns a DataStoreConnectionHandle for JDO2,
 	 * which will also work on JDO1 until actually accessing the JDBC Connection.
 	 * <p>For pre-JDO2 implementations, override this method to return the
-	 * Connection through the corresponding vendor-specific mechanism, or null
+	 * Connection through the corresponding vendor-specific mechanism, or <code>null</code>
 	 * if the Connection is not retrievable.
 	 * <p><b>NOTE:</b> A JDO2 DataStoreConnection is always a wrapper,
 	 * never the native JDBC Connection. If you need access to the native JDBC
@@ -297,7 +297,7 @@ public class DefaultJdoDialect implements JdoDialect {
 	 * <p>Default implementation always returns null. Can be overridden in
 	 * subclasses to extract SQL Strings for vendor-specific exception classes.
 	 * @param ex the JDOException, containing a SQLException
-	 * @return the SQL String, or null if none found
+	 * @return the SQL String, or <code>null</code> if none found
 	 */
 	protected String extractSqlStringFromException(JDOException ex) {
 		return null;

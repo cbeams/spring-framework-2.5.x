@@ -142,7 +142,7 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Return the View object, or null if we are using a view name
+	 * Return the View object, or <code>null</code> if we are using a view name
 	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 */
 	public View getView() {
@@ -161,7 +161,7 @@ public class ModelAndView {
 
 	/**
 	 * Return the view name to be resolved by the DispatcherServlet
-	 * via a ViewResolver, or null if we are using a View object.
+	 * via a ViewResolver, or <code>null</code> if we are using a View object.
 	 */
 	public String getViewName() {
 		return viewName;

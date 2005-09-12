@@ -53,7 +53,7 @@ public interface SqlMapClientCallback {
 	 *
 	 * @param executor an active iBATIS SqlMapSession, passed-in as
 	 * SqlMapExecutor interface here to avoid manual lifecycle handling
-	 * @return a result object, or null if none
+	 * @return a result object, or <code>null</code> if none
 	 * @throws SQLException if throw my the iBATIS SQL Maps API
 	 * @see SqlMapClientTemplate#queryForList
 	 * @see SqlMapClientTemplate#queryForMap

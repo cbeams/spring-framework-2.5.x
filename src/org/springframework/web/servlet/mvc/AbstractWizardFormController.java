@@ -274,7 +274,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @param command form object with request parameters bound onto it
 	 * @param errors validation errors holder
 	 * @param page current wizard page
-	 * @return a Map with reference data entries, or null if none
+	 * @return a Map with reference data entries, or <code>null</code> if none
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #referenceData(HttpServletRequest, int)
 	 * @see ModelAndView
@@ -292,7 +292,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current HTTP request
 	 * @param page current wizard page
-	 * @return a Map with reference data entries, or null if none
+	 * @return a Map with reference data entries, or <code>null</code> if none
 	 * @throws Exception in case of invalid state or arguments
 	 * @see ModelAndView
 	 */
@@ -410,7 +410,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * <p>Default implementation delegates to the <code>getPageSessionAttributeName</code>
 	 * version without arguments.
 	 * @param request current HTTP request
-	 * @return the name of the form session attribute, or null if not in session form mode
+	 * @return the name of the form session attribute, or <code>null</code> if not in session form mode
 	 * @see #getPageSessionAttributeName
 	 * @see #getFormSessionAttributeName(javax.servlet.http.HttpServletRequest)
 	 * @see javax.servlet.http.HttpSession#getAttribute
@@ -442,7 +442,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * to override this method.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @return a prepared view, or null if handled directly
+	 * @return a prepared view, or <code>null</code> if handled directly
 	 * @throws Exception in case of errors
 	 * @see #showNewForm
 	 * @see #setBindOnNewForm

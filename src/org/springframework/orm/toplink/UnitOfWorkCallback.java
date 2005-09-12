@@ -69,7 +69,7 @@ public abstract class UnitOfWorkCallback implements TopLinkCallback {
 	 * Called with a UnitOfWork to work on, either the active UnitOfWork or a
 	 * temporarily acquired UnitOfWork (as determined by the transaction status).
 	 * @param unitOfWork the TopLink UnitOfWork to perform write operations on
-	 * @return a result object, or null if none
+	 * @return a result object, or <code>null</code> if none
 	 * @throws TopLinkException in case of TopLink errors
 	 */
 	protected abstract Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException;

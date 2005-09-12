@@ -67,7 +67,7 @@ public class LocalJaxRpcServiceFactory {
 	}
 
 	/**
-	 * Return the ServiceFactory class to use, or null if default.
+	 * Return the ServiceFactory class to use, or <code>null</code> if default.
 	 */
 	public Class getServiceFactoryClass() {
 		return serviceFactoryClass;

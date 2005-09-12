@@ -161,7 +161,7 @@ public class CancellableFormController extends SimpleFormController {
 	 * @param request current servlet request
 	 * @param response current servlet response
 	 * @param command form object with request parameters bound onto it
-	 * @return the prepared model and view, or null
+	 * @return the prepared model and view, or <code>null</code>
 	 * @throws Exception in case of errors
 	 * @see #isCancelRequest(javax.servlet.http.HttpServletRequest)
 	 * @see #onCancel(Object)
@@ -183,7 +183,7 @@ public class CancellableFormController extends SimpleFormController {
 	 * additional model parameters, use {@link #setCancelView(String)} rather than
 	 * overriding an <code>onCancel</code> method.
 	 * @param command form object with request parameters bound onto it
-	 * @return the prepared model and view, or null
+	 * @return the prepared model and view, or <code>null</code>
 	 * @throws Exception in case of errors
 	 * @see #onCancel(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, Object)
 	 * @see #setCancelView

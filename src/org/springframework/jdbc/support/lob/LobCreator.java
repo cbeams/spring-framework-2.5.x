@@ -57,7 +57,7 @@ public interface LobCreator {
 	 * or create a Blob instance for it, depending on the database and driver.
 	 * @param ps the PreparedStatement to the set the content on
 	 * @param paramIndex the parameter index to use
-	 * @param content the content as byte array, or null for SQL NULL
+	 * @param content the content as byte array, or <code>null</code> for SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.PreparedStatement#setBytes
 	 */
@@ -70,7 +70,7 @@ public interface LobCreator {
 	 * or create a Blob instance for it, depending on the database and driver.
 	 * @param ps the PreparedStatement to the set the content on
 	 * @param paramIndex the parameter index to use
-	 * @param contentStream the content as binary stream, or null for SQL NULL
+	 * @param contentStream the content as binary stream, or <code>null</code> for SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.PreparedStatement#setBinaryStream
 	 */
@@ -84,7 +84,7 @@ public interface LobCreator {
 	 * or create a Clob instance for it, depending on the database and driver.
 	 * @param ps the PreparedStatement to the set the content on
 	 * @param paramIndex the parameter index to use
-	 * @param content the content as String, or null for SQL NULL
+	 * @param content the content as String, or <code>null</code> for SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.PreparedStatement#setBytes
 	 */
@@ -97,7 +97,7 @@ public interface LobCreator {
 	 * or create a Clob instance for it, depending on the database and driver.
 	 * @param ps the PreparedStatement to the set the content on
 	 * @param paramIndex the parameter index to use
-	 * @param asciiStream the content as ASCII stream, or null for SQL NULL
+	 * @param asciiStream the content as ASCII stream, or <code>null</code> for SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.PreparedStatement#setAsciiStream
 	 */
@@ -111,7 +111,7 @@ public interface LobCreator {
 	 * or create a Clob instance for it, depending on the database and driver.
 	 * @param ps the PreparedStatement to the set the content on
 	 * @param paramIndex the parameter index to use
-	 * @param characterStream the content as character stream, or null for SQL NULL
+	 * @param characterStream the content as character stream, or <code>null</code> for SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.PreparedStatement#setCharacterStream
 	 */

@@ -350,7 +350,7 @@ public class BindException extends Exception implements Errors {
 	/**
 	 * Retrieve the custom PropertyEditor for the given field, if any.
 	 * @param field the field name
-	 * @return the custom PropertyEditor, or null
+	 * @return the custom PropertyEditor, or <code>null</code>
 	 */
 	public PropertyEditor getCustomEditor(String field) {
 		String fixedField = fixedField(field);

@@ -137,7 +137,7 @@ public interface BeanFactory {
 	 * as can happen with getBean(String). 
 	 * @param name the name of the bean to return
 	 * @param requiredType type the bean must match. Can be an interface or superclass
-	 * of the actual class, or null for any match. For example, if the value is
+	 * of the actual class, or <code>null</code> for any match. For example, if the value is
 	 * Object.class, this method will succeed whatever the class of the returned instance.
 	 * @return an instance of the bean (never null)
 	 * @throws BeanNotOfRequiredTypeException if the bean is not of the required type
@@ -168,7 +168,7 @@ public interface BeanFactory {
 	 * More specifically, checks the type of object that getBean would return.
 	 * For a FactoryBean, returns the type of object that the FactoryBean creates.
 	 * @param name the name of the bean to query
-	 * @return the type of the bean, or null if not determinable
+	 * @return the type of the bean, or <code>null</code> if not determinable
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @since 1.1.2
 	 * @see #getBean

@@ -72,7 +72,7 @@ public class AnnotationTransactionAttributeSource
 	 * @param atts attributes attached to a method or class. May
 	 * be null, in which case a null TransactionAttribute will be returned.
 	 * @return TransactionAttribute configured transaction attribute,
-	 * or null if none was found
+	 * or <code>null</code> if none was found
 	 */
 	protected TransactionAttribute findTransactionAttribute(Collection atts) {
 		if (atts == null) {

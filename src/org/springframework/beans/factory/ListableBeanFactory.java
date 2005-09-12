@@ -102,7 +102,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * to include beans in ancestor factories too.
 	 * <p>Note: Ignores any singleton beans that have been registered by
 	 * other means than bean definitions.
-	 * @param type the class or interface to match, or null for all bean names
+	 * @param type the class or interface to match, or <code>null</code> for all bean names
 	 * @return the names of beans matching the given object type 
 	 * (including subclasses), or an empty array if none
 	 * @deprecated in favor of getBeanNamesForType.
@@ -127,7 +127,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * <p>This version of getBeanNamesForType matches all kinds of beans, be it
 	 * singletons, prototypes, or FactoryBeans. In most implementations, the
 	 * result will be the same as for <code>getBeanNamesOfType(type, true, true)</code>.
-	 * @param type the class or interface to match, or null for all bean names
+	 * @param type the class or interface to match, or <code>null</code> for all bean names
 	 * @return the names of beans (or objects created by FactoryBeans) matching
 	 * the given object type (including subclasses), or an empty array if none
 	 * @see FactoryBean#getObjectType
@@ -150,7 +150,7 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * to include beans in ancestor factories too.
 	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
 	 * by other means than bean definitions.
-	 * @param type the class or interface to match, or null for all bean names
+	 * @param type the class or interface to match, or <code>null</code> for all bean names
 	 * @param includePrototypes whether to include prototype beans too
 	 * or just singletons (also applies to FactoryBeans)
 	 * @param includeFactoryBeans whether to include <i>objects created by
@@ -180,7 +180,7 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * <p>This version of getBeansOfType matches all kinds of beans, be it
 	 * singletons, prototypes, or FactoryBeans. In most implementations, the
 	 * result will be the same as for <code>getBeansOfType(type, true, true)</code>.
-	 * @param type the class or interface to match, or null for all concrete beans
+	 * @param type the class or interface to match, or <code>null</code> for all concrete beans
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values
 	 * @throws BeansException if a bean could not be created
@@ -205,7 +205,7 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * to include beans in ancestor factories too.
 	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
 	 * by other means than bean definitions.
-	 * @param type the class or interface to match, or null for all concrete beans
+	 * @param type the class or interface to match, or <code>null</code> for all concrete beans
 	 * @param includePrototypes whether to include prototype beans too
 	 * or just singletons (also applies to FactoryBeans)
 	 * @param includeFactoryBeans whether to include <i>objects created by

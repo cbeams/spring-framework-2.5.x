@@ -32,7 +32,7 @@ public interface ErrorCoded {
 	 * Return the error code associated with this failure. 
 	 * The GUI can render this any way it pleases, allowing for localization etc.
 	 * @return a String error code associated with this failure,
-	 * or null if not error-coded
+	 * or <code>null</code> if not error-coded
 	 */
 	String getErrorCode();
 

@@ -60,7 +60,7 @@ public interface HibernateCallback {
 	 * propagated to the caller of the template.
 	 *
 	 * @param session active Hibernate session
-	 * @return a result object, or null if none
+	 * @return a result object, or <code>null</code> if none
 	 * @throws HibernateException in case of Hibernate errors
 	 * @throws SQLException in case of errors on direct JDBC access
 	 * @see HibernateTemplate#execute

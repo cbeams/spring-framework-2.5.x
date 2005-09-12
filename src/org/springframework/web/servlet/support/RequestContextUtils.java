@@ -149,7 +149,7 @@ public abstract class RequestContextUtils {
 	 * Return the MultipartResolver that has been bound to the request by the
 	 * DispatcherServlet.
 	 * @param request current HTTP request
-	 * @return the current MultipartResolver, or null if not a multipart request
+	 * @return the current MultipartResolver, or <code>null</code> if not a multipart request
 	 */
 	public static MultipartResolver getMultipartResolver(ServletRequest request) {
 		return (MultipartResolver) request.getAttribute(DispatcherServlet.MULTIPART_RESOLVER_ATTRIBUTE);
