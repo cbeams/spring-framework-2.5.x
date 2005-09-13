@@ -690,10 +690,12 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			throws BeansException {
 
 		if (bd instanceof RootBeanDefinition) {
+			// Return root bean definition as-is.
 			return (RootBeanDefinition) bd;
 		}
 
 		else if (bd instanceof ChildBeanDefinition) {
+			// Child bean definition: needs to be merged with parent.
 			ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
 			RootBeanDefinition pbd = null;
 			if (!beanName.equals(cbd.getParentName())) {
@@ -711,9 +713,19 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				}
 			}
 
-			// deep copy with overridden values
+			// Deep copy with overridden values.
 			RootBeanDefinition rbd = new RootBeanDefinition(pbd);
 			rbd.overrideFrom(cbd);
+
+			// Validate merged definition: mainly to prepare method overrides.
+			try {
+				rbd.validate();
+			}
+			catch (BeanDefinitionValidationException ex) {
+				throw new BeanDefinitionStoreException(rbd.getResourceDescription(), beanName,
+						"Validation of bean definition failed", ex);
+			}
+
 			return rbd;
 		}
 		else {

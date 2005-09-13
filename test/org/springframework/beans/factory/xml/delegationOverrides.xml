@@ -20,17 +20,22 @@
 		<replaced-method name="replaceMe" replacer="fixedReplacer"/>
 
 	</bean>
-	
-	<bean id="replaceVoidMethod" class="org.springframework.beans.factory.xml.OverrideOneMethodSubclass">
-		
+
+	<bean id="someParent" abstract="true">
+
 		<lookup-method name="getPrototypeDependency" bean="jenny"/>
-		
+
 		<lookup-method name="protectedOverrideSingleton" bean="david"/>
-		
+
 		<!--
 			This method is not overloaded, so we don't need to specify any arg types
 		-->
 		<replaced-method name="doSomething" replacer="doSomethingReplacer"/>
+
+	</bean>
+
+	<bean id="replaceVoidMethod" parent="someParent"
+			class="org.springframework.beans.factory.xml.OverrideOneMethodSubclass">
 
 	</bean>
 
