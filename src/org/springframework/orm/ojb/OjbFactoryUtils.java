@@ -87,6 +87,8 @@ public abstract class OjbFactoryUtils {
 
 			if (TransactionSynchronizationManager.isSynchronizationActive()) {
 				logger.debug("Registering transaction synchronization for OJB PersistenceBroker");
+				// Use same PersistenceBroker for further OJB actions within the transaction.
+				// Thread object will get removed by synchronization at transaction completion.
 				pbHolder = new PersistenceBrokerHolder(pb);
 				pbHolder.setSynchronizedWithTransaction(true);
 				TransactionSynchronizationManager.registerSynchronization(
