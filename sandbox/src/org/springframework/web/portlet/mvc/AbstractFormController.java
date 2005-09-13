@@ -16,6 +16,7 @@
 
 package org.springframework.web.portlet.mvc;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import javax.portlet.ActionRequest;
@@ -212,7 +213,22 @@ import org.springframework.web.servlet.ModelAndView;
  *		    <code>processFormSubmission</code> must call
  *		    {@link #setFormSubmit setFormSubmit}.
  *		    Otherwise, the render phase will not realize the form was submitted 
- *		    and will simply display a new blank form.
+ *		    and will simply display a new blank form.</td>
+ *	</tr>
+ *	<tr>
+ *		<td>passRenderParameters</td>
+ *		<td>null</td>
+ *		<td>An array of parameters that will be passed forward from the action
+ *          phase to the render phase if the form needs to be displayed 
+ *          again.  These can also be passed forwarded explicitly by calling
+ *          the <code>passRenderParameters</code> method from any action 
+ *          phase method.  For <code>AbstractFormController</code>, this means that 
+ *          parameters will be preserved if an action request occurs that is 
+ *          not a form submit or if an invalid submit occurs. If there are 
+ *          render parameters you need in <code>renderFormSubmission</code>,
+ *          then you need to pass those forward from 
+ *          <code>processFormSubmission</code>.  Descendants of this 
+ *          controller should follow similar behavior.</td>
  *	</tr>
  * </table>
  * </p>
@@ -271,6 +287,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 
     private boolean redirectAction = false;
 
+    private	 String[] passRenderParameters = null;
+    
 	/**
 	 * Create a new AbstractFormController.
 	 * <p>Subclasses should set the following properties, either in the constructor
@@ -343,6 +361,26 @@ public abstract class AbstractFormController extends BaseCommandController {
     public boolean isRedirectAction() {
         return redirectAction;
     }
+
+    /**
+     * Specify the list of parameters that should be passed forward
+     * from the action phase to the render phase whenever the form is rerendered
+     * @param parameters
+     * @see #passRenderParameters(ActionRequest, ActionResponse)
+     */
+    public void setPassRenderParameters(String[] parameters) {
+        this.passRenderParameters = parameters;
+    }
+
+    /**
+     * The list of parameters that will be passed from the the
+     * action phase to the render phase whenever the form is rerendered
+     * @return the list of parameters
+     * @see #passRenderParameters(ActionRequest, ActionResponse)
+     */
+    public String[] getPassRenderParameters() {
+        return passRenderParameters;
+    }
     
 	/**
 	 * Handle the render request phase of the form.
@@ -383,7 +421,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 		// if it is not a submit then just exit
 		if (!isFormSubmission(request)) {
 			if (logger.isDebugEnabled()) logger.debug("not a form submit - passing parameters to render phase");
-		    passAllParametersToRenderPhase(request, response);
+		    passRenderParameters(request, response);
 			return;
 		}
 		
@@ -407,6 +445,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 			if (logger.isDebugEnabled()) logger.debug("invalid form submission - cannot get valid command object");
 			setFormSubmit(response);
 			setInvalidSubmit(response);
+		    passRenderParameters(request, response);
 			command = formBackingObject(request);
 			BindException errors = bindAndValidate(request, command).getErrors();
 			handleInvalidSubmit(request, response);
@@ -549,6 +588,33 @@ public abstract class AbstractFormController extends BaseCommandController {
 	protected String getFormSessionAttributeName() {
 		return getClass().getName() + ".FORM." + getCommandName();
 	}
+
+    /**
+     * Pass the specified list of action request parameters to the render phase
+     * by putting them into the action response object. This may not be called
+     * when the action will call will call
+     * {@link ActionResponse#sendRedirect sendRedirect}.
+     * @param request the current action request
+     * @param response the current action response
+     * @see ActionResponse#setRenderParameter
+     */
+    protected void passRenderParameters(ActionRequest request, ActionResponse response) {
+        if (passRenderParameters == null) return;
+		try {
+		    for (int i = 0, n = passRenderParameters.length; i < n; i++) {
+		        String paramName = passRenderParameters[i];
+		        String paramValues[] = request.getParameterValues(paramName);
+		        if (paramValues != null) {
+					if (logger.isDebugEnabled())
+						logger.debug("Passing parameter to render phase '" + paramName + "' = " +
+			                (paramValues == null ? "NULL" : Arrays.asList(paramValues).toString()));
+			        response.setRenderParameter(paramName, paramValues);
+		        }
+		    }
+		} catch (IllegalStateException ex) {
+		    // ignore in case sendRedirect was already set
+		}
+    }
 
 	/**
 	 * Show a new form. Prepares a backing object for the current form

@@ -71,6 +71,11 @@ import org.springframework.web.portlet.util.PortletUtils;
  *
  * <p>Note: Page numbering starts with 0, to be able to pass an array
  * consisting of the corresponding view names to the "pages" bean property.
+ * 
+ * <p>Parameters indicated with <code>setPassRenderParameters</code> will be present
+ * for each page.  If there are render parameters you need in <code>renderFinish</code>
+ * or <code>renderCancel</code>, then you need to pass those forward from the
+ * <code>processFinish</code> or <code>processCancel</code> methods, respectively.
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
@@ -625,9 +630,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cancelling wizard for form bean '" + getCommandName() + "'");
 			}
-			processCancel(request, response, command, errors);
-			setCancelRenderParameter(request, response);
 			setPageRenderParameter(response, currentPage);
+			setCancelRenderParameter(request, response);
+			processCancel(request, response, command, errors);
 			return;
 		}
 
@@ -636,9 +641,11 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			if (logger.isDebugEnabled()) {
 				logger.debug("Finishing wizard for form bean '" + getCommandName() + "'");
 			}
+			if (!isRedirectAction()) {
+				setPageRenderParameter(response, currentPage);
+				setFinishRenderParameter(request, response);
+			}
 			validatePagesAndFinish(request, response, command, errors, currentPage);
-			setFinishRenderParameter(request, response);
-			setPageRenderParameter(response, currentPage);
 			return;
 		}
 
@@ -650,12 +657,14 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			validatePage(command, errors, currentPage, false);
 		}
 		
-		// Give subclasses a change to perform custom post-procession
+		setPageRenderParameter(response, currentPage);
+		setTargetRenderParameter(request, response);
+	    passRenderParameters(request, response);
+
+	    // Give subclasses a change to perform custom post-procession
 		// of the current page and its command object.
 		postProcessPage(request, command, errors, currentPage);
 
-		setPageRenderParameter(response, currentPage);
-		setTargetRenderParameter(request, response);
 	}
 
 	/**
@@ -824,8 +833,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		}
 
 		// No remaining errors -> proceed with finish.
+		if (!isRedirectAction())
+			setPageRenderParameter(response, currentPage);
 		processFinish(request, response, command, errors);
-		setPageRenderParameter(response, currentPage);
 
 	}
 

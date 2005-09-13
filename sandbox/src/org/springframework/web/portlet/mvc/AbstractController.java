@@ -17,6 +17,7 @@
 package org.springframework.web.portlet.mvc;
 
 import java.util.Enumeration;
+import java.util.HashMap;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -113,7 +114,12 @@ import org.springframework.web.servlet.ModelAndView;
  * reach the render phase of a different controller by simply changing the values for the 
  * criteria your mapping is using, such as portlet mode or a request parameter, during the
  * action phase of your controller.  This is very handy since redirects within the portlet
- * are apparently impossible.</p>  
+ * are apparently impossible.  Before doing this, it is usually wise to call 
+ * <code>clearAllRenderParameters</code> and then explicitly set all the parameters that
+ * you want the new controller to see.  This avoids unexpected parameters from being passed
+ * to the render phase of the second controller, such as the parameter indicating a form 
+ * submit ocurred in an <code>AbstractFormController</code>.
+ * </p>  
  * 
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -245,7 +251,7 @@ public abstract class AbstractController extends PortletContentGenerator impleme
     /**
      * Pass all the action request parameters to the render phase by putting them into
      * the action response object. This may not be called when the action will call
-     * will call {@link ActionResponse#sendRedirect sendRedirect}.
+     * {@link ActionResponse#sendRedirect sendRedirect}.
      * @param request the current action request
      * @param response the current action response
      * @see ActionResponse#setRenderParameter
@@ -260,6 +266,23 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 		        String values[] = request.getParameterValues(param);
 		        response.setRenderParameter(param, values);
 		    }	        
+		} catch (IllegalStateException ex) {
+		    // ignore in case sendRedirect was already set
+		}
+    }
+
+    /**
+     * Clears all the render parameters from the ActionResponse.
+     * This may not be called when the action will call
+     * {@link ActionResponse#sendRedirect sendRedirect}.
+     * @param response the current action response
+     * @see ActionResponse#setRenderParameters
+     */
+    protected void clearAllRenderParameters(ActionResponse response) {
+		if (logger.isDebugEnabled())
+			logger.debug("Clearing all the parameters from being passed to the render phase");
+		try {
+	        response.setRenderParameters(new HashMap());
 		} catch (IllegalStateException ex) {
 		    // ignore in case sendRedirect was already set
 		}

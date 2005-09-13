@@ -121,6 +121,11 @@ import org.springframework.web.servlet.ModelAndView;
  * <table>
  * </p>
  * 
+ * <p>Parameters indicated with <code>setPassRenderParameters</code> will be
+ * preserved if the form has errors or if a form change request occurs.
+ * If there are render parameters you need in <code>onSubmitRender</code>,
+ * then you need to pass those forward from <code>onSubmitAction</code>.
+ *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Nick Lothian
@@ -296,6 +301,7 @@ public class SimpleFormController extends AbstractFormController {
 				logger.debug("Data binding errors: " + errors.getErrorCount());
 			if (isRedirectAction())
 			    setFormSubmit(response);
+		    passRenderParameters(request, response);
 			return;
 		}
 		else if (isFormChangeRequest(request)) {
@@ -303,6 +309,7 @@ public class SimpleFormController extends AbstractFormController {
 			    logger.debug("Detected form change request -> routing request to onFormChange");
 			if (isRedirectAction())
 			    setFormSubmit(response);
+		    passRenderParameters(request, response);
 			onFormChange(request, response, command);
 			return;
 		}
