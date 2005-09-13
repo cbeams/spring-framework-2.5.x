@@ -34,6 +34,7 @@ public abstract class MethodOverride {
 
 	private boolean overloaded = true;
 
+
 	/**
 	 * Construct a new override for the given method.
 	 * @param methodName the name of the method to override
@@ -65,6 +66,7 @@ public abstract class MethodOverride {
 	protected boolean isOverloaded() {
 		return overloaded;
 	}
+
 
 	/**
 	 * Subclasses must override this to indicate whether they match

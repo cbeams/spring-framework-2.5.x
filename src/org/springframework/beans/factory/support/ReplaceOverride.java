@@ -39,6 +39,7 @@ public class ReplaceOverride extends MethodOverride {
 	 */
 	private List typeIdentifiers = new LinkedList();
 
+
 	/**
 	 * Construct a new ReplaceOverride.
 	 * @param methodName the name of the method to override
@@ -48,7 +49,14 @@ public class ReplaceOverride extends MethodOverride {
 		super(methodName);
 		this.methodReplacerBeanName = methodReplacerBeanName;
 	}
-	
+
+	/**
+	 * Return the name of the bean implementing MethodReplacer.
+	 */
+	public String getMethodReplacerBeanName() {
+		return methodReplacerBeanName;
+	}
+
 	/**
 	 * Add a fragment of a class string, like "Exception"
 	 * or "java.lang.Exc", to identify a parameter type
@@ -57,11 +65,12 @@ public class ReplaceOverride extends MethodOverride {
 	public void addTypeIdentifier(String s) {
 		this.typeIdentifiers.add(s);
 	}
-	
+
+
 	public boolean matches(Method method) {
 		// TODO could cache result for efficiency
 		if (!method.getName().equals(getMethodName())) {
-			// it can't match
+			// It can't match.
 			return false;
 		}
 		
@@ -83,13 +92,7 @@ public class ReplaceOverride extends MethodOverride {
 		}
 		return true;			
 	}
-	
-	/**
-	 * Return the name of the bean implementing MethodReplacer.
-	 */
-	public String getMethodReplacerBeanName() {
-		return methodReplacerBeanName;
-	}
+
 
 	public String toString() {
 		return "Replace override for method '" + getMethodName() + "; will call bean '" +

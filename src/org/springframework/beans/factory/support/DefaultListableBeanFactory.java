@@ -308,7 +308,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			catch (BeanDefinitionValidationException ex) {
 				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
-						"Validation of bean definition with name failed", ex);
+						"Validation of bean definition failed", ex);
 			}
 		}
 

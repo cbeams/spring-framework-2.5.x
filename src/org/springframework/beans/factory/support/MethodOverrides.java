@@ -37,7 +37,8 @@ import java.util.Set;
 public class MethodOverrides {
 
 	private final Set overrides = new HashSet();
-	
+
+
 	/**
 	 * Create new MethodOverrides.
 	 */
@@ -50,6 +51,7 @@ public class MethodOverrides {
 	public MethodOverrides(MethodOverrides other) {
 		addOverrides(other);
 	}
+
 
 	/**
 	 * Copy all given method overrides into this object.

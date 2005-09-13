@@ -517,8 +517,8 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		
 		if (hasBeanClass()) {
 			// Check that lookup methods exists
-			for (Iterator itr = getMethodOverrides().getOverrides().iterator(); itr.hasNext(); ) {
-				MethodOverride mo = (MethodOverride) itr.next();
+			for (Iterator it = getMethodOverrides().getOverrides().iterator(); it.hasNext(); ) {
+				MethodOverride mo = (MethodOverride) it.next();
 				validateMethodOverride(mo);
 			}
 		}

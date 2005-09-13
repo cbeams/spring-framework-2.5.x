@@ -30,6 +30,7 @@ public class LookupOverride extends MethodOverride {
 	
 	private final String beanName;
 
+
 	/**
 	 * Construct a new LookupOverride.
 	 * @param methodName the name of the method to override. This
@@ -41,7 +42,7 @@ public class LookupOverride extends MethodOverride {
 		super(methodName);
 		this.beanName = beanName;
 	}
-	
+
 	/**
 	 * Return the name of the bean that should be returned
 	 * by this method.
@@ -50,12 +51,14 @@ public class LookupOverride extends MethodOverride {
 		return beanName;
 	}
 
+
 	/**
 	 * Doesn't allow for overloading, so matching method name is fine.
 	 */
 	public boolean matches(Method method) {
 		return method.getName().equals(getMethodName());
 	}
+
 
 	public String toString() {
 		return "LookupOverride for method '" + getMethodName() + "'; will return bean '" + beanName + "'";
