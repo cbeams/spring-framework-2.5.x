@@ -109,7 +109,7 @@ public class JndiTemplate {
 	/**
 	 * Look up the object with the given name in the current JNDI context.
 	 * @param name the JNDI name of the object
-	 * @return object found (cannot be null; if a not so well-behaved
+	 * @return object found (cannot be <code>null</code>; if a not so well-behaved
 	 * JNDI implementations returns null, a NamingException gets thrown)
 	 * @throws NamingException if there is no object with the given
 	 * name bound to JNDI
@@ -137,7 +137,7 @@ public class JndiTemplate {
 	 * superclass of the actual class, or <code>null</code> for any match. For example, if the
 	 * value is Object.class, this method will succeed whatever the class of the
 	 * returned instance.
-	 * @return object found (cannot be null; if a not so well-behaved
+	 * @return object found (cannot be <code>null</code>; if a not so well-behaved
 	 * JNDI implementations returns null, a NamingException gets thrown)
 	 * @throws NamingException if there is no object with the given
 	 * name bound to JNDI

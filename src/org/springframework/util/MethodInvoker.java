@@ -244,7 +244,7 @@ public class MethodInvoker {
 		if (this.methodObject == null) {
 			throw new IllegalStateException("prepare() must be called prior to invoke() on MethodInvoker");
 		}
-		// In the static case, target will just be null.
+		// In the static case, target will just be <code>null</code>.
 		return this.methodObject.invoke(this.targetObject, this.arguments);
 	}
 

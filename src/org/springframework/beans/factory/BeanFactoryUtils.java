@@ -54,7 +54,7 @@ public abstract class BeanFactoryUtils {
 	 * Return the bean name, stripping out the factory dereference prefix if necessary.
 	 */
 	public static String transformedBeanName(String name) {
-		Assert.notNull(name, "Name must not be null");
+		Assert.notNull(name, "Name must not be <code>null</code>");
 		String beanName = name;
 		if (beanName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX)) {
 			beanName = beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length());

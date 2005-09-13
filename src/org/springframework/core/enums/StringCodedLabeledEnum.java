@@ -36,7 +36,7 @@ public class StringCodedLabeledEnum extends AbstractLabeledEnum {
 	/**
 	 * Create a new StringCodedLabeledEnum instance.
 	 * @param code the String code
-	 * @param label the label (can be null)
+	 * @param label the label (can be <code>null</code>)
 	 */
 	public StringCodedLabeledEnum(String code, String label) {
 		super(label);

@@ -198,7 +198,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	/**
 	 * Return the owning BeanFactory
-	 * May be null, as this object doesn't need to belong to a bean factory.
+	 * May be <code>null</code>, as this object doesn't need to belong to a bean factory.
 	 */
 	protected BeanFactory getBeanFactory() {
 		return this.beanFactory;
@@ -417,7 +417,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @param beanClass the class of the bean to advise
 	 * @param beanName the name of the bean
 	 * @param customTargetSource targetSource returned by getTargetSource() method:
-	 * may be ignored. Will be null unless a custom target source is in use.
+	 * may be ignored. Will be <code>null</code> unless a custom target source is in use.
 	 * @return an array of additional interceptors for the particular bean;
 	 * or an empty array if no additional interceptors but just the common ones;
 	 * or <code>null</code> if no proxy at all, not even with the common interceptors.

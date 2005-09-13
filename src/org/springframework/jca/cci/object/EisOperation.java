@@ -48,7 +48,7 @@ public abstract class EisOperation implements InitializingBean {
 	 */
 	public void setCciTemplate(CciTemplate cciTemplate) {
 		if (cciTemplate == null) {
-			throw new IllegalArgumentException("cciTemplate must not be null");
+			throw new IllegalArgumentException("cciTemplate must not be <code>null</code>");
 		}
 		this.cciTemplate = cciTemplate;
 	}

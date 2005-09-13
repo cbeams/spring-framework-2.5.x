@@ -241,7 +241,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 */
 	public final void setDelegate(Object delegate) throws ApplicationContextException {
 		if (delegate == null) {
-			throw new IllegalArgumentException("delegate cannot be null in MultiActionController");
+			throw new IllegalArgumentException("delegate cannot be <code>null</code> in MultiActionController");
 		}
 		this.delegate = delegate;
 		this.handlerMethodMap = new HashMap();

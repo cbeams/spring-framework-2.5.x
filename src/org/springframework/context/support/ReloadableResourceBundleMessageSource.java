@@ -404,7 +404,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	/**
 	 * Refresh the PropertiesHolder for the given bundle filename.
-	 * The holder can be null if not cached before, or a timed-out cache entry
+	 * The holder can be <code>null</code> if not cached before, or a timed-out cache entry
 	 * (potentially getting re-validated against the current last-modified timestamp).
 	 */
 	protected PropertiesHolder refreshProperties(String filename, PropertiesHolder propHolder) {

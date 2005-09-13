@@ -339,7 +339,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 		// Create form-backing object for new form.
 		Object command = formBackingObject(request);
 		if (command == null) {
-			throw new ServletException("Form object returned by formBackingObject() must not be null");
+			throw new ServletException("Form object returned by formBackingObject() must not be <code>null</code>");
 		}
 		if (!checkCommand(command)) {
 			throw new ServletException("Form object returned by formBackingObject() must match commandClass");

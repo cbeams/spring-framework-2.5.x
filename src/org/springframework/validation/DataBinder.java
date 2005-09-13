@@ -257,7 +257,7 @@ public class DataBinder {
 	 * <p>Note: Only one single registered custom editor per property path
 	 * is supported. In case of a Collection/array, do not register an editor
 	 * for both the Collection/array and each element on the same property.
-	 * @param requiredType type of the property (can be null if a field is
+	 * @param requiredType type of the property (can be <code>null</code> if a field is
 	 * given but should be specified in any case for consistency checking)
 	 * @param field name of the field (can also be a nested path), or
 	 * null if registering an editor for all fields of the given type

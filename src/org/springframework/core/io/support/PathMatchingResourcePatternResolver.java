@@ -148,7 +148,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * (applying to the thread that does the "getResources" call)
 	 */
 	public PathMatchingResourcePatternResolver(ResourceLoader resourceLoader, ClassLoader classLoader) {
-		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
+		Assert.notNull(resourceLoader, "ResourceLoader must not be <code>null</code>");
 		this.resourceLoader = resourceLoader;
 		this.classLoader = classLoader;
 	}
@@ -175,7 +175,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see org.springframework.util.AntPathMatcher
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
-		Assert.notNull(pathMatcher, "PathMatcher must not be null");
+		Assert.notNull(pathMatcher, "PathMatcher must not be <code>null</code>");
 		this.pathMatcher = pathMatcher;
 	}
 

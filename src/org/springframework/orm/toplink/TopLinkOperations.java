@@ -107,7 +107,7 @@ public interface TopLinkOperations {
 	 * non-read-only transaction, and read-only objects else.
 	 * @param entityClass the entity class that has the named query descriptor
 	 * @param queryName the name of the query
-	 * @param args the arguments for the query (can be null)
+	 * @param args the arguments for the query (can be <code>null</code>)
 	 * @return the result object or list of result objects for the query
 	 * (can be cast to the entity class or Collection/List, respectively)
 	 * @throws org.springframework.dao.DataAccessException in case of TopLink errors
@@ -119,7 +119,7 @@ public interface TopLinkOperations {
 	 * Execute a given named query with the given arguments.
 	 * @param entityClass the entity class that has the named query descriptor
 	 * @param queryName the name of the query
-	 * @param args the arguments for the query (can be null)
+	 * @param args the arguments for the query (can be <code>null</code>)
 	 * @param enforceReadOnly whether to always retrieve read-only objects from
 	 * the plain TopLink Session (else, read-write objects will be retrieved
 	 * from the TopLink UnitOfWork in case of a non-read-only transaction)
@@ -164,7 +164,7 @@ public interface TopLinkOperations {
 	 * non-read-only transaction, and read-only objects else.
 	 * @param query the query object to execute (for example,
 	 * a ReadObjectQuery or ReadAllQuery instance)
-	 * @param args the arguments for the query (can be null)
+	 * @param args the arguments for the query (can be <code>null</code>)
 	 * @return the result object or list of result objects for the query
 	 * (can be cast to the entity class or Collection/List, respectively)
 	 * @throws org.springframework.dao.DataAccessException in case of TopLink errors
@@ -176,7 +176,7 @@ public interface TopLinkOperations {
 	 * Execute the given query object with the given arguments.
 	 * @param query the query object to execute (for example,
 	 * a ReadObjectQuery or ReadAllQuery instance)
-	 * @param args the arguments for the query (can be null)
+	 * @param args the arguments for the query (can be <code>null</code>)
 	 * @param enforceReadOnly whether to always retrieve read-only objects from
 	 * the plain TopLink Session (else, read-write objects will be retrieved
 	 * from the TopLink UnitOfWork in case of a non-read-only transaction)

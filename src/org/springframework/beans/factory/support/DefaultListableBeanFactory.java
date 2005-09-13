@@ -300,7 +300,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			throws BeanDefinitionStoreException {
 
 		Assert.hasText(beanName, "Bean name must not be empty");
-		Assert.notNull(beanDefinition, "Bean definition must not be null");
+		Assert.notNull(beanDefinition, "Bean definition must not be <code>null</code>");
 
 		if (beanDefinition instanceof AbstractBeanDefinition) {
 			try {

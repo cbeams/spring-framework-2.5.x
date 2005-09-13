@@ -40,7 +40,7 @@ public interface BeanFactoryAware {
 	 * Callback that supplies the owning factory to a bean instance.
 	 * <p>Invoked after population of normal bean properties but before an init
 	 * callback like InitializingBean's afterPropertiesSet or a custom init-method.
-	 * @param beanFactory owning BeanFactory (may not be null).
+	 * @param beanFactory owning BeanFactory (may not be <code>null</code>).
 	 * The bean can immediately call methods on the factory.
 	 * @throws BeansException in case of initialization errors
 	 * @see BeanInitializationException

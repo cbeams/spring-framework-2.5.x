@@ -192,7 +192,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * or contains any invalid placeholders
 	 */
 	public void setEnterMessage(String enterMessage) throws IllegalArgumentException {
-		Assert.hasText(enterMessage, "enterMessage cannot be null or zero length");
+		Assert.hasText(enterMessage, "enterMessage cannot be <code>null</code> or zero length");
 		checkForInvalidPlaceholders(enterMessage);
 		Assert.doesNotContain(enterMessage, PLACEHOLDER_RETURN_VALUE,
 				"enterMessage cannot contain placeholder [" + PLACEHOLDER_RETURN_VALUE + "]");
@@ -218,7 +218,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * or contains any invalid placeholders
 	 */
 	public void setExitMessage(String exitMessage) {
-		Assert.hasText(exitMessage, "exitMessage cannot be null or zero length");
+		Assert.hasText(exitMessage, "exitMessage cannot be <code>null</code> or zero length");
 		checkForInvalidPlaceholders(exitMessage);
 		Assert.doesNotContain(exitMessage, PLACEHOLDER_EXCEPTION,
 				"exitMessage cannot contain placeholder [" + PLACEHOLDER_EXCEPTION + "]");
@@ -239,7 +239,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * or contains any invalid placeholders
 	 */
 	public void setExceptionMessage(String exceptionMessage) {
-		Assert.hasText(exceptionMessage, "exceptionMessage cannot be null or zero length");
+		Assert.hasText(exceptionMessage, "exceptionMessage cannot be <code>null</code> or zero length");
 		checkForInvalidPlaceholders(exceptionMessage);
 		Assert.doesNotContain(exceptionMessage, PLACEHOLDER_RETURN_VALUE,
 				"exceptionMessage cannot contain placeholder [" + PLACEHOLDER_RETURN_VALUE + "]");
@@ -291,10 +291,10 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * Used to derive values for all placeholders except <code>$[exception]</code>
 	 * and <code>$[returnValue]</code>.
 	 * @param returnValue any value returned by the invocation.
-	 * Used to replace the <code>$[returnValue]</code> placeholder. May be null.
+	 * Used to replace the <code>$[returnValue]</code> placeholder. May be <code>null</code>.
 	 * @param throwable any <code>Throwable</code> raised during the invocation.
 	 * The value of <code>Throwable.toString()</code> is replaced for the
-	 * <code>$[exception]</code> placeholder. May be null.
+	 * <code>$[exception]</code> placeholder. May be <code>null</code>.
 	 * @param invocationTime the value to write in place of the
 	 * <code>$[invocationTime]</code> placeholder
 	 * @return the formatted output to write to the log

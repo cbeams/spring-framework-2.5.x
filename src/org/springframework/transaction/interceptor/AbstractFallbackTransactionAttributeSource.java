@@ -68,8 +68,8 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * Return the transaction attribute for this method invocation.
 	 * Defaults to the class's transaction attribute if no method
 	 * attribute is found
-	 * @param method method for the current invocation. Can't be null
-	 * @param targetClass target class for this invocation. May be null.
+	 * @param method method for the current invocation. Can't be <code>null</code>
+	 * @param targetClass target class for this invocation. May be <code>null</code>.
 	 * @return TransactionAttribute for this method, or <code>null</code> if the method is non-transactional
 	 */
 	public final TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
@@ -105,7 +105,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * Must not produce same key for overloaded methods.
 	 * Must produce same key for different instances of the same method.
 	 * @param method the method
-	 * @param targetClass the target class (may be null)
+	 * @param targetClass the target class (may be <code>null</code>)
 	 * @return the cache key
 	 */
 	protected Object getCacheKey(Method method, Class targetClass) {
@@ -176,7 +176,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * if the TransactionAttribute is a RuleBasedTransactionAttribute.
 	 * Return null if it's not transactional. 
 	 * @param atts attributes attached to a method or class. May
-	 * be null, in which case a null TransactionAttribute will be returned.
+	 * be <code>null</code>, in which case a null TransactionAttribute will be returned.
 	 * @return TransactionAttribute configured transaction attribute, or <code>null</code>
 	 * if none was found
 	 */

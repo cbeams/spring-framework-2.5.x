@@ -84,7 +84,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	/**
 	 * Return a PreparedStatementCreator to perform an operation
 	 * with the given parameters.
-	 * @param params parameter array. May be null.
+	 * @param params parameter array. May be <code>null</code>.
 	 */
 	protected final PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
 		return this.preparedStatementFactory.newPreparedStatementCreator(params);
@@ -93,7 +93,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	/**
 	 * Return a PreparedStatementSetter to perform an operation
 	 * with the given parameters.
-	 * @param params parameter array. May be null.
+	 * @param params parameter array. May be <code>null</code>.
 	 */
 	protected final PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
 		return this.preparedStatementFactory.newPreparedStatementSetter(params);

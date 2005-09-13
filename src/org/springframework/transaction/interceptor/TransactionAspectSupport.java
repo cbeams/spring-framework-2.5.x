@@ -299,7 +299,7 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 	/**
 	 * Call this in all cases: exception or normal return. Resets
 	 * the TransactionInfo ThreadLocal
-	 * @param txInfo information about the current transaction. May be null.
+	 * @param txInfo information about the current transaction. May be <code>null</code>.
 	 */
 	protected void doFinally(TransactionInfo txInfo) {
 		if (txInfo != null) {
@@ -377,7 +377,7 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 
 		private void restoreThreadLocalStatus() {
 			// Use stack to restore old transaction TransactionInfo.
-			// Will be null if none was set.
+			// Will be <code>null</code> if none was set.
 			currentTransactionInfo.set(oldTransactionInfo);
 		}
 

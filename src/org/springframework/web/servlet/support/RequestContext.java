@@ -130,7 +130,7 @@ public class RequestContext {
 	 * work with the root WebApplicationContext (outside a DispatcherServlet).
 	 * @param request current HTTP request
 	 * @param servletContext the servlet context of the web application
-	 * (can be null; necessary for fallback to root WebApplicationContext)
+	 * (can be <code>null</code>; necessary for fallback to root WebApplicationContext)
 	 * @see org.springframework.web.context.WebApplicationContext
 	 * @see org.springframework.web.servlet.DispatcherServlet
 	 */
@@ -147,7 +147,7 @@ public class RequestContext {
 	 * ServletContext to be able to fallback to the root WebApplicationContext.
 	 * @param request current HTTP request
 	 * @param model the model attributes for the current view
-	 * (can be null, using the request attributes for Errors retrieval)
+	 * (can be <code>null</code>, using the request attributes for Errors retrieval)
 	 * @see org.springframework.web.servlet.DispatcherServlet
 	 * @see #RequestContext(javax.servlet.http.HttpServletRequest, javax.servlet.ServletContext, Map)
 	 */
@@ -164,9 +164,9 @@ public class RequestContext {
 	 * work with a root WebApplicationContext (outside a DispatcherServlet).
 	 * @param request current HTTP request
 	 * @param servletContext the servlet context of the web application
-	 * (can be null; necessary for fallback to root WebApplicationContext)
+	 * (can be <code>null</code>; necessary for fallback to root WebApplicationContext)
 	 * @param model the model attributes for the current view
-	 * (can be null, using the request attributes for Errors retrieval)
+	 * (can be <code>null</code>, using the request attributes for Errors retrieval)
 	 * @see org.springframework.web.context.WebApplicationContext
 	 * @see org.springframework.web.servlet.DispatcherServlet
 	 */
@@ -186,9 +186,9 @@ public class RequestContext {
 	 * and/or ThemeResolver can be found in the request.
 	 * @param request current HTTP request
 	 * @param servletContext the servlet context of the web application
-	 * (can be null; necessary for fallback to root WebApplicationContext)
+	 * (can be <code>null</code>; necessary for fallback to root WebApplicationContext)
 	 * @param model the model attributes for the current view
-	 * (can be null, using the request attributes for Errors retrieval)
+	 * (can be <code>null</code>, using the request attributes for Errors retrieval)
 	 * @see #getFallbackLocale
 	 * @see #getFallbackTheme
 	 * @see org.springframework.web.servlet.DispatcherServlet#LOCALE_RESOLVER_ATTRIBUTE

@@ -68,7 +68,7 @@ public abstract class StringUtils {
 	 * StringUtils.hasLength(" ") = true
 	 * StringUtils.hasLength("Hello") = true
 	 * </pre>
-	 * @param str the String to check, may be null
+	 * @param str the String to check, may be <code>null</code>
 	 * @return <code>true</code> if the String is not null and has length
 	 */
 	public static boolean hasLength(String str) {
@@ -86,7 +86,7 @@ public abstract class StringUtils {
 	 * StringUtils.hasText("12345") = true
 	 * StringUtils.hasText(" 12345 ") = true
 	 * </pre>
-	 * @param str the String to check, may be null
+	 * @param str the String to check, may be <code>null</code>
 	 * @return <code>true</code> if the String is not null, length > 0,
 	 *         and not whitespace only
 	 * @see java.lang.Character#isWhitespace
@@ -267,7 +267,7 @@ public abstract class StringUtils {
 	 * Capitalize a <code>String</code>, changing the first letter to
 	 * upper case as per {@link Character#toUpperCase(char)}.
 	 * No other letters are changed.
-	 * @param str the String to capitalize, may be null
+	 * @param str the String to capitalize, may be <code>null</code>
 	 * @return the capitalized String, <code>null</code> if null
 	 */
 	public static String capitalize(String str) {
@@ -278,7 +278,7 @@ public abstract class StringUtils {
 	 * Uncapitalize a <code>String</code>, changing the first letter to
 	 * lower case as per {@link Character#toLowerCase(char)}.
 	 * No other letters are changed.
-	 * @param str the String to uncapitalize, may be null
+	 * @param str the String to uncapitalize, may be <code>null</code>
 	 * @return the uncapitalized String, <code>null</code> if null
 	 */
 	public static String uncapitalize(String str) {

@@ -30,7 +30,7 @@ public interface HierarchicalMessageSource extends MessageSource {
 	 * that this object can't resolve.
 	 * @param parent the parent MessageSource that will be used to
 	 * resolve messages that this object can't resolve.
-	 * May be null, in which case no further resolution is possible.
+	 * May be <code>null</code>, in which case no further resolution is possible.
 	 */
 	void setParentMessageSource(MessageSource parent);
 

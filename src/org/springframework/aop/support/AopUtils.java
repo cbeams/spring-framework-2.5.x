@@ -117,7 +117,7 @@ public abstract class AopUtils {
 	 * DefaultFoo.bar(). This enables attributes on that method to be found.
 	 * @param method method to be invoked, which may come from an interface
 	 * @param targetClass target class for the curren invocation. May
-	 * be null or may not even implement the method.
+	 * be <code>null</code> or may not even implement the method.
 	 * @return the more specific method, or the original method if the
 	 * targetClass doesn't specialize it or implement it or is null
 	 */

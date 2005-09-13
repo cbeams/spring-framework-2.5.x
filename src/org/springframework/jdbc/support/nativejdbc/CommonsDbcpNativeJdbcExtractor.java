@@ -57,7 +57,7 @@ public class CommonsDbcpNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (con instanceof DelegatingConnection) {
 			Connection nativeCon = ((DelegatingConnection) con).getInnermostDelegate();
-			// For some reason, the innermost delegate can be null: not for a
+			// For some reason, the innermost delegate can be <code>null</code>: not for a
 			// Statement's Connection but for the Connection handle returned by the pool.
 			// We'll fall back to the MetaData's Connection in this case, which is
 			// a native unwrapped Connection with Commons DBCP 1.1 and 1.2.

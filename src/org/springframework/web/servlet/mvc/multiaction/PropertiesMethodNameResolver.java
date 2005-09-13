@@ -68,7 +68,7 @@ public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 	 * @see org.springframework.util.AntPathMatcher
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
-		Assert.notNull(pathMatcher, "PathMatcher must not be null");
+		Assert.notNull(pathMatcher, "PathMatcher must not be <code>null</code>");
 		this.pathMatcher = pathMatcher;
 	}
 

@@ -32,7 +32,7 @@ public interface TransactionAttributeSource {
 	 * Return the transaction attribute for this method.
 	 * Return null if the method is non-transactional.
 	 * @param method method
-	 * @param targetClass target class. May be null, in which case the declaring
+	 * @param targetClass target class. May be <code>null</code>, in which case the declaring
 	 * class of the method must be used.
 	 * @return TransactionAttribute transaction attribute or <code>null</code>.
 	 */

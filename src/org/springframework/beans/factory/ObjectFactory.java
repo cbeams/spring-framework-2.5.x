@@ -39,7 +39,7 @@ public interface ObjectFactory {
 	/**
 	 * Return an instance (possibly shared or independent)
 	 * of the object managed by this factory.
-	 * @return an instance of the bean (should never be null)
+	 * @return an instance of the bean (should never be <code>null</code>)
 	 * @throws BeansException in case of creation errors
 	 */
 	Object getObject() throws BeansException;

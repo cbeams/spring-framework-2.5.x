@@ -141,7 +141,7 @@ public abstract class SessionFactoryUtils {
 	 * bound to the current thread by Spring's transaction facilities.
 	 * @param session the TopLink Session to check
 	 * @param sessionFactory TopLink SessionFactory that the Session was created with
-	 * (can be null)
+	 * (can be <code>null</code>)
 	 * @return whether the Session is transactional
 	 */
 	public static boolean isSessionTransactional(Session session, SessionFactory sessionFactory) {
@@ -186,7 +186,7 @@ public abstract class SessionFactoryUtils {
 	 * if it is not managed externally (i.e. not bound to the thread).
 	 * @param session the TopLink Session to close
 	 * @param sessionFactory TopLink SessionFactory that the Session was created with
-	 * (can be null)
+	 * (can be <code>null</code>)
 	 */
 	public static void releaseSession(Session session, SessionFactory sessionFactory) {
 		if (session == null) {

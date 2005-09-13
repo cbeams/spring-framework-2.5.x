@@ -36,7 +36,7 @@ public abstract class DataAccessUtils {
 	 * Return a unique result object from the given Collection.
 	 * Returns null if 0 result objects found; throws an exception
 	 * if more than 1 found.
-	 * @param results the result Collection (can be null)
+	 * @param results the result Collection (can be <code>null</code>)
 	 * @return the unique result object, or <code>null</code> if none
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object has been found in the given Collection
@@ -55,7 +55,7 @@ public abstract class DataAccessUtils {
 	/**
 	 * Return a unique result object from the given Collection.
 	 * Throws an exception if 0 or more than 1 result objects found.
-	 * @param results the result Collection (can be null)
+	 * @param results the result Collection (can be <code>null</code>)
 	 * @return the unique result object
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object or none at all has been found in the given Collection
@@ -73,7 +73,7 @@ public abstract class DataAccessUtils {
 	 * Throws an exception if 0 or more than 1 result objects found,
 	 * of if the unique result object is not convertable to the
 	 * specified required type.
-	 * @param results the result Collection (can be null)
+	 * @param results the result Collection (can be <code>null</code>)
 	 * @return the unique result object
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object or none at all has been found in the given Collection
@@ -109,7 +109,7 @@ public abstract class DataAccessUtils {
 	 * Return a unique int result from the given Collection.
 	 * Throws an exception if 0 or more than 1 result objects found,
 	 * of if the unique result object is not convertable to an int.
-	 * @param results the result Collection (can be null)
+	 * @param results the result Collection (can be <code>null</code>)
 	 * @return the unique int result
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object or none at all has been found in the given Collection
@@ -126,7 +126,7 @@ public abstract class DataAccessUtils {
 	 * Return a unique long result from the given Collection.
 	 * Throws an exception if 0 or more than 1 result objects found,
 	 * of if the unique result object is not convertable to a long.
-	 * @param results the result Collection (can be null)
+	 * @param results the result Collection (can be <code>null</code>)
 	 * @return the unique long result
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object or none at all has been found in the given Collection

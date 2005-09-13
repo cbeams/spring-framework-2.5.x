@@ -71,7 +71,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Set the view's name. Helpful for traceability.
 	 * Framework code must call this when constructing views.
-	 * @param beanName the view's name. May not be null.
+	 * @param beanName the view's name. May not be <code>null</code>.
 	 * Views should use this for log messages.
 	 */
 	public void setBeanName(String beanName) {
@@ -79,7 +79,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	}
 
 	/**
-	 * Return the view's name. Should never be null,
+	 * Return the view's name. Should never be <code>null</code>,
 	 * if the view was correctly configured.
 	 */
 	public String getBeanName() {

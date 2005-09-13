@@ -91,7 +91,7 @@ public abstract class StoredProcedure extends SqlCall {
 	 * Alternatively, they can return void.
 	 * @param inParams map of input parameters, keyed by name as in parameter
 	 * declarations. Output parameters need not (but can be) included in this map.
-	 * It is legal for map entries to be null, and this will produce the correct
+	 * It is legal for map entries to be <code>null</code>, and this will produce the correct
 	 * behavior using a NULL argument to the stored procedure.
 	 * @return map of output params, keyed by name as in parameter declarations.
 	 * Output parameters will appear here, with their values after the
@@ -112,7 +112,7 @@ public abstract class StoredProcedure extends SqlCall {
 	 * Alternatively, they can return void.
 	 * @param inParamMapper map of input parameters, keyed by name as in parameter
 	 * declarations. Output parameters need not (but can be) included in this map.
-	 * It is legal for map entries to be null, and this will produce the correct
+	 * It is legal for map entries to be <code>null</code>, and this will produce the correct
 	 * behavior using a NULL argument to the stored procedure.
 	 * @return map of output params, keyed by name as in parameter declarations.
 	 * Output parameters will appear here, with their values after the

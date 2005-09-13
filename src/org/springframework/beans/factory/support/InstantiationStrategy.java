@@ -36,7 +36,7 @@ public interface InstantiationStrategy {
 	 * Return an instance of the bean with the given name in this factory.
 	 * @param beanDefinition the bean definition
 	 * @param beanName name of the bean when it's created in this context.
-	 * The name can be null if we're autowiring a bean that doesn't belong to the factory.
+	 * The name can be <code>null</code> if we're autowiring a bean that doesn't belong to the factory.
 	 * @param owner owning BeanFactory
 	 * @return a bean instance for this bean definition
 	 */
@@ -48,7 +48,7 @@ public interface InstantiationStrategy {
 	 * creating it via the given constructor.
 	 * @param beanDefinition the bean definition
 	 * @param beanName name of the bean when it's created in this context.
-	 * The name can be null if we're autowiring a bean that doesn't belong to the factory.
+	 * The name can be <code>null</code> if we're autowiring a bean that doesn't belong to the factory.
 	 * @param owner owning BeanFactory
 	 * @param ctor the constructor to use
 	 * @param args the constructor arguments to apply
@@ -63,7 +63,7 @@ public interface InstantiationStrategy {
 	 * creating it via the given factory method.
 	 * @param beanDefinition bean definition
 	 * @param beanName name of the bean when it's created in this context.
-	 * The name can be null if we're autowiring a bean that doesn't belong to the factory.
+	 * The name can be <code>null</code> if we're autowiring a bean that doesn't belong to the factory.
 	 * @param owner owning BeanFactory
 	 * @param factoryBean the factory bean instance to call the factory method on,
 	 * or <code>null</code> in case of a static factory method

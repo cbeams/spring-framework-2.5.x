@@ -54,7 +54,7 @@ public class SetFactoryBean extends AbstractFactoryBean {
 	 */
 	public void setTargetSetClass(Class targetSetClass) {
 		if (targetSetClass == null) {
-			throw new IllegalArgumentException("targetSetClass must not be null");
+			throw new IllegalArgumentException("targetSetClass must not be <code>null</code>");
 		}
 		if (!Set.class.isAssignableFrom(targetSetClass)) {
 			throw new IllegalArgumentException("targetSetClass must implement [java.util.Set]");

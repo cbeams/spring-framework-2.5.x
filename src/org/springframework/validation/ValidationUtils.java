@@ -105,7 +105,7 @@ public abstract class ValidationUtils {
 	 * @param field the field name to check
 	 * @param errorCode error code, interpretable as message key
 	 * @param errorArgs error arguments, for argument binding via MessageFormat
-	 * (can be null)
+	 * (can be <code>null</code>)
 	 * @param defaultMessage fallback default message
 	 */
 	public static void rejectIfEmpty(
@@ -156,7 +156,7 @@ public abstract class ValidationUtils {
 	 * @param field the field name to check
 	 * @param errorCode error code, interpretable as message key
 	 * @param errorArgs error arguments, for argument binding via MessageFormat
-	 * (can be null)
+	 * (can be <code>null</code>)
 	 * @param defaultMessage fallback default message
 	 */
 	public static void rejectIfEmptyOrWhitespace(

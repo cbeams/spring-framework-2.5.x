@@ -198,7 +198,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 * on JDK 1.4+, but needs to be done explicitly on JDK 1.3.
 	 * @param is the InputStream to read from
 	 * @param codebaseUrl the codebase URL to load classes from if not found locally
-	 * (can be null)
+	 * (can be <code>null</code>)
 	 * @return the new ObjectInputStream instance to use
 	 * @throws IOException if creation of the ObjectInputStream failed
 	 * @see org.springframework.remoting.rmi.CodebaseAwareObjectInputStream

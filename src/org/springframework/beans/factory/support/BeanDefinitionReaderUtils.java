@@ -51,7 +51,7 @@ public class BeanDefinitionReaderUtils {
 	 * @param cargs the constructor arguments, if any
 	 * @param pvs the property values, if any
 	 * @param classLoader the ClassLoader to use for loading bean classes
-	 * (can be null to just register bean classes by name)
+	 * (can be <code>null</code> to just register bean classes by name)
 	 * @return the bean definition
 	 * @throws ClassNotFoundException if the bean class could not be loaded
 	 */

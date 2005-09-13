@@ -84,9 +84,9 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 	 * @param rowNum row number (from 0) we're up to
 	 * @param parameters to the query (passed to the execute() method).
 	 * Subclasses are rarely interested in these.
-	 * It can be null if there are no parameters.
+	 * It can be <code>null</code> if there are no parameters.
 	 * @param context passed to the execute() method.
-	 * It can be null if no contextual information is need.
+	 * It can be <code>null</code> if no contextual information is need.
 	 * @return an object of the result type
 	 * @throws SQLException if there's an error extracting data.
 	 * Subclasses can simply not catch SQLExceptions, relying on the

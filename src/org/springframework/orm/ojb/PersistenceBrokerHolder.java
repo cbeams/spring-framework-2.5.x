@@ -38,7 +38,7 @@ public class PersistenceBrokerHolder extends ResourceHolderSupport {
 	private final PersistenceBroker persistenceBroker;
 
 	public PersistenceBrokerHolder(PersistenceBroker persistenceBroker) {
-		Assert.notNull(persistenceBroker, "PersistenceBroker must not be null");
+		Assert.notNull(persistenceBroker, "PersistenceBroker must not be <code>null</code>");
 		this.persistenceBroker = persistenceBroker;
 	}
 

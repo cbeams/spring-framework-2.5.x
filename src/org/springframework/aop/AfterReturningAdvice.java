@@ -33,7 +33,7 @@ public interface AfterReturningAdvice extends Advice {
 	 * @param returnValue the value returned by the method, if any
 	 * @param method method being invoked
 	 * @param args arguments to the method
-	 * @param target target of the method invocation. May be null.
+	 * @param target target of the method invocation. May be <code>null</code>.
 	 * @throws Throwable if this object wishes to abort the call.
 	 * Any exception thrown will be returned to the caller if it's
 	 * allowed by the method signature. Otherwise the exception

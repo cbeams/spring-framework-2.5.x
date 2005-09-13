@@ -87,8 +87,8 @@ public class ModelAndView {
 	 * Creates new ModelAndView given a View object and a model.
 	 * @param view View object to render
 	 * @param model Map of model names (Strings) to model objects
-	 * (Objects). Model entries may not be null, but the model Map
-	 * may be null if there is no model data.
+	 * (Objects). Model entries may not be <code>null</code>, but the model Map
+	 * may be <code>null</code> if there is no model data.
 	 */
 	public ModelAndView(View view, Map model) {
 		this.view = view;
@@ -100,8 +100,8 @@ public class ModelAndView {
 	 * @param viewName name of the View to render, to be resolved
 	 * by the DispatcherServlet
 	 * @param model Map of model names (Strings) to model objects
-	 * (Objects). Model entries may not be null, but the model Map
-	 * may be null if there is no model data.
+	 * (Objects). Model entries may not be <code>null</code>, but the model Map
+	 * may be <code>null</code> if there is no model data.
 	 */
 	public ModelAndView(String viewName, Map model) {
 		this.viewName = viewName;
@@ -198,7 +198,7 @@ public class ModelAndView {
 	/**
 	 * Add an object to the model.
 	 * @param modelName name of the object to add to the model
-	 * @param modelObject object to add to the model. May not be null.
+	 * @param modelObject object to add to the model. May not be <code>null</code>.
 	 * @return this ModelAndView, convenient to allow usages like
 	 * return modelAndView.addObject("foo", bar);
 	 */

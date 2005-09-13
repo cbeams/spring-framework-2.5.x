@@ -42,7 +42,7 @@ public class PreparedStatementCreatorFactory {
 	/** The SQL, which won't change when the parameters change */
 	private final String sql;
 
-	/** List of SqlParameter objects. May not be null. */
+	/** List of SqlParameter objects. May not be <code>null</code>. */
 	private final List declaredParameters;
 
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
@@ -141,7 +141,7 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Return a new PreparedStatementCreator for the given parameters.
-	 * @param params parameter array. May be null.
+	 * @param params parameter array. May be <code>null</code>.
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
 		return new PreparedStatementCreatorImpl((params != null) ? Arrays.asList(params) : Collections.EMPTY_LIST);
@@ -149,7 +149,7 @@ public class PreparedStatementCreatorFactory {
 	
 	/**
 	 * Return a new PreparedStatementCreator for the given parameters.
-	 * @param params List of parameters. May be null.
+	 * @param params List of parameters. May be <code>null</code>.
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(List params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.EMPTY_LIST);
@@ -157,7 +157,7 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Return a new PreparedStatementSetter for the given parameters.
-	 * @param params parameter array. May be null.
+	 * @param params parameter array. May be <code>null</code>.
 	 */
 	public PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
 		return new PreparedStatementCreatorImpl((params != null) ? Arrays.asList(params) : Collections.EMPTY_LIST);
@@ -165,7 +165,7 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Return a new PreparedStatementSetter for the given parameters.
-	 * @param params List of parameters. May be null.
+	 * @param params List of parameters. May be <code>null</code>.
 	 */
 	public PreparedStatementSetter newPreparedStatementSetter(List params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.EMPTY_LIST);

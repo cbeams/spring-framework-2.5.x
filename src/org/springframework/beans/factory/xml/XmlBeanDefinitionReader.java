@@ -143,7 +143,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public int loadBeanDefinitions(Resource resource) throws BeansException {
 		if (resource == null) {
-			throw new BeanDefinitionStoreException("resource cannot be null: expected an XML file");
+			throw new BeanDefinitionStoreException("resource cannot be <code>null</code>: expected an XML file");
 		}
 
 		InputStream is = null;

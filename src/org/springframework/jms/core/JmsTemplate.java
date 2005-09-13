@@ -449,7 +449,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * <p>This implementation uses JMS 1.1 API.
 	 * @param session the JMS Session to create a MessageConsumer for
 	 * @param destination the JMS Destination to create a MessageConsumer for
-	 * @param messageSelector the message selector for this consumer (can be null)
+	 * @param messageSelector the message selector for this consumer (can be <code>null</code>)
 	 * @return the new JMS MessageConsumer
 	 * @throws JMSException if thrown by JMS API methods
 	 */

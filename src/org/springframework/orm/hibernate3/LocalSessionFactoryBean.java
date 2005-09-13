@@ -400,7 +400,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * Sessions and care for transaction/request scoping.
 	 * @see org.hibernate.SessionFactory#getCurrentSession()
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
-	 * @see org.springframework.orm.hibernate3.HibernateTransactionManager
+	 * @see HibernateTransactionManager
 	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewFilter
 	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor
 	 */
@@ -961,7 +961,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 
 	/**
-	 * Invocation handler that delegates <code>getCurrentSession</code> calls
+	 * Invocation handler that delegates <code>getCurrentSession()</code> calls
 	 * to SessionFactoryUtils, for being aware of thread-bound transactions.
 	 */
 	private static class TransactionAwareInvocationHandler implements InvocationHandler {

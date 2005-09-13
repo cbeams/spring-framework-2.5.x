@@ -37,7 +37,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 /**
- * FactoryBean that creates a local JDO PersistenceManager instance.
+ * FactoryBean that creates a local JDO EntityManagerFactory instance.
  * Behaves like a PersistenceManagerFactory instance when used as bean
  * reference, e.g. for JdoTemplate's "persistenceManagerFactory" property.
  * Note that switching to a JndiObjectFactoryBean or a bean-style
@@ -65,7 +65,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  * support bean-style configuration, which makes it very easy to set up as
  * Spring-managed bean. The implementation class becomes the bean class;
  * the remaining properties are applied as bean properties (starting with
- * lower-case characters, in contrast to the respective JDO properties).
+ * lower-case characters, in contrast to the corresponding JDO properties).
  *
  * <p>For example, in case of <a href="http://www.jpox.org">JPOX</a>:
  *
@@ -132,7 +132,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	}
 
 	/**
-	 * Set JDO properties, like "javax.jdo.PersistenceManagerFactoryClass".
+	 * Set JDO properties, such as"javax.jdo.PersistenceManagerFactoryClass".
 	 * <p>Can be used to override values in a JDO properties config file,
 	 * or to specify all necessary properties locally.
 	 */

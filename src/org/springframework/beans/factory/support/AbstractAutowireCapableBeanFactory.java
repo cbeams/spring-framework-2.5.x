@@ -1043,7 +1043,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param beanName the bean has in the factory. Used for debug output.
 	 * @param bean new bean instance we may need to initialize
 	 * @param mergedBeanDefinition the bean definition that the bean was created with
-	 * (can also be null, if initializing )
+	 * (can also be <code>null</code>, if initializing )
 	 * @throws Throwable if thrown by init methods or by the invocation process
 	 * @see #invokeCustomInitMethod
 	 * @see #createBean

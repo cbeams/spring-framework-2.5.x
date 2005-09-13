@@ -42,7 +42,7 @@ public class CallableStatementCreatorFactory {
 	/** The SQL call string, which won't change when the parameters change. */
 	private final String callString;
 
-	/** List of SqlParameter objects. May not be null. */
+	/** List of SqlParameter objects. May not be <code>null</code>. */
 	private final List declaredParameters;
 
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
@@ -110,7 +110,7 @@ public class CallableStatementCreatorFactory {
 
 	/**
 	 * Return a new CallableStatementCreator instance given this parameters.
-	 * @param inParams List of parameters. May be null.
+	 * @param inParams List of parameters. May be <code>null</code>.
 	 */
 	public CallableStatementCreator newCallableStatementCreator(Map inParams) {
 		return new CallableStatementCreatorImpl(inParams != null ? inParams : new HashMap());
@@ -118,7 +118,7 @@ public class CallableStatementCreatorFactory {
 
 	/**
 	 * Return a new CallableStatementCreator instance given this parameter mapper.
-	 * @param inParamMapper ParameterMapper implementation that will return a Map of parameters. May not be null.
+	 * @param inParamMapper ParameterMapper implementation that will return a Map of parameters. May not be <code>null</code>.
 	 */
 	public CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
 		return new CallableStatementCreatorImpl(inParamMapper);
@@ -137,7 +137,7 @@ public class CallableStatementCreatorFactory {
 
 		/**
 		 * Create a new CallableStatementCreatorImpl.
-		 * @param inParams list of SqlParameter objects. May not be null.
+		 * @param inParams list of SqlParameter objects. May not be <code>null</code>.
 		 */
 		public CallableStatementCreatorImpl(Map inParams) {
 			this.inParameterMapper = null;
@@ -147,7 +147,7 @@ public class CallableStatementCreatorFactory {
 		/**
 		 * Create a new CallableStatementCreatorImpl.
 		 * @param inParamMapper ParameterMapper implementation for mapping input parameters.
-		 * May not be null.
+		 * May not be <code>null</code>.
 		 */
 		public CallableStatementCreatorImpl(ParameterMapper inParamMapper) {
 			this.inParameterMapper = inParamMapper;
@@ -188,7 +188,7 @@ public class CallableStatementCreatorFactory {
 						!(declaredParameter instanceof SqlReturnResultSet)) {
 					throw new InvalidDataAccessApiUsageException("Required input parameter '" + declaredParameter.getName() + "' is missing");
 				}
-				// the value may still be null
+				// the value may still be <code>null</code>
 				Object inValue = this.inParameters.get(declaredParameter.getName());
 				if (!(declaredParameter instanceof SqlOutParameter) && !(declaredParameter instanceof SqlReturnResultSet)) {
 					StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParameter, inValue);

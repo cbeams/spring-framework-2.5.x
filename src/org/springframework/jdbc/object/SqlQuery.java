@@ -302,7 +302,7 @@ public abstract class SqlQuery extends SqlOperation {
 	 * choose the most efficient Collection type: e.g. ArrayList
 	 * instead of LinkedList for large result sets.
 	 * @param parameters parameters to the execute() method, in case subclass
-	 * is interested. May be null if there were no parameters.
+	 * is interested. May be <code>null</code> if there were no parameters.
 	 * @see #execute
 	 */
 	protected abstract ResultReader newResultReader(int rowsExpected, Object[] parameters, Map context);

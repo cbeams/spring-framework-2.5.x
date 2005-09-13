@@ -71,7 +71,7 @@ public abstract class UpdatableSqlQuery extends SqlQuery {
 	 * @param rs ResultSet we're working through
 	 * @param rowNum row number (from 0) we're up to
 	 * @param context passed to the execute() method.
-	 * It can be null if no contextual information is need.  If you
+	 * It can be <code>null</code> if no contextual information is need.  If you
 	 * need to pass in data for each row, you can pass in a HashMap with 
 	 * the primary key of the row being the key for the HashMap.  That way
 	 * it is easy to locate the updates for each row 

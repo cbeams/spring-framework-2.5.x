@@ -611,7 +611,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 					setProxyContext = true;
 				}
 
-				// May be null. Get as late as possible to minimize the time we
+				// May be <code>null</code>. Get as late as possible to minimize the time we
 				// "own" the target, in case it comes from a pool.
 				target = getTarget();
 				if (target != null) {

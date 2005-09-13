@@ -213,7 +213,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * registering a nested path that the object is in.
 	 * @param object object wrapped by this BeanWrapper.
 	 * @param nestedPath the nested path of the object
-	 * @param superBw the containing BeanWrapper (must not be null)
+	 * @param superBw the containing BeanWrapper (must not be <code>null</code>)
 	 */
 	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl superBw) {
 		this.defaultEditors = superBw.defaultEditors;
@@ -962,7 +962,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * Convert the value to the required type (if necessary from a String),
 	 * for the specified property.
 	 * @param propertyName name of the property
-	 * @param oldValue previous value, if available (may be null)
+	 * @param oldValue previous value, if available (may be <code>null</code>)
 	 * @param newValue proposed change value
 	 * @param requiredType the type we must convert to
 	 * (or <code>null</code> if not known, for example in case of a collection element)

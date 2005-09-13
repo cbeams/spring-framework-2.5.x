@@ -50,7 +50,7 @@ public interface FactoryBean {
 	 * <p>If this method returns null, the factory will consider the
 	 * FactoryBean as not fully initialized and throw a corresponding
 	 * FactoryBeanNotInitializedException.
-	 * @return an instance of the bean (should not be null; a null value
+	 * @return an instance of the bean (should not be <code>null</code>; a null value
 	 * will be considered as an indication of incomplete initialization)
 	 * @throws Exception in case of creation errors
 	 * @see FactoryBeanNotInitializedException

@@ -269,7 +269,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 			this.server = JmxUtils.locateMBeanServer();
 		}
 
-		// The beans property may be null, for example
+		// The beans property may be <code>null</code>, for example
 		// if we are relying solely on auto-detection.
 		if (this.beans == null) {
 			this.beans = new HashMap();

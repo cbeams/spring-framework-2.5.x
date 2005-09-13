@@ -86,7 +86,7 @@ public class JotmFactoryBean implements FactoryBean, DisposableBean {
 
 	/**
 	 * Return the JOTM instance created by this factory bean, if any.
-	 * Will be null if an already active JOTM instance is used.
+	 * Will be <code>null</code> if an already active JOTM instance is used.
 	 * <p>Application code should never need to access this.
 	 */
 	public Jotm getJotm() {

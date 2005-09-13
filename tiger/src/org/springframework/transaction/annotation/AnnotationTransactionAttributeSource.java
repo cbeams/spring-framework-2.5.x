@@ -70,7 +70,7 @@ public class AnnotationTransactionAttributeSource
 	 * This version actually converts JDK 5.0+ Annotations to the Spring
 	 * classes. Returns null if it's not transactional.
 	 * @param atts attributes attached to a method or class. May
-	 * be null, in which case a null TransactionAttribute will be returned.
+	 * be <code>null</code>, in which case a null TransactionAttribute will be returned.
 	 * @return TransactionAttribute configured transaction attribute,
 	 * or <code>null</code> if none was found
 	 */

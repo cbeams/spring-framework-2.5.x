@@ -35,7 +35,7 @@ public class ShortCodedLabeledEnum extends AbstractLabeledEnum {
 	/**
 	 * Create a new ShortCodedLabeledEnum instance.
 	 * @param code the short code
-	 * @param label the label (can be null)
+	 * @param label the label (can be <code>null</code>)
 	 */
 	public ShortCodedLabeledEnum(int code, String label) {
 		super(label);

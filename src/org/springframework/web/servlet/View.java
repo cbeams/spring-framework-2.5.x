@@ -49,7 +49,7 @@ public interface View {
 	 * The second step will be the actual rendering of the view,
 	 * for example including the JSP via a RequestDispatcher.
 	 * @param model Map with name Strings as keys and corresponding model
-	 * objects as values (Map can also be null in case of empty model)
+	 * objects as values (Map can also be <code>null</code> in case of empty model)
 	 * @param request current HTTP request
 	 * @param response HTTP response we are building
 	 * @throws Exception if rendering failed

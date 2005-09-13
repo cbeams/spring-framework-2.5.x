@@ -43,7 +43,7 @@ public class ModelAndViewDefiningException extends ServletException {
 	 */
 	public ModelAndViewDefiningException(ModelAndView modelAndView) {
 		if (modelAndView == null) {
-			throw new IllegalArgumentException("modelAndView must not be null in ModelAndViewDefiningException");
+			throw new IllegalArgumentException("modelAndView must not be <code>null</code> in ModelAndViewDefiningException");
 		}
 		this.modelAndView = modelAndView;
 	}

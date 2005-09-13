@@ -100,7 +100,7 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 	 * Build a message String for the given SQLException.
 	 * Called when creating an instance of a generic DataAccessException class.
 	 * @param task readable text describing the task being attempted
-	 * @param sql SQL query or update that caused the problem. May be null.
+	 * @param sql SQL query or update that caused the problem. May be <code>null</code>.
 	 * @param sqlEx the offending SQLException
 	 * @return the message String to use
 	 */

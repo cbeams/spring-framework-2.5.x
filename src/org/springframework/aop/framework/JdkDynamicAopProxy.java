@@ -143,7 +143,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 				setProxyContext = true;
 			}
 
-			// May be null. Get as late as possible to minimize the time we "own" the target,
+			// May be <code>null</code>. Get as late as possible to minimize the time we "own" the target,
 			// in case it comes from a pool.
 			target = targetSource.getTarget();
 			if (target != null) {

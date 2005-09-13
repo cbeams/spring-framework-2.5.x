@@ -94,7 +94,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 */
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		if (jdbcTemplate == null) {
-			throw new IllegalArgumentException("jdbcTemplate must not be null");
+			throw new IllegalArgumentException("jdbcTemplate must not be <code>null</code>");
 		}
 		this.jdbcTemplate = jdbcTemplate;
 	}
@@ -332,7 +332,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	/**
 	 * Validate the parameters passed to an execute method based on declared parameters.
 	 * Subclasses should invoke this method before every executeQuery() or update() method.
-	 * @param parameters parameters supplied. May be null.
+	 * @param parameters parameters supplied. May be <code>null</code>.
 	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
 	 */
 	protected void validateParameters(Object[] parameters) throws InvalidDataAccessApiUsageException {

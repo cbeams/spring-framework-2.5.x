@@ -43,7 +43,7 @@ import org.aopalliance.aop.AspectException;
 public abstract class AopContext {
 	
 	/**
-	 * AOP proxy associated with this thread. Will be null unless the
+	 * AOP proxy associated with this thread. Will be <code>null</code> unless the
 	 * exposeInvocation property on the controlling proxy has been set to true.
 	 * The default value for this property is false, for performance reasons.
 	 */
@@ -73,7 +73,7 @@ public abstract class AopContext {
 	 * Note that the caller should be careful to return the old value
 	 * before it's done.
 	 * @param proxy the proxy to expose
-	 * @return the old proxy, which may be null if none was bound
+	 * @return the old proxy, which may be <code>null</code> if none was bound
 	 */
 	public static Object setCurrentProxy(Object proxy) {
 		Object old = currentProxy.get();

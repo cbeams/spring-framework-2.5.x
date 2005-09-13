@@ -82,7 +82,7 @@ public class LocalizedResourceHelper {
 	 * descriptor for the default location will be returned.
 	 * @param name the name of the file, without localization part nor extension
 	 * @param extension the file extension (e.g. ".xls")
-	 * @param locale the current locale (may be null)
+	 * @param locale the current locale (may be <code>null</code>)
 	 * @return the most specific localized resource found
 	 * @see java.util.ResourceBundle
 	 */

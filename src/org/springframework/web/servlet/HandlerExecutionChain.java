@@ -53,7 +53,7 @@ public class HandlerExecutionChain {
 
 	/**
 	 * Return the handler object to execute.
-	 * @return the handler object (should not be null)
+	 * @return the handler object (should not be <code>null</code>)
 	 */
 	public Object getHandler() {
 		return handler;
@@ -62,7 +62,7 @@ public class HandlerExecutionChain {
 	/**
 	 * Return the array of interceptors to apply (in the given order)
 	 * before the handler itself executes.
-	 * @return the array of HandlerInterceptors instances (may be null)
+	 * @return the array of HandlerInterceptors instances (may be <code>null</code>)
 	 */
 	public HandlerInterceptor[] getInterceptors() {
 		return interceptors;

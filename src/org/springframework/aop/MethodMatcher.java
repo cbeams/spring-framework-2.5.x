@@ -47,7 +47,7 @@ public interface MethodMatcher {
 	 * Perform static checking. If this returns false, or if the isRuntime() method
 	 * returns false, no runtime check will be made.
 	 * @param method the candidate method
-	 * @param targetClass target class (may be null, in which case the candidate
+	 * @param targetClass target class (may be <code>null</code>, in which case the candidate
 	 * class must be taken to be the method's declaring class)
 	 * @return whether or not this method matches statically
 	 */

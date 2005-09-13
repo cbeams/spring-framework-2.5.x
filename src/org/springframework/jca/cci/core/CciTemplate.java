@@ -216,7 +216,7 @@ public class CciTemplate implements CciOperations {
 	 * @param spec the CCI InteractionSpec instance that defines
 	 * the interaction (connector-specific)
 	 * @param inputRecord the input record
-	 * @param outputRecord output record (can be null)
+	 * @param outputRecord output record (can be <code>null</code>)
 	 * @param outputExtractor object to convert the output record to a result object
 	 * @return the output data extracted with the RecordExtractor object
 	 * @throws DataAccessException if there is any problem

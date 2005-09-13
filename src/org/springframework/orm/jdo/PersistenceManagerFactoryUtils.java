@@ -147,8 +147,8 @@ public abstract class PersistenceManagerFactoryUtils {
 
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering transaction synchronization for JDO PersistenceManager");
-			// Use same PersistenceManager for further JDO actions within the transaction
-			// thread object will get removed by synchronization at transaction completion.
+			// Use same PersistenceManager for further JDO actions within the transaction.
+			// Thread object will get removed by synchronization at transaction completion.
 			pmHolder = new PersistenceManagerHolder(pm);
 			pmHolder.setSynchronizedWithTransaction(true);
 			TransactionSynchronizationManager.registerSynchronization(
@@ -164,7 +164,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * bound to the current thread by Spring's transaction facilities.
 	 * @param pm the JDO PersistenceManager to check
 	 * @param pmf JDO PersistenceManagerFactory that the PersistenceManager
-	 * was created with (can be null)
+	 * was created with (can be <code>null</code>)
 	 * @return whether the PersistenceManager is transactional
 	 */
 	public static boolean isPersistenceManagerTransactional(
@@ -183,7 +183,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * @param query the JDO Query object
 	 * @param pmf JDO PersistenceManagerFactory that the Query was created for
 	 * @param jdoDialect the JdoDialect to use for applying a query timeout
-	 * (must not be null)
+	 * (must not be <code>null</code>)
 	 * @see JdoDialect#applyQueryTimeout
 	 */
 	public static void applyTransactionTimeout(
@@ -250,7 +250,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * if it is not managed externally (i.e. not bound to the thread).
 	 * @param pm PersistenceManager to close
 	 * @param pmf PersistenceManagerFactory that the PersistenceManager was created with
-	 * (can be null)
+	 * (can be <code>null</code>)
 	 */
 	public static void releasePersistenceManager(PersistenceManager pm, PersistenceManagerFactory pmf) {
 		try {
@@ -269,7 +269,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * Same as <code>releasePersistenceManager</code>, but throwing the original JDOException.
 	 * @param pm PersistenceManager to close
 	 * @param pmf PersistenceManagerFactory that the PersistenceManager was created with
-	 * (can be null)
+	 * (can be <code>null</code>)
 	 * @throws JDOException if thrown by JDO methods
 	 */
 	public static void doReleasePersistenceManager(PersistenceManager pm, PersistenceManagerFactory pmf)

@@ -406,8 +406,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
-		Assert.notNull(requiredType, "Required type must not be null");
-		Assert.notNull(propertyEditor, "PropertyEditor must not be null");
+		Assert.notNull(requiredType, "Required type must not be <code>null</code>");
+		Assert.notNull(propertyEditor, "PropertyEditor must not be <code>null</code>");
 		this.customEditors.put(requiredType, propertyEditor);
 	}
 
@@ -420,7 +420,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
-		Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be null");
+		Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be <code>null</code>");
 		this.beanPostProcessors.add(beanPostProcessor);
 		if (beanPostProcessor instanceof DestructionAwareBeanPostProcessor) {
 			this.hasDestructionAwareBeanPostProcessors = true;
@@ -467,7 +467,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 	public void registerSingleton(String beanName, Object singletonObject) throws BeanDefinitionStoreException {
 		Assert.hasText(beanName, "Bean name must not be empty");
-		Assert.notNull(singletonObject, "Singleton object must not be null");
+		Assert.notNull(singletonObject, "Singleton object must not be <code>null</code>");
 		synchronized (this.singletonCache) {
 			Object oldObject = this.singletonCache.get(beanName);
 			if (oldObject != null) {
@@ -487,7 +487,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	protected void addSingleton(String beanName, Object singletonObject) {
 		Assert.hasText(beanName, "Bean name must not be empty");
-		Assert.notNull(singletonObject, "Singleton object must not be null");
+		Assert.notNull(singletonObject, "Singleton object must not be <code>null</code>");
 		synchronized (this.singletonCache) {
 			this.singletonCache.put(beanName, singletonObject);
 		}
@@ -1104,7 +1104,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param beanName name of the bean
 	 * @param mergedBeanDefinition the bean definition for the bean
 	 * @param args arguments to use if creating a prototype using explicit arguments
-	 * to a static factory method. This parameter must be null except in this case.
+	 * to a static factory method. This parameter must be <code>null</code> except in this case.
 	 * @return a new instance of the bean
 	 * @throws BeanCreationException if the bean could not be created
 	 */

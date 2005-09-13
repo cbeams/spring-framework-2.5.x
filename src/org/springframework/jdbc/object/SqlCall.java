@@ -181,7 +181,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	/**
 	 * Return a CallableStatementCreator to perform an operation
 	 * with this parameters.
-	 * @param inParams parameters. May be null.
+	 * @param inParams parameters. May be <code>null</code>.
 	 */
 	protected CallableStatementCreator newCallableStatementCreator(Map inParams) {
 		return this.callableStatementFactory.newCallableStatementCreator(inParams);
@@ -190,7 +190,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	/**
 	 * Return a CallableStatementCreator to perform an operation
 	 * with the parameters returned from this ParameterMapper.
-	 * @param inParamMapper parametermapper. May not be null.
+	 * @param inParamMapper parametermapper. May not be <code>null</code>.
 	 */
 	protected CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
 		return this.callableStatementFactory.newCallableStatementCreator(inParamMapper);

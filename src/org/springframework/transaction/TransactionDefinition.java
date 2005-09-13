@@ -153,7 +153,7 @@ public interface TransactionDefinition {
 	boolean isReadOnly();
 
 	/**
-	 * Return the name of this transaction. Can be null.
+	 * Return the name of this transaction. Can be <code>null</code>.
 	 * This will be used as transaction name to be shown in a
 	 * transaction monitor, if applicable (for example, WebLogic's).
 	 * <p>In case of Spring's declarative transactions, the exposed name will

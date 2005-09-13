@@ -129,7 +129,7 @@ public class ConstructorArgumentValues {
 
 	/**
 	 * Look for a generic argument value that matches the given type.
-	 * @param requiredType the type to match (can be null to find an
+	 * @param requiredType the type to match (can be <code>null</code> to find an
 	 * arbitrary next generic argument value, as fallback)
 	 * @return the ValueHolder for the argument, or <code>null</code> if none set
 	 */
@@ -141,7 +141,7 @@ public class ConstructorArgumentValues {
 	 * Look for the next generic argument value that matches the given type,
 	 * ignoring argument values that have already been used in the current
 	 * resolution process.
-	 * @param requiredType the type to match (can be null to find an
+	 * @param requiredType the type to match (can be <code>null</code> to find an
 	 * arbitrary next generic argument value, as fallback)
 	 * @param usedValueHolders a Set of ValueHolder objects that have already
 	 * been used in the current resolution process and should therefore not

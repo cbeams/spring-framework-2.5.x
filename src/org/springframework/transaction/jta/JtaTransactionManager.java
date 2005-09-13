@@ -270,7 +270,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	public void setJndiTemplate(JndiTemplate jndiTemplate) {
 		if (jndiTemplate == null) {
-			throw new IllegalArgumentException("jndiTemplate must not be null");
+			throw new IllegalArgumentException("jndiTemplate must not be <code>null</code>");
 		}
 		this.jndiTemplate = jndiTemplate;
 	}

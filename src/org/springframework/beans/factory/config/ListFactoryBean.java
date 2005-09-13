@@ -52,7 +52,7 @@ public class ListFactoryBean extends AbstractFactoryBean {
 	 */
 	public void setTargetListClass(Class targetListClass) {
 		if (targetListClass == null) {
-			throw new IllegalArgumentException("targetListClass must not be null");
+			throw new IllegalArgumentException("targetListClass must not be <code>null</code>");
 		}
 		if (!List.class.isAssignableFrom(targetListClass)) {
 			throw new IllegalArgumentException("targetListClass must implement [java.util.List]");

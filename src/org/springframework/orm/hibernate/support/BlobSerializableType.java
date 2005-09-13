@@ -70,7 +70,7 @@ public class BlobSerializableType extends AbstractLobType {
 
 	/**
 	 * Constructor used for testing: takes an explicit LobHandler
-	 * and an explicit JTA TransactionManager (can be null).
+	 * and an explicit JTA TransactionManager (can be <code>null</code>).
 	 */
 	protected BlobSerializableType(LobHandler lobHandler, TransactionManager jtaTransactionManager) {
 		super(lobHandler, jtaTransactionManager);

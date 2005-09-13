@@ -38,7 +38,7 @@ public interface SQLExceptionTranslator {
 	 * Translate the given SQL exception into a generic
 	 * data access exception.
 	 * @param task readable text describing the task being attempted
-	 * @param sql SQL query or update that caused the problem. May be null.
+	 * @param sql SQL query or update that caused the problem. May be <code>null</code>.
 	 * @param sqlEx the offending SQLException
 	 * @return the DataAccessException to throw
 	 */

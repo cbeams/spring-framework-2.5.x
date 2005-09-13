@@ -53,7 +53,7 @@ public class JspAwareRequestContext extends RequestContext {
 	 * using the given model attributes for Errors retrieval.
 	 * @param pageContext current JSP page context
 	 * @param model the model attributes for the current view
-	 * (can be null, using the request attributes for Errors retrieval)
+	 * (can be <code>null</code>, using the request attributes for Errors retrieval)
 	 */
 	public JspAwareRequestContext(PageContext pageContext, Map model) {
 		initContext(pageContext, model);
@@ -64,7 +64,7 @@ public class JspAwareRequestContext extends RequestContext {
 	 * using the given model attributes for Errors retrieval.
 	 * @param pageContext current JSP page context
 	 * @param model the model attributes for the current view
-	 * (can be null, using the request attributes for Errors retrieval)
+	 * (can be <code>null</code>, using the request attributes for Errors retrieval)
 	 */
 	protected void initContext(PageContext pageContext, Map model) {
 		if (!(pageContext.getRequest() instanceof HttpServletRequest)) {

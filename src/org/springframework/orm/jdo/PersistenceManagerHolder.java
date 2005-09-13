@@ -38,7 +38,7 @@ public class PersistenceManagerHolder extends ResourceHolderSupport {
 	private final PersistenceManager persistenceManager;
 
 	public PersistenceManagerHolder(PersistenceManager persistenceManager) {
-		Assert.notNull(persistenceManager, "PersistenceManager must not be null");
+		Assert.notNull(persistenceManager, "PersistenceManager must not be <code>null</code>");
 		this.persistenceManager = persistenceManager;
 	}
 
