@@ -139,26 +139,23 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	}
 
 	/**
-	 * Set the prefix that gets applied to view names when building a URL.
-	 * @param prefix view name prefix
+	 * Set the prefix that gets prepended to view names when building a URL.
 	 */
 	public void setPrefix(String prefix) {
-		this.prefix = prefix;
+		this.prefix = (prefix != null ? prefix : "");
 	}
 
 	/**
-	 * Set the suffix that gets applied to view names when building a URL.
-	 * @param suffix view name suffix
+	 * Set the suffix that gets appended to view names when building a URL.
 	 */
 	public void setSuffix(String suffix) {
-		this.suffix = suffix;
+		this.suffix = (suffix != null ? suffix : "");
 	}
 
 	/**
 	 * Set the content type for all views.
 	 * May be ignored by view classes if the view itself is assumed
 	 * to set the content type, e.g. in case of JSPs.
-	 * @param contentType the content type
 	 */
 	public void setContentType(String contentType) {
 		this.contentType = contentType;

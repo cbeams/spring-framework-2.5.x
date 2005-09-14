@@ -43,7 +43,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	private boolean cache = true;
 
 	/** View name --> View instance */
-	private final Map viewMap = Collections.synchronizedMap(new HashMap());
+	private final Map viewCache = Collections.synchronizedMap(new HashMap());
 
 
 	/**
@@ -73,11 +73,11 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 		else {
 			String cacheKey = getCacheKey(viewName, locale);
 			// No synchronization, as we can live with occasional double caching.
-			View view = (View) this.viewMap.get(cacheKey);
+			View view = (View) this.viewCache.get(cacheKey);
 			if (view == null) {
 				// Ask the subclass to create the View object.
 				view = createView(viewName, locale);
-				this.viewMap.put(cacheKey, view);
+				this.viewCache.put(cacheKey, view);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Cached view '" + cacheKey + "'");
 				}
@@ -101,7 +101,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 		}
 		else {
 			String cacheKey = getCacheKey(viewName, locale);
-			if (viewMap.remove(cacheKey) == null) {
+			if (viewCache.remove(cacheKey) == null) {
 				// some debug output might be useful
 				if (logger.isDebugEnabled()) {
 					logger.debug("No cached instance for view '" + cacheKey + "' was found");
