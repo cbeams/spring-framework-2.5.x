@@ -106,7 +106,15 @@ public abstract class AutowireUtils {
 	 * @return whether the bean property is excluded
 	 */
 	public static boolean isExcludedFromDependencyCheck(PropertyDescriptor pd) {
-		return (pd.getWriteMethod().getDeclaringClass().getName().indexOf("$$") != -1);
+		Method wm = pd.getWriteMethod();
+		if (wm.getDeclaringClass().getName().indexOf("$$") == -1) {
+			// Not a CGLIB method so it's OK.
+			return false;
+		}
+		// It was declared by CGLIB, but we might still want to autowire it
+		// if it was actually declared by the superclass.
+		Class superclass = wm.getDeclaringClass().getSuperclass();
+		return !ClassUtils.hasMethod(superclass, wm.getName(), wm.getParameterTypes());
 	}
 
 	/**
