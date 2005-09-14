@@ -16,6 +16,10 @@
 
 package org.springframework.web.servlet.mvc;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -23,13 +27,71 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Controller that transforms the virtual filename at the end of a URL
- * to a view name. Example: "/index.html" -> "index"
+ * into a view name and returns that view. Can optionally prepend a prefix
+ * and/or append a suffix to build the viewname from the URL filename.
+ *
+ * <p>Example: "/index" -> "index"
+ * Example: "/index.html" -> "index"
+ * Example: "/index.html" + prefix "pre_" and suffix "_suf" -> "pre_index_suf".
+ *
+ * <p>Thanks to David Barri for suggesting prefix/suffix support!
+ *
  * @author Alef Arendsen
+ * @author Juergen Hoeller
+ * @see #setPrefix
+ * @see #setSuffix
  */
-public class UrlFilenameViewController implements Controller {
+public class UrlFilenameViewController extends AbstractController {
 
-	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) {
+	private String prefix = "";
+
+	private String suffix = "";
+
+	/** Request URI String --> view name String */
+	private final Map viewNameCache = Collections.synchronizedMap(new HashMap());
+
+
+	/**
+	 * Set the prefix that gets prepended to the request URL filename
+	 * to build a view name.
+	 */
+	public void setPrefix(String prefix) {
+		this.prefix = (prefix != null ? prefix : "");
+	}
+
+	/**
+	 * Set the suffix that gets appended to the request URL filename
+	 * to build a view name.
+	 */
+	public void setSuffix(String suffix) {
+		this.suffix = (suffix != null ? suffix : "");
+	}
+
+
+	/**
+	 * Returns a ModelAndView with the view name being the URL filename,
+	 * with prefix/suffix applied when appropriate.
+	 * @see #getFilenameFromRequestURI
+	 * @see #setPrefix
+	 * @see #setSuffix
+	 */
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) {
 		String uri = request.getRequestURI();
+		String viewName = (String) this.viewNameCache.get(uri);
+		if (viewName == null) {
+			viewName = this.prefix + getFilenameFromRequestURI(uri) + this.suffix;
+			this.viewNameCache.put(uri, viewName);
+		}
+		return new ModelAndView(viewName);
+	}
+
+	/**
+	 * Extract the URL filename from the given request URI
+	 * @param uri the request URI (e.g. "/index.html")
+	 * @return the extracted URI filename (e.g. "index")
+	 * @see javax.servlet.http.HttpServletRequest#getRequestURI()
+	 */
+	protected String getFilenameFromRequestURI(String uri) {
 		int begin = uri.lastIndexOf('/');
 		if (begin == -1) {
 			begin = 0;
@@ -37,21 +99,19 @@ public class UrlFilenameViewController implements Controller {
 		else {
 			begin++;
 		}
-		int end;
-		if (uri.indexOf(";") != -1) {
-			end = uri.indexOf(";");
+		int end = uri.indexOf(';');
+		if (end == -1) {
+			end = uri.indexOf('?');
+			if (end == -1) {
+				end = uri.length();
+			}
 		}
-		else if (uri.indexOf("?") != -1) {
-			end = uri.indexOf("?");
+		String filename = uri.substring(begin, end);
+		int dotIndex = filename.lastIndexOf('.');
+		if (dotIndex != -1) {
+			filename = filename.substring(0, dotIndex);
 		}
-		else {
-			end = uri.length();
-		}
-		String fileName = uri.substring(begin, end);
-		if (fileName.indexOf(".") != -1) {
-			fileName = fileName.substring(0, fileName.lastIndexOf("."));
-		}
-		return new ModelAndView(fileName);
+		return filename;
 	}
 
 }
