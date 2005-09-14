@@ -16,7 +16,7 @@
 
 package org.springframework.cache.ehcache;
 
-import junit.framework.TestCase;
+import junit.framework.*;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 
@@ -29,7 +29,11 @@ import org.springframework.core.io.ClassPathResource;
  */
 public class EhCacheSupportTests extends TestCase {
 
-	public void testLoadingBlankCacheManager() throws Exception {
+	public EhCacheSupportTests(String name) {
+        super(name);
+    }
+
+    public void testLoadingBlankCacheManager() throws Exception {
 		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
 		cacheManagerFb.afterPropertiesSet();
 		try {
@@ -163,5 +167,15 @@ public class EhCacheSupportTests extends TestCase {
 		assertTrue("Singleton property", cacheFb.isSingleton());
 		
 	}
+
+    // Suite method is needed for the tests to succeed on JRockit
+    public static Test suite() {
+        TestSuite suite = new TestSuite();
+        suite.addTest(new EhCacheSupportTests("testLoadingBlankCacheManager"));
+        suite.addTest(new EhCacheSupportTests("testEhCacheFactoryBeanWithDefaultCacheManager"));
+        suite.addTest(new EhCacheSupportTests("testEhCacheFactory"));
+        suite.addTest(new EhCacheSupportTests("testFactoryBeans"));
+        return suite;
+    }
 
 }

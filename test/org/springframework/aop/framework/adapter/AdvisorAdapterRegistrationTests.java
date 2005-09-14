@@ -16,10 +16,10 @@
 
 package org.springframework.aop.framework.adapter;
 
-import junit.framework.TestCase;
+import junit.framework.*;
 
-import org.springframework.aop.Advisor;
-import org.springframework.aop.SimpleBeforeAdviceImpl;
+import org.springframework.aop.*;
+import org.springframework.aop.support.*;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.ITestBean;
 import org.springframework.context.ApplicationContext;
@@ -32,22 +32,26 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class AdvisorAdapterRegistrationTests extends TestCase {
 
-	public void testAdvisorAdapterRegistrationManagerNotPresentInContext() {
-		ApplicationContext ctx = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/adapter/withoutBPPContext.xml");
-		ITestBean tb = (ITestBean) ctx.getBean("testBean");
+    public AdvisorAdapterRegistrationTests(String name) {
+        super(name);
+    }
+
+    public void testAdvisorAdapterRegistrationManagerNotPresentInContext() {
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/adapter/withoutBPPContext.xml");
+        ITestBean tb = (ITestBean) ctx.getBean("testBean");
 		// just invoke any method to see if advice fired
-		try {
+        try {
 			tb.getName();
 			fail("Should throw UnknownAdviceTypeException");
 		}
 		catch (UnknownAdviceTypeException ex) {
-			// expected
+            // expected
 			assertEquals(0, getAdviceImpl(tb).getInvocationCounter());
 		}
 	}
 
 	public void testAdvisorAdapterRegistrationManagerPresentInContext() {
-		ApplicationContext ctx = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/adapter/withBPPContext.xml");
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/adapter/withBPPContext.xml");
 		ITestBean tb = (ITestBean) ctx.getBean("testBean");
 		// just invoke any method to see if advice fired
 		try {
@@ -64,5 +68,14 @@ public class AdvisorAdapterRegistrationTests extends TestCase {
 		Advisor advisor = advised.getAdvisors()[0];
 		return (SimpleBeforeAdviceImpl) advisor.getAdvice();
 	}
+
+    // temporary suite method to make tests work on JRockit!
+    // Alef knows more about this.
+    public static Test suite() {
+        TestSuite suite = new TestSuite();
+        suite.addTest(new AdvisorAdapterRegistrationTests("testAdvisorAdapterRegistrationManagerNotPresentInContext"));
+        suite.addTest(new AdvisorAdapterRegistrationTests("testAdvisorAdapterRegistrationManagerPresentInContext"));
+        return suite;
+    }
 
 }
