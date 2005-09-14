@@ -28,7 +28,6 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
 /**
- * 
  * @author Rod Johnson
  */
 public class AopProxyUtilsTests extends TestCase {
@@ -53,7 +52,6 @@ public class AopProxyUtilsTests extends TestCase {
 		as.addInterface(Comparable.class);
 		Class[] completedInterfaces = AopProxyUtils.completeProxiedInterfaces(as);
 		assertEquals(3, completedInterfaces.length);
-		
 		
 		// Can't assume ordering for others, so use a list
 		List l = Arrays.asList(completedInterfaces);
