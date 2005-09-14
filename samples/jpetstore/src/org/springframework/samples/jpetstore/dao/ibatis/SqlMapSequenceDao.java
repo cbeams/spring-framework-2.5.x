@@ -17,11 +17,12 @@ public class SqlMapSequenceDao extends SqlMapClientDaoSupport {
     Sequence sequence = new Sequence(name, -1);
     sequence = (Sequence) getSqlMapClientTemplate().queryForObject("getSequence", sequence);
     if (sequence == null) {
-      throw new DataRetrievalFailureException("Error: A null sequence was returned from the database (could not get next " +
-      			name + " sequence).");
+      throw new DataRetrievalFailureException(
+					"Could not get next value of sequence '" + name + "': sequence does not exist");
     }
     Object parameterObject = new Sequence(name, sequence.getNextId() + 1);
     getSqlMapClientTemplate().update("updateSequence", parameterObject, 1);
     return sequence.getNextId();
   }
+
 }
