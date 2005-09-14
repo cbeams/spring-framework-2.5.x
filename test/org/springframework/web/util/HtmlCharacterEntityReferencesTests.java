@@ -38,9 +38,9 @@ public class HtmlCharacterEntityReferencesTests extends TestCase {
 		HtmlCharacterEntityReferences entityReferences = new HtmlCharacterEntityReferences();
 		Map referenceCharactersMap = getReferenceCharacterMap();
 
-		for (int character = 0; character < 64000; character++) {
-			if (referenceCharactersMap.containsKey(new Integer(character))) {
-				String referenceName = (String) referenceCharactersMap.get(new Integer(character));
+		for (int character = 0; character < 10000; character++) {
+			String referenceName = (String) referenceCharactersMap.get(new Integer(character));
+			if (referenceName != null) {
 				String fullReference =
 						HtmlCharacterEntityReferences.REFERENCE_START +
 						referenceName +
