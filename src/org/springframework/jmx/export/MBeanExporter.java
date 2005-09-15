@@ -558,7 +558,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 						logger.debug("Replacing existing MBean at [" + objectName + "].");
 					}
 					this.server.unregisterMBean(objectName);
-					doRegister(mbean, objectName);
+					this.server.registerMBean(mbean, objectName);
 				}
 				catch (InstanceNotFoundException ex) {
 					throw new IllegalStateException("Unable to replace existing MBean at [" + objectName + "].", ex);
