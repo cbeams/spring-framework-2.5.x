@@ -119,10 +119,6 @@ public abstract class FrameworkPortlet extends PortletBean {
 	 */
 	public static final String DEFAULT_VIEW_RENDERER_SERVLET = "/WEB-INF/servlet/view";
 
-	/**
-	 * Commonly used key value in Portal user info map for the name of the user
-	 */
-	private static final String PORTLET_USER_INFO_USER_NAME = "user.name";
 
 	
 	/** PortletApplicationContext implementation class to use */
@@ -146,6 +142,8 @@ public abstract class FrameworkPortlet extends PortletBean {
 	/** ViewRendererServlet */
 	private String viewRendererServlet;
 
+	/** USER_INFO attributes that may contain the username of the current user */
+    private String [] userinfoUsernameAttributes = { "user.login.id", "user.name" };
 	
 	/**
 	 * Set a custom context class. This class must be of type PortletApplicationContext;
@@ -245,6 +243,26 @@ public abstract class FrameworkPortlet extends PortletBean {
         return (viewRendererServlet != null ? viewRendererServlet : DEFAULT_VIEW_RENDERER_SERVLET);
     }
 
+    /**
+     * Set the list of attributes to search in the USER_INFO map when trying
+     * to find the username of the current user. 
+     * @param userinfoUsernameAttributes
+     * @see #getUsernameForRequest
+     */
+    public void setUserinfoUsernameAttributes(String[] userinfoUsernameAttributes) {
+        this.userinfoUsernameAttributes = userinfoUsernameAttributes;
+    }
+    
+    /**
+     * Returns the list of attributes that will be searched in the USER_INFO map
+     * when trying to find the username of the current user
+     * @return array of attribute names
+     * @see #getUsernameForRequest
+     */
+    public String[] getUserinfoUsernameAttributes() {
+        return userinfoUsernameAttributes;
+    }
+    
     
 	/**
 	 * Overridden method of PortletBean, invoked after any bean properties
@@ -336,7 +354,8 @@ public abstract class FrameworkPortlet extends PortletBean {
 				(ConfigurablePortletApplicationContext) BeanUtils.instantiateClass(getContextClass());
 		pac.setParent(parent);
 		pac.setPortletContext(getPortletContext());
-		pac.setServletContext(parent.getServletContext());
+		if (parent != null)
+		    pac.setServletContext(parent.getServletContext());
 		pac.setNamespace(getNamespace());
 		if (getContextConfigLocation() != null) {
 			pac.setConfigLocations(
@@ -459,19 +478,27 @@ public abstract class FrameworkPortlet extends PortletBean {
 	 * @param request current portlet request
 	 * @return the username, or null if none
 	 * @see javax.portlet.PortletRequest#getUserPrincipal
+	 * @see javax.portlet.PortletRequest#getRemoteUser
 	 * @see javax.portlet.PortletRequest#USER_INFO
+	 * @see #setUserinfoUsernameAttributes(String[])
 	 */
 	protected String getUsernameForRequest(PortletRequest request) {
-	    
-	    // Try the Principal first
+
+	    // Try the Principal
 		Principal userPrincipal = request.getUserPrincipal();
 		if (userPrincipal != null) return userPrincipal.getName();
+
+		// Try the RemoteUser
+		String userName = request.getRemoteUser();
+		if (userName!= null) return userName;
 		
-		// Try the user info map next
+		// Try the USER_INFO map
 		Map userInfo = (Map)request.getAttribute(PortletRequest.USER_INFO);
 		if (userInfo != null) {
-		    String userName = (String)userInfo.get(PORTLET_USER_INFO_USER_NAME);		
-			if (userName != null) return userName;
+		    for (int i = 0, n = userinfoUsernameAttributes.length; i < n; i++) {
+		        userName = (String)userInfo.get(userinfoUsernameAttributes[i]);
+			    if (userName != null) return userName;
+		    }
 		}
 		
 		// Nothing worked
