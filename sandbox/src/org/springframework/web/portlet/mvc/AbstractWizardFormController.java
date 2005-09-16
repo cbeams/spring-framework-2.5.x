@@ -818,6 +818,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		// In case of binding errors -> show current page.
 		if (errors.hasErrors()) {
 			setPageRenderParameter(response, currentPage);
+		    passRenderParameters(request, response);
 			return;
 		}
 
@@ -827,6 +828,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 				validatePage(command, errors, page, true);
 				if (errors.hasErrors()) {
 					setPageRenderParameter(response, currentPage);
+				    passRenderParameters(request, response);
 					return;
 				}
 			}

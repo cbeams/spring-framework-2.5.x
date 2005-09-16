@@ -216,19 +216,19 @@ import org.springframework.web.servlet.ModelAndView;
  *		    and will simply display a new blank form.</td>
  *	</tr>
  *	<tr>
- *		<td>passRenderParameters</td>
+ *		<td>renderParameters</td>
  *		<td>null</td>
  *		<td>An array of parameters that will be passed forward from the action
  *          phase to the render phase if the form needs to be displayed 
- *          again.  These can also be passed forwarded explicitly by calling
+ *          again.  These can also be passed forward explicitly by calling
  *          the <code>passRenderParameters</code> method from any action 
- *          phase method.  For <code>AbstractFormController</code>, this means that 
- *          parameters will be preserved if an action request occurs that is 
- *          not a form submit or if an invalid submit occurs. If there are 
- *          render parameters you need in <code>renderFormSubmission</code>,
- *          then you need to pass those forward from 
- *          <code>processFormSubmission</code>.  Descendants of this 
- *          controller should follow similar behavior.</td>
+ *          phase method.  Abstract descendants of this controller should follow 
+ *          similar behavior.  If there are parameters you need in 
+ *          <code>renderFormSubmission</code>, then you need to pass those 
+ *          forward from <code>processFormSubmission</code>.  If you override the
+ *          default behavior of invalid submits and you set sessionForm to true,
+ *          then you probably will not need to set this because your parameters
+ *          are only going to be needed on the first request.</td>
  *	</tr>
  * </table>
  * </p>
@@ -287,7 +287,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 
     private boolean redirectAction = false;
 
-    private	 String[] passRenderParameters = null;
+    private	 String[] renderParameters = null;
     
 	/**
 	 * Create a new AbstractFormController.
@@ -364,22 +364,24 @@ public abstract class AbstractFormController extends BaseCommandController {
 
     /**
      * Specify the list of parameters that should be passed forward
-     * from the action phase to the render phase whenever the form is rerendered
+     * from the action phase to the render phase whenever the form is
+     * rerendered or when {@link #passRenderParameters} is called.
      * @param parameters
-     * @see #passRenderParameters(ActionRequest, ActionResponse)
+     * @see #passRenderParameters
      */
-    public void setPassRenderParameters(String[] parameters) {
-        this.passRenderParameters = parameters;
+    public void setRenderParameters(String[] parameters) {
+        this.renderParameters = parameters;
     }
 
     /**
-     * The list of parameters that will be passed from the the
-     * action phase to the render phase whenever the form is rerendered
+     * Returns the list of parameters that will be passed forward
+     * from the action phase to the render phase whenever the form is
+     * rerendered or when {@link #passRenderParameters} is called.
      * @return the list of parameters
-     * @see #passRenderParameters(ActionRequest, ActionResponse)
+     * @see #passRenderParameters
      */
-    public String[] getPassRenderParameters() {
-        return passRenderParameters;
+    public String[] getRenderParameters() {
+        return renderParameters;
     }
     
 	/**
@@ -445,11 +447,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 			if (logger.isDebugEnabled()) logger.debug("invalid form submission - cannot get valid command object");
 			setFormSubmit(response);
 			setInvalidSubmit(response);
-		    passRenderParameters(request, response);
-			command = formBackingObject(request);
-			BindException errors = bindAndValidate(request, command).getErrors();
 			handleInvalidSubmit(request, response);
-			setRenderCommandAndErrors(request, command, errors);
 			return;
 		}
 
@@ -599,10 +597,10 @@ public abstract class AbstractFormController extends BaseCommandController {
      * @see ActionResponse#setRenderParameter
      */
     protected void passRenderParameters(ActionRequest request, ActionResponse response) {
-        if (passRenderParameters == null) return;
+        if (renderParameters == null) return;
 		try {
-		    for (int i = 0, n = passRenderParameters.length; i < n; i++) {
-		        String paramName = passRenderParameters[i];
+		    for (int i = 0, n = renderParameters.length; i < n; i++) {
+		        String paramName = renderParameters[i];
 		        String paramValues[] = request.getParameterValues(paramName);
 		        if (paramValues != null) {
 					if (logger.isDebugEnabled())
@@ -1015,6 +1013,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 */
 	protected void handleInvalidSubmit(ActionRequest request, ActionResponse response)
 			throws Exception {
+	    passRenderParameters(request, response);
 		Object command = formBackingObject(request);
 		BindException errors = bindAndValidate(request, command).getErrors();
 		processFormSubmission(request, response, command, errors);
