@@ -16,11 +16,10 @@
 
 package org.springframework.jmx.export.assembler;
 
-import java.util.Properties;
-
 import javax.management.MBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
+import java.util.Properties;
 
 /**
  * @author Rob Harrop
@@ -40,7 +39,7 @@ public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAss
 	public void testWithFallThrough() throws Exception {
 		MethodNameBasedMBeanInfoAssembler assembler =
 				getWithMapping("foobar", "add,myOperation,getName,setName,getAge");
-		assembler.setManagedMethods(new String[] {"getNickName", "setNickName"});
+		assembler.setManagedMethods(new String[]{"getNickName", "setNickName"});
 
 		ModelMBeanInfo inf = assembler.getMBeanInfo(getBean(), getObjectName());
 		MBeanAttributeInfo attr = inf.getAttribute("NickName");
@@ -90,7 +89,7 @@ public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAss
 	private void assertNickName(MBeanAttributeInfo attr) {
 		assertNotNull("Nick Name should not be null", attr);
 		assertTrue("Nick Name should be writable", attr.isWritable());
-		assertTrue("Nick Name should be readab;e", attr.isReadable());
+		assertTrue("Nick Name should be readable", attr.isReadable());
 	}
 
 }

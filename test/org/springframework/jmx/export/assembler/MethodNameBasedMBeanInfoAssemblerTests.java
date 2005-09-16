@@ -55,5 +55,5 @@ public class MethodNameBasedMBeanInfoAssemblerTests extends AbstractJmxAssembler
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/assembler/methodNameAssembler.xml";
 	}
-	
+
 }

@@ -49,6 +49,7 @@ import org.springframework.util.StringUtils;
  * @see #setMethodMappings
  * @see InterfaceBasedMBeanInfoAssembler
  * @see SimpleReflectiveMBeanInfoAssembler
+ * @see MethodExclusionMBeanInfoAssembler
  * @see org.springframework.jmx.export.MBeanExporter
  */
 public class MethodNameBasedMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssembler {
