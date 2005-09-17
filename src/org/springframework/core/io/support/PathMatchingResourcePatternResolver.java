@@ -269,8 +269,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				result.addAll(doFindPathMatchingFileResources(rootDirResource, subPattern));
 			}
 		}
-		if (logger.isInfoEnabled()) {
-			logger.info("Resolved location pattern [" + locationPattern + "] to resources " + result);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Resolved location pattern [" + locationPattern + "] to resources " + result);
 		}
 		return (Resource[]) result.toArray(new Resource[result.size()]);
 	}
