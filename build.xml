@@ -144,6 +144,10 @@
 
 		<rmic base="${target.classes.dir}" classname="org.springframework.remoting.rmi.RmiInvocationWrapper"/>
 
+		<rmic base="${target.classes.dir}" classname="org.springframework.remoting.rmi.RmiInvocationWrapper" iiop="true">
+			<classpath refid="all-libs"/>
+		</rmic>
+
 		<copy todir="${target.classes.dir}" preservelastmodified="true">
 			<fileset dir="${src.dir}">
 				<include name="**/*.properties"/>
