@@ -25,10 +25,13 @@ import org.aopalliance.intercept.MethodInvocation;
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see RemoteInvocationFactory
+ * @see DefaultRemoteInvocationFactory
  */
 public abstract class RemoteInvocationBasedAccessor extends UrlBasedRemoteAccessor {
 
 	private RemoteInvocationFactory remoteInvocationFactory = new DefaultRemoteInvocationFactory();
+
 
 	/**
 	 * Set the RemoteInvocationFactory to use for this accessor.

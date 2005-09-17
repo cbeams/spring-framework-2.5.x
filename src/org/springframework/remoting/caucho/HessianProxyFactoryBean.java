@@ -46,10 +46,12 @@ public class HessianProxyFactoryBean extends HessianClientInterceptor implements
 
 	private Object serviceProxy;
 
+
 	public void afterPropertiesSet() throws MalformedURLException {
 		super.afterPropertiesSet();
 		this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(), this);
 	}
+	
 
 	public Object getObject() {
 		return this.serviceProxy;

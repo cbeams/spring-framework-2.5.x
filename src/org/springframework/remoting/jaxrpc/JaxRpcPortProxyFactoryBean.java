@@ -48,6 +48,7 @@ public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor impl
 
 	private Object serviceProxy;
 
+
 	public void afterPropertiesSet() throws ServiceException {
 		if (getServiceInterface() == null) {
 			throw new IllegalArgumentException("serviceInterface is required");
@@ -55,6 +56,7 @@ public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor impl
 		super.afterPropertiesSet();
 		this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(), this);
 	}
+
 
 	public Object getObject() {
 		return this.serviceProxy;

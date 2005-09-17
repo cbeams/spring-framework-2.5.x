@@ -38,9 +38,13 @@ import org.apache.commons.logging.LogFactory;
  */
 public abstract class RemoteAccessor {
 
+	/**
+	 * Logger, available to subclasses.
+	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Class serviceInterface;
+
 
 	/**
 	 * Set the interface of the service to access.

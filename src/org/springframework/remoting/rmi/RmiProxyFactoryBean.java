@@ -61,6 +61,7 @@ public class RmiProxyFactoryBean extends RmiClientInterceptor implements Factory
 
 	private Object serviceProxy;
 
+
 	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
 		if (getServiceInterface() == null) {
@@ -68,6 +69,7 @@ public class RmiProxyFactoryBean extends RmiClientInterceptor implements Factory
 		}
 		this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(), this);
 	}
+
 
 	public Object getObject() {
 		return this.serviceProxy;

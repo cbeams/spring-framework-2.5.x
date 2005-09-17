@@ -64,6 +64,7 @@ public class JndiRmiProxyFactoryBean extends JndiRmiClientInterceptor implements
 
 	private Object serviceProxy;
 
+
 	public void afterPropertiesSet() throws NamingException {
 		super.afterPropertiesSet();
 		if (getServiceInterface() == null) {
@@ -71,6 +72,7 @@ public class JndiRmiProxyFactoryBean extends JndiRmiClientInterceptor implements
 		}
 		this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(),  this);
 	}
+
 
 	public Object getObject() {
 		return this.serviceProxy;

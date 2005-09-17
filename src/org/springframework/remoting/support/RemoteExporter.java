@@ -35,6 +35,9 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class RemoteExporter {
 
+	/**
+	 * Logger, available to subclasses.
+	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Object service;

@@ -55,12 +55,14 @@ public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor
 
 	private Object serviceProxy;
 
+
 	public void afterPropertiesSet() throws MalformedURLException {
 		if (getServiceInterface() == null) {
 			throw new IllegalArgumentException("serviceInterface is required");
 		}
 		this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(), this);
 	}
+
 
 	public Object getObject() {
 		return this.serviceProxy;

@@ -56,6 +56,7 @@ public class CodebaseAwareObjectInputStream extends ObjectInputStream {
 
 	private final String codebaseUrl;
 
+
 	/**
 	 * Create a new CodebaseAwareObjectInputStream for the given InputStream and codebase.
 	 * @param	in input stream to read from
@@ -67,6 +68,7 @@ public class CodebaseAwareObjectInputStream extends ObjectInputStream {
 		super(in);
 		this.codebaseUrl = codebaseUrl;
 	}
+
 
 	/**
 	 * Overridden version delegates to super class first,

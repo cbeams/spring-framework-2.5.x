@@ -25,6 +25,8 @@ import java.lang.reflect.InvocationTargetException;
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see RemoteInvocationExecutor
+ * @see DefaultRemoteInvocationExecutor
  */
 public abstract class RemoteInvocationBasedExporter extends RemoteExporter {
 

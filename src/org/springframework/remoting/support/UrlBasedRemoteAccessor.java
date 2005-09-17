@@ -26,6 +26,7 @@ package org.springframework.remoting.support;
 public abstract class UrlBasedRemoteAccessor extends RemoteAccessor {
 
 	private String serviceUrl;
+	
 
 	/**
 	 * Set the URL of the service that this factory should create a proxy for.
