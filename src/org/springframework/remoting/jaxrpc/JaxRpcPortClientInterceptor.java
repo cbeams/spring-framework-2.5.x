@@ -87,6 +87,8 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 	private Class portInterface;
 
+	private boolean lookupServiceOnStartup = true;
+
 	private QName portQName;
 
 	private Remote portStub;
@@ -263,9 +265,24 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		return portInterface;
 	}
 
+	/**
+	 * Set whether to look up the JAX-RPC service on startup. Default is "true".
+	 * <p>Can be turned off to allow for late start of the target server.
+	 * In this case, the JAX-RPC service will be fetched on first access.
+	 */
+	public void setLookupServiceOnStartup(boolean lookupServiceOnStartup) {
+		this.lookupServiceOnStartup = lookupServiceOnStartup;
+	}
 
+
+	/**
+	 * Prepares the JAX-RPC service and port if the "lookupServiceOnStartup"
+	 * is turned on (which it is by default).
+	 */
 	public void afterPropertiesSet() throws ServiceException {
-		prepare();
+		if (this.lookupServiceOnStartup) {
+			prepare();
+		}
 	}
 
 	/**
@@ -286,12 +303,12 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			throw new IllegalArgumentException("portName is required");
 		}
 
+		// Cache the QName for the port.
+		this.portQName = getQName(this.portName);
+
 		if (this.jaxRpcService == null) {
 			this.jaxRpcService = createJaxRpcService();
 		}
-
-		// Cache the QName for the port.
-		this.portQName = getQName(this.portName);
 
 		// Determine interface to use at the JAX-RPC port level:
 		// Use portInterface if specified, else fall back to serviceInterface.
@@ -339,6 +356,14 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	}
 
 	/**
+	 * Return whether this client interceptor has already been prepared,
+	 * i.e. has already looked up the JAX-RPC service and port.
+	 */
+	protected boolean isPrepared() {
+		return (this.portQName != null);
+	}
+
+	/**
 	 * Return the prepared QName for the port.
 	 * @see #setPortName
 	 * @see #getQName
@@ -350,7 +375,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	/**
 	 * Return whether to always use JAX-RPC dynamic calls.
 	 * Called by <code>afterPropertiesSet</code>.
-	 * <p>Default is false; if an RMI interface is specified as "portInterface"
+	 * <p>Default is "false"; if an RMI interface is specified as "portInterface"
 	 * or "serviceInterface", it will be used to create a JAX-RPC port stub.
 	 * <p>Can be overridden to enforce the use of the JAX-RPC Call API,
 	 * for example if there is a need to customize at the Call level.
@@ -426,15 +451,43 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	}
 
 
+	/**
+	 * Translates the method invocation into a JAX-RPC service invocation.
+	 * Uses traditional RMI stub invocation if a JAX-RPC port stub is available;
+	 * falls back to JAX-RPC dynamic calls else.
+	 * @see #getPortStub()
+	 * @see org.springframework.remoting.rmi.RmiClientInterceptorUtils
+	 * @see #performJaxRpcCall
+	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		if (AopUtils.isToStringMethod(invocation.getMethod())) {
-			return "JAX-RPC proxy for port [" + getPortName() + "] of service [" +
-					getJaxRpcService().getServiceName() + "]";
+			return "JAX-RPC proxy for port [" + getPortName() + "] of service [" + getServiceName() + "]";
+		}
+
+		// Lazily prepare service and stub if appropriate.
+		if (!this.lookupServiceOnStartup) {
+			synchronized (this) {
+				if (!isPrepared()) {
+					try {
+						prepare();
+					}
+					catch (ServiceException ex) {
+						throw RmiClientInterceptorUtils.convertRmiAccessException(
+								invocation.getMethod(), ex, this.portName);
+					}
+				}
+			}
+		}
+		else {
+			if (!isPrepared()) {
+				throw new IllegalStateException("JaxRpcClientInterceptor is not properly initialized - " +
+						"invoke 'prepare' before attempting any operations");
+			}
 		}
 
 		Remote stub = getPortStub();
 		if (stub != null) {
-			// JAX-RPC stub available -> traditional RMI stub invocation.
+			// JAX-RPC port stub available -> traditional RMI stub invocation.
 			if (logger.isDebugEnabled()) {
 				logger.debug("Invoking operation '" + invocation.getMethod().getName() +
 						"' on JAX-RPC port stub");
@@ -471,11 +524,6 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 */
 	protected Object performJaxRpcCall(MethodInvocation invocation) throws Throwable {
 		Service service = getJaxRpcService();
-		if (service == null) {
-			throw new IllegalStateException("JaxRpcClientInterceptor is not properly initialized - " +
-					"invoke 'prepare' before attempting any operations");
-		}
-
 		QName portQName = getPortQName();
 
 		// Create JAX-RPC call object, using the method name as operation name.

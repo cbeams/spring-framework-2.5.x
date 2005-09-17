@@ -20,10 +20,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Arrays;
 
 import javax.xml.namespace.QName;
 import javax.xml.rpc.Call;
@@ -33,8 +33,8 @@ import javax.xml.rpc.ServiceFactory;
 import javax.xml.rpc.Stub;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 import org.easymock.ArgumentsMatcher;
+import org.easymock.MockControl;
 
 import org.springframework.remoting.RemoteAccessException;
 
@@ -77,7 +77,7 @@ public class JaxRpcSupportTests extends TestCase {
 		assertTrue(factory.getObject() instanceof IRemoteBean);
 		IRemoteBean proxy = (IRemoteBean) factory.getObject();
 		proxy.setName("myName");
-		assertEquals("myName", RemoteBean.singleton.name);
+		assertEquals("myName", RemoteBean.name);
 		MockServiceFactory.service1Control.verify();
 	}
 
@@ -105,7 +105,7 @@ public class JaxRpcSupportTests extends TestCase {
 		assertTrue(factory.getObject() instanceof IRemoteBean);
 		IRemoteBean proxy = (IRemoteBean) factory.getObject();
 		proxy.setName("myName");
-		assertEquals("myName", RemoteBean.singleton.name);
+		assertEquals("myName", RemoteBean.name);
 		MockServiceFactory.service1Control.verify();
 	}
 
@@ -148,7 +148,45 @@ public class JaxRpcSupportTests extends TestCase {
 		CallMockServiceFactory.call1Control.verify();
 	}
 
-	public void testJaxRpcPortProxyFactoryBeanWithRemoteException() throws Exception {
+	public void testJaxRpcPortProxyFactoryBeanWithDynamicCallsAndServiceException() throws Exception {
+		JaxRpcPortProxyFactoryBean factory = new JaxRpcPortProxyFactoryBean();
+		factory.setServiceFactoryClass(MockServiceFactory.class);
+		factory.setNamespaceUri("myNamespace");
+		factory.setServiceName("myServiceX");
+		factory.setPortName("myPort");
+		factory.setServiceInterface(IRemoteBean.class);
+		try {
+			factory.afterPropertiesSet();
+			fail("Should have thrown ServiceException");
+		}
+		catch (ServiceException ex) {
+			// expected
+		}
+	}
+
+	public void testJaxRpcPortProxyFactoryBeanWithDynamicCallsAndLazyLookupAndServiceException() throws Exception {
+		JaxRpcPortProxyFactoryBean factory = new JaxRpcPortProxyFactoryBean();
+		factory.setServiceFactoryClass(MockServiceFactory.class);
+		factory.setNamespaceUri("myNamespace");
+		factory.setServiceName("myServiceX");
+		factory.setPortName("myPort");
+		factory.setServiceInterface(IRemoteBean.class);
+		factory.setLookupServiceOnStartup(false);
+		factory.afterPropertiesSet();
+
+		assertTrue(factory.getObject() instanceof IRemoteBean);
+		IRemoteBean proxy = (IRemoteBean) factory.getObject();
+		try {
+			proxy.setName("exception");
+			fail("Should have thrown Service");
+		}
+		catch (RemoteException ex) {
+			// expected
+			assertTrue(ex.getCause() instanceof ServiceException);
+		}
+	}
+
+	public void testJaxRpcPortProxyFactoryBeanWithDynamicCallsAndRemoteException() throws Exception {
 		JaxRpcPortProxyFactoryBean factory = new JaxRpcPortProxyFactoryBean();
 		factory.setServiceFactoryClass(MockServiceFactory.class);
 		factory.setNamespaceUri("myNamespace");
@@ -189,8 +227,48 @@ public class JaxRpcSupportTests extends TestCase {
 		assertFalse(factory.getObject() instanceof IRemoteBean);
 		IBusinessBean proxy = (IBusinessBean) factory.getObject();
 		proxy.setName("myName");
-		assertEquals("myName", RemoteBean.singleton.name);
+		assertEquals("myName", RemoteBean.name);
 		MockServiceFactory.service1Control.verify();
+	}
+
+	public void testJaxRpcPortProxyFactoryBeanWithPortInterfaceAndServiceException() throws Exception {
+		JaxRpcPortProxyFactoryBean factory = new JaxRpcPortProxyFactoryBean();
+		factory.setServiceFactoryClass(MockServiceFactory.class);
+		factory.setNamespaceUri("myNamespace");
+		factory.setServiceName("myServiceX");
+		factory.setPortInterface(IRemoteBean.class);
+		factory.setPortName("myPort");
+		factory.setServiceInterface(IRemoteBean.class);
+		try {
+			factory.afterPropertiesSet();
+			fail("Should have thrown ServiceException");
+		}
+		catch (ServiceException ex) {
+			// expected
+		}
+	}
+
+	public void testJaxRpcPortProxyFactoryBeanWithPortInterfaceAndLazyLookupAndServiceException() throws Exception {
+		JaxRpcPortProxyFactoryBean factory = new JaxRpcPortProxyFactoryBean();
+		factory.setServiceFactoryClass(MockServiceFactory.class);
+		factory.setNamespaceUri("myNamespace");
+		factory.setServiceName("myServiceX");
+		factory.setPortName("myPort");
+		factory.setPortInterface(IRemoteBean.class);
+		factory.setServiceInterface(IRemoteBean.class);
+		factory.setLookupServiceOnStartup(false);
+		factory.afterPropertiesSet();
+
+		assertTrue(factory.getObject() instanceof IRemoteBean);
+		IRemoteBean proxy = (IRemoteBean) factory.getObject();
+		try {
+			proxy.setName("exception");
+			fail("Should have thrown Service");
+		}
+		catch (RemoteException ex) {
+			// expected
+			assertTrue(ex.getCause() instanceof ServiceException);
+		}
 	}
 
 	public void testJaxRpcPortProxyFactoryBeanWithPortInterfaceAndRemoteException() throws Exception {
@@ -326,12 +404,10 @@ public class JaxRpcSupportTests extends TestCase {
 
 	public static class RemoteBean implements IRemoteBean, Stub {
 
-		private static RemoteBean singleton;
 		private static String name;
 		private static Map properties;
 
 		public RemoteBean() {
-			singleton = this;
 			properties = new HashMap();
 		}
 
