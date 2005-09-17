@@ -16,7 +16,6 @@
 
 package org.springframework.remoting.rmi;
 
-import java.lang.reflect.InvocationTargetException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -28,8 +27,6 @@ import java.rmi.server.UnicastRemoteObject;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.remoting.support.RemoteInvocation;
-import org.springframework.remoting.support.RemoteInvocationBasedExporter;
 
 /**
  * RMI exporter that exposes the specified service as RMI object with the specified
@@ -39,8 +36,8 @@ import org.springframework.remoting.support.RemoteInvocationBasedExporter;
  *
  * <p>With an RMI invoker, RMI communication works on the RmiInvocationHandler
  * level, needing only one stub for any service. Service interfaces do not have to
- * extend java.rmi.Remote or throw RemoteException on all methods, but in and out
- * parameters have to be serializable.
+ * extend <code>java.rmi.Remote</code> or throw <code>java.rmi.RemoteException</code>
+ * on all methods, but in and out parameters have to be serializable.
  *
  * <p>The major advantage of RMI, compared to Hessian and Burlap, is serialization.
  * Effectively, any serializable Java object can be transported without hassle.
@@ -66,8 +63,7 @@ import org.springframework.remoting.support.RemoteInvocationBasedExporter;
  * @see org.springframework.remoting.caucho.BurlapServiceExporter
  * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
  */
-public class RmiServiceExporter extends RemoteInvocationBasedExporter
-		implements InitializingBean, DisposableBean {
+public class RmiServiceExporter extends RmiBasedExporter implements InitializingBean, DisposableBean {
 
 	private String serviceName;
 
@@ -349,39 +345,6 @@ public class RmiServiceExporter extends RemoteInvocationBasedExporter
 	 */
 	protected void testRegistry(Registry registry) throws RemoteException {
 		registry.list();
-	}
-
-
-	/**
-	 * Determine the object to export: either the service object itself
-	 * or a RmiInvocationWrapper in case of a non-RMI service object.
-	 * @return the RMI object to export
-	 */
-	protected Remote getObjectToExport() {
-		// determine remote object
-		if (getService() instanceof Remote &&
-				((getServiceInterface() == null) || Remote.class.isAssignableFrom(getServiceInterface()))) {
-			// conventional RMI service
-			return (Remote) getService();
-		}
-		else {
-			// RMI invoker
-			if (logger.isInfoEnabled()) {
-				logger.info("RMI object '" + this.serviceName + "' is an RMI invoker");
-			}
-			return new RmiInvocationWrapper(getProxyForService(), this);
-		}
-	}
-
-
-	/**
-	 * Redefined here to be visible to RmiInvocationWrapper.
-	 * Simply delegates to the corresponding superclass method.
-	 */
-	protected Object invoke(RemoteInvocation invocation, Object targetObject)
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-
-		return super.invoke(invocation, targetObject);
 	}
 
 

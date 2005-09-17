@@ -23,13 +23,18 @@ import java.rmi.RemoteException;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 
+import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiObjectLocator;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
+import org.springframework.remoting.support.DefaultRemoteInvocationFactory;
+import org.springframework.remoting.support.RemoteInvocation;
+import org.springframework.remoting.support.RemoteInvocationFactory;
 
 /**
  * Interceptor for accessing RMI services from JNDI.
@@ -73,6 +78,8 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 
 	private Class serviceInterface;
 
+	private RemoteInvocationFactory remoteInvocationFactory = new DefaultRemoteInvocationFactory();
+
 	private boolean lookupStubOnStartup = true;
 
 	private boolean cacheStub = true;
@@ -100,6 +107,23 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	 */
 	public Class getServiceInterface() {
 		return serviceInterface;
+	}
+
+	/**
+	 * Set the RemoteInvocationFactory to use for this accessor.
+	 * Default is a DefaultRemoteInvocationFactory.
+	 * <p>A custom invocation factory can add further context information
+	 * to the invocation, for example user credentials.
+	 */
+	public void setRemoteInvocationFactory(RemoteInvocationFactory remoteInvocationFactory) {
+		this.remoteInvocationFactory = remoteInvocationFactory;
+	}
+
+	/**
+	 * Return the RemoteInvocationFactory used by this accessor.
+	 */
+	public RemoteInvocationFactory getRemoteInvocationFactory() {
+		return remoteInvocationFactory;
 	}
 
 	/**
@@ -139,7 +163,12 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	}
 
 
+	/**
+	 * Fetch the RMI stub on startup, if necessary.
+	 * @see #prepare()
+	 */
 	public void afterPropertiesSet() throws NamingException {
+		super.afterPropertiesSet();
 		prepare();
 	}
 
@@ -150,8 +179,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	 * @see #lookupStub
 	 */
 	public void prepare() throws NamingException {
-		super.afterPropertiesSet();
-		// cache RMI stub on initialization?
+		// Cache RMI stub on initialization?
 		if (this.lookupStubOnStartup) {
 			Remote stub = lookupStub();
 			if (this.cacheStub) {
@@ -181,6 +209,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 			throw new NamingException("Located RMI stub of class [" + stub.getClass().getName() +
 					"], with JNDI name [" + getJndiName() + "], does not implement interface [java.rmi.Remote]");
 		}
+		// TODO: narrow to RmiInvocationHandler?
 		return (Remote) stub;
 	}
 
@@ -303,21 +332,78 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	 * @throws Throwable in case of invocation failure
 	 */
 	protected Object doInvoke(MethodInvocation invocation, Remote stub) throws Throwable {
-		// traditional RMI stub invocation
-		try {
-			return RmiClientInterceptorUtils.doInvoke(invocation, stub);
-		}
-		catch (InvocationTargetException ex) {
-			Throwable targetEx = ex.getTargetException();
-			if (targetEx instanceof RemoteException) {
-				RemoteException rex = (RemoteException) targetEx;
+		if (stub instanceof RmiInvocationHandler) {
+			// RMI invoker
+			try {
+				return doInvoke(invocation, (RmiInvocationHandler) stub);
+			}
+			catch (RemoteException ex) {
 				throw RmiClientInterceptorUtils.convertRmiAccessException(
-						invocation.getMethod(), rex, isConnectFailure(rex), getJndiName());
+				    invocation.getMethod(), ex, isConnectFailure(ex), getJndiName());
 			}
-			else {
-				throw targetEx;
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
+			catch (Throwable ex) {
+				throw new AspectException("Failed to invoke remote service [" + getJndiName() + "]", ex);
 			}
 		}
+		else {
+			// traditional RMI stub
+			try {
+				return RmiClientInterceptorUtils.doInvoke(invocation, stub);
+			}
+			catch (InvocationTargetException ex) {
+				Throwable targetEx = ex.getTargetException();
+				if (targetEx instanceof RemoteException) {
+					RemoteException rex = (RemoteException) targetEx;
+					throw RmiClientInterceptorUtils.convertRmiAccessException(
+							invocation.getMethod(), rex, isConnectFailure(rex), getJndiName());
+				}
+				else {
+					throw targetEx;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Apply the given AOP method invocation to the given RmiInvocationHandler.
+	 * The default implementation calls invoke with a plain RemoteInvocation.
+	 * <p>Can be overridden in subclasses to provide custom RemoteInvocation
+	 * subclasses, containing additional invocation parameters like user
+	 * credentials. Can also process the returned result object.
+	 * @param methodInvocation the current AOP method invocation
+	 * @param invocationHandler the RmiInvocationHandler to apply the invocation to
+	 * @return the invocation result
+	 * @throws NoSuchMethodException if the method name could not be resolved
+	 * @throws IllegalAccessException if the method could not be accessed
+	 * @throws InvocationTargetException if the method invocation resulted in an exception
+	 * @see org.springframework.remoting.support.RemoteInvocation
+	 */
+	protected Object doInvoke(MethodInvocation methodInvocation, RmiInvocationHandler invocationHandler)
+	    throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
+		if (AopUtils.isToStringMethod(methodInvocation.getMethod())) {
+			return "RMI invoker proxy for service URL [" + getJndiName() + "]";
+		}
+
+		return invocationHandler.invoke(createRemoteInvocation(methodInvocation));
+	}
+
+	/**
+	 * Create a new RemoteInvocation object for the given AOP method invocation.
+	 * The default implementation delegates to the RemoteInvocationFactory.
+	 * <p>Can be overridden in subclasses to provide custom RemoteInvocation
+	 * subclasses, containing additional invocation parameters like user credentials.
+	 * Note that it is preferable to use a custom RemoteInvocationFactory which
+	 * is a reusable strategy.
+	 * @param methodInvocation the current AOP method invocation
+	 * @return the RemoteInvocation object
+	 * @see RemoteInvocationFactory#createRemoteInvocation
+	 */
+	protected RemoteInvocation createRemoteInvocation(MethodInvocation methodInvocation) {
+		return getRemoteInvocationFactory().createRemoteInvocation(methodInvocation);
 	}
 
 }

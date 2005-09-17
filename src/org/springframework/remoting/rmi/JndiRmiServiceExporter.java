@@ -19,13 +19,14 @@ package org.springframework.remoting.rmi;
 import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Properties;
 
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jndi.JndiAccessor;
+import org.springframework.jndi.JndiTemplate;
 
 /**
  * Service exporter which binds RMI services to JNDI.
@@ -34,6 +35,14 @@ import org.springframework.jndi.JndiAccessor;
  * <p>Exports services via the <code>PortableRemoteObject</code> class.
  * You need to run "rmic" with the "-iiop" option to generate corresponding
  * stubs and skeletons for each exported service.
+ *
+ * <p>Also supports exposing any non-RMI service via RMI invokers, to be accessed via
+ * JndiRmiClientInterceptor/JndiRmiProxyFactoryBean's automatic detection of such invokers.
+ *
+ * <p>With an RMI invoker, RMI communication works on the RmiInvocationHandler
+ * level, needing only one stub for any service. Service interfaces do not have to
+ * extend <code>java.rmi.Remote</code> or throw <code>java.rmi.RemoteException</code>
+ * on all methods, but in and out parameters have to be serializable.
  *
  * <p>The JNDI environment can be specified as "jndiEnvironment" bean property,
  * or be configured in a <code>jndi.properties</code> file or as system properties.
@@ -57,19 +66,31 @@ import org.springframework.jndi.JndiAccessor;
  * @see JndiRmiProxyFactoryBean
  * @see javax.rmi.PortableRemoteObject#exportObject
  */
-public class JndiRmiServiceExporter extends JndiAccessor implements InitializingBean, DisposableBean {
+public class JndiRmiServiceExporter extends RmiBasedExporter implements InitializingBean, DisposableBean {
 
-	private Remote service;
+	private JndiTemplate jndiTemplate = new JndiTemplate();
 
 	private String jndiName;
 
+	private Remote exportedObject;
+
 
 	/**
-	 * Set the RMI service to export.
-	 * Typically populated via a bean reference.
+	 * Set the JNDI template to use for JNDI lookups.
+	 * You can also specify JNDI environment settings via "jndiEnvironment".
+	 * @see #setJndiEnvironment
 	 */
-	public void setService(Remote service) {
-		this.service = service;
+	public void setJndiTemplate(JndiTemplate jndiTemplate) {
+		this.jndiTemplate = (jndiTemplate != null ? jndiTemplate : new JndiTemplate());
+	}
+
+	/**
+	 * Set the JNDI environment to use for JNDI lookups.
+	 * Creates a JndiTemplate with the given environment settings.
+	 * @see #setJndiTemplate
+	 */
+	public void setJndiEnvironment(Properties jndiEnvironment) {
+		this.jndiTemplate = new JndiTemplate(jndiEnvironment);
 	}
 
 	/**
@@ -88,12 +109,18 @@ public class JndiRmiServiceExporter extends JndiAccessor implements Initializing
 		if (this.jndiName == null) {
 			throw new IllegalArgumentException("jndiName is required");
 		}
+
+		// Initialize and cache exported object.
+		this.exportedObject = getObjectToExport();
+
 		if (logger.isInfoEnabled()) {
 			logger.info("Binding RMI service to JNDI location [" + this.jndiName + "]");
 		}
-		PortableRemoteObject.exportObject(this.service);
-		getJndiTemplate().rebind(this.jndiName, this.service);
+
+		PortableRemoteObject.exportObject(this.exportedObject);
+		this.jndiTemplate.rebind(this.jndiName, this.exportedObject);
 	}
+
 
 	/**
 	 * Unbind the RMI service from JNDI on bean factory shutdown.
@@ -102,8 +129,8 @@ public class JndiRmiServiceExporter extends JndiAccessor implements Initializing
 		if (logger.isInfoEnabled()) {
 			logger.info("Unbinding RMI service from JNDI location [" + this.jndiName + "]");
 		}
-		getJndiTemplate().unbind(this.jndiName);
-		PortableRemoteObject.unexportObject(this.service);
+		this.jndiTemplate.unbind(this.jndiName);
+		PortableRemoteObject.unexportObject(this.exportedObject);
 	}
 
 }
