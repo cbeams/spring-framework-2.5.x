@@ -64,13 +64,13 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 
 	public void setAsText(String text) {
-		String locationPatternToUse = resolvePath(text).trim();
+		String patternToUse = resolvePath(text).trim();
 		try {
-			setValue(this.resourcePatternResolver.getResources(locationPatternToUse));
+			setValue(this.resourcePatternResolver.getResources(patternToUse));
 		}
 		catch (IOException ex) {
 			throw new IllegalArgumentException(
-			    "Could not convert location pattern [" + locationPatternToUse + "] to Resource array");
+			    "Could not resolve resource location pattern [" + patternToUse + "]: " + ex.getMessage());
 		}
 	}
 
