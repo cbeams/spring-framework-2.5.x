@@ -48,6 +48,7 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 
 	private Class expectedType;
 
+
 	/**
 	 * Set the JNDI name to look up. If it doesn't begin with "java:comp/env/"
 	 * this prefix is added if resourceRef is set to true.
@@ -82,17 +83,14 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	}
 
 	/**
-	 * Check the jndiName property and initiate a lookup.
-	 * <p>The JNDI object will thus be fetched eagerly on initialization.
-	 * For refreshing the JNDI object, subclasses can invoke <code>lookup</code>
-	 * at any later time.
-	 * @see #lookup
+	 * Check the "jndiName" property.
 	 */
 	public void afterPropertiesSet() throws NamingException {
 		if (!StringUtils.hasLength(getJndiName())) {
 			throw new IllegalArgumentException("jndiName is required");
 		}
 	}
+
 
 	/**
 	 * Perform the actual JNDI lookup via the JndiTemplate.

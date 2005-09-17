@@ -39,7 +39,9 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	/** JNDI prefix used in a J2EE container */
 	public static final String CONTAINER_PREFIX = "java:comp/env/";
 
+
 	private boolean resourceRef = false;
+
 
 	/**
 	 * Set whether the lookup occurs in a J2EE container, i.e. if the prefix
@@ -57,6 +59,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	public boolean isResourceRef() {
 		return resourceRef;
 	}
+
 
 	/**
 	 * Perform an actual JNDI lookup for the given name via the JndiTemplate.

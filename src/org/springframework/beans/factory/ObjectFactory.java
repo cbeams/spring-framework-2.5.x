@@ -22,16 +22,17 @@ import org.springframework.beans.BeansException;
  * <p>Interface defining a factory which can return an Object instance
  * (possibly shared or independent) when invoked.
  * 
- * <p>This interface is typically used to encapsulate a generic factory 
- * which returns a new instance (prototype) on each invocation.
- * It is similar to FactoryBean, but implementations of the latter interface
+ * <p>This interface is typically used to encapsulate a generic factory  which
+ * returns a new instance (prototype) of some target object on each invocation.
+ *
+ * <p>This interface is similar to FactoryBean, but implementations of the latter
  * are normally meant to be defined as instances by the user in a BeanFactory,
- * while implementations of this class are normally meant to be fed as a
- * property to other beans. As such, the getObject method has different
+ * while implementations of this class are normally meant to be fed as a property
+ * to other beans. As such, the <code>getObject</code> method has different
  * exception handling behavior.
  * 
  * @author Colin Sampaleanu
- * @since 2004-5-11
+ * @since 11.05.2004
  * @see FactoryBean
  */
 public interface ObjectFactory {
