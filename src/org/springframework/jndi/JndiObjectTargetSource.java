@@ -69,7 +69,7 @@ public class JndiObjectTargetSource extends JndiObjectLocator implements TargetS
 
 
 	/**
-	 * Set whether to look up the JNDI object on startup. Default is true.
+	 * Set whether to look up the JNDI object on startup. Default is "true".
 	 * <p>Can be turned off to allow for late availability of the JNDI object.
 	 * In this case, the JNDI object will be fetched on first access.
 	 * @see #setCache
@@ -80,7 +80,7 @@ public class JndiObjectTargetSource extends JndiObjectLocator implements TargetS
 
 	/**
 	 * Set whether to cache the JNDI object once it has been located.
-	 * Default is true.
+	 * Default is "true".
 	 * <p>Can be turned off to allow for hot redeployment of JNDI objects.
 	 * In this case, the JNDI object will be fetched for each invocation.
 	 * @see #setLookupOnStartup

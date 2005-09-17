@@ -227,7 +227,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	/**
 	 * Set whether to check that the Hibernate Session is not in read-only mode
 	 * in case of write operations (save/update/delete).
-	 * <p>Default is true, for fail-fast behavior when attempting write operations
+	 * <p>Default is "true", for fail-fast behavior when attempting write operations
 	 * within a read-only transaction. Turn this off to allow save/update/delete
 	 * on a Session with flush mode NEVER.
 	 * @see #setFlushMode

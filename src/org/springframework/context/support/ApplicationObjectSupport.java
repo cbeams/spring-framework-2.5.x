@@ -64,12 +64,12 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 
 	public final void setApplicationContext(ApplicationContext context) throws BeansException {
 		if (context == null && !isContextRequired()) {
-			// reset internal context state
+			// Reset internal context state.
 			this.applicationContext = null;
 			this.messageSourceAccessor = null;
 		}
 		if (this.applicationContext == null) {
-			// initialize with passed-in context
+			// Initialize with passed-in context.
 			if (!requiredContextClass().isInstance(context)) {
 				throw new ApplicationContextException(
 						"Invalid application context: needs to be of type [" + requiredContextClass().getName() + "]");
@@ -90,7 +90,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 
 	/**
 	 * Determine whether this application object needs to run in an ApplicationContext.
-	 * <p>Default is false. Can be overridden to enforce running in a context
+	 * <p>Default is "false". Can be overridden to enforce running in a context
 	 * (i.e. to throw IllegalStateException on accessors if outside a context).
 	 * @see #getApplicationContext
 	 * @see #getMessageSourceAccessor

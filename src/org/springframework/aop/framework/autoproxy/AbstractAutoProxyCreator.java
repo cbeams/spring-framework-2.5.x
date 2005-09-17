@@ -185,7 +185,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	/**
 	 * Set whether the common interceptors should be applied before
-	 * bean-specific ones. Default is true; else, bean-specific
+	 * bean-specific ones. Default is "true"; else, bean-specific
 	 * interceptors will get applied first.
 	 */
 	public void setApplyCommonInterceptorsFirst(boolean applyCommonInterceptorsFirst) {

@@ -195,7 +195,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	}
 
 	/**
-	 * Set whether to ignore unresolvable placeholders. Default is false:
+	 * Set whether to ignore unresolvable placeholders. Default is "false":
 	 * An exception will be thrown if a placeholder cannot not be resolved.
 	 */
 	public void setIgnoreUnresolvablePlaceholders(boolean ignoreUnresolvablePlaceholders) {

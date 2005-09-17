@@ -82,7 +82,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	}
 
 	/**
-	 * Set whether to look up the JNDI object on startup. Default is true.
+	 * Set whether to look up the JNDI object on startup. Default is "true".
 	 * <p>Can be turned off to allow for late availability of the JNDI object.
 	 * In this case, the JNDI object will be fetched on first access.
 	 * <p>For a lazy lookup, a proxy interface needs to be specified.
@@ -95,7 +95,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 
 	/**
 	 * Set whether to cache the JNDI object once it has been located.
-	 * Default is true.
+	 * Default is "true".
 	 * <p>Can be turned off to allow for hot redeployment of JNDI objects.
 	 * In this case, the JNDI object will be fetched for each invocation.
 	 * <p>For hot redeployment, a proxy interface needs to be specified.

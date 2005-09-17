@@ -189,7 +189,7 @@ public class ScheduledTimerTask {
 
 	/**
 	 * Set whether to schedule as fixed-rate execution, rather than
-	 * fixed-delay execution. Default is false, i.e. fixed delay.
+	 * fixed-delay execution. Default is "false", i.e. fixed delay.
 	 * <p>See Timer javadoc for details on those execution modes.
 	 * @see java.util.Timer#schedule(TimerTask, long, long)
 	 * @see java.util.Timer#scheduleAtFixedRate(TimerTask, long, long)

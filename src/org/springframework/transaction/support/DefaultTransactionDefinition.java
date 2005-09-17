@@ -32,7 +32,7 @@ import org.springframework.transaction.TransactionDefinition;
  * @since 08.05.2003
  * @see org.springframework.transaction.support.TransactionTemplate
  * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute
- *  @version $Id: DefaultTransactionDefinition.java,v 1.11 2005-03-25 09:27:49 jhoeller Exp $
+ *  @version $Id: DefaultTransactionDefinition.java,v 1.12 2005-09-17 17:05:31 jhoeller Exp $
  */
 public class DefaultTransactionDefinition implements TransactionDefinition, Serializable {
 
@@ -179,7 +179,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 	/**
 	 * Set whether to optimize as read-only transaction.
-	 * Default is false.
+	 * Default is "false".
 	 */
 	public final void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;

@@ -52,7 +52,7 @@ public interface Advised {
 	 * ThreadLocal for retrieval via the AopContext class. This is useful
 	 * if an advised object needs to call another advised method on itself.
 	 * (If it uses <code>this</code>, the invocation will not be advised).
-	 * <p>Default is false, for optimal performance.
+	 * <p>Default is "false", for optimal performance.
 	 */
 	void setExposeProxy(boolean exposeProxy);
 	

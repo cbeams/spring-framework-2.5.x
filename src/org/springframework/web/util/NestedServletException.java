@@ -32,7 +32,7 @@ import javax.servlet.ServletException;
  * and cannot derive from NestedCheckedException.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 1.2.5
  * @see #getMessage
  * @see #printStackTrace
  * @see org.springframework.core.NestedCheckedException

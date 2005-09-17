@@ -101,7 +101,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 
 	/**
 	 * Set if a singleton should be created, or a new object on each
-	 * request else. Default is true.
+	 * request else. Default is "true".
 	 */
 	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;

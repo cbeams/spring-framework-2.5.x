@@ -139,7 +139,7 @@ public interface BeanFactory {
 	 * @param requiredType type the bean must match. Can be an interface or superclass
 	 * of the actual class, or <code>null</code> for any match. For example, if the value is
 	 * Object.class, this method will succeed whatever the class of the returned instance.
-	 * @return an instance of the bean (never null)
+	 * @return an instance of the bean (never <code>null</code>)
 	 * @throws BeanNotOfRequiredTypeException if the bean is not of the required type
 	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
 	 * @throws BeansException if the bean could not be created

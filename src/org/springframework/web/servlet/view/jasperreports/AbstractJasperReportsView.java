@@ -460,14 +460,14 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		try {
 			String fileName = resource.getFilename();
 			if (fileName.endsWith(".jasper")) {
-				// load pre-compiled report
+				// Load pre-compiled report.
 				if (logger.isInfoEnabled()) {
 					logger.info("Loading pre-compiled Jasper Report from " + resource);
 				}
 				return (JasperReport) JRLoader.loadObject(resource.getInputStream());
 			}
 			else if (fileName.endsWith(".jrxml")) {
-				// compile report on-the-fly
+				// Compile report on-the-fly.
 				if (logger.isInfoEnabled()) {
 					logger.info("Compiling Jasper Report loaded from " + resource);
 				}

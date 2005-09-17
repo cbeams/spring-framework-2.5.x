@@ -65,7 +65,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * Set if URL lookup should always use the full path within the current servlet
 	 * context. Else, the path within the current servlet mapping is used
 	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
-	 * Default is false.
+	 * Default is "false".
 	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
 	 */
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
@@ -111,7 +111,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	/**
 	 * Set whether to lazily initialize handlers. Only applicable to
 	 * singleton handlers, as prototypes are always lazily initialized.
-	 * Default is false, as eager initialization allows for more efficiency
+	 * Default is "false", as eager initialization allows for more efficiency
 	 * through referencing the controller objects directly.
 	 * <p>If you want to allow your controllers to be lazily initialized,
 	 * make them "lazy-init" and set this flag to true. Just making them

@@ -233,7 +233,7 @@ public class RequestContext {
 	 * <p>Default implementation checks for a JSTL locale attribute
 	 * in request, session or application scope; if not found,
 	 * returns the <code>HttpServletRequest.getLocale()</code>.
-	 * @return the fallback locale (never null)
+	 * @return the fallback locale (never <code>null</code>)
 	 * @see javax.servlet.http.HttpServletRequest#getLocale
 	 */
 	protected Locale getFallbackLocale() {
@@ -266,7 +266,7 @@ public class RequestContext {
 	/**
 	 * Determine the fallback theme for this context.
 	 * <p>Default implementation returns the default theme (with name "theme").
-	 * @return the fallback theme (never null)
+	 * @return the fallback theme (never <code>null</code>)
 	 */
 	protected Theme getFallbackTheme() {
 		return getWebApplicationContext().getTheme(DEFAULT_THEME_NAME);

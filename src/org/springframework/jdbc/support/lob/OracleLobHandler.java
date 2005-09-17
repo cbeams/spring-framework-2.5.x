@@ -157,7 +157,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 	/**
 	 * Set whether to cache the temporary LOB in the buffer cache.
-	 * This value will be passed into BLOB/CLOB.createTemporary. Default is true.
+	 * This value will be passed into BLOB/CLOB.createTemporary. Default is "true".
 	 * @see oracle.sql.BLOB#createTemporary
 	 * @see oracle.sql.CLOB#createTemporary
 	 */

@@ -91,7 +91,7 @@ public class SimpleNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	/**
 	 * Set whether it is necessary to work on the native Connection to
-	 * receive native Statements. Default is false. If true, the Connection
+	 * receive native Statements. Default is "false". If true, the Connection
 	 * will be unwrapped first to create a Statement.
 	 * <p>This makes sense if you need to work with native Statements from
 	 * a pool that does not allow to extract the native JDBC objects from its
@@ -111,7 +111,7 @@ public class SimpleNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	/**
 	 * Set whether it is necessary to work on the native Connection to
-	 * receive native PreparedStatements. Default is false. If true,
+	 * receive native PreparedStatements. Default is "false". If true,
 	 * the Connection will be unwrapped first to create a PreparedStatement.
 	 * <p>This makes sense if you need to work with native PreparedStatements from
 	 * a pool that does not allow to extract the native JDBC objects from its
@@ -131,7 +131,7 @@ public class SimpleNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	/**
 	 * Set whether it is necessary to work on the native Connection to
-	 * receive native CallableStatements. Default is false. If true,
+	 * receive native CallableStatements. Default is "false". If true,
 	 * the Connection will be unwrapped first to create a CallableStatement.
 	 * <p>This makes sense if you need to work with native CallableStatements from
 	 * a pool that does not allow to extract the native JDBC objects from its

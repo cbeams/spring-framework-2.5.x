@@ -56,7 +56,7 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 
 	/**
 	 * Set whether the encoding of this filter should override existing
-	 * request encodings. Default is false, i.e. do not modify encoding
+	 * request encodings. Default is "false", i.e. do not modify encoding
 	 * if ServletRequest.getCharacterEncoding returns a non-null value.
 	 * @see #setEncoding
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding

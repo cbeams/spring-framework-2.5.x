@@ -152,7 +152,7 @@ public class ResourceServlet extends HttpServletBean {
 
 	/**
 	 * Set whether to apply the file timestamp of the target resource
-	 * as last-modified value. Default is false.
+	 * as last-modified value. Default is "false".
 	 * <p>This is mainly intended for JSP targets that don't generate
 	 * session-specific or database-driven content: Such files can be
 	 * cached by the browser as long as the last-modified timestamp

@@ -229,7 +229,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Return the internal MessageSource used by the context.
-	 * @return the internal MessageSource (never null)
+	 * @return the internal MessageSource (never <code>null</code>)
 	 * @throws IllegalStateException if the context has not been initialized yet
 	 */
 	private ApplicationEventMulticaster getApplicationEventMulticaster() throws IllegalStateException {
@@ -650,7 +650,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Return the internal MessageSource used by the context.
-	 * @return the internal MessageSource (never null)
+	 * @return the internal MessageSource (never <code>null</code>)
 	 * @throws IllegalStateException if the context has not been initialized yet
 	 */
 	private MessageSource getMessageSource() throws IllegalStateException {

@@ -89,19 +89,19 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 	/**
 	 * Special string added to distinguish owner.(abstract)=true
-	 * Default is false.
+	 * Default is "false".
 	 */
 	public static final String ABSTRACT_KEY = "(abstract)";
 
 	/**
 	 * Special string added to distinguish owner.(singleton)=true
-	 * Default is true.
+	 * Default is "true".
 	 */
 	public static final String SINGLETON_KEY = "(singleton)";
 
 	/**
 	 * Special string added to distinguish owner.(lazy-init)=true
-	 * Default is false.
+	 * Default is "false".
 	 */
 	public static final String LAZY_INIT_KEY = "(lazy-init)";
 

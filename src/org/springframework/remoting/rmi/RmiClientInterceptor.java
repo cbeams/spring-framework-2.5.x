@@ -70,7 +70,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 
 
 	/**
-	 * Set whether to look up the RMI stub on startup. Default is true.
+	 * Set whether to look up the RMI stub on startup. Default is "true".
 	 * <p>Can be turned off to allow for late start of the RMI server.
 	 * In this case, the RMI stub will be fetched on first access.
 	 * @see #setCacheStub
@@ -81,7 +81,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 
 	/**
 	 * Set whether to cache the RMI stub once it has been located.
-	 * Default is true.
+	 * Default is "true".
 	 * <p>Can be turned off to allow for hot restart of the RMI server.
 	 * In this case, the RMI stub will be fetched for each invocation.
 	 * @see #setLookupStubOnStartup
@@ -92,7 +92,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 
 	/**
 	 * Set whether to refresh the RMI stub on connect failure.
-	 * Default is false.
+	 * Default is "false".
 	 * <p>Can be turned on to allow for hot restart of the RMI server.
 	 * If a cached RMI stub throws an RMI exception that indicates a
 	 * remote connect failure, a fresh proxy will be fetched and the
@@ -120,7 +120,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 		if (getServiceUrl() == null) {
 			throw new IllegalArgumentException("serviceUrl is required");
 		}
-		// cache RMI stub on initialization?
+		// Cache RMI stub on initialization?
 		if (this.lookupStubOnStartup) {
 			Remote remoteObj = lookupStub();
 			if (logger.isInfoEnabled()) {
@@ -187,9 +187,9 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 
 
 	/**
-	 * Fetches an RMI stub and delegates to doInvoke.
+	 * Fetches an RMI stub and delegates to <code>doInvoke</code>.
 	 * If configured to refresh on connect failure, it will call
-	 * refreshAndRetry on corresponding RMI exceptions.
+	 * <code>refreshAndRetry</code> on corresponding RMI exceptions.
 	 * @see #getStub
 	 * @see #doInvoke(MethodInvocation, Remote)
 	 * @see #refreshAndRetry

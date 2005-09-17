@@ -71,7 +71,7 @@ public class CauchoRemoteAccessor extends UrlBasedRemoteAccessor implements Init
 
 	/**
 	 * Set whether overloaded methods should be enabled for remote invocations.
-	 * Default is false.
+	 * Default is "false".
 	 * @see com.caucho.hessian.client.HessianProxyFactory#setOverloadEnabled
 	 * @see com.caucho.burlap.client.BurlapProxyFactory#setOverloadEnabled
 	 */

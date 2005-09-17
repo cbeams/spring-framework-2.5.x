@@ -278,7 +278,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * DispatcherServlet has processed within an include request. Else, just the
 	 * DispatcherServlet's own request attributes will be reset, but not model
 	 * attributes for JSPs or special attributes set by views (for example, JSTL's).
-	 * <p>Default is true, which is strongly recommended. Views should not rely on
+	 * <p>Default is "true", which is strongly recommended. Views should not rely on
 	 * request attributes having been set by (dynamic) includes. This allows JSP views
 	 * rendered by an included controller to use any model attributes, even with the
 	 * same names as in the main JSP, without causing side effects. Only turn this
@@ -292,7 +292,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Set whether to detect all HandlerMapping beans in this servlet's context.
 	 * Else, just a single bean with name "handlerMapping" will be expected.
-	 * <p>Default is true. Turn this off if you want this servlet to use a
+	 * <p>Default is "true". Turn this off if you want this servlet to use a
 	 * single HandlerMapping, despite multiple HandlerMapping beans being
 	 * defined in the context.
 	 */
@@ -303,7 +303,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Set whether to detect all HandlerExceptionResolver beans in this servlet's context.
 	 * Else, just a single bean with name "handlerExceptionResolver" will be expected.
-	 * <p>Default is true. Turn this off if you want this servlet to use a
+	 * <p>Default is "true". Turn this off if you want this servlet to use a
 	 * single HandlerExceptionResolver, despite multiple HandlerExceptionResolver
 	 * beans being defined in the context.
 	 */
@@ -314,7 +314,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Set whether to detect all ViewResolver beans in this servlet's context.
 	 * Else, just a single bean with name "viewResolver" will be expected.
-	 * <p>Default is true. Turn this off if you want this servlet to use a
+	 * <p>Default is "true". Turn this off if you want this servlet to use a
 	 * single ViewResolver, despite multiple ViewResolver beans being
 	 * defined in the context.
 	 */

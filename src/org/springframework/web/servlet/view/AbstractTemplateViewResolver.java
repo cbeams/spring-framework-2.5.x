@@ -47,7 +47,7 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 
 	/**
 	 * Set whether all request attributes should be added to the
-	 * model prior to merging with the template. Default is false.
+	 * model prior to merging with the template. Default is "false".
 	 * @see AbstractTemplateView#setExposeRequestAttributes
 	 */
 	public void setExposeRequestAttributes(boolean exposeRequestAttributes) {
@@ -56,7 +56,7 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 
 	/**
 	 * Set whether all HttpSession attributes should be added to the
-	 * model prior to merging with the template. Default is false.
+	 * model prior to merging with the template. Default is "false".
 	 * @see AbstractTemplateView#setExposeSessionAttributes
 	 */
 	public void setExposeSessionAttributes(boolean exposeSessionAttributes) {
@@ -65,7 +65,7 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 
 	/**
 	 * Set whether to expose a RequestContext for use by Spring's macro library,
-	 * under the name "springBindRequestContext". Default is false.
+	 * under the name "springBindRequestContext". Default is "false".
 	 * @see AbstractTemplateView#setExposeSpringMacroHelpers
 	 */
 	public void setExposeSpringMacroHelpers(boolean exposeSpringMacroHelpers) {

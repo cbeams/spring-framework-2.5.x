@@ -111,7 +111,7 @@ public class MessageTag extends HtmlEscapingAwareTag {
 
 	/**
 	 * Set JavaScript escaping for this tag, as boolean value.
-	 * Default is false.
+	 * Default is "false".
 	 */
 	public void setJavaScriptEscape(String javaScriptEscape) throws JspException {
 		this.javaScriptEscape =

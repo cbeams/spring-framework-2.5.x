@@ -172,7 +172,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
 	 * Set whether to publish this servlet's context as a ServletContext attribute,
-	 * available to all objects in the web container. Default is true.
+	 * available to all objects in the web container. Default is "true".
 	 * <p>This is especially handy during testing, although it is debatable whether
 	 * it's good practice to let other application objects access the context this way.
 	 */
@@ -189,7 +189,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
 	 * Set whether this servlet should publish a RequestHandlerEvent at the end
-	 * of each request. Default is true; can be turned off for a slight performance
+	 * of each request. Default is "true"; can be turned off for a slight performance
 	 * improvement, provided that no ApplicationListeners rely on such events.
 	 */
 	public void setPublishEvents(boolean publishEvents) {

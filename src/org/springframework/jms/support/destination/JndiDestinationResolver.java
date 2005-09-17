@@ -60,7 +60,7 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Desti
 
 
 	/**
-	 * Set whether to cache resolved destinations. Default is true.
+	 * Set whether to cache resolved destinations. Default is "true".
 	 * <p>Can be turned off to re-lookup a destination for each operation,
 	 * which allows for hot restarting of destinations. This is mainly
 	 * useful during development.
@@ -71,7 +71,7 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Desti
 
 	/**
 	 * Set the ability of JmsTemplate to create dynamic destinations
-	 * if the destination name is not found in JNDI. Default is false.
+	 * if the destination name is not found in JNDI. Default is "false".
 	 */
 	public void setFallbackToDynamicDestination(boolean fallbackToDynamicDestination) {
 		this.fallbackToDynamicDestination = fallbackToDynamicDestination;

@@ -119,7 +119,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * Set whether to use a single session for each request. Default is true.
+	 * Set whether to use a single session for each request. Default is "true".
 	 * <p>If set to false, each data access operation or transaction will use
 	 * its own session (like without Open Session in View). Each of those
 	 * sessions will be registered for deferred close, though, actually

@@ -29,7 +29,7 @@ import org.springframework.jms.support.JmsAccessor;
  * <p>Not intended to be used directly. See JmsTemplate.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 1.2.5
  * @see org.springframework.jms.support.JmsAccessor
  * @see org.springframework.jms.core.JmsTemplate
  */

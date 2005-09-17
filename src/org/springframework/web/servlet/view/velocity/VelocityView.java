@@ -206,7 +206,7 @@ public class VelocityView extends AbstractTemplateView {
 	}
 
 	/**
-	 * Set whether the Velocity template should be cached. Default is false.
+	 * Set whether the Velocity template should be cached. Default is "false".
 	 * It should normally be true in production, but setting this to false enables us to
 	 * modify Velocity templates without restarting the application (similar to JSPs).
 	 * <p>Note that this is a minor optimization only, as Velocity itself caches

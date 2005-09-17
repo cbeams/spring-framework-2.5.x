@@ -75,7 +75,7 @@ public abstract class AopProxyUtils {
 	 * i.e. all non-Advised interfaces that the proxy implements.
 	 * @param proxy the proxy to analyze (usually a JDK dynamic proxy)
 	 * @return all user-specified interfaces that the proxy implements,
-	 * in the original order (never null or empty)
+	 * in the original order (never <code>null</code> or empty)
 	 * @see Advised
 	 */
 	public static Class[] proxiedUserInterfaces(Object proxy) {

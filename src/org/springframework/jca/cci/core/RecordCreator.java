@@ -52,7 +52,7 @@ public interface RecordCreator {
 	 * <p>For use as <i>input</i> creator with CciTemplate's <code>execute</code> methods,
 	 * this method should create a <i>populated</i> Record instance. For use as
 	 * <i>output</i> Record creator, it should return an <i>empty</i> Record instance.
-	 * @param recordFactory the CCI RecordFactory (never null, but not guaranteed to be
+	 * @param recordFactory the CCI RecordFactory (never <code>null</code>, but not guaranteed to be
 	 * supported by the connector: its create methods might throw NotSupportedException)
 	 * @return the Record instance
 	 * @throws ResourceException if thrown by a CCI method, to be auto-converted

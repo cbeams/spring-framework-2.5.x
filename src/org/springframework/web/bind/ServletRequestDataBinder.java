@@ -66,7 +66,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	}
 
 	/**
-	 * Set whether to bind empty MultipartFile parameters. Default is true.
+	 * Set whether to bind empty MultipartFile parameters. Default is "true".
 	 * <p>Turn this off if you want to keep an already bound MultipartFile
 	 * when the user resubmits the form without choosing a different file.
 	 * Else, the already bound MultipartFile will be replaced by an empty

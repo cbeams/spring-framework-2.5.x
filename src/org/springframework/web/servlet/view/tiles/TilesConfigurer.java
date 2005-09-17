@@ -79,7 +79,7 @@ public class TilesConfigurer extends WebApplicationObjectSupport implements Init
 	}
 
 	/**
-	 * Set whether to validate the Tiles definitions. Default is true.
+	 * Set whether to validate the Tiles definitions. Default is "true".
 	 */
 	public void setValidateDefinitions(boolean validateDefinitions) {
 		this.validateDefinitions = validateDefinitions;

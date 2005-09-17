@@ -41,7 +41,7 @@ public interface Attributes {
 	/**
 	 * Return the class attributes of the target class.
 	 * @param targetClass the class that contains attribute information
-	 * @return a collection of attributes, possibly an empty collection, never null
+	 * @return a collection of attributes, possibly an empty collection, never <code>null</code>
 	 */
 	Collection getAttributes(Class targetClass);
 
@@ -60,7 +60,7 @@ public interface Attributes {
 	/**
 	 * Return the method attributes of the target method.
 	 * @param targetMethod the method that contains attribute information
-	 * @return a Collection of attributes, possibly an empty Collection, never null
+	 * @return a Collection of attributes, possibly an empty Collection, never <code>null</code>
 	 */
 	Collection getAttributes(Method targetMethod);
 
@@ -72,14 +72,14 @@ public interface Attributes {
 	 * through the unfiltered Collection yourself.
 	 * @param targetMethod the method that contains attribute information
 	 * @param filter specify that only this type of class should be returned
-	 * @return a Collection of attributes, possibly an empty Collection, never null
+	 * @return a Collection of attributes, possibly an empty Collection, never <code>null</code>
 	 */
 	Collection getAttributes(Method targetMethod, Class filter);
 
 	/**
 	 * Return the field attributes of the target field.
 	 * @param targetField the field that contains attribute information
-	 * @return a Collection of attribute, possibly an empty Collection, never null
+	 * @return a Collection of attribute, possibly an empty Collection, never <code>null</code>
 	 */
 	Collection getAttributes(Field targetField);
 
@@ -91,7 +91,7 @@ public interface Attributes {
 	 * through the unfiltered Collection yourself.
 	 * @param targetField the field that contains attribute information
 	 * @param filter specify that only this type of class should be returned
-	 * @return a Collection of attributes, possibly an empty Collection, never null
+	 * @return a Collection of attributes, possibly an empty Collection, never <code>null</code>
 	 */
 	Collection getAttributes(Field targetField, Class filter);
 

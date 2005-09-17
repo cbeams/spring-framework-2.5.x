@@ -182,7 +182,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 	/**
 	 * Set whether to autodetect a JDBC DataSource used by the JDO PersistenceManagerFactory,
-	 * as returned by the <code>getConnectionFactory()</code> method. Default is true.
+	 * as returned by the <code>getConnectionFactory()</code> method. Default is "true".
 	 * <p>Can be turned off to deliberately ignore an available DataSource,
 	 * to not expose JDO transactions as JDBC transactions for that DataSource.
 	 * @see #setDataSource

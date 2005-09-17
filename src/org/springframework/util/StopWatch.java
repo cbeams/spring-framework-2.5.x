@@ -87,7 +87,7 @@ public class StopWatch {
 	/**
 	 * Determine whether the TaskInfo array is built over time. Set this to
 	 * false when using a StopWatch for millions of intervals, or the task
-	 * info structure will consume excessive memory. Default is true.
+	 * info structure will consume excessive memory. Default is "true".
 	 */
 	public void setKeepTaskList(boolean keepTaskList) {
 		this.keepTaskList = keepTaskList;

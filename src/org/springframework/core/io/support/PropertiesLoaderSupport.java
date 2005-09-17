@@ -98,7 +98,7 @@ public abstract class PropertiesLoaderSupport {
 	/**
 	 * Set if failure to find the property resource should be ignored.
 	 * True is appropriate if the properties file is completely optional.
-	 * Default is false.
+	 * Default is "false".
 	 */
 	public void setIgnoreResourceNotFound(boolean ignoreResourceNotFound) {
 		this.ignoreResourceNotFound = ignoreResourceNotFound;

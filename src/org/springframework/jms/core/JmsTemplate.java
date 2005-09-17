@@ -138,7 +138,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 
 	/**
-	 * Set the destination to be used on send operations that do not
+	 * Set the destination to be used on send/receive operations that do not
 	 * have a destination parameter.
 	 * <p>Alternatively, specify a "defaultDestinationName", to be
 	 * dynamically resolved via the DestinationResolver.
@@ -152,7 +152,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	/**
-	 * Return the destination to be used on send operations that do not
+	 * Return the destination to be used on send/receive operations that do not
 	 * have a destination parameter.
 	 */
 	public Destination getDefaultDestination() {
@@ -160,9 +160,9 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	/**
-	 * Set the destination name to be used on send operations that do not
-	 * have a destination parameter. The specified name will be dynamically
-	 * resolved via the DestinationResolver.
+	 * Set the destination name to be used on send/receive operations that
+	 * do not have a destination parameter. The specified name will be
+	 * dynamically resolved via the DestinationResolver.
 	 * <p>Alternatively, specify a JMS Destination object as "defaultDestination".
 	 * @see #send(MessageCreator)
 	 * @see #convertAndSend(Object)
@@ -175,8 +175,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	/**
-	 * Return the destination name to be used on send operations that do not
-	 * have a destination parameter.
+	 * Return the destination name to be used on send/receive operations that
+	 * do not have a destination parameter.
 	 */
 	public String getDefaultDestinationName() {
 		return (this.defaultDestination instanceof String ? (String) this.defaultDestination : null);

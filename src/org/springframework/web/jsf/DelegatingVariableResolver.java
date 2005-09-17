@@ -134,7 +134,7 @@ public class DelegatingVariableResolver extends VariableResolver {
 	 * Retrieve the web application context to delegate bean name resolution to.
 	 * <p>Default implementation delegates to FacesContextUtils.
 	 * @param facesContext the current JSF context
-	 * @return the Spring web application context (never null)
+	 * @return the Spring web application context (never <code>null</code>)
 	 * @see FacesContextUtils#getRequiredWebApplicationContext
 	 */
 	protected WebApplicationContext getWebApplicationContext(FacesContext facesContext) {

@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
  * implement the Serializable marker interface if it is actually serializable.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 1.2.5
  * @see #setConcurrencyLimit
  * @see #beforeAccess()
  * @see #afterAccess()

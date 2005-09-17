@@ -213,7 +213,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Set whether to autodetect a JDBC DataSource used by the Hibernate SessionFactory,
-	 * if set via LocalSessionFactoryBean's <code>setDataSource</code>. Default is true.
+	 * if set via LocalSessionFactoryBean's <code>setDataSource</code>. Default is "true".
 	 * <p>Can be turned off to deliberately ignore an available DataSource,
 	 * to not expose Hibernate transactions as JDBC transactions for that DataSource.
 	 * @see #setDataSource

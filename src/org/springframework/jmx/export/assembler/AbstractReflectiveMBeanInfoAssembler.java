@@ -161,7 +161,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 	/**
 	 * Set whether to expose the JMX descriptor field "class" for managed operations.
-	 * Default is false, letting the JMX implementation determine the actual class
+	 * Default is "false", letting the JMX implementation determine the actual class
 	 * through reflection.
 	 * <p>Set this property to <code>true</code> for JMX implementations that
 	 * require the "class" field to be specified, for example WebLogic's.

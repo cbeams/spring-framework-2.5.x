@@ -413,7 +413,7 @@ public abstract class StringUtils {
 	/**
 	 * Turn given source String array into sorted array.
 	 * @param source the source array
-	 * @return the sorted array (never null)
+	 * @return the sorted array (never <code>null</code>)
 	 */
 	public static String[] sortStringArray(String[] source) {
 		if (source == null) {

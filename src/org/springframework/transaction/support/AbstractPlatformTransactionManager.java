@@ -215,7 +215,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * Set if doRollback should be performed on failure of the doCommit call.
 	 * Typically not necessary and thus to be avoided as it can override the
-	 * commit exception with a subsequent rollback exception. Default is false.
+	 * commit exception with a subsequent rollback exception. Default is "false".
 	 * @see #doCommit
 	 * @see #doRollback
 	 */

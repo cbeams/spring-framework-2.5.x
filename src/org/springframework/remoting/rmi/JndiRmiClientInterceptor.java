@@ -103,7 +103,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	}
 
 	/**
-	 * Set whether to look up the RMI stub on startup. Default is true.
+	 * Set whether to look up the RMI stub on startup. Default is "true".
 	 * <p>Can be turned off to allow for late start of the RMI server.
 	 * In this case, the RMI stub will be fetched on first access.
 	 * @see #setCacheStub
@@ -114,7 +114,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 
 	/**
 	 * Set whether to cache the RMI stub once it has been located.
-	 * Default is true.
+	 * Default is "true".
 	 * <p>Can be turned off to allow for hot restart of the RMI server.
 	 * In this case, the RMI stub will be fetched for each invocation.
 	 * @see #setLookupStubOnStartup
@@ -125,7 +125,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 
 	/**
 	 * Set whether to refresh the RMI stub on connect failure.
-	 * Default is false.
+	 * Default is "false".
 	 * <p>Can be turned on to allow for hot restart of the RMI server.
 	 * If a cached RMI stub throws an RMI exception that indicates a
 	 * remote connect failure, a fresh proxy will be fetched and the

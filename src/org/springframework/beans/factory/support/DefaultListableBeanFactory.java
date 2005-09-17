@@ -90,7 +90,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Set if it should be allowed to override bean definitions by registering a
 	 * different definition with the same name, automatically replacing the former.
-	 * If not, an exception will be thrown. Default is true.
+	 * If not, an exception will be thrown. Default is "true".
 	 */
 	public void setAllowBeanDefinitionOverriding(boolean allowBeanDefinitionOverriding) {
 		this.allowBeanDefinitionOverriding = allowBeanDefinitionOverriding;

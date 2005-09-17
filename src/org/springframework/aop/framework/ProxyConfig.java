@@ -74,7 +74,7 @@ public class ProxyConfig implements Serializable {
 	
 	/**
 	 * Set whether to proxy the target class directly as well as any interfaces.
-	 * We can set this to true to force CGLIB proxying. Default is false.
+	 * We can set this to true to force CGLIB proxying. Default is "false".
 	 */
 	public void setProxyTargetClass(boolean proxyTargetClass) {
 		this.proxyTargetClass = proxyTargetClass;
@@ -105,7 +105,7 @@ public class ProxyConfig implements Serializable {
 	 * will mean that advice cannot be changed after a proxy has been obtained
 	 * from this factory.
 	 * @param optimize whether to enable aggressive optimizations.
-	 * Default is false.
+	 * Default is "false".
 	 */
 	public void setOptimize(boolean optimize) {
 		this.optimize = optimize;
@@ -123,7 +123,7 @@ public class ProxyConfig implements Serializable {
 	 * ThreadLocal for retrieval via the AopContext class. This is useful
 	 * if an advised object needs to call another advised method on itself.
 	 * (If it uses <code>this</code>, the invocation will not be advised).
-	 * <p>Default is false, for optimal performance.
+	 * <p>Default is "false", for optimal performance.
 	 */
 	public void setExposeProxy(boolean exposeProxy) {
 		this.exposeProxy = exposeProxy;
@@ -174,7 +174,7 @@ public class ProxyConfig implements Serializable {
 
 	/**
 	 * Set whether proxies created by this configuration should be prevented
-	 * from being cast to Advised to query proxy status. Default is false,
+	 * from being cast to Advised to query proxy status. Default is "false",
 	 * meaning that any AOP proxy can be cast to Advised.
 	 */
 	public void setOpaque(boolean opaque) {

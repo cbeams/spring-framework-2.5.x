@@ -486,7 +486,7 @@ public class MimeMessageHelper {
 
 	/**
 	 * Set whether to validate all addresses which get passed to this helper.
-	 * Default is false.
+	 * Default is "false".
 	 * <p>Note that this is by default just available for JavaMail >= 1.3.
 	 * You can override the default <code>validateAddress method</code> for
 	 * validation on older JavaMail versions (or for custom validation).

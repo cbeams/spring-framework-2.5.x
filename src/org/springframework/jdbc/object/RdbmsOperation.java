@@ -386,7 +386,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	/**
 	 * Return whether BLOB or CLOB parameters are supported
-	 * for this kind of operation. Default is true.
+	 * for this kind of operation. Default is "true".
 	 */
 	protected boolean supportsLobParameters() {
 		return true;

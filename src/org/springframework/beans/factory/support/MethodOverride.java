@@ -53,7 +53,7 @@ public abstract class MethodOverride {
 	/**
 	 * Set whether the overridden method has to be considered as overloaded
 	 * (that is, whether arg type matching has to happen).
-	 * Default is true; can be switched to false to optimize runtime performance.
+	 * Default is "true"; can be switched to false to optimize runtime performance.
 	 */
 	protected void setOverloaded(boolean overloaded) {
 		this.overloaded = overloaded;

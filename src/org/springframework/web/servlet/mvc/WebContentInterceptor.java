@@ -59,7 +59,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * Set if URL lookup should always use full path within current servlet
 	 * context. Else, the path within the current servlet mapping is used
 	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
-	 * Default is false.
+	 * Default is "false".
 	 * <p>Only relevant for the "cacheMappings" setting.
 	 * @see #setCacheMappings
 	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath

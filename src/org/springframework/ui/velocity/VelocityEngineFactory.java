@@ -166,7 +166,7 @@ public class VelocityEngineFactory {
 	 * <p>If this is enabled, VelocityEngineFactory will try to resolve the
 	 * specified "resourceLoaderPath" as file system resource (which will work
 	 * for expanded class path resources and ServletContext resources too).
-	 * <p>Default is true. Turn this off to always load via SpringResourceLoader
+	 * <p>Default is "true". Turn this off to always load via SpringResourceLoader
 	 * (i.e. as stream, without hot detection of template changes), which might
 	 * be necessary if some of your templates reside in an expanded classes
 	 * directory while others reside in jar files.

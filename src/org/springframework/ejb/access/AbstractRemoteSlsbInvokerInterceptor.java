@@ -65,7 +65,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 
 	/**
 	 * Set whether to refresh the EJB home on connect failure.
-	 * Default is false.
+	 * Default is "false".
 	 * <p>Can be turned on to allow for hot restart of the EJB server.
 	 * If a cached EJB home throws an RMI exception that indicates a
 	 * remote connect failure, a fresh home will be fetched and the

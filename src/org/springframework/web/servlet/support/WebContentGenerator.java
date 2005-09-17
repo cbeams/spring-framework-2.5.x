@@ -112,7 +112,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
-	 * Set whether to use the HTTP 1.0 expires header. Default is true.
+	 * Set whether to use the HTTP 1.0 expires header. Default is "true".
 	 * <p>Note: Cache headers will only get applied if caching is enabled
 	 * for the current request.
 	 */
@@ -128,7 +128,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
-	 * Set whether to use the HTTP 1.1 cache-control header. Default is true.
+	 * Set whether to use the HTTP 1.1 cache-control header. Default is "true".
 	 * <p>Note: Cache headers will only get applied if caching is enabled
 	 * for the current request.
 	 */

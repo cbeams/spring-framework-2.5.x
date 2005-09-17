@@ -24,6 +24,8 @@ import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
+import org.springframework.util.Assert;
+
 /**
  * Adapter for a JTA UserTransaction handle, taking a JTA TransactionManager
  * reference and creating a JTA UserTransaction handle for it.
@@ -34,7 +36,7 @@ import javax.transaction.UserTransaction;
  * adapter such as this class to be used when intending to talk to
  * a TransactionManager handle through the UserTransaction interface.
  *
- * <p>Used internally by JtaTransactionManager for certain scenarios.
+ * <p>Used internally by Spring's JtaTransactionManager for certain scenarios.
  * Not intended for direct use in application code.
  *
  * @author Juergen Hoeller
@@ -44,11 +46,13 @@ public class UserTransactionAdapter implements UserTransaction {
 
 	private final TransactionManager transactionManager;
 
+
 	/**
 	 * Create a new UserTransactionAdapter.
 	 * @param transactionManager the JTA TransactionManager
 	 */
 	public UserTransactionAdapter(TransactionManager transactionManager) {
+		Assert.notNull(transactionManager, "TransactionManager is required");
 		this.transactionManager = transactionManager;
 	}
 
@@ -58,6 +62,7 @@ public class UserTransactionAdapter implements UserTransaction {
 	public TransactionManager getTransactionManager() {
 		return transactionManager;
 	}
+
 
 	public void begin() throws NotSupportedException, SystemException {
 		this.transactionManager.begin();

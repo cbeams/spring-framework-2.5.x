@@ -63,7 +63,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 
 	/**
 	 * Set whether all request attributes should be added to the
-	 * model prior to merging with the template. Default is false.
+	 * model prior to merging with the template. Default is "false".
 	 */
 	public void setExposeRequestAttributes(boolean exposeRequestAttributes) {
 		this.exposeRequestAttributes = exposeRequestAttributes;
@@ -71,7 +71,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 
 	/**
 	 * Set whether all HttpSession attributes should be added to the
-	 * model prior to merging with the template. Default is false.
+	 * model prior to merging with the template. Default is "false".
 	 */
 	public void setExposeSessionAttributes(boolean exposeSessionAttributes) {
 		this.exposeSessionAttributes = exposeSessionAttributes;
@@ -79,7 +79,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 
 	/**
 	 * Set whether HttpServletRequest attributes are allowed to override (hide)
-	 * controller generated model attributes of the same name. Default is false,
+	 * controller generated model attributes of the same name. Default is "false",
 	 * which causes an exception to be thrown if request attributes of the same
 	 * name as model attributes are found.
 	 */
@@ -89,7 +89,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
     
 	/**
 	 * Set whether HttpSession attributes are allowed to override (hide)
-	 * controller generated model attributes of the same name. Default is false,
+	 * controller generated model attributes of the same name. Default is "false",
 	 * which causes an exception to be thrown if session attributes of the same
 	 * name as model attributes are found.
 	 */
@@ -99,7 +99,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 
 	/**
 	 * Set whether to expose a RequestContext for use by Spring's macro library,
-	 * under the name "springBindRequestContext". Default is false.
+	 * under the name "springBindRequestContext". Default is "false".
 	 * <p>Currently needed for Spring's Velocity and FreeMarker default macros.
 	 * Note that this is <b>not</b> required for templates that use HTML
 	 * forms <b>unless</b> you wish to take advantage of the Spring helper macros.

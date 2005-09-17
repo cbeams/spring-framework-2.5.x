@@ -112,7 +112,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	/**
 	 * Set whether to use the message code as default message instead of
 	 * throwing a NoSuchMessageException. Useful for development and debugging.
-	 * Default is false.
+	 * Default is "false".
 	 * <p>Note: In case of a MessageSourceResolvable with multiple codes
 	 * (like a FieldError) and a MessageSource that has a parent MessageSource,
 	 * do <i>not</i> activate "useCodeAsDefaultMessage" in the <i>parent</i>:

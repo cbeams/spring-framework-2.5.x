@@ -106,7 +106,7 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 
 	/**
 	 * Set whether elements can overflow to disk when the in-memory cache
-	 * has reached the maximum size limit. Default is true.
+	 * has reached the maximum size limit. Default is "true".
 	 */
 	public void setOverflowToDisk(boolean overflowToDisk) {
 		this.overflowToDisk = overflowToDisk;
@@ -114,7 +114,7 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 
 	/**
 	 * Set whether elements are eternal. If true, timeouts are ignored
-	 * and the element is never expired. Default is false.
+	 * and the element is never expired. Default is "false".
 	 */
 	public void setEternal(boolean eternal) {
 		this.eternal = eternal;

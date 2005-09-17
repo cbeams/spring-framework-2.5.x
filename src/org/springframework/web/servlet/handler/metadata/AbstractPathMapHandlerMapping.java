@@ -91,7 +91,7 @@ public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMa
 	/**
 	 * Set whether to perform a dependency check for objects on autowired handlers.
 	 * Not applicable to autowiring a constructor, thus ignored there.
-	 * <p>Default is true.
+	 * <p>Default is "true".
 	 */
 	public void setDependencyCheck(boolean dependencyCheck) {
 		this.dependencyCheck = dependencyCheck;

@@ -51,7 +51,7 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 
 	/**
 	 * Set if a singleton should be created, or a new object
-	 * on each request else. Default is true (a singleton).
+	 * on each request else. Default is "true" (a singleton).
 	 */
 	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;

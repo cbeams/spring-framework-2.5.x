@@ -162,6 +162,7 @@ public abstract class RmiClientInterceptorUtils {
 	 */
 	public static Exception convertRmiAccessException(
 			Method method, RemoteException ex, boolean isConnectFailure, String serviceName) {
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Remote service [" + serviceName + "] threw exception", ex);
 		}
