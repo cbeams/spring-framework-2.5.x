@@ -16,6 +16,7 @@
 
 package org.springframework.jmx.access;
 
+import java.net.BindException;
 import java.net.MalformedURLException;
 
 import javax.management.MBeanServerConnection;
@@ -36,12 +37,17 @@ public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTes
 
 	private JMXConnectorServer connectorServer;
 
-	private JMXConnector connector;
-
+	private JMXConnector connector;	
+	
 	public void setUp() throws Exception {
 		super.setUp();
 		this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(getServiceUrl(), null, server);
-		this.connectorServer.start();
+		try {
+			this.connectorServer.start();
+		} catch (BindException e) {
+			// skipping tests, server already running at this port
+			runTests = false;
+		}
 	}
 
 	private JMXServiceURL getServiceUrl() throws MalformedURLException {
@@ -58,7 +64,7 @@ public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTes
 		return this.connector.getMBeanServerConnection();
 	}
 
-	public void tearDown() throws Exception {
+	public void tearDown() throws Exception {		
 		if (this.connector != null) {
 			this.connector.close();
 		}

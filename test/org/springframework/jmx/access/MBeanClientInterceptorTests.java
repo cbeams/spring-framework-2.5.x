@@ -43,6 +43,8 @@ public class MBeanClientInterceptorTests extends AbstractJmxTests {
 	protected static final String OBJECT_NAME = "spring:test=proxy";
 
 	protected JmxTestBean target;
+	
+	protected boolean runTests = true;
 
 	public void setUp() throws Exception {
 		super.setUp();
@@ -74,12 +76,14 @@ public class MBeanClientInterceptorTests extends AbstractJmxTests {
 	}
 
 	public void testProxyClassIsDifferent() throws Exception {
+		if (!runTests) return;
 		IJmxTestBean proxy = getProxy();
 		assertTrue("The proxy class should be different than the base class",
 				(proxy.getClass() != IJmxTestBean.class));
 	}
 
 	public void testDifferentProxiesSameClass() throws Exception {
+		if (!runTests) return;
 		IJmxTestBean proxy1 = getProxy();
 		IJmxTestBean proxy2 = getProxy();
 
@@ -88,18 +92,21 @@ public class MBeanClientInterceptorTests extends AbstractJmxTests {
 	}
 
 	public void testGetAttributeValue() throws Exception {
+		if (!runTests) return;
 		IJmxTestBean proxy1 = getProxy();
 		int age = proxy1.getAge();
 		assertEquals("The age should be 100", 100, age);
 	}
 
 	public void testSetAttributeValue() throws Exception {
+		if (!runTests) return;
 		IJmxTestBean proxy = getProxy();
 		proxy.setName("Rob Harrop");
 		assertEquals("The name of the bean should have been updated", "Rob Harrop", target.getName());
 	}
 
 	public void testSetReadOnlyAttribute() throws Exception {
+		if (!runTests) return;
 		IJmxTestBean proxy = getProxy();
 		try {
 			proxy.setAge(900);
@@ -111,18 +118,21 @@ public class MBeanClientInterceptorTests extends AbstractJmxTests {
 	}
 
 	public void testInvokeNoArgs() throws Exception {
+		if (!runTests) return;
 		IJmxTestBean proxy = getProxy();
 		long result = proxy.myOperation();
 		assertEquals("The operation should return 1", 1, result);
 	}
 
 	public void testInvokeArgs() throws Exception {
+		if (!runTests) return;
 		IJmxTestBean proxy = getProxy();
 		int result = proxy.add(1, 2);
 		assertEquals("The operation should return 3", 3, result);
 	}
 
 	public void testInvokeUnexposedMethodWithException() throws Exception {
+		if (!runTests) return;
 		IJmxTestBean bean = getProxy();
 		try {
 			bean.dontExposeMe();
@@ -134,6 +144,7 @@ public class MBeanClientInterceptorTests extends AbstractJmxTests {
 	}
 
 	public void testLazyConnectionToRemote() throws Exception {
+		if (!runTests) return;
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			// to avoid NoClassDefFoundError for JSSE
 			return;
