@@ -250,7 +250,7 @@ public class MBeanExporterTests extends TestCase {
 			MBeanExporter adaptor = new MBeanExporter();
 			adaptor.setServer(server);
 			adaptor.setBeans(beans);
-			adaptor.setRegistrationBehavior(MBeanExporter.REGISTER_IGNORE_EXISTING);
+			adaptor.setRegistrationBehavior(MBeanExporter.REGISTRATION_IGNORE_EXISTING);
 
 			adaptor.afterPropertiesSet();
 
@@ -285,7 +285,7 @@ public class MBeanExporterTests extends TestCase {
 			MBeanExporter adaptor = new MBeanExporter();
 			adaptor.setServer(server);
 			adaptor.setBeans(beans);
-			adaptor.setRegistrationBehavior(MBeanExporter.REGISTER_REPLACE_EXISTING);
+			adaptor.setRegistrationBehavior(MBeanExporter.REGISTRATION_REPLACE_EXISTING);
 
 			adaptor.afterPropertiesSet();
 

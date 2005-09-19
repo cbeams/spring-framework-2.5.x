@@ -16,8 +16,28 @@
 
 package org.springframework.jmx.export;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.JMException;
+import javax.management.MBeanException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.modelmbean.InvalidTargetObjectTypeException;
+import javax.management.modelmbean.ModelMBean;
+import javax.management.modelmbean.ModelMBeanInfo;
+import javax.management.modelmbean.RequiredModelMBean;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.beans.factory.BeanFactory;
@@ -28,6 +48,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.core.Constants;
 import org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler;
 import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
 import org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler;
@@ -36,62 +57,55 @@ import org.springframework.jmx.export.naming.ObjectNamingStrategy;
 import org.springframework.jmx.export.naming.SelfNaming;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.core.Constants;
-
-import javax.management.JMException;
-import javax.management.MBeanException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanRegistrationException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.InstanceNotFoundException;
-import javax.management.modelmbean.InvalidTargetObjectTypeException;
-import javax.management.modelmbean.ModelMBean;
-import javax.management.modelmbean.ModelMBeanInfo;
-import javax.management.modelmbean.RequiredModelMBean;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A bean that allows for any Spring-managed bean to be exposed to a JMX
  * <code>MBeanServer</code>, without the need to define any JMX-specific
  * information in the bean classes.
- * <p/>
+ *
  * <p>If the bean implements one of the JMX management interfaces then
  * <code>MBeanExporter</code> can simply register the MBean with the server
  * automatically, through its autodetection process.
- * <p/>
+ *
  * <p>If the bean does not implement one of the JMX management interfaces then
  * <code>MBeanExporter</code> will create the management information using the
  * supplied <code>MBeanInfoAssembler</code> implementation.
- * <p/>
+ *
  * <p>A list of <code>MBeanExporterListener</code>s can be registered via the
  * <code>listeners</code> property, allowing application code to be notified
  * of MBean registration and unregistration events.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @since 1.2
  * @see #setBeans
  * @see #setAutodetect
  * @see #setAssembler
  * @see #setListeners
  * @see org.springframework.jmx.export.assembler.MBeanInfoAssembler
  * @see MBeanExporterListener
- * @since 1.2
  */
 public class MBeanExporter implements BeanFactoryAware, InitializingBean, DisposableBean {
 
-	public static final int REGISTER_FAIL_ON_EXISTING = 0;
+	/**
+	 * Constant indicating that registration should fail when
+	 * attempting to register an MBean under a name that already exists.
+	 * <p>This is the default registration behavior.
+	 */
+	public static final int REGISTRATION_FAIL_ON_EXISTING = 0;
 
-	public static final int REGISTER_IGNORE_EXISTING = 1;
+	/**
+	 * Constant indicating that registration should ignore the affected MBean
+	 * when attempting to register an MBean under a name that already exists.
+	 */
+	public static final int REGISTRATION_IGNORE_EXISTING = 1;
 
-	public static final int REGISTER_REPLACE_EXISTING = 2;
+	/**
+	 * Constant indicating that registration should replace the affected MBean
+	 * when attempting to register an MBean under a name that already exists.
+	 */
+	public static final int REGISTRATION_REPLACE_EXISTING = 2;
+
 
 	/**
 	 * Constant for the JMX <code>mr_type</code> "ObjectReference".
@@ -102,6 +116,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * Constants for this class.
 	 */
 	private static final Constants constants = new Constants(MBeanExporter.class);
+
 
 	/**
 	 * <code>Log</code> instance for this class.
@@ -122,6 +137,11 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * Whether to autodetect MBeans in the bean factory.
 	 */
 	private boolean autodetect = false;
+
+	/**
+	 * A list of bean names that should be excluded from auto-detection.
+	 */
+	private String[] excludedBeans = new String[0];
 
 	/**
 	 * Stores the <code>MBeanInfoAssembler</code> to use for this exporter.
@@ -149,15 +169,11 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	private MBeanExporterListener[] listeners;
 
 	/**
-	 * A list of bean names that should be excluded from auto-detection.
-	 */
-	private String[] excludedBeans = new String[0];
-
-	/**
 	 * The action take when registering an MBean and finding that it already exists.
 	 * By default an exception is raised.
 	 */
-	private int registrationBehavior = REGISTER_FAIL_ON_EXISTING;
+	private int registrationBehavior = REGISTRATION_FAIL_ON_EXISTING;
+
 
 	/**
 	 * Specify the instance <code>MBeanServer</code> with which all beans should
@@ -203,6 +219,13 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	}
 
 	/**
+	 * Set the list of names for beans that should be excluded from autodetection.
+	 */
+	public void setExcludedBeans(String[] excludedBeans) {
+		this.excludedBeans = (excludedBeans != null ? excludedBeans : new String[0]);
+	}
+
+	/**
 	 * Set the implementation of the <code>MBeanInfoAssembler</code> interface to use
 	 * for this exporter. Default is a <code>SimpleReflectiveMBeanInfoAssembler</code>.
 	 * <p>The passed-in assembler can optionally implement the
@@ -237,6 +260,31 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	}
 
 	/**
+	 * Set the registration behavior by the name of the corresponding constant,
+	 * e.g. "REGISTRATION_IGNORE_EXISTING".
+	 * @see #setRegistrationBehavior
+	 * @see #REGISTRATION_FAIL_ON_EXISTING
+	 * @see #REGISTRATION_IGNORE_EXISTING
+	 * @see #REGISTRATION_REPLACE_EXISTING
+	 */
+	public void setRegistrationBehaviorName(String registrationBehavior) {
+		setRegistrationBehavior(constants.asNumber(registrationBehavior).intValue());
+	}
+
+	/**
+	 * Specify  what action should be taken when attempting to register an MBean
+	 * under an {@link javax.management.ObjectName} that already exists.
+	 * <p>Default is REGISTRATION_FAIL_ON_EXISTING.
+	 * @see #setRegistrationBehaviorName(String)
+	 * @see #REGISTRATION_FAIL_ON_EXISTING
+	 * @see #REGISTRATION_IGNORE_EXISTING
+	 * @see #REGISTRATION_REPLACE_EXISTING
+	 */
+	public void setRegistrationBehavior(int registrationBehavior) {
+		this.registrationBehavior = registrationBehavior;
+	}
+
+	/**
 	 * This callback is only required for resolution of bean names in the "beans"
 	 * <code>Map</code> and for autodetection of MBeans (in the latter case,
 	 * a <code>ListableBeanFactory</code> is required).
@@ -253,36 +301,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 		}
 	}
 
-	/**
-	 * Sets the list of names for beans that should be excluded from autodetection.
-	 */
-	public void setExcludedBeans(String[] excludedBeans) {
-		this.excludedBeans = (excludedBeans == null) ? new String[0] : excludedBeans;
-	}
-
-	/**
-	 * Sets the value of the <code>registrationBehavior</code> flag indicating what action should be
-	 * taken when attempting to register an MBean under an {@link javax.management.ObjectName} that already exists.
-	 * @see #setRegistrationBehaviorName(String)
-	 * @see #REGISTER_FAIL_ON_EXISTING
-	 * @see #REGISTER_IGNORE_EXISTING
-	 * @see #REGISTER_REPLACE_EXISTING
-	 */
-	public void setRegistrationBehavior(int registrationBehavior) {
-		this.registrationBehavior = registrationBehavior;
-	}
-
-	/**
-	 * Sets the value of the <code>registrationBehavior</code> flag indicating what action should be
-	 * taken when attempting to register an MBean under an {@link javax.management.ObjectName} that already exists.
-	 * @see #setRegistrationBehavior(int)
-	 * @see #REGISTER_FAIL_ON_EXISTING
-	 * @see #REGISTER_IGNORE_EXISTING
-	 * @see #REGISTER_REPLACE_EXISTING
-	 */
-	public void setRegistrationBehaviorName(String registrationBehavior) {
-		setRegistrationBehavior(constants.asNumber(registrationBehavior).intValue());
-	}
 
 	/**
 	 * Start bean registration automatically when deployed in an
@@ -539,33 +557,35 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	}
 
 	/**
-	 * Actually registers the MBean with the server. The behavior when encountering an existing MBean can be
-	 * configured using the {@link #setRegistrationBehavior(int)} and {@link #setRegistrationBehaviorName(String)} methods.
+	 * Actually registers the MBean with the server. The behavior when encountering
+	 * an existing MBean can be configured using the {@link #setRegistrationBehavior(int)}
+	 * and {@link #setRegistrationBehaviorName(String)} methods.
 	 */
-	protected void doRegister(Object mbean, ObjectName objectName) throws InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
+	protected void doRegister(Object mbean, ObjectName objectName) throws JMException {
 		try {
 			this.server.registerMBean(mbean, objectName);
 		}
-		catch (InstanceAlreadyExistsException e) {
-			if (this.registrationBehavior == REGISTER_IGNORE_EXISTING) {
+		catch (InstanceAlreadyExistsException ex) {
+			if (this.registrationBehavior == REGISTRATION_IGNORE_EXISTING) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Ignoring existing MBean at [" + objectName + "].");
+					logger.debug("Ignoring existing MBean at [" + objectName + "]");
 				}
 			}
-			else if (this.registrationBehavior == REGISTER_REPLACE_EXISTING) {
+			else if (this.registrationBehavior == REGISTRATION_REPLACE_EXISTING) {
 				try {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Replacing existing MBean at [" + objectName + "].");
+						logger.debug("Replacing existing MBean at [" + objectName + "]");
 					}
 					this.server.unregisterMBean(objectName);
 					this.server.registerMBean(mbean, objectName);
 				}
-				catch (InstanceNotFoundException ex) {
-					throw new IllegalStateException("Unable to replace existing MBean at [" + objectName + "].", ex);
+				catch (InstanceNotFoundException ex2) {
+					throw new IllegalStateException(
+							"Unable to replace existing MBean at [" + objectName + "]: " + ex.getMessage());
 				}
 			}
 			else {
-				throw e;
+				throw ex;
 			}
 		}
 	}
@@ -668,7 +688,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 
 	/**
 	 * Return whether the specified bean definition should be considered as lazy-init.
-	 *
 	 * @param beanFactory the bean factory that is supposed to contain the bean definition
 	 * @param beanName the name of the bean to check
 	 * @see org.springframework.beans.factory.config.ConfigurableListableBeanFactory#getBeanDefinition
@@ -693,7 +712,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * <p>This method is called to obtain a <code>ModelMBean</code> instance to
 	 * use when registering a bean. This method is called once per bean during the
 	 * registration phase and must return a new instance of <code>ModelMBean</code>
-	 *
 	 * @return a new instance of a class that implements <code>ModelMBean</code>
 	 * @throws MBeanException if creation of the ModelMBean failed
 	 */
@@ -711,7 +729,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	/**
 	 * Notifies all registered <code>MBeanExporterListener</code> that an MBean
 	 * with the supplied <code>ObjectName</code> has been registered.
-	 *
 	 * @param objectName the <code>ObjectName</code> of the registered MBean
 	 * @see MBeanExporterListener
 	 */
@@ -727,7 +744,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	/**
 	 * Notifies all registered <code>MBeanExporterListener</code> that an MBean
 	 * with the supplied <code>ObjectName</code> has been unregistered.
-	 *
 	 * @param objectName the <code>ObjectName</code> of the registered MBean
 	 * @see MBeanExporterListener
 	 */
@@ -781,48 +797,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 		 * @param beanName the name of the bean
 		 */
 		boolean include(Class beanClass, String beanName);
-	}
-
-	/**
-	 * Stores information about how an MBean was picked up for registration and what kind of
-	 * MBean it is.
-	 */
-	private static class RegistrationRecord {
-
-		private boolean loadAtStartup = true;
-
-		private boolean springCreated = true;
-
-		private boolean autodetected;
-
-		private ObjectName objectName;
-
-		public RegistrationRecord(ObjectName objectName) {
-			this.objectName = objectName;
-		}
-
-		public RegistrationRecord(ObjectName objectName, boolean loadAtStartup, boolean springCreated, boolean autodetected) {
-			this.objectName = objectName;
-			this.loadAtStartup = loadAtStartup;
-			this.springCreated = springCreated;
-			this.autodetected = autodetected;
-		}
-
-		public boolean isLoadAtStartup() {
-			return this.loadAtStartup;
-		}
-
-		public boolean isSpringCreated() {
-			return this.springCreated;
-		}
-
-		public boolean isAutodetected() {
-			return this.autodetected;
-		}
-
-		public ObjectName getObjectName() {
-			return objectName;
-		}
 	}
 
 }
