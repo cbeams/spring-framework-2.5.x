@@ -4,7 +4,7 @@
 <!--
   - Scheduler context for Quartz. Schedules "list images" and "check images" jobs.
   - Note that Quartz Jobs are throwaway objects, in contrast to shared TimerTasks.
-	-->
+  -->
 <beans>
 
 	<!-- Quartz Scheduler, with pre-registered triggers -->

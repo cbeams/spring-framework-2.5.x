@@ -2,9 +2,9 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <!--
-	- Dispatcher servlet for HTTP remoting via Hessian, Burlap, and Spring's
-	- HTTP invoker (see remoting-servlet.xml for the controllers).
-	-->
+  - Dispatcher servlet for HTTP remoting via Hessian, Burlap, and Spring's
+  - HTTP invoker (see remoting-servlet.xml for the controllers).
+  -->
 <beans>
 
 	<!-- Hessian exporter for the JPetStore OrderService -->

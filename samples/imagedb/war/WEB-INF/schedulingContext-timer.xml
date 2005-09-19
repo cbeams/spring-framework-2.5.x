@@ -4,7 +4,7 @@
 <!--
   - Scheduler context for Timer. Schedules "list images" and "check images" tasks.
   - Note that TimerTasks are shared instances, in contrast to throwaway Quartz Jobs.
-	-->
+  -->
 <beans>
 
 	<!-- java.util.Timer, with pre-registered scheduled tasks -->

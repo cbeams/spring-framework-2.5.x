@@ -12,7 +12,6 @@
   - * spring.jar
   - * commons-logging.jar
   -->
-
 <web-app>
 
   <!--

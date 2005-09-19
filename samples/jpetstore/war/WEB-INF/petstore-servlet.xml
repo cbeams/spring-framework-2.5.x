@@ -3,8 +3,8 @@
 
 <!--
   - DispatcherServlet application context for the Spring web MVC
-	- implementation of JPetStore's web tier.
-	-->
+  - implementation of JPetStore's web tier.
+  -->
 <beans>
 
 	<!-- ========================= VIEW DEFINITIONS ========================= -->

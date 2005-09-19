@@ -3,7 +3,7 @@
 
 <!--
   - DispatcherServlet application context for the Countries web tier.
-	-->
+  -->
 <beans>
 
 	<!-- ========================= MAPPING DEFINITIONS ========================= -->

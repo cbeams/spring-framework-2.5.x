@@ -3,9 +3,9 @@
 
 <!--
   - Application context definition for JPetStore's business layer.
-	- Contains bean references to the transaction manager and to the DAOs in
-	- dataAccessContext-local/jta.xml (see web.xml's "contextConfigLocation").
-	-->
+  - Contains bean references to the transaction manager and to the DAOs in
+  - dataAccessContext-local/jta.xml (see web.xml's "contextConfigLocation").
+  -->
 <beans>
 
 	<!-- ========================= GENERAL DEFINITIONS ========================= -->

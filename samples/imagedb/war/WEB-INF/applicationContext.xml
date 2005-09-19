@@ -3,7 +3,7 @@
 
 <!--
   - Middle tier application context definition for the image database.
-	-->
+  -->
 <beans>
 
 	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->

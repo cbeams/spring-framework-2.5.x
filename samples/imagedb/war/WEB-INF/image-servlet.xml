@@ -3,7 +3,7 @@
 
 <!--
   - DispatcherServlet application context for the image database.
-	-->
+  -->
 <beans>
 
 	<!-- MultipartResolver for parsing file uploads, implementation for Commons FileUpload -->

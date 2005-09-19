@@ -3,7 +3,7 @@
 
 <!--
   - DispatcherServlet application context for PetClinic's web tier.
-	-->
+  -->
 <beans>
 
 	<!-- ========================= MESSAGE SOURCE DEFINITION ========================= -->

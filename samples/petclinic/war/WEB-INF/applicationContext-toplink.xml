@@ -3,11 +3,11 @@
 
 <!--
   - Application context definition for PetClinic on TopLink.
-	-
-	- A full "toplink.jar" and "xmlparserv2.jar" from the TopLink 10.1.3+
-	- distribution needs to be added to the "WEB-INF/lib" directory
-	- (or to "lib/toplink" before building the "petclinic.war" file).
-	-->
+  -
+  - A full "toplink.jar" and "xmlparserv2.jar" from the TopLink 10.1.3+
+  - distribution needs to be added to the "WEB-INF/lib" directory
+  - (or to "lib/toplink" before building the "petclinic.war" file).
+  -->
 <beans>
 
 	<!-- ========================= RESOURCE DEFINITIONS ========================= -->

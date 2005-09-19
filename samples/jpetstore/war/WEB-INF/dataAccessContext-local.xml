@@ -3,13 +3,13 @@
 
 <!--
   - Application context definition for JPetStore's data access layer.
-	- Accessed by business layer objects defined in "applicationContext.xml"
-	- (see web.xml's "contextConfigLocation").
-	-
-	- This version of the data access layer works on a combined database,
-	- using a local DataSource with DataSourceTransactionManager. It does not
-	- need any JTA support in the container: It will run as-is in plain Tomcat.
-	-->
+  - Accessed by business layer objects defined in "applicationContext.xml"
+  - (see web.xml's "contextConfigLocation").
+  -
+  - This version of the data access layer works on a combined database,
+  - using a local DataSource with DataSourceTransactionManager. It does not
+  - need any JTA support in the container: It will run as-is in plain Tomcat.
+  -->
 <beans>
 
 	<!-- ========================= RESOURCE DEFINITIONS ========================= -->

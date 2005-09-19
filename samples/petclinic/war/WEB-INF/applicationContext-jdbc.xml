@@ -3,7 +3,7 @@
 
 <!--
   - Application context definition for PetClinic on JDBC.
-	-->
+  -->
 <beans>
 
 	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
