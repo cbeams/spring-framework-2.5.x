@@ -30,6 +30,17 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 
 	private Object identifier;
 
+
+	/**
+	 * Create a general ObjectRetrievalFailureException with the given message,
+	 * without any information on the affected object.
+	 * @param msg exception message
+	 * @param ex source exception
+	 */
+	public ObjectRetrievalFailureException(String msg, Throwable ex) {
+		super(msg, ex);
+	}
+
 	/**
 	 * Create a new ObjectRetrievalFailureException for the given object,
 	 * with the default "not found" message.
@@ -52,6 +63,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 */
 	public ObjectRetrievalFailureException(
 			Class persistentClass, Object identifier, String msg, Throwable ex) {
+
 		super(msg, ex);
 		this.persistentClass = persistentClass;
 		this.identifier = identifier;
@@ -79,10 +91,12 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 */
 	public ObjectRetrievalFailureException(
 			String persistentClassName, Object identifier, String msg, Throwable ex) {
+
 		super(msg, ex);
 		this.persistentClass = persistentClassName;
 		this.identifier = identifier;
 	}
+
 
 	/**
 	 * Return the persistent class of the object that was not found.
@@ -97,8 +111,10 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * Will work for both Class objects and String names.
 	 */
 	public String getPersistentClassName() {
-		return (this.persistentClass instanceof Class ?
-				((Class) this.persistentClass).getName() : this.persistentClass.toString());
+		if (this.persistentClass instanceof Class) {
+			return ((Class) this.persistentClass).getName();
+		}
+		return (this.persistentClass != null ? this.persistentClass.toString() : null);
 	}
 
 	/**

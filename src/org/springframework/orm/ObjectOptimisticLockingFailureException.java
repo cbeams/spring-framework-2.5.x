@@ -31,6 +31,17 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 
 	private Object identifier;
 
+
+	/**
+	 * Create a general ObjectOptimisticLockingFailureException with the given message,
+	 * without any information on the affected object.
+	 * @param msg exception message
+	 * @param ex source exception
+	 */
+	public ObjectOptimisticLockingFailureException(String msg, Throwable ex) {
+		super(msg, ex);
+	}
+
 	/**
 	 * Create a new ObjectOptimisticLockingFailureException for the given object,
 	 * with the default "optimistic locking failed" message.
@@ -53,6 +64,7 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 */
 	public ObjectOptimisticLockingFailureException(
 			Class persistentClass, Object identifier, String msg, Throwable ex) {
+
 		super(msg, ex);
 		this.persistentClass = persistentClass;
 		this.identifier = identifier;
@@ -80,10 +92,12 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 */
 	public ObjectOptimisticLockingFailureException(
 			String persistentClassName, Object identifier, String msg, Throwable ex) {
+
 		super(msg, ex);
 		this.persistentClass = persistentClassName;
 		this.identifier = identifier;
 	}
+
 
 	/**
 	 * Return the persistent class of the object for which the locking failed.
@@ -98,8 +112,10 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 * Will work for both Class objects and String names.
 	 */
 	public String getPersistentClassName() {
-		return (this.persistentClass instanceof Class ?
-				((Class) this.persistentClass).getName() : this.persistentClass.toString());
+		if (this.persistentClass instanceof Class) {
+			return ((Class) this.persistentClass).getName();
+		}
+		return (this.persistentClass != null ? this.persistentClass.toString() : null);
 	}
 
 	/**
