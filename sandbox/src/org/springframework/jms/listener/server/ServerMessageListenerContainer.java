@@ -60,7 +60,8 @@ public class ServerMessageListenerContainer extends AbstractMessageListenerConta
 	}
 
 
-	protected void registerListener(Connection con) throws JMSException {
+	protected void registerListener() throws JMSException {
+		Connection con = getConnection();
 		Destination destination = getDestination();
 		if (destination == null) {
 			Session session = con.createSession(false, Session.AUTO_ACKNOWLEDGE);

@@ -21,11 +21,35 @@ import javax.jms.Message;
 import javax.jms.Session;
 
 /**
+ * Variant of the standard JMS MessageListener interface,
+ * offering not only the received Message but also the underlying
+ * JMS Session object. The latter can be used to send reply messages,
+ * without the need to access an external Connection/Session,
+ * i.e. without the need to access the underlying ConnectionFactory.
+ *
+ * <p>Supported by Spring's SimpleMessageListenerContainer and
+ * ServerMessageListenerContainer, as direct alternative to the standard
+ * JMS MessageListener interface. Typically <i>not</i> supported by
+ * JCA-based listener containers: For maximum compatibility, implement
+ * a standard MessageListener instead.
+ *
  * @author Juergen Hoeller
  * @since 1.3
+ * @see AbstractMessageListenerContainer#setMessageListener
+ * @see SimpleMessageListenerContainer
+ * @see org.springframework.jms.listener.server.ServerMessageListenerContainer
+ * @see javax.jms.MessageListener
  */
 public interface SessionAwareMessageListener {
 
+	/**
+	 * Callback for a received JMS message.
+	 * <p>Implementors are supposed to process the given Message,
+	 * typically sending reply messages through the given Session.
+	 * @param message the received JMS message
+	 * @param session the underlying JMS Session
+	 * @throws JMSException if thrown by JMS methods
+	 */
 	void onMessage(Message message, Session session) throws JMSException;
 
 }

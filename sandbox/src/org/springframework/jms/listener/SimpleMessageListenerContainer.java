@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -66,11 +65,11 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	}
 
 
-	protected void registerListener(Connection con) throws JMSException {
+	protected void registerListener() throws JMSException {
 		this.sessions = new HashSet(this.concurrentConsumers);
 		this.consumers = new HashSet(this.concurrentConsumers);
 		for (int i = 0; i < this.concurrentConsumers; i++) {
-			Session session = createSession(con);
+			Session session = createSession(getConnection());
 			MessageConsumer consumer = createListenerConsumer(session);
 			this.sessions.add(session);
 			this.consumers.add(consumer);
