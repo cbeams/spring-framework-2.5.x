@@ -79,7 +79,7 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 	 * @param targetMap the Map to decoarate
 	 */
 	public CachingMapDecorator(Map targetMap) {
-		Assert.notNull(targetMap, "Map cannot be <code>null</code>");
+		Assert.notNull(targetMap, "Target Map is required");
 		this.targetMap = targetMap;
 	}
 
