@@ -178,11 +178,11 @@ public class JaxRpcSupportTests extends TestCase {
 		IRemoteBean proxy = (IRemoteBean) factory.getObject();
 		try {
 			proxy.setName("exception");
-			fail("Should have thrown Service");
+			fail("Should have thrown RemoteException");
 		}
 		catch (RemoteException ex) {
 			// expected
-			assertTrue(ex.getCause() instanceof ServiceException);
+			assertTrue(ex.detail instanceof ServiceException);
 		}
 	}
 
@@ -267,7 +267,7 @@ public class JaxRpcSupportTests extends TestCase {
 		}
 		catch (RemoteException ex) {
 			// expected
-			assertTrue(ex.getCause() instanceof ServiceException);
+			assertTrue(ex.detail instanceof ServiceException);
 		}
 	}
 
