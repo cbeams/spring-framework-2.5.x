@@ -17,12 +17,13 @@
 package org.springframework.orm.hibernate3;
 
 import org.hibernate.StaleObjectStateException;
+import org.hibernate.StaleStateException;
 
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 /**
  * Hibernate-specific subclass of ObjectOptimisticLockingFailureException.
- * Converts Hibernate's StaleObjectStateException.
+ * Converts Hibernate's StaleObjectStateException and StaleStateException.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -32,6 +33,10 @@ public class HibernateOptimisticLockingFailureException extends ObjectOptimistic
 
 	public HibernateOptimisticLockingFailureException(StaleObjectStateException ex) {
 		super(ex.getEntityName(), ex.getIdentifier(), ex.getMessage(), ex);
+	}
+
+	public HibernateOptimisticLockingFailureException(StaleStateException ex) {
+		super(ex.getMessage(), ex);
 	}
 
 }

@@ -39,6 +39,7 @@ import org.hibernate.Query;
 import org.hibernate.QueryException;
 import org.hibernate.SessionFactory;
 import org.hibernate.StaleObjectStateException;
+import org.hibernate.StaleStateException;
 import org.hibernate.TransientObjectException;
 import org.hibernate.WrongClassException;
 import org.hibernate.classic.Session;
@@ -2145,6 +2146,22 @@ public class HibernateTemplateTests extends TestCase {
 			assertEquals(TestBean.class.getName(), ex.getPersistentClassName());
 			assertEquals("id", ex.getIdentifier());
 			assertEquals(sosex, ex.getCause());
+		}
+
+		final StaleStateException ssex = new StaleStateException("msg");
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					throw ssex;
+				}
+			});
+			fail("Should have thrown HibernateOptimisticLockingFailureException");
+		}
+		catch (HibernateOptimisticLockingFailureException ex) {
+			// expected
+			assertNull(ex.getPersistentClassName());
+			assertNull(ex.getIdentifier());
+			assertEquals(ssex, ex.getCause());
 		}
 
 		final QueryException qex = new QueryException("msg");

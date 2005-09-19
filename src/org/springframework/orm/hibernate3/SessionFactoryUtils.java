@@ -44,6 +44,7 @@ import org.hibernate.QueryException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.StaleObjectStateException;
+import org.hibernate.StaleStateException;
 import org.hibernate.TransientObjectException;
 import org.hibernate.UnresolvableObjectException;
 import org.hibernate.WrongClassException;
@@ -642,6 +643,9 @@ public abstract class SessionFactoryUtils {
 		}
 		if (ex instanceof StaleObjectStateException) {
 			return new HibernateOptimisticLockingFailureException((StaleObjectStateException) ex);
+		}
+		if (ex instanceof StaleStateException) {
+			return new HibernateOptimisticLockingFailureException((StaleStateException) ex);
 		}
 		if (ex instanceof QueryException) {
 			return new HibernateQueryException((QueryException) ex);
