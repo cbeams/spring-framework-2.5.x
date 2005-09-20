@@ -6,7 +6,7 @@ package org.springframework.web.filter;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.aop.target.scope.ScopeMap;
-import org.springframework.web.util.RequestHolder;
+import org.springframework.util.Assert;
 
 /**
  * HttpSession-backed ScopeMap implementation. Relies
@@ -29,7 +29,8 @@ public class HttpSessionScopeMap implements ScopeMap {
 	}
 
 	public Object get(Object scopeIdentifier, String name) {
-		HttpSession session = RequestHolder.currentSession();
+		Assert.isInstanceOf(HttpSession.class, scopeIdentifier, "Scope identifier is not HTTP session!");
+		HttpSession session = (HttpSession)scopeIdentifier;
 		if (this.synchronizeOnSession) {
 			synchronized (session) {
 				return session.getAttribute(name);
@@ -40,7 +41,8 @@ public class HttpSessionScopeMap implements ScopeMap {
 	}
 
 	public void put(Object scopeIdentifier, String name, Object o) {
-		HttpSession session = RequestHolder.currentSession();
+		Assert.isInstanceOf(HttpSession.class, scopeIdentifier, "Scope identifier is not HTTP session!");
+		HttpSession session = (HttpSession)scopeIdentifier;
 		if (this.synchronizeOnSession) {
 			synchronized (session) {
 				session.setAttribute(name, o);
@@ -54,7 +56,8 @@ public class HttpSessionScopeMap implements ScopeMap {
 	}
 
 	public void remove(Object scopeIdentifier, String name) {
-		RequestHolder.currentSession().removeAttribute(name);
+		Assert.isInstanceOf(HttpSession.class, scopeIdentifier, "Scope identifier is not HTTP session!");
+		((HttpSession)scopeIdentifier).removeAttribute(name);
 	}
 
 }
