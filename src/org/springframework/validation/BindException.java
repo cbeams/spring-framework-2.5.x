@@ -28,6 +28,7 @@ import java.util.Stack;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.util.Assert;
 
 /**
  * Default implementation of the Errors interface, supporting
@@ -78,6 +79,7 @@ public class BindException extends Exception implements Errors {
 	 * @see DefaultMessageCodesResolver
 	 */
 	public BindException(Object target, String objectName) {
+		Assert.notNull(target, "Target object must not be null");
 		this.target = target;
 		this.objectName = objectName;
 	}
