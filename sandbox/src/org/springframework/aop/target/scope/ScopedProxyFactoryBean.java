@@ -39,6 +39,8 @@ import org.springframework.beans.factory.InitializingBean;
 public class ScopedProxyFactoryBean extends AbstractSingletonProxyFactoryBean 
 		implements InitializingBean, BeanFactoryAware, ScopingConfig {
 
+	private static final long serialVersionUID = 3947369008083198726L;
+
 	/**
 	 * The cached singleton proxy
 	 */
@@ -159,7 +161,7 @@ public class ScopedProxyFactoryBean extends AbstractSingletonProxyFactoryBean
 		return scopedTargetSource.getScopeMap();
 	}
 	
-private class DefaultScopedObject implements ScopedObject {
+	private class DefaultScopedObject implements ScopedObject {
 		
 		private Handle handle;
 		
