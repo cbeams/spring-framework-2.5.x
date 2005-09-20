@@ -49,14 +49,16 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 
 
 	/**
-	 * Create a CachingMapDecorator with strong keys.
+	 * Create a CachingMapDecorator with strong keys,
+	 * using an underlying synchronized Map.
 	 */
 	public CachingMapDecorator() {
 		this(false);
 	}
 
 	/**
-	 * Create a CachingMapDecorator.
+	 * Create a CachingMapDecorator,
+	 * using an underlying synchronized Map.
 	 * @param weakKeys whether to use weak references for keys
 	 */
 	public CachingMapDecorator(boolean weakKeys) {
@@ -65,7 +67,8 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 	}
 
 	/**
-	 * Create a CachingMapDecorator with initial size.
+	 * Create a CachingMapDecorator with initial size,
+	 * using an underlying synchronized Map.
 	 * @param weakKeys whether to use weak references for keys
 	 * @param size the initial cache size
 	 */
@@ -76,7 +79,9 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 
 	/**
 	 * Create a CachingMapDecorator for the given Map.
-	 * @param targetMap the Map to decoarate
+	 * <p>The passed-in Map won't get synchronized explicitly,
+	 * so make sure to pass in a properly synchronized Map, if desired.
+	 * @param targetMap the Map to decorate
 	 */
 	public CachingMapDecorator(Map targetMap) {
 		Assert.notNull(targetMap, "Target Map is required");
@@ -132,6 +137,10 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 	/**
 	 * Get value for key.
 	 * Creates and caches value if it doesn't already exist in the cache.
+	 * <p>This implementation is <i>not</i> synchronized: This is highly
+	 * concurrent but does not guarantee unique instances in the cache,
+	 * as multiple values for the same key could get created in parallel.
+	 * Consider overriding this method to synchronize it, if desired.
 	 * @see #create(Object)
 	 */
 	public Object get(Object key) {
