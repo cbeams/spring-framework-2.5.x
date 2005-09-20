@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import junit.framework.TestCase;
+import junit.framework.*;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TestBean;
@@ -40,13 +40,17 @@ public class BeanFactoryBootstrapTests extends TestCase {
 		this.savedProps = System.getProperties();
 	}
 
-	protected void tearDown() {
+    public BeanFactoryBootstrapTests(String string) {
+        super(string);
+    }
+
+    protected void tearDown() {
 		System.setProperties(this.savedProps);
 	}
 
 	/** How to test many singletons? */
 	public void testGetInstanceWithNullPropertiesFails() throws BeansException {
-		System.setProperties(null);
+        System.setProperties(null);
 		BeanFactoryBootstrap.reinitialize();
 		try {
 			BeanFactoryBootstrap bsb = BeanFactoryBootstrap.getInstance();
@@ -58,7 +62,7 @@ public class BeanFactoryBootstrapTests extends TestCase {
 	}
 	
 	public void testGetInstanceWithUnknownBeanFactoryClassFails() throws BeansException {
-		System.setProperties(null);
+        System.setProperties(null);
 		Properties p = new Properties();
 		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class",
 		"org.springframework.beans.factory.support.xxxxXmlBeanFactory");
@@ -75,7 +79,7 @@ public class BeanFactoryBootstrapTests extends TestCase {
 	}
 	
 	public void testGetInstanceWithMistypedBeanFactoryClassFails() throws BeansException {
-		System.setProperties(null);
+        System.setProperties(null);
 		Properties p = new Properties();
 		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class",
 		"java.awt.Point");
@@ -93,7 +97,7 @@ public class BeanFactoryBootstrapTests extends TestCase {
 			ex.printStackTrace();
 		}
 	}
-	
+
 //	public void testXmlBeanFactory() throws Exception {
 //		Properties p = new Properties();
 //		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class", 
@@ -128,7 +132,7 @@ public class BeanFactoryBootstrapTests extends TestCase {
 //	}
 
 	public void testDummyBeanFactory() throws Exception {
-		Properties p = new Properties();
+        Properties p = new Properties();
 		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class",
 		"org.springframework.beans.factory.access.BeanFactoryBootstrapTests$DummyBeanFactory");
 		
@@ -150,8 +154,19 @@ public class BeanFactoryBootstrapTests extends TestCase {
 		}
 	}
 
+    // A temporary solution to make tests work on JRockit VM
+    // Alef knows more about this
+    public static Test suite() {
+        TestSuite suite = new TestSuite();
+        suite.addTest(new BeanFactoryBootstrapTests("testGetInstanceWithNullPropertiesFails"));
+        suite.addTest(new BeanFactoryBootstrapTests("testGetInstanceWithUnknownBeanFactoryClassFails"));
+        suite.addTest(new BeanFactoryBootstrapTests("testGetInstanceWithMistypedBeanFactoryClassFails"));
+        suite.addTest(new BeanFactoryBootstrapTests("testDummyBeanFactory"));
+        return suite;
+    }
 
-	public static class DummyBeanFactory implements BeanFactory {
+
+    private static class DummyBeanFactory implements BeanFactory {
 
 		public Map map = new HashMap();
 
@@ -187,6 +202,5 @@ public class BeanFactoryBootstrapTests extends TestCase {
 		public String[] getAliases(String name) {
 			throw new UnsupportedOperationException("getAliases");
 		}
-	}
-
+    }
 }
