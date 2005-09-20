@@ -94,7 +94,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 */
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		if (jdbcTemplate == null) {
-			throw new IllegalArgumentException("jdbcTemplate must not be <code>null</code>");
+			throw new IllegalArgumentException("jdbcTemplate must not be null");
 		}
 		this.jdbcTemplate = jdbcTemplate;
 	}

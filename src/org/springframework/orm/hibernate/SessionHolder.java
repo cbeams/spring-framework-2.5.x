@@ -85,8 +85,8 @@ public class SessionHolder extends ResourceHolderSupport {
 	}
 
 	public void addSession(Object key, Session session) {
-		Assert.notNull(key, "Key must not be <code>null</code>");
-		Assert.notNull(session, "Session must not be <code>null</code>");
+		Assert.notNull(key, "Key must not be null");
+		Assert.notNull(session, "Session must not be null");
 		this.sessionMap.put(key, session);
 	}
 

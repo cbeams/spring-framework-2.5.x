@@ -36,7 +36,7 @@ public class SessionHolder extends ResourceHolderSupport {
 	private final Session session;
 
 	public SessionHolder(Session session) {
-		Assert.notNull(session, "Session must not be <code>null</code>");
+		Assert.notNull(session, "Session must not be null");
 		this.session = session;
 	}
 

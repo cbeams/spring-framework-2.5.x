@@ -48,7 +48,7 @@ public class PropertyValue implements Serializable {
 	 */
 	public PropertyValue(String name, Object value) {
 		if (name == null) {
-			throw new IllegalArgumentException("Property name cannot be <code>null</code>");
+			throw new IllegalArgumentException("Property name cannot be null");
 		}
 		this.name = name;
 		this.value = value;

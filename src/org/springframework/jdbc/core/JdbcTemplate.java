@@ -289,7 +289,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	public Object query(final String sql, final ResultSetExtractor rse) throws DataAccessException {
 		if (sql == null) {
-			throw new InvalidDataAccessApiUsageException("SQL must not be <code>null</code>");
+			throw new InvalidDataAccessApiUsageException("SQL must not be null");
 		}
 		if (JdbcUtils.countParameterPlaceholders(sql, '?', "'\"") > 0) {
 			throw new InvalidDataAccessApiUsageException(
@@ -371,7 +371,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	public int update(final String sql) throws DataAccessException {
 		if (sql == null) {
-			throw new InvalidDataAccessApiUsageException("SQL must not be <code>null</code>");
+			throw new InvalidDataAccessApiUsageException("SQL must not be null");
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL update [" + sql + "]");
@@ -393,7 +393,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	public int[] batchUpdate(final String[] sql) throws DataAccessException {
 		if (sql == null) {
-			throw new InvalidDataAccessApiUsageException("SQL must not be <code>null</code>");
+			throw new InvalidDataAccessApiUsageException("SQL must not be null");
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update of " + sql.length + " statements");
@@ -540,7 +540,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	public Object query(String sql, PreparedStatementSetter pss, final ResultSetExtractor rse)
 			throws DataAccessException {
 		if (sql == null) {
-			throw new InvalidDataAccessApiUsageException("SQL may not be <code>null</code>");
+			throw new InvalidDataAccessApiUsageException("SQL may not be null");
 		}
 		return query(new SimplePreparedStatementCreator(sql), pss, rse);
 	}

@@ -104,7 +104,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @see org.springframework.util.AntPathMatcher
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
-		Assert.notNull(pathMatcher, "PathMatcher must not be <code>null</code>");
+		Assert.notNull(pathMatcher, "PathMatcher must not be null");
 		this.pathMatcher = pathMatcher;
 	}
 

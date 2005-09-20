@@ -81,7 +81,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 */
 	public void setCollectionClass(Class collectionClass) {
 		if (collectionClass == null) {
-			throw new IllegalArgumentException("collectionClass must not be <code>null</code>");
+			throw new IllegalArgumentException("collectionClass must not be null");
 		}
 		if (!Collection.class.isAssignableFrom(collectionClass)) {
 			throw new IllegalArgumentException("collectionClass must implement [java.util.Collection]");

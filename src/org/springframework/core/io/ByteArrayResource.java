@@ -58,7 +58,7 @@ public class ByteArrayResource extends AbstractResource {
 	 */
 	public ByteArrayResource(byte[] byteArray, String description) {
 		if (byteArray == null) {
-			throw new IllegalArgumentException("Byte array must not be <code>null</code>");
+			throw new IllegalArgumentException("Byte array must not be null");
 		}
 		this.byteArray = byteArray;
 		this.description = description;

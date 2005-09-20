@@ -930,7 +930,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public List findByCriteria(final DetachedCriteria criteria, final int firstResult, final int maxResults)
 			throws DataAccessException {
 
-		Assert.notNull(criteria, "DetachedCriteria must not be <code>null</code>");
+		Assert.notNull(criteria, "DetachedCriteria must not be null");
 		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Criteria executableCriteria = criteria.getExecutableCriteria(session);
@@ -953,7 +953,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public List findByExample(final Object exampleEntity, final int firstResult, final int maxResults)
 			throws DataAccessException {
 
-		Assert.notNull(exampleEntity, "Example entity must not be <code>null</code>");
+		Assert.notNull(exampleEntity, "Example entity must not be null");
 		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				Criteria executableCriteria = session.createCriteria(exampleEntity.getClass());

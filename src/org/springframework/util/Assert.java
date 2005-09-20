@@ -37,7 +37,7 @@ import java.util.Map;
  * deemed invalid, an IllegalArgumentException is thrown. For example:
  *
  * <pre>
- * Assert.notNull(clazz, "The class must not be <code>null</code>");
+ * Assert.notNull(clazz, "The class must not be null");
  * Assert.isTrue(i > 0, "The value must be greater than zero");</pre>
  *
  * Mainly for internal use within the framework; consider Jakarta's Commons Lang
@@ -80,7 +80,7 @@ public abstract class Assert {
 	/**
 	 * Assert that an object is not null.
 	 * <pre>
-	 * Assert.notNull(clazz, "The class must not be <code>null</code>");</pre>
+	 * Assert.notNull(clazz, "The class must not be null");</pre>
 	 * @param object the object to check
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if the object is <code>null</code>
@@ -99,7 +99,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object is <code>null</code>
 	 */
 	public static void notNull(Object object) {
-		notNull(object, "[Assertion failed] - this argument is required; it cannot be <code>null</code>");
+		notNull(object, "[Assertion failed] - this argument is required; it cannot be null");
 	}
 
 
@@ -293,7 +293,7 @@ public abstract class Assert {
 	 * @see Class#isInstance
 	 */
 	public static void isInstanceOf(Class clazz, Object obj, String message) {
-		Assert.notNull(clazz, "The clazz to perform the instanceof assertion cannot be <code>null</code>");
+		Assert.notNull(clazz, "The clazz to perform the instanceof assertion cannot be null");
 		Assert.isTrue(clazz.isInstance(obj), message +
 				"Object of class '" + (obj != null ? obj.getClass().getName() : "[null]") +
 				"' must be an instance of '" + clazz.getName() + "'");

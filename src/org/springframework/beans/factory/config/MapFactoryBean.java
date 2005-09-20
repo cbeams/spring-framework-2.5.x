@@ -54,7 +54,7 @@ public class MapFactoryBean extends AbstractFactoryBean {
 	 */
 	public void setTargetMapClass(Class targetMapClass) {
 		if (targetMapClass == null) {
-			throw new IllegalArgumentException("targetMapClass must not be <code>null</code>");
+			throw new IllegalArgumentException("targetMapClass must not be null");
 		}
 		if (!Map.class.isAssignableFrom(targetMapClass)) {
 			throw new IllegalArgumentException("targetMapClass must implement [java.util.Map]");

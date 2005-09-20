@@ -406,8 +406,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
-		Assert.notNull(requiredType, "Required type must not be <code>null</code>");
-		Assert.notNull(propertyEditor, "PropertyEditor must not be <code>null</code>");
+		Assert.notNull(requiredType, "Required type must not be null");
+		Assert.notNull(propertyEditor, "PropertyEditor must not be null");
 		this.customEditors.put(requiredType, propertyEditor);
 	}
 
@@ -420,7 +420,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
-		Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be <code>null</code>");
+		Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be null");
 		this.beanPostProcessors.add(beanPostProcessor);
 		if (beanPostProcessor instanceof DestructionAwareBeanPostProcessor) {
 			this.hasDestructionAwareBeanPostProcessors = true;
@@ -467,7 +467,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 	public void registerSingleton(String beanName, Object singletonObject) throws BeanDefinitionStoreException {
 		Assert.hasText(beanName, "Bean name must not be empty");
-		Assert.notNull(singletonObject, "Singleton object must not be <code>null</code>");
+		Assert.notNull(singletonObject, "Singleton object must not be null");
 		synchronized (this.singletonCache) {
 			Object oldObject = this.singletonCache.get(beanName);
 			if (oldObject != null) {
@@ -487,7 +487,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	protected void addSingleton(String beanName, Object singletonObject) {
 		Assert.hasText(beanName, "Bean name must not be empty");
-		Assert.notNull(singletonObject, "Singleton object must not be <code>null</code>");
+		Assert.notNull(singletonObject, "Singleton object must not be null");
 		synchronized (this.singletonCache) {
 			this.singletonCache.put(beanName, singletonObject);
 		}

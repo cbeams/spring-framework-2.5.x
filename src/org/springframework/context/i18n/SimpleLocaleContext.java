@@ -37,7 +37,7 @@ public class SimpleLocaleContext implements LocaleContext {
 	 * @param locale the Locale to expose
 	 */
 	public SimpleLocaleContext(Locale locale) {
-		Assert.notNull(locale, "Locale must not be <code>null</code>");
+		Assert.notNull(locale, "Locale must not be null");
 		this.locale = locale;
 	}
 

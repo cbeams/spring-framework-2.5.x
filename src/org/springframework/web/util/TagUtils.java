@@ -59,7 +59,7 @@ public abstract class TagUtils {
 	public static int getScope(String scope) {
 		if (scope == null) {
 			throw new IllegalArgumentException(
-					"Scope to search for cannot be <code>null</code>");
+					"Scope to search for cannot be null");
 		}
 		else if (scope.equals(SCOPE_REQUEST)) {
 			return PageContext.REQUEST_SCOPE;
