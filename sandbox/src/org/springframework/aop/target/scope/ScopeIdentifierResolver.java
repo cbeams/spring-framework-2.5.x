@@ -19,8 +19,8 @@ public interface ScopeIdentifierResolver {
 	/**
 	 * Return the identifier of the current scope.
 	 * How this is populated is dependent on the implementation.
-	 * A ThreadLocal implementation may be used, in which case the 
-	 * scope identifier may not matter. Implementations must
+	 * A ThreadLocal implementation may be used or the source may
+	 * be a cache that is cleared every so often. Implementations must
 	 * return the same value in successive method calls within
 	 * the one scope.
 	 * @throws IllegalStateException if there is no current scope
