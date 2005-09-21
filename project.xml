@@ -373,7 +373,7 @@
 		</dependency>
 		<dependency>
 			<id>itext</id>
-			<version>1.1.4</version>
+			<version>1.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>jamon</groupId>
@@ -389,6 +389,12 @@
 			<id>jdom</id>
 			<version>b9</version>
 		</dependency>
+                <dependency>
+                        <groupId>jexcelapi</groupId>
+                        <artifactId>jxl</artifactId>
+                        <version>2.4.2</version>
+                </dependency>
+		
 		<dependency>
 			<groupId>jotm</groupId>
 			<artifactId>jotm</artifactId>
