@@ -123,7 +123,7 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 		// check whether session is required
 		if (this.requireSession) {
 			if (request.getPortletSession(false) == null) {
-				throw new PortletException("Pre-existing session required but none found");
+				throw new SessionRequiredException("Pre-existing session required but none found");
 			}
 		}
 
