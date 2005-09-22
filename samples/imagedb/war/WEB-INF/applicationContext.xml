@@ -32,9 +32,9 @@
 		<property name="dataSource" ref="dataSource"/>
 	</bean>
 
-	<!-- NativeJdbcExtractor for the Commons DBCP connection pool above -->
+	<!-- NativeJdbcExtractor for the C3P0 connection pool above -->
 	<!-- (just needed for oracleLobHandler) -->
-	<bean id="nativeJdbcExtractor" class="org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor"
+	<bean id="nativeJdbcExtractor" class="org.springframework.jdbc.support.nativejdbc.C3P0NativeJdbcExtractor"
 			lazy-init="true"/>
 
 	<!-- LobHandler for Oracle JDBC drivers -->
