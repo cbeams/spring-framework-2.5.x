@@ -134,6 +134,9 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	public boolean preHandle(PortletRequest request, PortletResponse response, Object handler)
 	    throws DataAccessException {
 
+        if (!(request instanceof RenderRequest))
+            return true;
+        
 		if ((isSingleSession() && TransactionSynchronizationManager.hasResource(getSessionFactory())) ||
 		    SessionFactoryUtils.isDeferredCloseActive(getSessionFactory())) {
 			// do not modify the Session: just mark the request accordingly
@@ -197,6 +200,9 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 			PortletRequest request, PortletResponse response, Object handler, Exception ex)
 			throws DataAccessException {
 
+        if (!(request instanceof RenderRequest))
+            return;
+        
 		String participateAttributeName = getParticipateAttributeName();
 		Integer count = (Integer) request.getAttribute(participateAttributeName);
 		if (count != null) {

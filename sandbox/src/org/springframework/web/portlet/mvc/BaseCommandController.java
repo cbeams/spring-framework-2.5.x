@@ -16,18 +16,13 @@
 
 package org.springframework.web.portlet.mvc;
 
-import javax.portlet.ActionRequest;
-import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
-import javax.portlet.PortletSession;
-import javax.portlet.RenderRequest;
 
 import org.springframework.validation.BindException;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
-import org.springframework.web.portlet.support.SessionRequiredException;
 
 /**
  * <p>Controller implementation which creates an object (the command object) on
@@ -134,30 +129,6 @@ import org.springframework.web.portlet.support.SessionRequiredException;
  * @author John A. Lewis
  */
 public abstract class BaseCommandController extends AbstractController {
-
-	/**
-	 * Unlike the Servlet version of these classes, we have to deal with the
-	 * two-phase nature of the porlet request.  To do this, we need to pass
-	 * forward the command object and the bind/validation errors that occured
-	 * on the command object from the action phase to the render phase.
-	 * The only direct way to pass things forward and preserve them for each
-	 * render request is through render parameters, but these are limited to
-	 * String objects and we need to pass more complicated objects.  The only
-	 * other way to do this is in the session.  The bad thing about using the
-	 * session is that we have no way of knowing when we are done re-rendering
-	 * the request and so we don't know when we can remove the objects from
-	 * the session.  So we will end up polluting the session with old objects
-	 * when we finally leave the render of this controller and move on to 
-	 * somthing else.  To minimize the pollution, we will use a static string
-	 * value as the session attribute name.  At least this way we are only ever 
-	 * leaving one orphaned set behind.  The methods that return these names
-	 * can be overridden if you want to use a different method, but be aware
-	 * of the session pollution that may occur.
-	 */
-	private static final String RENDER_COMMAND_SESSION_ATTRIBUTE = 
-			"org.springframework.web.portlet.mvc.RenderCommand";
-	private static final String RENDER_ERRORS_SESSION_ATTRIBUTE = 
-			"org.springframework.web.portlet.mvc.RenderErrors";
 
 	public static final String DEFAULT_COMMAND_NAME = "command";
 
@@ -459,78 +430,6 @@ public abstract class BaseCommandController extends AbstractController {
 	 */
 	protected void onBindAndValidate(PortletRequest request, Object command, BindException errors)
 			throws Exception {
-	}
-
-	/** 
-	 * Return the name of the session attribute that holds
-	 * the render phase command object for this form controller.
-	 * @return the name of the render phase command object session attribute
-	 * @see javax.portlet.PortletSession#getAttribute
-	 */
-	protected String getRenderCommandSessionAttributeName() {
-		return RENDER_COMMAND_SESSION_ATTRIBUTE;
-	}
-
-	/** 
-	 * Return the name of the session attribute that holds
-	 * the render phase command object for this form controller.
-	 * @return the name of the render phase command object session attribute
-	 * @see javax.portlet.PortletSession#getAttribute
-	 */
-	protected String getRenderErrorsSessionAttributeName() {
-		return RENDER_ERRORS_SESSION_ATTRIBUTE;
-	}
-
-	/**
-	 * Get the command object cached for the render phase
-	 * @see #getRenderErrors
-	 * @see #getRenderCommandSessionAttributeName
-	 * @see #setRenderCommandAndErrors
-	 */
-	protected final Object getRenderCommand(RenderRequest request)
-			throws PortletException {
-		PortletSession session = request.getPortletSession(false);
-		if (session == null)
-		    throw new SessionRequiredException("could not obtain portlet session");
-		Object command = session.getAttribute(getRenderCommandSessionAttributeName());
-		if (command == null)
-		    throw new SessionRequiredException("could not obtain command object from portlet session");
-		return command;
-	}
-
-	/**
-	 * Get the bind and validation errors cached for the render phase
-	 * @see #getRenderCommand
-	 * @see #getRenderErrorsSessionAttributeName
-	 * @see #setRenderCommandAndErrors
-	 */
-	protected final BindException getRenderErrors(RenderRequest request) 
-			throws PortletException {
-		PortletSession session = request.getPortletSession(false);
-		if (session == null)
-		    throw new SessionRequiredException("could not obtain portlet session");
-		BindException errors = (BindException)session.getAttribute(getRenderErrorsSessionAttributeName());
-		if (errors == null)
-		    throw new SessionRequiredException("could not obtain errors object from portlet session");
-		return errors;
-	}
-
-	/**
-	 * Set the command object and errors object for the render phase.
-	 * @param request the current action request
-	 * @param command the command object to preserve for the render phase
-	 * @param errors the errors from binding and validation to preserve for the render phase
-	 * @see #getRenderCommand
-	 * @see #getRenderErrors
-	 * @see #getRenderCommandSessionAttributeName
-	 * @see #getRenderErrorsSessionAttributeName
-	 */
-	protected final void setRenderCommandAndErrors(ActionRequest request,
-			Object command, BindException errors) throws Exception {
-		if (logger.isDebugEnabled()) logger.debug("Storing command and error objects in session for render phase");
-		PortletSession session = request.getPortletSession();
-		session.setAttribute(getRenderCommandSessionAttributeName(), command);
-		session.setAttribute(getRenderErrorsSessionAttributeName(), errors);
 	}
 
 }

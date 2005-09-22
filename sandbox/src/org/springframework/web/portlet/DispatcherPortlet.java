@@ -780,19 +780,17 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			try {
 
 				// Check for forwarded exception from the action phase
-				PortletSession session = request.getPortletSession(false);
-				if (session != null) {
-				    if (TRUE.equals(request.getParameter(ACTION_EXCEPTION_PARAMETER))) {
-						Exception ex = (Exception)session.getAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE);
-						if (ex != null) {
-						    logger.error("render phase found exception caught during action phase -- rethrowing it");
-						    throw ex;
-						}
-				    } else {
-				        session.removeAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE);
-				    }
-				}
-				
+				PortletSession session = request.getPortletSession();
+			    if (TRUE.equals(request.getParameter(ACTION_EXCEPTION_PARAMETER))) {
+					Exception ex = (Exception)session.getAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE);
+					if (ex != null) {
+					    logger.error("render phase found exception caught during action phase -- rethrowing it");
+					    throw ex;
+					}
+			    } else {
+			        session.removeAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE);
+			    }
+			    
 				// Determine handler for the current request.
 				mappedHandler = getHandler(processedRequest, false);
 				if (mappedHandler == null || mappedHandler.getHandler() == null) {
