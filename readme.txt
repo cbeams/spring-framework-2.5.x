@@ -88,7 +88,7 @@ The "dist" directory contains the following distinct jar files for use in applic
 jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-core" (~110 KB)
+* "spring-core" (~115 KB)
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
@@ -116,19 +116,19 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: JMX support, JCA support, scheduling support, mail support, caching support
 - Dependencies: spring-beans, (spring-dao, spring-context, spring-jdbc, JMX, Quartz, JavaMail, EHCache)
 
-* "spring-web" (~130 KB)
+* "spring-web" (~135 KB)
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
 - Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts, JSF)
 
-* "spring-webmvc" (~195 KB)
+* "spring-webmvc" (~200 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI, Velocity, FreeMarker, JasperReports)
 
-* "spring-remoting" (~130 KB)
+* "spring-remoting" (~135 KB)
 - Contents: remoting support, EJB support, JMS support
 - Dependencies: spring-aop, spring-beans, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB, JMS)
 
-* "spring-orm" (~170 KB)
+* "spring-orm" (~175 KB)
 - Contents: iBATIS SQL Maps support, Apache OJB support, TopLink support, JDO support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, iBATIS SQL Maps, Apache OJB, TopLink, JDO)
 
@@ -136,7 +136,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: Hibernate 2.1 support, Hibernate 3.x support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, Hibernate2, Hibernate3)
 
-* "spring" (~1805 KB)
+* "spring" (~1830 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 

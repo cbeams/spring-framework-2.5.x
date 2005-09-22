@@ -3,13 +3,14 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.5 (26.9.2005)
+Changes in version 1.2.5 (23.9.2005)
 ------------------------------------
 
 Package org.springframework.aop
 * added overloaded "getProxy" method with an explicit ClassLoader argument to ProxyFactory
 * added protected "Object getProxy(AopProxy)" hook to ProxyFactoryBean, for specifying a custom class loader
 * modified AbstractAutoProxyCreator to defer setting of the frozen flag until *after* advice has been applied (SPR-1250)
+* lowered Cglib2AopProxy's log level for detected final methods on a proxy class from "warn" to "info"
 
 Package org.springframework.beans
 * fixed BeanWrapperImpl's "getPropertyType" implementation to avoid potential NPE in case of no custom editors
@@ -48,6 +49,9 @@ Package org.springframework.remoting
 * reworked JndiRmiServiceExporter to handle RMI invoker targets as well (mainly for WebLogic's T3)
 * added "lookupServiceOnStartup" flag to JaxRpcPortClientInterceptor/ProxyFactoryBean, to be turned off for lazy init
 
+Package org.springframework.samples
+* fixed Image Database to have its NativeJdbcExtractor defined for C3P0 (applied when using OracleLobHandler)
+
 Package org.springframework.transaction
 * added protected "Object getProxy(AopProxy)" hook to TransactionProxyFactoryBean, for specifying a custom class loader
 
@@ -79,6 +83,7 @@ Changes in version 1.2.4 (26.8.2005)
 Package org.springframework.aop
 * added "loggerName" bean property to AbstractTraceInterceptor, allowing to log into a specified log category
 * added "whenExhaustedAction" and "whenExhaustedActionName" bean properties to CommonsPoolTargetSource
+* Cglib2AopProxy logs warnings when a final method cannot be proxied (CGLIB will simply ignore such a method)
 
 Package org.springframework.beans
 * changed BeanWrapperImpl's default behavior to not extract old property values, avoiding side effects caused by getters
