@@ -44,8 +44,9 @@ import org.springframework.util.FileCopyUtils;
 
 /**
  * LobHandler implementation for Oracle databases. Uses proprietary API to
- * create oracle.sql.BLOB and oracle.sql.CLOB instances, as necessary when
- * working with Oracle's JDBC driver. Developed and tested on Oracle 9i.
+ * create <code>oracle.sql.BLOB</code> and <code>oracle.sql.CLOB</code>
+ * instances, as necessary when working with Oracle's JDBC driver.
+ * Developed and tested on Oracle 9i; also tested on Oracle 10g.
  *
  * <p>While most databases are able to work with DefaultLobHandler, Oracle just
  * accepts Blob/Clob instances created via its own proprietary BLOB/CLOB API,
@@ -54,16 +55,17 @@ import org.springframework.util.FileCopyUtils;
  * this LobHandler implementation.
  *
  * <p>Needs to work on a native JDBC Connection, to be able to cast it to
- * oracle.jdbc.OracleConnection. If you pass in Connections from a connection
- * pool (the usual case in a J2EE environment), you need to set an appropriate
- * NativeJdbcExtractor to allow for automatical retrieval of the underlying
- * native JDBC Connection. LobHandler and NativeJdbcExtractor are separate
- * concerns, therefore they are represented by separate strategy interfaces.
+ * <code>oracle.jdbc.OracleConnection</code>. If you pass in Connections from
+ * a connection pool (the usual case in a J2EE environment), you need to set
+ * an appropriate NativeJdbcExtractor to allow for automatical retrieval of
+ * the underlying native JDBC Connection. LobHandler and NativeJdbcExtractor
+ * are separate concerns, therefore they are represented by separate strategy
+ * interfaces.
  *
  * <p>Coded via reflection to avoid dependencies on Oracle classes.
  * Even reads in Oracle constants via reflection because of different Oracle
- * drivers (classes12, ojdbc14) having different constant values!
- * As it initializes the Oracle classes on instantiation, do not define this
+ * drivers (classes12, ojdbc14) having different constant values! As this
+ * LobHandler initializes Oracle classes on instantiation, do not define this
  * as eager-initializing singleton if you do not want to depend on the Oracle
  * JAR being in the class path: use "lazy-init=true" to avoid this issue.
  *
@@ -138,15 +140,16 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 	/**
 	 * Set an appropriate NativeJdbcExtractor to be able to retrieve the underlying
-	 * native oracle.jdbc.OracleConnection. This is necessary for DataSource-based
-	 * connection pools, as those need to return wrapped JDBC Connection handles.
+	 * native <code>oracle.jdbc.OracleConnection</code>. This is necessary for
+	 * DataSource-based connection pools, as those need to return wrapped JDBC
+	 * Connection handles that cannot be cast to a native Connection implementation.
 	 * <p>Effectively, this LobHandler just invokes a single NativeJdbcExtractor
 	 * method, namely <code>getNativeConnectionFromStatement</code> with a
 	 * PreparedStatement argument (falling back to a
 	 * <code>PreparedStatement.getConnection()</code> call if no extractor is set).
 	 * <p>A common choice is SimpleNativeJdbcExtractor, whose Connection unwrapping
-	 * (which is what OracleLobHandler needs) will work with almost any connection
-	 * pool. See SimpleNativeJdbcExtractor's javadoc for details.
+	 * (which is what OracleLobHandler needs) will work with many connection pools.
+	 * See SimpleNativeJdbcExtractor's javadoc for details.
 	 * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor#getNativeConnectionFromStatement
 	 * @see org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor
 	 * @see oracle.jdbc.OracleConnection
@@ -212,6 +215,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 		public void setBlobAsBytes(PreparedStatement ps, int paramIndex, final byte[] content)
 				throws SQLException {
+
 			if (content != null) {
 				Blob blob = (Blob) createLob(ps, blobClass, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
@@ -234,6 +238,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		public void setBlobAsBinaryStream(
 				PreparedStatement ps, int paramIndex, final InputStream binaryStream, int contentLength)
 				throws SQLException {
+
 			if (binaryStream != null) {
 				Blob blob = (Blob) createLob(ps, blobClass, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
@@ -255,6 +260,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 		public void setClobAsString(PreparedStatement ps, int paramIndex, final String content)
 		    throws SQLException {
+
 			if (content != null) {
 				Clob clob = (Clob) createLob(ps, clobClass, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
@@ -277,6 +283,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		public void setClobAsAsciiStream(
 				PreparedStatement ps, int paramIndex, final InputStream asciiStream, int contentLength)
 		    throws SQLException {
+
 			if (asciiStream != null) {
 				Clob clob = (Clob) createLob(ps, clobClass, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
@@ -299,6 +306,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		public void setClobAsCharacterStream(
 				PreparedStatement ps, int paramIndex, final Reader characterStream, int contentLength)
 		    throws SQLException {
+
 			if (characterStream != null) {
 				Clob clob = (Clob) createLob(ps, clobClass, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
@@ -354,6 +362,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		 */
 		protected Connection getOracleConnection(PreparedStatement ps)
 				throws SQLException, ClassNotFoundException {
+
 			Connection conToUse = (nativeJdbcExtractor != null) ?
 					nativeJdbcExtractor.getNativeConnectionFromStatement(ps) : ps.getConnection();
 			if (!connectionClass.isAssignableFrom(conToUse.getClass())) {

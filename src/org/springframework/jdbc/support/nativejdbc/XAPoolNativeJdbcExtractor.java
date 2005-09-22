@@ -25,10 +25,12 @@ import org.enhydra.jdbc.core.CorePreparedStatement;
 
 /**
  * Implementation of the NativeJdbcExtractor interface for ObjectWeb's XAPool.
- * Returns underlying native Connections and native PreparedStatements to
+ *
+ * <p>Returns underlying native Connections and native PreparedStatements to
  * application code instead of XAPool's wrapper implementations; unwraps the
  * Connection for native Statements and native CallableStatements.
- * The returned JDBC classes can then safely be cast, e.g. to OracleResultSet.
+ * The returned JDBC classes can then safely be cast, e.g. to
+ * <code>oracle.jdbc.OracleConnection</code>.
  *
  * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working with
  * an XAPool DataSource: If a given object is not an XAPool wrapper, it will
@@ -40,7 +42,7 @@ import org.enhydra.jdbc.core.CorePreparedStatement;
 public class XAPoolNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	/**
-	 * Return true, as CoreStatement does not allow access to the
+	 * Return <code>true</code>, as CoreStatement does not allow access to the
 	 * underlying Connection.
 	 */
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
@@ -48,7 +50,7 @@ public class XAPoolNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 	/**
-	 * Return true, as CoreCallableStatement does not allow access to the
+	 * Return <code>true</code>, as CoreCallableStatement does not allow access to the
 	 * underlying Connection.
 	 */
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {

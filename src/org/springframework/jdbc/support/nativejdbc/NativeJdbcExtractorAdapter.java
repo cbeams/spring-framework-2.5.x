@@ -50,21 +50,21 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor {
 
 	/**
-	 * Return false by default.
+	 * Return <code>false</code> by default.
 	 */
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
 		return false;
 	}
 
 	/**
-	 * Return false by default.
+	 * Return <code>false</code> by default.
 	 */
 	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
 		return false;
 	}
 
 	/**
-	 * Return false by default.
+	 * Return <code>false</code> by default.
 	 */
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 		return false;

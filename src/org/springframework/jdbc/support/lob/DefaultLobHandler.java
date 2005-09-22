@@ -26,14 +26,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Default implementation of the LobHandler interface. Invokes the direct accessor
- * methods that java.sql.ResultSet and java.sql.PreparedStatement offer.
+ * Default implementation of the LobHandler interface. Invokes the
+ * direct accessor methods that <code>java.sql.ResultSet</code> and
+ * <code>java.sql.PreparedStatement</code> offer.
  *
  * <p>This LobHandler should work for any JDBC driver that is JDBC compliant
  * in terms of the spec's suggestions regarding simple BLOB and CLOB handling.
+ * This does not apply to Oracle 9i, and only to a limited degree to Oracle 10g!
+ * As a consequence, use OracleLobHandler for accessing Oracle BLOBs/CLOBs.
  *
  * @author Juergen Hoeller
  * @since 04.12.2003
+ * @see OracleLobHandler
  * @see java.sql.ResultSet#getBytes
  * @see java.sql.ResultSet#getBinaryStream
  * @see java.sql.ResultSet#getString
@@ -48,6 +52,7 @@ import org.apache.commons.logging.LogFactory;
 public class DefaultLobHandler extends AbstractLobHandler {
 
 	protected final Log logger = LogFactory.getLog(getClass());
+
 
 	public byte[] getBlobAsBytes(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning BLOB as bytes");
@@ -84,6 +89,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 		public void setBlobAsBytes(PreparedStatement ps, int paramIndex, byte[] content)
 				throws SQLException {
+
 			ps.setBytes(paramIndex, content);
 			if (logger.isDebugEnabled()) {
 				logger.debug(content != null ? "Set bytes for BLOB with length " + content.length :
@@ -94,6 +100,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		public void setBlobAsBinaryStream(
 				PreparedStatement ps, int paramIndex, InputStream binaryStream, int contentLength)
 				throws SQLException {
+
 			ps.setBinaryStream(paramIndex, binaryStream, contentLength);
 			if (logger.isDebugEnabled()) {
 				logger.debug(binaryStream != null ? "Set binary stream for BLOB with length " + contentLength :
@@ -103,6 +110,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 		public void setClobAsString(PreparedStatement ps, int paramIndex, String content)
 		    throws SQLException {
+
 			ps.setString(paramIndex, content);
 			if (logger.isDebugEnabled()) {
 				logger.debug(content != null ? "Set string for CLOB with length " + content.length() :
@@ -113,6 +121,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		public void setClobAsAsciiStream(
 				PreparedStatement ps, int paramIndex, InputStream asciiStream, int contentLength)
 		    throws SQLException {
+
 			ps.setAsciiStream(paramIndex, asciiStream, contentLength);
 			if (logger.isDebugEnabled()) {
 				logger.debug(asciiStream != null ? "Set ASCII stream for CLOB with length " + contentLength :
@@ -124,6 +133,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		public void setClobAsCharacterStream(
 				PreparedStatement ps, int paramIndex, Reader characterStream, int contentLength)
 		    throws SQLException {
+
 			ps.setCharacterStream(paramIndex, characterStream, contentLength);
 			if (logger.isDebugEnabled()) {
 				logger.debug(characterStream != null ? "Set character stream for CLOB with length " + contentLength :

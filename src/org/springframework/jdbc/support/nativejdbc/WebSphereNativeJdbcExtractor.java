@@ -28,10 +28,11 @@ import org.springframework.dao.DataAccessResourceFailureException;
 
 /**
  * Implementation of the NativeJdbcExtractor interface for WebSphere.
- * Returns the underlying native Connection to application code instead
+ *
+ * <p>Returns the underlying native Connection to application code instead
  * of WebSphere's wrapper implementation; unwraps the Connection for
  * native statements. The returned JDBC classes can then safely be cast,
- * e.g. to OracleConnection.
+ * e.g. to <code>oracle.jdbc.OracleConnection</code>.
  *
  * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working
  * with a WebSphere DataSource: If a given object is not a WebSphere
@@ -96,23 +97,24 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 			logger.debug("Could not find WebSphere 4 connection pool classes", ex);
 		}
 	}
+	
 
 	/**
-	 * Return true, as WebSphere returns wrapped Statements.
+	 * Return <code>true</code>, as WebSphere returns wrapped Statements.
 	 */
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
 		return true;
 	}
 
 	/**
-	 * Return true, as WebSphere returns wrapped PreparedStatements.
+	 * Return <code>true</code>, as WebSphere returns wrapped PreparedStatements.
 	 */
 	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
 		return true;
 	}
 
 	/**
-	 * Return true, as WebSphere returns wrapped CallableStatements.
+	 * Return <code>true</code>, as WebSphere returns wrapped CallableStatements.
 	 */
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 		return true;

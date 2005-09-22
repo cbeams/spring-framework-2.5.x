@@ -25,17 +25,17 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 /**
- * Implementation of the NativeJdbcExtractor interface for WebLogic Server.
- * Returns the underlying native Connection to application code instead
- * of WebLogic's wrapper implementation; unwraps the Connection for
- * native statements. The returned JDBC classes can then safely be cast,
- * e.g. to OracleConnection.
+ * Implementation of the NativeJdbcExtractor interface for WebLogic Server
+ * 6.1+.
+ *
+ * <p>Returns the underlying native Connection to application code instead
+ * of WebLogic's wrapper implementation; unwraps the Connection for native
+ * statements. The returned JDBC classes can then safely be cast, e.g. to
+ * <code>oracle.jdbc.OracleConnection</code>.
  *
  * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working
  * with a WebLogic DataSource: If a given object is not a WebLogic
  * Connection wrapper, it will be returned as-is.
- *
- * <p>Currently only tested with BEA WebLogic 8.1.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -47,9 +47,11 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	private static final String JDBC_EXTENSION_NAME = "weblogic.jdbc.extensions.WLConnection";
 
+
 	private final Class jdbcExtensionClass;
 
 	private final Method getVendorConnectionMethod;
+
 
 	/**
 	 * This constructor retrieves the WebLogic JDBC extension interface,
@@ -66,22 +68,23 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		}
 	}
 
+
 	/**
-	 * Return true, as WebLogic returns wrapped Statements.
+	 * Return <code>true</code>, as WebLogic returns wrapped Statements.
 	 */
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
 		return true;
 	}
 
 	/**
-	 * Return true, as WebLogic returns wrapped PreparedStatements.
+	 * Return <code>true</code>, as WebLogic returns wrapped PreparedStatements.
 	 */
 	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
 		return true;
 	}
 
 	/**
-	 * Return true, as WebLogic returns wrapped CallableStatements.
+	 * Return <code>true</code>, as WebLogic returns wrapped CallableStatements.
 	 */
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 		return true;

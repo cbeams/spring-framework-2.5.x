@@ -26,9 +26,11 @@ import org.springframework.dao.DataAccessResourceFailureException;
 
 /**
  * Implementation of the NativeJdbcExtractor interface for the C3P0 connection pool.
- * Returns underlying native Connections to application code instead of C3P0's
+ *
+ * <p>Returns underlying native Connections to application code instead of C3P0's
  * wrapper implementations; unwraps the Connection for native Statements.
- * The returned JDBC classes can then safely be cast, e.g. to OracleResultSet.
+ * The returned JDBC classes can then safely be cast, e.g. to
+ * <code>oracle.jdbc.OracleConnection</code>.
  *
  * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working with
  * a C3P0 DataSource: If a given object is not a C3P0 wrapper, it will be

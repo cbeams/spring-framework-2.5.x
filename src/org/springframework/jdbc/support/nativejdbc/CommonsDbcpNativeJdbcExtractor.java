@@ -33,10 +33,13 @@ import org.apache.commons.dbcp.DelegatingStatement;
 import org.springframework.dao.DataAccessResourceFailureException;
 
 /**
- * Implementation of the NativeJdbcExtractor interface for the Jakarta Commons
- * DBCP connection pool. Returns the underlying native Connection, Statement,
- * ResultSet etc to application code instead of DBCP's wrapper implementations.
- * The returned JDBC classes can then safely be cast, e.g. to OracleResultSet.
+ * Implementation of the NativeJdbcExtractor interface for the
+ * Jakarta Commons DBCP connection pool.
+ *
+ * <p>Returns the underlying native Connection, Statement, etc to
+ * application code instead of DBCP's wrapper implementations.
+ * The returned JDBC classes can then safely be cast, e.g. to
+ * <code>oracle.jdbc.OracleConnection</code>.
  *
  * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working with a
  * Commons DBCP DataSource: If a given object is not a Commons DBCP wrapper,
@@ -44,8 +47,9 @@ import org.springframework.dao.DataAccessResourceFailureException;
  *
  * <p>Tested against Commons DBCP 1.1 and 1.2, but should also work with 1.0.
  * Before Commons DBCP 1.1, DelegatingCallableStatement and DelegatingResultSet
- * have not offered any means to access underlying delegates; consequently,
- * getNativeCallableStatement and getNativeResultSet will not work with 1.0.
+ * have not offered any means to access underlying delegates: As a consequence,
+ * <code>getNativeCallableStatement</code> and <code>getNativeResultSet</code>
+ * will not work with Commons DBCP 1.0.
  *
  * @author Juergen Hoeller
  * @since 25.08.2003
@@ -53,6 +57,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
 public class CommonsDbcpNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	private static final String GET_INNERMOST_DELEGATE_METHOD_NAME = "getInnermostDelegate";
+
 
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (con instanceof DelegatingConnection) {

@@ -29,13 +29,15 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 /**
- * Implementation of the NativeJdbcExtractor interface for the JBoss 3.2
- * connection pool. Returns the underlying native Connection, Statement,
- * etc to application code instead of JBoss' wrapper implementations. The
- * returned JDBC classes can then safely be cast, e.g. to OracleConnection.
+ * Implementation of the NativeJdbcExtractor interface for JBoss 3.2.
+ *
+ * <p>Returns the underlying native Connection, Statement, etc to
+ * application code instead of JBoss' wrapper implementations.
+ * The returned JDBC classes can then safely be cast, e.g. to
+ * <code>oracle.jdbc.OracleConnection</code>.
  *
  * <p>Note that JBoss started wrapping ResultSets as of 3.2.4, which is
- * supported by this implementation, while still being compatible with 3.2.x
+ * supported by this implementation, while still being compatible with 3.2.x.
  *
  * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working with
  * a JBoss connection pool: If a given object is not a JBoss wrapper,
@@ -83,6 +85,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 					"Could not initialize JBossNativeJdbcExtractor because JBoss API classes are not available", ex);
 		}
 	}
+
 
 	/**
 	 * Retrieve the Connection via JBoss' <code>getUnderlyingConnection</code> method.
