@@ -21,10 +21,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 
 import net.sf.cglib.core.CodeGenerationException;
 import net.sf.cglib.proxy.Callback;
@@ -92,7 +92,8 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	/**
 	 * Keeps track of the <code>Class</code>es that we have validated for final methods
 	 */
-	private static Set VALIDATED_CLASSES = new HashSet();
+	private static Set validatedClasses = new HashSet();
+
 
 	/**
 	 * Config used to configure this proxy
@@ -112,11 +113,11 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 	private transient Map fixedInterceptorMap;
 
+
 	/**
 	 * Create a new Cglib2AopProxy for the given config.
-	 *
 	 * @throws AopConfigException if the config is invalid. We try to throw an informative
-	 *                            exception in this case, rather than let a mysterious failure happen later.
+	 * exception in this case, rather than let a mysterious failure happen later.
 	 */
 	protected Cglib2AopProxy(AdvisedSupport config) throws AopConfigException {
 		if (config == null) {
@@ -135,8 +136,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 	/**
 	 * Set constructor arguments to use for creating the proxy.
-	 *
-	 * @param constructorArgs     the constructor argument values
+	 * @param constructorArgs the constructor argument values
 	 * @param constructorArgTypes the constructor argument types
 	 */
 	protected void setConstructorArguments(Object[] constructorArgs, Class[] constructorArgTypes) {
@@ -224,10 +224,12 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	 * validates it if not.
 	 */
 	private void validateClassIfNecessary(Class proxySuperClass) {
-		synchronized (VALIDATED_CLASSES) {
-			if (logger.isWarnEnabled() && !(VALIDATED_CLASSES.contains(proxySuperClass))) {
-				validateClass(proxySuperClass);
-				VALIDATED_CLASSES.add(proxySuperClass);
+		if (logger.isInfoEnabled()) {
+			synchronized (validatedClasses) {
+				if (!validatedClasses.contains(proxySuperClass)) {
+					doValidateClass(proxySuperClass);
+					validatedClasses.add(proxySuperClass);
+				}
 			}
 		}
 	}
@@ -236,13 +238,13 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	 * Checks for final methods on the <code>Class</code> and writes warnings to the log
 	 * for each one found.
 	 */
-	private void validateClass(Class proxySuperClass) {
+	private void doValidateClass(Class proxySuperClass) {
 		Method[] methods = proxySuperClass.getMethods();
 		for (int i = 0; i < methods.length; i++) {
 			Method method = methods[i];
-			if((Object.class != method.getDeclaringClass()) && Modifier.isFinal(method.getModifiers())) {
-				logger.warn("Unable to proxy method [" + method +
-						"] because it is final. All calls to this method via a proxy will be routed directly to the proxy.");
+			if (!Object.class.equals(method.getDeclaringClass()) && Modifier.isFinal(method.getModifiers())) {
+				logger.info("Unable to proxy method [" + method + "] because it is final: " +
+						"All calls to this method via a proxy will be routed directly to the proxy.");
 			}
 		}
 	}
@@ -300,12 +302,14 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			// TODO: small memory optimisation here (can skip creation for
 			// methods with no advice)
 			for (int x = 0; x < methods.length; x++) {
-				List chain = this.advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(this.advised, null, methods[x], rootClass);
-				fixedCallbacks[x] = new FixedChainStaticTargetInterceptor(chain, this.advised.getTargetSource().getTarget(), this.advised.getTargetSource().getTargetClass());
+				List chain = this.advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(
+						this.advised, null, methods[x], rootClass);
+				fixedCallbacks[x] = new FixedChainStaticTargetInterceptor(
+						chain, this.advised.getTargetSource().getTarget(), this.advised.getTargetSource().getTargetClass());
 				this.fixedInterceptorMap.put(methods[x].toString(), new Integer(x));
 			}
 
-			// now copy both the callbacks from mainCallbacks
+			// Now copy both the callbacks from mainCallbacks
 			// and fixedCallbacks into the callbacks array.
 			callbacks = new Callback[mainCallbacks.length + fixedCallbacks.length];
 
@@ -899,13 +903,19 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		}
 	}
 
+
+	/**
+	 * Helper class that determines whether the CGLIB Enhancer
+	 * supports the <code>setInterceptDuringConstruction</code> method
+	 * (which it should as of CGLIB 2.1).
+	 */
 	private static class CglibUtils {
 
 		private static boolean canSkipConstructorInterception;
 
 		static {
 			try {
-				Enhancer.class.getMethod("setInterceptDuringConstruction", new Class[]{boolean.class});
+				Enhancer.class.getMethod("setInterceptDuringConstruction", new Class[] {boolean.class});
 				canSkipConstructorInterception = true;
 			}
 			catch (NoSuchMethodException ex) {
@@ -917,4 +927,5 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			return canSkipConstructorInterception;
 		}
 	}
+
 }
