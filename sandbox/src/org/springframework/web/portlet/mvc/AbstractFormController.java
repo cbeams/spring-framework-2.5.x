@@ -595,12 +595,10 @@ public abstract class AbstractFormController extends BaseCommandController {
 	protected final BindException getErrorsForNewForm(RenderRequest request) throws Exception {
 	    // Create form-backing object for new form
 		Object command = formBackingObject(request);
-		if (command == null) {
+		if (command == null)
 			throw new PortletException("Form object returned by formBackingObject() must not be null");
-		}
-		if (!checkCommand(command)) {
+		if (!checkCommand(command))
 			throw new PortletException("Form object returned by formBackingObject() must match commandClass");
-		}
 		
 		// Bind without validation, to allow for prepopulating a form, and for
 		// convenient error evaluation in views (on both first attempt and resubmit).
@@ -925,6 +923,10 @@ public abstract class AbstractFormController extends BaseCommandController {
 			throws Exception {
 	    passRenderParameters(request, response);
 		Object command = formBackingObject(request);
+		if (command == null)
+			throw new PortletException("Form object returned by formBackingObject() must not be null");
+		if (!checkCommand(command))
+			throw new PortletException("Form object returned by formBackingObject() must match commandClass");
 		BindException errors = bindAndValidate(request, command).getErrors();
 		processFormSubmission(request, response, command, errors);
 		setRenderCommandAndErrors(request, command, errors);
