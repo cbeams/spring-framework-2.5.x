@@ -28,6 +28,7 @@ import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.support.ServletContextAwareProcessor;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
 import org.springframework.web.portlet.context.PortletContextAware;
 
@@ -160,6 +161,7 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 	 * @see PortletContextAwareProcessor
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
 		beanFactory.addBeanPostProcessor(new PortletContextAwareProcessor(this.portletContext));
 		beanFactory.ignoreDependencyInterface(PortletContextAware.class);
 	}
