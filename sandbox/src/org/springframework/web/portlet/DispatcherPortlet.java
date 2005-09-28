@@ -32,6 +32,7 @@ import java.util.Set;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.Portlet;
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
@@ -44,6 +45,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -280,6 +282,9 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	/** Detect all ViewResolvers or just expect "viewResolver" bean? */
 	private boolean detectAllViewResolvers = true;
 
+	/** Detect all other instances of Portlet and initialize them? */
+	private boolean detectOtherPortlets = false;
+
 	/** LocaleResolver used by this portlet */
 	private LocaleResolver localeResolver;
 
@@ -349,7 +354,18 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		this.detectAllViewResolvers = detectAllViewResolvers;
 	}
 
-
+	/**
+	 * Set whether to detect other beans that are <code>javax.portlet.Portlet</code>
+	 * implementations in this portlet's context and then initialize them 
+	 * with the same <code>PortletConfig</code> as this portlet.
+	 * <p>Default is false. Turn this on if you want other Portlets 
+	 * to be initialized automatically.
+	 */
+    public void setDetectOtherPortlets(boolean detectOtherPortlets) {
+        this.detectOtherPortlets = detectOtherPortlets;
+    }
+    
+    
 	/**
 	 * Overridden method, invoked after any bean properties have been set and the
 	 * PortletApplicationContext and BeanFactory for this namespace is available.
@@ -363,6 +379,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		initHandlerAdapters();
 		initHandlerExceptionResolvers();
 		initViewResolvers();
+		initOtherPortlets();
 	}
 
 	/**
@@ -532,6 +549,45 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			if (logger.isInfoEnabled()) {
 				logger.info("No ViewResolvers found in portlet '" + getPortletName() + "': using default");
 			}
+		}
+	}
+
+	/**
+	 * Initialize any other <code>javax.portlet.Portlet</code> beans that may be
+	 * delegated to by this class.
+	 */
+	private void initOtherPortlets() throws BeansException {
+
+	    // Should we detect and initialize other instances of Portlet?
+	    if (!this.detectOtherPortlets)
+	        return;
+	    
+	    // Get all instances of javax.portlet.Portlet
+	    Map otherPortlets = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+				getPortletApplicationContext(), Portlet.class, true, false);
+
+	    // If there are none, then return
+		if (otherPortlets == null || otherPortlets.isEmpty())
+		    return;
+		
+		if (logger.isInfoEnabled())
+			logger.info("Initializing " + otherPortlets.size() + " additional bean(s) that implement javax.portlet.Portlet");
+		
+		// Initialize all the other Portlets
+		for (Iterator it = otherPortlets.entrySet().iterator(); it.hasNext(); ) {
+		    Map.Entry entry = (Map.Entry)it.next();
+		    String name = entry.getKey().toString();
+		    Portlet portlet = (Portlet)entry.getValue();
+		    if (!this.equals(portlet)) { // don't try to reinitialize myself!
+			    try {
+					if (logger.isDebugEnabled())
+						logger.debug("Initializing Portlet '" + name + "'");
+			        portlet.init(this.getPortletConfig());
+			    } catch (PortletException ex) {
+					logger.error("Unable to initialize Portlet '" + name + "'");
+			        throw new FatalBeanException("Error initializing bean '" + name + "' that implements javax.portlet.Portlet", ex);
+			    }
+		    }
 		}
 	}
 
