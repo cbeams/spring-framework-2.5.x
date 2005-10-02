@@ -77,8 +77,6 @@ import org.springframework.util.FileCopyUtils;
  */
 public class OracleLobHandler extends AbstractLobHandler {
 
-	private static final String CONNECTION_CLASS_NAME = "oracle.jdbc.OracleConnection";
-
 	private static final String BLOB_CLASS_NAME = "oracle.sql.BLOB";
 
 	private static final String CLOB_CLASS_NAME = "oracle.sql.CLOB";
@@ -89,8 +87,6 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
-
-	private final Class connectionClass;
 
 	private final Class blobClass;
 
@@ -116,8 +112,6 @@ public class OracleLobHandler extends AbstractLobHandler {
 	 */
 	public OracleLobHandler() {
 		try {
-			this.connectionClass = getClass().getClassLoader().loadClass(CONNECTION_CLASS_NAME);
-
 			// initialize oracle.sql.BLOB class
 			this.blobClass = getClass().getClassLoader().loadClass(BLOB_CLASS_NAME);
 			this.durationSessionConstants.put(
@@ -332,8 +326,11 @@ public class OracleLobHandler extends AbstractLobHandler {
 		 */
 		protected Object createLob(PreparedStatement ps, Class lobClass, LobCallback callback)
 				throws SQLException {
+
+			Connection con = null;
 			try {
-				Object lob = prepareLob(getOracleConnection(ps), lobClass);
+				con = getOracleConnection(ps);
+				Object lob = prepareLob(con, lobClass);
 				callback.populateLob(lob);
 				lob.getClass().getMethod("close", (Class[]) null).invoke(lob, (Object[]) null);
 				this.createdLobs.add(lob);
@@ -346,6 +343,11 @@ public class OracleLobHandler extends AbstractLobHandler {
 			catch (InvocationTargetException ex) {
 				if (ex.getTargetException() instanceof SQLException) {
 					throw (SQLException) ex.getTargetException();
+				}
+				else if (con != null && ex.getTargetException() instanceof ClassCastException) {
+					throw new InvalidDataAccessApiUsageException(
+							"OracleLobCreator needs to work on [oracle.jdbc.OracleConnection], not on [" +
+							con.getClass() + "]: specify a corresponding NativeJdbcExtractor");
 				}
 				else {
 					throw new DataAccessResourceFailureException("Could not create Oracle LOB",
@@ -363,14 +365,8 @@ public class OracleLobHandler extends AbstractLobHandler {
 		protected Connection getOracleConnection(PreparedStatement ps)
 				throws SQLException, ClassNotFoundException {
 
-			Connection conToUse = (nativeJdbcExtractor != null) ?
+			return (nativeJdbcExtractor != null) ?
 					nativeJdbcExtractor.getNativeConnectionFromStatement(ps) : ps.getConnection();
-			if (!connectionClass.isAssignableFrom(conToUse.getClass())) {
-				throw new InvalidDataAccessApiUsageException(
-						"OracleLobCreator needs to work on [oracle.jdbc.OracleConnection], not on [" +
-						conToUse.getClass() + "] - specify a corresponding NativeJdbcExtractor");
-			}
-			return conToUse;
 		}
 
 		/**
