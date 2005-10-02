@@ -36,7 +36,8 @@ import org.springframework.core.io.Resource;
 public class PathMatchingResourcePatternResolverTests extends TestCase {
 
 	private static final String[] CLASSES_IN_CORE_IO_SUPPORT =
-			new String[] {"LocalizedResourceHelper.class", "PathMatchingResourcePatternResolver.class",
+			new String[] {"EncodedResource.class", "LocalizedResourceHelper.class",
+										"PathMatchingResourcePatternResolver.class",
 										"PropertiesLoaderSupport.class", "ResourceArrayPropertyEditor.class",
 										"ResourcePatternResolver.class", "ResourcePatternUtils.class"};
 

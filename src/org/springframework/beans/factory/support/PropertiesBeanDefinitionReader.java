@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,6 +33,9 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.EncodedResource;
+import org.springframework.util.DefaultPropertiesPersister;
+import org.springframework.util.PropertiesPersister;
 
 /**
  * Bean definition reader for a simple properties format.
@@ -119,8 +123,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public static final String REF_PREFIX = "*";
 
 
-	/** Name of default parent bean */
 	private String defaultParentBean;
+
+	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
 
 
 	/**
@@ -153,6 +158,23 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		return defaultParentBean;
 	}
 
+	/**
+	 * Set the PropertiesPersister to use for parsing properties files.
+	 * The default is DefaultPropertiesPersister.
+	 * @see org.springframework.util.DefaultPropertiesPersister
+	 */
+	public void setPropertiesPersister(PropertiesPersister propertiesPersister) {
+		this.propertiesPersister =
+				(propertiesPersister != null ? propertiesPersister : new DefaultPropertiesPersister());
+	}
+
+	/**
+	 * Return the PropertiesPersister to use for parsing properties files.
+	 */
+	public PropertiesPersister getPropertiesPersister() {
+		return propertiesPersister;
+	}
+
 
 	/**
 	 * Load bean definitions from the specified properties file,
@@ -162,36 +184,66 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @throws BeansException in case of loading or parsing errors
 	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource, String)
 	 */
-	public int loadBeanDefinitions(Resource resource) {
-		return loadBeanDefinitions(resource, null);
+	public int loadBeanDefinitions(Resource resource) throws BeansException {
+		return loadBeanDefinitions(new EncodedResource(resource), null);
 	}
 
 	/**
 	 * Load bean definitions from the specified properties file.
 	 * @param resource the resource descriptor for the properties file
+	 * @param prefix match or filter within the keys in the map: e.g. 'beans.'
+	 * (can be empty or <code>null</code>)
 	 * @return the number of bean definitions found
 	 * @throws BeansException in case of loading or parsing errors
 	 */
-	public int loadBeanDefinitions(Resource resource, String prefix) {
+	public int loadBeanDefinitions(Resource resource, String prefix) throws BeansException {
+		return loadBeanDefinitions(new EncodedResource(resource), prefix);
+	}
+
+	/**
+	 * Load bean definitions from the specified properties file.
+	 * @param encodedResource the resource descriptor for the properties file,
+	 * allowing to specify an encoding to use for parsing the file
+	 * @return the number of bean definitions found
+	 * @throws BeansException in case of loading or parsing errors
+	 */
+	public int loadBeanDefinitions(EncodedResource encodedResource) throws BeansException {
+		return loadBeanDefinitions(encodedResource, null);
+	}
+
+	/**
+	 * Load bean definitions from the specified properties file.
+	 * @param encodedResource the resource descriptor for the properties file,
+	 * allowing to specify an encoding to use for parsing the file
+	 * @return the number of bean definitions found
+	 * @throws BeansException in case of loading or parsing errors
+	 */
+	public int loadBeanDefinitions(EncodedResource encodedResource, String prefix) throws BeansException {
 		Properties props = new Properties();
 		try {
-			InputStream is = resource.getInputStream();
+			InputStream is = encodedResource.getResource().getInputStream();
 			try {
-				props.load(is);
+				if (encodedResource.getEncoding() != null) {
+					getPropertiesPersister().load(props, new InputStreamReader(is, encodedResource.getEncoding()));
+				}
+				else {
+					getPropertiesPersister().load(props, is);
+				}
 			}
 			finally {
 				is.close();
 			}
-			return registerBeanDefinitions(props, prefix, resource.getDescription());
+			return registerBeanDefinitions(props, prefix, encodedResource.getResource().getDescription());
 		}
 		catch (IOException ex) {
-			throw new BeanDefinitionStoreException("Could not parse properties from " + resource, ex);
+			throw new BeanDefinitionStoreException("Could not parse properties from " + encodedResource.getResource(), ex);
 		}
 	}
 
 	/**
 	 * Register bean definitions contained in a resource bundle,
 	 * using all property keys (i.e. not filtering by prefix).
+	 * @param rb the ResourceBundle to load from
 	 * @return the number of bean definitions found
 	 * @throws BeansException in case of loading or parsing errors
 	 * @see #registerBeanDefinitions(java.util.ResourceBundle, String)
@@ -204,6 +256,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * Register bean definitions contained in a ResourceBundle.
 	 * <p>Similar syntax as for a Map. This method is useful to enable
 	 * standard Java internationalization support.
+	 * @param rb the ResourceBundle to load from
+	 * @param prefix match or filter within the keys in the map: e.g. 'beans.'
+	 * (can be empty or <code>null</code>)
 	 * @return the number of bean definitions found
 	 * @throws BeansException in case of loading or parsing errors
 	 */
@@ -218,10 +273,11 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		return registerBeanDefinitions(map, prefix);
 	}
 
+
 	/**
 	 * Register bean definitions contained in a Map,
 	 * using all property keys (i.e. not filtering by prefix).
-	 * @param map Map name -> property (String or Object). Property values
+	 * @param map Map: name -> property (String or Object). Property values
 	 * will be strings if coming from a Properties file etc. Property names
 	 * (keys) <b>must</b> be Strings. Class keys must be Strings.
 	 * @return the number of bean definitions found
@@ -253,6 +309,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * will be strings if coming from a Properties file etc. Property names
 	 * (keys) <b>must</b> be strings. Class keys must be Strings.
 	 * @param prefix match or filter within the keys in the map: e.g. 'beans.'
+	 * (can be empty or <code>null</code>)
 	 * @param resourceDescription description of the resource that the Map came from
 	 * (for logging purposes)
 	 * @return the number of bean definitions found
