@@ -25,6 +25,7 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
+import javax.jms.Topic;
 
 import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionHolder;
@@ -456,16 +457,24 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	protected MessageConsumer createConsumer(Session session, Destination destination, String messageSelector)
 			throws JMSException {
 
-		return session.createConsumer(destination, messageSelector, isPubSubNoLocal());
+		// Only pass in the NoLocal flag in case of a Topic:
+		// Some JMS providers, such as WebSphere MQ 6.0, throw IllegalStateException
+		// in case of the NoLocal flag being specified for a Queue.
+		if (destination instanceof Topic) {
+			return session.createConsumer(destination, messageSelector, isPubSubNoLocal());
+		}
+		else {
+			return session.createConsumer(destination, messageSelector);
+		}
 	}
 
 
 	/**
 	 * Execute the action specified by the given action object within a
-	 * JMS Session. Generalized version of execute(SessionCallback),
+	 * JMS Session. Generalized version of <code>execute(SessionCallback)</code>,
 	 * allowing to start the JMS Connection on the fly.
-	 * <p>Use execute(SessionCallback) for the general case. Starting
-	 * the JMS Connection is just necessary for receiving messages,
+	 * <p>Use <code>execute(SessionCallback)</code> for the general case.
+	 * Starting the JMS Connection is just necessary for receiving messages,
 	 * which is preferably achieve through the <code>receive</code> methods.
 	 * @param action callback object that exposes the session
 	 * @return the result object from working with the session

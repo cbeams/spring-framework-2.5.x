@@ -22,6 +22,7 @@ import java.io.StringWriter;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.DeliveryMode;
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
@@ -62,7 +63,7 @@ public class JmsTemplateTests extends TestCase {
 	private Session mockSession;
 
 	private MockControl queueControl;
-	private Queue mockQueue;
+	private Destination mockQueue;
 
 	private int deliveryMode = DeliveryMode.PERSISTENT;
 	private int priority = 9;
@@ -395,16 +396,14 @@ public class JmsTemplateTests extends TestCase {
 		else {
 			if (explicitDestination) {
 				template.send(mockQueue, new MessageCreator() {
-					public Message createMessage(Session session)
-							throws JMSException {
+					public Message createMessage(Session session) throws JMSException {
 						return session.createTextMessage("just testing");
 					}
 				});
 			}
 			else {
 				template.send(destinationName, new MessageCreator() {
-					public Message createMessage(Session session)
-							throws JMSException {
+					public Message createMessage(Session session) throws JMSException {
 						return session.createTextMessage("just testing");
 					}
 				});
@@ -563,7 +562,7 @@ public class JmsTemplateTests extends TestCase {
 		MessageConsumer mockMessageConsumer = (MessageConsumer) messageConsumerControl.getMock();
 
 		String selectorString = "selector";
-		mockSession.createConsumer(mockQueue, messageSelector ? selectorString : null, noLocal);
+		mockSession.createConsumer(mockQueue, messageSelector ? selectorString : null);
 		sessionControl.setReturnValue(mockMessageConsumer);
 
 		if (useTransactedTemplate()) {
