@@ -85,6 +85,15 @@ public class JotmFactoryBean implements FactoryBean, DisposableBean {
 	}
 
 	/**
+	 * Set the default transaction timeout for the JOTM instance.
+	 * <p>Should only be called for a local JOTM instance,
+	 * not when accessing an existing (shared) JOTM instance.
+	 */
+	public void setDefaultTimeout(int defaultTimeout) {
+		this.jotmCurrent.setDefaultTimeout(defaultTimeout);
+	}
+
+	/**
 	 * Return the JOTM instance created by this factory bean, if any.
 	 * Will be <code>null</code> if an already active JOTM instance is used.
 	 * <p>Application code should never need to access this.
