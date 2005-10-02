@@ -212,7 +212,9 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		else {
 			MessageFormat messageFormat = resolveCode(code, locale);
 			if (messageFormat != null) {
-				return messageFormat.format(resolveArguments(args, locale));
+				synchronized (messageFormat) {
+					return messageFormat.format(resolveArguments(args, locale));
+				}
 			}
 		}
 
@@ -269,7 +271,9 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 				this.cachedMessageFormats.put(msg, messageFormat);
 			}
 		}
-		return messageFormat.format(resolveArguments(args, locale));
+		synchronized (messageFormat) {
+			return messageFormat.format(resolveArguments(args, locale));
+		}
 	}
 
 	/**
@@ -338,7 +342,9 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	protected String resolveCodeWithoutArguments(String code, Locale locale) {
 		MessageFormat messageFormat = resolveCode(code, locale);
 		if (messageFormat != null) {
-			return messageFormat.format(new Object[0]);
+			synchronized (messageFormat) {
+				return messageFormat.format(new Object[0]);
+			}
 		}
 		return null;
 	}
