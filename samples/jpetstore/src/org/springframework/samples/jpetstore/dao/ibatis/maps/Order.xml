@@ -59,8 +59,8 @@
       values (#orderId#, #username#, #orderDate#, #shipAddress1#, #shipAddress2:varchar#, #shipCity#, #shipState#, #shipZip#, #shipCountry#, #billAddress1#, #billAddress2:VARCHAR#, #billCity#, #billState#, #billZip#, #billCountry#, #courier#, #totalPrice#, #billToFirstName#, #billToLastName#, #shipToFirstName#, #shipToLastName#, #creditCard#, #expiryDate#, #cardType#, #locale#)
   </insert>
 
-  <!-- Special MS SQL Server hack to allow the Item ID to be retrieved so that it can be used for Line Item foreign keys!
-       This is called with queryForObject despite it's being an update!  -->
+  <!-- Special MS SQL Server version to allow the Item ID to be retrieved from an identity column.
+       This is called with queryForObject despite it's being an update! -->
   <statement id="msSqlServerInsertOrder" resultClass="java.lang.Integer">
     insert into orders (userid, orderdate, shipaddr1, shipaddr2, shipcity, shipstate, shipzip, shipcountry, billaddr1, billaddr2, billcity, billstate, billzip, billcountry, courier, totalprice, billtofirstname, billtolastname, shiptofirstname, shiptolastname, creditcard, exprdate, cardtype, locale)
       values (#username#, #orderDate#, #shipAddress1#, #shipAddress2:VARCHAR#, #shipCity#, #shipState#, #shipZip#, #shipCountry#, #billAddress1#, #billAddress2:VARCHAR#, #billCity#, #billState#, #billZip#, #billCountry#, #courier#, #totalPrice#, #billToFirstName#, #billToLastName#, #shipToFirstName#, #shipToLastName#, #creditCard#, #expiryDate#, #cardType#, #locale#);
