@@ -228,7 +228,7 @@
   &lt;/bean&gt;
 
   &lt;bean id="mySessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
-    &lt;property name="dataSource" ref="myDataSource/&gt;
+    &lt;property name="dataSource" ref="myDataSource"/&gt;
     &lt;property name="mappingResources"&gt;
       &lt;list&gt;
         &lt;value&gt;product.hbm.xml&lt;/value&gt;
