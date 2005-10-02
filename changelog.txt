@@ -3,10 +3,41 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.6 (xx.xx.2005)
+Changes in version 1.2.6 (19.10.2005)
 -------------------------------------
+
+Package org.springframework.beans
+* PropertiesBeanDefinitionReader supports loading bean definitions from properties files with non-standard encodings
+* DefaultXmlBeanDefinitionParser supports system property placeholders in import paths: e.g. "file:${user.dir}/ctx.xml"
+
+Package org.springframework.context
+* fixed AbstractMessageSource to synchronize on MessageFormat instance while using it to format message with arguments
+
+Package org.springframework.core
+* added EncodedResource class to package "core.io.support", combining a Resource with an encoding to use for reading
+* PropertiesBeanDefinitionReader supports loading bean definitions from properties files with non-standard encodings
+
+Package org.springframework.jdbc
+* relaxed OracleLobHandler's eager "oracle.jdbc.OracleConnection" class check to avoid potential class loader issue
+
+Package org.springframework.jms
+* JmsException returns null from "getErrorCode()" (rather than some text) if the root cause is not a JMSException
+* fixed JmsException to not throw NullPointerException in case of null root cause
+* refined JmsTemplate to only pass in the NoLocal argument in case of an actual Topic (for WebSphere 6.0 compatibility)
+
+Package org.springframework.jmx
+* fixed InterfaceMBeanInfoAssembler to expose methods declared by super-interfaces of specified interfaces as well
+
+Package org.springframework.remoting
+* added support for JAX-RPC 1.1 "loadService(Class)" to LocalJaxRpcServiceFactory, via "jaxRpcServiceInterface" property
+* added support for JAX-RPC 1.1 service properties to LocalJaxRpcServiceFactory, via "jaxRpcServiceProperties" property
+
+Package org.springframework.transaction
+* added "defaultTimeout" bean property to JotmFactoryBean, for specifying the default JOTM transaction timeout
+
 Package org.springframework.web
-* Velocity and FreeMarker form macros include an id attribute on each element
+* added "bindingErrorProcessor" property to BaseCommandController, for declaratively overriding DataBinder's default
+* Velocity and FreeMarker form macros include an "id" attribute on each element
 
 
 Changes in version 1.2.5 (23.9.2005)
