@@ -121,7 +121,8 @@ public abstract class PropertiesLoaderSupport {
 	 * @see org.springframework.util.DefaultPropertiesPersister
 	 */
 	public void setPropertiesPersister(PropertiesPersister propertiesPersister) {
-		this.propertiesPersister = propertiesPersister;
+		this.propertiesPersister =
+				(propertiesPersister != null ? propertiesPersister : new DefaultPropertiesPersister());
 	}
 
 
