@@ -3,6 +3,12 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 1.2.6 (xx.xx.2005)
+-------------------------------------
+Package org.springframework.web
+* Velocity and FreeMarker form macros include an id attribute on each element
+
+
 Changes in version 1.2.5 (23.9.2005)
 ------------------------------------
 
