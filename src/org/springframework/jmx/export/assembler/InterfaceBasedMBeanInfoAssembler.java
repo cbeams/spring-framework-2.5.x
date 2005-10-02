@@ -203,7 +203,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractReflectiveMBeanInf
 
 		if (ifaces != null) {
 			for (int i = 0; i < ifaces.length; i++) {
-				Method[] methods = ifaces[i].getDeclaredMethods();
+				Method[] methods = ifaces[i].getMethods();
 				for (int j = 0; j < methods.length; j++) {
 					Method ifaceMethod = methods[j];
 					if (ifaceMethod.getName().equals(method.getName()) &&
