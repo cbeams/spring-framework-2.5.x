@@ -27,8 +27,9 @@ import javax.servlet.http.HttpServletResponse;
  * Bootstrap servlet to start up Spring's root WebApplicationContext.
  * Simply delegates to ContextLoader.
  *
- * <p>This servlet should have a lower load-on-startup value in web.xml
- * than any servlets that access the root web application context.
+ * <p>This servlet should have a lower <code>load-on-startup</code> value
+ * in <code>web.xml</code> than any servlets that access the root web
+ * application context.
  *
  * <p><i>Note that this class has been deprecated for containers implementing
  * Servlet API 2.4 or higher, in favor of ContextLoaderListener.</i><br>
@@ -39,8 +40,8 @@ import javax.servlet.http.HttpServletResponse;
  *
  * <p>Servlet 2.3 containers known to work with bootstrap listeners are:
  * <ul>
- * <li>Apache Tomcat 4.x
- * <li>Jetty 4.x
+ * <li>Apache Tomcat 4.x+
+ * <li>Jetty 4.x+
  * <li>Resin 2.1.8+
  * <li>Orion 2.0.2+
  * <li>BEA WebLogic 8.1 SP3
@@ -73,6 +74,7 @@ public class ContextLoaderServlet extends HttpServlet {
 
 	private ContextLoader contextLoader;
 
+
 	/**
 	 * Initialize the root web application context.
 	 */
@@ -96,6 +98,7 @@ public class ContextLoaderServlet extends HttpServlet {
 		return contextLoader;
 	}
 
+
 	/**
 	 * Close the root web application context.
 	 */
@@ -104,6 +107,7 @@ public class ContextLoaderServlet extends HttpServlet {
 			this.contextLoader.closeWebApplicationContext(getServletContext());
 		}
 	}
+
 
 	/**
 	 * This should never even be called since no mapping to this servlet should
@@ -116,6 +120,7 @@ public class ContextLoaderServlet extends HttpServlet {
 				request.getRequestURI() + "] was ignored");
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 	}
+
 
 	public String getServletInfo() {
 		return "ContextLoaderServlet for Servlet API 2.2/2.3 " +

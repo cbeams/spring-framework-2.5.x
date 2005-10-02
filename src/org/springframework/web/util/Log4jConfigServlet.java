@@ -31,10 +31,11 @@ import javax.servlet.http.HttpServletResponse;
  * don't need application-specific log files within the WAR directory, don't use
  * Log4J setup within the application (thus, don't use Log4jConfigListener or
  * Log4jConfigServlet). Instead, use a global, VM-wide Log4J setup (for example,
- * in JBoss) or JDK 1.4's java.util.logging (which is global too).
+ * in JBoss) or JDK 1.4's <code>java.util.logging</code> (which is global too).
  *
- * <p>Note: This servlet should have a lower load-on-startup value in web.xml
- * than ContextLoaderServlet, when using custom Log4J initialization.
+ * <p>Note: This servlet should have a lower <code>load-on-startup</code> value
+ * in <code>web.xml</code> than ContextLoaderServlet, when using custom Log4J
+ * initialization.
  *
  * <p><i>Note that this class has been deprecated for containers implementing
  * Servlet API 2.4 or higher, in favor of Log4jConfigListener.</i><br>
@@ -61,6 +62,7 @@ public class Log4jConfigServlet extends HttpServlet {
 		Log4jWebConfigurer.shutdownLogging(getServletContext());
 	}
 
+
 	/**
 	 * This should never even be called since no mapping to this servlet should
 	 * ever be created in web.xml. That's why a correctly invoked Servlet 2.3
@@ -72,6 +74,7 @@ public class Log4jConfigServlet extends HttpServlet {
 				request.getRequestURI() + "] was ignored");
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 	}
+
 
 	public String getServletInfo() {
 		return "Log4jConfigServlet for Servlet API 2.2/2.3 " +

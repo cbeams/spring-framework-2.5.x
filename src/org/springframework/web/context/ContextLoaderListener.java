@@ -40,6 +40,7 @@ public class ContextLoaderListener implements ServletContextListener {
 
 	private ContextLoader contextLoader;
 
+
 	/**
 	 * Initialize the root web application context.
 	 */
@@ -62,6 +63,7 @@ public class ContextLoaderListener implements ServletContextListener {
 	public ContextLoader getContextLoader() {
 		return contextLoader;
 	}
+
 
 	/**
 	 * Close the root web application context.

@@ -162,13 +162,13 @@ public abstract class JmsUtils {
 			// construct the converted exception dynamically based on name.
 			String shortName = ClassUtils.getShortName(ex.getClass().getName());
 
-			// all JmsException subclasses are in the same package:
+			// All JmsException subclasses reside in the same package.
 			String longName = JmsException.class.getPackage().getName() + "." + shortName;
 
 			try {
 				Class clazz = Class.forName(longName);
 				Constructor ctor = clazz.getConstructor(new Class[] {ex.getClass()});
-				Object counterpart = ctor.newInstance(new Object[]{ex});
+				Object counterpart = ctor.newInstance(new Object[] {ex});
 				return (JmsException) counterpart;
 			}
 			catch (Throwable ex2) {
@@ -179,7 +179,7 @@ public abstract class JmsUtils {
 			}
 		}
 
-		// fallback: uncategorized
+		// Fallback: uncategorized exception.
 		return new UncategorizedJmsException(ex);
 	}
 
