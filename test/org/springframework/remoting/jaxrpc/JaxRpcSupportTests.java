@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.xml.namespace.QName;
 import javax.xml.rpc.Call;
@@ -44,22 +45,57 @@ import org.springframework.remoting.RemoteAccessException;
  */
 public class JaxRpcSupportTests extends TestCase {
 
-	public void testLocalJaxRpcServiceFactoryBeanWithWsdlAndNamespace() throws Exception {
-		LocalJaxRpcServiceFactoryBean factory = new LocalJaxRpcServiceFactoryBean();
-		factory.setServiceFactoryClass(MockServiceFactory.class);
-		factory.setWsdlDocumentUrl(new URL("http://myUrl1"));
-		factory.setServiceName("myService2");
-		factory.afterPropertiesSet();
-		assertTrue("Correct singleton value", factory.isSingleton());
-		assertEquals(MockServiceFactory.service2, factory.getObject());
-	}
-
-	public void testLocalJaxRpcServiceFactoryBeanWithoutWsdlAndNamespace() throws Exception {
+	public void testLocalJaxRpcServiceFactoryBeanWithServiceNameAndNamespace() throws Exception {
 		LocalJaxRpcServiceFactoryBean factory = new LocalJaxRpcServiceFactoryBean();
 		factory.setServiceFactoryClass(MockServiceFactory.class);
 		factory.setNamespaceUri("myNamespace");
 		factory.setServiceName("myService1");
 		factory.afterPropertiesSet();
+		assertEquals(MockServiceFactory.service1, factory.getObject());
+	}
+
+	public void testLocalJaxRpcServiceFactoryBeanWithServiceNameAndWsdl() throws Exception {
+		LocalJaxRpcServiceFactoryBean factory = new LocalJaxRpcServiceFactoryBean();
+		factory.setServiceFactoryClass(MockServiceFactory.class);
+		factory.setServiceName("myService2");
+		factory.setWsdlDocumentUrl(new URL("http://myUrl1"));
+		factory.afterPropertiesSet();
+		assertTrue("Correct singleton value", factory.isSingleton());
+		assertEquals(MockServiceFactory.service2, factory.getObject());
+	}
+
+	public void testLocalJaxRpcServiceFactoryBeanWithServiceNameAndWsdlAndProperties() throws Exception {
+		LocalJaxRpcServiceFactoryBean factory = new LocalJaxRpcServiceFactoryBean();
+		factory.setServiceFactoryClass(MockServiceFactory.class);
+		factory.setServiceName("myService2");
+		factory.setWsdlDocumentUrl(new URL("http://myUrl1"));
+		Properties props = new Properties();
+		props.setProperty("myKey", "myValue");
+		factory.setJaxRpcServiceProperties(props);
+		factory.afterPropertiesSet();
+		assertTrue("Correct singleton value", factory.isSingleton());
+		assertEquals(MockServiceFactory.service1, factory.getObject());
+	}
+
+	public void testLocalJaxRpcServiceFactoryBeanWithJaxRpcServiceInterface() throws Exception {
+		LocalJaxRpcServiceFactoryBean factory = new LocalJaxRpcServiceFactoryBean();
+		factory.setServiceFactoryClass(MockServiceFactory.class);
+		factory.setJaxRpcServiceInterface(IRemoteBean.class);
+		factory.afterPropertiesSet();
+		assertTrue("Correct singleton value", factory.isSingleton());
+		assertEquals(MockServiceFactory.service2, factory.getObject());
+	}
+
+	public void testLocalJaxRpcServiceFactoryBeanWithJaxRpcServiceInterfaceAndWsdl() throws Exception {
+		LocalJaxRpcServiceFactoryBean factory = new LocalJaxRpcServiceFactoryBean();
+		factory.setServiceFactoryClass(MockServiceFactory.class);
+		factory.setWsdlDocumentUrl(new URL("http://myUrl1"));
+		factory.setJaxRpcServiceInterface(IRemoteBean.class);
+		Properties props = new Properties();
+		props.setProperty("myKey", "myValue");
+		factory.setJaxRpcServiceProperties(props);
+		factory.afterPropertiesSet();
+		assertTrue("Correct singleton value", factory.isSingleton());
 		assertEquals(MockServiceFactory.service1, factory.getObject());
 	}
 
@@ -315,6 +351,13 @@ public class JaxRpcSupportTests extends TestCase {
 			service1Control.setReturnValue(new RemoteBean());
 		}
 
+		public Service createService(QName qName) throws ServiceException {
+			if (!"myNamespace".equals(qName.getNamespaceURI()) || !"myService1".equals(qName.getLocalPart())) {
+				throw new ServiceException("not supported");
+			}
+			return service1;
+		}
+
 		public Service createService(URL url, QName qName) throws ServiceException {
 			try {
 				if (!(new URL("http://myUrl1")).equals(url) || !"".equals(qName.getNamespaceURI()) ||
@@ -327,9 +370,38 @@ public class JaxRpcSupportTests extends TestCase {
 			return service2;
 		}
 
-		public Service createService(QName qName) throws ServiceException {
-			if (!"myNamespace".equals(qName.getNamespaceURI()) || !"myService1".equals(qName.getLocalPart())) {
+		public Service loadService(URL url, QName qName, Properties props) throws ServiceException {
+			try {
+				if (!(new URL("http://myUrl1")).equals(url) || !"".equals(qName.getNamespaceURI()) ||
+						!"myService2".equals(qName.getLocalPart())) {
+					throw new ServiceException("not supported");
+				}
+			}
+			catch (MalformedURLException ex) {
+			}
+			if (props == null || !"myValue".equals(props.getProperty("myKey"))) {
+				throw new ServiceException("invalid properties");
+			}
+			return service1;
+		}
+
+		public Service loadService(Class ifc) throws ServiceException {
+			if (!IRemoteBean.class.equals(ifc)) {
 				throw new ServiceException("not supported");
+			}
+			return service2;
+		}
+
+		public Service loadService(URL url, Class ifc, Properties props) throws ServiceException {
+			try {
+				if (!(new URL("http://myUrl1")).equals(url) || !IRemoteBean.class.equals(ifc)) {
+					throw new ServiceException("not supported");
+				}
+			}
+			catch (MalformedURLException ex) {
+			}
+			if (props == null || !"myValue".equals(props.getProperty("myKey"))) {
+				throw new ServiceException("invalid properties");
 			}
 			return service1;
 		}
