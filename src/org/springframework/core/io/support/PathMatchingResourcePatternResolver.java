@@ -58,15 +58,22 @@ import org.springframework.util.StringUtils;
  *
  * <p>There is special support for retrieving multiple class path resources with the
  * same name, via the "classpath*" prefix. For example, "classpath*:META-INF/beans.xml"
- * will find all beans.xml files in the class path, be it in "classes" directories
- * or in JAR files. This is particularly useful for auto-detecting config files
+ * will find all "beans.xml" files in the class path, be it in "classes" directories
+ * or in JAR files. This is particularly useful for autodetecting config files
  * of the same name at the same location within each jar file.
  *
- * <p>The "classpath*" prefix can also be combined with a PathMatcher pattern, for
+ * <p>The "classpath*:" prefix can also be combined with a PathMatcher pattern, for
  * example "classpath*:META-INF/*-beans.xml". In this case, all matching resources
  * in the class path will be found, even if multiple resources of the same name
- * exist in different jar files. Note that "classpath*:" will only work with at
- * least one root directory before the pattern starts.
+ * exist in different jar files.
+ *
+ * <p><b>WARNING:</b> Note that "classpath*:" will only work reliably with at least
+ * one root directory before the pattern starts, unless the actual target files
+ * reside in the file system. This means that a pattern like "classpath*:*.xml"
+ * will <i>not</i> retrieve files from the root of jar files but rather only from
+ * the root of expanded directories. This originates from a limitation in the JDK's
+ * <code>ClassLoader.getResources</code> method which only returns file system
+ * locations for a passed-in empty String (indicating potential roots to search).
  *
  * <p>Warning: Ant-style patterns with "classpath:" resources are not guaranteed to
  * find matching resources if the root package to search is available in multiple
@@ -82,6 +89,7 @@ import org.springframework.util.StringUtils;
  * @see #CLASSPATH_ALL_URL_PREFIX
  * @see org.springframework.util.AntPathMatcher
  * @see org.springframework.core.io.ResourceLoader#getResource
+ * @see java.lang.ClassLoader#getResources
  */
 public class PathMatchingResourcePatternResolver implements ResourcePatternResolver {
 
@@ -94,6 +102,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	/** URL prefix for referencing an entry from a jar file: "jar:" */
 	private static final String JAR_URL_PREFIX = "jar:";
 
+	/** Separator between JAR URL and file path within the JAR */
 	private static final String JAR_URL_SEPARATOR = "!/";
 
 
