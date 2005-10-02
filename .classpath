@@ -54,7 +54,7 @@
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-sqlmap.jar"/>
 	<classpathentry kind="lib" path="lib/jotm/jotm.jar"/>
 	<classpathentry kind="lib" path="lib/jotm/xapool.jar"/>
-	<classpathentry kind="lib" path="lib/quartz/quartz.jar"/>
+	<classpathentry kind="lib" path="lib/quartz/quartz-1.5.0.jar"/>
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-sqlmap-2.jar"/>
 	<classpathentry kind="lib" path="lib/caucho/burlap-2.1.12.jar"/>
 	<classpathentry kind="lib" path="lib/caucho/hessian-2.1.12.jar"/>
