@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.validation.BindException;
+import org.springframework.validation.BindingErrorProcessor;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
@@ -142,6 +143,8 @@ public abstract class BaseCommandController extends AbstractController {
 
 	private MessageCodesResolver messageCodesResolver;
 
+	private BindingErrorProcessor bindingErrorProcessor;
+
 
 	/**
 	 * Set the name of the command in the model.
@@ -223,7 +226,8 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Set the strategy to use for resolving errors into message codes.
 	 * Applies the given strategy to all data binders used by this controller.
-	 * <p>Default is null, i.e. using the default strategy of the data binder.
+	 * <p>Default is <code>null</code>, i.e. using the default strategy of
+	 * the data binder.
 	 * @see #createBinder
 	 * @see org.springframework.validation.DataBinder#setMessageCodesResolver
 	 */
@@ -237,6 +241,26 @@ public abstract class BaseCommandController extends AbstractController {
 	public final MessageCodesResolver getMessageCodesResolver() {
 		return messageCodesResolver;
 	}
+
+	/**
+	 * Set the strategy to use for processing binding errors, that is,
+	 * required field errors and <code>PropertyAccessException</code>s.
+	 * <p>Default is <code>null</code>, i.e. using the default strategy of
+	 * the data binder.
+	 * @see #createBinder
+	 * @see org.springframework.validation.DataBinder#setBindingErrorProcessor
+	 */
+	public final void setBindingErrorProcessor(BindingErrorProcessor bindingErrorProcessor) {
+		this.bindingErrorProcessor = bindingErrorProcessor;
+	}
+
+	/**
+	 * Return the strategy to use for processing binding errors.
+	 */
+	public final BindingErrorProcessor getBindingErrorProcessor() {
+		return bindingErrorProcessor;
+	}
+
 
 	protected void initApplicationContext() {
 		if (this.validators != null) {
@@ -341,6 +365,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @see #bindAndValidate
 	 * @see #initBinder
 	 * @see #setMessageCodesResolver
+	 * @see #setBindingErrorProcessor
 	 */
 	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command)
 	    throws Exception {
@@ -348,6 +373,9 @@ public abstract class BaseCommandController extends AbstractController {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName());
 		if (this.messageCodesResolver != null) {
 			binder.setMessageCodesResolver(this.messageCodesResolver);
+		}
+		if (this.bindingErrorProcessor != null) {
+			binder.setBindingErrorProcessor(this.bindingErrorProcessor);
 		}
 		initBinder(request, binder);
 		return binder;
