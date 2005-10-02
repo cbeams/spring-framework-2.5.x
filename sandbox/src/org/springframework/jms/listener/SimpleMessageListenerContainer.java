@@ -26,6 +26,7 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.Session;
+import javax.jms.Topic;
 
 import org.springframework.jms.support.JmsUtils;
 
@@ -116,7 +117,15 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
-		return session.createConsumer(destination, getMessageSelector(), isPubSubNoLocal());
+		// Only pass in the NoLocal flag in case of a Topic:
+		// Some JMS providers, such as WebSphere MQ 6.0, throw IllegalStateException
+		// in case of the NoLocal flag being specified for a Queue.
+		if (destination instanceof Topic) {
+			return session.createConsumer(destination, getMessageSelector(), isPubSubNoLocal());
+		}
+		else {
+			return session.createConsumer(destination, getMessageSelector());
+		}
 	}
 
 }
