@@ -52,6 +52,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.SystemPropertyUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
@@ -61,8 +62,9 @@ import org.springframework.util.xml.DomUtils;
  *
  * <p>The structure, elements and attribute names of the required XML document
  * are hard-coded in this class. (Of course a transform could be run if necessary
- * to produce this format). "beans" doesn't need to be the root element of the XML
- * document: This class will parse all bean definition elements in the XML file.
+ * to produce this format). <code>&lt;beans&gt;</code> doesn't need to be the root
+ * element of the XML document: This class will parse all bean definition elements
+ * in the XML file, not regarding the actual root element.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -163,7 +165,12 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	private String defaultDependencyCheck;
 
 
-
+	/**
+	 * Parses bean definitions according to the "spring-beans" DTD.
+	 * <p>Opens a DOM Document; then initializes the default settings
+	 * specified at <code>&lt;beans&gt;</code> level; then parses
+	 * the contained bean definitions.
+	 */
 	public int registerBeanDefinitions(BeanDefinitionReader reader, Document doc, Resource resource)
 			throws BeanDefinitionStoreException {
 
@@ -172,21 +179,21 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 		logger.debug("Loading bean definitions");
 		Element root = doc.getDocumentElement();
-		preProcessXml(root);
 
-		this.defaultLazyInit = root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE);
-		this.defaultAutowire = root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE);
-		this.defaultDependencyCheck = root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE);
+		initDefaults(root);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Default lazy init '" + this.defaultLazyInit + "'");
-			logger.debug("Default autowire '" + this.defaultAutowire + "'");
-			logger.debug("Default dependency check '" + this.defaultDependencyCheck + "'");
+			logger.debug("Default lazy init '" + getDefaultLazyInit() + "'");
+			logger.debug("Default autowire '" + getDefaultAutowire() + "'");
+			logger.debug("Default dependency check '" + getDefaultDependencyCheck() + "'");
 		}
 
+		preProcessXml(root);
 		int beanDefinitionCount = parseBeanDefinitions(root);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Found " + beanDefinitionCount + " <bean> elements in " + resource);
 		}
+		postProcessXml(root);
+
 		return beanDefinitionCount;
 	}
 
@@ -204,6 +211,26 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		return resource;
 	}
 
+
+	/**
+	 * Initialize the default lazy-init, autowire and dependency check settings.
+	 * @see #setDefaultLazyInit
+	 * @see #setDefaultAutowire
+	 * @see #setDefaultDependencyCheck
+	 */
+	protected void initDefaults(Element root) {
+		setDefaultLazyInit(root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE));
+		setDefaultAutowire(root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE));
+		setDefaultDependencyCheck(root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE));
+	}
+
+	/**
+	 * Set the default lazy-init flag for the document that's currently parsed.
+	 */
+	protected final void setDefaultLazyInit(String defaultLazyInit) {
+		this.defaultLazyInit = defaultLazyInit;
+	}
+
 	/**
 	 * Return the default lazy-init flag for the document that's currently parsed.
 	 */
@@ -212,10 +239,24 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	}
 
 	/**
+	 * Set the default autowire setting for the document that's currently parsed.
+	 */
+	protected final void setDefaultAutowire(String defaultAutowire) {
+		this.defaultAutowire = defaultAutowire;
+	}
+
+	/**
 	 * Return the default autowire setting for the document that's currently parsed.
 	 */
 	protected final String getDefaultAutowire() {
 		return defaultAutowire;
+	}
+
+	/**
+	 * Set the default dependency-check setting for the document that's currently parsed.
+	 */
+	protected final void setDefaultDependencyCheck(String defaultDependencyCheck) {
+		this.defaultDependencyCheck = defaultDependencyCheck;
 	}
 
 	/**
@@ -229,7 +270,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Allow the XML to be extensible by processing any custom element types first,
 	 * before we start to process the bean definitions. This method is a natural
-	 * extension point for any other custom pre processing of the XML.
+	 * extension point for any other custom pre-processing of the XML.
 	 * <p>Default implementation is empty. Subclasses can override this method to
 	 * convert custom elements into standard Spring bean definitions, for example.
 	 * Implementors have access to the parser's bean definition reader and the
@@ -277,6 +318,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 */
 	protected void importBeanDefinitionResource(Element ele) throws BeanDefinitionStoreException {
 		String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
+		// Resolve system properties: e.g. "${user.dir}"
+		location = SystemPropertyUtils.resolvePlaceholders(location);
 
 		if (ResourcePatternUtils.isUrl(location)) {
 			int importCount = getBeanDefinitionReader().loadBeanDefinitions(location);
@@ -298,6 +341,20 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 						"Invalid relative resource location [" + location + "] to import bean definitions from", ex);
 			}
 		}
+	}
+
+	/**
+	 * Allow the XML to be extensible by processing any custom element types last,
+	 * after we finished processing the bean definitions. This method is a natural
+	 * extension point for any other custom post-processing of the XML.
+	 * <p>Default implementation is empty. Subclasses can override this method to
+	 * convert custom elements into standard Spring bean definitions, for example.
+	 * Implementors have access to the parser's bean definition reader and the
+	 * underlying XML resource, through the corresponding accessors.
+	 * @see #getBeanDefinitionReader()
+	 * @see #getResource()
+	 */
+	protected void postProcessXml(Element root) throws BeanDefinitionStoreException {
 	}
 
 
@@ -418,7 +475,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			String lazyInit = ele.getAttribute(LAZY_INIT_ATTRIBUTE);
 			if (DEFAULT_VALUE.equals(lazyInit) && bd.isSingleton()) {
 				// Just apply default to singletons, as lazy-init has no meaning for prototypes.
-				lazyInit = this.defaultLazyInit;
+				lazyInit = getDefaultLazyInit();
 			}
 			bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
 
@@ -426,11 +483,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		}
 		catch (ClassNotFoundException ex) {
 			throw new BeanDefinitionStoreException(
-					this.resource, beanName, "Bean class [" + className + "] not found", ex);
+					getResource(), beanName, "Bean class [" + className + "] not found", ex);
 		}
 		catch (NoClassDefFoundError err) {
 			throw new BeanDefinitionStoreException(
-					this.resource, beanName, "Class that bean class [" + className + "] depends on not found", err);
+					getResource(), beanName, "Class that bean class [" + className + "] depends on not found", err);
 		}
 	}
 
