@@ -30,6 +30,8 @@ import org.springframework.context.BeanThatListens;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.EncodedResource;
 
 /**
  * Tests for static application context with custom application event multicaster.
@@ -60,7 +62,8 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 		sac.registerSingleton("aca", ACATest.class, new MutablePropertyValues());
 		sac.registerPrototype("aca-prototype", ACATest.class, new MutablePropertyValues());
 		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(sac.getDefaultListableBeanFactory());
-		reader.loadBeanDefinitions(new ClassPathResource("testBeans.properties", getClass()));
+		Resource resource = new ClassPathResource("testBeans.properties", getClass());
+		reader.loadBeanDefinitions(new EncodedResource(resource, "ISO-8859-1"));
 		sac.refresh();
 		sac.addListener(listener);
 
