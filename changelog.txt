@@ -7,13 +7,19 @@ Changes in version 1.2.6 (19.10.2005)
 -------------------------------------
 
 Package org.springframework.beans
+* AbstractBeanFactory throws BeanDefinitionStoreException if parent not found (instead of NoSuchBeanDefinitionException)
 * PropertiesBeanDefinitionReader supports loading bean definitions from properties files with non-standard encodings
+* XmlBeanDefinitionReader supports reading from resource with explicit encoding
+* XmlBeanDefinitionReader supports reading from SAX InputSource (useful to pass in XML system id or java.io.Reader)
 * DefaultXmlBeanDefinitionParser supports system property placeholders in import paths: e.g. "file:${user.dir}/ctx.xml"
+* DefaultXmlBeanDefinitionParser calls "postProcessXml" template method after parsing standard bean definitions
+* DefaultXmlBeanDefinitionParser allows for overriding default lazy-init, autowire and dependency-check values
 
 Package org.springframework.context
 * fixed AbstractMessageSource to synchronize on MessageFormat instance while using it to format message with arguments
 
 Package org.springframework.core
+* added DescriptiveResource implementation, holding a resource description but not pointing to a readable resource
 * added EncodedResource class to package "core.io.support", combining a Resource with an encoding to use for reading
 * PropertiesBeanDefinitionReader supports loading bean definitions from properties files with non-standard encodings
 
@@ -23,7 +29,7 @@ Package org.springframework.jdbc
 Package org.springframework.jms
 * JmsException returns null from "getErrorCode()" (rather than some text) if the root cause is not a JMSException
 * fixed JmsException to not throw NullPointerException in case of null root cause
-* refined JmsTemplate to only pass in the NoLocal argument in case of an actual Topic (for WebSphere 6.0 compatibility)
+* fixed JmsTemplate to only pass in the NoLocal argument in case of an actual Topic (for WebSphere 6.0 compatibility)
 
 Package org.springframework.jmx
 * fixed InterfaceMBeanInfoAssembler to expose methods declared by super-interfaces of specified interfaces as well
@@ -36,6 +42,8 @@ Package org.springframework.transaction
 * added "defaultTimeout" bean property to JotmFactoryBean, for specifying the default JOTM transaction timeout
 
 Package org.springframework.web
+* ContextLoader reads the default WebApplicationContext impl class from "ContextLoader.properties" in the same package
+* factored out "findRequiredWebApplicationContext" method from *ActionSupport to DelegatingActionUtils for Struts
 * added "bindingErrorProcessor" property to BaseCommandController, for declaratively overriding DataBinder's default
 * Velocity and FreeMarker form macros include an "id" attribute on each element
 
