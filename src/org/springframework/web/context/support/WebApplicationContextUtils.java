@@ -78,6 +78,7 @@ public abstract class WebApplicationContextUtils {
 	 */
 	public static WebApplicationContext getRequiredWebApplicationContext(ServletContext sc)
 	    throws IllegalStateException {
+
 		WebApplicationContext wac = getWebApplicationContext(sc);
 		if (wac == null) {
 			throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");

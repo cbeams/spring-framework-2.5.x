@@ -73,6 +73,7 @@ public abstract class FacesContextUtils {
 	 */
 	public static WebApplicationContext getRequiredWebApplicationContext(FacesContext fc)
 	    throws IllegalStateException {
+
 		WebApplicationContext wac = getWebApplicationContext(fc);
 		if (wac == null) {
 			throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
