@@ -26,6 +26,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -34,7 +35,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.xml.SimpleSaxErrorHandler;
 
 /**
@@ -142,24 +145,81 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
 	public int loadBeanDefinitions(Resource resource) throws BeansException {
-		if (resource == null) {
-			throw new BeanDefinitionStoreException("resource cannot be <code>null</code>: expected an XML file");
+		return loadBeanDefinitions(new EncodedResource(resource));
+	}
+
+	/**
+	 * Load bean definitions from the specified XML file.
+	 * @param encodedResource the resource descriptor for the XML file,
+	 * allowing to specify an encoding to use for parsing the file
+	 * @return the number of bean definitions found
+	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
+	 */
+	public int loadBeanDefinitions(EncodedResource encodedResource) throws BeansException {
+		if (encodedResource == null) {
+			throw new BeanDefinitionStoreException("Resource cannot be null: expected an XML file");
+		}
+		if (logger.isInfoEnabled()) {
+			logger.info("Loading XML bean definitions from " + encodedResource.getResource());
 		}
 
-		InputStream is = null;
+		try {
+			InputStream inputStream = encodedResource.getResource().getInputStream();
+			try {
+				InputSource inputSource = new InputSource(inputStream);
+				if (encodedResource.getEncoding() != null) {
+					inputSource.setEncoding(encodedResource.getEncoding());
+				}
+				return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
+			}
+			finally {
+				inputStream.close();
+			}
+		}
+		catch (IOException ex) {
+			throw new BeanDefinitionStoreException(
+					"IOException parsing XML document from " + encodedResource.getResource(), ex);
+		}
+	}
+
+	/**
+	 * Load bean definitions from the specified XML file.
+	 * @param inputSource the SAX InputSource to read from
+	 * @return the number of bean definitions found
+	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
+	 */
+	public int loadBeanDefinitions(InputSource inputSource) throws BeansException {
+		return loadBeanDefinitions(inputSource, "resource loaded through SAX InputSource");
+	}
+
+	/**
+	 * Load bean definitions from the specified XML file.
+	 * @param inputSource the SAX InputSource to read from
+	 * @param resourceDescription a description of the resource
+	 * (can be <code>null</code> or empty)
+	 * @return the number of bean definitions found
+	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
+	 */
+	public int loadBeanDefinitions(InputSource inputSource, String resourceDescription) throws BeansException {
+		return doLoadBeanDefinitions(inputSource, new DescriptiveResource(resourceDescription));
+	}
+
+
+	/**
+	 * Actually load bean definitions from the specified XML file.
+	 * @param inputSource the SAX InputSource to read from
+	 * @param resource the resource descriptor for the XML file
+	 * @return the number of bean definitions found
+	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
+	 */
+	protected int doLoadBeanDefinitions(InputSource inputSource, Resource resource) throws BeansException {
 		try {
 			DocumentBuilderFactory factory = createDocumentBuilderFactory();
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using JAXP implementation [" + factory + "]");
 			}
 			DocumentBuilder builder = createDocumentBuilder(factory);
-
-			if (logger.isInfoEnabled()) {
-				logger.info("Loading XML bean definitions from " + resource + "");
-			}
-			is = resource.getInputStream();
-			Document doc = builder.parse(is);
-
+			Document doc = builder.parse(inputSource);
 			return registerBeanDefinitions(doc, resource);
 		}
 		catch (ParserConfigurationException ex) {
@@ -174,16 +234,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 		catch (IOException ex) {
 			throw new BeanDefinitionStoreException("IOException parsing XML document from " + resource, ex);
-		}
-		finally {
-			if (is != null) {
-				try {
-					is.close();
-				}
-				catch (IOException ex) {
-					logger.warn("Could not close InputStream", ex);
-				}
-			}
 		}
 	}
 
@@ -224,7 +274,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 		return docBuilder;
 	}
-
 
 	/**
 	 * Register the bean definitions contained in the given DOM document.

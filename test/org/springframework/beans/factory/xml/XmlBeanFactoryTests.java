@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Arrays;
@@ -54,10 +55,14 @@ import org.springframework.beans.factory.support.MethodReplacer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
+
+import org.xml.sax.InputSource;
 
 /**
  * Miscellaneous tests for XML bean definitions.
@@ -72,6 +77,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
 		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
+
 		assertTrue("7 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 7);
 		TestBean emma = (TestBean) xbf.getBean("emma");
 		TestBean georgia = (TestBean) xbf.getBean("georgia");
@@ -89,7 +95,9 @@ public class XmlBeanFactoryTests extends TestCase {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
-		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
+		Resource resource = new ClassPathResource("reftypes.xml", getClass());
+		reader.loadBeanDefinitions(new EncodedResource(resource, "ISO-8859-1"));
+
 		assertTrue("7 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 7);
 		TestBean jen = (TestBean) xbf.getBean("jenny");
 		TestBean dave = (TestBean) xbf.getBean("david");
@@ -100,11 +108,17 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue("1 jen instance", davesJen == jen);
 	}
 
-	public void testInnerBeans() {
+	public void testInnerBeans() throws IOException {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
-		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
+		InputStream inputStream = getClass().getResourceAsStream("reftypes.xml");
+		try {
+			reader.loadBeanDefinitions(new InputSource(inputStream));
+		}
+		finally {
+			inputStream.close();
+		}
 
 		TestBean hasInnerBeans = (TestBean) xbf.getBean("hasInnerBeans");
 		assertEquals(5, hasInnerBeans.getAge());
