@@ -663,7 +663,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * in this instance
 	 * @return a (potentially merged) RootBeanDefinition for the given bean
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
-	 * @throws BeansException in case of errors
+	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
 	protected RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors)
 	    throws BeansException {
@@ -684,10 +684,10 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param beanName the name of the bean definition
 	 * @param bd the original bean definition (Root/ChildBeanDefinition)
 	 * @return a (potentially merged) RootBeanDefinition for the given bean
-	 * @throws BeansException in case of errors
+	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
 	protected RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition bd)
-			throws BeansException {
+			throws BeanDefinitionStoreException {
 
 		if (bd instanceof RootBeanDefinition) {
 			// Return root bean definition as-is.
@@ -698,19 +698,25 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			// Child bean definition: needs to be merged with parent.
 			ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
 			RootBeanDefinition pbd = null;
-			if (!beanName.equals(cbd.getParentName())) {
-				pbd = getMergedBeanDefinition(cbd.getParentName(), true);
-			}
-			else {
-				if (getParentBeanFactory() instanceof AbstractBeanFactory) {
-					AbstractBeanFactory parentFactory = (AbstractBeanFactory) getParentBeanFactory();
-					pbd = parentFactory.getMergedBeanDefinition(cbd.getParentName(), true);
+			try {
+				if (!beanName.equals(cbd.getParentName())) {
+					pbd = getMergedBeanDefinition(cbd.getParentName(), true);
 				}
 				else {
-					throw new NoSuchBeanDefinitionException(cbd.getParentName(),
-							"Parent name '" + cbd.getParentName() + "' is equal to bean name '" + beanName +
-							"' - cannot be resolved without an AbstractBeanFactory parent");
+					if (getParentBeanFactory() instanceof AbstractBeanFactory) {
+						AbstractBeanFactory parentFactory = (AbstractBeanFactory) getParentBeanFactory();
+						pbd = parentFactory.getMergedBeanDefinition(cbd.getParentName(), true);
+					}
+					else {
+						throw new NoSuchBeanDefinitionException(cbd.getParentName(),
+								"Parent name '" + cbd.getParentName() + "' is equal to bean name '" + beanName +
+								"': cannot be resolved without an AbstractBeanFactory parent");
+					}
 				}
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				throw new BeanDefinitionStoreException(cbd.getResourceDescription(), beanName,
+						"Could not resolve parent bean definition '" + cbd.getParentName() + "'", ex);
 			}
 
 			// Deep copy with overridden values.
@@ -728,6 +734,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 			return rbd;
 		}
+
 		else {
 			throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanName,
 					"Definition is neither a RootBeanDefinition nor a ChildBeanDefinition");

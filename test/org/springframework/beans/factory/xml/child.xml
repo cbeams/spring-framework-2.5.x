@@ -9,13 +9,13 @@
 	</bean>
 	
 	<bean id="inheritsWithDifferentClass" class="org.springframework.beans.DerivedTestBean"
-		parent="inheritedTestBean" init-method="initialize">
+			parent="inheritedTestBean" init-method="initialize">
 		<property name="name"><value>override</value></property>
 		<!-- age should inherit value of 1 from parent -->
 	</bean>
 
 	<bean id="inheritsWithClass" class="org.springframework.beans.DerivedTestBean"
-		parent="inheritedTestBeanWithoutClass" init-method="initialize">
+			parent="inheritedTestBeanWithoutClass" init-method="initialize">
 		<property name="name"><value>override</value></property>
 		<!-- age should inherit value of 1 from parent -->
 	</bean>

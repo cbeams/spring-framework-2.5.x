@@ -18,9 +18,9 @@ package org.springframework.beans.factory.xml;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Arrays;
@@ -33,6 +33,7 @@ import javax.servlet.ServletException;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
+import org.xml.sax.InputSource;
 
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.FatalBeanException;
@@ -48,8 +49,8 @@ import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.DummyFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MethodReplacer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -61,8 +62,6 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
-
-import org.xml.sax.InputSource;
 
 /**
  * Miscellaneous tests for XML bean definitions.
@@ -290,10 +289,11 @@ public class XmlBeanFactoryTests extends TestCase {
 			TestBean inherits = (TestBean) child.getBean("bogusParent");
 			fail();
 		}
-		catch (NoSuchBeanDefinitionException ex) {
+		catch (BeanDefinitionStoreException ex) {
 			// OK
 			// check exception message contains the name
 			assertTrue(ex.getMessage().indexOf("bogusParent") != -1);
+			assertTrue(ex.getCause() instanceof NoSuchBeanDefinitionException);
 		}
 	}
 
