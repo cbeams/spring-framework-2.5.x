@@ -54,6 +54,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver implements Orde
 
 	/** Default if no other location is supplied */
 	public final static String DEFAULT_LOCATION = "/WEB-INF/views.xml";
+	
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
@@ -89,6 +90,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver implements Orde
 		}
 	}
 
+
 	/**
 	 * This implementation returns just the view name,
 	 * as XmlViewResolver doesn't support localized resolution.
@@ -98,8 +100,9 @@ public class XmlViewResolver extends AbstractCachingViewResolver implements Orde
 	}
 
 	protected View loadView(String viewName, Locale locale) throws BeansException {
+		BeanFactory factory = initFactory();
 		try {
-			return (View) initFactory().getBean(viewName, View.class);
+			return (View) factory.getBean(viewName, View.class);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// to allow for ViewResolver chaining
@@ -139,6 +142,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver implements Orde
 		}
 		return factory;
 	}
+
 
 	public void destroy() throws BeansException {
 		if (this.cachedFactory != null) {

@@ -127,8 +127,9 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 
 
 	protected View loadView(String viewName, Locale locale) throws Exception {
+		BeanFactory factory = initFactory(locale);
 		try {
-			return (View) initFactory(locale).getBean(viewName, View.class);
+			return (View) factory.getBean(viewName, View.class);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// to allow for ViewResolver chaining
