@@ -61,7 +61,7 @@ public class ByteArrayResource extends AbstractResource {
 			throw new IllegalArgumentException("Byte array must not be null");
 		}
 		this.byteArray = byteArray;
-		this.description = description;
+		this.description = (description != null ? description : "");
 	}
 
 	/**

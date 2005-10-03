@@ -64,7 +64,7 @@ public class InputStreamResource extends AbstractResource {
 			throw new IllegalArgumentException("InputStream must not be null");
 		}
 		this.inputStream = inputStream;
-		this.description = description;
+		this.description = (description != null ? description : "");
 	}
 
 
