@@ -23,10 +23,11 @@ import org.apache.struts.action.ActionServlet;
 import org.apache.struts.config.ModuleConfig;
 
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
- * Common methods for various ways to make Struts delegate to
- * Spring-managed Actions.
+ * Common methods for letting Struts Actions work with a
+ * Spring WebApplicationContext.
  *
  * <p>As everything in Struts is based on concrete inheritance,
  * we have to provide an Action subclass (DelegatingActionProxy) and
@@ -44,33 +45,81 @@ public abstract class DelegatingActionUtils {
 
 	protected static final Log logger = LogFactory.getLog(DelegatingActionUtils.class);
 
+
 	/**
-	 * Fetch ContextLoaderPlugIn's WebApplicationContext from the
-	 * ServletContext, containing the Struts Action beans to delegate to.
+	 * Fetch ContextLoaderPlugIn's WebApplicationContext from the ServletContext.
 	 * <p>Checks for a module-specific context first, falling back to the
 	 * context for the default module else.
 	 * @param actionServlet the associated ActionServlet
-	 * @param moduleConfig the associated ModuleConfig
+	 * @param moduleConfig the associated ModuleConfig (can be <code>null</code>)
+	 * @return the WebApplicationContext, or <code>null</code> if none
+	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
+	 */
+	public static WebApplicationContext getWebApplicationContext(
+			ActionServlet actionServlet, ModuleConfig moduleConfig) {
+
+		WebApplicationContext wac = null;
+		String modulePrefix = null;
+
+		// Try module-specific attribute.
+		if (moduleConfig != null) {
+			modulePrefix = moduleConfig.getPrefix();
+			wac = (WebApplicationContext) actionServlet.getServletContext().getAttribute(
+					ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX + modulePrefix);
+		}
+
+		// If not found, try attribute for default module.
+		if (wac == null && !"".equals(modulePrefix)) {
+			wac = (WebApplicationContext) actionServlet.getServletContext().getAttribute(
+					ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX);
+		}
+
+		return wac;
+	}
+
+	/**
+	 * Fetch ContextLoaderPlugIn's WebApplicationContext from the ServletContext.
+	 * <p>Checks for a module-specific context first, falling back to the
+	 * context for the default module else.
+	 * @param actionServlet the associated ActionServlet
+	 * @param moduleConfig the associated ModuleConfig (can be <code>null</code>)
 	 * @return the WebApplicationContext
 	 * @throws IllegalStateException if no WebApplicationContext could be found
 	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
 	 */
 	public static WebApplicationContext getRequiredWebApplicationContext(
 			ActionServlet actionServlet, ModuleConfig moduleConfig) throws IllegalStateException {
-		// Try module-specific attribute.
-		String modulePrefix = moduleConfig.getPrefix();
-		String attrName = ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX + modulePrefix;
-		WebApplicationContext wac = (WebApplicationContext) actionServlet.getServletContext().getAttribute(attrName);
-		// If not found, try attribute for default module.
-		if (wac == null && !"".equals(modulePrefix)) {
-			attrName = ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX;
-			wac = (WebApplicationContext) actionServlet.getServletContext().getAttribute(attrName);
-		}
-		// If no context found, throw an exception.
+
+		WebApplicationContext wac = getWebApplicationContext(actionServlet, moduleConfig);
+		// If no Struts-specific context found, throw an exception.
 		if (wac == null) {
 			throw new IllegalStateException(
 					"Could not find ContextLoaderPlugIn's WebApplicationContext as ServletContext attribute [" +
-					attrName + "] - did you register [" + ContextLoaderPlugIn.class.getName() + "]?");
+					ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX + "]: Did you register [" +
+					ContextLoaderPlugIn.class.getName() + "]?");
+		}
+		return wac;
+	}
+
+	/**
+	 * Find most specific context available: check ContextLoaderPlugIn's
+	 * WebApplicationContext first, fall back to root WebApplicationContext else.
+	 * <p>When checking the ContextLoaderPlugIn context: checks for a module-specific
+	 * context first, falling back to the context for the default module else.
+	 * @param actionServlet the associated ActionServlet
+	 * @param moduleConfig the associated ModuleConfig (can be <code>null</code>)
+	 * @return the WebApplicationContext
+	 * @throws IllegalStateException if no WebApplicationContext could be found
+	 * @see #getWebApplicationContext
+	 * @see org.springframework.web.context.support.WebApplicationContextUtils#getRequiredWebApplicationContext
+	 */
+	public static WebApplicationContext findRequiredWebApplicationContext(
+			ActionServlet actionServlet, ModuleConfig moduleConfig) throws IllegalStateException {
+
+		WebApplicationContext wac = getWebApplicationContext(actionServlet, moduleConfig);
+		// If no Struts-specific context found, fall back to root context.
+		if (wac == null) {
+			wac = WebApplicationContextUtils.getRequiredWebApplicationContext(actionServlet.getServletContext());
 		}
 		return wac;
 	}

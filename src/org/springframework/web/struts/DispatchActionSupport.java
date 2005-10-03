@@ -25,7 +25,6 @@ import org.apache.struts.actions.DispatchAction;
 
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -66,6 +65,7 @@ public abstract class DispatchActionSupport extends DispatchAction {
 
 	private MessageSourceAccessor messageSourceAccessor;
 
+
 	/**
 	 * Initialize the WebApplicationContext for this Action.
 	 * Invokes onInit after successful initialization of the context.
@@ -90,19 +90,14 @@ public abstract class DispatchActionSupport extends DispatchAction {
 	 * @param actionServlet the associated ActionServlet
 	 * @return the WebApplicationContext
 	 * @throws IllegalStateException if no WebApplicationContext could be found
-	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
-	 * @see org.springframework.web.context.support.WebApplicationContextUtils#getWebApplicationContext
+	 * @see DelegatingActionUtils#findRequiredWebApplicationContext
 	 */
 	protected WebApplicationContext initWebApplicationContext(ActionServlet actionServlet)
 			throws IllegalStateException {
-		ServletContext sc = actionServlet.getServletContext();
-		WebApplicationContext wac = (WebApplicationContext)
-				sc.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX);
-		if (wac == null) {
-			wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
-		}
-		return wac;
+
+		return DelegatingActionUtils.findRequiredWebApplicationContext(actionServlet, null);
 	}
+
 
 	/**
 	 * Return the current Spring WebApplicationContext.
@@ -134,6 +129,7 @@ public abstract class DispatchActionSupport extends DispatchAction {
 	protected final File getTempDir() {
 		return WebUtils.getTempDir(getServletContext());
 	}
+
 
 	/**
 	 * Callback for custom initialization after the context has been set up.
