@@ -16,6 +16,10 @@
 
 package org.springframework.web.context;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
@@ -28,6 +32,7 @@ import org.springframework.beans.factory.access.BeanFactoryReference;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
@@ -75,12 +80,6 @@ public class ContextLoader {
 	public static final String CONTEXT_CLASS_PARAM = "contextClass";
 
 	/**
-	 * Default context class for ContextLoader.
-	 * @see org.springframework.web.context.support.XmlWebApplicationContext
-	 */
-	public static final Class DEFAULT_CONTEXT_CLASS = XmlWebApplicationContext.class;
-
-	/**
 	 * Name of servlet context parameter that can specify the config location
 	 * for the root context, falling back to the implementation's default
 	 * otherwise.
@@ -112,6 +111,34 @@ public class ContextLoader {
 	 * instance.
 	 */
 	public static final String LOCATOR_FACTORY_KEY_PARAM = "parentContextKey";
+
+	/**
+	 * Name of the class path resource (relative to the ContextLoader class)
+	 * that defines ContextLoader's default strategy names.
+	 */
+	private static final String DEFAULT_STRATEGIES_PATH = "ContextLoader.properties";
+
+
+	private static final Properties defaultStrategies = new Properties();
+
+	static {
+		// Load default strategy implementations from properties file.
+		// This is currently strictly internal and not meant to be customized
+		// by application developers.
+		try {
+			ClassPathResource resource = new ClassPathResource(DEFAULT_STRATEGIES_PATH, ContextLoader.class);
+			InputStream is = resource.getInputStream();
+			try {
+				defaultStrategies.load(is);
+			}
+			finally {
+				is.close();
+			}
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Could not load 'ContextLoader.properties': " + ex.getMessage());
+		}
+	}
 
 
 	private final Log logger = LogFactory.getLog(ContextLoader.class);
@@ -186,35 +213,23 @@ public class ContextLoader {
 	}
 
 	/**
-	 * Instantiate the root WebApplicationContext for this loader, either a
-	 * default XmlWebApplicationContext or a custom context class if specified.
+	 * Instantiate the root WebApplicationContext for this loader, either the
+	 * default context class or a custom context class if specified.
 	 * <p>This implementation expects custom contexts to implement
 	 * ConfigurableWebApplicationContext. Can be overridden in subclasses.
 	 * @param servletContext current servlet context
 	 * @param parent the parent ApplicationContext to use, or <code>null</code> if none
 	 * @return the root WebApplicationContext
 	 * @throws BeansException if the context couldn't be initialized
-	 * @see #CONTEXT_CLASS_PARAM
-	 * @see #DEFAULT_CONTEXT_CLASS
 	 * @see ConfigurableWebApplicationContext
-	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
 	protected WebApplicationContext createWebApplicationContext(
 			ServletContext servletContext, ApplicationContext parent) throws BeansException {
 
-		String contextClassName = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
-		Class contextClass = DEFAULT_CONTEXT_CLASS;
-		if (contextClassName != null) {
-			try {
-				contextClass = Class.forName(contextClassName, true, Thread.currentThread().getContextClassLoader());
-			}
-			catch (ClassNotFoundException ex) {
-				throw new ApplicationContextException("Failed to load context class [" + contextClassName + "]", ex);
-			}
-			if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
-				throw new ApplicationContextException("Custom context class [" + contextClassName +
-						"] is not of type ConfigurableWebApplicationContext");
-			}
+		Class contextClass = determineContextClass(servletContext);
+		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
+			throw new ApplicationContextException("Custom context class [" + contextClass.getName() +
+					"] is not of type ConfigurableWebApplicationContext");
 		}
 
 		ConfigurableWebApplicationContext wac =
@@ -229,6 +244,38 @@ public class ContextLoader {
 
 		wac.refresh();
 		return wac;
+	}
+
+	/**
+	 * Return the WebApplicationContext implementation class to use, either the
+	 * default XmlWebApplicationContext or a custom context class if specified.
+	 * @param servletContext current servlet context
+	 * @return the WebApplicationContext implementation class to use
+	 * @throws ApplicationContextException if the context class couldn't be loaded
+	 * @see #CONTEXT_CLASS_PARAM
+	 * @see org.springframework.web.context.support.XmlWebApplicationContext
+	 */
+	protected Class determineContextClass(ServletContext servletContext) throws ApplicationContextException {
+		String contextClassName = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
+		if (contextClassName != null) {
+			try {
+				return Class.forName(contextClassName, true, Thread.currentThread().getContextClassLoader());
+			}
+			catch (ClassNotFoundException ex) {
+				throw new ApplicationContextException(
+						"Failed to load custom context class [" + contextClassName + "]", ex);
+			}
+		}
+		else {
+			contextClassName = defaultStrategies.getProperty(WebApplicationContext.class.getName());
+			try {
+				return Class.forName(contextClassName, true, getClass().getClassLoader());
+			}
+			catch (ClassNotFoundException ex) {
+				throw new ApplicationContextException(
+						"Failed to load default context class [" + contextClassName + "]", ex);
+			}
+		}
 	}
 
 	/**
@@ -274,6 +321,7 @@ public class ContextLoader {
 
 		return parentContext;
 	}
+
 
 	/**
 	 * Close Spring's web application context for the given servlet context. If
