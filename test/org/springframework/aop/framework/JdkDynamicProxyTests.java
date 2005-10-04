@@ -128,4 +128,38 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 		//assertTrue(target.invocation == tii.invocation);
 	}
 
+	public void testProxyNotWrappedIfIncompatible() {
+		FooBar bean = new FooBar();
+
+		AdvisedSupport as = new AdvisedSupport(new Class[]{Foo.class});
+		as.setTarget(bean);
+
+		Foo proxy = (Foo)createProxy(as);
+
+		assertSame("Target should be returned when return types are incompatible", bean, proxy.getBarThis());
+		assertSame("Proxy should be returned when return types are compatible", proxy, proxy.getFooThis());
+
+	}
+
+	public static interface Foo {
+		Bar getBarThis();
+		Foo getFooThis();
+	}
+
+	public static interface Bar {
+
+	}
+
+	public static class FooBar implements Foo, Bar {
+
+		public Bar getBarThis() {
+			return this;
+		}
+
+		public Foo getFooThis() {
+			return this;
+		}
+	}
+
+
 }

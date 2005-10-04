@@ -175,8 +175,8 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			}
 
 			// massage return value if necessary
-			if (retVal != null && retVal == target) {
-				// Special case: it returned "this".
+			if (retVal != null && retVal == target && method.getReturnType().isInstance(proxy)) {
+				// Special case: it returned "this" and the return type of the method is type-compatible
 				// Note that we can't help if the target sets
 				// a reference to itself in another returned object.
 				retVal = proxy;
