@@ -100,7 +100,7 @@
 
 	<!-- Hibernate 3.0's JMX statistics service -->
 	<!-- Implements the StatisticsServiceMBean management interface -->
-	<bean name="petclinic:service=hibernateStatistics" class="org.hibernate.jmx.StatisticsService">
+	<bean name="petclinic:type=HibernateStatistics" class="org.hibernate.jmx.StatisticsService">
 		<property name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 

@@ -119,16 +119,16 @@
 	<bean id="jmxExporter" class="org.springframework.jmx.export.MBeanExporter">
 		<property name="beans">
 			<map>
-				<entry key="petclinic:service=clinic" value-ref="clinic"/>
-				<entry key="petclinic:service=callMonitor" value-ref="callMonitor"/>
+				<entry key="petclinic:type=Clinic" value-ref="clinic"/>
+				<entry key="petclinic:type=CallMonitor" value-ref="callMonitor"/>
 			</map>
 		</property>
 		<property name="assembler">
 			<bean class="org.springframework.jmx.export.assembler.InterfaceBasedMBeanInfoAssembler">
 				<property name="interfaceMappings">
 					<props>
-						<prop key="petclinic:service=clinic">org.springframework.samples.petclinic.jdbc.CachingClinic</prop>
-						<prop key="petclinic:service=callMonitor">org.springframework.samples.petclinic.jmx.CallMonitor</prop>
+						<prop key="petclinic:type=Clinic">org.springframework.samples.petclinic.jdbc.CachingClinic</prop>
+						<prop key="petclinic:type=CallMonitor">org.springframework.samples.petclinic.jmx.CallMonitor</prop>
 					</props>
 				</property>
 				<!-- Comment the following in on JBoss 3.x, which doesn't follow -->
