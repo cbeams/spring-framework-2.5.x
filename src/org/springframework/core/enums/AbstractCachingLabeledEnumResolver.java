@@ -45,11 +45,13 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 
 	protected transient final Log logger = LogFactory.getLog(getClass());
 
+
 	private CachingMapDecorator labeledEnumCache = new CachingMapDecorator() {
 		protected Object create(Object key) {
 			Set typeEnums = findLabeledEnums((Class) key);
 			if (typeEnums == null || typeEnums.isEmpty()) {
-				throw new IllegalArgumentException("Unsupported labeled enumeration type '" + key + "': "
+				throw new IllegalArgumentException(
+						"Unsupported labeled enumeration type '" + key + "': "
 						+ "make sure you've properly defined this enumeration: "
 						+ "if it's static, are the class and its fields public/static/final?");
 			}
