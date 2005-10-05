@@ -46,6 +46,7 @@ Package org.springframework.web
 * factored out "findRequiredWebApplicationContext" method from *ActionSupport to DelegatingActionUtils for Struts
 * added "bindingErrorProcessor" property to BaseCommandController, for declaratively overriding DataBinder's default
 * Velocity and FreeMarker form macros include an "id" attribute on each element
+* Velocity and FreeMarker ViewResolvers have the ability to set "allowSessionOverride" and "allowRequestOverride" on all views that they resolve
 
 
 Changes in version 1.2.5 (23.9.2005)

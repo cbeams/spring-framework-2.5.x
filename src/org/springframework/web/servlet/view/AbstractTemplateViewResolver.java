@@ -39,6 +39,10 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 	private boolean exposeSessionAttributes = false;
 
 	private boolean exposeSpringMacroHelpers = false;
+    
+    private boolean allowRequestOverride = false;
+    
+    private boolean allowSessionOverride = false;
 
 
 	protected Class requiredViewClass() {
@@ -72,12 +76,33 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 		this.exposeSpringMacroHelpers = exposeSpringMacroHelpers;
 	}
 
+    /**
+     * Set whether HttpServletRequest attributes are allowed to override (hide)
+     * controller generated model attributes of the same name. Default is "false",
+     * which causes an exception to be thrown if request attributes of the same
+     * name as model attributes are found.
+     */
+    public void setAllowRequestOverride(boolean allowRequestOverride) {
+        this.allowRequestOverride = allowRequestOverride;
+    }
+    
+    /**
+     * Set whether HttpSession attributes are allowed to override (hide)
+     * controller generated model attributes of the same name. Default is "false",
+     * which causes an exception to be thrown if session attributes of the same
+     * name as model attributes are found.
+     */
+    public void setAllowSessionOverride(boolean allowSessionOverride) {
+        this.allowSessionOverride = allowSessionOverride;
+    }
 
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		AbstractTemplateView view = (AbstractTemplateView) super.buildView(viewName);
 		view.setExposeRequestAttributes(this.exposeRequestAttributes);
 		view.setExposeSessionAttributes(this.exposeSessionAttributes);
 		view.setExposeSpringMacroHelpers(this.exposeSpringMacroHelpers);
+        view.setAllowRequestOverride(this.allowRequestOverride);
+        view.setAllowSessionOverride(this.allowSessionOverride);
 		return view;
 	}
 
