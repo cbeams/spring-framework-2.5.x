@@ -34,16 +34,16 @@ import org.aopalliance.intercept.MethodInvocation;
  */
 public abstract class AbstractPerformanceMonitorInterceptor extends AbstractTraceInterceptor {
 
-	private String prefix;
+	private String prefix = "";
 
-	private String suffix;
+	private String suffix = "";
 
 
 	/**
 	 * Set the text that will get appended to the trace data.
 	 */
 	public void setPrefix(String prefix) {
-		this.prefix = prefix;
+		this.prefix = (prefix != null) ? prefix : "";
 	}
 
 	/**
@@ -57,7 +57,7 @@ public abstract class AbstractPerformanceMonitorInterceptor extends AbstractTrac
 	 * Set the text that will get prepended to the trace data.
 	 */
 	public void setSuffix(String suffix) {
-		this.suffix = suffix;
+		this.suffix = (suffix != null) ? suffix : "";
 	}
 
 	/**
