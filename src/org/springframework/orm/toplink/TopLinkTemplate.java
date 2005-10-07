@@ -48,9 +48,9 @@ import org.springframework.util.StringUtils;
  * The latter or code calling the latter only have to deal with business
  * objects, query objects, and <code>org.springframework.dao</code> exceptions.
  *
- * <p>The central method is "execute", supporting TopLink code implementing
- * the TopLinkCallback interface. It provides TopLink Session handling
- * such that neither the TopLinkCallback implementation nor the calling
+ * <p>The central method is <code>execute</code>, supporting TopLink code
+ * implementing the TopLinkCallback interface. It provides TopLink Session
+ * handling such that neither the TopLinkCallback implementation nor the calling
  * code needs to explicitly care about retrieving/closing TopLink Sessions,
  * or handling Session lifecycle exceptions. For typical single step actions,
  * there are various convenience methods (read, readAll, merge, delete, etc).
@@ -61,11 +61,12 @@ import org.springframework.util.StringUtils;
  * always be configured as bean in the application context, in the first case
  * given to the service directly, in the second case to the prepared template.
  *
- * <p>This class can be considered a programmatic alternative to TopLinkInterceptor.
- * The major advantage is its straightforwardness, the major disadvantage that
- * no checked application exceptions can get thrown from within data access code.
- * Corresponding checks and the actual throwing of such exceptions can often
- * be deferred to after callback execution, though.
+ * <p>This class can be considered as direct alternative to working with the raw
+ * TopLink Session API (through <code>SessionFactoryUtils.getSession()</code>).
+ * The major advantage is its automatic conversion to DataAccessExceptions, the
+ * major disadvantage that no checked application exceptions can get thrown from
+ * within data access code. Corresponding checks and the actual throwing of such
+ * exceptions can often be deferred to after callback execution, though.
  *
  * <p>Note that even if TopLinkTransactionManager is used for transaction
  * demarcation in higher-level services, all those services above the data

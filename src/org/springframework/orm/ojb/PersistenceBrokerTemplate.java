@@ -36,7 +36,7 @@ import org.springframework.orm.ObjectRetrievalFailureException;
  * and converts PersistenceBrokerExceptions into Spring DataAccessExceptions,
  * following the <code>org.springframework.dao</code> exception hierarchy.
  *
- * <p>The central method is "execute", supporting OJB code implementing
+ * <p>The central method is <code>execute</code>, supporting OJB code implementing
  * the PersistenceBrokerCallback interface. It provides PersistenceBroker handling
  * such that neither the PersistenceBrokerCallback implementation nor the calling
  * code needs to explicitly care about retrieving/closing PersistenceBrokers,

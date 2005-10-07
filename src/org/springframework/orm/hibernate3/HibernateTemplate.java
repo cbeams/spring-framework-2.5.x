@@ -52,9 +52,9 @@ import org.springframework.util.Assert;
  * interface. The latter or code calling the latter only have to deal with
  * domain objects, query objects, and <code>org.springframework.dao</code> exceptions.
  *
- * <p>The central method is "execute", supporting Hibernate code implementing
- * the HibernateCallback interface. It provides Hibernate Session handling
- * such that neither the HibernateCallback implementation nor the calling
+ * <p>The central method is <code>execute</code>, supporting Hibernate code
+ * implementing the HibernateCallback interface. It provides Hibernate Session
+ * handling such that neither the HibernateCallback implementation nor the calling
  * code needs to explicitly care about retrieving/closing Hibernate Sessions,
  * or handling Session lifecycle exceptions. For typical single step actions,
  * there are various convenience methods (find, load, saveOrUpdate, delete).
@@ -65,11 +65,12 @@ import org.springframework.util.Assert;
  * always be configured as bean in the application context, in the first case
  * given to the service directly, in the second case to the prepared template.
  *
- * <p>This class can be considered a programmatic alternative to HibernateInterceptor.
- * The major advantage is its straightforwardness, the major disadvantage that
- * no checked application exceptions can get thrown from within data access code.
- * Corresponding checks and the actual throwing of such exceptions can often
- * be deferred to after callback execution, though.
+ * <p>This class can be considered as direct alternative to working with the raw
+ * Hibernate3 Session API (through <code>SessionFactory.getCurrentSession()</code>).
+ * The major advantage is its automatic conversion to DataAccessExceptions, the
+ * major disadvantage that no checked application exceptions can get thrown from
+ * within data access code. Corresponding checks and the actual throwing of such
+ * exceptions can often be deferred to after callback execution, though.
  *
  * <p>Note that even if HibernateTransactionManager is used for transaction
  * demarcation in higher-level services, all those services above the data

@@ -38,10 +38,10 @@ import org.springframework.util.ClassUtils;
  * JDOExceptions into Spring DataAccessExceptions, following the
  * <code>org.springframework.dao</code> exception hierarchy.
  *
- * <p>The central method is "execute", supporting JDO code implementing
- * the JdoCallback interface. It provides JDO PersistenceManager handling
- * such that neither the JdoCallback implementation nor the calling code
- * needs to explicitly care about retrieving/closing PersistenceManagers,
+ * <p>The central method is <code>execute</code>, supporting JDO code
+ * implementing the JdoCallback interface. It provides JDO PersistenceManager
+ * handling such that neither the JdoCallback implementation nor the calling
+ * code needs to explicitly care about retrieving/closing PersistenceManagers,
  * or handling JDO lifecycle exceptions.
  *
  * <p>Typically used to implement data access or business logic services that
@@ -56,11 +56,13 @@ import org.springframework.util.ClassUtils;
  * the application context, in the first case given to the service directly,
  * in the second case to the prepared template.
  *
- * <p>This class can be considered a programmatic alternative to JdoInterceptor.
- * The major advantage is its straightforwardness, the major disadvantage that
- * no checked application exceptions can get thrown from within data access code.
- * Corresponding checks and the actual throwing of such exceptions can often
- * be deferred to after callback execution, though.
+ * <p>This class can be considered as direct alternative to working with the
+ * raw JDO PersistenceManager API (through
+ * <code>PersistenceManagerFactoryUtils.getPersistenceManager()</code>).
+ * The major advantage is its automatic conversion to DataAccessExceptions, the
+ * major disadvantage that no checked application exceptions can get thrown from
+ * within data access code. Corresponding checks and the actual throwing of such
+ * exceptions can often be deferred to after callback execution, though.
  *
  * <p>Note that even if JdoTransactionManager is used for transaction
  * demarcation in higher-level services, all those services above the data
