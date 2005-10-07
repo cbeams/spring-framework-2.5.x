@@ -71,9 +71,9 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 
 	private MessageSource parentMessageSource;
 
-	private boolean alwaysUseMessageFormat = false;
-
 	private boolean useCodeAsDefaultMessage = false;
+
+	private boolean alwaysUseMessageFormat = false;
 
 	/**
 	 * Cache to hold already generated MessageFormats per message.
@@ -89,24 +89,6 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 
 	public MessageSource getParentMessageSource() {
 		return parentMessageSource;
-	}
-
-	/**
-	 * Set whether to always apply the MessageFormat rules, parsing even
-	 * messages without arguments.
-	 * <p>Default is "false": Messages without arguments are by default
-	 * returned as-is, without parsing them through MessageFormat.
-	 * Set this to "true" to enforce MessageFormat for all messages,
-	 * expecting all message texts to be written with MessageFormat escaping.
-	 * <p>For example, MessageFormat expects a single quote to be escaped
-	 * as "''". If your message texts are all written with such escaping,
-	 * even when not defining argument placeholders, you need to set this
-	 * flag to "true". Else, only message texts with actual arguments
-	 * are supposed to be written with MessageFormat escaping.
-	 * @see java.text.MessageFormat
-	 */
-	public void setAlwaysUseMessageFormat(boolean alwaysUseMessageFormat) {
-		this.alwaysUseMessageFormat = alwaysUseMessageFormat;
 	}
 
 	/**
@@ -131,16 +113,57 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		this.useCodeAsDefaultMessage = useCodeAsDefaultMessage;
 	}
 
+	/**
+	 * Return whether to use the message code as default message instead of
+	 * throwing a NoSuchMessageException. Useful for development and debugging.
+	 * Default is "false".
+	 * <p>Alternatively, consider overriding the <code>getDefaultMessage</code>
+	 * method to return a custom fallback message for an unresolvable code.
+	 * @see #getDefaultMessage(String)
+	 */
+	protected boolean isUseCodeAsDefaultMessage() {
+		return useCodeAsDefaultMessage;
+	}
+
+	/**
+	 * Set whether to always apply the MessageFormat rules, parsing even
+	 * messages without arguments.
+	 * <p>Default is "false": Messages without arguments are by default
+	 * returned as-is, without parsing them through MessageFormat.
+	 * Set this to "true" to enforce MessageFormat for all messages,
+	 * expecting all message texts to be written with MessageFormat escaping.
+	 * <p>For example, MessageFormat expects a single quote to be escaped
+	 * as "''". If your message texts are all written with such escaping,
+	 * even when not defining argument placeholders, you need to set this
+	 * flag to "true". Else, only message texts with actual arguments
+	 * are supposed to be written with MessageFormat escaping.
+	 * @see java.text.MessageFormat
+	 */
+	public void setAlwaysUseMessageFormat(boolean alwaysUseMessageFormat) {
+		this.alwaysUseMessageFormat = alwaysUseMessageFormat;
+	}
+
+	/**
+	 * Return whether to always apply the MessageFormat rules, parsing even
+	 * messages without arguments.
+	 */
+	protected boolean isAlwaysUseMessageFormat() {
+		return alwaysUseMessageFormat;
+	}
+
 
 	public final String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
 		String msg = getMessageInternal(code, args, locale);
 		if (msg != null) {
 			return msg;
 		}
-		if (defaultMessage == null && this.useCodeAsDefaultMessage) {
-			return code;
+		if (defaultMessage == null) {
+			String fallback = getDefaultMessage(code);
+			if (fallback != null) {
+				return fallback;
+			}
 		}
-		return formatMessage(defaultMessage, args, locale);
+		return renderDefaultMessage(defaultMessage, args, locale);
 	}
 
 	public final String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
@@ -148,8 +171,9 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		if (msg != null) {
 			return msg;
 		}
-		if (this.useCodeAsDefaultMessage) {
-			return code;
+		String fallback = getDefaultMessage(code);
+		if (fallback != null) {
+			return fallback;
 		}
 		throw new NoSuchMessageException(code, locale);
 	}
@@ -168,10 +192,13 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 			}
 		}
 		if (resolvable.getDefaultMessage() != null) {
-			return formatMessage(resolvable.getDefaultMessage(), resolvable.getArguments(), locale);
+			return renderDefaultMessage(resolvable.getDefaultMessage(), resolvable.getArguments(), locale);
 		}
-		if (this.useCodeAsDefaultMessage && codes.length > 0) {
-			return codes[0];
+		if (codes.length > 0) {
+			String fallback = getDefaultMessage(codes[0]);
+			if (fallback != null) {
+				return fallback;
+			}
 		}
 		throw new NoSuchMessageException(codes.length > 0 ? codes[codes.length - 1] : null, locale);
 	}
@@ -199,7 +226,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 			locale = Locale.getDefault();
 		}
 
-		if (!this.alwaysUseMessageFormat && ObjectUtils.isEmpty(args)) {
+		if (!isAlwaysUseMessageFormat() && ObjectUtils.isEmpty(args)) {
 			// Optimized resolution: no arguments to apply,
 			// therefore no MessageFormat needs to be involved.
 			// Note that the default implementation still uses MessageFormat;
@@ -248,11 +275,47 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		return null;
 	}
 
+	/**
+	 * Return a fallback default message for the given code, if any.
+	 * <p>Default is to return the code itself if "useCodeAsDefaultMessage"
+	 * is activated, or return no fallback else. In case of no fallback,
+	 * the caller will usually receive a NoSuchMessageException from
+	 * <code>getMessage</code>.
+	 * @param code the message code that we couldn't resolve
+	 * and that we didn't receive an explicit default message for
+	 * @return the default message to use, or <code>null</code> if none
+	 * @see #setUseCodeAsDefaultMessage
+	 */
+	protected String getDefaultMessage(String code) {
+		if (isUseCodeAsDefaultMessage()) {
+			return code;
+		}
+		return null;
+	}
+
+
+	/**
+	 * Render the given default message String. The default message is
+	 * passed in as specified by the caller and can be rendered into
+	 * a fully formatted default message shown to the user.
+	 * <p>Default implementation passes the String to <code>formatMessage</code>,
+	 * resolving any argument placeholders found in them. Subclasses may override
+	 * this method to plug in custom processing of default messages.
+	 * @param defaultMessage the passed-in default message String
+	 * @param args array of arguments that will be filled in for params within
+	 * the message, or <code>null</code> if none.
+	 * @param locale the Locale used for formatting
+	 * @return the rendered default message (with resolved arguments)
+	 * @see #formatMessage(String, Object[], java.util.Locale)
+	 */
+	protected String renderDefaultMessage(String defaultMessage, Object[] args, Locale locale) {
+		return formatMessage(defaultMessage, args, locale);
+	}
 
 	/**
 	 * Format the given message String, using cached MessageFormats.
-	 * Invoked for passed-in default messages, to resolve any argument
-	 * placeholders found in them.
+	 * By default invoked for passed-in default messages, to resolve
+	 * any argument placeholders found in them.
 	 * @param msg the message to format
 	 * @param args array of arguments that will be filled in for params within
 	 * the message, or <code>null</code> if none.
