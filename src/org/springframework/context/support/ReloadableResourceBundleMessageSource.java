@@ -182,9 +182,10 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * fallback will be the default file (e.g. "messages.properties" for
 	 * basename "messages").
 	 * <p>Falling back to the system Locale is the default behavior of
-	 * java.util.ResourceBundle. However, this is often not desirable in an
-	 * application server environment, where the system Locale is not relevant
-	 * to the application at all: Set this flag to "false" in such a scenario.
+	 * <code>java.util.ResourceBundle</code>. However, this is often not
+	 * desirable in an application server environment, where the system Locale
+	 * is not relevant to the application at all: Set this flag to "false"
+	 * in such a scenario.
 	 */
 	public void setFallbackToSystemLocale(boolean fallbackToSystemLocale) {
 		this.fallbackToSystemLocale = fallbackToSystemLocale;
@@ -210,7 +211,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	/**
 	 * Set the PropertiesPersister to use for parsing properties files.
-	 * The default is DefaultPropertiesPersister.
+	 * <p>The default is a DefaultPropertiesPersister.
 	 * @see org.springframework.util.DefaultPropertiesPersister
 	 */
 	public void setPropertiesPersister(PropertiesPersister propertiesPersister) {
@@ -220,15 +221,22 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	/**
 	 * Set the ResourceLoader to use for loading bundle properties files.
-	 * The default is DefaultResourceLoader. Will get overridden by the
-	 * ApplicationContext if running in a context.
+	 * <p>The default is a DefaultResourceLoader. Will get overridden by the
+	 * ApplicationContext if running in a context, as it implements the
+	 * ResourceLoaderAware interface. Can be manually overridden when
+	 * running outside of an ApplicationContext.
 	 * @see org.springframework.core.io.DefaultResourceLoader
+	 * @see org.springframework.context.ResourceLoaderAware
 	 */
 	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
+		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
 	}
 
 
+	/**
+	 * Resolves the given message code as key in the retrieved bundle files,
+	 * returning the value found in the bundle as-is (without MessageFormat parsing).
+	 */
 	protected String resolveCodeWithoutArguments(String code, Locale locale) {
 		if (this.cacheMillis < 0) {
 			PropertiesHolder propHolder = getMergedProperties(locale);
@@ -253,6 +261,10 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		return null;
 	}
 
+	/**
+	 * Resolves the given message code as key in the retrieved bundle files,
+	 * using a cached MessageFormat instance per message code.
+	 */
 	protected MessageFormat resolveCode(String code, Locale locale) {
 		if (this.cacheMillis < 0) {
 			PropertiesHolder propHolder = getMergedProperties(locale);
@@ -276,6 +288,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		}
 		return null;
 	}
+
 
 	/**
 	 * Get a PropertiesHolder that contains the actually visible properties
@@ -334,7 +347,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 				for (Iterator it = fallbackFilenames.iterator(); it.hasNext();) {
 					String fallbackFilename = (String) it.next();
 					if (!filenames.contains(fallbackFilename)) {
-						// entry for fallback locale that isn't alread in filenames list
+						// Entry for fallback locale that isn't already in filenames list.
 						filenames.add(fallbackFilename);
 					}
 				}
@@ -386,9 +399,12 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		return result;
 	}
 
+
 	/**
 	 * Get a PropertiesHolder for the given filename, either from the
 	 * cache or freshly loaded.
+	 * @param filename the bundle filename (basename + Locale)
+	 * @return the current PropertiesHolder for the bundle
 	 */
 	protected PropertiesHolder getProperties(String filename) {
 		synchronized (this.cachedProperties) {
@@ -407,6 +423,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * Refresh the PropertiesHolder for the given bundle filename.
 	 * The holder can be <code>null</code> if not cached before, or a timed-out cache entry
 	 * (potentially getting re-validated against the current last-modified timestamp).
+	 * @param filename the bundle filename (basename + Locale)
+	 * @param propHolder the current PropertiesHolder for the bundle
 	 */
 	protected PropertiesHolder refreshProperties(String filename, PropertiesHolder propHolder) {
 		long refreshTimestamp = (this.cacheMillis < 0) ? -1 : System.currentTimeMillis();
@@ -421,13 +439,13 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 				long fileTimestamp = -1;
 
 				if (this.cacheMillis >= 0) {
-					// last-modified timestamp of file will just be read if caching with timeout
+					// Last-modified timestamp of file will just be read if caching with timeout.
 					File file = null;
 					try {
 						file = resource.getFile();
 					}
 					catch (IOException ex) {
-						// probably a class path resource: cache it forever
+						// Probably a class path resource: cache it forever.
 						if (logger.isDebugEnabled()) {
 							logger.debug(
 									resource + " could not be resolved in the file system - assuming that is hasn't changed", ex);
@@ -449,41 +467,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 					}
 				}
 
-				InputStream is = resource.getInputStream();
-				Properties props = new Properties();
-				try {
-					if (resource.getFilename().endsWith(XML_SUFFIX)) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Loading properties [" + resource.getFilename() + "]");
-						}
-						this.propertiesPersister.loadFromXml(props, is);
-					}
-					else {
-						String encoding = null;
-						if (this.fileEncodings != null) {
-							encoding = this.fileEncodings.getProperty(filename);
-						}
-						if (encoding == null) {
-							encoding = this.defaultEncoding;
-						}
-						if (encoding != null) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Loading properties [" + resource.getFilename() + "] with encoding '" + encoding + "'");
-							}
-							this.propertiesPersister.load(props, new InputStreamReader(is, encoding));
-						}
-						else {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Loading properties [" + resource.getFilename() + "]");
-							}
-							this.propertiesPersister.load(props, is);
-						}
-					}
-					propHolder = new PropertiesHolder(props, fileTimestamp);
-				}
-				finally {
-					is.close();
-				}
+				Properties props = loadProperties(resource, filename);
+				propHolder = new PropertiesHolder(props, fileTimestamp);
 			}
 
 			catch (IOException ex) {
@@ -491,17 +476,17 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 					logger.warn(
 							"Could not parse properties file [" + resource.getFilename() + "]: " + ex.getMessage(), ex);
 				}
-				// empty holder representing "not valid"
+				// Empty holder representing "not valid".
 				propHolder = new PropertiesHolder();
 			}
 		}
 
 		else {
-			// resource does not exist
+			// Resource does not exist.
 			if (logger.isDebugEnabled()) {
 				logger.debug("No properties file found for [" + filename + "] - neither plain properties nor XML");
 			}
-			// empty holder representing "not found"
+			// Empty holder representing "not found".
 			propHolder = new PropertiesHolder();
 		}
 
@@ -509,6 +494,52 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		this.cachedProperties.put(filename, propHolder);
 		return propHolder;
 	}
+
+	/**
+	 * Load the properties from the given resource.
+	 * @param resource the resource to load from
+	 * @param filename the original bundle filename (basename + Locale)
+	 * @return the populated Properties instance
+	 * @throws IOException if properties loading failed
+	 */
+	protected Properties loadProperties(Resource resource, String filename) throws IOException {
+		InputStream is = resource.getInputStream();
+		Properties props = new Properties();
+		try {
+			if (resource.getFilename().endsWith(XML_SUFFIX)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Loading properties [" + resource.getFilename() + "]");
+				}
+				this.propertiesPersister.loadFromXml(props, is);
+			}
+			else {
+				String encoding = null;
+				if (this.fileEncodings != null) {
+					encoding = this.fileEncodings.getProperty(filename);
+				}
+				if (encoding == null) {
+					encoding = this.defaultEncoding;
+				}
+				if (encoding != null) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Loading properties [" + resource.getFilename() + "] with encoding '" + encoding + "'");
+					}
+					this.propertiesPersister.load(props, new InputStreamReader(is, encoding));
+				}
+				else {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Loading properties [" + resource.getFilename() + "]");
+					}
+					this.propertiesPersister.load(props, is);
+				}
+			}
+			return props;
+		}
+		finally {
+			is.close();
+		}
+	}
+
 
 	/**
 	 * Clear the resource bundle cache.
@@ -534,6 +565,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 			((ReloadableResourceBundleMessageSource) getParentMessageSource()).clearCacheIncludingAncestors();
 		}
 	}
+
 
 	public String toString() {
 		return getClass().getName() + ": basenames=[" + StringUtils.arrayToCommaDelimitedString(this.basenames) + "]";
