@@ -39,9 +39,11 @@ public class ResourceJobSchedulingDataProcessor extends JobSchedulingDataProcess
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
+
 	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
+		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
 	}
+
 
 	protected InputStream getInputStream(String fileName) {
 		try {
