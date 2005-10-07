@@ -37,6 +37,7 @@ import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.JdkVersion;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Juergen Hoeller
@@ -361,15 +362,16 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();
-			fail("Should have thrown BeanDefinitionStoreException");
+			fail("Should have thrown BeanInitializationException");
 		}
 		catch (BeanInitializationException ex) {
 			// expected
 			assertTrue(ex.getCause() instanceof FileNotFoundException);
 			// slight hack for Linux/Unix systems
-			String userDir = System.getProperty("user.dir");
-			if (userDir.startsWith("/"))
+			String userDir = StringUtils.cleanPath(System.getProperty("user.dir"));
+			if (userDir.startsWith("/")) {
 				userDir = userDir.substring(1);
+			}
 			assertTrue(ex.getMessage().indexOf(userDir) != -1);
 		}
 	}
@@ -384,13 +386,13 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();
-			fail("Should have thrown BeanDefinitionStoreException");
+			fail("Should have thrown BeanInitializationException");
 		}
 		catch (BeanInitializationException ex) {
 			// expected
 			assertTrue(ex.getCause() instanceof FileNotFoundException);
 			// slight hack for Linux/Unix systems			
-			String userDir = System.getProperty("user.dir");
+			String userDir = StringUtils.cleanPath(System.getProperty("user.dir"));
 			if (userDir.startsWith("/")) {
 				userDir = userDir.substring(1);
 			}

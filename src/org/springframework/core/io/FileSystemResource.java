@@ -27,7 +27,7 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Resource implementation for java.io.File handles.
+ * Resource implementation for <code>java.io.File</code> handles.
  * Obviously supports resolution as File, and also as URL.
  *
  * @author Juergen Hoeller
@@ -58,11 +58,11 @@ public class FileSystemResource extends AbstractResource {
 	public FileSystemResource(String path) {
 		Assert.notNull(path, "path is required");
 		this.file = new File(path);
-		this.path = path;
+		this.path = StringUtils.cleanPath(path);
 	}
 
 	/**
-	 * Return the path for this resource.
+	 * Return the file path for this resource.
 	 */
 	public final String getPath() {
 		return path;
@@ -133,14 +133,14 @@ public class FileSystemResource extends AbstractResource {
 	 */
 	public boolean equals(Object obj) {
 		return (obj == this ||
-		    (obj instanceof FileSystemResource && this.file.equals(((FileSystemResource) obj).file)));
+		    (obj instanceof FileSystemResource && this.path.equals(((FileSystemResource) obj).path)));
 	}
 
 	/**
 	 * This implementation returns the hash code of the underlying File reference.
 	 */
 	public int hashCode() {
-		return this.file.hashCode();
+		return this.path.hashCode();
 	}
 
 }

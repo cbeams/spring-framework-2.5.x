@@ -79,7 +79,7 @@ public class ClassPathResource extends AbstractResource {
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
-		this.path = path;
+		this.path = StringUtils.cleanPath(path);
 		this.classLoader = classLoader;
 	}
 
@@ -93,7 +93,7 @@ public class ClassPathResource extends AbstractResource {
 	 */
 	public ClassPathResource(String path, Class clazz) {
 		Assert.notNull(path, "path is required");
-		this.path = path;
+		this.path = StringUtils.cleanPath(path);
 		this.clazz = clazz;
 	}
 
@@ -105,7 +105,6 @@ public class ClassPathResource extends AbstractResource {
 	 * @param clazz the class to load resources with, if any
 	 */
 	protected ClassPathResource(String path, ClassLoader classLoader, Class clazz) {
-		Assert.notNull(path, "path is required");
 		this.path = path;
 		this.classLoader = classLoader;
 		this.clazz = clazz;

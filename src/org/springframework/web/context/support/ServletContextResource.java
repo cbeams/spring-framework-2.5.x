@@ -70,7 +70,7 @@ public class ServletContextResource extends AbstractResource {
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}
-		this.path = path;
+		this.path = StringUtils.cleanPath(path);
 	}
 
 	/**

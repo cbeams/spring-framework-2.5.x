@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 
 import junit.framework.TestCase;
 
@@ -40,6 +41,7 @@ public class ResourceTests extends TestCase {
 		assertFalse(resource.isOpen());
 		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
 		assertEquals("testString", content);
+		assertEquals(resource, new ByteArrayResource("testString".getBytes()));
 	}
 	
 	public void testByteArrayResourceWithDescription() throws IOException {
@@ -49,56 +51,77 @@ public class ResourceTests extends TestCase {
 		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
 		assertEquals("testString", content);
 		assertEquals("my description", resource.getDescription());
+		assertEquals(resource, new ByteArrayResource("testString".getBytes()));
 	}
 
 	public void testInputStreamResource() throws IOException {
-		Resource resource = new InputStreamResource(new ByteArrayInputStream("testString".getBytes()));
+		InputStream is = new ByteArrayInputStream("testString".getBytes());
+		Resource resource = new InputStreamResource(is);
 		assertTrue(resource.exists());
 		assertTrue(resource.isOpen());
 		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
 		assertEquals("testString", content);
+		assertEquals(resource, new InputStreamResource(is));
 	}
 
 	public void testInputStreamResourceWithDescription() throws IOException {
-		Resource resource = new InputStreamResource(
-				new ByteArrayInputStream("testString".getBytes()), "my description");
+		InputStream is = new ByteArrayInputStream("testString".getBytes());
+		Resource resource = new InputStreamResource(is, "my description");
 		assertTrue(resource.exists());
 		assertTrue(resource.isOpen());
 		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
 		assertEquals("testString", content);
 		assertEquals("my description", resource.getDescription());
+		assertEquals(resource, new InputStreamResource(is));
 	}
 
 	public void testClassPathResource() throws IOException {
 		Resource resource = new ClassPathResource("org/springframework/core/io/Resource.class");
 		doTestResource(resource);
+		Resource resource2 = new ClassPathResource("org/springframework/core/../core/io/./Resource.class");
+		assertEquals(resource, resource2);
+		// Check whether equal/hashCode works in a HashSet.
+		HashSet resources = new HashSet();
+		resources.add(resource);
+		resources.add(resource2);
+		assertEquals(1, resources.size());
 	}
 
 	public void testClassPathResourceWithClassLoader() throws IOException {
 		Resource resource =
 				new ClassPathResource("org/springframework/core/io/Resource.class", getClass().getClassLoader());
 		doTestResource(resource);
+		assertEquals(resource,
+				new ClassPathResource("org/springframework/core/../core/io/./Resource.class", getClass().getClassLoader()));
 	}
 
 	public void testClassPathResourceWithClass() throws IOException {
 		Resource resource = new ClassPathResource("Resource.class", getClass());
 		doTestResource(resource);
+		assertEquals(resource, new ClassPathResource("Resource.class", getClass()));
 	}
 
 	public void testFileSystemResource() throws IOException {
 		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());
 		doTestResource(resource);
+		assertEquals(new FileSystemResource(getClass().getResource("Resource.class").getFile()), resource);
+		Resource resource2 = new FileSystemResource("core/io/Resource.class");
+		assertEquals(resource2, new FileSystemResource("core/../core/io/./Resource.class"));
 	}
 
 	public void testUrlResource() throws IOException {
 		Resource resource = new UrlResource(getClass().getResource("Resource.class"));
 		doTestResource(resource);
+		assertEquals(new UrlResource(getClass().getResource("Resource.class")), resource);
+		Resource resource2 = new UrlResource("file:core/io/Resource.class");
+		assertEquals(resource2, new UrlResource("file:core/../core/io/./Resource.class"));
 	}
 
 	public void testServletContextResource() throws IOException {
 		MockServletContext sc = new MockServletContext();
 		Resource resource = new ServletContextResource(sc, "org/springframework/core/io/Resource.class");
 		doTestResource(resource);
+		assertEquals(resource, new ServletContextResource(sc, "org/springframework/core/../core/io/./Resource.class"));
 	}
 
 	private void doTestResource(Resource resource) throws IOException {
@@ -145,15 +168,17 @@ public class ResourceTests extends TestCase {
 		Resource relative = resource.createRelative("subdir");
 		assertEquals(new ServletContextResource(sc, "dir/subdir"), relative);
 	}
-	
+
+	/*
 	public void testNonFileResourceExists() throws Exception {
 		Resource resource = new UrlResource("http://www.springframework.org");
-		assertTrue(resource.exists());		
+		assertTrue(resource.exists());
 	}
-	
+	*/
+
 	public void testAbstractResourceExceptions() throws Exception {
 		final String name = "test-resource";
-		
+
 		Resource resource = new AbstractResource() {
 			public String getDescription() {
 				return name;
@@ -162,7 +187,7 @@ public class ResourceTests extends TestCase {
 				return null;
 			}
 		};
-		
+
 		try {
 			resource.getURL();
 			fail("FileNotFoundException should have been thrown");

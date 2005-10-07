@@ -247,8 +247,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		Set result = new HashSet();
 		while (resourceUrls.hasMoreElements()) {
 			URL url = (URL) resourceUrls.nextElement();
-			// Use normalized path to avoid multiple entries pointing to the same resource.
-			result.add(new UrlResource(StringUtils.cleanPath(url.toString())));
+			result.add(new UrlResource(url));
 		}
 		return (Resource[]) result.toArray(new Resource[result.size()]);
 	}

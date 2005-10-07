@@ -24,6 +24,7 @@ import java.net.URL;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Resource implementation for java.net.URL locators.
@@ -36,7 +37,15 @@ import org.springframework.util.ResourceUtils;
  */
 public class UrlResource extends AbstractResource {
 
+	/**
+	 * Original URL, used for actual access.
+	 */
 	private final URL url;
+
+	/**
+	 * Cleaned URL (with normalized path), used for comparisons.
+	 */
+	private final URL cleanedUrl;
 
 
 	/**
@@ -46,6 +55,7 @@ public class UrlResource extends AbstractResource {
 	public UrlResource(URL url) {
 		Assert.notNull(url, "url is required");
 		this.url = url;
+		this.cleanedUrl = getCleanedUrl(this.url, url.toString());
 	}
 
 	/**
@@ -55,6 +65,25 @@ public class UrlResource extends AbstractResource {
 	public UrlResource(String path) throws MalformedURLException {
 		Assert.notNull(path, "path is required");
 		this.url = new URL(path);
+		this.cleanedUrl = getCleanedUrl(this.url, path);
+	}
+
+	/**
+	 * Determine a cleaned URL for the given original URL.
+	 * @param originalUrl the original URL
+	 * @param originalPath the original URL path
+	 * @return the cleaned URL
+	 * @see org.springframework.util.StringUtils#cleanPath
+	 */
+	private URL getCleanedUrl(URL originalUrl, String originalPath) {
+		try {
+			return new URL(StringUtils.cleanPath(originalPath));
+		}
+		catch (MalformedURLException ex) {
+			// Cleaned URL path cannot be converted to URL
+			// -> take original URL.
+			return originalUrl;
+		}
 	}
 
 
@@ -116,14 +145,14 @@ public class UrlResource extends AbstractResource {
 	 */
 	public boolean equals(Object obj) {
 		return (obj == this ||
-		    (obj instanceof UrlResource && this.url.equals(((UrlResource) obj).url)));
+		    (obj instanceof UrlResource && this.cleanedUrl.equals(((UrlResource) obj).cleanedUrl)));
 	}
 
 	/**
 	 * This implementation returns the hash code of the underlying URL reference.
 	 */
 	public int hashCode() {
-		return this.url.hashCode();
+		return this.cleanedUrl.hashCode();
 	}
 
 }
