@@ -46,7 +46,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * <p>For writing LOBs, either an active Spring transaction synchronization
  * or an active JTA transaction (with "jtaTransactionManager" specified on
- * LocalSessionFactoryBean) is required.
+ * LocalSessionFactoryBean or a Hibernate TransactionManagerLookup configured
+ * through the corresponding Hibernate property) is required.
  *
  * <p>Offers template methods for setting parameters and getting result values,
  * passing in the LobHandler or LobCreator to use.
@@ -68,6 +69,7 @@ public abstract class AbstractLobType implements UserType {
 	 */
 	public static final int LOB_CREATOR_SYNCHRONIZATION_ORDER =
 			SessionFactoryUtils.SESSION_SYNCHRONIZATION_ORDER - 100;
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -190,11 +192,13 @@ public abstract class AbstractLobType implements UserType {
 		catch (IOException ex) {
 			throw new HibernateException("I/O errors during LOB access", ex);
 		}
+
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering Spring transaction synchronization for Hibernate LOB type");
 			TransactionSynchronizationManager.registerSynchronization(
 			    new SpringLobCreatorSynchronization(lobCreator));
 		}
+
 		else {
 			if (this.jtaTransactionManager != null) {
 				try {
