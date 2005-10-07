@@ -893,22 +893,23 @@
         </listitem>
 
         <listitem>
-          <para>among other activities, this can trigger a callback by Spring
-          to Hibernate, via Hibernate's afterTransactionCompletion callback
-          (used to clear the Hibernate cache), followed by an explicit close()
-          call on the Hibernate Session, which results in Hibernate trying to
-          close() the JDBC Connection.</para>
+          <para>Among other activities, this can trigger a callback by Spring
+          to Hibernate, via Hibernate's <literal>afterTransactionCompletion</literal>
+          callback (used to clear the Hibernate cache), followed by an explicit
+					<literal>close()</literal> call on the Hibernate Session, which
+          results in Hibernate trying to <literal>close()</literal> the JDBC
+          Connection.</para>
         </listitem>
 
         <listitem>
-          <para>in some environments, this Connection.close() call then
-          triggers the warning or error, as the AppServer no longer considers
-          the Connection usable at all, since the transaction has
-          committed.</para>
+          <para>In some environments, this <literal>Connection.close()</literal>
+          call then triggers the warning or error, as the application server
+          no longer considers the Connection usable at all, since the
+          transaction has already been committed.</para>
         </listitem>
       </itemizedlist>
 
-      <para>When Hibernateis configured with awarenesss of the JTA
+      <para>When Hibernate is configured with awareness of the JTA
       <literal>TransactionManager</literal>, the sequence of events when a JTA
       transaction commits is instead as follows:</para>
 
