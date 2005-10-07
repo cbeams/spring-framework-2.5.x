@@ -45,6 +45,16 @@ import org.hibernate.persister.entity.EntityPersister;
  * <p>Typically specified as entry for LocalSessionFactoryBean's "eventListeners"
  * map, with key "merge".
  *
+ * <p><b>NOTE:</b> Due to incompatible changes in the Hibernate 3.1 event listener API
+ * (according to the Hibernate 3.1 beta releases that were available at the time of
+ * this writing), this merge event listener will currently only work as-is with
+ * Hibernate 3.0. Consider copying this implementation and adapting it to the changed
+ * API if you want to run it against Hibernate 3.1.
+ *
+ * <p>Spring 1.3 is likely to update its default implementation of this class to
+ * Hibernate 3.1, even if the remainder of Spring 1.3's Hibernate3 support will stay
+ * compatible with Hibernate 3.0.
+ *
  * @author Juergen Hoeller
  * @since 1.2
  * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#setEventListeners(java.util.Map)
