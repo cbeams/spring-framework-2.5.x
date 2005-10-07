@@ -75,7 +75,9 @@ public class UrlFilenameViewController extends AbstractController {
 	 * @see #setPrefix
 	 * @see #setSuffix
 	 */
-	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) {
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
 		String uri = request.getRequestURI();
 		String viewName = (String) this.viewNameCache.get(uri);
 		if (viewName == null) {
