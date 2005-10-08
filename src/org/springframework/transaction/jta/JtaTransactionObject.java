@@ -38,6 +38,7 @@ public class JtaTransactionObject implements SmartTransactionObject {
 
 	private final UserTransaction userTransaction;
 
+
 	/**
 	 * Create a new JtaTransactionObject for the given JTA UserTransaction.
 	 * @param userTransaction the JTA UserTransaction for the current transaction
@@ -53,6 +54,7 @@ public class JtaTransactionObject implements SmartTransactionObject {
 	public UserTransaction getUserTransaction() {
 		return userTransaction;
 	}
+
 
 	/**
 	 * This implementation checks the UserTransaction's rollback-only flag.

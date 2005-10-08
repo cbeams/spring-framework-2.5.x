@@ -134,9 +134,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition implements
 	 * @throws TransactionException in case of a rollback error
 	 */
 	private void rollbackOnException(TransactionStatus status, Throwable ex) throws TransactionException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Initiating transaction rollback on application exception", ex);
-		}
+		logger.debug("Initiating transaction rollback on application exception", ex);
 		try {
 			this.transactionManager.rollback(status);
 		}
