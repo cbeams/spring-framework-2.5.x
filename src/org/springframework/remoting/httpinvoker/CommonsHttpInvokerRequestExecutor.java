@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.PostMethod;
 
@@ -86,6 +87,7 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	 * @see #createPostMethod
 	 * @see #setRequestBody
 	 * @see #executePostMethod
+	 * @see #validateResponse
 	 * @see #getResponseBody
 	 */
 	protected RemoteInvocationResult doExecuteRequest(
@@ -96,6 +98,7 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 		try {
 			setRequestBody(config, postMethod, baos);
 			executePostMethod(config, getHttpClient(), postMethod);
+			validateResponse(config, postMethod);
 			InputStream responseBody = getResponseBody(config, postMethod);
 			return readRemoteInvocationResult(responseBody, config.getCodebaseUrl());
 		}
@@ -126,8 +129,7 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	 * as the PostMethod's request body. This can be overridden, for example,
 	 * to write a specific encoding and potentially set appropriate HTTP
 	 * request headers.
-	 * @param config the HTTP invoker configuration that specifies the
-	 * target service
+	 * @param config the HTTP invoker configuration that specifies the target service
 	 * @param postMethod the PostMethod to set the request body on
 	 * @param baos the ByteArrayOutputStream that contains the serialized
 	 * RemoteInvocation object
@@ -146,8 +148,7 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 
 	/**
 	 * Execute the given PostMethod instance.
-	 * @param config the HTTP invoker configuration that specifies the
-	 * target service
+	 * @param config the HTTP invoker configuration that specifies the target service
 	 * @param httpClient the HttpClient to execute on
 	 * @param postMethod the PostMethod to execute
 	 * @throws IOException if thrown by I/O methods
@@ -161,13 +162,33 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	}
 
 	/**
+	 * Validate the given response as contained in the PostMethod object,
+	 * throwing an exception if it does not correspond to a successful HTTP response.
+	 * <p>Default implementation rejects any HTTP status code beyond 2xx, to avoid
+	 * parsing the response body and trying to deserialize from a corrupted stream.
+	 * @param config the HTTP invoker configuration that specifies the target service
+	 * @param postMethod the executed PostMethod to validate
+	 * @throws IOException if validation failed
+	 * @see org.apache.commons.httpclient.methods.PostMethod#getStatusCode()
+	 * @see org.apache.commons.httpclient.HttpException
+	 */
+	protected void validateResponse(HttpInvokerClientConfiguration config, PostMethod postMethod)
+			throws IOException {
+
+		if (postMethod.getStatusCode() >= 300) {
+			throw new HttpException(
+					"Did not receive successful HTTP response: status code = " + postMethod.getStatusCode() +
+					", status message = [" + postMethod.getStatusText() + "]");
+		}
+	}
+
+	/**
 	 * Extract the response body from the given executed remote invocation
 	 * request.
 	 * <p>The default implementation simply fetches the PostMethod's response
 	 * body stream. This can be overridden, for example, to check for GZIP
 	 * response encoding and wrap the returned InputStream in a GZIPInputStream.
-	 * @param config the HTTP invoker configuration that specifies the
-	 * target service
+	 * @param config the HTTP invoker configuration that specifies the target service
 	 * @param postMethod the PostMethod to read the response body from
 	 * @return an InputStream for the response body
 	 * @throws IOException if thrown by I/O methods

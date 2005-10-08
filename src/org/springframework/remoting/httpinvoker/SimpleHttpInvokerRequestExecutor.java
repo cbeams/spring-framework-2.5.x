@@ -48,21 +48,19 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 	 * @see #openConnection
 	 * @see #prepareConnection
 	 * @see #writeRequestBody
+	 * @see #validateResponse
 	 * @see #readResponseBody
 	 */
 	protected RemoteInvocationResult doExecuteRequest(
 			HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
 			throws IOException, ClassNotFoundException {
 
-		// open connection
 		HttpURLConnection con = openConnection(config);
-
-		// send request
 		prepareConnection(con, baos.size());
 		writeRequestBody(config, con, baos);
-
-		// parse response
+		validateResponse(config, con);
 		InputStream responseBody = readResponseBody(config, con);
+
 		return readRemoteInvocationResult(responseBody, config.getCodebaseUrl());
 	}
 
@@ -102,12 +100,10 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 
 	/**
 	 * Set the given serialized remote invocation as request body.
-	 * <p>The default implementation simply write the serialized invocation
-	 * to the HttpURLConnection's OutputStream. This can be overridden,
-	 * for example, to write a specific encoding and potentially set
-	 * appropriate HTTP request headers.
-	 * @param config the HTTP invoker configuration that specifies the
-	 * target service
+	 * <p>The default implementation simply write the serialized invocation to the
+	 * HttpURLConnection's OutputStream. This can be overridden, for example, to write
+	 * a specific encoding and potentially set appropriate HTTP request headers.
+	 * @param config the HTTP invoker configuration that specifies the target service
 	 * @param con the HttpURLConnection to write the request body to
 	 * @param baos the ByteArrayOutputStream that contains the serialized
 	 * RemoteInvocation object
@@ -123,14 +119,33 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 	}
 
 	/**
+	 * Validate the given response as contained in the HttpURLConnection object,
+	 * throwing an exception if it does not correspond to a successful HTTP response.
+	 * <p>Default implementation rejects any HTTP status code beyond 2xx, to avoid
+	 * parsing the response body and trying to deserialize from a corrupted stream.
+	 * @param config the HTTP invoker configuration that specifies the target service
+	 * @param con the HttpURLConnection to validate
+	 * @throws IOException if validation failed
+	 * @see java.net.HttpURLConnection#getResponseCode()
+	 */
+	protected void validateResponse(HttpInvokerClientConfiguration config, HttpURLConnection con)
+			throws IOException {
+
+		if (con.getResponseCode() >= 300) {
+			throw new IOException(
+					"Did not receive successful HTTP response: status code = " + con.getResponseCode() +
+					", status message = [" + con.getResponseMessage() + "]");
+		}
+	}
+
+	/**
 	 * Extract the response body from the given executed remote invocation
 	 * request.
 	 * <p>The default implementation simply reads the serialized invocation
 	 * from the HttpURLConnection's InputStream. This can be overridden,
 	 * for example, to check for GZIP response encoding and wrap the
 	 * returned InputStream in a GZIPInputStream.
-	 * @param config the HTTP invoker configuration that specifies the
-	 * target service
+	 * @param config the HTTP invoker configuration that specifies the target service
 	 * @param con the HttpURLConnection to read the response body from
 	 * @return an InputStream for the response body
 	 * @throws IOException if thrown by I/O methods
