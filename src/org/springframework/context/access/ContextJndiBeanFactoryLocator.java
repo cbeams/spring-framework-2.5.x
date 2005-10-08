@@ -28,19 +28,21 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.BeanFactoryReference;
 import org.springframework.beans.factory.access.BootstrapException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.util.StringUtils;
 
 /**
  * BeanFactoryLocator implementation that creates the BeanFactory from one or
- * more classpath locations specified in one JNDI environment variable.
+ * more classpath locations specified in a JNDI environment variable.
  *
  * <p>This default implementation creates a ClassPathXmlApplicationContext.
- * Subclasses may override createBeanFactory for custom instantiation.
+ * Subclasses may override <code>createBeanFactory</code> for custom instantiation.
  *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
+ * @see #createBeanFactory
  */
 public class ContextJndiBeanFactoryLocator extends JndiLocatorSupport implements BeanFactoryLocator {
 
@@ -50,20 +52,21 @@ public class ContextJndiBeanFactoryLocator extends JndiLocatorSupport implements
 	 */
 	public static final String BEAN_FACTORY_PATH_DELIMITERS = ",; \t\n";
 
+
 	/**
-	 * Load/use a bean factory, as specified by a factoryKey which is a JNDI
+	 * Load/use a bean factory, as specified by a factory key which is a JNDI
 	 * address, of the form <code>java:comp/env/ejb/BeanFactoryPath</code>. The
 	 * contents of this JNDI location must be a string containing one or more
-	 * classpath resource names (separated by any of the delimiters
-	 * '<code>,; \t\n</code>' if there is more than one. The resulting
-	 * BeanFactory (or subclass) will be created from the combined resources.
+	 * classpath resource names (separated by any of the delimiters '<code>,; \t\n</code>'
+	 * if there is more than one. The resulting BeanFactory (or ApplicationContext)
+	 * will be created from the combined resources.
+	 * @see #createBeanFactory
 	 */
 	public BeanFactoryReference useBeanFactory(String factoryKey) throws BeansException {
-		String beanFactoryPath = null;
 		try {
-			beanFactoryPath = (String) lookup(factoryKey);
-			if (logger.isInfoEnabled()) {
-				logger.info("Bean factory path from JNDI environment variable [" + factoryKey +
+			String beanFactoryPath = (String) lookup(factoryKey);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Bean factory path from JNDI environment variable [" + factoryKey +
 						"] is: " + beanFactoryPath);
 			}
 			String[] paths = StringUtils.tokenizeToStringArray(beanFactoryPath, BEAN_FACTORY_PATH_DELIMITERS);
@@ -76,14 +79,32 @@ public class ContextJndiBeanFactoryLocator extends JndiLocatorSupport implements
 	}
 
 	/**
-	 * Actually create the BeanFactory, given an array of class path resource strings
-	 * which should be combined. This is split out as a separate method so that subclasses
-	 * can override the actual type uses (to be an ApplicationContext, for example).
+	 * Create the BeanFactory instance, given an array of class path resource Strings
+	 * which should be combined. This is split out as a separate method so that
+	 * subclasses can override the actual BeanFactory implementation class.
+	 * <p>Delegates to <code>createApplicationContext</code> by default,
+	 * wrapping the result in a ContextBeanFactoryReference.
 	 * @param resources an array of Strings representing classpath resource names
 	 * @return the created BeanFactory, wrapped in a BeanFactoryReference
+	 * (for example, a ContextBeanFactoryReference wrapping an ApplicationContext)
+	 * @throws BeansException if factory creation failed
+	 * @see #createApplicationContext
+	 * @see ContextBeanFactoryReference
 	 */
 	protected BeanFactoryReference createBeanFactory(String[] resources) throws BeansException {
-		return new ContextBeanFactoryReference(new ClassPathXmlApplicationContext(resources));
+		ApplicationContext ctx = createApplicationContext(resources);
+		return new ContextBeanFactoryReference(ctx);
+	}
+
+	/**
+	 * Create the ApplicationContext instance, given an array of class path resource
+	 * Strings which should be combined
+	 * @param resources an array of Strings representing classpath resource names
+	 * @return the created ApplicationContext
+	 * @throws BeansException if context creation failed
+	 */
+	protected ApplicationContext createApplicationContext(String[] resources) throws BeansException {
+		return new ClassPathXmlApplicationContext(resources);
 	}
 
 }
