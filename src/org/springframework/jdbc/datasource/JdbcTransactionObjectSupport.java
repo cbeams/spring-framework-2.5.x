@@ -155,7 +155,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 			getConnectionHolderForSavepoint().getConnection().releaseSavepoint((Savepoint) savepoint);
 		}
 		catch (SQLException ex) {
-			logger.info("Could not explicitly release JDBC savepoint", ex);
+			logger.debug("Could not explicitly release JDBC savepoint", ex);
 		}
 	}
 
