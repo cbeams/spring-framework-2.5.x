@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.rmi.RemoteException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,6 +61,7 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 	protected static final String CONTENT_TYPE_SERIALIZED_OBJECT = "application/x-java-serialized-object";
 
 	private Object proxy;
+
 
 	public void afterPropertiesSet() {
 		this.proxy = getProxyForService();
@@ -171,7 +173,7 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 
 		Object obj = ois.readObject();
 		if (!(obj instanceof RemoteInvocation)) {
-			throw new IOException("Deserialized object needs to be assignable to type [" +
+			throw new RemoteException("Deserialized object needs to be assignable to type [" +
 					RemoteInvocation.class.getName() + "]: " + obj);
 		}
 		return (RemoteInvocation) obj;

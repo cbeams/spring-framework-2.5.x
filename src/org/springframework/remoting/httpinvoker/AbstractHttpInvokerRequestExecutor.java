@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.rmi.RemoteException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -223,7 +224,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 
 		Object obj = ois.readObject();
 		if (!(obj instanceof RemoteInvocationResult)) {
-			throw new IOException("Deserialized object needs to be assignable to type [" +
+			throw new RemoteException("Deserialized object needs to be assignable to type [" +
 					RemoteInvocationResult.class.getName() + "]: " + obj);
 		}
 		return (RemoteInvocationResult) obj;
