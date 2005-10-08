@@ -31,8 +31,9 @@ import javax.ejb.SessionContext;
  */
 abstract class AbstractSessionBean extends AbstractEnterpriseBean implements SmartSessionBean {
 
-	/** the SessionContext passed to this object */
+	/** The SessionContext passed to this object */
 	private SessionContext sessionContext;
+
 
 	/**
 	 * Set the session context.

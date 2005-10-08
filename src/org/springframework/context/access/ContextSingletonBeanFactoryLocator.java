@@ -64,11 +64,11 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 
 	/**
 	 * Returns an instance which uses the the specified selector, as the name of the
-	 * definition file(s). In the case of a name with a Spring 'classpath*:' prefix,
-	 * or with no prefix, which is treated the same, the current thread's context
-	 * class loader's getResources() method will be called with this value to get all
-	 * resources having that name. These resources will then be combined to form a
-	 * definition. In the case where the name uses a Spring 'classpath:' prefix, or
+	 * definition file(s). In the case of a name with a Spring "classpath*:" prefix,
+	 * or with no prefix, which is treated the same, the current thread's context class
+	 * loader's <code>getResources</code> method will be called with this value to get
+	 * all resources having that name. These resources will then be combined to form a
+	 * definition. In the case where the name uses a Spring "classpath:" prefix, or
 	 * a standard URL prefix, then only one resource file will be loaded as the
 	 * definition.
 	 * @param selector the name of the resource(s) which will be read and combine to
@@ -77,8 +77,8 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	 * definition.
 	 */
 	public static BeanFactoryLocator getInstance(String selector) throws BeansException {
-		// For backwards compatibility, we prepend 'classpath*:' to the selector name if there
-		// is no other prefix (i.e. classpath*:, classpath:, or some URL prefix.
+		// For backwards compatibility, we prepend "classpath*:" to the selector name if there
+		// is no other prefix (i.e. "classpath*:", "classpath:", or some URL prefix).
 		if (selector.indexOf(':') == -1) {
 			selector = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + selector;
 		}
@@ -121,8 +121,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	 * instead of the default BeanFactory. This does not affect what can actually
 	 * be loaded by that definition.
 	 */
-	protected BeanFactory createDefinition(String resourceName, String factoryKey)
-			throws BeansException {
+	protected BeanFactory createDefinition(String resourceName, String factoryKey) throws BeansException {
 		return new ClassPathXmlApplicationContext(new String[] { resourceName }, false);
 	}
 
@@ -133,7 +132,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	 */
 	protected void initializeDefinition(BeanFactory groupDef) throws BeansException {
 		if (groupDef instanceof ConfigurableApplicationContext) {
-			((ConfigurableApplicationContext)groupDef).refresh();
+			((ConfigurableApplicationContext) groupDef).refresh();
 		}
 	}
 	

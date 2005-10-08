@@ -25,9 +25,9 @@ import org.springframework.context.ConfigurableApplicationContext;
  * ApplicationContext-specific implementation of BeanFactoryReference,
  * wrapping a newly created ApplicationContext, closing it on release.
  *
- * <p>As per BeanFactoryReference contract, release may be called more than once,
- * with subsequent calls not doing anything. However, callging getFactory after
- * a release call will cause an exception.
+ * <p>As per BeanFactoryReference contract, <code>release</code> may be called
+ * more than once, with subsequent calls not doing anything. However, calling
+ * <code>getFactory</code> after a <code>release</code> call will cause an exception.
  *
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
@@ -38,9 +38,15 @@ public class ContextBeanFactoryReference implements BeanFactoryReference {
 
 	private ApplicationContext applicationContext;
 
+
+	/**
+	 * Create a new ContextBeanFactoryReference for the given context.
+	 * @param applicationContext the ApplicationContext to wrap
+	 */
 	public ContextBeanFactoryReference(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
+
 
 	public BeanFactory getFactory() {
 		if (this.applicationContext == null) {
@@ -54,7 +60,7 @@ public class ContextBeanFactoryReference implements BeanFactoryReference {
 		if (this.applicationContext != null) {
 			ApplicationContext savedCtx;
 			
-			// We don't actually guarantee thread-safty, but it's not a lot of extra work.
+			// We don't actually guarantee thread-safety, but it's not a lot of extra work.
 			synchronized (this) {
 				savedCtx = this.applicationContext;
 				this.applicationContext = null;

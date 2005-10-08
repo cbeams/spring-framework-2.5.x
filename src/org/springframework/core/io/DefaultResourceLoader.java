@@ -63,10 +63,10 @@ public class DefaultResourceLoader implements ResourceLoader {
 	/**
 	 * Specify the ClassLoader to load class path resources with,
 	 * or <code>null</code> if using the thread context class loader on actual access
-	 * (applying to the thread that does ClassPathResource calls).
+	 * (applying to the thread that performs ClassPathResource calls).
 	 * <p>The default is that ClassLoader access will happen via the thread
 	 * context class loader on actual access (applying to the thread that
-	 * does ClassPathResource calls).
+	 * performs ClassPathResource calls).
 	 */
 	public void setClassLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;

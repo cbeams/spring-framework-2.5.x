@@ -49,7 +49,8 @@ public abstract class AbstractStatelessSessionBean extends AbstractSessionBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** 
+
+	/**
 	 * This implementation loads the BeanFactory. A BeansException thrown by
 	 * loadBeanFactory will simply get propagated, as it is a runtime exception.
 	 * <p>Don't override it (although it can't be made final): code your own
@@ -73,6 +74,7 @@ public abstract class AbstractStatelessSessionBean extends AbstractSessionBean {
 	 * @throws CreateException
 	 */
 	protected abstract void onEjbCreate() throws CreateException;
+
 
 	/**
 	 * @see javax.ejb.SessionBean#ejbActivate(). This method always throws an exception, as

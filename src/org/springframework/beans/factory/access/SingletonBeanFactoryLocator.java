@@ -282,14 +282,6 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	private static Map instances = new HashMap();
 
 
-	// We map BeanFactoryGroup objects by String keys, and by the definition object.
-	private final Map bfgInstancesByKey = new HashMap();
-
-	private final Map bfgInstancesByObj = new HashMap();
-
-	private final String resourceName;
-
-
 	/**
 	 * Returns an instance which uses the default "classpath*:beanRefFactory.xml",
 	 * as the name of the definition file(s). All resources returned by calling the
@@ -333,6 +325,14 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 			return bfl;
 		}
 	}
+
+
+	// We map BeanFactoryGroup objects by String keys, and by the definition object.
+	private final Map bfgInstancesByKey = new HashMap();
+
+	private final Map bfgInstancesByObj = new HashMap();
+
+	private final String resourceName;
 
 
 	/**
@@ -518,7 +518,9 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	}
 
 
-	// We track BeanFactory instances with this class.
+	/**
+	 * We track BeanFactory instances with this class.
+	 */
 	private static class BeanFactoryGroup {
 
 		private BeanFactory definition;
