@@ -618,7 +618,6 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		JtaTransactionObject txObject = (JtaTransactionObject) transaction;
-		logger.debug("Beginning JTA transaction");
 		try {
 			doJtaBegin(txObject, definition);
 		}
@@ -707,7 +706,6 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	protected Object doSuspend(Object transaction) {
 		JtaTransactionObject txObject = (JtaTransactionObject) transaction;
-		logger.debug("Suspending JTA transaction");
 		try {
 			return doJtaSuspend(txObject);
 		}
@@ -736,7 +734,6 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	protected void doResume(Object transaction, Object suspendedResources) {
 		JtaTransactionObject txObject = (JtaTransactionObject) transaction;
-		logger.debug("Resuming JTA transaction");
 		try {
 			doJtaResume(txObject, suspendedResources);
 		}
@@ -780,7 +777,6 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	protected void doCommit(DefaultTransactionStatus status) {
 		JtaTransactionObject txObject = (JtaTransactionObject) status.getTransaction();
-		logger.debug("Committing JTA transaction");
 		try {
 			txObject.getUserTransaction().commit();
 		}
@@ -801,7 +797,6 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	protected void doRollback(DefaultTransactionStatus status) {
 		JtaTransactionObject txObject = (JtaTransactionObject) status.getTransaction();
-		logger.debug("Rolling back JTA transaction");
 		try {
 			txObject.getUserTransaction().rollback();
 		}
