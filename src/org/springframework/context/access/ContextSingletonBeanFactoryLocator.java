@@ -26,6 +26,7 @@ import org.springframework.beans.factory.access.SingletonBeanFactoryLocator;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternUtils;
 
 /**
  * <p>Variant of SingletonBeanFactoryLocator which creates its internal bean
@@ -79,7 +80,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	public static BeanFactoryLocator getInstance(String selector) throws BeansException {
 		// For backwards compatibility, we prepend "classpath*:" to the selector name if there
 		// is no other prefix (i.e. "classpath*:", "classpath:", or some URL prefix).
-		if (selector.indexOf(':') == -1) {
+		if (!ResourcePatternUtils.isUrl(selector)) {
 			selector = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + selector;
 		}
 
