@@ -88,10 +88,12 @@ public class WeakReferenceMonitor {
 		// Add entry, the key is given reference.
 		trackedEntries.put(ref, entry);
 
-		// Start lazily thread polling handleQueue.
-		if (!isMonitoringThreadRunning()) {
-			monitoringThread = new Thread(new MonitoringProcess(), WeakReferenceMonitor.class.getName());
-			monitoringThread.start();
+		// Start monitoring thread lazily.
+		synchronized (WeakReferenceMonitor.class) {
+			if (!isMonitoringThreadRunning()) {
+				monitoringThread = new Thread(new MonitoringProcess(), WeakReferenceMonitor.class.getName());
+				monitoringThread.start();
+			}
 		}
 	}
 
@@ -108,7 +110,9 @@ public class WeakReferenceMonitor {
 	 * Check if monitoring thread is currently running.
 	 */
 	private static boolean isMonitoringThreadRunning() {
-		return (monitoringThread != null);
+		synchronized (WeakReferenceMonitor.class) {
+			return (monitoringThread != null);
+		}
 	}
 
 
@@ -139,7 +143,9 @@ public class WeakReferenceMonitor {
 			}
 			finally {
 				logger.debug("Stopping reference monitor thread");
-				monitoringThread = null;
+				synchronized (WeakReferenceMonitor.class) {
+					monitoringThread = null;
+				}
 			}
 		}
 	}
