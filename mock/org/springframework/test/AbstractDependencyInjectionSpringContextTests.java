@@ -71,7 +71,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 public abstract class AbstractDependencyInjectionSpringContextTests extends AbstractSpringContextTests {
 
 	private boolean populateProtectedVariables = false;
-	
+
+	private int autowireMode = AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
+
 	private boolean dependencyCheck = true;
 
 	/** Application context this test will run against */
@@ -90,26 +92,51 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 		this.populateProtectedVariables = populateFields;
 	}
 
+	/**
+	 * Return whether to populate protected variables of this test case.
+	 */
 	public boolean isPopulateProtectedVariables() {
 		return populateProtectedVariables;
 	}
-	
+
+	/**
+	 * Set the autowire mode for test properties set by Dependency Injection.
+	 * <p>The default is "AUTOWIRE_BY_TYPE".
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_BY_TYPE
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_BY_NAME
+	 */
+	public void setAutowireMode(int autowireMode) {
+		this.autowireMode = autowireMode;
+	}
+
+	/**
+	 * Return the autowire mode for test properties set by Dependency Injection.
+	 */
+	public int getAutowireMode() {
+		return autowireMode;
+	}
+
 	/**
 	 * Set whether or not dependency checking should be performed
-	 * for test properties set by Dependency Injection. The default
-	 * is true, meaning that tests cannot be run unless all properties
-	 * are populated.
-	 * @param dependencyCheck whether or not to perform
-	 * dependency checking on all object properties.
+	 * for test properties set by Dependency Injection.
+	 * <p>The default is "true", meaning that tests cannot be run
+	 * unless all properties are populated.
 	 */
 	public void setDependencyCheck(boolean dependencyCheck) {
 		this.dependencyCheck = dependencyCheck;
 	}
-	
+
+	/**
+	 * Return whether or not dependency checking should be performed
+	 * for test properties set by Dependency Injection.
+	 */
 	public boolean isDependencyCheck() {
 		return dependencyCheck;
 	}
 
+	/**
+	 * Return the current number of context load attempts.
+	 */
 	public final int getLoadCount() {
 		return loadCount;
 	}
@@ -136,7 +163,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 		}
 		else {
 			this.applicationContext.getBeanFactory().autowireBeanProperties(
-			    this, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, isDependencyCheck());
+			    this, getAutowireMode(), isDependencyCheck());
 		}
 
 		try {
