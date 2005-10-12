@@ -726,10 +726,6 @@ public abstract class SessionFactoryUtils {
 			try {
 				session.close();
 			}
-			catch (JDBCException ex) {
-				// SQLException underneath
-				logger.error("Could not close Hibernate Session", ex.getSQLException());
-			}
 			catch (HibernateException ex) {
 				logger.error("Could not close Hibernate Session", ex);
 			}
@@ -822,7 +818,7 @@ public abstract class SessionFactoryUtils {
 				if (session == null) {
 					session = this.sessionHolder.getSession();
 				}
-				// further check: only flush when not FlushMode.NEVER
+				// Further check: only flush when not FlushMode.NEVER
 				if (!session.getFlushMode().equals(FlushMode.NEVER)) {
 					try {
 						session.flush();
@@ -830,7 +826,7 @@ public abstract class SessionFactoryUtils {
 					catch (JDBCException ex) {
 						if (this.jdbcExceptionTranslator != null) {
 							throw this.jdbcExceptionTranslator.translate(
-									"Hibernate transaction synchronization", null, ex.getSQLException());
+									"Hibernate transaction synchronization: " + ex.getMessage(), null, ex.getSQLException());
 						}
 						else {
 							throw new HibernateJdbcException(ex);
