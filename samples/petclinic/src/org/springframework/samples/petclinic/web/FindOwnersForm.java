@@ -20,6 +20,7 @@ public class FindOwnersForm	extends AbstractClinicForm {
 
 	/** Creates a new instance of FindOwnersForm */
 	public FindOwnersForm() {
+		setCommandName("owner");
 		// OK to start with a blank command object
 		setCommandClass(Owner.class);
 	}

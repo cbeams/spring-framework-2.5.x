@@ -17,6 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class AddVisitForm extends AbstractClinicForm {
 
 	public AddVisitForm() {
+		setCommandName("visit");
 		// need a session to hold the formBackingObject
 		setSessionForm(true);
 	}

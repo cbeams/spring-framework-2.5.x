@@ -20,6 +20,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class EditPetForm extends AbstractClinicForm {
 
 	public EditPetForm() {
+		setCommandName("pet");
 		// need a session to hold the formBackingObject
 		setSessionForm(true);
 		// initialize the form from the formBackingObject

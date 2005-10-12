@@ -15,6 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class EditOwnerForm extends AbstractClinicForm {
 
 	public EditOwnerForm() {
+		setCommandName("owner");
 		// need a session to hold the formBackingObject
 		setSessionForm(true);
 		// initialize the form from the formBackingObject
