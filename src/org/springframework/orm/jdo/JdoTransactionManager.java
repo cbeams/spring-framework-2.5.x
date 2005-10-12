@@ -146,8 +146,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
 	 * application code accessing this DataSource directly via DataSourceUtils
 	 * or JdbcTemplate. The Connection will be taken from the JDO PersistenceManager.
-	 * <p>Note that you need to use a JDO dialect for a specific JDO implementation
-	 * to allow for exposing JDO transactions as JDBC transactions.
+	 * <p>Note that you need to use a JDO dialect for a specific JDO provider to
+	 * allow for exposing JDO transactions as JDBC transactions.
 	 * <p>The DataSource specified here should be the target DataSource to manage
 	 * transactions for, not a TransactionAwareDataSourceProxy. Only data access
 	 * code may work with TransactionAwareDataSourceProxy, while the transaction

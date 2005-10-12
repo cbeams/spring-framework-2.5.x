@@ -37,7 +37,7 @@ import org.springframework.dao.DataAccessException;
  * gain due to JDO's field interception mechanism that doesn't involve
  * the overhead of snapshot comparisons.
  *
- * <p>Eager flushing is just available for specific JDO implementations.
+ * <p>Eager flushing is just available for specific JDO providers.
  * You need to a corresponding JdoDialect to make eager flushing work.
  *
  * <p>Not intended to be used directly. See JdoTemplate and JdoInterceptor.

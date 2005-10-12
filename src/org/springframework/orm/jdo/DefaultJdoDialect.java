@@ -147,8 +147,8 @@ public class DefaultJdoDialect implements JdoDialect {
 
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 			throw new InvalidIsolationLevelException(
-					"Standard JDO does not support custom isolation levels - " +
-					"use a special JdoDialect for your JDO implementation");
+					"Standard JDO does not support custom isolation levels: " +
+					"use a special JdoDialect implementation for your JDO provider");
 		}
 		transaction.begin();
 		return null;
@@ -192,10 +192,10 @@ public class DefaultJdoDialect implements JdoDialect {
 	/**
 	 * This implementation does nothing, assuming that the Connection
 	 * will implicitly be closed with the PersistenceManager.
-	 * <p>If the JDO implementation returns a Connection handle that
-	 * it expects the application to close, the dialect needs to invoke
+	 * <p>If the JDO provider returns a Connection handle that it
+	 * expects the application to close, the dialect needs to invoke
 	 * <code>Connection.close</code> here.
-	 * @see java.sql.Connection#close
+	 * @see java.sql.Connection#close()
 	 */
 	public void releaseJdbcConnection(ConnectionHandle conHandle, PersistenceManager pm)
 			throws JDOException, SQLException {

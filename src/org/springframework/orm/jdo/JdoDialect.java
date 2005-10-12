@@ -35,8 +35,8 @@ import org.springframework.transaction.TransactionException;
  * the underlying JDBC Connection and explicit flushing of changes to the database.
  * Also defines various further hooks that even go beyond standard JDO 2.0.
  *
- * <p>To be implemented for specific JDO implementations such as JPOX, Kodo, Lido,
- * Versant Open Access. Almost every O/R-based JDO implementation offers proprietary
+ * <p>To be implemented for specific JDO providers such as JPOX, Kodo, Lido,
+ * Versant Open Access. Almost every O/R-based JDO provider offers proprietary
  * means to access the underlying JDBC Connection and to explicitly flush changes;
  * hence, this would be the minimum functionality level that should be supported.
  *
@@ -111,8 +111,8 @@ public interface JdoDialect {
 	 * transaction (for example, by JdoTransactionManager). The returned handle will
 	 * be passed into the <code>releaseJdbcConnection</code> method when not needed anymore.
 	 * <p>This strategy is necessary as JDO 1.0 does not provide a standard way to retrieve
-	 * the underlying JDBC Connection (due to the fact that a JDO implementation might not
-	 * work with a relational database at all).
+	 * the underlying JDBC Connection (due to the fact that a JDO provider might not work
+	 * with a relational database at all).
 	 * <p>Implementations are encouraged to return an unwrapped Connection object, i.e.
 	 * the Connection as they got it from the connection pool. This makes it easier for
 	 * application code to get at the underlying native JDBC Connection, like an

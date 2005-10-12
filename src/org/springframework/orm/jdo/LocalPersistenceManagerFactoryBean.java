@@ -54,7 +54,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  * <p>This PersistenceManager handling strategy is most appropriate for
  * applications that solely use JDO for data access. In this case,
  * JdoTransactionManager is much more convenient than setting up your
- * JDO implementation for JTA transactions (which might involve JCA).
+ * JDO provider for JTA transactions (which might involve JCA).
  *
  * <p>As alternative to the properties-driven approach that this FactoryBean offers
  * (which is analogous to using the standard JDOHelper class with a Properties
