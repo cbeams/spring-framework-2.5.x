@@ -25,15 +25,15 @@ import org.apache.commons.logging.Log;
  * Performance monitor interceptor that uses <b>JAMon</b> library
  * to perform the performance measurement on the intercepted method
  * and output the stats.
- * <p/>
+ *
  * <p>This code is inspired by Thierry Templier's blog.
  * 
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @since 1.1.3
  * @see com.jamonapi.MonitorFactory
  * @see PerformanceMonitorInterceptor
- * @since 1.1.3
  */
 public class JamonPerformanceMonitorInterceptor extends AbstractPerformanceMonitorInterceptor {
 
@@ -52,6 +52,7 @@ public class JamonPerformanceMonitorInterceptor extends AbstractPerformanceMonit
 	public JamonPerformanceMonitorInterceptor(boolean useDynamicLogger) {
 		setUseDynamicLogger(useDynamicLogger);
 	}
+
 
 	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
 		String name = createInvocationTraceName(invocation);
