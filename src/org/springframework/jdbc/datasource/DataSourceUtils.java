@@ -191,7 +191,7 @@ public abstract class DataSourceUtils {
 			}
 		}
 		catch (Exception ex) {
-			logger.info("Could not reset JDBC Connection after transaction", ex);
+			logger.debug("Could not reset JDBC Connection after transaction", ex);
 		}
 	}
 
