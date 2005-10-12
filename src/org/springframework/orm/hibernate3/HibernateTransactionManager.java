@@ -40,6 +40,7 @@ import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
+import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
@@ -101,6 +102,16 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <i>Note that Hibernate itself does not support nested transactions! Hence,
  * do not expect Hibernate access code to participate in a nested transaction.</i>
  *
+ * <p><b>WARNING:</b> If running against Hibernate 3.1+, the JDBC DataSource (i.e.
+ * the connection pool) used by Hibernate must reset JDBC Connection properties
+ * such as isolation level and read-only flag on <code>Connection.close()</code>.
+ * With previous versions of Hibernate, this transaction manager was able to do
+ * this cleanup after the transaction. Due to a change in Hibernate 3.1's JDBC
+ * Connection handling, this is not the case anymore; hence, the burden is solely
+ * on the connection pool. Most connection pools automatically automatically
+ * perform such cleanup, but notably, Jakarta Commons DBCP doesn't. Consider
+ * using C3P0 instead of Commons DBCP in such a scenario.
+ *
  * @author Juergen Hoeller
  * @since 1.2
  * @see #setSessionFactory
@@ -125,6 +136,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	private DataSource dataSource;
 
 	private boolean autodetectDataSource = true;
+
+	private boolean prepareConnection = true;
 
 	private Object entityInterceptor;
 
@@ -221,6 +234,27 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 */
 	public void setAutodetectDataSource(boolean autodetectDataSource) {
 		this.autodetectDataSource = autodetectDataSource;
+	}
+
+	/**
+	 * Set whether to prepare the underlying JDBC Connection of a transactional
+	 * Hibernate Session, that is, whether to apply a transaction-specific
+	 * isolation level and/or the transaction's read-only flag to the underlying
+	 * JDBC Connection.
+	 * <p>Default is "true". If you turn this flag off, the transaction manager
+	 * will not support per-transaction isolation levels anymore. It will not
+	 * call <code>Connection.setReadOnly(true)</code> for read-only transactions
+	 * anymore either. If this flag is turned off, no cleanup of a JDBC Connection
+	 * is required after a transaction, since no Connection settings will get modified.
+	 * <p>It is recommended to turn this flag off if running against Hibernate 3.1
+	 * and a connection pool that does not reset connection settings (for example,
+	 * Jakarta Commons DBCP). Consider using a smarter connection pool instead
+	 * (for example, C3P0).
+	 * @see java.sql.Connection#setTransactionIsolation
+	 * @see java.sql.Connection#setReadOnly
+	 */
+	public void setPrepareConnection(boolean prepareConnection) {
+		this.prepareConnection = prepareConnection;
 	}
 
 	/**
@@ -404,9 +438,19 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			txObject.getSessionHolder().setSynchronizedWithTransaction(true);
 			session = txObject.getSessionHolder().getSession();
 
-			Connection con = session.connection();
-			Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
-			txObject.setPreviousIsolationLevel(previousIsolationLevel);
+			Integer previousIsolationLevel = null;
+			if (this.prepareConnection) {
+				// We're allowed to change the transaction settings of the JDBC Connection.
+				Connection con = session.connection();
+				previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
+				txObject.setPreviousIsolationLevel(previousIsolationLevel);
+			}
+			else if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+				// We should set a specific isolation level but are not allowed to...
+				throw new InvalidIsolationLevelException(
+						"HibernateTransactionManager is not allowed to support custom isolation levels: " +
+						"turn its 'prepareConnection' flag on and use a connection pool with proper cleanup");
+			}
 
 			if (definition.isReadOnly() && txObject.isNewSessionHolder()) {
 				// Just set to NEVER in case of a new Session for this transaction.
@@ -432,6 +476,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			// Register the Hibernate Session's JDBC Connection for the DataSource, if set.
 			if (getDataSource() != null) {
+				Connection con = session.connection();
 				ConnectionHolder conHolder = new ConnectionHolder(con);
 				if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
 					conHolder.setTimeoutInSeconds(definition.getTimeout());
@@ -546,15 +591,20 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			TransactionSynchronizationManager.unbindResource(getDataSource());
 		}
 
-		try {
-			Connection con = txObject.getSessionHolder().getSession().connection();
-			DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
-		}
-		catch (HibernateException ex) {
-			logger.info("Could not access JDBC Connection of Hibernate Session", ex);
+		Session session = txObject.getSessionHolder().getSession();
+		if (session.isConnected()) {
+			// We're running on Hibernate 3.0: we're able to reset the isolation level
+			// and/or read-only flag of the JDBC Connection here. On Hibernate 3.1+,
+			// we need to rely on the connection pool to perform proper cleanup.
+			try {
+				Connection con = session.connection();
+				DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
+			}
+			catch (HibernateException ex) {
+				logger.debug("Could not access JDBC Connection of Hibernate Session", ex);
+			}
 		}
 
-		Session session = txObject.getSessionHolder().getSession();
 		if (txObject.isNewSessionHolder()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing Hibernate Session [" + SessionFactoryUtils.toString(session) +
@@ -569,6 +619,13 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 			if (txObject.getSessionHolder().getPreviousFlushMode() != null) {
 				session.setFlushMode(txObject.getSessionHolder().getPreviousFlushMode());
+			}
+			if (!session.isConnected()) {
+				// We're running against Hibernate 3.1+, where Hibernate will
+				// automatically disconnect the Session after a transaction.
+				// We'll reconnect it here, as the Session is likely gonna be
+				// used for lazy loading during an "open session in view" pase.
+				session.reconnect();
 			}
 		}
 		txObject.getSessionHolder().clear();
