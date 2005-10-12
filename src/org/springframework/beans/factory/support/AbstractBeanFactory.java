@@ -1136,7 +1136,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * <p>Default implementation returns <code>null</code> to indicate that the
 	 * type cannot be determined. Subclasses are encouraged to try to determine
 	 * the actual return type here, matching their strategy of resolving
-	 * factory methods in the <code>createBean</code> imüplementation.
+	 * factory methods in the <code>createBean</code> implementation.
 	 * @param beanName name of the bean
 	 * @param mergedBeanDefinition the bean definition for the bean
 	 * @return the type for the bean if determinable, or <code>null</code> else

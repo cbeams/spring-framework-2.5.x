@@ -192,7 +192,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 		return factory;
 	}
 
-	/**€
+	/**
 	 * Return the resource bundle for the given basename and Locale.
 	 * @param basename the basename to look for
 	 * @param locale the Locale to look for
