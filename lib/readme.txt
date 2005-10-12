@@ -17,7 +17,7 @@ distribution/website before using any of them in your own applications.
 - included in spring.jar and spring-aop.jar
 
 * axis/axis.jar, axis/saaj.jar, axis/wsdl4j.jar
-- Apache Axis 1.2.1 (http://ws.apache.org/axis)
+- Apache Axis 1.3 (http://ws.apache.org/axis)
 - required for running JPetStore
 
 * c3p0/c3p0-0.9.0.2.jar
@@ -197,7 +197,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's CommonsMultipartResolver
 
 * jakarta-commons/commons-httpclient.jar
-- Commons HttpClient 3.0 RC3 (http://jakarta.apache.org/commons/httpclient)
+- Commons HttpClient 3.0 RC4 (http://jakarta.apache.org/commons/httpclient)
 - required for building the framework
 - required at runtime when using Spring's CommonsHttpInvokerRequestExecutor
 
