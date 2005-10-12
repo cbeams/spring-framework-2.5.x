@@ -46,7 +46,7 @@ import org.hibernate.persister.entity.EntityPersister;
  * map, with key "merge".
  *
  * <p><b>NOTE:</b> Due to incompatible changes in the Hibernate 3.1 event listener API
- * (according to the Hibernate 3.1 beta releases that were available at the time of
+ * (according to the Hibernate 3.1 RC1 release that was available at the time of
  * this writing), this merge event listener will currently only work as-is with
  * Hibernate 3.0. Consider copying this implementation and adapting it to the changed
  * API if you want to run it against Hibernate 3.1.
@@ -61,6 +61,10 @@ import org.hibernate.persister.entity.EntityPersister;
  */
 public class IdTransferringMergeEventListener extends DefaultMergeEventListener {
 
+	/**
+	 * Hibernate 3.0 implementation of ID transferral.
+	 * Comment this out and the below in for a Hibernate 3.1 version of this class.
+	 */
 	protected Object entityIsTransient(MergeEvent event, Map copyCache) {
 		Object mergedCopy = super.entityIsTransient(event, copyCache);
 		SessionImplementor session = event.getSession();
@@ -71,5 +75,21 @@ public class IdTransferringMergeEventListener extends DefaultMergeEventListener 
 		persister.setIdentifier(event.getOriginal(), id, session.getEntityMode());
 		return mergedCopy;
 	}
+
+	/**
+	 * Hibernate 3.1 implementation of ID transferral.
+	 * Comment this in and the above out for a Hibernate 3.1 version of this class.
+	 */
+	/*
+	protected void entityIsTransient(MergeEvent event, Map copyCache) {
+		super.entityIsTransient(event, copyCache);
+		SessionImplementor session = event.getSession();
+		EntityPersister persister = session.getEntityPersister(event.getEntityName(), event.getEntity());
+		// Extract id from merged copy (which is currently registered with Session).
+		Serializable id = persister.getIdentifier(event.getResult(), session.getEntityMode());
+		// Set id on original object (which remains detached).
+		persister.setIdentifier(event.getOriginal(), id, session.getEntityMode());
+	}
+	*/
 
 }
