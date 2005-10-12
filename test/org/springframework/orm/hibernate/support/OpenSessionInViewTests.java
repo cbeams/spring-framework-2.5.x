@@ -345,8 +345,7 @@ public class OpenSessionInViewTests extends TestCase {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
-			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf));
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
 			}
@@ -420,8 +419,7 @@ public class OpenSessionInViewTests extends TestCase {
 		filter.init(filterConfig);
 
 		final FilterChain filterChain = new FilterChain() {
-			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf));
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
 			}
@@ -502,8 +500,7 @@ public class OpenSessionInViewTests extends TestCase {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
-			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 				TransactionStatus ts = tm.getTransaction(
 						new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
@@ -566,7 +563,7 @@ public class OpenSessionInViewTests extends TestCase {
 		wac.close();
 	}
 
-	public void testOpenSessionInViewFilterWithDeferredCloseAndActiveDeferredClose() throws Exception {
+	public void testOpenSessionInViewFilterWithDeferredCloseAndAlreadyActiveDeferredClose() throws Exception {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		final MockControl sessionControl = MockControl.createControl(Session.class);
@@ -607,8 +604,7 @@ public class OpenSessionInViewTests extends TestCase {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
-			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 				TransactionStatus ts = tm.getTransaction(
 						new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
