@@ -46,7 +46,7 @@ import org.springframework.util.FileCopyUtils;
  * LobHandler implementation for Oracle databases. Uses proprietary API to
  * create <code>oracle.sql.BLOB</code> and <code>oracle.sql.CLOB</code>
  * instances, as necessary when working with Oracle's JDBC driver.
- * Developed and tested on Oracle 9i; also tested on Oracle 10g.
+ * Note that this LobHandler requires Oracle JDBC driver 9i or higher!
  *
  * <p>While most databases are able to work with DefaultLobHandler, Oracle just
  * accepts Blob/Clob instances created via its own proprietary BLOB/CLOB API,
@@ -112,14 +112,14 @@ public class OracleLobHandler extends AbstractLobHandler {
 	 */
 	public OracleLobHandler() {
 		try {
-			// initialize oracle.sql.BLOB class
+			// Initialize oracle.sql.BLOB class
 			this.blobClass = getClass().getClassLoader().loadClass(BLOB_CLASS_NAME);
 			this.durationSessionConstants.put(
 					this.blobClass, new Integer(this.blobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null)));
 			this.modeReadWriteConstants.put(
 					this.blobClass, new Integer(this.blobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null)));
 
-			// initialize oracle.sql.CLOB class
+			// Initialize oracle.sql.CLOB class
 			this.clobClass = getClass().getClassLoader().loadClass(CLOB_CLASS_NAME);
 			this.durationSessionConstants.put(
 					this.clobClass, new Integer(this.clobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null)));
@@ -128,7 +128,8 @@ public class OracleLobHandler extends AbstractLobHandler {
 		}
 		catch (Exception ex) {
 			throw new InvalidDataAccessApiUsageException(
-					"Couldn't initialize OracleLobHandler because Oracle driver classes are not available", ex);
+					"Couldn't initialize OracleLobHandler because Oracle driver classes are not available. " +
+					"Note that OracleLobHandler requires Oracle JDBC driver 9i or higher!", ex);
 		}
 	}
 
