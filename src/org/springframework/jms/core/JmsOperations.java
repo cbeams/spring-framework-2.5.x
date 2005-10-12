@@ -67,6 +67,10 @@ public interface JmsOperations {
 	Object execute(ProducerCallback action) throws JmsException;
 
 
+	//-------------------------------------------------------------------------
+	// Convenience methods for sending messages
+	//-------------------------------------------------------------------------
+
 	/**
 	 * Send a message to the default destination.
 	 * <p>This will only work with a default destination specified!
@@ -94,6 +98,10 @@ public interface JmsOperations {
 	 */
 	void send(String destinationName, MessageCreator messageCreator) throws JmsException;
 
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for sending auto-converted messages
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Send the given object to the default destination, converting the object
@@ -160,6 +168,10 @@ public interface JmsOperations {
 	void convertAndSend(String destinationName, Object message, MessagePostProcessor postProcessor)
 	    throws JmsException;
 
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for receiving messages
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Receive a message synchronously from the default destination, but only
@@ -235,6 +247,10 @@ public interface JmsOperations {
 	 */
 	Message receiveSelected(String destinationName, String messageSelector) throws JmsException;
 
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for receiving auto-converted messages
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Receive a message synchronously from the default destination, but only

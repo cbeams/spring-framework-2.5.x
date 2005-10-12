@@ -389,87 +389,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 
 	/**
-	 * Create a JMS Connection via this template's ConnectionFactory.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @return the new JMS Connection
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected Connection createConnection() throws JMSException {
-		return getConnectionFactory().createConnection();
-	}
-
-	/**
-	 * Create a JMS Session for the given Connection.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param con the JMS Connection to create a Session for
-	 * @return the new JMS Session
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected Session createSession(Connection con) throws JMSException {
-		return con.createSession(isSessionTransacted(), getSessionAcknowledgeMode());
-	}
-
-	/**
-	 * Create a JMS MessageProducer for the given Session and Destination,
-	 * configuring it to disable message ids and/or timestamps (if necessary).
-	 * <p>Delegates to <code>doCreateProducer</code> for creation of the raw
-	 * JMS MessageProducer, which needs to be specific to JMS 1.1 or 1.0.2.
-	 * @param session the JMS Session to create a MessageProducer for
-	 * @param destination the JMS Destination to create a MessageProducer for
-	 * @return the new JMS MessageProducer
-	 * @throws JMSException if thrown by JMS API methods
-	 * @see #doCreateProducer
-	 * @see #setMessageIdEnabled
-	 * @see #setMessageTimestampEnabled
-	 */
-	protected MessageProducer createProducer(Session session, Destination destination) throws JMSException {
-		MessageProducer producer = doCreateProducer(session, destination);
-		if (!isMessageIdEnabled()) {
-			producer.setDisableMessageID(true);
-		}
-		if (!isMessageTimestampEnabled()) {
-			producer.setDisableMessageTimestamp(true);
-		}
-		return producer;
-	}
-
-	/**
-	 * Create a raw JMS MessageProducer for the given Session and Destination.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param session the JMS Session to create a MessageProducer for
-	 * @param destination the JMS Destination to create a MessageProducer for
-	 * @return the new JMS MessageProducer
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected MessageProducer doCreateProducer(Session session, Destination destination) throws JMSException {
-		return session.createProducer(destination);
-	}
-
-	/**
-	 * Create a JMS MessageConsumer for the given Session and Destination.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param session the JMS Session to create a MessageConsumer for
-	 * @param destination the JMS Destination to create a MessageConsumer for
-	 * @param messageSelector the message selector for this consumer (can be <code>null</code>)
-	 * @return the new JMS MessageConsumer
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected MessageConsumer createConsumer(Session session, Destination destination, String messageSelector)
-			throws JMSException {
-
-		// Only pass in the NoLocal flag in case of a Topic:
-		// Some JMS providers, such as WebSphere MQ 6.0, throw IllegalStateException
-		// in case of the NoLocal flag being specified for a Queue.
-		if (destination instanceof Topic) {
-			return session.createConsumer(destination, messageSelector, isPubSubNoLocal());
-		}
-		else {
-			return session.createConsumer(destination, messageSelector);
-		}
-	}
-
-
-	/**
 	 * Execute the action specified by the given action object within a
 	 * JMS Session. Generalized version of <code>execute(SessionCallback)</code>,
 	 * allowing to start the JMS Connection on the fly.
@@ -540,6 +459,10 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 
+	//-------------------------------------------------------------------------
+	// Convenience methods for sending messages
+	//-------------------------------------------------------------------------
+
 	public void send(MessageCreator messageCreator) throws JmsException {
 		checkDefaultDestination();
 		if (getDefaultDestination() != null) {
@@ -600,6 +523,10 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}
 	}
 
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for sending auto-converted messages
+	//-------------------------------------------------------------------------
 
 	public void convertAndSend(Object message) throws JmsException {
 		checkDefaultDestination();
@@ -665,6 +592,10 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		});
 	}
 
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for receiving messages
+	//-------------------------------------------------------------------------
 
 	public Message receive() throws JmsException {
 		checkDefaultDestination();
@@ -768,6 +699,10 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 
+	//-------------------------------------------------------------------------
+	// Convenience methods for receiving auto-converted messages
+	//-------------------------------------------------------------------------
+
 	public Object receiveAndConvert() throws JmsException {
 		checkMessageConverter();
 		return doConvertFromMessage(receive());
@@ -808,6 +743,91 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			}
 		}
 		return null;
+	}
+
+
+	//-------------------------------------------------------------------------
+	// JMS 1.1 factory methods, potentially overridden for JMS 1.0.2
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Create a JMS Connection via this template's ConnectionFactory.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @return the new JMS Connection
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	protected Connection createConnection() throws JMSException {
+		return getConnectionFactory().createConnection();
+	}
+
+	/**
+	 * Create a JMS Session for the given Connection.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @param con the JMS Connection to create a Session for
+	 * @return the new JMS Session
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	protected Session createSession(Connection con) throws JMSException {
+		return con.createSession(isSessionTransacted(), getSessionAcknowledgeMode());
+	}
+
+	/**
+	 * Create a JMS MessageProducer for the given Session and Destination,
+	 * configuring it to disable message ids and/or timestamps (if necessary).
+	 * <p>Delegates to <code>doCreateProducer</code> for creation of the raw
+	 * JMS MessageProducer, which needs to be specific to JMS 1.1 or 1.0.2.
+	 * @param session the JMS Session to create a MessageProducer for
+	 * @param destination the JMS Destination to create a MessageProducer for
+	 * @return the new JMS MessageProducer
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see #doCreateProducer
+	 * @see #setMessageIdEnabled
+	 * @see #setMessageTimestampEnabled
+	 */
+	protected MessageProducer createProducer(Session session, Destination destination) throws JMSException {
+		MessageProducer producer = doCreateProducer(session, destination);
+		if (!isMessageIdEnabled()) {
+			producer.setDisableMessageID(true);
+		}
+		if (!isMessageTimestampEnabled()) {
+			producer.setDisableMessageTimestamp(true);
+		}
+		return producer;
+	}
+
+	/**
+	 * Create a raw JMS MessageProducer for the given Session and Destination.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @param session the JMS Session to create a MessageProducer for
+	 * @param destination the JMS Destination to create a MessageProducer for
+	 * @return the new JMS MessageProducer
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	protected MessageProducer doCreateProducer(Session session, Destination destination) throws JMSException {
+		return session.createProducer(destination);
+	}
+
+	/**
+	 * Create a JMS MessageConsumer for the given Session and Destination.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @param session the JMS Session to create a MessageConsumer for
+	 * @param destination the JMS Destination to create a MessageConsumer for
+	 * @param messageSelector the message selector for this consumer (can be <code>null</code>)
+	 * @return the new JMS MessageConsumer
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	protected MessageConsumer createConsumer(Session session, Destination destination, String messageSelector)
+			throws JMSException {
+
+		// Only pass in the NoLocal flag in case of a Topic:
+		// Some JMS providers, such as WebSphere MQ 6.0, throw IllegalStateException
+		// in case of the NoLocal flag being specified for a Queue.
+		if (destination instanceof Topic) {
+			return session.createConsumer(destination, messageSelector, isPubSubNoLocal());
+		}
+		else {
+			return session.createConsumer(destination, messageSelector);
+		}
 	}
 
 }
