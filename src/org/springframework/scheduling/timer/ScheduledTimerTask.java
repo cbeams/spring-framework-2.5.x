@@ -24,9 +24,9 @@ import java.util.TimerTask;
  * and a delay plus period. Period needs to be specified;
  * there is no point in a default for it.
  *
- * <p>The J2SE Timer does not offer more sophisticated scheduling
- * options like cron expressions. Consider using Quartz for such
- * demanding needs.
+ * <p>The JDK Timer does not offer more sophisticated scheduling
+ * options such as  cron expressions. Consider using Quartz for
+ * such advanced needs.
  *
  * <p>Note that Timer uses a TimerTask instance that is shared
  * between repeated executions, in contrast to Quartz which

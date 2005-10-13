@@ -26,12 +26,12 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * FactoryBean that sets up a J2SE Timer and exposes it for bean references.
+ * FactoryBean that sets up a JDK 1.3+ Timer and exposes it for bean references.
  *
- * <p>Allows registration of ScheduledTimerTasks, automatically starting
+ * <p>Allows for registration of ScheduledTimerTasks, automatically starting
  * the Timer on initialization and cancelling it on destruction of the context.
  * In scenarios that just require static registration of tasks at startup,
- * ther is no need to access the Timer instance itself in application code.
+ * there is no need to access the Timer instance itself in application code.
  *
  * <p>Note that Timer uses a TimerTask instance that is shared between
  * repeated executions, in contrast to Quartz which instantiates a new
@@ -104,11 +104,11 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 	}
 
 	/**
-	 * Create a new Timer instance. Called by afterPropertiesSet.
+	 * Create a new Timer instance. Called by <code>afterPropertiesSet</code>.
 	 * Can be overridden in subclasses to provide custom Timer subclasses.
 	 * @param daemon whether to create a Timer that runs as daemon thread
 	 * @return a new Timer instance
-	 * @see #afterPropertiesSet
+	 * @see #afterPropertiesSet()
 	 * @see java.util.Timer#Timer(boolean)
 	 */
 	protected Timer createTimer(boolean daemon) {
