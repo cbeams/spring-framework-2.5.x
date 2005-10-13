@@ -26,7 +26,8 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.Constants;
 
 /**
- * Jakarta Commons pooling implementation extending <code>AbstractPoolingTargetSource</code>.
+ * TargetSource implementation that holds objects in a configurable
+ * Jakarta Commons Pool.
  *
  * <p>By default, an instance of <code>GenericObjectPool</code> is created.
  * Subclasses may change the type of <code>ObjectPool</code> used by
@@ -203,6 +204,10 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	}
 
 
+	/**
+	 * Creates and holds an ObjectPool instance.
+	 * @see #createObjectPool()
+	 */
 	protected final void createPool(BeanFactory beanFactory) {
 		logger.info("Creating Commons object pool");
 		this.pool = createObjectPool();
