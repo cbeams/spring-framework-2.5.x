@@ -80,10 +80,11 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	/** Any instance of this class bound to JNDI */
 	private static SimpleNamingContextBuilder activated;
 
+
 	/**
 	 * Checks if a SimpleNamingContextBuilder is active.
 	 * @return the current SimpleNamingContextBuilder instance,
-	 * or null if none
+	 * or <code>null</code> if none
 	 */
 	public static SimpleNamingContextBuilder getCurrentContextBuilder() {
 		return activated;
@@ -100,22 +101,23 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	 */
 	public static SimpleNamingContextBuilder emptyActivatedContextBuilder() throws NamingException {
 		if (activated != null) {
-			// clear already activated context builder
+			// Clear already activated context builder.
 			activated.clear();
-			return activated;
 		}
 		else {
-			// create and activate new context builder
+			// Create and activate new context builder.
 			SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
+			// The activate() call will cause an assigment to the activated variable.
 			builder.activate();
-			return builder;
 		}
+		return activated;
 	}
 
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	private Hashtable boundObjects = new Hashtable();
+	private final Hashtable boundObjects = new Hashtable();
+
 
 	/**
 	 * Register the context builder by registering it with the JNDI NamingManager.
@@ -132,14 +134,14 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	}
 
 	/**
-	 * Clears all bindings in this context builder.
+	 * Clear all bindings in this context builder.
 	 */
 	public void clear() {
-		boundObjects.clear();
+		this.boundObjects.clear();
 	}
 
 	/**
-	 * Binds the given object under the given name, for all naming contexts
+	 * Bind the given object under the given name, for all naming contexts
 	 * that this context builder will generate.
 	 * @param name the JNDI name of the object (e.g. "java:comp/env/jdbc/myds")
 	 * @param obj the object to bind (e.g. a DataSource implementation)
