@@ -70,8 +70,20 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	 * @see #setResourceRef
 	 */
 	protected Object lookup(String jndiName) throws NamingException {
+		return lookup(jndiName, null);
+	}
+
+	/**
+	 * Perform an actual JNDI lookup for the given name via the JndiTemplate.
+   * If the name doesn't begin with "java:comp/env/", this prefix is added
+	 * if resourceRef is set to true.
+	 * @param jndiName the JNDI name to look up
+	 * @throws NamingException if the JNDI lookup failed
+	 * @see #setResourceRef
+	 */
+	protected Object lookup(String jndiName, Class requiredType) throws NamingException {
 		String jndiNameToUse = convertJndiName(jndiName);
-		Object jndiObject = getJndiTemplate().lookup(jndiNameToUse);
+		Object jndiObject = getJndiTemplate().lookup(jndiNameToUse, requiredType);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Located object with JNDI name [" + jndiNameToUse + "]");
 		}

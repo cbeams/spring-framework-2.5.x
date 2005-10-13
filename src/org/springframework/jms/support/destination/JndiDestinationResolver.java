@@ -94,7 +94,7 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Desti
 		Destination dest = (Destination) this.destinationCache.get(destinationName);
 		if (dest == null) {
 			try {
-				dest = (Destination) lookup(destinationName);
+				dest = (Destination) lookup(destinationName, Destination.class);
 			}
 			catch (NamingException ex) {
 				if (logger.isDebugEnabled()) {

@@ -64,7 +64,7 @@ public class ContextJndiBeanFactoryLocator extends JndiLocatorSupport implements
 	 */
 	public BeanFactoryReference useBeanFactory(String factoryKey) throws BeansException {
 		try {
-			String beanFactoryPath = (String) lookup(factoryKey);
+			String beanFactoryPath = (String) lookup(factoryKey, String.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Bean factory path from JNDI environment variable [" + factoryKey +
 						"] is: " + beanFactoryPath);

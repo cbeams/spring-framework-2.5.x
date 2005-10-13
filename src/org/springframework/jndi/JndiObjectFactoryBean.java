@@ -135,14 +135,14 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	}
 
 	public Class getObjectType() {
-		if (this.jndiObject != null) {
-			return this.jndiObject.getClass();
-		}
-		else if (this.proxyInterface != null) {
+		if (this.proxyInterface != null) {
 			return this.proxyInterface;
 		}
+		else if (this.jndiObject != null) {
+			return this.jndiObject.getClass();
+		}
 		else {
-			return null;
+			return getExpectedType();
 		}
 	}
 

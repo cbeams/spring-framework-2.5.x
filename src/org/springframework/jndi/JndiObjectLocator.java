@@ -101,14 +101,7 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	 * @see #setExpectedType
 	 */
 	protected Object lookup() throws NamingException {
-		Object jndiObject = lookup(getJndiName());
-		// Check expected type, if any.
-		if (getExpectedType() != null && !getExpectedType().isInstance(jndiObject)) {
-			throw new NamingException(
-					"Located JNDI object [" + jndiObject + "] is not assignable to expected type [" +
-					this.expectedType.getName() + "]");
-		}
-		return jndiObject;
+		return lookup(getJndiName(), getExpectedType());
 	}
 
 }
