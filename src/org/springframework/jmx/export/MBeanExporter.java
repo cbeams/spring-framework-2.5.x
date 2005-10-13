@@ -139,7 +139,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	private boolean autodetect = false;
 
 	/**
-	 * A list of bean names that should be excluded from auto-detection.
+	 * A list of bean names that should be excluded from autodetection.
 	 */
 	private String[] excludedBeans = new String[0];
 
@@ -333,7 +333,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 		}
 
 		// The beans property may be <code>null</code>, for example
-		// if we are relying solely on auto-detection.
+		// if we are relying solely on autodetection.
 		if (this.beans == null) {
 			this.beans = new HashMap();
 		}
@@ -448,7 +448,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * @param beanInstance the bean to register, either an MBean or a plain bean
 	 * @param beanKey the key associated with this bean in the beans map
 	 * @return the <code>ObjectName</code> under which the bean was registered
-	 *         with the <code>MBeanServer</code>
+	 * with the <code>MBeanServer</code>
 	 * @throws JMException an error in the underlying JMX infrastructure
 	 */
 	private ObjectName registerBeanInstance(Object beanInstance, String beanKey)
@@ -473,7 +473,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * @param mbean the bean instance to register
 	 * @param beanKey the key associated with this bean in the beans map
 	 * @return the <code>ObjectName</code> under which the bean was registered
-	 *         with the <code>MBeanServer</code>
+	 * with the <code>MBeanServer</code>
 	 * @throws JMException an error in the underlying JMX infrastructure
 	 */
 	private ObjectName registerMBean(Object mbean, String beanKey) throws JMException {
@@ -500,7 +500,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * @param bean the bean instance to register
 	 * @param beanKey the key associated with this bean in the beans map
 	 * @return the <code>ObjectName</code> under which the bean was registered
-	 *         with the <code>MBeanServer</code>
+	 * with the <code>MBeanServer</code>
 	 * @throws JMException in case of an error in the underlying JMX infrastructure
 	 * @throws InvalidTargetObjectTypeException an error in the definition of the MBean resource
 	 */
@@ -526,7 +526,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * @param beanName the name of the bean in the <code>BeanFactory</code>
 	 * @param beanKey the key associated with this bean in the beans map
 	 * @return the <code>ObjectName</code> under which the bean was registered
-	 *         with the <code>MBeanServer</code>
+	 * with the <code>MBeanServer</code>
 	 * @throws JMException an error in the underlying JMX infrastructure
 	 * @throws InvalidTargetObjectTypeException an error in the definition of the MBean resource
 	 */
@@ -792,7 +792,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 		/**
 		 * Called during the autodetection process to decide whether
 		 * or not a bean should be include.
-		 *
 		 * @param beanClass the class of the bean
 		 * @param beanName the name of the bean
 		 */
