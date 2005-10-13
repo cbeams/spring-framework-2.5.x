@@ -61,6 +61,8 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  */
 public class SessionLoader {
 
+	private static final String SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE = WebApplicationContext.class + ".SESSION";
+
 	private static Log log = LogFactory.getLog(SessionLoader.class);
 	
 	public static final  String SESSION_CONTEXT_PARAM = "sessionContext";
@@ -101,11 +103,11 @@ public class SessionLoader {
 			return this.applicationContext;
 		} catch (RuntimeException e) {
 			log.error("Session context initialization failed", e);
-			servletContext.setAttribute(WebApplicationContext.SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE, e);
+			servletContext.setAttribute(SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE, e);
 			throw e;
 		} catch (Error e) {
 			log.error("Session context initialization failed", e);
-			servletContext.setAttribute(WebApplicationContext.SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE, e);
+			servletContext.setAttribute(SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE, e);
 			throw e;
 		}
 	}

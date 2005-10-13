@@ -71,7 +71,7 @@ public class SessionLoaderListenerServlet23 implements ServletContextListener,
 	/**
 	 * <p>HTTP session has been created. This method adds the application context to the session for easy access.
 	 * 
-	 *  @see WebApplicationContext#SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE
+	 *  @see SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public void sessionCreated(HttpSessionEvent httpSessionEvent) {
 		HttpSession session = httpSessionEvent.getSession();
@@ -84,7 +84,7 @@ public class SessionLoaderListenerServlet23 implements ServletContextListener,
 	/**
 	 * <p>HTTP session is being destroyed. This method removes the application context from the session.
 	 * 
-	 * @see WebApplicationContext#SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE
+	 * @see SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public void sessionDestroyed(HttpSessionEvent httpSessionEvent) {
 		HttpSession session = httpSessionEvent.getSession();
@@ -97,7 +97,7 @@ public class SessionLoaderListenerServlet23 implements ServletContextListener,
 	/**
 	 * <p>HTTP session has been activated (de-serialized). This method adds the application context to the session for easy access.
 	 * 
-	 * @see WebApplicationContext#SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE
+	 * @see SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public void sessionDidActivate(HttpSessionEvent httpSessionEvent) {
 		HttpSession session = httpSessionEvent.getSession();
@@ -114,7 +114,7 @@ public class SessionLoaderListenerServlet23 implements ServletContextListener,
 	 * on each VM is equal (which is the expected scenario) each VM publishes its own application context instance in the session. Prototype instances
 	 * that have been created in the scope of a session are stored in the session and should be serializable in clustered environments.
 	 * 
-	 * @see WebApplicationContext#SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE
+	 * @see SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public void sessionWillPassivate(HttpSessionEvent httpSessionEvent) {
 		HttpSession session = httpSessionEvent.getSession();
@@ -125,20 +125,20 @@ public class SessionLoaderListenerServlet23 implements ServletContextListener,
 	}
 	
 	private void addToSession(HttpSession session, ApplicationContext applicationContext) {
-		session.setAttribute(WebApplicationContext.SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.applicationContext);
+		session.setAttribute(SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.applicationContext);
 		if (log.isDebugEnabled()) {
 			log.debug("Published session WebApplicationContext [" + this.applicationContext +
 					"] as Session attribute with name [" +
-					WebApplicationContext.SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "]");
+					SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "]");
 		}		
 	}
 	
 	private void removeFromSession(HttpSession session) {
-		session.removeAttribute(WebApplicationContext.SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		session.removeAttribute(SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		if (log.isDebugEnabled()) {
 			log.debug("Removed session WebApplicationContext [" + this.applicationContext +
 					"] with attribute name [" +
-					WebApplicationContext.SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "] from Session");
+					SESSION_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "] from Session");
 		}
 	}
 }
