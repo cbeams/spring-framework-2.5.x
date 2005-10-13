@@ -6,6 +6,9 @@ http://www.springframework.org
 Changes in version 1.2.6 (19.10.2005)
 -------------------------------------
 
+Package org.springframework.aop
+* fixed AbstractPerformanceMonitorInterceptor to have "prefix" and "suffix" initialized with emtpy String (avoiding NPE)
+
 Package org.springframework.beans
 * AbstractBeanFactory throws BeanDefinitionStoreException if parent not found (instead of NoSuchBeanDefinitionException)
 * PropertiesBeanDefinitionReader supports loading bean definitions from properties files with non-standard encodings
@@ -38,12 +41,31 @@ Package org.springframework.jms
 Package org.springframework.jmx
 * fixed InterfaceMBeanInfoAssembler to expose methods declared by super-interfaces of specified interfaces as well
 
+Package org.springframework.jndi
+* added "lookup(String jndiName, Class requiredType)" method to JndiLocatorSupport, used by JndiObjectFactoryBean
+
+Package org.springframework.orm
+* refined HibernateTransactionManager and SessionFactoryUtils to adapt to Hibernate 3.1's changed Session management
+
 Package org.springframework.remoting
+* added "validateResponse" method to Simple/CommonsHttpInvokerRequestExecutor, by default rejecting HTTP status >= 300
 * added support for JAX-RPC 1.1 "loadService(Class)" to LocalJaxRpcServiceFactory, via "jaxRpcServiceInterface" property
 * added support for JAX-RPC 1.1 service properties to LocalJaxRpcServiceFactory, via "jaxRpcServiceProperties" property
 
+Package org.springframework.samples
+* reworked PetClinic form JSPs to use domain command name ("owner", "pet", "visit") in combination with "nestedPath" tag
+
+Package org.springframework.test
+* added "setAutowireMode" and "getAutowireMode" methods to AbstractDependencyInjectionSpringContextTests
+
 Package org.springframework.transaction
 * added "defaultTimeout" bean property to JotmFactoryBean, for specifying the default JOTM transaction timeout
+
+Package org.springframework.ui
+* Multiple custom TemplateLoaders / loader paths can now be set on FreeMarkerConfigurationFactory / FreeMarkerConfigurer
+
+Package org.springframework.util
+* fixed WeakReferenceMonitor to correctly synchronize access to the monitoring thread, for proper lazy initialization
 
 Package org.springframework.web
 * ContextLoader reads the default WebApplicationContext impl class from "ContextLoader.properties" in the same package
@@ -52,7 +74,6 @@ Package org.springframework.web
 * refined UrlFilenameViewController to let its "handleRequestInternal" method throw Exception (for potential subclasses)
 * Velocity/FreeMarkerViewResolver allows for setting "allowRequestOverride" and "allowSessionOverride" on its Views
 * Velocity and FreeMarker form macros include an "id" attribute on each element
-* Multiple custom TemplateLoaders can now be set on FreeMarkerConfigurationFactory
 
 
 Changes in version 1.2.5 (23.9.2005)
