@@ -89,9 +89,9 @@ public abstract class ResourceUtils {
 	public static URL getURL(String resourceLocation) throws FileNotFoundException {
 		if (resourceLocation.startsWith(CLASSPATH_URL_PREFIX)) {
 			String path = resourceLocation.substring(CLASSPATH_URL_PREFIX.length());
-			String description = "class path resource [" + path + "]";
 			URL url = Thread.currentThread().getContextClassLoader().getResource(path);
 			if (url == null) {
+				String description = "class path resource [" + path + "]";
 				throw new FileNotFoundException(
 						description + " cannot be resolved to URL because it does not exist");
 			}
@@ -104,7 +104,7 @@ public abstract class ResourceUtils {
 		catch (MalformedURLException ex) {
 			// no URL -> treat as file path
 			try {
-				return new URL("file:" + resourceLocation);
+				return new URL(FILE_URL_PREFIX + resourceLocation);
 			}
 			catch (MalformedURLException ex2) {
 				throw new FileNotFoundException("Resource location [" + resourceLocation +
