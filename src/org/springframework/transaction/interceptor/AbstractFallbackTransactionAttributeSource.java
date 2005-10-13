@@ -94,6 +94,9 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 				this.cache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
 			}
 			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Adding transactional method [" + method.getName() + "] with attribute [" + txAtt + "]");
+				}
 				this.cache.put(cacheKey, txAtt);
 			}
 			return txAtt;
