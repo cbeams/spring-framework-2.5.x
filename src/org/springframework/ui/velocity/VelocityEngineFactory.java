@@ -161,6 +161,13 @@ public class VelocityEngineFactory {
 	}
 
 	/**
+	 * Return the Spring ResourceLoader to use for loading FreeMarker template files.
+	 */
+	protected ResourceLoader getResourceLoader() {
+		return resourceLoader;
+	}
+
+	/**
 	 * Set whether to prefer file system access for template loading.
 	 * File system access enables hot detection of template changes.
 	 * <p>If this is enabled, VelocityEngineFactory will try to resolve the
@@ -174,6 +181,13 @@ public class VelocityEngineFactory {
 	 */
 	public void setPreferFileSystemAccess(boolean preferFileSystemAccess) {
 		this.preferFileSystemAccess = preferFileSystemAccess;
+	}
+
+	/**
+	 * Return whether to prefer file system access for template loading.
+	 */
+	protected boolean isPreferFileSystemAccess() {
+		return preferFileSystemAccess;
 	}
 
 	/**
@@ -217,39 +231,7 @@ public class VelocityEngineFactory {
 
 		// Set a resource loader path, if required.
 		if (this.resourceLoaderPath != null) {
-			if (this.preferFileSystemAccess) {
-				// Try to load via the file system, fall back to SpringResourceLoader
-				// (for hot detection of template changes, if possible).
-				try {
-					Resource path = this.resourceLoader.getResource(this.resourceLoaderPath);
-					File file = path.getFile();  // will fail if not resolvable in the file system
-					if (logger.isDebugEnabled()) {
-						logger.debug("Resource loader path [" + path + "] resolved to file [" + file.getAbsolutePath() + "]");
-					}
-					velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
-					velocityEngine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, file.getAbsolutePath());
-					velocityEngine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_CACHE, "true");
-				}
-				catch (IOException ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Cannot resolve resource loader path [" + this.resourceLoaderPath +
-								"] to java.io.File: using SpringResourceLoader", ex);
-					}
-					else if (logger.isInfoEnabled()) {
-						logger.info("Cannot resolve resource loader path [" + this.resourceLoaderPath +
-								"] to java.io.File: using SpringResourceLoader");
-					}
-					initSpringResourceLoader(velocityEngine);
-				}
-			}
-			else {
-				// Always load via SpringResourceLoader
-				// (without hot detection of template changes).
-				if (logger.isDebugEnabled()) {
-					logger.debug("File system access not preferred: using SpringResourceLoader");
-				}
-				initSpringResourceLoader(velocityEngine);
-			}
+			initVelocityResourceLoader(velocityEngine, this.resourceLoaderPath);
 		}
 
 		// Log via Commons Logging?
@@ -291,11 +273,70 @@ public class VelocityEngineFactory {
 	}
 
 	/**
-	 * Initialize a SpringResourceLoader for the given VelocityEngine.
-	 * @param velocityEngine the VelocityEngine to configure
-	 * @see SpringResourceLoader
+	 * Return a new VelocityEngine. Subclasses can override this for
+	 * custom initialization, or for using a mock object for testing.
+	 * <p>Called by <code>createVelocityEngine()</code>.
+	 * @return the VelocityEngine instance
+	 * @throws IOException if a config file wasn't found
+	 * @throws VelocityException on Velocity initialization failure
+	 * @see #createVelocityEngine()
 	 */
-	protected void initSpringResourceLoader(VelocityEngine velocityEngine) {
+	protected VelocityEngine newVelocityEngine() throws IOException, VelocityException {
+		return new VelocityEngine();
+	}
+
+	/**
+	 * Initialize a Velocity resource loader for the given VelocityEngine:
+	 * either a standard Velocity FileResourceLoader or a SpringResourceLoader.
+	 * <p>Called by <code>createVelocityEngine()</code>.
+	 * @param velocityEngine the VelocityEngine to configure
+	 * @param resourceLoaderPath the path to load Velocity resources from
+	 * @see org.apache.velocity.runtime.resource.loader.FileResourceLoader
+	 * @see SpringResourceLoader
+	 * @see #initSpringResourceLoader
+	 * @see #createVelocityEngine()
+	 */
+	protected void initVelocityResourceLoader(VelocityEngine velocityEngine, String resourceLoaderPath) {
+		if (isPreferFileSystemAccess()) {
+			// Try to load via the file system, fall back to SpringResourceLoader
+			// (for hot detection of template changes, if possible).
+			try {
+				Resource path = getResourceLoader().getResource(resourceLoaderPath);
+				File file = path.getFile();  // will fail if not resolvable in the file system
+				if (logger.isDebugEnabled()) {
+					logger.debug("Resource loader path [" + path + "] resolved to file [" + file.getAbsolutePath() + "]");
+				}
+				velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
+				velocityEngine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, file.getAbsolutePath());
+				velocityEngine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_CACHE, "true");
+			}
+			catch (IOException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Cannot resolve resource loader path [" + resourceLoaderPath +
+							"] to java.io.File: using SpringResourceLoader", ex);
+				}
+				initSpringResourceLoader(velocityEngine, resourceLoaderPath);
+			}
+		}
+		else {
+			// Always load via SpringResourceLoader
+			// (without hot detection of template changes).
+			if (logger.isDebugEnabled()) {
+				logger.debug("File system access not preferred: using SpringResourceLoader");
+			}
+			initSpringResourceLoader(velocityEngine, resourceLoaderPath);
+		}
+	}
+
+	/**
+	 * Initialize a SpringResourceLoader for the given VelocityEngine.
+	 * <p>Called by <code>initVelocityResourceLoader</code>.
+	 * @param velocityEngine the VelocityEngine to configure
+	 * @param resourceLoaderPath the path to load Velocity resources from
+	 * @see SpringResourceLoader
+	 * @see #initVelocityResourceLoader
+	 */
+	protected void initSpringResourceLoader(VelocityEngine velocityEngine, String resourceLoaderPath) {
 		velocityEngine.setProperty(
 				RuntimeConstants.RESOURCE_LOADER, SpringResourceLoader.NAME);
 		velocityEngine.setProperty(
@@ -303,33 +344,20 @@ public class VelocityEngineFactory {
 		velocityEngine.setProperty(
 				SpringResourceLoader.SPRING_RESOURCE_LOADER_CACHE, "true");
 		velocityEngine.setApplicationAttribute(
-				SpringResourceLoader.SPRING_RESOURCE_LOADER, this.resourceLoader);
+				SpringResourceLoader.SPRING_RESOURCE_LOADER, getResourceLoader());
 		velocityEngine.setApplicationAttribute(
-				SpringResourceLoader.SPRING_RESOURCE_LOADER_PATH, this.resourceLoaderPath);
-	}
-
-	/**
-	 * Return a new VelocityEngine. Subclasses can override this for
-	 * custom initialization, or for using a mock object for testing.
-	 * Called by createVelocityEngine.
-	 * @return the VelocityEngine instance
-	 * @throws IOException if a config file wasn't found
-	 * @throws VelocityException on Velocity initialization failure
-	 * @see #createVelocityEngine
-	 */
-	protected VelocityEngine newVelocityEngine() throws IOException, VelocityException {
-		return new VelocityEngine();
+				SpringResourceLoader.SPRING_RESOURCE_LOADER_PATH, resourceLoaderPath);
 	}
 
 	/**
 	 * To be implemented by subclasses that want to to perform custom
 	 * post-processing of the VelocityEngine after this FactoryBean
 	 * performed its default configuration (but before VelocityEngine.init).
-	 * Called by createVelocityEngine.
+	 * <p>Called by <code>createVelocityEngine()</code>.
 	 * @param velocityEngine the current VelocityEngine
 	 * @throws IOException if a config file wasn't found
 	 * @throws VelocityException on Velocity initialization failure
-	 * @see #createVelocityEngine
+	 * @see #createVelocityEngine()
 	 * @see org.apache.velocity.app.VelocityEngine#init
 	 */
 	protected void postProcessVelocityEngine(VelocityEngine velocityEngine)
