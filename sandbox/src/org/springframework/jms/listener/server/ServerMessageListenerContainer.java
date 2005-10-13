@@ -30,8 +30,25 @@ import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.support.JmsUtils;
 
 /**
+ * Message listener container that builds on the JMS ServerSessionPool SPI,
+ * creating JMS ServerSessions through a pluggable ServerSessionFactory.
+ *
+ * <p>This is the most sophisticated message listener container possible
+ * with standard JMS. It allows for dynamic management of JMS Sessions,
+ * potentially using a pool of Sessions that receive messages in parallel.
+ *
+ * <p>Note that the default ServerSessionFactory is a SimpleServerSessionFactory,
+ * which will create a new ServerSession for each listener execution.
+ * Consider specifying a CommonsPoolServerSessionFactory to reuse JMS Sessions
+ * and/or to limit the number of concurrent ServerSession executions
+ *
+ * <p>For a simpler message listener container, in particular if using
+ * a JMS provider without ServerSessionPool support, consider using
+ * SimpleMessageListenerContainer.
+ *
  * @author Juergen Hoeller
  * @since 1.3
+ * @see org.springframework.jms.listener.SimpleMessageListenerContainer
  */
 public class ServerMessageListenerContainer extends AbstractMessageListenerContainer
 		implements ListenerSessionManager {
@@ -43,23 +60,55 @@ public class ServerMessageListenerContainer extends AbstractMessageListenerConta
 	private ConnectionConsumer consumer;
 
 
+	/**
+	 * Set the Spring ServerSessionFactory to use.
+	 * <p>Default is a plain SimpleServerSessionFactory.
+	 * Consider using a CommonsPoolServerSessionFactory to reuse JMS Sessions
+	 * and/or to limit the number of concurrent ServerSession executions.
+	 * @see SimpleServerSessionFactory
+	 * @see CommonsPoolServerSessionFactory
+	 */
 	public void setServerSessionFactory(ServerSessionFactory serverSessionFactory) {
-		this.serverSessionFactory = serverSessionFactory;
+		this.serverSessionFactory =
+				(serverSessionFactory != null ? serverSessionFactory : new SimpleServerSessionFactory());
 	}
 
+	/**
+	 * Return the Spring ServerSessionFactory to use.
+	 */
 	protected ServerSessionFactory getServerSessionFactory() {
 		return serverSessionFactory;
 	}
 
+	/**
+	 * Set the maximum number of messages to load into a JMS Session.
+	 * Default is 1.
+	 * <p>See the corresponding JMS <code>createConnectionConsumer</code>
+	 * argument for details.
+	 * @see javax.jms.Connection#createConnectionConsumer
+	 */
 	public void setMaxMessages(int maxMessages) {
 		this.maxMessages = maxMessages;
 	}
 
+	/**
+	 * Return the maximum number of messages to load into a JMS Session.
+	 */
 	protected int getMaxMessages() {
 		return maxMessages;
 	}
 
 
+	//-------------------------------------------------------------------------
+	// Implementation of AbstractMessageListenerContainer's template methods
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Creates a JMS ServerSessionPool for the specified listener and registers
+	 * it with a JMS ConnectionConsumer for the specified destination.
+	 * @see #createServerSessionPool
+	 * @see #createConsumer
+	 */
 	protected void registerListener() throws JMSException {
 		Connection con = getConnection();
 		Destination destination = getDestination();
@@ -76,27 +125,62 @@ public class ServerMessageListenerContainer extends AbstractMessageListenerConta
 		this.consumer = createConsumer(con, destination, pool);
 	}
 
+	/**
+	 * Create a JMS ServerSessionPool for the specified message listener,
+	 * via this container's ServerSessionFactory.
+	 * <p>This message listener container implements the ListenerSessionManager
+	 * interface, hence can be passed to the ServerSessionFactory itself.
+	 * @see #setServerSessionFactory
+	 * @see ServerSessionFactory#getServerSession(ListenerSessionManager)
+	 */
+	protected ServerSessionPool createServerSessionPool() throws JMSException {
+		return new ServerSessionPool() {
+			public ServerSession getServerSession() throws JMSException {
+				logger.debug("JMS ConnectionConsumer requests ServerSession");
+				return getServerSessionFactory().getServerSession(ServerMessageListenerContainer.this);
+			}
+		};
+	}
+
+	/**
+	 * Return the JMS ConnectionConsumer used by this message listener container.
+	 * Available after initialization.
+	 */
 	protected final ConnectionConsumer getConsumer() {
 		return consumer;
 	}
 
+	/**
+	 * Close the JMS ServerSessionPool for the specified message listener,
+	 * via this container's ServerSessionFactory, and subsequently also
+	 * this container's JMS ConnectionConsumer.
+	 * <p>This message listener container implements the ListenerSessionManager
+	 * interface, hence can be passed to the ServerSessionFactory itself.
+	 * @see #setServerSessionFactory
+	 * @see ServerSessionFactory#getServerSession(ListenerSessionManager)
+	 */
 	protected void destroyListener() throws JMSException {
 		logger.debug("Closing ServerSessionFactory");
-		this.serverSessionFactory.close(this);
+		getServerSessionFactory().close(this);
 		logger.debug("Closing JMS ConnectionConsumer");
 		this.consumer.close();
 	}
 
 
-	protected ServerSessionPool createServerSessionPool() throws JMSException {
-		return new ServerSessionPool() {
-			public ServerSession getServerSession() throws JMSException {
-				logger.debug("JMS ConnectionConsumer requests ServerSession");
-				return serverSessionFactory.getServerSession(ServerMessageListenerContainer.this);
-			}
-		};
-	}
+	//-------------------------------------------------------------------------
+	// Implementation of the ListenerSessionManager interface
+	//-------------------------------------------------------------------------
 
+	/**
+	 * Create a JMS Session with the specified listener registered.
+	 * Listener execution is delegated to the <code>executeListener</code> method.
+	 * <p>Default implementation simply calls <code>setMessageListener</code>
+	 * on a newly created JMS Session, according to the JMS specification's
+	 * ServerSessionPool section.
+	 * @return the JMS Session
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see #executeListener
+	 */
 	public Session createListenerSession() throws JMSException {
 		final Session session = createSession(getConnection());
 
@@ -109,10 +193,22 @@ public class ServerMessageListenerContainer extends AbstractMessageListenerConta
 		return session;
 	}
 
+	/**
+	 * Execute the given JMS Session, triggering invocation
+	 * of its listener.
+	 * <p>Default implementation simply calls <code>run()</code>
+	 * on the JMS Session, according to the JMS specification's
+	 * ServerSessionPool section.
+	 * @param session the JMS Session to execute
+	 */
 	public void executeListenerSession(Session session) {
 		session.run();
 	}
 
+
+	//-------------------------------------------------------------------------
+	// JMS 1.1 factory methods, potentially overridden for JMS 1.0.2
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Create a JMS ConnectionConsumer for the given Connection.

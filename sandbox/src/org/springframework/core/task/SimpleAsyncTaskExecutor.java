@@ -39,14 +39,30 @@ import org.springframework.util.ConcurrencyThrottleSupport;
 public class SimpleAsyncTaskExecutor extends ConcurrencyThrottleSupport
 		implements TaskExecutor, Serializable {
 
-	public void execute(Runnable task) {
+	/**
+	 * Executes the given task, within a concurrency throttle
+	 * if configured (through the superclass's settings).
+	 * @see #beforeAccess()
+	 * @see #doExecute(Runnable)
+	 * @see #afterAccess()
+	 */
+	public final void execute(Runnable task) {
 		beforeAccess();
 		try {
-			new Thread(task).start();
+			doExecute(task);
 		}
 		finally {
 			afterAccess();
 		}
+	}
+
+	/**
+	 * Template method for the actual execution of a task.
+	 * <p>Default implementation creates a new Thread and starts it.
+	 * @param task the Runnable to execute
+	 */
+	protected void doExecute(Runnable task) {
+		new Thread(task).start();
 	}
 
 }

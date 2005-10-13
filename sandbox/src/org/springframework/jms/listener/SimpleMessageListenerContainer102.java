@@ -17,6 +17,7 @@
 package org.springframework.jms.listener;
 
 import javax.jms.Connection;
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.Queue;
@@ -28,9 +29,13 @@ import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 import javax.jms.TopicSession;
-import javax.jms.Destination;
 
 /**
+ * A subclass of SimpleMessageListenerContainer that uses the JMS 1.0.2 specification,
+ * rather than the JMS 1.1 methods used by SimpleMessageListenerContainer itself.
+ * This class can be used for JMS 1.0.2 providers, offering the same facility as
+ * SimpleMessageListenerContainer does for JMS 1.1 providers.
+ *
  * @author Juergen Hoeller
  * @since 1.3
  */

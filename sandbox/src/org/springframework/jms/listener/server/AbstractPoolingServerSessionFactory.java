@@ -28,8 +28,18 @@ import org.springframework.jms.support.JmsUtils;
 import org.springframework.scheduling.timer.TimerTaskExecutor;
 
 /**
+ * Abstract base class for ServerSessionFactory implementations
+ * that pool ServerSessionFactory instances.
+ * 
+ * <p>Provides a factory method that creates a poolable ServerSession
+ * (to be added as new instance to a pool), a callback method invoked
+ * when a ServerSession finished an execution of its listener (to return
+ * an instance to the pool), and a method to destroy a ServerSession instance
+ * (after removing an instance from the pool).
+ *
  * @author Juergen Hoeller
  * @since 1.3
+ * @see CommonsPoolServerSessionFactory
  */
 public abstract class AbstractPoolingServerSessionFactory implements ServerSessionFactory {
 
@@ -40,12 +50,24 @@ public abstract class AbstractPoolingServerSessionFactory implements ServerSessi
 	private int maxSize;
 
 
+	/**
+	 * Specify the TaskExecutor to use for executing ServerSessions
+	 * (and consequently, the underlying MessageListener).
+	 * <p>Default is a TimerTaskExecutor for each pooled ServerSession,
+	 * using one Thread per pooled JMS Session. Alternatives are a shared
+	 * TimerTaskExecutor, sharing a single Thread for the execution of all
+	 * ServerSessions, or a TaskExecutor implementation backed by a thread pool.
+	 * @see org.springframework.scheduling.timer.TimerTaskExecutor
+	 */
 	public void setTaskExecutor(TaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
+	/**
+	 * Return the TaskExecutor to use for executing ServerSessions.
+	 */
 	protected TaskExecutor getTaskExecutor() {
-		return this.taskExecutor;
+		return taskExecutor;
 	}
 
 	/**
@@ -63,21 +85,50 @@ public abstract class AbstractPoolingServerSessionFactory implements ServerSessi
 	}
 
 
+	/**
+	 * Create a new poolable ServerSession.
+	 * To be called when a new instance should be added to the pool.
+	 * @param sessionManager the listener session manager to create the
+	 * poolable ServerSession for
+	 * @return the new poolable ServerSession
+	 * @throws JMSException if creation failed
+	 */
 	protected final ServerSession createServerSession(ListenerSessionManager sessionManager) throws JMSException {
-		return new PooledServerSession(sessionManager);
+		return new PoolableServerSession(sessionManager);
 	}
 
+	/**
+	 * Destroy the given poolable ServerSession.
+	 * To be called when an instance got removed from the pool.
+	 * @param serverSession the poolable ServerSession to destroy
+	 */
 	protected final void destroyServerSession(ServerSession serverSession) {
 		if (serverSession != null) {
-			((PooledServerSession) serverSession).close();
+			((PoolableServerSession) serverSession).close();
 		}
 	}
 
 
-	protected abstract void serverSessionFinished(ServerSession serverSession, ListenerSessionManager sessionManager);
+	/**
+	 * Template method called by a ServerSession if it finished
+	 * execution of its listener and is ready to go back into the pool.
+	 * <p>Subclasses should implement the actual returning of the instance
+	 * to the pool.
+	 * @param serverSession the ServerSession that finished its execution
+	 * @param sessionManager the session manager that the ServerSession belongs to
+	 */
+	protected abstract void serverSessionFinished(
+			ServerSession serverSession, ListenerSessionManager sessionManager);
 
 
-	private class PooledServerSession implements ServerSession {
+	/**
+	 * ServerSession implementation designed to be pooled.
+	 * Creates a new JMS Session on instantiation, reuses it
+	 * for all executions, and closes it on <code>close</code>.
+	 * <p>Creates a TimerTaskExecutor (using a single Thread) per
+	 * ServerSession, unless given a specific TaskExecutor to use.
+	 */
+	private class PoolableServerSession implements ServerSession {
 
 		private final ListenerSessionManager sessionManager;
 
@@ -87,7 +138,7 @@ public abstract class AbstractPoolingServerSessionFactory implements ServerSessi
 
 		private TimerTaskExecutor internalExecutor;
 
-		public PooledServerSession(final ListenerSessionManager sessionManager) throws JMSException {
+		public PoolableServerSession(final ListenerSessionManager sessionManager) throws JMSException {
 			this.sessionManager = sessionManager;
 			this.session = sessionManager.createListenerSession();
 			this.taskExecutor = getTaskExecutor();
@@ -109,7 +160,7 @@ public abstract class AbstractPoolingServerSessionFactory implements ServerSessi
 						sessionManager.executeListenerSession(session);
 					}
 					finally {
-						serverSessionFinished(PooledServerSession.this, sessionManager);
+						serverSessionFinished(PoolableServerSession.this, sessionManager);
 					}
 				}
 			});

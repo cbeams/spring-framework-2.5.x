@@ -35,6 +35,10 @@ import java.io.Serializable;
  */
 public class SyncTaskExecutor implements TaskExecutor, Serializable {
 
+	/**
+	 * Executes the given task synchronously,
+	 * through direct invocation of its <code>run()</code> method.
+	 */
 	public void execute(Runnable task) {
 		task.run();
 	}

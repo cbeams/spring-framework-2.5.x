@@ -28,11 +28,28 @@ import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
-import org.springframework.jms.listener.server.AbstractPoolingServerSessionFactory;
-
 /**
+ * ServerSessionFactory implementation that holds ServerSessions
+ * in a configurable Jakarta Commons Pool.
+ *
+ * <p>By default, an instance of <code>GenericObjectPool</code> is created.
+ * Subclasses may change the type of <code>ObjectPool</code> used by
+ * overriding the <code>createObjectPool</code> method.
+ *
+ * <p>Provides many configuration properties mirroring those of the Commons Pool
+ * <code>GenericObjectPool</code> class; these properties are passed to the
+ * <code>GenericObjectPool</code> during construction. If creating a subclass of this
+ * class to change the <code>ObjectPool</code> implementation type, pass in the values
+ * of configuration properties that are relevant to your chosen implementation.
+ *
  * @author Juergen Hoeller
  * @since 1.3
+ * @see GenericObjectPool
+ * @see #createObjectPool
+ * @see #setMaxSize
+ * @see #setMaxIdle
+ * @see #setMinIdle
+ * @see #setMaxWait
  */
 public class CommonsPoolServerSessionFactory extends AbstractPoolingServerSessionFactory {
 
@@ -144,11 +161,19 @@ public class CommonsPoolServerSessionFactory extends AbstractPoolingServerSessio
 	}
 
 
+	/**
+	 * Returns a ServerSession from the pool, creating a new pool for the given
+	 * session manager if necessary.
+	 * @see #createObjectPool
+	 */
 	public ServerSession getServerSession(ListenerSessionManager sessionManager) throws JMSException {
 		ObjectPool pool = null;
 		synchronized (this.serverSessionPools) {
 			pool = (ObjectPool) this.serverSessionPools.get(sessionManager);
 			if (pool == null) {
+				if (logger.isInfoEnabled()) {
+					logger.info("Creating Commons ServerSession pool for: " + sessionManager);
+				}
 				pool = createObjectPool(sessionManager);
 				this.serverSessionPools.put(sessionManager, pool);
 			}
@@ -163,6 +188,16 @@ public class CommonsPoolServerSessionFactory extends AbstractPoolingServerSessio
 		}
 	}
 
+	/**
+	 * Subclasses can override this if they want to return a specific Commons pool.
+	 * They should apply any configuration properties to the pool here.
+	 * <p>Default is a GenericObjectPool instance with the given pool size.
+	 * @param sessionManager the session manager to use for
+	 * creating and executing new listener sessions
+	 * @return an empty Commons <code>ObjectPool</code>.
+	 * @see org.apache.commons.pool.impl.GenericObjectPool
+	 * @see #setMaxSize
+	 */
 	protected ObjectPool createObjectPool(ListenerSessionManager sessionManager) {
 		GenericObjectPool pool = new GenericObjectPool(createPoolableObjectFactory(sessionManager));
 		pool.setMaxActive(getMaxSize());
@@ -174,6 +209,16 @@ public class CommonsPoolServerSessionFactory extends AbstractPoolingServerSessio
 		return pool;
 	}
 
+	/**
+	 * Create a Commons PoolableObjectFactory adapter for the given session manager.
+	 * Calls <code>createServerSession</code> and <code>destroyServerSession</code>
+	 * as defined by the AbstractPoolingServerSessionFactory class.
+	 * @param sessionManager the session manager to use for
+	 * creating and executing new listener sessions
+	 * @return the Commons PoolableObjectFactory
+	 * @see #createServerSession
+	 * @see #destroyServerSession
+	 */
 	protected PoolableObjectFactory createPoolableObjectFactory(final ListenerSessionManager sessionManager) {
 		return new PoolableObjectFactory() {
 			public Object makeObject() throws JMSException {
@@ -192,6 +237,10 @@ public class CommonsPoolServerSessionFactory extends AbstractPoolingServerSessio
 		};
 	}
 
+	/**
+	 * Returns the given ServerSession, which just finished an execution
+	 * of its listener, back to the pool.
+	 */
 	protected void serverSessionFinished(ServerSession serverSession, ListenerSessionManager sessionManager) {
 		ObjectPool pool = (ObjectPool) this.serverSessionPools.get(sessionManager);
 		try {
@@ -202,6 +251,9 @@ public class CommonsPoolServerSessionFactory extends AbstractPoolingServerSessio
 		}
 	}
 
+	/**
+	 * Closes all pools held by this ServerSessionFactory.
+	 */
 	public void close(ListenerSessionManager sessionManager) {
 		synchronized (this.serverSessionPools) {
 			for (Iterator it = this.serverSessionPools.values().iterator(); it.hasNext();) {

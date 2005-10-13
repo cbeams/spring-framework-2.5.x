@@ -31,8 +31,20 @@ import javax.jms.Topic;
 import org.springframework.jms.support.JmsUtils;
 
 /**
+ * Message listener container that uses plain JMS client API to
+ * create concurrent MessageConsumers for the specified listeners.
+ *
+ * <p>This is the simplest form of a message listener container.
+ * It creates a fixed number of JMS Sessions to invoke the listener,
+ * not allowing for dynamic adaptation to runtime demands. Its main
+ * advantage is its low level of complexity and the minimum requirements
+ * on the JMS provider: Not even the ServerSessionPool facility is required.
+ *
+ * <p>For more dynamic needs, consider using ServerMessageListenerContainer.
+ *
  * @author Juergen Hoeller
  * @since 1.3
+ * @see org.springframework.jms.listener.server.ServerMessageListenerContainer
  */
 public class SimpleMessageListenerContainer extends AbstractMessageListenerContainer {
 
@@ -61,11 +73,24 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		return pubSubNoLocal;
 	}
 
+	/**
+	 * Specify the number of concurrent consumers to create.
+	 * Default is 1.
+	 */
 	public void setConcurrentConsumers(int concurrentConsumers) {
 		this.concurrentConsumers = concurrentConsumers;
 	}
 
 
+	//-------------------------------------------------------------------------
+	// Implementation of AbstractMessageListenerContainer's template methods
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Creates the specified number of concurrent consumers,
+	 * in the form of a JMS Session plus associated MessageConsumer.
+	 * @see #createListenerConsumer
+	 */
 	protected void registerListener() throws JMSException {
 		this.sessions = new HashSet(this.concurrentConsumers);
 		this.consumers = new HashSet(this.concurrentConsumers);
@@ -77,20 +102,14 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		}
 	}
 
-	protected void destroyListener() throws JMSException {
-		logger.debug("Closing JMS MessageConsumers");
-		for (Iterator it = this.consumers.iterator(); it.hasNext();) {
-			MessageConsumer consumer = (MessageConsumer) it.next();
-			JmsUtils.closeMessageConsumer(consumer);
-		}
-		logger.debug("Closing JMS Sessions");
-		for (Iterator it = this.sessions.iterator(); it.hasNext();) {
-			Session session = (Session) it.next();
-			JmsUtils.closeSession(session);
-		}
-	}
-
-
+	/**
+	 * Create a MessageConsumer for the given JMS Session,
+	 * registering a MessageListener for the specified listener.
+	 * @param session the JMS Session to work on
+	 * @return the MessageConsumer
+	 * @throws JMSException if thrown by JMS methods
+	 * @see #executeListener
+	 */
 	protected MessageConsumer createListenerConsumer(final Session session) throws JMSException {
 		Destination destination = getDestination();
 		if (destination == null) {
@@ -107,6 +126,26 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		return consumer;
 	}
 
+	/**
+	 * Destroy the registered JMS Sessions and associated MessageConsumers.
+	 */
+	protected void destroyListener() throws JMSException {
+		logger.debug("Closing JMS MessageConsumers");
+		for (Iterator it = this.consumers.iterator(); it.hasNext();) {
+			MessageConsumer consumer = (MessageConsumer) it.next();
+			JmsUtils.closeMessageConsumer(consumer);
+		}
+		logger.debug("Closing JMS Sessions");
+		for (Iterator it = this.sessions.iterator(); it.hasNext();) {
+			Session session = (Session) it.next();
+			JmsUtils.closeSession(session);
+		}
+	}
+
+
+	//-------------------------------------------------------------------------
+	// JMS 1.1 factory methods, potentially overridden for JMS 1.0.2
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Create a JMS MessageConsumer for the given Session and Destination.

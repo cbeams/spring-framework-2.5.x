@@ -19,16 +19,41 @@ package org.springframework.jms.listener.server;
 import javax.jms.JMSException;
 import javax.jms.ServerSession;
 
-import org.springframework.jms.listener.server.ListenerSessionManager;
-
 /**
+ * SPI interface to be implemented by components that manage
+ * JMS ServerSessions. Usually, but not necessarily, an implementation
+ * of this interface will hold a pool of ServerSessions.
+ *
+ * <p>The passed-in ListenerSessionManager has to be used for creating
+ * and executing JMS Sessions. This session manager is responsible for
+ * registering a MessageListener with all Sessions that it creates.
+ * Consequently, the ServerSessionFactory implementation has to
+ * concentrate on the actual lifecycle (e.g. pooling) of JMS Sessions,
+ * but is not concerned about Session creation or execution.
+ *
  * @author Juergen Hoeller
  * @since 1.3
+ * @see ListenerSessionManager
+ * @see ServerMessageListenerContainer
  */
 public interface ServerSessionFactory {
 
+	/**
+	 * Retrieve a JMS ServerSession for the given session manager.
+	 * @param sessionManager the session manager to use for
+	 * creating and executing new listener sessions
+	 * (implicitly indicating the target listener to invoke)
+	 * @return the JMS ServerSession
+	 * @throws JMSException if retrieval failed
+	 */
 	ServerSession getServerSession(ListenerSessionManager sessionManager) throws JMSException;
 
+	/**
+	 * Close all ServerSessions for the given session manager.
+	 * @param sessionManager the session manager used for
+	 * creating and executing new listener sessions
+	 * (implicitly indicating the target listener)
+	 */
 	void close(ListenerSessionManager sessionManager);
 
 }

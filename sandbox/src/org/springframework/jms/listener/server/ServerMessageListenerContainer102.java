@@ -30,6 +30,11 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 
 /**
+ * A subclass of ServerMessageListenerContainer that uses the JMS 1.0.2 specification,
+ * rather than the JMS 1.1 methods used by ServerMessageListenerContainer itself.
+ * This class can be used for JMS 1.0.2 providers, offering the same facility as
+ * ServerMessageListenerContainer does for JMS 1.1 providers.
+ *
  * @author Juergen Hoeller
  * @since 1.3
  */

@@ -31,7 +31,7 @@ import javax.jms.Session;
  * ServerMessageListenerContainer, as direct alternative to the standard
  * JMS MessageListener interface. Typically <i>not</i> supported by
  * JCA-based listener containers: For maximum compatibility, implement
- * a standard MessageListener instead.
+ * a standard JMS MessageListener instead.
  *
  * @author Juergen Hoeller
  * @since 1.3

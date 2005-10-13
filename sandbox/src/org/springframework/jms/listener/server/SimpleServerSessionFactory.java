@@ -16,133 +16,84 @@
 
 package org.springframework.jms.listener.server;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.jms.JMSException;
 import javax.jms.ServerSession;
 import javax.jms.Session;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.support.JmsUtils;
 
 /**
+ * The simplest possible implementation of the ServerSessionFactory SPI:
+ * creating a new ServerSession with a new JMS Session every time.
+ * This is the default used by ServerMessageListenerContainer.
+ *
+ * <p>The execution of a ServerSession (and its MessageListener) gets delegated
+ * to a TaskExecutor. By default, a SimpleAsyncTaskExecutor will be used,
+ * creating a new Thread for every execution attempt. Alternatives are a
+ * TimerTaskExecutor, sharing a single Thread for the execution of all
+ * ServerSessions, or a TaskExecutor implementation backed by a thread pool.
+ *
+ * <p>To reuse JMS Sessions and/or to limit the number of concurrent
+ * ServerSession executions, consider using a pooling ServerSessionFactory:
+ * for example, CommonsPoolServerSessionFactory.
+ *
  * @author Juergen Hoeller
  * @since 1.3
+ * @see org.springframework.core.task.TaskExecutor
+ * @see org.springframework.core.task.SimpleAsyncTaskExecutor
+ * @see org.springframework.scheduling.timer.TimerTaskExecutor
+ * @see CommonsPoolServerSessionFactory
+ * @see ServerMessageListenerContainer
  */
 public class SimpleServerSessionFactory implements ServerSessionFactory {
 
-	protected final Log logger = LogFactory.getLog(getClass());
-
 	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
 
-	private int concurrencyLimit = -1;
 
-	private int concurrencyCount = 0;
-
-	private Map concurrencyCountMap = Collections.synchronizedMap(new HashMap(1));
-
-	private transient final Object monitor = new Object();
-
-
+	/**
+	 * Specify the TaskExecutor to use for executing ServerSessions
+	 * (and consequently, the underlying MessageListener).
+	 * <p>Default is a SimpleAsyncTaskExecutor, creating a new Thread for
+	 * every execution attempt. Alternatives are a TimerTaskExecutor,
+	 * sharing a single Thread for the execution of all ServerSessions,
+	 * or a TaskExecutor implementation backed by a thread pool.
+	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
+	 * @see org.springframework.scheduling.timer.TimerTaskExecutor
+	 */
 	public void setTaskExecutor(TaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
+	/**
+	 * Return the TaskExecutor to use for executing ServerSessions.
+	 */
 	protected TaskExecutor getTaskExecutor() {
 		return taskExecutor;
 	}
 
+
 	/**
-	 * Set the maximum number of parallel listener executions allowed.
-	 * Default is -1, indicating no concurrency limit.
+	 * Creates a new SimpleServerSession with a new JMS Session
+	 * for every call.
 	 */
-	public void setConcurrencyLimit(int concurrencyLimit) {
-		this.concurrencyLimit = concurrencyLimit;
-	}
-
-
 	public ServerSession getServerSession(ListenerSessionManager sessionManager) throws JMSException {
-		if (this.concurrencyLimit == 0) {
-			throw new IllegalStateException("Currently no invocations allowed - concurrency limit set to 0");
-		}
-		if (this.concurrencyLimit > 0) {
-			boolean debug = logger.isDebugEnabled();
-			synchronized (this.monitor) {
-				while (this.concurrencyCount >= this.concurrencyLimit) {
-					if (debug) {
-						logger.debug("JMS ServerSession concurrency count " + this.concurrencyCount +
-								" has reached limit " + this.concurrencyLimit + " - blocking");
-					}
-					try {
-						this.monitor.wait();
-					}
-					catch (InterruptedException ex) {
-					}
-				}
-				if (debug) {
-					logger.debug("Creating JMS ServerSession at concurrency count " + this.concurrencyCount);
-				}
-				this.concurrencyCount++;
-				synchronized (this.concurrencyCountMap) {
-					Integer specificCount = (Integer) this.concurrencyCountMap.get(sessionManager);
-					if (specificCount == null) {
-						specificCount = new Integer(0);
-					}
-					this.concurrencyCountMap.put(sessionManager, new Integer(specificCount.intValue() + 1));
-				}
-			}
-		}
 		return new SimpleServerSession(sessionManager);
 	}
 
-	protected void serverSessionFinished(ListenerSessionManager sessionManager) {
-		if (this.concurrencyLimit > 0) {
-			synchronized (this.monitor) {
-				this.concurrencyCount--;
-				synchronized (this.concurrencyCountMap) {
-					Integer specificCount = (Integer) this.concurrencyCountMap.get(sessionManager);
-					if (specificCount.intValue() > 1) {
-						this.concurrencyCountMap.put(sessionManager, new Integer(specificCount.intValue() - 1));
-					}
-					else {
-						this.concurrencyCountMap.remove(sessionManager);
-					}
-				}
-				if (logger.isDebugEnabled()) {
-					logger.debug("JMS ServerSession finished at concurrency count " + this.concurrencyCount);
-				}
-				this.monitor.notify();
-			}
-		}
-	}
-
+	/**
+	 * This implementation is empty, as there is no state held for
+	 * each ListenerSessionManager.
+	 */
 	public void close(ListenerSessionManager sessionManager) {
-		if (this.concurrencyLimit > 0) {
-			boolean debug = logger.isDebugEnabled();
-			synchronized (this.monitor) {
-				Integer specificCount = null;
-				while ((specificCount = (Integer) this.concurrencyCountMap.get(sessionManager)) != null) {
-					if (debug) {
-						logger.debug("Still " + specificCount +
-								" JMS ServerSessions open for ListenerSessionFactory - delaying shutdown");
-					}
-					try {
-						this.monitor.wait();
-					}
-					catch (InterruptedException ex) {
-					}
-				}
-			}
-		}
 	}
 
 
+	/**
+	 * ServerSession implementation that simply creates a new
+	 * JMS Session and executes it via the specified TaskExecutor.
+	 */
 	private class SimpleServerSession implements ServerSession {
 
 		private final ListenerSessionManager sessionManager;
@@ -166,7 +117,6 @@ public class SimpleServerSessionFactory implements ServerSessionFactory {
 					}
 					finally {
 						JmsUtils.closeSession(session);
-						serverSessionFinished(sessionManager);
 					}
 				}
 			});

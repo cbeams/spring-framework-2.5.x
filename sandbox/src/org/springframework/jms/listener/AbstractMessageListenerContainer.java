@@ -31,9 +31,20 @@ import org.springframework.jms.support.destination.JmsDestinationAccessor;
 
 /**
  * Abstract base class for message listener containers.
+ * Cam either host a standard JMS MessageListener or a
+ * Spring SessionAwareMessageListener.
+ *
+ * <p>Holds a single JMS Connection that all listeners are
+ * supposed to be registered on. The actual registration
+ * process is up to concrete subclasses.
  *
  * @author Juergen Hoeller
  * @since 1.3
+ * @see #setMessageListener
+ * @see javax.jms.MessageListener
+ * @see SessionAwareMessageListener
+ * @see SimpleMessageListenerContainer
+ * @see org.springframework.jms.listener.server.ServerMessageListenerContainer
  */
 public abstract class AbstractMessageListenerContainer extends JmsDestinationAccessor implements DisposableBean {
 
@@ -207,12 +218,37 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	}
 
 	/**
-	 * Return the JMS Connection used by this listener container.
+	 * Return the JMS Connection used by this message listener container.
+	 * Available after initialization.
 	 */
 	protected final Connection getConnection() {
 		return this.connection;
 	}
 
+	/**
+	 * Destroy the registered listener object and close this
+	 * listener container.
+	 * <p>The underlying JMS Connection will receive a <code>close</code> call.
+	 * @throws JmsException if shutdown failed
+	 * @see #destroyListener()
+	 * @see javax.jms.Connection#close()
+	 */
+	public final void destroy() {
+		try {
+			destroyListener();
+			logger.debug("Closing JMS Connection");
+			this.connection.close();
+		}
+		catch (JMSException ex) {
+				JmsUtils.closeConnection(this.connection);
+				throw convertJmsAccessException(ex);
+			}
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Lifecycle methods for dynamically starting and stopping the listener
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Start this listener container.
@@ -245,28 +281,22 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	}
 
 
+	//-------------------------------------------------------------------------
+	// Template methods for listener execution
+	//-------------------------------------------------------------------------
+
 	/**
-	 * Destroy the registered listener object and close this
-	 * listener container.
-	 * <p>The underlying JMS Connection will receive a <code>close</code> call.
-	 * @throws JmsException if shutdown failed
-	 * @see #destroyListener()
-	 * @see javax.jms.Connection#close()
+	 * Execute the specified listener,
+	 * committing or rolling back the transaction afterwards (if necessary).
+	 * @param session the JMS Session to work on
+	 * @param message the received JMS Message
+	 * @throws JmsException the converted JMS exception, if any
+	 * @see #invokeListener(javax.jms.Session, javax.jms.Message)
+	 * @see #commitIfNecessary
+	 * @see #rollbackOnExceptionIfNecessary
+	 * @see #convertJmsAccessException
 	 */
-	public final void destroy() {
-		try {
-			destroyListener();
-			logger.debug("Closing JMS Connection");
-			this.connection.close();
-		}
-		catch (JMSException ex) {
-				JmsUtils.closeConnection(this.connection);
-				throw convertJmsAccessException(ex);
-			}
-	}
-
-
-	protected void executeListener(Session session, Message message) {
+	protected void executeListener(Session session, Message message) throws JmsException {
 		try {
 			invokeListener(session, message);
 			commitIfNecessary(session, message);
@@ -285,19 +315,54 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 		}
 	}
 
+	/**
+	 * Invoke the specified listener: either as standard JMS MessageListener
+	 * or as Spring SessionAwareMessageListener
+	 * @param session the JMS Session to work on
+	 * @param message the received JMS Message
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see #setMessageListener
+	 * @see #invokeListener(javax.jms.MessageListener, javax.jms.Message)
+	 */
 	protected void invokeListener(Session session, Message message) throws JMSException {
 		if (getMessageListener() instanceof MessageListener) {
 			((MessageListener) getMessageListener()).onMessage(message);
 		}
 		else if (getMessageListener() instanceof SessionAwareMessageListener) {
-			invokeSessionAwareListener(session, message);
+			invokeListener((SessionAwareMessageListener) getMessageListener(), session, message);
 		}
 		else {
 			throw new IllegalArgumentException("Only MessageListener and SessionAwareMessageListener supported");
 		}
 	}
 
-	protected void invokeSessionAwareListener(Session session, Message message) throws JMSException {
+	/**
+	 * Invoke the specified listener as standard JMS MessageListener.
+	 * <p>Default implementation performs a plain invocation of the
+	 * <code>onMessage</code> method.
+	 * @param listener the JMS MessageListener to invoke
+	 * @param message the received JMS Message
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see javax.jms.MessageListener#onMessage
+	 */
+	protected void invokeListener(MessageListener listener, Message message) throws JMSException {
+		listener.onMessage(message);
+	}
+
+	/**
+	 * Invoke the specified listener as Spring SessionAwareMessageListener,
+	 * exposing a new JMS Session (potentially with its own transaction)
+	 * to the listener if demanded.
+	 * @param listener the Spring SessionAwareMessageListener to invoke
+	 * @param session the JMS Session to work on
+	 * @param message the received JMS Message
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see SessionAwareMessageListener
+	 * @see #setExposeListenerSession
+	 */
+	protected void invokeListener(SessionAwareMessageListener listener, Session session, Message message)
+			throws JMSException {
+
 		Session sessionToExpose = session;
 		Connection con = null;
 		try {
@@ -306,15 +371,15 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 				sessionToExpose = createSession(con);
 			}
 			((SessionAwareMessageListener) getMessageListener()).onMessage(message, sessionToExpose);
-			if (con != null) {
-				if (session.getTransacted() && isSessionTransacted()) {
+			if (sessionToExpose != session) {
+				if (sessionToExpose.getTransacted() && isSessionTransacted()) {
 					// Transacted session created by this container -> commit.
-					JmsUtils.commitIfNecessary(session);
+					JmsUtils.commitIfNecessary(sessionToExpose);
 				}
 			}
 		}
 		finally {
-			if (con != null) {
+			if (sessionToExpose != session) {
 				JmsUtils.closeSession(sessionToExpose);
 				JmsUtils.closeConnection(con);
 			}
@@ -377,6 +442,34 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	}
 
 
+	//-------------------------------------------------------------------------
+	// Template methods to be implemented by subclasses
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Register the specified listener on the underlying JMS Connection.
+	 * <p>Subclasses need to implement this method for their specific
+	 * listener management process.
+	 * @throws JMSException if registration failed
+	 * @see #getMessageListener()
+	 * @see #getConnection()
+	 */
+	protected abstract void registerListener() throws JMSException;
+
+	/**
+	 * Destroy the registered listener.
+	 * The JMS Connection will automatically be closed <i>afterwards</i>
+	 * <p>Subclasses need to implement this method for their specific
+	 * listener management process.
+	 * @throws JMSException if destruction failed
+	 */
+	protected abstract void destroyListener() throws JMSException;
+
+
+	//-------------------------------------------------------------------------
+	// JMS 1.1 factory methods, potentially overridden for JMS 1.0.2
+	//-------------------------------------------------------------------------
+
 	/**
 	 * Create a JMS Connection via this template's ConnectionFactory.
 	 * <p>This implementation uses JMS 1.1 API.
@@ -407,25 +500,5 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	protected boolean isClientAcknowledge(Session session) throws JMSException {
 		return (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
 	}
-
-
-	/**
-	 * Register the specified listener on the underlying JMS Connection.
-	 * <p>Subclasses need to implement this method for their specific
-	 * listener management process.
-	 * @throws JMSException if registration failed
-	 * @see #getMessageListener()
-	 * @see #getConnection()
-	 */
-	protected abstract void registerListener() throws JMSException;
-
-	/**
-	 * Destroy the registered listener.
-	 * The JMS Connection will automatically be closed <i>afterwards</i>
-	 * <p>Subclasses need to implement this method for their specific
-	 * listener management process.
-	 * @throws JMSException if destruction failed
-	 */
-	protected abstract void destroyListener() throws JMSException;
 
 }

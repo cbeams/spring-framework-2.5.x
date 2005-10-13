@@ -20,13 +20,37 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 
 /**
+ * SPI interface for creating and executing JMS Sessions,
+ * pre-populated with a specific MessageListener.
+ * Implemented by ServerMessageListenerContainer,
+ * accessed by ServerSessionFactory implementations.
+ *
+ * <p>Effectively, an instance that implements this interface
+ * represents a message listener container for a specific
+ * listener and destination.
+ *
  * @author Juergen Hoeller
  * @since 1.3
+ * @see ServerSessionFactory
+ * @see ServerMessageListenerContainer
  */
 public interface ListenerSessionManager {
 
+	/**
+	 * Create a new JMS Session, pre-populated with this manager's
+	 * MessageListener.
+	 * @return the new JMS Session
+	 * @throws JMSException if Session creation failed
+	 * @see javax.jms.Session#setMessageListener(javax.jms.MessageListener)
+	 */
 	Session createListenerSession() throws JMSException;
 
+	/**
+	 * Execute the given JMS Session, triggering its MessageListener
+	 * with pre-loaded messages.
+	 * @param session the JMS Session to invoke
+	 * @see javax.jms.Session#run()
+	 */
 	void executeListenerSession(Session session);
 
 }
