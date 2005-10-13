@@ -52,6 +52,7 @@ Package org.springframework.web
 * refined UrlFilenameViewController to let its "handleRequestInternal" method throw Exception (for potential subclasses)
 * Velocity/FreeMarkerViewResolver allows for setting "allowRequestOverride" and "allowSessionOverride" on its Views
 * Velocity and FreeMarker form macros include an "id" attribute on each element
+* Multiple custom TemplateLoaders can now be set on FreeMarkerConfigurationFactory
 
 
 Changes in version 1.2.5 (23.9.2005)

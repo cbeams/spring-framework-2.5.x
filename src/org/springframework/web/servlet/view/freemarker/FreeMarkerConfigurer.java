@@ -90,32 +90,24 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	/**
 	 * Initialize FreeMarkerConfigurationFactory's Configuration
 	 * if not overridden by a preconfigured FreeMarker Configuation.
+     * <p>Sets up a ClassTemplateLoader to use for loading Spring
+     * macros.
 	 * @see #createConfiguration
 	 * @see #setConfiguration
 	 */
 	public void afterPropertiesSet() throws IOException, TemplateException {
 		if (this.configuration == null) {
+            templateLoaders.add(new ClassTemplateLoader(getClass()));
+            logger.info("ClassTemplateLoader for Spring macros added to FreeMarker configuration");            
 			this.configuration = createConfiguration();
 		}
 	}
 
 	/**
-	 * Post-processes the config to ensure that the Spring macro library can be resolved
-	 * and imported by application templates: A ClassTemplateLoader for this package is
-	 * added to the FreeMarker configuration.
-	 * @see freemarker.cache.ClassTemplateLoader
+     * Return the Configuration object wrapped by this bean.
+     * 
+	 * @see org.springframework.web.servlet.view.freemarker.FreeMarkerConfig#getConfiguration()
 	 */
-	protected void postProcessConfiguration(Configuration config) {
-		TemplateLoader loader = config.getTemplateLoader();
-		ClassTemplateLoader formMacroLoader = new ClassTemplateLoader(getClass());
-		TemplateLoader[] loaders = new TemplateLoader[] {loader, formMacroLoader};
-		MultiTemplateLoader multiLoader = new MultiTemplateLoader(loaders);
-		config.setTemplateLoader(multiLoader);
-		if (logger.isInfoEnabled()) {
-			logger.info("ClassTemplateLoader for Spring macros added to FreeMarker configuration");
-		}
-	}
-
 	public Configuration getConfiguration() {
 		return this.configuration;
 	}

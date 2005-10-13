@@ -19,18 +19,23 @@ package org.springframework.ui.freemarker;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import freemarker.template.Configuration;
-import freemarker.template.SimpleHash;
-import freemarker.template.TemplateException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+
+import freemarker.cache.FileTemplateLoader;
+import freemarker.cache.MultiTemplateLoader;
+import freemarker.cache.TemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.SimpleHash;
+import freemarker.template.TemplateException;
 
 /**
  * Factory that configures a FreeMarker Configuration. Can be used standalone, but
@@ -65,6 +70,8 @@ import org.springframework.core.io.ResourceLoader;
 public class FreeMarkerConfigurationFactory {
 
 	protected final Log logger = LogFactory.getLog(getClass());
+    
+    protected List templateLoaders = new ArrayList();
 
 	private Resource configLocation;
 
@@ -118,10 +125,13 @@ public class FreeMarkerConfigurationFactory {
 	 * <p>To enforce the use of SpringTemplateLoader, i.e. to not resolve a path
 	 * as file system resource in any case, turn off the "preferFileSystemAccess"
 	 * flag. See the latter's javadoc for details.
+     * <p>If you wish to specify your own list of TemplateLoaders, do not set this
+     * property and instead use <code>setTemplateLoaders(List templateLoaders)</code>
 	 * @see org.springframework.core.io.ResourceEditor
 	 * @see org.springframework.context.ApplicationContext#getResource
 	 * @see freemarker.template.Configuration#setDirectoryForTemplateLoading
 	 * @see SpringTemplateLoader
+     * @see #setTemplateLoaders
 	 */
 	public void setTemplateLoaderPath(String templateLoaderPath) {
 		this.templateLoaderPath = templateLoaderPath;
@@ -152,6 +162,21 @@ public class FreeMarkerConfigurationFactory {
 	public void setPreferFileSystemAccess(boolean preferFileSystemAccess) {
 		this.preferFileSystemAccess = preferFileSystemAccess;
 	}
+    
+    /**
+     * Sets a List of <code>TemplateLoader<code>s that will be used to search
+     * for templates.  For example, one or more custom loaders such as DataBase
+     * loaders can be configured.
+     * <p>
+     * Note, setting a templateLoaderPath will override this list and cause the
+     * configuration to search only the path given. 
+     * @param templateLoaders the List of templateLoaders that this Configuration
+     * should use to search for templates
+     * @see #setTemplateLoaderPath
+     */
+    public void setTemplateLoaders(List templateLoaders) {
+        this.templateLoaders = templateLoaders;
+    }
 
 
 	/**
@@ -202,7 +227,7 @@ public class FreeMarkerConfigurationFactory {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Template loader path [" + path + "] resolved to file [" + file.getAbsolutePath() + "]");
 					}
-					config.setDirectoryForTemplateLoading(file);
+					templateLoaders.add(new FileTemplateLoader(file));
 				}
 				catch (IOException ex) {
 					if (logger.isDebugEnabled()) {
@@ -213,7 +238,7 @@ public class FreeMarkerConfigurationFactory {
 						logger.info("Cannot resolve template loader path [" + this.templateLoaderPath +
 								"] to java.io.File: using SpringTemplateLoader");
 					}
-					config.setTemplateLoader(
+					templateLoaders.add(
 							new SpringTemplateLoader(this.resourceLoader, this.templateLoaderPath));
 				}
 			}
@@ -223,11 +248,18 @@ public class FreeMarkerConfigurationFactory {
 				if (logger.isDebugEnabled()) {
 					logger.debug("File system access not preferred: using SpringTemplateLoader");
 				}
-				config.setTemplateLoader(
+                templateLoaders.add(
 						new SpringTemplateLoader(this.resourceLoader, this.templateLoaderPath));
 			}
+            
 		}
-
+        
+        TemplateLoader loader = getAggregateTemplateLoader();
+        if (loader != null) {
+            logger.debug("Setting TemplateLoader on Configuration to [" + loader + "]");
+            config.setTemplateLoader(loader);
+        }
+        
 		postProcessConfiguration(config);
 		return config;
 	}
@@ -258,5 +290,27 @@ public class FreeMarkerConfigurationFactory {
 	protected void postProcessConfiguration(Configuration config)
 			throws IOException, TemplateException {
 	}
+    
+    /**
+     * @return the right TemplateLoader based on the templateLoaders list.
+     */
+    private TemplateLoader getAggregateTemplateLoader() {
+        int numLoaders = templateLoaders.size();
+        switch (numLoaders) {
+            case 0:
+                logger.info("No FreeMarker TemplateLoaders specified");
+                return null;
+        
+            case 1:
+                return (TemplateLoader) templateLoaders.get(0);
+            
+            default:        
+                TemplateLoader[] loaders = 
+                    (TemplateLoader[]) templateLoaders.toArray(new TemplateLoader[numLoaders]);
+            
+                MultiTemplateLoader multiLoader = new MultiTemplateLoader(loaders);
+                return multiLoader;
+        }
+    }
 
 }

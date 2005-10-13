@@ -92,8 +92,8 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * is expected in the current web application context, with any bean name.
 	 * @see FreeMarkerConfig
 	 */
-	public void setConfiguration(Configuration configration) {
-		this.configuration = configration;
+	public void setConfiguration(Configuration configuration) {
+		this.configuration = configuration;
 	}
 
 	/**
