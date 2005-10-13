@@ -54,7 +54,7 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  *
  * @author Darren Davison
  * @author Juergen Hoeller
- * @since 3/3/2004
+ * @since 03.03.2004
  * @see #setUrl
  * @see #setExposeSpringMacroHelpers
  * @see #setEncoding
@@ -158,8 +158,8 @@ public class FreeMarkerView extends AbstractTemplateView {
 			getTemplate(getConfiguration().getLocale());
 		}
 		catch (ParseException ex) {
-		    throw new ApplicationContextException(
-						"Failed to parse FreeMarker template for URL [" +  getUrl() + "]", ex);
+			throw new ApplicationContextException(
+					"Failed to parse FreeMarker template for URL [" +  getUrl() + "]", ex);
 		}
 		catch (IOException ex) {
 			throw new ApplicationContextException(
@@ -175,6 +175,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 */
 	protected void renderMergedTemplateModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
 		response.setContentType(getContentType());
 		exposeHelpers(model, request);
 		doRender(model, request, response);
@@ -264,6 +265,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 */
 	protected void processTemplate(Template template, Map model, HttpServletResponse response)
 			throws IOException, TemplateException {
+
 		template.process(model, response.getWriter());
 	}
 

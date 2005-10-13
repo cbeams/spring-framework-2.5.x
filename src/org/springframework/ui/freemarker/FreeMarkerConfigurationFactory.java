@@ -264,11 +264,11 @@ public class FreeMarkerConfigurationFactory {
 	/**
 	 * Return a new Configuration object. Subclasses can override this for
 	 * custom initialization, or for using a mock object for testing.
-	 * Called by createConfiguration.
+	 * <p>Called by <code>createConfiguration()</code>.
 	 * @return the Configuration object
 	 * @throws IOException if a config file wasn't found
 	 * @throws TemplateException on FreeMarker initialization failure
-	 * @see #createConfiguration
+	 * @see #createConfiguration()
 	 */
 	protected Configuration newConfiguration() throws IOException, TemplateException {
 		return new Configuration();
@@ -315,10 +315,10 @@ public class FreeMarkerConfigurationFactory {
 	 * To be overridden by subclasses that want to to register custom
 	 * TemplateLoader instances after this factory created its default
 	 * template loaders.
-	 * <p>Called by <code>createConfiguration</code>.
+	 * <p>Called by <code>createConfiguration()</code>.
 	 * @param templateLoaders the current List of TemplateLoader instances,
 	 * to be modified by a subclass
-	 * @see #createConfiguration
+	 * @see #createConfiguration()
 	 */
 	protected void postProcessTemplateLoaders(List templateLoaders) {
 	}
@@ -348,11 +348,11 @@ public class FreeMarkerConfigurationFactory {
 	 * To be overridden by subclasses that want to to perform custom
 	 * post-processing of the Configuration object after this factory
 	 * performed its default initialization.
-	 * <p>Called by <code>createConfiguration</code>.
+	 * <p>Called by <code>createConfiguration()</code>.
 	 * @param config the current Configuration object
 	 * @throws IOException if a config file wasn't found
 	 * @throws TemplateException on FreeMarker initialization failure
-	 * @see #createConfiguration
+	 * @see #createConfiguration()
 	 */
 	protected void postProcessConfiguration(Configuration config)
 			throws IOException, TemplateException {

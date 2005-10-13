@@ -45,7 +45,7 @@ import org.springframework.context.ResourceLoaderAware;
  * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3 or higher.
  *
  * @author Darren Davison
- * @since 3/3/2004
+ * @since 03.03.2004
  * @see #setConfigLocation
  * @see #setFreemarkerSettings
  * @see #setTemplateLoaderPath

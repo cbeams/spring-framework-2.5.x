@@ -24,7 +24,7 @@ import freemarker.template.Configuration;
  * used by FreeMarkerView.
  *
  * @author Darren Davison
- * @since 3/3/2004
+ * @since 03.03.2004
  * @see FreeMarkerConfigurer
  * @see FreeMarkerView
  */
