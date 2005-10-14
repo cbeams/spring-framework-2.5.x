@@ -66,6 +66,7 @@ Package org.springframework.ui
 
 Package org.springframework.util
 * fixed WeakReferenceMonitor to correctly synchronize access to the monitoring thread, for proper lazy initialization
+* updated parseNumber to support Bytes, Shorts, Integers and Longs that are supplied as hexadecimal numbers with either the 0x or 0X prefixes
 
 Package org.springframework.web
 * ContextLoader reads the default WebApplicationContext impl class from "ContextLoader.properties" in the same package
