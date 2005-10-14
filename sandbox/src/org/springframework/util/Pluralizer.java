@@ -51,6 +51,7 @@ public abstract class Pluralizer {
 		// hard h -> hes
 		registerPluralizationRule(new RegexPluralizationRule("([^aeioudgkprt]h$)", "es", 1));
 	}
+
 	public static String pluralize(String term) {
 
 		String pluralForm = (String) pluralizationCache.get(term);
@@ -62,7 +63,7 @@ public abstract class Pluralizer {
 				pluralForm = rule.apply(term);
 			}
 			else {
-				pluralForm = applyDefaultRules(term);
+				pluralForm = applyDefaultRule(term);
 
 				if (logger.isDebugEnabled()) {
 					logger.debug("Located pluralization [" + pluralForm + "] for term [" + term + "] using default rules.");
@@ -99,16 +100,10 @@ public abstract class Pluralizer {
 	}
 
 	/**
-	 * Applies default English pluralization rules adding &quot;es&quot; to the end of
-	 * words that end in &quot;s&quot; and adding &quot;s&quot; in all other cases.
+	 * Applies default English pluralization rules adding &quot;s&quot; to the end of the term.
 	 */
-	private static String applyDefaultRules(String term) {
-		if (StringUtils.endsWithIgnoreCase(term, "s")) {
-			return term + "es";
-		}
-		else {
-			return term + "s";
-		}
+	private static String applyDefaultRule(String term) {
+		return term + "s";
 	}
 
 	public static interface PluralizationRule {
