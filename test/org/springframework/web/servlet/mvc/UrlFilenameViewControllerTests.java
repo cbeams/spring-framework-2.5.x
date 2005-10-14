@@ -24,6 +24,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 14.09.2005
  */
 public class UrlFilenameViewControllerTests extends TestCase {
@@ -74,6 +75,15 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = ctrl.handleRequest(request, response);
 		assertEquals("index_mysuf", mv.getViewName());
+		assertTrue(mv.getModel().isEmpty());
+	}
+
+	public void testWithNestedPath() throws Exception {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/products/view.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = controller.handleRequest(request, response);
+		assertEquals("products/view", mv.getViewName());
 		assertTrue(mv.getModel().isEmpty());
 	}
 
