@@ -68,7 +68,7 @@ public final class BooleanComparator implements Comparator, Serializable {
 		if (this == obj) {
 			return true;
 		}
-		if (obj instanceof BooleanComparator) {
+		if (!(obj instanceof BooleanComparator)) {
 			return false;
 		}
 		return (this.trueLow == ((BooleanComparator) obj).trueLow);
