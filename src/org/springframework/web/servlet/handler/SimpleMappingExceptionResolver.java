@@ -43,6 +43,9 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class SimpleMappingExceptionResolver implements HandlerExceptionResolver, Ordered {
 
+	/**
+	 * The default name of the exception attribute: "exception".
+	 */
 	public static final String DEFAULT_EXCEPTION_ATTRIBUTE = "exception";
 	
 
@@ -134,6 +137,8 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	/**
 	 * Set the name of the model attribute as which the exception should
 	 * be exposed. Default is "exception".
+	 * <p>This can be either set to a different attribute name or to
+	 * <code>null</code> for not exposing an exception attribute at all.
 	 * @see #DEFAULT_EXCEPTION_ATTRIBUTE
 	 */
 	public void setExceptionAttribute(String exceptionAttribute) {
