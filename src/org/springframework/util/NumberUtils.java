@@ -42,9 +42,10 @@ public abstract class NumberUtils {
 	 */
 	private static final int BASE_DEC = 10;
 
-	protected static final String HEX_PREFIX_LOWER = "0x";
-
-	protected static final String HEX_PREFIX_UPPER = "0X";
+	/**
+	 * Prefix for hexadecimal numbers.
+	 */
+	protected static final String HEX_PREFIX = "0x";
 
 	/**
 	 * Convert the given number into an instance of the given target class.
@@ -104,6 +105,7 @@ public abstract class NumberUtils {
 	 * Parse the given text into a number instance of the given target class,
 	 * using the corresponding default <code>valueOf</code> methods. Trims the
 	 * input <code>String</code> before attempting to parse the number.
+	 * Supports numbers in hex format (with leading 0x).
 	 * @param text the text to convert
 	 * @param targetClass the target class to parse into
 	 * @return the parsed number
@@ -125,7 +127,7 @@ public abstract class NumberUtils {
 
 		if(isHexString(trimmed)) {
 			radix = BASE_HEX;
-			trimmed = trimmed.substring(HEX_PREFIX_LOWER.length());
+			trimmed = trimmed.substring(HEX_PREFIX.length());
 		}
 
 		if(targetClass.equals(Byte.class)) {
@@ -186,7 +188,7 @@ public abstract class NumberUtils {
 	 * indicating a hex number.
 	 */
 	public static boolean isHexString(String text) {
-		return (text.startsWith(HEX_PREFIX_LOWER) || text.startsWith(HEX_PREFIX_UPPER));
+		return StringUtils.startsWithIgnoreCase(text, HEX_PREFIX);
 	}
 
 }
