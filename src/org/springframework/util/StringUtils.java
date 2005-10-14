@@ -42,6 +42,7 @@ import java.util.TreeSet;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Keith Donald
+ * @author Rob Harrop
  * @since 16 April 2001
  * @see org.apache.commons.lang.StringUtils
  */
@@ -159,6 +160,29 @@ public abstract class StringUtils {
 		String lcStr = str.substring(0, prefix.length()).toLowerCase();
 		String lcPrefix = prefix.toLowerCase();
 		return lcStr.equals(lcPrefix);
+	}
+
+	/**
+	 * Test if the given String ends with the specified suffix,
+	 * ignoring upper/lower case.
+	 * @param str the String to check
+	 * @param suffix the suffix to look for
+	 * @see java.lang.String#endsWith
+	 */
+	public static boolean endsWithIgnoreCase(String str, String suffix) {
+		if (str == null || suffix == null) {
+			return false;
+		}
+		if (str.endsWith(suffix)) {
+			return true;
+		}
+		if (str.length() < suffix.length()) {
+			return false;
+		}
+
+		String lcStr = str.substring(suffix.length()).toLowerCase();
+		String lcSuffix = suffix.toLowerCase();
+		return lcStr.equals(lcSuffix);
 	}
 
 	/**
