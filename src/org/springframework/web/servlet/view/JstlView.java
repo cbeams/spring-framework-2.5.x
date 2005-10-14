@@ -40,6 +40,7 @@ public class JstlView extends InternalResourceView {
 
 	private MessageSource jstlAwareMessageSource;
 
+
 	protected void initApplicationContext() {
 		super.initApplicationContext();
 		this.jstlAwareMessageSource =

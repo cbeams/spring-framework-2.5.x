@@ -40,6 +40,7 @@ public class TilesJstlView extends TilesView {
 
 	private MessageSource jstlAwareMessageSource;
 
+
 	protected void initApplicationContext() {
 		super.initApplicationContext();
 		this.jstlAwareMessageSource =
