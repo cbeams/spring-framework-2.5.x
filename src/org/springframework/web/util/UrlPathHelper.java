@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
  * and RequestContext for path matching and/or URI determination.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 14.01.2004
  * @see org.springframework.web.servlet.handler.AbstractUrlHandlerMapping
  * @see org.springframework.web.servlet.mvc.multiaction.AbstractUrlMethodNameResolver
@@ -178,7 +179,8 @@ public class UrlPathHelper {
 		String requestUri = getRequestUri(request);
 		if (StringUtils.startsWithIgnoreCase(requestUri, contextPath)) {
 			// Normal case: URI contains context path.
-			return requestUri.substring(contextPath.length());
+			String path = requestUri.substring(contextPath.length());
+			return StringUtils.hasText(path) ? path : "/";
 		}
 		else {
 			// Special case: rather unusual.
