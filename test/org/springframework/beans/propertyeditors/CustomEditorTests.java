@@ -538,6 +538,12 @@ public class CustomEditorTests extends TestCase {
 		assertEquals("", editor.getAsText());
 	}
 
+	public void testCustomNumberEditorWithHex() {
+		CustomNumberEditor editor = new CustomNumberEditor(Integer.class, false);
+		editor.setAsText("0x" + Integer.toHexString(64));
+		assertEquals(new Integer(64), editor.getValue());
+	}
+
 	public void testCustomNumberEditorWithEmptyAsNull() {
 		CustomNumberEditor editor = new CustomNumberEditor(Integer.class, true);
 		editor.setAsText("5");

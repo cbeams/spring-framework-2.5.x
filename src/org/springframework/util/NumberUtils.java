@@ -33,6 +33,20 @@ import java.text.ParseException;
 public abstract class NumberUtils {
 
 	/**
+	 * Base for hexadecimal numbers.
+	 */
+	private static final int BASE_HEX = 16;
+
+	/**
+	 * Base for decimal numbers.
+	 */
+	private static final int BASE_DEC = 10;
+
+	protected static final String HEX_PREFIX_LOWER = "0x";
+
+	protected static final String HEX_PREFIX_UPPER = "0X";
+
+	/**
 	 * Convert the given number into an instance of the given target class.
 	 * @param number the number to convert
 	 * @param targetClass the target class to convert to
@@ -107,20 +121,27 @@ public abstract class NumberUtils {
 	public static Number parseNumber(String text, Class targetClass) {
 		String trimmed = text.trim();
 
+		int radix = BASE_DEC;
+
+		if(isHexString(trimmed)) {
+			radix = BASE_HEX;
+			trimmed = trimmed.substring(HEX_PREFIX_LOWER.length());
+		}
+
 		if(targetClass.equals(Byte.class)) {
-			return Byte.valueOf(trimmed);
+			return Byte.valueOf(trimmed, radix);
 		}
 		else if (targetClass.equals(Short.class)) {
-			return Short.valueOf(trimmed);
+			return Short.valueOf(trimmed, radix);
 		}
 		else if (targetClass.equals(Integer.class)) {
-			return Integer.valueOf(trimmed);
+			return Integer.valueOf(trimmed, radix);
 		}
 		else if (targetClass.equals(Long.class)) {
-			return Long.valueOf(trimmed);
+			return Long.valueOf(trimmed, radix);
 		}
 		else if (targetClass.equals(BigInteger.class)) {
-			return new BigInteger(trimmed);
+			return new BigInteger(trimmed, radix);
 		}
 		else if (targetClass.equals(Float.class)) {
 			return Float.valueOf(trimmed);
@@ -158,6 +179,14 @@ public abstract class NumberUtils {
 		catch (ParseException ex) {
 			throw new IllegalArgumentException(ex.getMessage());
 		}
+	}
+
+	/**
+	 * Indicates whether the supplied text starts with either <code>0x</code> or <code>0X</code>
+	 * indicating a hex number.
+	 */
+	public static boolean isHexString(String text) {
+		return (text.startsWith(HEX_PREFIX_LOWER) || text.startsWith(HEX_PREFIX_UPPER));
 	}
 
 }
