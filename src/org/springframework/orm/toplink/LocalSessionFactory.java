@@ -24,15 +24,16 @@ import javax.sql.DataSource;
 import oracle.toplink.exceptions.TopLinkException;
 import oracle.toplink.internal.databaseaccess.DatabasePlatform;
 import oracle.toplink.jndi.JNDIConnector;
+import oracle.toplink.sessionbroker.SessionBroker;
 import oracle.toplink.sessions.DatabaseLogin;
 import oracle.toplink.sessions.DatabaseSession;
 import oracle.toplink.sessions.SessionLog;
 import oracle.toplink.threetier.ServerSession;
 import oracle.toplink.tools.sessionconfiguration.XMLLoader;
 import oracle.toplink.tools.sessionmanagement.SessionManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -314,7 +315,7 @@ public class LocalSessionFactory {
 		try {
 			loaderClass = Class.forName("oracle.toplink.tools.sessionconfiguration.XMLSessionConfigLoader");
 			getSessionMethod = SessionManager.class.getMethod("getSession",
-					new Class[] {loaderClass, String.class, ClassLoader.class, boolean.class, boolean.class});
+					new Class[] {loaderClass, String.class, ClassLoader.class, boolean.class, boolean.class, boolean.class});
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using TopLink 10.1.3 XMLSessionConfigLoader");
 			}
@@ -331,11 +332,16 @@ public class LocalSessionFactory {
 
 		// TopLink 10.1.3 XMLSessionConfigLoader found -> create loader instance
 		// through reflection and fetch specified Session from SessionManager.
+        // This invocation will check if the ClassLoader passed in is the same
+        // as the one used to a session currently loaded with the same "sessionName"
+        // If the ClassLoaders are different, then this LocalSessionFactory is being
+        // re-loaded after a hot-deploy and the existing DatabaseSession will be logged
+        // out and re-built from scratch.
 		try {
 			Constructor ctor = loaderClass.getConstructor(new Class[] {String.class});
 			Object loader = ctor.newInstance(new Object[] {configLocation});
 			return (DatabaseSession) getSessionMethod.invoke(manager,
-					new Object[] {loader, sessionName, sessionClassLoader, Boolean.FALSE, Boolean.FALSE});
+					new Object[] {loader, sessionName, sessionClassLoader, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE});
 		}
 		catch (Exception ex) {
 			ReflectionUtils.handleReflectionException(ex);
@@ -369,6 +375,9 @@ public class LocalSessionFactory {
 		if (session instanceof ServerSession) {
 			return new ServerSessionFactory((ServerSession) session);
 		}
+        else if (session instanceof SessionBroker) {
+            return new SessionBrokerSessionFactory((SessionBroker)session);
+        }
 		else {
 			return new SingleSessionFactory(session);
 		}
