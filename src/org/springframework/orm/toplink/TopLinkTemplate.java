@@ -33,6 +33,7 @@ import oracle.toplink.sessions.Session;
 import oracle.toplink.sessions.UnitOfWork;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -163,7 +164,12 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 	}
 
 	public List executeFind(TopLinkCallback action) throws DataAccessException {
-		return (List) execute(action);
+		Object result = execute(action);
+		if (result != null && !(result instanceof List)) {
+			throw new InvalidDataAccessApiUsageException(
+					"Result object returned from TopLinkCallback isn't a List: [" + result + "]");
+		}
+		return (List) result;
 	}
 
 

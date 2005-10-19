@@ -333,7 +333,12 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	public List executeFind(HibernateCallback action) throws DataAccessException {
-		return (List) execute(action, isExposeNativeSession());
+		Object result = execute(action, isExposeNativeSession());
+		if (result != null && !(result instanceof List)) {
+			throw new InvalidDataAccessApiUsageException(
+					"Result object returned from HibernateCallback isn't a List: [" + result + "]");
+		}
+		return (List) result;
 	}
 
 	/**

@@ -29,6 +29,7 @@ import org.apache.ojb.broker.query.Query;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.orm.ObjectRetrievalFailureException;
 
 /**
@@ -155,7 +156,12 @@ public class PersistenceBrokerTemplate extends OjbAccessor implements Persistenc
 	}
 
 	public Collection executeFind(PersistenceBrokerCallback action) throws DataAccessException {
-		return (Collection) execute(action);
+		Object result = execute(action);
+		if (result != null && !(result instanceof Collection)) {
+			throw new InvalidDataAccessApiUsageException(
+					"Result object returned from PersistenceBrokerCallback isn't a Collection: [" + result + "]");
+		}
+		return (Collection) result;
 	}
 
 
