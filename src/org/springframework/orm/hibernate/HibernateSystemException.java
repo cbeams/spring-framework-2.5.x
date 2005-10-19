@@ -31,8 +31,13 @@ import org.springframework.dao.UncategorizedDataAccessException;
  */
 public class HibernateSystemException extends UncategorizedDataAccessException {
 
-	public HibernateSystemException(HibernateException ex) {
-		super(ex.getMessage(), ex);
+	/**
+	 * Create a new HibernateSystemException,
+	 * wrapping an arbitrary HibernateException.
+	 * @param cause the HibernateException thrown
+	 */
+	public HibernateSystemException(HibernateException cause) {
+		super(cause != null ? cause.getMessage() : null, cause);
 	}
 
 }
