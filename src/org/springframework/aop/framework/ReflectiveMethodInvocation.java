@@ -39,6 +39,7 @@ import org.springframework.aop.support.AopUtils;
  * (once per clone), using the <code>invocableClone</code> method.
  * 
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see #invokeJoinpoint
  * @see #proceed
  * @see #invocableClone
@@ -79,6 +80,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	public ReflectiveMethodInvocation(
 	    Object proxy, Object target, Method method, Object[] arguments,
 	    Class targetClass, List interceptorsAndDynamicMethodMatchers) {
+
 		this.proxy = proxy;
 		this.target = target;
 		this.targetClass = targetClass;

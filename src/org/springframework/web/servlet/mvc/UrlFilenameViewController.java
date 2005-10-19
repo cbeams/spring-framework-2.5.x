@@ -88,8 +88,8 @@ public class UrlFilenameViewController extends AbstractController {
 	}
 
 	/**
-	 * Extract the URL filename from the given request URI. Correctly resolves nested paths such
-	 * as /products/view.html as well.
+	 * Extract the URL filename from the given request URI.
+	 * Correctly resolves nested paths such as "/products/view.html" as well.
 	 * @param uri the request URI (e.g. "/index.html")
 	 * @return the extracted URI filename (e.g. "index")
 	 * @see javax.servlet.http.HttpServletRequest#getRequestURI()

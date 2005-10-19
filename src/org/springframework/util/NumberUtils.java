@@ -32,20 +32,15 @@ import java.text.ParseException;
  */
 public abstract class NumberUtils {
 
-	/**
-	 * Base for hexadecimal numbers.
-	 */
+	/** Base for hexadecimal numbers */
 	private static final int BASE_HEX = 16;
 
-	/**
-	 * Base for decimal numbers.
-	 */
+	/** Base for decimal numbers */
 	private static final int BASE_DEC = 10;
 
-	/**
-	 * Prefix for hexadecimal numbers.
-	 */
+	/** Prefix for hexadecimal numbers */
 	protected static final String HEX_PREFIX = "0x";
+
 
 	/**
 	 * Convert the given number into an instance of the given target class.
@@ -122,7 +117,6 @@ public abstract class NumberUtils {
 	 */
 	public static Number parseNumber(String text, Class targetClass) {
 		String trimmed = text.trim();
-
 		int radix = BASE_DEC;
 
 		if(isHexString(trimmed)) {
@@ -184,8 +178,8 @@ public abstract class NumberUtils {
 	}
 
 	/**
-	 * Indicates whether the supplied text starts with either <code>0x</code> or <code>0X</code>
-	 * indicating a hex number.
+	 * Indicates whether the supplied text starts with either <code>0x</code> or
+	 * <code>0X</code>, indicating a hex number.
 	 */
 	public static boolean isHexString(String text) {
 		return StringUtils.startsWithIgnoreCase(text, HEX_PREFIX);

@@ -73,12 +73,12 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * @return TransactionAttribute for this method, or <code>null</code> if the method is non-transactional
 	 */
 	public final TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
-		// First, see if we have a cached value
+		// First, see if we have a cached value.
 		Object cacheKey = getCacheKey(method, targetClass);
 		Object cached = this.cache.get(cacheKey);
 		if (cached != null) {
 			// Value will either be canonical value indicating there is no transaction attribute,
-			// or an actual transaction attribute
+			// or an actual transaction attribute.
 			if (cached == NULL_TRANSACTION_ATTRIBUTE) {
 				return null;
 			}
@@ -87,9 +87,9 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 			}
 		}
 		else {
-			// We need to work it out
+			// We need to work it out.
 			TransactionAttribute txAtt = computeTransactionAttribute(method, targetClass);
-			// Put it in the cache
+			// Put it in the cache.
 			if (txAtt == null) {
 				this.cache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
 			}

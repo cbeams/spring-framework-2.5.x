@@ -726,7 +726,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	protected Object doJtaSuspend(JtaTransactionObject txObject) throws SystemException {
 		if (getTransactionManager() == null) {
 			throw new TransactionSuspensionNotSupportedException(
-					"JtaTransactionManager needs a JTA TransactionManager for suspending a transaction - " +
+					"JtaTransactionManager needs a JTA TransactionManager for suspending a transaction: " +
 					"specify the 'transactionManager' or 'transactionManagerName' property");
 		}
 		return getTransactionManager().suspend();
@@ -760,7 +760,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 		if (getTransactionManager() == null) {
 			throw new TransactionSuspensionNotSupportedException(
-					"JtaTransactionManager needs a JTA TransactionManager for suspending a transaction - " +
+					"JtaTransactionManager needs a JTA TransactionManager for suspending a transaction: " +
 					"specify the 'transactionManager' or 'transactionManagerName' property");
 		}
 		getTransactionManager().resume((Transaction) suspendedTransaction);

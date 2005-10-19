@@ -105,6 +105,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/** Constants instance for AbstractPlatformTransactionManager */
 	private static final Constants constants = new Constants(AbstractPlatformTransactionManager.class);
 
+
 	/** Transient to optimize serialization */
 	protected transient Log logger = LogFactory.getLog(getClass());
 
