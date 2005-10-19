@@ -29,6 +29,7 @@ import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.ClassUtils;
@@ -200,7 +201,12 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	}
 
 	public Collection executeFind(JdoCallback action) throws DataAccessException {
-		return (Collection) execute(action, isExposeNativePersistenceManager());
+		Object result = execute(action, isExposeNativePersistenceManager());
+		if (result != null && !(result instanceof Collection)) {
+			throw new InvalidDataAccessApiUsageException(
+					"Result object returned from JdoCallback isn't a Collection: [" + result + "]");
+		}
+		return (Collection) result;
 	}
 
 	/**
@@ -221,7 +227,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			PersistenceManager pmToExpose = (exposeNativePersistenceManager ? pm : createPersistenceManagerProxy(pm));
 			Object result = action.doInJdo(pmToExpose);
 			flushIfNecessary(pm, existingTransaction);
-			return result;
+			return postProcessResult(result, pm, existingTransaction);
 		}
 		catch (JDOException ex) {
 			throw convertJdoAccessException(ex);
@@ -237,18 +243,37 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 	/**
 	 * Create a close-suppressing proxy for the given JDO PersistenceManager.
-	 * The proxy also prepares returned JDO Query objects.
+	 * Called by the <code>execute</code> method.
+	 * <p>The proxy also prepares returned JDO Query objects.
 	 * @param pm the JDO PersistenceManager to create a proxy for
 	 * @return the PersistenceManager proxy, implementing all interfaces
 	 * implemented by the passed-in PersistenceManager object (that is,
 	 * also implementing all vendor-specific extension interfaces)
 	 * @see javax.jdo.PersistenceManager#close
+	 * @see #execute(JdoCallback, boolean)
 	 * @see #prepareQuery
 	 */
 	protected PersistenceManager createPersistenceManagerProxy(PersistenceManager pm) {
 		Class[] ifcs = ClassUtils.getAllInterfaces(pm);
 		return (PersistenceManager) Proxy.newProxyInstance(
 				getClass().getClassLoader(), ifcs, new CloseSuppressingInvocationHandler(pm));
+	}
+
+	/**
+	 * Post-process the given result object, which might be a Collection.
+	 * Called by the <code>execute</code> method.
+	 * <p>Default implementation always returns the passed-in Object as-is.
+	 * Subclasses might override this to automatically detach result
+	 * collections or even single result objects.
+	 * @param pm the current JDO PersistenceManager
+	 * @param result the result object (might be a Collection)
+	 * @param existingTransaction if executing within an existing transaction
+	 * (within an existing JDO PersistenceManager that won't be closed immediately)
+	 * @return the post-processed result object (can be simply be the passed-in object)
+	 * @see #execute(JdoCallback, boolean)
+	 */
+	protected Object postProcessResult(Object result, PersistenceManager pm, boolean existingTransaction) {
+		return result;
 	}
 
 
