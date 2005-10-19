@@ -100,6 +100,10 @@ public abstract class DataSourceUtils {
 		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
 		if (conHolder != null) {
 			conHolder.requested();
+			if (!conHolder.hasConnection()) {
+				logger.debug("Fetching resumed JDBC Connection from DataSource");
+				conHolder.setConnection(dataSource.getConnection());
+			}
 			return conHolder.getConnection();
 		}
 
@@ -332,6 +336,14 @@ public abstract class DataSourceUtils {
 		public void suspend() {
 			if (this.holderActive) {
 				TransactionSynchronizationManager.unbindResource(this.dataSource);
+				if (!this.connectionHolder.isOpen()) {
+					// Release Connection on suspend if the application doesn't keep
+					// a handle to it anymore. We will fetch a fresh Connection if the
+					// application accesses the ConnectionHolder again after resume,
+					// assuming that it will participate in the same transaction.
+					releaseConnection(this.connectionHolder.getConnection(), this.dataSource);
+					this.connectionHolder.setConnection(null);
+				}
 			}
 		}
 
@@ -350,7 +362,9 @@ public abstract class DataSourceUtils {
 			if (!this.connectionHolder.isOpen()) {
 				TransactionSynchronizationManager.unbindResource(this.dataSource);
 				this.holderActive = false;
-				releaseConnection(this.connectionHolder.getConnection(), this.dataSource);
+				if (this.connectionHolder.hasConnection()) {
+					releaseConnection(this.connectionHolder.getConnection(), this.dataSource);
+				}
 			}
 		}
 
@@ -361,7 +375,9 @@ public abstract class DataSourceUtils {
 			if (TransactionSynchronizationManager.hasResource(this.dataSource)) {
 				TransactionSynchronizationManager.unbindResource(this.dataSource);
 				this.holderActive = false;
-				releaseConnection(this.connectionHolder.getConnection(), this.dataSource);
+				if (this.connectionHolder.hasConnection()) {
+					releaseConnection(this.connectionHolder.getConnection(), this.dataSource);
+				}
 			}
 		}
 	}

@@ -19,6 +19,7 @@ package org.springframework.jdbc.datasource;
 import java.sql.Connection;
 
 import org.springframework.transaction.support.ResourceHolderSupport;
+import org.springframework.util.Assert;
 
 /**
  * Connection holder, wrapping a JDBC Connection.
@@ -37,15 +38,17 @@ import org.springframework.transaction.support.ResourceHolderSupport;
  */
 public class ConnectionHolder extends ResourceHolderSupport {
 
-	private final ConnectionHandle connectionHandle;
+	private ConnectionHandle connectionHandle;
 
 	private Connection currentConnection;
+
 
 	/**
 	 * Create a new ConnectionHolder for the given ConnectionHandle.
 	 * @param connectionHandle the ConnectionHandle to hold
 	 */
 	public ConnectionHolder(ConnectionHandle connectionHandle) {
+		Assert.notNull(connectionHandle, "ConnectionHandle is required");
 		this.connectionHandle = connectionHandle;
 	}
 
@@ -67,6 +70,32 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	}
 
 	/**
+	 * Return whether this holder currently has a Connection.
+	 */
+	protected boolean hasConnection() {
+		return (this.connectionHandle != null);
+	}
+
+	/**
+	 * Override the existing Connection handle with the given Connection.
+	 * Reset the handle if given <code>null</code>.
+	 * <p>Used for releasing the Connection on suspend (with a <code>null</code>
+	 * argument) and setting a fresh Connection on resume.
+	 */
+	protected void setConnection(Connection connection) {
+		if (this.currentConnection != null) {
+			this.connectionHandle.releaseConnection(this.currentConnection);
+			this.currentConnection = null;
+		}
+		if (connection != null) {
+			this.connectionHandle = new SimpleConnectionHandle(connection);
+		}
+		else {
+			this.connectionHandle = null;
+		}
+	}
+
+	/**
 	 * Return the current Connection held by this ConnectionHolder.
 	 * <p>This will be the same Connection until <code>released</code>
 	 * gets called on the ConnectionHolder, which will reset the
@@ -75,6 +104,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 * @see #released()
 	 */
 	public Connection getConnection() {
+		Assert.notNull(this.connectionHandle, "Active Connection is required");
 		if (this.currentConnection == null) {
 			this.currentConnection = this.connectionHandle.getConnection();
 		}
