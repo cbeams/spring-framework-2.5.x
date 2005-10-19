@@ -19,8 +19,10 @@ package org.springframework.web.servlet.view.xslt;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -95,6 +97,8 @@ public abstract class AbstractXsltView extends AbstractView {
 
 	private boolean indent = true;
 
+	private Properties outputProperties;
+
 	private boolean cache = true;
 
 	private TransformerFactory transformerFactory;
@@ -156,6 +160,17 @@ public abstract class AbstractXsltView extends AbstractView {
 	 */
 	public void setIndent(boolean indent) {
 		this.indent = indent;
+	}
+
+	/**
+	 * Set arbitrary transformer output properties to be applied to the stylesheet.
+	 * <p>Any values specified here will override defaults that this view sets
+	 * programmatically.
+	 * @param outputProperties output properties to apply to the transformation process
+	 * @see javax.xml.transform.Transformer#setOutputProperty
+	 */
+	public void setOutputProperties(Properties outputProperties) {
+		this.outputProperties = outputProperties;
 	}
 
 	/**
@@ -388,8 +403,9 @@ public abstract class AbstractXsltView extends AbstractView {
 	}
 
 	/**
-	 * Perform the actual transformation, writing to the given result.  Simply delegates to the
-	 * doTransform(Source, Map, Result, String) version.
+	 * Perform the actual transformation, writing to the given result.
+	 * Simply delegates to the
+	 * <code>doTransform(Source, Map, Result, String)</code> version.
 	 * @param dom the XML node to transform
 	 * @param parameters a Map of parameters to be applied to the stylesheet
 	 * @param result the result to write to
@@ -437,14 +453,24 @@ public abstract class AbstractXsltView extends AbstractView {
 				}
 			}
 
+			// Specify default output properties.
 			trans.setOutputProperty(OutputKeys.ENCODING, encoding);
 			if (this.indent) {
 				trans.setOutputProperty(OutputKeys.INDENT, "yes");
 			}
-
 			// Xalan-specific, but won't do any harm in other XSLT engines.
 			trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 
+			// Apply any arbitrary output properties, if specified.
+			if (this.outputProperties != null) {
+				Enumeration propsEnum = this.outputProperties.propertyNames();
+				while (propsEnum.hasMoreElements()) {
+					String propName = (String) propsEnum.nextElement();
+					trans.setOutputProperty(propName, this.outputProperties.getProperty(propName));
+				}
+			}
+
+			// Perform the actual XSLT transformation.
 			trans.transform(source, result);
 			if (logger.isDebugEnabled()) {
 				logger.debug("XSLT transformed with stylesheet [" + this.stylesheetLocation + "]");
@@ -461,10 +487,11 @@ public abstract class AbstractXsltView extends AbstractView {
 	}
 
 	/**
-	 * Return a Map of parameters to be applied to the stylesheet.
+	 * Return a Map of transformer parameters to be applied to the stylesheet.
 	 * Subclasses can override this method in order to apply one or more
 	 * parameters to the transformation process.
-	 * <p>Default implementation delegates to simple getParameter version.
+	 * <p>Default implementation delegates to simple
+	 * <code>getParameters</code> version.
 	 * @param request current HTTP request
 	 * @return a Map of parameters to apply to the transformation process
 	 * @see #getParameters()
@@ -475,10 +502,10 @@ public abstract class AbstractXsltView extends AbstractView {
 	}
 
 	/**
-	 * Return a Map of parameters to be applied to the stylesheet.
+	 * Return a Map of transformer parameters to be applied to the stylesheet.
 	 * Subclasses can override this method in order to apply one or more
 	 * parameters to the transformation process.
-	 * <p>Default implementation delegates simply returns null.
+	 * <p>Default implementation delegates simply returns <code>null</code>.
 	 * @return a Map of parameters to apply to the transformation process
 	 * @see #getParameters(HttpServletRequest)
 	 * @see javax.xml.transform.Transformer#setParameter
