@@ -134,8 +134,9 @@ public abstract class JdoAccessor implements InitializingBean {
 
 	/**
 	 * Flush the given JDO persistence manager if necessary.
-	 * @param pm the current JDO PersistenceManage
+	 * @param pm the current JDO PersistenceManager
 	 * @param existingTransaction if executing within an existing transaction
+	 * (within an existing JDO PersistenceManager that won't be closed immediately)
 	 * @throws JDOException in case of JDO flushing errors
 	 */
 	public void flushIfNecessary(PersistenceManager pm, boolean existingTransaction) throws JDOException {
