@@ -18,6 +18,8 @@ package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
 
+import org.springframework.util.Assert;
+
 /**
  * Simple implementation of the ConnectionHandle interface,
  * containing a given JDBC Connection.
@@ -29,20 +31,30 @@ public class SimpleConnectionHandle implements ConnectionHandle {
 
 	private final Connection connection;
 
+
 	/**
 	 * Create a new SimpleConnectionHandle for the given Connection.
 	 * @param connection the JDBC Connection
 	 */
 	public SimpleConnectionHandle(Connection connection) {
+		Assert.notNull(connection, "Connection is required");
 		this.connection = connection;
 	}
 
+	/**
+	 * Return the specified Connection as-is.
+	 */
 	public Connection getConnection() {
 		return connection;
 	}
 
+	/**
+	 * This implementation is empty, as we're using a standard
+	 * Connection handle that does not have to be released.
+	 */
 	public void releaseConnection(Connection con) {
 	}
+
 
 	public String toString() {
 		return "SimpleConnectionHandle: " + this.connection;
