@@ -37,7 +37,7 @@ public class SimpleConnectionHandle implements ConnectionHandle {
 	 * @param connection the JDBC Connection
 	 */
 	public SimpleConnectionHandle(Connection connection) {
-		Assert.notNull(connection, "Connection is required");
+		Assert.notNull(connection, "Connection must not be null");
 		this.connection = connection;
 	}
 

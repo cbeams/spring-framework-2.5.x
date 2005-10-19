@@ -35,11 +35,19 @@ public class SessionHolder extends ResourceHolderSupport {
 
 	private final Session session;
 
+
+	/**
+	 * Create a new SessionHolder for the given TopLink Session.
+	 * @param session the TopLink Session
+	 */
 	public SessionHolder(Session session) {
 		Assert.notNull(session, "Session must not be null");
 		this.session = session;
 	}
 
+	/**
+	 * Return this holder's TopLink Session.
+	 */
 	public Session getSession() {
 		return session;
 	}

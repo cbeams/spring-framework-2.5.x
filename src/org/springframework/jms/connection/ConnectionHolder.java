@@ -20,6 +20,7 @@ import javax.jms.Connection;
 import javax.jms.Session;
 
 import org.springframework.transaction.support.ResourceHolderSupport;
+import org.springframework.util.Assert;
 
 /**
  * Connection holder, wrapping a JMS Connection and a JMS Session.
@@ -39,15 +40,29 @@ public class ConnectionHolder extends ResourceHolderSupport {
 
 	private final Session session;
 
+
+	/**
+	 * Create a new ConnectionHolder for the given JMS resources.
+	 * @param connection the JMS Connection
+	 * @param session the JMS Session
+	 */
 	public ConnectionHolder(Connection connection, Session session) {
+		Assert.notNull(connection, "Connection must not be null");
+		Assert.notNull(session, "Session must not be null");
 		this.connection = connection;
 		this.session = session;
 	}
 
+	/**
+	 * Return this holder's JMS Connection.
+	 */
 	public Connection getConnection() {
 		return connection;
 	}
 
+	/**
+	 * Return this holder's JMS Session.
+	 */
 	public Session getSession() {
 		return session;
 	}

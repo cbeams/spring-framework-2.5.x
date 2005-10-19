@@ -48,7 +48,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 * @param connectionHandle the ConnectionHandle to hold
 	 */
 	public ConnectionHolder(ConnectionHandle connectionHandle) {
-		Assert.notNull(connectionHandle, "ConnectionHandle is required");
+		Assert.notNull(connectionHandle, "ConnectionHandle must not be null");
 		this.connectionHandle = connectionHandle;
 	}
 

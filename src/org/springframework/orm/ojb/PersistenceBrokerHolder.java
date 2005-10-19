@@ -37,11 +37,19 @@ public class PersistenceBrokerHolder extends ResourceHolderSupport {
 
 	private final PersistenceBroker persistenceBroker;
 
+
+	/**
+	 * Create a new PersistenceBrokerHolder for the given OJB PersistenceBroker.
+	 * @param persistenceBroker the OJB PersistenceBroker
+	 */
 	public PersistenceBrokerHolder(PersistenceBroker persistenceBroker) {
 		Assert.notNull(persistenceBroker, "PersistenceBroker must not be null");
 		this.persistenceBroker = persistenceBroker;
 	}
 
+	/**
+	 * Return this holder's OJB PersistenceBroker.
+	 */
 	public PersistenceBroker getPersistenceBroker() {
 		return persistenceBroker;
 	}
