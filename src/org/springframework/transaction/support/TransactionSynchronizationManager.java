@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.support;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -224,12 +225,12 @@ public abstract class TransactionSynchronizationManager {
 	 */
 	public static void registerSynchronization(TransactionSynchronization synchronization)
 	    throws IllegalStateException {
+
 		if (!isSynchronizationActive()) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
 		List synchs = (List) synchronizations.get();
 		synchs.add(synchronization);
-		Collections.sort(synchs, synchronizationComparator);
 	}
 
 	/**
@@ -244,7 +245,12 @@ public abstract class TransactionSynchronizationManager {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
 		List synchs = (List) synchronizations.get();
-		return Collections.unmodifiableList(new LinkedList(synchs));
+		// Sort lazily here, not in registerSynchronization.
+		Collections.sort(synchs, synchronizationComparator);
+		// Return unmodifiable snapshot, to avoid ConcurrentModificationExceptions
+		// while iterating and invoking synchronization callbacks that in turn
+		// might register further synchronizations.
+		return Collections.unmodifiableList(new ArrayList(synchs));
 	}
 
 	/**
