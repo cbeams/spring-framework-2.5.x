@@ -44,6 +44,10 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Juergen Hoeller
  * @since 1.1.1
+ * @see #createLinkedSetIfPossible
+ * @see #createLinkedMapIfPossible
+ * @see #createLinkedCaseInsensitiveMapIfPossible
+ * @see #createIdentityMapIfPossible
  */
 public class CollectionFactory {
 
@@ -53,6 +57,7 @@ public class CollectionFactory {
 	private static final Log logger = LogFactory.getLog(CollectionFactory.class);
 
 	private static boolean commonsCollections3xAvailable;
+
 
 	static {
 		// Check whether JDK 1.4+ collections and/or
@@ -70,6 +75,7 @@ public class CollectionFactory {
 		}
 	}
 
+
 	/**
 	 * Create a linked set if possible: that is, if running on JDK >= 1.4
 	 * or if Commons Collections 3.x is available. Prefers a JDK 1.4+
@@ -81,15 +87,15 @@ public class CollectionFactory {
 	 */
 	public static Set createLinkedSetIfPossible(int initialCapacity) {
 		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
-			logger.debug("Creating java.util.LinkedHashSet");
+			logger.debug("Creating [java.util.LinkedHashSet]");
 			return Jdk14CollectionFactory.createLinkedHashSet(initialCapacity);
 		}
 		else if (commonsCollections3xAvailable) {
-			logger.debug("Creating org.apache.commons.collections.set.ListOrderedSet");
+			logger.debug("Creating [org.apache.commons.collections.set.ListOrderedSet]");
 			return CommonsCollectionFactory.createListOrderedSet(initialCapacity);
 		}
 		else {
-			logger.debug("Falling back to java.util.HashSet for linked set");
+			logger.debug("Falling back to [java.util.HashSet] for linked set");
 			return new HashSet(initialCapacity);
 		}
 	}
@@ -105,15 +111,15 @@ public class CollectionFactory {
 	 */
 	public static Map createLinkedMapIfPossible(int initialCapacity) {
 		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
-			logger.debug("Creating java.util.LinkedHashMap");
+			logger.debug("Creating [java.util.LinkedHashMap]");
 			return Jdk14CollectionFactory.createLinkedHashMap(initialCapacity);
 		}
 		else if (commonsCollections3xAvailable) {
-			logger.debug("Creating org.apache.commons.collections.map.LinkedMap");
+			logger.debug("Creating [org.apache.commons.collections.map.LinkedMap]");
 			return CommonsCollectionFactory.createLinkedMap(initialCapacity);
 		}
 		else {
-			logger.debug("Falling back to java.util.HashMap for linked map");
+			logger.debug("Falling back to [java.util.HashMap] for linked map");
 			return new HashMap(initialCapacity);
 		}
 	}
@@ -129,15 +135,15 @@ public class CollectionFactory {
 	 */
 	public static Map createLinkedCaseInsensitiveMapIfPossible(int initialCapacity) {
 		if (commonsCollections3xAvailable) {
-			logger.debug("Creating org.apache.commons.collections.map.ListOrderedMap/CaseInsensitiveMap");
+			logger.debug("Creating [org.apache.commons.collections.map.ListOrderedMap/CaseInsensitiveMap]");
 			return CommonsCollectionFactory.createListOrderedCaseInsensitiveMap(initialCapacity);
 		}
 		else if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
-			logger.debug("Falling back to java.util.LinkedHashMap for linked case-insensitive map");
+			logger.debug("Falling back to [java.util.LinkedHashMap] for linked case-insensitive map");
 			return Jdk14CollectionFactory.createLinkedHashMap(initialCapacity);
 		}
 		else {
-			logger.debug("Falling back to java.util.HashMap for linked case-insensitive map");
+			logger.debug("Falling back to [java.util.HashMap] for linked case-insensitive map");
 			return new HashMap(initialCapacity);
 		}
 	}
@@ -153,15 +159,15 @@ public class CollectionFactory {
 	 */
 	public static Map createIdentityMapIfPossible(int initialCapacity) {
 		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
-			logger.debug("Creating java.util.IdentityHashMap");
+			logger.debug("Creating [java.util.IdentityHashMap]");
 			return Jdk14CollectionFactory.createIdentityHashMap(initialCapacity);
 		}
 		else if (commonsCollections3xAvailable) {
-			logger.debug("Creating org.apache.commons.collections.map.IdentityMap");
+			logger.debug("Creating [org.apache.commons.collections.map.IdentityMap]");
 			return CommonsCollectionFactory.createIdentityMap(initialCapacity);
 		}
 		else {
-			logger.debug("Falling back to java.util.HashMap for identity map");
+			logger.debug("Falling back to [java.util.HashMap] for identity map");
 			return new HashMap(initialCapacity);
 		}
 	}
