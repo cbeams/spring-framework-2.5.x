@@ -20,12 +20,15 @@ import java.sql.Connection;
 
 import javax.sql.DataSource;
 
+import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.JDBCException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.impl.SessionImpl;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -102,15 +105,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <i>Note that Hibernate itself does not support nested transactions! Hence,
  * do not expect Hibernate access code to participate in a nested transaction.</i>
  *
- * <p><b>WARNING:</b> If running against Hibernate 3.1+, the JDBC DataSource (i.e.
- * the connection pool) used by Hibernate must reset JDBC Connection properties
- * such as isolation level and read-only flag on <code>Connection.close()</code>.
- * With previous versions of Hibernate, this transaction manager was able to do
- * this cleanup after the transaction. Due to a change in Hibernate 3.1's JDBC
- * Connection handling, this is not the case anymore; hence, the burden is solely
- * on the connection pool. Most connection pools automatically automatically
- * perform such cleanup, but notably, Jakarta Commons DBCP doesn't. Consider
- * using C3P0 instead of Commons DBCP in such a scenario.
+ * <p>Requires Hibernate 3.0.3 or later.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -130,6 +125,24 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
 		implements BeanFactoryAware, InitializingBean {
+
+	// Hibernate 3.1 support: to be commented in as of Spring 1.3
+	/*
+	private static boolean hibernateSetTimeoutAvailable;
+
+	static {
+		// Determine whether the Hibernate 3.1 Transaction.setTimeout(int) method
+		// is available, for use in this HibernateTransactionManager's doBegin.
+		try {
+			Transaction.class.getMethod("setTimeout", new Class[] {int.class});
+			hibernateSetTimeoutAvailable = true;
+		}
+		catch (NoSuchMethodException ex) {
+			hibernateSetTimeoutAvailable = false;
+		}
+	}
+	*/
+
 
 	private SessionFactory sessionFactory;
 
@@ -248,8 +261,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * is required after a transaction, since no Connection settings will get modified.
 	 * <p>It is recommended to turn this flag off if running against Hibernate 3.1
 	 * and a connection pool that does not reset connection settings (for example,
-	 * Jakarta Commons DBCP). Consider using a smarter connection pool instead
-	 * (for example, C3P0).
+	 * Jakarta Commons DBCP). To keep this flag turned on, you can set the
+	 * "hibernate.connection.release_mode" property to "on_close" instead,
+	 * or consider using a smarter connection pool (for example, C3P0).
 	 * @see java.sql.Connection#setTransactionIsolation
 	 * @see java.sql.Connection#setReadOnly
 	 */
@@ -439,17 +453,29 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			session = txObject.getSessionHolder().getSession();
 
 			Integer previousIsolationLevel = null;
-			if (this.prepareConnection) {
+			if (this.prepareConnection && isSameConnectionForEntireSession(session)) {
 				// We're allowed to change the transaction settings of the JDBC Connection.
+				if (logger.isDebugEnabled()) {
+					logger.debug(
+							"Preparing JDBC Connection of Hibernate Session [" + SessionFactoryUtils.toString(session) + "]");
+				}
 				Connection con = session.connection();
 				previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 				txObject.setPreviousIsolationLevel(previousIsolationLevel);
 			}
-			else if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-				// We should set a specific isolation level but are not allowed to...
-				throw new InvalidIsolationLevelException(
-						"HibernateTransactionManager is not allowed to support custom isolation levels: " +
-						"turn its 'prepareConnection' flag on and use a connection pool with proper cleanup");
+			else {
+				// Not allowed to change the transaction settings of the JDBC Connection.
+				if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+					// We should set a specific isolation level but are not allowed to...
+					throw new InvalidIsolationLevelException(
+							"HibernateTransactionManager is not allowed to support custom isolation levels: " +
+							"make sure that its 'prepareConnection' flag is on (the default) and that the " +
+							"Hibernate connection release mode is set to 'on_close' (LocalSessionFactoryBean's default)");
+				}
+				if (logger.isDebugEnabled()) {
+					logger.debug(
+							"Not preparing JDBC Connection of Hibernate Session [" + SessionFactoryUtils.toString(session) + "]");
+				}
 			}
 
 			if (definition.isReadOnly() && txObject.isNewSessionHolder()) {
@@ -466,13 +492,33 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				}
 			}
 
-			// Add the Hibernate transaction to the session holder.
-			txObject.getSessionHolder().setTransaction(session.beginTransaction());
+			Transaction hibTx = null;
 
 			// Register transaction timeout.
 			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
+				// Hibernate 3.1 support: to be commented in as of Spring 1.3
+				/*
+				if (hibernateSetTimeoutAvailable) {
+					// Use Hibernate's own transaction timeout mechanism on Hibernate 3.1
+					// Applies to all statements, also to inserts, updates and deletes!
+					hibTx = session.getTransaction();
+					hibTx.setTimeout(definition.getTimeout());
+					hibTx.begin();
+				}
+				else {
+				*/
+				// Use Spring query timeouts driven by SessionHolder on Hibernate 3.0
+				// Only applies to Hibernate queries, not to insert/update/delete statements.
+				hibTx = session.beginTransaction();
 				txObject.getSessionHolder().setTimeoutInSeconds(definition.getTimeout());
 			}
+			else {
+				// Open a plain Hibernate transaction without specified timeout.
+				hibTx = session.beginTransaction();
+			}
+
+			// Add the Hibernate transaction to the session holder.
+			txObject.getSessionHolder().setTransaction(hibTx);
 
 			// Register the Hibernate Session's JDBC Connection for the DataSource, if set.
 			if (getDataSource() != null) {
@@ -592,10 +638,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 
 		Session session = txObject.getSessionHolder().getSession();
-		if (session.isConnected()) {
-			// We're running on Hibernate 3.0: we're able to reset the isolation level
-			// and/or read-only flag of the JDBC Connection here. On Hibernate 3.1+,
-			// we need to rely on the connection pool to perform proper cleanup.
+		if (this.prepareConnection && session.isConnected() && isSameConnectionForEntireSession(session)) {
+			// We're running with connection release mode "on_close": We're able to reset
+			// the isolation level and/or read-only flag of the JDBC Connection here.
+			// Else, we need to rely on the connection pool to perform proper cleanup.
 			try {
 				Connection con = session.connection();
 				DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
@@ -621,7 +667,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				session.setFlushMode(txObject.getSessionHolder().getPreviousFlushMode());
 			}
 			if (!session.isConnected()) {
-				// We're running against Hibernate 3.1+, where Hibernate will
+				// We're running against Hibernate 3.1 RC1, where Hibernate will
 				// automatically disconnect the Session after a transaction.
 				// We'll reconnect it here, as the Session is likely gonna be
 				// used for lazy loading during an "open session in view" pase.
@@ -629,6 +675,27 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 		}
 		txObject.getSessionHolder().clear();
+	}
+
+	/**
+	 * Return whether the given Hibernate Session will always hold the same
+	 * JDBC Connection. This is used to check whether the transaction manager
+	 * can safely prepare and clean up the JDBC Connection used for a transaction.
+	 * <p>Default implementation checks the Session's connection release mode
+	 * to be "on_close". Unfortunately, this requires casting to SessionImpl,
+	 * as of Hibernate 3.0.5 / 3.1 RC2. If that cast doesn't work, we'll
+	 * simply assume we're safe and return <code>true</code>.
+	 * @param session the Hibernate Session to check
+	 * @see org.hibernate.impl.SessionImpl#getConnectionReleaseMode()
+	 * @see org.hibernate.ConnectionReleaseMode#ON_CLOSE
+	 */
+	protected boolean isSameConnectionForEntireSession(Session session) {
+		if (!(session instanceof SessionImpl)) {
+			// The best we can do is to assume we're safe.
+			return true;
+		}
+		ConnectionReleaseMode releaseMode = ((SessionImpl) session).getConnectionReleaseMode();
+		return ConnectionReleaseMode.ON_CLOSE.equals(releaseMode);
 	}
 
 	/**
