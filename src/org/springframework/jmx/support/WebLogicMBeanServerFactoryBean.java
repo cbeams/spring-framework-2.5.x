@@ -24,6 +24,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.util.ClassUtils;
+import org.springframework.jndi.JndiTemplate;
 
 /**
  * FactoryBean that obtains the WebLogic <code>MBeanServer</code> instance
@@ -34,6 +35,12 @@ import org.springframework.util.ClassUtils;
  * This FactoryBean is a direct alternative to <code>MBeanServerFactoryBean</code>,
  * which uses standard JMX 1.2 API to access the platform's MBeanServer.
  *
+ * <p>To access the <code>MBeanServer</code> on the local server simply set the
+ * <code>lookupLocal</code> property to <code>true</code>. For remote servers you
+ * must specify login credentials so that the <code>MBeanHome</code> instance can
+ * be obtained. Default login credentials are already configured and remote lookup
+ * is the default mode.
+ * 
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
@@ -45,10 +52,21 @@ public class WebLogicMBeanServerFactoryBean implements FactoryBean, Initializing
 
 	private static final String WEBLOGIC_JMX_HELPER_CLASS = "weblogic.management.Helper";
 
+	private static final String WEBLOGIC_MBEAN_HOME_CLASS = "weblogic.management.MBeanHome";
+
 	private static final String GET_MBEAN_HOME_METHOD = "getMBeanHome";
 
 	private static final String GET_MBEAN_SERVER_METHOD = "getMBeanServer";
 
+	private static final String LOCAL_JNDI_NAME_FIELD = "LOCAL_JNDI_NAME";
+
+	/**
+	 * Indicates whether the local <code>MBeanHome</code> should be access directly or whether the
+	 * supplied credentials should be used to perform a lookup against a specific server.
+	 */
+	private boolean lookupLocal = false;
+
+	private JndiTemplate jndiTemplate = new JndiTemplate();
 
 	private String username = "weblogic";
 
@@ -93,23 +111,60 @@ public class WebLogicMBeanServerFactoryBean implements FactoryBean, Initializing
 		this.serverName = serverName;
 	}
 
+	/**
+	 * Indicates whether the <code>MBeanHome</code> should be accessed directly from the local
+	 * JNDI tree (<code>true</code>) or accessed from a specific server using the supplied credentials
+	 * (<code>false</code>). The default value is <code>false</code>.
+	 * @see #setServerName(String)
+	 * @see #setServerUrl(String)
+	 * @see #setUsername(String)
+	 * @see #setPassword(String)
+	 */
+	public void setLookupLocal(boolean lookupLocal) {
+		this.lookupLocal = lookupLocal;
+	}
+
+	/**
+	 * Sets the {@link org.springframework.jndi.JndiTemplate} instance to use
+	 * when looking up a local <code>MBeanHome</code> instance.
+	 * @see #setLookupLocal(boolean)
+	 */
+	public void setJndiTemplate(JndiTemplate jndiTemplate) {
+		this.jndiTemplate = jndiTemplate;
+	}
+
 	public void afterPropertiesSet() throws MBeanServerNotFoundException {
+
 		try {
+            Object mbeanHome;
+
+			if (this.lookupLocal) {
+				/*
+			     * MBeanHome home = this.jndiTemplate.lookup(MBeanHome.LOCAL_JNDI_NAME);
+			     */
+				Class mbeanHomeClass = ClassUtils.forName(WEBLOGIC_MBEAN_HOME_CLASS);
+				String name = (String) mbeanHomeClass.getField(LOCAL_JNDI_NAME_FIELD).get(null);
+				mbeanHome = this.jndiTemplate.lookup(name);
+			}
+			else {
+				/*
+			     * MBeanHome home = Helper.getMBeanHome(this.username, this.password, this.serverUrl, this.serverName);
+			     */
+				Class helperClass = ClassUtils.forName(WEBLOGIC_JMX_HELPER_CLASS);
+				Class[] argTypes = new Class[]{String.class, String.class, String.class, String.class};
+				Object[] args = new Object[]{this.username, this.password, this.serverUrl, this.serverName};
+
+				mbeanHome = helperClass.getMethod(GET_MBEAN_HOME_METHOD, argTypes).invoke(null, args);
+			}
+
 			/*
-			MBeanHome home = Helper.getMBeanHome(this.username, this.password, this.serverUrl, this.serverName);
-			this.mbeanServer = home.getMBeanServer();
+			* this.mbeanServer = home.getMBeanServer();
 			*/
-
-			Class helperClass = ClassUtils.forName(WEBLOGIC_JMX_HELPER_CLASS);
-			Class[] argTypes = new Class[] {String.class, String.class, String.class, String.class};
-			Object[] args = new Object[] {this.username, this.password, this.serverUrl, this.serverName};
-
-			Object mbeanHome = helperClass.getMethod(GET_MBEAN_HOME_METHOD, argTypes).invoke(null, args);
 			this.mbeanServer = (MBeanServer)
 					mbeanHome.getClass().getMethod(GET_MBEAN_SERVER_METHOD, null).invoke(mbeanHome, null);
 		}
 		catch (ClassNotFoundException ex) {
-			throw new MBeanServerNotFoundException("Could not find WebLogic's JMX Helper class", ex);
+			throw new MBeanServerNotFoundException("Could not find WebLogic's JMX Helper or MBeanHome class", ex);
 		}
 		catch (InvocationTargetException ex) {
 			throw new MBeanServerNotFoundException(
