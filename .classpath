@@ -110,5 +110,6 @@
 	<classpathentry kind="lib" path="lib/aspectj/aspectjweaver.jar"/>
 	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-1.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/jexcelapi/jxl.jar"/>
+	<classpathentry kind="lib" path="lib/commonj/commonj-twm.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
