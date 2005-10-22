@@ -246,7 +246,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
 			}
 			stmt = conToUse.createStatement();
-			DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
+			applyStatementSettings(stmt);
 			Statement stmtToUse = stmt;
 			if (this.nativeJdbcExtractor != null) {
 				stmtToUse = this.nativeJdbcExtractor.getNativeStatement(stmt);
@@ -302,12 +302,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			public Object doInStatement(Statement stmt) throws SQLException {
 				ResultSet rs = null;
 				try {
-					if (getFetchSize() > 0) {
-						stmt.setFetchSize(getFetchSize());
-					}
-					if (getMaxRows() > 0) {
-						stmt.setMaxRows(getMaxRows());
-					}
 					rs = stmt.executeQuery(sql);
 					ResultSet rsToUse = rs;
 					if (nativeJdbcExtractor != null) {
@@ -446,7 +440,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
 			}
 			ps = psc.createPreparedStatement(conToUse);
-			DataSourceUtils.applyTransactionTimeout(ps, getDataSource());
+			applyStatementSettings(ps);
 			PreparedStatement psToUse = ps;
 			if (this.nativeJdbcExtractor != null) {
 				psToUse = this.nativeJdbcExtractor.getNativePreparedStatement(ps);
@@ -507,12 +501,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				ResultSet rs = null;
 				try {
-					if (getFetchSize() > 0) {
-						ps.setFetchSize(getFetchSize());
-					}
-					if (getMaxRows() > 0) {
-						ps.setMaxRows(getMaxRows());
-					}
 					if (pss != null) {
 						pss.setValues(ps);
 					}
@@ -800,7 +788,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
 			}
 			cs = csc.createCallableStatement(conToUse);
-			DataSourceUtils.applyTransactionTimeout(cs, getDataSource());
+			applyStatementSettings(cs);
 			CallableStatement csToUse = cs;
 			if (this.nativeJdbcExtractor != null) {
 				csToUse = this.nativeJdbcExtractor.getNativeCallableStatement(cs);
@@ -974,6 +962,28 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return returnedResults;
 	}
 
+
+	//-------------------------------------------------------------------------
+	// General helper methods
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Prepare the given JDBC Statement (or PreparedStatement or CallableStatement),
+	 * applying statement settings such as fetch size, max rows, and query timeout.
+	 * @param stmt the JDBC Statement to prepare
+	 * @see #setFetchSize
+	 * @see #setMaxRows
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#applyTransactionTimeout
+	 */
+	protected void applyStatementSettings(Statement stmt) throws SQLException {
+		if (getFetchSize() > 0) {
+			stmt.setFetchSize(getFetchSize());
+		}
+		if (getMaxRows() > 0) {
+			stmt.setMaxRows(getMaxRows());
+		}
+		DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
+	}
 
 	/**
 	 * Throw an SQLWarningException if we're not ignoring warnings.
