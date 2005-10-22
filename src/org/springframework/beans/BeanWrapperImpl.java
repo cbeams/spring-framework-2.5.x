@@ -199,7 +199,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	/**
 	 * Create new BeanWrapperImpl for the given object,
 	 * registering a nested path that the object is in.
-	 * @param object object wrapped by this BeanWrapper.
+	 * @param object object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
 	 * @param rootObject the root object at the top of the path
 	 */
@@ -211,7 +211,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	/**
 	 * Create new BeanWrapperImpl for the given object,
 	 * registering a nested path that the object is in.
-	 * @param object object wrapped by this BeanWrapper.
+	 * @param object object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
 	 * @param superBw the containing BeanWrapper (must not be <code>null</code>)
 	 */
@@ -562,8 +562,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Creating new nested BeanWrapper for property '" + canonicalName + "'");
 			}
-			nestedBw =
-					new BeanWrapperImpl(propertyValue, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR, this);
+			nestedBw = newNestedBeanWrapper(propertyValue, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR);
 			// inherit all type-specific PropertyEditors
 			if (this.customEditors != null) {
 				for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
@@ -598,6 +597,24 @@ public class BeanWrapperImpl implements BeanWrapper {
 		return nestedBw;
 	}
 
+	/**
+	 * Create a new nested BeanWrapper instance.
+	 * <p>Default implementation creates a BeanWrapperImpl instance.
+	 * Can be overridden in subclasses to create a BeanWrapperImpl subclass.
+	 * @param object object wrapped by this BeanWrapper
+	 * @param nestedPath the nested path of the object
+	 * @return the nested BeanWrapper instance
+	 * @see #BeanWrapperImpl(Object, String, BeanWrapperImpl)
+	 */
+	protected BeanWrapperImpl newNestedBeanWrapper(Object object, String nestedPath) {
+		return new BeanWrapperImpl(object, nestedPath, this);
+	}
+
+	/**
+	 * Parse the given property name into the corresponding property name tokens.
+	 * @param propertyName the property name to parse
+	 * @return representation of the parsed property tokens
+	 */
 	private PropertyTokenHolder getPropertyNameTokens(String propertyName) {
 		PropertyTokenHolder tokens = new PropertyTokenHolder();
 		String actualName = null;
