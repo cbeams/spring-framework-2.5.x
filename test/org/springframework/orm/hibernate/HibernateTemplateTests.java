@@ -165,6 +165,8 @@ public class HibernateTemplateTests extends TestCase {
 	public void testExecuteWithNotAllowCreateAndThreadBound() {
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		sfControl.replay();
 		sessionControl.replay();
 
@@ -190,6 +192,8 @@ public class HibernateTemplateTests extends TestCase {
 	public void testExecuteWithThreadBoundAndFlushCommit() {
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.AUTO);
 		session.setFlushMode(FlushMode.COMMIT);
@@ -222,6 +226,8 @@ public class HibernateTemplateTests extends TestCase {
 	public void testExecuteWithThreadBoundAndFlushEager() throws HibernateException {
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.NEVER);
 		session.setFlushMode(FlushMode.AUTO);

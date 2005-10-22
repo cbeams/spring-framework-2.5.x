@@ -91,6 +91,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(tx, 1);
 		session.connection();
 		sessionControl.setReturnValue(con, 3);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 2);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
 		query.setTimeout(10);
@@ -168,6 +170,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		tx.rollback();
@@ -227,6 +231,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.AUTO, 1);
 		session.flush();
@@ -284,6 +290,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 2);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.AUTO, 1);
 		session.flush();
@@ -352,6 +360,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.AUTO, 1);
 		session.close();
@@ -411,6 +421,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		tx.rollback();
@@ -476,8 +488,12 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session2, 1);
 		session1.beginTransaction();
 		session1Control.setReturnValue(tx, 1);
+		session1.isOpen();
+		session1Control.setReturnValue(true, 1);
 		session2.beginTransaction();
 		session2Control.setReturnValue(tx, 1);
+		session2.isOpen();
+		session2Control.setReturnValue(true, 1);
 		session2.getFlushMode();
 		session2Control.setReturnValue(FlushMode.AUTO, 1);
 		session2.flush();
@@ -562,6 +578,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(sf, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.AUTO, 2);
 		session.flush();
@@ -627,10 +645,13 @@ public class HibernateTransactionManagerTests extends TestCase {
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		final Session session = (Session) sessionControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.NEVER, 1);
 		session.setFlushMode(FlushMode.AUTO);
@@ -700,6 +721,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		tx.commit();
@@ -770,6 +793,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 2);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 2);
 		session.close();
 		sessionControl.setReturnValue(null, 2);
 		tx.commit();
@@ -852,6 +877,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(con, 2);
 		con.setReadOnly(true);
 		conControl.setVoidCallable(1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
 		query.list();
@@ -914,6 +941,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		tx.commit();
 		SQLException sqlEx = new SQLException("argh", "27");
 		txControl.setThrowable(new JDBCException("mymsg", sqlEx), 1);
@@ -982,6 +1011,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.NEVER, 1);
 		session.setFlushMode(FlushMode.AUTO);
@@ -1067,6 +1098,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.NEVER, 1);
 		session.setFlushMode(FlushMode.AUTO);
@@ -1161,6 +1194,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		tx2.commit();
 		tx2Control.setVoidCallable(1);
 
+		session.isOpen();
+		sessionControl.setReturnValue(true, 2);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.NEVER, 2);
 		session.setFlushMode(FlushMode.AUTO);
@@ -1296,6 +1331,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(tx, 1);
 		session.connection();
 		sessionControl.setReturnValue(con, 3);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		md.supportsSavepoints();
 		mdControl.setReturnValue(true, 1);
 		con.getMetaData();
@@ -1451,12 +1488,10 @@ public class HibernateTransactionManagerTests extends TestCase {
 	}
 
 	protected void tearDown() {
-		/*
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
-		*/
 	}
 
 }

@@ -71,6 +71,23 @@ public class SessionHolder extends ResourceHolderSupport {
 		return (Session) this.sessionMap.get(key);
 	}
 
+	public Session getValidatedSession() {
+		return getValidatedSession(DEFAULT_KEY);
+	}
+
+	public Session getValidatedSession(Object key) {
+		Session session = (Session) this.sessionMap.get(key);
+		// Check for dangling Session that's around but already closed.
+		// Effectively an assertion: that should never happen in practice.
+		// We'll seamlessly remove the Session here, to not let it cause
+		// any side effects.
+		if (session != null && !session.isOpen()) {
+			this.sessionMap.remove(key);
+			session = null;
+		}
+		return session;
+	}
+
 	public Session getAnySession() {
 		synchronized (this.sessionMap) {
 			if (!this.sessionMap.isEmpty()) {

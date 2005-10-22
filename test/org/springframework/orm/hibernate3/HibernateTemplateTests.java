@@ -190,6 +190,8 @@ public class HibernateTemplateTests extends TestCase {
 	public void testExecuteWithNotAllowCreateAndThreadBound() {
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		sfControl.replay();
 		sessionControl.replay();
 
@@ -215,6 +217,8 @@ public class HibernateTemplateTests extends TestCase {
 	public void testExecuteWithThreadBoundAndFlushEager() throws HibernateException {
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.AUTO);
 		session.flush();
@@ -245,6 +249,8 @@ public class HibernateTemplateTests extends TestCase {
 	public void testExecuteWithThreadBoundAndFilter() {
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.enableFilter("myFilter");
 		sessionControl.setReturnValue(null, 1);
 		session.disableFilter("myFilter");
@@ -275,6 +281,8 @@ public class HibernateTemplateTests extends TestCase {
 	public void testExecuteWithThreadBoundAndFilters() {
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.enableFilter("myFilter");
 		sessionControl.setReturnValue(null, 1);
 		session.enableFilter("yourFilter");

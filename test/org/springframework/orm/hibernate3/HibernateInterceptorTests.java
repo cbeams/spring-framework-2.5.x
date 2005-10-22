@@ -139,6 +139,8 @@ public class HibernateInterceptorTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		sfControl.replay();
 		sessionControl.replay();
 
@@ -166,6 +168,8 @@ public class HibernateInterceptorTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.AUTO, 1);
 		session.flush();
@@ -198,6 +202,8 @@ public class HibernateInterceptorTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.NEVER, 1);
 		session.setFlushMode(FlushMode.AUTO);
@@ -234,6 +240,8 @@ public class HibernateInterceptorTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.AUTO, 1);
 		session.setFlushMode(FlushMode.COMMIT);
@@ -268,6 +276,8 @@ public class HibernateInterceptorTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.AUTO, 1);
 		session.setFlushMode(FlushMode.ALWAYS);
@@ -302,6 +312,8 @@ public class HibernateInterceptorTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.enableFilter("myFilter");
 		sessionControl.setReturnValue(null, 1);
 		session.disableFilter("myFilter");
@@ -334,6 +346,8 @@ public class HibernateInterceptorTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.enableFilter("myFilter");
 		sessionControl.setReturnValue(null, 1);
 		session.enableFilter("yourFilter");

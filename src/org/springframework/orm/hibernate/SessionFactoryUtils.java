@@ -259,31 +259,32 @@ public abstract class SessionFactoryUtils {
 		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 		if (sessionHolder != null && !sessionHolder.isEmpty()) {
 			// pre-bound Hibernate Session
+			Session session = null;
 			if (TransactionSynchronizationManager.isSynchronizationActive() &&
 					sessionHolder.doesNotHoldNonDefaultSession()) {
 				// Spring transaction management is active ->
 				// register pre-bound Session with it for transactional flushing.
+				session = sessionHolder.getValidatedSession();
 				if (!sessionHolder.isSynchronizedWithTransaction()) {
 					logger.debug("Registering Spring transaction synchronization for existing Hibernate Session");
 					TransactionSynchronizationManager.registerSynchronization(
 							new SpringSessionSynchronization(sessionHolder, sessionFactory, jdbcExceptionTranslator, false));
 					sessionHolder.setSynchronizedWithTransaction(true);
 					// Switch to FlushMode.AUTO if we're not within a read-only transaction.
-					FlushMode flushMode = sessionHolder.getSession().getFlushMode();
+					FlushMode flushMode = session.getFlushMode();
 					if (FlushMode.NEVER.equals(flushMode) &&
 							!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-						sessionHolder.getSession().setFlushMode(FlushMode.AUTO);
+						session.setFlushMode(FlushMode.AUTO);
 						sessionHolder.setPreviousFlushMode(flushMode);
 					}
 				}
-				return sessionHolder.getSession();
 			}
 			else {
 				// No Spring transaction management active -> try JTA transaction synchronization.
-				Session session = getJtaSynchronizedSession(sessionHolder, sessionFactory, jdbcExceptionTranslator);
-				if (session != null) {
-					return session;
-				}
+				session = getJtaSynchronizedSession(sessionHolder, sessionFactory, jdbcExceptionTranslator);
+			}
+			if (session != null) {
+				return session;
 			}
 		}
 
@@ -362,14 +363,14 @@ public abstract class SessionFactoryUtils {
 				if (jtaStatus == Status.STATUS_ACTIVE || jtaStatus == Status.STATUS_MARKED_ROLLBACK) {
 					// look for transaction-specific Session
 					Transaction jtaTx = jtaTm.getTransaction();
-					Session session = sessionHolder.getSession(jtaTx);
+					Session session = sessionHolder.getValidatedSession(jtaTx);
 					if (session == null && !sessionHolder.isSynchronizedWithTransaction()) {
 						// No transaction-specific Session found: If not already marked as
 						// synchronized with transaction, register the default thread-bound
 						// Session as JTA-transactional. If there is no default Session,
 						// we're a new inner JTA transaction with an outer one being suspended:
 						// In that case, we'll return null to trigger opening of a new Session.
-						session = sessionHolder.getSession();
+						session = sessionHolder.getValidatedSession();
 						if (session != null) {
 							logger.debug("Registering JTA transaction synchronization for existing Hibernate Session");
 							sessionHolder.addSession(jtaTx, session);
@@ -380,9 +381,9 @@ public abstract class SessionFactoryUtils {
 											jtaTm));
 							sessionHolder.setSynchronizedWithTransaction(true);
 							// Switch to FlushMode.AUTO if we're not within a read-only transaction.
-							FlushMode flushMode = sessionHolder.getSession().getFlushMode();
+							FlushMode flushMode = session.getFlushMode();
 							if (FlushMode.NEVER.equals(flushMode)) {
-								sessionHolder.getSession().setFlushMode(FlushMode.AUTO);
+								session.setFlushMode(FlushMode.AUTO);
 								sessionHolder.setPreviousFlushMode(flushMode);
 							}
 						}
@@ -392,7 +393,7 @@ public abstract class SessionFactoryUtils {
 				else {
 					// No transaction active -> simply return default thread-bound Session, if any
 					// (possibly from OpenSessionInViewFilter/Interceptor).
-					return sessionHolder.getSession();
+					return sessionHolder.getValidatedSession();
 				}
 			}
 			catch (Exception ex) {
@@ -402,7 +403,7 @@ public abstract class SessionFactoryUtils {
 		else {
 			// No JTA TransactionManager -> simply return default thread-bound Session, if any
 			// (possibly from OpenSessionInViewFilter/Interceptor).
-			return sessionHolder.getSession();
+			return sessionHolder.getValidatedSession();
 		}
 	}
 

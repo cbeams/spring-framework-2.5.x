@@ -85,6 +85,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		conControl.setReturnValue(false, 1);
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		session.connection();
@@ -152,6 +154,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		session.close();
@@ -208,6 +212,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		session.getFlushMode();
@@ -263,6 +269,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		session.getFlushMode();
@@ -320,6 +328,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		session.getFlushMode();
@@ -377,6 +387,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		session.close();
@@ -440,6 +452,10 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session1, 1);
 		sf.openSession();
 		sfControl.setReturnValue(session2, 1);
+		session1.isOpen();
+		session1Control.setReturnValue(true, 1);
+		session2.isOpen();
+		session2Control.setReturnValue(true, 1);
 		session1.beginTransaction();
 		session1Control.setReturnValue(tx, 1);
 		session2.beginTransaction();
@@ -521,6 +537,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 2);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		session.getFlushMode();
@@ -585,6 +603,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
@@ -647,6 +666,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		sf.openSession(entityInterceptor);
 		sfControl.setReturnValue(session, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		session.close();
@@ -714,6 +735,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		sf.openSession(entityInterceptor2);
 		sfControl.setReturnValue(session, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 2);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 2);
 		session.close();
@@ -783,6 +806,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		session.setFlushMode(FlushMode.NEVER);
@@ -847,6 +872,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		tx.commit();
@@ -913,6 +940,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
 
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		session.getFlushMode();
@@ -996,6 +1025,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		MockControl tx2Control = MockControl.createControl(Transaction.class);
 		final Transaction tx2 = (Transaction) tx2Control.getMock();
 
+		session.isOpen();
+		sessionControl.setReturnValue(true, 2);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx1, 1);
 		tx1.rollback();
@@ -1136,6 +1167,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		conControl.setReturnValue(false, 1);
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		session.connection();
