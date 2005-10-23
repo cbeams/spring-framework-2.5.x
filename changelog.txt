@@ -3,14 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.6 (19.10.2005)
+Changes in version 1.2.6 (29.10.2005)
 -------------------------------------
 
 Package org.springframework.aop
 * fixed AbstractPerformanceMonitorInterceptor to have "prefix" and "suffix" initialized with emtpy String (avoiding NPE)
 
 Package org.springframework.beans
+* factored out protected "newNestedBeanWrapper" template method from BeanWrapperImpl's "getNestedBeanWrapper" method
 * AbstractBeanFactory throws BeanDefinitionStoreException if parent not found (instead of NoSuchBeanDefinitionException)
+* DefaultListableBeanFactory does not include its toString output in NoSuchBeanDefinitionException messages anymore
 * PropertiesBeanDefinitionReader supports loading bean definitions from properties files with non-standard encodings
 * XmlBeanDefinitionReader supports reading from resource with explicit encoding
 * XmlBeanDefinitionReader supports reading from SAX InputSource (useful to pass in XML system id or java.io.Reader)
@@ -31,6 +33,10 @@ Package org.springframework.core
 * PropertiesBeanDefinitionReader supports loading bean definitions from properties files with non-standard encodings
 
 Package org.springframework.jdbc
+* JdbcTemplate applies "fetchSize" and "maxRows" settings to all created Statements, not just to "query" operations
+* JdbcTemplate exposes Connection proxy to ConnectionCallbacks, preparing Statements, unless NativeJdbcExtractor is set
+* ResultSetWrappingSqlRowSet implements Serializable interface now, assuming that the contained RowSet is serializable
+* refined JTA synchronization in DataSourceUtils to release JDBC Connection on suspend (for JBoss JTA compatibility)
 * relaxed OracleLobHandler's eager "oracle.jdbc.OracleConnection" class check to avoid potential class loader issue
 
 Package org.springframework.jms
@@ -45,7 +51,14 @@ Package org.springframework.jndi
 * added "lookup(String jndiName, Class requiredType)" method to JndiLocatorSupport, used by JndiObjectFactoryBean
 
 Package org.springframework.orm
+* all "executeFind" operations throw InvalidDataAccessApiUsageException if the result isn't actually a Collection/List
+* added "postProcessResult" template method to JdoTemplate, enabling subclasses to perform auto-detachment of the result
+* changed TopLink ServerSessionFactory's managed client handling to proxy-based, in base class AbstractSessionFactory
+* added support for TopLink SessionBroker to LocalSessionFactoryBean, through SessionBrokerSessionFactory
+* added "isOpen" assertions to Hibernate Session synchronization, seamlessly removing dangling Sessions (fail-safe)
 * refined HibernateTransactionManager and SessionFactoryUtils to adapt to Hibernate 3.1's changed Session management
+* fixed HibernateTemplate to apply a "firstResult" value of 0 to DetachedCriteria too, resetting to beginning of results
+* fixed HibernateSystemException to not throw NullPointerException in case of null root cause
 
 Package org.springframework.remoting
 * added "validateResponse" method to Simple/CommonsHttpInvokerRequestExecutor, by default rejecting HTTP status >= 300
@@ -59,6 +72,7 @@ Package org.springframework.test
 * added "setAutowireMode" and "getAutowireMode" methods to AbstractDependencyInjectionSpringContextTests
 
 Package org.springframework.transaction
+* optimized TransactionSynchronizationManager to perform synchronization sort lazily (in "getSynchronizations")
 * added "defaultTimeout" bean property to JotmFactoryBean, for specifying the default JOTM transaction timeout
 
 Package org.springframework.ui
@@ -66,13 +80,16 @@ Package org.springframework.ui
 
 Package org.springframework.util
 * fixed WeakReferenceMonitor to correctly synchronize access to the monitoring thread, for proper lazy initialization
-* updated parseNumber to support Bytes, Shorts, Integers and Longs that are supplied as hexadecimal numbers with either the 0x or 0X prefixes
+* "NumberUtils.parseNumber" supports Byte/Short/Integer/Long supplied as hexadecimal number with "0x"/"0X" prefix
+* fixed BooleanComparator's "equals" implementation
 
 Package org.springframework.web
 * ContextLoader reads the default WebApplicationContext impl class from "ContextLoader.properties" in the same package
 * factored out "findRequiredWebApplicationContext" method from *ActionSupport to DelegatingActionUtils for Struts
 * added "bindingErrorProcessor" property to BaseCommandController, for declaratively overriding DataBinder's default
 * refined UrlFilenameViewController to let its "handleRequestInternal" method throw Exception (for potential subclasses)
+* refined RedirectView to properly support anchors: appending an anchor fragment after URL parameters, if any
+* added "outputProperties" bean property to AbstractXlstView, for specifying arbitrary transformer output properties
 * Velocity/FreeMarkerViewResolver allows for setting "allowRequestOverride" and "allowSessionOverride" on its Views
 * Velocity and FreeMarker form macros include an "id" attribute on each element
 
