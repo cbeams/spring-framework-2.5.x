@@ -249,7 +249,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * @return the PersistenceManager proxy, implementing all interfaces
 	 * implemented by the passed-in PersistenceManager object (that is,
 	 * also implementing all vendor-specific extension interfaces)
-	 * @see javax.jdo.PersistenceManager#close
+	 * @see javax.jdo.PersistenceManager#close()
 	 * @see #execute(JdoCallback, boolean)
 	 * @see #prepareQuery
 	 */
@@ -617,8 +617,8 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 	/**
 	 * Invocation handler that suppresses close calls on JDO PersistenceManagers.
-	 * Also prepares returned Query and Criteria objects.
-	 * @see javax.jdo.PersistenceManager#close
+	 * Also prepares returned Query objects.
+	 * @see javax.jdo.PersistenceManager#close()
 	 */
 	private class CloseSuppressingInvocationHandler implements InvocationHandler {
 
