@@ -16,7 +16,6 @@
 
 package org.springframework.orm.toplink;
 
-import oracle.toplink.exceptions.TopLinkException;
 import oracle.toplink.sessions.DatabaseSession;
 import oracle.toplink.sessions.Session;
 
@@ -35,6 +34,7 @@ public class SingleSessionFactory implements SessionFactory {
 
 	private final Session session;
 
+
 	/**
 	 * Create a new SingleSessionFactory with the given Session.
 	 * @param session the TopLink Session to hold
@@ -42,6 +42,7 @@ public class SingleSessionFactory implements SessionFactory {
 	public SingleSessionFactory(Session session) {
 		this.session = session;
 	}
+
 
 	/**
 	 * Return the held TopLink Session as-is.
@@ -62,9 +63,10 @@ public class SingleSessionFactory implements SessionFactory {
 	 * Throws an UnsupportedOperationException: SingleSessionFactory does not
 	 * support transaction-aware Sessions. Use ServerSessionFactory instead.
 	 */
-	public Session createTransactionAwareSession() throws TopLinkException {
+	public Session createTransactionAwareSession() {
 		throw new UnsupportedOperationException("SingleSessionFactory does not support transaction-aware Sessions");
 	}
+
 
 	/**
 	 * Shut the pre-configured TopLink Session down.

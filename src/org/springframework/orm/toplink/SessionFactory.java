@@ -71,8 +71,8 @@ public interface SessionFactory {
 
 	/**
 	 * Create a new transaction-aware TopLink Session that exposes the currently
-	 * active Session and UnitOfWork via <code>Session.getActiveSession</code>
-	 * and <code>Session.getActiveUnitOfWork</code>, respectively.
+	 * active Session and UnitOfWork via <code>Session.getActiveSession()</code>
+	 * and <code>Session.getActiveUnitOfWork()</code>, respectively.
 	 * <p>Such a Session reference can be used analogously to a managed TopLink
 	 * Session in a JTA environment, with Spring-managed transactions backing it.
 	 * <p>It is usually preferable to let DAOs work with a full SessionFactory,

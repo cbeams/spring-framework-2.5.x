@@ -332,11 +332,11 @@ public class LocalSessionFactory {
 
 		// TopLink 10.1.3 XMLSessionConfigLoader found -> create loader instance
 		// through reflection and fetch specified Session from SessionManager.
-        // This invocation will check if the ClassLoader passed in is the same
-        // as the one used to a session currently loaded with the same "sessionName"
-        // If the ClassLoaders are different, then this LocalSessionFactory is being
-        // re-loaded after a hot-deploy and the existing DatabaseSession will be logged
-        // out and re-built from scratch.
+		// This invocation will check if the ClassLoader passed in is the same
+		// as the one used to a session currently loaded with the same "sessionName"
+		// If the ClassLoaders are different, then this LocalSessionFactory is being
+		// re-loaded after a hot-deploy and the existing DatabaseSession will be logged
+		// out and re-built from scratch.
 		try {
 			Constructor ctor = loaderClass.getConstructor(new Class[] {String.class});
 			Object loader = ctor.newInstance(new Object[] {configLocation});
@@ -375,9 +375,9 @@ public class LocalSessionFactory {
 		if (session instanceof ServerSession) {
 			return new ServerSessionFactory((ServerSession) session);
 		}
-        else if (session instanceof SessionBroker) {
-            return new SessionBrokerSessionFactory((SessionBroker)session);
-        }
+		else if (session instanceof SessionBroker) {
+			return new SessionBrokerSessionFactory((SessionBroker) session);
+		}
 		else {
 			return new SingleSessionFactory(session);
 		}
