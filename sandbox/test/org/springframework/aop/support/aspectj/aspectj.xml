@@ -10,7 +10,7 @@
 		<advice ref="interceptor">
 			<pointcut expression="execution(int org.springframework.beans.ITestBean.getAge())"/>
 		</advice>
-	</aspect>-->
+	</aop:aspect>-->
 
 
 	<bean id="proxyCreator" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>

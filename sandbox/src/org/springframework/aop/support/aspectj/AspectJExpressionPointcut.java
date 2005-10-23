@@ -1,29 +1,32 @@
-
 package org.springframework.aop.support.aspectj;
 
-import org.aspectj.weaver.tools.*;
+import org.aspectj.weaver.tools.JoinPointMatch;
+import org.aspectj.weaver.tools.PointcutExpression;
+import org.aspectj.weaver.tools.PointcutParser;
+import org.aspectj.weaver.tools.PointcutPrimitive;
+import org.aspectj.weaver.tools.ShadowMatch;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.support.AbstractExpressionPointcut;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * @author robh
  */
-public class AspectJExpressionPointcut extends AbstractExpressionPointcut {
+public class AspectJExpressionPointcut extends AbstractExpressionPointcut implements ClassFilter, MethodMatcher {
 
-	private ClassFilter classFilter;
+	private static final Set DEFAULT_SUPPORTED_PRIMITIVES = new HashSet();
 
-	private MethodMatcher methodMatcher;
+	private final Map shadowMapCache = new HashMap();
 
 	private PointcutParser pointcutParser;
 
 	private PointcutExpression pointcutExpression;
-
-	private static final Set DEFAULT_SUPPORTED_PRIMITIVES = new HashSet();
 
 	static {
 		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.EXECUTION);
@@ -31,31 +34,23 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut {
 	}
 
 	public AspectJExpressionPointcut() {
-		pointcutParser = new PointcutParser(getSupportedPrimitives());
-	}
-	
-	public AspectJExpressionPointcut(PointcutParser pointcutParser) {
-		this.pointcutParser = pointcutParser;
+		this.pointcutParser = new PointcutParser(getSupportedPrimitives());
 	}
 
 	public ClassFilter getClassFilter() {
 		checkReadyToMatch();
-		return this.classFilter;
+		return this;
 	}
 
 	public MethodMatcher getMethodMatcher() {
 		checkReadyToMatch();
-		return this.methodMatcher;
+		return this;
 	}
 
 	public void onSetExpression(String expression) {
 		this.pointcutExpression = this.pointcutParser.parsePointcutExpression(expression);
-
-
-		this.classFilter = new AspectJExpressionClassFilter(this.pointcutExpression, expression);
-		this.methodMatcher = new AspectJExpressionMethodMatcher(this.pointcutExpression, expression);
 	}
-	
+
 	public PointcutExpression getPointcutExpression() {
 		return this.pointcutExpression;
 	}
@@ -70,52 +65,42 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut {
 		}
 	}
 
-	private static class AspectJExpressionClassFilter implements ClassFilter {
 
-		private PointcutExpression pointcutExpression;
+	public boolean matches(Class targetClass) {
+		return this.pointcutExpression.couldMatchJoinPointsInType(targetClass);
+	}
 
-		private String expression;
+	public boolean isRuntime() {
+		return this.pointcutExpression.mayNeedDynamicTest();
+	}
 
-		public AspectJExpressionClassFilter(PointcutExpression pointcutExpression, String expression) {
-			this.pointcutExpression = pointcutExpression;
-			this.expression = expression;
+	public boolean matches(Method method, Class targetClass) {
+		ShadowMatch shadowMatch = this.pointcutExpression.matchesMethodExecution(method);
+		return shadowMatch.maybeMatches();
+	}
+
+	public boolean matches(Method method, Class targetClass, Object[] args) {
+		ShadowMatch shadowMatch = this.pointcutExpression.matchesMethodExecution(method);
+
+		if (shadowMatch.alwaysMatches()) {
+			return true;
 		}
-
-		public boolean matches(Class targetClass) {
-			return this.pointcutExpression.couldMatchJoinPointsInType(targetClass);
+		else {
+			Object target = null; // soon to be something other than null
+			JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(target, target, args);
+			return joinPointMatch.matches();
 		}
 	}
 
-	private static class AspectJExpressionMethodMatcher implements MethodMatcher {
+	private ShadowMatch getShadowMatch(Method method) {
+		synchronized (shadowMapCache) {
+			ShadowMatch shadowMatch = (ShadowMatch) shadowMapCache.get(method);
 
-		private PointcutExpression pointcutExpression;
-
-		private String expression;
-
-		public AspectJExpressionMethodMatcher(PointcutExpression pointcutExpression, String expression) {
-			this.pointcutExpression = pointcutExpression;
-			this.expression = expression;
-		}
-
-		public boolean matches(Method method, Class targetClass) {
-			FuzzyBoolean result = this.pointcutExpression.matchesMethodExecution(method, targetClass);
-
-
-			return (result != FuzzyBoolean.NO);
-		}
-
-		public boolean isRuntime() {
-			return this.pointcutExpression.mayNeedDynamicTest();
-		}
-
-		public boolean matches(Method method, Class targetClass, Object[] args) {
-			FuzzyBoolean staticMatch = this.pointcutExpression.matchesMethodExecution(method, targetClass);
-
-			if(staticMatch == FuzzyBoolean.MAYBE) {
-               return this.pointcutExpression.matchesDynamically(null, null, args);
-			} else {
-				return (staticMatch == FuzzyBoolean.YES);
+			if (shadowMatch == null) {
+				shadowMatch = this.pointcutExpression.matchesMethodExecution(method);
+				shadowMapCache.put(method, shadowMatch);
 			}
+			return shadowMatch;
 		}
 	}
 }
