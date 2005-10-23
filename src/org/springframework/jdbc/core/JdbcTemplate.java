@@ -16,6 +16,10 @@
 
 package org.springframework.jdbc.core;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,6 +37,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.SQLWarningException;
+import org.springframework.jdbc.datasource.ConnectionProxy;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -215,7 +220,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		try {
 			Connection conToUse = con;
 			if (this.nativeJdbcExtractor != null) {
+				// Extract native JDBC Connection, castable to OracleConnection or the like.
 				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
+			}
+			else {
+				// Create close-suppressing Connection proxy, also preparing returned Statements.
+				conToUse = createConnectionProxy(con);
 			}
 			return action.doInConnection(conToUse);
 		}
@@ -229,6 +239,24 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		finally {
 			DataSourceUtils.releaseConnection(con, getDataSource());
 		}
+	}
+
+	/**
+	 * Create a close-suppressing proxy for the given JDBC Connection.
+	 * Called by the <code>execute</code> method.
+	 * <p>The proxy also prepares returned JDBC Statements, applying
+	 * statement settings such as fetch size, max rows, and query timeout.
+	 * @param con the JDBC Connection to create a proxy for
+	 * @return the Connection proxy
+	 * @see java.sql.Connection#close()
+	 * @see #execute(ConnectionCallback)
+	 * @see #applyStatementSettings
+	 */
+	protected Connection createConnectionProxy(Connection con) {
+		return (Connection) Proxy.newProxyInstance(
+				ConnectionProxy.class.getClassLoader(),
+				new Class[] {ConnectionProxy.class},
+				new CloseSuppressingInvocationHandler(con));
 	}
 
 
@@ -1015,6 +1043,59 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			return null;
 		}
 	}
+
+
+	/**
+	 * Invocation handler that suppresses close calls on JDBC COnnections.
+	 * Also prepares returned Statement (Prepared/CallbackStatement) objects.
+	 * @see java.sql.Connection#close()
+	 */
+	private class CloseSuppressingInvocationHandler implements InvocationHandler {
+
+		private final Connection target;
+
+		public CloseSuppressingInvocationHandler(Connection target) {
+			this.target = target;
+		}
+
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			// Invocation on ConnectionProxy interface coming in...
+
+			if (method.getName().equals("getTargetConnection")) {
+				// Handle getTargetConnection method: return underlying Connection.
+				return this.target;
+			}
+			else if (method.getName().equals("equals")) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+			}
+			else if (method.getName().equals("hashCode")) {
+				// Use hashCode of PersistenceManager proxy.
+				return new Integer(hashCode());
+			}
+			else if (method.getName().equals("close")) {
+				// Handle close method: suppress, not valid.
+				return null;
+			}
+
+			// Invoke method on target Connection.
+			try {
+				Object retVal = method.invoke(this.target, args);
+
+				// If return value is a JDBC Statement, apply statement settings
+				// (fetch size, max rows, transaction timeout).
+				if (retVal instanceof Statement) {
+					applyStatementSettings(((Statement) retVal));
+				}
+
+				return retVal;
+			}
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
+		}
+	}
+
 
 
 	/**

@@ -44,6 +44,7 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
+import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractorAdapter;
 
 /** 
  * Mock object based tests for JdbcTemplate.
@@ -252,10 +253,8 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		mockResultSet.close();
 		ctrlResultSet.setVoidCallable();
 
-		MockControl ctrlStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement =
-			(PreparedStatement) ctrlStatement.getMock();
+		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
 		if (fetchSize != null) {
 			mockStatement.setFetchSize(fetchSize.intValue());
 		}
@@ -359,9 +358,36 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		replay();
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		template.setNativeJdbcExtractor(new PlainNativeJdbcExtractor());
 		Object result = template.execute(new ConnectionCallback() {
 			public Object doInConnection(Connection con) {
-				assertEquals(con, mockConnection);
+				assertSame(mockConnection, con);
+				return "test";
+			}
+		});
+
+		assertEquals("test", result);
+	}
+
+	public void testConnectionCallbackWithStatementSettings() throws Exception {
+		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
+		mockConnection.prepareStatement("some SQL");
+		ctrlConnection.setReturnValue(mockStatement, 1);
+		mockStatement.setFetchSize(10);
+		ctrlStatement.setVoidCallable(1);
+		mockStatement.setMaxRows(20);
+		ctrlStatement.setVoidCallable(1);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable(1);
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		Object result = template.execute(new ConnectionCallback() {
+			public Object doInConnection(Connection con) throws SQLException {
+				PreparedStatement ps = con.prepareStatement("some SQL");
+				ps.close();
+				assertSame(mockConnection, new PlainNativeJdbcExtractor().getNativeConnection(con));
 				return "test";
 			}
 		});
@@ -1671,6 +1697,14 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		// verify confirms if test is successful by checking if close() called
 		ctrlResultSet.verify();
 		ctrlCallable.verify();
+	}
+
+
+	private static class PlainNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
+
+		protected Connection doGetNativeConnection(Connection con) throws SQLException {
+			return con;
+		}
 	}
 
 
