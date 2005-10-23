@@ -136,7 +136,7 @@ public interface InputStreamSource {
       a <literal>String</literal> argument which is meant to represent a path.
       For the latter case, a JavaBeans <literal>PropertyEditor</literal> will
       ultimately decide which type of Resource to create. If the path string
-      contains a few well known (to it, that is) prefixes such as
+      contains a few well-known (to it, that is) prefixes such as
       <literal>classpath:</literal>, it will create an appropriate specialized
       <literal>Resource</literal> for that prefix. However, if it doesn't
       recognize the prefiix, it will assume the this is just a standard URL
@@ -379,7 +379,7 @@ public interface InputStreamSource {
 
       <para>One use for this mechanism is when doing component-style
       application assembly. All components can 'publish' context definition
-      fragments to a well know location path, and when the final application
+      fragments to a well-known location path, and when the final application
       context is created using the same path prefixed via
       <literal>classpath*</literal>:, all component fragments will be picked
       up automatically.</para>
