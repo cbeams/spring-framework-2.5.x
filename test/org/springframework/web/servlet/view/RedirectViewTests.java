@@ -114,6 +114,16 @@ public class RedirectViewTests extends TestCase {
 		test(m, url, false, expectedUrlForEncoding);
 	}
 	
+	public void testParamWithAnchor() throws Exception {
+		String url = "http://url.somewhere.com/test.htm#myAnchor";
+		String key = "foo";
+		String val = "bar";
+		Map m = new HashMap();
+		m.put(key, val);
+		String expectedUrlForEncoding = "http://url.somewhere.com/test.htm" + "?" + key + "=" + val + "#myAnchor";
+		test(m, url, false, expectedUrlForEncoding);
+	}
+
 	public void testObjectConversion() throws Exception {
 		String url = "http://url.somewhere.com";
 		String key = "foo";

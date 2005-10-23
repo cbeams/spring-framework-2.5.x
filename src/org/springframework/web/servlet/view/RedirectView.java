@@ -60,7 +60,7 @@ import org.springframework.core.JdkVersion;
 public class RedirectView extends AbstractUrlBasedView {
 
 	public static final String DEFAULT_ENCODING_SCHEME = "UTF-8";
-	
+
 
 	private boolean contextRelative = false;
 
@@ -154,10 +154,10 @@ public class RedirectView extends AbstractUrlBasedView {
 	protected final void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-		// prepare target URL
+		// Prepare target URL.
 		StringBuffer targetUrl = new StringBuffer();
 		if (this.contextRelative && getUrl().startsWith("/")) {
-			// do not apply context path to relative URLs
+			// Do not apply context path to relative URLs.
 			targetUrl.append(request.getContextPath());
 		}
 		targetUrl.append(getUrl());
@@ -178,7 +178,17 @@ public class RedirectView extends AbstractUrlBasedView {
 	protected void appendQueryProperties(StringBuffer targetUrl, Map model, String encodingScheme)
 			throws UnsupportedEncodingException {
 
-		// if there are not already some parameters, we need a ?
+		// Extract anchor fragment, if any.
+		// The following code does not use JDK 1.4's StringBuffer.indexOf(String)
+		// method to retain JDK 1.3 compatibility.
+		String fragment = null;
+		int anchorIndex = targetUrl.toString().indexOf('#');
+		if (anchorIndex > -1) {
+			fragment = targetUrl.substring(anchorIndex);
+			targetUrl.delete(anchorIndex, targetUrl.length());
+		}
+
+		// If there aren'nt already some parameters, we need a "?".
 		boolean first = (getUrl().indexOf('?') < 0);
 		Iterator entries = queryProperties(model).entrySet().iterator();
 		while (entries.hasNext()) {
@@ -194,6 +204,11 @@ public class RedirectView extends AbstractUrlBasedView {
 			String encodedValue =
 					(entry.getValue() != null ? urlEncode(entry.getValue().toString(), encodingScheme) : "");
 			targetUrl.append(encodedKey).append('=').append(encodedValue);
+		}
+
+		// Append anchor fragment, if any, to end of URL.
+		if (fragment != null) {
+			targetUrl.append(fragment);
 		}
 	}
 
@@ -243,11 +258,11 @@ public class RedirectView extends AbstractUrlBasedView {
 			throws IOException {
 
 		if (http10Compatible) {
-			// always send status code 302
+			// Always send status code 302.
 			response.sendRedirect(response.encodeRedirectURL(targetUrl));
 		}
 		else {
-			// correct HTTP status code is 303, in particular for POST requests
+			// Correct HTTP status code is 303, in particular for POST requests.
 			response.setStatus(303);
 			response.setHeader("Location", response.encodeRedirectURL(targetUrl));
 		}
