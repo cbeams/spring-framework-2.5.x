@@ -699,7 +699,7 @@ public interface HibernateOperations {
 	 * @param firstResult the index of the first result object to be retrieved
 	 * (numbered from 0)
 	 * @param maxResults the maximum number of result objects to retrieve
-	 * (or 0 for no limit)
+	 * (or <=0 for no limit)
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.criterion.DetachedCriteria#getExecutableCriteria(org.hibernate.Session)
@@ -725,7 +725,7 @@ public interface HibernateOperations {
 	 * @param firstResult the index of the first result object to be retrieved
 	 * (numbered from 0)
 	 * @param maxResults the maximum number of result objects to retrieve
-	 * (or 0 for no limit)
+	 * (or <=0 for no limit)
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.criterion.Example#create(Object)

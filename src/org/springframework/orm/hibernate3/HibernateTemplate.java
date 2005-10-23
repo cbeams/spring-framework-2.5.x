@@ -930,7 +930,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	//-------------------------------------------------------------------------
 
 	public List findByCriteria(DetachedCriteria criteria) throws DataAccessException {
-		return findByCriteria(criteria, 0, 0);
+		return findByCriteria(criteria, -1, -1);
 	}
 
 	public List findByCriteria(final DetachedCriteria criteria, final int firstResult, final int maxResults)
@@ -941,7 +941,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				Criteria executableCriteria = criteria.getExecutableCriteria(session);
 				prepareCriteria(executableCriteria);
-				if (firstResult > 0) {
+				if (firstResult >= 0) {
 					executableCriteria.setFirstResult(firstResult);
 				}
 				if (maxResults > 0) {
@@ -953,7 +953,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	public List findByExample(Object exampleEntity) throws DataAccessException {
-		return findByExample(exampleEntity, 0, 0);
+		return findByExample(exampleEntity, -1, -1);
 	}
 
 	public List findByExample(final Object exampleEntity, final int firstResult, final int maxResults)
@@ -965,7 +965,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				Criteria executableCriteria = session.createCriteria(exampleEntity.getClass());
 				executableCriteria.add(Example.create(exampleEntity));
 				prepareCriteria(executableCriteria);
-				if (firstResult > 0) {
+				if (firstResult >= 0) {
 					executableCriteria.setFirstResult(firstResult);
 				}
 				if (maxResults > 0) {
