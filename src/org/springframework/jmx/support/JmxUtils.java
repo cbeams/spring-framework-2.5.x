@@ -24,6 +24,8 @@ import javax.management.DynamicMBean;
 import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
+import javax.management.MalformedObjectNameException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -209,10 +211,29 @@ public class JmxUtils {
 		Class[] implementedInterfaces = clazz.getInterfaces();
 		String mbeanInterfaceName = clazz.getName() + MBEAN_SUFFIX;
 		for (int x = 0; x < implementedInterfaces.length; x++) {
-			if (implementedInterfaces[x].getName().equals(mbeanInterfaceName)) {
+			Class iface = implementedInterfaces[x];
+			if (iface.getName().equals(mbeanInterfaceName) || hasMBeanInterface(iface)) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Attempts to covert the supplied <code>Object</code> to an instance
+	 * {@link javax.management.ObjectName}. If the supplied	<code>Object</code> is
+	 * already an instance of {@link javax.management.ObjectName} then it is returned
+	 * as is. If the <code>Object</code> is an instance of <code>String</code> it is treated
+	 * as the <code>String</code> form the {@link javax.management.ObjectName}. Any other type
+	 * results in an {@link IllegalArgumentException}.
+	 */
+	public static ObjectName convertToObjectName(Object value) throws MalformedObjectNameException {
+		if(value instanceof ObjectName) {
+			return (ObjectName) value;
+		} else if(value instanceof String) {
+			return ObjectNameManager.getInstance((String)value);
+		} else {
+			throw new IllegalArgumentException("Unable to convert object of type [" + value.getClass() + "] to ObjectName.");
+		}
 	}
 }

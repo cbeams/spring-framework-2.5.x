@@ -21,6 +21,8 @@ import java.beans.PropertyDescriptor;
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+import javax.management.ObjectName;
+import javax.management.MalformedObjectNameException;
 
 import junit.framework.TestCase;
 
@@ -67,6 +69,10 @@ public class JmxUtilsTests extends TestCase {
 				JmxUtils.isMBean(abc.getClass()));
 	}
 
+	public void testSimpleMBeanWithExtendedInterface() throws Exception {
+		assertTrue("MBean interface via extension not detected correctly", JmxUtils.isMBean(FlowRegistryImpl.class));
+	}
+
 	public void testGetAttributeNameWithStrictCasing() {
 		PropertyDescriptor pd = new BeanWrapperImpl(AttributeTest.class).getPropertyDescriptor("name");
 		String attributeName = JmxUtils.getAttributeName(pd, true);
@@ -77,6 +83,20 @@ public class JmxUtilsTests extends TestCase {
 		PropertyDescriptor pd = new BeanWrapperImpl(AttributeTest.class).getPropertyDescriptor("name");
 		String attributeName = JmxUtils.getAttributeName(pd, false);
 		assertEquals("Incorrect casing on attribute name", "name", attributeName);
+	}
+
+	public void testConvertToObjectName() throws MalformedObjectNameException {
+		ObjectName objectName = ObjectNameManager.getInstance("spring:name=Test");
+		assertEquals(objectName, JmxUtils.convertToObjectName(objectName));
+		assertEquals(objectName, JmxUtils.convertToObjectName(objectName.toString()));
+		
+		try {
+			JmxUtils.convertToObjectName(new Integer(1));
+			fail("Should not be able to convert Integer to ObjectName");
+		} catch(IllegalArgumentException ex) {
+			//desired
+		}
+
 	}
 
 
@@ -150,4 +170,15 @@ public class JmxUtilsTests extends TestCase {
 
 	}
 
+	private static interface FlowRegistryMBean {
+
+	}
+
+	private static interface FlowRegistry extends FlowRegistryMBean {
+
+	}
+
+	private static class FlowRegistryImpl implements FlowRegistry {
+
+	}
 }
