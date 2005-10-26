@@ -16,7 +16,10 @@
 package org.springframework.util;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -104,6 +107,56 @@ public abstract class ReflectionUtils2 {
 		 * @throws IllegalAccessException
 		 */
 		void doWith(Field f) throws IllegalArgumentException, IllegalAccessException;
+	}
+	
+	
+	public static void doWithMethods(Class targetClass, MethodCallback mc) throws IllegalArgumentException {		
+		// Keep backing up the inheritance hierarchy
+		do {
+			// Copy each field declared on this class unless it's static or file
+			Method[] methods = targetClass.getDeclaredMethods();
+			
+			log.debug("Found " + methods.length + " methods on " + targetClass);
+			for (int i = 0; i < methods.length; i++) {
+//				 if (ff != null && !ff.matches(fields[i]))
+//					 continue;
+//						 
+				try {
+					if (!methods[i].isAccessible()) {
+						methods[i].setAccessible(true);					
+					}
+					mc.doWith(methods[i]);
+				}
+				catch (IllegalAccessException ex) {
+					throw new IllegalStateException("Shouldn't be illegal to access method '" + methods[i].getName() + "': " + ex);
+				}
+			}
+			
+			targetClass = targetClass.getSuperclass();
+		} while (targetClass != null);
+	}
+	
+	/**
+	 * Get all declared methods on the leaf class and all superclasses.
+	 * Leaf class methods are included first.
+	 * @param leafClass
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
+	public static Method[] getAllDeclaredMethods(Class leafClass) throws IllegalArgumentException {
+		// TODO need a set? unique by name and args!? No, will have most specific first
+		final List l = new LinkedList();
+		doWithMethods(leafClass, new MethodCallback() {
+			public void doWith(Method m) throws IllegalArgumentException ,IllegalAccessException {
+				l.add(m);
+			}
+		});
+		return (Method[]) l.toArray(new Method[l.size()]);
+	}
+	
+	
+	public interface MethodCallback {
+		void doWith(Method m) throws IllegalArgumentException, IllegalAccessException;
 	}
 	
 	/**
