@@ -89,6 +89,11 @@ public class ScopedProxyFactoryBean extends AbstractSingletonProxyFactoryBean
 		pf.copyFrom(this);
 		pf.setTargetSource(scopedTargetSource);
 		
+		if (scopedTargetSource.getTargetClass().isInterface()) {
+			pf.addInterface(scopedTargetSource.getTargetClass());
+			pf.setProxyTargetClass(false);
+		}
+		
 		// Add an introduction that implements only the
 		// methods on ScopedObject
 		pf.addAdvice(new DelegatingIntroductionInterceptor(new DefaultScopedObject(handle)));						
