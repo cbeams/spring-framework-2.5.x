@@ -32,16 +32,6 @@ import java.text.ParseException;
  */
 public abstract class NumberUtils {
 
-	/** Base for hexadecimal numbers */
-	private static final int BASE_HEX = 16;
-
-	/** Base for decimal numbers */
-	private static final int BASE_DEC = 10;
-
-	/** Prefix for hexadecimal numbers */
-	protected static final String HEX_PREFIX = "0x";
-
-
 	/**
 	 * Convert the given number into an instance of the given target class.
 	 * @param number the number to convert
@@ -98,46 +88,41 @@ public abstract class NumberUtils {
 
 	/**
 	 * Parse the given text into a number instance of the given target class,
-	 * using the corresponding default <code>valueOf</code> methods. Trims the
+	 * using the corresponding default <code>decode</code> methods. Trims the
 	 * input <code>String</code> before attempting to parse the number.
-	 * Supports numbers in hex format (with leading 0x).
+	 * Supports numbers in hex format (with leading 0x) and in octal format (with
+	 * leading 0).
 	 * @param text the text to convert
 	 * @param targetClass the target class to parse into
 	 * @return the parsed number
 	 * @throws IllegalArgumentException if the target class is not supported
 	 * (i.e. not a standard Number subclass as included in the JDK)
-	 * @see java.lang.Byte#valueOf
-	 * @see java.lang.Short#valueOf
-	 * @see java.lang.Integer#valueOf
-	 * @see java.lang.Long#valueOf
-	 * @see java.math.BigInteger#BigInteger(String)
+	 * @see java.lang.Byte#decode
+	 * @see java.lang.Short#decode
+	 * @see java.lang.Integer#decode
+	 * @see java.lang.Long#decode
+	 * @see #decodeBigInteger(String)
 	 * @see java.lang.Float#valueOf
 	 * @see java.lang.Double#valueOf
 	 * @see java.math.BigDecimal#BigDecimal(String)
 	 */
 	public static Number parseNumber(String text, Class targetClass) {
 		String trimmed = text.trim();
-		int radix = BASE_DEC;
-
-		if(isHexString(trimmed)) {
-			radix = BASE_HEX;
-			trimmed = trimmed.substring(HEX_PREFIX.length());
-		}
 
 		if(targetClass.equals(Byte.class)) {
-			return Byte.valueOf(trimmed, radix);
+			return Byte.decode(trimmed);
 		}
 		else if (targetClass.equals(Short.class)) {
-			return Short.valueOf(trimmed, radix);
+			return Short.decode(trimmed);
 		}
 		else if (targetClass.equals(Integer.class)) {
-			return Integer.valueOf(trimmed, radix);
+			return Integer.decode(trimmed);
 		}
 		else if (targetClass.equals(Long.class)) {
-			return Long.valueOf(trimmed, radix);
+			return Long.decode(trimmed);
 		}
 		else if (targetClass.equals(BigInteger.class)) {
-			return new BigInteger(trimmed, radix);
+			return decodeBigInteger(trimmed);
 		}
 		else if (targetClass.equals(Float.class)) {
 			return Float.valueOf(trimmed);
@@ -178,11 +163,37 @@ public abstract class NumberUtils {
 	}
 
 	/**
-	 * Indicates whether the supplied text starts with either <code>0x</code> or
-	 * <code>0X</code>, indicating a hex number.
+	 * Decode a {@link java.math.BigInteger} from a {@link String} value.
+	 * Supports decimal, hex and octal notation.
+	 * @see BigInteger#BigInteger(String, int)
 	 */
-	public static boolean isHexString(String text) {
-		return StringUtils.startsWithIgnoreCase(text, HEX_PREFIX);
+	private static BigInteger decodeBigInteger(String value) {
+		int radix = 10;
+		int index = 0;
+		boolean negative = false;
+
+		// Handle minus sign, if present
+		if (value.startsWith("-")) {
+			negative = true;
+			index++;
+		}
+
+		// Handle radix specifier, if present
+		if (value.startsWith("0x", index) || value.startsWith("0X", index)) {
+			index += 2;
+			radix = 16;
+		}
+		else if (value.startsWith("#", index)) {
+			index++;
+			radix = 16;
+		}
+		else if (value.startsWith("0", index) && value.length() > 1 + index) {
+			index++;
+			radix = 8;
+		}
+
+		BigInteger result = new BigInteger(value.substring(index), radix);
+		return (negative ? result.negate() : result);
 	}
 
 }

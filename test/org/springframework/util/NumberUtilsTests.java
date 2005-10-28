@@ -18,6 +18,8 @@ package org.springframework.util;
 
 import junit.framework.TestCase;
 
+import java.math.BigInteger;
+
 /**
  * @author Rob Harrop
  */
@@ -60,18 +62,72 @@ public class NumberUtilsTests extends TestCase {
 		String aShort = "0x" + Integer.toHexString(new Short(Short.MAX_VALUE).intValue());
 		String anInteger = "0x" + Integer.toHexString(Integer.MAX_VALUE);
 		String aLong = "0x" + Long.toHexString(Long.MAX_VALUE);
+		String aReallyBigInt = "FEBD4E677898DFEBFFEE44";
 
-		assertEquals("Byte did not parse", new Byte(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class));
-		assertEquals("Short did not parse", new Short(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class));
-		assertEquals("Integer did not parse", new Integer(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class));
-		assertEquals("Long did not parse", new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
+		assertByteEquals(aByte);
+		assertShortEquals(aShort);
+		assertIntegerEquals(anInteger);
+		assertLongEquals(aLong);
+		assertEquals("BigInteger did not parse", new BigInteger(aReallyBigInt, 16), NumberUtils.parseNumber("0x" + aReallyBigInt, BigInteger.class));
 	}
 
-	public void testIsHexString() {
-		assertTrue("Should be a hex string", NumberUtils.isHexString("0XFF"));
-		assertTrue("Should be a hex string", NumberUtils.isHexString("0xFF"));
-		assertFalse("Should not be a hex string", NumberUtils.isHexString("0FF"));
+	public void testParseAsOctal() {
+		String aByte = "0" + Integer.toOctalString(Byte.MAX_VALUE);
+		String aShort = "0" + Integer.toOctalString(Short.MAX_VALUE);
+		String anInteger = "0" + Integer.toOctalString(Integer.MAX_VALUE);
+		String aLong = "0" + Long.toOctalString(Long.MAX_VALUE);
+		String aBigInteger = "7776554354453435353631212";
 
+		assertByteEquals(aByte);
+		assertShortEquals(aShort);
+		assertIntegerEquals(anInteger);
+		assertLongEquals(aLong);
+		assertEquals("BigInteger did not parse", new BigInteger(aBigInteger, 8), NumberUtils.parseNumber("0" + aBigInteger, BigInteger.class));
 	}
 
+	public void testParseNegativeHex() throws Exception {
+		String aByte = "-0x80";
+		String aShort = "-0x8000";
+		String anInteger = "-0x80000000";
+		String aLong = "-0x8000000000000000";
+		String aReallyBigInt = "FEBD4E677898DFEBFFEE44";
+
+		assertNegativeByteEquals(aByte);
+		assertNegativeShortEquals(aShort);
+		assertNegativeIntegerEquals(anInteger);
+		assertNegativeLongEquals(aLong);
+		assertEquals("BigInteger did not parse", new BigInteger(aReallyBigInt, 16).negate(), NumberUtils.parseNumber("-0x" + aReallyBigInt, BigInteger.class));
+	}
+
+	private void assertLongEquals(String aLong) {
+		assertEquals("Long did not parse", Long.MAX_VALUE, NumberUtils.parseNumber(aLong, Long.class).longValue());
+	}
+
+	private void assertIntegerEquals(String anInteger) {
+		assertEquals("Integer did not parse", Integer.MAX_VALUE, NumberUtils.parseNumber(anInteger, Integer.class).intValue());
+	}
+
+	private void assertShortEquals(String aShort) {
+		assertEquals("Short did not parse", Short.MAX_VALUE, NumberUtils.parseNumber(aShort, Short.class).shortValue());
+	}
+
+	private void assertByteEquals(String aByte) {
+		assertEquals("Byte did not parse", Byte.MAX_VALUE, NumberUtils.parseNumber(aByte, Byte.class).byteValue());
+	}
+
+	private void assertNegativeLongEquals(String aLong) {
+		assertEquals("Long did not parse", Long.MIN_VALUE, NumberUtils.parseNumber(aLong, Long.class).longValue());
+	}
+
+	private void assertNegativeIntegerEquals(String anInteger) {
+		assertEquals("Integer did not parse", Integer.MIN_VALUE, NumberUtils.parseNumber(anInteger, Integer.class).intValue());
+	}
+
+	private void assertNegativeShortEquals(String aShort) {
+		assertEquals("Short did not parse", Short.MIN_VALUE, NumberUtils.parseNumber(aShort, Short.class).shortValue());
+	}
+
+	private void assertNegativeByteEquals(String aByte) {
+		assertEquals("Byte did not parse", Byte.MIN_VALUE, NumberUtils.parseNumber(aByte, Byte.class).byteValue());
+	}
 }
