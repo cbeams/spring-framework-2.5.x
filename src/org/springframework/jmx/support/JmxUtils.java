@@ -212,7 +212,7 @@ public class JmxUtils {
 		String mbeanInterfaceName = clazz.getName() + MBEAN_SUFFIX;
 		for (int x = 0; x < implementedInterfaces.length; x++) {
 			Class iface = implementedInterfaces[x];
-			if (iface.getName().equals(mbeanInterfaceName) || hasMBeanInterface(iface)) {
+			if (iface.getName().equals(mbeanInterfaceName)) {
 				return true;
 			}
 		}

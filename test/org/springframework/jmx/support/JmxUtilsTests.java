@@ -69,10 +69,6 @@ public class JmxUtilsTests extends TestCase {
 				JmxUtils.isMBean(abc.getClass()));
 	}
 
-	public void testSimpleMBeanWithExtendedInterface() throws Exception {
-		assertTrue("MBean interface via extension not detected correctly", JmxUtils.isMBean(FlowRegistryImpl.class));
-	}
-
 	public void testGetAttributeNameWithStrictCasing() {
 		PropertyDescriptor pd = new BeanWrapperImpl(AttributeTest.class).getPropertyDescriptor("name");
 		String attributeName = JmxUtils.getAttributeName(pd, true);
@@ -167,18 +163,6 @@ public class JmxUtilsTests extends TestCase {
 
 
 	public static class Abc extends Bar {
-
-	}
-
-	private static interface FlowRegistryMBean {
-
-	}
-
-	private static interface FlowRegistry extends FlowRegistryMBean {
-
-	}
-
-	private static class FlowRegistryImpl implements FlowRegistry {
 
 	}
 }
