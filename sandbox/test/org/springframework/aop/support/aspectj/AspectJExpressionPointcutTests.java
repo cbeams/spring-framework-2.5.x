@@ -1,16 +1,13 @@
-
 package org.springframework.aop.support.aspectj;
 
 import junit.framework.TestCase;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.weaver.tools.PointcutPrimitive;
 import org.aspectj.weaver.tools.UnsupportedPointcutPrimitiveException;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.TestBean;
 
 import java.lang.reflect.Method;
@@ -25,12 +22,6 @@ public class AspectJExpressionPointcutTests extends TestCase {
 	private Method setAge;
 
 	private Method setSomeNumber;
-
-	public void setUp() throws NoSuchMethodException {
-		getAge = TestBean.class.getMethod("getAge", null);
-		setAge = TestBean.class.getMethod("setAge", new Class[]{int.class});
-		setSomeNumber = TestBean.class.getMethod("setSomeNumber", new Class[]{Number.class});
-	}
 
 	public void testMatchExplicit() {
 		String expression = "execution(int org.springframework.beans.TestBean.getAge())";
@@ -49,6 +40,12 @@ public class AspectJExpressionPointcutTests extends TestCase {
 		assertFalse("Expression should match setAge() method", methodMatcher.matches(setAge, TestBean.class));
 	}
 
+
+	public void setUp() throws NoSuchMethodException {
+		getAge = TestBean.class.getMethod("getAge", null);
+		setAge = TestBean.class.getMethod("setAge", new Class[]{int.class});
+		setSomeNumber = TestBean.class.getMethod("setSomeNumber", new Class[]{Number.class});
+	}
 
 	public void testMatchWithTypePattern() throws Exception {
 		String expression = "execution(* *..TestBean.*Age(..))";
@@ -129,7 +126,8 @@ public class AspectJExpressionPointcutTests extends TestCase {
 		try {
 			getPointcut(expression);
 			fail("Invalid expression should throw IllegalArgumentException");
-		} catch(IllegalArgumentException ex) {
+		}
+		catch (IllegalArgumentException ex) {
 			assertTrue(true);
 			System.out.println(ex.getMessage());
 		}

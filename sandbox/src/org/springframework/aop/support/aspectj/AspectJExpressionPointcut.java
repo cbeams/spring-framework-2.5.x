@@ -75,12 +75,12 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	}
 
 	public boolean matches(Method method, Class targetClass) {
-		ShadowMatch shadowMatch = this.pointcutExpression.matchesMethodExecution(method);
+		ShadowMatch shadowMatch = getShadowMatch(method);
 		return shadowMatch.maybeMatches();
 	}
 
 	public boolean matches(Method method, Class targetClass, Object[] args) {
-		ShadowMatch shadowMatch = this.pointcutExpression.matchesMethodExecution(method);
+		ShadowMatch shadowMatch = getShadowMatch(method);
 
 		if (shadowMatch.alwaysMatches()) {
 			return true;
