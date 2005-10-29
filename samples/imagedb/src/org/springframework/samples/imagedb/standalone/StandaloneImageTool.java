@@ -15,7 +15,8 @@ import org.springframework.util.StopWatch;
  * Standalone sample that simply lists the image descriptors in the database.
  *
  * <p>Accesses the very same "WEB-INF/applicationContext.xml" file as the web
- * application. Needs to be executed in the web app root directory.
+ * application. Needs to be executed in the web app root directory (that is,
+ * with the web app root directory as JVM working directory).
  *
  * <p>Takes an optional command line argument that specifies the number of
  * calls to initiate for each image, a la "StandaloneImageTool 5". Can be
@@ -25,6 +26,9 @@ import org.springframework.util.StopWatch;
  * @since 08.01.2004
  */
 public class StandaloneImageTool {
+
+	public static final String CONTEXT_CONFIG_LOCATION = "WEB-INF/applicationContext.xml";
+
 
 	private final ImageDatabase imageDatabase;
 
@@ -45,7 +49,7 @@ public class StandaloneImageTool {
 			}
 			stopWatch.stop();
 			System.out.println("Found image '" + image.getName() + "' with content size " + os.size() +
-			                   " and description length " + image.getDescriptionLength());
+					" and description length " + image.getDescriptionLength());
 		}
 		System.out.println(stopWatch.prettyPrint());
 	}
@@ -56,7 +60,7 @@ public class StandaloneImageTool {
 		if (args.length > 1 && !"".equals(args[1])) {
 			nrOfCalls = Integer.parseInt(args[1]);
 		}
-		ApplicationContext context = new FileSystemXmlApplicationContext("WEB-INF/applicationContext.xml");
+		ApplicationContext context = new FileSystemXmlApplicationContext(CONTEXT_CONFIG_LOCATION);
 		ImageDatabase idb = (ImageDatabase) context.getBean("imageDatabase");
 		StandaloneImageTool tool = new StandaloneImageTool(idb);
 		tool.listImages(nrOfCalls);
