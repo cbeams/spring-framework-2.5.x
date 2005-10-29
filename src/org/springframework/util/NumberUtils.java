@@ -109,7 +109,7 @@ public abstract class NumberUtils {
 	public static Number parseNumber(String text, Class targetClass) {
 		String trimmed = text.trim();
 
-		if(targetClass.equals(Byte.class)) {
+		if (targetClass.equals(Byte.class)) {
 			return Byte.decode(trimmed);
 		}
 		else if (targetClass.equals(Short.class)) {
@@ -172,13 +172,13 @@ public abstract class NumberUtils {
 		int index = 0;
 		boolean negative = false;
 
-		// Handle minus sign, if present
+		// Handle minus sign, if present.
 		if (value.startsWith("-")) {
 			negative = true;
 			index++;
 		}
 
-		// Handle radix specifier, if present
+		// Handle radix specifier, if present.
 		if (value.startsWith("0x", index) || value.startsWith("0X", index)) {
 			index += 2;
 			radix = 16;

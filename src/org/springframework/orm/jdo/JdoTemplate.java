@@ -70,7 +70,7 @@ import org.springframework.util.ClassUtils;
  * access layer don't need need to be JDO-aware. Setting such a special
  * PlatformTransactionManager is a configuration issue, without introducing
  * code dependencies: For example, switching to JTA is just a matter of
- * Spring configuration (use JtaTransactionManager instead) and JDO vendor
+ * Spring configuration (use JtaTransactionManager instead) and JDO provider
  * configuration, neither affecting application code.
  *
  * <p>LocalPersistenceManagerFactoryBean is the preferred way of obtaining a
@@ -174,9 +174,9 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * code. Default is "false": a PersistenceManager proxy will be returned,
 	 * suppressing <code>close</code> calls and automatically applying transaction
 	 * timeouts (if any).
-	 * <p>As there is often a need to cast to a vendor-specific PersistenceManager
+	 * <p>As there is often a need to cast to a provider-specific PersistenceManager
 	 * class in DAOs that use the JDO 1.0 API, for JDO 2.0 previews and other
-	 * vendor-specific functionality, the exposed proxy implements all interfaces
+	 * provider-specific functionality, the exposed proxy implements all interfaces
 	 * implemented by the original PersistenceManager. If this is not sufficient,
 	 * turn this flag to "true".
 	 * @see JdoCallback
@@ -248,7 +248,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * @param pm the JDO PersistenceManager to create a proxy for
 	 * @return the PersistenceManager proxy, implementing all interfaces
 	 * implemented by the passed-in PersistenceManager object (that is,
-	 * also implementing all vendor-specific extension interfaces)
+	 * also implementing all provider-specific extension interfaces)
 	 * @see javax.jdo.PersistenceManager#close()
 	 * @see #execute(JdoCallback, boolean)
 	 * @see #prepareQuery
@@ -602,7 +602,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * automatically apply the transaction timeout (through the use of a special
 	 * PersistenceManager proxy). You need to set the "exposeNativePersistenceManager"
 	 * property to "false" to activate this. Note that you won't be able to cast
-	 * to a vendor-specific JDO PersistenceManager class anymore then.
+	 * to a provider-specific JDO PersistenceManager class anymore then.
 	 * @param query the JDO query object
 	 * @throws JDOException if the query could not be properly prepared
 	 * @see JdoCallback#doInJdo
@@ -629,7 +629,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			// Invocation on PersistenceManager interface (or vendor-specific extension) coming in...
+			// Invocation on PersistenceManager interface (or provider-specific extension) coming in...
 
 			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.

@@ -16,9 +16,9 @@
 
 package org.springframework.util;
 
-import junit.framework.TestCase;
-
 import java.math.BigInteger;
+
+import junit.framework.TestCase;
 
 /**
  * @author Rob Harrop
@@ -68,7 +68,8 @@ public class NumberUtilsTests extends TestCase {
 		assertShortEquals(aShort);
 		assertIntegerEquals(anInteger);
 		assertLongEquals(aLong);
-		assertEquals("BigInteger did not parse", new BigInteger(aReallyBigInt, 16), NumberUtils.parseNumber("0x" + aReallyBigInt, BigInteger.class));
+		assertEquals("BigInteger did not parse",
+				new BigInteger(aReallyBigInt, 16), NumberUtils.parseNumber("0x" + aReallyBigInt, BigInteger.class));
 	}
 
 	public void testParseAsOctal() {
@@ -82,7 +83,8 @@ public class NumberUtilsTests extends TestCase {
 		assertShortEquals(aShort);
 		assertIntegerEquals(anInteger);
 		assertLongEquals(aLong);
-		assertEquals("BigInteger did not parse", new BigInteger(aBigInteger, 8), NumberUtils.parseNumber("0" + aBigInteger, BigInteger.class));
+		assertEquals("BigInteger did not parse",
+				new BigInteger(aBigInteger, 8), NumberUtils.parseNumber("0" + aBigInteger, BigInteger.class));
 	}
 
 	public void testParseNegativeHex() throws Exception {
@@ -96,7 +98,8 @@ public class NumberUtilsTests extends TestCase {
 		assertNegativeShortEquals(aShort);
 		assertNegativeIntegerEquals(anInteger);
 		assertNegativeLongEquals(aLong);
-		assertEquals("BigInteger did not parse", new BigInteger(aReallyBigInt, 16).negate(), NumberUtils.parseNumber("-0x" + aReallyBigInt, BigInteger.class));
+		assertEquals("BigInteger did not parse",
+				new BigInteger(aReallyBigInt, 16).negate(), NumberUtils.parseNumber("-0x" + aReallyBigInt, BigInteger.class));
 	}
 
 	private void assertLongEquals(String aLong) {
@@ -130,4 +133,5 @@ public class NumberUtilsTests extends TestCase {
 	private void assertNegativeByteEquals(String aByte) {
 		assertEquals("Byte did not parse", Byte.MIN_VALUE, NumberUtils.parseNumber(aByte, Byte.class).byteValue());
 	}
+
 }

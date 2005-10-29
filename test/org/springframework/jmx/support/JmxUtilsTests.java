@@ -165,4 +165,5 @@ public class JmxUtilsTests extends TestCase {
 	public static class Abc extends Bar {
 
 	}
+
 }

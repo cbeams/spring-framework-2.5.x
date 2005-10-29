@@ -101,7 +101,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 				processKey(beanFactory, key, props.getProperty(key));
 			}
 			catch (BeansException ex) {
-				String msg = "Could not process key [" + key + "] in PropertyOverrideConfigurer";
+				String msg = "Could not process key '" + key + "' in PropertyOverrideConfigurer";
 				if (!this.ignoreInvalidKeys) {
 					throw new BeanInitializationException(msg, ex);
 				}
@@ -120,15 +120,15 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 
 		int separatorIndex = key.indexOf(this.beanNameSeparator);
 		if (separatorIndex == -1) {
-			throw new BeanInitializationException("Invalid key [" + key +
-					"]: expected 'beanName" + this.beanNameSeparator + "property'");
+			throw new BeanInitializationException("Invalid key '" + key +
+					"': expected 'beanName" + this.beanNameSeparator + "property'");
 		}
 		String beanName = key.substring(0, separatorIndex);
 		String beanProperty = key.substring(separatorIndex+1);
 		this.beanNames.add(beanName);
 		applyPropertyValue(factory, beanName, beanProperty, value);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Property '" + key + "' set to [" + value + "]");
+			logger.debug("Property '" + key + "' set to value [" + value + "]");
 		}
 	}
 
