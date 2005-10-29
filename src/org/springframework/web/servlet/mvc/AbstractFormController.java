@@ -229,9 +229,12 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 	/**
 	 * Handles two cases: form submissions and showing a new form.
-	 * Delegates the decision between the two to isFormSubmission,
+	 * Delegates the decision between the two to <code>isFormSubmission</code>,
 	 * always treating requests without existing form session attribute
 	 * as new form when using session form mode.
+	 * @see #isFormSubmission
+	 * @see #showNewForm
+	 * @see #processFormSubmission
 	 */
 	protected final ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {

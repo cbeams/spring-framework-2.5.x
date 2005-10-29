@@ -721,6 +721,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
 	 * with the command and the Errors instance, under the specified command name,
 	 * as expected by the "spring:bind" tag.
+	 * <p>You can call the <code>showPage</code> method to return back to the wizard,
+	 * in case of last-minute validation errors having been found that you would
+	 * like to present to the user within the original wizard form.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param command form object with the current wizard state
@@ -729,6 +732,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @throws Exception in case of invalid state or arguments
 	 * @see org.springframework.validation.Errors
 	 * @see org.springframework.validation.BindException#getModel
+	 * @see #showPage(javax.servlet.http.HttpServletRequest, org.springframework.validation.BindException, int)
 	 */
 	protected abstract ModelAndView processFinish(
 			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
