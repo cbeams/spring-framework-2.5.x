@@ -293,10 +293,13 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 					// previously resolved placeholder value.
 					propVal = parseStringValue(propVal, props, originalPlaceholderToUse);
 					buf.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Resolved placeholder '" + placeholder + "' to value [" + propVal + "]");
+					}
 					startIndex = buf.toString().indexOf(this.placeholderPrefix, startIndex + propVal.length());
 				}
 				else if (this.ignoreUnresolvablePlaceholders) {
-					// proceed with unprocessed value
+					// Proceed with unprocessed value.
 					startIndex = buf.toString().indexOf(this.placeholderPrefix, endIndex + this.placeholderSuffix.length());
 				}
 				else {
