@@ -37,4 +37,20 @@ public class LazyInitTargetSourceTests extends TestCase {
 		assertTrue(bf.containsSingleton("target"));
 	}
 
+	public void testCustomLazyInitSingletonTargetSource() {
+		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("customLazyInitTarget.xml", getClass()));
+		bf.preInstantiateSingletons();
+		TestBean tb = (TestBean) bf.getBean("proxy");
+		assertFalse(bf.containsSingleton("target"));
+		assertEquals("Rob Harrop", tb.getName());
+		assertTrue(bf.containsSingleton("target"));
+	}
+
+
+	public static class CustomLazyInitTargetSource extends LazyInitTargetSource {
+
+		protected void postProcessTargetObject(Object targetObject) {
+			((TestBean)targetObject).setName("Rob Harrop");
+		}
+	}
 }
