@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.support.rowset;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
@@ -35,6 +36,10 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  * <code>org.springframework.jdbc.InvalidResultSetAccessException</code>
  * instead (when appropriate).
  *
+ * <p>Note: This interface extends the <code>java.io.Serializable</code>
+ * marker interface. Implementations, which typically hold disconnected data,
+ * are encouraged to be actually serializable (as far as possible).
+ *
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 1.2
@@ -43,7 +48,7 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  * @see org.springframework.jdbc.InvalidResultSetAccessException
  * @see org.springframework.jdbc.core.JdbcTemplate#queryForRowSet
  */
-public interface SqlRowSet {
+public interface SqlRowSet extends Serializable {
 
 	/**
 	 * Retrieves the meta data (number, types and properties for the columns)

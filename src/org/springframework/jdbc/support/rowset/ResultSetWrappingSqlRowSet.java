@@ -16,7 +16,6 @@
 
 package org.springframework.jdbc.support.rowset;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -42,9 +41,9 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  * which implements the ResultSet interface.
  *
  * <p>Note: This class implements the <code>java.io.Serializable</code>
- * marker interface, but is only actually serializable if the disconnected
- * ResultSet/RowSet contained in it is serializable. Most CachedRowSet
- * implementations are, hence this class is marked as serializable upfront.
+ * marker interface through the SqlRowSet interface, but is only actually
+ * serializable if the disconnected ResultSet/RowSet contained in it is
+ * serializable. Most CachedRowSet implementations are serializable.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -52,7 +51,7 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  * @see java.sql.ResultSet
  * @see javax.sql.rowset.CachedRowSet
  */
-public class ResultSetWrappingSqlRowSet implements SqlRowSet, Serializable {
+public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 
 	private final ResultSet resultSet;
 
