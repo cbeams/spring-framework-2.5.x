@@ -22,7 +22,6 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.jar.JarEntry;
@@ -31,6 +30,7 @@ import java.util.jar.JarFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -244,7 +244,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			cl = Thread.currentThread().getContextClassLoader();
 		}
 		Enumeration resourceUrls = cl.getResources(path);
-		Set result = new HashSet();
+		Set result = CollectionFactory.createLinkedSetIfPossible(16);
 		while (resourceUrls.hasMoreElements()) {
 			URL url = (URL) resourceUrls.nextElement();
 			result.add(new UrlResource(url));
@@ -267,7 +267,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		String rootDirPath = determineRootDir(locationPattern);
 		String subPattern = locationPattern.substring(rootDirPath.length());
 		Resource[] rootDirResources = getResources(rootDirPath);
-		Set result = new HashSet();
+		Set result = CollectionFactory.createLinkedSetIfPossible(16);
 		for (int i = 0; i < rootDirResources.length; i++) {
 			Resource rootDirResource = rootDirResources[i];
 			if (isJarResource(rootDirResource)) {
@@ -367,7 +367,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			rootEntryPath = rootEntryPath.substring(0, rootEntryPath.length() - 1);
 		}
 		String jarFileUrlPrefix = JAR_URL_PREFIX + jarFileUrl + JAR_URL_SEPARATOR;
-		Set result = new HashSet();
+		Set result = CollectionFactory.createLinkedSetIfPossible(8);
 		for (Enumeration entries = jarFile.entries(); entries.hasMoreElements();) {
 			JarEntry entry = (JarEntry) entries.nextElement();
 			String entryPath = entry.getName();
@@ -395,7 +395,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			logger.debug("Looking for matching resources in directory tree [" + rootDir.getPath() + "]");
 		}
 		Set matchingFiles = retrieveMatchingFiles(rootDir, subPattern);
-		Set result = new HashSet(matchingFiles.size());
+		Set result = CollectionFactory.createLinkedSetIfPossible(matchingFiles.size());
 		for (Iterator it = matchingFiles.iterator(); it.hasNext();) {
 			File file = (File) it.next();
 			result.add(new FileSystemResource(file));
@@ -421,7 +421,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			fullPattern += "/";
 		}
 		fullPattern = fullPattern + StringUtils.replace(pattern, File.separator, "/");
-		Set result = new HashSet();
+		Set result = CollectionFactory.createLinkedSetIfPossible(8);
 		doRetrieveMatchingFiles(fullPattern, rootDir, result);
 		return result;
 	}
