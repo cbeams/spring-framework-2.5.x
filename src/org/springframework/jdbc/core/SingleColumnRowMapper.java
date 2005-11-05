@@ -81,19 +81,29 @@ public class SingleColumnRowMapper implements RowMapper {
 			if (String.class.equals(this.requiredType)) {
 				result = result.toString();
 			}
-			else if (Number.class.isAssignableFrom(this.requiredType) && Number.class.isInstance(result)) {
+			else if (Number.class.isAssignableFrom(this.requiredType)) {
 				try {
-					result = NumberUtils.convertNumberToTargetClass(((Number) result), this.requiredType);
+					if (result instanceof Number) {
+						// Convert original Number to target Number class.
+						result = NumberUtils.convertNumberToTargetClass(((Number) result), this.requiredType);
+					}
+					else {
+						// Convert stringified value to target Number class.
+						result = NumberUtils.parseNumber(result.toString(), this.requiredType);
+					}
 				}
 				catch (IllegalArgumentException ex) {
-					throw new TypeMismatchDataAccessException(ex.getMessage());
+					throw new TypeMismatchDataAccessException(
+							"Type mismatch affecting row number " + rowNum + " and column type '" +
+							rsmd.getColumnTypeName(1) + "': " + ex.getMessage());
 				}
 			}
 			else {
 				throw new TypeMismatchDataAccessException(
-						"Result object for row number " + rowNum + " and column type '" + rsmd.getColumnTypeName(1) +
-						"' and value [" + result + "] is of type [" + result.getClass().getName() +
-						"] and could not be converted to required type [" + this.requiredType.getName() + "]");
+						"Type mismatch affecting row number " + rowNum + " and column type '" +
+						rsmd.getColumnTypeName(1) + "': Value [" + result + "] is of type [" +
+						result.getClass().getName() + "] and cannot be converted to required type [" +
+						this.requiredType.getName() + "]");
 			}
 		}
 		return result;

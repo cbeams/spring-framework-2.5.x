@@ -51,6 +51,9 @@ public abstract class NumberUtils {
 	public static Number convertNumberToTargetClass(Number number, Class targetClass)
 			throws IllegalArgumentException {
 
+		Assert.notNull(number, "number must not be null");
+		Assert.notNull(targetClass, "targetClass must not be null");
+
 		if (targetClass.isInstance(number)) {
 			return number;
 		}
@@ -81,8 +84,8 @@ public abstract class NumberUtils {
 			return new BigDecimal(number.toString());
 		}
 		else {
-			throw new IllegalArgumentException("Couldn't convert number [" + number +
-					"] to target class [" + targetClass.getName() + "]");
+			throw new IllegalArgumentException("Couldn't convert number [" + number + "] of type [" +
+					number.getClass().getName() + "] to target class [" + targetClass.getName() + "]");
 		}
 	}
 
@@ -107,6 +110,9 @@ public abstract class NumberUtils {
 	 * @see java.math.BigDecimal#BigDecimal(String)
 	 */
 	public static Number parseNumber(String text, Class targetClass) {
+		Assert.notNull(text, "text must not be null");
+		Assert.notNull(targetClass, "targetClass must not be null");
+
 		String trimmed = text.trim();
 
 		if (targetClass.equals(Byte.class)) {
@@ -130,12 +136,12 @@ public abstract class NumberUtils {
 		else if (targetClass.equals(Double.class)) {
 			return Double.valueOf(trimmed);
 		}
-		else if (targetClass.equals(BigDecimal.class)) {
+		else if (targetClass.equals(BigDecimal.class) || targetClass.equals(Number.class)) {
 			return new BigDecimal(trimmed);
 		}
 		else {
 			throw new IllegalArgumentException(
-					"Cannot convert [" + trimmed + "] to target class [" + targetClass.getName() + "]");
+					"Cannot convert String [" + text + "] to target class [" + targetClass.getName() + "]");
 		}
 	}
 
@@ -145,20 +151,29 @@ public abstract class NumberUtils {
 	 * before attempting to parse the number.
 	 * @param text the text to convert
 	 * @param targetClass the target class to parse into
-	 * @param numberFormat the NumberFormat to use for parsing
+	 * @param numberFormat the NumberFormat to use for parsing (if <code>null</code>,
+	 * this method falls back to <code>parseNumber(String, Class)</code>)
 	 * @return the parsed number
 	 * @throws IllegalArgumentException if the target class is not supported
 	 * (i.e. not a standard Number subclass as included in the JDK)
 	 * @see java.text.NumberFormat#parse
 	 * @see #convertNumberToTargetClass
+	 * @see #parseNumber(String, Class)
 	 */
 	public static Number parseNumber(String text, Class targetClass, NumberFormat numberFormat) {
-		try {
-			Number number = numberFormat.parse(text.trim());
-			return convertNumberToTargetClass(number, targetClass);
+		if (numberFormat != null) {
+			Assert.notNull(text, "text must not be null");
+			Assert.notNull(targetClass, "targetClass must not be null");
+			try {
+				Number number = numberFormat.parse(text.trim());
+				return convertNumberToTargetClass(number, targetClass);
+			}
+			catch (ParseException ex) {
+				throw new IllegalArgumentException(ex.getMessage());
+			}
 		}
-		catch (ParseException ex) {
-			throw new IllegalArgumentException(ex.getMessage());
+		else {
+			return parseNumber(text, targetClass);
 		}
 	}
 
