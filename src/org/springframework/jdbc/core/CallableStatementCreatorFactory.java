@@ -161,7 +161,8 @@ public class CallableStatementCreatorFactory {
 			}
 			else {
 				if (this.inParameters == null) {
-					throw new InvalidDataAccessApiUsageException("A ParameterMapper or a Map of parameters must be provided");
+					throw new InvalidDataAccessApiUsageException(
+							"A ParameterMapper or a Map of parameters must be provided");
 				}
 			}
 
@@ -171,7 +172,7 @@ public class CallableStatementCreatorFactory {
 			}
 			else {
 				cs = con.prepareCall(callString, resultSetType,
-														 updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
+						updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
 			}
 
 			// determine CallabeStatement to pass to custom types
@@ -186,7 +187,8 @@ public class CallableStatementCreatorFactory {
 				if (!this.inParameters.containsKey(declaredParameter.getName()) &&
 						!(declaredParameter instanceof SqlOutParameter) && 
 						!(declaredParameter instanceof SqlReturnResultSet)) {
-					throw new InvalidDataAccessApiUsageException("Required input parameter '" + declaredParameter.getName() + "' is missing");
+					throw new InvalidDataAccessApiUsageException(
+							"Required input parameter '" + declaredParameter.getName() + "' is missing");
 				}
 				// the value may still be <code>null</code>
 				Object inValue = this.inParameters.get(declaredParameter.getName());
@@ -221,7 +223,9 @@ public class CallableStatementCreatorFactory {
 		}
 
 		public void cleanupParameters() {
-			StatementCreatorUtils.cleanupParameters(this.inParameters.values());
+			if (this.inParameters != null) {
+				StatementCreatorUtils.cleanupParameters(this.inParameters.values());
+			}
 		}
 
 		public String toString() {
