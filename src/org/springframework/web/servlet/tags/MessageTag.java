@@ -23,6 +23,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 
 import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ExpressionEvaluationUtils;
@@ -52,6 +53,8 @@ import org.springframework.web.util.TagUtils;
  */
 public class MessageTag extends HtmlEscapingAwareTag {
 
+	private Object message;
+
 	private String code;
 
 	private Object arguments;
@@ -64,6 +67,17 @@ public class MessageTag extends HtmlEscapingAwareTag {
 
 	private boolean javaScriptEscape = false;
 
+
+	/**
+	 * Set the MessageSourceResolvable for this tag.
+	 * Accepts a direct MessageSourceResolvable instance as well as a JSP
+	 * expression language String that points to a MessageSourceResolvable.
+	 * <p>If a MessageSourceResolvable is specified, it effectively overrides
+	 * any code, arguments or text specified on this tag.
+	 */
+	public void setMessage(Object message) {
+		this.message = message;
+	}
 
 	/**
 	 * Set the message code for this tag.
@@ -119,57 +133,25 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	}
 
 
+	/**
+	 * Resolves the message, escapes it if demanded,
+	 * and writes it to the page (or exposes it as variable).
+	 * @see #resolveMessage()
+	 * @see org.springframework.web.util.HtmlUtils#htmlEscape(String)
+	 * @see org.springframework.web.util.JavaScriptUtils#javaScriptEscape(String)
+	 * @see #writeMessage(String)
+	 */
 	protected final int doStartTagInternal() throws JspException, IOException {
-		MessageSource messageSource = getMessageSource();
-		if (messageSource == null) {
-			throw new JspTagException("No corresponding MessageSource found");
-		}
-
-		String resolvedCode = ExpressionEvaluationUtils.evaluateString("code", this.code, pageContext);
-		String resolvedText = ExpressionEvaluationUtils.evaluateString("text", this.text, pageContext);
-		String resolvedVar = ExpressionEvaluationUtils.evaluateString("var", this.var, pageContext);
-
 		try {
-			String msg = null;
-			if (resolvedCode != null) {
-				Object[] argumentsArray = null;
-				if (this.arguments instanceof String) {
-					argumentsArray = StringUtils.commaDelimitedListToStringArray((String) this.arguments);
-					for (int i = 0; i < argumentsArray.length; i++) {
-						argumentsArray[i] =
-						    ExpressionEvaluationUtils.evaluateString(
-						        "argument[" + i + "]", (String) argumentsArray[i], pageContext);
+			// Resolve the unescaped message.
+			String msg = resolveMessage();
 
-					}
-				}
-				else if (this.arguments instanceof Object[]) {
-					argumentsArray = (Object[]) this.arguments;
-				}
-				else if (this.arguments instanceof Collection) {
-					argumentsArray = ((Collection) this.arguments).toArray();
-				}
-				else if (this.arguments != null) {
-					// assume a single argument object
-					argumentsArray = new Object[] {this.arguments};
-				}
-				if (resolvedText != null) {
-					msg = messageSource.getMessage(
-							resolvedCode, argumentsArray, resolvedText, getRequestContext().getLocale());
-				}
-				else {
-					msg = messageSource.getMessage(
-							resolvedCode, argumentsArray, getRequestContext().getLocale());
-				}
-			}
-			else {
-				msg = resolvedText;
-			}
-
-			// HTML and/or JavaScript escape, if demanded
+			// HTML and/or JavaScript escape, if demanded.
 			msg = isHtmlEscape() ? HtmlUtils.htmlEscape(msg) : msg;
 			msg = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(msg) : msg;
 
-			// expose as variable, if demanded
+			// Expose as variable, if demanded, else write to the page.
+			String resolvedVar = ExpressionEvaluationUtils.evaluateString("var", this.var, pageContext);
 			if (resolvedVar != null) {
 				String resolvedScope = ExpressionEvaluationUtils.evaluateString("scope", this.scope, pageContext);
 				pageContext.setAttribute(resolvedVar, msg, TagUtils.getScope(resolvedScope));
@@ -177,11 +159,79 @@ public class MessageTag extends HtmlEscapingAwareTag {
 			else {
 				writeMessage(msg);
 			}
+
 			return EVAL_BODY_INCLUDE;
 		}
 		catch (NoSuchMessageException ex) {
 			throw new JspTagException(getNoSuchMessageExceptionDescription(ex));
 		}
+	}
+
+	/**
+	 * Resolve the specified message into a concrete message String.
+	 * The returned message String should be unescaped.
+	 */
+	protected String resolveMessage() throws JspException, NoSuchMessageException {
+		MessageSource messageSource = getMessageSource();
+		if (messageSource == null) {
+			throw new JspTagException("No corresponding MessageSource found");
+		}
+
+		// Evaluate the specified MessageSourceResolvable, if any.
+		MessageSourceResolvable resolvedMessage = null;
+		if (this.message instanceof MessageSourceResolvable) {
+			resolvedMessage = (MessageSourceResolvable) this.message;
+		}
+		else if (this.message != null) {
+			String expr = this.message.toString();
+			resolvedMessage = (MessageSourceResolvable)
+					ExpressionEvaluationUtils.evaluate("message", expr, MessageSourceResolvable.class, pageContext);
+		}
+
+		if (resolvedMessage != null) {
+			// We have a given MessageSourceResolvable.
+			return messageSource.getMessage(resolvedMessage, getRequestContext().getLocale());
+		}
+
+		String resolvedCode = ExpressionEvaluationUtils.evaluateString("code", this.code, pageContext);
+		String resolvedText = ExpressionEvaluationUtils.evaluateString("text", this.text, pageContext);
+
+		if (resolvedCode != null) {
+			// We have a code that we need to resolve.
+			Object[] argumentsArray = null;
+			if (this.arguments instanceof String) {
+				argumentsArray = StringUtils.commaDelimitedListToStringArray((String) this.arguments);
+				for (int i = 0; i < argumentsArray.length; i++) {
+					argumentsArray[i] =
+							ExpressionEvaluationUtils.evaluateString(
+									"argument[" + i + "]", (String) argumentsArray[i], pageContext);
+
+				}
+			}
+			else if (this.arguments instanceof Object[]) {
+				argumentsArray = (Object[]) this.arguments;
+			}
+			else if (this.arguments instanceof Collection) {
+				argumentsArray = ((Collection) this.arguments).toArray();
+			}
+			else if (this.arguments != null) {
+				// Assume a single argument object.
+				argumentsArray = new Object[] {this.arguments};
+			}
+			if (resolvedText != null) {
+				// We have a fallback text to consider.
+				return messageSource.getMessage(
+						resolvedCode, argumentsArray, resolvedText, getRequestContext().getLocale());
+			}
+			else {
+				// We have no fallback text to consider.
+				return messageSource.getMessage(
+						resolvedCode, argumentsArray, getRequestContext().getLocale());
+			}
+		}
+
+		// All we have is a specified literal text.
+		return resolvedText;
 	}
 
 	/**

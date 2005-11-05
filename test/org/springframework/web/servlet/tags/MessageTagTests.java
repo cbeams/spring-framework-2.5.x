@@ -39,6 +39,35 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class MessageTagTests extends AbstractTagTests {
 
+	public void testMessageTagWithMessageSourceResolvable1() throws JspException {
+		PageContext pc = createPageContext();
+		final StringBuffer message = new StringBuffer();
+		MessageTag tag = new MessageTag() {
+			protected void writeMessage(String msg) {
+				message.append(msg);
+			}
+		};
+		tag.setPageContext(pc);
+		tag.setMessage(new DefaultMessageSourceResolvable("test"));
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct message", "test message", message.toString());
+	}
+
+	public void testMessageTagWithMessageSourceResolvable2() throws JspException {
+		PageContext pc = createPageContext();
+		final StringBuffer message = new StringBuffer();
+		MessageTag tag = new MessageTag() {
+			protected void writeMessage(String msg) {
+				message.append(msg);
+			}
+		};
+		tag.setPageContext(pc);
+		pc.setAttribute("myattr", new DefaultMessageSourceResolvable("test"));
+		tag.setMessage("${myattr}");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct message", "test message", message.toString());
+	}
+
 	public void testMessageTagWithCode1() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
