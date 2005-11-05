@@ -718,7 +718,8 @@ public interface HibernateOperations {
 	void closeIterator(Iterator it) throws DataAccessException;
 
 	/**
-	 * Delete all objects returned by the query. Return the number of objects deleted.
+	 * Delete all objects returned by the query.
+	 * Return the number of entity instances deleted.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @return the number of instances deleted
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -727,7 +728,8 @@ public interface HibernateOperations {
 	int delete(String queryString) throws DataAccessException;
 
 	/**
-	 * Delete all objects returned by the query. Return the number of objects deleted.
+	 * Delete all objects returned by the query.
+	 * Return the number of entity instances deleted.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param value the value of the parameter
 	 * @param type Hibernate type of the parameter (or <code>null</code>)
@@ -738,7 +740,8 @@ public interface HibernateOperations {
 	int delete(String queryString, Object value, Type type) throws DataAccessException;
 
 	/**
-	 * Delete all objects returned by the query. Return the number of objects deleted.
+	 * Delete all objects returned by the query.
+	 * Return the number of entity instances deleted.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param values the values of the parameters
 	 * @param types Hibernate types of the parameters (or <code>null</code>)

@@ -951,6 +951,10 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 
+	//-------------------------------------------------------------------------
+	// Helper methods used by the operations above
+	//-------------------------------------------------------------------------
+
 	/**
 	 * Check whether write operations are allowed on the given Session.
 	 * <p>Default implementation throws an InvalidDataAccessApiUsageException

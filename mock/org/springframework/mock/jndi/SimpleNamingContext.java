@@ -32,16 +32,18 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.StringUtils;
 
 /**
  * Simple implementation of a JNDI naming context.
  * Only supports binding plain Objects to String names.
- * Mainly targetted at test environments, but also usable for standalone applications.
+ * Mainly for test environments, but also usable for standalone applications.
  *
  * <p>This class is not intended for direct usage by applications, although it
- * can be used e.g. to override's JndiTemplate's createInitialContext method in
- * unit tests. Use SimpleNamingContextBuilder to set up a JVM-level JNDI environment.
+ * can be used for example to override JndiTemplate's <code>createInitialContext</code>
+ * method in unit tests. Typically, SimpleNamingContextBuilder will be used to
+ * set up a JVM-level JNDI environment.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -57,6 +59,7 @@ public class SimpleNamingContext implements Context {
 	private Hashtable boundObjects;
 
 	private Hashtable environment = new Hashtable();
+
 
 	/**
 	 * Create a new naming context.
@@ -89,12 +92,16 @@ public class SimpleNamingContext implements Context {
 	// Actual implementations of Context methods follow
 
 	public NamingEnumeration list(String root) throws NamingException {
-		logger.info("Listing name/class pairs under [" + root + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Listing name/class pairs under [" + root + "]");
+		}
 		return new NameClassPairEnumeration(this, root);
 	}
 
 	public NamingEnumeration listBindings(String root) throws NamingException {
-		logger.info("Listing bindings under [" + root + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Listing bindings under [" + root + "]");
+		}
 		return new BindingEnumeration(this, root);
 	}
 
@@ -105,24 +112,27 @@ public class SimpleNamingContext implements Context {
 	 * @throws javax.naming.NameNotFoundException if the object could not be found
 	 */
 	public Object lookup(String pname) throws NameNotFoundException {
-		String name = root + pname;
-		logger.info("Static JNDI lookup: [" + name + "]");
-		if ("".equals(name)) {
-			return new SimpleNamingContext(root, boundObjects, environment);
+		String name = this.root + pname;
+		if (logger.isDebugEnabled()) {
+			logger.debug("Static JNDI lookup: [" + name + "]");
 		}
-		Object found = boundObjects.get(name);
+		if ("".equals(name)) {
+			return new SimpleNamingContext(this.root, this.boundObjects, this.environment);
+		}
+		Object found = this.boundObjects.get(name);
 		if (found == null) {
 			if (!name.endsWith("/")) {
 				name = name + "/";
 			}
-			for (Iterator it = boundObjects.keySet().iterator(); it.hasNext();) {
+			for (Iterator it = this.boundObjects.keySet().iterator(); it.hasNext();) {
 				String boundName = (String) it.next();
 				if (boundName.startsWith(name)) {
-					return new SimpleNamingContext(name, boundObjects, environment);
+					return new SimpleNamingContext(name, this.boundObjects, this.environment);
 				}
 			}
-			throw new NameNotFoundException("Name [" + root + pname + "] not bound: " + boundObjects.size() + " bindings -- [" +
-			                                StringUtils.collectionToDelimitedString(boundObjects.keySet(), ",") + "]");
+			throw new NameNotFoundException(
+					"Name [" + this.root + pname + "] not bound; " + this.boundObjects.size() + " bindings: [" +
+					StringUtils.collectionToDelimitedString(this.boundObjects.keySet(), ",") + "]");
 		}
 		return found;
 	}
@@ -139,13 +149,17 @@ public class SimpleNamingContext implements Context {
 	 * @see org.springframework.mock.jndi.SimpleNamingContextBuilder#bind
 	 */
 	public void bind(String name, Object obj) {
-		logger.info("Static JNDI binding: [" + root + name + "] = [" + obj + "]");
-		boundObjects.put(root + name, obj);
+		if (logger.isInfoEnabled()) {
+			logger.info("Static JNDI binding: [" + this.root + name + "] = [" + obj + "]");
+		}
+		this.boundObjects.put(this.root + name, obj);
 	}
 
 	public void unbind(String name) {
-		logger.info("Static JNDI remove: [" + root + name + "]");
-		boundObjects.remove(root + name);
+		if (logger.isInfoEnabled()) {
+			logger.info("Static JNDI remove: [" + this.root + name + "]");
+		}
+		this.boundObjects.remove(this.root + name);
 	}
 
 	public void rebind(String name, Object obj) {
@@ -159,7 +173,7 @@ public class SimpleNamingContext implements Context {
 	}
 
 	public Context createSubcontext(String name) {
-		Context subcontext = new SimpleNamingContext(root + name, boundObjects, environment);
+		Context subcontext = new SimpleNamingContext(this.root + name, this.boundObjects, this.environment);
 		bind(name, subcontext);
 		return subcontext;
 	}
@@ -184,7 +198,7 @@ public class SimpleNamingContext implements Context {
 	}
 
 
-	// Unsupported methods follow: no support for Name
+	// Unsupported methods follow: no support for javax.naming.Name
 
 	public NamingEnumeration list(Name arg0) {
 		throw new UnsupportedOperationException();
@@ -263,7 +277,8 @@ public class SimpleNamingContext implements Context {
 				if (boundName.startsWith(root)) {
 					int startIndex = root.length();
 					int endIndex = boundName.indexOf('/', startIndex);
-					String strippedName = (endIndex != -1 ? boundName.substring(startIndex, endIndex) : boundName.substring(startIndex));
+					String strippedName =
+							(endIndex != -1 ? boundName.substring(startIndex, endIndex) : boundName.substring(startIndex));
 					if (!contents.containsKey(strippedName)) {
 						try {
 							contents.put(strippedName, createObject(strippedName, context.lookup(proot + strippedName)));
