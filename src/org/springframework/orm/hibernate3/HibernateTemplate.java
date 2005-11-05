@@ -978,7 +978,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 
 	//-------------------------------------------------------------------------
-	// Convenience query methods for iteration
+	// Convenience query methods for iteration and bulk updates/deletes
 	//-------------------------------------------------------------------------
 
 	public Iterator iterate(String queryString) throws DataAccessException {
@@ -1013,6 +1013,34 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		}
 	}
 
+	public int bulkUpdate(String queryString) throws DataAccessException {
+		return bulkUpdate(queryString, (Object[]) null);
+	}
+
+	public int bulkUpdate(String queryString, Object value) throws DataAccessException {
+		return bulkUpdate(queryString, new Object[] {value});
+	}
+
+	public int bulkUpdate(final String queryString, final Object[] values) throws DataAccessException {
+		Integer updateCount = (Integer) execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = session.createQuery(queryString);
+				prepareQuery(queryObject);
+				if (values != null) {
+					for (int i = 0; i < values.length; i++) {
+						queryObject.setParameter(i, values[i]);
+					}
+				}
+				return queryObject.executeUpdate();
+			}
+		}, true);
+		return updateCount.intValue();
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Helper methods used by the operations above
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Check whether write operations are allowed on the given Session.

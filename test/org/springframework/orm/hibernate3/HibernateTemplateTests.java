@@ -2065,21 +2065,18 @@ public class HibernateTemplateTests extends TestCase {
 		sfControl.verify();
 	}
 
-	public void testIterateWithParameterAndType() throws HibernateException {
+	public void testBulkUpdate() throws HibernateException {
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
-		Iterator it = Collections.EMPTY_LIST.iterator();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
-		query.setParameter(0, "myvalue");
-		queryControl.setReturnValue(query, 1);
-		query.iterate();
-		queryControl.setReturnValue(it, 1);
+		query.executeUpdate();
+		queryControl.setReturnValue(5, 1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -2089,8 +2086,67 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		Iterator result = ht.iterate("some query string", "myvalue");
-		assertTrue("Correct list", result == it);
+		int result = ht.bulkUpdate("some query string");
+		assertTrue("Correct list", result == 5);
+		queryControl.verify();
+	}
+
+	public void testBulkUpdateWithParameter() throws HibernateException {
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter(0, "myvalue");
+		queryControl.setReturnValue(query, 1);
+		query.executeUpdate();
+		queryControl.setReturnValue(5, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		queryControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		int result = ht.bulkUpdate("some query string", "myvalue");
+		assertTrue("Correct list", result == 5);
+		queryControl.verify();
+	}
+
+	public void testBulkUpdateWithParameters() throws HibernateException {
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter(0, "myvalue1");
+		queryControl.setReturnValue(query, 1);
+		query.setParameter(1, new Integer(2));
+		queryControl.setReturnValue(query, 1);
+		query.executeUpdate();
+		queryControl.setReturnValue(5, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		queryControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		int result = ht.bulkUpdate("some query string",
+				new Object[] {"myvalue1", new Integer(2)});
+		assertTrue("Correct list", result == 5);
 		queryControl.verify();
 	}
 

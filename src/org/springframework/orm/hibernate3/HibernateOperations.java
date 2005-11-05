@@ -736,7 +736,7 @@ public interface HibernateOperations {
 
 
 	//-------------------------------------------------------------------------
-	// Convenience query methods for iteration
+	// Convenience query methods for iteration and bulk updates/deletes
 	//-------------------------------------------------------------------------
 
 	/**
@@ -747,6 +747,7 @@ public interface HibernateOperations {
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#createQuery
+	 * @see org.hibernate.Query#iterate
 	 */
 	Iterator iterate(String queryString) throws DataAccessException;
 
@@ -760,6 +761,7 @@ public interface HibernateOperations {
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#createQuery
+	 * @see org.hibernate.Query#iterate
 	 */
 	Iterator iterate(String queryString, Object value) throws DataAccessException;
 
@@ -773,6 +775,7 @@ public interface HibernateOperations {
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#createQuery
+	 * @see org.hibernate.Query#iterate
 	 */
 	Iterator iterate(String queryString, Object[] values) throws DataAccessException;
 
@@ -784,5 +787,40 @@ public interface HibernateOperations {
 	 * @see org.hibernate.Hibernate#close
 	 */
 	void closeIterator(Iterator it) throws DataAccessException;
+
+	/**
+	 * Update/delete all objects according to the given query.
+	 * Return the number of entity instances updated/deleted.
+	 * @param queryString an update/delete query expressed in Hibernate's query language
+	 * @return the number of instances updated/deleted
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.Session#createQuery
+	 * @see org.hibernate.Query#executeUpdate
+	 */
+	int bulkUpdate(String queryString) throws DataAccessException;
+
+	/**
+	 * Update/delete all objects according to the given query.
+	 * Return the number of entity instances updated/deleted.
+	 * @param queryString an update/delete query expressed in Hibernate's query language
+	 * @param value the value of the parameter
+	 * @return the number of instances updated/deleted
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.Session#createQuery
+	 * @see org.hibernate.Query#executeUpdate
+	 */
+	int bulkUpdate(String queryString, Object value) throws DataAccessException;
+
+	/**
+	 * Update/delete all objects according to the given query.
+	 * Return the number of entity instances updated/deleted.
+	 * @param queryString an update/delete query expressed in Hibernate's query language
+	 * @param values the values of the parameters
+	 * @return the number of instances updated/deleted
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.Session#createQuery
+	 * @see org.hibernate.Query#executeUpdate
+	 */
+	int bulkUpdate(String queryString, Object[] values) throws DataAccessException;
 
 }
