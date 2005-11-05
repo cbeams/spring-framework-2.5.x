@@ -1031,7 +1031,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 						queryObject.setParameter(i, values[i]);
 					}
 				}
-				return queryObject.executeUpdate();
+				return new Integer(queryObject.executeUpdate());
 			}
 		}, true);
 		return updateCount.intValue();
