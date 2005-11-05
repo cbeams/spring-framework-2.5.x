@@ -51,7 +51,7 @@ public class JmsInvokerTests extends TestCase {
 		final JmsInvokerServiceExporter exporter = new JmsInvokerServiceExporter();
 		exporter.setServiceInterface(ITestBean.class);
 		exporter.setService(target);
-		exporter.setJmsTemplate(createJmsTemplate());
+		//exporter.setJmsTemplate(createJmsTemplate());
 		exporter.afterPropertiesSet();
 		subscribeToQueue(exporter, getName());
 
@@ -93,7 +93,7 @@ public class JmsInvokerTests extends TestCase {
 		final JmsInvokerServiceExporter exporter = new JmsInvokerServiceExporter();
 		exporter.setServiceInterface(ITestBean.class);
 		exporter.setService(target);
-		exporter.setJmsTemplate(createJmsTemplate());
+		//exporter.setJmsTemplate(createJmsTemplate());
 		exporter.afterPropertiesSet();
 		subscribeToQueue(exporter, getName());
 
@@ -126,7 +126,7 @@ public class JmsInvokerTests extends TestCase {
 		final JmsInvokerServiceExporter exporter = new JmsInvokerServiceExporter();
 		exporter.setServiceInterface(ITestBean.class);
 		exporter.setService(target);
-		exporter.setJmsTemplate(createJmsTemplate());
+		//exporter.setJmsTemplate(createJmsTemplate());
 		exporter.setRemoteInvocationExecutor(new DefaultRemoteInvocationExecutor() {
 			public Object invoke(RemoteInvocation invocation, Object targetObject)
 					throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
@@ -179,7 +179,7 @@ public class JmsInvokerTests extends TestCase {
 		final JmsInvokerServiceExporter exporter = new JmsInvokerServiceExporter();
 		exporter.setServiceInterface(ITestBean.class);
 		exporter.setService(target);
-		exporter.setJmsTemplate(createJmsTemplate());
+		//exporter.setJmsTemplate(createJmsTemplate());
 		exporter.setRemoteInvocationExecutor(new DefaultRemoteInvocationExecutor() {
 			public Object invoke(RemoteInvocation invocation, Object targetObject)
 					throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
@@ -251,7 +251,7 @@ public class JmsInvokerTests extends TestCase {
 		QueueSession serverSession = createQueueSession();
 		Queue queue = serverSession.createQueue(queueName);
 		MessageConsumer consumer = serverSession.createConsumer(queue);
-		consumer.setMessageListener(exporter);
+		//consumer.setMessageListener(exporter);
 	}
 
 	protected JmsTemplate createJmsTemplate() {
