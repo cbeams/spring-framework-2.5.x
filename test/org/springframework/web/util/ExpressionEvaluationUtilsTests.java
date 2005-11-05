@@ -16,6 +16,7 @@
 
 package org.springframework.web.util;
 
+import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
 import junit.framework.TestCase;
@@ -24,6 +25,7 @@ import org.springframework.mock.web.MockPageContext;
 
 /**
  * @author Aled Arendsen
+ * @author Juergen Hoeller
  * @since 16.09.2003
  */
 public class ExpressionEvaluationUtilsTests extends TestCase {
@@ -57,8 +59,15 @@ public class ExpressionEvaluationUtilsTests extends TestCase {
 		Object o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
 		assertEquals(o, "blie");
 		
-		assertEquals(new String("test"),
-		             ExpressionEvaluationUtils.evaluate("test", "test", Float.class, ctx));
+		assertEquals("test", ExpressionEvaluationUtils.evaluate("test", "test", String.class, ctx));
+
+		try {
+			ExpressionEvaluationUtils.evaluate("test", "test", Float.class, ctx);
+			fail("Should have thrown JspException");
+		}
+		catch (JspException ex) {
+			// expected
+		}
 	}
 
 	public void testEvaluateString() throws Exception {

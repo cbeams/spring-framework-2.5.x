@@ -57,6 +57,7 @@ public abstract class ExpressionEvaluationUtils {
 
 	private static ExpressionEvaluationHelper helper;
 
+
 	static {
 		try {
 			Class.forName(JSP_20_CLASS_NAME);
@@ -102,8 +103,13 @@ public abstract class ExpressionEvaluationUtils {
 	 */
 	public static Object evaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
 	    throws JspException {
+
 		if (isExpressionLanguage(attrValue)) {
 			return helper.evaluate(attrName, attrValue, resultClass, pageContext);
+		}
+		else if (attrValue != null && resultClass != null && !resultClass.isInstance(attrValue)) {
+			throw new JspException("Attribute value \"" + attrValue + "\" is neither a JSP EL expression nor " +
+					"assignable to result class [" + resultClass.getName() + "]");
 		}
 		else {
 			return attrValue;
@@ -120,6 +126,7 @@ public abstract class ExpressionEvaluationUtils {
 	 */
 	public static String evaluateString(String attrName, String attrValue, PageContext pageContext)
 	    throws JspException {
+
 		if (isExpressionLanguage(attrValue)) {
 			return (String) helper.evaluate(attrName, attrValue, String.class, pageContext);
 		}
@@ -138,6 +145,7 @@ public abstract class ExpressionEvaluationUtils {
 	 */
 	public static int evaluateInteger(String attrName, String attrValue, PageContext pageContext)
 	    throws JspException {
+
 		if (isExpressionLanguage(attrValue)) {
 			return ((Integer) helper.evaluate(attrName, attrValue, Integer.class, pageContext)).intValue();
 		}
@@ -156,6 +164,7 @@ public abstract class ExpressionEvaluationUtils {
 	 */
 	public static boolean evaluateBoolean(String attrName, String attrValue, PageContext pageContext)
 	    throws JspException {
+
 		if (isExpressionLanguage(attrValue)) {
 			return ((Boolean) helper.evaluate(attrName, attrValue, Boolean.class, pageContext)).booleanValue();
 		}
@@ -204,6 +213,7 @@ public abstract class ExpressionEvaluationUtils {
 
 		public Object evaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
 		    throws JspException {
+
 			return ExpressionEvaluatorManager.evaluate(attrName, attrValue, resultClass, pageContext);
 		}
 	}
@@ -217,6 +227,7 @@ public abstract class ExpressionEvaluationUtils {
 
 		public Object evaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
 				throws JspException {
+
 			throw new JspException(
 					"Neither JSP 2.0 nor Jakarta JSTL available - cannot parse JSP EL expression \"" + attrValue + "\"");
 		}
