@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.Filter;
 import org.hibernate.FlushMode;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
@@ -418,7 +419,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * The proxy also prepares returned Query and Criteria objects.
 	 * @param session the Hibernate Session to create a proxy for
 	 * @return the Session proxy
-	 * @see org.hibernate.Session#close
+	 * @see org.hibernate.Session#close()
 	 * @see #prepareQuery
 	 * @see #prepareCriteria
 	 */
@@ -440,6 +441,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public Object get(final Class entityClass, final Serializable id, final LockMode lockMode)
 			throws DataAccessException {
+
 		return execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
@@ -571,6 +573,15 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		catch (HibernateException ex) {
 			throw SessionFactoryUtils.convertHibernateAccessException(ex);
 		}
+	}
+
+	public Filter enableFilter(String filterName) throws IllegalStateException {
+		Session session = SessionFactoryUtils.getSession(getSessionFactory(), false);
+		Filter filter = session.getEnabledFilter(filterName);
+		if (filter == null) {
+			filter = session.enableFilter(filterName);
+		}
+		return filter;
 	}
 
 

@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hibernate.Filter;
 import org.hibernate.LockMode;
 import org.hibernate.criterion.DetachedCriteria;
 
@@ -262,6 +263,17 @@ public interface HibernateOperations {
 	 * @see org.hibernate.Hibernate#initialize
 	 */
 	void initialize(Object proxy) throws DataAccessException;
+
+	/**
+	 * Return an enabled Hibernate Filter for the given filter name.
+	 * The returned Filter instance can be used to set filter parameters.
+	 * @param filterName the name of the filter
+	 * @return the enabled Hibernate Filter (either already enabled
+	 * or enabled on the fly by this operation)
+	 * @throws IllegalStateException if we are not running within a
+	 * transactional Session (in which case this operation does not make sense)
+	 */
+	Filter enableFilter(String filterName) throws IllegalStateException;
 
 
 	//-------------------------------------------------------------------------

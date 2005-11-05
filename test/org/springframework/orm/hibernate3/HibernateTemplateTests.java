@@ -27,6 +27,7 @@ import java.util.List;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 import org.hibernate.Criteria;
+import org.hibernate.Filter;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
@@ -308,6 +309,66 @@ public class HibernateTemplateTests extends TestCase {
 				}
 			});
 			assertTrue("Correct result list", result == l);
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
+		}
+	}
+
+	public void testExecuteWithThreadBoundAndParameterizedFilter() {
+		MockControl filterControl = MockControl.createControl(Filter.class);
+		Filter filter = (Filter) filterControl.getMock();
+
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
+		session.getEnabledFilter("myFilter");
+		sessionControl.setReturnValue(null, 1);
+		session.enableFilter("myFilter");
+		sessionControl.setReturnValue(filter, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setAllowCreate(false);
+		ht.setFilterName("myFilter");
+
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
+		try {
+			final List l = new ArrayList();
+			l.add("test");
+			Filter f = ht.enableFilter("myFilter");
+			assertTrue("Correct filter", f == filter);
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
+		}
+	}
+
+	public void testExecuteWithThreadBoundAndParameterizedExistingFilter() {
+		MockControl filterControl = MockControl.createControl(Filter.class);
+		Filter filter = (Filter) filterControl.getMock();
+
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 1);
+		session.getEnabledFilter("myFilter");
+		sessionControl.setReturnValue(filter, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setAllowCreate(false);
+		ht.setFilterName("myFilter");
+
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
+		try {
+			final List l = new ArrayList();
+			l.add("test");
+			Filter f = ht.enableFilter("myFilter");
+			assertTrue("Correct filter", f == filter);
 		}
 		finally {
 			TransactionSynchronizationManager.unbindResource(sf);
