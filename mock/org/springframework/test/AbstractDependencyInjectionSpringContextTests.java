@@ -62,6 +62,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * context locations.
  *
  * @author Rod Johnson
+ * @author Rob Harrop
  * @since 1.1.1
  * @see #setDirty
  * @see #contextKey
@@ -75,6 +76,8 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	private int autowireMode = AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
 
 	private boolean dependencyCheck = true;
+
+	private boolean autowireEnabled = true;
 
 	/** Application context this test will run against */
 	protected ConfigurableApplicationContext applicationContext;
@@ -114,6 +117,20 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 */
 	public int getAutowireMode() {
 		return autowireMode;
+	}
+
+	/**
+	 * Indicates whether subclasses should be autowired.
+	 */
+	public boolean isAutowireEnabled() {
+		return autowireEnabled;
+	}
+
+	/**
+	 * Turns autowiring of subclasses on/off (true/false).
+	 */
+	public void setAutowireEnabled(boolean autowireEnabled) {
+		this.autowireEnabled = autowireEnabled;
 	}
 
 	/**
@@ -161,7 +178,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 			}
 			populateProtectedVariables();
 		}
-		else {
+		else if(isAutowireEnabled()) {
 			this.applicationContext.getBeanFactory().autowireBeanProperties(
 			    this, getAutowireMode(), isDependencyCheck());
 		}
