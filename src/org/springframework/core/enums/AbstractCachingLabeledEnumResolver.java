@@ -89,10 +89,9 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 
 	public LabeledEnum getLabeledEnumByLabel(Class type, String label) throws IllegalArgumentException {
 		Map typeEnums = getLabeledEnumMap(type);
-		Iterator it = typeEnums.entrySet().iterator();
+		Iterator it = typeEnums.values().iterator();
 		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
-			LabeledEnum value = (LabeledEnum) entry.getValue();
+			LabeledEnum value = (LabeledEnum) it.next();
 			if (value.getLabel().equalsIgnoreCase(label)) {
 				return value;
 			}

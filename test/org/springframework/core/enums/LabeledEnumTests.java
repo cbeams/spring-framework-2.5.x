@@ -20,12 +20,20 @@ import junit.framework.TestCase;
 
 /**
  * @author Keith Donald
+ * @author Juergen Hoeller
  */
 public class LabeledEnumTests extends TestCase {
 
-	public void testForCodeFound() {
+	public void testCodeFound() {
 		Dog golden = (Dog) new StaticLabeledEnumResolver().getLabeledEnumByCode(Dog.class, new Short((short) 11));
 		Dog borderCollie = (Dog) new StaticLabeledEnumResolver().getLabeledEnumByCode(Dog.class, new Short((short) 13));
+		assertSame(golden, Dog.GOLDEN_RETRIEVER);
+		assertSame(borderCollie, Dog.BORDER_COLLIE);
+	}
+
+	public void testLabelFound() {
+		Dog golden = (Dog) new StaticLabeledEnumResolver().getLabeledEnumByLabel(Dog.class, "Golden Retriever");
+		Dog borderCollie = (Dog) new StaticLabeledEnumResolver().getLabeledEnumByLabel(Dog.class, "Border Collie");
 		assertSame(golden, Dog.GOLDEN_RETRIEVER);
 		assertSame(borderCollie, Dog.BORDER_COLLIE);
 	}
