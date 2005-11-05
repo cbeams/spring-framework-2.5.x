@@ -29,6 +29,7 @@ import javax.naming.NameNotFoundException;
 import javax.naming.NameParser;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.OperationNotSupportedException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,11 +55,11 @@ public class SimpleNamingContext implements Context {
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	private String root;
+	private final String root;
 
-	private Hashtable boundObjects;
+	private final Hashtable boundObjects;
 
-	private Hashtable environment = new Hashtable();
+	private final Hashtable environment = new Hashtable();
 
 
 	/**
@@ -182,6 +183,10 @@ public class SimpleNamingContext implements Context {
 		unbind(name);
 	}
 
+	public String composeName(String name, String prefix) {
+		return prefix + name;
+	}
+
 	public Hashtable getEnvironment() {
 		return environment;
 	}
@@ -200,64 +205,60 @@ public class SimpleNamingContext implements Context {
 
 	// Unsupported methods follow: no support for javax.naming.Name
 
-	public NamingEnumeration list(Name arg0) {
-		throw new UnsupportedOperationException();
+	public NamingEnumeration list(Name name) throws NamingException {
+		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
-	public NamingEnumeration listBindings(Name arg0) {
-		throw new UnsupportedOperationException();
+	public NamingEnumeration listBindings(Name name) throws NamingException {
+		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
-	public Object lookup(Name arg0) {
-		throw new UnsupportedOperationException();
+	public Object lookup(Name name) throws NamingException {
+		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
-	public Object lookupLink(Name arg0) {
-		throw new UnsupportedOperationException();
+	public Object lookupLink(Name name) throws NamingException {
+		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
-	public void bind(Name arg0, Object arg1) {
-		throw new UnsupportedOperationException();
+	public void bind(Name name, Object obj) throws NamingException {
+		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
-	public void unbind(Name arg0) {
-		throw new UnsupportedOperationException();
+	public void unbind(Name name) throws NamingException {
+		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
-	public void rebind(Name arg0, Object arg1) {
-		throw new UnsupportedOperationException();
+	public void rebind(Name name, Object obj) throws NamingException {
+		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
-	public void rename(Name arg0, Name arg1) {
-		throw new UnsupportedOperationException();
+	public void rename(Name oldName, Name newName) throws NamingException {
+		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
-	public Context createSubcontext(Name arg0) {
-		throw new UnsupportedOperationException();
+	public Context createSubcontext(Name name) throws NamingException {
+		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
-	public void destroySubcontext(Name arg0) {
-		throw new UnsupportedOperationException();
+	public void destroySubcontext(Name name) throws NamingException {
+		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
-	public String getNameInNamespace() {
-		throw new UnsupportedOperationException();
+	public String getNameInNamespace() throws NamingException {
+		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
-	public NameParser getNameParser(Name arg0) {
-		throw new UnsupportedOperationException();
+	public NameParser getNameParser(Name name) throws NamingException {
+		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
-	public NameParser getNameParser(String arg0) {
-		throw new UnsupportedOperationException();
+	public NameParser getNameParser(String name) throws NamingException {
+		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
-	public Name composeName(Name arg0, Name arg1) {
-		throw new UnsupportedOperationException();
-	}
-
-	public String composeName(String arg0, String arg1) {
-		throw new UnsupportedOperationException();
+	public Name composeName(Name name, Name prefix) throws NamingException {
+		throw new OperationNotSupportedException("SimpleNamingContext does not support [javax.naming.Name]");
 	}
 
 
