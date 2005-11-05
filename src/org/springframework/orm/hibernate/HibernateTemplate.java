@@ -416,7 +416,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * The proxy also prepares returned Query and Criteria objects.
 	 * @param session the Hibernate Session to create a proxy for
 	 * @return the Session proxy
-	 * @see net.sf.hibernate.Session#close
+	 * @see net.sf.hibernate.Session#close()
 	 * @see #prepareQuery
 	 * @see #prepareCriteria
 	 */
@@ -438,6 +438,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public Object get(final Class entityClass, final Serializable id, final LockMode lockMode)
 			throws DataAccessException {
+
 		return execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
@@ -456,6 +457,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public Object load(final Class entityClass, final Serializable id, final LockMode lockMode)
 			throws DataAccessException {
+
 		return execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
