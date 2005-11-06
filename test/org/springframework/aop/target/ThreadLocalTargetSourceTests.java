@@ -125,4 +125,22 @@ public class ThreadLocalTargetSourceTests extends TestCase {
 		assertEquals(2, ((ThreadLocalTargetSourceStats) apartment).getObjectCount());
 	}
 
+	/**
+	 * Test for SPR-1442. Destroyed target should re-associated with thread and not throw NPE
+	 */
+	public void testReuseDestroyedTarget() {
+		ThreadLocalTargetSource source = (ThreadLocalTargetSource)this.beanFactory.getBean("threadLocalTs");
+
+		// try first time
+		Object o = source.getTarget();
+		source.destroy();
+
+		// try second time
+		try {
+			source.getTarget();
+		} catch(NullPointerException ex) {
+			fail("Should not throw NPE");
+		}
+	}
+
 }

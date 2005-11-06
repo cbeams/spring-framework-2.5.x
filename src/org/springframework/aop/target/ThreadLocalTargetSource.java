@@ -41,6 +41,7 @@ import org.springframework.beans.factory.DisposableBean;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @see #destroy
  */
 public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
@@ -51,7 +52,7 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 	 * thread. Unlike most ThreadLocals, which are static, this variable
 	 * is meant to be per thread per instance of the ThreadLocalTargetSource class.
 	 */
-	private ThreadLocal targetInThread = new ThreadLocal();
+	private final ThreadLocal targetInThread = new ThreadLocal();
 
 	/**
 	 * Set of managed targets, enabling us to keep track of the targets we've created.
@@ -109,7 +110,7 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 		this.targetSet.clear();
 		
 		// clear ThreadLocal
-		this.targetInThread = null;
+		this.targetInThread.set(null);
 	}
 
 	public int getInvocationCount() {
