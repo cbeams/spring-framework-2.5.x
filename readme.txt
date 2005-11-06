@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.2.6 (October 2005)
---------------------------------------------------
+THE SPRING FRAMEWORK, release 1.2.6 (November 2005)
+---------------------------------------------------
 http://www.springframework.org
 
 
@@ -55,10 +55,10 @@ The Spring Framework requires J2SE 1.3 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1
 required for building the framework; for the full build including Tiger support, J2SE 5.0 is required.
 J2EE 1.2 (Servlet 2.2, JSP 1.1) is sufficient when not using Spring's JSP tag libraries or the EJB support.
 
-Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1, JMX 1.0/1.2,
-JCA 1.0, Hibernate 2.1/3.0, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, Apache OJB 1.0, iBATIS SQL Maps 1.3/2.0,
+Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1, JMX 1.0/1.2, JCA 1.0,
+Hibernate 2.1/3.0/3.1, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, Apache OJB 1.0, iBATIS SQL Maps 1.3/2.0,
 Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.4/1.5, EHCache 1.1, JSTL 1.0, Velocity 1.4,
-FreeMarker 2.3, JasperReports 0.6/1.0, Struts/Tiles 1.2, JSF 1.1, Jakarta Commons FileUpload 1.0, etc.
+FreeMarker 2.3, JasperReports 1.0/1.1, Struts/Tiles 1.1/1.2, JSF 1.1, Jakarta Commons FileUpload 1.0, etc.
 
 Release contents:
 * "src" contains the Java source files for the framework
@@ -124,7 +124,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI, Velocity, FreeMarker, JasperReports)
 
-* "spring-remoting" (~135 KB)
+* "spring-remoting" (~140 KB)
 - Contents: remoting support, EJB support, JMS support
 - Dependencies: spring-aop, spring-beans, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB, JMS)
 
@@ -132,11 +132,11 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: iBATIS SQL Maps support, Apache OJB support, TopLink support, JDO support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, iBATIS SQL Maps, Apache OJB, TopLink, JDO)
 
-* "spring-hibernate" (~180 KB)
+* "spring-hibernate" (~185 KB)
 - Contents: Hibernate 2.1 support, Hibernate 3.x support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, Hibernate2, Hibernate3)
 
-* "spring" (~1830 KB)
+* "spring" (~1850 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
