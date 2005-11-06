@@ -323,7 +323,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * @return the formatted message (with resolved arguments)
 	 */
 	protected String formatMessage(String msg, Object[] args, Locale locale) {
-		if (!this.alwaysUseMessageFormat && (args == null || args.length == 0)) {
+		if (msg == null || (!this.alwaysUseMessageFormat && (args == null || args.length == 0))) {
 			return msg;
 		}
 		MessageFormat messageFormat = null;
@@ -354,7 +354,9 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		}
 		MessageFormat messageFormat = new MessageFormat("");
 		messageFormat.setLocale(locale);
-		messageFormat.applyPattern(msg);
+		if (msg != null) {
+			messageFormat.applyPattern(msg);
+		}
 		return messageFormat;
 	}
 
