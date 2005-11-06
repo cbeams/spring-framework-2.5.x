@@ -71,13 +71,30 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public abstract class AbstractDependencyInjectionSpringContextTests extends AbstractSpringContextTests {
 
+	/**
+	 * Constant that indicates no autowiring at all.
+	 * @see #setAutowireMode
+	 */
+	public static final int AUTOWIRE_NO = 0;
+
+	/**
+	 * Constant that indicates autowiring bean properties by name.
+	 * @see #setAutowireMode
+	 */
+	public static final int AUTOWIRE_BY_NAME = AutowireCapableBeanFactory.AUTOWIRE_BY_NAME;
+
+	/**
+	 * Constant that indicates autowiring bean properties by type.
+	 * @see #setAutowireMode
+	 */
+	public static final int AUTOWIRE_BY_TYPE = AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
+
+
 	private boolean populateProtectedVariables = false;
 
-	private int autowireMode = AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
+	private int autowireMode = AUTOWIRE_BY_TYPE;
 
 	private boolean dependencyCheck = true;
-
-	private boolean autowireEnabled = true;
 
 	/** Application context this test will run against */
 	protected ConfigurableApplicationContext applicationContext;
@@ -104,9 +121,11 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 
 	/**
 	 * Set the autowire mode for test properties set by Dependency Injection.
-	 * <p>The default is "AUTOWIRE_BY_TYPE".
-	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_BY_TYPE
-	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_BY_NAME
+	 * <p>The default is "AUTOWIRE_BY_TYPE". Can be set to "AUTOWIRE_BY_NAME"
+	 * or "AUTOWIRE_NO" instead.
+	 * @see #AUTOWIRE_BY_TYPE
+	 * @see #AUTOWIRE_BY_NAME
+	 * @see #AUTOWIRE_NO
 	 */
 	public void setAutowireMode(int autowireMode) {
 		this.autowireMode = autowireMode;
@@ -117,20 +136,6 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 */
 	public int getAutowireMode() {
 		return autowireMode;
-	}
-
-	/**
-	 * Indicates whether subclasses should be autowired.
-	 */
-	public boolean isAutowireEnabled() {
-		return autowireEnabled;
-	}
-
-	/**
-	 * Turns autowiring of subclasses on/off (true/false).
-	 */
-	public void setAutowireEnabled(boolean autowireEnabled) {
-		this.autowireEnabled = autowireEnabled;
 	}
 
 	/**
@@ -178,7 +183,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 			}
 			populateProtectedVariables();
 		}
-		else if(isAutowireEnabled()) {
+		else if (getAutowireMode() != AUTOWIRE_NO) {
 			this.applicationContext.getBeanFactory().autowireBeanProperties(
 			    this, getAutowireMode(), isDependencyCheck());
 		}
