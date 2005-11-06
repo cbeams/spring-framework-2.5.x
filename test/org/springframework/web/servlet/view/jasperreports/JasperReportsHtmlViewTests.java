@@ -16,11 +16,12 @@
 
 package org.springframework.web.servlet.view.jasperreports;
 
+import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
+
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
-import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 
 /**
  * @author Rob Harrop
@@ -45,4 +46,5 @@ public class JasperReportsHtmlViewTests extends AbstractJasperReportsViewTests {
 		String encoding = (String) view.getConvertedExporterParameters().get(JRHtmlExporterParameter.CHARACTER_ENCODING);
 		assertEquals("UTF-8", encoding);
 	}
+
 }
