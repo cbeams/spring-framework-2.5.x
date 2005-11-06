@@ -10,6 +10,7 @@ Package org.springframework.aop
 * fixed AbstractPerformanceMonitorInterceptor to have "prefix" and "suffix" initialized with emtpy String (avoiding NPE)
 
 Package org.springframework.beans
+* reworked BeanUtils's "copyProperties" method to properly ignore properties not found in the target bean
 * factored out protected "newNestedBeanWrapper" template method from BeanWrapperImpl's "getNestedBeanWrapper" method
 * PropertyPlaceholderConfigurer logs resolved values at debug level, for improved traceability
 * AbstractBeanFactory throws BeanDefinitionStoreException if parent not found (instead of NoSuchBeanDefinitionException)
@@ -22,6 +23,7 @@ Package org.springframework.beans
 * DefaultXmlBeanDefinitionParser allows for overriding default lazy-init, autowire and dependency-check values
 
 Package org.springframework.context
+* fixed AbstractMessageSource to never try to create a MessageFormat instance for a null message
 * fixed AbstractMessageSource to synchronize on MessageFormat instance while using it to format message with arguments
 * added "getDefaultMessage" template method to AbstractMessageSource, allowing for customized fallback default messages
 * added "renderDefaultMessage" template method to AbstractMessageSource, allowing for custom processing of default msgs
@@ -30,6 +32,7 @@ Package org.springframework.core
 * unified path normalization in ClassPathResource, FileSystemResource, UrlResource and ServletContextResource
 * PathMatchingResourcePatternResolver uses linked Sets if possible, to preserve the order of resources found
 * refined PathMatchingResourcePatternResolver's "findAllClassPathResources" to work with Oracle OC4J 10.1.2 as well
+* refined PathMatchingResourcePatternResolver to use relative resources within jar locations (instead of URL building)
 * added DescriptiveResource implementation, holding a resource description but not pointing to a readable resource
 * added EncodedResource class to package "core.io.support", combining a Resource with an encoding to use for reading
 * PropertiesBeanDefinitionReader supports loading bean definitions from properties files with non-standard encodings
@@ -50,6 +53,7 @@ Package org.springframework.jms
 
 Package org.springframework.jmx
 * fixed InterfaceMBeanInfoAssembler to expose methods declared by super-interfaces of specified interfaces as well
+* added WebLogicJndiMBeanServerFactoryBean, for JNDI-based lookup of a WebLogic MBeanHome (by default the local one)
 
 Package org.springframework.jndi
 * added "lookup(String jndiName, Class requiredType)" method to JndiLocatorSupport, used by JndiObjectFactoryBean
@@ -97,11 +101,12 @@ Package org.springframework.web
 * factored out "findRequiredWebApplicationContext" method from *ActionSupport to DelegatingActionUtils for Struts
 * added "bindingErrorProcessor" property to BaseCommandController, for declaratively overriding DataBinder's default
 * refined UrlFilenameViewController to let its "handleRequestInternal" method throw Exception (for potential subclasses)
-* refined RedirectView to properly support anchors: appending an anchor fragment after URL parameters, if any
-* added "outputProperties" bean property to AbstractXlstView, for specifying arbitrary transformer output properties
 * added "message" attribute to JSP MessageTag, accepting a MessageSourceResolvable argument (direct or through JSP EL)
 * Velocity/FreeMarkerViewResolver allows for setting "allowRequestOverride" and "allowSessionOverride" on its Views
 * Velocity and FreeMarker form macros include an "id" attribute on each element
+* refined RedirectView to properly support anchors: appending an anchor fragment after URL parameters, if any
+* added "outputProperties" bean property to AbstractXlstView, for specifying arbitrary transformer output properties
+* added JasperReportsViewResolver as convenient UrlBasedViewResolver subclass, analogous to InternalResourceViewResolver
 
 
 Changes in version 1.2.5 (23.9.2005)
