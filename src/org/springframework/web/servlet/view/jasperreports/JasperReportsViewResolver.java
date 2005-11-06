@@ -16,66 +16,51 @@
 
 package org.springframework.web.servlet.view.jasperreports;
 
-import org.springframework.web.servlet.view.UrlBasedViewResolver;
-import org.springframework.web.servlet.view.AbstractUrlBasedView;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 import javax.sql.DataSource;
-import java.util.Properties;
-import java.util.Map;
-import java.util.HashMap;
 
 import net.sf.jasperreports.engine.design.JRCompiler;
 
+import org.springframework.web.servlet.view.AbstractUrlBasedView;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
+
 /**
- * {@link org.springframework.web.servlet.ViewResolver} implementation that resolves
- * instances of {@link AbstractJasperReportsView} by translating the
- * supplied view name into the URL of the report file.
+ * {@link org.springframework.web.servlet.ViewResolver} implementation that
+ * resolves instances of {@link AbstractJasperReportsView} by translating
+ * the supplied view name into the URL of the report file.
  * 
  * @author Rob Harrop
+ * @since 1.2.6
  */
 public class JasperReportsViewResolver extends UrlBasedViewResolver {
 
-	/**
-	 * A String key used to lookup the <code>JRDataSource</code> in the model.
-	 */
 	private String reportDataKey;
 
-	/**
-	 * Stores the paths to any sub-report files used by this top-level report,
-	 * along with the keys they are mapped to in the top-level report file.
-	 */
 	private Properties subReportUrls;
 
-	/**
-	 * Stores the names of any data source objects that need to be converted to
-	 * <code>JRDataSource</code> instances and included in the report parameters
-	 * to be passed on to a sub-report.
-	 */
 	private String[] subReportDataKeys;
 
-	/**
-	 * Stores the headers to written with each response
-	 */
 	private Properties headers;
 
-	/**
-	 * Stores the exporter parameters passed in by the user as passed in by the user. May be keyed as
-	 * <code>String</code>s with the fully qualified name of the exporter parameter field.
-	 */
 	private Map exporterParameters = new HashMap();
 
-	/**
-	 * Stores the <code>DataSource</code>, if any, used as the report data source.
-	 */
 	private DataSource jdbcDataSource;
 
-	/**
-	 * Holds the JRCompiler implementation to use for compiling reports on-the-fly.
-	 */
 	private JRCompiler reportCompiler;
 
+
 	/**
-	 * Sets the <code>reportDataKey</code> the view class should use.
+	 * Requires the view class to be a subclass of {@link AbstractJasperReportsView}.
+	 */
+	protected Class requiredViewClass() {
+		return AbstractJasperReportsView.class;
+	}
+
+	/**
+	 * Set the <code>reportDataKey</code> the view class should use.
 	 * @see AbstractJasperReportsView#setReportDataKey
 	 */
 	public void setReportDataKey(String reportDataKey) {
@@ -83,7 +68,7 @@ public class JasperReportsViewResolver extends UrlBasedViewResolver {
 	}
 
 	/**
-	 * Sets the <code>subReportUrls</code> the view class should use.
+	 * Set the <code>subReportUrls</code> the view class should use.
 	 * @see AbstractJasperReportsView#setSubReportUrls
 	 */
 	public void setSubReportUrls(Properties subReportUrls) {
@@ -91,7 +76,7 @@ public class JasperReportsViewResolver extends UrlBasedViewResolver {
 	}
 
 	/**
-	 * Sets the <code>subReportDataKeys</code> the view class should use.
+	 * Set the <code>subReportDataKeys</code> the view class should use.
 	 * @see AbstractJasperReportsView#setSubReportDataKeys
 	 */
 	public void setSubReportDataKeys(String[] subReportDataKeys) {
@@ -99,7 +84,7 @@ public class JasperReportsViewResolver extends UrlBasedViewResolver {
 	}
 
 	/**
-	 * Sets the <code>headers</code> the view class should use.
+	 * Set the <code>headers</code> the view class should use.
 	 * @see AbstractJasperReportsView#setHeaders
 	 */
 	public void setHeaders(Properties headers) {
@@ -107,7 +92,7 @@ public class JasperReportsViewResolver extends UrlBasedViewResolver {
 	}
 
 	/**
-	 * Sets the <code>exporterParameters</code> the view class should use.
+	 * Set the <code>exporterParameters</code> the view class should use.
 	 * @see AbstractJasperReportsView#setExporterParameters
 	 */
 	public void setExporterParameters(Map exporterParameters) {
@@ -115,7 +100,7 @@ public class JasperReportsViewResolver extends UrlBasedViewResolver {
 	}
 
 	/**
-	 * Sets the {@link DataSource} the view class should use.
+	 * Set the {@link DataSource} the view class should use.
 	 * @see AbstractJasperReportsView#setJdbcDataSource
 	 */
 	public void setJdbcDataSource(DataSource jdbcDataSource) {
@@ -123,37 +108,29 @@ public class JasperReportsViewResolver extends UrlBasedViewResolver {
 	}
 
 	/**
-	 * Sets the{@link JRCompiler} the view class should use.
+	 * Set the {@link JRCompiler} the view class should use.
 	 * @see AbstractJasperReportsView#setReportCompiler
 	 */
 	public void setReportCompiler(JRCompiler reportCompiler) {
 		this.reportCompiler = reportCompiler;
 	}
 
-	/**
-	 * Checks to see whether the supplied class is a subclass of {@link AbstractJasperReportsView}. If so,
-	 * delegates to the super class otherwise throws an {@link IllegalArgumentException}.
-	 */
-	public void setViewClass(Class viewClass) {
-		if(!AbstractJasperReportsView.class.isAssignableFrom(viewClass)) {
-			throw new IllegalArgumentException("Class [" + viewClass.getName() + "] is not a subclass of [" + AbstractJasperReportsView.class.getName() + "].");
-		}
-		super.setViewClass(viewClass);
-	}
 
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		AbstractJasperReportsView view = (AbstractJasperReportsView) super.buildView(viewName);
-		view.setExporterParameters(this.exporterParameters);
-		view.setHeaders(this.headers);
-		view.setJdbcDataSource(this.jdbcDataSource);
-		view.setReportDataKey(this.reportDataKey);
-		view.setSubReportDataKeys(this.subReportDataKeys);
-		view.setSubReportUrls(this.subReportUrls);
 
-		if(this.reportCompiler != null) {
+		view.setReportDataKey(this.reportDataKey);
+		view.setSubReportUrls(this.subReportUrls);
+		view.setSubReportDataKeys(this.subReportDataKeys);
+		view.setHeaders(this.headers);
+		view.setExporterParameters(this.exporterParameters);
+		view.setJdbcDataSource(this.jdbcDataSource);
+
+		if (this.reportCompiler != null) {
 			view.setReportCompiler(this.reportCompiler);
 		}
 
 		return view;
 	}
+
 }
