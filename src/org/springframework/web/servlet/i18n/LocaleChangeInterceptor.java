@@ -37,9 +37,13 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 
+	/**
+	 * Default name of the locale specification parameter: "locale".
+	 */
 	public static final String DEFAULT_PARAM_NAME = "locale";
 
 	private String paramName = DEFAULT_PARAM_NAME;
+
 
 	/**
 	 * Set the name of the parameter that contains a locale specification
@@ -49,8 +53,10 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 		this.paramName = paramName;
 	}
 
+
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws ServletException {
+
 		String newLocale = request.getParameter(this.paramName);
 		if (newLocale != null) {
 			LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
@@ -58,7 +64,7 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 			localeEditor.setAsText(newLocale);
 			localeResolver.setLocale(request, response, (Locale) localeEditor.getValue());
 		}
-		// proceed in any case
+		// Proceed in any case.
 		return true;
 	}
 

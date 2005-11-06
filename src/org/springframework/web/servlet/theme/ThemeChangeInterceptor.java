@@ -34,9 +34,13 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class ThemeChangeInterceptor extends HandlerInterceptorAdapter {
 
+	/**
+	 * Default name of the theme specification parameter: "theme".
+	 */
 	public static final String DEFAULT_PARAM_NAME = "theme";
 
 	private String paramName = DEFAULT_PARAM_NAME;
+
 
 	/**
 	 * Set the name of the parameter that contains a theme specification
@@ -46,14 +50,16 @@ public class ThemeChangeInterceptor extends HandlerInterceptorAdapter {
 		this.paramName = paramName;
 	}
 
+
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws ServletException {
+
 		ThemeResolver themeResolver = RequestContextUtils.getThemeResolver(request);
 		String newTheme = request.getParameter(this.paramName);
 		if (newTheme != null) {
 			themeResolver.setThemeName(request, response, newTheme);
 		}
-		// proceed in any case
+		// Proceed in any case.
 		return true;
 	}
 
