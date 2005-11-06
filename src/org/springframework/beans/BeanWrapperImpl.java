@@ -630,10 +630,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 						actualName = propertyName.substring(0, keyStart);
 					}
 					String key = propertyName.substring(keyStart + PROPERTY_KEY_PREFIX.length(), keyEnd);
-					if (key.startsWith("'") && key.endsWith("'")) {
-						key = key.substring(1, key.length() - 1);
-					}
-					else if (key.startsWith("\"") && key.endsWith("\"")) {
+					if ((key.startsWith("'") && key.endsWith("'")) || (key.startsWith("\"") && key.endsWith("\""))) {
 						key = key.substring(1, key.length() - 1);
 					}
 					keys.add(key);
