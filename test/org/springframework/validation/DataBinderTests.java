@@ -558,6 +558,8 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_ROD.java.lang.String", errors.getFieldError("array[0].name").getCodes()[5]);
 		assertEquals("NOT_ROD", errors.getFieldError("array[0].name").getCodes()[6]);
 		assertEquals(1, errors.getFieldErrorCount("map[key1].name"));
+		assertEquals(1, errors.getFieldErrorCount("map['key1'].name"));
+		assertEquals(1, errors.getFieldErrorCount("map[\"key1\"].name"));
 		assertEquals("NOT_ROD", errors.getFieldError("map[key1].name").getCode());
 		assertEquals("NOT_ROD.tb.map[key1].name", errors.getFieldError("map[key1].name").getCodes()[0]);
 		assertEquals("NOT_ROD.tb.map.name", errors.getFieldError("map[key1].name").getCodes()[1]);

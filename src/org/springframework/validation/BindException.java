@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.util.Assert;
@@ -155,6 +156,7 @@ public class BindException extends Exception implements Errors {
 		if (nestedPath == null) {
 			nestedPath = "";
 		}
+		nestedPath = BeanUtils.canonicalName(nestedPath);
 		if (nestedPath.length() > 0 && !nestedPath.endsWith(NESTED_PATH_SEPARATOR)) {
 			nestedPath += NESTED_PATH_SEPARATOR;
 		}
@@ -166,7 +168,7 @@ public class BindException extends Exception implements Errors {
 	 * regarding the nested path of this instance.
 	 */
 	protected String fixedField(String field) {
-		return getNestedPath() + field;
+		return getNestedPath() + BeanUtils.canonicalName(field);
 	}
 
 

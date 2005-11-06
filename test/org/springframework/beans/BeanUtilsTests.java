@@ -54,6 +54,36 @@ public class BeanUtilsTests extends TestCase {
 		}
 	}
 
+	public void testGetPropertyDescriptors() throws Exception {
+		PropertyDescriptor[] actual = Introspector.getBeanInfo(TestBean.class).getPropertyDescriptors();
+		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(TestBean.class);
+		assertNotNull("Descriptors should not be null", descriptors);
+		assertEquals("Invalid number of descriptors returned", actual.length, descriptors.length);
+	}
+
+	public void testBeanPropertyIsArray() {
+		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(ContainerBean.class);
+		for (int i = 0; i < descriptors.length; i++) {
+			PropertyDescriptor descriptor = descriptors[i];
+			if ("containedBeans".equals(descriptor.getName())) {
+				assertTrue("Property should be an array", descriptor.getPropertyType().isArray());
+				assertEquals(descriptor.getPropertyType().getComponentType(), ContainedBean.class);
+			}
+		}
+	}
+
+	public void testCanonicalName() {
+		assertEquals("map", BeanUtils.canonicalName("map"));
+		assertEquals("map[key1]", BeanUtils.canonicalName("map[key1]"));
+		assertEquals("map[key1]", BeanUtils.canonicalName("map['key1']"));
+		assertEquals("map[key1]", BeanUtils.canonicalName("map[\"key1\"]"));
+		assertEquals("map[key1][key2]", BeanUtils.canonicalName("map[key1][key2]"));
+		assertEquals("map[key1][key2]", BeanUtils.canonicalName("map['key1'][\"key2\"]"));
+		assertEquals("map[key1].name", BeanUtils.canonicalName("map[key1].name"));
+		assertEquals("map[key1].name", BeanUtils.canonicalName("map['key1'].name"));
+		assertEquals("map[key1].name", BeanUtils.canonicalName("map[\"key1\"].name"));
+	}
+
 	public void testCopyProperties() throws Exception {
 		TestBean tb = new TestBean();
 		tb.setName("rod");
@@ -99,26 +129,6 @@ public class BeanUtilsTests extends TestCase {
 		TestBean target = new TestBean();
 		BeanUtils.copyProperties(source, target, new String[] {"specialProperty"});
 		assertEquals(target.getName(), "name");
-	}
-
-	public void testGetPropertyDescriptors() throws Exception {
-		PropertyDescriptor[] actual = Introspector.getBeanInfo(TestBean.class).getPropertyDescriptors();
-		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(TestBean.class);
-		assertNotNull("Descriptors should not be null", descriptors);
-		assertEquals("Invalid number of descriptors returned", actual.length, descriptors.length);
-	}
-
-	public void testSPR1237() {
-		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(ContainerBean.class);
-
-		for (int i = 0; i < descriptors.length; i++) {
-			PropertyDescriptor descriptor = descriptors[i];
-
-			if("containedBeans".equals(descriptor.getName())) {
-				assertTrue("Property should be an array", descriptor.getPropertyType().isArray());
-				assertEquals(descriptor.getPropertyType().getComponentType(), ContainedBean.class);
-			}
-		}
 	}
 
 

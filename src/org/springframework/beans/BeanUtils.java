@@ -46,6 +46,7 @@ public abstract class BeanUtils {
 	 * type as value, for example: Integer.class -> int.class
 	 */
 	private static final Map primitiveWrapperTypeMap = new HashMap(8);
+
 	static {
 		primitiveWrapperTypeMap.put(Boolean.class, boolean.class);
 		primitiveWrapperTypeMap.put(Byte.class, byte.class);
@@ -56,6 +57,7 @@ public abstract class BeanUtils {
 		primitiveWrapperTypeMap.put(Float.class, float.class);
 		primitiveWrapperTypeMap.put(Double.class, double.class);
 	}
+
 
 	/**
 	 * Convenience method to instantiate a class using its no-arg constructor.
@@ -297,46 +299,6 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Copy the property values of the given source bean into the target bean.
-	 * @param source source bean
-	 * @param target target bean
-	 * @throws IllegalArgumentException if the classes of source and target do not match
-	 */
-	public static void copyProperties(Object source, Object target)
-			throws IllegalArgumentException, BeansException {
-		copyProperties(source, target, null);
-	}
-
-	/**
-	 * Copy the property values of the given source bean into the given target bean,
-	 * ignoring the given ignoreProperties.
-	 * @param source the source bean
-	 * @param target the target bean
-	 * @param ignoreProperties array of property names to ignore
-	 * @throws IllegalArgumentException if the classes of source and target do not match
-	 */
-	public static void copyProperties(Object source, Object target, String[] ignoreProperties)
-			throws IllegalArgumentException, BeansException {
-		Assert.notNull(source, "source must not be null");
-		Assert.notNull(target, "source must not be null");
-		List ignoreList = (ignoreProperties != null) ? Arrays.asList(ignoreProperties) : null;
-		BeanWrapper sourceBw = new BeanWrapperImpl(source);
-		BeanWrapper targetBw = new BeanWrapperImpl(target);
-		MutablePropertyValues values = new MutablePropertyValues();
-		for (int i = 0; i < sourceBw.getPropertyDescriptors().length; i++) {
-			PropertyDescriptor sourceDesc = sourceBw.getPropertyDescriptors()[i];
-			String name = sourceDesc.getName();
-			if (ignoreProperties == null || (!ignoreList.contains(name))) {
-				PropertyDescriptor targetDesc = targetBw.getPropertyDescriptor(name);
-				if (targetDesc.getWriteMethod() != null && targetDesc.getReadMethod() != null) {
-					values.addPropertyValue(new PropertyValue(name, sourceBw.getPropertyValue(name)));
-				}
-			}
-		}
-		targetBw.setPropertyValues(values);
-	}
-
-	/**
 	 * Retrieve the JavaBeans <code>PropertyDescriptor</code>s of a given class.
 	 * @param clazz the Class to retrieve the PropertyDescriptors for
 	 * @return an array of <code>PropertyDescriptors</code> for the given class
@@ -364,6 +326,82 @@ public abstract class BeanUtils {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Determine the canonical name for the given property path.
+	 * Removes surrounding quotes from map keys:<br>
+	 * <code>map['key']</code> -> <code>map[key]</code><br>
+	 * <code>map["key"]</code> -> <code>map[key]</code>
+	 * @param propertyName the bean property path
+	 * @return the canonical representation of the property path
+	 */
+	public static String canonicalName(String propertyName) {
+		if (propertyName == null) {
+			return "";
+		}
+		StringBuffer buf = new StringBuffer(propertyName);
+		int searchIndex = 0;
+		while (searchIndex != -1) {
+			int keyStart = buf.toString().indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX, searchIndex);
+			searchIndex = -1;
+			if (keyStart != -1) {
+				int keyEnd = buf.toString().indexOf(
+						PropertyAccessor.PROPERTY_KEY_SUFFIX, keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length());
+				if (keyEnd != -1) {
+					String key = buf.substring(keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length(), keyEnd);
+					if ((key.startsWith("'") && key.endsWith("'")) || (key.startsWith("\"") && key.endsWith("\""))) {
+						buf.delete(keyStart + 1, keyStart + 2);
+						buf.delete(keyEnd - 2, keyEnd - 1);
+						keyEnd = keyEnd - 2;
+					}
+					searchIndex = keyEnd + PropertyAccessor.PROPERTY_KEY_SUFFIX.length();
+				}
+			}
+		}
+		return buf.toString();
+	}
+
+	/**
+	 * Copy the property values of the given source bean into the target bean.
+	 * @param source source bean
+	 * @param target target bean
+	 * @throws IllegalArgumentException if the classes of source and target do not match
+	 */
+	public static void copyProperties(Object source, Object target)
+			throws IllegalArgumentException, BeansException {
+
+		copyProperties(source, target, null);
+	}
+
+	/**
+	 * Copy the property values of the given source bean into the given target bean,
+	 * ignoring the given ignoreProperties.
+	 * @param source the source bean
+	 * @param target the target bean
+	 * @param ignoreProperties array of property names to ignore
+	 * @throws IllegalArgumentException if the classes of source and target do not match
+	 */
+	public static void copyProperties(Object source, Object target, String[] ignoreProperties)
+			throws IllegalArgumentException, BeansException {
+
+		Assert.notNull(source, "source must not be null");
+		Assert.notNull(target, "target must not be null");
+		List ignoreList = (ignoreProperties != null) ? Arrays.asList(ignoreProperties) : null;
+		BeanWrapper sourceBw = new BeanWrapperImpl(source);
+		BeanWrapper targetBw = new BeanWrapperImpl(target);
+		MutablePropertyValues values = new MutablePropertyValues();
+		for (int i = 0; i < sourceBw.getPropertyDescriptors().length; i++) {
+			PropertyDescriptor sourceDesc = sourceBw.getPropertyDescriptors()[i];
+			String name = sourceDesc.getName();
+			if (ignoreProperties == null || (!ignoreList.contains(name))) {
+				PropertyDescriptor targetDesc = targetBw.getPropertyDescriptor(name);
+				if (targetDesc.getWriteMethod() != null && targetDesc.getReadMethod() != null) {
+					values.addPropertyValue(new PropertyValue(name, sourceBw.getPropertyValue(name)));
+				}
+			}
+		}
+		targetBw.setPropertyValues(values);
 	}
 
 }
