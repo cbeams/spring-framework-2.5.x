@@ -299,9 +299,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		int prefixEnd = location.indexOf(":") + 1;
 		int rootDirEnd = location.length();
 		while (rootDirEnd > prefixEnd && getPathMatcher().isPattern(location.substring(prefixEnd, rootDirEnd))) {
-			rootDirEnd = location.lastIndexOf('/', rootDirEnd - 1);
+			rootDirEnd = location.lastIndexOf('/', rootDirEnd - 2) + 1;
 		}
-		if (rootDirEnd == -1) {
+		if (rootDirEnd == 0) {
 			rootDirEnd = prefixEnd;
 		}
 		return location.substring(0, rootDirEnd);
@@ -361,19 +361,20 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for matching resources in jar file [" + jarFileUrl + "]");
 		}
-		if (rootEntryPath.endsWith("/")) {
-			// Root entry path must not end with slash to allow for proper matching.
+		if (!rootEntryPath.endsWith("/")) {
+			// Root entry path must end with slash to allow for proper matching.
 			// The Sun JRE does not return a slash here, but BEA JRockit does.
-			rootEntryPath = rootEntryPath.substring(0, rootEntryPath.length() - 1);
+			rootEntryPath = rootEntryPath + "/";
 		}
-		String jarFileUrlPrefix = JAR_URL_PREFIX + jarFileUrl + JAR_URL_SEPARATOR;
 		Set result = CollectionFactory.createLinkedSetIfPossible(8);
 		for (Enumeration entries = jarFile.entries(); entries.hasMoreElements();) {
 			JarEntry entry = (JarEntry) entries.nextElement();
 			String entryPath = entry.getName();
-			if (entryPath.startsWith(rootEntryPath) &&
-					getPathMatcher().match(subPattern, entryPath.substring(rootEntryPath.length()))) {
-				result.add(new UrlResource(jarFileUrlPrefix + entryPath));
+			if (entryPath.startsWith(rootEntryPath)) {
+				String relativePath = entryPath.substring(rootEntryPath.length());
+				if (getPathMatcher().match(subPattern, relativePath)) {
+					result.add(rootDirResource.createRelative(relativePath));
+				}
 			}
 		}
 		return result;
