@@ -36,8 +36,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when Spring's Hessian remoting support
 
-* cglib/cglib-nodep-2.1_2.jar
-- CGLIB 2.1_2 with ObjectWeb ASM 1.5.3 (http://cglib.sourceforge.net)
+* cglib/cglib-nodep-2.1_3.jar
+- CGLIB 2.1_3 with ObjectWeb ASM 1.5.3 (http://cglib.sourceforge.net)
 - required for building the framework
 - required at runtime when proxying full target classes via Spring AOP
 
@@ -62,7 +62,7 @@ distribution/website before using any of them in your own applications.
 - required for running PetClinic (by Hibernate)
 
 * freemarker/freemarker.jar
-- FreeMarker 2.3.3 (http://www.freemarker.org)
+- FreeMarker 2.3.4 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
@@ -297,8 +297,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's AbstractExcelView
 
-* quartz/quartz-1.5.0.jar
-- Quartz 1.5.0 (http://www.opensymphony.com/quartz)
+* quartz/quartz-1.5.1.jar
+- Quartz 1.5.1 (http://www.opensymphony.com/quartz)
 - required for building the framework
 - required at runtime when using Spring's Quartz scheduling support
 
