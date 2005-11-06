@@ -32,7 +32,7 @@ public class JasperReportViewResolverTests extends TestCase {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 
 		String prefix = "org/springframework/ui/jasperreports/";
-		String suffix = ".jrxml";
+		String suffix = ".jasper";
 		String viewName = "DataSourceReport";
 
 		JasperReportsViewResolver viewResolver = new JasperReportsViewResolver();
