@@ -348,7 +348,8 @@ public class OracleLobHandler extends AbstractLobHandler {
 				else if (con != null && ex.getTargetException() instanceof ClassCastException) {
 					throw new InvalidDataAccessApiUsageException(
 							"OracleLobCreator needs to work on [oracle.jdbc.OracleConnection], not on [" +
-							con.getClass() + "]: specify a corresponding NativeJdbcExtractor");
+							con.getClass().getName() + "]: specify a corresponding NativeJdbcExtractor",
+							ex.getTargetException());
 				}
 				else {
 					throw new DataAccessResourceFailureException("Could not create Oracle LOB",
