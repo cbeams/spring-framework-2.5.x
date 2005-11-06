@@ -46,24 +46,30 @@ import org.springframework.util.PropertiesPersister;
  * <p><b>Example:</b>
  *
  * <pre>
- * employee.class=MyClass         // bean is of class MyClass
+ * employee.(class)=MyClass         // bean is of class MyClass
  * employee.(abstract)=true       // this bean can't be instantiated directly
  * employee.group=Insurance       // real property
  * employee.usesDialUp=false      // real property (potentially overridden)
  *
- * salesrep.parent=employee       // derives from "employee" bean definition
+ * salesrep.(parent)=employee       // derives from "employee" bean definition
  * salesrep.(lazy-init)=true      // lazily initialize this singleton bean
  * salesrep.manager(ref)=tony     // reference to another bean
  * salesrep.department=Sales      // real property
  *
- * techie.parent=employee         // derives from "employee" bean definition
+ * techie.(parent)=employee         // derives from "employee" bean definition
  * techie.(singleton)=false       // bean is a prototype (not a shared instance)
  * techie.manager(ref)=jeff       // reference to another bean
  * techie.department=Engineering  // real property
  * techie.usesDialUp=true         // real property (overriding parent value)</pre>
  *
+ * <em><strong>Note:</strong> As of 1.2.6 the use of <code>class</code> and <code>parent</code>
+ * has been deprecated in favor of <code>(class)</code> and <code>(parent)</code> in keeping with all
+ * other special properties. Users should note that support for <code>class</code> and <code>parent</code>
+ * as special properties rather then actual bean properties will be removed in a future version.</em>
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 26.11.2003
  * @see DefaultListableBeanFactory
  */
@@ -83,13 +89,25 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 	/**
 	 * Prefix for the class property of a root bean definition.
+	 * @deprecated in favor of {@link #CLASS_KEY}
 	 */
-	public static final String CLASS_KEY = "class";
+	public static final String DEPRECATED_CLASS_KEY = "class";
+
+	/**
+	 * Special string added to distinguish owner.(class)=com.myapp.MyClass
+	 */
+	public static final String CLASS_KEY = "(class)";
 
 	/**
 	 * Reserved "property" to indicate the parent of a child bean definition.
+	 * @deprecated in favor of {@link #PARENT_KEY}
 	 */
-	public static final String PARENT_KEY = "parent";
+	public static final String DEPRECATED_PARENT_KEY = "parent";
+
+	/**
+	 * Special string added to distinguish owner.(parent)=parentBeanName
+	 */
+	public static final String PARENT_KEY = "(parent)";
 
 	/**
 	 * Special string added to distinguish owner.(abstract)=true
@@ -391,22 +409,22 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 			String key = (String) entry.getKey();
 			if (key.startsWith(prefix + SEPARATOR)) {
 				String property = key.substring(prefix.length() + SEPARATOR.length());
-				if (property.equals(CLASS_KEY)) {
+				if (isClassKey(property)) {
 					className = (String) entry.getValue();
 				}
-				else if (property.equals(ABSTRACT_KEY)) {
+				else if (ABSTRACT_KEY.equals(property)) {
 					String val = (String) entry.getValue();
-					isAbstract = val.equals(TRUE_VALUE);
+					isAbstract = TRUE_VALUE.equals(val);
 				}
-				else if (property.equals(SINGLETON_KEY)) {
+				else if (SINGLETON_KEY.equals(property)) {
 					String val = (String) entry.getValue();
-					singleton = (val == null) || val.equals(TRUE_VALUE);
+					singleton = (val == null) || TRUE_VALUE.equals(val);
 				}
-				else if (property.equals(LAZY_INIT_KEY)) {
+				else if (LAZY_INIT_KEY.equals(property)) {
 					String val = (String) entry.getValue();
-					lazyInit = val.equals(TRUE_VALUE);
+					lazyInit = TRUE_VALUE.equals(val);
 				}
-				else if (property.equals(PARENT_KEY)) {
+				else if (isParentKey(property)) {
 					parent = (String) entry.getValue();
 				}
 				else if (property.endsWith(REF_SUFFIX)) {
@@ -471,6 +489,40 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 			throw new BeanDefinitionStoreException(resourceDescription, beanName,
 					"Class that bean class [" + className + "] depends on not found", err);
 		}
+	}
+
+	/**
+	 * Indicates that whether the supplied property matches the parent property of
+	 * the bean definition.
+	 */
+	private boolean isParentKey(String property) {
+		if (PARENT_KEY.equals(property)) {
+			return true;
+		}
+		else if (DEPRECATED_PARENT_KEY.equals(property)) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Use of 'parent' property in " + getClass().getName() + " is deprecated in favor of '(parent)'.");
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Indicates that whether the supplied property matches the class property of
+	 * the bean definition.
+	 */
+	private boolean isClassKey(String property) {
+		if (CLASS_KEY.equals(property)) {
+			return true;
+		}
+		else if (DEPRECATED_CLASS_KEY.equals(property)) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Use of 'class' property in " + getClass().getName() + " is deprecated in favor of '(class)'.");
+			}
+			return true;
+		}
+		return false;
 	}
 
 }
