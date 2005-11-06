@@ -142,12 +142,7 @@
 		<!-- the standard MBeanServerFactory.findMBeanServer lookup mechanism. -->
 		<!--
 		<property name="server">
-			<bean class="org.springframework.jmx.support.WebLogicMBeanServerFactoryBean">
-				<property name="username" value="weblogic"/>
-				<property name="password" value="weblogic"/>
-				<property name="serverUrl" value="t3://localhost:7001"/>
-				<property name="serverName" value="server"/>
-			</bean>
+			<bean class="org.springframework.jmx.support.WebLogicJndiMBeanServerFactoryBean"/>
 		</property>
 		-->
 	</bean>
