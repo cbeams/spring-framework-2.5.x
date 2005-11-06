@@ -16,6 +16,7 @@
 
 package org.springframework.core.enums;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import org.springframework.util.comparator.CompoundComparator;
@@ -39,7 +40,7 @@ import org.springframework.util.comparator.NullSafeComparator;
  * @author Keith Donald
  * @since 1.2.2
  */
-public interface LabeledEnum extends Comparable {
+public interface LabeledEnum extends Comparable, Serializable {
 
 	/**
 	 * Shared Comparator instance that sorts enumerations by <code>CODE_ORDER</code>.

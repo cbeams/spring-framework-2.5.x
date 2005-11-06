@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @since 1.2.2
  */
-public abstract class AbstractLabeledEnum implements LabeledEnum, Serializable {
+public abstract class AbstractLabeledEnum implements LabeledEnum {
 
 	private final String label;
 
