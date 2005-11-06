@@ -60,6 +60,76 @@ public abstract class BeanUtils {
 
 
 	/**
+	 * Determine if the given type is assignable from the given value,
+	 * assuming setting by reflection. Considers primitive wrapper classes
+	 * as assignable to the corresponding primitive types.
+	 * <p>For example used in a bean factory's constructor resolution.
+	 * @param type the target type
+	 * @param value the value that should be assigned to the type
+	 * @return if the type is assignable from the value
+	 */
+	public static boolean isAssignable(Class type, Object value) {
+		Assert.notNull(type, "type must not be null");
+		return (value != null ? isAssignable(type, value.getClass()) : !type.isPrimitive());
+	}
+
+	/**
+	 * Determine if the given target type is assignable from the given value
+	 * type, assuming setting by reflection. Considers primitive wrapper
+	 * classes as assignable to the corresponding primitive types.
+	 * <p>For example used in BeanWrapperImpl's custom editor matrching.
+	 * @param targetType the target type
+	 * @param valueType the value type that should be assigned to the target type
+	 * @return if the target type is assignable from the value type
+	 */
+	public static boolean isAssignable(Class targetType, Class valueType) {
+		Assert.notNull(targetType, "targetType must not be null");
+		Assert.notNull(valueType, "valueType must not be null");
+		return (targetType.isAssignableFrom(valueType) ||
+				targetType.equals(primitiveWrapperTypeMap.get(valueType)));
+	}
+
+	/**
+	 * Check if the given class represents a "simple" property,
+	 * i.e. a primitive, a String, a Class, or a corresponding array.
+	 * Used to determine properties to check for a "simple" dependency-check.
+	 * @see org.springframework.beans.factory.support.RootBeanDefinition#DEPENDENCY_CHECK_SIMPLE
+	 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#checkDependencies
+	 */
+	public static boolean isSimpleProperty(Class clazz) {
+		Assert.notNull(clazz, "clazz must not be null");
+		return clazz.isPrimitive() || isPrimitiveArray(clazz) ||
+				isPrimitiveWrapper(clazz) || isPrimitiveWrapperArray(clazz) ||
+				clazz.equals(String.class) || clazz.equals(String[].class) ||
+				clazz.equals(Class.class) || clazz.equals(Class[].class);
+	}
+
+	/**
+	 * Check if the given class represents an array of primitives,
+	 * i.e. boolean, byte, char, short, int, long, float, or double.
+	 */
+	public static boolean isPrimitiveArray(Class clazz) {
+		return (clazz.isArray() && clazz.getComponentType().isPrimitive());
+	}
+
+	/**
+	 * Check if the given class represents a primitive wrapper,
+	 * i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double.
+	 */
+	public static boolean isPrimitiveWrapper(Class clazz) {
+		return primitiveWrapperTypeMap.containsKey(clazz);
+	}
+
+	/**
+	 * Check if the given class represents an array of primitive wrappers,
+	 * i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double.
+	 */
+	public static boolean isPrimitiveWrapperArray(Class clazz) {
+		return (clazz.isArray() && isPrimitiveWrapper(clazz.getComponentType()));
+	}
+
+
+	/**
 	 * Convenience method to instantiate a class using its no-arg constructor.
 	 * As this method doesn't try to load classes by name, it should avoid
 	 * class-loading issues.
@@ -229,74 +299,6 @@ public abstract class BeanUtils {
 		}
 	}
 
-	/**
-	 * Determine if the given type is assignable from the given value,
-	 * assuming setting by reflection. Considers primitive wrapper classes
-	 * as assignable to the corresponding primitive types.
-	 * <p>For example used in a bean factory's constructor resolution.
-	 * @param type the target type
-	 * @param value the value that should be assigned to the type
-	 * @return if the type is assignable from the value
-	 */
-	public static boolean isAssignable(Class type, Object value) {
-		Assert.notNull(type, "type must not be null");
-		return (value != null ? isAssignable(type, value.getClass()) : !type.isPrimitive());
-	}
-
-	/**
-	 * Determine if the given target type is assignable from the given value
-	 * type, assuming setting by reflection. Considers primitive wrapper
-	 * classes as assignable to the corresponding primitive types.
-	 * <p>For example used in BeanWrapperImpl's custom editor matrching.
-	 * @param targetType the target type
-	 * @param valueType the value type that should be assigned to the target type
-	 * @return if the target type is assignable from the value type
-	 */
-	public static boolean isAssignable(Class targetType, Class valueType) {
-		Assert.notNull(targetType, "targetType must not be null");
-		Assert.notNull(valueType, "valueType must not be null");
-		return (targetType.isAssignableFrom(valueType) ||
-				targetType.equals(primitiveWrapperTypeMap.get(valueType)));
-	}
-
-	/**
-	 * Check if the given class represents a "simple" property,
-	 * i.e. a primitive, a String, a Class, or a corresponding array.
-	 * Used to determine properties to check for a "simple" dependency-check.
-	 * @see org.springframework.beans.factory.support.RootBeanDefinition#DEPENDENCY_CHECK_SIMPLE
-	 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#checkDependencies
-	 */
-	public static boolean isSimpleProperty(Class clazz) {
-		Assert.notNull(clazz, "clazz must not be null");
-		return clazz.isPrimitive() || isPrimitiveArray(clazz) ||
-				isPrimitiveWrapper(clazz) || isPrimitiveWrapperArray(clazz) ||
-				clazz.equals(String.class) || clazz.equals(String[].class) ||
-				clazz.equals(Class.class) || clazz.equals(Class[].class);
-	}
-
-	/**
-	 * Check if the given class represents an array of primitives,
-	 * i.e. boolean, byte, char, short, int, long, float, or double.
-	 */
-	public static boolean isPrimitiveArray(Class clazz) {
-		return (clazz.isArray() && clazz.getComponentType().isPrimitive());
-	}
-
-	/**
-	 * Check if the given class represents a primitive wrapper,
-	 * i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double.
-	 */
-	public static boolean isPrimitiveWrapper(Class clazz) {
-		return primitiveWrapperTypeMap.containsKey(clazz);
-	}
-
-	/**
-	 * Check if the given class represents an array of primitive wrappers,
-	 * i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double.
-	 */
-	public static boolean isPrimitiveWrapperArray(Class clazz) {
-		return (clazz.isArray() && isPrimitiveWrapper(clazz.getComponentType()));
-	}
 
 	/**
 	 * Retrieve the JavaBeans <code>PropertyDescriptor</code>s of a given class.
@@ -310,12 +312,26 @@ public abstract class BeanUtils {
 	}
 
 	/**
+	 * Retrieve the JavaBeans <code>PropertyDescriptors</code> for the given property.
+	 * @param clazz the Class to retrieve the PropertyDescriptor for
+	 * @param propertyName the name of the property
+	 * @return the corresponding PropertyDescriptor, or <code>null</code> if none
+	 * @throws BeansException if PropertyDescriptor lookup fails
+	 */
+	public static PropertyDescriptor getPropertyDescriptor(Class clazz, String propertyName)
+			throws BeansException {
+
+		CachedIntrospectionResults cr = CachedIntrospectionResults.forClass(clazz);
+		return cr.getPropertyDescriptor(propertyName);
+	}
+
+	/**
 	 * Find a JavaBeans <code>PropertyDescriptor</code> for the given method,
 	 * with the method either being the read method or the write method for
 	 * that bean property.
 	 * @param method the method to find a corresponding PropertyDescriptor for
 	 * @return the corresponding PropertyDescriptor, or <code>null</code> if none
-	 * @throws BeansException if PropertyDescriptor look fails
+	 * @throws BeansException if PropertyDescriptor lookup fails
 	 */
 	public static PropertyDescriptor findPropertyForMethod(Method method) throws BeansException {
 		Assert.notNull(method, "method must not be null");
@@ -340,6 +356,11 @@ public abstract class BeanUtils {
 		if (propertyName == null) {
 			return "";
 		}
+
+		// The following code does not use JDK 1.4's StringBuffer.indexOf(String)
+		// method to retain JDK 1.3 compatibility. The slight loss in performance
+		// is not really relevant, as this code will typically just run on startup.
+
 		StringBuffer buf = new StringBuffer(propertyName);
 		int searchIndex = 0;
 		while (searchIndex != -1) {
@@ -362,46 +383,60 @@ public abstract class BeanUtils {
 		return buf.toString();
 	}
 
+
 	/**
 	 * Copy the property values of the given source bean into the target bean.
-	 * @param source source bean
-	 * @param target target bean
-	 * @throws IllegalArgumentException if the classes of source and target do not match
+	 * <p>Note: The source and target classes do not have to match or even be derived
+	 * from each other, as long as the properties match. Any bean properties that the
+	 * source bean exposes but the target bean does not will silently be ignored.
+	 * <p>This is just a convenience method. For more complex transfer needs,
+	 * consider using a full BeanWrapper.
+	 * @param source the source bean
+	 * @param target the target bean
+	 * @throws BeansException if the copying failed
+	 * @see BeanWrapper
 	 */
-	public static void copyProperties(Object source, Object target)
-			throws IllegalArgumentException, BeansException {
-
+	public static void copyProperties(Object source, Object target) throws BeansException {
 		copyProperties(source, target, null);
 	}
 
 	/**
 	 * Copy the property values of the given source bean into the given target bean,
-	 * ignoring the given ignoreProperties.
+	 * ignoring the given "ignoreProperties".
+	 * <p>Note: The source and target classes do not have to match or even be derived
+	 * from each other, as long as the properties match. Any bean properties that the
+	 * source bean exposes but the target bean does not will silently be ignored.
+	 * <p>This is just a convenience method. For more complex transfer needs,
+	 * consider using a full BeanWrapper.
 	 * @param source the source bean
 	 * @param target the target bean
 	 * @param ignoreProperties array of property names to ignore
-	 * @throws IllegalArgumentException if the classes of source and target do not match
+	 * @throws BeansException if the copying failed
+	 * @see BeanWrapper
 	 */
 	public static void copyProperties(Object source, Object target, String[] ignoreProperties)
-			throws IllegalArgumentException, BeansException {
+			throws BeansException {
 
 		Assert.notNull(source, "source must not be null");
 		Assert.notNull(target, "target must not be null");
 		List ignoreList = (ignoreProperties != null) ? Arrays.asList(ignoreProperties) : null;
-		BeanWrapper sourceBw = new BeanWrapperImpl(source);
-		BeanWrapper targetBw = new BeanWrapperImpl(target);
-		MutablePropertyValues values = new MutablePropertyValues();
-		for (int i = 0; i < sourceBw.getPropertyDescriptors().length; i++) {
-			PropertyDescriptor sourceDesc = sourceBw.getPropertyDescriptors()[i];
-			String name = sourceDesc.getName();
-			if (ignoreProperties == null || (!ignoreList.contains(name))) {
-				PropertyDescriptor targetDesc = targetBw.getPropertyDescriptor(name);
-				if (targetDesc.getWriteMethod() != null && targetDesc.getReadMethod() != null) {
-					values.addPropertyValue(new PropertyValue(name, sourceBw.getPropertyValue(name)));
+		PropertyDescriptor[] sourcePds = getPropertyDescriptors(source.getClass());
+		for (int i = 0; i < sourcePds.length; i++) {
+			PropertyDescriptor sourcePd = sourcePds[i];
+			if (sourcePd.getReadMethod() != null &&
+					(ignoreProperties == null || (!ignoreList.contains(sourcePd.getName())))) {
+				PropertyDescriptor targetPd = getPropertyDescriptor(target.getClass(), sourcePd.getName());
+				if (targetPd != null && targetPd.getWriteMethod() != null) {
+					try {
+						Object value = sourcePd.getReadMethod().invoke(source, new Object[0]);
+						targetPd.getWriteMethod().invoke(target, new Object[] {value});
+					}
+					catch (Exception ex) {
+						throw new FatalBeanException("Could not copy properties from source to target", ex);
+					}
 				}
 			}
 		}
-		targetBw.setPropertyValues(values);
 	}
 
 }
