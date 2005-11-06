@@ -347,7 +347,7 @@ public class ServletContextSupportTests extends TestCase {
 
 		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context") {
 			public Set getResourcePaths(String path) {
-				if ("/WEB-INF".equals(path)) {
+				if ("/WEB-INF/".equals(path)) {
 					return paths;
 				}
 				return null;
@@ -374,7 +374,7 @@ public class ServletContextSupportTests extends TestCase {
 
 		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context") {
 			public Set getResourcePaths(String path) {
-				if ("/WEB-INF".equals(path)) {
+				if ("/WEB-INF/".equals(path)) {
 					return paths;
 				}
 				return null;
