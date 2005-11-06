@@ -31,7 +31,9 @@ public class TypeMismatchException extends PropertyAccessException {
 	 */
 	public static final String ERROR_CODE = "typeMismatch";
 
+
 	private final Class requiredType;
+
 
 	/**
 	 * Create a new TypeMismatchException.

@@ -29,6 +29,7 @@ public class InvalidPropertyException extends FatalBeanException {
 
 	private final String propertyName;
 
+
 	/**
 	 * Create a new InvalidPropertyException.
 	 * @param beanClass the offending bean class
