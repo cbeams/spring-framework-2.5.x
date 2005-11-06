@@ -39,23 +39,62 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class AbstractBeanDefinition implements BeanDefinition {
 
+	/**
+	 * Constant that indicates no autowiring at all.
+	 * @see #setAutowireMode
+	 */
 	public static final int AUTOWIRE_NO = 0;
 
+	/**
+	 * Constant that indicates autowiring bean properties by name.
+	 * @see #setAutowireMode
+	 */
 	public static final int AUTOWIRE_BY_NAME = AutowireCapableBeanFactory.AUTOWIRE_BY_NAME;
 
+	/**
+	 * Constant that indicates autowiring bean properties by type.
+	 * @see #setAutowireMode
+	 */
 	public static final int AUTOWIRE_BY_TYPE = AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
 
+	/**
+	 * Constant that indicates autowiring a constructor.
+	 * @see #setAutowireMode
+	 */
 	public static final int AUTOWIRE_CONSTRUCTOR = AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR;
 
+	/**
+	 * Constant that indicates determining an appropriate autowire strategy
+	 * through introspection of the bean class.
+	 * @see #setAutowireMode
+	 */
 	public static final int AUTOWIRE_AUTODETECT = AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT;
 
 
+	/**
+	 * Constant that indicates no dependency check at all.
+	 * @see #setDependencyCheck
+	 */
 	public static final int DEPENDENCY_CHECK_NONE = 0;
 
+	/**
+	 * Constant that indicates dependency checking for object references.
+	 * @see #setDependencyCheck
+	 */
 	public static final int DEPENDENCY_CHECK_OBJECTS = 1;
 
+	/**
+	 * Constant that indicates dependency checking for "simple" properties.
+	 * @see #setDependencyCheck
+	 * @see org.springframework.beans.BeanUtils#isSimpleProperty
+	 */
 	public static final int DEPENDENCY_CHECK_SIMPLE = 2;
 
+	/**
+	 * Constant that indicates dependency checking for all properties
+	 * (object references as well as "simple" properties).
+	 * @see #setDependencyCheck
+	 */
 	public static final int DEPENDENCY_CHECK_ALL = 3;
 
 
