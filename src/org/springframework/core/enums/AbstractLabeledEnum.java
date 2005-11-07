@@ -71,13 +71,6 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 		return getType().hashCode() * 29 * getCode().hashCode();
 	}
 
-	/**
-	 * Return the code of this LabeledEnum instance as a short.
-	 */
-	public short getShortCode() {
-		return ((Number) getCode()).shortValue();
-	}
-
 	public String toString() {
 		String enumStr = (getLabel() != null ? getLabel() + " (" + getCode() + ")" : String.valueOf(getCode()));
 		return "[" + getType() + "." + enumStr + "]";
