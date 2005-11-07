@@ -16,8 +16,6 @@
 
 package org.springframework.core.enums;
 
-import java.io.Serializable;
-
 import org.springframework.util.Assert;
 
 /**
@@ -28,30 +26,27 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractLabeledEnum implements LabeledEnum {
 
-	private final String label;
-
-
 	/**
-	 * Create a new AbstractLabeledEnum instance with the given label.
+	 * Create a new AbstractLabeledEnum instance.
 	 */
-	protected AbstractLabeledEnum(String label) {
-		this.label = label;
+	protected AbstractLabeledEnum() {
 	}
 
 	public Class getType() {
 		return getClass();
 	}
 
-	/**
+	/*
 	 * This abstract method declaration shadows the method in the LabeledEnum interface.
 	 * This is necessary to properly work on Sun's JDK 1.3 classic VM in all cases.
 	 */
 	public abstract Comparable getCode();
 
-	public String getLabel() {
-		return label;
-	}
-
+	/*
+	 * This abstract method declaration shadows the method in the LabeledEnum interface.
+	 * This is necessary to properly work on Sun's JDK 1.3 classic VM in all cases.
+	 */
+	public abstract String getLabel();
 
 	public int compareTo(Object obj) {
 		Assert.isTrue(obj instanceof AbstractLabeledEnum, "You may only compare LabeledEnums");
@@ -74,6 +69,13 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 
 	public int hashCode() {
 		return getType().hashCode() * 29 * getCode().hashCode();
+	}
+
+	/**
+	 * Return the code of this LabeledEnum instance as a short.
+	 */
+	public short getShortCode() {
+		return ((Number) getCode()).shortValue();
 	}
 
 	public String toString() {

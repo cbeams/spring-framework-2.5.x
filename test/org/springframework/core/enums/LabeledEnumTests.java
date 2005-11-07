@@ -54,7 +54,7 @@ public class LabeledEnumTests extends TestCase {
 	}
 
 
-	public static class Other extends ShortCodedLabeledEnum {
+	public static class Other extends StaticLabeledEnum {
 
 		public static Other THING1 = new Other(1, "Thing1");
 
@@ -66,7 +66,7 @@ public class LabeledEnumTests extends TestCase {
 	}
 
 
-	public static class Dog extends ShortCodedLabeledEnum {
+	public static class Dog extends StaticLabeledEnum {
 
 		public static final Dog GOLDEN_RETRIEVER = new Dog(11, null) {
 			// this shouldn't be neccessary

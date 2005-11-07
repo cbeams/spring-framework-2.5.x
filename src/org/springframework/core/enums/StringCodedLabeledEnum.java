@@ -29,8 +29,11 @@ import org.springframework.util.Assert;
  * @since 1.2.2
  * @see org.springframework.core.enums.LabeledEnumResolver#getLabeledEnumSet(Class)
  */
-public class StringCodedLabeledEnum extends AbstractLabeledEnum {
+public class StringCodedLabeledEnum extends AbstractGenericLabeledEnum {
 
+	/**
+	 * The unique code of this enum.
+	 */
 	private final String code;
 
 	/**

@@ -28,8 +28,11 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @since 1.2.2
  */
-public class LetterCodedLabeledEnum extends AbstractLabeledEnum {
+public class LetterCodedLabeledEnum extends AbstractGenericLabeledEnum {
 
+	/**
+	 * The unique code of this enum.
+	 */
 	private final Character code;
 
 	/**

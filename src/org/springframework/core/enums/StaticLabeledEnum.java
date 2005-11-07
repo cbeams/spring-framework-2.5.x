@@ -16,41 +16,56 @@
 
 package org.springframework.core.enums;
 
+import java.io.ObjectStreamException;
+
 /**
- * Implementation of LabeledEnum which uses Short as the code type.
- *
- * <p>Should almost always be subclassed, but for some simple situations it may be
- * used directly. Note that you will not be able to use unique type-based functionality
- * like <code>LabeledEnumResolver.getLabeledEnumSet(type)</code> in this case.
+ * Base class for static type-safe labeled enum instances.
  *
  * @author Keith Donald
- * @since 1.2.2
+ * @since 1.2.6
  */
-public class ShortCodedLabeledEnum extends AbstractGenericLabeledEnum {
+public abstract class StaticLabeledEnum extends AbstractLabeledEnum {
 
 	/**
-	 * The unique code of this enum.
+	 * The unique code of the enum.
 	 */
 	private final Short code;
 
 	/**
-	 * Create a new ShortCodedLabeledEnum instance.
+	 * A descriptive label for the enum.
+	 */
+	private final transient String label;
+	
+	/**
+	 * Create a new StaticLabeledEnum instance.
 	 * @param code the short code
 	 * @param label the label (can be <code>null</code>)
 	 */
-	public ShortCodedLabeledEnum(int code, String label) {
-		super(label);
+	protected StaticLabeledEnum(int code, String label) {
 		this.code = new Short((short) code);
+		this.label = label;
 	}
 
 	public Comparable getCode() {
 		return code;
 	}
+	
+	public String getLabel() {
+		return label;
+	}
 
 	/**
-	 * Return the short code of this LabeledEnum instance.
+	 * Return the code of this LabeledEnum instance as a short.
 	 */
-	public short getShortCode() {
-		return ((Short) getCode()).shortValue();
+	public short shortValue() {
+		return ((Number) getCode()).shortValue();
 	}
+
+	/**
+	 * Return the resolved type safe static enum instance.
+	 */
+	private Object readResolve() throws ObjectStreamException {
+		return StaticLabeledEnumResolver.instance().getLabeledEnumByCode(getType(), getCode());
+	}
+	
 }

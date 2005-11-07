@@ -34,6 +34,12 @@ import org.springframework.util.Assert;
  */
 public class StaticLabeledEnumResolver extends AbstractCachingLabeledEnumResolver {
 
+	private static final StaticLabeledEnumResolver INSTANCE = new StaticLabeledEnumResolver();
+	
+	public static StaticLabeledEnumResolver instance() {
+		return INSTANCE;
+	}
+	
 	protected Set findLabeledEnums(Class type) {
 		Set typeEnums = new TreeSet();
 		Field[] fields = type.getFields();
