@@ -31,6 +31,7 @@ import java.sql.Connection;
  *
  * @author Juergen Hoeller
  * @since 08.05.2003
+ * @see PlatformTransactionManager#getTransaction(TransactionDefinition)
  * @see org.springframework.transaction.support.DefaultTransactionDefinition
  * @see org.springframework.transaction.interceptor.TransactionAttribute
  */
@@ -51,6 +52,13 @@ public interface TransactionDefinition {
 	/**
 	 * Support a current transaction, execute non-transactionally if none exists.
 	 * Analogous to EJB transaction attribute of the same name.
+	 * <p>Note: For transaction managers with transaction synchronization,
+	 * PROPAGATION_SUPPORTS is slightly different from no transaction at all,
+	 * as it defines a transaction scopp that synchronization will apply for.
+	 * As a consequence, the same resources (JDBC Connection, Hibernate Session, etc)
+	 * will be shared for the entire specified scope. Note that this depends on
+	 * the actual synchronization configuration of the transaction manager.
+	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#setTransactionSynchronization
 	 */
 	int PROPAGATION_SUPPORTS = 1;
 
@@ -63,12 +71,22 @@ public interface TransactionDefinition {
 	/**
 	 * Create a new transaction, suspend the current transaction if one exists.
 	 * Analogous to EJB transaction attribute of the same name.
+	 * <p>Note: Actual transaction suspension will not work on out-of-the-box
+	 * on all transaction managers. This in particular applies to JtaTransactionManager,
+	 * which requires the <code>javax.transaction.TransactionManager</code> to be
+	 * made available it to it (which is server-specific in standard J2EE).
+	 * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
 	 */
 	int PROPAGATION_REQUIRES_NEW = 3;
 
 	/**
 	 * Execute non-transactionally, suspend the current transaction if one exists.
 	 * Analogous to EJB transaction attribute of the same name.
+	 * <p>Note: Actual transaction suspension will not work on out-of-the-box
+	 * on all transaction managers. This in particular applies to JtaTransactionManager,
+	 * which requires the <code>javax.transaction.TransactionManager</code> to be
+	 * made available it to it (which is server-specific in standard J2EE).
+	 * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
 	 */
 	int PROPAGATION_NOT_SUPPORTED = 4;
 
@@ -81,6 +99,11 @@ public interface TransactionDefinition {
 	/**
 	 * Execute within a nested transaction if a current transaction exists,
 	 * behave like PROPAGATION_REQUIRED else. There is no analogous feature in EJB.
+	 * <p>Note: Actual creation of a nested transaction will only work on specific
+	 * transaction managers. Out of the box, this only applies to the JDBC
+	 * DataSourceTransactionManager when working on a JDBC 3.0 driver.
+	 * Some JTA providers might support nested transactions as well.
+	 * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
 	 */
 	int PROPAGATION_NESTED = 6;
 
@@ -92,12 +115,45 @@ public interface TransactionDefinition {
 	 */
 	int ISOLATION_DEFAULT          = -1;
 
+	/**
+	 * A constant indicating that dirty reads, non-repeatable reads and phantom reads
+	 * can occur. This level allows a row changed by one transaction to be read by
+	 * another transaction before any changes in that row have been committed
+	 * (a "dirty read"). If any of the changes are rolled back, the second
+	 * transaction will have retrieved an invalid row.
+	 * @see java.sql.Connection#TRANSACTION_READ_UNCOMMITTED
+	 */
 	int ISOLATION_READ_UNCOMMITTED = Connection.TRANSACTION_READ_UNCOMMITTED;
 
+	/**
+	 * A constant indicating that dirty reads are prevented; non-repeatable reads
+	 * and phantom reads can occur. This level only prohibits a transaction
+	 * from reading a row with uncommitted changes in it.
+	 * @see java.sql.Connection#TRANSACTION_READ_COMMITTED
+	 */
 	int ISOLATION_READ_COMMITTED   = Connection.TRANSACTION_READ_COMMITTED;
 
+	/**
+	 * A constant indicating that dirty reads and non-repeatable reads are
+	 * prevented; phantom reads can occur. This level prohibits a transaction
+	 * from reading a row with uncommitted changes in it, and it also prohibits
+	 * the situation where one transaction reads a row, a second transaction
+	 * alters the row, and the first transaction rereads the row, getting
+	 * different values the second time (a "non-repeatable read").
+	 * @see java.sql.Connection#TRANSACTION_REPEATABLE_READ
+	 */
 	int ISOLATION_REPEATABLE_READ  = Connection.TRANSACTION_REPEATABLE_READ;
 
+	/**
+	 * A constant indicating that dirty reads, non-repeatable reads and phantom
+	 * reads are prevented. This level includes the prohibitions in
+	 * <code>ISOLATION_REPEATABLE_READ</code> and further prohibits the situation
+	 * where one transaction reads all rows that satisfy a <code>WHERE</code>
+	 * condition, a second transaction inserts a row that satisfies that
+	 * <code>WHERE</code> condition, and the first transaction rereads for the
+	 * same condition, retrieving the additional "phantom" row in the second read.
+	 * @see java.sql.Connection#TRANSACTION_SERIALIZABLE
+	 */
 	int ISOLATION_SERIALIZABLE     = Connection.TRANSACTION_SERIALIZABLE;
 
 
@@ -112,6 +168,7 @@ public interface TransactionDefinition {
 	 * Return the propagation behavior.
 	 * Must return one of the PROPAGATION constants.
 	 * @see #PROPAGATION_REQUIRED
+	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isActualTransactionActive()
 	 */
 	int getPropagationBehavior();
 
@@ -149,6 +206,7 @@ public interface TransactionDefinition {
 	 * <p>A transaction manager that cannot interpret the read-only hint
 	 * will <i>not</i> throw an exception when given readOnly=true.
 	 * @see org.springframework.transaction.support.TransactionSynchronization#beforeCommit(boolean)
+	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isCurrentTransactionReadOnly()
 	 */
 	boolean isReadOnly();
 
@@ -158,6 +216,8 @@ public interface TransactionDefinition {
 	 * transaction monitor, if applicable (for example, WebLogic's).
 	 * <p>In case of Spring's declarative transactions, the exposed name will
 	 * be the fully-qualified class name + "." + method name (by default).
+	 * @see org.springframework.transaction.interceptor.TransactionAspectSupport
+	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionName()
 	 */
 	String getName();
 
