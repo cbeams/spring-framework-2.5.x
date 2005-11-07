@@ -64,7 +64,7 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 			return false;
 		}
 		LabeledEnum other = (LabeledEnum) obj;
-		return this.getCode().equals(other.getCode()) && this.getType().equals(other.getType());
+		return this.getType().equals(other.getType()) && this.getCode().equals(other.getCode());
 	}
 
 	public int hashCode() {
