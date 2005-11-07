@@ -36,6 +36,10 @@ public class StaticLabeledEnumResolver extends AbstractCachingLabeledEnumResolve
 
 	private static final StaticLabeledEnumResolver INSTANCE = new StaticLabeledEnumResolver();
 	
+	/**
+	 * Return the shared <code>StaticLabeledEnumResolver</code> singleton instance.
+	 * @since 1.2.6
+	 */
 	public static StaticLabeledEnumResolver instance() {
 		return INSTANCE;
 	}
