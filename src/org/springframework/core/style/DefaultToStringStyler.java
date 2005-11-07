@@ -20,12 +20,10 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Spring's default <code>toString()</code> styler. Underneath the hood,
- * uses the reflective visitor pattern to nicely encapsulate styling
- * algorithms for each type of styled object.
+ * Spring's default <code>toString()</code> styler.
  *
  * This class is used by ToStringBuilder to style <code>toString()</code>
- * output in a consistent manner.
+ * output in a consistent manner according to Spring conventions.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -35,7 +33,6 @@ public class DefaultToStringStyler implements ToStringStyler {
 
 	private final ValueStyler valueStyler;
 
-
 	public DefaultToStringStyler(ValueStyler valueStyler) {
 		this.valueStyler = valueStyler;
 	}
@@ -43,7 +40,6 @@ public class DefaultToStringStyler implements ToStringStyler {
 	protected final ValueStyler getValueStyler() {
 		return valueStyler;
 	}
-
 
 	public void styleStart(StringBuffer buffer, Object obj) {
 		if (!obj.getClass().isArray()) {

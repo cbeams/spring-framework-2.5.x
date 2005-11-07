@@ -31,6 +31,9 @@ import org.springframework.util.StringUtils;
 /**
  * Converts objects to string form, generally for debugging purposes, using
  * Spring's <code>toString</code> styling conventions.
+ * <p>
+ * Underneath the hood, uses the reflective visitor pattern to nicely encapsulate styling
+ * algorithms for each type of styled object.
  *
  * @author Keith Donald
  * @since 1.2.2
@@ -51,14 +54,11 @@ public class DefaultValueStyler implements ValueStyler {
 
 	private static final String ARRAY = "array";
 
-
 	private ReflectiveVisitorHelper reflectiveVisitorHelper = new ReflectiveVisitorHelper();
-
 
 	public String style(Object value) {
 		return (String) reflectiveVisitorHelper.invokeVisit(this, value);
 	}
-
 
 	String visit(String value) {
 		return ('\'' + value + '\'');
