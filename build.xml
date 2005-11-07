@@ -691,7 +691,7 @@
 
 		<junit forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
-			<jvmarg line="-Djava.awt.headless=true"/>
+			<jvmarg line="-Djava.awt.headless=true -XX:MaxPermSize=128m -Xmx128m"/>
 
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
