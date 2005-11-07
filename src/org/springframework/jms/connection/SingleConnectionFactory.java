@@ -39,7 +39,9 @@ import org.springframework.beans.factory.InitializingBean;
 
 /**
  * A JMS ConnectionFactory adapter that returns the same Connection on all
- * <code>createConnection</code> calls, and ignores calls to <code>close</code>.
+ * <code>createConnection</code> calls, and ignores calls to
+ * <code>Connection.close()</code>. According to the JMS Connection model,
+ * this is even thread-safe.
  *
  * <p>Useful for testing and standalone environemtns, to keep using the same
  * Connection for multiple JmsTemplate calls, without having a pooling
@@ -53,8 +55,10 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Mark Pollack
  * @author Juergen Hoeller
  * @since 1.1
- * @see SingleConnectionFactory102
+ * @see #createConnection()
+ * @see javax.jms.Connection#close()
  * @see org.springframework.jms.core.JmsTemplate
+ * @see SingleConnectionFactory102
  */
 public class SingleConnectionFactory
 		implements ConnectionFactory, QueueConnectionFactory, TopicConnectionFactory, InitializingBean, DisposableBean {

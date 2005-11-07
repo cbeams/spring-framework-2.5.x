@@ -69,6 +69,7 @@ public class JmsTransactionManager102 extends JmsTransactionManager {
 		afterPropertiesSet();
 	}
 
+
 	/**
 	 * Configure the JmsTransactionManager102 with knowledge of the JMS domain used.
 	 * This tells the JMS 1.0.2 provider which class hierarchy to use for creating
@@ -87,6 +88,7 @@ public class JmsTransactionManager102 extends JmsTransactionManager {
 	public boolean isPubSubDomain() {
 		return pubSubDomain;
 	}
+
 
 	/**
 	 * In addition to checking if the connection factory is set, make sure

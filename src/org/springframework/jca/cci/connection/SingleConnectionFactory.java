@@ -38,7 +38,8 @@ import org.springframework.beans.factory.DisposableBean;
 
 /**
  * A CCI ConnectionFactory adapter that returns the same Connection on all
- * <code>getConnection</code> calls, and ignores calls to <code>close</code>.
+ * <code>getConnection</code> calls, and ignores calls to
+ * <code>Connection.close()</code>.
  *
  * <p>Useful for testing and standalone environemtns, to keep using the same
  * Connection for multiple CciTemplate calls, without having a pooling
@@ -49,6 +50,8 @@ import org.springframework.beans.factory.DisposableBean;
  *
  * @author Juergen Hoeller
  * @since 1.2
+ * @see #getConnection()
+ * @see javax.resource.cci.Connection#close()
  * @see org.springframework.jca.cci.core.CciTemplate
  */
 public class SingleConnectionFactory extends DelegatingConnectionFactory implements DisposableBean {

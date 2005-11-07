@@ -28,7 +28,7 @@ import javax.jms.TopicConnectionFactory;
  * This class can be used for JMS 1.0.2 providers, offering the same API as
  * SingleConnectionFactory does for JMS 1.1 providers.
  *
- * <p>You need to set the pubSubDomain property accordingly, as this class
+ * <p>You need to set the "pubSubDomain" property accordingly, as this class
  * will always create either a QueueConnection or a TopicConnection.
  *
  * @author Juergen Hoeller
@@ -39,6 +39,7 @@ import javax.jms.TopicConnectionFactory;
 public class SingleConnectionFactory102 extends SingleConnectionFactory {
 
 	private boolean pubSubDomain = false;
+
 
 	/**
 	 * Create a new SingleConnectionFactory102 for bean-style usage.
@@ -61,6 +62,7 @@ public class SingleConnectionFactory102 extends SingleConnectionFactory {
 		afterPropertiesSet();
 	}
 
+
 	/**
 	 * Configure the factory with knowledge of the JMS domain used.
 	 * This tells the JMS 1.0.2 provider which class hierarchy to use
@@ -79,6 +81,7 @@ public class SingleConnectionFactory102 extends SingleConnectionFactory {
 	public boolean isPubSubDomain() {
 		return pubSubDomain;
 	}
+
 
 	/**
 	 * In addition to checking if the connection factory is set, make sure

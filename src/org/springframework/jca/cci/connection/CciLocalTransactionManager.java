@@ -52,7 +52,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * TransactionAwareConnectionFactoryProxy for your target ConnectionFactory, and pass
  * that proxy ConnectionFactory to your DAOs, which will automatically participate
  * in Spring-managed transactions through it. Note that CciLocalTransactionManager
- * still needs to be wired with the target DataSource, driving transactions for it.
+ * still needs to be wired with the target ConnectionFactory, driving transactions for it.
  *
  * @author Thierry Templier
  * @author Juergen Hoeller

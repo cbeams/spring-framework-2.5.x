@@ -55,8 +55,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Binds a Hibernate Session from the specified factory to the thread, potentially
  * allowing for one thread Session per factory. SessionFactoryUtils and
  * HibernateTemplate are aware of thread-bound Sessions and participate in such
- * transactions automatically. Using either is required for Hibernate access code
- * that needs to support this transaction handling mechanism.
+ * transactions automatically. Using either of those or going through
+ * <code>SessionFactory.getCurrentSession()</code> is required for Hibernate
+ * access code that needs to support this transaction handling mechanism.
  *
  * <p>Supports custom isolation levels, and timeouts that get applied as appropriate
  * Hibernate query timeouts. To support the latter, application code must either use
@@ -70,7 +71,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * This allows for mixing services that access Hibernate (including transactional
  * caching) and services that use plain JDBC (without being aware of Hibernate)!
  * Application code needs to stick to the same simple Connection lookup pattern as
- * with DataSourceTransactionManager (i.e. <code>DataSourceUtils.getConnection</code>).
+ * with DataSourceTransactionManager (i.e. <code>DataSourceUtils.getConnection</code>
+ * or going through a TransactionAwareDataSourceProxy).
  *
  * <p>Note that to be able to register a DataSource's Connection for plain JDBC
  * code, this instance needs to be aware of the DataSource (see setDataSource).
@@ -84,9 +86,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * then (see container setup), alternatively the Hibernate JCA connector can be used
  * for direct container integration. Normally, JTA setup for Hibernate is somewhat
  * container-specific due to the JTA TransactionManager lookup, required for proper
- * transactional handling of the SessionFactory-level read-write cache. Using the
- * JCA Connector can solve this but involves packaging issues and container-specific
- * connector deployment.
+ * transactional handling of the SessionFactory-level read-write cache.
  *
  * <p>Fortunately, there is an easier way with Spring: SessionFactoryUtils (and thus
  * HibernateTemplate) registers synchronizations with TransactionSynchronizationManager
@@ -105,7 +105,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <i>Note that Hibernate itself does not support nested transactions! Hence,
  * do not expect Hibernate access code to participate in a nested transaction.</i>
  *
- * <p>Requires Hibernate 3.0.3 or later.
+ * <p>Requires Hibernate 3.0.3 or later. As of Spring 1.3, this transaction manager
+ * will autodetect Hibernate 3.1 and use its advanced timeout functionality,
+ * while continuing to work with Hibernate 3.0 as well.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -115,7 +117,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see SessionFactoryUtils#getSession
  * @see SessionFactoryUtils#applyTransactionTimeout
  * @see SessionFactoryUtils#releaseSession
- * @see HibernateTemplate#execute
+ * @see HibernateTemplate
+ * @see org.hibernate.SessionFactory#getCurrentSession()
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#applyTransactionTimeout
  * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
@@ -670,7 +673,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				// We're running against Hibernate 3.1 RC1, where Hibernate will
 				// automatically disconnect the Session after a transaction.
 				// We'll reconnect it here, as the Session is likely gonna be
-				// used for lazy loading during an "open session in view" pase.
+				// used for lazy loading during an "open session in view" phase.
 				session.reconnect();
 			}
 		}

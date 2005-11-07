@@ -90,19 +90,30 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * isn't supported by some application servers (e.g. Tomcat). Unfortunately,
  * JCA has drawbacks too: Its setup is container-specific and can be tedious.
  *
- * <p>Note that this factory will always use "on_close" as default Hibernate
- * connection release mode, for the reason that this is appropriate for most
- * Spring-based applications (in particular when using HibernateTransactionManager).
- * Hibernate 3.0 used "on_close" as its own default too; however, Hibernate 3.1
- * changed this to "auto" (i.e. "after_statement" or "after_transaction").
+ * <p>This factory bean will by default expose a transaction-aware SessionFactory
+ * proxy, letting data access code work with the plain Hibernate SessionFactory
+ * and its <code>getCurrentSession()</code> method, while still being able to
+ * participate in current Spring-managed transactions: with any transaction
+ * management strategy, either local or JTA / EJB CMT, and any transaction
+ * synchronization mechanism, either Spring or JTA. Furthermore,
+ * <code>getCurrentSession()</code> will also seamlessly work with
+ * a request-scoped Session managed by OpenSessionInViewFilter/Interceptor.
  *
- * <p>Requires Hibernate 3.0.3 or later.
+ * <p>Requires Hibernate 3.0.3 or later. Note that this factory will always use
+ * "on_close" as default Hibernate connection release mode, for the reason that
+ * this is appropriate for most Spring-based applications (in particular when
+ * using Spring's HibernateTransactionManager). Hibernate 3.0 used "on_close"
+ * as its own default too; however, Hibernate 3.1 changed this to "auto"
+ * (i.e. "after_statement" or "after_transaction").
  *
  * @author Juergen Hoeller
  * @since 1.2
  * @see HibernateTemplate#setSessionFactory
  * @see HibernateTransactionManager#setSessionFactory
  * @see org.springframework.jndi.JndiObjectFactoryBean
+ * @see #setExposeTransactionAwareSessionFactory
+ * @see org.hibernate.SessionFactory#getCurrentSession()
+ * @see HibernateTransactionManager
  */
 public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 

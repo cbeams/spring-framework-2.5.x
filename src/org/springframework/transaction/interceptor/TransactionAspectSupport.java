@@ -41,8 +41,13 @@ import org.springframework.util.ClassUtils;
  * <p>Subclasses are responsible for calling methods in this class in the
  * correct order.
  *
+ * <p>If no transaction name has been specified in the TransactionAttribute,
+ * the exposed name will be the fully-qualified class name + "." + method name
+ * (by default).
+ *
  * <p>Uses the <b>Strategy</b> design pattern. A PlatformTransactionManager
- * implementation will perform the actual transaction management.
+ * implementation will perform the actual transaction management, and a
+ * TransactionAttributeSource is used for determining transaction definitions.
  *
  * <p>A transaction aspect is serializable if its PlatformTransactionManager
  * and TransactionAttributeSource are serializable.
@@ -50,6 +55,9 @@ import org.springframework.util.ClassUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 1.1
+ * @see #setTransactionManager
+ * @see #setTransactionAttributes
+ * @see #setTransactionAttributeSource
  */
 public class TransactionAspectSupport implements InitializingBean, Serializable {
 

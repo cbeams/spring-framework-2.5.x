@@ -46,8 +46,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Binds a TopLink Session from the specified factory to the thread, potentially
  * allowing for one thread Session per factory. SessionFactoryUtils and TopLinkTemplate
  * are aware of thread-bound Sessions and participate in such transactions automatically.
- * Using either is required for TopLink access code that needs to support this
- * transaction handling mechanism.
+ * Using either of those or going through <code>Session.getActiveUnitOfWork()</code> is
+ * required for TopLink access code that needs to support this transaction handling mechanism.
  *
  * <p>This implementation is appropriate for applications that solely use TopLink for
  * transactional data access. JTA (usually through JtaTransactionManager) is necessary for
@@ -61,7 +61,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * are <i>not</i> marked as read-only. This allows for mixing services that access TopLink
  * (including transactional caching) and services that use plain JDBC (without being aware
  * of TopLink)! Application code needs to stick to the same simple Connection lookup pattern
- * as with DataSourceTransactionManager (i.e. <code>DataSourceUtils.getConnection</code>).
+ * with DataSourceTransactionManager (i.e. <code>DataSourceUtils.getConnection</code>
+ * or going through a TransactionAwareDataSourceProxy).
  *
  * <p>Note that to be able to register a DataSource's Connection for plain JDBC code,
  * this instance needs to be aware of the DataSource (see "dataSource" property).
@@ -87,7 +88,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see LocalSessionFactoryBean
  * @see SessionFactoryUtils#getSession
  * @see SessionFactoryUtils#releaseSession
- * @see TopLinkTemplate#execute
+ * @see TopLinkTemplate
+ * @see oracle.toplink.sessions.Session#getActiveUnitOfWork()
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#applyTransactionTimeout
  * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection

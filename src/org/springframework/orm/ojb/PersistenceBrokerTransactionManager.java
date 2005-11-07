@@ -58,7 +58,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see #setPbKey
  * @see OjbFactoryUtils#getPersistenceBroker
  * @see OjbFactoryUtils#releasePersistenceBroker
- * @see PersistenceBrokerTemplate#execute
+ * @see PersistenceBrokerTemplate
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
 public class PersistenceBrokerTransactionManager extends AbstractPlatformTransactionManager {

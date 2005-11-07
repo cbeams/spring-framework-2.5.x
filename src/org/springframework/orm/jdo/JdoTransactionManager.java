@@ -41,13 +41,14 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Binds a JDO PersistenceManager from the specified factory to the thread, potentially
  * allowing for one thread PersistenceManager per factory. PersistenceManagerFactoryUtils
  * and JdoTemplate are aware of thread-bound persistence managers and participate in such
- * transactions automatically. Using either is required for JDO access code supporting
- * this transaction management mechanism.
+ * transactions automatically. Using either of those or going through a
+ * TransactionAwarePersistenceManagerFactoryProxy is required for JDO access code
+ * supporting this transaction management mechanism.
  *
  * <p>This implementation is appropriate for applications that solely use JDO for
  * transactional data access. JTA (usually through JtaTransactionManager) is necessary for
  * accessing multiple transactional resources. Note that you need to configure your JDO
- * tool accordingly to make it participate in JTA transactions. In contrast to Hibernate,
+ * provider accordingly to make it participate in JTA transactions. In contrast to Hibernate,
  * this cannot be transparently provided by the Spring transaction manager implementation.
  *
  * <p>With a JdoDialect specified, this implementation also supports direct DataSource
@@ -55,7 +56,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * This allows for mixing services that access JDO (including transactional caching)
  * and services that use plain JDBC (without being aware of JDO)!
  * Application code needs to stick to the same simple Connection lookup pattern as
- * with DataSourceTransactionManager (i.e. <code>DataSourceUtils.getConnection</code>).
+ * with DataSourceTransactionManager (i.e. <code>DataSourceUtils.getConnection</code>
+ * or going through a TransactionAwareDataSourceProxy).
  *
  * <p>Note that to be able to register a DataSource's Connection for plain JDBC code,
  * this instance needs to be aware of the DataSource (see "dataSource" property).
@@ -81,7 +83,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see LocalPersistenceManagerFactoryBean
  * @see PersistenceManagerFactoryUtils#getPersistenceManager
  * @see PersistenceManagerFactoryUtils#releasePersistenceManager
- * @see JdoTemplate#execute
+ * @see JdoTemplate
+ * @see TransactionAwarePersistenceManagerFactoryProxy
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
  * @see org.springframework.jdbc.core.JdbcTemplate

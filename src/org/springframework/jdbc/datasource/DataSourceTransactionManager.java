@@ -31,8 +31,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * PlatformTransactionManager implementation for a single JDBC DataSource.
- * Binds a JDBC Connection from the specified DataSource to the thread,
- * potentially allowing for one thread Connection per DataSource.
+ * Able to work in any environment with any JDBC driver, as long as the setup uses
+ * a JDBC 2.0 Standard Extensions / JDBC 3.0 <code>javax.sql.DataSource</code>
+ * as its Connection factory mechanism. Binds a JDBC Connection from the
+ * specified DataSource to the thread, potentially allowing for one thread
+ * Connection per DataSource.
  *
  * <p>Application code is required to retrieve the JDBC Connection via
  * <code>DataSourceUtils.getConnection(DataSource)</code> instead of J2EE's standard
@@ -51,19 +54,27 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * be wired with the target DataSource, driving transactions for it.
  *
  * <p>Supports custom isolation levels, and timeouts that get applied as
- * appropriate JDBC statement query timeouts. To support the latter,
- * application code must either use JdbcTemplate or call
- * <code>DataSourceUtils.applyTransactionTimeout</code> for each created statement.
+ * appropriate JDBC statement timeouts. To support the latter, application code
+ * must either use JdbcTemplate, call <code>DataSourceUtils.applyTransactionTimeout</code>
+ * for each created statement, or go through a TransactionAwareDataSourceProxy
+ * which will create timeout-aware Connections and Statements.
+ *
+ * <p>Consider defining a LazyConnectionDataSourceProxy for your target DataSource,
+ * pointing both this transaction manager and your DAOs to it. This will lead to
+ * optimized handling of "empty" transactions, that is, transactions without any
+ * statements executed. LazyConnectionDataSourceProxy will not fetch a JDBC
+ * Connection from the target DataSource until the first statement execution,
+ * lazily applying the specified transaction settings to the target Conection.
  *
  * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC
  * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to true, as nested
  * transactions work without restrictions on JDBC drivers that support Savepoints
- * (like Oracle).
+ * (such as the Oracle JDBC driver).
  *
- * <p>This implementation can be used instead of JtaTransactionManager in the single
- * resource case, as it does not require the container to support JTA: typically,
- * in combination with a locally defined JDBC DataSource like a Jakarta Commons DBCP
- * connection pool. Switching between this local strategy and a JTA environment is
+ * <p>This implementation can be used as a replacement for JtaTransactionManager in the
+ * single resource case, as it does not require a container that supports JTA: typically,
+ * in combination with a locally defined JDBC DataSource (e.g. a Jakarta Commons DBCP
+ * connection pool). Switching between this local strategy and a JTA environment is
  * just a matter of configuration, if you stick to the required connection lookup
  * pattern. Note that JTA does not support custom isolation levels!
  *
@@ -75,6 +86,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see DataSourceUtils#applyTransactionTimeout
  * @see DataSourceUtils#releaseConnection
  * @see TransactionAwareDataSourceProxy
+ * @see LazyConnectionDataSourceProxy
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @see org.springframework.jdbc.object
  */

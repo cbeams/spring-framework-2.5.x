@@ -31,7 +31,7 @@ import org.springframework.util.ObjectUtils;
  * Implementation of SmartDataSource that wraps a single Connection which is not
  * closed after use. Obviously, this is not multi-threading capable.
  *
- * <p>Note that at shutdown, someone should close the underlying connection via the
+ * <p>Note that at shutdown, someone should close the underlying Connection via the
  * <code>close()</code> method. Client code will never call close on the Connection
  * handle if it is SmartDataSource-aware (e.g. uses
  * <code>DataSourceUtils.releaseConnection</code>).
@@ -49,6 +49,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see #getConnection()
  * @see java.sql.Connection#close()
  * @see DataSourceUtils#releaseConnection
  * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
