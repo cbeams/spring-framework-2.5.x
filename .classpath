@@ -108,8 +108,8 @@
 	<classpathentry exported="true" kind="lib" path="lib/asm/asm-1.5.3.jar"/>
 	<classpathentry kind="lib" path="lib/asm/asm-util-1.5.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/aspectj/aspectjweaver.jar"/>
-	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jexcelapi/jxl.jar"/>
 	<classpathentry kind="lib" path="lib/commonj/commonj-twm.jar"/>
+	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-1.0.3.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
