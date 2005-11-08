@@ -199,6 +199,7 @@ public abstract class WebUtils {
 	 */
 	public static Object getRequiredSessionAttribute(HttpServletRequest request, String name)
 	    throws IllegalStateException {
+
 		Object attr = getSessionAttribute(request, name);
 		if (attr == null) {
 			throw new IllegalStateException("No session attribute '" + name + "' found");
@@ -237,6 +238,7 @@ public abstract class WebUtils {
 	 */
 	public static Object getOrCreateSessionAttribute(HttpSession session, String name, Class clazz)
 			throws IllegalArgumentException {
+
 		Object sessionObject = session.getAttribute(name);
 		if (sessionObject == null) {
 			try {
@@ -267,6 +269,7 @@ public abstract class WebUtils {
 	 */
 	public static void exposeRequestAttributes(ServletRequest request, Map attributes)
 			throws IllegalArgumentException {
+
 		Iterator it = attributes.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();

@@ -109,8 +109,9 @@ public interface Controller {
 
 	/**
 	 * Process the request and return a ModelAndView object which the DispatcherServlet
-	 * will render. A null return is not an error: It indicates that this object
-	 * completed request processing itself, thus there is no ModelAndView to render.
+	 * will render. A <code>null</code> return value is not an error: It indicates that
+	 * this object completed request processing itself, thus there is no ModelAndView
+	 * to render.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render, or <code>null</code> if handled directly
