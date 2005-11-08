@@ -46,26 +46,28 @@ import org.springframework.util.PropertiesPersister;
  * <p><b>Example:</b>
  *
  * <pre>
- * employee.(class)=MyClass         // bean is of class MyClass
+ * employee.(class)=MyClass       // bean is of class MyClass
  * employee.(abstract)=true       // this bean can't be instantiated directly
  * employee.group=Insurance       // real property
  * employee.usesDialUp=false      // real property (potentially overridden)
  *
- * salesrep.(parent)=employee       // derives from "employee" bean definition
+ * salesrep.(parent)=employee     // derives from "employee" bean definition
  * salesrep.(lazy-init)=true      // lazily initialize this singleton bean
  * salesrep.manager(ref)=tony     // reference to another bean
  * salesrep.department=Sales      // real property
  *
- * techie.(parent)=employee         // derives from "employee" bean definition
+ * techie.(parent)=employee       // derives from "employee" bean definition
  * techie.(singleton)=false       // bean is a prototype (not a shared instance)
  * techie.manager(ref)=jeff       // reference to another bean
  * techie.department=Engineering  // real property
  * techie.usesDialUp=true         // real property (overriding parent value)</pre>
  *
- * <em><strong>Note:</strong> As of 1.2.6 the use of <code>class</code> and <code>parent</code>
- * has been deprecated in favor of <code>(class)</code> and <code>(parent)</code> in keeping with all
- * other special properties. Users should note that support for <code>class</code> and <code>parent</code>
- * as special properties rather then actual bean properties will be removed in a future version.</em>
+ * <em><b>Note:</b> As of Spring 1.2.6, the use of <code>class</code> and
+ * <code>parent</code> has been deprecated in favor of <code>(class)</code> and
+ * <code>(parent)</code>, for consistency with all other special properties.
+ * Users should note that support for <code>class</code> and <code>parent</code>
+ * as special properties rather then actual bean properties will be removed in a
+ * future version.</em>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -88,26 +90,26 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public static final String SEPARATOR = ".";
 
 	/**
-	 * Prefix for the class property of a root bean definition.
-	 * @deprecated in favor of {@link #CLASS_KEY}
-	 */
-	public static final String DEPRECATED_CLASS_KEY = "class";
-
-	/**
 	 * Special string added to distinguish owner.(class)=com.myapp.MyClass
 	 */
 	public static final String CLASS_KEY = "(class)";
 
 	/**
-	 * Reserved "property" to indicate the parent of a child bean definition.
-	 * @deprecated in favor of {@link #PARENT_KEY}
+	 * Prefix for the class property of a root bean definition.
+	 * Deprecated in favor of {@link #CLASS_KEY}
 	 */
-	public static final String DEPRECATED_PARENT_KEY = "parent";
+	private static final String DEPRECATED_CLASS_KEY = "class";
 
 	/**
 	 * Special string added to distinguish owner.(parent)=parentBeanName
 	 */
 	public static final String PARENT_KEY = "(parent)";
+
+	/**
+	 * Reserved "property" to indicate the parent of a child bean definition.
+	 * Deprecated in favor of {@link #PARENT_KEY}
+	 */
+	private static final String DEPRECATED_PARENT_KEY = "parent";
 
 	/**
 	 * Special string added to distinguish owner.(abstract)=true
@@ -412,6 +414,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				if (isClassKey(property)) {
 					className = (String) entry.getValue();
 				}
+				else if (isParentKey(property)) {
+					parent = (String) entry.getValue();
+				}
 				else if (ABSTRACT_KEY.equals(property)) {
 					String val = (String) entry.getValue();
 					isAbstract = TRUE_VALUE.equals(val);
@@ -423,9 +428,6 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				else if (LAZY_INIT_KEY.equals(property)) {
 					String val = (String) entry.getValue();
 					lazyInit = TRUE_VALUE.equals(val);
-				}
-				else if (isParentKey(property)) {
-					parent = (String) entry.getValue();
 				}
 				else if (property.endsWith(REF_SUFFIX)) {
 					// This isn't a real property, but a reference to another prototype
@@ -492,23 +494,6 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	}
 
 	/**
-	 * Indicates that whether the supplied property matches the parent property of
-	 * the bean definition.
-	 */
-	private boolean isParentKey(String property) {
-		if (PARENT_KEY.equals(property)) {
-			return true;
-		}
-		else if (DEPRECATED_PARENT_KEY.equals(property)) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Use of 'parent' property in " + getClass().getName() + " is deprecated in favor of '(parent)'.");
-			}
-			return true;
-		}
-		return false;
-	}
-
-	/**
 	 * Indicates that whether the supplied property matches the class property of
 	 * the bean definition.
 	 */
@@ -519,6 +504,23 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		else if (DEPRECATED_CLASS_KEY.equals(property)) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Use of 'class' property in " + getClass().getName() + " is deprecated in favor of '(class)'.");
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Indicates that whether the supplied property matches the parent property of
+	 * the bean definition.
+	 */
+	private boolean isParentKey(String property) {
+		if (PARENT_KEY.equals(property)) {
+			return true;
+		}
+		else if (DEPRECATED_PARENT_KEY.equals(property)) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Use of 'parent' property in " + getClass().getName() + " is deprecated in favor of '(parent)'.");
 			}
 			return true;
 		}
