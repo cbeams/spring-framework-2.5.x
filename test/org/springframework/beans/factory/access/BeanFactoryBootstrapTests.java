@@ -20,7 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import junit.framework.*;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TestBean;
@@ -168,39 +170,40 @@ public class BeanFactoryBootstrapTests extends TestCase {
 
     private static class DummyBeanFactory implements BeanFactory {
 
-		public Map map = new HashMap();
+			public Map map = new HashMap();
 
-		 {
-			this.map.put("test", new TestBean());
-			this.map.put("s", new String());
-		}
-
-		public Object getBean(String name) {
-			Object bean = this.map.get(name);
-			if (bean == null) {
-				throw new NoSuchBeanDefinitionException(name, "no message");
+			 {
+				this.map.put("test", new TestBean());
+				this.map.put("s", "");
 			}
-			return bean;
-		}
 
-		public Object getBean(String name, Class requiredType) {
-			return getBean(name);
-		}
+			public Object getBean(String name) {
+				Object bean = this.map.get(name);
+				if (bean == null) {
+					throw new NoSuchBeanDefinitionException(name, "no message");
+				}
+				return bean;
+			}
 
-		public boolean containsBean(String name) {
-			return this.map.containsKey(name);
-		}
+			public Object getBean(String name, Class requiredType) {
+				return getBean(name);
+			}
 
-		public boolean isSingleton(String name) {
-			return true;
-		}
+			public boolean containsBean(String name) {
+				return this.map.containsKey(name);
+			}
 
-		public Class getType(String name) {
-			return null;
-		}
+			public boolean isSingleton(String name) {
+				return true;
+			}
 
-		public String[] getAliases(String name) {
-			throw new UnsupportedOperationException("getAliases");
-		}
+			public Class getType(String name) {
+				return null;
+			}
+
+			public String[] getAliases(String name) {
+				throw new UnsupportedOperationException("getAliases");
+			}
     }
+
 }

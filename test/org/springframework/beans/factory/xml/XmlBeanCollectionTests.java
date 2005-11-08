@@ -109,11 +109,11 @@ public class XmlBeanCollectionTests extends TestCase {
 		// Must be a list to support ordering
 		// Our bean doesn't modify the collection:
 		// of course it could be a different copy in a real object.
-		List friends = (List) rod.getFriends();
-		assertTrue(friends.size() == 2);
+		Object[] friends = rod.getFriends().toArray();
+		assertTrue(friends.length == 2);
 
-		assertTrue("First friend must be jen, not " + friends.get(0), friends.get(0) == jen);
-		assertTrue(friends.get(1) == dave);
+		assertTrue("First friend must be jen, not " + friends[0], friends[0] == jen);
+		assertTrue(friends[1] == dave);
 		// Should be ordered
 	}
 
@@ -123,22 +123,22 @@ public class XmlBeanCollectionTests extends TestCase {
 		TestBean jen = (TestBean) xbf.getBean("pJenny");
 		TestBean dave = (TestBean) xbf.getBean("pDavid");
 		TestBean rod = (TestBean) xbf.getBean("pRod");
-		List friends = (List) rod.getFriends();
-		assertTrue(friends.size() == 2);
-		assertTrue("First friend must be jen, not " + friends.get(0),
-				friends.get(0).toString().equals(jen.toString()));
-		assertTrue("Jen not same instance", friends.get(0) != jen);
-		assertTrue(friends.get(1).toString().equals(dave.toString()));
-		assertTrue("Dave not same instance", friends.get(1) != dave);
+		Object[] friends = rod.getFriends().toArray();
+		assertTrue(friends.length == 2);
+		assertTrue("First friend must be jen, not " + friends[0],
+				friends[0].toString().equals(jen.toString()));
+		assertTrue("Jen not same instance", friends[0] != jen);
+		assertTrue(friends[1].toString().equals(dave.toString()));
+		assertTrue("Dave not same instance", friends[1] != dave);
 
 		TestBean rod2 = (TestBean) xbf.getBean("pRod");
-		List friends2 = (List) rod2.getFriends();
-		assertTrue(friends2.size() == 2);
-		assertTrue("First friend must be jen, not " + friends2.get(0),
-				friends2.get(0).toString().equals(jen.toString()));
-		assertTrue("Jen not same instance", friends2.get(0) != friends.get(0));
-		assertTrue(friends2.get(1).toString().equals(dave.toString()));
-		assertTrue("Dave not same instance", friends2.get(1) != friends.get(1));
+		Object[] friends2 = rod2.getFriends().toArray();
+		assertTrue(friends2.length == 2);
+		assertTrue("First friend must be jen, not " + friends2[0],
+				friends2[0].toString().equals(jen.toString()));
+		assertTrue("Jen not same instance", friends2[0] != friends[0]);
+		assertTrue(friends2[1].toString().equals(dave.toString()));
+		assertTrue("Dave not same instance", friends2[1] != friends[1]);
 	}
 
 	public void testRefSubelementsBuildCollectionFromSingleElement() throws Exception {

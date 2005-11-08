@@ -118,7 +118,7 @@ public class JndiObjectFactoryBeanTests extends TestCase {
 
 	public void testLookupWithExpectedTypeAndMatch() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
-		String s = new String();
+		String s = "";
 		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", s));
 		jof.setJndiName("foo");
 		jof.setExpectedType(String.class);

@@ -51,7 +51,7 @@ public class KeyHolderTests extends TestCase {
 	public void testSingleKeyNonNumeric(){
 		LinkedList l = new LinkedList();
 		HashMap m = new HashMap(1);
-		m.put("key", new String("1"));
+		m.put("key", "1");
 		l.add(m);
 		kh.getKeyList().addAll(l);
 		try {

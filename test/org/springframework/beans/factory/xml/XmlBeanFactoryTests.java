@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Collection;
 
 import javax.mail.Session;
 import javax.servlet.ServletException;
@@ -128,17 +129,17 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals(6, inner1.getAge());
 
 		assertNotNull(hasInnerBeans.getFriends());
-		List friends = (List) hasInnerBeans.getFriends();
-		assertEquals(3, friends.size());
-		DerivedTestBean inner2 = (DerivedTestBean) friends.get(0);
+		Object[] friends = hasInnerBeans.getFriends().toArray();
+		assertEquals(3, friends.length);
+		DerivedTestBean inner2 = (DerivedTestBean) friends[0];
 		assertEquals("inner2", inner2.getName());
 		assertTrue(inner2.getBeanName().startsWith(DerivedTestBean.class.getName()));
 		assertFalse(xbf.containsBean("innerBean"));
 		assertNotNull(inner2);
 		assertEquals(7, inner2.getAge());
-		TestBean innerFactory = (TestBean) friends.get(1);
+		TestBean innerFactory = (TestBean) friends[1];
 		assertEquals(DummyFactory.SINGLETON_NAME, innerFactory.getName());
-		TestBean inner5 = (TestBean) friends.get(2);
+		TestBean inner5 = (TestBean) friends[2];
 		assertEquals("innerBean", inner5.getBeanName());
 
 		assertNotNull(hasInnerBeans.getSomeMap());

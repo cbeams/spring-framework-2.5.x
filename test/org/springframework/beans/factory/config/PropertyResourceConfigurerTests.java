@@ -239,7 +239,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals(tb2, tb1.getSpouse());
 		assertEquals(2, tb2.getFriends().size());
 		assertEquals("na98me", tb2.getFriends().iterator().next());
-		assertEquals(tb2, ((List) tb2.getFriends()).get(1));
+		assertEquals(tb2, tb2.getFriends().toArray()[1]);
 		assertEquals(3, tb2.getSomeSet().size());
 		assertTrue(tb2.getSomeSet().contains("na98me"));
 		assertTrue(tb2.getSomeSet().contains(tb2));
