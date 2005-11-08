@@ -87,6 +87,10 @@ import org.springframework.util.StringUtils;
  */
 public class DataBinder {
 
+	/** Default object name used for binding: "target" */
+	public static final String DEFAULT_OBJECT_NAME = "target";
+
+
 	/**
 	 * We'll create a lot of DataBinder instances: Let's use a static logger.
 	 */
@@ -104,6 +108,15 @@ public class DataBinder {
 
 
 	/**
+	 * Create a new DataBinder instance, with default object name.
+	 * @param target target object to bind onto
+	 * @see #DEFAULT_OBJECT_NAME
+	 */
+	public DataBinder(Object target) {
+		this(target, DEFAULT_OBJECT_NAME);
+	}
+
+	/**
 	 * Create a new DataBinder instance.
 	 * @param target target object to bind onto
 	 * @param objectName name of the target object
@@ -112,6 +125,7 @@ public class DataBinder {
 		this.errors = createErrors(target, objectName);
 		setExtractOldValueForEditor(true);
 	}
+
 
 	/**
 	 * Create a new Errors instance for this data binder.

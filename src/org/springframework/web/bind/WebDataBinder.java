@@ -55,8 +55,18 @@ public class WebDataBinder extends DataBinder {
 	 */
 	public static final String DEFAULT_FIELD_MARKER_PREFIX = "_";
 
+
 	private String fieldMarkerPrefix = DEFAULT_FIELD_MARKER_PREFIX;
 
+
+	/**
+	 * Create a new WebDataBinder instance, with default object name.
+	 * @param target target object to bind onto
+	 * @see #DEFAULT_OBJECT_NAME
+	 */
+	public WebDataBinder(Object target) {
+		super(target);
+	}
 
 	/**
 	 * Create a new WebDataBinder instance.
@@ -66,6 +76,7 @@ public class WebDataBinder extends DataBinder {
 	public WebDataBinder(Object target, String objectName) {
 		super(target, objectName);
 	}
+
 
 	/**
 	 * Specify a prefix that can be used for parameters that mark potentially

@@ -193,7 +193,7 @@ public class DataBinderTests extends TestCase {
 
 	public void testBindingWithCustomEditorOnObjectField() {
 		BeanWithObjectProperty tb = new BeanWithObjectProperty();
-		DataBinder binder = new DataBinder(tb, "tb");
+		DataBinder binder = new DataBinder(tb);
 		binder.registerCustomEditor(Integer.class, "object", new CustomNumberEditor(Integer.class, true));
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("object", "1"));
@@ -203,7 +203,7 @@ public class DataBinderTests extends TestCase {
 
 	public void testBindingWithAllowedFields() throws Exception {
 		TestBean rod = new TestBean();
-		DataBinder binder = new DataBinder(rod, "person");
+		DataBinder binder = new DataBinder(rod);
 		binder.setAllowedFields(new String[]{"name", "myparam"});
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
@@ -217,7 +217,7 @@ public class DataBinderTests extends TestCase {
 
 		Map m = binder.getErrors().getModel();
 		assertTrue("There is one element in map", m.size() == 2);
-		TestBean tb = (TestBean) m.get("person");
+		TestBean tb = (TestBean) m.get("target");
 		assertTrue("Same object", tb.equals(rod));
 	}
 

@@ -37,9 +37,22 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  * Note that BaseCommandController and its subclasses allow for easy customization
  * of the binder instances that they use through overriding <code>initBinder</code>.
  *
- * <p>Can also be used for manual data binding in custom web controllers.
- * Simply instantiate a ServletRequestDataBinder for each binding process,
- * and invoke <code>bind</code> with the current ServletRequest as argument.
+ * <p>Can also be used for manual data binding in custom web controllers:
+ * for example, in a plain Controller implementation or in a MultiActionController
+ * handler method. Simply instantiate a ServletRequestDataBinder for each binding
+ * process, and invoke <code>bind</code> with the current ServletRequest as argument:
+ *
+ * <pre>
+ * MyBean myBean = new MyBean();
+ * // apply binder to custom target object
+ * ServletRequestDataBinder binder = new ServletRequestDataBinder(myBean);
+ * // register custom editors, if desired
+ * binder.registerCustomEditor(...);
+ * // trigger actual binding of request parameters
+ * binder.bind(request);
+ * // optionally evaluate binding errors
+ * Errors errors = binder.getErrors();
+ * ...</pre>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -49,13 +62,22 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  * @see #setRequiredFields
  * @see #setFieldMarkerPrefix
  * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
- * @see org.springframework.web.servlet.mvc.multiaction.MultiActionController
+ * @see org.springframework.web.servlet.mvc.multiaction.MultiActionController#initBinder
  */
 public class ServletRequestDataBinder extends WebDataBinder {
 
 	private boolean bindEmptyMultipartFiles = true;
 	
-	
+
+	/**
+	 * Create a new ServletRequestDataBinder instance, with default object name.
+	 * @param target target object to bind onto
+	 * @see #DEFAULT_OBJECT_NAME
+	 */
+	public ServletRequestDataBinder(Object target) {
+		super(target);
+	}
+
 	/**
 	 * Create a new ServletRequestDataBinder instance.
 	 * @param target target object to bind onto
@@ -64,6 +86,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	public ServletRequestDataBinder(Object target, String objectName) {
 		super(target, objectName);
 	}
+
 
 	/**
 	 * Set whether to bind empty MultipartFile parameters. Default is "true".

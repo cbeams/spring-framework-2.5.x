@@ -33,11 +33,23 @@ import org.springframework.web.bind.WebDataBinder;
  * Note that BaseCommandController and its subclasses allow for easy customization
  * of the binder instances that they use through overriding <code>initBinder</code>.
  *
- * <p>Can also be used for manual data binding in custom portlet controllers.
- * Simply instantiate a PortletRequestDataBinder for each binding process,
- * and invoke <code>bind</code> with the current PortletRequest as argument.
+ * <p>Can also be used for manual data binding in custom web controllers:
+ * for example, in a plain Portlet Controller implementation. Simply instantiate
+ * a PortletRequestDataBinder for each binding process, and invoke <code>bind</code>
+ * with the current PortletRequest as argument:
  *
- * @author Rod Johnson
+ * <pre>
+ * MyBean myBean = new MyBean();
+ * // apply binder to custom target object
+ * PortletRequestDataBinder binder = new PortletRequestDataBinder(myBean);
+ * // register custom editors, if desired
+ * binder.registerCustomEditor(...);
+ * // trigger actual binding of request parameters
+ * binder.bind(request);
+ * // optionally evaluate binding errors
+ * Errors errors = binder.getErrors();
+ * ...</pre>
+ *
  * @author Juergen Hoeller
  * @author John A. Lewis
  * @see #bind(javax.portlet.PortletRequest)
@@ -50,6 +62,15 @@ import org.springframework.web.bind.WebDataBinder;
 public class PortletRequestDataBinder extends WebDataBinder {
 
 	/**
+	 * Create a new PortletRequestDataBinder instance, with default object name.
+	 * @param target target object to bind onto
+	 * @see #DEFAULT_OBJECT_NAME
+	 */
+	public PortletRequestDataBinder(Object target) {
+		super(target);
+	}
+
+	/**
 	 * Create a new PortletRequestDataBinder instance.
 	 * @param target target object to bind onto
 	 * @param objectName objectName of the target object
@@ -57,6 +78,7 @@ public class PortletRequestDataBinder extends WebDataBinder {
 	public PortletRequestDataBinder(Object target, String objectName) {
 		super(target, objectName);
 	}
+
 
 	/**
 	 * Bind the parameters of the given request to this binder's target.
