@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingErrorProcessor;
 import org.springframework.validation.MessageCodesResolver;
@@ -130,6 +131,7 @@ import org.springframework.web.bind.ServletRequestDataBinder;
  */
 public abstract class BaseCommandController extends AbstractController {
 
+	/** Default command name used for binding command objects: "command" */
 	public static final String DEFAULT_COMMAND_NAME = "command";
 
 
@@ -280,6 +282,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Subclasses can override this.
 	 * @param request current HTTP request
 	 * @return object command to bind onto
+	 * @throws Exception if the command object could not be obtained
 	 * @see #createCommand
 	 */
 	protected Object getCommand(HttpServletRequest request) throws Exception {
@@ -288,11 +291,14 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Create a new command instance for the command class of this controller.
+	 * <p>This implementation uses <code>BeanUtils.instantiateClass</code>,
+	 * so commands need to have public no-arg constructors.
+	 * Subclasses can override this implementation if desired.
 	 * @return the new command instance
-	 * @throws InstantiationException if the command class could not be instantiated
-	 * @throws IllegalAccessException if the class or its constructor is not accessible
+	 * @throws Exception if the command object could not be instantiated
+	 * @see org.springframework.beans.BeanUtils#instantiateClass(Class)
 	 */
-	protected final Object createCommand() throws InstantiationException, IllegalAccessException {
+	protected final Object createCommand() throws Exception {
 		if (this.commandClass == null) {
 			throw new IllegalStateException("Cannot create command without commandClass being set - " +
 					"either set commandClass or (in a form controller) override formBackingObject");
@@ -300,7 +306,7 @@ public abstract class BaseCommandController extends AbstractController {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating new command of class [" + this.commandClass.getName() + "]");
 		}
-		return this.commandClass.newInstance();
+		return BeanUtils.instantiateClass(this.commandClass);
 	}
 
 	/**
