@@ -630,7 +630,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (constructor.getParameterTypes().length < minNrOfArgs) {
 				throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
 						minNrOfArgs + " constructor arguments specified but no matching constructor found in bean '" +
-						beanName + "' (hint: specify index arguments for simple parameters to avoid type ambiguities)");
+						beanName + "' " +
+						"(hint: specify index and/or type arguments for simple parameters to avoid type ambiguities)");
 			}
 
 			// Try to resolve arguments for current constructor.
