@@ -397,7 +397,27 @@ public abstract class BeanUtils {
 	 * @see BeanWrapper
 	 */
 	public static void copyProperties(Object source, Object target) throws BeansException {
-		copyProperties(source, target, null);
+		copyProperties(source, target, null, null);
+	}
+
+	/**
+	 * Copy the property values of the given source bean into the given target bean,
+	 * only setting properties defined in the given "editable" class (or interface).
+	 * <p>Note: The source and target classes do not have to match or even be derived
+	 * from each other, as long as the properties match. Any bean properties that the
+	 * source bean exposes but the target bean does not will silently be ignored.
+	 * <p>This is just a convenience method. For more complex transfer needs,
+	 * consider using a full BeanWrapper.
+	 * @param source the source bean
+	 * @param target the target bean
+	 * @param editable the class (or interface) to restrict property setting to
+	 * @throws BeansException if the copying failed
+	 * @see BeanWrapper
+	 */
+	public static void copyProperties(Object source, Object target, Class editable)
+			throws BeansException {
+
+		copyProperties(source, target, editable, null);
 	}
 
 	/**
@@ -417,16 +437,44 @@ public abstract class BeanUtils {
 	public static void copyProperties(Object source, Object target, String[] ignoreProperties)
 			throws BeansException {
 
+		copyProperties(source, target, null, ignoreProperties);
+	}
+
+	/**
+	 * Copy the property values of the given source bean into the given target bean.
+	 * <p>Note: The source and target classes do not have to match or even be derived
+	 * from each other, as long as the properties match. Any bean properties that the
+	 * source bean exposes but the target bean does not will silently be ignored.
+	 * @param source the source bean
+	 * @param target the target bean
+	 * @param editable the class (or interface) to restrict property setting to
+	 * @param ignoreProperties array of property names to ignore
+	 * @throws BeansException if the copying failed
+	 * @see BeanWrapper
+	 */
+	private static void copyProperties(Object source, Object target, Class editable, String[] ignoreProperties)
+			throws BeansException {
+
 		Assert.notNull(source, "source must not be null");
 		Assert.notNull(target, "target must not be null");
+
+		Class actualEditable = target.getClass();
+		if (editable != null) {
+			if (!editable.isInstance(target)) {
+				throw new IllegalArgumentException("Target class [" + target.getClass().getName() +
+						"] not assignable to Editable class [" + editable.getName() + "]");
+			}
+			actualEditable = editable;
+		}
+		PropertyDescriptor[] targetPds = getPropertyDescriptors(actualEditable);
 		List ignoreList = (ignoreProperties != null) ? Arrays.asList(ignoreProperties) : null;
-		PropertyDescriptor[] sourcePds = getPropertyDescriptors(source.getClass());
-		for (int i = 0; i < sourcePds.length; i++) {
-			PropertyDescriptor sourcePd = sourcePds[i];
-			if (sourcePd.getReadMethod() != null &&
-					(ignoreProperties == null || (!ignoreList.contains(sourcePd.getName())))) {
-				PropertyDescriptor targetPd = getPropertyDescriptor(target.getClass(), sourcePd.getName());
-				if (targetPd != null && targetPd.getWriteMethod() != null) {
+
+		for (int i = 0; i < targetPds.length; i++) {
+			PropertyDescriptor targetPd = targetPds[i];
+			if (targetPd.getWriteMethod() != null &&
+					(ignoreProperties == null || (!ignoreList.contains(targetPd.getName())))) {
+				PropertyDescriptor sourcePd = getPropertyDescriptor(source.getClass(), targetPd.getName());
+				if (sourcePd != null && sourcePd.getReadMethod() != null) {
 					try {
 						Object value = sourcePd.getReadMethod().invoke(source, new Object[0]);
 						targetPd.getWriteMethod().invoke(target, new Object[] {value});
