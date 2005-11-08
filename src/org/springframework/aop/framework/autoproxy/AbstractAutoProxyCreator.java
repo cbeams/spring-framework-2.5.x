@@ -22,8 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
@@ -172,21 +170,18 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	}
 
 	/**
-	 * Set the common interceptors. These must be bean names
-	 * in the current factory. They can be of any advice or#
-	 * advisor type Spring supports. If this property isn't
-	 * set, there will be zero common interceptors. This is
-	 * perfectly valid, if "specific" interceptors such as
-	 * matching Advisors are all we want.
+	 * Set the common interceptors. These must be bean names in the current factory.
+	 * They can be of any advice or advisor type Spring supports. If this property
+	 * isn't set, there will be zero common interceptors. This is perfectly valid,
+	 * if "specific" interceptors such as matching Advisors are all we want.
 	 */
 	public void setInterceptorNames(String[] interceptorNames) {
 		this.interceptorNames = interceptorNames;
 	}
 
 	/**
-	 * Set whether the common interceptors should be applied before
-	 * bean-specific ones. Default is "true"; else, bean-specific
-	 * interceptors will get applied first.
+	 * Set whether the common interceptors should be applied before bean-specific ones.
+	 * Default is "true"; else, bean-specific interceptors will get applied first.
 	 */
 	public void setApplyCommonInterceptorsFirst(boolean applyCommonInterceptorsFirst) {
 		this.applyCommonInterceptorsFirst = applyCommonInterceptorsFirst;

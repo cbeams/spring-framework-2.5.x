@@ -26,14 +26,22 @@ import org.springframework.aop.TargetSource;
  * Auto proxy creator that identifies beans to proxy via a list of names.
  * Checks for direct, "xxx*", and "*xxx" matches.
  *
+ * <p>For configuration details, see the javadoc of the parent class
+ * AbstractAutoProxyCreator. Typically, you will specify a list of
+ * interceptor names to apply to all identified beans, via the
+ * "interceptorNames" property.
+ *
  * @author Juergen Hoeller
  * @since 10.10.2003
  * @see #setBeanNames
  * @see #isMatch
+ * @see #setInterceptorNames
+ * @see AbstractAutoProxyCreator
  */
 public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 
 	private List beanNames;
+
 
 	/**
 	 * Set the names of the beans that should automatically get wrapped with proxies.
@@ -43,6 +51,7 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	public void setBeanNames(String[] beanNames) {
 		this.beanNames = Arrays.asList(beanNames);
 	}
+
 
 	/**
 	 * Identify as bean to proxy if the bean name is in the configured list of names.
