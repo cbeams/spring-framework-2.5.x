@@ -69,7 +69,7 @@ public class LabeledEnumTests extends TestCase {
 	public static class Dog extends StaticLabeledEnum {
 
 		public static final Dog GOLDEN_RETRIEVER = new Dog(11, null) {
-			// this shouldn't be neccessary
+			// must set type to be recognized as a "Dog"
 			public Class getType() {
 				return Dog.class;
 			}

@@ -21,7 +21,7 @@ import org.springframework.util.Assert;
 /**
  * Implementation of LabeledEnum which uses a String as the code type.
  *
- * <p>Should almsot always be subclassed, but for some simple situations it may be
+ * <p>Should almost always be subclassed, but for some simple situations it may be
  * used directly. Note that you will not be able to use unique type-based
  * functionality like <code>LabeledEnumResolver.getLabeledEnumSet(type) in this case.
  *
