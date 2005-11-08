@@ -3,18 +3,20 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.6 (8.11.2005)
-------------------------------------
+Changes in version 1.2.6 (11.11.2005)
+-------------------------------------
 
 Package org.springframework.aop
 * fixed AbstractPerformanceMonitorInterceptor to have "prefix" and "suffix" initialized with emtpy String (avoiding NPE)
 
 Package org.springframework.beans
 * reworked BeanUtils's "copyProperties" method to properly ignore properties not found in the target bean
+* added new "copyProperties" variant to BeanUtils, for restriction of copying to properties of specified class/interface
 * factored out protected "newNestedBeanWrapper" template method from BeanWrapperImpl's "getNestedBeanWrapper" method
 * PropertyPlaceholderConfigurer logs resolved values at debug level, for improved traceability
 * AbstractBeanFactory throws BeanDefinitionStoreException if parent not found (instead of NoSuchBeanDefinitionException)
 * DefaultListableBeanFactory does not include its toString output in NoSuchBeanDefinitionException messages anymore
+* deprecated PropertiesBeanDefinitionReader's "class" and "property" keywords in favor of "(class)" and "(keyword)"
 * PropertiesBeanDefinitionReader supports loading bean definitions from properties files with non-standard encodings
 * XmlBeanDefinitionReader supports reading from resource with explicit encoding
 * XmlBeanDefinitionReader supports reading from SAX InputSource (useful to pass in XML system id or java.io.Reader)
@@ -35,11 +37,8 @@ Package org.springframework.core
 * refined PathMatchingResourcePatternResolver to use relative resources within jar locations (instead of URL building)
 * added DescriptiveResource implementation, holding a resource description but not pointing to a readable resource
 * added EncodedResource class to package "core.io.support", combining a Resource with an encoding to use for reading
-* PropertiesBeanDefinitionReader supports loading bean definitions from properties files with non-standard encodings
-
-Package org.springframework.core.enums
-* added StaticLabeledEnum, a convenient base class for type-safe enum classes whose instances are declared as public/static/final member variables
-* reworked ShortCoded, StringCoded, and LetterCoded enum implementations to be "GenericLabeledEnums" that are non-static and directly instantiable
+* added StaticLabeledEnum, a convenient base class for type-safe enum classes declared as static final member variables
+* reworked ShortCoded, StringCoded and LetterCoded enum implementations to be non-static "GenericLabeledEnums"
 
 Package org.springframework.jdbc
 * JdbcTemplate applies "fetchSize" and "maxRows" settings to all created Statements, not just to "query" operations
@@ -99,11 +98,13 @@ Package org.springframework.util
 
 Package org.springframework.validation
 * BindException uses canonical bean property paths for error registration, allowing any map key syntax for error access
+* added convenience constructors to DataBinder, WebDataBinder and ServletRequestDataBinder, using a default object name
 
 Package org.springframework.web
 * ContextLoader reads the default WebApplicationContext impl class from "ContextLoader.properties" in the same package
 * factored out "findRequiredWebApplicationContext" method from *ActionSupport to DelegatingActionUtils for Struts
 * added "bindingErrorProcessor" property to BaseCommandController, for declaratively overriding DataBinder's default
+* added "getCommandName(Object command)" template method to MultiActionController, for overriding default command name
 * refined UrlFilenameViewController to let its "handleRequestInternal" method throw Exception (for potential subclasses)
 * added "message" attribute to JSP MessageTag, accepting a MessageSourceResolvable argument (direct or through JSP EL)
 * Velocity/FreeMarkerViewResolver allows for setting "allowRequestOverride" and "allowSessionOverride" on its Views
