@@ -36,6 +36,7 @@ public class StringCodedLabeledEnum extends AbstractGenericLabeledEnum {
 	 */
 	private final String code;
 
+
 	/**
 	 * Create a new StringCodedLabeledEnum instance.
 	 * @param code the String code
@@ -46,6 +47,7 @@ public class StringCodedLabeledEnum extends AbstractGenericLabeledEnum {
 		Assert.hasText(code, "code is required");
 		this.code = code;
 	}
+
 
 	public Comparable getCode() {
 		return code;

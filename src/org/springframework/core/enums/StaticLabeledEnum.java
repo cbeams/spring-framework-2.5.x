@@ -16,7 +16,7 @@
 
 package org.springframework.core.enums;
 
-import java.io.ObjectStreamException;
+
 
 /**
  * Base class for static type-safe labeled enum instances.
@@ -25,6 +25,7 @@ import java.io.ObjectStreamException;
  * 
  * <pre>
  * public class FlowSessionStatus extends StaticLabeledEnum {
+ *
  *     // public static final instances!
  *     public static FlowSessionStatus CREATED = new FlowSessionStatus(0, &quot;Created&quot;);
  *     public static FlowSessionStatus ACTIVE = new FlowSessionStatus(1, &quot;Active&quot;);
@@ -37,9 +38,8 @@ import java.io.ObjectStreamException;
  *         super(code, label);
  *     }
  *     
- *     // custom behaivior
- * }
- * </pre>
+ *     // custom behavior
+ * }</pre>
  * 
  * @author Keith Donald
  * @since 1.2.6
@@ -56,15 +56,17 @@ public abstract class StaticLabeledEnum extends AbstractLabeledEnum {
 	 */
 	private final transient String label;
 
+
 	/**
 	 * Create a new StaticLabeledEnum instance.
 	 * @param code the short code
 	 * @param label the label (can be <code>null</code>)
 	 */
 	protected StaticLabeledEnum(int code, String label) {
-		this.code = new Short((short)code);
+		this.code = new Short((short) code);
 		this.label = label;
 	}
+
 
 	public Comparable getCode() {
 		return code;
@@ -78,13 +80,18 @@ public abstract class StaticLabeledEnum extends AbstractLabeledEnum {
 	 * Return the code of this LabeledEnum instance as a short.
 	 */
 	public short shortValue() {
-		return ((Number)getCode()).shortValue();
+		return ((Number) getCode()).shortValue();
 	}
+
+
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
 
 	/**
 	 * Return the resolved type safe static enum instance.
 	 */
-	private Object readResolve() throws ObjectStreamException {
+	private Object readResolve() {
 		return StaticLabeledEnumResolver.instance().getLabeledEnumByCode(getType(), getCode());
 	}
 

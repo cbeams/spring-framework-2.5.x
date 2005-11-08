@@ -29,9 +29,9 @@ public abstract class AbstractGenericLabeledEnum extends AbstractLabeledEnum {
 	 */
 	private final String label;
 
+
 	/**
 	 * Create a new StaticLabeledEnum instance.
-	 * @param code the short code
 	 * @param label the label (can be <code>null</code>)
 	 */
 	protected AbstractGenericLabeledEnum(String label) {
@@ -41,4 +41,5 @@ public abstract class AbstractGenericLabeledEnum extends AbstractLabeledEnum {
 	public String getLabel() {
 		return label;
 	}
+
 }

@@ -34,16 +34,22 @@ import org.springframework.util.Assert;
  */
 public class StaticLabeledEnumResolver extends AbstractCachingLabeledEnumResolver {
 
+	/**
+	 * Shared <code>StaticLabeledEnumResolver</code> singleton instance.
+	 */
 	private static final StaticLabeledEnumResolver INSTANCE = new StaticLabeledEnumResolver();
-	
+
+
 	/**
 	 * Return the shared <code>StaticLabeledEnumResolver</code> singleton instance.
-	 * @since 1.2.6
+	 * Mainly for resolving unique StaticLabeledEnum references on deserialization.
+	 * @see StaticLabeledEnum
 	 */
 	public static StaticLabeledEnumResolver instance() {
 		return INSTANCE;
 	}
-	
+
+
 	protected Set findLabeledEnums(Class type) {
 		Set typeEnums = new TreeSet();
 		Field[] fields = type.getFields();

@@ -35,6 +35,7 @@ public class LetterCodedLabeledEnum extends AbstractGenericLabeledEnum {
 	 */
 	private final Character code;
 
+
 	/**
 	 * Create a new LetterCodedLabeledEnum instance.
 	 * @param code the letter code
@@ -46,6 +47,7 @@ public class LetterCodedLabeledEnum extends AbstractGenericLabeledEnum {
 				"The code '" + code + "' is invalid: it must be a letter");
 		this.code = new Character(code);
 	}
+
 
 	public Comparable getCode() {
 		return code;

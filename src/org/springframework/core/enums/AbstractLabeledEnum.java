@@ -36,6 +36,7 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 		return getClass();
 	}
 
+
 	/*
 	 * This abstract method declaration shadows the method in the LabeledEnum interface.
 	 * This is necessary to properly work on Sun's JDK 1.3 classic VM in all cases.
@@ -47,6 +48,7 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 	 * This is necessary to properly work on Sun's JDK 1.3 classic VM in all cases.
 	 */
 	public abstract String getLabel();
+
 
 	public int compareTo(Object obj) {
 		Assert.isTrue(obj instanceof AbstractLabeledEnum, "You may only compare LabeledEnums");

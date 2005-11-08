@@ -33,6 +33,7 @@ public class ShortCodedLabeledEnum extends AbstractGenericLabeledEnum {
 	 */
 	private final Short code;
 
+
 	/**
 	 * Create a new ShortCodedLabeledEnum instance.
 	 * @param code the short code
@@ -42,6 +43,7 @@ public class ShortCodedLabeledEnum extends AbstractGenericLabeledEnum {
 		super(label);
 		this.code = new Short((short) code);
 	}
+
 
 	public Comparable getCode() {
 		return code;
@@ -53,4 +55,5 @@ public class ShortCodedLabeledEnum extends AbstractGenericLabeledEnum {
 	public short getShortCode() {
 		return ((Short) getCode()).shortValue();
 	}
+
 }
