@@ -32,6 +32,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
@@ -86,39 +87,15 @@ import org.springframework.web.servlet.support.SessionRequiredException;
  *
  * <p>Note that method overloading isn't allowed.
  * 
- * See also description of workflow performed by superclasses
- * <a href="AbstractController.html#workflow">here</a>.</p>
- * 
- * <p><b><a name="config">Exposed configuration properties</a>
- * (<a href="AbstractController.html#config">and those defined by superclass</a>):</b><br>
- * <table border="1">
- *  <tr>
- *      <td><b>name</b></th>
- *      <td><b>default</b></td>
- *      <td><b>description</b></td>
- *  </tr>
- *  <tr>
- *      <td>commandName</td>
- *      <td>command</td>
- *      <td>the name to use when binding the instantiated command class
- *          to the request</td>
- *  </tr>
- *  <tr>
- *      <td>validators</td>
- *      <td><i>null</i></td>
- *      <td>Array of Validator beans. The validator will be called at appropriate
- *          places in the workflow of subclasses (have a look at those for more info)
- *          to validate the command object.</td>
- *  </tr>
- *  <tr>
- *      <td>validator</td>
- *      <td><i>null</i></td>
- *      <td>Short-form property for setting only one Validator bean (usually passed in
- *          using a &lt;ref bean="beanId"/&gt; property.</td>
- *  </tr>
- * </table>
- * </p>
+ * <p>See also description of workflow performed by superclasses
+ * <a href="AbstractController.html#workflow">here</a>.
  *
+ * <p><b>Note:</b> For maximum data binding flexibility, consider direct usage
+ * of a ServletRequestDataBinder in your controller method, instead of relying
+ * on a declared command argument. This allows for full control over the entire
+ * binder setup and usage, including the invocation of Validators and the
+ * subsequent evaluation of binding/validation errors.
+ * 
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
@@ -127,13 +104,14 @@ import org.springframework.web.servlet.support.SessionRequiredException;
  * @see PropertiesMethodNameResolver
  * @see ParameterMethodNameResolver
  * @see org.springframework.web.servlet.mvc.LastModified#getLastModified
+ * @see org.springframework.web.bind.ServletRequestDataBinder
  */
 public class MultiActionController extends AbstractController implements LastModified  {
 		
 	/** Suffix for last-modified methods */
 	public static final String LAST_MODIFIED_METHOD_SUFFIX = "LastModified";
 
-	/** Default command name used for binding command objects */
+	/** Default command name used for binding command objects: "command" */
 	public static final String DEFAULT_COMMAND_NAME = "command";
 
 	/** Log category to use when no mapped handler is found for a request */
@@ -143,16 +121,13 @@ public class MultiActionController extends AbstractController implements LastMod
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
 
 
-	//---------------------------------------------------------------------
-	// Instance data
-	//---------------------------------------------------------------------
-
 	/**
 	 * Helper object that knows how to return method names from incoming requests.
 	 * Can be overridden via the methodNameResolver bean property
 	 */
 	private MethodNameResolver methodNameResolver = new InternalPathMethodNameResolver();
 
+	/** List of Validators to apply to commands */
 	private Validator[] validators;
 
 	/** Object we'll invoke methods on. Defaults to this. */
@@ -167,10 +142,6 @@ public class MultiActionController extends AbstractController implements LastMod
 	/** Methods, keyed by exception class */
 	private Map exceptionHandlerMap;
 
-
-	//---------------------------------------------------------------------
-	// Constructors
-	//---------------------------------------------------------------------
 
 	/**
 	 * Constructor for MultiActionController that looks for handler methods
@@ -195,10 +166,6 @@ public class MultiActionController extends AbstractController implements LastMod
 	}
 	
 	
-	//---------------------------------------------------------------------
-	// Bean properties
-	//---------------------------------------------------------------------
-
 	/**
 	 * Set the method name resolver that this class should use.
 	 * Allows parameterization of handler method mappings.
@@ -208,7 +175,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	}
 	
 	/**
-	 * Get the MethodNameResolver used by this class.
+	 * Return the MethodNameResolver used by this class.
 	 */
 	public final MethodNameResolver getMethodNameResolver() {
 		return this.methodNameResolver;
@@ -411,22 +378,17 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	/**
 	 * Create a new command object of the given class.
-	 * <p>This implementation uses <code>Class.newInstance()</code>,
+	 * <p>This implementation uses <code>BeanUtils.instantiateClass</code>,
 	 * so commands need to have public no-arg constructors.
-	 * Subclasses can override this implementation if they want.
+	 * Subclasses can override this implementation if desired.
+	 * @throws Exception if the command object could not be instantiated
+	 * @see org.springframework.beans.BeanUtils#instantiateClass(Class)
 	 */
 	protected Object newCommandObject(Class clazz) throws Exception {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Must create new command of class [" + clazz.getName() + "]");
 		}
-		try {
-			return clazz.newInstance();
-		}
-		catch (Exception ex) {
-			throw new ServletException(
-					"Cannot instantiate command of class [" + clazz.getName() +
-					"]: Does it have a public no arg constructor?", ex);
-		}
+		return BeanUtils.instantiateClass(clazz);
 	}
 
 	/**
@@ -441,8 +403,9 @@ public class MultiActionController extends AbstractController implements LastMod
 		binder.bind(request);
 		if (this.validators != null) {
 			for (int i = 0; i < this.validators.length; i++) {
-				if (this.validators[i].supports(command.getClass()))
+				if (this.validators[i].supports(command.getClass())) {
 					ValidationUtils.invokeValidator(this.validators[i], command, binder.getErrors());
+				}
 			}
 		}
 		binder.closeNoCatch();
@@ -465,9 +428,20 @@ public class MultiActionController extends AbstractController implements LastMod
 	protected ServletRequestDataBinder createBinder(ServletRequest request, Object command)
 	    throws Exception {
 
-		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, DEFAULT_COMMAND_NAME);
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName(command));
 		initBinder(request, binder);
 		return binder;
+	}
+
+	/**
+	 * Return the command name to use for the given command object.
+	 * Default is "command".
+	 * @param command the command object
+	 * @return the command name to use
+	 * @see #DEFAULT_COMMAND_NAME
+	 */
+	protected String getCommandName(Object command) {
+		return DEFAULT_COMMAND_NAME;
 	}
 
 	/**
