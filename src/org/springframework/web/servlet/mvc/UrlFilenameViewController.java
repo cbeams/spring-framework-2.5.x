@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2005 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -75,9 +75,7 @@ public class UrlFilenameViewController extends AbstractController {
 	 * @see #setPrefix
 	 * @see #setSuffix
 	 */
-	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) {
 		String uri = request.getRequestURI();
 		String viewName = (String) this.viewNameCache.get(uri);
 		if (viewName == null) {
@@ -88,14 +86,19 @@ public class UrlFilenameViewController extends AbstractController {
 	}
 
 	/**
-	 * Extract the URL filename from the given request URI.
-	 * Correctly resolves nested paths such as "/products/view.html" as well.
+	 * Extract the URL filename from the given request URI
 	 * @param uri the request URI (e.g. "/index.html")
 	 * @return the extracted URI filename (e.g. "index")
 	 * @see javax.servlet.http.HttpServletRequest#getRequestURI()
 	 */
 	protected String getFilenameFromRequestURI(String uri) {
-		int begin = (uri.startsWith("/") ? 1 : 0);
+		int begin = uri.lastIndexOf('/');
+		if (begin == -1) {
+			begin = 0;
+		}
+		else {
+			begin++;
+		}
 		int end = uri.indexOf(';');
 		if (end == -1) {
 			end = uri.indexOf('?');
@@ -110,4 +113,5 @@ public class UrlFilenameViewController extends AbstractController {
 		}
 		return filename;
 	}
+
 }
