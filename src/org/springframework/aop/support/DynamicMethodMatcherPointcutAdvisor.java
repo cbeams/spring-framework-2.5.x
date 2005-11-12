@@ -35,14 +35,16 @@ public abstract class DynamicMethodMatcherPointcutAdvisor extends DynamicMethodM
 	private int order = Integer.MAX_VALUE;
 
 	private Advice advice;
-	
+
+
 	protected DynamicMethodMatcherPointcutAdvisor() {
 	}
 
 	protected DynamicMethodMatcherPointcutAdvisor(Advice advice) {
 		this.advice = advice;
 	}
-	
+
+
 	public void setOrder(int order) {
 		this.order = order;
 	}
@@ -57,7 +59,8 @@ public abstract class DynamicMethodMatcherPointcutAdvisor extends DynamicMethodM
 	
 	public Advice getAdvice() {
 		return advice;
-	}	
+	}
+
 
 	public final Pointcut getPointcut() {
 		return this;

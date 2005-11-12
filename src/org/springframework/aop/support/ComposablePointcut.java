@@ -23,13 +23,14 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 
 /**
- * Convenient class for building up pointcuts.
- * All methods return ComposablePointcut, so we can use a concise
- * idiom like:
+ * Convenient class for building up pointcuts. All methods return
+ * ComposablePointcut, so we can use a concise idiom like:
+ *
  * <code>
  * Pointcut pc = new ComposablePointcut().union(classFilter).intersection(methodMatcher).intersection(pointcut);
  * </code>
- * There is no union() method on this class. Use the Pointcuts.union()
+ *
+ * <p>There is no union() method on this class. Use the Pointcuts.union()
  * method for this.
  *
  * @author Rod Johnson
@@ -40,7 +41,8 @@ public class ComposablePointcut implements Pointcut, Serializable {
 	private ClassFilter classFilter;
 	
 	private MethodMatcher methodMatcher;
-	
+
+
 	public ComposablePointcut() {
 		this.classFilter =  ClassFilter.TRUE;
 		this.methodMatcher = MethodMatcher.TRUE;
@@ -50,7 +52,8 @@ public class ComposablePointcut implements Pointcut, Serializable {
 		this.classFilter = classFilter;
 		this.methodMatcher = methodMatcher;
 	}
-	
+
+
 	public ComposablePointcut union(ClassFilter filter) {
 		this.classFilter = ClassFilters.union(this.classFilter, filter);
 		return this;
@@ -71,12 +74,12 @@ public class ComposablePointcut implements Pointcut, Serializable {
 		return this;
 	}
 	
-	
 	public ComposablePointcut intersection(Pointcut other) {
 		this.classFilter = ClassFilters.intersection(this.classFilter, other.getClassFilter());
 		this.methodMatcher = MethodMatchers.intersection(this.methodMatcher, other.getMethodMatcher());
 		return this;
 	}
+
 
 	public ClassFilter getClassFilter() {
 		return this.classFilter;

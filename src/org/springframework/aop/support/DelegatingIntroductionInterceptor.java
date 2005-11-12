@@ -53,7 +53,8 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 	 * May be "this" if a subclass implements the introduced interfaces.
 	 */
 	private Object delegate;
-	
+
+
 	/**
 	 * Construct a new DelegatingIntroductionInterceptor, providing
 	 * a delegate that implements the interfaces to be introduced.
@@ -71,7 +72,8 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 	protected DelegatingIntroductionInterceptor() {
 		init(this);
 	}
-	
+
+
 	/**
 	 * Both constructors use this, as it's impossible to pass
 	 * "this" from one constructor to another. 

@@ -34,6 +34,7 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 
 	private List mappedNames = new LinkedList();
 
+
 	/**
 	 * Convenience method when we have only a single method name
 	 * to match. Use either this method or setMappedNames(), not both.
@@ -56,7 +57,7 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 			}
 		}
 	}
-	
+
 	/**
 	 * Add another eligible method name, in addition to those already named.
 	 * Like the set methods, this method is for use when configuring proxies,
@@ -72,7 +73,8 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 		this.mappedNames.add(name);
 		return this;
 	}
-	
+
+
 	public boolean matches(Method method, Class targetClass) {
 		for (int i = 0; i < this.mappedNames.size(); i++) {
 			String mappedName = (String) this.mappedNames.get(i);

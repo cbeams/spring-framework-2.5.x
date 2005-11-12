@@ -39,6 +39,7 @@ public class TransactionAttributeSourceAdvisor extends StaticMethodMatcherPointc
 	
 	private TransactionAttributeSource transactionAttributeSource;
 
+
 	/**
 	 * Create a new TransactionAttributeSourceAdvisor.
 	 */
@@ -65,6 +66,7 @@ public class TransactionAttributeSourceAdvisor extends StaticMethodMatcherPointc
 		}
 		this.transactionAttributeSource = interceptor.getTransactionAttributeSource();
 	}
+
 
 	public boolean matches(Method method, Class targetClass) {
 		Assert.notNull(this.transactionAttributeSource, "transactionAttributeSource is required");

@@ -39,6 +39,7 @@ public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordere
 
 	private Advice advice;
 
+
 	public void setOrder(int order) {
 		this.order = order;
 	}
@@ -55,9 +56,11 @@ public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordere
 		return advice;
 	}
 
+
 	public boolean isPerInstance() {
 		throw new UnsupportedOperationException("perInstance property of Advisor is not yet supported in Spring");
 	}
+	
 
 	public boolean equals(Object other) {
 		if (!(other instanceof PointcutAdvisor)) {

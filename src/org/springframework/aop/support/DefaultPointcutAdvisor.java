@@ -36,6 +36,7 @@ public class DefaultPointcutAdvisor extends AbstractPointcutAdvisor implements S
 
 	private Pointcut pointcut = Pointcut.TRUE;
 
+
 	/**
 	 * Create an empty DefaultPointcutAdvisor.
 	 * Advice must be set before use using setter methods.
@@ -63,6 +64,7 @@ public class DefaultPointcutAdvisor extends AbstractPointcutAdvisor implements S
 		this.pointcut = pointcut;
 		setAdvice(advice);
 	}
+	
 
 	public void setPointcut(Pointcut pointcut) {
 		this.pointcut = pointcut;

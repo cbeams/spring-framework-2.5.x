@@ -36,13 +36,15 @@ public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMat
 	private int order = Integer.MAX_VALUE;
 
 	private Advice advice;
-	
+
+
 	public StaticMethodMatcherPointcutAdvisor() {
 	}
 
 	public StaticMethodMatcherPointcutAdvisor(Advice advice) {
 		this.advice = advice;
 	}
+
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -59,6 +61,7 @@ public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMat
 	public Advice getAdvice() {
 		return advice;
 	}
+
 
 	public Pointcut getPointcut() {
 		return this;

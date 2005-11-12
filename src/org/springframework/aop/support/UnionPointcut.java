@@ -36,27 +36,23 @@ class UnionPointcut implements Pointcut, Serializable {
 
 	private final Pointcut b;
 	
-	private MethodMatcher mm;
+	private MethodMatcher methodMatcher;
+
 
 	public UnionPointcut(Pointcut a, Pointcut b) {
 		this.a = a;
 		this.b = b;
-		this.mm = new PointcutUnionMethodMatcher();
+		this.methodMatcher = new PointcutUnionMethodMatcher();
 	}
 
-	/**
-	 * @see org.springframework.aop.Pointcut#getClassFilter()
-	 */
+
 	public ClassFilter getClassFilter() {
 		return ClassFilters.union(a.getClassFilter(), b.getClassFilter());
 	}
 
-	/**
-	 * @see org.springframework.aop.Pointcut#getMethodMatcher()
-	 */
 	public MethodMatcher getMethodMatcher() {
-		// Complicated: we need to consider both class filter and method matcher
-		return mm; 
+		// Complicated: we need to consider both class filter and method matcher.
+		return methodMatcher;
 	}
 
 
@@ -76,7 +72,6 @@ class UnionPointcut implements Pointcut, Serializable {
 			return a.getMethodMatcher().matches(method, targetClass, args) ||
 					b.getMethodMatcher().matches(method, targetClass, args);
 		}
-	
 	}
 
 }

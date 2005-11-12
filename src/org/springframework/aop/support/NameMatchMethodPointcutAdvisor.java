@@ -35,12 +35,14 @@ public class NameMatchMethodPointcutAdvisor extends NameMatchMethodPointcut
 
 	private Advice advice;
 
+
 	public NameMatchMethodPointcutAdvisor() {
 	}
 
 	public NameMatchMethodPointcutAdvisor(Advice advice) {
 		this.advice = advice;
 	}
+
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -57,6 +59,7 @@ public class NameMatchMethodPointcutAdvisor extends NameMatchMethodPointcut
 	public Advice getAdvice() {
 		return advice;
 	}
+
 
 	public Pointcut getPointcut() {
 		return this;

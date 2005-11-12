@@ -55,6 +55,7 @@ public class Perl5RegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	/** ORO pattern matcher to use */
 	private transient PatternMatcher matcher;
 
+
 	/**
 	 * Initialize ORO fields from patterns String[].
 	 */

@@ -36,6 +36,7 @@ public abstract class StaticMethodMatcherPointcut extends StaticMethodMatcher im
 
 	private ClassFilter classFilter = ClassFilter.TRUE;
 
+
 	/**
 	 * Set the ClassFilter to use for this pointcut.
 	 * Default is <code>ClassFilter.TRUE</code>.
@@ -48,6 +49,7 @@ public abstract class StaticMethodMatcherPointcut extends StaticMethodMatcher im
 	public ClassFilter getClassFilter() {
 		return classFilter;
 	}
+
 
 	public final MethodMatcher getMethodMatcher() {
 		return this;
