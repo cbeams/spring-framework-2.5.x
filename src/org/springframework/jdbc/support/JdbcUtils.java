@@ -105,11 +105,11 @@ public abstract class JdbcUtils {
 	}
 
 	/**
-	 * Retrieve a JDBC column value from a ResultSet. The returned value
-	 * should be a detached value object, not having any ties to the
-	 * active ResultSet: in particular, it should not be a Blob or Clob
-	 * object but rather a byte array respectively String representation.
-	 * <p>Uses the <code>getObject</code> method, but includes additional "hacks"
+	 * Retrieve a JDBC column value from a ResultSet, using the most appropriate
+	 * value type. The returned value should be a detached value object, not having
+	 * any ties to the active ResultSet: in particular, it should not be a Blob or
+	 * Clob object but rather a byte array respectively String representation.
+	 * <p>Uses the <code>getObject(index)</code> method, but includes additional "hacks"
 	 * to get around Oracle 10g returning a non-standard object for its TIMESTAMP
 	 * datatype and a <code>java.sql.Date</code> for DATE columns leaving out the
 	 * time portion: These columns will explicitly be extracted as standard

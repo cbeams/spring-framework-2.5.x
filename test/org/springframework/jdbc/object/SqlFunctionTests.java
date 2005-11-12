@@ -286,8 +286,8 @@ public class SqlFunctionTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(mockResultSetMetaData, 1);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getObject(1);
-		ctrlResultSet.setReturnValue(new Integer(14));
+		mockResultSet.getString(1);
+		ctrlResultSet.setReturnValue("14");
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();

@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.core;
 
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -69,41 +71,35 @@ public class SingleColumnRowMapper implements RowMapper {
 	}
 
 
+	/**
+	 * Extract a value for the single column in the current row.
+	 * <p>Validates that there is only one column selected,
+	 * then delegates to <code>getColumnValue()</code> and also
+	 * <code>convertValueToRequiredType</code>, if necessary.
+	 * @see java.sql.ResultSetMetaData#getColumnCount()
+	 * @see #getColumnValue(java.sql.ResultSet, int, Class)
+	 * @see #convertValueToRequiredType(Object, Class)
+	 */
 	public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+		// Validate column count.
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int nrOfColumns = rsmd.getColumnCount();
 		if (nrOfColumns != 1) {
 			throw new IncorrectResultSizeDataAccessException(
 					"Expected single column but found " + nrOfColumns, 1, nrOfColumns);
 		}
-		Object result = getColumnValue(rs, 1);
+
+		// Extract column value from JDBC ResultSet
+		Object result = getColumnValue(rs, 1, this.requiredType);
 		if (result != null && this.requiredType != null && !this.requiredType.isInstance(result)) {
-			if (String.class.equals(this.requiredType)) {
-				result = result.toString();
+			// Extracted value does not match already: try to convert it.
+			try {
+				return convertValueToRequiredType(result, this.requiredType);
 			}
-			else if (Number.class.isAssignableFrom(this.requiredType)) {
-				try {
-					if (result instanceof Number) {
-						// Convert original Number to target Number class.
-						result = NumberUtils.convertNumberToTargetClass(((Number) result), this.requiredType);
-					}
-					else {
-						// Convert stringified value to target Number class.
-						result = NumberUtils.parseNumber(result.toString(), this.requiredType);
-					}
-				}
-				catch (IllegalArgumentException ex) {
-					throw new TypeMismatchDataAccessException(
-							"Type mismatch affecting row number " + rowNum + " and column type '" +
-							rsmd.getColumnTypeName(1) + "': " + ex.getMessage());
-				}
-			}
-			else {
+			catch (IllegalArgumentException ex) {
 				throw new TypeMismatchDataAccessException(
 						"Type mismatch affecting row number " + rowNum + " and column type '" +
-						rsmd.getColumnTypeName(1) + "': Value [" + result + "] is of type [" +
-						result.getClass().getName() + "] and cannot be converted to required type [" +
-						this.requiredType.getName() + "]");
+						rsmd.getColumnTypeName(1) + "': " + ex.getMessage());
 			}
 		}
 		return result;
@@ -111,16 +107,132 @@ public class SingleColumnRowMapper implements RowMapper {
 
 	/**
 	 * Retrieve a JDBC object value for the specified column.
-	 * <p>The default implementation uses the <code>getObject</code> method.
-	 * Additionally, this implementation includes a "hack" to get around Oracle
-	 * returning a non-standard object for their TIMESTAMP datatype.
+	 * <p>The default implementation calls <code>ResultSet.getString(index)</code> etc
+	 * for all standard value types (String, Boolean, number types, date types, etc).
+	 * It calls <code>ResultSet.getObject(index)</code> else.
+	 * <p>If no required type has been specified, this method delegates to
+	 * <code>getColumnValue(rs, index)</code>, which basically calls
+	 * <code>ResultSet.getObject(index)</code> but applies some additional
+	 * default conversion to appropriate value types.
+	 * <p>Explicit extraction of a String is necessary to properly extract an Oracle
+	 * RAW value as a String, for example. For the other given types, it is also
+	 * recommendable to extract the desired types explicitly, to let the JDBC driver
+	 * perform appropriate (potentially database-specific) conversion.
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
-	 * @return the Object returned
-	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue
+	 * @param requiredType the type that each result object is expected to match
+	 * (or <code>null</code> if none specified)
+	 * @return the Object value
+	 * @see java.sql.ResultSet#getString(int)
+	 * @see java.sql.ResultSet#getObject(int)
+	 * @see #getColumnValue(java.sql.ResultSet, int)
+	 */
+	protected Object getColumnValue(ResultSet rs, int index, Class requiredType) throws SQLException {
+		if (requiredType != null) {
+			// Explicitly extract typed value, as far as possible.
+			if (String.class.equals(requiredType)) {
+				return rs.getString(index);
+			}
+			else if (Boolean.class.equals(requiredType)) {
+				return new Boolean(rs.getBoolean(index));
+			}
+			else if (Byte.class.equals(requiredType)) {
+				return new Byte(rs.getByte(index));
+			}
+			else if (Short.class.equals(requiredType)) {
+				return new Short(rs.getShort(index));
+			}
+			else if (Integer.class.equals(requiredType)) {
+				return new Integer(rs.getInt(index));
+			}
+			else if (Long.class.equals(requiredType)) {
+				return new Long(rs.getLong(index));
+			}
+			else if (Float.class.equals(requiredType)) {
+				return new Float(rs.getFloat(index));
+			}
+			else if (Double.class.equals(requiredType) || Number.class.equals(requiredType)) {
+				return new Double(rs.getDouble(index));
+			}
+			else if (byte[].class.equals(requiredType)) {
+				return rs.getBytes(index);
+			}
+			else if (java.sql.Date.class.equals(requiredType)) {
+				return rs.getDate(index);
+			}
+			else if (java.sql.Time.class.equals(requiredType)) {
+				return rs.getTime(index);
+			}
+			else if (java.sql.Timestamp.class.equals(requiredType) || java.util.Date.class.equals(requiredType)) {
+				return rs.getTimestamp(index);
+			}
+			else if (Blob.class.equals(requiredType)) {
+				return rs.getBlob(index);
+			}
+			else if (Clob.class.equals(requiredType)) {
+				return rs.getClob(index);
+			}
+			else {
+				// Some unknown type desired -> rely on getObject.
+				return rs.getObject(index);
+			}
+		}
+		else {
+			// No required type specified -> perform default extraction.
+			return getColumnValue(rs, index);
+		}
+	}
+
+	/**
+	 * Retrieve a JDBC object value for the specified column, using the most
+	 * appropriate value type. Called if no required type has been specified.
+	 * <p>The default implementation delegates to <code>JdbcUtils.getResultSetValue()</code>,
+	 * which uses the <code>ResultSet.getObject(index)</code> method. Additionally,
+	 * it includes a "hack" to get around Oracle returning a non-standard object for
+	 * their TIMESTAMP datatype. See the <code>JdbcUtils#getResultSetValue()</code>
+	 * javadoc for details.
+	 * @param rs is the ResultSet holding the data
+	 * @param index is the column index
+	 * @return the Object value
+	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue(java.sql.ResultSet, int)
 	 */
 	protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
 		return JdbcUtils.getResultSetValue(rs, index);
+	}
+
+	/**
+	 * Convert the given column value to the specified required type.
+	 * Only called if the extracted column value does not match already.
+	 * <p>If the required type is String, the value will simply get stringified
+	 * via <code>toString()</code>. In case of a Number, the value will be
+	 * converted into a Number, either through number conversion or through
+	 * String parsing (depending on the value type).
+	 * @param value the column value as extracted from <code>getColumnValue()</code>
+	 * (never <code>null</code>)
+	 * @param requiredType the type that each result object is expected to match
+	 * (never <code>null</code>)
+	 * @return the converted value
+	 * @see #getColumnValue(java.sql.ResultSet, int, Class)
+	 */
+	protected Object convertValueToRequiredType(Object value, Class requiredType) {
+		if (String.class.equals(this.requiredType)) {
+			return value.toString();
+		}
+		else if (Number.class.isAssignableFrom(this.requiredType)) {
+			if (value instanceof Number) {
+				// Convert original Number to target Number class.
+				return NumberUtils.convertNumberToTargetClass(((Number) value), this.requiredType);
+			}
+			else {
+				// Convert stringified value to target Number class.
+				return NumberUtils.parseNumber(value.toString(), this.requiredType);
+			}
+		}
+		else {
+			throw new IllegalArgumentException(
+					"Value [" + value + "] is of type [" + value.getClass().getName() +
+					"] and cannot be converted to required type [" + this.requiredType.getName() + "]");
+		}
 	}
 
 }
