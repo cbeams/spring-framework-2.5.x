@@ -462,19 +462,6 @@ public class DispatcherServletTests extends TestCase {
 		assertEquals("body", response.getContentAsString());
 	}
 
-	public void testServletHandlerAdapter() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/servlet.do");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		complexDispatcherServlet.service(request, response);
-		assertEquals("body", response.getContentAsString());
-
-		Servlet myServlet = (Servlet) complexDispatcherServlet.getWebApplicationContext().getBean("myServlet");
-		assertEquals("myServlet", myServlet.getServletConfig().getServletName());
-		assertEquals(getServletContext(), myServlet.getServletConfig().getServletContext());
-		complexDispatcherServlet.destroy();
-		assertNull(myServlet.getServletConfig());
-	}
-
 	public void testNotDetectAllHandlerMappings() throws ServletException, IOException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
@@ -529,6 +516,44 @@ public class DispatcherServletTests extends TestCase {
 		
 		assertFalse("Matched through parent controller/handler pair: not response=" + response.getStatus(),
 				response.getStatus() == HttpServletResponse.SC_NOT_FOUND);
+	}
+
+	public void testDetectAllHandlerAdapters() throws ServletException, IOException {
+		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
+		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
+		complexDispatcherServlet.setNamespace("test");
+		complexDispatcherServlet.init(new MockServletConfig(getServletContext(), "complex"));
+
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/servlet.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertEquals("body", response.getContentAsString());
+
+		request = new MockHttpServletRequest(getServletContext(), "GET", "/form.do");
+		response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertTrue("forwarded to form", "myform.jsp".equals(response.getForwardedUrl()));
+	}
+
+	public void testNotDetectAllHandlerAdapters() throws ServletException, IOException {
+		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
+		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
+		complexDispatcherServlet.setNamespace("test");
+		complexDispatcherServlet.setDetectAllHandlerAdapters(false);
+		complexDispatcherServlet.init(new MockServletConfig(getServletContext(), "complex"));
+
+		// only ServletHandlerAdapter with bean name "handlerAdapter" detected
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/servlet.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertEquals("body", response.getContentAsString());
+
+		// SimpleControllerHandlerAdapter not detected
+		request = new MockHttpServletRequest(getServletContext(), "GET", "/form.do");
+		response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertEquals("forwarded to failed", "failed0.jsp", response.getForwardedUrl());
+		assertTrue("Exception exposed", request.getAttribute("exception").getClass().equals(ServletException.class));
 	}
 
 	public void testNotDetectAllHandlerExceptionResolvers() throws ServletException, IOException {
@@ -629,6 +654,19 @@ public class DispatcherServletTests extends TestCase {
 		assertEquals("value2", request.getAttribute("test2"));
 		assertSame(wac, request.getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE));
 		assertNotSame(command, request.getAttribute("command"));
+	}
+
+	public void testServletHandlerAdapter() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/servlet.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertEquals("body", response.getContentAsString());
+
+		Servlet myServlet = (Servlet) complexDispatcherServlet.getWebApplicationContext().getBean("myServlet");
+		assertEquals("myServlet", myServlet.getServletConfig().getServletName());
+		assertEquals(getServletContext(), myServlet.getServletConfig().getServletContext());
+		complexDispatcherServlet.destroy();
+		assertNull(myServlet.getServletConfig());
 	}
 
 	public void testThrowawayController() throws Exception {

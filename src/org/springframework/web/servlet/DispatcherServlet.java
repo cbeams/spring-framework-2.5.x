@@ -148,14 +148,21 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Well-known name for the HandlerMapping object in the bean factory for this namespace.
 	 * Only used when "detectAllHandlerMappings" is turned off.
-	 * @see #setDetectAllViewResolvers
+	 * @see #setDetectAllHandlerMappings
 	 */
 	public static final String HANDLER_MAPPING_BEAN_NAME = "handlerMapping";
 
 	/**
+	 * Well-known name for the HandlerAdapter object in the bean factory for this namespace.
+	 * Only used when "detectAllHandlerAdapters" is turned off.
+	 * @see #setDetectAllHandlerAdapters
+	 */
+	public static final String HANDLER_ADAPTER_BEAN_NAME = "handlerAdapter";
+
+	/**
 	 * Well-known name for the HandlerExceptionResolver object in the bean factory for this
 	 * namespace. Only used when "detectAllHandlerExceptionResolvers" is turned off.
-	 * @see #setDetectAllViewResolvers
+	 * @see #setDetectAllHandlerExceptionResolvers
 	 */
 	public static final String HANDLER_EXCEPTION_RESOLVER_BEAN_NAME = "handlerExceptionResolver";
 
@@ -244,6 +251,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** Detect all HandlerMappings or just expect "handlerMapping" bean? */
 	private boolean detectAllHandlerMappings = true;
 
+	/** Detect all HandlerAdapters or just expect "handlerAdapter" bean? */
+	private boolean detectAllHandlerAdapters = true;
+
 	/** Detect all HandlerExceptionResolvers or just expect "handlerExceptionResolver" bean? */
 	private boolean detectAllHandlerExceptionResolvers = true;
 
@@ -298,6 +308,17 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	public void setDetectAllHandlerMappings(boolean detectAllHandlerMappings) {
 		this.detectAllHandlerMappings = detectAllHandlerMappings;
+	}
+
+	/**
+	 * Set whether to detect all HandlerAdapter beans in this servlet's context.
+	 * Else, just a single bean with name "handlerAdapter" will be expected.
+	 * <p>Default is "true". Turn this off if you want this servlet to use a
+	 * single HandlerAdapter, despite multiple HandlerAdapter beans being
+	 * defined in the context.
+	 */
+	public void setDetectAllHandlerAdapters(boolean detectAllHandlerAdapters) {
+		this.detectAllHandlerAdapters = detectAllHandlerAdapters;
 	}
 
 	/**
@@ -449,18 +470,30 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * for this namespace, we default to SimpleControllerHandlerAdapter.
 	 */
 	private void initHandlerAdapters() throws BeansException {
-		// Find all HandlerAdapters in the ApplicationContext,
-		// including ancestor contexts.
-		Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-				getWebApplicationContext(), HandlerAdapter.class, true, false);
-		if (!matchingBeans.isEmpty()) {
-			this.handlerAdapters = new ArrayList(matchingBeans.values());
-			// We keep HandlerAdapters in sorted order.
-			Collections.sort(this.handlerAdapters, new OrderComparator());
+		if (this.detectAllHandlerAdapters) {
+			// Find all HandlerAdapters in the ApplicationContext,
+			// including ancestor contexts.
+			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+					getWebApplicationContext(), HandlerAdapter.class, true, false);
+			if (!matchingBeans.isEmpty()) {
+				this.handlerAdapters = new ArrayList(matchingBeans.values());
+				// We keep HandlerAdapters in sorted order.
+				Collections.sort(this.handlerAdapters, new OrderComparator());
+			}
 		}
 		else {
-			// Ensure we have at least some HandlerAdapters, by registering
-			// default HandlerAdapters if no other adapters are found.
+			try {
+				Object ha = getWebApplicationContext().getBean(HANDLER_ADAPTER_BEAN_NAME);
+				this.handlerAdapters = Collections.singletonList(ha);
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				// Ignore, we'll add a default HandlerAdapter later.
+			}
+		}
+
+		// Ensure we have at least some HandlerAdapters, by registering
+		// default HandlerAdapters if no other adapters are found.
+		if (this.handlerAdapters == null) {
 			this.handlerAdapters = getDefaultStrategies(HandlerAdapter.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("No HandlerAdapters found in servlet '" + getServletName() + "': using default");

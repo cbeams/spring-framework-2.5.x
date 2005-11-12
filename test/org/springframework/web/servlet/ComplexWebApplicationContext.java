@@ -121,7 +121,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("bodyController", BodyController.class);
 
 		registerSingleton("servletPostProcessor", SimpleServletPostProcessor.class);
-		registerSingleton("servletHandlerAdapter", SimpleServletHandlerAdapter.class);
+		registerSingleton("handlerAdapter", SimpleServletHandlerAdapter.class);
 		registerSingleton("myServlet", MyServlet.class);
 
 		pvs = new MutablePropertyValues();
