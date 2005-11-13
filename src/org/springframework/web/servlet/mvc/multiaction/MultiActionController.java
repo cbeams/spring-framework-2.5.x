@@ -332,8 +332,8 @@ public class MultiActionController extends AbstractController implements LastMod
 	}
 	
 	/**
-	 * Invoke the named method.
-	 * <p>Use a custom exception handler if possible; otherwise, throw an
+	 * Invokes the named method.
+	 * <p>Uses a custom exception handler if possible; otherwise, throw an
 	 * unchecked exception; wrap a checked exception or Throwable.
 	 */
 	protected final ModelAndView invokeNamedMethod(
@@ -352,9 +352,8 @@ public class MultiActionController extends AbstractController implements LastMod
 			if (method.getParameterTypes().length >= 3 && method.getParameterTypes()[2].equals(HttpSession.class) ){
 				HttpSession session = request.getSession(false);
 				if (session == null) {
-					return handleException(request, response,
-							new SessionRequiredException(
-									"Pre-existing session required for handler method '" + methodName + "'"));
+					throw new SessionRequiredException(
+							"Pre-existing session required for handler method '" + methodName + "'");
 				}
 				params.add(session);
 			}
@@ -370,8 +369,12 @@ public class MultiActionController extends AbstractController implements LastMod
 			return (ModelAndView) method.invoke(this.delegate, params.toArray(new Object[params.size()]));
 		}
 		catch (InvocationTargetException ex) {
-			// This is what we're looking for: the handler method threw an exception
+			// The handler method threw an exception.
 			return handleException(request, response, ex.getTargetException());
+		}
+		catch (Exception ex) {
+			// The binding process threw an exception.
+			return handleException(request, response, ex);
 		}
 	}
 
