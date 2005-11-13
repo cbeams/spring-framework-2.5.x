@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.util.ClassUtils;
 
 /**
  * InvocationHandler implementation for the Spring AOP framework,
@@ -87,9 +88,10 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		}
 		this.advised = config;
 	}
+	
 
 	public Object getProxy() {
-		return getProxy(Thread.currentThread().getContextClassLoader());
+		return getProxy(ClassUtils.getDefaultClassLoader());
 	}
 
 	public Object getProxy(ClassLoader classLoader) {
