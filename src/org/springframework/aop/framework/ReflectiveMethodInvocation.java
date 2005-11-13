@@ -19,12 +19,13 @@ package org.springframework.aop.framework;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.aop.support.AopUtils;
 
@@ -35,8 +36,10 @@ import org.springframework.aop.support.AopUtils;
  * invokeJoinpoint() method to change this behavior, so this is also a useful
  * base class for more specialized MethodInvocation implementations.
  *
- * <p>It's possible to clone an invocation, to invoke <code>proceed</code> repeatedly
- * (once per clone), using the <code>invocableClone</code> method.
+ * <p>It is possible to clone an invocation, to invoke <code>proceed</code> repeatedly
+ * (once per clone), using the <code>invocableClone</code> method. It is also possible to
+ * add custom attributes to the invocation (since 1.2.6) using the 
+ * <code>getUserAttributes()</code> method.
  * 
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -55,6 +58,11 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	protected Object[] arguments;
 	
 	private final Class targetClass;
+	
+	/**
+	 * Lazily initialized map of user-specific attributes for this invocation.
+	 */
+	private Map userAttributes;
 
 	/**
 	 * List of MethodInterceptor and InterceptorAndDynamicMethodMatcher
@@ -87,6 +95,19 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		this.method = method;
 		this.arguments = arguments;
 		this.interceptorsAndDynamicMethodMatchers = interceptorsAndDynamicMethodMatchers;
+	}
+	
+	/**
+	 * Return user attributes associated with this invocation.
+	 * This map is initialized lazily and is not used in the AOP framework itself.
+	 * This method provides an invocation-bound alternative to a thread local.
+	 * @return any user attributes associated with this invocation.
+	 */
+	public Map getUserAttributes() {
+		if (userAttributes == null) {
+			userAttributes = new HashMap();
+		}
+		return userAttributes;
 	}
 
 	/**

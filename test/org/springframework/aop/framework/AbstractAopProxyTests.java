@@ -20,8 +20,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.transaction.TransactionRequiredException;
@@ -1385,6 +1387,58 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		assertEquals(1, cba.getCalls());
 		assertEquals(26, proxied.getAge());
 	}
+	
+	public void testUserAttributes() throws Throwable {
+		final Exception unexpectedException = new Exception();
+		
+		class MapAwareMethodInterceptor implements MethodInterceptor {
+			private final Map expectedValues;
+			private final Map valuesToAdd;
+			public MapAwareMethodInterceptor(Map expectedValues, Map valuesToAdd) {
+				this.expectedValues = expectedValues;
+				this.valuesToAdd = valuesToAdd;
+			}
+			public Object invoke(MethodInvocation invocation) throws Throwable {
+				ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) invocation;
+				for (Iterator it = rmi.getUserAttributes().keySet().iterator(); it.hasNext(); ){
+					Object key = it.next();
+					assertEquals(expectedValues.get(key), rmi.getUserAttributes().get(key));
+				}
+				rmi.getUserAttributes().putAll(valuesToAdd);
+				return invocation.proceed();
+			}
+		};
+		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
+		MapAwareMethodInterceptor mami1 = new MapAwareMethodInterceptor(new HashMap(), new HashMap());
+		Map firstValuesToAdd = new HashMap();
+		firstValuesToAdd.put("test", "");
+		MapAwareMethodInterceptor mami2 = new MapAwareMethodInterceptor(new HashMap(), firstValuesToAdd);
+		MapAwareMethodInterceptor mami3 = new MapAwareMethodInterceptor(firstValuesToAdd, new HashMap());
+		MapAwareMethodInterceptor mami4 = new MapAwareMethodInterceptor(firstValuesToAdd, new HashMap());
+		Map secondValuesToAdd = new HashMap();
+		secondValuesToAdd.put("foo", "bar");
+		secondValuesToAdd.put("cat", "dog");
+		MapAwareMethodInterceptor mami5 = new MapAwareMethodInterceptor(firstValuesToAdd, secondValuesToAdd);
+		Map finalExpected = new HashMap(firstValuesToAdd);
+		finalExpected.putAll(secondValuesToAdd);
+		MapAwareMethodInterceptor mami6 = new MapAwareMethodInterceptor(finalExpected, secondValuesToAdd);
+		
+		pc.addAdvice(mami1);
+		pc.addAdvice(mami2);
+		pc.addAdvice(mami3);
+		pc.addAdvice(mami4);
+		pc.addAdvice(mami5);
+		pc.addAdvice(mami6);
+
+		// We don't care about the object
+		pc.setTarget(new TestBean());
+		AopProxy aop = createAopProxy(pc);
+		ITestBean tb = (ITestBean) aop.getProxy();
+
+		String newName = "foo";
+		tb.setName(newName);
+		assertEquals(newName, tb.getName());
+	}
 
 	public void testMultiAdvice() throws Throwable {
 		CountingMultiAdvice cca = new CountingMultiAdvice();
@@ -1420,7 +1474,6 @@ public abstract class AbstractAopProxyTests extends TestCase {
 			// expected
 		}
 		assertEquals(6, cca.getCalls());
-
 	}
 
 	public void testBeforeAdviceThrowsException() {
