@@ -21,16 +21,21 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import org.aopalliance.aop.AspectException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
+import org.springframework.core.OrderComparator;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -45,6 +50,8 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.aop.framework.AopProxyUtils
  */
 public abstract class AopUtils {
+	
+	private static Log log = LogFactory.getLog(AopUtils.class);
 
 	/**
 	 * Return whether the given object is either a J2SE dynamic
@@ -274,6 +281,43 @@ public abstract class AopUtils {
 			return true;
 		}
 	}
+	
+	/**
+	 * Convenience method to return the sublist of the candidateAdvisors list
+	 * that are applicable to the given class.
+	 * @param candidateAdvisors advisors to evaluate
+	 * @param clazz target class
+	 * @return sublist of advisors that could apply to an object of the given class
+	 */
+	public static List findAdvisorsThatCanApply(List candidateAdvisors, Class clazz) {
+		List eligibleAdvisors = new LinkedList();
+		for (Iterator it = candidateAdvisors.iterator(); it.hasNext();) {
+			Advisor candidate = (Advisor) it.next();
+			if (AopUtils.canApply(candidate, clazz)) {
+				eligibleAdvisors.add(candidate);
+				if (log.isDebugEnabled()) {
+					log.debug("Candidate advisor [" + candidate + "] accepted for class [" + clazz.getName() + "]");
+				}
+			}
+			else {
+				if (log.isDebugEnabled()) {
+					log.debug("Candidate advisor [" + candidate + "] rejected for class [" + clazz.getName() + "]");
+				}
+			}
+		}
+		return eligibleAdvisors;
+	}
+	
+	/**
+	 * Sort the given list of advisors by order value
+	 * @param advisors Spring AOP advisors to sort
+	 * @return sorted list of advisors
+	 */
+	public static List sortAdvisorsByOrder(List advisors) {
+		Collections.sort(advisors, new OrderComparator());
+		return advisors;
+	}
+
 
 	/**
 	 * Invoke the target directly via reflection.

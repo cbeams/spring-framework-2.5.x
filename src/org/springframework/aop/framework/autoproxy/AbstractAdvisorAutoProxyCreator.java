@@ -16,18 +16,13 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.ControlFlow;
 import org.springframework.core.ControlFlowFactory;
-import org.springframework.core.OrderComparator;
 
 /**
  * Abstract BeanPostProcessor implementation that creates AOP proxies. 
@@ -48,9 +43,10 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @see #findCandidateAdvisors
+ * @see org.springframework.aop.support.AopUtils
  */
 public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
-	
+
 	/**
 	 * We override this method to ensure that all candidate advisors are materialized
 	 * under a stack trace including this bean. Otherwise, the dependencies won't
@@ -71,38 +67,22 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
-	 * Find all eligible advices and for auto-proxying this class.
+	 * Find all eligible advices for auto-proxying this class.
 	 * @return the empty list, not null, if there are no pointcuts or interceptors
 	 * @see #findCandidateAdvisors
 	 */
 	protected List findEligibleAdvisors(Class clazz) {
-		List candidateAdvisors = findCandidateAdvisors();
-		List eligibleAdvisors = new LinkedList();
-		for (Iterator it = candidateAdvisors.iterator(); it.hasNext();) {
-			Advisor candidate = (Advisor) it.next();
-			if (AopUtils.canApply(candidate, clazz)) {
-				eligibleAdvisors.add(candidate);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Candidate advisor [" + candidate + "] accepted for class [" + clazz.getName() + "]");
-				}
-			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Candidate advisor [" + candidate + "] rejected for class [" + clazz.getName() + "]");
-				}
-			}
-		}
-		return eligibleAdvisors;
+		return AopUtils.findAdvisorsThatCanApply(findCandidateAdvisors(), clazz);
 	}
-
+	
+	
 	/**
 	 * Sort advisors based on ordering.
 	 * @see org.springframework.core.Ordered
 	 * @see org.springframework.core.OrderComparator
 	 */
 	protected List sortAdvisors(List advisors) {
-		Collections.sort(advisors, new OrderComparator());
-		return advisors;
+		return AopUtils.sortAdvisorsByOrder(advisors);
 	}
 
 	/**
