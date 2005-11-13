@@ -27,6 +27,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.ClassUtils;
 
 /**
  * Abstract base class for bean definition readers which implement
@@ -47,7 +48,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 	private ResourceLoader resourceLoader;
 
-	private ClassLoader beanClassLoader = Thread.currentThread().getContextClassLoader();
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
 	/**
@@ -105,9 +106,9 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	 * Set the ClassLoader to use for bean classes.
 	 * Default is the context class loader of the thread that instantiated
 	 * this bean definition reader.
-	 * <p>Setting this to null suggests to not load bean classes but just register
-	 * bean definitions with class names, for example when just registering beans
-	 * in a registry but not actually instantiating them in a factory.
+	 * <p>Setting this to <code>null</code> suggests to not load bean classes but just
+	 * register bean definitions with class names, for example when just registering
+	 * beans in a registry but not actually instantiating them in a factory.
 	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {

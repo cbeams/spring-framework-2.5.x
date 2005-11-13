@@ -53,13 +53,33 @@ public abstract class ClassUtils {
 
 
 	/**
+	 * Return a default ClassLoader to use (never <code>null</code>).
+	 * Returns the thread context ClassLoader, if available.
+	 * The ClassLoader that loaded the ClassUtils class will be used as fallback.
+	 * <p>Call this method if you intend to use the thread context ClassLoader
+	 * in a scenario where you absolutely need a non-null ClassLoader reference:
+	 * for example, for class path resource loading (but not necessarily for
+	 * <code>Class.forName</code>, which accepts a <code>null</code> ClassLoader
+	 * reference as well).
+	 * @see java.lang.Thread#getContextClassLoader()
+	 */
+	public static ClassLoader getDefaultClassLoader() {
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		if (cl == null) {
+			// No thread context class loader -> use class loader of this class.
+			cl = ClassUtils.class.getClassLoader();
+		}
+		return cl;
+	}
+
+	/**
 	 * Replacement for <code>Class.forName()</code> that also returns Class instances
 	 * for primitives (like "int") and array class names (like "String[]").
 	 * <p>Always uses the thread context class loader.
 	 * @param name the name of the Class
 	 * @return Class instance for the supplied name
-	 * @see java.lang.Class#forName
-	 * @see java.lang.Thread#getContextClassLoader
+	 * @see java.lang.Class#forName(String, boolean, ClassLoader)
+	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	public static Class forName(String name) throws ClassNotFoundException {
 		return forName(name, Thread.currentThread().getContextClassLoader());
@@ -71,8 +91,8 @@ public abstract class ClassUtils {
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
 	 * @return Class instance for the supplied name
-	 * @see java.lang.Class#forName
-	 * @see java.lang.Thread#getContextClassLoader
+	 * @see java.lang.Class#forName(String, boolean, ClassLoader)
+	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	public static Class forName(String name, ClassLoader classLoader) throws ClassNotFoundException {
 		Class clazz = resolvePrimitiveClassName(name);

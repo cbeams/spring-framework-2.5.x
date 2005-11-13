@@ -31,9 +31,10 @@ import oracle.toplink.sessions.SessionLog;
 import oracle.toplink.threetier.ServerSession;
 import oracle.toplink.tools.sessionconfiguration.XMLLoader;
 import oracle.toplink.tools.sessionmanagement.SessionManager;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -247,13 +248,8 @@ public class LocalSessionFactory {
 		}
 
 		// Determine class loader to use.
-		ClassLoader classLoader = this.sessionClassLoader;
-		if (classLoader == null) {
-			classLoader = Thread.currentThread().getContextClassLoader();
-			if (classLoader == null) {
-				classLoader = getClass().getClassLoader();
-			}
-		}
+		ClassLoader classLoader =
+				(this.sessionClassLoader != null ? this.sessionClassLoader : ClassUtils.getDefaultClassLoader());
 
 		// Initialize the TopLink Session, using the configuration file
 		// and the session name.

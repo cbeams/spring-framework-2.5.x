@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.net.URL;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
@@ -38,9 +39,9 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
- * @see java.lang.Thread#getContextClassLoader
- * @see java.lang.ClassLoader#getResourceAsStream
- * @see java.lang.Class#getResourceAsStream
+ * @see java.lang.Thread#getContextClassLoader()
+ * @see java.lang.ClassLoader#getResourceAsStream(String)
+ * @see java.lang.Class#getResourceAsStream(String)
  */
 public class ClassPathResource extends AbstractResource {
 
@@ -58,8 +59,8 @@ public class ClassPathResource extends AbstractResource {
 	 * <p>The thread context class loader will be used for
 	 * loading the resource.
 	 * @param path the absolute path within the class path
-	 * @see java.lang.ClassLoader#getResourceAsStream
-	 * @see java.lang.Thread#getContextClassLoader
+	 * @see java.lang.ClassLoader#getResourceAsStream(String)
+	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 */
 	public ClassPathResource(String path) {
 		this(path, (ClassLoader) null);
@@ -72,7 +73,7 @@ public class ClassPathResource extends AbstractResource {
 	 * @param path the absolute path within the classpath
 	 * @param classLoader the class loader to load the resource with,
 	 * or <code>null</code> for the thread context class loader
-	 * @see java.lang.ClassLoader#getResourceAsStream
+	 * @see java.lang.ClassLoader#getResourceAsStream(String)
 	 */
 	public ClassPathResource(String path, ClassLoader classLoader) {
 		Assert.notNull(path, "path is required");
@@ -80,7 +81,7 @@ public class ClassPathResource extends AbstractResource {
 			path = path.substring(1);
 		}
 		this.path = StringUtils.cleanPath(path);
-		this.classLoader = classLoader;
+		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 	}
 
 	/**
@@ -110,35 +111,12 @@ public class ClassPathResource extends AbstractResource {
 		this.clazz = clazz;
 	}
 
+
 	/**
 	 * Return the path for this resource.
 	 */
 	public final String getPath() {
 		return path;
-	}
-
-	/**
-	 * Return the ClassLoader to use for loading resources.
-	 * Only called if no Class has been specified.
-	 * <p>Returns the explicitly specified ClassLoader, if any, or the thread context
-	 * ClassLoader else. If no thread context ClassLoader is available, the
-	 * ClassLoader that loaded the ClassPathResource class will be used as fallback.
-	 * @see #ClassPathResource(String, Class)
-	 * @see #ClassPathResource(String, ClassLoader)
-	 * @see java.lang.Thread#getContextClassLoader()
-	 */
-	protected ClassLoader getClassLoader() {
-		// If class loader explicitly specified, use it.
-		if (this.classLoader != null) {
-			return this.classLoader;
-		}
-		// No class loader specified -> use thread context class loader.
-		ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		if (cl == null) {
-			// No thread context class loader -> use class loader of this class.
-			cl = getClass().getClassLoader();
-		}
-		return cl;
 	}
 
 
@@ -153,7 +131,7 @@ public class ClassPathResource extends AbstractResource {
 			is = this.clazz.getResourceAsStream(this.path);
 		}
 		else {
-			is = getClassLoader().getResourceAsStream(this.path);
+			is = this.classLoader.getResourceAsStream(this.path);
 		}
 		if (is == null) {
 			throw new FileNotFoundException(
@@ -173,7 +151,7 @@ public class ClassPathResource extends AbstractResource {
 			url = this.clazz.getResource(this.path);
 		}
 		else {
-			url = getClassLoader().getResource(this.path);
+			url = this.classLoader.getResource(this.path);
 		}
 		if (url == null) {
 			throw new FileNotFoundException(
