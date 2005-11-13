@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
@@ -89,10 +90,16 @@ public class UrlResource extends AbstractResource {
 
 	/**
 	 * This implementation opens an InputStream for the given URL.
-	 * @see java.net.URL#openStream()
+	 * It sets the "UseCaches" flag to <code>false</code>,
+	 * mainly to avoid jar file locking on Windows.
+	 * @see java.net.URL#openConnection()
+	 * @see java.net.URLConnection#setUseCaches(boolean)
+	 * @see java.net.URLConnection#getInputStream()
 	 */
 	public InputStream getInputStream() throws IOException {
-		return this.url.openStream();
+		URLConnection con = this.url.openConnection();
+		con.setUseCaches(false);
+		return con.getInputStream();
 	}
 
 	/**
