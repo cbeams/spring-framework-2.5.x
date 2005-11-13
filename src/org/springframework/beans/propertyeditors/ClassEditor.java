@@ -36,10 +36,31 @@ import org.springframework.util.StringUtils;
  */
 public class ClassEditor extends PropertyEditorSupport {
 
+	private final ClassLoader classLoader;
+
+
+	/**
+	 * Create a default ClassEditor, using the thread context ClassLoader.
+	 */
+	public ClassEditor() {
+		this(null);
+	}
+
+	/**
+	 * Create a default ClassEditor, using the given ClassLoader.
+	 * @param classLoader the ClassLoader to use
+	 * (or <code>null</code> for the thread context ClassLoader)
+	 */
+	public ClassEditor(ClassLoader classLoader) {
+		this.classLoader =
+				(classLoader != null ? classLoader : Thread.currentThread().getContextClassLoader());
+	}
+
+
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (StringUtils.hasText(text)) {
 			try {
-				setValue(ClassUtils.forName(text.trim()));
+				setValue(ClassUtils.forName(text.trim(), this.classLoader));
 			}
 			catch (ClassNotFoundException ex) {
 				throw new IllegalArgumentException("Class not found: " + ex.getMessage());
