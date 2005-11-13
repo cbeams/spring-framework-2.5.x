@@ -362,4 +362,27 @@ public abstract class WebUtils {
 		return params;
 	}
 
+	/**
+	 * Extract the URL filename from the given request URL path.
+	 * Correctly resolves nested paths such as "/products/view.html" as well.
+	 * @param urlPath the request URL path (e.g. "/index.html")
+	 * @return the extracted URI filename (e.g. "index")
+	 */
+	public static String extractFilenameFromUrlPath(String urlPath) {
+		int begin = urlPath.lastIndexOf('/') + 1;
+		int end = urlPath.indexOf(';');
+		if (end == -1) {
+			end = urlPath.indexOf('?');
+			if (end == -1) {
+				end = urlPath.length();
+			}
+		}
+		String filename = urlPath.substring(begin, end);
+		int dotIndex = filename.lastIndexOf('.');
+		if (dotIndex != -1) {
+			filename = filename.substring(0, dotIndex);
+		}
+		return filename;
+	}
+
 }

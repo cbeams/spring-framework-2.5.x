@@ -16,6 +16,12 @@
 
 package org.springframework.web.servlet.mvc.multiaction;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.web.util.WebUtils;
+
 /**
  * Simple implementation of MethodNameResolver that maps URL to method
  * name. Although this is the default implementation used by the
@@ -37,13 +43,24 @@ public class InternalPathMethodNameResolver extends AbstractUrlMethodNameResolve
 
 	private String suffix = "";
 
+	/** Request URL path String --> method name String */
+	private final Map methodNameCache = Collections.synchronizedMap(new HashMap());
+
+
 	/**
 	 * Specify a common prefix for handler method names.
 	 * Will be prepended to the internal path found in the URL:
 	 * e.g. internal path "baz", prefix "my" -> method name "mybaz".
 	 */
 	public void setPrefix(String prefix) {
-		this.prefix = prefix;
+		this.prefix = (prefix != null ? prefix : "");
+	}
+
+	/**
+	 * Return the common prefix for handler method names.
+	 */
+	protected String getPrefix() {
+		return prefix;
 	}
 
 	/**
@@ -52,26 +69,56 @@ public class InternalPathMethodNameResolver extends AbstractUrlMethodNameResolve
 	 * e.g. internal path "baz", suffix "Handler" -> method name "bazHandler".
 	 */
 	public void setSuffix(String suffix) {
-		this.suffix = suffix;
+		this.suffix = (suffix != null ? suffix : "");
 	}
 
+	/**
+	 * Return the common suffix for handler method names.
+	 */
+	protected String getSuffix() {
+		return suffix;
+	}
+
+
+	/**
+	 * Extracts the method name indicated by the URL path.
+	 * @see #extractHandlerMethodNameFromUrlPath
+	 * @see #postProcessHandlerMethodName
+	 */
 	protected String getHandlerMethodNameForUrlPath(String urlPath) {
-		String methodName = urlPath;
-
-		// Look at resource name after last slash in the URL path.
-		int slashIndex = methodName.lastIndexOf('/');
-		if (slashIndex != -1) {
-			methodName = methodName.substring(slashIndex+1);
+		String methodName = (String) this.methodNameCache.get(urlPath);
+		if (methodName == null) {
+			methodName = extractHandlerMethodNameFromUrlPath(urlPath);
+			methodName = postProcessHandlerMethodName(methodName);
+			this.methodNameCache.put(urlPath, methodName);
 		}
+		return methodName;
+	}
 
-		// Ignore extension, if any.
-		int dotIndex = methodName.lastIndexOf('.');
-		if (dotIndex != -1) {
-			methodName = methodName.substring(0, dotIndex);
-		}
+	/**
+	 * Extract the handler method name from the given request URI.
+	 * Delegates to <code>WebUtils.extractViewNameFromUrlPath(String)</code>.
+	 * @param uri the request URI (e.g. "/index.html")
+	 * @return the extracted URI filename (e.g. "index")
+	 * @see org.springframework.web.util.WebUtils#extractFilenameFromUrlPath
+	 */
+	protected String extractHandlerMethodNameFromUrlPath(String uri) {
+		return WebUtils.extractFilenameFromUrlPath(uri);
+	}
 
-		// Prepend prefix and append suffix.
-		return (this.prefix + methodName + this.suffix);
+	/**
+	 * Build the full handler method name based on the given method name
+	 * as indicated by the URL path.
+	 * <p>The default implementation simply applies prefix and suffix.
+	 * This can be overridden, for example, to manipulate upper case
+	 * / lower case, etc.
+	 * @param methodName the original method name, as indicated by the URL path
+	 * @return the full method name to use
+	 * @see #getPrefix()
+	 * @see #getSuffix()
+	 */
+	protected String postProcessHandlerMethodName(String methodName) {
+		return getPrefix() + methodName + getSuffix();
 	}
 
 }

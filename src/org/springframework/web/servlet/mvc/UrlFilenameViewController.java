@@ -20,10 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Controller that transforms the virtual filename at the end of a URL
@@ -41,18 +38,18 @@ import org.springframework.web.servlet.ModelAndView;
  * @see #setPrefix
  * @see #setSuffix
  */
-public class UrlFilenameViewController extends AbstractController {
+public class UrlFilenameViewController extends AbstractUrlViewController {
 
 	private String prefix = "";
 
 	private String suffix = "";
 
-	/** Request URI String --> view name String */
+	/** Request URL path String --> view name String */
 	private final Map viewNameCache = Collections.synchronizedMap(new HashMap());
 
 
 	/**
-	 * Set the prefix that gets prepended to the request URL filename
+	 * Set the prefix to prepend to the request URL filename
 	 * to build a view name.
 	 */
 	public void setPrefix(String prefix) {
@@ -60,58 +57,69 @@ public class UrlFilenameViewController extends AbstractController {
 	}
 
 	/**
-	 * Set the suffix that gets appended to the request URL filename
+	 * Return the prefix to prepend to the request URL filename.
+	 */
+	protected String getPrefix() {
+		return prefix;
+	}
+
+	/**
+	 * Set the suffix to append to the request URL filename
 	 * to build a view name.
 	 */
 	public void setSuffix(String suffix) {
 		this.suffix = (suffix != null ? suffix : "");
 	}
 
+	/**
+	 * Return the suffix to append to the request URL filename.
+	 */
+	protected String getSuffix() {
+		return suffix;
+	}
+
 
 	/**
-	 * Returns a ModelAndView with the view name being the URL filename,
+	 * Returns view name based on the URL filename,
 	 * with prefix/suffix applied when appropriate.
-	 * @see #getFilenameFromRequestURI
+	 * @see #extractViewNameFromUrlPath
 	 * @see #setPrefix
 	 * @see #setSuffix
 	 */
-	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) {
-		String uri = request.getRequestURI();
-		String viewName = (String) this.viewNameCache.get(uri);
+	protected String getViewNameForUrlPath(String urlPath) {
+		String viewName = (String) this.viewNameCache.get(urlPath);
 		if (viewName == null) {
-			viewName = this.prefix + getFilenameFromRequestURI(uri) + this.suffix;
-			this.viewNameCache.put(uri, viewName);
+			viewName = extractViewNameFromUrlPath(urlPath);
+			viewName = postProcessViewName(viewName);
+			this.viewNameCache.put(urlPath, viewName);
 		}
-		return new ModelAndView(viewName);
+		return viewName;
 	}
 
 	/**
-	 * Extract the URL filename from the given request URI
+	 * Extract the URL filename from the given request URI.
+	 * Delegates to <code>WebUtils.extractViewNameFromUrlPath(String)</code>.
 	 * @param uri the request URI (e.g. "/index.html")
 	 * @return the extracted URI filename (e.g. "index")
-	 * @see javax.servlet.http.HttpServletRequest#getRequestURI()
+	 * @see org.springframework.web.util.WebUtils#extractFilenameFromUrlPath
 	 */
-	protected String getFilenameFromRequestURI(String uri) {
-		int begin = uri.lastIndexOf('/');
-		if (begin == -1) {
-			begin = 0;
-		}
-		else {
-			begin++;
-		}
-		int end = uri.indexOf(';');
-		if (end == -1) {
-			end = uri.indexOf('?');
-			if (end == -1) {
-				end = uri.length();
-			}
-		}
-		String filename = uri.substring(begin, end);
-		int dotIndex = filename.lastIndexOf('.');
-		if (dotIndex != -1) {
-			filename = filename.substring(0, dotIndex);
-		}
-		return filename;
+	protected String extractViewNameFromUrlPath(String uri) {
+		return WebUtils.extractFilenameFromUrlPath(uri);
+	}
+
+	/**
+	 * Build the full view name based on the given view name
+	 * as indicated by the URL path.
+	 * <p>The default implementation simply applies prefix and suffix.
+	 * This can be overridden, for example, to manipulate upper case
+	 * / lower case, etc.
+	 * @param viewName the original view name, as indicated by the URL path
+	 * @return the full view name to use
+	 * @see #getPrefix()
+	 * @see #getSuffix()
+	 */
+	protected String postProcessViewName(String viewName) {
+		return getPrefix() + viewName + getSuffix();
 	}
 
 }

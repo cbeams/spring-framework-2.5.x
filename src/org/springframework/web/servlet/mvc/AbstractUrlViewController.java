@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2005 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,31 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.mvc.multiaction;
+package org.springframework.web.servlet.mvc;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Abstract base class for URL-based MethodNameResolver implementations.
+ * Abstract base class for Controllers that return a view name based on the URL.
  *
- * <p>Provides infrastructure for mapping handlers to URLs and configurable
+ * <p>Provides infrastructure for determining view names from URLs and configurable
  * URL lookup. For information on the latter, see <code>alwaysUseFullPath</code>
  * and <code>urlDecode</code> properties.
  *
  * @author Juergen Hoeller
- * @since 14.01.2004
+ * @since 1.2.6
  * @see #setAlwaysUseFullPath
  * @see #setUrlDecode
  */
-public abstract class AbstractUrlMethodNameResolver implements MethodNameResolver {
-
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
+public abstract class AbstractUrlViewController extends AbstractController {
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
@@ -83,35 +79,28 @@ public abstract class AbstractUrlMethodNameResolver implements MethodNameResolve
 
 	/**
 	 * Retrieves the URL path to use for lookup and delegates to
-	 * <code>getHandlerMethodNameForUrlPath</code>.
-	 * Converts <code>null</code> values to NoSuchRequestHandlingMethodExceptions.
-	 * @see #getHandlerMethodNameForUrlPath
+	 * <code>getViewNameForUrlPath</code>.
+	 * @see #getViewNameForUrlPath
 	 */
-	public final String getHandlerMethodName(HttpServletRequest request)
-			throws NoSuchRequestHandlingMethodException {
-
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) {
 		String urlPath = this.urlPathHelper.getLookupPathForRequest(request);
-		String name = getHandlerMethodNameForUrlPath(urlPath);
-		if (name == null) {
-			throw new NoSuchRequestHandlingMethodException(request);
-		}
+		String viewName = getViewNameForUrlPath(urlPath);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Returning handler method name '" + name + "' for lookup path: " + urlPath);
+			logger.debug("Returning view name '" + viewName + "' for lookup path: " + urlPath);
 		}
-		return name;
+		return new ModelAndView(viewName);
 	}
 
 	/**
-	 * Return a method name that can handle this request, based on the
-	 * given lookup path. Called by <code>getHandlerMethodName</code>.
+	 * Return the name of the view to render for this request, based on the
+	 * given lookup path. Called by <code>handleRequestInternal</code>.
 	 * @param urlPath the URL path to use for lookup,
 	 * according to the settings in this class
-	 * @return a method name that can handle this request.
-	 * Should return null if no matching method found.
-	 * @see #getHandlerMethodName
+	 * @return a view name for this request (never <code>null</code>)
+	 * @see #handleRequestInternal
 	 * @see #setAlwaysUseFullPath
 	 * @see #setUrlDecode
 	 */
-	protected abstract String getHandlerMethodNameForUrlPath(String urlPath);
+	protected abstract String getViewNameForUrlPath(String urlPath);
 
 }
