@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.6 (11.11.2005)
+Changes in version 1.2.6 (14.11.2005)
 -------------------------------------
 
 Package org.springframework.aop
@@ -32,6 +32,7 @@ Package org.springframework.context
 
 Package org.springframework.core
 * unified path normalization in ClassPathResource, FileSystemResource, UrlResource and ServletContextResource
+* UrlResource sets the "UseCaches" flag to "false" for every URLConnection, mainly to avoid jar file locking on Windows
 * PathMatchingResourcePatternResolver uses linked Sets if possible, to preserve the order of resources found
 * refined PathMatchingResourcePatternResolver's "findAllClassPathResources" to work with Oracle OC4J 10.1.2 as well
 * refined PathMatchingResourcePatternResolver to use relative resources within jar locations (instead of URL building)
@@ -44,7 +45,7 @@ Package org.springframework.jdbc
 * JdbcTemplate applies "fetchSize" and "maxRows" settings to all created Statements, not just to "query" operations
 * JdbcTemplate exposes Connection proxy to ConnectionCallbacks, preparing Statements, unless NativeJdbcExtractor is set
 * avoid NPE in CallableStatementCreatorFactory if a ParameterMapper fails, through checking for not-null "inParameters"
-* SingleColumnRowMapper automatically converts String into Number now, if appropriate (for JdbcTemplate's "queryForInt")
+* SingleColumnRowMapper explicitly extracts Strings/numbers/etc through "ResultSet.getString/getInt", as far as possible
 * SqlRowSet extends Serializable interface now, assuming that the contained disconnected data is serializable
 * refined JTA synchronization in DataSourceUtils to release JDBC Connection on suspend (for JBoss JTA compatibility)
 * relaxed OracleLobHandler's eager "oracle.jdbc.OracleConnection" class check to avoid potential class loader issue
@@ -103,9 +104,14 @@ Package org.springframework.validation
 Package org.springframework.web
 * ContextLoader reads the default WebApplicationContext impl class from "ContextLoader.properties" in the same package
 * factored out "findRequiredWebApplicationContext" method from *ActionSupport to DelegatingActionUtils for Struts
+* added "detectAllHandlerAdapters" property to DispatcherServlet, allowing to enforce a single "handlerAdapter" bean
 * added "bindingErrorProcessor" property to BaseCommandController, for declaratively overriding DataBinder's default
 * added "getCommandName(Object command)" template method to MultiActionController, for overriding default command name
 * refined UrlFilenameViewController to let its "handleRequestInternal" method throw Exception (for potential subclasses)
+* created AbstractUrlViewController as base class for UrlFilenameViewController, providing UrlPathHelper path extraction
+* MultiActionController invokes an exception handler method even in case of binding/validation failure
+* InternalPathMethodNameResolver caches resolved method names (after prefix/suffix and method name post-processing)
+* ParameterMethodNameResolver logs its resolution results at debug level (indicating the triggering request parameter)
 * added "message" attribute to JSP MessageTag, accepting a MessageSourceResolvable argument (direct or through JSP EL)
 * Velocity/FreeMarkerViewResolver allows for setting "allowRequestOverride" and "allowSessionOverride" on its Views
 * Velocity and FreeMarker form macros include an "id" attribute on each element
