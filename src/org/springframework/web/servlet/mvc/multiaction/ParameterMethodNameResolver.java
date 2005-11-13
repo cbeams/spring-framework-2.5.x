@@ -20,6 +20,11 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.web.util.WebUtils;
+
 /**
  * Implementation of MethodNameResolver which supports several strategies for
  * mapping parameter values to the names of methods to invoke.
@@ -29,13 +34,13 @@ import javax.servlet.http.HttpServletRequest;
  * specified as a JavaBean property, if the default <code>action</code> is not
  * acceptable.
  * 
- * <p>The second strategy uses the very existence of a request parameter (i.e.
- * a request parameter with a certain name is found) as an indication that a 
+ * <p>The alternative strategy uses the very existence of a request parameter (
+ * i.e. a request parameter with a certain name is found) as an indication that a
  * method with the same name should be dispatched to. In this case, the actual
  * request parameter value is ignored. The list of parameter/method names may
  * be set via the <code>methodParamNames<code> JavaBean property.
- * 
- * <p>The second resolution strategy is prmarilly expected to be used with web
+ *
+ * <p>The second resolution strategy is primarily expected to be used with web
  * pages containing multiple submit buttons. The 'name' attribute of each
  * button should be set to the mapped method name, while the 'value' attribute
  * is normally displayed as the button label by the browser, and will be
@@ -52,6 +57,11 @@ import javax.servlet.http.HttpServletRequest;
  * buttons. The actual method name resolved if there is a match will always be
  * the bare form without the ".x". 
  * 
+ * <p><b>Note:</b> If both strategies are configured, i.e. both "paramName"
+ * and "methodParamNames" are specified, then both will be checked for any given
+ * request. A match for an explicit request parameter in the "methodParamNames"
+ * list always wins over a value specified for a "paramName" action parameter.
+ *
  * <p>For use with either strategy, the name of a default handler method to use
  * when there is no match, can be specified as a JavaBean property.
  * 
@@ -78,6 +88,8 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 	public static final String DEFAULT_PARAM_NAME = "action";
 
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	private String paramName = DEFAULT_PARAM_NAME;
 
 	private String[] methodParamNames;
@@ -88,7 +100,7 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 
 
 	/**
-	 * Set the name of the parameter whose <i>value</o> identifies the name of
+	 * Set the name of the parameter whose <i>value</i> identifies the name of
 	 * the method to invoke. Default is "action".
 	 * <p>Alternatively, specify parameter names where the very existence of each
 	 * parameter means that a method of the same name should be invoked, via
@@ -137,28 +149,32 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 	}
 
 
-	// template method impl.
 	public String getHandlerMethodName(HttpServletRequest request) throws NoSuchRequestHandlingMethodException {
 		String methodName = null;
-
-		// Check parameter whose value identifies the method to invoke, if any.
-		if (this.paramName != null) {
-			methodName = request.getParameter(this.paramName);
-		}
 
 		// Check parameter names where the very existence of each parameter
 		// means that a method of the same name should be invoked, if any.
 		if (this.methodParamNames != null) {
 			for (int i = 0; i < this.methodParamNames.length; ++i) {
 				String candidate = this.methodParamNames[i];
-				if (request.getParameter(candidate) != null) {
+				if (WebUtils.hasSubmitParameter(request, candidate)) {
 					methodName = candidate;
+					if (logger.isDebugEnabled()) {
+						logger.debug("Determined handler method '" + methodName +
+								"' based on existence of explicit request parameter of same name");
+					}
 					break;
 				}
-				// now check for image submit button too
-				if (request.getParameter(candidate + ".x") != null) {
-					methodName = candidate;
-					break;
+			}
+		}
+
+		// Check parameter whose value identifies the method to invoke, if any.
+		if (methodName == null && this.paramName != null) {
+			methodName = request.getParameter(this.paramName);
+			if (methodName != null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Determined handler method '" + methodName +
+							"' based on value of request parameter '" + this.paramName + "'");
 				}
 			}
 		}
@@ -167,11 +183,15 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 			// Resolve logical name into real method name, if appropriate.
 			if (this.logicalMappings != null) {
 				methodName = this.logicalMappings.getProperty(methodName, methodName);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Resolved method name '" + methodName + "' to handler method '" + methodName + "'");
+				}
 			}
 		}
 		else {
 			// No specific method resolved: use default method.
 			methodName = this.defaultMethodName;
+			logger.debug("Falling back to default handler method '" + this.defaultMethodName + "'");
 		}
 
 		// If resolution failed completely, throw an exception.
