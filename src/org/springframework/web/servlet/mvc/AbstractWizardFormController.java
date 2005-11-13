@@ -159,7 +159,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Useful to check whether the last page has been reached.
 	 * <p>Note that a concrete wizard form controller might override
 	 * <code>getPageCount(HttpServletRequest, Object)</code> to determine
-	 * the page count dynamically.
+	 * the page count dynamically. The default implementation of that extended
+	 * <code>getPageCount</code> variant returns the static page count as
+	 * determined by this <code>getPageCount()</code> method.
 	 * @see #getPageCount(javax.servlet.http.HttpServletRequest, Object)
 	 */
 	protected final int getPageCount() {
