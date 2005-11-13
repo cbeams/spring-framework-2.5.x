@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -144,7 +145,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 		}
 		this.driverClassName = driverClassName;
 		try {
-			Class.forName(this.driverClassName, true, Thread.currentThread().getContextClassLoader());
+			ClassUtils.forName(this.driverClassName);
 		}
 		catch (ClassNotFoundException ex) {
 			throw new CannotGetJdbcConnectionException(

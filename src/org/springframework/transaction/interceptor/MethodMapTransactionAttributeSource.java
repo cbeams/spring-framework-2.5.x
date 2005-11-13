@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.transaction.TransactionUsageException;
+import org.springframework.util.ClassUtils;
 
 /**
  * Simple implementation of TransactionAttributeSource that
@@ -91,7 +92,7 @@ public class MethodMapTransactionAttributeSource implements TransactionAttribute
 		String className = name.substring(0, lastDotIndex);
 		String methodName = name.substring(lastDotIndex + 1);
 		try {
-			Class clazz = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+			Class clazz = ClassUtils.forName(className);
 			addTransactionalMethod(clazz, methodName, attr);
 		}
 		catch (ClassNotFoundException ex) {

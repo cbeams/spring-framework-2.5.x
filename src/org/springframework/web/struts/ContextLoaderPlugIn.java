@@ -31,6 +31,7 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
@@ -149,7 +150,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 	 * @see #createWebApplicationContext
 	 */
 	public void setContextClassName(String contextClassName) throws ClassNotFoundException {
-		this.contextClass = Class.forName(contextClassName, true, Thread.currentThread().getContextClassLoader());
+		this.contextClass = ClassUtils.forName(contextClassName);
 	}
 
 	/**

@@ -132,7 +132,7 @@ public class MethodInvoker {
 		}
 		String className = staticMethod.substring(0, lastDotIndex);
 		String methodName = staticMethod.substring(lastDotIndex + 1);
-		setTargetClass(Class.forName(className, true, Thread.currentThread().getContextClassLoader()));
+		setTargetClass(ClassUtils.forName(className));
 		setTargetMethod(methodName);
 	}
 

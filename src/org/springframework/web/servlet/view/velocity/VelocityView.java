@@ -40,6 +40,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 
@@ -140,7 +141,7 @@ public class VelocityView extends AbstractTemplateView {
 			String className = toolAttributes.getProperty(attributeName);
 			Class toolClass = null;
 			try {
-				toolClass = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+				toolClass = ClassUtils.forName(className);
 			}
 			catch (ClassNotFoundException ex) {
 				throw new IllegalArgumentException(

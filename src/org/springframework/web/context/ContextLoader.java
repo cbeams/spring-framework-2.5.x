@@ -33,6 +33,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
@@ -259,7 +260,7 @@ public class ContextLoader {
 		String contextClassName = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
 		if (contextClassName != null) {
 			try {
-				return Class.forName(contextClassName, true, Thread.currentThread().getContextClassLoader());
+				return ClassUtils.forName(contextClassName);
 			}
 			catch (ClassNotFoundException ex) {
 				throw new ApplicationContextException(
