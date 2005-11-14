@@ -56,7 +56,7 @@ public interface BeanDefinitionReader {
 	 * tag in XML bean definitions. It is recommended, however, to apply
 	 * such imports relative to the defining resource; only explicit full
 	 * resource locations will trigger absolute resource loading.
-	 * <p>There is also a <code>loadBeanDefinitions</code> method available,
+	 * <p>There is also a <code>loadBeanDefinitions(String)</code> method available,
 	 * for loading bean definitions from a resource location (or location pattern).
 	 * This is a convenience to avoid explicit ResourceLoader handling.
 	 * @see #loadBeanDefinitions(String)
@@ -66,9 +66,9 @@ public interface BeanDefinitionReader {
 
 	/**
 	 * Return the class loader to use for bean classes.
-	 * <p>Null suggests to not load bean classes but just register bean definitions
-	 * with class names, for example when just registering beans in a registry
-	 * but not actually instantiating them in a factory.
+	 * <p><code>null</code> suggests to not load bean classes but just register bean
+	 * definitions with class names, for example when just registering beans in a
+	 * registry but not actually instantiating them in a factory.
 	 */
 	ClassLoader getBeanClassLoader();
 
