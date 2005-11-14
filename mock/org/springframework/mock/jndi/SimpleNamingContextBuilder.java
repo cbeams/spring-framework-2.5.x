@@ -79,7 +79,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder {
 	
-	/** Any instance of this class bound to JNDI */
+	/** An instance of this class bound to JNDI */
 	private static SimpleNamingContextBuilder activated;
 
 
@@ -131,6 +131,12 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	 */
 	public void activate() throws IllegalStateException, NamingException {
 		logger.info("Activating simple JNDI environment");
+		if (NamingManager.hasInitialContextFactoryBuilder()) {
+			throw new IllegalStateException(
+					"Cannot activate SimpleNamingContextBuilder: there is already a JNDI provider registered. " +
+					"Note that JNDI is a JVM-wide service, shared at the JVM system class loader level, " +
+					"with no reset option. As a consequence, a JNDI provider must only be registered once per JVM.");
+		}
 		NamingManager.setInitialContextFactoryBuilder(this);
 		activated = this;
 	}
