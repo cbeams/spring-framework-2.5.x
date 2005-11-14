@@ -13,6 +13,8 @@ Package org.springframework.beans
 * reworked BeanUtils's "copyProperties" method to properly ignore properties not found in the target bean
 * added new "copyProperties" variant to BeanUtils, for restriction of copying to properties of specified class/interface
 * factored out protected "newNestedBeanWrapper" template method from BeanWrapperImpl's "getNestedBeanWrapper" method
+* factored out PropertyEditorRegistry interface from BeanWrapper, implemented by BeanWrapperImpl and DataBinder
+* reworked PropertyEditorRegistrar interface to work on PropertyEditorRegistry interface instead of DataBinder class
 * PropertyPlaceholderConfigurer logs resolved values at debug level, for improved traceability
 * AbstractBeanFactory throws BeanDefinitionStoreException if parent not found (instead of NoSuchBeanDefinitionException)
 * DefaultListableBeanFactory does not include its toString output in NoSuchBeanDefinitionException messages anymore
@@ -25,6 +27,7 @@ Package org.springframework.beans
 * DefaultXmlBeanDefinitionParser allows for overriding default lazy-init, autowire and dependency-check values
 
 Package org.springframework.context
+* AbstractApplicationContext registers a ClassLoader-aware ClassEditor for its configured ClassLoader
 * fixed AbstractMessageSource to never try to create a MessageFormat instance for a null message
 * fixed AbstractMessageSource to synchronize on MessageFormat instance while using it to format message with arguments
 * added "getDefaultMessage" template method to AbstractMessageSource, allowing for customized fallback default messages
@@ -33,6 +36,7 @@ Package org.springframework.context
 Package org.springframework.core
 * unified path normalization in ClassPathResource, FileSystemResource, UrlResource and ServletContextResource
 * UrlResource sets the "UseCaches" flag to "false" for every URLConnection, mainly to avoid jar file locking on Windows
+* DefaultResourceLoader and PathMatchingResourcePatternResolver obtain thread context ClassLoader at construction time
 * PathMatchingResourcePatternResolver uses linked Sets if possible, to preserve the order of resources found
 * refined PathMatchingResourcePatternResolver's "findAllClassPathResources" to work with Oracle OC4J 10.1.2 as well
 * refined PathMatchingResourcePatternResolver to use relative resources within jar locations (instead of URL building)
@@ -112,6 +116,7 @@ Package org.springframework.web
 * MultiActionController invokes an exception handler method even in case of binding/validation failure
 * InternalPathMethodNameResolver caches resolved method names (after prefix/suffix and method name post-processing)
 * ParameterMethodNameResolver logs its resolution results at debug level (indicating the triggering request parameter)
+* JSP MessageTag evaluates given "arguments" CSV into argument Objects, retaining their natural type (no stringifying)
 * added "message" attribute to JSP MessageTag, accepting a MessageSourceResolvable argument (direct or through JSP EL)
 * Velocity/FreeMarkerViewResolver allows for setting "allowRequestOverride" and "allowSessionOverride" on its Views
 * Velocity and FreeMarker form macros include an "id" attribute on each element
