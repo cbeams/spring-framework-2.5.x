@@ -200,12 +200,11 @@ public class MessageTag extends HtmlEscapingAwareTag {
 			// We have a code that we need to resolve.
 			Object[] argumentsArray = null;
 			if (this.arguments instanceof String) {
-				argumentsArray = StringUtils.commaDelimitedListToStringArray((String) this.arguments);
-				for (int i = 0; i < argumentsArray.length; i++) {
+				String[] stringArray = StringUtils.commaDelimitedListToStringArray((String) this.arguments);
+				argumentsArray = new Object[stringArray.length];
+				for (int i = 0; i < stringArray.length; i++) {
 					argumentsArray[i] =
-							ExpressionEvaluationUtils.evaluateString(
-									"argument[" + i + "]", (String) argumentsArray[i], pageContext);
-
+							ExpressionEvaluationUtils.evaluate("argument[" + i + "]", stringArray[i], pageContext);
 				}
 			}
 			else if (this.arguments instanceof Object[]) {

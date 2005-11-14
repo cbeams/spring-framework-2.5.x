@@ -117,6 +117,25 @@ public abstract class ExpressionEvaluationUtils {
 	}
 
 	/**
+	 * Evaluate the given expression to an Object, be it EL or a conventional String.
+	 * @param attrName name of the attribute (typically a JSP tag attribute)
+	 * @param attrValue value of the attribute
+	 * @param pageContext current JSP PageContext
+	 * @return the result of the evaluation
+	 * @throws JspException in case of parsing errors
+	 */
+	public static Object evaluate(String attrName, String attrValue, PageContext pageContext)
+	    throws JspException {
+
+		if (isExpressionLanguage(attrValue)) {
+			return helper.evaluate(attrName, attrValue, Object.class, pageContext);
+		}
+		else {
+			return attrValue;
+		}
+	}
+
+	/**
 	 * Evaluate the given expression to a String, be it EL or a conventional String.
 	 * @param attrName name of the attribute (typically a JSP tag attribute)
 	 * @param attrValue value of the attribute

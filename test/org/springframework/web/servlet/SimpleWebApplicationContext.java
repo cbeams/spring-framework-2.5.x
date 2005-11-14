@@ -59,6 +59,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 		addMessage("test", Locale.ENGLISH, "test message");
 		addMessage("test", Locale.CANADA, "Canadian & test message");
 		addMessage("testArgs", Locale.ENGLISH, "test {0} message {1}");
+		addMessage("testArgsFormat", Locale.ENGLISH, "test {0} message {1,number,#.##} X");
 
 		registerSingleton(UiApplicationContextUtils.THEME_SOURCE_BEAN_NAME, DummyThemeSource.class);
 
