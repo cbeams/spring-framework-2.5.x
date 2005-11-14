@@ -37,6 +37,7 @@ public abstract class AbstractClinicTests extends AbstractTransactionalDataSourc
 
 	protected Clinic clinic;
 
+
 	/**
 	 * This method is provided to set the Clinic instance being tested by the Dependency Injection
 	 * injection behaviour of the superclass from the <code>org.springframework.test</code> package.
@@ -45,6 +46,7 @@ public abstract class AbstractClinicTests extends AbstractTransactionalDataSourc
 	public void setClinic(Clinic clinic) {
 		this.clinic = clinic;
 	}
+
 
 	public void testGetVets() {
 		Collection vets = this.clinic.getVets();
@@ -134,10 +136,10 @@ public abstract class AbstractClinicTests extends AbstractTransactionalDataSourc
 		int found = o6.getPets().size();
 		Pet pet = new Pet();
 		pet.setName("bowser");
-		o6.addPet(pet);
 		Collection types = this.clinic.getPetTypes();
 		pet.setType((PetType) EntityUtils.getById(types, PetType.class, 2));
 		pet.setBirthDate(new Date());
+		o6.addPet(pet);
 		assertEquals(found + 1, o6.getPets().size());
 		// both storePet and storeOwner are necessary to cover all ORM tools
 		this.clinic.storePet(pet);
