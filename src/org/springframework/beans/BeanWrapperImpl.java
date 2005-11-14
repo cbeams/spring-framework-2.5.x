@@ -20,45 +20,21 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
-import java.io.File;
-import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
-import java.util.SortedSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
-import org.springframework.beans.propertyeditors.CharacterEditor;
-import org.springframework.beans.propertyeditors.ClassEditor;
-import org.springframework.beans.propertyeditors.CustomBooleanEditor;
-import org.springframework.beans.propertyeditors.CustomCollectionEditor;
-import org.springframework.beans.propertyeditors.CustomNumberEditor;
-import org.springframework.beans.propertyeditors.FileEditor;
-import org.springframework.beans.propertyeditors.InputStreamEditor;
-import org.springframework.beans.propertyeditors.LocaleEditor;
-import org.springframework.beans.propertyeditors.PropertiesEditor;
-import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
-import org.springframework.beans.propertyeditors.URLEditor;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.ResourceArrayPropertyEditor;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -73,8 +49,9 @@ import org.springframework.util.StringUtils;
  * <p>Note: Auto-registers default property editors from the
  * <code>org.springframework.beans.propertyeditors</code> package, which apply
  * in addition to the JDK's standard PropertyEditors. Applications can call
- * BeanWrapper's <code>registerCustomEditor</code> method to register an editor
- * for the particular instance (i.e. they're not shared across the application).
+ * the <code>registerCustomEditor</code> method to register an editor for a
+ * particular instance (i.e. they're not shared across the application).
+ * See the base class PropertyEditorRegistrySupport for details.
  *
  * <p>BeanWrapperImpl will convert collection and array values to the
  * corresponding target collections or arrays, if necessary. Custom property
@@ -86,31 +63,16 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @see #registerCustomEditor
- * @see java.beans.PropertyEditorManager
- * @see java.beans.PropertyEditorSupport#setAsText
- * @see java.beans.PropertyEditorSupport#setValue
- * @see org.springframework.beans.propertyeditors.ByteArrayPropertyEditor
- * @see org.springframework.beans.propertyeditors.ClassEditor
- * @see org.springframework.beans.propertyeditors.CharacterEditor
- * @see org.springframework.beans.propertyeditors.CustomBooleanEditor
- * @see org.springframework.beans.propertyeditors.CustomNumberEditor
- * @see org.springframework.beans.propertyeditors.CustomCollectionEditor
- * @see org.springframework.beans.propertyeditors.FileEditor
- * @see org.springframework.beans.propertyeditors.InputStreamEditor
- * @see org.springframework.jndi.JndiTemplateEditor
- * @see org.springframework.beans.propertyeditors.LocaleEditor
- * @see org.springframework.beans.propertyeditors.PropertiesEditor
- * @see org.springframework.beans.PropertyValuesEditor
- * @see org.springframework.core.io.support.ResourceArrayPropertyEditor
- * @see org.springframework.core.io.ResourceEditor
- * @see org.springframework.beans.propertyeditors.StringArrayPropertyEditor
- * @see org.springframework.transaction.interceptor.TransactionAttributeEditor
- * @see org.springframework.transaction.interceptor.TransactionAttributeSourceEditor
- * @see org.springframework.beans.propertyeditors.URLEditor
  * @since 15 April 2001
+ * @see #registerCustomEditor
+ * @see #setPropertyValues
+ * @see #setPropertyValue
+ * @see #getPropertyValue
+ * @see #getPropertyType
+ * @see BeanWrapper
+ * @see PropertyEditorRegistrySupport
  */
-public class BeanWrapperImpl implements BeanWrapper {
+public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements BeanWrapper {
 
 	/**
 	 * We'll create a lot of these objects, so we don't want a new logger every time
@@ -118,13 +80,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	private static final Log logger = LogFactory.getLog(BeanWrapperImpl.class);
 
 
-	//---------------------------------------------------------------------
-	// Instance data
-	//---------------------------------------------------------------------
-
-	/**
-	 * The wrapped object
-	 */
+	/** The wrapped object */
 	private Object object;
 
 	private String nestedPath = "";
@@ -132,10 +88,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 	private Object rootObject;
 
 	private boolean extractOldValueForEditor = false;
-
-	private final Map defaultEditors;
-
-	private Map customEditors;
 
 	/**
 	 * Cached introspections results for this object, to prevent encountering
@@ -170,11 +122,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 */
 	public BeanWrapperImpl(boolean registerDefaultEditors) {
 		if (registerDefaultEditors) {
-			this.defaultEditors = new HashMap(32);
 			registerDefaultEditors();
-		}
-		else {
-			this.defaultEditors = Collections.EMPTY_MAP;
 		}
 	}
 
@@ -216,79 +164,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @param superBw the containing BeanWrapper (must not be <code>null</code>)
 	 */
 	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl superBw) {
-		this.defaultEditors = superBw.defaultEditors;
 		setWrappedInstance(object, nestedPath, superBw.getWrappedInstance());
-	}
-
-	/**
-	 * Register default editors in this class, for restricted environments.
-	 * We're not using the JRE's PropertyEditorManager to avoid potential
-	 * SecurityExceptions when running in a SecurityManager.
-	 * <p>Registers a <code>CustomNumberEditor</code> for all primitive number types,
-	 * their corresponding wrapper types, <code>BigInteger</code> and <code>BigDecimal</code>.
-	 */
-	private void registerDefaultEditors() {
-		// Simple editors, without parameterization capabilities.
-		// The JDK does not contain a default editor for any of these target types.
-		this.defaultEditors.put(byte[].class, new ByteArrayPropertyEditor());
-		this.defaultEditors.put(Class.class, new ClassEditor());
-		this.defaultEditors.put(File.class, new FileEditor());
-		this.defaultEditors.put(InputStream.class, new InputStreamEditor());
-		this.defaultEditors.put(Locale.class, new LocaleEditor());
-		this.defaultEditors.put(Properties.class, new PropertiesEditor());
-		this.defaultEditors.put(Resource[].class, new ResourceArrayPropertyEditor());
-		this.defaultEditors.put(String[].class, new StringArrayPropertyEditor());
-		this.defaultEditors.put(URL.class, new URLEditor());
-
-		// Default instances of collection editors.
-		// Can be overridden by registering custom instances of those as custom editors.
-		this.defaultEditors.put(Collection.class, new CustomCollectionEditor(Collection.class));
-		this.defaultEditors.put(Set.class, new CustomCollectionEditor(Set.class));
-		this.defaultEditors.put(SortedSet.class, new CustomCollectionEditor(SortedSet.class));
-		this.defaultEditors.put(List.class, new CustomCollectionEditor(List.class));
-
-		// Default instances of character and boolean editors.
-		// Can be overridden by registering custom instances of those as custom editors.
-		PropertyEditor characterEditor = new CharacterEditor(false);
-		PropertyEditor booleanEditor = new CustomBooleanEditor(false);
-
-		// The JDK does not contain a default editor for char!
-		this.defaultEditors.put(char.class, characterEditor);
-		this.defaultEditors.put(Character.class, characterEditor);
-
-		// Spring's CustomBooleanEditor accepts more flag values than the JDK's default editor.
-		this.defaultEditors.put(boolean.class, booleanEditor);
-		this.defaultEditors.put(Boolean.class, booleanEditor);
-
-		// The JDK does not contain default editors for number wrapper types!
-		// Override JDK primitive number editors with our own CustomNumberEditor.
-		PropertyEditor byteEditor = new CustomNumberEditor(Byte.class, false);
-		PropertyEditor shortEditor = new CustomNumberEditor(Short.class, false);
-		PropertyEditor integerEditor = new CustomNumberEditor(Integer.class, false);
-		PropertyEditor longEditor = new CustomNumberEditor(Long.class, false);
-		PropertyEditor floatEditor = new CustomNumberEditor(Float.class, false);
-		PropertyEditor doubleEditor = new CustomNumberEditor(Double.class, false);
-
-		this.defaultEditors.put(byte.class, byteEditor);
-		this.defaultEditors.put(Byte.class, byteEditor);
-
-		this.defaultEditors.put(short.class, shortEditor);
-		this.defaultEditors.put(Short.class, shortEditor);
-
-		this.defaultEditors.put(int.class, integerEditor);
-		this.defaultEditors.put(Integer.class, integerEditor);
-
-		this.defaultEditors.put(long.class, longEditor);
-		this.defaultEditors.put(Long.class, longEditor);
-
-		this.defaultEditors.put(float.class, floatEditor);
-		this.defaultEditors.put(Float.class, floatEditor);
-
-		this.defaultEditors.put(double.class, doubleEditor);
-		this.defaultEditors.put(Double.class, doubleEditor);
-
-		this.defaultEditors.put(BigDecimal.class, new CustomNumberEditor(BigDecimal.class, false));
-		this.defaultEditors.put(BigInteger.class, new CustomNumberEditor(BigInteger.class, false));
 	}
 
 
@@ -366,142 +242,10 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 	}
 
-
 	public void setExtractOldValueForEditor(boolean extractOldValueForEditor) {
 		this.extractOldValueForEditor = extractOldValueForEditor;
 	}
 
-	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
-		registerCustomEditor(requiredType, null, propertyEditor);
-	}
-
-	public void registerCustomEditor(Class requiredType, String propertyPath, PropertyEditor propertyEditor) {
-		if (requiredType == null && propertyPath == null) {
-			throw new IllegalArgumentException("Either requiredType or propertyPath is required");
-		}
-		if (this.customEditors == null) {
-			this.customEditors = new HashMap();
-		}
-		if (propertyPath != null) {
-			this.customEditors.put(propertyPath, new CustomEditorHolder(propertyEditor, requiredType));
-		}
-		else {
-			this.customEditors.put(requiredType, propertyEditor);
-		}
-	}
-
-	public PropertyEditor findCustomEditor(Class requiredType, String propertyPath) {
-		if (this.customEditors == null) {
-			return null;
-		}
-		if (propertyPath != null) {
-			// Check property-specific editor first.
-			PropertyEditor editor = getCustomEditor(propertyPath, requiredType);
-			if (editor == null) {
-				List strippedPaths = new LinkedList();
-				addStrippedPropertyPaths(strippedPaths, "", propertyPath);
-				for (Iterator it = strippedPaths.iterator(); it.hasNext() && editor == null;) {
-					String strippedPath = (String) it.next();
-					editor = getCustomEditor(strippedPath, requiredType);
-				}
-			}
-			if (editor != null) {
-				return editor;
-			}
-			else if (requiredType == null) {
-				requiredType = getPropertyType(propertyPath);
-			}
-		}
-		// No property-specific editor -> check type-specific editor.
-		return getCustomEditor(requiredType);
-	}
-
-	/**
-	 * Get custom editor that has been registered for the given property.
-	 * @return the custom editor, or <code>null</code> if none specific for this property
-	 */
-	private PropertyEditor getCustomEditor(String propertyName, Class requiredType) {
-		CustomEditorHolder holder = (CustomEditorHolder) this.customEditors.get(propertyName);
-		return (holder != null ? holder.getPropertyEditor(requiredType) : null);
-	}
-
-	/**
-	 * Get custom editor for the given type. If no direct match found,
-	 * try custom editor for superclass (which will in any case be able
-	 * to render a value as String via <code>getAsText</code>).
-	 * @return the custom editor, or <code>null</code> if none found for this type
-	 * @see java.beans.PropertyEditor#getAsText
-	 */
-	private PropertyEditor getCustomEditor(Class requiredType) {
-		if (requiredType != null) {
-			PropertyEditor editor = (PropertyEditor) this.customEditors.get(requiredType);
-			if (editor == null) {
-				for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
-					Object key = it.next();
-					if (key instanceof Class && ((Class) key).isAssignableFrom(requiredType)) {
-						editor = (PropertyEditor) this.customEditors.get(key);
-					}
-				}
-			}
-			return editor;
-		}
-		return null;
-	}
-
-
-	/**
-	 * Add property paths with all variations of stripped keys and/or indexes.
-	 * Invokes itself recursively with nested paths
-	 * @param strippedPaths the result list to add to
-	 * @param nestedPath the current nested path
-	 * @param propertyPath the property path to check for keys/indexes to strip
-	 */
-	private void addStrippedPropertyPaths(List strippedPaths, String nestedPath, String propertyPath) {
-		int startIndex = propertyPath.indexOf(PROPERTY_KEY_PREFIX_CHAR);
-		if (startIndex != -1) {
-			int endIndex = propertyPath.indexOf(PROPERTY_KEY_SUFFIX_CHAR);
-			if (endIndex != -1) {
-				String prefix = propertyPath.substring(0, startIndex);
-				String key = propertyPath.substring(startIndex, endIndex + 1);
-				String suffix = propertyPath.substring(endIndex + 1, propertyPath.length());
-				// strip the first key
-				strippedPaths.add(nestedPath + prefix + suffix);
-				// search for further keys to strip, with the first key stripped
-				addStrippedPropertyPaths(strippedPaths, nestedPath + prefix, suffix);
-				// search for further keys to strip, with the first key not stripped
-				addStrippedPropertyPaths(strippedPaths, nestedPath + prefix + key, suffix);
-			}
-		}
-	}
-
-	/**
-	 * Determine the first (or last) nested property separator in the
-	 * given property path, ignoring dots in keys (like "map[my.key]").
-	 * @param propertyPath the property path to check
-	 * @param last whether to return the last separator rather than the first
-	 * @return the index of the nested property separator, or -1 if none
-	 */
-	private int getNestedPropertySeparatorIndex(String propertyPath, boolean last) {
-		boolean inKey = false;
-		int i = (last ? propertyPath.length() - 1 : 0);
-		while ((last && i >= 0) || i < propertyPath.length()) {
-			switch (propertyPath.charAt(i)) {
-				case PROPERTY_KEY_PREFIX_CHAR:
-				case PROPERTY_KEY_SUFFIX_CHAR:
-					inKey = !inKey;
-					break;
-				case NESTED_PROPERTY_SEPARATOR_CHAR:
-					if (!inKey) {
-						return i;
-					}
-			}
-			if (last)
-				i--;
-			else
-				i++;
-		}
-		return -1;
-	}
 
 	/**
 	 * Get the last component of the path. Also works if not nested.
@@ -513,7 +257,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		if (bw == this) {
 			return nestedPath;
 		}
-		return nestedPath.substring(getNestedPropertySeparatorIndex(nestedPath, true) + 1);
+		return nestedPath.substring(PropertyAccessorUtils.getLastNestedPropertySeparatorIndex(nestedPath) + 1);
 	}
 
 	/**
@@ -522,7 +266,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @return a BeanWrapper for the target bean
 	 */
 	protected BeanWrapperImpl getBeanWrapperForPropertyPath(String propertyPath) throws BeansException {
-		int pos = getNestedPropertySeparatorIndex(propertyPath, false);
+		int pos = PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex(propertyPath);
 		// handle nested properties recursively
 		if (pos > -1) {
 			String nestedProperty = propertyPath.substring(0, pos);
@@ -547,46 +291,24 @@ public class BeanWrapperImpl implements BeanWrapper {
 		if (this.nestedBeanWrappers == null) {
 			this.nestedBeanWrappers = new HashMap();
 		}
-		// get value of bean property
+		// Get Value of bean property-
 		PropertyTokenHolder tokens = getPropertyNameTokens(nestedProperty);
-		Object propertyValue = getPropertyValue(tokens);
 		String canonicalName = tokens.canonicalName;
-		String propertyName = tokens.actualName;
+		Object propertyValue = getPropertyValue(tokens);
 		if (propertyValue == null) {
 			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + canonicalName);
 		}
 
-		// lookup cached sub-BeanWrapper, create new one if not found
+		// Lookup cached sub-BeanWrapper, create new one if not found.
 		BeanWrapperImpl nestedBw = (BeanWrapperImpl) this.nestedBeanWrappers.get(canonicalName);
 		if (nestedBw == null || nestedBw.getWrappedInstance() != propertyValue) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Creating new nested BeanWrapper for property '" + canonicalName + "'");
 			}
 			nestedBw = newNestedBeanWrapper(propertyValue, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR);
-			// inherit all type-specific PropertyEditors
-			if (this.customEditors != null) {
-				for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
-					Map.Entry entry = (Map.Entry) it.next();
-					if (entry.getKey() instanceof Class) {
-						Class requiredType = (Class) entry.getKey();
-						PropertyEditor editor = (PropertyEditor) entry.getValue();
-						nestedBw.registerCustomEditor(requiredType, editor);
-					}
-					else if (entry.getKey() instanceof String) {
-						String editorPath = (String) entry.getKey();
-						int pos = getNestedPropertySeparatorIndex(editorPath, false);
-						if (pos != -1) {
-							String editorNestedProperty = editorPath.substring(0, pos);
-							String editorNestedPath = editorPath.substring(pos + 1);
-							if (editorNestedProperty.equals(canonicalName) || editorNestedProperty.equals(propertyName)) {
-								CustomEditorHolder editorHolder = (CustomEditorHolder) entry.getValue();
-								nestedBw.registerCustomEditor(
-										editorHolder.getRegisteredType(), editorNestedPath, editorHolder.getPropertyEditor());
-							}
-						}
-					}
-				}
-			}
+			// Inherit all type-specific PropertyEditors.
+			copyDefaultEditorsTo(nestedBw);
+			copyCustomEditorsTo(nestedBw, canonicalName);
 			this.nestedBeanWrappers.put(canonicalName, nestedBw);
 		}
 		else {
@@ -657,7 +379,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		return nestedBw.getPropertyValue(tokens);
 	}
 
-	protected Object getPropertyValue(PropertyTokenHolder tokens) throws BeansException {
+	private Object getPropertyValue(PropertyTokenHolder tokens) throws BeansException {
 		String propertyName = tokens.canonicalName;
 		String actualName = tokens.actualName;
 		PropertyDescriptor pd = getPropertyDescriptorInternal(tokens.actualName);
@@ -747,7 +469,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		nestedBw.setPropertyValue(tokens, value);
 	}
 
-	protected void setPropertyValue(PropertyTokenHolder tokens, Object newValue) throws BeansException {
+	private void setPropertyValue(PropertyTokenHolder tokens, Object newValue) throws BeansException {
 		String propertyName = tokens.canonicalName;
 
 		if (tokens.keys != null) {
@@ -1000,7 +722,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 				if (requiredType != null) {
 					if (pe == null) {
 						// No custom editor -> check BeanWrapperImpl's default editors.
-						pe = (PropertyEditor) this.defaultEditors.get(requiredType);
+						pe = (PropertyEditor) getDefaultEditor(requiredType);
 						if (pe == null) {
 							// No BeanWrapper default editor -> check standard JavaBean editors.
 							pe = PropertyEditorManager.findEditor(requiredType);
@@ -1153,42 +875,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 		return nestedBw.cachedIntrospectionResults.getPropertyDescriptor(getFinalPath(nestedBw, propertyName));
 	}
 
-	public Class getPropertyType(String propertyName) throws BeansException {
-		try {
-			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
-			if (pd != null) {
-				return pd.getPropertyType();
-			}
-			else {
-				// Maybe an indexed/mapped property...
-				Object value = getPropertyValue(propertyName);
-				if (value != null) {
-					return value.getClass();
-				}
-				// Check to see if there is a custom editor,
-				// which might give an indication on the desired target type.
-				if (this.customEditors != null) {
-					CustomEditorHolder editorHolder = (CustomEditorHolder) this.customEditors.get(propertyName);
-					if (editorHolder == null) {
-						List strippedPaths = new LinkedList();
-						addStrippedPropertyPaths(strippedPaths, "", propertyName);
-						for (Iterator it = strippedPaths.iterator(); it.hasNext() && editorHolder == null;) {
-							String strippedName = (String) it.next();
-							editorHolder = (CustomEditorHolder) this.customEditors.get(strippedName);
-						}
-					}
-					if (editorHolder != null) {
-						return editorHolder.getRegisteredType();
-					}
-				}
-			}
-		}
-		catch (InvalidPropertyException ex) {
-			// Consider as not determinable.
-		}
-		return null;
-	}
-
 	public boolean isReadableProperty(String propertyName) {
 		// This is a programming error, although asking for a property
 		// that doesn't exist is not.
@@ -1239,59 +925,37 @@ public class BeanWrapperImpl implements BeanWrapper {
 		return false;
 	}
 
+	public Class getPropertyType(String propertyName) throws BeansException {
+		try {
+			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+			if (pd != null) {
+				return pd.getPropertyType();
+			}
+			else {
+				// Maybe an indexed/mapped property...
+				Object value = getPropertyValue(propertyName);
+				if (value != null) {
+					return value.getClass();
+				}
+				// Check to see if there is a custom editor,
+				// which might give an indication on the desired target type.
+				Class editorType = guessPropertyTypeFromEditors(propertyName);
+				if (editorType != null) {
+					return editorType;
+				}
+			}
+		}
+		catch (InvalidPropertyException ex) {
+			// Consider as not determinable.
+		}
+		return null;
+	}
 
-	//---------------------------------------------------------------------
-	// Diagnostics
-	//---------------------------------------------------------------------
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer("BeanWrapperImpl: wrapping class [");
 		sb.append(getWrappedClass().getName()).append("]");
 		return sb.toString();
-	}
-
-	/**
-	 * Holder for a registered custom editor with property name.
-	 * Keeps the PropertyEditor itself plus the type it was registered for.
-	 */
-	private static class CustomEditorHolder {
-
-		private final PropertyEditor propertyEditor;
-
-		private final Class registeredType;
-
-		private CustomEditorHolder(PropertyEditor propertyEditor, Class registeredType) {
-			this.propertyEditor = propertyEditor;
-			this.registeredType = registeredType;
-		}
-
-		private PropertyEditor getPropertyEditor() {
-			return propertyEditor;
-		}
-
-		private Class getRegisteredType() {
-			return registeredType;
-		}
-
-		private PropertyEditor getPropertyEditor(Class requiredType) {
-			// Special case: If no required type specified, which usually only happens for
-			// Collection elements, or required type is not assignable to registered type,
-			// which usually only happens for generic properties of type Object -
-			// then return PropertyEditor if not registered for Collection or array type.
-			// (If not registered for Collection or array, it is assumed to be intended
-			// for elements.)
-			if (this.registeredType == null ||
-					(requiredType != null &&
-					(BeanUtils.isAssignable(this.registeredType, requiredType) ||
-					BeanUtils.isAssignable(requiredType, this.registeredType))) ||
-					(requiredType == null &&
-					(!Collection.class.isAssignableFrom(this.registeredType) && !this.registeredType.isArray()))) {
-				return this.propertyEditor;
-			}
-			else {
-				return null;
-			}
-		}
 	}
 
 

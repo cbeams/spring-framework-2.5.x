@@ -22,16 +22,18 @@ package org.springframework.validation;
  * same set of property editors in several different situations: write
  * a corresponding registrar and reuse that in each case.
  *
- * <p>Note: This interface is currently only intended for use with Web Flow
- * previews. It will be reworked into a more generic mechanism for Spring 1.3
- * and Web Flow 1.0, working on a passed-in PropertyEditorRegistry interface
- * rather than the DataBinder class, with the reworked version likely to
- * reside in the "org.springframework.beans" package.
+ * <p>Note: This interface is only intended for use with Spring Web Flow previews.
+ * Since Spring 1.2.6, it is superseded by the PropertyEditorRegistrar interface
+ * in the beans package, working on a passed-in PropertyEditorRegistry interface
+ * rather than the DataBinder class. This is also what Spring Web Flow 1.0 RC1+
+ * is using.
  * 
  * @author Keith Donald
  * @since 1.2.2
- * @see DataBinder
- * @see java.beans.PropertyEditor
+ * @deprecated since Spring 1.2.6, in favor of the PropertyEditorRegistrar
+ * interface in the <code>org.springframework.beans</code> package
+ * @see org.springframework.beans.PropertyEditorRegistrar
+ * @see org.springframework.beans.PropertyEditorRegistry
  */
 public interface PropertyEditorRegistrar {
 	

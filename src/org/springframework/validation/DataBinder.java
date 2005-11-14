@@ -28,6 +28,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessException;
 import org.springframework.beans.PropertyAccessExceptionsException;
+import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.util.StringUtils;
@@ -85,7 +86,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.context.MessageSource
  * @see org.springframework.web.bind.ServletRequestDataBinder
  */
-public class DataBinder {
+public class DataBinder implements PropertyEditorRegistry {
 
 	/** Default object name used for binding: "target" */
 	public static final String DEFAULT_OBJECT_NAME = "target";
@@ -249,37 +250,16 @@ public class DataBinder {
 		this.errors.getBeanWrapper().setExtractOldValueForEditor(extractOldValueForEditor);
 	}
 
-	/**
-	 * Register the given custom property editor for all properties
-	 * of the given type.
-	 * @param requiredType type of the property
-	 * @param propertyEditor editor to register
-	 * @see org.springframework.beans.BeanWrapper#registerCustomEditor
-	 */
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
 		this.errors.getBeanWrapper().registerCustomEditor(requiredType, propertyEditor);
 	}
 
-	/**
-	 * Register the given custom property editor for the given type and
-	 * field, or for all fields of the given type.
-	 * <p>If the field denotes an array or Collection, the PropertyEditor
-	 * will get applied either to the array/Collection itself (the
-	 * PropertyEditor has to create an array or Collection value) or to
-	 * each element (the PropertyEditor has to create the element type),
-	 * depending on the specified required type.
-	 * <p>Note: Only one single registered custom editor per property path
-	 * is supported. In case of a Collection/array, do not register an editor
-	 * for both the Collection/array and each element on the same property.
-	 * @param requiredType type of the property (can be <code>null</code> if a field is
-	 * given but should be specified in any case for consistency checking)
-	 * @param field name of the field (can also be a nested path), or
-	 * null if registering an editor for all fields of the given type
-	 * @param propertyEditor editor to register
-	 * @see org.springframework.beans.BeanWrapper#registerCustomEditor
-	 */
 	public void registerCustomEditor(Class requiredType, String field, PropertyEditor propertyEditor) {
 		getBeanWrapper().registerCustomEditor(requiredType, field, propertyEditor);
+	}
+
+	public PropertyEditor findCustomEditor(Class requiredType, String propertyPath) {
+		return getBeanWrapper().findCustomEditor(requiredType, propertyPath);
 	}
 
 	/**
