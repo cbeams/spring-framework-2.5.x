@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * ResourcePatternResolver implementation that applies Ant-style path matching,
- * using Spring's PathMatcher class.
+ * using Spring's PathMatcher utility.
  *
  * <p>Locations can either be suitable for <code>ResourceLoader.getResource</code>
  * (URLs like "file:C:/context.xml", pseudo-URLs like "classpath:/context.xml",
@@ -89,8 +89,8 @@ import org.springframework.util.StringUtils;
  * @since 1.0.2
  * @see #CLASSPATH_ALL_URL_PREFIX
  * @see org.springframework.util.AntPathMatcher
- * @see org.springframework.core.io.ResourceLoader#getResource
- * @see java.lang.ClassLoader#getResources
+ * @see org.springframework.core.io.ResourceLoader#getResource(String)
+ * @see java.lang.ClassLoader#getResources(String)
  */
 public class PathMatchingResourcePatternResolver implements ResourcePatternResolver {
 
@@ -99,9 +99,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	/** URL protocol for an entry from a zip file: "zip" */
 	private static final String URL_PROTOCOL_ZIP = "zip";
-
-	/** URL prefix for referencing an entry from a jar file: "jar:" */
-	private static final String JAR_URL_PREFIX = "jar:";
 
 	/** Separator between JAR URL and file path within the JAR */
 	private static final String JAR_URL_SEPARATOR = "!/";
@@ -118,8 +115,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	/**
 	 * Create a new PathMatchingResourcePatternResolver with a DefaultResourceLoader.
-	 * <p>ClassLoader access will happen via the thread context class loader on actual
-	 * access (applying to the thread that does the "getResources" call)
+	 * <p>ClassLoader access will happen via the thread context class loader.
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public PathMatchingResourcePatternResolver() {
@@ -129,8 +125,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	/**
 	 * Create a new PathMatchingResourcePatternResolver with a DefaultResourceLoader.
 	 * @param classLoader the ClassLoader to load classpath resources with,
-	 * or <code>null</code> for using the thread context class loader on actual access
-	 * (applying to the thread that does the "getResources" call)
+	 * or <code>null</code> for using the thread context class loader
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public PathMatchingResourcePatternResolver(ClassLoader classLoader) {
@@ -139,8 +134,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	/**
 	 * Create a new PathMatchingResourcePatternResolver.
-	 * <p>ClassLoader access will happen via the thread context class loader on actual
-	 * access (applying to the thread that does the "getResources" call)
+	 * <p>ClassLoader access will happen via the thread context class loader.
 	 * @param resourceLoader the ResourceLoader to load root directories and
 	 * actual resources with
 	 */
@@ -160,6 +154,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		this.resourceLoader = resourceLoader;
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 	}
+
 
 	/**
 	 * Return the ResourceLoader that this pattern resolver works with.
