@@ -68,6 +68,8 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 
 	private String[] basenames = new String[] {DEFAULT_BASENAME};
 
+	private ClassLoader bundleClassLoader = Thread.currentThread().getContextClassLoader();
+
 	private String defaultParentView;
 
 	/* Locale -> BeanFactory */
@@ -105,6 +107,22 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	 */
 	public void setBasenames(String[] basenames) {
 		this.basenames = basenames;
+	}
+
+	/**
+	 * Set the ClassLoader to load resource bundles with.
+	 * Default is the thread context ClassLoader.
+	 */
+	public void setBundleClassLoader(ClassLoader classLoader) {
+		this.bundleClassLoader = classLoader;
+	}
+
+	/**
+	 * Return the ClassLoader to load resource bundles with. Default is the
+	 * specified bundle ClassLoader, usually the thread context ClassLoader.
+	 */
+	protected ClassLoader getBundleClassLoader() {
+		return bundleClassLoader;
 	}
 
 	/**
@@ -193,7 +211,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	}
 
 	/**
-	 * Return the resource bundle for the given basename and Locale.
+	 * Obtain the resource bundle for the given basename and Locale.
 	 * @param basename the basename to look for
 	 * @param locale the Locale to look for
 	 * @return the corresponding ResourceBundle
@@ -204,17 +222,10 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 		return ResourceBundle.getBundle(basename, locale, getBundleClassLoader());
 	}
 
+
 	/**
-	 * Return the ClassLoader to use for loading resource bundles.
-	 * Default is the current Thread's context class loader.
-	 * @see Thread#currentThread()
-	 * @see Thread#getContextClassLoader()
+	 * Close the bundle bean factories on context shutdown.
 	 */
-	protected ClassLoader getBundleClassLoader() {
-		return Thread.currentThread().getContextClassLoader();
-	}
-
-
 	public void destroy() throws BeansException {
 		for (Iterator it = this.bundleCache.values().iterator(); it.hasNext();) {
 			ConfigurableApplicationContext factory = (ConfigurableApplicationContext) it.next();

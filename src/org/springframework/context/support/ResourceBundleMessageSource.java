@@ -54,7 +54,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 
 	private String[] basenames = new String[0];
 
-	private ClassLoader classLoader;
+	private ClassLoader bundleClassLoader = Thread.currentThread().getContextClassLoader();
 
 	/**
 	 * Cache to hold loaded ResourceBundles.
@@ -106,12 +106,29 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 	}
 
 	/**
-	 * Set the ClassLoader to load resource bundles with,
-	 * or <code>null</code> for using the thread context class loader on actual access
-	 * (applying to the thread that does the "getMessage" call).
+	 * Set the ClassLoader to load resource bundles with.
+	 * Default is the thread context ClassLoader.
+	 * @deprecated in favor of <code>setBundleClassLoader</code>
+	 * @see #setBundleClassLoader
 	 */
 	public void setClassLoader(ClassLoader classLoader) {
-		this.classLoader = classLoader;
+		this.bundleClassLoader = classLoader;
+	}
+
+	/**
+	 * Set the ClassLoader to load resource bundles with.
+	 * Default is the thread context ClassLoader.
+	 */
+	public void setBundleClassLoader(ClassLoader classLoader) {
+		this.bundleClassLoader = classLoader;
+	}
+
+	/**
+	 * Return the ClassLoader to load resource bundles with. Default is the
+	 * specified bundle ClassLoader, usually the thread context ClassLoader.
+	 */
+	protected ClassLoader getBundleClassLoader() {
+		return bundleClassLoader;
 	}
 
 
@@ -164,12 +181,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 				}
 			}
 			try {
-				ClassLoader cl = this.classLoader;
-				if (cl == null) {
-					// No class loader specified -> use thread context class loader.
-					cl = Thread.currentThread().getContextClassLoader();
-				}
-				ResourceBundle bundle = ResourceBundle.getBundle(basename, locale, cl);
+				ResourceBundle bundle = doGetBundle(basename, locale);
 				if (localeMap == null) {
 					localeMap = new HashMap();
 					this.cachedResourceBundles.put(basename, localeMap);
@@ -186,6 +198,19 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 				return null;
 			}
 		}
+	}
+
+	/**
+	 * Obtain the resource bundle for the given basename and Locale.
+	 * @param basename the basename to look for
+	 * @param locale the Locale to look for
+	 * @return the corresponding ResourceBundle
+	 * @throws MissingResourceException if no matching bundle could be found
+	 * @see java.util.ResourceBundle#getBundle(String, java.util.Locale, ClassLoader)
+	 * @see #getBundleClassLoader()
+	 */
+	protected ResourceBundle doGetBundle(String basename, Locale locale) throws MissingResourceException {
+		return ResourceBundle.getBundle(basename, locale, getBundleClassLoader());
 	}
 
 	/**
