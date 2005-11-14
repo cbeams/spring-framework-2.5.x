@@ -34,9 +34,9 @@ import org.springframework.transaction.TransactionTimedOutException;
  */
 public abstract class ResourceHolderSupport {
 
-	private boolean synchronizedWithTransaction;
+	private boolean synchronizedWithTransaction = false;
 
-	private boolean rollbackOnly;
+	private boolean rollbackOnly = false;
 
 	private Date deadline;
 
@@ -170,7 +170,6 @@ public abstract class ResourceHolderSupport {
 		this.synchronizedWithTransaction = false;
 		this.rollbackOnly = false;
 		this.deadline = null;
-		this.referenceCount = 0;
 	}
 
 }
