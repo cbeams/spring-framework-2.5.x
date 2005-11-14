@@ -55,7 +55,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	 * given method in the given class. If the method name is null,
 	 * matches all control flows below that class.
 	 * @param clazz the clazz
-	 * @param clazz the name of the method
+	 * @param methodName the name of the method
 	 */
 	public ControlFlowPointcut(Class clazz, String methodName) {
 		this.clazz = clazz;
