@@ -46,6 +46,7 @@ Package org.springframework.core
 * reworked ShortCoded, StringCoded and LetterCoded enum implementations to be non-static "GenericLabeledEnums"
 
 Package org.springframework.jdbc
+* reworked DataSourceTransactionManager to support pre-bound non-transactional JDBC Connections (e.g. from SUPPORTS)
 * JdbcTemplate applies "fetchSize" and "maxRows" settings to all created Statements, not just to "query" operations
 * JdbcTemplate exposes Connection proxy to ConnectionCallbacks, preparing Statements, unless NativeJdbcExtractor is set
 * avoid NPE in CallableStatementCreatorFactory if a ParameterMapper fails, through checking for not-null "inParameters"
