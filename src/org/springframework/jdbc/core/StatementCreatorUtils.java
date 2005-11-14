@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
  * implementations, providing sophisticated parameter management (including
  * support for LOB values).
  *
- * <p>Used in PreparedStatementCreatorFactory and CallableStatementCreatorFactory.
+ * <p>Used by PreparedStatementCreatorFactory and CallableStatementCreatorFactory.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -50,6 +50,7 @@ import org.apache.commons.logging.LogFactory;
 public class StatementCreatorUtils {
 
 	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
+
 
 	/**
 	 * Set the value for a parameter. The method used is based on the SQL type
