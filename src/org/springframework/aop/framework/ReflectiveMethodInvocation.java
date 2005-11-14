@@ -26,6 +26,7 @@ import java.util.Map;
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.aop.support.AopUtils;
 
@@ -81,9 +82,9 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * Construct a new MethodInvocation with given arguments
 	 * @param interceptorsAndDynamicMethodMatchers interceptors that should be applied,
 	 * along with any InterceptorAndDynamicMethodMatchers that need evaluation at runtime.
-	 * MethodMatchers included in this struct must already have been found to have matched as far
-	 * as was possibly statically. Passing an array might be about 10% faster, but would complicate
-	 * the code. And it would work only for static pointcuts.
+	 * MethodMatchers included in this struct must already have been found to have matched
+	 * as far as was possibly statically. Passing an array might be about 10% faster,
+	 * but would complicate the code. And it would work only for static pointcuts.
 	 */
 	public ReflectiveMethodInvocation(
 	    Object proxy, Object target, Method method, Object[] arguments,
@@ -96,19 +97,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		this.arguments = arguments;
 		this.interceptorsAndDynamicMethodMatchers = interceptorsAndDynamicMethodMatchers;
 	}
-	
-	/**
-	 * Return user attributes associated with this invocation.
-	 * This map is initialized lazily and is not used in the AOP framework itself.
-	 * This method provides an invocation-bound alternative to a thread local.
-	 * @return any user attributes associated with this invocation.
-	 */
-	public Map getUserAttributes() {
-		if (userAttributes == null) {
-			userAttributes = new HashMap();
-		}
-		return userAttributes;
-	}
+
 
 	/**
 	 * Return the proxy that this interception was made through.
@@ -136,6 +125,20 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 	public final Object[] getArguments() {
 		return this.arguments;
+	}
+
+	/**
+	 * Return user attributes associated with this invocation.
+	 * This map is initialized lazily and is not used in the AOP framework itself.
+	 * This method provides an invocation-bound alternative to a ThreadLocal.
+	 * @return any user attributes associated with this invocation
+	 * (never <code>null</code>)
+	 */
+	public Map getUserAttributes() {
+		if (this.userAttributes == null) {
+			this.userAttributes = new HashMap();
+		}
+		return this.userAttributes;
 	}
 
 

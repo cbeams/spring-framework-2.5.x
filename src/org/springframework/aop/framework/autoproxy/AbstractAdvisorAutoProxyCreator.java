@@ -57,6 +57,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 		findCandidateAdvisors();
 	}
 
+
 	protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String name, TargetSource targetSource) {
 		List advisors = findEligibleAdvisors(beanClass);
 		if (advisors.isEmpty()) {
@@ -74,8 +75,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	protected List findEligibleAdvisors(Class clazz) {
 		return AopUtils.findAdvisorsThatCanApply(findCandidateAdvisors(), clazz);
 	}
-	
-	
+
 	/**
 	 * Sort advisors based on ordering.
 	 * @see org.springframework.core.Ordered
@@ -98,6 +98,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 		ControlFlow cflow = ControlFlowFactory.createControlFlow();
 		return cflow.under(getClass(), "findCandidateAdvisors");
 	}
+
 
 	/**
 	 * Find all candidate advisors to use in auto-proxying.
