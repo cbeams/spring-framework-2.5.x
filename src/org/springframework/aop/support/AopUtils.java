@@ -51,7 +51,8 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class AopUtils {
 	
-	private static Log log = LogFactory.getLog(AopUtils.class);
+	private static Log logger = LogFactory.getLog(AopUtils.class);
+
 
 	/**
 	 * Return whether the given object is either a J2SE dynamic
@@ -108,8 +109,8 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Return whether the given method is an "toString" method.
-	 * @see java.lang.Object#toString
+	 * Return whether the given method is a "toString" method.
+	 * @see java.lang.Object#toString()
 	 */
 	public static boolean isToStringMethod(Method method) {
 		return (method != null && method.getName().equals("toString") &&
@@ -144,18 +145,17 @@ public abstract class AopUtils {
 	/**
 	 * Convenience method to convert a string array of interface names
 	 * to a class array.
+	 * @return an array of interface classes
 	 * @throws IllegalArgumentException if any of the classes is not an interface
 	 * @throws ClassNotFoundException if any of the classes can't be loaded
-	 * @return an array of interface classes
 	 */
 	public static Class[] toInterfaceArray(String[] interfaceNames)
 	    throws IllegalArgumentException, ClassNotFoundException {
 
 		Class interfaces[] = new Class[interfaceNames.length];
 		for (int i = 0; i < interfaceNames.length; i++) {
-			interfaces[i] = Class.forName(
-					interfaceNames[i].trim(), true, Thread.currentThread().getContextClassLoader());
-			// Check it's an interface.
+			interfaces[i] = ClassUtils.forName(interfaceNames[i].trim());
+			// Check whether it is an interface.
 			if (!interfaces[i].isInterface()) {
 				throw new IllegalArgumentException(
 						"Can proxy only interfaces: [" + interfaces[i].getName() + "] is a class");
@@ -295,13 +295,13 @@ public abstract class AopUtils {
 			Advisor candidate = (Advisor) it.next();
 			if (AopUtils.canApply(candidate, clazz)) {
 				eligibleAdvisors.add(candidate);
-				if (log.isDebugEnabled()) {
-					log.debug("Candidate advisor [" + candidate + "] accepted for class [" + clazz.getName() + "]");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Candidate advisor [" + candidate + "] accepted for class [" + clazz.getName() + "]");
 				}
 			}
 			else {
-				if (log.isDebugEnabled()) {
-					log.debug("Candidate advisor [" + candidate + "] rejected for class [" + clazz.getName() + "]");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Candidate advisor [" + candidate + "] rejected for class [" + clazz.getName() + "]");
 				}
 			}
 		}
@@ -325,8 +325,7 @@ public abstract class AopUtils {
 	 * @param method the method to invoke
 	 * @param args the arguments for the method
 	 * @throws Throwable if thrown by the target method
-	 * @throws org.aopalliance.aop.AspectException if encountering
-	 * a reflection error
+	 * @throws org.aopalliance.aop.AspectException if encountering a reflection error
 	 */
 	public static Object invokeJoinpointUsingReflection(Object target, Method method, Object[] args)
 	    throws Throwable {
@@ -341,11 +340,11 @@ public abstract class AopUtils {
 			throw ex.getTargetException();
 		}
 		catch (IllegalArgumentException ex) {
-			throw new AspectException("AOP configuration seems to be invalid: tried calling " +
-			    method + " on [" + target + "]: ", ex);
+			throw new AspectException("AOP configuration seems to be invalid: tried calling method [" +
+			    method + "] on target [" + target + "]", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new AspectException("Couldn't access method " + method, ex);
+			throw new AspectException("Couldn't access method: " + method, ex);
 		}
 	}
 
