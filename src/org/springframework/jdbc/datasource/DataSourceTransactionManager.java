@@ -160,14 +160,13 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 		ConnectionHolder conHolder =
 		    (ConnectionHolder) TransactionSynchronizationManager.getResource(this.dataSource);
-		txObject.setConnectionHolder(conHolder);
+		txObject.setConnectionHolder(conHolder, false);
 		return txObject;
 	}
 
 	protected boolean isExistingTransaction(Object transaction) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
-		// Consider a pre-bound connection as transaction.
-		return (txObject.getConnectionHolder() != null);
+		return (txObject.getConnectionHolder() != null && txObject.getConnectionHolder().isTransactionActive());
 	}
 
 	/**
@@ -179,20 +178,23 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		Connection con = null;
 
 		try {
-			con = this.dataSource.getConnection();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Acquired Connection [" + con + "] for JDBC transaction");
+			if (txObject.getConnectionHolder() == null) {
+				Connection newCon = this.dataSource.getConnection();
+				if (logger.isDebugEnabled()) {
+					logger.debug("Acquired Connection [" + newCon + "] for JDBC transaction");
+				}
+				txObject.setConnectionHolder(new ConnectionHolder(newCon), true);
 			}
 
-			txObject.setConnectionHolder(new ConnectionHolder(con));
 			txObject.getConnectionHolder().setSynchronizedWithTransaction(true);
+			con = txObject.getConnectionHolder().getConnection();
 
 			Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 			txObject.setPreviousIsolationLevel(previousIsolationLevel);
 
 			// Switch to manual commit if necessary. This is very expensive in some JDBC drivers,
-			// so we don't want to do it unnecessarily (for example if we're configured
-			// Commons DBCP to set it already).
+			// so we don't want to do it unnecessarily (for example if we've explicitly
+			// configured the connection pool to set it already).
 			if (con.getAutoCommit()) {
 				txObject.setMustRestoreAutoCommit(true);
 				if (logger.isDebugEnabled()) {
@@ -200,11 +202,16 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 				}
 				con.setAutoCommit(false);
 			}
+			txObject.getConnectionHolder().setTransactionActive(true);
 
 			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
 				txObject.getConnectionHolder().setTimeoutInSeconds(definition.getTimeout());
 			}
-			TransactionSynchronizationManager.bindResource(getDataSource(), txObject.getConnectionHolder());
+
+			// Bind the session holder to the thread.
+			if (txObject.isNewConnectionHolder()) {
+				TransactionSynchronizationManager.bindResource(getDataSource(), txObject.getConnectionHolder());
+			}
 		}
 
 		catch (SQLException ex) {
@@ -266,9 +273,10 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	protected void doCleanupAfterCompletion(Object transaction) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
 
-		// Remove the connection holder from the thread.
-		TransactionSynchronizationManager.unbindResource(this.dataSource);
-		txObject.getConnectionHolder().clear();
+		// Remove the connection holder from the thread, if exposed.
+		if (txObject.isNewConnectionHolder()) {
+			TransactionSynchronizationManager.unbindResource(this.dataSource);
+		}
 
 		// Reset connection.
 		Connection con = txObject.getConnectionHolder().getConnection();
@@ -286,6 +294,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			logger.debug("Releasing JDBC Connection [" + con + "] after transaction");
 		}
 		DataSourceUtils.releaseConnection(con, this.dataSource);
+
+		txObject.getConnectionHolder().clear();
 	}
 
 
@@ -300,7 +310,22 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	 */
 	private static class DataSourceTransactionObject extends JdbcTransactionObjectSupport {
 
+		private boolean newConnectionHolder;
+
 		private boolean mustRestoreAutoCommit;
+
+		public void setConnectionHolder(ConnectionHolder connectionHolder, boolean newConnection) {
+			super.setConnectionHolder(connectionHolder);
+			this.newConnectionHolder = newConnection;
+		}
+
+		public boolean isNewConnectionHolder() {
+			return newConnectionHolder;
+		}
+
+		public boolean hasTransaction() {
+			return (getConnectionHolder() != null && getConnectionHolder().isTransactionActive());
+		}
 
 		public void setMustRestoreAutoCommit(boolean mustRestoreAutoCommit) {
 			this.mustRestoreAutoCommit = mustRestoreAutoCommit;

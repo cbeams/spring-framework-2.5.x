@@ -42,6 +42,8 @@ public class ConnectionHolder extends ResourceHolderSupport {
 
 	private Connection currentConnection;
 
+	private boolean transactionActive = false;
+
 
 	/**
 	 * Create a new ConnectionHolder for the given ConnectionHandle.
@@ -62,6 +64,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 		this.connectionHandle = new SimpleConnectionHandle(connection);
 	}
 
+
 	/**
 	 * Return the ConnectionHandle held by this ConnectionHolder.
 	 */
@@ -75,6 +78,21 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	protected boolean hasConnection() {
 		return (this.connectionHandle != null);
 	}
+
+	/**
+	 * Set whether this holder represents an active transaction.
+	 */
+	protected void setTransactionActive(boolean transactionActive) {
+		this.transactionActive = transactionActive;
+	}
+
+	/**
+	 * Return whether this holder represents an active transaction.
+	 */
+	protected boolean isTransactionActive() {
+		return this.transactionActive;
+	}
+
 
 	/**
 	 * Override the existing Connection handle with the given Connection.
@@ -126,6 +144,12 @@ public class ConnectionHolder extends ResourceHolderSupport {
 			this.connectionHandle.releaseConnection(this.currentConnection);
 			this.currentConnection = null;
 		}
+	}
+
+
+	public void clear() {
+		super.clear();
+		this.transactionActive = false;
 	}
 
 }
