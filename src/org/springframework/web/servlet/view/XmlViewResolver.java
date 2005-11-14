@@ -144,6 +144,9 @@ public class XmlViewResolver extends AbstractCachingViewResolver implements Orde
 	}
 
 
+	/**
+	 * Close the view bean factory on context shutdown.
+	 */
 	public void destroy() throws BeansException {
 		if (this.cachedFactory != null) {
 			this.cachedFactory.close();
