@@ -578,7 +578,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					}
 					doRollback(status);
 				}
-				else if (status.getTransaction() != null) {
+				else if (status.hasTransaction()) {
 					if (status.isLocalRollbackOnly() || isGlobalRollbackOnParticipationFailure()) {
 						if (status.isDebug()) {
 							logger.debug(
