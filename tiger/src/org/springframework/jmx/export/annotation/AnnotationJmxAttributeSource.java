@@ -27,6 +27,7 @@ import org.springframework.jmx.export.metadata.ManagedNotification;
 import org.springframework.jmx.export.metadata.ManagedOperation;
 import org.springframework.jmx.export.metadata.ManagedResource;
 import org.springframework.jmx.export.metadata.ManagedOperationParameter;
+import org.springframework.util.AnnotationUtils;
 
 /**
  * Implementation of the <code>JmxAttributeSource</code> interface that
@@ -51,37 +52,22 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 		if (ann == null) {
 			return null;
 		}
-		org.springframework.jmx.export.annotation.ManagedResource mr =
-				(org.springframework.jmx.export.annotation.ManagedResource) ann;
-		ManagedResource attr = new ManagedResource();
-		attr.setObjectName(mr.objectName());
-		attr.setDescription(mr.description());
-		attr.setCurrencyTimeLimit(mr.currencyTimeLimit());
-		attr.setLog(mr.log());
-		attr.setLogFile(mr.logFile());
-		attr.setPersistPolicy(mr.persistPolicy());
-		attr.setPersistPeriod(mr.persistPeriod());
-		attr.setPersistLocation(mr.persistLocation());
-		attr.setPersistName(mr.persistName());
-		return attr;
+		ManagedResource managedResource = new ManagedResource();
+		AnnotationUtils.copyPropertiesToBean(ann, managedResource);
+		return managedResource;
 	}
 
 	public ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException {
-		Annotation ann = method.getAnnotation(org.springframework.jmx.export.annotation.ManagedAttribute.class);
+		org.springframework.jmx.export.annotation.ManagedAttribute ann = method.getAnnotation(org.springframework.jmx.export.annotation.ManagedAttribute.class);
 		if (ann == null) {
 			return null;
 		}
-		org.springframework.jmx.export.annotation.ManagedAttribute ma =
-				(org.springframework.jmx.export.annotation.ManagedAttribute) ann;
-		ManagedAttribute attr = new ManagedAttribute();
-		attr.setDescription(ma.description());
-		attr.setPersistPolicy(ma.persistPolicy());
-		attr.setPersistPeriod(ma.persistPeriod());
-		attr.setCurrencyTimeLimit(ma.currencyTimeLimit());
-		if (ma.defaultValue().length() > 0) {
-			attr.setDefaultValue(ma.defaultValue());
+		ManagedAttribute managedAttribute = new ManagedAttribute();
+		AnnotationUtils.copyPropertiesToBean(ann, managedAttribute, "defaultValue");
+		if (ann.defaultValue().length() > 0) {
+			managedAttribute.setDefaultValue(ann.defaultValue());
 		}
-		return attr;
+		return managedAttribute;
 	}
 
 	public ManagedOperation getManagedOperation(Method method) throws InvalidMetadataException {
@@ -95,11 +81,9 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 		if (ann == null) {
 			return null;
 		}
-		org.springframework.jmx.export.annotation.ManagedOperation mo =
-				(org.springframework.jmx.export.annotation.ManagedOperation) ann;
+
 		ManagedOperation op = new ManagedOperation();
-		op.setDescription(mo.description());
-		op.setCurrencyTimeLimit(mo.currencyTimeLimit());
+		AnnotationUtils.copyPropertiesToBean(ann, op);
 		return op;
 	}
 
@@ -112,14 +96,13 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 			result = new ManagedOperationParameter[0];
 		}
 		else {
-			org.springframework.jmx.export.annotation.ManagedOperationParameter[] paramData = params.value();
+			Annotation[] paramData = params.value();
 			result = new ManagedOperationParameter[paramData.length];
 			for (int i = 0; i < paramData.length; i++) {
-				org.springframework.jmx.export.annotation.ManagedOperationParameter mop = paramData[i];
-				ManagedOperationParameter attr = new ManagedOperationParameter();
-				attr.setName(mop.name());
-				attr.setDescription(mop.description());
-				result[i] = attr;
+				Annotation annotation = paramData[i];
+				ManagedOperationParameter managedOperationParameter = new ManagedOperationParameter();
+				AnnotationUtils.copyPropertiesToBean(annotation, managedOperationParameter);
+				result[i] = managedOperationParameter;
 			}
 		}
 		return result;
@@ -130,16 +113,14 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 		if(notificationsAnn == null) {
 			return new ManagedNotification[0];
 		}
-		org.springframework.jmx.export.annotation.ManagedNotification[] notifications = notificationsAnn.value();
+		Annotation[] notifications = notificationsAnn.value();
 		ManagedNotification[] result = new ManagedNotification[notifications.length];
 		for (int i = 0; i < notifications.length; i++) {
-			org.springframework.jmx.export.annotation.ManagedNotification notification = notifications[i];
+			Annotation notification = notifications[i];
 
-			ManagedNotification notif = new ManagedNotification();
-			notif.setName(notification.name());
-			notif.setDescription(notification.description());
-			notif.setNotificationTypes(notification.notificationTypes());
-			result[i] = notif;
+			ManagedNotification managedNotification = new ManagedNotification();
+			AnnotationUtils.copyPropertiesToBean(notification, managedNotification);
+			result[i] = managedNotification;
 		}
 		return result;
 	}
