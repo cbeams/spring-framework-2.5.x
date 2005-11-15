@@ -52,7 +52,7 @@ import org.springframework.util.StringUtils;
  * @see MethodExclusionMBeanInfoAssembler
  * @see org.springframework.jmx.export.MBeanExporter
  */
-public class MethodNameBasedMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssembler {
+public class MethodNameBasedMBeanInfoAssembler extends AbstractConfigurableMBeanInfoAssembler {
 
 	/**
 	 * Stores the set of method names to use for creating the management interface.

@@ -19,6 +19,7 @@ package org.springframework.jmx.support;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Hashtable;
 
 import javax.management.DynamicMBean;
 import javax.management.MBeanParameterInfo;
@@ -26,15 +27,18 @@ import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import javax.management.modelmbean.ModelMBeanNotificationInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.jmx.MBeanServerNotFoundException;
+import org.springframework.jmx.export.metadata.ManagedNotification;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Collection of generic utility methods to support Spring JMX.
@@ -47,11 +51,20 @@ import org.springframework.util.StringUtils;
 public class JmxUtils {
 
 	/**
+	 * Log instance for this class.
+	 */
+	private static final Log logger = LogFactory.getLog(JmxUtils.class);
+
+	/**
 	 * Suffix used to identify an MBean interface
 	 */
 	private static final String MBEAN_SUFFIX = "MBean";
 
-	private static final Log logger = LogFactory.getLog(JmxUtils.class);
+	/**
+	 * The key used when extending an existing {@link ObjectName} with the
+	 * identity hash code of its corresponding managed resource.
+	 */
+	public static final String IDENTITY_OBJECT_NAME_KEY = "identity";
 
 
 	/**
@@ -245,5 +258,39 @@ public class JmxUtils {
 					"Unable to convert object of type [" + value.getClass() + "] to ObjectName");
 		}
 	}
+
+	/**
+	 * Appends an additional key/value pair to an existing {@link ObjectName} with the key being
+	 * the static value <code>identity</code> and the value being the identity hash code of the
+	 * managed resource being exposed on the supplied {@link ObjectName}. This can be used to provide
+	 * a unique {@link ObjectName} for each distinct instance of a particular bean or class. Useful when
+	 * generating {@link ObjectName ObjectNames} at runtime for a set of managed resources based on
+	 * the template value supplied by a {@link org.springframework.jmx.export.naming.ObjectNamingStrategy}.
+	 */
+	public static ObjectName appendIdentityToObjectName(ObjectName objectName, Object managedResource) throws MalformedObjectNameException {
+		Hashtable keyProperties = objectName.getKeyPropertyList();
+		keyProperties.put(IDENTITY_OBJECT_NAME_KEY, ObjectUtils.getIdentityHexString(managedResource));
+		return ObjectNameManager.getInstance(objectName.getDomain(), keyProperties);
+	}
+
+	/**
+	 * Converts the supplied {@link ManagedNotification} into the corresponding {@link ModelMBeanNotificationInfo}.
+	 */
+	public static ModelMBeanNotificationInfo convertToModelMBeanNotificationInfo(ManagedNotification notificationInfo) {
+		String name = notificationInfo.getName();
+		if(!StringUtils.hasText(name)) {
+			throw new IllegalArgumentException("Must specify notification name.");
+		}
+
+		String[] notifTypes = notificationInfo.getNotificationTypes();
+		if(notifTypes == null || notifTypes.length == 0) {
+			throw new IllegalArgumentException("Must specify at least one notification type.");
+		}
+
+		String description = notificationInfo.getDescription();
+
+		return new ModelMBeanNotificationInfo(notifTypes, name, description);
+	}
+
 
 }

@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import org.springframework.beans.BeanUtils;
 import org.springframework.jmx.export.metadata.*;
 import org.springframework.jmx.export.metadata.ManagedAttribute;
+import org.springframework.jmx.export.metadata.ManagedNotification;
 import org.springframework.jmx.export.metadata.ManagedOperation;
 import org.springframework.jmx.export.metadata.ManagedResource;
 import org.springframework.jmx.export.metadata.ManagedOperationParameter;
@@ -120,6 +121,25 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 				attr.setDescription(mop.description());
 				result[i] = attr;
 			}
+		}
+		return result;
+	}
+
+	public ManagedNotification[] getManagedNotifications(Class clazz) throws InvalidMetadataException {
+		ManagedNotifications notificationsAnn = (ManagedNotifications) clazz.getAnnotation(ManagedNotifications.class);
+		if(notificationsAnn == null) {
+			return new ManagedNotification[0];
+		}
+		org.springframework.jmx.export.annotation.ManagedNotification[] notifications = notificationsAnn.value();
+		ManagedNotification[] result = new ManagedNotification[notifications.length];
+		for (int i = 0; i < notifications.length; i++) {
+			org.springframework.jmx.export.annotation.ManagedNotification notification = notifications[i];
+
+			ManagedNotification notif = new ManagedNotification();
+			notif.setName(notification.name());
+			notif.setDescription(notification.description());
+			notif.setNotificationTypes(notification.notificationTypes());
+			result[i] = notif;
 		}
 		return result;
 	}

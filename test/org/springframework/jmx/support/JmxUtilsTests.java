@@ -30,6 +30,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.TestDynamicMBean;
+import org.springframework.util.ObjectUtils;
 
 /**
  * @author Rob Harrop
@@ -85,14 +86,25 @@ public class JmxUtilsTests extends TestCase {
 		ObjectName objectName = ObjectNameManager.getInstance("spring:name=Test");
 		assertEquals(objectName, JmxUtils.convertToObjectName(objectName));
 		assertEquals(objectName, JmxUtils.convertToObjectName(objectName.toString()));
-		
+
 		try {
 			JmxUtils.convertToObjectName(new Integer(1));
 			fail("Should not be able to convert Integer to ObjectName");
 		} catch(IllegalArgumentException ex) {
 			//desired
 		}
+	}
 
+	public void testAppendIdentityToObjectName() throws MalformedObjectNameException {
+		ObjectName objectName = ObjectNameManager.getInstance("spring:type=Test");
+		Object managedResource = new Object();
+		ObjectName uniqueName = JmxUtils.appendIdentityToObjectName(objectName, managedResource);
+
+		String typeProperty = "type";
+
+		assertEquals("Domain of transformed name is incorrect", objectName.getDomain(), uniqueName.getDomain());
+		assertEquals("Type key is incorrect", objectName.getKeyProperty(typeProperty), uniqueName.getKeyProperty("type"));
+		assertEquals("Identity key is incorrect", ObjectUtils.getIdentityHexString(managedResource), uniqueName.getKeyProperty(JmxUtils.IDENTITY_OBJECT_NAME_KEY));
 	}
 
 

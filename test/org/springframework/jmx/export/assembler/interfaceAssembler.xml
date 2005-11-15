@@ -12,7 +12,21 @@
 			</map>
 		</property>
 		<property name="assembler">
-			<bean class="org.springframework.jmx.export.assembler.InterfaceBasedMBeanInfoAssembler"/>
+			<bean class="org.springframework.jmx.export.assembler.InterfaceBasedMBeanInfoAssembler">
+				<property name="notificationInfoMappings">
+					<map>
+						<entry key="bean:name=testBean4">
+							<list>
+								<bean class="org.springframework.jmx.export.metadata.ManagedNotification">
+									<property name="name" value="My Notification"/>
+									<property name="description" value="A Notification"/>
+									<property name="notificationTypes" value="type.foo,type.bar"/>
+								</bean>
+							</list>
+						</entry>
+					</map>
+				</property>
+			</bean>
 		</property>
 	</bean>
 

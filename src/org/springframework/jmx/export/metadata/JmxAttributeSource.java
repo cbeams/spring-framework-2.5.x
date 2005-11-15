@@ -69,4 +69,13 @@ public interface JmxAttributeSource {
 	 */
 	ManagedOperationParameter[] getManagedOperationParameters(Method method) throws InvalidMetadataException;
 
+	/**
+	 * Implementations should return an array of {@link ManagedNotification ManagedNotifications}
+	 * if the supplied the <code>Class</code> has the corresponding metadata. Otherwise
+	 * should return an empty array.
+	 * @param clazz the <code>Class</code> to read the metadata from.
+	 * @return the notification information
+	 * @throws InvalidMetadataException in the case of invalid metadata
+	 */
+	ManagedNotification[] getManagedNotifications(Class clazz) throws InvalidMetadataException;
 }

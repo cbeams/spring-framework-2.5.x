@@ -32,13 +32,14 @@ import org.springframework.core.JdkVersion;
 import org.springframework.jmx.AbstractJmxTests;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
+import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.assembler.AbstractReflectiveMBeanInfoAssembler;
 
 /**
  * @author Rob Harrop
  */
-public class MBeanClientInterceptorTests extends AbstractJmxTests {
+public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 
 	protected static final String OBJECT_NAME = "spring:test=proxy";
 
@@ -46,8 +47,7 @@ public class MBeanClientInterceptorTests extends AbstractJmxTests {
 	
 	protected boolean runTests = true;
 
-	public void setUp() throws Exception {
-		super.setUp();
+	public void onSetUp() throws Exception {
 
 		target = new JmxTestBean();
 		target.setAge(100);
@@ -56,14 +56,14 @@ public class MBeanClientInterceptorTests extends AbstractJmxTests {
 		MBeanExporter adapter = new MBeanExporter();
 		Map beans = new HashMap();
 		beans.put(OBJECT_NAME, target);
-		adapter.setServer(server);
+		adapter.setServer(getServer());
 		adapter.setBeans(beans);
 		adapter.setAssembler(new ProxyTestAssembler());
 		adapter.afterPropertiesSet();
 	}
 
 	protected MBeanServerConnection getServerConnection() throws Exception {
-		return server;
+		return getServer();
 	}
 
 	protected IJmxTestBean getProxy() throws Exception {
@@ -151,7 +151,7 @@ public class MBeanClientInterceptorTests extends AbstractJmxTests {
 		}
 
 		JMXServiceURL url = new JMXServiceURL("service:jmx:jmxmp://localhost:9876");
-		JMXConnectorServer connector = JMXConnectorServerFactory.newJMXConnectorServer(url, null, server);
+		JMXConnectorServer connector = JMXConnectorServerFactory.newJMXConnectorServer(url, null, getServer());
 
 		MBeanProxyFactoryBean factory = new MBeanProxyFactoryBean();
 		factory.setServiceUrl(url.toString());

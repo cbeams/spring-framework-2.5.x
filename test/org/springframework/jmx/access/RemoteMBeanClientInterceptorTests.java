@@ -39,9 +39,9 @@ public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTes
 
 	private JMXConnector connector;	
 	
-	public void setUp() throws Exception {
-		super.setUp();
-		this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(getServiceUrl(), null, server);
+	public void onSetUp() throws Exception {
+		super.onSetUp();
+		this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(getServiceUrl(), null, getServer());
 		try {
 			this.connectorServer.start();
 		} catch (BindException e) {

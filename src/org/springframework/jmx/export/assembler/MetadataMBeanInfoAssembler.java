@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 
 import javax.management.Descriptor;
 import javax.management.MBeanParameterInfo;
+import javax.management.JMException;
+import javax.management.modelmbean.ModelMBeanNotificationInfo;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
@@ -31,6 +33,8 @@ import org.springframework.jmx.export.metadata.ManagedAttribute;
 import org.springframework.jmx.export.metadata.ManagedOperation;
 import org.springframework.jmx.export.metadata.ManagedOperationParameter;
 import org.springframework.jmx.export.metadata.ManagedResource;
+import org.springframework.jmx.export.metadata.ManagedNotification;
+import org.springframework.jmx.support.JmxUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -226,6 +230,21 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		return parameterInfo;
 	}
 
+	/**
+	 * Reads the {@link ManagedNotification} metadata from the <code>Class</code> of the managed resource
+	 * and generates and returns the corresponding {@link ModelMBeanNotificationInfo} metadata.
+	 */
+	protected ModelMBeanNotificationInfo[] getNotificationInfo(Object managedBean, String beanKey) throws JMException {
+		ManagedNotification[] notificationAttributes = this.attributeSource.getManagedNotifications(getClassToExpose(managedBean));
+		ModelMBeanNotificationInfo[] notificationInfos = new ModelMBeanNotificationInfo[notificationAttributes.length];
+
+		for (int i = 0; i < notificationAttributes.length; i++) {
+			ManagedNotification attribute = notificationAttributes[i];
+			notificationInfos[i] = JmxUtils.convertToModelMBeanNotificationInfo(attribute);
+		}
+
+		return notificationInfos;
+	}
 
 	/**
 	 * Adds descriptor fields from the <code>ManagedResource</code> attribute

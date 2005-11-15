@@ -24,9 +24,12 @@ import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jmx.AbstractJmxTests;
 import org.springframework.jmx.IJmxTestBean;
+import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.support.ObjectNameManager;
 
 /**
+ * Tests creation of JMX MBean proxies.
+ * 
  * @author Rob Harrop
  */
 public class MBeanProxyFactoryBeanTests extends AbstractJmxTests {
@@ -62,8 +65,9 @@ public class MBeanProxyFactoryBeanTests extends AbstractJmxTests {
 		fb.setProxyInterface(IJmxTestBean.class);
 		fb.setObjectName(OBJECT_NAME);
 		fb.afterPropertiesSet();
-		Object proxy = fb.getObject();
-		assertNotNull(proxy);
+		IJmxTestBean proxy = (IJmxTestBean)fb.getObject();
+		assertNotNull("Proxy should not be null", proxy);
+		assertEquals("Incorrect name value", "TEST", proxy.getName());
 	}
 
 	public void testProxyFactoryBeanWithAutodetect() throws Exception {
@@ -83,7 +87,7 @@ public class MBeanProxyFactoryBeanTests extends AbstractJmxTests {
 
 	private MBeanProxyFactoryBean getProxyFactory() throws MalformedObjectNameException {
 		MBeanProxyFactoryBean fb = new MBeanProxyFactoryBean();
-		fb.setServer(server);
+		fb.setServer(getServer());
 		fb.setObjectName(OBJECT_NAME);
 		return fb;
 	}

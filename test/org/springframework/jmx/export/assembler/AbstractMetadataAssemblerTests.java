@@ -93,7 +93,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		assertNotNull("Attribute should not be null", attr);
 	}
 
-	public void testMBeanDescriptor() throws Exception {
+	public void testManagedResourceDescriptor() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		Descriptor desc = info.getMBeanDescriptor();
 
@@ -106,16 +106,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		assertEquals("Persist Name should be bar", "bar.jmx", desc.getFieldValue("persistName"));
 	}
 
-	public void testAgeAttributeDescriptor() throws Exception {
-		ModelMBeanInfo info = getMBeanInfoFromAssembler();
-		Descriptor desc = info.getAttribute(AGE_ATTRIBUTE).getDescriptor();
-
-		assertEquals("Currency Time Limit should be 15", "15", desc.getFieldValue("currencyTimeLimit"));
-		assertEquals("Persist Policy should be inherited", null, desc.getFieldValue("persistPolicy"));
-		assertEquals("Persist Period should be inherited", null, desc.getFieldValue("persistPeriod"));
-	}
-
-	public void testNameAttributeDescriptor() throws Exception {
+	public void testAttributeDescriptor() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		Descriptor desc = info.getAttribute(NAME_ATTRIBUTE).getDescriptor();
 
@@ -166,40 +157,11 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		exporter.setBeans(beans);
 		exporter.afterPropertiesSet();
 
-		MBeanInfo inf = server.getMBeanInfo(ObjectNameManager.getInstance(objectName));
+		MBeanInfo inf = getServer().getMBeanInfo(ObjectNameManager.getInstance(objectName));
 		assertEquals("Incorrect number of operations", getExpectedOperationCount(), inf.getOperations().length);
 		assertEquals("Incorrect number of attributes", getExpectedAttributeCount(), inf.getAttributes().length);
 
 		assertTrue("Not included in autodetection", assembler.includeBean(proxy.getClass(), "some bean name"));
-	}
-
-	public void testWithJdkProxy() throws Exception {
-		IJmxTestBean tb = createJmxTestBean();
-		ProxyFactory pf = new ProxyFactory();
-		pf.setTarget(tb);
-		pf.addInterface(IJmxTestBean.class);
-		pf.addAdvice(new NopInterceptor());
-		Object proxy = pf.getProxy();
-
-		MetadataMBeanInfoAssembler assembler = (MetadataMBeanInfoAssembler) getAssembler();
-
-		MBeanExporter exporter = new MBeanExporter();
-		exporter.setBeanFactory(getContext());
-		exporter.setAssembler(assembler);
-
-		String objectName = "spring:bean=test,proxy=true";
-
-		Map beans = new HashMap();
-		beans.put(objectName, proxy);
-		exporter.setBeans(beans);
-
-		try {
-			exporter.afterPropertiesSet();
-			fail("Should have thrown an IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
 	}
 
 	protected abstract String getObjectName();

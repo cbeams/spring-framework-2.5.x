@@ -16,8 +16,8 @@
 
 package org.springframework.jmx.support;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
+import org.springframework.core.JdkVersion;
+import org.springframework.jmx.AbstractMBeanServerTests;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
@@ -27,14 +27,13 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-
-import org.springframework.core.JdkVersion;
-import org.springframework.jmx.AbstractJmxTests;
+import java.io.IOException;
+import java.net.MalformedURLException;
 
 /**
  * @author Rob Harrop
  */
-public class ConnectorServerFactoryBeanTests extends AbstractJmxTests {
+public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 
 	private static final String OBJECT_NAME = "spring:type=connector,name=test";
 
@@ -48,7 +47,7 @@ public class ConnectorServerFactoryBeanTests extends AbstractJmxTests {
 		bean.afterPropertiesSet();
 
 		try {
-			checkServerConnection(server);
+			checkServerConnection(getServer());
 		}
 		finally {
 			bean.destroy();
@@ -62,11 +61,11 @@ public class ConnectorServerFactoryBeanTests extends AbstractJmxTests {
 		}
 
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
-		bean.setServer(server);
+		bean.setServer(getServer());
 		bean.afterPropertiesSet();
 
 		try {
-			checkServerConnection(server);
+			checkServerConnection(getServer());
 		}
 		finally {
 			bean.destroy();
@@ -80,7 +79,7 @@ public class ConnectorServerFactoryBeanTests extends AbstractJmxTests {
 
 		try {
 			// Try to get the connector bean.
-			ObjectInstance instance = server.getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
+			ObjectInstance instance = getServer().getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
 			assertNotNull("ObjectInstance should not be null", instance);
 		}
 		finally {
@@ -94,7 +93,7 @@ public class ConnectorServerFactoryBeanTests extends AbstractJmxTests {
 
 		try {
 			// Try to get the connector bean.
-			ObjectInstance instance = server.getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
+			getServer().getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
 			fail("Instance should not be found");
 		}
 		catch (InstanceNotFoundException ex) {
@@ -107,8 +106,9 @@ public class ConnectorServerFactoryBeanTests extends AbstractJmxTests {
 
 	private void checkServerConnection(MBeanServer hostedServer) throws IOException, MalformedURLException {
 		// Try to connect using client.
-		JMXConnector connector = JMXConnectorFactory.connect(
-				new JMXServiceURL(ConnectorServerFactoryBean.DEFAULT_SERVICE_URL));
+		JMXServiceURL serviceURL = new JMXServiceURL(ConnectorServerFactoryBean.DEFAULT_SERVICE_URL);
+		JMXConnector connector = JMXConnectorFactory.connect(serviceURL);
+
 		assertNotNull("Client Connector should not be null", connector);
 
 		// Get the MBean server connection.

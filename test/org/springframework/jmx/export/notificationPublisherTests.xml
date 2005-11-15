@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
+		"http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+	<bean id="publisher" class="org.springframework.jmx.export.NotificationPublisherTests$MyNotificationPublisher"/>
+
+	<bean id="mbeanExporter" class="org.springframework.jmx.export.MBeanExporter">
+		<property name="beans">
+			<map>
+				<entry key="spring:type=Publisher" value-ref="publisher"/>
+			</map>
+		</property>
+	</bean>
+</beans>

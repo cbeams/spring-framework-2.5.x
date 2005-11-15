@@ -24,6 +24,7 @@ import org.springframework.jmx.IJmxTestBean;
 @ManagedResource(objectName = "bean:name=testBean4", description = "My Managed Bean", log = true,
 		logFile = "jmx.log", currencyTimeLimit = 15, persistPolicy = "OnUpdate", persistPeriod = 200,
 		persistLocation = "./foo", persistName = "bar.jmx")
+@ManagedNotifications({@ManagedNotification(name="My Notification", notificationTypes={"type.foo", "type.bar"})})
 public class AnnotationTestBean implements IJmxTestBean {
 
 	private String name;
@@ -62,7 +63,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 		return name;
 	}
 
-	@org.springframework.jmx.export.annotation.ManagedAttribute(description = "The Nick Name Attribute")
+	@ManagedAttribute(description = "The Nick Name Attribute")
 	public String getNickName() {
 		return this.nickName;
 	}
@@ -71,7 +72,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 		this.nickName = nickName;
 	}
 
-	@org.springframework.jmx.export.annotation.ManagedAttribute(description = "The Is Superman Attribute")
+	@ManagedAttribute(description = "The Is Superman Attribute")
 	public void setSuperman(boolean superman) {
 		this.isSuperman = superman;
 	}

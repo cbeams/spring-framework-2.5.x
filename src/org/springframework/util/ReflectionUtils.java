@@ -17,12 +17,14 @@
 package org.springframework.util;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Simple utility class for handling reflection exceptions.
  * Only intended for internal use.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 1.2.2
  */
 public abstract class ReflectionUtils {
@@ -70,4 +72,32 @@ public abstract class ReflectionUtils {
 				": " + ex.getTargetException().getMessage());
 	}
 
+	/**
+	 * Invoke the specified {@link Method} against the supplied target object with no arguments
+	 * The target object can be null when invoking a static {@link Method}.
+	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
+	 */
+	public static Object invokeMethod(Method method, Object target) {
+		 return invokeMethod(method, target, null);
+	}
+
+	/**
+	 * Invoke the specified {@link Method} against the supplied target object with the supplied arguments
+	 * The target object can be null when invoking a static {@link Method}.
+	 * <p/>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
+	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
+	 */
+	public static Object invokeMethod(Method method, Object target, Object[] args) {
+		try {
+			return method.invoke(target, args);
+		}
+		catch (IllegalAccessException e) {
+			handleReflectionException(e);
+			throw new IllegalStateException("Should not get here.", e);
+		}
+		catch (InvocationTargetException e) {
+			handleReflectionException(e);
+			throw new IllegalStateException("Should not get here.", e);
+		}
+	}
 }

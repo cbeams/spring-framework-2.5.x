@@ -9,6 +9,17 @@
 				</entry>
 			</map>
 		</property>
+		<property name="assembler">
+			<bean class="org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler">
+				<property name="notificationInfos">
+					<bean class="org.springframework.jmx.export.metadata.ManagedNotification">
+						<property name="name" value="My Notification"/>
+						<property name="description" value="A Notification"/>
+						<property name="notificationTypes" value="type.foo,type.bar"/>
+					</bean>
+				</property>
+			</bean>
+		</property>
 	</bean>
 
 

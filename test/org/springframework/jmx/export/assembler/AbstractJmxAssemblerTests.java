@@ -20,6 +20,7 @@ import javax.management.Attribute;
 import javax.management.Descriptor;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
+import javax.management.MBeanNotificationInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
@@ -109,7 +110,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 
 	public void testSetAttribute() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
-		server.setAttribute(objectName, new Attribute(NAME_ATTRIBUTE, "Rob Harrop"));
+		getServer().setAttribute(objectName, new Attribute(NAME_ATTRIBUTE, "Rob Harrop"));
 		IJmxTestBean bean = (IJmxTestBean) getContext().getBean("testBean");
 		assertEquals("Rob Harrop", bean.getName());
 	}
@@ -117,15 +118,15 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	public void testGetAttribute() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
 		getBean().setName("John Smith");
-		Object val = server.getAttribute(objectName, NAME_ATTRIBUTE);
+		Object val = getServer().getAttribute(objectName, NAME_ATTRIBUTE);
 		assertEquals("Incorrect result", "John Smith", val);
 	}
 
 	public void testOperationInvocation() throws Exception{
 		ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
-		Object result = server.invoke(objectName, "add",
+		Object result = getServer().invoke(objectName, "add",
 				new Object[] {new Integer(20), new Integer(30)}, new String[] {"int", "int"});
-    assertEquals("Incorrect result", new Integer(50), result);
+	assertEquals("Incorrect result", new Integer(50), result);
 	}
 
 	public void testAttributeInfoHasDescriptors() throws Exception {
@@ -161,6 +162,19 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 		assertEquals("set operation should have role \"setter\"", "setter", set.getDescriptor().getFieldValue("role"));
 	}
 
+	public void testNotificationMetadata() throws Exception {
+		ModelMBeanInfo info = (ModelMBeanInfo) getMBeanInfo();
+		MBeanNotificationInfo[] notifications = info.getNotifications();
+		assertEquals("Incorrect number of notifications", 1, notifications.length);
+		assertEquals("Incorrect notification name", "My Notification", notifications[0].getName());
+
+		String[] notifTypes = notifications[0].getNotifTypes();
+
+		assertEquals("Incorrect number of notification types", 2, notifTypes.length);
+		assertEquals("Notification type.foo not found", "type.foo", notifTypes[0]);
+		assertEquals("Notification type.bar not found", "type.bar", notifTypes[1]);
+	}
+
 	protected ModelMBeanInfo getMBeanInfoFromAssembler() throws Exception {
 		IJmxTestBean bean = getBean();
 		ModelMBeanInfo info = getAssembler().getMBeanInfo(bean, getObjectName());
@@ -168,11 +182,11 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	}
 
 	protected MBeanInfo getMBeanInfo() throws Exception {
-		return server.getMBeanInfo(ObjectNameManager.getInstance(getObjectName()));
+		return getServer().getMBeanInfo(ObjectNameManager.getInstance(getObjectName()));
 	}
 
 	protected ObjectInstance getObjectInstance() throws Exception {
-		return server.getObjectInstance(ObjectNameManager.getInstance(getObjectName()));
+		return getServer().getObjectInstance(ObjectNameManager.getInstance(getObjectName()));
 	}
 
 	protected abstract int getExpectedOperationCount();

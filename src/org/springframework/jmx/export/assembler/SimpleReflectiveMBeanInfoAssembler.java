@@ -27,7 +27,7 @@ import java.lang.reflect.Method;
  * @author Juergen Hoeller
  * @since 1.2
  */
-public class SimpleReflectiveMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssembler {
+public class SimpleReflectiveMBeanInfoAssembler extends AbstractConfigurableMBeanInfoAssembler {
 
 	/**
 	 * Always returns <code>true</code>.

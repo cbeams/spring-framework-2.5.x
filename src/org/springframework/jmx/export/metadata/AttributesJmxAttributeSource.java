@@ -191,4 +191,13 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 		}
 	}
 
+	/**
+	 * If the specified has {@link ManagedNotification} attributes these are returned, otherwise
+	 * a zero-length array is returned.
+	 */
+	public ManagedNotification[] getManagedNotifications(Class clazz) {
+		Assert.notNull(this.attributes, "'attributes' is required");
+		Collection attrs = this.attributes.getAttributes(clazz, ManagedNotification.class);
+		return attrs.isEmpty() ? new ManagedNotification[0] : (ManagedNotification[]) attrs.toArray(new ManagedNotification[attrs.size()]);
+	}
 }

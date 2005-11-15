@@ -16,9 +16,9 @@
 
 package org.springframework.jmx.support;
 
-import org.springframework.core.JdkVersion;
-import org.springframework.jmx.AbstractJmxTests;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.core.JdkVersion;
+import org.springframework.jmx.AbstractMBeanServerTests;
 
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnectorServer;
@@ -29,7 +29,7 @@ import java.net.MalformedURLException;
 /**
  * @author Rob Harrop
  */
-public class MBeanServerConnectionFactoryBeanTests extends AbstractJmxTests {
+public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTests {
 
 	private static final String SERVICE_URL = "service:jmx:jmxmp://localhost:9876";
 
@@ -38,7 +38,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractJmxTests {
 	}
 
 	private JMXConnectorServer getConnectorServer() throws Exception {
-		return JMXConnectorServerFactory.newJMXConnectorServer(getServiceUrl(), null, server);
+		return JMXConnectorServerFactory.newJMXConnectorServer(getServiceUrl(), null, getServer());
 	}
 
 	public void testValidConnection() throws Exception {
@@ -60,7 +60,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractJmxTests {
 				assertNotNull("Connection should not be null", connection);
 
 				// perform simple MBean count test
-				assertEquals("MBean count should be the same", server.getMBeanCount(), connection.getMBeanCount());
+				assertEquals("MBean count should be the same", getServer().getMBeanCount(), connection.getMBeanCount());
 			}
 			finally {
 				bean.destroy();
@@ -102,9 +102,10 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractJmxTests {
 			connector = getConnectorServer();
 			connector.start();
 
-			assertEquals("Incorrect MBean count", server.getMBeanCount(), connection.getMBeanCount());
-		} finally {
-			if(connector != null) {
+			assertEquals("Incorrect MBean count", getServer().getMBeanCount(), connection.getMBeanCount());
+		}
+		finally {
+			if (connector != null) {
 				connector.stop();
 			}
 		}

@@ -21,7 +21,8 @@ package org.springframework.jmx;
  *    (description="My Managed Bean", objectName="spring:bean=test",
  *    log=true, logFile="jmx.log", currencyTimeLimit=15, persistPolicy="OnUpdate",
  *    persistPeriod=200, persistLocation="./foo", persistName="bar.jmx")
- *
+ * @@org.springframework.jmx.export.metadata.ManagedNotification
+ *    (name="My Notification", description="A Notification", notificationTypes="type.foo,type.bar")
  * @author Rob Harrop
  */
 public class JmxTestBean implements IJmxTestBean {

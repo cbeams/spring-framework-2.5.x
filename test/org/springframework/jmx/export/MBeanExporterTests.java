@@ -16,11 +16,11 @@
 
 package org.springframework.jmx.export;
 
-import junit.framework.TestCase;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
@@ -30,7 +30,6 @@ import org.springframework.jmx.support.ObjectNameManager;
 import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
 import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
@@ -43,61 +42,41 @@ import java.util.Map;
 /**
  * @author Rob Harrop
  */
-public class MBeanExporterTests extends TestCase {
+public class MBeanExporterTests extends AbstractMBeanServerTests {
 
 	private static final String OBJECT_NAME = "spring:test=jmxMBeanAdaptor";
 
 	public void testWithSuppliedMBeanServer() throws Exception {
-		MBeanServer server = MBeanServerFactory.newMBeanServer();
-		try {
-			MBeanExporter adaptor = new MBeanExporter();
-			adaptor.setBeans(getBeanMap());
-			adaptor.setServer(server);
-			adaptor.afterPropertiesSet();
-			assertTrue("The bean was not registered with the MBeanServer",
-					beanExists(server, ObjectNameManager.getInstance(OBJECT_NAME)));
-		}
-		finally {
-			server.unregisterMBean(new ObjectName(OBJECT_NAME));
-		}
+		MBeanExporter adaptor = new MBeanExporter();
+		adaptor.setBeans(getBeanMap());
+		adaptor.setServer(server);
+		adaptor.afterPropertiesSet();
+		assertIsRegistered("The bean was not registered with the MBeanServer", ObjectNameManager.getInstance(OBJECT_NAME));
 	}
 
 	public void testWithLocatedMBeanServer() throws Exception {
-		MBeanServer server = MBeanServerFactory.createMBeanServer();
-		try {
-			MBeanExporter adaptor = new MBeanExporter();
-			adaptor.setBeans(getBeanMap());
-			adaptor.afterPropertiesSet();
-			assertTrue("The bean was not registered with the MBeanServer",
-					beanExists(server, ObjectNameManager.getInstance(OBJECT_NAME)));
-			server.unregisterMBean(new ObjectName(OBJECT_NAME));
-		}
-		finally {
-			MBeanServerFactory.releaseMBeanServer(server);
-		}
+		MBeanExporter adaptor = new MBeanExporter();
+		adaptor.setBeans(getBeanMap());
+		adaptor.afterPropertiesSet();
+		assertIsRegistered("The bean was not registered with the MBeanServer", ObjectNameManager.getInstance(OBJECT_NAME));
+		server.unregisterMBean(new ObjectName(OBJECT_NAME));
 	}
 
 	public void testUserCreatedMBeanRegWithDynamicMBean() throws Exception {
 		Map map = new HashMap();
 		map.put("spring:name=dynBean", new TestDynamicMBean());
 
-		MBeanServer server = MBeanServerFactory.createMBeanServer();
-		try {
-			InvokeDetectAssembler asm = new InvokeDetectAssembler();
+		InvokeDetectAssembler asm = new InvokeDetectAssembler();
 
-			MBeanExporter adaptor = new MBeanExporter();
-			adaptor.setServer(server);
-			adaptor.setBeans(map);
-			adaptor.setAssembler(asm);
-			adaptor.afterPropertiesSet();
+		MBeanExporter adaptor = new MBeanExporter();
+		adaptor.setServer(server);
+		adaptor.setBeans(map);
+		adaptor.setAssembler(asm);
+		adaptor.afterPropertiesSet();
 
-			Object name = server.getAttribute(ObjectNameManager.getInstance("spring:name=dynBean"), "name");
-			assertEquals("The name attribute is incorrect", "Rob Harrop", name);
-			assertFalse("Assembler should not have been invoked", asm.invoked);
-		}
-		finally {
-			MBeanServerFactory.releaseMBeanServer(server);
-		}
+		Object name = server.getAttribute(ObjectNameManager.getInstance("spring:name=dynBean"), "name");
+		assertEquals("The name attribute is incorrect", "Rob Harrop", name);
+		assertFalse("Assembler should not have been invoked", asm.invoked);
 	}
 
 	public void testAutodetectMBeans() throws Exception {
@@ -151,32 +130,17 @@ public class MBeanExporterTests extends TestCase {
 		MockMBeanExporterListener listener1 = new MockMBeanExporterListener();
 		MockMBeanExporterListener listener2 = new MockMBeanExporterListener();
 
-		MBeanServer server = MBeanServerFactory.newMBeanServer();
-		MBeanExporter adaptor = null;
-		try {
-			adaptor = new MBeanExporter();
-			adaptor.setBeans(getBeanMap());
-			adaptor.setServer(server);
-			adaptor.setListeners(new MBeanExporterListener[]{listener1, listener2});
-			adaptor.afterPropertiesSet();
-		}
-		finally {
-			if (adaptor != null) {
-				adaptor.destroy();
-			}
-		}
-
+		MBeanExporter adaptor = new MBeanExporter();
+		adaptor.setBeans(getBeanMap());
+		adaptor.setServer(server);
+		adaptor.setListeners(new MBeanExporterListener[]{listener1, listener2});
+		adaptor.afterPropertiesSet();
+		adaptor.destroy();
+		
 		assertListener(listener1);
 		assertListener(listener2);
 	}
 
-	private void assertListener(MockMBeanExporterListener listener) throws MalformedObjectNameException {
-		ObjectName desired = ObjectNameManager.getInstance(OBJECT_NAME);
-		assertEquals("Incorrect number of registrations", 1, listener.getRegistered().size());
-		assertEquals("Incorrect number of unregistrations", 1, listener.getUnregistered().size());
-		assertEquals("Incorrect ObjectName in register", desired, listener.getRegistered().get(0));
-		assertEquals("Incorrect ObjectName in unregister", desired, listener.getUnregistered().get(0));
-	}
 
 	public void testExportJdkProxy() throws Exception {
 		JmxTestBean bean = new JmxTestBean();
@@ -192,7 +156,6 @@ public class MBeanExporterTests extends TestCase {
 
 		Map beans = new HashMap();
 		beans.put(name, proxy);
-		MBeanServer server = MBeanServerFactory.newMBeanServer();
 
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
@@ -213,91 +176,80 @@ public class MBeanExporterTests extends TestCase {
 		beans.put("foo", testBean);
 
 
-		MBeanServer server = MBeanServerFactory.createMBeanServer();
-		try {
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(server);
+		exporter.setBeans(beans);
 
-			MBeanExporter adaptor = new MBeanExporter();
-			adaptor.setServer(server);
-			adaptor.setBeans(beans);
+		exporter.afterPropertiesSet();
 
-			adaptor.afterPropertiesSet();
-
-			ObjectInstance instance = server.getObjectInstance(objectName);
-			assertNotNull(instance);
-		}
-		finally {
-			MBeanServerFactory.releaseMBeanServer(server);
-		}
+		ObjectInstance instance = server.getObjectInstance(objectName);
+		assertNotNull(instance);
 	}
 
 	public void testRegisterIgnoreExisting() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance(OBJECT_NAME);
 
-		MBeanServer server = MBeanServerFactory.createMBeanServer();
-		try {
 
-			Person preRegistered = new Person();
-			preRegistered.setName("Rob Harrop");
+		Person preRegistered = new Person();
+		preRegistered.setName("Rob Harrop");
 
-			server.registerMBean(preRegistered, objectName);
+		server.registerMBean(preRegistered, objectName);
 
-			Person springRegistered = new Person();
-			springRegistered.setName("Sally Greenwood");
+		Person springRegistered = new Person();
+		springRegistered.setName("Sally Greenwood");
 
-			Map beans = new HashMap();
-			beans.put(objectName.toString(), springRegistered);
+		Map beans = new HashMap();
+		beans.put(objectName.toString(), springRegistered);
 
-			MBeanExporter adaptor = new MBeanExporter();
-			adaptor.setServer(server);
-			adaptor.setBeans(beans);
-			adaptor.setRegistrationBehavior(MBeanExporter.REGISTRATION_IGNORE_EXISTING);
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(server);
+		exporter.setBeans(beans);
+		exporter.setRegistrationBehavior(MBeanExporter.REGISTRATION_IGNORE_EXISTING);
 
-			adaptor.afterPropertiesSet();
+		exporter.afterPropertiesSet();
 
-			ObjectInstance instance = server.getObjectInstance(objectName);
-			assertNotNull(instance);
+		ObjectInstance instance = server.getObjectInstance(objectName);
+		assertNotNull(instance);
 
-			// should still be the first bean with name Rob Harrop
-			assertEquals("Rob Harrop", server.getAttribute(objectName, "Name"));
-		}
-		finally {
-			MBeanServerFactory.releaseMBeanServer(server);
-		}
+		// should still be the first bean with name Rob Harrop
+		assertEquals("Rob Harrop", server.getAttribute(objectName, "Name"));
 	}
 
 	public void testRegisterReplaceExisting() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance(OBJECT_NAME);
 
-		MBeanServer server = MBeanServerFactory.createMBeanServer();
-		try {
+		Person preRegistered = new Person();
+		preRegistered.setName("Rob Harrop");
 
-			Person preRegistered = new Person();
-			preRegistered.setName("Rob Harrop");
+		server.registerMBean(preRegistered, objectName);
 
-			server.registerMBean(preRegistered, objectName);
+		Person springRegistered = new Person();
+		springRegistered.setName("Sally Greenwood");
 
-			Person springRegistered = new Person();
-			springRegistered.setName("Sally Greenwood");
+		Map beans = new HashMap();
+		beans.put(objectName.toString(), springRegistered);
 
-			Map beans = new HashMap();
-			beans.put(objectName.toString(), springRegistered);
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(server);
+		exporter.setBeans(beans);
+		exporter.setRegistrationBehavior(MBeanExporter.REGISTRATION_REPLACE_EXISTING);
 
-			MBeanExporter adaptor = new MBeanExporter();
-			adaptor.setServer(server);
-			adaptor.setBeans(beans);
-			adaptor.setRegistrationBehavior(MBeanExporter.REGISTRATION_REPLACE_EXISTING);
+		exporter.afterPropertiesSet();
 
-			adaptor.afterPropertiesSet();
+		ObjectInstance instance = server.getObjectInstance(objectName);
+		assertNotNull(instance);
 
-			ObjectInstance instance = server.getObjectInstance(objectName);
-			assertNotNull(instance);
+		// should still be the new bean with name Sally Greenwood
+		assertEquals("Sally Greenwood", server.getAttribute(objectName, "Name"));
+	}
 
-			// should still be the new bean with name Sally Greenwood
-			assertEquals("Sally Greenwood", server.getAttribute(objectName, "Name"));
-		}
-		finally {
-			MBeanServerFactory.releaseMBeanServer(server);
-		}
+
+	private void assertListener(MockMBeanExporterListener listener) throws MalformedObjectNameException {
+		ObjectName desired = ObjectNameManager.getInstance(OBJECT_NAME);
+		assertEquals("Incorrect number of registrations", 1, listener.getRegistered().size());
+		assertEquals("Incorrect number of unregistrations", 1, listener.getUnregistered().size());
+		assertEquals("Incorrect ObjectName in register", desired, listener.getRegistered().get(0));
+		assertEquals("Incorrect ObjectName in unregister", desired, listener.getUnregistered().get(0));
 	}
 
 	private Map getBeanMap() {
@@ -305,12 +257,6 @@ public class MBeanExporterTests extends TestCase {
 		map.put(OBJECT_NAME, new JmxTestBean());
 		return map;
 	}
-
-	private boolean beanExists(MBeanServer server, ObjectName objectName) throws Exception {
-		ObjectInstance inst = server.getObjectInstance(objectName);
-		return (inst != null);
-	}
-
 
 	private static class InvokeDetectAssembler implements MBeanInfoAssembler {
 
@@ -376,5 +322,4 @@ public class MBeanExporterTests extends TestCase {
 			this.name = name;
 		}
 	}
-
 }

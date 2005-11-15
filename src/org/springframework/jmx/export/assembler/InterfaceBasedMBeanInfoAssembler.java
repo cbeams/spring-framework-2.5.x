@@ -55,7 +55,7 @@ import org.springframework.util.StringUtils;
  * @see SimpleReflectiveMBeanInfoAssembler
  * @see org.springframework.jmx.export.MBeanExporter
  */
-public class InterfaceBasedMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssembler {
+public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanInfoAssembler {
 
 	/**
 	 * Stores the array of interfaces to use for creating the management interface.

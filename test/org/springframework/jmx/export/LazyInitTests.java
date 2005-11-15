@@ -36,6 +36,8 @@ public class LazyInitTests extends TestCase {
 
 	public void testInvokeOnLazyInitBean() throws Exception {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getApplicationContextPath());
+		assertFalse(ctx.getBeanFactory().containsSingleton("testBean"));
+		assertFalse(ctx.getBeanFactory().containsSingleton("testBean2"));
 		try {
 			MBeanServer server = (MBeanServer) ctx.getBean("server");
 

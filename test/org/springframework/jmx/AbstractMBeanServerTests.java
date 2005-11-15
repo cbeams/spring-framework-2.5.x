@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
 
 /**
  * @author Rob Harrop
@@ -12,14 +13,23 @@ public abstract class AbstractMBeanServerTests extends TestCase {
 
 	protected MBeanServer server;
 
-	public void setUp() throws Exception {
+	public final void setUp() throws Exception {
 		this.server = MBeanServerFactory.createMBeanServer();
 		onSetUp();
 	}
 
 	protected void tearDown() throws Exception {
-		MBeanServerFactory.releaseMBeanServer(this.server);
+		MBeanServerFactory.releaseMBeanServer(this.getServer());
 	}
 
-	protected abstract void onSetUp() throws Exception;
+	protected void onSetUp() throws Exception{
+	}
+
+	public MBeanServer getServer() {
+		return server;
+	}
+
+	protected void assertIsRegistered(String message, ObjectName objectName) {
+		assertTrue(message, getServer().isRegistered(objectName));
+	}
 }

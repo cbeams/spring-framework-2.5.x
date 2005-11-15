@@ -15,8 +15,20 @@
 			<bean class="org.springframework.jmx.export.assembler.MethodNameBasedMBeanInfoAssembler">
 				<property name="methodMappings">
 					<props>
-						<prop key="bean:name=testBean4">getNickName,setNickName,add,myOperation,getName,setName,getAge</prop>
+						<prop key="bean:name=testBean4">
+							getNickName,setNickName,add,myOperation,getName,setName,getAge</prop>
 					</props>
+				</property>
+				<property name="notificationInfoMappings">
+					<map>
+						<entry key="bean:name=testBean4">
+							<bean class="org.springframework.jmx.export.metadata.ManagedNotification">
+								<property name="name" value="My Notification"/>
+								<property name="description" value="A Notification"/>
+								<property name="notificationTypes" value="type.foo,type.bar"/>
+							</bean>
+						</entry>
+					</map>
 				</property>
 			</bean>
 		</property>
@@ -32,4 +44,4 @@
 	</bean>
 
 </beans
->
+		>

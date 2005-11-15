@@ -23,6 +23,8 @@ import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
+import java.util.Hashtable;
+
 /**
  * An implementation of the <code>ObjectNamingStrategy</code> interface that
  * creates a name based on the the identity of a given instance.
@@ -35,18 +37,22 @@ import org.springframework.util.ObjectUtils;
  */
 public class IdentityNamingStrategy implements ObjectNamingStrategy {
 
+	public static final String TYPE_KEY = "type";
+
+	public static final String HASH_CODE_KEY = "hashCode";
+
 	/**
 	 * Returns an instance of <code>ObjectName</code> based on the identity
 	 * of the managed resource.
 	 */
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
-		StringBuffer sb = new StringBuffer(256);
-		sb.append(managedBean.getClass().getPackage().getName());
-		sb.append(":class=");
-		sb.append(ClassUtils.getShortName(managedBean.getClass()));
-		sb.append(",hashCode=");
-		sb.append(ObjectUtils.getIdentityHexString(managedBean));
-		return ObjectNameManager.getInstance(sb.toString());
+		String domain = managedBean.getClass().getPackage().getName();
+
+		Hashtable keys = new Hashtable();
+		keys.put(TYPE_KEY, ClassUtils.getShortName(managedBean.getClass()));
+		keys.put(HASH_CODE_KEY, ObjectUtils.getIdentityHexString(managedBean));
+
+		return ObjectNameManager.getInstance(domain, keys);
 	}
 
 }

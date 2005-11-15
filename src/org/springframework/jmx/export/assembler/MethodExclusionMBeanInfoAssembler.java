@@ -54,7 +54,7 @@ import org.springframework.util.StringUtils;
  * @see MethodNameBasedMBeanInfoAssembler
  * @see org.springframework.jmx.export.MBeanExporter
  */
-public class MethodExclusionMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssembler {
+public class MethodExclusionMBeanInfoAssembler extends AbstractConfigurableMBeanInfoAssembler {
 
 	private Set ignoredMethods;
 
