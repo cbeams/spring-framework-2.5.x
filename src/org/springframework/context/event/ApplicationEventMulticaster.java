@@ -21,7 +21,10 @@ import org.springframework.context.ApplicationListener;
 
 /**
  * Interface to be implemented by objects that can manage a number
- * of ApplicationListeners, and publish events to them.
+ * of ApplicationListeners, and publish events to them. An example
+ * of such an object is an ApplicationEventPublisher, typically
+ * the ApplicationContext, which can use an ApplicationEventMulticaster
+ * as a helper to publish events to listeners.
  *
  * @author Rod Johnson
  */
