@@ -69,7 +69,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 * If no linked Set implementation is available, a plain HashSet will
 	 * be used as fallback (not keeping the registration order).
 	 * <p>Note that a Set class specified will not permit multiple instances
-	 * of the same listener, while a List class woill allow for registering
+	 * of the same listener, while a List class will allow for registering
 	 * the same listener multiple times.
 	 * <p>Consider Doug Lea's <code>java.util.concurrent.CopyOnWriteArraySet</code> or its
 	 * non-JDK predecessor, <code>EDU.oswego.cs.dl.util.concurrent.CopyOnWriteArraySet</code>
