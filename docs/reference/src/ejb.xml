@@ -301,7 +301,6 @@ public void setMyComponent(MyComponent myComponent) {
 
     <programlisting>   /**
     * Override default BeanFactoryLocator implementation
-    * 
     * @see javax.ejb.SessionBean#setSessionContext(javax.ejb.SessionContext)
     */
    public void setSessionContext(SessionContext sessionContext) {
@@ -309,6 +308,34 @@ public void setMyComponent(MyComponent myComponent) {
        setBeanFactoryLocator(ContextSingletonBeanFactoryLocator.getInstance());
        setBeanFactoryLocatorKey(ServicesConstants.PRIMARY_CONTEXT_ID);
    }</programlisting>
+
+    <para>
+    You would then need to create a bean definition file named
+    <literal>beanRefContext.xml</literal>. This file defines all bean factories
+    (usually in the form of application contexts) that may be used in the EJB.
+    In many cases, this file will only contain a single bean definition such as this:
+		</para>
+
+		<programlisting>
+			&lt;beans&gt;
+        &lt;bean id="businessBeanFactory"
+            class="org.springframework.context.support.ClassPathXmlApplicationContext"&gt;
+            &lt;constructor-arg&gt;
+            	&lt;value&gt;businessApplicationContext.xml&lt;/value&gt;
+            &lt;/constructor-arg&gt;
+        &lt;/bean&gt;
+			&lt;/beans&gt;
+    </programlisting>
+
+		<para>
+    Where <literal>businessApplicationContext.xml</literal> contains the bean
+    definitions for all business service POJOs. In the above example,
+    <literal>ServicesConstants.PRIMARY_CONTEXT_ID.PRIMARY_CONTEXT_ID</literal>
+    would be defined as follows:</para>
+
+		<programlisting>
+    public static final String ServicesConstants.PRIMARY_CONTEXT_ID = "businessBeanFactory";
+		</programlisting>
 
     <para>Please see the respective JavaDocs for
     <literal>BeanFactoryLocator</literal> and
