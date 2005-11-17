@@ -32,6 +32,7 @@ public class HandlerExecutionChain {
 
 	private HandlerInterceptor[] interceptors;
 
+
 	/**
 	 * Create new HandlerExecutionChain.
 	 * @param handler the handler object to execute
@@ -50,6 +51,7 @@ public class HandlerExecutionChain {
 		this.handler = handler;
 		this.interceptors = interceptors;
 	}
+
 
 	/**
 	 * Return the handler object to execute.

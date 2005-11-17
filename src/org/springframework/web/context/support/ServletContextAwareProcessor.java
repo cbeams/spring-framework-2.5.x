@@ -43,12 +43,14 @@ public class ServletContextAwareProcessor implements BeanPostProcessor {
 
 	private final ServletContext servletContext;
 
+
 	/**
 	 * Create a new ServletContextAwareProcessor for the given context.
 	 */
 	public ServletContextAwareProcessor(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
+
 
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		if (bean instanceof ServletContextAware) {
