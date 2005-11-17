@@ -18,7 +18,7 @@ Package org.springframework.beans
 * PropertyPlaceholderConfigurer logs resolved values at debug level, for improved traceability
 * AbstractBeanFactory throws BeanDefinitionStoreException if parent not found (instead of NoSuchBeanDefinitionException)
 * DefaultListableBeanFactory does not include its toString output in NoSuchBeanDefinitionException messages anymore
-* deprecated PropertiesBeanDefinitionReader's "class" and "property" keywords in favor of "(class)" and "(keyword)"
+* deprecated PropertiesBeanDefinitionReader's "class" and "parent" keywords in favor of "(class)" and "(parent)"
 * PropertiesBeanDefinitionReader supports loading bean definitions from properties files with non-standard encodings
 * XmlBeanDefinitionReader supports reading from resource with explicit encoding
 * XmlBeanDefinitionReader supports reading from SAX InputSource (useful to pass in XML system id or java.io.Reader)
