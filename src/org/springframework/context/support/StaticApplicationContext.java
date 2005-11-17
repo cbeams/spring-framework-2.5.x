@@ -37,7 +37,8 @@ import org.springframework.context.ApplicationContext;
  */
 public class StaticApplicationContext extends GenericApplicationContext {
 
-	private final StaticMessageSource messageSource;
+	private final StaticMessageSource staticMessageSource;
+
 
 	/**
 	 * Create a new StaticApplicationContext.
@@ -61,8 +62,8 @@ public class StaticApplicationContext extends GenericApplicationContext {
 		super(parent);
 
 		// initialize and register StaticMessageSource
-		this.messageSource = new StaticMessageSource();
-		getBeanFactory().registerSingleton(MESSAGE_SOURCE_BEAN_NAME, this.messageSource);
+		this.staticMessageSource = new StaticMessageSource();
+		getBeanFactory().registerSingleton(MESSAGE_SOURCE_BEAN_NAME, this.staticMessageSource);
 	}
 
 	/**
@@ -71,8 +72,9 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	 * @see #addMessage
 	 */
 	public StaticMessageSource getStaticMessageSource() {
-		return messageSource;
+		return staticMessageSource;
 	}
+
 
 	/**
 	 * Register a singleton bean with the underlying bean factory.
