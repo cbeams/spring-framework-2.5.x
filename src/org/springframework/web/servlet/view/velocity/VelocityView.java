@@ -23,7 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,6 +42,7 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractTemplateView;
+import org.springframework.web.util.NestedServletException;
 
 /**
  * View using the Velocity template engine.
@@ -434,7 +434,7 @@ public class VelocityView extends AbstractTemplateView {
 					velocityContext.put(attributeName, tool);
 				}
 				catch (Exception ex) {
-					throw new ServletException(
+					throw new NestedServletException(
 							"Could not instantiate Velocity tool '" + attributeName + "': " + ex.getMessage(), ex);
 				}
 			}

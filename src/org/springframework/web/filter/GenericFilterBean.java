@@ -40,6 +40,7 @@ import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResourceLoader;
+import org.springframework.web.util.NestedServletException;
 
 /**
  * Simple base implementation of <code>javax.servlet.Filter</code> that treats
@@ -133,7 +134,7 @@ public abstract class GenericFilterBean implements Filter {
 			String msg = "Failed to set bean properties on filter '" +
 			    filterConfig.getFilterName() + "': " + ex.getMessage();
 			logger.error(msg, ex);
-			throw new ServletException(msg, ex);
+			throw new NestedServletException(msg, ex);
 		}
 
 		// Let subclasses do whatever initialization they like.
