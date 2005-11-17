@@ -49,7 +49,8 @@ public abstract class SqlOperation extends RdbmsOperation {
 	protected final void compileInternal() {
 		// validate parameter count
 		try {
-			int bindVarCount = JdbcUtils.countParameterPlaceholders(getSql(), '?', "'\"");
+			//int bindVarCount = JdbcUtils.countParameterPlaceholders(getSql(), '?', "'\"");
+			int bindVarCount = JdbcUtils.countParameterPlaceholders(getSql());
 			if (bindVarCount != getDeclaredParameters().size()) {
 				throw new InvalidDataAccessApiUsageException(
 						"SQL '" + getSql() + "' requires " + bindVarCount + " bind variables, but " +
@@ -87,6 +88,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * @param params parameter array. May be <code>null</code>.
 	 */
 	protected final PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
+		preparedStatementFactory.setParsedSql(JdbcUtils.parseSqlStatement(getSql()));
 		return this.preparedStatementFactory.newPreparedStatementCreator(params);
 	}
 

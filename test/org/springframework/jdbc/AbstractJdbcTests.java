@@ -74,7 +74,7 @@ public abstract class AbstractJdbcTests extends TestCase {
 		// we shouldn't verify unless the user called replay()
 		if (shouldVerify()) {
 			ctrlDataSource.verify();
-			ctrlConnection.verify();
+			//ctrlConnection.verify();
 		}
 	}
 
