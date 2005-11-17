@@ -41,7 +41,7 @@ import org.springframework.beans.factory.DisposableBean;
  * <code>getConnection</code> calls, and ignores calls to
  * <code>Connection.close()</code>.
  *
- * <p>Useful for testing and standalone environemtns, to keep using the same
+ * <p>Useful for testing and standalone environments, to keep using the same
  * Connection for multiple CciTemplate calls, without having a pooling
  * ConnectionFactory, also spanning any number of transactions.
  *

@@ -43,7 +43,7 @@ import org.springframework.beans.factory.InitializingBean;
  * <code>Connection.close()</code>. According to the JMS Connection model,
  * this is even thread-safe.
  *
- * <p>Useful for testing and standalone environemtns, to keep using the same
+ * <p>Useful for testing and standalone environments, to keep using the same
  * Connection for multiple JmsTemplate calls, without having a pooling
  * ConnectionFactory, also spanning any number of transactions.
  *
