@@ -93,7 +93,7 @@ public class TransformTag extends HtmlEscapingAwareTag {
 		Object resolvedValue = this.value;
 		if (this.value instanceof String) {
 			String strValue = (String) this.value;
-			resolvedValue = ExpressionEvaluationUtils.evaluate("value", strValue, Object.class, pageContext);
+			resolvedValue = ExpressionEvaluationUtils.evaluate("value", strValue, pageContext);
 		}
 		if (resolvedValue != null) {
 			// Find the BindTag, if applicable.
