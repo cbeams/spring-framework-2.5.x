@@ -93,11 +93,11 @@ public abstract class ReflectionUtils {
 		}
 		catch (IllegalAccessException e) {
 			handleReflectionException(e);
-			throw new IllegalStateException("Should not get here. " + e.getMessage());
+			throw new IllegalStateException("Unexpected reflection exception - " + e.getMessage());
 		}
 		catch (InvocationTargetException e) {
 			handleReflectionException(e);
-			throw new IllegalStateException("Should not get here." + e.getMessage());
+			throw new IllegalStateException("Unexpected reflection exception -" + e.getMessage());
 		}
 	}
 }
