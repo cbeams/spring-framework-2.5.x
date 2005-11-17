@@ -18,9 +18,6 @@ package org.springframework.web.servlet.handler;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.Ordered;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -38,8 +35,6 @@ import org.springframework.web.servlet.HandlerMapping;
  */
 public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
     implements HandlerMapping, Ordered {
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
