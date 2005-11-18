@@ -99,7 +99,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 
 	/**
 	 * Set whether to expose a RequestContext for use by Spring's macro library,
-	 * under the name "springBindRequestContext". Default is "false".
+	 * under the name "springMacroRequestContext". Default is "false".
 	 * <p>Currently needed for Spring's Velocity and FreeMarker default macros.
 	 * Note that this is <b>not</b> required for templates that use HTML
 	 * forms <b>unless</b> you wish to take advantage of the Spring helper macros.
@@ -108,6 +108,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	public void setExposeSpringMacroHelpers(boolean exposeSpringMacroHelpers) {
 		this.exposeSpringMacroHelpers = exposeSpringMacroHelpers;
 	}
+
 
 	protected final void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
