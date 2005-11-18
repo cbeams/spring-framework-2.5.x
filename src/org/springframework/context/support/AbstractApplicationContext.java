@@ -126,10 +126,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 
-	//---------------------------------------------------------------------
-	// Instance data
-	//---------------------------------------------------------------------
-
 	/** Logger used by this class. Available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -145,6 +141,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** System time in milliseconds when this context started */
 	private long startupTime;
 
+	/** Flag that indicates whether this context is currently active */
+	private boolean active = true;
+
+	/** Reference to the JVM shutdown hook, if registered */
+	private Thread shutdownHook;
+
 	/** ResourcePatternResolver used by this context */
 	private ResourcePatternResolver resourcePatternResolver;
 
@@ -154,10 +156,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** Helper class used in event publishing */
 	private ApplicationEventMulticaster applicationEventMulticaster;
 
-
-	//---------------------------------------------------------------------
-	// Constructors
-	//---------------------------------------------------------------------
 
 	/**
 	 * Create a new AbstractApplicationContext with no parent.
@@ -262,6 +260,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return beanFactoryPostProcessors;
 	}
 
+
 	public void refresh() throws BeansException, IllegalStateException {
 		this.startupTime = System.currentTimeMillis();
 
@@ -298,29 +297,39 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 
-		// Invoke factory processors registered as beans in the context.
-		invokeBeanFactoryPostProcessors();
+		try {
+			// Invoke factory processors registered as beans in the context.
+			invokeBeanFactoryPostProcessors();
 
-		// Register bean processors that intercept bean creation.
-		registerBeanPostProcessors();
+			// Register bean processors that intercept bean creation.
+			registerBeanPostProcessors();
 
-		// Initialize message source for this context.
-		initMessageSource();
+			// Initialize message source for this context.
+			initMessageSource();
 
-		// Initialize event multicaster for this context.
-		initApplicationEventMulticaster();
+			// Initialize event multicaster for this context.
+			initApplicationEventMulticaster();
 
-		// Initialize other special beans in specific context subclasses.
-		onRefresh();
+			// Initialize other special beans in specific context subclasses.
+			onRefresh();
 
-		// Check for listener beans and register them.
-		registerListeners();
+			// Check for listener beans and register them.
+			registerListeners();
 
-		// iIstantiate singletons this late to allow them to access the message source.
-		beanFactory.preInstantiateSingletons();
+			// Instantiate singletons this late to allow them to access the message source.
+			beanFactory.preInstantiateSingletons();
 
-		// Last step: publish corresponding event.
-		publishEvent(new ContextRefreshedEvent(this));
+			// Last step: publish corresponding event.
+			publishEvent(new ContextRefreshedEvent(this));
+
+			this.active = true;
+		}
+
+		catch (BeansException ex) {
+			// Destroy already created singletons to avoid dangling resources.
+			beanFactory.destroySingletons();
+			throw ex;
+		}
 	}
 
 	/**
@@ -508,28 +517,21 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		getApplicationEventMulticaster().addApplicationListener(listener);
 	}
 
-	/**
-	 * Publishes a ContextClosedEvent and destroys the singletons
-	 * in the bean factory of this application context.
-	 * @see org.springframework.context.event.ContextClosedEvent
-	 */
-	public void close() {
-		if (logger.isInfoEnabled()) {
-			logger.info("Closing application context [" + getDisplayName() + "]");
-		}
 
-		try {
-			// Publish shutdown event.
-			publishEvent(new ContextClosedEvent(this));
-		}
-		finally {
-			// Destroy all cached singletons in this context, invoking
-			// DisposableBean.destroy and/or the specified "destroy-method".
-			ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-			if (beanFactory != null) {
-				beanFactory.destroySingletons();
+	/**
+	 * Register a shutdown hook with the JVM runtime, closing this context
+	 * on JVM shutdown unless it has already been closed at that time.
+	 * @see java.lang.Runtime#addShutdownHook
+	 * @see #close()
+	 * @see #doClose()
+	 */
+	public void registerShutdownHook() {
+		this.shutdownHook = new Thread() {
+			public void run() {
+				doClose();
 			}
-		}
+		};
+		Runtime.getRuntime().addShutdownHook(this.shutdownHook);
 	}
 
 	/**
@@ -539,11 +541,57 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * which is rather unusual.
 	 * <p>The <code>close</code> method is the native way to
 	 * shut down an ApplicationContext.
-	 * @see #close
+	 * @see #close()
 	 * @see org.springframework.beans.factory.access.SingletonBeanFactoryLocator
 	 */
 	public void destroy() {
 		close();
+	}
+
+	/**
+	 * Closes this application context, destroying all beans in its bean factory.
+	 * Delegates to <code>doClose()</code> for the actual closing procedure.
+	 * Also removes a JVM shutdown hook, if registered, as it's not needed anymore.
+	 * @see #doClose()
+	 * @see #registerShutdownHook()
+	 */
+	public void close() {
+		doClose();
+		// If we registered a JVM shutdown hook, we don't need it anymore now:
+		// We've already explicitly close the context.
+		if (this.shutdownHook != null) {
+			Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
+		}
+	}
+
+	/**
+	 * Actually performs context closing: publishes a ContextClosedEvent and
+	 * destroys the singletons in the bean factory of this application context.
+	 * <p>Called by both <code>close()</code> and a JVM shutdown hook, if any.
+	 * @see org.springframework.context.event.ContextClosedEvent
+	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#destroySingletons()
+	 * @see #close()
+	 * @see #registerShutdownHook()
+	 */
+	protected void doClose() {
+		if (this.active) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Closing application context [" + getDisplayName() + "]");
+			}
+			try {
+				// Publish shutdown event.
+				publishEvent(new ContextClosedEvent(this));
+			}
+			finally {
+				// Destroy all cached singletons in this context, invoking
+				// DisposableBean.destroy and/or the specified "destroy-method".
+				ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+				if (beanFactory != null) {
+					beanFactory.destroySingletons();
+				}
+			}
+			this.active = false;
+		}
 	}
 
 

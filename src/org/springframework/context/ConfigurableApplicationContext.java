@@ -54,6 +54,9 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
 	/**
 	 * Load or refresh the persistent representation of the configuration,
 	 * which might an XML file, properties file, or relational database schema.
+	 * <p>As this is a startup method, it should destroy already created singletons
+	 * if it fails, to avoid dangling resources. In other words, after invocation
+	 * of that method, either all or no singletons at all should be instantiated.
 	 * @throws BeansException if the bean factory could not be initialized
 	 * @throws IllegalStateException if already initialized and multiple refresh
 	 * attempts are not supported
@@ -76,7 +79,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
 	/**
 	 * Close this application context, releasing all resources and locks that the
 	 * implementation might hold. This includes destroying all cached singleton beans.
-	 * <p>Note: Does <i>not</i> invoke close on a parent context.
+	 * <p>Note: Does <i>not</i> invoke <code>close</code> on a parent context;
+	 * parent contexts have their own, independent lifecycle.
 	 */
 	void close();
 

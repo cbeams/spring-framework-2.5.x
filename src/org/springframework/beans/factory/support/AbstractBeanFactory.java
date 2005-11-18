@@ -549,13 +549,18 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		if (logger.isInfoEnabled()) {
 			logger.info("Destroying singletons in factory {" + this + "}");
 		}
-		synchronized (this.singletonCache) {
-			this.singletonCache.clear();
-		}
-		synchronized (this.disposableBeans) {
-			for (Iterator it = new HashSet(this.disposableBeans.keySet()).iterator(); it.hasNext();) {
-				destroyDisposableBean((String) it.next());
+		try {
+			synchronized (this.singletonCache) {
+				this.singletonCache.clear();
 			}
+			synchronized (this.disposableBeans) {
+				for (Iterator it = new HashSet(this.disposableBeans.keySet()).iterator(); it.hasNext();) {
+					destroyDisposableBean((String) it.next());
+				}
+			}
+		}
+		catch (Throwable ex) {
+			logger.error("Unexpected failure during bean destruction", ex);
 		}
 	}
 

@@ -71,9 +71,6 @@ public interface ConfigurableListableBeanFactory
 	/**
 	 * Ensure that all non-lazy-init singletons are instantiated, also considering
 	 * FactoryBeans. Typically invoked at the end of factory setup, if desired.
-	 * <p>As this is a startup method, it should destroy already created singletons
-	 * if it fails, to avoid dangling resources. In other words, after invocation
-	 * of that method, either all or no singletons at all should be instantiated.
 	 * @throws BeansException if one of the singleton beans could not be created
 	 */
 	void preInstantiateSingletons() throws BeansException;

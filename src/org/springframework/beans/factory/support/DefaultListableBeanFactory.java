@@ -259,35 +259,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (logger.isInfoEnabled()) {
 			logger.info("Pre-instantiating singletons in factory [" + this + "]");
 		}
-		try {
-			for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
-				String beanName = (String) it.next();
-				if (containsBeanDefinition(beanName)) {
-					RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
-					if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
-						if (bd.hasBeanClass() && FactoryBean.class.isAssignableFrom(bd.getBeanClass())) {
-							FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
-							if (factory.isSingleton()) {
-								getBean(beanName);
-							}
-						}
-						else {
+		for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
+			String beanName = (String) it.next();
+			if (containsBeanDefinition(beanName)) {
+				RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+				if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+					if (bd.hasBeanClass() && FactoryBean.class.isAssignableFrom(bd.getBeanClass())) {
+						FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
+						if (factory.isSingleton()) {
 							getBean(beanName);
 						}
 					}
+					else {
+						getBean(beanName);
+					}
 				}
 			}
-		}
-		catch (BeansException ex) {
-			// destroy already created singletons to avoid dangling resources
-			try {
-				destroySingletons();
-			}
-			catch (Throwable ex2) {
-				logger.error("Pre-instantiating singletons failed, " +
-						"and couldn't destroy already created singletons", ex2);
-			}
-			throw ex;
 		}
 	}
 

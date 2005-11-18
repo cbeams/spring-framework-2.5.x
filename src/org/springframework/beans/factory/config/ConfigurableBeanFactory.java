@@ -131,6 +131,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	/**
 	 * Destroy all cached singletons in this factory.
 	 * To be called on shutdown of a factory.
+	 * <p>Should never throw an exception but rather log shutdown failures.
 	 */
 	void destroySingletons();
 
