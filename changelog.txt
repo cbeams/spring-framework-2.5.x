@@ -3,6 +3,39 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 1.3 RC1 (2.12.2005)
+--------------------------------------
+
+Package org.springframework.core
+* introduced TaskExecutor abstraction, as strategy interface for the execution of Runnables
+* added SyncTaskExecutor and SimpleAsyncTaskExecutor as simple default implementations of the TaskExecutor interface
+
+Package org.springframework.context
+* refined AbstractApplicationContext's lifecycle behavior to properly ignore repeated "close()" calls
+* moved DefaultListableBeanFactory's cleanup on "preInstantiateSingletons()" behavior to AbstractApplicationContext
+* reworked SimpleApplicationEventMulticaster to delegate to a TaskExecutor, using a SyncTaskExecutor as default
+
+Package org.springframework.jms
+* added SimpleMessageListenerContainer mechanism for async JMS message reception via the plain JMS MessageConsumer API
+* added ServerMessageListenerContainer mechanism for async JMS message reception via the JMS ServerSessionPool API
+
+Package org.springframework.orm
+* HibernateTransactionManager autodetects Hibernate 3.1 to support its native transaction timeout
+* upgraded IdTransferringMergeEventListener to Hibernate 3.1 (which changed its listener API in an incompatible fashion)
+
+Package org.springframework.scheduling
+* added TimerTaskExecutor adapter for accessing a "java.util.Timer" through the TaskExecutor interface
+* added scheduling-style support for the JDK 1.5 ThreadPoolExecutor mechanism in the "java.util.concurrent" package
+* added ConcurrentTaskExecutor adapter for accessing a JDK 1.5 Executor through the TaskExecutor interface
+* added scheduling-style support for the CommonJ TimerManager API, as supported by WebLogic 9 and WebSphere 6
+* added WorkManagerTaskExecutor adapter for accessing a CommonJ WorkManager through the TaskExecutor interface
+
+Package org.springframework.web
+* added "currentFormObject" template method to AbstractFormController, for post-processing of a session form object
+* FixedLocaleResolver returns the JVM's default Locale if no explicit default Locale specified
+* VelocityView converts Velocity's MethodInvocationException to a Spring NestedServletException with original root cause
+
+
 Changes in version 1.2.6 (14.11.2005)
 -------------------------------------
 
