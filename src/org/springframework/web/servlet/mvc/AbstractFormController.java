@@ -431,7 +431,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 		}
 		session.removeAttribute(formAttrName);
 
-		return sessionFormObject;
+		return currentFormObject(request, sessionFormObject);
 	}
 
 	/**
@@ -456,6 +456,20 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 */
 	protected Object formBackingObject(HttpServletRequest request) throws Exception {
 		return createCommand();
+	}
+
+	/**
+	 * Return the current form object to use for binding and further processing,
+	 * based on the passed-in form object as found in the HttpSession.
+	 * <p>The default implementation simply returns the session form object as-is.
+	 * Subclasses can override this to post-process the session form object,
+	 * for example reattaching it to a persistence manager.
+	 * @param sessionFormObject the form object retrieved from the HttpSession
+	 * @return the form object to use for binding and further processing
+	 * @throws Exception in case of invalid state or arguments
+	 */
+	protected Object currentFormObject(HttpServletRequest request, Object sessionFormObject) throws Exception {
+		return sessionFormObject;
 	}
 
 
