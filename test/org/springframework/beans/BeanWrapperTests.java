@@ -31,7 +31,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import junit.framework.TestCase;
-import org.hibernate.FlushMode;
+import net.sf.hibernate.FlushMode;
 
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
