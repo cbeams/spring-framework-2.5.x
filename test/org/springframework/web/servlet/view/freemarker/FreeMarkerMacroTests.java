@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.view.freemarker;
 
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -143,12 +142,18 @@ public class FreeMarkerMacroTests extends TestCase {
 		model.put("springMacroRequestContext", rc);
 		model.put("nameOptionMap", names);
 
-		StringWriter sw = new StringWriter();
-		Template t = config.getTemplate("test.ftl");
-		t.process(model, sw);
+		FreeMarkerView view = new FreeMarkerView();
+		view.setBeanName("myView");
+		view.setUrl("test.ftl");
+		view.setConfiguration(config);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		view.render(model, request, response);
 
 		// tokenize output and ignore whitespace
-		String output = sw.getBuffer().toString();
+		String output = response.getContentAsString();
 		String[] tokens = StringUtils.tokenizeToStringArray(output, "\t\n");
 
 		for (int i = 0; i < tokens.length; i++) {

@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.view.velocity;
 
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 
@@ -141,20 +139,25 @@ public class VelocityMacroTests extends TestCase {
 		VelocityConfigurer vc = new VelocityConfigurer();
 		vc.setPreferFileSystemAccess(false);
 		VelocityEngine ve = vc.createVelocityEngine();
-		VelocityContext context = new VelocityContext();
-		context.put("command", tb);
-		context.put("springMacroRequestContext", rc);
-		context.put("nameOptionMap", names);
 
-		StringWriter sw = new StringWriter();
-		ve.mergeTemplate("org/springframework/web/servlet/view/velocity/test.vm", "UTF-8", context, sw);
+		Map model = new HashMap();
+		model.put("command", tb);
+		model.put("springMacroRequestContext", rc);
+		model.put("nameOptionMap", names);
+
+		VelocityView view = new VelocityView();
+		view.setBeanName("myView");
+		view.setUrl("org/springframework/web/servlet/view/velocity/test.vm");
+		view.setEncoding("UTF-8");
+		view.setVelocityEngine(ve);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		view.render(model, request, response);
+
 		// tokenize output and ignore whitespace
-		String output = sw.getBuffer().toString();
-
+		String output = response.getContentAsString();
 		String[] tokens = StringUtils.tokenizeToStringArray(output, "\t\n");
-
-		//for (int i=0; i<tokens.length; i++) System.out.println(tokens[i]);
-
 		for (int i = 0; i < tokens.length; i++) {
 			if (tokens[i].equals("NAME")) assertEquals("Darren", tokens[i + 1]);
 			if (tokens[i].equals("AGE")) assertEquals("99", tokens[i + 1]);
