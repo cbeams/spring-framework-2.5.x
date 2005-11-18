@@ -63,9 +63,10 @@ import org.springframework.util.ClassUtils;
  * <code>formatMappings</code> property.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 1.1.5
- * @see #setFormatKey(String)
- * @see #setFormatMappings(java.util.Properties)
+ * @see #setFormatKey
+ * @see #setFormatMappings
  */
 public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 
@@ -155,12 +156,15 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	}
 
 	/**
-	 * Gets the mappings of <code>Content-Disposition</code> header values to
-	 * mapping keys.
+	 * Return the mappings of <code>Content-Disposition</code> header values to
+	 * mapping keys. Mainly available for configuration through property paths
+	 * that specify individual keys.
 	 */
 	public Properties getContentDispositionMappings() {
-		// NOTE: Added to support configuration through the properties file mechanism.
-		return contentDispositionMappings;
+		if (this.contentDispositionMappings == null) {
+			this.contentDispositionMappings = new Properties();
+		}
+		return this.contentDispositionMappings;
 	}
 
 
