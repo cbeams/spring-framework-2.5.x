@@ -208,7 +208,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Return the primary Validator for this controller.
 	 */
 	public final Validator getValidator() {
-		return (validators != null && validators.length > 0 ? validators[0] : null);
+		return (this.validators != null && this.validators.length > 0 ? this.validators[0] : null);
 	}
 
 	/**
@@ -318,7 +318,7 @@ public abstract class BaseCommandController extends AbstractController {
 	protected final boolean checkCommand(Object command) {
 		return (this.commandClass == null || this.commandClass.isInstance(command));
 	}
-	
+
 
 	/**
 	 * Bind the parameters of the given request to the given command object.
