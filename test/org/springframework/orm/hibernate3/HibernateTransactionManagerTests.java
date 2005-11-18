@@ -87,16 +87,18 @@ public class HibernateTransactionManagerTests extends TestCase {
 		conControl.setReturnValue(false, 1);
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
-		session.beginTransaction();
+		session.getTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		tx.setTimeout(10);
+		txControl.setVoidCallable(1);
+		tx.begin();
+		txControl.setVoidCallable(1);
 		session.connection();
 		sessionControl.setReturnValue(con, 3);
 		session.isOpen();
 		sessionControl.setReturnValue(true, 2);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
-		query.setTimeout(10);
-		queryControl.setReturnValue(query, 1);
 		query.list();
 		queryControl.setReturnValue(list, 1);
 		tx.commit();
@@ -153,7 +155,6 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.verify();
 		sessionControl.verify();
 		txControl.verify();
-		queryControl.verify();
 	}
 
 	public void testTransactionRollback() throws Exception {

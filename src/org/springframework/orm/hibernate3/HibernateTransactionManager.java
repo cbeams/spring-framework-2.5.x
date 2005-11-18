@@ -106,8 +106,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * do not expect Hibernate access code to participate in a nested transaction.</i>
  *
  * <p>Requires Hibernate 3.0.3 or later. As of Spring 1.3, this transaction manager
- * will autodetect Hibernate 3.1 and use its advanced timeout functionality,
- * while continuing to work with Hibernate 3.0 as well.
+ * autodetects Hibernate 3.1 and use its advanced timeout functionality, while
+ * continuing to work with Hibernate 3.0 as well.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -129,8 +129,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
 		implements BeanFactoryAware, InitializingBean {
 
-	// Hibernate 3.1 support: to be commented in as of Spring 1.3
-	/*
 	private static boolean hibernateSetTimeoutAvailable;
 
 	static {
@@ -144,7 +142,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			hibernateSetTimeoutAvailable = false;
 		}
 	}
-	*/
 
 
 	private SessionFactory sessionFactory;
@@ -499,8 +496,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			// Register transaction timeout.
 			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-				// Hibernate 3.1 support: to be commented in as of Spring 1.3
-				/*
 				if (hibernateSetTimeoutAvailable) {
 					// Use Hibernate's own transaction timeout mechanism on Hibernate 3.1
 					// Applies to all statements, also to inserts, updates and deletes!
@@ -509,11 +504,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					hibTx.begin();
 				}
 				else {
-				*/
-				// Use Spring query timeouts driven by SessionHolder on Hibernate 3.0
-				// Only applies to Hibernate queries, not to insert/update/delete statements.
-				hibTx = session.beginTransaction();
-				txObject.getSessionHolder().setTimeoutInSeconds(definition.getTimeout());
+					// Use Spring query timeouts driven by SessionHolder on Hibernate 3.0
+					// Only applies to Hibernate queries, not to insert/update/delete statements.
+					hibTx = session.beginTransaction();
+					txObject.getSessionHolder().setTimeoutInSeconds(definition.getTimeout());
+				}
 			}
 			else {
 				// Open a plain Hibernate transaction without specified timeout.
@@ -686,8 +681,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * can safely prepare and clean up the JDBC Connection used for a transaction.
 	 * <p>Default implementation checks the Session's connection release mode
 	 * to be "on_close". Unfortunately, this requires casting to SessionImpl,
-	 * as of Hibernate 3.0.5 / 3.1 RC2. If that cast doesn't work, we'll
-	 * simply assume we're safe and return <code>true</code>.
+	 * as of Hibernate 3.0/3.1. If that cast doesn't work, we'll simply assume
+	 * we're safe and return <code>true</code>.
 	 * @param session the Hibernate Session to check
 	 * @see org.hibernate.impl.SessionImpl#getConnectionReleaseMode()
 	 * @see org.hibernate.ConnectionReleaseMode#ON_CLOSE
