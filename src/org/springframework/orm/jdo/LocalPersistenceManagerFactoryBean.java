@@ -140,6 +140,17 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 		this.jdoProperties = jdoProperties;
 	}
 
+	/**
+	 * Return the JDO properties, if any. Mainly available for
+	 * configuration through property paths that specify individual keys.
+	 */
+	public Properties getJdoProperties() {
+		if (this.jdoProperties == null) {
+			this.jdoProperties = new Properties();
+		}
+		return this.jdoProperties;
+	}
+
 
 	/**
 	 * Initialize the PersistenceManagerFactory for the given location.

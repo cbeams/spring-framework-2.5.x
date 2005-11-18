@@ -325,6 +325,17 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	}
 
 	/**
+	 * Return the Hibernate properties, if any. Mainly available for
+	 * configuration through property paths that specify individual keys.
+	 */
+	public Properties getHibernateProperties() {
+		if (this.hibernateProperties == null) {
+			this.hibernateProperties = new Properties();
+		}
+		return this.hibernateProperties;
+	}
+
+	/**
 	 * Set the DataSource to be used by the SessionFactory.
 	 * If set, this will override corresponding settings in Hibernate properties.
 	 * <p>If this is set, the Hibernate settings should not define
