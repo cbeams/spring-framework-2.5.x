@@ -1072,6 +1072,7 @@
 				<include name="lib/c3p0/**"/>
 				<include name="lib/caucho/**"/>
 				<include name="lib/cglib/**"/>
+				<include name="lib/commonj/**"/>
 				<include name="lib/cos/**"/>
 				<include name="lib/dom4j/**"/>
 				<include name="lib/easymock/**"/>
