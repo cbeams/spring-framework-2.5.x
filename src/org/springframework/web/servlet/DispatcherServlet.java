@@ -189,12 +189,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = DispatcherServlet.class.getName() + ".CONTEXT";
 
 	/**
-	 * Request attribute to hold current multipart resolver, retrievable by views/binders.
-	 * @see org.springframework.web.servlet.support.RequestContextUtils#getMultipartResolver
-	 */
-	public static final String MULTIPART_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".MULTIPART";
-
-	/**
 	 * Request attribute to hold current locale, retrievable by views.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocaleResolver
 	 */
@@ -809,11 +803,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected HttpServletRequest checkMultipart(HttpServletRequest request) throws MultipartException {
 		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
 			if (request instanceof MultipartHttpServletRequest) {
-				logger.info("Request is already a MultipartHttpServletRequest - if not in a forward, " +
+				logger.debug("Request is already a MultipartHttpServletRequest - if not in a forward, " +
 						"this typically results from an additional MultipartFilter in web.xml");
 			}
 			else {
-				request.setAttribute(MULTIPART_RESOLVER_ATTRIBUTE, this.multipartResolver);
 				return this.multipartResolver.resolveMultipart(request);
 			}
 		}

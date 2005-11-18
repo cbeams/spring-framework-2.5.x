@@ -54,8 +54,8 @@ import javax.servlet.http.HttpServletRequest;
  * binder, to automatically apply multipart content to command bean properties.
  *
  * <p>As an alternative to using a MultipartResolver with a DispatcherServlet,
- * a MultipartFilter can be registered in web.xml. It will delegate to a
- * corresponding MultipartResolver bean in the root application context.
+ * a MultipartFilter can be registered in <code>web.xml</code>. It will delegate
+ * to a corresponding MultipartResolver bean in the root application context.
  * This is mainly intended for applications that do not use Spring's own
  * web MVC framework.
  *
@@ -73,7 +73,6 @@ import javax.servlet.http.HttpServletRequest;
  * @see org.springframework.web.multipart.support.ByteArrayMultipartFileEditor
  * @see org.springframework.web.multipart.support.StringMultipartFileEditor
  * @see org.springframework.web.servlet.DispatcherServlet
- * @see org.springframework.web.servlet.support.RequestContextUtils#getMultipartResolver
  */
 public interface MultipartResolver {
 

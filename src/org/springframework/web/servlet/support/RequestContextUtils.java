@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.ui.context.Theme;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
-import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ThemeResolver;
@@ -143,16 +142,6 @@ public abstract class RequestContextUtils {
 		WebApplicationContext context = getWebApplicationContext(request);
 		String themeName = getThemeResolver(request).resolveThemeName(request);
 		return context.getTheme(themeName);
-	}
-
-	/**
-	 * Return the MultipartResolver that has been bound to the request by the
-	 * DispatcherServlet.
-	 * @param request current HTTP request
-	 * @return the current MultipartResolver, or <code>null</code> if not a multipart request
-	 */
-	public static MultipartResolver getMultipartResolver(ServletRequest request) {
-		return (MultipartResolver) request.getAttribute(DispatcherServlet.MULTIPART_RESOLVER_ATTRIBUTE);
 	}
 
 }
