@@ -21,53 +21,68 @@ import java.util.Map;
 import org.springframework.beans.TestBean;
 
 /**
- * used for VTL and FTL macro tests
- * 
+ * Dummy request context used for VTL and FTL macro tests.
+ *
  * @author Darren Davison
- * @since 25-Jan-05
+ * @since 25.01.2005
  */
 public class DummyMacroRequestContext {
-    Map msgMap;
-    String contextPath;
-    TestBean command;
 
-    public String getMessage(String code) {
-        return (String) msgMap.get(code);
-    }
-    public String getMessage(String code, String defaultMsg) {
-        String msg = (String) msgMap.get(code);
-        return (msg == null) ? defaultMsg : msg; 
-    }
-    public DummyBindStatus getBindStatus(String path) throws IllegalStateException {
-        return new DummyBindStatus();
-    }
-    public DummyBindStatus getBindStatus(String path, boolean htmlEscape) throws IllegalStateException {
-        return new DummyBindStatus();
-    }
+	private Map msgMap;
 
-    public String getContextPath() {
-        return contextPath;
-    }
-    public void setContextPath(String contextPath) {
-        this.contextPath = contextPath;
-    }
-    public void setMsgMap(Map msgMap) {
-        this.msgMap = msgMap;
-    }
-    public TestBean getCommand() {
-        return command;
-    }
-    public void setCommand(TestBean command) {
-        this.command = command;
-    }
-    
-    public class DummyBindStatus {      
-        public String getExpression() {
-            return "name";
-        }
-        public String getValue() {
-            return "Darren";
-        }
-    }
+	private String contextPath;
+
+	private TestBean command;
+
+
+	public String getMessage(String code) {
+		return (String) msgMap.get(code);
+	}
+
+	public String getMessage(String code, String defaultMsg) {
+		String msg = (String) msgMap.get(code);
+		return (msg == null) ? defaultMsg : msg;
+	}
+
+	public DummyBindStatus getBindStatus(String path) throws IllegalStateException {
+		return new DummyBindStatus();
+	}
+
+	public DummyBindStatus getBindStatus(String path, boolean htmlEscape) throws IllegalStateException {
+		return new DummyBindStatus();
+	}
+
+	public String getContextPath() {
+		return contextPath;
+	}
+
+	public void setContextPath(String contextPath) {
+		this.contextPath = contextPath;
+	}
+
+	public void setMsgMap(Map msgMap) {
+		this.msgMap = msgMap;
+	}
+
+	public TestBean getCommand() {
+		return command;
+	}
+
+	public void setCommand(TestBean command) {
+		this.command = command;
+	}
+
+
+	public static class DummyBindStatus {
+
+		public String getExpression() {
+			return "name";
+		}
+
+		public String getValue() {
+			return "Darren";
+		}
+	}
+
 }
 
