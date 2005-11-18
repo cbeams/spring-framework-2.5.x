@@ -26,21 +26,26 @@ import org.springframework.web.servlet.LocaleResolver;
 /**
  * Implementation of LocaleResolver that always returns a fixed default Locale.
  *
- * <p>Note: Does not support setLocale, because the fixed Locale cannot be changed.
+ * <p>Note: Does not support <code>setLocale</code>, as the fixed Locale
+ * cannot be changed.
  *
  * @author Juergen Hoeller
  * @since 1.1
  */
 public class FixedLocaleResolver implements LocaleResolver {
 
-	private Locale defaultLocale;
+	private Locale defaultLocale = Locale.getDefault();
+
 
 	/**
 	 * Set the fixed Locale that this resolver will return.
+	 * Default is the current JVM's default Locale.
+	 * @see java.util.Locale#getDefault()
 	 */
 	public void setDefaultLocale(Locale defaultLocale) {
-		this.defaultLocale = defaultLocale;
+		this.defaultLocale = (defaultLocale != null ? defaultLocale : Locale.getDefault());
 	}
+
 
 	public Locale resolveLocale(HttpServletRequest request) {
 		return this.defaultLocale;
