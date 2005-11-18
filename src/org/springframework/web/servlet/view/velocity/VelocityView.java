@@ -31,6 +31,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.app.tools.VelocityFormatter;
 import org.apache.velocity.context.Context;
+import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
@@ -359,6 +360,7 @@ public class VelocityView extends AbstractTemplateView {
 	 */
 	protected Context createVelocityContext(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
 		return createVelocityContext(model);
 	}
 
@@ -390,8 +392,9 @@ public class VelocityView extends AbstractTemplateView {
 	 * @throws Exception if there's a fatal error while we're adding model attributes
 	 * @see #exposeHelpers(org.apache.velocity.context.Context, HttpServletRequest)
 	 */
-	protected void exposeHelpers(Context velocityContext, HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+	protected void exposeHelpers(
+			Context velocityContext, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
 		exposeHelpers(velocityContext, request);
 	}
 
@@ -549,9 +552,19 @@ public class VelocityView extends AbstractTemplateView {
 	 * @throws Exception if thrown by Velocity
 	 * @see org.apache.velocity.Template#merge
 	 */
-	protected void mergeTemplate(Template template, Context context, HttpServletResponse response)
-			throws Exception {
-		template.merge(context, response.getWriter());
+	protected void mergeTemplate(
+			Template template, Context context, HttpServletResponse response) throws Exception {
+
+		try {
+			template.merge(context, response.getWriter());
+		}
+		catch (MethodInvocationException ex) {
+			throw new NestedServletException(
+					"Method invocation failed during rendering of Velocity view with name '" +
+					getBeanName() + "': " + ex.getMessage() + "; reference [" + ex.getReferenceName() +
+					"], method '" + ex.getMethodName() + "'",
+					ex.getWrappedThrowable());
+		}
 	}
 
 
