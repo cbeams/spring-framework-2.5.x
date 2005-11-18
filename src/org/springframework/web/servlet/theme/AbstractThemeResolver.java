@@ -28,9 +28,13 @@ import org.springframework.web.servlet.ThemeResolver;
  */
 public abstract class AbstractThemeResolver implements ThemeResolver {
 
+	/**
+	 * Out-of-the-box value for the default theme name: "theme".
+	 */
 	public final static String ORIGINAL_DEFAULT_THEME_NAME = "theme";
 
 	private String defaultThemeName = ORIGINAL_DEFAULT_THEME_NAME;
+
 
 	/**
 	 * Set the name of the default theme.

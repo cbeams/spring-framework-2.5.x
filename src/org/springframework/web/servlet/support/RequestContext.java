@@ -253,7 +253,7 @@ public class RequestContext {
 					if (locale == null) {
 						locale = (Locale) getServletContext().getAttribute(JSTL_LOCALE_ATTRIBUTE + APPLICATION_SCOPE_SUFFIX);
 						if (locale == null) {
-							// Nor JSTL locale available -> fall back to accept-header locale.
+							// No JSTL locale available -> fall back to accept-header locale.
 							locale = getRequest().getLocale();
 						}
 					}

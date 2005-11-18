@@ -24,7 +24,8 @@ import javax.servlet.http.HttpServletResponse;
  * Implementation of ThemeResolver that simply uses a fixed theme.
  * The fixed name can be defined via the defaultTheme property.
  *
- * <p>Note: Does not support setThemeName, as the theme is fixed.
+ * <p>Note: Does not support <code>setThemeName</code>, as the fixed theme
+ * cannot be changed.
  *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
