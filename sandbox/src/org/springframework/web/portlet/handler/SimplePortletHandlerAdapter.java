@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.portlet.support;
+package org.springframework.web.portlet.handler;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -23,7 +23,7 @@ import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
 import org.springframework.web.portlet.HandlerAdapter;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.portlet.ModelAndView;
 
 /**
  * Adapter to delegate out to standard JSR-168 Portlets from the generic DispatcherPortlet.
@@ -33,8 +33,8 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * <p>This is an SPI class, not used directly by application code.
  *
- * @author Rod Johnson
  * @author John Lewis
+ * @since 1.3
  * @see org.springframework.web.portlet.DispatcherPortlet
  * @see Portlet
  */
@@ -43,15 +43,18 @@ public class SimplePortletHandlerAdapter implements HandlerAdapter {
 	public boolean supports(Object handler) {
 		return (handler instanceof Portlet);
 	}
-	
-	public ModelAndView handleRender(RenderRequest request, RenderResponse response, Object handler) throws Exception {
+
+	public ModelAndView handleRender(RenderRequest request, RenderResponse response, Object handler)
+			throws Exception {
+
 		((Portlet) handler).render(request, response);
 		return null;
 	}
-	
-	public void handleAction(ActionRequest request, ActionResponse response, Object handler) throws Exception {
+
+	public void handleAction(ActionRequest request, ActionResponse response, Object handler)
+			throws Exception {
+
 		((Portlet) handler).processAction(request, response);
 	}
-	
 
 }

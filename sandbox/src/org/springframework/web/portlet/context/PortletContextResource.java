@@ -12,9 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
-package org.springframework.web.portlet.context.support;
+package org.springframework.web.portlet.context;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -40,6 +40,7 @@ import org.springframework.web.portlet.util.PortletUtils;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
+ * @since 1.3
  * @see javax.portlet.PortletContext#getResourceAsStream
  * @see javax.portlet.PortletContext#getRealPath
  */
@@ -48,6 +49,7 @@ public class PortletContextResource extends AbstractResource {
 	private final PortletContext portletContext;
 
 	private final String path;
+
 
 	/**
 	 * Create a new PortletContextResource.
@@ -84,6 +86,7 @@ public class PortletContextResource extends AbstractResource {
 	public String getPath() {
 		return path;
 	}
+
 
 	/**
 	 * This implementation delegates to PortletContext.getResourceAsStream,
@@ -129,6 +132,7 @@ public class PortletContextResource extends AbstractResource {
 	public String getDescription() {
 		return "PortletContext resource [" + this.path + "]";
 	}
+
 
 	public boolean equals(Object obj) {
 		if (obj == this) {

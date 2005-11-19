@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.portlet.bind;
 
@@ -52,6 +52,7 @@ import org.springframework.web.bind.WebDataBinder;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
+ * @since 1.3
  * @see #bind(javax.portlet.PortletRequest)
  * @see #registerCustomEditor
  * @see #setAllowedFields

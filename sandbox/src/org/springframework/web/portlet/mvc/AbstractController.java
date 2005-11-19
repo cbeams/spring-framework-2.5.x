@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.portlet.mvc;
 
@@ -27,8 +27,8 @@ import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 import javax.portlet.WindowState;
 
-import org.springframework.web.portlet.support.PortletContentGenerator;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.portlet.ModelAndView;
+import org.springframework.web.portlet.handler.PortletContentGenerator;
 
 /**
  * <p>Convenient superclass for controller implementations, using the Template
@@ -60,7 +60,7 @@ import org.springframework.web.servlet.ModelAndView;
  *  <li>Call method {@link #handleRenderRequestInternal handleRenderRequestInternal},
  *      (optionally synchronizing around the call on the PortletSession),
  *      which should be overridden by extending classes to provide actual functionality to 
- *      return {@link org.springframework.web.servlet.ModelAndView ModelAndView} objects.
+ *      return {@link org.springframework.web.portlet.ModelAndView ModelAndView} objects.
  *      This will be executed repeatedly as the portal updates the current displayed page.</li>
  * </ol>
  * </p>
@@ -121,10 +121,10 @@ import org.springframework.web.servlet.ModelAndView;
  * submit ocurred in an <code>AbstractFormController</code>.
  * </p>  
  * 
- * @author Rod Johnson
- * @author Juergen Hoeller
- * @author Rainer Schmitz
  * @author John A. Lewis
+ * @author Rainer Schmitz
+ * @author Juergen Hoeller
+ * @since 1.3
  */
 public abstract class AbstractController extends PortletContentGenerator implements Controller {
 
@@ -219,7 +219,6 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 		}
 
 		handleActionRequestInternal(request, response);
-		return;
 	}
 
 	/**

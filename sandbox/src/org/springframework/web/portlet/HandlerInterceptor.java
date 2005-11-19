@@ -21,8 +21,6 @@ import javax.portlet.PortletResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
-import org.springframework.web.servlet.ModelAndView;
-
 /**
  * Workflow interface that allows for customized handler execution chains.
  * Applications can register any number of existing or custom interceptors
@@ -60,11 +58,11 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author Juergen Hoeller
  * @author John Lewis
+ * @since 1.3
  * @see HandlerExecutionChain#getInterceptors
  * @see org.springframework.web.portlet.HandlerMapping
  * @see org.springframework.web.portlet.handler.AbstractHandlerMapping#setInterceptors
  * @see org.springframework.web.portlet.HandlerExecutionChain
- * @see javax.servlet.Filter
  */
 public interface HandlerInterceptor {
 

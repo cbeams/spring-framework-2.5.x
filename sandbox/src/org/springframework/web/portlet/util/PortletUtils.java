@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.portlet.util;
 
@@ -27,15 +27,18 @@ import javax.portlet.PortletContext;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 
+import org.springframework.web.util.WebUtils;
+
 /**
  * Miscellaneous utilities for portlet applications.
  * Used by various framework classes.
- * @author Rod Johnson
+ *
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
+ * @since 1.3
  */
-public abstract class PortletUtils extends org.springframework.web.util.WebUtils {
+public abstract class PortletUtils {
 
 	/**
 	 * Return the temporary directory for the current web application,
@@ -44,7 +47,7 @@ public abstract class PortletUtils extends org.springframework.web.util.WebUtils
 	 * @return the File representing the temporary directory
 	 */
 	public static File getTempDir(PortletContext portletContext) {
-		return (File) portletContext.getAttribute(TEMP_DIR_CONTEXT_ATTRIBUTE);
+		return (File) portletContext.getAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE);
 	}
 
 	/**
@@ -239,14 +242,14 @@ public abstract class PortletUtils extends org.springframework.web.util.WebUtils
 	 * @param request current portlet request
 	 * @param name name of the parameter
 	 * @return if the parameter was sent
-	 * @see #SUBMIT_IMAGE_SUFFIXES
+	 * @see org.springframework.web.util.WebUtils#SUBMIT_IMAGE_SUFFIXES
 	 */
 	public static boolean hasSubmitParameter(PortletRequest request, String name) {
 		if (request.getParameter(name) != null) {
 			return true;
 		}
-		for (int i = 0; i < SUBMIT_IMAGE_SUFFIXES.length; i++) {
-			String suffix = SUBMIT_IMAGE_SUFFIXES[i];
+		for (int i = 0; i < WebUtils.SUBMIT_IMAGE_SUFFIXES.length; i++) {
+			String suffix = WebUtils.SUBMIT_IMAGE_SUFFIXES[i];
 			if (request.getParameter(name + suffix) != null) {
 				return true;
 			}
@@ -261,14 +264,14 @@ public abstract class PortletUtils extends org.springframework.web.util.WebUtils
 	 * @param request current portlet request
 	 * @param name name of the parameter
 	 * @return the actual parameter name with suffix if needed - null if not present
-	 * @see #SUBMIT_IMAGE_SUFFIXES
+	 * @see org.springframework.web.util.WebUtils#SUBMIT_IMAGE_SUFFIXES
 	 */
 	public static String getSubmitParameter(PortletRequest request, String name) {
 		if (request.getParameter(name) != null) {
 			return name;
 		}
-		for (int i = 0; i < SUBMIT_IMAGE_SUFFIXES.length; i++) {
-			String suffix = SUBMIT_IMAGE_SUFFIXES[i];
+		for (int i = 0; i < WebUtils.SUBMIT_IMAGE_SUFFIXES.length; i++) {
+			String suffix = WebUtils.SUBMIT_IMAGE_SUFFIXES[i];
 			if (request.getParameter(name + suffix) != null) {
 				return name + suffix;
 			}

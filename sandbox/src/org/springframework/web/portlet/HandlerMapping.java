@@ -44,9 +44,8 @@ import javax.portlet.PortletRequest;
  * to specify a sorting order and thus a priority for getting applied by
  * DispatcherPortlet. Non-Ordered instances get treated as lowest priority.
  *
- * @author Rod Johnson
- * @author Juergen Hoeller
  * @author John A. Lewis
+ * @author Juergen Hoeller
  * @see org.springframework.core.Ordered
  * @see org.springframework.web.portlet.handler.AbstractHandlerMapping
  * @see org.springframework.web.portlet.handler.PortletModeHandlerMapping

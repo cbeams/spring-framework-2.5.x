@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package org.springframework.web.portlet.context.support;
+package org.springframework.web.portlet.context;
 
+import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.AbstractRefreshableApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.ui.context.Theme;
-import org.springframework.ui.context.ThemeSource;
-import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.ServletContextAwareProcessor;
-import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
-import org.springframework.web.portlet.context.PortletContextAware;
 
 /**
  * AbstractRefreshableApplicationContext subclass that implements the
@@ -66,6 +65,7 @@ import org.springframework.web.portlet.context.PortletContextAware;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
+ * @since 1.3
  * @see #loadBeanDefinitions
  * @see #getConfigLocations
  * @see org.springframework.web.portlet.context.ConfigurablePortletApplicationContext#setConfigLocations
@@ -76,13 +76,16 @@ import org.springframework.web.portlet.context.PortletContextAware;
  * @see org.springframework.context.support.GenericApplicationContext
  */
 public abstract class AbstractRefreshablePortletApplicationContext extends AbstractRefreshableApplicationContext
-		implements ConfigurablePortletApplicationContext{
+		implements ConfigurablePortletApplicationContext {
+
+	/** Servlet context that this context runs in */
+	private ServletContext servletContext;
 
 	/** Portlet context that this context runs in */
 	private PortletContext portletContext;
 
-	/** Servlet context that this context runs in */
-	private ServletContext servletContext;
+	/** Portlet config that this context runs in */
+	private PortletConfig portletConfig;
 
 	/** Namespace of this context, or null if root */
 	private String namespace;
@@ -90,12 +93,16 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 	/** Paths to XML configuration files */
 	private String[] configLocations;
 
-	/** the ThemeSource for this ApplicationContext */
-	private ThemeSource themeSource;
-
 
 	public AbstractRefreshablePortletApplicationContext() {
 		setDisplayName("Root PortletApplicationContext");
+	}
+
+	public void setParent(ApplicationContext parent) {
+		super.setParent(parent);
+		if (parent instanceof WebApplicationContext) {
+			this.servletContext = ((WebApplicationContext) parent).getServletContext();
+		}
 	}
 
 	public void setPortletContext(PortletContext portletContext) {
@@ -106,12 +113,12 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 		return this.portletContext;
 	}
 
-	public void setServletContext(ServletContext servletContext) {
-		this.servletContext = servletContext;
+	public void setPortletConfig(PortletConfig portletConfig) {
+		this.portletConfig = portletConfig;
 	}
 
-	public ServletContext getServletContext() {
-		return this.servletContext;
+	public PortletConfig getPortletConfig() {
+		return portletConfig;
 	}
 
 	public void setNamespace(String namespace) {
@@ -162,8 +169,10 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
-		beanFactory.addBeanPostProcessor(new PortletContextAwareProcessor(this.portletContext));
+		beanFactory.addBeanPostProcessor(new PortletContextAwareProcessor(this.portletContext, this.portletConfig));
+		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 		beanFactory.ignoreDependencyInterface(PortletContextAware.class);
+		beanFactory.ignoreDependencyInterface(PortletConfigAware.class);
 	}
 
 	/**
@@ -180,17 +189,6 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 	 */
 	protected ResourcePatternResolver getResourcePatternResolver() {
 		return new PortletContextResourcePatternResolver(this);
-	}
-
-	/**
-	 * Initialize the theme capability.
-	 */
-	protected void onRefresh() {
-		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
-	}
-
-	public Theme getTheme(String themeName) {
-		return this.themeSource.getTheme(themeName);
 	}
 
 

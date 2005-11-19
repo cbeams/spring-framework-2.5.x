@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.portlet.mvc;
 
@@ -21,10 +21,7 @@ import javax.portlet.ActionResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.AbstractCommandController;
-import org.springframework.web.servlet.mvc.AbstractController;
-import org.springframework.web.servlet.mvc.AbstractFormController;
+import org.springframework.web.portlet.ModelAndView;
 
 /**
  * Base portlet Controller interface, representing a component that receives 
@@ -63,9 +60,9 @@ import org.springframework.web.servlet.mvc.AbstractFormController;
  * optional validation, form handling, etc should be obtained through extending
  * one of the abstract controller classes mentioned above.</p>
  *
- * @author Rod Johnson
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
+ * @since 1.3
  * @see SimpleControllerHandlerAdapter
  * @see AbstractController
  * @see AbstractCommandController
@@ -74,7 +71,6 @@ import org.springframework.web.servlet.mvc.AbstractFormController;
  * @see org.springframework.context.ApplicationContextAware
  * @see org.springframework.context.ResourceLoaderAware
  * @see org.springframework.web.portlet.context.PortletContextAware
- * @see org.springframework.web.portlet.context.support.PortletApplicationObjectSupport
  */
 public interface Controller {
 

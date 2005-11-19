@@ -19,8 +19,6 @@ package org.springframework.web.portlet;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
-import org.springframework.web.servlet.ModelAndView;
-
 /**
  * Interface to be implemented by objects than can resolve exceptions thrown
  * during handler mapping or execution, in the typical case to error views.
@@ -32,6 +30,7 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
+ * @since 1.3
  */
 public interface HandlerExceptionResolver {
 

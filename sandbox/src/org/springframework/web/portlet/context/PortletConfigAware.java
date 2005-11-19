@@ -16,27 +16,26 @@
 
 package org.springframework.web.portlet.context;
 
-import javax.portlet.PortletContext;
+import javax.portlet.PortletConfig;
 
 /**
  * Interface to be implemented by any object that wishes to be notified
- * of the PortletContext (typically determined by the PortletApplicationContext)
+ * of the PortletConfig (typically determined by the PortletApplicationContext)
  * that it runs in.
  *
  * @author Juergen Hoeller
- * @author William G. Thompson, Jr.
  * @since 1.3
- * @see PortletConfigAware
+ * @see PortletContextAware
  */
-public interface PortletContextAware {
+public interface PortletConfigAware {
 
 	/**
-	 * Set the PortletContext that this object runs in.
+	 * Set the PortletConfigthat this object runs in.
 	 * <p>Invoked after population of normal bean properties but before an init
 	 * callback like InitializingBean's afterPropertiesSet or a custom init-method.
 	 * Invoked after ApplicationContextAware's setApplicationContext.
-	 * @param portletContext PortletContext object to be used by this object
+	 * @param portletConfig PortletConfig object to be used by this object
 	 */
-	void setPortletContext(PortletContext portletContext);
+	void setPortletConfig(PortletConfig portletConfig);
 
 }

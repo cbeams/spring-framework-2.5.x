@@ -30,7 +30,7 @@ import org.springframework.orm.hibernate.SessionFactoryUtils;
 import org.springframework.orm.hibernate.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.portlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.portlet.ModelAndView;
 
 /**
  * Spring web HandlerInterceptor that binds a Hibernate Session to the thread for the

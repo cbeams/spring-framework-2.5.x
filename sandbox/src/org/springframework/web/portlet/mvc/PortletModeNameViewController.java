@@ -12,14 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.portlet.mvc;
 
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.portlet.ModelAndView;
 
 /**
  * <p>Trivial controller that transforms the PortletMode to a view name.
@@ -43,15 +43,14 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
+ * @since 1.3
  */
 public class PortletModeNameViewController extends AbstractController {
 
-    /* (non-Javadoc)
-     * @see AbstractController#handleRenderRequestInternal
-     */
-    protected ModelAndView handleRenderRequestInternal(RenderRequest request,
-            RenderResponse response) throws Exception {
-        return new ModelAndView(request.getPortletMode().toString());
-    }
+	protected ModelAndView handleRenderRequestInternal(
+			RenderRequest request, RenderResponse response) throws Exception {
+
+		return new ModelAndView(request.getPortletMode().toString());
+	}
 
 }

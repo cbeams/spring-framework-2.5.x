@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.portlet.bind;
 
@@ -21,15 +21,26 @@ import javax.portlet.PortletException;
 /**
  * Fatal binding exception, thrown when we want to
  * treat binding exceptions as unrecoverable.
- * @author Rod Johnson
+ *
+ * @author Juergen Hoeller
  * @author John A. Lewis
+ * @since 1.3
  */
 public class PortletRequestBindingException extends PortletException {
 
+	/**
+	 * Constructor for PortletRequestBindingException.
+	 * @param msg the detail message
+	 */
 	public PortletRequestBindingException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for PortletRequestBindingException.
+	 * @param msg the detail message
+	 * @param ex the nested exception
+	 */
 	public PortletRequestBindingException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

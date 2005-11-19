@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.portlet.handler;
 
@@ -34,29 +34,28 @@ import org.springframework.context.ApplicationContextException;
  * <p>The bean configuration for this mapping will look something like this:</p>
  * <pre>
  * 	&lt;bean id="portletModeHandlerMapping" class="org.springframework.web.portlet.handler.PortletModeHandlerMapping"&gt;
- *		&lt;property name="portletModeMap"&gt;
- *			&lt;map&gt;
- *				&lt;entry key="view"&gt;&lt;ref bean="viewHandler"/&gt;&lt;/entry&gt;
- *				&lt;entry key="edit"&gt;&lt;ref bean="editHandler"/&gt;&lt;/entry&gt;
- *				&lt;entry key="help"&gt;&lt;ref bean="helpHandler"/&gt;&lt;/entry&gt;
- *			&lt;/map&gt;
- *		&lt;/property&gt;
- *	&lt;/bean&gt;
+ * 		&lt;property name="portletModeMap"&gt;
+ * 			&lt;map&gt;
+ * 				&lt;entry key="view"&gt;&lt;ref bean="viewHandler"/&gt;&lt;/entry&gt;
+ * 				&lt;entry key="edit"&gt;&lt;ref bean="editHandler"/&gt;&lt;/entry&gt;
+ * 				&lt;entry key="help"&gt;&lt;ref bean="helpHandler"/&gt;&lt;/entry&gt;
+ * 			&lt;/map&gt;
+ * 		&lt;/property&gt;
+ * 	&lt;/bean&gt;
  * </pre>
- * 
+ *
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
+ * @since 1.3
  */
 public class PortletModeHandlerMapping extends AbstractHandlerMapping {
 
-	// lazy init the handlers at startup
-    private boolean lazyInitHandlers = false;
-
-    // map passed in from the application context file
 	private Map portletModeMap;
 
-	// internal map build from passed in map and used by mapping routines
+	private boolean lazyInitHandlers = false;
+
 	private final Map handlerMap = new HashMap();
+
 
 	/**
 	 * Set a Map with PortletModes as keys and handler beans as values.
@@ -75,27 +74,6 @@ public class PortletModeHandlerMapping extends AbstractHandlerMapping {
 		this.portletModeMap = mappings;
 	}
 
-	public void initApplicationContext() throws BeansException {
-
-	    // make sure the map got initialized
-	    if (this.portletModeMap == null || this.portletModeMap.isEmpty())
-			logger.warn("Neither 'portletModeMap' nor 'mappings' set on PortletModeHandlerMapping");
-		else {
-
-		    // iterate through the portlet modes in the passed in map
-		    for(Iterator itr = this.portletModeMap.keySet().iterator(); itr.hasNext(); ) {
-
-	            // get the portlet mode for this mapping
-		        String modeKey = (String)itr.next();
-				PortletMode mode = new PortletMode(modeKey);
-
-				// get the handler and register it
-				Object handler = this.portletModeMap.get(modeKey);
-				registerHandler(mode, handler);
-			}
-		}
-	}
-	
 	/**
 	 * Set whether to lazily initialize handlers. Only applicable to
 	 * singleton handlers, as prototypes are always lazily initialized.
@@ -110,20 +88,41 @@ public class PortletModeHandlerMapping extends AbstractHandlerMapping {
 		this.lazyInitHandlers = lazyInitHandlers;
 	}
 
+
+	public void initApplicationContext() throws BeansException {
+		// Make sure the map got initialized.
+		if (this.portletModeMap == null || this.portletModeMap.isEmpty()) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Neither 'portletModeMap' nor 'mappings' set on PortletModeHandlerMapping");
+			}
+		}
+		else {
+			// Iterate through the portlet modes in the passed in map.
+			for (Iterator it = this.portletModeMap.keySet().iterator(); it.hasNext();) {
+				// Get the portlet mode for this mapping.
+				String modeKey = (String) it.next();
+				PortletMode mode = new PortletMode(modeKey);
+				// Get the handler and register it.
+				Object handler = this.portletModeMap.get(modeKey);
+				registerHandler(mode, handler);
+			}
+		}
+	}
+
 	/**
 	 * Register the given handler instance for the given PortletMode.
 	 * @param mode the PortletMode the bean is mapped to
 	 * @param handler the handler instance
 	 * @throws BeansException if the handler couldn't be registered
 	 */
-	protected void registerHandler(PortletMode mode, Object handler) 
+	protected void registerHandler(PortletMode mode, Object handler)
 			throws BeansException {
-	    
-	    // check for duplicate mapping
-	    Object mappedHandler = this.handlerMap.get(mode);
+
+		// check for duplicate mapping
+		Object mappedHandler = this.handlerMap.get(mode);
 		if (mappedHandler != null)
 			throw new ApplicationContextException("Cannot map handler [" + handler + "] to mode [" + mode +
-			        "]: there's already handler [" + mappedHandler + "] mapped");
+					"]: there's already handler [" + mappedHandler + "] mapped");
 
 		// eagerly resolve handler if referencing singleton via name
 		if (!this.lazyInitHandlers && handler instanceof String) {
@@ -141,20 +140,16 @@ public class PortletModeHandlerMapping extends AbstractHandlerMapping {
 	/**
 	 * Look up a handler for the PortletMode of the given request.
 	 * @param request current portlet request
-	 * @return the looked up handler instance, or null
+	 * @return the looked up handler instance, or <code>null</code>
 	 */
 	protected Object getHandlerInternal(PortletRequest request) throws Exception {
-
-	    // get the portlet mode
+		// Look up the handler for the portlet mode.
 		PortletMode mode = request.getPortletMode();
-
-		// look up the handler for the mode
-	    Object handler = handlerMap.get(mode);
-	    if (logger.isDebugEnabled())
-			logger.debug("mode [" + mode + "] = " + "handler [" + handler + "]");
-
-	    // return the handler
-	    return handler;
+		Object handler = this.handlerMap.get(mode);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Portlet mode '" + mode + "' -> handler [" + handler + "]");
+		}
+		return handler;
 	}
 
 }

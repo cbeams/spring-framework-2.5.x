@@ -19,7 +19,7 @@ package org.springframework.web.portlet.mvc;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.portlet.ModelAndView;
 
 /**
  * <p>Trivial controller that always returns a named view. The view
@@ -59,13 +59,14 @@ import org.springframework.web.servlet.ModelAndView;
  * </table>
  * </p>
  *
- * @author Rod Johnson
  * @author John A. Lewis
+ * @since 1.3
  */
 public class ParameterizableViewController extends AbstractController {
 	
 	private String viewName;
-	
+
+
 	/**
 	 * Set the name of the view to delegate to.
 	 */
@@ -80,18 +81,17 @@ public class ParameterizableViewController extends AbstractController {
 		return viewName;
 	}
 
+
 	protected void initApplicationContext() {
 		if (this.viewName == null) {
 			throw new IllegalArgumentException("viewName is required");
 		}
 	}
 
-    /* (non-Javadoc)
-     * @see AbstractController#handleRenderRequestInternal
-     */
-    protected ModelAndView handleRenderRequestInternal(RenderRequest request,
-            RenderResponse response) throws Exception {
-        return new ModelAndView(this.viewName);
-    }
+	protected ModelAndView handleRenderRequestInternal(
+			RenderRequest request, RenderResponse response) throws Exception {
+
+		return new ModelAndView(this.viewName);
+	}
 
 }

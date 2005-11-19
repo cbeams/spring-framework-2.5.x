@@ -19,10 +19,11 @@ package org.springframework.web.portlet;
 /**
  * Handler execution chain, consisting of handler object and any
  * preprocessing interceptors. Returned by HandlerMapping's
- * getHandler method.
+ * <code>getHandler</code> method.
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
+ * @since 1.3
  * @see HandlerMapping#getHandler
  * @see HandlerInterceptor
  */
@@ -31,6 +32,7 @@ public class HandlerExecutionChain {
 	private Object handler;
 
 	private HandlerInterceptor[] interceptors;
+
 
 	/**
 	 * Create new HandlerExecutionChain.
@@ -51,9 +53,10 @@ public class HandlerExecutionChain {
 		this.interceptors = interceptors;
 	}
 
+
 	/**
 	 * Return the handler object to execute.
-	 * @return the handler object (should not be null)
+	 * @return the handler object (should not be <code>null</code>)
 	 */
 	public Object getHandler() {
 		return handler;
@@ -62,7 +65,7 @@ public class HandlerExecutionChain {
 	/**
 	 * Return the array of interceptors to apply (in the given order)
 	 * before the handler itself executes.
-	 * @return the array of HandlerInterceptors instances (may be null)
+	 * @return the array of HandlerInterceptors instances (may be <code>null</code>)
 	 */
 	public HandlerInterceptor[] getInterceptors() {
 		return interceptors;

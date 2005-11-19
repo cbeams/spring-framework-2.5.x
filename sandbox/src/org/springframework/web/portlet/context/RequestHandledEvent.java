@@ -14,31 +14,36 @@
  * limitations under the License.
  */
 
-package org.springframework.web.portlet.context.support;
+package org.springframework.web.portlet.context;
 
 import org.springframework.context.ApplicationEvent;
 
 /**
- * Event raised when a portlet request is handled within a PortletApplicationContext.
+ * Event raised when a portlet request is handled within an ApplicationContext.
  * Supported by Spring's own FrameworkPortlet, but can also be raised
  * by any other web component.
  *
- * @author Rod Johnson
  * @author Juergen Hoeller
  * @author John A. Lewis
- * @see org.springframework.web.servlet.FrameworkPortlet
+ * @since 1.3
+ * @see org.springframework.web.portlet.FrameworkPortlet
+ * @see org.springframework.context.ApplicationContext#publishEvent
  */
 public class RequestHandledEvent extends ApplicationEvent {
 
 	/** Request processing time */
 	private final long processingTimeMillis;
 
+	/** Name of the portlet that handled the request */
 	private final String portletName;
 
+	/** PortletMode of the request */
 	private final String portletMode;
 
+	/** Type of Portlet Request */
 	private final String requestType;
-	
+
+	/** Session id that applied to the request, if any */
 	private String sessionId;
 
 	/** Usually the UserPrincipal */
@@ -54,10 +59,11 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * @param processingTimeMillis the processing time of the request in milliseconds
 	 * @param portletName the name of the portlet that handled the request
 	 * @param portletMode the PortletMode of the request (usually 'view', 'edit', or 'help')
-	 * @param requestType the type of Portlet Request ('action' or 'render')
+	 * @param requestType the type of Portlet request ('action' or 'render')
 	 */
 	public RequestHandledEvent(Object source, long processingTimeMillis,
 			String portletName, String portletMode, String requestType) {
+
 		super(source);
 		this.processingTimeMillis = processingTimeMillis;
 		this.portletName = portletName;
@@ -71,12 +77,13 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * @param processingTimeMillis the processing time of the request in milliseconds
 	 * @param portletName the name of the portlet that handled the request
 	 * @param portletMode the PortletMode of the request (usually 'view', 'edit', or 'help')
-	 * @param requestType the type of Portlet Request ('action' or 'render')
+	 * @param requestType the type of Portlet request ('action' or 'render')
 	 * @param failureCause the cause of failure, if any
 	 */
 	public RequestHandledEvent(Object source, long processingTimeMillis,
-	        String portletName, String portletMode, String requestType,
-	        Throwable failureCause) {
+			String portletName, String portletMode, String requestType,
+			Throwable failureCause) {
+
 		this(source, processingTimeMillis, portletName, portletMode, requestType);
 		this.failureCause = failureCause;
 	}
@@ -87,14 +94,15 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * @param processingTimeMillis the processing time of the request in milliseconds
 	 * @param portletName the name of the portlet that handled the request
 	 * @param portletMode the PortletMode of the request (usually 'view', 'edit', or 'help')
-	 * @param requestType the type of Portlet Request ('action' or 'render')
+	 * @param requestType the type of Portlet request ('action' or 'render')
 	 * @param sessionId the id of the HTTP session, if any
 	 * @param userName the name of the user that was associated with the
 	 * request, if any (usually the UserPrincipal)
 	 */
 	public RequestHandledEvent(Object source, long processingTimeMillis,
-	        String portletName, String portletMode, String requestType,
+			String portletName, String portletMode, String requestType,
 			String sessionId, String userName) {
+
 		this(source, processingTimeMillis, portletName, portletMode, requestType);
 		this.sessionId = sessionId;
 		this.userName = userName;
@@ -106,17 +114,18 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * @param processingTimeMillis the processing time of the request in milliseconds
 	 * @param portletName the name of the portlet that handled the request
 	 * @param portletMode the PortletMode of the request (usually 'view', 'edit', or 'help')
-	 * @param requestType the type of Portlet Request ('action' or 'render')
+	 * @param requestType the type of Portlet request ('action' or 'render')
 	 * @param sessionId the id of the HTTP session, if any
 	 * @param userName the name of the user that was associated with the
 	 * request, if any (usually the UserPrincipal)
 	 * @param failureCause the cause of failure, if any
 	 */
 	public RequestHandledEvent(Object source, long processingTimeMillis,
-	        String portletName, String portletMode, String requestType,
+			String portletName, String portletMode, String requestType,
 			String sessionId, String userName, Throwable failureCause) {
+
 		this(source, processingTimeMillis, portletName, portletMode, requestType,
-		        sessionId, userName);
+				sessionId, userName);
 		this.failureCause = failureCause;
 	}
 
@@ -159,7 +168,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	/**
 	 * Return the name of the user that was associated with the request
 	 * (usually the UserPrincipal).
-	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal
+	 * @see javax.portlet.PortletRequest#getUserPrincipal()
 	 */
 	public String getUserName() {
 		return userName;

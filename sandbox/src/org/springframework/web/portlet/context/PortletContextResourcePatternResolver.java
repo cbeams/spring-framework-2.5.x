@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.portlet.context.support;
+package org.springframework.web.portlet.context;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -40,6 +40,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
+ * @since 1.3
  */
 public class PortletContextResourcePatternResolver extends PathMatchingResourcePatternResolver {
 
@@ -67,7 +68,7 @@ public class PortletContextResourcePatternResolver extends PathMatchingResourceP
 	 * matching resources below the web application root directory.
 	 * In case of other resources, delegates to the superclass version.
 	 * @see #doRetrieveMatchingPortletContextResources
-	 * @see PortletContextResource
+	 * @see org.springframework.web.portlet.context.PortletContextResource
 	 * @see javax.portlet.PortletContext#getResourcePaths
 	 */
 	protected Set doFindPathMatchingFileResources(Resource rootDirResource, String subPattern) throws IOException {
@@ -91,7 +92,7 @@ public class PortletContextResourcePatternResolver extends PathMatchingResourceP
 	 * @param dir the current directory
 	 * @param result the Set of matching Resources to add to
 	 * @throws IOException if directory contents could not be retrieved
-	 * @see PortletContextResource
+	 * @see org.springframework.web.portlet.context.PortletContextResource
 	 * @see javax.portlet.PortletContext#getResourcePaths
 	 */
 	protected void doRetrieveMatchingPortletContextResources(

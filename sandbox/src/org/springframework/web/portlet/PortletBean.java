@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 package org.springframework.web.portlet;
 
 import java.util.Enumeration;
@@ -36,7 +36,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
-import org.springframework.web.portlet.context.support.PortletContextResourceLoader;
+import org.springframework.web.portlet.context.PortletContextResourceLoader;
 
 /**
  * Simple extension of <code>javax.portlet.GenericPortlet</code> that treats
@@ -51,10 +51,11 @@ import org.springframework.web.portlet.context.support.PortletContextResourceLoa
  * <p>This portlet superclass has no dependency on a Spring application context,
  * in contrast to the FrameworkPortlet class which loads its own context.
  *
- * @author Rod Johnson
- * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
+ * @author Juergen Hoeller
+ * @author Rod Johnson
+ * @since 1.3
  * @see #addRequiredProperty
  * @see #initPortletBean
  * @see #doDispatch

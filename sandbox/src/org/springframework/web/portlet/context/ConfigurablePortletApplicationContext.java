@@ -12,12 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.portlet.context;
 
+import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
-import javax.servlet.ServletContext;
 
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -32,12 +32,13 @@ import org.springframework.context.ConfigurableApplicationContext;
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
+ * @since 1.3
  * @see #refresh
  * @see org.springframework.web.context.ContextLoader#createWebApplicationContext
  * @see org.springframework.web.portlet.FrameworkPortlet#createPortletApplicationContext
  * @see org.springframework.web.context.ConfigurableWebApplicationContext
  */
-public interface ConfigurablePortletApplicationContext extends PortletApplicationContext, ConfigurableApplicationContext {
+public interface ConfigurablePortletApplicationContext extends ConfigurableApplicationContext {
 
 	/**
 	 * Any number of these characters are considered delimiters between
@@ -51,29 +52,26 @@ public interface ConfigurablePortletApplicationContext extends PortletApplicatio
 	 * Set the PortletContext for this portlet application context.
 	 * <p>Does not cause an initialization of the context: refresh needs to be
 	 * called after the setting of all configuration properties.
-	 * @see #refresh
+	 * @see #refresh()
 	 */
 	void setPortletContext(PortletContext portletContext);
 
 	/**
-	 * Set the ServletContext for this portlet application context.
-	 * <p>Does not cause an initialization of the context: refresh needs to be
-	 * called after the setting of all configuration properties.
-	 * @see #refresh
+	 * Set the PortletConfig for this portlet application context.
+	 * @see #refresh()
 	 */
-	void setServletContext(ServletContext servletContext);
+	void setPortletConfig(PortletConfig portletConfig);
 
 	/**
 	 * Set the namespace for this portlet application context,
 	 * to be used for building a default context config location.
-	 * The root portlet application context does not have a namespace.
 	 */
 	void setNamespace(String namespace);
 
 	/**
 	 * Set the config locations for this portlet application context.
 	 * If not set, the implementation is supposed to use a default for the
-	 * given namespace respectively the root portlet application context.
+	 * given namespace.
 	 */
 	void setConfigLocations(String[] configLocations);
 

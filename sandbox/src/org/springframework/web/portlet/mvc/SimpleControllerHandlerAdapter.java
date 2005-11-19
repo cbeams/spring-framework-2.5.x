@@ -22,15 +22,15 @@ import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
 import org.springframework.web.portlet.HandlerAdapter;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.portlet.ModelAndView;
 
 /**
  * Adapter to use the Controller workflow interface with the generic DispatcherPortlet.
  *
  * <p>This is an SPI class, not used directly by application code.
  *
- * @author Rod Johnson
  * @author John Lewis
+ * @since 1.3
  * @see org.springframework.web.portlet.DispatcherPortlet
  * @see Controller
  */
@@ -39,14 +39,17 @@ public class SimpleControllerHandlerAdapter implements HandlerAdapter {
 	public boolean supports(Object handler) {
 		return (handler instanceof Controller);
 	}
-	
-	public ModelAndView handleRender(RenderRequest request, RenderResponse response, Object handler) throws Exception {
+
+	public ModelAndView handleRender(RenderRequest request, RenderResponse response, Object handler)
+			throws Exception {
+
 		return ((Controller) handler).handleRenderRequest(request, response);
 	}
-	
-	public void handleAction(ActionRequest request, ActionResponse response, Object handler) throws Exception {
+
+	public void handleAction(ActionRequest request, ActionResponse response, Object handler)
+			throws Exception {
+
 		((Controller) handler).handleActionRequest(request, response);
 	}
-	
 
 }

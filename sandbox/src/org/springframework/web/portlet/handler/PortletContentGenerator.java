@@ -12,9 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
-package org.springframework.web.portlet.support;
+package org.springframework.web.portlet.handler;
 
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -25,7 +25,7 @@ import javax.portlet.PortletResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
-import org.springframework.web.portlet.context.support.PortletApplicationObjectSupport;
+import org.springframework.web.portlet.context.PortletApplicationObjectSupport;
 
 /**
  * Convenient superclass for any kind of web content generator,
@@ -34,9 +34,9 @@ import org.springframework.web.portlet.context.support.PortletApplicationObjectS
  *
  * <p>Supports portlet cache control options.
  *
- * @author Rod Johnson
  * @author Juergen Hoeller
  * @author John A. Lewis
+ * @since 1.3
  * @see org.springframework.web.portlet.mvc.AbstractController
  */
 public abstract class PortletContentGenerator extends PortletApplicationObjectSupport {
@@ -156,11 +156,13 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 	 * response should be cacheable for, 0 to prevent caching
 	 */
 	protected final void applyCacheSeconds(RenderResponse response, int seconds) {
-		if (seconds > 0)
+		if (seconds > 0) {
 			cacheForSeconds(response, seconds);
-		else if (seconds == 0)
+		}
+		else if (seconds == 0) {
 			preventCaching(response);
-		// leave caching to the portlet configuration otherwise
+		}
+		// Leave caching to the portlet configuration otherwise.
 	}
 
 }

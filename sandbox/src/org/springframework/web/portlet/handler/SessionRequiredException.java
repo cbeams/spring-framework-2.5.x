@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.web.portlet.support;
+package org.springframework.web.portlet.handler;
 
 import javax.portlet.PortletException;
 
 /**
  * Exception thrown when a web content generator requires a pre-existing session.
  *
- * @author John Johnson
- * @see PortletContentGenerator
+ * @author John Lewis
+ * @since 1.3
+ * @see org.springframework.web.portlet.handler.PortletContentGenerator
  */
 public class SessionRequiredException extends PortletException {
 
+	/**
+	 * Create a new SessionRequiredException.
+	 * @param msg the detail message
+	 */
 	public SessionRequiredException(String msg) {
 		super(msg);
 	}

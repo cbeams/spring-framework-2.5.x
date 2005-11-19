@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.Ordered;
 import org.springframework.web.portlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.portlet.ModelAndView;
 
 /**
  * Exception resolver that allows for mapping exception class names to view names,
@@ -41,6 +41,7 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author Juergen Hoeller
  * @author John Lewis
+ * @since 1.3
  */
 public class SimpleMappingExceptionResolver implements HandlerExceptionResolver, Ordered {
 

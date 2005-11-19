@@ -21,8 +21,6 @@ import javax.portlet.ActionResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
-import org.springframework.web.servlet.ModelAndView;
-
 /**
  * Portlet MVC framework SPI interface, allowing parameterization of core MVC workflow.
  *
@@ -41,8 +39,8 @@ import org.springframework.web.servlet.ModelAndView;
  * specify a sorting order and thus a priority for getting applied by
  * DispatcherPortlet. Non-Ordered instances get treated as lowest priority.
  *
- * @author Rod Johnson
  * @author John Lewis
+ * @since 1.3
  * @see org.springframework.web.portlet.mvc.SimpleControllerHandlerAdapter
  */
 public interface HandlerAdapter {
@@ -59,7 +57,7 @@ public interface HandlerAdapter {
 	 * @return whether or not this object can use the given handler
 	 */
 	boolean supports(Object handler); 
-	
+
 	/**
 	 * Use the given handler to handle this render request.
 	 * The workflow that is required may vary widely.

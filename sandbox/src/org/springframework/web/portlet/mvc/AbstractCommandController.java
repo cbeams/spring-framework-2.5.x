@@ -22,8 +22,8 @@ import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
 import org.springframework.validation.BindException;
+import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * <p>Abstract base class for custom command controllers. Autopopulates a
@@ -32,7 +32,7 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * <p>This command controller should preferrable not be used to handle form
  * submission, because functionality for forms is more offered in more
- * detail by the {@link org.springframework.web.servlet.mvc.AbstractFormController
+ * detail by the {@link org.springframework.web.portlet.mvc.AbstractFormController
  * AbstractFormController} and its corresponding implementations.</p>
  *
  * <p><b><a name="config">Exposed configuration properties</a>
@@ -42,9 +42,9 @@ import org.springframework.web.servlet.ModelAndView;
  * <p><b><a name="workflow">Workflow
  * (<a name="BaseCommandController.html#workflow">and that defined by superclass</a>):</b><br>
  *
- * @author Rod Johnson
- * @author Juergen Hoeller
  * @author John A. Lewis
+ * @author Juergen Hoeller
+ * @since 1.3
  * @see #setCommandClass
  * @see #setCommandName
  * @see #setValidator
@@ -55,11 +55,11 @@ public abstract class AbstractCommandController extends BaseCommandController {
 	 * This render parameter is used to indicate forward to the render phase
 	 * that a valid command (and errors) object is in the session.
 	 */
-	private static final String COMMAND_IN_SESSION_PARAMETER = 
-			"command-in-session";
+	private static final String COMMAND_IN_SESSION_PARAMETER = "command-in-session";
 
 	private static final String TRUE = Boolean.TRUE.toString();
-	
+
+
 	/**
 	 * Create a new AbstractCommandController.
 	 */
@@ -83,50 +83,52 @@ public abstract class AbstractCommandController extends BaseCommandController {
 		setCommandClass(commandClass);
 		setCommandName(commandName);
 	}
-	
-	protected final ModelAndView handleRenderRequestInternal(RenderRequest request, RenderResponse response)
-			throws Exception {
 
-	    Object command = null;
+
+	protected final ModelAndView handleRenderRequestInternal(
+			RenderRequest request, RenderResponse response) throws Exception {
+
+		Object command = null;
 		BindException errors = null;
 
-	    // get the command and errors objects from the session, if they exist
+		// get the command and errors objects from the session, if they exist
 		if (isCommandInSession(request)) {
-			if (logger.isDebugEnabled())
-			    logger.debug("render phase obtaining command and errors objects from session");
-		    command = getRenderCommand(request);
+			logger.debug("Render phase obtaining command and errors objects from session");
+			command = getRenderCommand(request);
 			errors = getRenderErrors(request);
-		} else {
-			if (logger.isDebugEnabled())
-			    logger.debug("render phase creating new command and errors objects");
+		}
+		else {
+			logger.debug("Render phase creating new command and errors objects");
 		}
 
-		// if no command object was in the session, create a new one
-		if (command == null)
-		    command = getCommand(request);
+		// If no command object was in the session, create a new one.
+		if (command == null) {
+			command = getCommand(request);
+		}
 
-		// if no errors object was in the session, compute a new one
-	    if (errors == null) {
-	        PortletRequestDataBinder binder = bindAndValidate(request, command);
-	        errors = binder.getErrors();
-	    }
+		// If no errors object was in the session, compute a new one.
+		if (errors == null) {
+			PortletRequestDataBinder binder = bindAndValidate(request, command);
+			errors = binder.getErrors();
+		}
 
-	    return handleRender(request, response, command, errors);
+		return handleRender(request, response, command, errors);
 	}
 
 	protected final void handleActionRequestInternal(ActionRequest request, ActionResponse response)
-	throws Exception {
+			throws Exception {
 
-	    // create the command object
-	    Object command = getCommand(request);
+		// Create the command object.
+		Object command = getCommand(request);
 
-	    // compute the errors object
-	    PortletRequestDataBinder binder = bindAndValidate(request, command);
-	    BindException errors = binder.getErrors();
+		// Compute the errors object.
+		PortletRequestDataBinder binder = bindAndValidate(request, command);
+		BindException errors = binder.getErrors();
 
-	    handleAction(request, response, command, errors);
+		// Actually handle the action.
+		handleAction(request, response, command, errors);
 
-	    // pass the command and errors forward to the render phase
+		// Pass the command and errors forward to the render phase.
 		setRenderCommandAndErrors(request, command, errors);
 		setCommandInSession(response);
 	}
@@ -166,7 +168,7 @@ public abstract class AbstractCommandController extends BaseCommandController {
 			ActionRequest request, ActionResponse response, Object command, BindException errors)
 			throws Exception;
 
-	/** 
+	/**
 	 * Return the name of the render parameter that indicates there
 	 * is a valid command (and errors) object in the session.
 	 * @return the name of the render parameter
@@ -184,12 +186,15 @@ public abstract class AbstractCommandController extends BaseCommandController {
 	 * @see #isCommandInSession
 	 */
 	protected final void setCommandInSession(ActionResponse response) {
-		if (logger.isDebugEnabled())
-			logger.debug("Setting render parameter [" + getCommandInSessionParameterName() + "] to indicate a valid command (and errors) object are in the session");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Setting render parameter [" + getCommandInSessionParameterName() +
+					"] to indicate a valid command (and errors) object are in the session");
+		}
 		try {
-		    response.setRenderParameter(getCommandInSessionParameterName(), TRUE);
-		} catch (IllegalStateException ex) {
-		    // ignore in case sendRedirect was already set
+			response.setRenderParameter(getCommandInSessionParameterName(), TRUE);
+		}
+		catch (IllegalStateException ex) {
+			// Ignore in case sendRedirect was already set.
 		}
 	}
 
@@ -202,7 +207,7 @@ public abstract class AbstractCommandController extends BaseCommandController {
 	 * @see #setCommandInSession
 	 */
 	protected final boolean isCommandInSession(RenderRequest request) {
-	    return TRUE.equals(request.getParameter(getCommandInSessionParameterName()));
+		return TRUE.equals(request.getParameter(getCommandInSessionParameterName()));
 	}
 
 }

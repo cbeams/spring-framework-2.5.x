@@ -18,11 +18,8 @@ package org.springframework.web.portlet.handler;
 
 import javax.portlet.PortletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
-import org.springframework.web.portlet.context.support.PortletApplicationObjectSupport;
 import org.springframework.web.portlet.HandlerExecutionChain;
 import org.springframework.web.portlet.HandlerInterceptor;
 import org.springframework.web.portlet.HandlerMapping;
@@ -33,13 +30,12 @@ import org.springframework.web.portlet.HandlerMapping;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
+ * @since 1.3
  * @see #getHandlerInternal
  * @see org.springframework.web.portlet.HandlerInterceptor
  */
-public abstract class AbstractHandlerMapping extends PortletApplicationObjectSupport
+public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
     implements HandlerMapping, Ordered {
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
@@ -64,7 +60,9 @@ public abstract class AbstractHandlerMapping extends PortletApplicationObjectSup
 	 */
 	public final void setDefaultHandler(Object defaultHandler) {
 		this.defaultHandler = defaultHandler;
-		logger.info("Default mapping to handler [" + this.defaultHandler + "]");
+		if (logger.isInfoEnabled()) {
+			logger.info("Default mapping to handler [" + this.defaultHandler + "]");
+		}
 	}
 
 	/**

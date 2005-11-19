@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.portlet.context.support;
+package org.springframework.web.portlet.context;
 
 import javax.portlet.PortletContext;
 
@@ -23,7 +23,7 @@ import org.springframework.core.io.Resource;
 
 /**
  * ResourceLoader implementation that resolves paths as PortletContext
- * resources, for use outside a PortletApplicationContext (for example,
+ * resources, for use outside a Portlet ApplicationContext (for example,
  * in a PortletBean subclass).
  *
  * <p>Within a WebApplicationContext, resource paths are automatically
@@ -31,14 +31,15 @@ import org.springframework.core.io.Resource;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
+ * @since 1.3
  * @see #getResourceByPath
  * @see PortletContextResource
- * @see org.springframework.web.portlet.context.PortletApplicationContext
  * @see org.springframework.web.portlet.PortletBean
  */
 public class PortletContextResourceLoader extends DefaultResourceLoader {
 
 	private final PortletContext portletContext;
+
 
 	/**
 	 * Create a new PortletContextResourceLoader.

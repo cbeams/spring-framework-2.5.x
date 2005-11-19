@@ -30,8 +30,9 @@ import javax.portlet.RenderResponse;
 
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.util.PortletUtils;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Form controller for typical wizard-style workflows.
@@ -71,14 +72,15 @@ import org.springframework.web.portlet.util.PortletUtils;
  *
  * <p>Note: Page numbering starts with 0, to be able to pass an array
  * consisting of the corresponding view names to the "pages" bean property.
- * 
+ *
  * <p>Parameters indicated with <code>setPassRenderParameters</code> will be present
  * for each page.  If there are render parameters you need in <code>renderFinish</code>
  * or <code>renderCancel</code>, then you need to pass those forward from the
  * <code>processFinish</code> or <code>processCancel</code> methods, respectively.
- *
+
  * @author Juergen Hoeller
  * @author John A. Lewis
+ * @since 1.3
  * @see #setPages
  * @see #validatePage
  * @see #processFinish
@@ -145,7 +147,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @param pages view names for the pages
 	 */
 	public final void setPages(String[] pages) {
-		if (pages == null || pages.length == 0)  {
+		if (pages == null || pages.length == 0) {
 			throw new IllegalArgumentException("No wizard pages defined");
 		}
 		this.pages = pages;
@@ -231,7 +233,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Calls page-specific onBindAndValidate method.
 	 */
 	protected final void onBindAndValidate(PortletRequest request, Object command, BindException errors)
-	    throws Exception {
+			throws Exception {
+
 		onBindAndValidate(request, command, errors, getCurrentPage(request));
 	}
 
@@ -252,7 +255,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see org.springframework.validation.Errors
 	 */
 	protected void onBindAndValidate(PortletRequest request, Object command, BindException errors, int page)
-	    throws Exception {
+			throws Exception {
 	}
 
 	/**
@@ -268,7 +271,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Calls page-specific referenceData method.
 	 */
 	protected final Map referenceData(PortletRequest request, Object command, Errors errors)
-	    throws Exception {
+			throws Exception {
+
 		return referenceData(request, command, errors, getCurrentPage(request));
 	}
 
@@ -284,10 +288,11 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @return a Map with reference data entries, or null if none
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #referenceData(PortletRequest, int)
-	 * @see ModelAndView
+	 * @see org.springframework.web.portlet.ModelAndView
 	 */
 	protected Map referenceData(PortletRequest request, Object command, Errors errors, int page)
-	    throws Exception {
+			throws Exception {
+
 		return referenceData(request, page);
 	}
 
@@ -300,19 +305,19 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @param page current wizard page
 	 * @return a Map with reference data entries, or null if none
 	 * @throws Exception in case of invalid state or arguments
-	 * @see ModelAndView
+	 * @see org.springframework.web.portlet.ModelAndView
 	 */
 	protected Map referenceData(PortletRequest request, int page) throws Exception {
 		return null;
 	}
 
-	
+
 	/**
 	 * Show first page as form view.
 	 */
 	protected final ModelAndView showForm(
-			RenderRequest request, RenderResponse response, BindException errors)
-	    throws Exception {
+			RenderRequest request, RenderResponse response, BindException errors) throws Exception {
+
 		return showPage(request, errors, getInitialPage(request, errors.getTarget()));
 	}
 
@@ -327,7 +332,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @throws Exception in case of invalid state or arguments
 	 */
 	protected final ModelAndView showPage(RenderRequest request, BindException errors, int page)
-	    throws Exception {
+			throws Exception {
 
 		if (page >= 0 && page < getPageCount(request, errors.getTarget())) {
 			if (logger.isDebugEnabled()) {
@@ -353,7 +358,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			String viewName = getViewName(request, errors.getTarget(), page);
 			return showForm(request, errors, viewName, controlModel);
 		}
-		
+
 		else {
 			throw new PortletException("Invalid wizard page number: " + page);
 		}
@@ -433,102 +438,106 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * the session attribute directly.
 	 * @return the name of the page session attribute
 	 * @see #getFormSessionAttributeName
-	 * @see javax.servlet.http.HttpSession#getAttribute
+	 * @see javax.portlet.PortletSession#getAttribute
 	 */
 	protected String getPageSessionAttributeName() {
 		return getClass().getName() + ".PAGE." + getCommandName();
 	}
 
-    /**
-     * Pass the page number to the render phase by setting a render parameter.
-     * This method may not be called when the action calls
-     * {@link javax.portlet.ActionResponse#sendRedirect(String)}.
-     * @param response the current action response
-     * @param page the page number
-     * @see ActionResponse#setRenderParameter
-     */
-    protected void setPageRenderParameter(ActionResponse response, int page) {
+	/**
+	 * Pass the page number to the render phase by setting a render parameter.
+	 * This method may not be called when the action calls
+	 * {@link javax.portlet.ActionResponse#sendRedirect(String)}.
+	 * @param response the current action response
+	 * @param page the page number
+	 * @see ActionResponse#setRenderParameter
+	 */
+	protected void setPageRenderParameter(ActionResponse response, int page) {
 		if (logger.isDebugEnabled())
 			logger.debug("Setting page number render parameter [" + PARAM_PAGE + "] to [" + page + "]");
 		try {
-		    response.setRenderParameter(PARAM_PAGE, new Integer(page).toString());
-		} catch (IllegalStateException ex) {
-		    // ignore in case sendRedirect was already set
+			response.setRenderParameter(PARAM_PAGE, new Integer(page).toString());
 		}
-    }
+		catch (IllegalStateException ex) {
+			// ignore in case sendRedirect was already set
+		}
+	}
 
-    /**
-     * Pass the the parameter that indicates the target page of the request 
-     * forward to the render phase. If the <code>getTargetPage<code> method 
-     * was overridden, this may need to be overriden as well.
-     * @param request the current action request
-     * @param response the current action response
-     * @see #PARAM_TARGET
-     * @see #getTargetPage(PortletRequest, int)
-     * @see #getTargetPage(PortletRequest, Object, Errors, int)
-     * @see ActionResponse#setRenderParameter
-     */
-    protected void setTargetRenderParameter(ActionRequest request, ActionResponse response) {
+	/**
+	 * Pass the the parameter that indicates the target page of the request
+	 * forward to the render phase. If the <code>getTargetPage<code> method
+	 * was overridden, this may need to be overriden as well.
+	 * @param request the current action request
+	 * @param response the current action response
+	 * @see #PARAM_TARGET
+	 * @see #getTargetPage(PortletRequest, int)
+	 * @see #getTargetPage(PortletRequest, Object, Errors, int)
+	 * @see ActionResponse#setRenderParameter
+	 */
+	protected void setTargetRenderParameter(ActionRequest request, ActionResponse response) {
 		try {
 			Iterator it = PortletUtils.getParametersStartingWith(request, PARAM_TARGET).entrySet().iterator();
 			while (it.hasNext()) {
-			    Map.Entry entry = (Map.Entry)it.next();
-			    String param = PARAM_TARGET + (String)entry.getKey();
-			    Object value = entry.getValue();
+				Map.Entry entry = (Map.Entry) it.next();
+				String param = PARAM_TARGET + (String) entry.getKey();
+				Object value = entry.getValue();
 				if (logger.isDebugEnabled()) logger.debug("Setting target render parameter [" + param + "]");
-		        if (value instanceof String) response.setRenderParameter(param, (String)value);
-		        if (value instanceof String[]) response.setRenderParameter(param, (String[])value);
+				if (value instanceof String) response.setRenderParameter(param, (String) value);
+				if (value instanceof String[]) response.setRenderParameter(param, (String[]) value);
 			}
-		} catch (IllegalStateException ex) {
-		    // ignore in case sendRedirect was already set
 		}
-    }
+		catch (IllegalStateException ex) {
+			// ignore in case sendRedirect was already set
+		}
+	}
 
-    /**
-     * Pass the the parameter that indicates a finish request forward to the
-     * render phase. If the <code>isFinishRequest</code> method 
-     * was overridden, this may need to be overriden as well.
-     * @param request the current action request
-     * @param response the current action response
-     * @see #PARAM_FINISH
-     * @see #isFinishRequest
-     * @see ActionResponse#setRenderParameter
-     */
-    protected void setFinishRenderParameter(ActionRequest request, ActionResponse response) {
+	/**
+	 * Pass the the parameter that indicates a finish request forward to the
+	 * render phase. If the <code>isFinishRequest</code> method
+	 * was overridden, this may need to be overriden as well.
+	 * @param request the current action request
+	 * @param response the current action response
+	 * @see #PARAM_FINISH
+	 * @see #isFinishRequest
+	 * @see ActionResponse#setRenderParameter
+	 */
+	protected void setFinishRenderParameter(ActionRequest request, ActionResponse response) {
 		if (logger.isDebugEnabled())
 			logger.debug("Setting cancel render parameter [" + PARAM_FINISH + "]");
 		try {
-		    String name = PortletUtils.getSubmitParameter(request, PARAM_FINISH);
-		    if (name != null)
-		        response.setRenderParameter(name, request.getParameter(name));
-		} catch (IllegalStateException ex) {
-		    // ignore in case sendRedirect was already set
+			String name = PortletUtils.getSubmitParameter(request, PARAM_FINISH);
+			if (name != null)
+				response.setRenderParameter(name, request.getParameter(name));
 		}
-    }
+		catch (IllegalStateException ex) {
+			// ignore in case sendRedirect was already set
+		}
+	}
 
-    /**
-     * Pass the the parameter that indicates a cancel request forward to the
-     * render phase. If the <code>isCancelRequest</code> method 
-     * was overridden, this may need to be overriden as well.
-     * @param request the current action request
-     * @param response the current action response
-     * @see #PARAM_CANCEL
-     * @see #isCancelRequest
-     * @see ActionResponse#setRenderParameter
-     */
-    protected void setCancelRenderParameter(ActionRequest request, ActionResponse response) {
+	/**
+	 * Pass the the parameter that indicates a cancel request forward to the
+	 * render phase. If the <code>isCancelRequest</code> method
+	 * was overridden, this may need to be overriden as well.
+	 * @param request the current action request
+	 * @param response the current action response
+	 * @see #PARAM_CANCEL
+	 * @see #isCancelRequest
+	 * @see ActionResponse#setRenderParameter
+	 */
+	protected void setCancelRenderParameter(ActionRequest request, ActionResponse response) {
 		if (logger.isDebugEnabled())
 			logger.debug("Setting cancel render parameter [" + PARAM_CANCEL + "]");
 		try {
-		    String name = PortletUtils.getSubmitParameter(request, PARAM_CANCEL);
-		    if (name != null)
-		        response.setRenderParameter(name, request.getParameter(name));
-		} catch (IllegalStateException ex) {
-		    // ignore in case sendRedirect was already set
+			String name = PortletUtils.getSubmitParameter(request, PARAM_CANCEL);
+			if (name != null)
+				response.setRenderParameter(name, request.getParameter(name));
 		}
-    }
+		catch (IllegalStateException ex) {
+			// ignore in case sendRedirect was already set
+		}
+	}
 
-    /**
+	/**
 	 * Handle an invalid submit request, e.g. when in session form mode but no form object
 	 * was found in the session (like in case of an invalid resubmit by the browser).
 	 * <p>Default implementation for wizard form controllers simply shows the initial page
@@ -544,6 +553,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 */
 	protected ModelAndView renderInvalidSubmit(RenderRequest request, RenderResponse response)
 			throws Exception {
+
 		return showNewForm(request, response);
 	}
 
@@ -551,22 +561,21 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Handle an invalid submit request, e.g. when in session form mode but no form object
 	 * was found in the session (like in case of an invalid resubmit by the browser).
 	 * <p>Default implementation for wizard form controllers simply shows the initial page
-	 * of a new wizard form, so here in the action phase this method does nothing. If you 
+	 * of a new wizard form, so here in the action phase this method does nothing. If you
 	 * want to take some action on an invalid submit, you need to override this method.
 	 * @param request current portlet action request
 	 * @param response current portlet action response
 	 * @throws Exception in case of errors
 	 * @see #renderInvalidSubmit
 	 */
-	 protected void handleInvalidSubmit(ActionRequest request, ActionResponse response) throws Exception {
-	 }
-	 
+	protected void handleInvalidSubmit(ActionRequest request, ActionResponse response) throws Exception {
+	}
+
 	/**
 	 * Apply wizard workflow: finish, cancel, page change.
 	 * @see #processFormSubmission
 	 */
-	protected final ModelAndView renderFormSubmission(
-			RenderRequest request, RenderResponse response, Object command, BindException errors)
+	protected final ModelAndView renderFormSubmission(RenderRequest request, RenderResponse response, Object command, BindException errors)
 			throws Exception {
 
 		int currentPage = getCurrentPage(request);
@@ -605,6 +614,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		// Show current page again
 		return showPage(request, errors, currentPage);
 	}
+
 
 	/**
 	 * Apply wizard workflow: finish, cancel, page change.
@@ -656,12 +666,12 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			}
 			validatePage(command, errors, currentPage, false);
 		}
-		
+
 		setPageRenderParameter(response, currentPage);
 		setTargetRenderParameter(request, response);
-	    passRenderParameters(request, response);
+		passRenderParameters(request, response);
 
-	    // Give subclasses a change to perform custom post-procession
+		// Give subclasses a change to perform custom post-procession
 		// of the current page and its command object.
 		postProcessPage(request, command, errors, currentPage);
 
@@ -693,8 +703,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 				return pageAttr.intValue();
 			}
 		}
-		throw new IllegalStateException(
-				"Page attribute [" + pageAttrName + "] neither found in session nor in request");
+		throw new IllegalStateException("Page attribute [" + pageAttrName + "] neither found in session nor in request");
 	}
 
 	/**
@@ -710,14 +719,6 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see #PARAM_FINISH
 	 */
 	protected boolean isFinishRequest(PortletRequest request) {
-		return isFinish(request);
-	}
-
-	/**
-	 * @deprecated in favor of <code>isFinishRequest</code>
-	 * @see #isFinishRequest(PortletRequest)
-	 */
-	protected boolean isFinish(PortletRequest request) {
 		return PortletUtils.hasSubmitParameter(request, PARAM_FINISH);
 	}
 
@@ -734,20 +735,12 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see #PARAM_CANCEL
 	 */
 	protected boolean isCancelRequest(PortletRequest request) {
-		return isCancel(request);
-	}
-
-	/**
-	 * @deprecated in favor of <code>isCancelRequest</code>
-	 * @see #isCancelRequest(PortletRequest)
-	 */
-	protected boolean isCancel(PortletRequest request) {
 		return PortletUtils.hasSubmitParameter(request, PARAM_CANCEL);
 	}
 
 	/**
 	 * Return the target page specified in the request.
-	 * <p>Default implementation delegates to 
+	 * <p>Default implementation delegates to
 	 * <code>getTargetPage(PortletRequest, int)</code>.
 	 * Subclasses can override this for customized target page determination.
 	 * @param request current portlet request
@@ -777,8 +770,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		while (paramNames.hasMoreElements()) {
 			String paramName = (String) paramNames.nextElement();
 			if (paramName.startsWith(PARAM_TARGET)) {
-				for (int i = 0; i < PortletUtils.SUBMIT_IMAGE_SUFFIXES.length; i++) {
-					String suffix = PortletUtils.SUBMIT_IMAGE_SUFFIXES[i];
+				for (int i = 0; i < WebUtils.SUBMIT_IMAGE_SUFFIXES.length; i++) {
+					String suffix = WebUtils.SUBMIT_IMAGE_SUFFIXES[i];
 					if (paramName.endsWith(suffix)) {
 						paramName = paramName.substring(0, paramName.length() - suffix.length());
 					}
@@ -795,8 +788,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see #validatePagesAndFinish
 	 */
 	private ModelAndView renderValidatePagesAndFinish(
-			RenderRequest request, RenderResponse response, Object command, BindException errors,
-			int currentPage) throws Exception {
+			RenderRequest request, RenderResponse response, Object command, BindException errors, int currentPage)
+			throws Exception {
 
 		// In case of any errors -> show current page.
 		if (errors.hasErrors())
@@ -812,13 +805,13 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see #renderValidatePagesAndFinish
 	 */
 	private void validatePagesAndFinish(
-			ActionRequest request, ActionResponse response, Object command, BindException errors,
-			int currentPage) throws Exception {
+			ActionRequest request, ActionResponse response, Object command, BindException errors, int currentPage)
+			throws Exception {
 
 		// In case of binding errors -> show current page.
 		if (errors.hasErrors()) {
 			setPageRenderParameter(response, currentPage);
-		    passRenderParameters(request, response);
+			passRenderParameters(request, response);
 			return;
 		}
 
@@ -828,7 +821,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 				validatePage(command, errors, page, true);
 				if (errors.hasErrors()) {
 					setPageRenderParameter(response, currentPage);
-				    passRenderParameters(request, response);
+					passRenderParameters(request, response);
 					return;
 				}
 			}
@@ -912,8 +905,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	protected ModelAndView renderFinish(
 			RenderRequest request, RenderResponse response, Object command, BindException errors)
 			throws Exception {
-		throw new PortletException(
-				"Wizard form controller class [" + getClass().getName() + "] does not support a finish render request");
+
+		throw new PortletException("Wizard form controller class [" + getClass().getName() + "] does not support a finish render request");
 	}
 
 	/**
@@ -932,6 +925,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	protected void processFinish(
 			ActionRequest request, ActionResponse response, Object command, BindException errors)
 			throws Exception {
+
 		throw new PortletException(
 				"Wizard form controller class [" + getClass().getName() + "] does not support a finish action request");
 	}
@@ -957,6 +951,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	protected ModelAndView renderCancel(
 			RenderRequest request, RenderResponse response, Object command, BindException errors)
 			throws Exception {
+
 		throw new PortletException(
 				"Wizard form controller class [" + getClass().getName() + "] does not support a cancel render request");
 	}
@@ -977,7 +972,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	protected void processCancel(
 			ActionRequest request, ActionResponse response, Object command, BindException errors)
 			throws Exception {
-	    throw new PortletException(
+
+		throw new PortletException(
 				"Wizard form controller class [" + getClass().getName() + "] does not support a cancel action request");
 	}
 

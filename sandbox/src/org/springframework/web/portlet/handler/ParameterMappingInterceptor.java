@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.portlet.handler;
 
 import javax.portlet.ActionRequest;
@@ -23,76 +24,58 @@ import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
 import org.springframework.web.portlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.portlet.ModelAndView;
 
 /**
  * Interceptor to foward mapping request parameters to the render action.
  *
  * @author Rainer Schmitz
  * @author John Lewis
+ * @since 1.3
  * @see ParameterHandlerMapping
  */
 public class ParameterMappingInterceptor implements HandlerInterceptor {
 
-    ParameterHandlerMapping handlerMapping;
+	private ParameterHandlerMapping handlerMapping;
 
-    /**
-     * Return the ParameterHandlerMapping containing the mapping request
-     * parameter name.
-     *
-     * @return Returns the handlerMapping.
-     */
-    public ParameterHandlerMapping getHandlerMapping() {
-        return handlerMapping;
-    }
 
-    /**
-     * Set the ParameterHandlerMapping containing the mapping request
-     * parameter name. If no value is provided, the default parameter mapping
-     * name {@link ParameterHandlerMapping#DEFAULT_PARAMETER_NAME} is used.
-     *
-     * @param handlerMapping The ParameterHandlerMapping to set.
-     */
-    public void setHandlerMapping(ParameterHandlerMapping handlerMapping) {
-        this.handlerMapping = handlerMapping;
-    }
+	/**
+	 * Set the ParameterHandlerMapping containing the mapping request
+	 * parameter name. If no value is provided, the default parameter mapping
+	 * name {@link ParameterHandlerMapping#DEFAULT_PARAMETER_NAME} is used.
+	 * @param handlerMapping The ParameterHandlerMapping to set.
+	 */
+	public void setHandlerMapping(ParameterHandlerMapping handlerMapping) {
+		this.handlerMapping = handlerMapping;
+	}
 
-    /**
-     * If request is an {@link javax.portlet.ActionRequest ActionRequest} get
-     * handler mapping parameter and add it to the ActionResponse.
-     *
-     * @see org.springframework.web.portlet.HandlerInterceptor#preHandle
-     */
-    public boolean preHandle(PortletRequest request, PortletResponse response,
-            Object handler) throws Exception {
-        if (request instanceof ActionRequest) {
-            String parameterName = (handlerMapping == null) ? ParameterHandlerMapping.DEFAULT_PARAMETER_NAME
-                    : handlerMapping.getParameterName();
-            String mappingParameter = request.getParameter(parameterName);
-            if (mappingParameter != null) {
-                ((ActionResponse)response).setRenderParameter(parameterName, mappingParameter);
-            }
 
-        }
-        return true;
-    }
+	/**
+	 * If request is an {@link javax.portlet.ActionRequest ActionRequest},
+	 * get handler mapping parameter and add it to the ActionResponse.
+	 */
+	public boolean preHandle(PortletRequest request, PortletResponse response, Object handler)
+			throws Exception {
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.springframework.web.portlet.HandlerInterceptor#postHandle
-     */
-    public void postHandle(RenderRequest request, RenderResponse response,
-            Object handler, ModelAndView modelAndView) throws Exception {
-    }
+		if (request instanceof ActionRequest) {
+			String parameterName = (this.handlerMapping != null ? handlerMapping.getParameterName() :
+					ParameterHandlerMapping.DEFAULT_PARAMETER_NAME);
+			String mappingParameter = request.getParameter(parameterName);
+			if (mappingParameter != null) {
+				((ActionResponse) response).setRenderParameter(parameterName, mappingParameter);
+			}
+		}
+		return true;
+	}
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.springframework.web.portlet.HandlerInterceptor#afterCompletion
-     */
-    public void afterCompletion(PortletRequest request, PortletResponse response,
-            Object handler, Exception ex) throws Exception {
-    }
+	public void postHandle(
+			RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView)
+			throws Exception {
+	}
+
+	public void afterCompletion(
+			PortletRequest request, PortletResponse response, Object handler, Exception ex)
+			throws Exception {
+	}
 
 }

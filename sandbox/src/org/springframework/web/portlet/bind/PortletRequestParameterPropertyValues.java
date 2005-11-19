@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.portlet.bind;
 
@@ -32,15 +32,16 @@ import org.springframework.web.portlet.util.PortletUtils;
  * <p>This class is not immutable to be able to efficiently remove property
  * values that should be ignored for binding.
  *
- * @author Rod Johnson
  * @author Juergen Hoeller
  * @author John A. Lewis
+ * @since 1.3
  * @see org.springframework.web.portlet.util.PortletUtils#getParametersStartingWith
  */
 public class PortletRequestParameterPropertyValues extends MutablePropertyValues {
 
 	/** Default prefix separator */
 	public static final String DEFAULT_PREFIX_SEPARATOR = "_";
+
 
 	/**
 	 * Create new PortletRequestPropertyValues using no prefix
