@@ -50,12 +50,14 @@ public class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
 	private final ApplicationContext applicationContext;
 
+
 	/**
 	 * Create a new ApplicationContextAwareProcessor for the given context.
 	 */
 	public ApplicationContextAwareProcessor(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
+
 
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		if (bean instanceof ResourceLoaderAware) {
