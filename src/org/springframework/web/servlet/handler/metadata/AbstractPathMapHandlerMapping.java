@@ -125,7 +125,7 @@ public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMa
 				// Autowire the given handler class via AutowireCapableBeanFactory.
 				// Either autowires a constructor or by type, depending on the
 				// constructors available in the given class.
-				Object handler = beanFactory.autowire(handlerClass, this.autowireMode, this.dependencyCheck);
+				Object handler = beanFactory.createBean(handlerClass, this.autowireMode, this.dependencyCheck);
 
 				// We now have an "autowired" handler, that may reference beans in the
 				// application context. We now add the new handler to the factory.
