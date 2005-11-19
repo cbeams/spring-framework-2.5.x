@@ -33,6 +33,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -184,6 +185,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	public ApplicationContext getParent() {
 		return parent;
+	}
+
+	/**
+	 * Return this context's internal bean factory as AutowireCapableBeanFactory,
+	 * if already available.
+	 * @see #getBeanFactory()
+	 */
+	public AutowireCapableBeanFactory getAutowireCapableBeanFactory() throws IllegalStateException {
+		return getBeanFactory();
 	}
 
 	/**
@@ -638,10 +648,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	public String[] getBeanDefinitionNames() {
 		return getBeanFactory().getBeanDefinitionNames();
-	}
-
-	public String[] getBeanDefinitionNames(Class type) {
-		return getBeanFactory().getBeanDefinitionNames(type);
 	}
 
 	public String[] getBeanNamesForType(Class type) {
