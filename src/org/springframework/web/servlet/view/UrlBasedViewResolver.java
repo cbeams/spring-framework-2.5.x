@@ -297,9 +297,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	 */
 	protected View loadView(String viewName, Locale locale) throws Exception {
 		AbstractUrlBasedView view = buildView(viewName);
-		view.setApplicationContext(getApplicationContext());
-		view.afterPropertiesSet();
-		return view;
+		return (View) getApplicationContext().getAutowireCapableBeanFactory().initializeBean(view, viewName);
 	}
 
 	/**
@@ -315,7 +313,6 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	 */
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(this.viewClass);
-		view.setBeanName(viewName);
 		view.setUrl(this.prefix + viewName + this.suffix);
 		if (this.contentType != null) {
 			view.setContentType(this.contentType);
