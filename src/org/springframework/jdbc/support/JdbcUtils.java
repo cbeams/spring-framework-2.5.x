@@ -36,6 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
@@ -542,36 +543,64 @@ public abstract class JdbcUtils {
 	 * Any named parameters are placed in the correct position in the Object array based on the
 	 * parsed SQL statement info.
 	 * @param sql the SQL statement.
-	 * @param argMap the Map of parameters.
+	 * @param sqlData the Map of parameters.
 	 * @param parsedSql the parsed SQL statement.
 	 */
-	public static Object[] convertArgMapToArray(String sql, Map argMap, ParsedSql parsedSql) {
+	public static Object[] convertArgMapToArray(String sql, Map sqlData, ParsedSql parsedSql) {
 		Object[] args = new Object[parsedSql.getNamedParameterCount()];
 		if (parsedSql.getNamedParameterCount() != parsedSql.getParameterCount()) {
 			throw new InvalidDataAccessApiUsageException("You must supply named parameter placeholders for all " +
 					"parameters when using a Map for the parameter values.");
 		}
-		if (parsedSql.getNamedParameterCount() != argMap.size()) {
-			if (parsedSql.getNamedParameterCount() > argMap.size()) {
+		if (parsedSql.getNamedParameterCount() != sqlData.size()) {
+			if (parsedSql.getNamedParameterCount() > sqlData.size()) {
 			throw new InvalidDataAccessApiUsageException("Wrong number of parameters/values supplied.  You have " +
-					parsedSql.getNamedParameterCount() + " named parameter(s) and supplied " + argMap.size() +
+					parsedSql.getNamedParameterCount() + " named parameter(s) and supplied " + sqlData.size() +
 					" parameter value(s).");
 			}
 			else {
 				logger.warn("You have additional entries in the parameter map supplied.  There are " +
-					parsedSql.getNamedParameterCount() + " named parameter(s) and " + argMap.size() +
+					parsedSql.getNamedParameterCount() + " named parameter(s) and " + sqlData.size() +
 					" parameter value(s).");
 			}
 		}
 		for (int i = 0; i < parsedSql.getNamedParameters().size(); i++) {
-			if (!argMap.containsKey(parsedSql.getNamedParameters().get(i))) {
+			if (!sqlData.containsKey(parsedSql.getNamedParameters().get(i))) {
 				throw new InvalidDataAccessApiUsageException("No entry supplied for the '" +
 						parsedSql.getNamedParameters().get(i) + "' parameter.");
 
 			}
-			args[i] = argMap.get(parsedSql.getNamedParameters().get(i));
+			args[i] = sqlData.get(parsedSql.getNamedParameters().get(i));
 		}
 		return args;
 	}
 
+	/**
+	 * Convert a Map of parameter types to a corresponding int array.  This is necessary in
+	 * order to reuse existing methods on JdbcTemplate.
+	 * Any named parameter types are placed in the correct position in the Object array based on the
+	 * parsed SQL statement info.
+	 * @param sql the SQL statement.
+	 * @param typeMap the Map of parameter types.
+	 * @param parsedSql the parsed SQL statement.
+	 */
+	public static int[] convertTypeMapToArray(String sql, Map typeMap, ParsedSql parsedSql) {
+		int[] types = new int[parsedSql.getNamedParameterCount()];
+		if (parsedSql.getNamedParameterCount() != typeMap.size()) {
+			if (parsedSql.getNamedParameterCount() < typeMap.size()) {
+				logger.warn("You have additional entries in the type map supplied.  There are " +
+					parsedSql.getNamedParameterCount() + " named parameter(s) and " + typeMap.size() +
+					" type value(s).");
+			}
+		}
+		for (int i = 0; i < parsedSql.getNamedParameters().size(); i++) {
+			if (typeMap.containsKey(parsedSql.getNamedParameters().get(i))) {
+				types[i] = ((Integer)typeMap.get(parsedSql.getNamedParameters().get(i))).intValue();
+			}
+			else {
+				types[i] = SqlTypeValue.TYPE_UNKNOWN;
+			}
+		}
+		return types;
+	}
 }

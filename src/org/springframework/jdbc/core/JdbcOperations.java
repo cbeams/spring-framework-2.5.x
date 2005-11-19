@@ -439,9 +439,7 @@ public interface JdbcOperations {
 	 * with a RowCallbackHandler (potentially implementing the ResultReader
 	 * sub-interface that provides a result List).
 	 * @param sql SQL query to execute
-	 * @param argMap map of arguments to bind to the query
-	 * @param argTypes SQL types of the arguments
-	 * (constants from <code>java.sql.Types</code>)
+	 * @param namedParameters Container of arguments and argument types to bind to the query
 	 * @param rch object that will extract results (potentially a ResultReader),
 	 * one row at a time
 	 * @return the result List in case of a ResultReader, or <code>null</code> else
@@ -449,7 +447,7 @@ public interface JdbcOperations {
 	 * @see ResultReader
 	 * @see java.sql.Types
 	 */
-	List query(String sql, Map argMap, int[] argTypes, RowCallbackHandler rch)
+	List query(String sql, SqlNamedParameters namedParameters, RowCallbackHandler rch)
 	    throws DataAccessException;
 
 	/**
@@ -532,15 +530,13 @@ public interface JdbcOperations {
 	 * of arguments to bind to the query, mapping each row to a Java object
 	 * via a RowMapper.
 	 * @param sql SQL query to execute
-	 * @param argMap map of arguments to bind to the query
-	 * @param argTypes SQL types of the arguments
-	 * (constants from <code>java.sql.Types</code>)
+	 * @param namedParameters Container of arguments and argument types to bind to the query
 	 * @param rowMapper object that will map one object per row
 	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if the query fails
 	 * @see java.sql.Types
 	 */
-	List query(String sql, Map argMap, int[] argTypes, RowMapper rowMapper)
+	List query(String sql, SqlNamedParameters namedParameters, RowMapper rowMapper)
 	    throws DataAccessException;
 
 	/**
@@ -593,9 +589,7 @@ public interface JdbcOperations {
 	 * of arguments to bind to the query, mapping a single result row to a
 	 * Java object via a RowMapper.
 	 * @param sql SQL query to execute
-	 * @param argMap map of arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
-	 * @param argTypes SQL types of the arguments
+	 * @param namedParameters Container of arguments and argument types to bind to the query
 	 * (constants from <code>java.sql.Types</code>)
 	 * @param rowMapper object that will map one object per row
 	 * @return the single mapped object
@@ -603,7 +597,7 @@ public interface JdbcOperations {
 	 * return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
-	Object queryForObject(String sql, Map argMap, int[] argTypes, RowMapper rowMapper)
+	Object queryForObject(String sql, SqlNamedParameters namedParameters, RowMapper rowMapper)
 			throws DataAccessException;
 
 	/**
@@ -664,9 +658,7 @@ public interface JdbcOperations {
 	 * <p>The query is expected to be a single row/single column query; the returned
 	 * result will be directly mapped to the corresponding object type.
 	 * @param sql SQL query to execute
-	 * @param argMap map of arguments to bind to the query
-	 * @param argTypes SQL types of the arguments
-	 * (constants from <code>java.sql.Types</code>)
+	 * @param namedParameters Container of arguments and argument types to bind to the query
 	 * @param requiredType the type that the result object is expected to match
 	 * @return the result object of the required type, or <code>null</code> in case of SQL NULL
 	 * @throws IncorrectResultSizeDataAccessException if the query does not return
@@ -675,7 +667,7 @@ public interface JdbcOperations {
 	 * @see #queryForObject(String, Class)
 	 * @see java.sql.Types
 	 */
-	Object queryForObject(String sql, Map argMap, int[] argTypes, Class requiredType)
+	Object queryForObject(String sql, SqlNamedParameters namedParameters, Class requiredType)
 	    throws DataAccessException;
 
 	/**
@@ -740,9 +732,7 @@ public interface JdbcOperations {
 	 * <p>The query is expected to be a single row query; the result row will be
 	 * mapped to a Map (one entry for each column, using the column name as the key).
 	 * @param sql SQL query to execute
-	 * @param argMap map of arguments to bind to the query
-	 * @param argTypes SQL types of the arguments
-	 * (constants from <code>java.sql.Types</code>)
+	 * @param namedParameters Container of arguments and argument types to bind to the query
 	 * @return the result Map (one entry for each column, using the
 	 * column name as the key)
 	 * @throws IncorrectResultSizeDataAccessException if the query does not
@@ -752,7 +742,7 @@ public interface JdbcOperations {
 	 * @see ColumnMapRowMapper
 	 * @see java.sql.Types
 	 */
-	Map queryForMap(String sql, Map argMap, int[] argTypes) throws DataAccessException;
+	Map queryForMap(String sql, SqlNamedParameters namedParameters) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -820,8 +810,7 @@ public interface JdbcOperations {
 	 * <p>The query is expected to be a single row/single column query that
 	 * results in a long value.
 	 * @param sql SQL query to execute
-	 * @param argMap map of arguments to bind to the query
-	 * @param argTypes SQL types of the arguments
+	 * @param namedParameters Container of arguments and argument types to bind to the query
 	 * (constants from <code>java.sql.Types</code>)
 	 * @return the long value, or 0 in case of SQL NULL
 	 * @throws IncorrectResultSizeDataAccessException if the query does not return
@@ -830,7 +819,7 @@ public interface JdbcOperations {
 	 * @see #queryForLong(String)
 	 * @see java.sql.Types
 	 */
-	long queryForLong(String sql, Map argMap, int[] argTypes) throws DataAccessException;
+	long queryForLong(String sql, SqlNamedParameters namedParameters) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -888,9 +877,7 @@ public interface JdbcOperations {
 	 * <p>The query is expected to be a single row/single column query that
 	 * results in an int value.
 	 * @param sql SQL query to execute
-	 * @param argMap map of arguments to bind to the query
-	 * @param argTypes SQL types of the arguments
-	 * (constants from <code>java.sql.Types</code>)
+	 * @param namedParameters Container of arguments and argument types to bind to the query
 	 * @return the int value, or 0 in case of SQL NULL
 	 * @throws IncorrectResultSizeDataAccessException if the query does not return
 	 * exactly one row, or does not return exactly one column in that row
@@ -898,7 +885,7 @@ public interface JdbcOperations {
 	 * @see #queryForInt(String)
 	 * @see java.sql.Types
 	 */
-	int queryForInt(String sql, Map argMap, int[] argTypes) throws DataAccessException;
+	int queryForInt(String sql, SqlNamedParameters namedParameters) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -958,10 +945,7 @@ public interface JdbcOperations {
 	 * <p>The results will be mapped to a List (one entry for each row) of
 	 * result objects, each of them matching the specified element type.
 	 * @param sql SQL query to execute
-	 * @param argMap map of arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
-	 * @param argTypes SQL types of the arguments
-	 * (constants from <code>java.sql.Types</code>)
+	 * @param namedParameters Container of arguments and argument types to bind to the query
 	 * @param elementType the required type of element in the result list
 	 * (for example, <code>Integer.class</code>)
 	 * @return a List of objects that match the specified element type
@@ -969,7 +953,7 @@ public interface JdbcOperations {
 	 * @see #queryForList(String, Class)
 	 * @see SingleColumnRowMapper
 	 */
-	List queryForList(String sql, Map argMap, int[] argTypes, Class elementType)
+	List queryForList(String sql, SqlNamedParameters namedParameters, Class elementType)
 			throws DataAccessException;
 
 	/**
@@ -1033,16 +1017,13 @@ public interface JdbcOperations {
 	 * Thus  Each element in the list will be of the form returned by this interface's
 	 * queryForMap() methods.
 	 * @param sql SQL query to execute
-	 * @param argMap map of arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
-	 * @param argTypes SQL types of the arguments
-	 * (constants from <code>java.sql.Types</code>)
+	 * @param namedParameters Container of arguments and argument types to bind to the query
 	 * @return a List that contains a Map per row
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForList(String)
 	 * @see java.sql.Types
 	 */
-	List queryForList(String sql, Map argMap, int[] argTypes) throws DataAccessException;
+	List queryForList(String sql, SqlNamedParameters namedParameters) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -1109,9 +1090,7 @@ public interface JdbcOperations {
 	 * class is used, which is part of JDK 1.5+ and also available separately as part of
 	 * Sun's JDBC RowSet Implementations download (rowset.jar).
 	 * @param sql SQL query to execute
-	 * @param argMap map of arguments to bind to the query
-	 * @param argTypes SQL types of the arguments
-	 * (constants from <code>java.sql.Types</code>)
+	 * @param namedParameters Container of arguments and argument types to bind to the query
 	 * @return a SqlRowSet representation (possibly a wrapper around a
 	 * <code>javax.sql.rowset.CachedRowSet</code>)
 	 * @throws DataAccessException if there is any problem executing the query
@@ -1120,7 +1099,7 @@ public interface JdbcOperations {
 	 * @see javax.sql.rowset.CachedRowSet
 	 * @see java.sql.Types
 	 */
-	SqlRowSet queryForRowSet(String sql, Map argMap, int[] argTypes) throws DataAccessException;
+	SqlRowSet queryForRowSet(String sql, SqlNamedParameters namedParameters) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -1211,14 +1190,12 @@ public interface JdbcOperations {
 	/**
 	 * Issue an update via a prepared statement, binding the given arguments.
 	 * @param sql SQL, containing bind parameters
-	 * @param argMap map of arguments to bind to the query
-	 * @param argTypes SQL types of the arguments
-	 * (constants from <code>java.sql.Types</code>)
+	 * @param namedParameters Container of arguments and argument types to bind to the query
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
 	 * @see java.sql.Types
 	 */
-	int update(String sql, Map argMap, int[] argTypes) throws DataAccessException;
+	int update(String sql, SqlNamedParameters namedParameters) throws DataAccessException;
 
 	/**
 	 * Issue an update via a prepared statement, binding the given arguments.
