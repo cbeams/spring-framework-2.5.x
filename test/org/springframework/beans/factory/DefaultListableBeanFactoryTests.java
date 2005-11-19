@@ -45,7 +45,7 @@ import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 
 /**
- * Tests properties population and autowire behaviour.
+ * Tests properties population and autowire behavior.
  *
  * @author Rod Johnson
  */

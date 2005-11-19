@@ -49,19 +49,19 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	}
 
 	public void assertTestBeanCount(int count) {
-		String[] defNames = getListableBeanFactory().getBeanDefinitionNames(TestBean.class);
+		String[] defNames = getListableBeanFactory().getBeanNamesForType(TestBean.class, true, false);
 		assertTrue("We should have " + count + " beans for class org.springframework.beans.TestBean, not " +
 				defNames.length, defNames.length == count);
 
 		int countIncludingFactoryBeans = count + 2;
-		String[] names = getListableBeanFactory().getBeanNamesForType(TestBean.class);
+		String[] names = getListableBeanFactory().getBeanNamesForType(TestBean.class, true, true);
 		assertTrue("We should have " + countIncludingFactoryBeans +
 				" beans for class org.springframework.beans.TestBean, not " + names.length,
 				names.length == countIncludingFactoryBeans);
 	}
 
 	public void testGetDefinitionsForNoSuchClass() {
-		String[] defnames = getListableBeanFactory().getBeanDefinitionNames(String.class);
+		String[] defnames = getListableBeanFactory().getBeanNamesForType(String.class);
 		assertTrue("No string definitions", defnames.length == 0);
 	}
 	
@@ -71,8 +71,8 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	 */
 	public void testGetCountForFactoryClass() {
 		assertTrue("Should have 2 factories, not " +
-				getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length,
-				getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length == 2);
+				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length,
+				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length == 2);
 
 		assertTrue("Should have 2 factories, not " +
 				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length,

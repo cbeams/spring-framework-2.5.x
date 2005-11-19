@@ -113,18 +113,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return (String[]) this.beanDefinitionNames.toArray(new String[this.beanDefinitionNames.size()]);
 	}
 
-	public String[] getBeanDefinitionNames(Class type) {
-		List matches = new ArrayList();
-		Iterator it = this.beanDefinitionNames.iterator();
-		while (it.hasNext()) {
-			String beanName = (String) it.next();
-			if (isBeanDefinitionTypeMatch(beanName, type)) {
-				matches.add(beanName);
-			}
-		}
-		return (String[]) matches.toArray(new String[matches.size()]);
-	}
-
 	public String[] getBeanNamesForType(Class type) {
 		return getBeanNamesForType(type, true, true);
 	}

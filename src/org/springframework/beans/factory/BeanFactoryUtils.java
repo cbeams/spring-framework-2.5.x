@@ -93,34 +93,6 @@ public abstract class BeanFactoryUtils {
 		}
 		return (String[]) result.toArray(new String[result.size()]);
 	}
-	
-	/**
-	 * Get all bean names for the given type, including those defined in ancestor
-	 * factories. Will return unique names in case of overridden bean definitions.
-	 * <p>Does <i>not</i> consider objects created by FactoryBeans but rather the
-	 * FactoryBean classes themselves, avoiding instantiation of any beans. Use
-	 * <code>beanNamesForTypeIncludingAncestors</code> to match objects created by
-	 * FactoryBeans.
-	 * @param lbf the bean factory
-	 * @param type the type that beans must match
-	 * @return the array of matching bean names, or an empty array if none
-	 * @deprecated in favor of beanNamesForTypeIncludingAncestors.
-	 * This method will be removed as of Spring 1.3.
-	 * @see #beanNamesForTypeIncludingAncestors
-	 */
-	public static String[] beanNamesIncludingAncestors(ListableBeanFactory lbf, Class type) {
-		Set result = new HashSet();
-		result.addAll(Arrays.asList(lbf.getBeanDefinitionNames(type)));
-		if (lbf instanceof HierarchicalBeanFactory) {
-			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
-			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
-				String[] parentResult = beanNamesIncludingAncestors(
-						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				result.addAll(Arrays.asList(parentResult));
-			}
-		}
-		return (String[]) result.toArray(new String[result.size()]);
-	}
 
 
 	/**

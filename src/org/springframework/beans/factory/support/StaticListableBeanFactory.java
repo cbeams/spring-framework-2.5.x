@@ -156,20 +156,6 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return (String[]) keySet.toArray(new String[keySet.size()]);
 	}
 
-	public String[] getBeanDefinitionNames(Class type) {
-		List matches = new ArrayList();
-		Set keys = this.beans.keySet();
-		Iterator it = keys.iterator();
-		while (it.hasNext()) {
-			String name = (String) it.next();
-			Object beanInstance = this.beans.get(name);
-			if (type.isInstance(beanInstance)) {
-				matches.add(name);
-			}
-		}
-		return (String[]) matches.toArray(new String[matches.size()]);
-	}
-
 	public String[] getBeanNamesForType(Class type) {
 		return getBeanNamesForType(type, true, true);
 	}

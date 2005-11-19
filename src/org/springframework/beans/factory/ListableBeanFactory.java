@@ -92,28 +92,6 @@ public interface ListableBeanFactory extends BeanFactory {
 	
 	/**
 	 * Return the names of beans matching the given type (including subclasses),
-	 * judging from the bean definitions. Merges child bean definition with
-	 * their parent before checking the type.
-	 * <p>Does <i>not</i> consider objects created by FactoryBeans but rather the
-	 * FactoryBean classes themselves, avoiding instantiation of any beans. Use
-	 * <code>getBeanNamesForType</code> to match objects created by FactoryBeans.
-	 * <p>Does not consider any hierarchy this factory may participate in.
-	 * Use BeanFactoryUtils' <code>beanNamesIncludingAncestors</code>
-	 * to include beans in ancestor factories too.
-	 * <p>Note: Ignores any singleton beans that have been registered by
-	 * other means than bean definitions.
-	 * @param type the class or interface to match, or <code>null</code> for all bean names
-	 * @return the names of beans matching the given object type 
-	 * (including subclasses), or an empty array if none
-	 * @deprecated in favor of getBeanNamesForType.
-	 * This method will be removed as of Spring 1.3.
-	 * @see #getBeanNamesForType
-	 * @see BeanFactoryUtils#beanNamesIncludingAncestors(ListableBeanFactory, Class)
-	 */
-	String[] getBeanDefinitionNames(Class type);
-
-	/**
-	 * Return the names of beans matching the given type (including subclasses),
 	 * judging from either bean definitions or the value of <code>getObjectType</code>
 	 * in the case of FactoryBeans.
 	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans

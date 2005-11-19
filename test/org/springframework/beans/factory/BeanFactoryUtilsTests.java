@@ -25,9 +25,9 @@ import junit.framework.TestCase;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.servlet.HandlerAdapter;
 
@@ -66,28 +66,19 @@ public class BeanFactoryUtilsTests extends TestCase {
 				BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory) == 7);
 	}
 
-	public void testHierarchicalNamesWithOverride() throws Exception {
-		List names = Arrays.asList(
-				BeanFactoryUtils.beanNamesIncludingAncestors(this.listableBeanFactory, ITestBean.class));
-		// includes 2 TestBeans from FactoryBeans (DummyFactory definitions)
-		assertEquals(2, names.size());
-		assertTrue(names.contains("test"));
-		assertTrue(names.contains("test3"));
-	}
-
 	public void testHierarchicalNamesWithNoMatch() throws Exception {
 		List names = Arrays.asList(
-				BeanFactoryUtils.beanNamesIncludingAncestors(this.listableBeanFactory, HandlerAdapter.class));
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, HandlerAdapter.class));
 		assertEquals(0, names.size());
 	}
 
 	public void testHierarchicalNamesWithMatchOnlyInRoot() throws Exception {
 		List names = Arrays.asList(
-				BeanFactoryUtils.beanNamesIncludingAncestors(this.listableBeanFactory, IndexedTestBean.class));
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, IndexedTestBean.class));
 		assertEquals(1, names.size());
 		assertTrue(names.contains("indexedBean"));
 		// Distinguish from default ListableBeanFactory behavior
-		assertTrue(listableBeanFactory.getBeanDefinitionNames(IndexedTestBean.class).length == 0);
+		assertTrue(listableBeanFactory.getBeanNamesForType(IndexedTestBean.class).length == 0);
 	}
 
 	public void testGetBeanNamesForTypeWithOverride() throws Exception {
