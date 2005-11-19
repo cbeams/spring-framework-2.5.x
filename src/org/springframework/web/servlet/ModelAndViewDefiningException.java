@@ -18,7 +18,7 @@ package org.springframework.web.servlet;
 
 import javax.servlet.ServletException;
 
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.util.Assert;
 
 /**
  * Exception to be thrown on error conditions that should forward
@@ -36,15 +36,14 @@ public class ModelAndViewDefiningException extends ServletException {
 
 	private ModelAndView modelAndView;
 
+
 	/**
 	 * Create new ModelAndViewDefiningException with the given ModelAndView,
 	 * typically representing a specific error page.
 	 * @param modelAndView ModelAndView with view to forward to and model to expose
 	 */
 	public ModelAndViewDefiningException(ModelAndView modelAndView) {
-		if (modelAndView == null) {
-			throw new IllegalArgumentException("modelAndView must not be <code>null</code> in ModelAndViewDefiningException");
-		}
+		Assert.notNull(modelAndView, "ModelAndView must not be null in ModelAndViewDefiningException");
 		this.modelAndView = modelAndView;
 	}
 

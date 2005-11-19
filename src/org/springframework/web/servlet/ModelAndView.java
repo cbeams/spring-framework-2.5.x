@@ -185,7 +185,7 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Return the model map. Never returns null.
+	 * Return the model map. Never returns <code>null</code>.
 	 * To be called by application code for modifying the model.
 	 */
 	public Map getModel() {
@@ -223,7 +223,7 @@ public class ModelAndView {
 	 * The object will be empty afterwards.
 	 * <p>Can be used to suppress rendering of a given ModelAndView object
 	 * in the <code>postHandle</code> method of a HandlerInterceptor.
-	 * @see #isEmpty
+	 * @see #isEmpty()
 	 * @see HandlerInterceptor#postHandle
 	 */
 	public void clear() {
@@ -235,7 +235,7 @@ public class ModelAndView {
 	/**
 	 * Return whether this ModelAndView object is empty,
 	 * i.e. whether it does not hold any view and does not contain a model.
-	 * @see #clear
+	 * @see #clear()
 	 */
 	public boolean isEmpty() {
 		return (this.view == null && this.viewName == null && this.model == null);
