@@ -35,8 +35,8 @@ import org.springframework.beans.factory.BeanFactory;
  *
  * <p>Note that this interface is not implemented by ApplicationContext
  * facades, as it is hardly ever used by application code. It is available
- * on the internal BeanFactory of a context, though, accessible through
- * ConfigurableApplicationContext's <code>getBeanFactory</code> method.
+ * on from an application context too, though, accessible through
+ * ApplicationContext's <code>getAutowireCapableBeanFactory</code> method.
  *
  * <p>To get access to an AutowireCapableBeanFactory, you can also
  * implement the BeanFactoryAware interface, which exposes the internal
@@ -49,12 +49,22 @@ import org.springframework.beans.factory.BeanFactory;
  * @see org.springframework.beans.factory.ListableBeanFactory
  * @see org.springframework.beans.factory.BeanFactoryAware
  * @see org.springframework.beans.factory.config.ConfigurableListableBeanFactory
- * @see org.springframework.context.ConfigurableApplicationContext#getBeanFactory
+ * @see org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()
  */
 public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
+	 * Constant that indicates no autowiring at all
+	 * (other than callbacks such as BeanFactoryAware).
+	 * @see #createBean
+	 * @see #autowire
+	 * @see #autowireBeanProperties
+	 */
+	int AUTOWIRE_NO = 0;
+
+	/**
 	 * Constant that indicates autowiring bean properties by name.
+	 * @see #createBean
 	 * @see #autowire
 	 * @see #autowireBeanProperties
 	 */
@@ -62,6 +72,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
 	 * Constant that indicates autowiring bean properties by type.
+	 * @see #createBean
 	 * @see #autowire
 	 * @see #autowireBeanProperties
 	 */
@@ -69,6 +80,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
 	 * Constant that indicates autowiring a constructor.
+	 * @see #createBean
 	 * @see #autowire
 	 */
 	int AUTOWIRE_CONSTRUCTOR = 3;
@@ -76,24 +88,52 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	/**
 	 * Constant that indicates determining an appropriate autowire strategy
 	 * through introspection of the bean class.
+	 * @see #createBean
 	 * @see #autowire
 	 */
 	int AUTOWIRE_AUTODETECT = 4;
 
 
 	/**
-	 * Create a new bean instance of the given class with the specified autowire
+	 * Fully create a new bean instance of the given class with the specified
+	 * autowire strategy. All constants defined in this interface are supported here.
+	 * <p>Performs full initialization of the bean, including all applicable
+	 * BeanPostProcessors.
+	 * @param beanClass the class of the bean to create
+	 * @param autowireMode by name or type, using the constants in this interface
+	 * @param dependencyCheck whether to perform a dependency check for objects
+	 * (not applicable to autowiring a constructor, thus ignored there)
+	 * @return the new bean instance
+	 * @throws BeansException if instantiation or wiring failed
+	 * @see #AUTOWIRE_NO
+	 * @see #AUTOWIRE_BY_NAME
+	 * @see #AUTOWIRE_BY_TYPE
+	 * @see #AUTOWIRE_CONSTRUCTOR
+	 * @see #AUTOWIRE_AUTODETECT
+	 */
+	Object createBean(Class beanClass, int autowireMode, boolean dependencyCheck)
+			throws BeansException;
+
+	/**
+	 * Instantiate a new bean instance of the given class with the specified autowire
 	 * strategy. All constants defined in this interface are supported here.
+	 * <p>Does <i>not</i> apply any BeanPostProcessors or perform any further
+	 * initialization of the bean. This interface offers distinct, fine-grained
+	 * operations for those purposes, for example <code>initializeBean</code>.
 	 * @param beanClass the class of the bean to instantiate
 	 * @param autowireMode by name or type, using the constants in this interface
 	 * @param dependencyCheck whether to perform a dependency check for objects
 	 * (not applicable to autowiring a constructor, thus ignored there)
 	 * @return the new bean instance
 	 * @throws BeansException if instantiation or wiring failed
+	 * @see #AUTOWIRE_NO
 	 * @see #AUTOWIRE_BY_NAME
 	 * @see #AUTOWIRE_BY_TYPE
 	 * @see #AUTOWIRE_CONSTRUCTOR
 	 * @see #AUTOWIRE_AUTODETECT
+	 * @see #initializeBean
+	 * @see #applyBeanPostProcessorsBeforeInitialization
+	 * @see #applyBeanPostProcessorsAfterInitialization
 	 */
 	Object autowire(Class beanClass, int autowireMode, boolean dependencyCheck)
 			throws BeansException;
@@ -127,6 +167,17 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @see #autowireBeanProperties
 	 */
 	void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException;
+
+	/**
+	 * Initialize the given bean instance, applying factory callbacks
+	 * such as <code>setBeanName</code> and <code>setBeanFactory</code>,
+	 * also applying all bean post processors.
+	 * @param existingBean the existing bean instance
+	 * @param beanName the name of the bean, to be passed to it if necessary
+	 * @return the bean instance to use, either the original or a wrapped one
+	 * @throws BeansException if the initialization failed
+	 */
+	Object initializeBean(Object existingBean, String beanName) throws BeansException;
 
 	/**
 	 * Apply BeanPostProcessors to the given existing bean instance,

@@ -30,7 +30,7 @@ import org.springframework.util.ClassUtils;
  * properties of RootBeanDefinition and ChildBeanDefinition.
  *
  * <p>The autowire constants match the ones defined in the
- * AutowireCapableBeanFactory interface, adding AUTOWIRE_NO.
+ * AutowireCapableBeanFactory interface.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -43,7 +43,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 * Constant that indicates no autowiring at all.
 	 * @see #setAutowireMode
 	 */
-	public static final int AUTOWIRE_NO = 0;
+	public static final int AUTOWIRE_NO = AutowireCapableBeanFactory.AUTOWIRE_NO;
 
 	/**
 	 * Constant that indicates autowiring bean properties by name.
