@@ -343,9 +343,19 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/spring-hibernate.jar">
+		<jar jarfile="${dist.dir}/spring-hibernate2.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/orm/hibernate/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-hibernate3.jar">
+			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/orm/hibernate3/**"/>
 			</fileset>
 			<manifest>
@@ -366,6 +376,8 @@
 			<fileset dir="${target.classes.dir}">
 				<include name="META-INF/**"/>
 				<include name="org/springframework/**"/>
+				<exclude name="org/springframework/orm/hibernate/**"/>
+				<exclude name="org/springframework/orm/hibernate3/**"/>
 			</fileset>
 			<zipfileset src="lib/aopalliance/aopalliance.jar"/>
 			<manifest>
@@ -1091,12 +1103,14 @@
 				<include name="lib/jdo/**"/>
 				<include name="lib/jmx/**"/>
 				<include name="lib/jotm/**"/>
+				<include name="lib/jpa/**"/>
 				<include name="lib/jsf/**"/>
 				<include name="lib/junit/**"/>
 				<include name="lib/log4j/**"/>
 				<include name="lib/ojb/**"/>
 				<include name="lib/oro/**"/>
 				<include name="lib/poi/**"/>
+				<include name="lib/portlet/**"/>
 				<include name="lib/quartz/**"/>
 				<include name="lib/struts/**"/>
 				<include name="lib/toplink/**"/>
