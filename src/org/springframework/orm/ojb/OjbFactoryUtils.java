@@ -105,16 +105,6 @@ public abstract class OjbFactoryUtils {
 
 	/**
 	 * Close the given PersistenceBroker, created for the given PBKey,
-	 * if it isn't bound to the thread.
-	 * @deprecated in favor of releasePersistenceBroker
-	 * @see #releasePersistenceBroker
-	 */
-	public static void closePersistenceBrokerIfNecessary(PersistenceBroker pb, PBKey pbKey) {
-		releasePersistenceBroker(pb, pbKey);
-	}
-
-	/**
-	 * Close the given PersistenceBroker, created for the given PBKey,
 	 * if it is not managed externally (i.e. not bound to the thread).
 	 * @param pb PersistenceBroker to close
 	 * @param pbKey PBKey that the PersistenceBroker was created with

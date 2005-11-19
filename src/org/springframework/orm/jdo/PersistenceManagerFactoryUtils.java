@@ -237,16 +237,6 @@ public abstract class PersistenceManagerFactoryUtils {
 
 	/**
 	 * Close the given PersistenceManager, created via the given factory,
-	 * if it isn't bound to the thread.
-	 * @deprecated in favor of releasePersistenceManager
-	 * @see #releasePersistenceManager
-	 */
-	public static void closePersistenceManagerIfNecessary(PersistenceManager pm, PersistenceManagerFactory pmf) {
-		releasePersistenceManager(pm, pmf);
-	}
-
-	/**
-	 * Close the given PersistenceManager, created via the given factory,
 	 * if it is not managed externally (i.e. not bound to the thread).
 	 * @param pm PersistenceManager to close
 	 * @param pmf PersistenceManagerFactory that the PersistenceManager was created with

@@ -26,19 +26,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 /**
  * Generic utility methods for working with JDBC. Mainly for internal use
@@ -50,6 +50,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 public abstract class JdbcUtils {
 
 	private static final Log logger = LogFactory.getLog(JdbcUtils.class);
+
 	private static final int MAX_SELECT_LIST_ENTRIES = 100;
 
 
@@ -338,34 +339,6 @@ public abstract class JdbcUtils {
 				Types.DOUBLE == sqlType || Types.FLOAT == sqlType || Types.INTEGER == sqlType ||
 				Types.NUMERIC == sqlType || Types.REAL == sqlType || Types.SMALLINT == sqlType ||
 				Types.TINYINT == sqlType;
-	}
-
-	/**
-	 * Translate a SQL type into one of a few values:
-	 * All string types are translated to String.
-	 * All integer types are translated to Integer.
-	 * All real types are translated to Double.
-	 * All other types are left untouched.
-	 * @param sqlType the type to be translated into a simpler type
-	 * @return the new SQL type
-	 * @deprecated This is only used by deprecated constructors in
-	 * SqlFunction and will be removed alongside those constructors.
-	 * @see org.springframework.jdbc.object.SqlFunction#SqlFunction(javax.sql.DataSource, String, int)
-	 */
-	public static int translateType(int sqlType) {
-		int retType = sqlType;
-		if (Types.CHAR == sqlType || Types.VARCHAR == sqlType) {
-			retType = Types.VARCHAR;
-		}
-		else if (Types.BIT == sqlType || Types.TINYINT == sqlType || Types.SMALLINT == sqlType ||
-				Types.INTEGER == sqlType) {
-			retType = Types.INTEGER;
-		}
-		else if (Types.DECIMAL == sqlType || Types.DOUBLE == sqlType || Types.FLOAT == sqlType ||
-				Types.NUMERIC == sqlType || Types.REAL == sqlType) {
-			retType = Types.NUMERIC;
-		}
-		return retType;
 	}
 
 	/**

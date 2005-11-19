@@ -196,16 +196,6 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	/**
 	 * Close the given Hibernate Session, created via this DAO's SessionFactory,
 	 * if it isn't bound to the thread.
-	 * @deprecated in favor of releaseSession
-	 * @see #releaseSession
-	 */
-	protected final void closeSessionIfNecessary(Session session) {
-		releaseSession(session);
-	}
-
-	/**
-	 * Close the given Hibernate Session, created via this DAO's SessionFactory,
-	 * if it isn't bound to the thread.
 	 * <p>Typically used in plain Hibernate code, in combination with
 	 * <code>getSession</code> and <code>convertHibernateAccessException</code>.
 	 * @param session Session to close

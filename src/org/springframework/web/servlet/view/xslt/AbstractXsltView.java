@@ -263,7 +263,6 @@ public abstract class AbstractXsltView extends AbstractView {
 		 * transformation. Support for Nodes is retained for backwards compatibility.
 		 */
 		Source source = null;
-		Node dom = null;
 		String docRoot = null;
 
 		// Value of a single element in the map, if there is one.
@@ -283,17 +282,11 @@ public abstract class AbstractXsltView extends AbstractView {
 			// We don't need to worry about model name, either:
 			// we leave the Node alone.
 			logger.debug("No need to domify: was passed an XML Node or Source");
-			source = singleModel instanceof Node ? new DOMSource((Node) singleModel) : (Source) singleModel;
+			source = (singleModel instanceof Node ? new DOMSource((Node) singleModel) : (Source) singleModel);
 		}
 		else {
 			// docRoot local variable takes precedence
-			dom = createDomNode(model, (docRoot == null) ? this.root : docRoot, request, response);
-			if (dom != null) {
-				source = new DOMSource(dom);
-			}
-			else {
-				source = createXsltSource(model, (docRoot == null) ? this.root : docRoot, request, response);
-			}
+			source = createXsltSource(model, (docRoot != null ? docRoot : this.root), request, response);
 		}
 
 		doTransform(model, source, request, response);
@@ -326,61 +319,6 @@ public abstract class AbstractXsltView extends AbstractView {
 	}
 
 	/**
-	 * Return the XML <code>Node</code> to transform.
-	 * <p>
-	 * This method is deprecated from version 1.2 with the preferred extension point
-	 * being <code>createXsltSource(Map, String, HttpServletRequest, HttpServletResponse)</code>
-	 * instead.  Code that previously implemented this method can now override the preferred
-	 * method, returning <code>new DOMSource(node)</code> in place of returning <code>node</code>
-	 * @param model the model Map
-	 * @param root name for root element. This can be supplied as a bean property
-	 * to concrete subclasses within the view definition file, but will be overridden
-	 * in the case of a single object in the model map to be the key for that object.
-	 * If no root property is specified and multiple model objects exist, a default
-	 * root tag name will be supplied.
-	 * @param request HTTP request. Subclasses won't normally use this, as
-	 * request processing should have been complete. However, we might to
-	 * create a RequestContext to expose as part of the model.
-	 * @param response HTTP response. Subclasses won't normally use this,
-	 * however there may sometimes be a need to set cookies.
-	 * @return the XML node to transform
-	 * @throws Exception we let this method throw any exception; the
-	 * AbstractXlstView superclass will catch exceptions
-	 * @deprecated in favor of <code>createXsltSource(Map, String, HttpServletRequest, HttpServletResponse)</code>
-	 */
-	protected Node createDomNode(Map model, String root, HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-
-		return null;
-	}
-
-	/**
-	 * Perform the actual transformation, writing to the HTTP response.
-	 * <p>Default implementation delegates to the doTransform version
-	 * that takes a Result argument, building a StreamResult for the
-	 * ServletResponse OutputStream.
-	 * @param model the model Map
-	 * @param dom the XNL node to transform
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @throws Exception we let this method throw any exception; the
-	 * AbstractXlstView superclass will catch exceptions
-	 * @see #doTransform(Node, Map, Result, String)
-	 * @see javax.xml.transform.stream.StreamResult
-	 * @see javax.servlet.ServletResponse#getOutputStream
-	 * @see #doTransform(Map, Source, HttpServletRequest, HttpServletResponse)
-	 * @deprecated the preferred method is <code>doTransform</code> with a Source argument
-	 * @see #doTransform(java.util.Map, javax.xml.transform.Source, HttpServletRequest, HttpServletResponse)
-	 */
-	protected void doTransform(Map model, Node dom, HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-
-		doTransform(new DOMSource(dom), getParameters(request),
-				new StreamResult(new BufferedOutputStream(response.getOutputStream())),
-				response.getCharacterEncoding());
-	}
-
-	/**
 	 * Perform the actual transformation, writing to the HTTP response.
 	 * <p>Default implementation delegates to the doTransform version
 	 * that takes a Result argument, building a StreamResult for the
@@ -391,35 +329,16 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @param response current HTTP response
 	 * @throws Exception we let this method throw any exception; the
 	 * AbstractXlstView superclass will catch exceptions
-	 * @see #doTransform(Node, Map, Result, String)
 	 * @see javax.xml.transform.stream.StreamResult
 	 * @see javax.servlet.ServletResponse#getOutputStream
 	 */
-	protected void doTransform(Map model, Source source, HttpServletRequest request, HttpServletResponse response)
+	protected void doTransform(
+			Map model, Source source, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
 		doTransform(source, getParameters(request),
 				new StreamResult(new BufferedOutputStream(response.getOutputStream())),
 				response.getCharacterEncoding());
-	}
-
-	/**
-	 * Perform the actual transformation, writing to the given result.
-	 * Simply delegates to the
-	 * <code>doTransform(Source, Map, Result, String)</code> version.
-	 * @param dom the XML node to transform
-	 * @param parameters a Map of parameters to be applied to the stylesheet
-	 * @param result the result to write to
-	 * @throws Exception we let this method throw any exception; the
-	 * AbstractXlstView superclass will catch exceptions
-	 * @see #doTransform(Source, Map, Result, String)
-	 * @deprecated the preferred method is
-	 * <code>doTransform(Source source, Map parameters, Result result, String encoding)</code>
-	 */
-	protected void doTransform(Node dom, Map parameters, Result result, String encoding)
-			throws Exception {
-
-		doTransform(new DOMSource(dom), parameters, result, encoding);
 	}
 
 	/**

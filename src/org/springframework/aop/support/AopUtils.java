@@ -19,7 +19,6 @@ package org.springframework.aop.support;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -181,55 +180,6 @@ public abstract class AopUtils {
 			sb.append(intf.getName());
 		}
 		return sb.toString();
-	}
-
-	/**
-	 * Return all interfaces that the given object implements as array,
-	 * including ones implemented by superclasses.
-	 * @param object the object to analyse for interfaces
-	 * @return all interfaces that the given object implements as array
-	 * @deprecated in favor of <code>ClassUtils.getAllInterfaces</code>
-	 * @see org.springframework.util.ClassUtils#getAllInterfaces(Object)
-	 */
-	public static Class[] getAllInterfaces(Object object) {
-		return getAllInterfacesForClass(object.getClass());
-	}
-
-	/**
-	 * Return all interfaces that the given class implements as array,
-	 * including ones implemented by superclasses.
-	 * @param clazz the class to analyse for interfaces
-	 * @return all interfaces that the given object implements as array
-	 * @deprecated in favor of <code>ClassUtils.getAllInterfacesForClass</code>
-	 * @see org.springframework.util.ClassUtils#getAllInterfacesForClass(Class)
-	 */
-	public static Class[] getAllInterfacesForClass(Class clazz) {
-		Set interfaces = ClassUtils.getAllInterfacesForClassAsSet(clazz);
-		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
-	}
-
-	/**
-	 * Return all interfaces that the given object implements as List,
-	 * including ones implemented by superclasses.
-	 * @param object the object to analyse for interfaces
-	 * @return all interfaces that the given object implements as List
-	 * @deprecated in favor of <code>ClassUtils.getAllInterfacesAsSet</code>
-	 * @see org.springframework.util.ClassUtils#getAllInterfacesAsSet(Object)
-	 */
-	public static List getAllInterfacesAsList(Object object) {
-		return getAllInterfacesForClassAsList(object.getClass());
-	}
-
-	/**
-	 * Return all interfaces that the given class implements as List,
-	 * including ones implemented by superclasses.
-	 * @param clazz the class to analyse for interfaces
-	 * @return all interfaces that the given object implements as List
-	 * @deprecated in favor of <code>ClassUtils.getAllInterfacesForClassAsSet</code>
-	 * @see org.springframework.util.ClassUtils#getAllInterfacesForClassAsSet(Class)
-	 */
-	public static List getAllInterfacesForClassAsList(Class clazz) {
-		return new ArrayList(ClassUtils.getAllInterfacesForClassAsSet(clazz));
 	}
 
 	/**

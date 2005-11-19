@@ -21,7 +21,6 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.Map;
 
-import net.sf.jasperreports.engine.JRAbstractExporter;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRDataSourceProvider;
 import net.sf.jasperreports.engine.JRException;
@@ -53,7 +52,6 @@ public abstract class JasperReportsUtils {
 	 * <code>java.util.Collection</code> or object array is detected.
 	 * The latter are converted to <code>JRBeanCollectionDataSource</code>
 	 * or <code>JRBeanArrayDataSource</code>, respectively.
-	 *
 	 * @param value the report data value to convert
 	 * @return the JRDataSource
 	 * @throws IllegalArgumentException if the value could not be converted
@@ -80,22 +78,11 @@ public abstract class JasperReportsUtils {
 	}
 
 	/**
-	 * @see #render(net.sf.jasperreports.engine.JRExporter, net.sf.jasperreports.engine.JasperPrint, java.io.Writer)
-	 * @deprecated in favor of the <code>render</render> version with JRExporter parameter
-	 */
-	public static void render(JRAbstractExporter exporter, JasperPrint print, Writer writer)
-			throws JRException {
-
-		render((JRExporter) exporter, print, writer);
-	}
-
-	/**
 	 * Render the supplied <code>JasperPrint</code> instance using the
 	 * supplied <code>JRAbstractExporter</code> instance and write the results
 	 * to the supplied <code>Writer</code>.
 	 * <p>Make sure that the <code>JRAbstractExporter</code> implementation
 	 * you supply is capable of writing to a <code>Writer</code>.
-	 *
 	 * @param exporter the <code>JRAbstractExporter</code> to use to render the report
 	 * @param print the <code>JasperPrint</code> instance to render
 	 * @param writer the <code>Writer</code> to write the result to
@@ -110,22 +97,11 @@ public abstract class JasperReportsUtils {
 	}
 
 	/**
-	 * @see #render(net.sf.jasperreports.engine.JRExporter, net.sf.jasperreports.engine.JasperPrint, java.io.OutputStream)
-	 * @deprecated in favor of the <code>render</render> version with JRExporter parameter
-	 */
-	public static void render(JRAbstractExporter exporter, JasperPrint print, OutputStream outputStream)
-			throws JRException {
-
-		render((JRExporter) exporter, print, outputStream);
-	}
-
-	/**
 	 * Render the supplied <code>JasperPrint</code> instance using the
 	 * supplied <code>JRAbstractExporter</code> instance and write the results
 	 * to the supplied <code>OutputStream</code>.
 	 * <p>Make sure that the <code>JRAbstractExporter</code> implementation you
 	 * supply is capable of writing to a <code>OutputStream</code>.
-	 *
 	 * @param exporter the <code>JRAbstractExporter</code> to use to render the report
 	 * @param print the <code>JasperPrint</code> instance to render
 	 * @param outputStream the <code>OutputStream</code> to write the result to
@@ -142,7 +118,6 @@ public abstract class JasperReportsUtils {
 	/**
 	 * Render a report in CSV format using the supplied report data.
 	 * Writes the results to the supplied <code>Writer</code>.
-	 *
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param writer the <code>Writer</code> to write the rendered report to
@@ -162,7 +137,6 @@ public abstract class JasperReportsUtils {
 	/**
 	 * Render a report in HTML format using the supplied report data.
 	 * Writes the results to the supplied <code>Writer</code>.
-	 *
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param writer the <code>Writer</code> to write the rendered report to
@@ -182,7 +156,6 @@ public abstract class JasperReportsUtils {
 	/**
 	 * Render a report in PDF format using the supplied report data.
 	 * Writes the results to the supplied <code>OutputStream</code>.
-	 *
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param stream the <code>OutputStream</code> to write the rendered report to
@@ -202,7 +175,6 @@ public abstract class JasperReportsUtils {
 	/**
 	 * Render a report in PDF format using the supplied report data.
 	 * Writes the results to the supplied <code>OutputStream</code>.
-	 *
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param stream the <code>OutputStream</code> to write the rendered report to

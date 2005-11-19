@@ -112,45 +112,6 @@ public class SqlFunction extends MappingSqlQuery {
 		setResultType(resultType);
 	}
 
-	/**
-	 * Create a new SqlFunction object with SQL and return type, but without
-	 * parameters. Must add parameters or settle with none.
-	 * @param ds DataSource to obtain connections from
-	 * @param sql SQL to execute
-	 * @param retType SQL type of the return value, as defined in the
-	 * <code>java.sql.Types</code> class
-	 * @deprecated Use the constructor with a result type Class instead.
-	 * Note that the current version of SqlFunction will be able to guess
-	 * the correct result type in my cases, so you often don't even
-	 * need to specifiy the result type explicitly.
-	 * @see #SqlFunction(javax.sql.DataSource, String, int[], Class)
-	 */
-	public SqlFunction(DataSource ds, String sql, int retType) {
-		this(ds, sql, null, retType);
-	}
-
-	/**
-	 * Create a new SqlFunction object with SQL, parameters and a return type.
-	 * @param ds DataSource to obtain connections from
-	 * @param sql SQL to execute
-	 * @param types SQL types of the parameters, as defined in the
-	 * <code>java.sql.Types</code> class
-	 * @param retType SQL type of the return value, as defined in the
-	 * <code>java.sql.Types</code> class
-	 * @deprecated Use the constructor with a result type Class instead.
-	 * Note that the current version of SqlFunction will be able to guess
-	 * the correct result type in my cases, so you often don't even
-	 * need to specifiy the result type explicitly.
-	 * @see #SqlFunction(javax.sql.DataSource, String, int[], Class)
-	 */
-	public SqlFunction(DataSource ds, String sql, int[] types, int retType) {
-		setRowsExpected(1);
-		setDataSource(ds);
-		setSql(sql);
-		setTypes(types);
-		setResultType(determineRequiredType(retType));
-	}
-
 
 	/**
 	 * Specify the type that the result object is required to match.
@@ -159,29 +120,6 @@ public class SqlFunction extends MappingSqlQuery {
 	 */
 	public void setResultType(Class resultType) {
 		this.rowMapper.setRequiredType(resultType);
-	}
-
-	/**
-	 * Determine the corresponding Java type for the given SQL type.
-	 * <p>This will be removed along with the deprecated constructors
-	 * that take a SQL type argument for the return type.
-	 * @param sqlType the SQL type of the return value
-	 * @return the corresponding Java type
-	 */
-	private Class determineRequiredType(int sqlType) {
-		int translatedType = JdbcUtils.translateType(sqlType);
-		switch (translatedType) {
-			case Types.VARCHAR:
-				return String.class;
-			case Types.INTEGER:
-				return Integer.class;
-			case Types.BIGINT:
-				return Long.class;
-			case Types.NUMERIC:
-				return Double.class;
-			default:
-				return null;
-		}
 	}
 
 

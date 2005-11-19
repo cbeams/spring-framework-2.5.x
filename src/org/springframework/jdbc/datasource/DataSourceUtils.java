@@ -215,16 +215,6 @@ public abstract class DataSourceUtils {
 	}
 
 	/**
-	 * Close the given Connection if necessary, i.e. if it is not bound to the thread
-	 * and it is not created by a SmartDataSource returning shouldClose=false.
-	 * @deprecated in favor of releaseConnection
-	 * @see #releaseConnection
-	 */
-	public static void closeConnectionIfNecessary(Connection con, DataSource dataSource) {
-		releaseConnection(con, dataSource);
-	}
-
-	/**
 	 * Close the given Connection, created via the given DataSource,
 	 * if it is not managed externally (i.e. not bound to the thread).
 	 * Will never close a Connection from a SmartDataSource returning shouldClose=false.

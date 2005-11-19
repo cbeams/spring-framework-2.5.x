@@ -157,16 +157,6 @@ public abstract class JdoDaoSupport extends DaoSupport {
 	/**
 	 * Close the given JDO PersistenceManager, created via this DAO's
 	 * PersistenceManagerFactory, if it isn't bound to the thread.
-	 * @deprecated in favor of releasePersistenceManager
-	 * @see #releasePersistenceManager
-	 */
-	protected final void closePersistenceManagerIfNecessary(PersistenceManager pm) {
-		releasePersistenceManager(pm);
-	}
-
-	/**
-	 * Close the given JDO PersistenceManager, created via this DAO's
-	 * PersistenceManagerFactory, if it isn't bound to the thread.
 	 * @param pm PersistenceManager to close
 	 * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#releasePersistenceManager
 	 */

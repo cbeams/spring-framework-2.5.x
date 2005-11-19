@@ -108,16 +108,6 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 	/**
 	 * Set the ClassLoader to load resource bundles with.
 	 * Default is the thread context ClassLoader.
-	 * @deprecated in favor of <code>setBundleClassLoader</code>
-	 * @see #setBundleClassLoader
-	 */
-	public void setClassLoader(ClassLoader classLoader) {
-		this.bundleClassLoader = classLoader;
-	}
-
-	/**
-	 * Set the ClassLoader to load resource bundles with.
-	 * Default is the thread context ClassLoader.
 	 */
 	public void setBundleClassLoader(ClassLoader classLoader) {
 		this.bundleClassLoader = classLoader;

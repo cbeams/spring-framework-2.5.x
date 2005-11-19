@@ -667,16 +667,6 @@ public abstract class SessionFactoryUtils {
 
 	/**
 	 * Close the given Session, created via the given factory,
-	 * if it isn't bound to the thread.
-	 * @deprecated in favor of releaseSession
-	 * @see #releaseSession
-	 */
-	public static void closeSessionIfNecessary(Session session, SessionFactory sessionFactory) {
-		releaseSession(session, sessionFactory);
-	}
-
-	/**
-	 * Close the given Session, created via the given factory,
 	 * if it is not managed externally (i.e. not bound to the thread).
 	 * @param session the Hibernate Session to close
 	 * @param sessionFactory Hibernate SessionFactory that the Session was created with

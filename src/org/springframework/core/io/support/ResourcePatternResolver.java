@@ -50,13 +50,6 @@ import org.springframework.core.io.ResourceLoader;
 public interface ResourcePatternResolver extends ResourceLoader {
 
 	/**
-	 * @deprecated as of Spring 1.2.2, in favor of CLASSPATH_ALL_URL_PREFIX
-	 * (to avoid shadowing the constant of the same name in ResourceLoader)
-	 * @see #CLASSPATH_ALL_URL_PREFIX
-	 */
-	String CLASSPATH_URL_PREFIX = "classpath*:";
-
-	/**
 	 * Pseudo URL prefix for all matching resources from the class path: "classpath*:"
 	 * This differs from ResourceLoader's classpath URL prefix in that it
 	 * retrieves all matching resources for a given name (e.g. "/beans.xml"),

@@ -118,16 +118,6 @@ public abstract class JdbcDaoSupport extends DaoSupport {
 	/**
 	 * Close the given JDBC Connection, created via this DAO's DataSource,
 	 * if it isn't bound to the thread.
-	 * @deprecated in favor of releaseConnection
-	 * @see #releaseConnection
-	 */
-	protected final void closeConnectionIfNecessary(Connection con) {
-		releaseConnection(con);
-	}
-
-	/**
-	 * Close the given JDBC Connection, created via this DAO's DataSource,
-	 * if it isn't bound to the thread.
 	 * @param con Connection to close
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
 	 */

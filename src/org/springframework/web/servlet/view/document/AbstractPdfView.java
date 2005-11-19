@@ -75,7 +75,7 @@ public abstract class AbstractPdfView extends AbstractView {
 
 		// IE workaround: write into byte array first.
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(OUTPUT_BYTE_ARRAY_INITIAL_SIZE);
-		Document document = getDocument();
+		Document document = newDocument();
 		PdfWriter writer = newWriter(document, baos);
 
 		// Apply preferences and build metadata.
@@ -95,14 +95,6 @@ public abstract class AbstractPdfView extends AbstractView {
 		ServletOutputStream out = response.getOutputStream();
 		baos.writeTo(out);
 		out.flush();
-	}
-
-	/**
-	 * @deprecated in favor of newDocument
-	 * @see #newDocument
-	 */
-	protected Document getDocument() {
-		return newDocument();
 	}
 
 	/**

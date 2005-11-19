@@ -141,15 +141,6 @@ public abstract class PersistenceBrokerDaoSupport extends DaoSupport {
 
 	/**
 	 * Close the given PersistenceBroker if it isn't bound to the thread.
-	 * @deprecated in favor of releasePersistenceBroker
-	 * @see #releasePersistenceBroker
-	 */
-	protected final void closePersistenceBrokerIfNecessary(PersistenceBroker pb) {
-		releasePersistenceBroker(pb);
-	}
-
-	/**
-	 * Close the given PersistenceBroker if it isn't bound to the thread.
 	 * @param pb PersistenceBroker to close
 	 */
 	protected final void releasePersistenceBroker(PersistenceBroker pb) {
