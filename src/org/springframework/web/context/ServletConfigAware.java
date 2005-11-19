@@ -16,29 +16,33 @@
 
 package org.springframework.web.context;
 
-import javax.servlet.ServletContext;
+import javax.servlet.ServletConfig;
 
 /**
  * Interface to be implemented by any object that wishes to be notified
- * of the ServletContext (typically determined by the WebApplicationContext)
+ * of the ServletConfig (typically determined by the WebApplicationContext)
  * that it runs in.
  *
+ * <p>Only satisfied if actually running within a Servlet-specific
+ * WebApplicationContext. If this callback interface is encountered
+ * elsewhere, an exception will be thrown on bean creation.
+ *
  * @author Juergen Hoeller
- * @since 12.03.2004
- * @see ServletConfigAware
+ * @since 1.3
+ * @see ServletContextAware
  */
-public interface ServletContextAware {
+public interface ServletConfigAware {
 
 	/**
-	 * Set the ServletContext that this object runs in.
+	 * Set the ServletConfig that this object runs in.
 	 * <p>Invoked after population of normal bean properties but before an init
 	 * callback like InitializingBean's <code>afterPropertiesSet</code> or a
 	 * custom init-method. Invoked after ApplicationContextAware's
 	 * <code>setApplicationContext</code>.
-	 * @param servletContext ServletContext object to be used by this object
+	 * @param servletConfig ServletConfig object to be used by this object
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext
 	 */
-	void setServletContext(ServletContext servletContext);
+	void setServletConfig(ServletConfig servletConfig);
 
 }

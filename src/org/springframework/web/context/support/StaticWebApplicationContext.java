@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.support;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -26,6 +27,7 @@ import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
+import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
 
 /**
@@ -49,6 +51,8 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 
 	private ServletContext servletContext;
 
+	private ServletConfig servletConfig;
+
 	private String namespace;
 
 	private ThemeSource themeSource;
@@ -67,6 +71,17 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 
 	public ServletContext getServletContext() {
 		return servletContext;
+	}
+
+	public void setServletConfig(ServletConfig servletConfig) {
+		this.servletConfig = servletConfig;
+		if (servletConfig != null && this.servletContext == null) {
+			this.servletContext = servletConfig.getServletContext();
+		}
+	}
+
+	public ServletConfig getServletConfig() {
+		return servletConfig;
 	}
 
 	public void setNamespace(String namespace) {
@@ -90,8 +105,9 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	 * @see ServletContextAwareProcessor
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
+		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
+		beanFactory.ignoreDependencyInterface(ServletConfigAware.class);
 	}
 
 	/**

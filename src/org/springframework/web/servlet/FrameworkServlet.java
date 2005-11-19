@@ -297,6 +297,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(getContextClass());
 		wac.setParent(parent);
 		wac.setServletContext(getServletContext());
+		wac.setServletConfig(getServletConfig());
 		wac.setNamespace(getNamespace());
 		if (getContextConfigLocation() != null) {
 			wac.setConfigLocations(

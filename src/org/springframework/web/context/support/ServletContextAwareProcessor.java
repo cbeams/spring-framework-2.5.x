@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.support;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
@@ -23,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
 
 /**
@@ -41,14 +43,34 @@ public class ServletContextAwareProcessor implements BeanPostProcessor {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final ServletContext servletContext;
+	private ServletContext servletContext;
+
+	private ServletConfig servletConfig;
 
 
 	/**
 	 * Create a new ServletContextAwareProcessor for the given context.
 	 */
 	public ServletContextAwareProcessor(ServletContext servletContext) {
+		this(servletContext, null);
+	}
+
+	/**
+	 * Create a new ServletContextAwareProcessor for the given config.
+	 */
+	public ServletContextAwareProcessor(ServletConfig servletConfig) {
+		this(null, servletConfig);
+	}
+
+	/**
+	 * Create a new ServletContextAwareProcessor for the given context and config.
+	 */
+	public ServletContextAwareProcessor(ServletContext servletContext, ServletConfig servletConfig) {
 		this.servletContext = servletContext;
+		this.servletConfig = servletConfig;
+		if (servletContext == null && servletConfig != null) {
+			this.servletContext = servletConfig.getServletContext();
+		}
 	}
 
 
@@ -62,6 +84,16 @@ public class ServletContextAwareProcessor implements BeanPostProcessor {
 				logger.debug("Invoking setServletContext on ServletContextAware bean '" + beanName + "'");
 			}
 			((ServletContextAware) bean).setServletContext(this.servletContext);
+		}
+		if (bean instanceof ServletConfigAware) {
+			if (this.servletConfig == null) {
+				throw new IllegalStateException("Cannot satisfy ServletConfigAware for bean '" +
+						beanName + "' without ServletConfig");
+			}
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invoking setServletConfig on ServletConfigAware bean '" + beanName + "'");
+			}
+			((ServletConfigAware) bean).setServletConfig(this.servletConfig);
 		}
 		return bean;
 	}

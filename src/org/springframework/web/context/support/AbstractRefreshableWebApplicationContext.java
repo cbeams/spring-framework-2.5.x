@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.support;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
@@ -28,6 +29,7 @@ import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
+import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
 
 /**
@@ -79,6 +81,9 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	/** Servlet context that this context runs in */
 	private ServletContext servletContext;
 
+	/** Servlet config that this context runs in, if any */
+	private ServletConfig servletConfig;
+
 	/** Namespace of this context, or <code>null</code> if root */
 	private String namespace;
 
@@ -100,6 +105,17 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 
 	public ServletContext getServletContext() {
 		return this.servletContext;
+	}
+
+	public void setServletConfig(ServletConfig servletConfig) {
+		this.servletConfig = servletConfig;
+		if (servletConfig != null && this.servletContext == null) {
+			this.servletContext = servletConfig.getServletContext();
+		}
+	}
+
+	public ServletConfig getServletConfig() {
+		return servletConfig;
 	}
 
 	public void setNamespace(String namespace) {
@@ -149,8 +165,9 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	 * @see ServletContextAwareProcessor
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
+		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
+		beanFactory.ignoreDependencyInterface(ServletConfigAware.class);
 	}
 
 	/**
