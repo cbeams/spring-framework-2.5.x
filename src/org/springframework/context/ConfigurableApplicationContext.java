@@ -22,11 +22,12 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
  * SPI interface to be implemented by most if not all application contexts.
- * Provides means to configure an application context in addition to the
+ * Provides facilities to configure an application context in addition to the
  * application context client methods in the ApplicationContext interface.
  *
  * <p>Configuration and lifecycle methods are encapsulated here to avoid
- * making them obvious to ApplicationContext client code.
+ * making them obvious to ApplicationContext client code. The present
+ * methods should only be used by startup and shutdown code.
  *
  * @author Juergen Hoeller
  * @since 03.11.2003
@@ -70,7 +71,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
 	 * will already have been instantiated before. Use a BeanFactoryPostProcessor
 	 * to intercept the bean factory setup process before beans get touched.
 	 * @throws IllegalStateException if the context does not hold an internal
-	 * bean factory yet (usually if <code>refresh</code> has never been called)
+	 * bean factory yet (usually if <code>refresh()</code> has never been called)
 	 * @see #refresh()
 	 * @see #addBeanFactoryPostProcessor
 	 */
