@@ -18,6 +18,7 @@ package org.springframework.context;
 
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 /** 
@@ -48,6 +49,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see ApplicationContextAware#setApplicationContext
+ * @see ConfigurableApplicationContext
  */
 public interface ApplicationContext extends ListableBeanFactory, HierarchicalBeanFactory,
 		MessageSource, ApplicationEventPublisher, ResourcePatternResolver {
@@ -58,7 +60,25 @@ public interface ApplicationContext extends ListableBeanFactory, HierarchicalBea
 	 * @return the parent context, or <code>null</code> if there is no parent
 	 */
 	ApplicationContext getParent();
-	
+
+	/**
+	 * Expose AutowireCapableBeanFactory functionality for this context.
+	 * <p>This is not typically used by application code, except for the purpose
+	 * of initializing bean instances that live outside the application context,
+	 * applying the Spring bean lifecycle (fully or partly) to them.
+	 * <p>Alternatively, the internal BeanFactory exposed by the
+	 * ConfigurableApplicationContext interface offers access to the
+	 * AutowireCapableBeanFactory interface too. The present method mainly
+	 * serves as convenient, specific facility on the ApplicationContext
+	 * interface itself.
+	 * @throws IllegalStateException if the context does not support
+	 * the AutowireCapableBeanFactory interface or does not hold an autowire-capable
+	 * bean factory yet (usually if <code>refresh()</code> has never been called)
+	 * @see ConfigurableApplicationContext#refresh()
+	 * @see ConfigurableApplicationContext#getBeanFactory()
+	 */
+	AutowireCapableBeanFactory getAutowireCapableBeanFactory() throws IllegalStateException;
+
 	/**
 	 * Return a friendly name for this context.
 	 * @return a display name for this context
@@ -70,14 +90,5 @@ public interface ApplicationContext extends ListableBeanFactory, HierarchicalBea
 	 * @return the timestamp (ms) when this context was first loaded
 	 */
 	long getStartupDate();
-
-	/**
-	 * Notify all listeners registered with this application of an application
-	 * event. Events may be framework events (such as RequestHandledEvent)
-	 * or application-specific events.
-	 * @param event event to publish
-	 * @see org.springframework.web.context.support.RequestHandledEvent
-	 */
-	void publishEvent(ApplicationEvent event);
 
 }
