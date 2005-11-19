@@ -27,6 +27,7 @@ import javax.servlet.ServletException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
 
 /**
@@ -63,13 +64,36 @@ import org.springframework.web.context.ServletContextAware;
  * @see org.springframework.web.servlet.HttpServletBean
  * @see org.springframework.web.servlet.mvc.ServletWrappingController
  */
-public class SimpleServletPostProcessor implements DestructionAwareBeanPostProcessor, ServletContextAware {
+public class SimpleServletPostProcessor implements
+		DestructionAwareBeanPostProcessor, ServletContextAware, ServletConfigAware {
+
+	private boolean useSharedServletConfig = true;
 
 	private ServletContext servletContext;
+
+	private ServletConfig servletConfig;
+
+
+	/**
+	 * Set whether to use the shared ServletConfig object passed in
+	 * through <code>setServletConfig</code>, if available.
+	 * <p>Default is "true". Turn this setting to "false" to pass in
+	 * a mock ServletConfig object with the bean name as servlet name,
+	 * holding the current ServletContext.
+	 * @see #setServletConfig
+	 */
+	public void setUseSharedServletConfig(boolean useSharedServletConfig) {
+		this.useSharedServletConfig = useSharedServletConfig;
+	}
 
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
+
+	public void setServletConfig(ServletConfig servletConfig) {
+		this.servletConfig = servletConfig;
+	}
+
 
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
@@ -77,8 +101,12 @@ public class SimpleServletPostProcessor implements DestructionAwareBeanPostProce
 
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		if (bean instanceof Servlet) {
+			ServletConfig config = this.servletConfig;
+			if (config == null || !this.useSharedServletConfig) {
+				config = new DelegatingServletConfig(beanName, this.servletContext);
+			}
 			try {
-				((Servlet) bean).init(new DelegatingServletConfig(beanName, this.servletContext));
+				((Servlet) bean).init(config);
 			}
 			catch (ServletException ex) {
 				throw new BeanInitializationException("Servlet.init threw exception", ex);
@@ -96,8 +124,7 @@ public class SimpleServletPostProcessor implements DestructionAwareBeanPostProce
 
 	/**
 	 * Internal implementation of the ServletConfig interface, to be passed
-	 * to the wrapped servlet. Delegates to ServletWrappingController fields
-	 * and methods to provide init parameters and other environment info.
+	 * to the wrapped servlet.
 	 */
 	private static class DelegatingServletConfig implements ServletConfig {
 
