@@ -37,16 +37,16 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -240,9 +240,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 
-	/** Perform cleanup of request attributes after include request? */
-	private boolean cleanupAfterInclude = true;
-
 	/** Detect all HandlerMappings or just expect "handlerMapping" bean? */
 	private boolean detectAllHandlerMappings = true;
 
@@ -254,6 +251,9 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/** Detect all ViewResolvers or just expect "viewResolver" bean? */
 	private boolean detectAllViewResolvers = true;
+
+	/** Perform cleanup of request attributes after include request? */
+	private boolean cleanupAfterInclude = true;
 
 	/** MultipartResolver used by this servlet */
 	private MultipartResolver multipartResolver;
@@ -276,23 +276,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** List of ViewResolvers used by this servlet */
 	private List viewResolvers;
 
-
-	/**
-	 * Set whether to perform cleanup of request attributes after an include request,
-	 * i.e. whether to reset the original state of all request attributes after the
-	 * DispatcherServlet has processed within an include request. Else, just the
-	 * DispatcherServlet's own request attributes will be reset, but not model
-	 * attributes for JSPs or special attributes set by views (for example, JSTL's).
-	 * <p>Default is "true", which is strongly recommended. Views should not rely on
-	 * request attributes having been set by (dynamic) includes. This allows JSP views
-	 * rendered by an included controller to use any model attributes, even with the
-	 * same names as in the main JSP, without causing side effects. Only turn this
-	 * off for special needs, for example to deliberately allow main JSPs to access
-	 * attributes from JSP views rendered by an included controller.
-	 */
-	public void setCleanupAfterInclude(boolean cleanupAfterInclude) {
-		this.cleanupAfterInclude = cleanupAfterInclude;
-	}
 
 	/**
 	 * Set whether to detect all HandlerMapping beans in this servlet's context.
@@ -336,6 +319,23 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	public void setDetectAllViewResolvers(boolean detectAllViewResolvers) {
 		this.detectAllViewResolvers = detectAllViewResolvers;
+	}
+
+	/**
+	 * Set whether to perform cleanup of request attributes after an include request,
+	 * i.e. whether to reset the original state of all request attributes after the
+	 * DispatcherServlet has processed within an include request. Else, just the
+	 * DispatcherServlet's own request attributes will be reset, but not model
+	 * attributes for JSPs or special attributes set by views (for example, JSTL's).
+	 * <p>Default is "true", which is strongly recommended. Views should not rely on
+	 * request attributes having been set by (dynamic) includes. This allows JSP views
+	 * rendered by an included controller to use any model attributes, even with the
+	 * same names as in the main JSP, without causing side effects. Only turn this
+	 * off for special needs, for example to deliberately allow main JSPs to access
+	 * attributes from JSP views rendered by an included controller.
+	 */
+	public void setCleanupAfterInclude(boolean cleanupAfterInclude) {
+		this.cleanupAfterInclude = cleanupAfterInclude;
 	}
 
 
@@ -598,11 +598,8 @@ public class DispatcherServlet extends FrameworkServlet {
 				String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
 				strategies = new ArrayList(classNames.length);
 				for (int i = 0; i < classNames.length; i++) {
-					Class clazz = Class.forName(classNames[i], true, getClass().getClassLoader());
-					Object strategy = BeanUtils.instantiateClass(clazz);
-					if (strategy instanceof ApplicationContextAware) {
-						((ApplicationContextAware) strategy).setApplicationContext(getWebApplicationContext());
-					}
+					Class clazz = ClassUtils.forName(classNames[i]);
+					Object strategy = createDefaultStrategy(clazz);
 					strategies.add(strategy);
 				}
 			}
@@ -615,6 +612,20 @@ public class DispatcherServlet extends FrameworkServlet {
 			throw new BeanInitializationException(
 					"Could not find DispatcherServlet's default strategy class for interface [" + key + "]", ex);
 		}
+	}
+
+	/**
+	 * Create a default strategy.
+	 * Default implementation uses <code>AutowireCapableBeanFactory.createBean</code>.
+	 * @param clazz the strategy implementation class to instantiate
+	 * @return the fully configured strategy instance
+	 * @see #getWebApplicationContext()
+	 * @see org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#createBean
+	 */
+	protected Object createDefaultStrategy(Class clazz) {
+		return getWebApplicationContext().getAutowireCapableBeanFactory().createBean(
+				clazz, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 	}
 
 
