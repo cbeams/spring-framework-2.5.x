@@ -27,9 +27,12 @@ import org.springframework.context.ApplicationEvent;
  * @author Juergen Hoeller
  * @since January 17, 2001
  * @see org.springframework.web.servlet.FrameworkServlet
+ * @see org.springframework.context.ApplicationContext#publishEvent
+ * @see PerformanceMonitorListener
  */
 public class RequestHandledEvent extends ApplicationEvent {
 
+	/** URL that the triggered the request */
 	private final String requestUrl;
 
 	/** Request processing time */
@@ -41,8 +44,10 @@ public class RequestHandledEvent extends ApplicationEvent {
 	/** Usually GET or POST */
 	private final String method;
 
+	/** Name of the servlet that handled the request */
 	private final String servletName;
 
+	/** Session id that applied to the request, if any */
 	private String sessionId;
 
 	/** Usually the UserPrincipal */
@@ -63,6 +68,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 */
 	public RequestHandledEvent(Object source, String requestUrl, long processingTimeMillis,
 			String clientAddress, String method, String servletName) {
+
 		super(source);
 		this.requestUrl = requestUrl;
 		this.processingTimeMillis = processingTimeMillis;
@@ -83,6 +89,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 */
 	public RequestHandledEvent(Object source, String requestUrl, long processingTimeMillis,
 			String clientAddress, String method, String servletName, Throwable failureCause) {
+
 		this(source, requestUrl, processingTimeMillis, clientAddress, method, servletName);
 		this.failureCause = failureCause;
 	}
@@ -102,6 +109,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	public RequestHandledEvent(Object source, String requestUrl, long processingTimeMillis,
 			String clientAddress, String method, String servletName,
 			String sessionId, String userName) {
+
 		this(source, requestUrl, processingTimeMillis, clientAddress, method, servletName);
 		this.sessionId = sessionId;
 		this.userName = userName;
@@ -123,6 +131,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	public RequestHandledEvent(Object source, String requestUrl, long processingTimeMillis,
 			String clientAddress, String method, String servletName,
 			String sessionId, String userName, Throwable failureCause) {
+
 		this(source, requestUrl, processingTimeMillis, clientAddress, method, servletName, sessionId, userName);
 		this.failureCause = failureCause;
 	}
@@ -173,7 +182,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	/**
 	 * Return the name of the user that was associated with the request
 	 * (usually the UserPrincipal).
-	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal
+	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
 	 */
 	public String getUserName() {
 		return userName;

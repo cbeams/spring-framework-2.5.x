@@ -41,6 +41,7 @@ public class PerformanceMonitorListener implements ApplicationListener {
 
 	protected final ResponseTimeMonitorImpl responseTimeMonitor = new ResponseTimeMonitorImpl();
 
+
 	public void onApplicationEvent(ApplicationEvent event) {
 		if (event instanceof RequestHandledEvent) {
 			RequestHandledEvent rhe = (RequestHandledEvent) event;

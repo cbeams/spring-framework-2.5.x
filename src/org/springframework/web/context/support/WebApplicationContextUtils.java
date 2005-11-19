@@ -41,7 +41,7 @@ import org.springframework.web.context.WebApplicationContext;
 public abstract class WebApplicationContextUtils {
 	
 	/**
-	 * Find the root WebApplicationContext for this web app, which is
+	 * Find the root WebApplicationContext for this web application, which is
 	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
@@ -67,7 +67,7 @@ public abstract class WebApplicationContextUtils {
 	}
 
 	/**
-	 * Find the root WebApplicationContext for this web app, which is
+	 * Find the root WebApplicationContext for this web application, which is
 	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
