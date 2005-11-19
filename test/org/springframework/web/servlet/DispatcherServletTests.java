@@ -65,6 +65,7 @@ public class DispatcherServletTests extends TestCase {
 
 	private DispatcherServlet complexDispatcherServlet;
 
+
 	protected void setUp() throws ServletException {
 		servletConfig = new MockServletConfig(new MockServletContext(), "simple");
 		MockServletConfig complexConfig = new MockServletConfig(servletConfig.getServletContext(), "complex");
@@ -492,6 +493,7 @@ public class DispatcherServletTests extends TestCase {
 	public void testDetectHandlerMappingFromParent() throws ServletException, IOException {
 		// Create a parent context that includes a mapping
 		StaticWebApplicationContext parent = new StaticWebApplicationContext();
+		parent.setServletContext(servletConfig.getServletContext());
 		parent.registerSingleton("parentHandler", ControllerFromParent.class, new MutablePropertyValues());
 		
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -663,7 +665,7 @@ public class DispatcherServletTests extends TestCase {
 		assertEquals("body", response.getContentAsString());
 
 		Servlet myServlet = (Servlet) complexDispatcherServlet.getWebApplicationContext().getBean("myServlet");
-		assertEquals("myServlet", myServlet.getServletConfig().getServletName());
+		assertEquals("complex", myServlet.getServletConfig().getServletName());
 		assertEquals(getServletContext(), myServlet.getServletConfig().getServletContext());
 		complexDispatcherServlet.destroy();
 		assertNull(myServlet.getServletConfig());

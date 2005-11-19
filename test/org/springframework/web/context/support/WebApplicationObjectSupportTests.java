@@ -20,6 +20,7 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.util.WebUtils;
@@ -35,26 +36,28 @@ public class WebApplicationObjectSupportTests extends TestCase {
 		wac.setServletContext(new MockServletContext());
 		File tempDir = new File("");
 		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, tempDir);
+		wac.registerBeanDefinition("test", new RootBeanDefinition(TestWebApplicationObject.class));
 		wac.refresh();
-		WebApplicationObjectSupport wao = new WebApplicationObjectSupport() {
-		};
-		wao.setApplicationContext(wac);
+		WebApplicationObjectSupport wao = (WebApplicationObjectSupport) wac.getBean("test");
 		assertEquals(wao.getServletContext(), wac.getServletContext());
 		assertEquals(wao.getTempDir(), tempDir);
 	}
 
 	public void testWebApplicationObjectSupportWithWrongContext() {
 		StaticApplicationContext ac = new StaticApplicationContext();
-		WebApplicationObjectSupport wao = new WebApplicationObjectSupport() {
-		};
+		ac.registerBeanDefinition("test", new RootBeanDefinition(TestWebApplicationObject.class));
+		WebApplicationObjectSupport wao = (WebApplicationObjectSupport) ac.getBean("test");
 		try {
-			wao.setApplicationContext(ac);
 			wao.getWebApplicationContext();
 			fail("Should have thrown IllegalStateException");
 		}
 		catch (IllegalStateException ex) {
 			// expected
 		}
+	}
+
+
+	public static class TestWebApplicationObject extends WebApplicationObjectSupport {
 	}
 
 }
