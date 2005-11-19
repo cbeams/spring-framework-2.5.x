@@ -143,6 +143,11 @@ public class ServletWrappingController extends AbstractController
 		this.beanName = name;
 	}
 
+
+	/**
+	 * Initialize the wrapped Servlet instance.
+	 * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
+	 */
 	public void afterPropertiesSet() throws Exception {
 		if (this.servletClass == null) {
 			throw new IllegalArgumentException("servletClass is required");
@@ -158,12 +163,23 @@ public class ServletWrappingController extends AbstractController
 		this.servletInstance.init(new DelegatingServletConfig());
 	}
 
+
+	/**
+	 * Invoke the the wrapped Servlet instance.
+	 * @see javax.servlet.Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
+	 */
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 	    throws Exception {
+
 		this.servletInstance.service(request, response);
 		return null;
 	}
 
+
+	/**
+	 * Destroy the wrapped Servlet instance.
+	 * @see javax.servlet.Servlet#destroy()
+	 */
 	public void destroy() {
 		this.servletInstance.destroy();
 	}
@@ -181,7 +197,7 @@ public class ServletWrappingController extends AbstractController
 		}
 
 		public ServletContext getServletContext() {
-			return getWebApplicationContext().getServletContext();
+			return ServletWrappingController.this.getServletContext();
 		}
 
 		public String getInitParameter(String paramName) {
