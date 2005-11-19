@@ -22,6 +22,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ApplicationObjectSupport;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.WebUtils;
 
@@ -32,16 +33,25 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @since 28.08.2003
  */
-public abstract class WebApplicationObjectSupport extends ApplicationObjectSupport {
+public abstract class WebApplicationObjectSupport extends ApplicationObjectSupport
+		implements ServletContextAware {
+
+	private ServletContext servletContext;
+
+
+	public void setServletContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
+	}
+
 
 	/**
 	 * Overrides the base class behavior to enforce running in an ApplicationContext.
 	 * All accessors will throw IllegalStateException if not running in a context.
-	 * @see #getApplicationContext
-	 * @see #getMessageSourceAccessor
-	 * @see #getWebApplicationContext
-	 * @see #getServletContext
-	 * @see #getTempDir
+	 * @see #getApplicationContext()
+	 * @see #getMessageSourceAccessor()
+	 * @see #getWebApplicationContext()
+	 * @see #getServletContext()
+	 * @see #getTempDir()
 	 */
 	protected boolean isContextRequired() {
 		return true;
@@ -49,7 +59,12 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 
 	/**
 	 * Return the current application context as WebApplicationContext.
+	 * <p><b>NOTE:</b> Only use this if you actually need to access
+	 * WebApplicationContext-specific functionality. Preferably use
+	 * <code>getApplicationContext()</code> or <code>getServletContext()</code>
+	 * else, to be able to run in non-WebApplicationContext environments as well.
 	 * @throws IllegalStateException if not running in a WebApplicationContext
+	 * @see #getApplicationContext()
 	 */
 	protected final WebApplicationContext getWebApplicationContext() throws IllegalStateException {
 		ApplicationContext ctx = getApplicationContext();
@@ -63,9 +78,12 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 
 	/**
 	 * Return the current ServletContext.
-	 * @throws IllegalStateException if not running in a WebApplicationContext
+	 * @throws IllegalStateException if not running within a ServletContext
 	 */
-	protected final ServletContext getServletContext() {
+	protected final ServletContext getServletContext() throws IllegalStateException {
+		if (this.servletContext != null) {
+			return this.servletContext;
+		}
 		return getWebApplicationContext().getServletContext();
 	}
 
