@@ -59,7 +59,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	public final void setDefaultHandler(Object defaultHandler) {
 		this.defaultHandler = defaultHandler;
-		logger.info("Default mapping to handler [" + this.defaultHandler + "]");
+		if (logger.isInfoEnabled()) {
+			logger.info("Default mapping to handler [" + this.defaultHandler + "]");
+		}
 	}
 
 	/**

@@ -91,9 +91,10 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	 * Return the temporary directory for the current web application,
 	 * as provided by the servlet container.
 	 * @return the File representing the temporary directory
-	 * @throws IllegalStateException if not running in a WebApplicationContext
+	 * @throws IllegalStateException if not running within a ServletContext
+	 * @see org.springframework.web.util.WebUtils#getTempDir(javax.servlet.ServletContext)
 	 */
-	protected final File getTempDir() {
+	protected final File getTempDir() throws IllegalStateException {
 		return WebUtils.getTempDir(getServletContext());
 	}
 

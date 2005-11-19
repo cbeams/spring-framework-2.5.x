@@ -561,14 +561,6 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see #PARAM_FINISH
 	 */
 	protected boolean isFinishRequest(HttpServletRequest request) {
-		return isFinish(request);
-	}
-
-	/**
-	 * @deprecated in favor of <code>isFinishRequest</code>
-	 * @see #isFinishRequest(javax.servlet.http.HttpServletRequest)
-	 */
-	protected boolean isFinish(HttpServletRequest request) {
 		return WebUtils.hasSubmitParameter(request, PARAM_FINISH);
 	}
 
@@ -585,14 +577,6 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see #PARAM_CANCEL
 	 */
 	protected boolean isCancelRequest(HttpServletRequest request) {
-		return isCancel(request);
-	}
-
-	/**
-	 * @deprecated in favor of <code>isCancelRequest</code>
-	 * @see #isCancelRequest(javax.servlet.http.HttpServletRequest)
-	 */
-	protected boolean isCancel(HttpServletRequest request) {
 		return WebUtils.hasSubmitParameter(request, PARAM_CANCEL);
 	}
 

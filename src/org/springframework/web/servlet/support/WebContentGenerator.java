@@ -296,7 +296,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		else if (seconds == 0) {
 			preventCaching(response);
 		}
-		// leave caching to the client otherwise
+		// Leave caching to the client otherwise.
 	}
 
 }

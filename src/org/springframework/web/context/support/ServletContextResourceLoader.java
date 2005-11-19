@@ -41,6 +41,7 @@ public class ServletContextResourceLoader extends DefaultResourceLoader {
 
 	private final ServletContext servletContext;
 
+
 	/**
 	 * Create a new ServletContextResourceLoader.
 	 * @param servletContext the ServletContext to load resources with

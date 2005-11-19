@@ -32,7 +32,7 @@ import org.springframework.web.util.NestedServletException;
 public class ServletRequestBindingException extends NestedServletException {
 
 	/**
-	 * Constructor for MultipartException.
+	 * Constructor for ServletRequestBindingException.
 	 * @param msg the detail message
 	 */
 	public ServletRequestBindingException(String msg) {
@@ -40,7 +40,7 @@ public class ServletRequestBindingException extends NestedServletException {
 	}
 
 	/**
-	 * Constructor for MultipartException.
+	 * Constructor for ServletRequestBindingException.
 	 * @param msg the detail message
 	 * @param ex the nested exception
 	 */

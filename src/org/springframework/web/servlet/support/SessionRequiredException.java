@@ -26,6 +26,10 @@ import javax.servlet.ServletException;
  */
 public class SessionRequiredException extends ServletException {
 
+	/**
+	 * Create a new SessionRequiredException.
+	 * @param msg the detail message
+	 */
 	public SessionRequiredException(String msg) {
 		super(msg);
 	}
