@@ -26,6 +26,8 @@ import org.springframework.util.ObjectUtils;
  * situations alternatives are presented.
  *
  * @author Rod Johnson
+ * @author Alef Arendsen
+ * @author Arjen Poutsma
  */
 public class NotWritablePropertyException extends InvalidPropertyException {
 

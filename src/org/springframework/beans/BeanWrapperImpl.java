@@ -65,6 +65,8 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Alef Arendsen
+ * @author Arjen Poutsma
  * @since 15 April 2001
  * @see #registerCustomEditor
  * @see #setPropertyValues

@@ -40,6 +40,8 @@ import org.springframework.util.StringUtils;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Alef Arendsen
+ * @author Arjen Poutsma
  */
 public class BeanWrapperTests extends TestCase {
 
