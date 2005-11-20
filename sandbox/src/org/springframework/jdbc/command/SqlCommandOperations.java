@@ -17,7 +17,6 @@
 package org.springframework.jdbc.command;
 
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.SqlNamedParameters;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import java.util.List;
@@ -39,35 +38,39 @@ public interface SqlCommandOperations {
 
     Object executeScalar(Map parameters);
 
-    Object executeScalar(SqlNamedParameters parameters);
+    Object executeScalar(SqlNamedParameterHolder parameters);
 
     Object executeObject(RowMapper rowMapper);
 
     Object executeObject(RowMapper rowMapper, Map parameters);
 
-    Object executeObject(RowMapper rowMapper, SqlNamedParameters parameters);
+    Object executeObject(RowMapper rowMapper, SqlNamedParameterHolder parameters);
 
     List executeQuery();
 
     List executeQuery(Map parameters);
 
-    List executeQuery(SqlNamedParameters parameters);
+    List executeQuery(SqlNamedParameterHolder parameters);
 
     List executeQuery(RowMapper rowMapper);
 
     List executeQuery(RowMapper rowMapper, Map parameters);
 
-    List executeQuery(RowMapper rowMapper, SqlNamedParameters parameters);
+    List executeQuery(RowMapper rowMapper, SqlNamedParameterHolder parameters);
 
     SqlRowSet executeRowSet();
 
     SqlRowSet executeRowSet(Map parameters);
 
-    SqlRowSet executeRowSet(SqlNamedParameters parameters);
+    SqlRowSet executeRowSet(SqlNamedParameterHolder parameters);
 
     int executeUpdate();
 
     int executeUpdate(Map parameters);
 
-    int executeUpdate(SqlNamedParameters parameters);
+    int executeUpdate(SqlNamedParameterHolder parameters);
+
+    public Map getSqlTypes();
+
+    public void setSqlTypes(Map sqlTypes);
 }
