@@ -26,15 +26,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -73,6 +75,9 @@ import org.springframework.util.StringUtils;
  * @see PropertyEditorRegistrySupport
  */
 public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements BeanWrapper {
+
+	private static final int MAXIMUM_PROPERTY_DISTANCE = 2;
+
 
 	/**
 	 * We'll create a lot of these objects, so we don't want a new logger every time
@@ -564,7 +569,9 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 		else {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
 			if (pd == null || pd.getWriteMethod() == null) {
-				throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName);
+				Class rootClass = getRootClass();
+				String[] possibleMatches = determinePropertyAlternatives(rootClass, propertyName);
+				throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName, possibleMatches);
 			}
 
 			Method readMethod = pd.getReadMethod();
@@ -620,6 +627,66 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 				throw new MethodInvocationException(pce, ex);
 			}
 		}
+	}
+	
+	/**
+	 * Generated possible property alternatives for the given property and
+	 * class. Internally uses the <code>getStringDistance()</code>, in its
+	 * turn using a Levenshtein algorithm to determine distances between
+	 * string. The maximum distance is defined in the MAXIMUM_PROPERTY_DISTANCE
+	 * constant.
+	 * @see #MAXIMUM_PROPERTY_DISTANCE
+	 * @see #getStringDistance(String, String)
+	 */
+	private String[] determinePropertyAlternatives(Class rootClass, String propertyName) {
+		PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(rootClass);
+		
+		List possibleAlternatives = new ArrayList();		
+		for (int i = 0; i < propertyDescriptors.length; i++) {
+			if (isWritableProperty(propertyDescriptors[i].getName())) {
+				String possibleAlternative = propertyDescriptors[i].getName();
+				if (getStringDistance(propertyName, possibleAlternative) <= MAXIMUM_PROPERTY_DISTANCE) {
+					possibleAlternatives.add(possibleAlternative);
+				}
+			}
+		}
+		Collections.sort(possibleAlternatives);
+		return (String[]) possibleAlternatives.toArray(new String[possibleAlternatives.size()]);
+	}
+
+	private int getStringDistance(String s, String t) {
+		if (s.length() == 0) {
+			return t.length();
+		}
+		if (t.length() == 0) {
+			return s.length();
+		}
+		int d[][] = new int[s.length() + 1][t.length() + 1];
+
+		for (int i = 0; i <= s.length(); i++) {
+			d[i][0] = i;
+		}
+		for (int j = 0; j <= t.length(); j++) {
+			d[0][j] = j;
+		}
+
+		for (int i = 1; i <= s.length(); i++) {
+			char s_i = s.charAt(i - 1);
+			for (int j = 1; j <= t.length(); j++) {
+				int cost;				
+				char t_j = t.charAt(j - 1);
+				if (s_i == t_j) {
+					cost = 0;
+				} else {
+					cost = 1;
+				}
+				d[i][j] = Math.min(Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1),
+						d[i - 1][j - 1] + cost);
+			}
+		}
+
+		return d[s.length()][t.length()];
+
 	}
 
 	public void setPropertyValue(PropertyValue pv) throws BeansException {
@@ -874,7 +941,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 		BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyName);
 		return nestedBw.cachedIntrospectionResults.getPropertyDescriptor(getFinalPath(nestedBw, propertyName));
 	}
-
+	
 	public boolean isReadableProperty(String propertyName) {
 		// This is a programming error, although asking for a property
 		// that doesn't exist is not.
