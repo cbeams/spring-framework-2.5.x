@@ -19,6 +19,7 @@ package org.springframework.web.servlet.view.jasperreports;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Iterator;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -49,6 +50,30 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 				assertNotNull("Value not mapped to correct key", value);
 				assertEquals("Incorrect value for parameter", "/foo/bar", value);
+			}
+
+			/**
+			 * Merges the configured {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} with any specified
+			 * in the supplied model data. {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} in the model
+			 * override those specified in the configuration.
+			 * @see #setExporterParameters(java.util.Map)
+			 */
+			protected Map mergeExporterParameters(Map model) {
+				Map mergedParameters = new HashMap(getConvertedExporterParameters());
+				for (Iterator iterator = model.keySet().iterator(); iterator.hasNext();) {
+					Object key = iterator.next();
+
+					if (key instanceof JRExporterParameter) {
+						Object value = model.get(key);
+						if (value instanceof String) {
+							mergedParameters.put(key, value);
+						}
+						else {
+							logger.warn("Ignoring exporter parameter [" + key + "]. Value is not a String.");
+						}
+					}
+				}
+				return mergedParameters;
 			}
 		};
 

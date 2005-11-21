@@ -335,8 +335,11 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Checks to see that a valid report file URL is supplied in the
 	 * configuration. Compiles the report file is necessary.
+	 * <p/>Subclasses can add custom initialization logic by overriding
+	 * the {@link #onInit} method.
+	 * @see #onInit() 
 	 */
-	protected void initApplicationContext() throws ApplicationContextException {
+	protected final void initApplicationContext() throws ApplicationContextException {
 		Resource mainReport = getApplicationContext().getResource(getUrl());
 		this.report = loadReport(mainReport);
 
@@ -364,6 +367,17 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		if (!this.headers.containsKey(HEADER_CONTENT_DISPOSITION)) {
 			this.headers.setProperty(HEADER_CONTENT_DISPOSITION, CONTENT_DISPOSITION_INLINE);
 		}
+
+		onInit();
+	}
+
+	/**
+	 * Subclasses can override this to add some custom initialization logic. Called
+	 * by {@link #initApplicationContext()} as soon as all standard initialization logic
+	 * has finished executing.
+	 * @see #initApplicationContext()
+	 */
+	protected void onInit() {
 	}
 
 	/**
@@ -488,7 +502,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 					"Could not parse JasperReports report for URL [" + getUrl() + "]", ex);
 		}
 	}
-
 
 	/**
 	 * Finds the report data to use for rendering the report and then invokes the

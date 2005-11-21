@@ -18,6 +18,8 @@ package org.springframework.web.servlet.view.jasperreports;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -60,8 +62,10 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 		// Prepare report for rendering.
 		JRExporter exporter = createExporter();
 
-		if (getConvertedExporterParameters() != null) {
-			exporter.setParameters(getConvertedExporterParameters());
+		// set exporter parameters - overriding with values from the Model
+		Map mergedExporterParameters = mergeExporterParameters(model);
+		if (mergedExporterParameters != null) {
+			exporter.setParameters(mergedExporterParameters);
 		}
 
 		if (useWriter()) {
@@ -108,4 +112,32 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 */
 	protected abstract boolean useWriter();
 
+	/**
+	 * Merges the configured {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} with any specified
+	 * in the supplied model data. {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} in the model
+	 * override those specified in the configuration.
+	 * @see #setExporterParameters(java.util.Map)
+	 */
+	protected Map mergeExporterParameters(Map model) {
+		Map mergedParameters = new HashMap();
+		if(getConvertedExporterParameters() != null) {
+			mergedParameters.putAll(getConvertedExporterParameters());
+		}
+		for (Iterator iterator = model.keySet().iterator(); iterator.hasNext();) {
+			Object key = iterator.next();
+
+			if (key instanceof JRExporterParameter) {
+				Object value = model.get(key);
+				if (value instanceof String) {
+					mergedParameters.put(key, value);
+				}
+				else {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Ignoring exporter parameter [" + key + "]. Value is not a String.");
+					}
+				}
+			}
+		}
+		return mergedParameters;
+	}
 }

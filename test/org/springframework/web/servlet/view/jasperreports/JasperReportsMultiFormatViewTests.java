@@ -19,10 +19,12 @@ package org.springframework.web.servlet.view.jasperreports;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Iterator;
 
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JRExporterParameter;
 
 /**
  * @author Rob Harrop

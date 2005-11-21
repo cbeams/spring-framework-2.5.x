@@ -248,6 +248,30 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		}
 	}
 
+	public void testOverrideExporterParameters() throws Exception {
+		AbstractJasperReportsView view = getView(COMPILED_REPORT);
+
+		if (!(view instanceof AbstractJasperReportsSingleFormatView) || !((AbstractJasperReportsSingleFormatView) view).useWriter()) {
+			return;
+		}
+
+		String characterEncoding = "UTF-8";
+		String overiddenCharacterEncoding = "ASCII";
+
+		Map parameters = new HashMap();
+		parameters.put(JRExporterParameter.CHARACTER_ENCODING, characterEncoding);
+
+		view.setExporterParameters(parameters);
+		view.convertExporterParameters();
+
+		Map model = getModel();
+		model.put(JRExporterParameter.CHARACTER_ENCODING, overiddenCharacterEncoding);
+
+		view.render(model, this.request, this.response);
+
+		assertEquals(overiddenCharacterEncoding, this.response.getCharacterEncoding());
+	}
+
 	public void testSubReportWithUnspecifiedParentDataSource() throws Exception {
 		if (!canCompileReport) {
 			return;
@@ -371,7 +395,6 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		ctl.replay();
 		return ds;
 	}
-
 
 	private class MockDataSourceProvider extends JRAbstractBeanDataSourceProvider {
 

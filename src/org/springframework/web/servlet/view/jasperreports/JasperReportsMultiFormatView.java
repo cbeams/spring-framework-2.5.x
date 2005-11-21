@@ -20,10 +20,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Iterator;
 
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JRExporterParameter;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContextException;
@@ -202,7 +204,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 		// Can skip most initialization since all relevant
 		// URL processing has been done - just need to convert
 		// parameters on the sub view..
-    view.convertExporterParameters();
+        view.convertExporterParameters();
 
 		response.setContentType(view.getContentType());
 
@@ -230,4 +232,27 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 		}
 	}
 
+	/**
+	 * Merges the configured {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} with any specified
+	 * in the supplied model data. {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} in the model
+	 * override those specified in the configuration.
+	 * @see #setExporterParameters(java.util.Map)
+	 */
+	protected Map mergeExporterParameters(Map model) {
+		Map mergedParameters = new HashMap(getConvertedExporterParameters());
+		for (Iterator iterator = model.keySet().iterator(); iterator.hasNext();) {
+			Object key = iterator.next();
+
+			if (key instanceof JRExporterParameter) {
+				Object value = model.get(key);
+				if (value instanceof String) {
+					mergedParameters.put(key, value);
+				}
+				else {
+					logger.warn("Ignoring exporter parameter [" + key + "]. Value is not a String.");
+				}
+			}
+		}
+		return mergedParameters;
+	}
 }
