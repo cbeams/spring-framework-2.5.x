@@ -29,10 +29,20 @@ import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.RequiredModelMBean;
 
 /**
+ * Extension of the {@link RequiredModelMBean} class that ensures the
+ * {@link Thread#getContextClassLoader() context ClassLoader} is switched
+ * for the managed resources {@link ClassLoader} before any invocations
+ * occur.
+ *
  * @author Rob Harrop
+ * @see RequiredModelMBean
  */
 public class SpringModelMBean extends RequiredModelMBean {
 
+	/**
+	 * Stores the {@link ClassLoader} to use for invocations. Defaults
+	 * to the current thread {@link ClassLoader}.
+	 */
 	private ClassLoader managedResourceClassLoader = Thread.currentThread().getContextClassLoader();
 
 	public SpringModelMBean() throws MBeanException, RuntimeOperationsException {
@@ -42,12 +52,21 @@ public class SpringModelMBean extends RequiredModelMBean {
 		super(mbi);
 	}
 
+	/**
+	 * Sets managed resource to expose and stores its {@link ClassLoader}.
+	 */
 	public void setManagedResource(Object managedResource, String managedResourceType) throws MBeanException, RuntimeOperationsException, InstanceNotFoundException, InvalidTargetObjectTypeException {
 		this.managedResourceClassLoader = managedResource.getClass().getClassLoader();
 		super.setManagedResource(managedResource, managedResourceType);
 	}
 
-
+	/**
+	 * Switches the {@link Thread#getContextClassLoader() context ClassLoader} for
+	 * the managed resources {@link ClassLoader} before allowing the invocation to
+	 * occur.
+	 * @see javax.management.modelmbean.ModelMBean#invoke
+	 * @see #managedResourceClassLoader
+	 */
 	public Object invoke(final String opName, final Object[] opArgs, final String[] sig) throws MBeanException, ReflectionException {
 		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 		try {
@@ -59,6 +78,13 @@ public class SpringModelMBean extends RequiredModelMBean {
 		}
 	}
 
+	/**
+	 * Switches the {@link Thread#getContextClassLoader() context ClassLoader} for
+	 * the managed resources {@link ClassLoader} before allowing the invocation to
+	 * occur.
+	 * @see javax.management.modelmbean.ModelMBean#getAttribute
+	 * @see #managedResourceClassLoader
+	 */
 	public Object getAttribute(final String attrName) throws AttributeNotFoundException, MBeanException, ReflectionException {
 		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 		try {
@@ -70,6 +96,13 @@ public class SpringModelMBean extends RequiredModelMBean {
 		}
 	}
 
+	/**
+	 * Switches the {@link Thread#getContextClassLoader() context ClassLoader} for
+	 * the managed resources {@link ClassLoader} before allowing the invocation to
+	 * occur.
+	 * @see javax.management.modelmbean.ModelMBean#getAttributes
+	 * @see #managedResourceClassLoader
+	 */
 	public AttributeList getAttributes(String[] attrNames) {
 		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 		try {
@@ -81,6 +114,13 @@ public class SpringModelMBean extends RequiredModelMBean {
 		}
 	}
 
+	/**
+	 * Switches the {@link Thread#getContextClassLoader() context ClassLoader} for
+	 * the managed resources {@link ClassLoader} before allowing the invocation to
+	 * occur.
+	 * @see javax.management.modelmbean.ModelMBean#setAttribute
+	 * @see #managedResourceClassLoader
+	 */
 	public void setAttribute(Attribute attribute) throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
 		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 		try {
@@ -92,6 +132,13 @@ public class SpringModelMBean extends RequiredModelMBean {
 		}
 	}
 
+	/**
+	 * Switches the {@link Thread#getContextClassLoader() context ClassLoader} for
+	 * the managed resources {@link ClassLoader} before allowing the invocation to
+	 * occur.
+	 * @see javax.management.modelmbean.ModelMBean#setAttributes
+	 * @see #managedResourceClassLoader
+	 */
 	public AttributeList setAttributes(AttributeList attributes) {
 		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 		try {

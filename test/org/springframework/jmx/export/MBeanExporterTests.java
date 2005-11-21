@@ -33,6 +33,7 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
+import javax.management.Attribute;
 import javax.management.modelmbean.ModelMBeanInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -241,6 +242,38 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		// should still be the new bean with name Sally Greenwood
 		assertEquals("Sally Greenwood", server.getAttribute(objectName, "Name"));
+	}
+
+	public void testWithExposeClassLoader() throws Exception {
+		String name = "Rob Harrop";
+		String otherName = "Juergen Hoeller";
+
+		JmxTestBean bean = new JmxTestBean();
+		bean.setName(name);
+		ObjectName objectName = ObjectNameManager.getInstance("spring:type=Test");
+
+		Map beans = new HashMap();
+		beans.put(objectName.toString(), bean);
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(getServer());
+		exporter.setBeans(beans);
+		exporter.setExposeManagedResourceClassLoader(true);
+		exporter.afterPropertiesSet();
+
+		assertIsRegistered("Bean instance not registered", objectName);
+
+		Object result = server.invoke(objectName, "add",
+				new Object[]{new Integer(2), new Integer(3)},
+				new String[]{int.class.getName(), int.class.getName()});
+
+		assertEquals("Incorrect result return from add", result, new Integer(5));
+		assertEquals("Incorrect attribute value", name, server.getAttribute(objectName, "Name"));
+
+		server.setAttribute(objectName, new Attribute("Name", otherName));
+		assertEquals("Incorrect updated name.", otherName, bean.getName());
+
+
 	}
 
 

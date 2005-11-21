@@ -113,6 +113,12 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	private boolean ensureUniqueRuntimeObjectNames = true;
 
 	/**
+	 * Indicates whether Spring should expose the managed resource {@link ClassLoader} in the MBean.
+	 * @see #setExposeManagedResourceClassLoader(boolean)
+	 */
+	private boolean exposeManagedResourceClassLoader = false;
+
+	/**
 	 * A list of bean names that should be excluded from autodetection.
 	 */
 	private String[] excludedBeans = new String[0];
@@ -244,6 +250,15 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	 */
 	public void setEnsureUniqueRuntimeObjectNames(boolean ensureUniqueRuntimeObjectNames) {
 		this.ensureUniqueRuntimeObjectNames = ensureUniqueRuntimeObjectNames;
+	}
+
+	/**
+	 * Indicates whether or not the managed resource should be exposed
+	 * as the {@link Thread#getContextClassLoader() context ClassLoader} before allowing
+	 * any invocations on the MBean to occur. Default value is <code>false</code>.
+	 */
+	public void setExposeManagedResourceClassLoader(boolean exposeManagedResourceClassLoader) {
+		this.exposeManagedResourceClassLoader = exposeManagedResourceClassLoader;
 	}
 
 	/**
@@ -677,7 +692,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	 * @throws javax.management.MBeanException if creation of the ModelMBean failed
 	 */
 	protected ModelMBean createModelMBean() throws MBeanException {
-		return new RequiredModelMBean();
+		return this.exposeManagedResourceClassLoader ? new SpringModelMBean() : new RequiredModelMBean();
 	}
 
 	/**
