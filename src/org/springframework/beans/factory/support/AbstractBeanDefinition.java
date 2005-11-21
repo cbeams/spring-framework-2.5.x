@@ -120,6 +120,10 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	private String destroyMethodName;
 
+	private boolean isDefaultInitMethod;
+
+	private boolean isDefaultDestroyMethod;
+
 	private String factoryMethodName;
 	
 	private String factoryBeanName;
@@ -127,7 +131,6 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	private String[] dependsOn;
 
 	private String resourceDescription;
-
 
 	/**
 	 * Create a new AbstractBeanDefinition with default settings.
@@ -165,7 +168,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		setDependencyCheck(original.getDependencyCheck());
 
 		setInitMethodName(original.getInitMethodName());
+		setDefaultInitMethod(original.isDefaultInitMethod());
 		setDestroyMethodName(original.getDestroyMethodName());
+		setDefaultDestroyMethod(original.isDefaultDestroyMethod());
 		setFactoryMethodName(original.getFactoryMethodName());
 		setFactoryBeanName(original.getFactoryBeanName());
 
@@ -201,9 +206,11 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 		if (other.getInitMethodName() != null) {
 			setInitMethodName(other.getInitMethodName());
+			setDefaultInitMethod(other.isDefaultInitMethod());
 		}
 		if (other.getDestroyMethodName() != null) {
 			setDestroyMethodName(other.getDestroyMethodName());
+			setDefaultDestroyMethod(other.isDefaultDestroyMethod());
 		}
 		if (other.getFactoryMethodName() != null) {
 			setFactoryMethodName(other.getFactoryMethodName());
@@ -456,6 +463,22 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
+	 * Indicates whether the configured init method is the default.
+	 * @see #getInitMethodName()
+	 */
+	public boolean isDefaultInitMethod() {
+		return this.isDefaultInitMethod;
+	}
+
+	/**
+	 * Specifies whether or not the configured init method is the default.
+	 * Default value is <code>false</code>.
+	 */
+	public void setDefaultInitMethod(boolean defaultInitMethod) {
+		this.isDefaultInitMethod = defaultInitMethod;
+	}
+
+	/**
 	 * Set the name of the destroy method. The default is null
 	 * in which case there is no destroy method.
 	 */
@@ -468,6 +491,22 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 */
 	public String getDestroyMethodName() {
 		return this.destroyMethodName;
+	}
+
+	/**
+	 * Indicates whether the configured destory method is the default.
+	 * @see #getDestroyMethodName()
+	 */
+	public boolean isDefaultDestroyMethod() {
+		return this.isDefaultDestroyMethod;
+	}
+
+	/**
+	 * Specifies whether or not the configured destroy method is the default.
+	 * Default value is <code>false</code>.
+	 */
+	public void setDefaultDestroyMethod(boolean defaultDestroyMethod) {
+		this.isDefaultDestroyMethod = defaultDestroyMethod;
 	}
 
 	/**

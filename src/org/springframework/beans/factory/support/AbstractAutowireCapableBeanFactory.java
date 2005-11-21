@@ -809,7 +809,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		if (mergedBeanDefinition != null && mergedBeanDefinition.getInitMethodName() != null) {
-			invokeCustomInitMethod(beanName, bean, mergedBeanDefinition.getInitMethodName());
+			invokeCustomInitMethod(beanName, bean, mergedBeanDefinition.getInitMethodName(), mergedBeanDefinition.isDefaultInitMethod());
 		}
 	}
 
@@ -821,9 +821,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param beanName the bean has in the factory. Used for debug output.
 	 * @param bean new bean instance we may need to initialize
 	 * @param initMethodName the name of the custom init method
+	 * @param defaultInitMethod indicates whether the defined init method was configured
+	 * as the default.
 	 * @see #invokeInitMethods
 	 */
-	protected void invokeCustomInitMethod(String beanName, Object bean, String initMethodName)
+	protected void invokeCustomInitMethod(String beanName, Object bean, String initMethodName, boolean defaultInitMethod)
 			throws Throwable {
 
 		if (logger.isDebugEnabled()) {
@@ -832,6 +834,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		Method initMethod = BeanUtils.findMethod(bean.getClass(), initMethodName, null);
 		if (initMethod == null) {
+			if(defaultInitMethod) {
+				// ignore non-existent default lifecycle methods.
+				return;
+			}
 			throw new NoSuchMethodException("Couldn't find an init method named '" + initMethodName +
 					"' on bean with name '" + beanName + "'");
 		}
