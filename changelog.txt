@@ -15,6 +15,7 @@ Package org.springframework.beans
 * removed deprecated "getBeanDefinitionNames(type)" method from ListableBeanFactory and BeanFactoryUtils
 * added "createBean" and "instantiateBean" methods to AutowireCapableBeanFactory interface
 * added intelligent error messages to BeanWrapperImpl when properties are not found
+* Changed MutablePropertyValues.addPropertyValue(String, Object) to return 'this'
 
 Package org.springframework.core
 * introduced TaskExecutor abstraction, as strategy interface for the execution of Runnables
