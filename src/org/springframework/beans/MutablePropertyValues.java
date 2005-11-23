@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.StringUtils;
@@ -33,8 +34,10 @@ import org.springframework.util.StringUtils;
  */
 public class MutablePropertyValues implements PropertyValues, Serializable {
 
-	/** List of PropertyValue objects */
-	private final ArrayList propertyValueList;
+	/**
+	 * List of PropertyValue objects.
+	 */
+	private final List propertyValueList;
 	
 	/**
 	 * Creates a new empty MutablePropertyValues object.
@@ -154,10 +157,12 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * a property name and a property value.
 	 * @param propertyName name of the property
 	 * @param propertyValue value of the property
+	 * @return this object to allow creating objects, adding multiple
+	 * PropertyValues in a single statement
 	 * @see #addPropertyValue(PropertyValue)
 	 */
-	public void addPropertyValue(String propertyName, Object propertyValue) {
-		addPropertyValue(new PropertyValue(propertyName, propertyValue));
+	public MutablePropertyValues addPropertyValue(String propertyName, Object propertyValue) {
+		return addPropertyValue(new PropertyValue(propertyName, propertyValue));
 	}
 
 	/**
