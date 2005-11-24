@@ -21,10 +21,10 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.Result;
+import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXResult;
 
 import org.apache.fop.apps.Driver;
-import org.w3c.dom.Node;
 
 
 /**
@@ -60,7 +60,7 @@ public abstract class AbstractXslFoView extends AbstractXsltView {
      * 
      * @see org.springframework.web.servlet.view.xslt.AbstractXsltView#doTransform(Map, Map, Result, String)
      */
-    protected void doTransform(Map model, Node dom, HttpServletRequest request, HttpServletResponse response)
+    protected void doTransform(Map model, Source source, HttpServletRequest request, HttpServletResponse response)
         throws Exception {            
         driver = new Driver();
         driver.setRenderer(renderer);
@@ -68,7 +68,7 @@ public abstract class AbstractXslFoView extends AbstractXsltView {
         Result result = new SAXResult(driver.getContentHandler());         
         
         // delegate to the superclass for the actual output having constructed the Result
-        doTransform(dom, getParameters(request), result, response.getCharacterEncoding());   
+        doTransform(source, getParameters(request), result, response.getCharacterEncoding());   
     }
         
     /**
