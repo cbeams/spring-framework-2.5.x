@@ -26,12 +26,22 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class NoSuchRequestHandlingMethodException extends ServletException {
 	
+	/**
+	 * Create a new NoSuchRequestHandlingMethodException for the given request.
+	 * @param request the offending HTTP request
+	 */
 	public NoSuchRequestHandlingMethodException(HttpServletRequest request) {
 		super("No handling method can be found for request [" + request + "]");
 	}
 	
-	public NoSuchRequestHandlingMethodException(String name, Class controllerClass) {
-		super("No request handling method with name '" + name + "' in class '" + controllerClass.getName() + "'");
+	/**
+	 * Create a new NoSuchRequestHandlingMethodException for the given request.
+	 * @param methodName the name of the handler method that wasn't found
+	 * @param controllerClass the class the handler method was expected to be in
+	 */
+	public NoSuchRequestHandlingMethodException(String methodName, Class controllerClass) {
+		super("No request handling method with name '" + methodName +
+				"' in class [" + controllerClass.getName() + "]");
 	}
 
 }

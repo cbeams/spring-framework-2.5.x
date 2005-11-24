@@ -28,6 +28,10 @@ import javax.servlet.ServletException;
  */
 public class RequestMethodNotSupportedException extends ServletException {
 
+	/**
+	 * Create a new RequestMethodNotSupportedException.
+	 * @param msg the detail message
+	 */
 	public RequestMethodNotSupportedException(String msg) {
 		super(msg);
 	}
