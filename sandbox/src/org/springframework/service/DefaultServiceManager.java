@@ -62,7 +62,7 @@ public class DefaultServiceManager implements ServiceManager
     public boolean validateSingleton()
     {
         boolean rval = true;
-        String[] beanName = _ctx.getBeanDefinitionNames(ServiceBean.class);
+        String[] beanName = _ctx.getBeanNamesForType(ServiceBean.class);
         for (int i = 0; i < beanName.length; i++)
         {
             if (!_ctx.isSingleton(beanName[i]))
