@@ -19,14 +19,14 @@ package org.springframework.autobuilds.ejbtest.dbutil.mapper.hibernate;
 import java.io.Serializable;
 import java.util.List;
 
-import net.sf.hibernate.HibernateException;
-import net.sf.hibernate.Session;
-import net.sf.hibernate.SessionFactory;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 
 import org.springframework.autobuilds.ejbtest.dbutil.mapper.Mapper;
 import org.springframework.autobuilds.ejbtest.dbutil.mapper.MapperFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.orm.hibernate.HibernateCallback;
+import org.springframework.orm.hibernate3.HibernateCallback;
 
 /**
  * Hibernate implementation of Mapper

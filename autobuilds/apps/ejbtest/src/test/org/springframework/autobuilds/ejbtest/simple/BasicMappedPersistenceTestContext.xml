@@ -42,7 +42,7 @@
     </property>
   </bean>
 
-  <bean id="hibSessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean">
+  <bean id="hibSessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
     <property name="dataSource"><ref local="dataSource"/></property>
     <property name="mappingResources">
       <list>
@@ -51,14 +51,14 @@
 		</property>
     <property name="hibernateProperties">
       <props>
-        <prop key="hibernate.dialect">net.sf.hibernate.dialect.HSQLDialect</prop>
+        <prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
         <prop key="hibernate.show_sql">true</prop>
         <prop key="hibernate.use_outer_join">true</prop>
       </props>
     </property>
   </bean>
   
-  <bean id="myTransactionManager" class="org.springframework.orm.hibernate.HibernateTransactionManager">
+  <bean id="myTransactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
     <property name="sessionFactory"><ref bean="hibSessionFactory"/></property>
     <!--
     <property name="dataSource"><ref bean="myDataSource"/></property>

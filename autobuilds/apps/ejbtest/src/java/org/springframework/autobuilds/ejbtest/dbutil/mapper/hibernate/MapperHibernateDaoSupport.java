@@ -16,10 +16,10 @@
 
 package org.springframework.autobuilds.ejbtest.dbutil.mapper.hibernate;
 
-import net.sf.hibernate.SessionFactory;
+import org.hibernate.SessionFactory;
 
-import org.springframework.orm.hibernate.HibernateTemplate;
-import org.springframework.orm.hibernate.support.HibernateDaoSupport;
+import org.springframework.orm.hibernate3.HibernateTemplate;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 /**
  * Subclass of Spring's HibernateDaoSupport which defaults the defaultAllowCreate flag to 

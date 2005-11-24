@@ -18,13 +18,13 @@ package org.springframework.autobuilds.ejbtest.dbutil.mapper.hibernate;
 
 import java.util.HashMap;
 
-import net.sf.hibernate.SessionFactory;
+import org.hibernate.SessionFactory;
 
 import org.springframework.autobuilds.ejbtest.dbutil.mapper.Mapper;
 import org.springframework.autobuilds.ejbtest.dbutil.mapper.MapperFactory;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.orm.hibernate.LocalSessionFactoryBean;
+import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 
 /**
  * An implementation of MapperFactory. An instance of this should either be
@@ -41,16 +41,6 @@ public class MapperFactoryImpl implements MapperFactory {
   protected HashMap _mappers;
 
   public MapperFactoryImpl() {
-    // need to create a session factory
-    LocalSessionFactoryBean sessFacBean = new LocalSessionFactoryBean();
-    try {
-      sessFacBean.afterPropertiesSet();
-    }
-    catch (Exception e) {
-      throw new DataAccessResourceFailureException(
-          "Exception configuring session factory");
-    }
-    _sessionFactory = (SessionFactory) sessFacBean.getObject();
   }
 
   public MapperFactoryImpl(SessionFactory sessionFactory) {

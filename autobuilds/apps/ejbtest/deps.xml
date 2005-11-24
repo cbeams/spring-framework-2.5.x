@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
-  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/ejbtest/deps.xml,v 1.1 2004-11-13 03:59:33 colins Exp $"
+  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/ejbtest/deps.xml,v 1.2 2005-11-24 22:57:51 colins Exp $"
 -->
 
 <project name="ejbtest-deps">
@@ -20,10 +20,9 @@
       <pathelement location="${DOM4J_JAR}"/>
       <pathelement location="${EHCACHE_JAR}"/>
       <pathelement location="${EJB_JAR}"/>
-      <pathelement location="${HIBERNATE2_JAR}"/>
+      <pathelement location="${HIBERNATE3_JAR}"/>
       <pathelement location="${JUNIT_JAR}"/>
       <pathelement location="${JUNIT_ADDONS_JAR}"/>
-      <pathelement location="${ODMG_JAR}"/>
       <pathelement location="${SPRING_JAR}"/>
     </path>
 

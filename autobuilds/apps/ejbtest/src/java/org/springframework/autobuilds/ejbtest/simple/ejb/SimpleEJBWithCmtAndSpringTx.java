@@ -19,7 +19,7 @@ package org.springframework.autobuilds.ejbtest.simple.ejb;
 import javax.ejb.CreateException;
 import javax.ejb.SessionContext;
 
-import net.sf.hibernate.SessionFactory;
+import org.hibernate.SessionFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
