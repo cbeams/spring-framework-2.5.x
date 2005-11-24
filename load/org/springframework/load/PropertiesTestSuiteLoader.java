@@ -47,7 +47,7 @@ public class PropertiesTestSuiteLoader  {
 			testSuite.runAllTests(true);
 			
 			// Now find all reporters
-			String[] reporterNames = lbf.getBeanDefinitionNames(TestReporter.class);
+			String[] reporterNames = lbf.getBeanNamesForType(TestReporter.class);
 			TestReporter[] reporters = new TestReporter[reporterNames.length];
 			for (int i = 0; i < reporterNames.length; i++) {
 				System.out.println("Found reporter name " + reporterNames[i]);

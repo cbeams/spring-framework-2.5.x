@@ -39,7 +39,7 @@ public class BeanFactoryTestSuite extends AbstractTestSuite implements Initializ
 	public void init(ListableBeanFactory lbf) {
 		System.out.println("init");
 		this.beanFactory = lbf;
-		String[] allTestNames = lbf.getBeanDefinitionNames(Test.class);
+		String[] allTestNames = lbf.getBeanNamesForType(Test.class);
 		this.testNames = new LinkedList();
 		if (allTestNames.length == 0)
 			throw new RuntimeException("No test beans defined");
