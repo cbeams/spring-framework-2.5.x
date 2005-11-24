@@ -52,17 +52,32 @@ package org.springframework.util;
  */
 public class AntPathMatcher implements PathMatcher {
 
+	/** Default path separator: "/" */
+	public static final String DEFAULT_PATH_SEPARATOR = "/";
+
+	private String pathSeparator = DEFAULT_PATH_SEPARATOR;
+
+
+	/**
+	 * Set the path separator to use for pattern parsing.
+	 * Default is "/", as in Ant.
+	 */
+	public void setPathSeparator(String pathSeparator) {
+		this.pathSeparator = (pathSeparator != null ? pathSeparator : DEFAULT_PATH_SEPARATOR);
+	}
+
+
 	public boolean isPattern(String str) {
 		return (str.indexOf('*') != -1 || str.indexOf('?') != -1);
 	}
 
 	public boolean match(String pattern, String str) {
-		if (str.startsWith("/") != pattern.startsWith("/")) {
+		if (str.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}
 
-		String[] patDirs = StringUtils.tokenizeToStringArray(pattern, "/");
-		String[] strDirs = StringUtils.tokenizeToStringArray(str, "/");
+		String[] patDirs = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
+		String[] strDirs = StringUtils.tokenizeToStringArray(str, this.pathSeparator);
 
 		int patIdxStart = 0;
 		int patIdxEnd = patDirs.length - 1;
