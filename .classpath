@@ -111,5 +111,7 @@
 	<classpathentry kind="lib" path="lib/jexcelapi/jxl.jar"/>
 	<classpathentry kind="lib" path="lib/commonj/commonj-twm.jar"/>
 	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-1.0.3.jar"/>
+	<classpathentry kind="src" path="samples/petclinic/test"/>
+	<classpathentry kind="lib" path="lib/antlr/antlr-2.7.5H3.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
