@@ -105,7 +105,7 @@ public abstract class AbstractBenchmarkController extends AbstractController {
 	protected void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
 		
-		String[] names = getApplicationContext().getBeanDefinitionNames(BenchmarkFactory.class);
+		String[] names = getApplicationContext().getBeanNamesForType(BenchmarkFactory.class);
 		for (int i = 0; i < names.length; i++) {
 			BenchmarkFactory bmf = (BenchmarkFactory) getApplicationContext().getBean(names[i]);
 			this.benchmarkFactories.put(names[i], bmf);
