@@ -36,6 +36,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
+import org.springframework.util.StringUtils;
 
 /**
  * Bean definition reader for a simple properties format.
@@ -283,7 +284,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @throws BeansException in case of loading or parsing errors
 	 */
 	public int registerBeanDefinitions(ResourceBundle rb, String prefix) throws BeanDefinitionStoreException {
-		// Simply create a map and call overloaded method
+		// Simply create a map and call overloaded method.
 		Map map = new HashMap();
 		Enumeration keys = rb.getKeys();
 		while (keys.hasMoreElements()) {
@@ -408,50 +409,49 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
-			String key = (String) entry.getKey();
+			String key = StringUtils.trimWhitespace((String) entry.getKey());
 			if (key.startsWith(prefix + SEPARATOR)) {
 				String property = key.substring(prefix.length() + SEPARATOR.length());
 				if (isClassKey(property)) {
-					className = (String) entry.getValue();
+					className = StringUtils.trimWhitespace((String) entry.getValue());
 				}
 				else if (isParentKey(property)) {
-					parent = (String) entry.getValue();
+					parent = StringUtils.trimWhitespace((String) entry.getValue());
 				}
 				else if (ABSTRACT_KEY.equals(property)) {
-					String val = (String) entry.getValue();
+					String val = StringUtils.trimWhitespace((String) entry.getValue());
 					isAbstract = TRUE_VALUE.equals(val);
 				}
 				else if (SINGLETON_KEY.equals(property)) {
-					String val = (String) entry.getValue();
+					String val = StringUtils.trimWhitespace((String) entry.getValue());
 					singleton = (val == null) || TRUE_VALUE.equals(val);
 				}
 				else if (LAZY_INIT_KEY.equals(property)) {
-					String val = (String) entry.getValue();
+					String val = StringUtils.trimWhitespace((String) entry.getValue());
 					lazyInit = TRUE_VALUE.equals(val);
 				}
 				else if (property.endsWith(REF_SUFFIX)) {
 					// This isn't a real property, but a reference to another prototype
 					// Extract property name: property is of form dog(ref)
 					property = property.substring(0, property.length() - REF_SUFFIX.length());
-					String ref = (String) entry.getValue();
+					String ref = StringUtils.trimWhitespace((String) entry.getValue());
 
 					// It doesn't matter if the referenced bean hasn't yet been registered:
-					// this will ensure that the reference is resolved at rungime
-					// Default is not to use singleton
+					// this will ensure that the reference is resolved at runtime.
 					Object val = new RuntimeBeanReference(ref);
 					pvs.addPropertyValue(new PropertyValue(property, val));
 				}
 				else{
-					// normal bean property
+					// It's a normal bean property.
 					Object val = entry.getValue();
 					if (val instanceof String) {
 						String strVal = (String) val;
-						// if it starts with a reference prefix...
+						// If it starts with a reference prefix...
 						if (strVal.startsWith(REF_PREFIX)) {
-							// expand reference
+							// Expand the reference.
 							String targetName = strVal.substring(1);
 							if (targetName.startsWith(REF_PREFIX)) {
-								// escaped prefix -> use plain value
+								// Escaped prefix -> use plain value.
 								val = targetName;
 							}
 							else {
