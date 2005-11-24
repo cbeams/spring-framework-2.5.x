@@ -36,7 +36,7 @@ import org.springframework.transaction.TransactionSystemException;
  * the server's internal JTA TransactionManager.
  *
  * <p>This class doesn't need be used with WebLogic 8.1 or higher, since the
- * regular JNDI lookup is sufficient there: it returns a JTA TransactionManager
+ * regular JNDI lookup is sufficient there: It returns a JTA TransactionManager
  * that can handle all transaction management tasks properly.
  *
  * <p><b>Note that as of Spring 1.2, this class is effectively superseded by
@@ -57,10 +57,12 @@ import org.springframework.transaction.TransactionSystemException;
 public class WebLogicServerTransactionManagerFactoryBean implements FactoryBean {
 
 	private static final String TX_HELPER_CLASS_NAME = "weblogic.transaction.TxHelper";
+	
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final TransactionManager transactionManager;
+
 
 	/**
 	 * This constructor retrieves the WebLogic TransactionManager factory class,
@@ -88,6 +90,7 @@ public class WebLogicServerTransactionManagerFactoryBean implements FactoryBean 
 					"Could not access WebLogic's TxHelper.getTransactionManager method", ex);
 		}
 	}
+
 
 	public Object getObject() {
 		return this.transactionManager;
