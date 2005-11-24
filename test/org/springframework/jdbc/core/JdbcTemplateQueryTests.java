@@ -366,8 +366,8 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(mockResultSetMetaData);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getObject(1);
-		ctrlResultSet.setReturnValue(new Double(22.5));
+		mockResultSet.getBigDecimal(1);
+		ctrlResultSet.setReturnValue(new BigDecimal(22.5));
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
