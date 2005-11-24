@@ -425,7 +425,7 @@ public class VelocityView extends AbstractTemplateView {
 	 * @see #exposeHelpers(org.apache.velocity.context.Context, HttpServletRequest, HttpServletResponse)
 	 */
 	protected void exposeToolAttributes(Context velocityContext, HttpServletRequest request) throws Exception {
-		// expose generic attributes
+		// Expose generic attributes.
 		if (this.toolAttributes != null) {
 			for (Iterator it = this.toolAttributes.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
@@ -437,18 +437,17 @@ public class VelocityView extends AbstractTemplateView {
 					velocityContext.put(attributeName, tool);
 				}
 				catch (Exception ex) {
-					throw new NestedServletException(
-							"Could not instantiate Velocity tool '" + attributeName + "': " + ex.getMessage(), ex);
+					throw new NestedServletException("Could not instantiate Velocity tool '" + attributeName + "'", ex);
 				}
 			}
 		}
 
-		// expose VelocityFormatter attribute
+		// Expose VelocityFormatter attribute.
 		if (this.velocityFormatterAttribute != null) {
 			velocityContext.put(this.velocityFormatterAttribute, new VelocityFormatter(velocityContext));
 		}
 
-		// expose locale-aware DateTool/NumberTool attributes
+		// Expose locale-aware DateTool/NumberTool attributes.
 		if (this.dateToolAttribute != null || this.numberToolAttribute != null) {
 			Locale locale = RequestContextUtils.getLocale(request);
 			if (this.dateToolAttribute != null) {

@@ -389,7 +389,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 			throws ServletException, IOException {
 
 		long startTime = System.currentTimeMillis();
-		Exception failureCause = null;
+		Throwable failureCause = null;
+
 		try {
 			doService(request, response);
 		}
@@ -401,14 +402,11 @@ public abstract class FrameworkServlet extends HttpServletBean {
 			failureCause = ex;
 			throw ex;
 		}
-		catch (RuntimeException ex) {
+		catch (Throwable ex) {
 			failureCause = ex;
-			throw ex;
+			throw new NestedServletException("Request processing failed", ex);
 		}
-		catch (Exception ex) {
-			failureCause = ex;
-			throw new NestedServletException(ex.getMessage(), ex);
-		}
+
 		finally {
 			if (failureCause != null) {
 				logger.error("Could not complete request", failureCause);

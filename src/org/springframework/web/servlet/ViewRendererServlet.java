@@ -82,11 +82,8 @@ public class ViewRendererServlet extends HttpServlet {
 		catch (IOException ex) {
 			throw ex;
 		}
-		catch (RuntimeException ex) {
-			throw ex;
-		}
 		catch (Exception ex) {
-			throw new NestedServletException(ex.getMessage(), ex);
+			throw new NestedServletException("View rendering failed", ex);
 		}
 	}
 
