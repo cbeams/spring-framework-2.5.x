@@ -12,10 +12,11 @@ Overall
 * neither the Hibernate 2.1 support nor the Hibernate 3.x support is included in "spring.jar" anymore
 
 Package org.springframework.beans
+* added intelligent error messages to BeanWrapperImpl when properties are not found
+* changed MutablePropertyValues.addPropertyValue(String, Object) to return 'this'
 * removed deprecated "getBeanDefinitionNames(type)" method from ListableBeanFactory and BeanFactoryUtils
 * added "createBean" and "instantiateBean" methods to AutowireCapableBeanFactory interface
-* added intelligent error messages to BeanWrapperImpl when properties are not found
-* Changed MutablePropertyValues.addPropertyValue(String, Object) to return 'this'
+* PropertiesBeanDefinitionReader trims String values for special keys such as "(class)", "(parent)", etc
 
 Package org.springframework.core
 * introduced TaskExecutor abstraction, as strategy interface for the execution of Runnables
@@ -27,15 +28,32 @@ Package org.springframework.context
 * moved DefaultListableBeanFactory's cleanup on "preInstantiateSingletons()" behavior to AbstractApplicationContext
 * reworked SimpleApplicationEventMulticaster to delegate to a TaskExecutor, using a SyncTaskExecutor as default
 
+Package org.springframework.dao
+* introduced EmptyResultDataAccessException as specific subclass of IncorrectResultSizeDataAccessException
+
+Package org.springframework.jdbc
+* factored out protected "getColumnMapRowMapper" and "getSingleColumnRowMapper" hooks within JdbcTemplate
+* SingleColumnRowMapper throws specific IncorrectResultSetColumnCountException in case of invalid column count
+* SingleColumnRowMapper explicitly calls "ResultSet.getBigDecimal()" if the required type is BigDecimal
+
 Package org.springframework.jms
 * added SimpleMessageListenerContainer mechanism for async JMS message reception via the plain JMS MessageConsumer API
 * added ServerMessageListenerContainer mechanism for async JMS message reception via the JMS ServerSessionPool API
+
+Package org.springframework.jmx
+* introduced MBeanExportOperations interface, providing a programmatic facility for registering MBeans on MBeanExporter
+* introduced MBeanExportException as unified exception hierarchy for MBeanExporter and MBeanExportOperations
+* MBeanExporter no longer ignores autodetected MBeans with invalid object names: specify appropriate "excludedBeans"
 
 Package org.springframework.orm
 * added support for the Java Persistence API (JPA) preview, in the form of the "org.springframework.orm.jpa" package
 * JdoTransactionManager does explicit "isActive()" check before attempting a rollback, to avoid illegal state exception
 * HibernateTransactionManager autodetects Hibernate 3.1 to support its native transaction timeout
 * upgraded IdTransferringMergeEventListener to Hibernate 3.1 (which changed its listener API in an incompatible fashion)
+
+Package org.springframework.remoting
+* HttpInvokerServiceExporter, HessianServiceExporter and BurlapServiceExporter implement Handler instead of Controller
+* HttpInvokerRequestExecutor is allowed to throw any Exception, not just IOException and ClassNotFoundException
 
 Package org.springframework.scheduling
 * added TimerTaskExecutor adapter for accessing a "java.util.Timer" through the TaskExecutor interface
@@ -44,9 +62,13 @@ Package org.springframework.scheduling
 * added scheduling-style support for the CommonJ TimerManager API, as supported by WebLogic 9 and WebSphere 6
 * added WorkManagerTaskExecutor adapter for accessing a CommonJ WorkManager through the TaskExecutor interface
 
+Package org.springframework.util
+* added "setPathSeparator" method to AntPathMatcher, allowing to override the default path separator "/"
+
 Package org.springframework.web
 * introduced ServletConfigAware interface, for getting access to a Framework/DispatcherServlet's ServletConfig object
 * SimpleServletPostProcessor configures Servlets with DispatcherServlet's ServletConfig by default (can be turned off)
+* introduced Handler interface as alternative to Controller, with no ModelAndView and only throwing Servlet/IOException
 * added "currentFormObject" template method to AbstractFormController, for post-processing of a session form object
 * FixedLocaleResolver returns the JVM's default Locale if no explicit default Locale specified
 * VelocityView converts Velocity's MethodInvocationException to a Spring NestedServletException with original root cause
