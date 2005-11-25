@@ -54,6 +54,10 @@ import org.apache.commons.logging.LogFactory;
  */
 final class CachedIntrospectionResults {
 
+	//---------------------------------------------------------------------
+	// Static section
+	//---------------------------------------------------------------------
+
 	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
 
 	/**
@@ -65,13 +69,14 @@ final class CachedIntrospectionResults {
 
 
 	/**
-	 * We might use this from the EJB tier, so we don't want to use synchronization.
-	 * Object references are atomic, so we can live with doing the occasional
-	 * unnecessary lookup at startup only.
+	 * Create CachedIntrospectionResults for the given bean class.
+	 * <P>We don't want to use synchronization here. Object references are atomic,
+	 * so we can live with doing the occasional unnecessary lookup at startup only.
+	 * @param beanClass the bean class to analyze
 	 */
-	static CachedIntrospectionResults forClass(Class clazz) throws BeansException {
+	public static CachedIntrospectionResults forClass(Class beanClass) throws BeansException {
 		CachedIntrospectionResults results = null;
-		Object value = classCache.get(clazz);
+		Object value = classCache.get(beanClass);
 		if (value instanceof Reference) {
 			Reference ref = (Reference) value;
 			results = (CachedIntrospectionResults) ref.get();
@@ -81,21 +86,21 @@ final class CachedIntrospectionResults {
 		}
 		if (results == null) {
 			// can throw BeansException
-			results = new CachedIntrospectionResults(clazz);
-			boolean cacheSafe = isCacheSafe(clazz);
+			results = new CachedIntrospectionResults(beanClass);
+			boolean cacheSafe = isCacheSafe(beanClass);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Class [" + clazz.getName() + "] is " + (!cacheSafe ? "not " : "") + "cache-safe");
+				logger.debug("Class [" + beanClass.getName() + "] is " + (!cacheSafe ? "not " : "") + "cache-safe");
 			}
 			if (cacheSafe) {
-				classCache.put(clazz, results);
+				classCache.put(beanClass, results);
 			}
 			else {
-				classCache.put(clazz, new WeakReference(results));
+				classCache.put(beanClass, new WeakReference(results));
 			}
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Using cached introspection results for class [" + clazz.getName() + "]");
+				logger.debug("Using cached introspection results for class [" + beanClass.getName() + "]");
 			}
 		}
 		return results;
@@ -126,6 +131,10 @@ final class CachedIntrospectionResults {
 	}
 
 
+	//---------------------------------------------------------------------
+	// Instance section
+	//---------------------------------------------------------------------
+
 	private final BeanInfo beanInfo;
 
 	/** Property descriptors keyed by property name */
@@ -133,7 +142,7 @@ final class CachedIntrospectionResults {
 
 
 	/**
-	 * Create new CachedIntrospectionResults instance fot the given class.
+	 * Create a new CachedIntrospectionResults instance for the given class.
 	 */
 	private CachedIntrospectionResults(Class clazz) throws BeansException {
 		try {
@@ -188,15 +197,15 @@ final class CachedIntrospectionResults {
 		}
 	}
 
-	BeanInfo getBeanInfo() {
+	public BeanInfo getBeanInfo() {
 		return this.beanInfo;
 	}
 
-	Class getBeanClass() {
+	public Class getBeanClass() {
 		return this.beanInfo.getBeanDescriptor().getBeanClass();
 	}
 
-	PropertyDescriptor getPropertyDescriptor(String propertyName) {
+	public PropertyDescriptor getPropertyDescriptor(String propertyName) {
 		return (PropertyDescriptor) this.propertyDescriptorCache.get(propertyName);
 	}
 
