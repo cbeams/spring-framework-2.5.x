@@ -20,14 +20,18 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * Supports last-modified HTTP requests to facilitate content caching.
- * Same contract as for the Servlet API's getLastModified method.
+ * Same contract as for the Servlet API's <code>getLastModified</code> method.
  *
- * <p>Delegated to by SimpleControllerHandlerAdapter's getLastModified method.
- * Any controller within Spring's default MVC framework can implement this.
+ * <p>Delegated to by a HandlerAdapters's <code>getLastModified</code> implementation.
+ * By default, any Controller or Handler within Spring's default framework can
+ * implement this interface to enable last-modified checking.
  *
  * @author Rod Johnson
- * @see SimpleControllerHandlerAdapter
  * @see javax.servlet.http.HttpServlet#getLastModified
+ * @see Controller
+ * @see SimpleControllerHandlerAdapter
+ * @see Handler
+ * @see SimpleHandlerAdapter
  */
 public interface LastModified {
 	

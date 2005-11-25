@@ -16,6 +16,7 @@
 
 package org.springframework.remoting.caucho;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 
 import javax.servlet.ServletException;
@@ -26,11 +27,14 @@ import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.server.HessianSkeleton;
 
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteExporter;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.util.Assert;
+import org.springframework.web.servlet.mvc.Handler;
+import org.springframework.web.servlet.support.RequestMethodNotSupportedException;
 import org.springframework.web.servlet.support.WebContentGenerator;
+import org.springframework.web.util.NestedServletException;
 
 /**
  * Web controller that exports the specified service bean as Hessian service
@@ -54,48 +58,59 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
  * @see org.springframework.remoting.rmi.RmiServiceExporter
  */
-public class HessianServiceExporter extends RemoteExporter implements Controller, InitializingBean {
+public class HessianServiceExporter extends RemoteExporter implements Handler, InitializingBean {
 
 	private HessianSkeleton skeleton;
 
-	public void afterPropertiesSet() throws Exception {
+
+	public void afterPropertiesSet() {
+		prepare();
+	}
+
+	/**
+	 * Initialize this service exporter.
+	 */
+	public void prepare() {
 		try {
-			// Try Hessian 3.x (with service interface argument).
-			Constructor ctor = HessianSkeleton.class.getConstructor(new Class[] {Object.class, Class.class});
-			checkService();
-			checkServiceInterface();
-			this.skeleton = (HessianSkeleton) ctor.newInstance(new Object[] {getProxyForService(), getServiceInterface()});
+			try {
+				// Try Hessian 3.x (with service interface argument).
+				Constructor ctor = HessianSkeleton.class.getConstructor(new Class[] {Object.class, Class.class});
+				checkService();
+				checkServiceInterface();
+				this.skeleton = (HessianSkeleton)
+						ctor.newInstance(new Object[] {getProxyForService(), getServiceInterface()});
+			}
+			catch (NoSuchMethodException ex) {
+				// Fall back to Hessian 2.x (without service interface argument).
+				Constructor ctor = HessianSkeleton.class.getConstructor(new Class[] {Object.class});
+				this.skeleton = (HessianSkeleton) ctor.newInstance(new Object[] {getProxyForService()});
+			}
 		}
-		catch (NoSuchMethodException ex) {
-			// Fall back to Hessian 2.x (without service interface argument).
-			Constructor ctor = HessianSkeleton.class.getConstructor(new Class[] {Object.class});
-			this.skeleton = (HessianSkeleton) ctor.newInstance(new Object[] {getProxyForService()});
+		catch (Exception ex) {
+			throw new BeanInitializationException("Hessian skeleton initialization failed", ex);
 		}
 	}
+
 
 	/**
 	 * Process the incoming Hessian request and create a Hessian response.
 	 */
-	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		Assert.notNull(this.skeleton, "HessianServiceExporter has not been initialized");
+
 		if (!WebContentGenerator.METHOD_POST.equals(request.getMethod())) {
-			throw new ServletException("HessianServiceExporter only supports POST requests");
+			throw new RequestMethodNotSupportedException("HessianServiceExporter only supports POST requests");
 		}
 
 		HessianInput in = new HessianInput(request.getInputStream());
 		HessianOutput out = new HessianOutput(response.getOutputStream());
 		try {
 		  this.skeleton.invoke(in, out);
-			return null;
-		}
-		catch (Exception ex) {
-			throw ex;
-		}
-		catch (Error ex) {
-			throw ex;
 		}
 		catch (Throwable ex) {
-			// Should never happen: There are no Throwables other than Exceptions and Errors.
-		  throw new ServletException(ex);
+		  throw new NestedServletException("Hessian skeleton invocation failed", ex);
 		}
 	}
 

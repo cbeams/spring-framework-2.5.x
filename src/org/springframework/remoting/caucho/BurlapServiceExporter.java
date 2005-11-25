@@ -16,6 +16,7 @@
 
 package org.springframework.remoting.caucho;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 
 import javax.servlet.ServletException;
@@ -26,11 +27,13 @@ import com.caucho.burlap.io.BurlapInput;
 import com.caucho.burlap.io.BurlapOutput;
 import com.caucho.burlap.server.BurlapSkeleton;
 
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteExporter;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.util.Assert;
+import org.springframework.web.servlet.mvc.Handler;
 import org.springframework.web.servlet.support.WebContentGenerator;
+import org.springframework.web.util.NestedServletException;
 
 /**
  * Web controller that exports the specified service bean as Burlap service
@@ -54,29 +57,48 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
  * @see org.springframework.remoting.rmi.RmiServiceExporter
  */
-public class BurlapServiceExporter extends RemoteExporter implements Controller, InitializingBean {
+public class BurlapServiceExporter extends RemoteExporter implements Handler, InitializingBean {
 
 	private BurlapSkeleton skeleton;
 
-	public void afterPropertiesSet() throws Exception {
+
+	public void afterPropertiesSet() {
+		prepare();
+	}
+
+	/**
+	 * Initialize this service exporter.
+	 */
+	public void prepare() {
 		try {
-			// Try Burlap 3.x (with service interface argument).
-			Constructor ctor = BurlapSkeleton.class.getConstructor(new Class[] {Object.class, Class.class});
-			checkService();
-			checkServiceInterface();
-			this.skeleton = (BurlapSkeleton) ctor.newInstance(new Object[] {getProxyForService(), getServiceInterface()});
+			try {
+				// Try Burlap 3.x (with service interface argument).
+				Constructor ctor = BurlapSkeleton.class.getConstructor(new Class[] {Object.class, Class.class});
+				checkService();
+				checkServiceInterface();
+				this.skeleton = (BurlapSkeleton)
+						ctor.newInstance(new Object[] {getProxyForService(), getServiceInterface()});
+			}
+			catch (NoSuchMethodException ex) {
+				// Fall back to Burlap 2.x (without service interface argument).
+				Constructor ctor = BurlapSkeleton.class.getConstructor(new Class[] {Object.class});
+				this.skeleton = (BurlapSkeleton) ctor.newInstance(new Object[] {getProxyForService()});
+			}
 		}
-		catch (NoSuchMethodException ex) {
-			// Fall back to Burlap 2.x (without service interface argument).
-			Constructor ctor = BurlapSkeleton.class.getConstructor(new Class[] {Object.class});
-			this.skeleton = (BurlapSkeleton) ctor.newInstance(new Object[] {getProxyForService()});
+		catch (Exception ex) {
+			throw new BeanInitializationException("Burlap skeleton initialization failed", ex);
 		}
 	}
+
 
 	/**
 	 * Process the incoming Burlap request and create a Burlap response.
 	 */
-	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		Assert.notNull(this.skeleton, "BurlapServiceExporter has not been initialized");
+
 		if (!WebContentGenerator.METHOD_POST.equals(request.getMethod())) {
 			throw new ServletException("BurlapServiceExporter only supports POST requests");
 		}
@@ -85,17 +107,9 @@ public class BurlapServiceExporter extends RemoteExporter implements Controller,
 		BurlapOutput out = new BurlapOutput(response.getOutputStream());
 		try {
 		  this.skeleton.invoke(in, out);
-			return null;
-		}
-		catch (Exception ex) {
-			throw ex;
-		}
-		catch (Error ex) {
-			throw ex;
 		}
 		catch (Throwable ex) {
-			// Should never happen: There are no Throwables other than Exceptions and Errors.
-		  throw new ServletException(ex);
+		  throw new NestedServletException("Burlap skeleton invocation failed", ex);
 		}
 	}
 

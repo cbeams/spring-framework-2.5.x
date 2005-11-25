@@ -28,6 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -64,8 +65,7 @@ public class HttpInvokerTests extends TestCase {
 
 		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
 			protected RemoteInvocationResult doExecuteRequest(
-					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
-					throws IOException, ClassNotFoundException {
+					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos) throws Exception {
 				assertEquals("http://myurl", config.getServiceUrl());
 				MockHttpServletRequest request = new MockHttpServletRequest();
 				MockHttpServletResponse response = new MockHttpServletResponse();
@@ -169,7 +169,12 @@ public class HttpInvokerTests extends TestCase {
 				request.addHeader("Compression", "gzip");
 				MockHttpServletResponse response = new MockHttpServletResponse();
 				request.setContent(baos.toByteArray());
-				exporter.handleRequest(request, response);
+				try {
+					exporter.handleRequest(request, response);
+				}
+				catch (ServletException ex) {
+					throw new IOException(ex.toString());
+				}
 				return readRemoteInvocationResult(
 						new ByteArrayInputStream(response.getContentAsByteArray()), config.getCodebaseUrl());
 			}
@@ -232,8 +237,7 @@ public class HttpInvokerTests extends TestCase {
 
 		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
 			protected RemoteInvocationResult doExecuteRequest(
-					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
-					throws IOException, ClassNotFoundException {
+					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos) throws Exception {
 				assertEquals("http://myurl", config.getServiceUrl());
 				MockHttpServletRequest request = new MockHttpServletRequest();
 				MockHttpServletResponse response = new MockHttpServletResponse();
@@ -321,8 +325,7 @@ public class HttpInvokerTests extends TestCase {
 
 		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
 			protected RemoteInvocationResult doExecuteRequest(
-					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
-					throws IOException, ClassNotFoundException {
+					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos) throws Exception {
 				assertEquals("http://myurl", config.getServiceUrl());
 				MockHttpServletRequest request = new MockHttpServletRequest();
 				MockHttpServletResponse response = new MockHttpServletResponse();
@@ -370,8 +373,7 @@ public class HttpInvokerTests extends TestCase {
 
 		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
 			protected RemoteInvocationResult doExecuteRequest(
-					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
-					throws IOException, ClassNotFoundException {
+					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos) throws Exception {
 				assertEquals("http://myurl", config.getServiceUrl());
 				MockHttpServletRequest request = new MockHttpServletRequest();
 				MockHttpServletResponse response = new MockHttpServletResponse();

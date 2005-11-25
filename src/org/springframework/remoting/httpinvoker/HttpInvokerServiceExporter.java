@@ -23,6 +23,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.rmi.RemoteException;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -31,8 +32,9 @@ import org.springframework.remoting.rmi.CodebaseAwareObjectInputStream;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationBasedExporter;
 import org.springframework.remoting.support.RemoteInvocationResult;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.util.Assert;
+import org.springframework.web.servlet.mvc.Handler;
+import org.springframework.web.util.NestedServletException;
 
 /**
  * Web controller that exports the specified service bean as HTTP invoker
@@ -56,7 +58,7 @@ import org.springframework.web.servlet.mvc.Controller;
  * @see org.springframework.remoting.caucho.BurlapServiceExporter
  */
 public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
-		implements Controller, InitializingBean {
+		implements Handler, InitializingBean {
 
 	protected static final String CONTENT_TYPE_SERIALIZED_OBJECT = "application/x-java-serialized-object";
 
@@ -64,6 +66,13 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 
 
 	public void afterPropertiesSet() {
+		prepare();
+	}
+
+	/**
+	 * Initialize this service exporter.
+	 */
+	public void prepare() {
 		this.proxy = getProxyForService();
 	}
 
@@ -75,13 +84,19 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * @see #invokeAndCreateResult
 	 * @see #writeRemoteInvocationResult(HttpServletRequest, HttpServletResponse, RemoteInvocationResult)
 	 */
-	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
-			throws IOException, ClassNotFoundException {
+	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 
-		RemoteInvocation invocation = readRemoteInvocation(request);
-		RemoteInvocationResult result = invokeAndCreateResult(invocation, this.proxy);
-		writeRemoteInvocationResult(request, response, result);
-		return null;
+		Assert.notNull(this.proxy, "HttpInvokerServiceExporter has not been initialized");
+
+		try {
+			RemoteInvocation invocation = readRemoteInvocation(request);
+			RemoteInvocationResult result = invokeAndCreateResult(invocation, this.proxy);
+			writeRemoteInvocationResult(request, response, result);
+		}
+		catch (ClassNotFoundException ex) {
+			throw new NestedServletException("Class not found during deserialization", ex);
+		}
 	}
 
 
