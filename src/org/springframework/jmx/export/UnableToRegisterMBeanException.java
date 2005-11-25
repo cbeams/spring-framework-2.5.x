@@ -17,16 +17,31 @@
 package org.springframework.jmx.export;
 
 /**
+ * Exception thrown when we are unable to register an MBean,
+ * for example because of a naming conflict.
+ *
  * @author Rob Harrop
+ * @since 1.3
  */
 public class UnableToRegisterMBeanException extends MBeanExportException {
 
-
-	public UnableToRegisterMBeanException(String message) {
-		super(message);
+	/**
+	 * Create a new <code>UnableToRegisterMBeanException</code> with the
+	 * specified error message.
+	 * @param msg the error message
+	 */
+	public UnableToRegisterMBeanException(String msg) {
+		super(msg);
 	}
 
-	public UnableToRegisterMBeanException(String message, Throwable cause) {
-		super(message, cause);
+	/**
+	 * Create a new <code>UnableToRegisterMBeanException</code> with the
+	 * specified error message and root cause.
+	 * @param msg the error message
+	 * @param ex the root cause
+	 */
+	public UnableToRegisterMBeanException(String msg, Throwable ex) {
+		super(msg, ex);
 	}
+
 }
