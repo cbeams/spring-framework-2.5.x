@@ -138,7 +138,7 @@ public abstract class JpaAccessor implements InitializingBean {
 	 * for the specified EntityManagerFactory if none set.
 	 */
 	public void afterPropertiesSet() {
-		if (getEntityManagerFactory() == null || getEntityManager() == null) {
+		if (getEntityManagerFactory() == null && getEntityManager() == null) {
 			throw new IllegalArgumentException("entityManagerFactory or entityManager is required");
 		}
 		getJpaDialect();
