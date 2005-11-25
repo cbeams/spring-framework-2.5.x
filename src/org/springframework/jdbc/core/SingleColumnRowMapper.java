@@ -23,8 +23,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.TypeMismatchDataAccessException;
+import org.springframework.jdbc.IncorrectResultSetColumnCountException;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.NumberUtils;
 
@@ -86,8 +86,7 @@ public class SingleColumnRowMapper implements RowMapper {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int nrOfColumns = rsmd.getColumnCount();
 		if (nrOfColumns != 1) {
-			throw new IncorrectResultSizeDataAccessException(
-					"Expected single column but found " + nrOfColumns, 1, nrOfColumns);
+			throw new IncorrectResultSetColumnCountException(1, nrOfColumns);
 		}
 
 		// Extract column value from JDBC ResultSet

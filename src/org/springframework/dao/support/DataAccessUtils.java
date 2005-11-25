@@ -18,6 +18,7 @@ package org.springframework.dao.support;
 
 import java.util.Collection;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.TypeMismatchDataAccessException;
 import org.springframework.util.CollectionUtils;
@@ -58,10 +59,15 @@ public abstract class DataAccessUtils {
 	 * @param results the result Collection (can be <code>null</code>)
 	 * @return the unique result object
 	 * @throws IncorrectResultSizeDataAccessException if more than one
-	 * result object or none at all has been found in the given Collection
+	 * result object has been found in the given Collection
+	 * @throws EmptyResultDataAccessException if no result object
+	 * at all has been found in the given Collection
 	 */
 	public static Object requiredUniqueResult(Collection results) throws IncorrectResultSizeDataAccessException {
 		int size = (results != null ? results.size() : 0);
+		if (size == 0) {
+			throw new EmptyResultDataAccessException(1);
+		}
 		if (!CollectionUtils.hasUniqueObject(results)) {
 			throw new IncorrectResultSizeDataAccessException(1, size);
 		}
@@ -76,7 +82,9 @@ public abstract class DataAccessUtils {
 	 * @param results the result Collection (can be <code>null</code>)
 	 * @return the unique result object
 	 * @throws IncorrectResultSizeDataAccessException if more than one
-	 * result object or none at all has been found in the given Collection
+	 * result object has been found in the given Collection
+	 * @throws EmptyResultDataAccessException if no result object
+	 * at all has been found in the given Collection
 	 * @throws TypeMismatchDataAccessException if the unique object does
 	 * not match the specified required type
 	 */
@@ -112,7 +120,9 @@ public abstract class DataAccessUtils {
 	 * @param results the result Collection (can be <code>null</code>)
 	 * @return the unique int result
 	 * @throws IncorrectResultSizeDataAccessException if more than one
-	 * result object or none at all has been found in the given Collection
+	 * result object has been found in the given Collection
+	 * @throws EmptyResultDataAccessException if no result object
+	 * at all has been found in the given Collection
 	 * @throws TypeMismatchDataAccessException if the unique object
 	 * in the collection is not convertable to an int
 	 */
@@ -129,7 +139,9 @@ public abstract class DataAccessUtils {
 	 * @param results the result Collection (can be <code>null</code>)
 	 * @return the unique long result
 	 * @throws IncorrectResultSizeDataAccessException if more than one
-	 * result object or none at all has been found in the given Collection
+	 * result object has been found in the given Collection
+	 * @throws EmptyResultDataAccessException if no result object
+	 * at all has been found in the given Collection
 	 * @throws TypeMismatchDataAccessException if the unique object
 	 * in the collection is not convertable to a long
 	 */

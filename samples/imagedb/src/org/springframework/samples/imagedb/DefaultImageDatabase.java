@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.LobRetrievalFailureException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
@@ -63,8 +64,8 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 				"SELECT content FROM imagedb WHERE image_name=?", new Object[] {name},
 				new AbstractLobStreamingResultSetExtractor() {
 					protected void handleNoRowFound() throws LobRetrievalFailureException {
-						throw new IncorrectResultSizeDataAccessException(
-						    "Image with name '" + name + "' not found in database", 1, 0);
+						throw new EmptyResultDataAccessException(
+						    "Image with name '" + name + "' not found in database", 1);
 					}
 					public void streamData(ResultSet rs) throws SQLException, IOException {
 						InputStream is = lobHandler.getBlobAsBinaryStream(rs, 1);

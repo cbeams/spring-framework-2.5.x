@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.LobRetrievalFailureException;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -85,23 +86,23 @@ public abstract class AbstractLobStreamingResultSetExtractor implements ResultSe
 	/**
 	 * Handle the case where the ResultSet does not contain a row.
 	 * @throws DataAccessException a corresponding exception,
-	 * by default an IncorrectResultSizeDataAccessException
-	 * @see org.springframework.jdbc.LobRetrievalFailureException
+	 * by default an EmptyResultDataAccessException
+	 * @see org.springframework.dao.EmptyResultDataAccessException
 	 */
 	protected void handleNoRowFound() throws DataAccessException {
-		throw new IncorrectResultSizeDataAccessException("LobStreamingResultSetExtractor did not find row in database",
-		                                                 1, 0);
+		throw new EmptyResultDataAccessException(
+				"LobStreamingResultSetExtractor did not find row in database", 1);
 	}
 
 	/**
 	 * Handle the case where the ResultSet contains multiple rows.
 	 * @throws DataAccessException a corresponding exception,
 	 * by default an IncorrectResultSizeDataAccessException
-	 * @see org.springframework.jdbc.LobRetrievalFailureException
+	 * @see org.springframework.dao.IncorrectResultSizeDataAccessException
 	 */
 	protected void handleMultipleRowsFound() throws DataAccessException {
-		throw new IncorrectResultSizeDataAccessException("LobStreamingResultSetExtractor found multiple rows in database",
-		                                                 1, -1);
+		throw new IncorrectResultSizeDataAccessException(
+				"LobStreamingResultSetExtractor found multiple rows in database", 1);
 	}
 
 	/**
