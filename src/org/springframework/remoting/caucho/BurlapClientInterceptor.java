@@ -117,7 +117,7 @@ public class BurlapClientInterceptor extends CauchoRemoteAccessor implements Met
 		catch (InvocationTargetException ex) {
 			if (ex.getTargetException() instanceof BurlapRuntimeException) {
 				BurlapRuntimeException bre = (BurlapRuntimeException) ex.getTargetException();
-				Throwable rootCause = (bre.getRootCause() != null) ? bre.getRootCause() : bre;
+				Throwable rootCause = (bre.getRootCause() != null ? bre.getRootCause() : bre);
 				throw convertBurlapAccessException(rootCause);
 			}
 			else if (ex.getTargetException() instanceof UndeclaredThrowableException) {
@@ -127,7 +127,7 @@ public class BurlapClientInterceptor extends CauchoRemoteAccessor implements Met
 			throw ex.getTargetException();
 		}
 		catch (Throwable ex) {
-			throw new AspectException("Failed to invoke Burlap service [" + getServiceUrl() + "]", ex);
+			throw new AspectException("Failed to invoke Burlap remote service [" + getServiceUrl() + "]", ex);
 		}
 	}
 
@@ -140,11 +140,11 @@ public class BurlapClientInterceptor extends CauchoRemoteAccessor implements Met
 	protected RemoteAccessException convertBurlapAccessException(Throwable ex) {
 		if (ex instanceof ConnectException) {
 			throw new RemoteConnectFailureException(
-					"Cannot connect to Burlap service at [" + getServiceUrl() + "]", ex);
+					"Cannot connect to Burlap remote service at [" + getServiceUrl() + "]", ex);
 		}
 		else {
 			throw new RemoteAccessException(
-			    "Cannot access Burlap service at [" + getServiceUrl() + "]", ex);
+			    "Cannot access Burlap remote service at [" + getServiceUrl() + "]", ex);
 		}
 	}
 

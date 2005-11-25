@@ -101,6 +101,7 @@ public class ServletForwardingController extends AbstractController implements B
 	private String servletName;
 
 	private String beanName;
+	
 
 	/**
 	 * Set the name of the servlet to forward to,
@@ -117,6 +118,7 @@ public class ServletForwardingController extends AbstractController implements B
 			this.servletName = name;
 		}
 	}
+
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {

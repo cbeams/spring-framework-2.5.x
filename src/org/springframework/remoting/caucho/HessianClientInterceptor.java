@@ -117,7 +117,7 @@ public class HessianClientInterceptor extends CauchoRemoteAccessor implements Me
 		catch (InvocationTargetException ex) {
 			if (ex.getTargetException() instanceof HessianRuntimeException) {
 				HessianRuntimeException hre = (HessianRuntimeException) ex.getTargetException();
-				Throwable rootCause = (hre.getRootCause() != null) ? hre.getRootCause() : hre;
+				Throwable rootCause = (hre.getRootCause() != null ? hre.getRootCause() : hre);
 				throw convertHessianAccessException(rootCause);
 			}
 			else if (ex.getTargetException() instanceof UndeclaredThrowableException) {
@@ -127,7 +127,7 @@ public class HessianClientInterceptor extends CauchoRemoteAccessor implements Me
 			throw ex.getTargetException();
 		}
 		catch (Throwable ex) {
-			throw new AspectException("Failed to invoke Hessian service [" + getServiceUrl() + "]", ex);
+			throw new AspectException("Failed to invoke Hessian remote service [" + getServiceUrl() + "]", ex);
 		}
 	}
 
@@ -140,11 +140,11 @@ public class HessianClientInterceptor extends CauchoRemoteAccessor implements Me
 	protected RemoteAccessException convertHessianAccessException(Throwable ex) {
 		if (ex instanceof ConnectException) {
 			throw new RemoteConnectFailureException(
-					"Cannot connect to Hessian service at [" + getServiceUrl() + "]", ex);
+					"Cannot connect to Hessian remote service at [" + getServiceUrl() + "]", ex);
 		}
 		else {
 			throw new RemoteAccessException(
-			    "Cannot access Hessian service at [" + getServiceUrl() + "]", ex);
+			    "Cannot access Hessian remote service at [" + getServiceUrl() + "]", ex);
 		}
 	}
 
