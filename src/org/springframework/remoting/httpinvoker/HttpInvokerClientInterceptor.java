@@ -17,12 +17,14 @@
 package org.springframework.remoting.httpinvoker;
 
 import java.io.IOException;
+import java.net.ConnectException;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.remoting.RemoteAccessException;
+import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationBasedAccessor;
 import org.springframework.remoting.support.RemoteInvocationResult;
@@ -119,11 +121,8 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 		try {
 			result = executeRequest(invocation);
 		}
-		catch (IOException ex) {
-			throw new RemoteAccessException("Cannot access HTTP invoker remote service at [" + getServiceUrl() + "]", ex);
-		}
-		catch (ClassNotFoundException ex) {
-			throw new RemoteAccessException("Cannot deserialize result from [" + getServiceUrl() + "]", ex);
+		catch (Throwable ex) {
+			throw convertHttpInvokerAccessException(ex);
 		}
 		return recreateRemoteInvocationResult(result);
 	}
@@ -138,12 +137,33 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	 * @return the RemoteInvocationResult object
 	 * @throws IOException if thrown by I/O operations
 	 * @throws ClassNotFoundException if thrown during deserialization
+	 * @throws Exception in case of general errors
 	 * @see #getHttpInvokerRequestExecutor
 	 * @see HttpInvokerClientConfiguration
 	 */
-	protected RemoteInvocationResult executeRequest(RemoteInvocation invocation)
-			throws IOException, ClassNotFoundException {
+	protected RemoteInvocationResult executeRequest(RemoteInvocation invocation) throws Exception {
 		return getHttpInvokerRequestExecutor().executeRequest(this, invocation);
+	}
+
+	/**
+	 * Convert the given HTTP invoker access exception to an appropriate
+	 * Spring RemoteAccessException.
+	 * @param ex the exception to convert
+	 * @return the RemoteAccessException to throw
+	 */
+	protected RemoteAccessException convertHttpInvokerAccessException(Throwable ex) {
+		if (ex instanceof ConnectException) {
+			throw new RemoteConnectFailureException(
+					"Cannot connect to HTTP invoker remote service at [" + getServiceUrl() + "]", ex);
+		}
+		else if (ex instanceof ClassNotFoundException) {
+			throw new RemoteAccessException(
+					"Cannot deserialize result from HTTP invoker remote service [" + getServiceUrl() + "]", ex);
+		}
+		else {
+			throw new RemoteAccessException(
+			    "Cannot access HTTP invoker remote service at [" + getServiceUrl() + "]", ex);
+		}
 	}
 
 }

@@ -58,8 +58,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 
 
 	public final RemoteInvocationResult executeRequest(
-			HttpInvokerClientConfiguration config, RemoteInvocation invocation)
-			throws IOException, ClassNotFoundException {
+			HttpInvokerClientConfiguration config, RemoteInvocation invocation) throws Exception {
 
 		ByteArrayOutputStream baos = getByteArrayOutputStream(invocation);
 		if (logger.isDebugEnabled()) {
@@ -144,11 +143,12 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 * @return the RemoteInvocationResult object
 	 * @throws IOException if thrown by I/O operations
 	 * @throws ClassNotFoundException if thrown during deserialization
+	 * @throws Exception in case of general errors
 	 * @see #readRemoteInvocationResult(java.io.InputStream, String)
 	 */
 	protected abstract RemoteInvocationResult doExecuteRequest(
 			HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
-			throws IOException, ClassNotFoundException;
+			throws Exception;
 
 	/**
 	 * Deserialize a RemoteInvocationResult object from the given InputStream.
