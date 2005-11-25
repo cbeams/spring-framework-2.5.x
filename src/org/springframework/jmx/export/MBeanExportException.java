@@ -23,7 +23,7 @@ import org.springframework.core.NestedRuntimeException;
  *
  * @author Rob Harrop
  * @since 1.3
- * @see MBeanExporterOperations
+ * @see MBeanExportOperations
  */
 public class MBeanExportException extends NestedRuntimeException {
 

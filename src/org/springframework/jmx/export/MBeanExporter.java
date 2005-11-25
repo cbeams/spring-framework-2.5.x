@@ -31,7 +31,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
-import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.management.modelmbean.ModelMBean;
 import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.RequiredModelMBean;
@@ -84,7 +83,8 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.jmx.export.assembler.MBeanInfoAssembler
  * @see MBeanExporterListener
  */
-public class MBeanExporter extends MBeanRegistrationSupport implements InitializingBean, DisposableBean, MBeanExporterOperations, BeanFactoryAware {
+public class MBeanExporter extends MBeanRegistrationSupport
+		implements InitializingBean, DisposableBean, MBeanExportOperations, BeanFactoryAware {
 
 	/**
 	 * Constant for the JMX <code>mr_type</code> "ObjectReference".
@@ -92,10 +92,11 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	private static final String MR_TYPE_OBJECT_REFERENCE = "ObjectReference";
 
 	/**
-	 * Wildcard used to map a {@link javax.management.NotificationListener} to all MBeans registered by
-	 * the <code>MBeanExporter</code>.
+	 * Wildcard used to map a {@link javax.management.NotificationListener}
+	 * to all MBeans registered by the <code>MBeanExporter</code>.
 	 */
 	private static final String WILDCARD = "*";
+
 
 	/**
 	 * The beans to be exposed as JMX managed resources.
@@ -114,7 +115,6 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 
 	/**
 	 * Indicates whether Spring should expose the managed resource {@link ClassLoader} in the MBean.
-	 * @see #setExposeManagedResourceClassLoader(boolean)
 	 */
 	private boolean exposeManagedResourceClassLoader = false;
 
@@ -149,19 +149,6 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	 */
 	private ListableBeanFactory beanFactory;
 
-	/**
-	 * Set whether to autodetect MBeans in the bean factory that this exporter
-	 * runs in. Will also ask an <code>AutodetectCapableMBeanInfoAssembler</code>
-	 * if available.
-	 * <p>This feature is turned off by default. Explicitly specify "true" here
-	 * to enable autodetection.
-	 * @see #setAssembler
-	 * @see AutodetectCapableMBeanInfoAssembler
-	 * @see org.springframework.jmx.support.JmxUtils#isMBean
-	 */
-	public void setAutodetect(boolean autodetect) {
-		this.autodetect = autodetect;
-	}
 
 	/**
 	 * Supply a <code>Map</code> of beans to be registered with the JMX
@@ -181,6 +168,20 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	 */
 	public void setBeans(Map beans) {
 		this.beans = beans;
+	}
+
+	/**
+	 * Set whether to autodetect MBeans in the bean factory that this exporter
+	 * runs in. Will also ask an <code>AutodetectCapableMBeanInfoAssembler</code>
+	 * if available.
+	 * <p>This feature is turned off by default. Explicitly specify "true" here
+	 * to enable autodetection.
+	 * @see #setAssembler
+	 * @see AutodetectCapableMBeanInfoAssembler
+	 * @see org.springframework.jmx.support.JmxUtils#isMBean
+	 */
+	public void setAutodetect(boolean autodetect) {
+		this.autodetect = autodetect;
 	}
 
 	/**
@@ -253,8 +254,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	}
 
 	/**
-	 * Indicates whether or not the managed resource should be exposed
-	 * as the {@link Thread#getContextClassLoader() context ClassLoader} before allowing
+	 * Indicates whether or not the managed resource should be exposed as the
+	 * {@link Thread#getContextClassLoader() thread context ClassLoader} before allowing
 	 * any invocations on the MBean to occur. Default value is <code>false</code>.
 	 */
 	public void setExposeManagedResourceClassLoader(boolean exposeManagedResourceClassLoader) {
@@ -279,39 +280,58 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	 * Specifying a asterisk (<code>*</code>) will cause the listener to be associated with all
 	 * MBeans registered by this class at startup time.
 	 * <p>The value of each entry is the {@link javax.management.NotificationListener} to register.
-	 * For more advanced options such as registering {@link javax.management.NotificationFilter NotificationFilters}
-	 * and handback objects see {@link #setNotificationListeners(NotificationListenerBean[])}.
-	 * @throws MalformedObjectNameException if one of the supplied {@link ObjectName ObjectNames} is malformed.
+	 * For more advanced options such as registering
+	 * {@link javax.management.NotificationFilter NotificationFilters} and
+	 * handback objects see {@link #setNotificationListeners(NotificationListenerBean[])}.
+	 * @throws MalformedObjectNameException if one of the supplied
+	 * {@link ObjectName ObjectName} instances is malformed
 	 */
 	public void setNotificationListeners(Map listeners) throws MalformedObjectNameException {
 		List notificationListeners = new ArrayList();
 		for (Iterator iterator = listeners.entrySet().iterator(); iterator.hasNext();) {
 			Map.Entry entry = (Map.Entry) iterator.next();
 
-			// get the listener from the map value
+			// Get the listener from the map value.
 			Object value = entry.getValue();
-			if(!(value instanceof NotificationListener)) {
-				throw new IllegalArgumentException("Map entry value [" + value + "] is not a valid NotificationListener.");
+			if (!(value instanceof NotificationListener)) {
+				throw new IllegalArgumentException(
+						"Map entry value [" + value + "] is not a valid NotificationListener");
 			}
 
-			// get the ObjectName from the map value
-			Object key = entry.getKey(); // should be the ObjectName
+			// Get the ObjectName from the map key.
+			Object key = entry.getKey();
 			ObjectName mappedObjectName = null;
 
-			if(!WILDCARD.equals(key)) {
+			if (!WILDCARD.equals(key)) {
 				mappedObjectName = JmxUtils.convertToObjectName(entry.getKey());
 			}
 
-			NotificationListenerBean bean = new NotificationListenerBean((NotificationListener)value);
+			NotificationListenerBean bean = new NotificationListenerBean((NotificationListener) value);
 
-			if(mappedObjectName != null) {
-				// this listener is mapped to a specific ObjectName
+			if (mappedObjectName != null) {
+				// This listener is mapped to a specific ObjectName.
 				bean.setMappedObjectName(mappedObjectName);
 			}
 
 			notificationListeners.add(bean);
 		}
-		this.notificationListeners = (NotificationListenerBean[]) notificationListeners.toArray(new NotificationListenerBean[notificationListeners.size()]);
+		this.notificationListeners = (NotificationListenerBean[])
+				notificationListeners.toArray(new NotificationListenerBean[notificationListeners.size()]);
+	}
+
+
+	//---------------------------------------------------------------------
+	// Lifecycle in bean factory: automatically register/unregister beans
+	//---------------------------------------------------------------------
+
+	/**
+	 * Start bean registration automatically when deployed in an
+	 * <code>ApplicationContext</code>.
+	 * @see #registerBeans()
+	 */
+	public void afterPropertiesSet() {
+		logger.info("Registering beans for JMX exposure on startup");
+		registerBeans();
 	}
 
 	/**
@@ -319,42 +339,44 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	 * when the enclosing <code>ApplicationContext</code> is destroyed.
 	 */
 	public void destroy() {
+		logger.info("Unregistering JMX-exposed beans on shutdown");
 		unregisterBeans();
 	}
 
-	/**
-	 * Start bean registration automatically when deployed in an
-	 * <code>ApplicationContext</code>.
-	 * @see #registerBeans()
-	 */
-	public void afterPropertiesSet() throws JMException {
-		// register the beans now
-		registerBeans();
-	}
 
-	public ObjectName registerManagedResource(Object managedResource) {
+	//---------------------------------------------------------------------
+	// Implementation of MBeanExportOperations interface
+	//---------------------------------------------------------------------
+
+	public ObjectName registerManagedResource(Object managedResource) throws MBeanExportException {
 		try {
 			ObjectName objectName = getObjectName(managedResource, null);
-			if(this.ensureUniqueRuntimeObjectNames) {
+			if (this.ensureUniqueRuntimeObjectNames) {
 				objectName = JmxUtils.appendIdentityToObjectName(objectName, managedResource);
 			}
 			registerManagedResource(managedResource, objectName);
 			return objectName;
 		}
-		catch (MalformedObjectNameException e) {
-			throw new MBeanExportException("Unable to generate ObjectName for managed resource [" + managedResource + "].", e);
+		catch (MalformedObjectNameException ex) {
+			throw new MBeanExportException("Unable to generate ObjectName for MBean [" + managedResource + "]", ex);
 		}
 	}
 
-	public void registerManagedResource(Object managedResource, ObjectName objectName) {
+	public void registerManagedResource(Object managedResource, ObjectName objectName) throws MBeanExportException {
+		Object mbean = createAndConfigureMBean(managedResource, managedResource.getClass().getName());
 		try {
-			Object mbean = createAndConfigureMBean(managedResource, managedResource.getClass().getName());
 			doRegister(mbean, objectName);
 		}
-		catch (JMException e) {
-			throw new MBeanExportException("Unable to register MBean with MBeanServer.", e);
+		catch (JMException ex) {
+			throw new UnableToRegisterMBeanException(
+					"Unable to register MBean [" + managedResource + "] with object name [" + objectName + "]", ex);
 		}
 	}
+
+
+	//---------------------------------------------------------------------
+	// Exporter implementation
+	//---------------------------------------------------------------------
 
 	/**
 	 * Registers the defined beans with the <code>MBeanServer</code>. Each bean is exposed
@@ -408,54 +430,16 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 				Map.Entry entry = (Map.Entry) it.next();
 				String beanKey = (String) entry.getKey();
 				Object value = entry.getValue();
-
 				registerBeanNameOrInstance(value, beanKey);
 			}
 
 			// all MBeans are now registered successfully - go ahead and register the notification listeners
 			registerNotificationListeners();
 		}
-		catch (JMException ex) {
+		catch (MBeanExportException ex) {
 			// Unregister beans already registered by this exporter.
 			unregisterBeans();
-			throw new MBeanExportException("Unable to register MBeans.", ex);
-		}
-	}
-
-	/**
-	 * Registers the configured {@link NotificationListener NotificationListeners} with the {@link MBeanServer}.
-	 */
-	private void registerNotificationListeners() {
-		for (int i = 0; i < this.notificationListeners.length; i++) {
-			NotificationListenerBean bean = this.notificationListeners[i];
-			NotificationListener listener = bean.getNotificationListener();
-			NotificationFilter filter = bean.getNotificationFilter();
-			Object handback = bean.getHandback();
-			ObjectName[] namesToRegisterWith = getObjectNamesForNotificationListener(bean);
-			for (int j = 0; j < namesToRegisterWith.length; j++) {
-				ObjectName objectName = namesToRegisterWith[j];
-				try {
-					this.server.addNotificationListener(objectName, listener, filter, handback);
-				}
-				catch (InstanceNotFoundException e) {
-					throw new MBeanExportException("Unable to register NotificationListener for MBean [" +
-							objectName + "] because that MBean instance does not exist.", e);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Retrieves the {@link javax.management.ObjectName ObjectNames} for which a
-	 * {@link NotificationListener} should be registered.
-	 */
-	private ObjectName[] getObjectNamesForNotificationListener(NotificationListenerBean bean) {
-		ObjectName[] mappedObjectNames = bean.getMappedObjectNames();
-		if(mappedObjectNames == null) {
-			// mapped to all MBeans registered by the MBeanExporter
-			return (ObjectName[]) registeredBeans.toArray(new ObjectName[registeredBeans.size()]);
-		} else {
-			return mappedObjectNames;
+			throw ex;
 		}
 	}
 
@@ -494,64 +478,67 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	 * @param mapValue the value configured for this bean in the beans map.
 	 * May be either the <code>String</code> name of a bean, or the bean itself.
 	 * @return the <code>ObjectName</code> under which the resource was registered
-	 * @throws javax.management.JMException in case of an error in the underlying JMX infrastructure
+	 * @throws MBeanExportException if the export failed
 	 * @see #setBeans
 	 * @see #registerLazyInit
 	 * @see #registerMBean
 	 * @see #registerSimpleBean
 	 */
-	protected ObjectName registerBeanNameOrInstance(Object mapValue, String beanKey)
-			throws JMException {
-		if (mapValue instanceof String) {
-			// Bean name pointing to a potentially lazy-init bean in the factory.
-			if (this.beanFactory == null) {
-				throw new JMException("Cannot resolve bean names if not running in a BeanFactory");
-			}
-
-			String beanName = (String) mapValue;
-			if (isBeanDefinitionLazyInit(this.beanFactory, beanName)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found bean name for lazy init bean with key [" + beanKey +
-							"]. Registering bean with lazy init support.");
+	protected ObjectName registerBeanNameOrInstance(Object mapValue, String beanKey) throws MBeanExportException {
+		try {
+			if (mapValue instanceof String) {
+				// Bean name pointing to a potentially lazy-init bean in the factory.
+				if (this.beanFactory == null) {
+					throw new MBeanExportException("Cannot resolve bean names if not running in a BeanFactory");
 				}
-				return registerLazyInit(beanName, beanKey);
+				String beanName = (String) mapValue;
+				if (isBeanDefinitionLazyInit(this.beanFactory, beanName)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Found bean name for lazy init bean with key [" + beanKey +
+								"]. Registering bean with lazy init support.");
+					}
+					return registerLazyInit(beanName, beanKey);
+				}
+				else {
+					if (logger.isDebugEnabled()) {
+						logger.debug("String value under key [" + beanKey + "] points to a bean that was not " +
+								"registered for lazy initialization. Registering bean normally with JMX server.");
+					}
+					Object bean = this.beanFactory.getBean(beanName);
+					return registerBeanInstance(bean, beanKey);
+				}
 			}
 			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("String value under key [" + beanKey + "] points to a bean that was not " +
-							"registered for lazy initialization. Registering bean normally with JMX server.");
-				}
-				Object bean = this.beanFactory.getBean(beanName);
-				return registerBeanInstance(bean, beanKey);
+				// Plain bean instance -> register it directly.
+				return registerBeanInstance(mapValue, beanKey);
 			}
 		}
-		else {
-			// Plain bean instance -> register it directly.
-			return registerBeanInstance(mapValue, beanKey);
+		catch (JMException ex) {
+			throw new UnableToRegisterMBeanException(
+					"Unable to register MBean [" + mapValue + "] with key [" + beanKey + "]", ex);
 		}
 	}
 
 	/**
 	 * Registers an existing MBean or an MBean adapter for a plain bean
 	 * with the <code>MBeanServer</code>.
-	 * @param beanInstance the bean to register, either an MBean or a plain bean
+	 * @param bean the bean to register, either an MBean or a plain bean
 	 * @param beanKey the key associated with this bean in the beans map
 	 * @return the <code>ObjectName</code> under which the bean was registered
 	 * with the <code>MBeanServer</code>
 	 */
-	private ObjectName registerBeanInstance(Object beanInstance, String beanKey)
-			throws JMException {
-		if (JmxUtils.isMBean(beanInstance.getClass())) {
+	private ObjectName registerBeanInstance(Object bean, String beanKey) throws JMException {
+		if (JmxUtils.isMBean(bean.getClass())) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Located MBean under key [" + beanKey + "]: registering with JMX server");
 			}
-			return registerMBean(beanInstance, beanKey);
+			return registerMBean(bean, beanKey);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Located bean under key [" + beanKey + "] registering with JMX server.");
+				logger.debug("Located simple bean under key [" + beanKey + "]: registering with JMX server");
 			}
-			return registerSimpleBean(beanInstance, beanKey);
+			return registerSimpleBean(bean, beanKey);
 		}
 	}
 
@@ -561,23 +548,14 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	 * @param beanKey the key associated with this bean in the beans map
 	 * @return the <code>ObjectName</code> under which the bean was registered
 	 * with the <code>MBeanServer</code>
-	 * @throws javax.management.JMException an error in the underlying JMX infrastructure
 	 */
 	private ObjectName registerMBean(Object mbean, String beanKey) throws JMException {
-		try {
-			ObjectName objectName = getObjectName(mbean, beanKey);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Registering MBean [" + objectName + "]");
-			}
-			doRegister(mbean, objectName);
-			return objectName;
+		ObjectName objectName = getObjectName(mbean, beanKey);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Registering MBean [" + objectName + "]");
 		}
-		catch (MalformedObjectNameException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Unable to register MBean [" + mbean + "] with key [" + beanKey + "]");
-			}
-			return null;
-		}
+		doRegister(mbean, objectName);
+		return objectName;
 	}
 
 	/**
@@ -588,29 +566,16 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	 * @param beanKey the key associated with this bean in the beans map
 	 * @return the <code>ObjectName</code> under which the bean was registered
 	 * with the <code>MBeanServer</code>
-	 * @throws javax.management.JMException in case of an error in the underlying JMX infrastructure
 	 */
-	private ObjectName registerSimpleBean(Object bean, String beanKey)
-			throws JMException {
+	private ObjectName registerSimpleBean(Object bean, String beanKey) throws JMException {
 		ObjectName objectName = getObjectName(bean, beanKey);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Registering and assembling MBean [" + objectName + "]");
 		}
-
 		ModelMBean mbean = createAndConfigureMBean(bean, beanKey);
 		doRegister(mbean, objectName);
 		injectNotificationPublisherIfNecessary(bean, mbean);
 		return objectName;
-	}
-
-	/**
-	 * If the supplied managed resource implements the {@link NotificationPublisherAware} an instance of
-	 * {@link org.springframework.jmx.export.notification.NotificationPublisher} is injected.
-	 */
-	private void injectNotificationPublisherIfNecessary(Object managedResource, ModelMBean modelMBean) {
-		if (managedResource instanceof NotificationPublisherAware) {
-		  ((NotificationPublisherAware)managedResource).setNotificationPublisher(new ModelMBeanNotificationPublisher(modelMBean));
-		}
 	}
 
 	/**
@@ -620,11 +585,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	 * @param beanKey the key associated with this bean in the beans map
 	 * @return the <code>ObjectName</code> under which the bean was registered
 	 * with the <code>MBeanServer</code>
-	 * @throws javax.management.JMException an error in the underlying JMX infrastructure
 	 */
-	private ObjectName registerLazyInit(String beanName, String beanKey)
-			throws JMException {
-
+	private ObjectName registerLazyInit(String beanName, String beanKey) throws JMException {
 		NotificationPublisherAwareLazyTargetSource targetSource = new NotificationPublisherAwareLazyTargetSource();
 		targetSource.setTargetBeanName(beanName);
 		targetSource.setBeanFactory(this.beanFactory);
@@ -655,7 +617,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	 * @param bean the name of the bean in the <code>BeanFactory</code>
 	 * @param beanKey the key associated with the bean in the beans map
 	 * @return the <code>ObjectName</code> for the supplied bean
-	 * @throws javax.management.MalformedObjectNameException if the retrieved <code>ObjectName</code> is malformed.
+	 * @throws javax.management.MalformedObjectNameException
+	 * if the retrieved <code>ObjectName</code> is malformed
 	 */
 	protected ObjectName getObjectName(Object bean, String beanKey) throws MalformedObjectNameException {
 		if (bean instanceof SelfNaming) {
@@ -670,16 +633,17 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	 * Creates an MBean that is configured with the appropriate management interface
 	 * for the supplied managed resource.
 	 */
-	protected ModelMBean createAndConfigureMBean(Object managedResource, String beanKey) throws JMException {
+	protected ModelMBean createAndConfigureMBean(Object managedResource, String beanKey)
+			throws MBeanExportException {
 		try {
 			ModelMBean mbean = createModelMBean();
 			mbean.setModelMBeanInfo(getMBeanInfo(managedResource, beanKey));
 			mbean.setManagedResource(managedResource, MR_TYPE_OBJECT_REFERENCE);
 			return mbean;
 		}
-		catch (InvalidTargetObjectTypeException e) {
-			throw new MBeanExportException("A serious error has occured in the Spring Framework" +
-					" preventing registration of this MBean. Please report this immediately.", e);
+		catch (Exception ex) {
+			throw new MBeanExportException("Could not create ModelMBean for managed resource [" +
+					managedResource + "] with key [" + beanKey + "]", ex);
 		}
 	}
 
@@ -692,23 +656,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 	 * @throws javax.management.MBeanException if creation of the ModelMBean failed
 	 */
 	protected ModelMBean createModelMBean() throws MBeanException {
-		return this.exposeManagedResourceClassLoader ? new SpringModelMBean() : new RequiredModelMBean();
-	}
-
-	/**
-	 * Called when an MBean is registered. Notifies all registered {@link MBeanExporterListener MBeanExporterListeners}
-	 * of the registration event.
-	 */
-	protected void onRegister(ObjectName objectName) {
-		notifyListenersOfRegistration(objectName);
-	}
-
-	/**
-	 * Called when an MBean is registered. Notifies all registered {@link MBeanExporterListener MBeanExporterListeners}
-	 * of the unregistration event.
-	 */
-	protected void onUnregister(ObjectName objectName) {
-		notifyListenersOfUnregistration(objectName);
+		return (this.exposeManagedResourceClassLoader ? new SpringModelMBean() : new RequiredModelMBean());
 	}
 
 	/**
@@ -725,31 +673,10 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 		return info;
 	}
 
-	/**
-	 * Notifies all registered {@link MBeanExporterListener MBeanExporterListeners} of the
-	 * registration of the MBean identified by the supplied {@link ObjectName}.
-	 */
-	private void notifyListenersOfRegistration(ObjectName objectName) {
-		if (listeners != null) {
-			for (int i = 0; i < listeners.length; i++) {
-				MBeanExporterListener listener = listeners[i];
-				listener.mbeanRegistered(objectName);
-			}
-		}
-	}
 
-	/**
-	 * Notifies all registered {@link MBeanExporterListener MBeanExporterListeners} of the
-	 * unregistration of the MBean identified by the supplied {@link ObjectName}.
-	 */
-	private void notifyListenersOfUnregistration(ObjectName objectName) {
-		if (listeners != null) {
-			for (int i = 0; i < listeners.length; i++) {
-				MBeanExporterListener listener = listeners[i];
-				listener.mbeanUnregistered(objectName);
-			}
-		}
-	}
+	//---------------------------------------------------------------------
+	// Autodetection process
+	//---------------------------------------------------------------------
 
 	/**
 	 * Invoked when using an <code>AutodetectCapableMBeanInfoAssembler</code>.
@@ -820,21 +747,124 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 		return (Arrays.binarySearch(this.excludedBeans, beanName) > -1);
 	}
 
+
+	//---------------------------------------------------------------------
+	// Management of notification listeners
+	//---------------------------------------------------------------------
+
+	/**
+	 * If the supplied managed resource implements the {@link NotificationPublisherAware} an instance of
+	 * {@link org.springframework.jmx.export.notification.NotificationPublisher} is injected.
+	 */
+	private void injectNotificationPublisherIfNecessary(Object managedResource, ModelMBean modelMBean) {
+		if (managedResource instanceof NotificationPublisherAware) {
+		  ((NotificationPublisherAware) managedResource).setNotificationPublisher(
+					new ModelMBeanNotificationPublisher(modelMBean));
+		}
+	}
+
+	/**
+	 * Registers the configured {@link NotificationListener NotificationListeners}
+	 * with the {@link MBeanServer}.
+	 */
+	private void registerNotificationListeners() {
+		for (int i = 0; i < this.notificationListeners.length; i++) {
+			NotificationListenerBean bean = this.notificationListeners[i];
+			NotificationListener listener = bean.getNotificationListener();
+			NotificationFilter filter = bean.getNotificationFilter();
+			Object handback = bean.getHandback();
+			ObjectName[] namesToRegisterWith = getObjectNamesForNotificationListener(bean);
+			for (int j = 0; j < namesToRegisterWith.length; j++) {
+				ObjectName objectName = namesToRegisterWith[j];
+				try {
+					this.server.addNotificationListener(objectName, listener, filter, handback);
+				}
+				catch (InstanceNotFoundException ex) {
+					throw new MBeanExportException("Unable to register NotificationListener for MBean [" +
+							objectName + "] because that MBean instance does not exist", ex);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Retrieves the {@link javax.management.ObjectName ObjectNames} for which a
+	 * {@link NotificationListener} should be registered.
+	 */
+	private ObjectName[] getObjectNamesForNotificationListener(NotificationListenerBean bean) {
+		ObjectName[] mappedObjectNames = bean.getMappedObjectNames();
+		if (mappedObjectNames == null) {
+			// Mapped to all MBeans registered by the MBeanExporter.
+			return (ObjectName[]) this.registeredBeans.toArray(new ObjectName[this.registeredBeans.size()]);
+		}
+		else {
+			return mappedObjectNames;
+		}
+	}
+
+	/**
+	 * Called when an MBean is registered. Notifies all registered
+	 * {@link MBeanExporterListener MBeanExporterListeners} of the registration event.
+	 */
+	protected void onRegister(ObjectName objectName) {
+		notifyListenersOfRegistration(objectName);
+	}
+
+	/**
+	 * Called when an MBean is registered. Notifies all registered
+	 * {@link MBeanExporterListener MBeanExporterListeners} of the unregistration event.
+	 */
+	protected void onUnregister(ObjectName objectName) {
+		notifyListenersOfUnregistration(objectName);
+	}
+
+	/**
+	 * Notifies all registered {@link MBeanExporterListener MBeanExporterListeners} of the
+	 * registration of the MBean identified by the supplied {@link ObjectName}.
+	 */
+	private void notifyListenersOfRegistration(ObjectName objectName) {
+		if (this.listeners != null) {
+			for (int i = 0; i < this.listeners.length; i++) {
+				this.listeners[i].mbeanRegistered(objectName);
+			}
+		}
+	}
+
+	/**
+	 * Notifies all registered {@link MBeanExporterListener MBeanExporterListeners} of the
+	 * unregistration of the MBean identified by the supplied {@link ObjectName}.
+	 */
+	private void notifyListenersOfUnregistration(ObjectName objectName) {
+		if (this.listeners != null) {
+			for (int i = 0; i < this.listeners.length; i++) {
+				this.listeners[i].mbeanUnregistered(objectName);
+			}
+		}
+	}
+
+
+	//---------------------------------------------------------------------
+	// Inner classes for internal use
+	//---------------------------------------------------------------------
+
 	/**
 	 * Internal callback interface for the autodetection process.
 	 */
 	private static interface AutodetectCallback {
+
 		/**
 		 * Called during the autodetection process to decide whether
-		 * or not a bean should be include.
+		 * or not a bean should be included.
 		 * @param beanClass the class of the bean
 		 * @param beanName the name of the bean
 		 */
 		boolean include(Class beanClass, String beanName);
 	}
 
+
 	/**
-	 * Extension of {@link LazyInitTargetSource} that will inject a {@link org.springframework.jmx.export.notification.NotificationPublisher}
+	 * Extension of {@link LazyInitTargetSource} that will inject a
+	 * {@link org.springframework.jmx.export.notification.NotificationPublisher}
 	 * into the lazy resource as it is created if required.
 	 */
 	private class NotificationPublisherAwareLazyTargetSource extends LazyInitTargetSource {
@@ -846,8 +876,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements Initializ
 		}
 
 		protected void postProcessTargetObject(Object targetObject) {
-			injectNotificationPublisherIfNecessary(targetObject, modelMBean);
+			injectNotificationPublisherIfNecessary(targetObject, this.modelMBean);
 		}
 	}
-}
 
+}
