@@ -17,20 +17,22 @@
 package org.springframework.jmx.export.notification;
 
 /**
- * Interface to be implemented by any Spring-managed resource that is to be registered with an
- * {@link javax.management.MBeanServer} and wishes to send JMX
- * {@link javax.management.Notification javax.management.Notifications}.
- * <p/>
- * Provides Spring-created managed resources with a {@link NotificationPublisher} as soon as they are registered with
- * the {@link javax.management.MBeanServer}.
+ * Interface to be implemented by any Spring-managed resource that is to be
+ * registered with an {@link javax.management.MBeanServer} and wishes to send
+ * JMX {@link javax.management.Notification javax.management.Notifications}.
+ *
+ * <p>Provides Spring-created managed resources with a {@link NotificationPublisher}
+ * as soon as they are registered with the {@link javax.management.MBeanServer}.
  *
  * @author Rob Harrop
+ * @since 1.3
  * @see NotificationPublisher
  */
 public interface NotificationPublisherAware {
 
 	/**
-	 * Sets the {@link NotificationPublisher} instance for the current managed resource instance.
+	 * Set the {@link NotificationPublisher} instance for the current managed resource instance.
 	 */
 	void setNotificationPublisher(NotificationPublisher notificationPublisher);
+
 }

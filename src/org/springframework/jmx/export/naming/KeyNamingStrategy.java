@@ -75,6 +75,7 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 	 */
 	private Properties mergedMappings;
 
+
 	/**
 	 * Set local properties, containing object name mappings, e.g. via
 	 * the "props" tag in XML bean definitions. These can be considered
@@ -99,6 +100,7 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 	public void setMappingLocations(Resource[] mappingLocations) {
 		this.mappingLocations = mappingLocations;
 	}
+
 
 	/**
 	 * Merges the <code>Properties</code> configured in the <code>mappings</code> and
@@ -133,6 +135,7 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 			}
 		}
 	}
+	
 
 	/**
 	 * Attempts to retrieve the <code>ObjectName</code> via the given key, trying to

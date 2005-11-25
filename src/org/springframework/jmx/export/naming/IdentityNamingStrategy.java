@@ -16,14 +16,14 @@
 
 package org.springframework.jmx.export.naming;
 
+import java.util.Hashtable;
+
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-
-import java.util.Hashtable;
 
 /**
  * An implementation of the <code>ObjectNamingStrategy</code> interface that
@@ -40,6 +40,7 @@ public class IdentityNamingStrategy implements ObjectNamingStrategy {
 	public static final String TYPE_KEY = "type";
 
 	public static final String HASH_CODE_KEY = "hashCode";
+
 
 	/**
 	 * Returns an instance of <code>ObjectName</code> based on the identity

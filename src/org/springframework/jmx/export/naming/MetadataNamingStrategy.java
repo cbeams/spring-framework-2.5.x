@@ -40,6 +40,7 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy {
 	 */
 	private JmxAttributeSource attributeSource;
 
+
 	/**
 	 * Set the implementation of the <code>JmxAttributeSource</code> interface to use
 	 * when reading the source level metadata.
@@ -47,6 +48,7 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy {
 	public void setAttributeSource(JmxAttributeSource attributeSource) {
 		this.attributeSource = attributeSource;
 	}
+
 
 	/**
 	 * Reads the <code>ObjectName</code> from the source level metadata associated

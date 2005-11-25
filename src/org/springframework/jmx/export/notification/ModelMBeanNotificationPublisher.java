@@ -16,43 +16,47 @@
 
 package org.springframework.jmx.export.notification;
 
-import org.springframework.util.Assert;
-
 import javax.management.AttributeChangeNotification;
 import javax.management.MBeanException;
 import javax.management.Notification;
 import javax.management.modelmbean.ModelMBean;
 
+import org.springframework.util.Assert;
+
 /**
- * Implementation of the {@link NotificationPublisher} interface that uses the infrastructure provided the
- * {@link ModelMBean} interface to track {@link javax.management.NotificationListener javax.management.NotificationListeners}
+ * Implementation of the {@link NotificationPublisher} interface that uses
+ * the infrastructure provided the {@link ModelMBean} interface to track
+ * {@link javax.management.NotificationListener javax.management.NotificationListeners}
  * and send {@link Notification Notifications} to those listeners.
  *
  * @author Rob Harrop
+ * @since 1.3
  * @see ModelMBean
  * @see NotificationPublisherAware
  */
 public class ModelMBeanNotificationPublisher implements NotificationPublisher {
 
 	/**
-	 * The {@link ModelMBean} instance wrapping the managed resource into which this <code>NotificationPublisher</code>
-	 * will be injected.
+	 * The {@link ModelMBean} instance wrapping the managed resource into which this
+	 * <code>NotificationPublisher</code> will be injected.
 	 */
-	private ModelMBean modelMBean;
+	private final ModelMBean modelMBean;
+
 
 	/**
-	 * Creates a new <code>ModelMBeanNotificationPublisher</code> that will publish all {@link javax.management.Notification Notifications}
-	 * to the supplied {@link ModelMBean}.
+	 * Creates a new <code>ModelMBeanNotificationPublisher</code> that will publish all
+	 * {@link javax.management.Notification Notifications} to the supplied {@link ModelMBean}.
 	 */
 	public ModelMBeanNotificationPublisher(ModelMBean modelMBean) {
 		this.modelMBean = modelMBean;
 	}
 
+
 	/**
 	 * Sends the supplied {@link Notification} using the wrapped {@link ModelMBean} instance.
 	 */
 	public void sendNotification(Notification notification) {
-		Assert.notNull(notification, "Notification cannot be null.");
+		Assert.notNull(notification, "Notification must not be null");
 		try {
 			if (notification instanceof AttributeChangeNotification) {
 				this.modelMBean.sendAttributeChangeNotification((AttributeChangeNotification) notification);
@@ -61,8 +65,8 @@ public class ModelMBeanNotificationPublisher implements NotificationPublisher {
 				this.modelMBean.sendNotification(notification);
 			}
 		}
-		catch (MBeanException e) {
-			throw new UnableToSendNotificationException("Unable to send notification.", e);
+		catch (MBeanException ex) {
+			throw new UnableToSendNotificationException("Unable to send notification [" + notification + "]", ex);
 		}
 	}
 }

@@ -16,25 +16,25 @@
 
 package org.springframework.jmx.export;
 
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
+import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
 import javax.management.ReflectionException;
 import javax.management.RuntimeOperationsException;
-import javax.management.AttributeNotFoundException;
-import javax.management.AttributeList;
-import javax.management.Attribute;
-import javax.management.InvalidAttributeValueException;
 import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.RequiredModelMBean;
 
 /**
  * Extension of the {@link RequiredModelMBean} class that ensures the
- * {@link Thread#getContextClassLoader() context ClassLoader} is switched
- * for the managed resources {@link ClassLoader} before any invocations
- * occur.
+ * {@link Thread#getContextClassLoader() thread context ClassLoader} is switched
+ * for the managed resources {@link ClassLoader} before any invocations occur.
  *
  * @author Rob Harrop
+ * @since 1.3
  * @see RequiredModelMBean
  */
 public class SpringModelMBean extends RequiredModelMBean {
@@ -45,29 +45,43 @@ public class SpringModelMBean extends RequiredModelMBean {
 	 */
 	private ClassLoader managedResourceClassLoader = Thread.currentThread().getContextClassLoader();
 
+
+	/**
+	 * Construct a new SpringModelMBean instance with an empty {@link ModelMBeanInfo}.
+	 * @see javax.management.modelmbean.RequiredModelMBean#RequiredModelMBean()
+	 */
 	public SpringModelMBean() throws MBeanException, RuntimeOperationsException {
+		super();
 	}
 
-	public SpringModelMBean(ModelMBeanInfo mbi) throws MBeanException, RuntimeOperationsException {
+	/**
+	 * Construct a new SpringModelMBean instance with the given {@link ModelMBeanInfo}.
+	 * @see javax.management.modelmbean.RequiredModelMBean#RequiredModelMBean(ModelMBeanInfo)
+	 */
+	public SpringModelMBean(ModelMBeanInfo mbi) throws MBeanException, RuntimeOperationsException  {
 		super(mbi);
 	}
+
 
 	/**
 	 * Sets managed resource to expose and stores its {@link ClassLoader}.
 	 */
-	public void setManagedResource(Object managedResource, String managedResourceType) throws MBeanException, RuntimeOperationsException, InstanceNotFoundException, InvalidTargetObjectTypeException {
+	public void setManagedResource(Object managedResource, String managedResourceType)
+			throws MBeanException, InstanceNotFoundException, InvalidTargetObjectTypeException {
+
 		this.managedResourceClassLoader = managedResource.getClass().getClassLoader();
 		super.setManagedResource(managedResource, managedResourceType);
 	}
 
+
 	/**
-	 * Switches the {@link Thread#getContextClassLoader() context ClassLoader} for
-	 * the managed resources {@link ClassLoader} before allowing the invocation to
-	 * occur.
+	 * Switches the {@link Thread#getContextClassLoader() context ClassLoader} for the
+	 * managed resources {@link ClassLoader} before allowing the invocation to occur.
 	 * @see javax.management.modelmbean.ModelMBean#invoke
-	 * @see #managedResourceClassLoader
 	 */
-	public Object invoke(final String opName, final Object[] opArgs, final String[] sig) throws MBeanException, ReflectionException {
+	public Object invoke(final String opName, final Object[] opArgs, final String[] sig)
+			throws MBeanException, ReflectionException {
+
 		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(this.managedResourceClassLoader);
@@ -79,13 +93,13 @@ public class SpringModelMBean extends RequiredModelMBean {
 	}
 
 	/**
-	 * Switches the {@link Thread#getContextClassLoader() context ClassLoader} for
-	 * the managed resources {@link ClassLoader} before allowing the invocation to
-	 * occur.
+	 * Switches the {@link Thread#getContextClassLoader() context ClassLoader} for the
+	 * managed resources {@link ClassLoader} before allowing the invocation to occur.
 	 * @see javax.management.modelmbean.ModelMBean#getAttribute
-	 * @see #managedResourceClassLoader
 	 */
-	public Object getAttribute(final String attrName) throws AttributeNotFoundException, MBeanException, ReflectionException {
+	public Object getAttribute(final String attrName)
+			throws AttributeNotFoundException, MBeanException, ReflectionException {
+
 		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(this.managedResourceClassLoader);
@@ -97,11 +111,9 @@ public class SpringModelMBean extends RequiredModelMBean {
 	}
 
 	/**
-	 * Switches the {@link Thread#getContextClassLoader() context ClassLoader} for
-	 * the managed resources {@link ClassLoader} before allowing the invocation to
-	 * occur.
+	 * Switches the {@link Thread#getContextClassLoader() context ClassLoader} for the
+	 * managed resources {@link ClassLoader} before allowing the invocation to occur.
 	 * @see javax.management.modelmbean.ModelMBean#getAttributes
-	 * @see #managedResourceClassLoader
 	 */
 	public AttributeList getAttributes(String[] attrNames) {
 		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
@@ -115,13 +127,13 @@ public class SpringModelMBean extends RequiredModelMBean {
 	}
 
 	/**
-	 * Switches the {@link Thread#getContextClassLoader() context ClassLoader} for
-	 * the managed resources {@link ClassLoader} before allowing the invocation to
-	 * occur.
+	 * Switches the {@link Thread#getContextClassLoader() context ClassLoader} for the
+	 * managed resources {@link ClassLoader} before allowing the invocation to occur.
 	 * @see javax.management.modelmbean.ModelMBean#setAttribute
-	 * @see #managedResourceClassLoader
 	 */
-	public void setAttribute(Attribute attribute) throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
+	public void setAttribute(Attribute attribute)
+			throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
+
 		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(this.managedResourceClassLoader);
@@ -133,11 +145,9 @@ public class SpringModelMBean extends RequiredModelMBean {
 	}
 
 	/**
-	 * Switches the {@link Thread#getContextClassLoader() context ClassLoader} for
-	 * the managed resources {@link ClassLoader} before allowing the invocation to
-	 * occur.
+	 * Switches the {@link Thread#getContextClassLoader() context ClassLoader} for the
+	 * managed resources {@link ClassLoader} before allowing the invocation to occur.
 	 * @see javax.management.modelmbean.ModelMBean#setAttributes
-	 * @see #managedResourceClassLoader
 	 */
 	public AttributeList setAttributes(AttributeList attributes) {
 		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
