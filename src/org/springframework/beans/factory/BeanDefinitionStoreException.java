@@ -33,6 +33,7 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 
 	private String beanName;
 
+
 	/**
 	 * Create a new BeanDefinitionStoreException.
 	 * @param msg the detail message
@@ -97,6 +98,7 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 		this.resourceDescription = resourceDescription;
 		this.beanName = beanName;
 	}
+
 
 	/**
 	 * Return the description of the resource that the bean

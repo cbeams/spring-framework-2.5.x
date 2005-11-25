@@ -30,6 +30,7 @@ public class BeanCreationException extends FatalBeanException {
 
 	private String beanName;
 
+
 	/**
 	 * Create a new BeanCreationException.
 	 * @param msg the detail message
@@ -90,6 +91,7 @@ public class BeanCreationException extends FatalBeanException {
 		this.resourceDescription = resourceDescription;
 		this.beanName = beanName;
 	}
+
 
 	/**
 	 * Return the description of the resource that the bean

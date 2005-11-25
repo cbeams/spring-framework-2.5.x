@@ -32,7 +32,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	public static final String ERROR_CODE = "typeMismatch";
 
 
-	private final Class requiredType;
+	private Class requiredType;
 
 
 	/**
@@ -61,6 +61,7 @@ public class TypeMismatchException extends PropertyAccessException {
 				ex);
 		this.requiredType = requiredType;
 	}
+
 
 	/**
 	 * Return the required target type.

@@ -35,22 +35,24 @@ import java.io.PrintWriter;
 public class PropertyAccessExceptionsException extends BeansException {
 
 	/** BeanWrapper wrapping the target object for binding */
-	private final BeanWrapper beanWrapper;
+	private BeanWrapper beanWrapper;
 
 	/** List of PropertyAccessException objects */
-	private final PropertyAccessException[] propertyAccessExceptions;
+	private PropertyAccessException[] propertyAccessExceptions;
+
 
 	/**
 	 * Create a new PropertyAccessExceptionsException.
 	 * @param beanWrapper the BeanWrapper that wraps the target object
 	 * @param propertyAccessExceptions the List of PropertyAccessExceptions
 	 */
-	public PropertyAccessExceptionsException(BeanWrapper beanWrapper,
-																					 PropertyAccessException[] propertyAccessExceptions) {
+	public PropertyAccessExceptionsException(
+			BeanWrapper beanWrapper, PropertyAccessException[] propertyAccessExceptions) {
 		super("");
 		this.beanWrapper = beanWrapper;
 		this.propertyAccessExceptions = propertyAccessExceptions;
 	}
+
 
 	/**
 	 * Return the BeanWrapper that generated this exception.
@@ -93,6 +95,7 @@ public class PropertyAccessExceptionsException extends BeansException {
 		}
 		return null;
 	}
+
 
 	public String getMessage() {
 		StringBuffer sb = new StringBuffer();

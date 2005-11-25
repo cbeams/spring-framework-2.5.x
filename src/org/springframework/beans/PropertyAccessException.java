@@ -28,7 +28,7 @@ import org.springframework.core.ErrorCoded;
  */
 public abstract class PropertyAccessException extends BeansException implements ErrorCoded {
 
-	private final PropertyChangeEvent propertyChangeEvent;
+	private PropertyChangeEvent propertyChangeEvent;
 	
 
 	/**
@@ -51,6 +51,7 @@ public abstract class PropertyAccessException extends BeansException implements 
 		super(msg, ex);
 		this.propertyChangeEvent = propertyChangeEvent;
 	}
+
 
 	/**
 	 * Return the PropertyChangeEvent that resulted in the problem.

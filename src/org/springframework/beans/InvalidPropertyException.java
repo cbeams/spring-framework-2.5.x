@@ -25,9 +25,9 @@ package org.springframework.beans;
  */
 public class InvalidPropertyException extends FatalBeanException {
 
-	private final Class beanClass;
+	private Class beanClass;
 
-	private final String propertyName;
+	private String propertyName;
 
 
 	/**
