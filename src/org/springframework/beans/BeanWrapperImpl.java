@@ -26,17 +26,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -65,8 +63,6 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @author Alef Arendsen
- * @author Arjen Poutsma
  * @since 15 April 2001
  * @see #registerCustomEditor
  * @see #setPropertyValues
@@ -78,11 +74,8 @@ import org.springframework.util.StringUtils;
  */
 public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements BeanWrapper {
 
-	private static final int MAXIMUM_PROPERTY_DISTANCE = 2;
-
-
 	/**
-	 * We'll create a lot of these objects, so we don't want a new logger every time
+	 * We'll create a lot of these objects, so we don't want a new logger every time.
 	 */
 	private static final Log logger = LogFactory.getLog(BeanWrapperImpl.class);
 
@@ -107,10 +100,6 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	 */
 	private Map nestedBeanWrappers;
 
-
-	//---------------------------------------------------------------------
-	// Constructors
-	//---------------------------------------------------------------------
 
 	/**
 	 * Create new empty BeanWrapperImpl. Wrapped instance needs to be set afterwards.
@@ -176,7 +165,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 
 
 	//---------------------------------------------------------------------
-	// Implementation of BeanWrapper
+	// Implementation of BeanWrapper interface
 	//---------------------------------------------------------------------
 
 	/**
@@ -251,6 +240,111 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 
 	public void setExtractOldValueForEditor(boolean extractOldValueForEditor) {
 		this.extractOldValueForEditor = extractOldValueForEditor;
+	}
+
+
+	public PropertyDescriptor[] getPropertyDescriptors() {
+		return this.cachedIntrospectionResults.getBeanInfo().getPropertyDescriptors();
+	}
+
+	public PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
+		if (propertyName == null) {
+			throw new IllegalArgumentException("Can't find property descriptor for <code>null</code> property");
+		}
+		PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+		if (pd != null) {
+			return pd;
+		}
+		else {
+			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
+					"No property '" + propertyName + "' found");
+		}
+	}
+
+	/**
+	 * Internal version of getPropertyDescriptor:
+	 * Returns null if not found rather than throwing an exception.
+	 */
+	protected PropertyDescriptor getPropertyDescriptorInternal(String propertyName) throws BeansException {
+		Assert.state(this.object != null, "BeanWrapper does not hold a bean instance");
+		BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyName);
+		return nestedBw.cachedIntrospectionResults.getPropertyDescriptor(getFinalPath(nestedBw, propertyName));
+	}
+
+	public boolean isReadableProperty(String propertyName) {
+		// This is a programming error, although asking for a property
+		// that doesn't exist is not.
+		if (propertyName == null) {
+			throw new IllegalArgumentException("Can't find readability status for <code>null</code> property");
+		}
+		try {
+			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+			if (pd != null) {
+				if (pd.getReadMethod() != null) {
+					return true;
+				}
+			}
+			else {
+				// maybe an indexed/mapped property
+				getPropertyValue(propertyName);
+				return true;
+			}
+		}
+		catch (InvalidPropertyException ex) {
+			// cannot be evaluated, so can't be readable
+		}
+		return false;
+	}
+
+	public boolean isWritableProperty(String propertyName) {
+		// This is a programming error, although asking for a property
+		// that doesn't exist is not.
+		if (propertyName == null) {
+			throw new IllegalArgumentException("Can't find writability status for <code>null</code> property");
+		}
+		try {
+			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+			if (pd != null) {
+				if (pd.getWriteMethod() != null) {
+					return true;
+				}
+			}
+			else {
+				// maybe an indexed/mapped property
+				getPropertyValue(propertyName);
+				return true;
+			}
+		}
+		catch (InvalidPropertyException ex) {
+			// cannot be evaluated, so can't be writable
+		}
+		return false;
+	}
+
+	public Class getPropertyType(String propertyName) throws BeansException {
+		try {
+			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+			if (pd != null) {
+				return pd.getPropertyType();
+			}
+			else {
+				// Maybe an indexed/mapped property...
+				Object value = getPropertyValue(propertyName);
+				if (value != null) {
+					return value.getClass();
+				}
+				// Check to see if there is a custom editor,
+				// which might give an indication on the desired target type.
+				Class editorType = guessPropertyTypeFromEditors(propertyName);
+				if (editorType != null) {
+					return editorType;
+				}
+			}
+		}
+		catch (InvalidPropertyException ex) {
+			// Consider as not determinable.
+		}
+		return null;
 	}
 
 
@@ -379,6 +473,10 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 		return tokens;
 	}
 
+
+	//---------------------------------------------------------------------
+	// Implementation of PropertyAccessor interface
+	//---------------------------------------------------------------------
 
 	public Object getPropertyValue(String propertyName) throws BeansException {
 		BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyName);
@@ -571,9 +669,10 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 		else {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
 			if (pd == null || pd.getWriteMethod() == null) {
-				Class rootClass = getRootClass();
-				String[] possibleMatches = determinePropertyAlternatives(rootClass, propertyName);
-				throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName, possibleMatches);
+				PropertyMatches matches = PropertyMatches.forProperty(propertyName, getRootClass());
+				throw new NotWritablePropertyException(
+						getRootClass(), this.nestedPath + propertyName,
+						matches.buildErrorMessage(), matches.getPossibleMatches());
 			}
 
 			Method readMethod = pd.getReadMethod();
@@ -631,66 +730,6 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 		}
 	}
 	
-	/**
-	 * Generated possible property alternatives for the given property and
-	 * class. Internally uses the <code>getStringDistance()</code>, in its
-	 * turn using a Levenshtein algorithm to determine distances between
-	 * string. The maximum distance is defined in the MAXIMUM_PROPERTY_DISTANCE
-	 * constant.
-	 * @see #MAXIMUM_PROPERTY_DISTANCE
-	 * @see #getStringDistance(String, String)
-	 */
-	private String[] determinePropertyAlternatives(Class rootClass, String propertyName) {
-		PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(rootClass);
-		
-		List possibleAlternatives = new ArrayList();		
-		for (int i = 0; i < propertyDescriptors.length; i++) {
-			if (isWritableProperty(propertyDescriptors[i].getName())) {
-				String possibleAlternative = propertyDescriptors[i].getName();
-				if (getStringDistance(propertyName, possibleAlternative) <= MAXIMUM_PROPERTY_DISTANCE) {
-					possibleAlternatives.add(possibleAlternative);
-				}
-			}
-		}
-		Collections.sort(possibleAlternatives);
-		return (String[]) possibleAlternatives.toArray(new String[possibleAlternatives.size()]);
-	}
-
-	private int getStringDistance(String s, String t) {
-		if (s.length() == 0) {
-			return t.length();
-		}
-		if (t.length() == 0) {
-			return s.length();
-		}
-		int d[][] = new int[s.length() + 1][t.length() + 1];
-
-		for (int i = 0; i <= s.length(); i++) {
-			d[i][0] = i;
-		}
-		for (int j = 0; j <= t.length(); j++) {
-			d[0][j] = j;
-		}
-
-		for (int i = 1; i <= s.length(); i++) {
-			char s_i = s.charAt(i - 1);
-			for (int j = 1; j <= t.length(); j++) {
-				int cost;				
-				char t_j = t.charAt(j - 1);
-				if (s_i == t_j) {
-					cost = 0;
-				} else {
-					cost = 1;
-				}
-				d[i][j] = Math.min(Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1),
-						d[i - 1][j - 1] + cost);
-			}
-		}
-
-		return d[s.length()][t.length()];
-
-	}
-
 	public void setPropertyValue(PropertyValue pv) throws BeansException {
 		setPropertyValue(pv.getName(), pv.getValue());
 	}
@@ -916,117 +955,16 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	}
 
 
-	public PropertyDescriptor[] getPropertyDescriptors() {
-		return this.cachedIntrospectionResults.getBeanInfo().getPropertyDescriptors();
-	}
-
-	public PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
-		if (propertyName == null) {
-			throw new IllegalArgumentException("Can't find property descriptor for <code>null</code> property");
-		}
-		PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
-		if (pd != null) {
-			return pd;
-		}
-		else {
-			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
-					"No property '" + propertyName + "' found");
-		}
-	}
-
-	/**
-	 * Internal version of getPropertyDescriptor:
-	 * Returns null if not found rather than throwing an exception.
-	 */
-	protected PropertyDescriptor getPropertyDescriptorInternal(String propertyName) throws BeansException {
-		Assert.state(this.object != null, "BeanWrapper does not hold a bean instance");
-		BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyName);
-		return nestedBw.cachedIntrospectionResults.getPropertyDescriptor(getFinalPath(nestedBw, propertyName));
-	}
-	
-	public boolean isReadableProperty(String propertyName) {
-		// This is a programming error, although asking for a property
-		// that doesn't exist is not.
-		if (propertyName == null) {
-			throw new IllegalArgumentException("Can't find readability status for <code>null</code> property");
-		}
-		try {
-			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
-			if (pd != null) {
-				if (pd.getReadMethod() != null) {
-					return true;
-				}
-			}
-			else {
-				// maybe an indexed/mapped property
-				getPropertyValue(propertyName);
-				return true;
-			}
-		}
-		catch (InvalidPropertyException ex) {
-			// cannot be evaluated, so can't be readable
-		}
-		return false;
-	}
-
-	public boolean isWritableProperty(String propertyName) {
-		// This is a programming error, although asking for a property
-		// that doesn't exist is not.
-		if (propertyName == null) {
-			throw new IllegalArgumentException("Can't find writability status for <code>null</code> property");
-		}
-		try {
-			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
-			if (pd != null) {
-				if (pd.getWriteMethod() != null) {
-					return true;
-				}
-			}
-			else {
-				// maybe an indexed/mapped property
-				getPropertyValue(propertyName);
-				return true;
-			}
-		}
-		catch (InvalidPropertyException ex) {
-			// cannot be evaluated, so can't be writable
-		}
-		return false;
-	}
-
-	public Class getPropertyType(String propertyName) throws BeansException {
-		try {
-			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
-			if (pd != null) {
-				return pd.getPropertyType();
-			}
-			else {
-				// Maybe an indexed/mapped property...
-				Object value = getPropertyValue(propertyName);
-				if (value != null) {
-					return value.getClass();
-				}
-				// Check to see if there is a custom editor,
-				// which might give an indication on the desired target type.
-				Class editorType = guessPropertyTypeFromEditors(propertyName);
-				if (editorType != null) {
-					return editorType;
-				}
-			}
-		}
-		catch (InvalidPropertyException ex) {
-			// Consider as not determinable.
-		}
-		return null;
-	}
-
-
 	public String toString() {
 		StringBuffer sb = new StringBuffer("BeanWrapperImpl: wrapping class [");
 		sb.append(getWrappedClass().getName()).append("]");
 		return sb.toString();
 	}
 
+
+	//---------------------------------------------------------------------
+	// Inner class for internal use
+	//---------------------------------------------------------------------
 
 	private static class PropertyTokenHolder {
 

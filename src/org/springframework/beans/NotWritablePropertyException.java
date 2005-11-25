@@ -16,9 +16,7 @@
 
 package org.springframework.beans;
 
-import java.util.Arrays;
 
-import org.springframework.util.ObjectUtils;
 
 /**
  * Exception thrown on an attempt to set the value of a property
@@ -32,51 +30,39 @@ import org.springframework.util.ObjectUtils;
 public class NotWritablePropertyException extends InvalidPropertyException {
 
 	private String[] possibleMatches = null;
-	
-	public NotWritablePropertyException(Class beanClass, String propertyName, String[] possibleMatches) {
-		super(beanClass, propertyName, generateMessage(beanClass, propertyName, possibleMatches));
-		this.possibleMatches = possibleMatches;
-	}
+
 
 	/**
 	 * Create a new NotWritablePropertyException.
 	 * @param beanClass the offending bean class
-	 * @param propertyName the offending property
+	 * @param propertyName the offending property name
 	 * @param msg the detail message
 	 * @param ex the root cause
 	 */
 	public NotWritablePropertyException(Class beanClass, String propertyName, String msg, Throwable ex) {
 		super(beanClass, propertyName, msg, ex);
 	}
-	
-	private static String generateMessage(Class beanClass, String propertyName, String[] possibleMatches) {		
-		StringBuffer buffy = new StringBuffer();
-		buffy.append("Bean property '");
-		buffy.append(propertyName);
-		buffy.append("' is not writable or has an invalid setter method. ");
-		
-		if (ObjectUtils.isEmpty(possibleMatches)) {
-			buffy.append("Does the parameter type of the setter match the return type of the getter?");
-		} else {
-			buffy.append("Did you mean ");
-			for (int i = 0; i < possibleMatches.length; i++) {
-				buffy.append('\'');
-				buffy.append(possibleMatches[i]);
-				
-				if (i < possibleMatches.length - 2) {
-					buffy.append("', ");
-				} else if (i == possibleMatches.length - 2){
-					buffy.append("', or ");
-				}			
-	 		}
-			buffy.append("'?");
-		}
-		return buffy.toString();
+
+	/**
+	 * Create a new NotWritablePropertyException.
+	 * @param beanClass the offending bean class
+	 * @param propertyName the offending property name
+	 * @param msg the detail message
+	 * @param possibleMatches suggestions for actual bean property names
+	 * that closely match the invalid property name
+	 */
+	public NotWritablePropertyException(Class beanClass, String propertyName, String msg, String[] possibleMatches) {
+		super(beanClass, propertyName, msg);
+		this.possibleMatches = possibleMatches;
 	}
 
+
+	/**
+	 * Return suggestions for actual bean property names that closely match
+	 * the invalid property name, if any.
+	 */
 	public String[] getPossibleMatches() {
 		return possibleMatches;
 	}
-	
 
 }
