@@ -1,41 +1,36 @@
 package org.springframework.web.servlet.view.jasperreports;
 
 import net.sf.jasperreports.engine.JRExporter;
+
 import org.springframework.beans.BeanUtils;
 
 /**
+ * Configurable JasperReports View, allowing to specify the JasperReports exporter
+ * to be specified through bean properties rather than through the view class name.
+ *
  * @author Rob Harrop
+ * @since 1.3
+ * @see JasperReportsCsvView
+ * @see JasperReportsHtmlView
+ * @see JasperReportsPdfView
+ * @see JasperReportsXlsView
  */
 public class ConfigurableJasperReportsView extends AbstractJasperReportsSingleFormatView {
 
-	/**
-	 * The {@link JRExporter} implementation <code>Class</code> to use.
-	 */
 	private Class exporterClass;
 
-	/**
-	 * Indicates where the {@link JRExporter} should write to.
-	 * @see #setUseWriter(boolean)
-	 */
 	private boolean useWriter = true;
 
-	/**
-	 * Checks that the {@link #setExporterClass(Class) exporterClass} property is specified.
-	 */
-	protected void onInit() {
-		if(this.exporterClass == null) {
-			throw new IllegalArgumentException("Property [exporterClass] is required.");
-		}
-	}
 
 	/**
-	 * Sets the {@link JRExporter} implementation <code>Class</code> to use. Throws
+	 * Set the {@link JRExporter} implementation <code>Class</code> to use. Throws
 	 * {@link IllegalArgumentException} if the <code>Class</code> doesn't implement
-	 * {@link JRExporter}. Required.
+	 * {@link JRExporter}. Required setting, as it does not have a default.
 	 */
 	public void setExporterClass(Class exporterClass) {
-		if(!(JRExporter.class.isAssignableFrom(exporterClass))) {
-			throw new IllegalArgumentException("Exporter class [" + exporterClass.getName() + "] does not implement JRExporter.");
+		if (!(JRExporter.class.isAssignableFrom(exporterClass))) {
+			throw new IllegalArgumentException(
+					"Exporter class [" + exporterClass.getName() + "] does not implement JRExporter");
 		}
 		this.exporterClass = exporterClass;
 	}
@@ -50,12 +45,14 @@ public class ConfigurableJasperReportsView extends AbstractJasperReportsSingleFo
 	}
 
 	/**
-	 * Indicates how the {@link JRExporter} should render its data.
-	 * @see #setUseWriter(boolean)
+	 * Checks that the {@link #setExporterClass(Class) exporterClass} property is specified.
 	 */
-	protected boolean useWriter() {
-		return this.useWriter;
+	protected void onInit() {
+		if (this.exporterClass == null) {
+			throw new IllegalArgumentException("exporterClass is required");
+		}
 	}
+
 
 	/**
 	 * Returns a new instance of the specified {@link JRExporter} class.
@@ -64,6 +61,14 @@ public class ConfigurableJasperReportsView extends AbstractJasperReportsSingleFo
 	 */
 	protected JRExporter createExporter() {
 		return (JRExporter) BeanUtils.instantiateClass(this.exporterClass);
+	}
+
+	/**
+	 * Indicates how the {@link JRExporter} should render its data.
+	 * @see #setUseWriter(boolean)
+	 */
+	protected boolean useWriter() {
+		return this.useWriter;
 	}
 
 }

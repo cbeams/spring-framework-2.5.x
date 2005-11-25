@@ -38,7 +38,8 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * List of PropertyValue objects.
 	 */
 	private final List propertyValueList;
-	
+
+
 	/**
 	 * Creates a new empty MutablePropertyValues object.
 	 * Property values can be added with the addPropertyValue methods.
@@ -94,7 +95,8 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 			this.propertyValueList = new ArrayList(0);
 		}
 	}
-	
+
+
 	/**
 	 * Copy all given PropertyValues into this object. Guarantees PropertyValue
 	 * references are independent, although it can't deep copy objects currently
@@ -230,6 +232,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		}
 		return changes;
 	}
+
 
 	public String toString() {
 		PropertyValue[] pvs = getPropertyValues();

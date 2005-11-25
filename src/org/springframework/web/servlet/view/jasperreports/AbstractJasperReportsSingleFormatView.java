@@ -17,9 +17,9 @@
 package org.springframework.web.servlet.view.jasperreports;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -62,14 +62,14 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 		// Prepare report for rendering.
 		JRExporter exporter = createExporter();
 
-		// set exporter parameters - overriding with values from the Model
+		// Set exporter parameters - overriding with values from the Model.
 		Map mergedExporterParameters = mergeExporterParameters(model);
 		if (mergedExporterParameters != null) {
 			exporter.setParameters(mergedExporterParameters);
 		}
 
 		if (useWriter()) {
-			// Copy the encoding configured for the report into the response-
+			// Copy the encoding configured for the report into the response.
 			String encoding = (String) exporter.getParameter(JRExporterParameter.CHARACTER_ENCODING);
 			if (encoding != null) {
 				response.setCharacterEncoding(encoding);
@@ -95,27 +95,8 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	}
 
 	/**
-	 * Create a JasperReports exporter for a specific output format,
-	 * which will be used to render the report to the HTTP response.
-	 * <p>The <code>useWriter</code> method determines whether the
-	 * output will be written as text or as binary content.
-	 * @see #useWriter
-	 */
-	protected abstract JRExporter createExporter();
-
-	/**
-	 * Return whether to use a <code>java.io.Writer</code> to write text content
-	 * to the HTTP response. Else, a <code>java.io.OutputStream</code> will be used,
-	 * to write binary content to the response.
-	 * @see javax.servlet.ServletResponse#getWriter
-	 * @see javax.servlet.ServletResponse#getOutputStream
-	 */
-	protected abstract boolean useWriter();
-
-	/**
-	 * Merges the configured {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} with any specified
-	 * in the supplied model data. {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} in the model
-	 * override those specified in the configuration.
+	 * Merges the configured JRExporterParameters with any specified in the supplied model data.
+	 * JRExporterParameters in the model override those specified in the configuration.
 	 * @see #setExporterParameters(java.util.Map)
 	 */
 	protected Map mergeExporterParameters(Map model) {
@@ -133,11 +114,31 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 				}
 				else {
 					if (logger.isWarnEnabled()) {
-						logger.warn("Ignoring exporter parameter [" + key + "]. Value is not a String.");
+						logger.warn("Ignoring exporter parameter [" + key + "]: value is not a String");
 					}
 				}
 			}
 		}
 		return mergedParameters;
 	}
+
+
+	/**
+	 * Create a JasperReports exporter for a specific output format,
+	 * which will be used to render the report to the HTTP response.
+	 * <p>The <code>useWriter</code> method determines whether the
+	 * output will be written as text or as binary content.
+	 * @see #useWriter
+	 */
+	protected abstract JRExporter createExporter();
+
+	/**
+	 * Return whether to use a <code>java.io.Writer</code> to write text content
+	 * to the HTTP response. Else, a <code>java.io.OutputStream</code> will be used,
+	 * to write binary content to the response.
+	 * @see javax.servlet.ServletResponse#getWriter
+	 * @see javax.servlet.ServletResponse#getOutputStream
+	 */
+	protected abstract boolean useWriter();
+
 }
