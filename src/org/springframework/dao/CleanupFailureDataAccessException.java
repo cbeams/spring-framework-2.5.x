@@ -33,7 +33,7 @@ public class CleanupFailureDataAccessException extends DataAccessException {
 
 	/**
 	 * Constructor for CleanupFailureDataAccessException.
-	 * @param msg Message
+	 * @param msg the detail message
 	 * @param ex root cause from the underlying data access API,
 	 * such as JDBC
 	 */

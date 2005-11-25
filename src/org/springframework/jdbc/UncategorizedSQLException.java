@@ -32,6 +32,7 @@ public class UncategorizedSQLException extends UncategorizedDataAccessException 
 	/** SQL that led to the problem */
 	private final String sql;
 
+
 	/**
 	 * Constructor for UncategorizedSQLException.
 	 * @param task name of current task
@@ -43,6 +44,7 @@ public class UncategorizedSQLException extends UncategorizedDataAccessException 
 				ex.getSQLState() + "]; error code [" + ex.getErrorCode() + "]; " + ex.getMessage(), ex);
 		this.sql = sql;
 	}
+	
 
 	/**
 	 * Return the underlying SQLException.

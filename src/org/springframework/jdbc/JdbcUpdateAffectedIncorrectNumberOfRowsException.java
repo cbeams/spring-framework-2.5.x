@@ -33,6 +33,7 @@ public class JdbcUpdateAffectedIncorrectNumberOfRowsException extends IncorrectU
 	/** Number of rows that actually were affected */
 	private int actual;
 
+
 	/**
 	 * Constructor for JdbcUpdateAffectedIncorrectNumberOfRowsException.
 	 * @param sql SQL we were tring to execute
@@ -44,6 +45,7 @@ public class JdbcUpdateAffectedIncorrectNumberOfRowsException extends IncorrectU
 		this.expected = expected;
 		this.actual = actual;
 	}
+
 
 	/**
 	 * Return the number of rows that should have been affected.

@@ -22,12 +22,24 @@ package org.springframework.dao;
  *
  * @author Juergen Hoeller
  * @since 1.0.2
+ * @see EmptyResultDataAccessException
  */
 public class IncorrectResultSizeDataAccessException extends DataRetrievalFailureException {
 
 	private int expectedSize;
 
 	private int actualSize;
+
+
+	/**
+	 * Constructor for IncorrectResultSizeDataAccessException.
+	 * @param expectedSize the expected result size
+	 */
+	public IncorrectResultSizeDataAccessException(int expectedSize) {
+		super("Incorrect result size: expected " + expectedSize);
+		this.expectedSize = expectedSize;
+		this.actualSize = -1;
+	}
 
 	/**
 	 * Constructor for IncorrectResultSizeDataAccessException.
@@ -42,7 +54,18 @@ public class IncorrectResultSizeDataAccessException extends DataRetrievalFailure
 
 	/**
 	 * Constructor for IncorrectResultSizeDataAccessException.
-	 * @param msg message
+	 * @param msg the detail message
+	 * @param expectedSize the expected result size
+	 */
+	public IncorrectResultSizeDataAccessException(String msg, int expectedSize) {
+		super(msg);
+		this.expectedSize = expectedSize;
+		this.actualSize = -1;
+	}
+
+	/**
+	 * Constructor for IncorrectResultSizeDataAccessException.
+	 * @param msg the detail message
 	 * @param expectedSize the expected result size
 	 * @param actualSize the actual result size (or -1 if unknown)
 	 */
@@ -51,6 +74,7 @@ public class IncorrectResultSizeDataAccessException extends DataRetrievalFailure
 		this.expectedSize = expectedSize;
 		this.actualSize = actualSize;
 	}
+
 
 	/**
 	 * Return the expected result size.

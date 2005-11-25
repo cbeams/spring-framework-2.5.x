@@ -26,7 +26,7 @@ public class DataAccessResourceFailureException extends DataAccessException {
 
 	/**
 	 * Constructor for ResourceFailureDataAccessException.
-	 * @param msg message
+	 * @param msg the detail message
 	 */
 	public DataAccessResourceFailureException(String msg) {
 		super(msg);
@@ -34,7 +34,7 @@ public class DataAccessResourceFailureException extends DataAccessException {
 
 	/**
 	 * Constructor for ResourceFailureDataAccessException.
-	 * @param msg message
+	 * @param msg the detail message
 	 * @param ex root cause from data access API in use
 	 */
 	public DataAccessResourceFailureException(String msg, Throwable ex) {

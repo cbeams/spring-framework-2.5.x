@@ -26,7 +26,7 @@ public class DeadlockLoserDataAccessException extends PessimisticLockingFailureE
 
 	/**
 	 * Constructor for DeadlockLoserDataAccessException.
-	 * @param msg message
+	 * @param msg the detail message
 	 * @param ex root cause from data access API in use
 	 */
 	public DeadlockLoserDataAccessException(String msg, Throwable ex) {

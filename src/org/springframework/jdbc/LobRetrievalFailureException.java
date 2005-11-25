@@ -30,7 +30,7 @@ public class LobRetrievalFailureException extends DataRetrievalFailureException 
 
 	/**
 	 * Constructor for LobRetrievalFailureException.
-	 * @param msg message
+	 * @param msg the detail message
 	 */
 	public LobRetrievalFailureException(String msg) {
 		super(msg);
@@ -38,7 +38,7 @@ public class LobRetrievalFailureException extends DataRetrievalFailureException 
 
 	/**
 	 * Constructor for LobRetrievalFailureException.
-	 * @param msg message
+	 * @param msg the detail message
 	 * @param ex IOException root cause
 	 */
 	public LobRetrievalFailureException(String msg, IOException ex) {

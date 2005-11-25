@@ -26,7 +26,7 @@ public class CannotAcquireLockException extends PessimisticLockingFailureExcepti
 
 	/**
 	 * Constructor for CannotAcquireLockException.
-	 * @param msg message
+	 * @param msg the detail message
 	 */
 	public CannotAcquireLockException(String msg) {
 		super(msg);
@@ -34,7 +34,7 @@ public class CannotAcquireLockException extends PessimisticLockingFailureExcepti
 
 	/**
 	 * Constructor for CannotAcquireLockException.
-	 * @param msg message
+	 * @param msg the detail message
 	 * @param ex root cause from data access API in use
 	 */
 	public CannotAcquireLockException(String msg, Throwable ex) {

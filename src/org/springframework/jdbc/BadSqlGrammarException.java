@@ -35,6 +35,7 @@ public class BadSqlGrammarException extends InvalidDataAccessResourceUsageExcept
 	
 	private String sql;
 
+
 	/**
 	 * Constructor for BadSqlGrammarException.
 	 * @param task name of current task
@@ -45,7 +46,8 @@ public class BadSqlGrammarException extends InvalidDataAccessResourceUsageExcept
 		super(task + "; bad SQL grammar [" + sql + "]", ex);
 		this.sql = sql;
 	}
-	
+
+
 	/**
 	 * Return the wrapped SQLException.
 	 */

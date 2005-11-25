@@ -36,6 +36,7 @@ public class InvalidResultSetAccessException extends InvalidDataAccessResourceUs
 	
 	private String sql;
 
+
 	/**
 	 * Constructor for InvalidResultSetAccessException.
 	 * @param task name of current task
@@ -54,6 +55,7 @@ public class InvalidResultSetAccessException extends InvalidDataAccessResourceUs
 	public InvalidResultSetAccessException(SQLException ex) {
 		super(ex.getMessage(), ex);
 	}
+
 
 	/**
 	 * Return the wrapped SQLException.

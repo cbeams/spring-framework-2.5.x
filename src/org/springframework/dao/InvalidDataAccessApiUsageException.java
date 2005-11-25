@@ -29,7 +29,7 @@ public class InvalidDataAccessApiUsageException extends DataAccessException {
 
 	/**
 	 * Constructor for InvalidDataAccessApiUsageException.
-	 * @param msg message
+	 * @param msg the detail message
 	 */
 	public InvalidDataAccessApiUsageException(String msg) {
 		super(msg);
@@ -37,7 +37,7 @@ public class InvalidDataAccessApiUsageException extends DataAccessException {
 
 	/**
 	 * Constructor for InvalidDataAccessApiUsageException.
-	 * @param msg message
+	 * @param msg the detail message
 	 * @param ex root cause from data access API in use
 	 */
 	public InvalidDataAccessApiUsageException(String msg, Throwable ex) {

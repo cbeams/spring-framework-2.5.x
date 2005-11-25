@@ -33,8 +33,8 @@ import org.springframework.dao.UncategorizedDataAccessException;
 public class SQLWarningException extends UncategorizedDataAccessException {
 
 	/**
-	 * Constructor for ConnectionFactoryException.
-	 * @param msg message
+	 * Constructor for SQLWarningException.
+	 * @param msg the detail message
 	 * @param ex JDBC warning
 	 */
 	public SQLWarningException(String msg, SQLWarning ex) {
