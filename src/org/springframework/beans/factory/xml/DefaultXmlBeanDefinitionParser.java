@@ -34,6 +34,11 @@ import org.w3c.dom.NodeList;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.xml.support.NamespaceHandlerResolver;
+import org.springframework.beans.factory.xml.support.DefaultNamespaceHandlerResolver;
+import org.springframework.beans.factory.xml.support.NamespaceHandler;
+import org.springframework.beans.factory.xml.support.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.support.BeanDefinitionDecorator;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -69,6 +74,7 @@ import org.springframework.util.xml.DomUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Erik Wiersma
  * @since 18.12.2003
  */
 public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
@@ -153,12 +159,15 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String PROPS_ELEMENT = "props";
 	public static final String PROP_ELEMENT = "prop";
 
+    private static final String BEANS_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
 
-	protected final Log logger = LogFactory.getLog(getClass());
+    protected final Log logger = LogFactory.getLog(getClass());
 
 	private BeanDefinitionReader beanDefinitionReader;
 
-	private Resource resource;
+    private NamespaceHandlerResolver namespaceHandlerResolver;
+
+    private Resource resource;
 
 	private String defaultLazyInit;
 
@@ -170,6 +179,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	private String defaultDestroyMethod;
 
+    public DefaultXmlBeanDefinitionParser() {
+        this.namespaceHandlerResolver = createNamespaceHandlerResolver();
+    }
 
 	/**
 	 * Parses bean definitions according to the "spring-beans" DTD.
@@ -200,8 +212,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		}
 		postProcessXml(root);
 
-		return beanDefinitionCount;
-	}
+        return beanDefinitionCount;
+    }
 
 	/**
 	 * Return the BeanDefinitionReader that this parser has been called from.
@@ -321,7 +333,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	protected void preProcessXml(Element root) throws BeanDefinitionStoreException {
 	}
 
-	/**
+    protected NamespaceHandlerResolver createNamespaceHandlerResolver() {
+        return new DefaultNamespaceHandlerResolver();
+    }
+
+    /**
 	 * Parse the elements at the root level in the document:
 	 * "import", "alias", "bean".
 	 * @param root the DOM root element of the document
@@ -330,58 +346,117 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	protected int parseBeanDefinitions(Element root) throws BeanDefinitionStoreException {
 		NodeList nl = root.getChildNodes();
 		int beanDefinitionCount = 0;
-		for (int i = 0; i < nl.getLength(); i++) {
+        for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element) {
+            if (node instanceof Element) {
 				Element ele = (Element) node;
-				if (IMPORT_ELEMENT.equals(node.getNodeName())) {
-					importBeanDefinitionResource(ele);
-				}
-				else if (ALIAS_ELEMENT.equals(node.getNodeName())) {
-					String name = ele.getAttribute(NAME_ATTRIBUTE);
-					String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
-					this.beanDefinitionReader.getBeanFactory().registerAlias(name, alias);
-				}
-				else if (BEAN_ELEMENT.equals(node.getNodeName())) {
-					beanDefinitionCount++;
-					BeanDefinitionHolder bdHolder = parseBeanDefinitionElement(ele, false);
-					BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, this.beanDefinitionReader.getBeanFactory());
-				}
+                String namespaceUri = ele.getNamespaceURI();
+
+                if(isDefaultNamespace(namespaceUri)) {
+                   beanDefinitionCount += parseDefaultElement(ele);
+                } else {
+                   beanDefinitionCount += parseCustomElement(ele);
+                }
 			}
 		}
 		return beanDefinitionCount;
 	}
 
-	/**
-	 * Parse an "import" element and load the bean definitions
-	 * from the given resource into the bean factory.
-	 */
-	protected void importBeanDefinitionResource(Element ele) throws BeanDefinitionStoreException {
-		String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
-		// Resolve system properties: e.g. "${user.dir}"
-		location = SystemPropertyUtils.resolvePlaceholders(location);
+    private boolean isDefaultNamespace(String namespaceUri) {
+        return namespaceUri == null || BEANS_NAMESPACE_URI.equals(namespaceUri);
+    }
 
-		if (ResourcePatternUtils.isUrl(location)) {
-			int importCount = getBeanDefinitionReader().loadBeanDefinitions(location);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Imported " + importCount + " bean definitions from URL location [" + location + "]");
-			}
-		}
-		else {
-			// No URL -> considering resource location as relative to the current file.
-			try {
-				Resource relativeResource = getResource().createRelative(location);
-				int importCount = getBeanDefinitionReader().loadBeanDefinitions(relativeResource);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Imported " + importCount + " bean definitions from relative location [" + location + "]");
-				}
-			}
-			catch (IOException ex) {
-				throw new BeanDefinitionStoreException(
-						"Invalid relative resource location [" + location + "] to import bean definitions from", ex);
-			}
-		}
-	}
+    private int parseDefaultElement(Element ele) {
+        if (IMPORT_ELEMENT.equals(ele.getNodeName())) {
+            importBeanDefinitionResource(ele);
+            return 0;
+        }
+        else if (ALIAS_ELEMENT.equals(ele.getNodeName())) {
+            String name = ele.getAttribute(NAME_ATTRIBUTE);
+            String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
+            this.beanDefinitionReader.getBeanFactory().registerAlias(name, alias);
+            return 0;
+        }
+        else if (BEAN_ELEMENT.equals(ele.getNodeName())) {
+            BeanDefinitionHolder bdHolder = parseBeanDefinitionElement(ele, false);
+            return decorateAndRegisterBeanDefinition(ele, bdHolder);
+        }
+        else {
+            // non-important element
+            return 0;
+        }
+    }
+
+    protected int parseCustomElement(Element ele) {
+        String namespaceUri = ele.getNamespaceURI();
+        NamespaceHandler handler = this.namespaceHandlerResolver.resolve(namespaceUri);
+
+        if(handler == null) {
+            throw new BeanDefinitionStoreException("Unable to locate NamespaceHandler for namespace ["
+                    + namespaceUri + "].");
+        }
+        int countBefore = getBeanDefinitionCount();
+        BeanDefinitionParser parser = handler.findParserForElement(ele);
+        parser.parse(ele, this.beanDefinitionReader.getBeanFactory());
+        return (getBeanDefinitionCount() - countBefore);
+    }
+
+    private int decorateAndRegisterBeanDefinition(Element element, BeanDefinitionHolder definitionHolder) {
+        int registeredCount = 1;
+        BeanDefinitionHolder rootDefinition = definitionHolder;
+
+        NodeList children = element.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node node = children.item(i);
+            String uri = node.getNamespaceURI();
+            if (node.getNodeType() == Node.ELEMENT_NODE && !isDefaultNamespace(uri)) {
+                Element childElement = (Element)node;
+                // a node from a namespace outside of the standard - should map to a decorator
+                NamespaceHandler handler = this.namespaceHandlerResolver.resolve(uri);
+                BeanDefinitionDecorator decorator = handler.findDecoratorForElement(childElement);
+                int countBefore = getBeanDefinitionCount();
+                rootDefinition = decorator.decorate(childElement, rootDefinition, this.beanDefinitionReader.getBeanFactory());
+                registeredCount += (getBeanDefinitionCount() - countBefore);
+            }
+        }
+        // register the final decorated instance
+        BeanDefinitionReaderUtils.registerBeanDefinition(rootDefinition, this.beanDefinitionReader.getBeanFactory());
+        return registeredCount;
+    }
+
+    private int getBeanDefinitionCount() {
+        return this.beanDefinitionReader.getBeanFactory().getBeanDefinitionCount();
+    }
+    /**
+     * Parse an "import" element and load the bean definitions
+     * from the given resource into the bean factory.
+     */
+    protected void importBeanDefinitionResource(Element ele) throws BeanDefinitionStoreException {
+        String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
+        // Resolve system properties: e.g. "${user.dir}"
+        location = SystemPropertyUtils.resolvePlaceholders(location);
+
+        if (ResourcePatternUtils.isUrl(location)) {
+            int importCount = getBeanDefinitionReader().loadBeanDefinitions(location);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Imported " + importCount + " bean definitions from URL location [" + location + "]");
+            }
+        }
+        else {
+            // No URL -> considering resource location as relative to the current file.
+            try {
+                Resource relativeResource = getResource().createRelative(location);
+                int importCount = getBeanDefinitionReader().loadBeanDefinitions(relativeResource);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Imported " + importCount + " bean definitions from relative location [" + location + "]");
+                }
+            }
+            catch (IOException ex) {
+                throw new BeanDefinitionStoreException(
+                        "Invalid relative resource location [" + location + "] to import bean definitions from", ex);
+            }
+        }
+    }
 
 	/**
 	 * Allow the XML to be extensible by processing any custom element types last,
@@ -780,7 +855,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			return parseBeanDefinitionElement(ele, true);
 		}
 		else if (ele.getTagName().equals(REF_ELEMENT)) {
-			// A generic reference to any name of any bean.			            
+			// A generic reference to any name of any bean.
 			String beanRef = ele.getAttribute(BEAN_REF_ATTRIBUTE);
 			if (!StringUtils.hasLength(beanRef)) {
 				// A reference to the id of another bean in the same XML file.

@@ -111,7 +111,8 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testInnerBeans() throws IOException {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(false);
+
+        reader.setValidating(false);
 		InputStream inputStream = getClass().getResourceAsStream("reftypes.xml");
 		try {
 			reader.loadBeanDefinitions(new InputSource(inputStream));

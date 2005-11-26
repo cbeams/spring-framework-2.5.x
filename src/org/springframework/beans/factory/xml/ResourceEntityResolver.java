@@ -23,6 +23,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -48,7 +49,7 @@ import org.springframework.core.io.ResourceLoader;
  * @see org.springframework.core.io.ResourceLoader
  * @see org.springframework.context.ApplicationContext
  */
-public class ResourceEntityResolver extends BeansDtdResolver {
+public class ResourceEntityResolver extends DelegatingEntityResolver {
 
 	private final ResourceLoader resourceLoader;
 
@@ -62,7 +63,7 @@ public class ResourceEntityResolver extends BeansDtdResolver {
 		this.resourceLoader = resourceLoader;
 	}
 
-	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
+	public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
 		InputSource source = super.resolveEntity(publicId, systemId);
 		if (source == null && systemId != null) {
 			String resourcePath = null;
