@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
-  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/common-build/common-targets.xml,v 1.2 2005-11-26 04:05:31 colins Exp $"
+  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/common-build/common-targets.xml,v 1.3 2005-11-26 17:37:59 colins Exp $"
 -->
 
 <project name="common-targets">
@@ -189,9 +189,9 @@
     <loadproperties srcFile="properties.tmp"/>
     <delete file="properties.tmp"/>
 
-    <!--fileset id="classes.for.web.inf.classes.fileset" dir="${target.classes.dir}">
+    <fileset id="classes.for.web.inf.classes.fileset" dir="${target.classes.dir}">
       <include name="**/*" />
-    </fileset-->
+    </fileset>
 
   </target>
 
