@@ -31,7 +31,7 @@ public interface CmtJtaNoSpringTxRemote extends EJBObject {
 
 	public String echo(String input) throws RemoteException;
 
-	public void testSameSessionReceivedInTwoHibernateCallbacks()
+	public void testSameSessionReceivedInTwoRequests()
 			throws TestFailureException, RemoteException;
 
 	public void throwExceptionSoSessionUnbindCanBeVerified()

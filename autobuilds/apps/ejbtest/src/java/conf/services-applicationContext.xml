@@ -34,7 +34,7 @@
 	</bean>
 
 	<!-- Hibernate SessionFactory -->
-	<bean id="hibSessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean">
+	<bean id="hibSessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
 		<property name="dataSource"><ref local="dataSource"/></property>
 		<property name="mappingResources">
       <list>
@@ -48,14 +48,14 @@
         <prop key="hibernate.show_sql">true</prop>
         <!-- the transaction manager lookup is needed to allow a Hibernate Session to be bound to the
              CMT transaction (through JTA) when no Spring transaction is present -->
-				<prop key="hibernate.transaction.manager_lookup_class">net.sf.hibernate.transaction.JBossTransactionManagerLookup</prop>
+				<prop key="hibernate.transaction.manager_lookup_class">org.hibernate.transaction.JBossTransactionManagerLookup</prop>
 			</props>
 		</property>
 	</bean>
 
   <!-- define a HibernateInterceptor instance -->
   <bean id="hibInterceptor"
-        class="org.springframework.orm.hibernate.HibernateInterceptor">
+        class="org.springframework.orm.hibernate3.HibernateInterceptor">
     <property name="sessionFactory"><ref local="hibSessionFactory"/></property>
   </bean>
 
@@ -167,9 +167,10 @@
 	</bean>
   
 	<!-- now a local EJB (with cache on, although the test which uses this is mainly for testing local proxies -->
-	<bean id="simpleWithCmtAndSpringTx" lazy-init="true" class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+	<bean id="simpleWithCmtAndSpringTx" lazy-init="true"
+			class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
 		<property name="jndiName">
-			<value>local/SimpleWithCmtAndSpringTx</value>
+			<value>java:comp/env/ejb/SimpleWithCmtAndSpringTxLocalHome</value>
 		</property>
 		<property name="cacheHome">
 			<value>false</value>
@@ -181,9 +182,10 @@
   
 	<!-- now a local EJB proxy pointing to an EJB that uses CMT, but which will delegate to
        a POJO that itself is not wrapped with Spring transactions -->
-	<bean id="simpleWithCmtAndNoSpringTx" lazy-init="true" class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+	<bean id="simpleWithCmtAndNoSpringTx" lazy-init="true" 
+			class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
 		<property name="jndiName">
-			<value>local/SimpleWithCmtAndNoSpringTx</value>
+			<value>java:comp/env/ejb/SimpleWithCmtAndNoSpringTxLocalHome</value>
 		</property>
 		<property name="businessInterface">
 			<value>org.springframework.autobuilds.ejbtest.simple.SimpleService</value>
@@ -192,16 +194,16 @@
   
 	<!-- now a local EJB proxy pointing to an EJB that uses no CMT, but which will delegate to
        a POJO that itself is wrapped by Spring transactions -->
-	<bean id="simpleWithNoCmtAndSpringTx" lazy-init="true" class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+	<bean id="simpleWithNoCmtAndSpringTx" lazy-init="true"
+			class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
 		<property name="jndiName">
-			<value>local/SimpleWithNoCmtAndSpringTx</value>
+			<value>java:comp/env/ejb/SimpleWithNoCmtAndSpringTxLocalHome</value>
 		</property>
 		<property name="businessInterface">
 			<value>org.springframework.autobuilds.ejbtest.simple.SimpleService</value>
 		</property>
 	</bean>
 
-  
 	<!-- stateless session bean proxy for test of proper Hibernate Session binding and unbinding, when
        no spring TX is used at the same time, but only CMT transaction (accessed via JTA)  -->
 	<bean id="cmtJtaNoSpringTx" lazy-init="true" class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">

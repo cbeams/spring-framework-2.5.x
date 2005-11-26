@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
-  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/common-build/common-targets.xml,v 1.1 2004-11-14 17:19:16 colins Exp $"
+  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/common-build/common-targets.xml,v 1.2 2005-11-26 04:05:31 colins Exp $"
 -->
 
 <project name="common-targets">
@@ -78,7 +78,7 @@
   
   <target name="init_post" depends="configure.eclipse">
 
-    <!-- set target appserver, default to jboss -->
+	<!-- set target appserver, default to jboss -->
     <property name="target.appserver" value="jboss"/>
     <condition property="target.appserver.jboss">
       <equals arg1="${target.appserver}" arg2="jboss"/>
@@ -188,6 +188,10 @@
     </echoproperties>
     <loadproperties srcFile="properties.tmp"/>
     <delete file="properties.tmp"/>
+
+    <!--fileset id="classes.for.web.inf.classes.fileset" dir="${target.classes.dir}">
+      <include name="**/*" />
+    </fileset-->
 
   </target>
 
@@ -584,17 +588,20 @@
   -->
   <target name="web-primary" depends="web-pre" if="build.web"
           description="creates the primary web-app in exploded format">
+    <antcall target="web.copy.classes" inheritRefs="true"/>
+    <antcall target="web.copy.libs" inheritRefs="true"/>
+  </target>
 
-	<!-- for now we are going to be lazy and include the entire bean classes in our web -->
-	<copy todir="${target.web.primary.dir}/WEB-INF/classes">
-      <fileset dir="${target.classes.dir}">
-         <include name="**/startup/*" />
-      </fileset>
+  <!-- broken out so derived build can override which classes and libs get copied -->
+  <target name="web.copy.classes">
+    <!-- by default copy all classes -->
+    <copy todir="${target.web.dir}/WEB-INF/classes">
+      <fileset refid="classes.for.web.inf.classes.fileset"/>
     </copy>
+  </target>
+  <target name="web.copy.libs">
 	<copy todir="${target.web.primary.dir}/WEB-INF/lib" flatten="true">
       <fileset dir="${target.lib.dir}">
-        <include name="${name}.jar" />
-        <include name="${name}-beans-client.jar" />
         <include name="log4j-properties.jar" />
       </fileset>
       <fileset refid="deps.webapp.libdir.fileset"/>

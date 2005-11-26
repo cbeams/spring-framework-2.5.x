@@ -15,7 +15,10 @@
     <java>aopalliance.jar</java>
   </module>
   <module>
-    <java>cglib-full-2.0.2.jar</java>
+    <java>cglib-nodep-2.1_3.jar</java>
+  </module>
+  <module>
+    <java>commons-codec.jar</java>
   </module>
   <module>
     <java>commons-collections.jar</java>
@@ -24,19 +27,19 @@
     <java>commons-logging.jar</java>
   </module>
   <module>
-    <java>dom4j.jar</java>
+    <java>dom4j-1.6.jar</java>
   </module>
   <module>
-    <java>ehcache-1.0.jar</java>
+    <java>ehcache-1.1.jar</java>
   </module>
   <module>
-    <java>hibernate2.jar</java>
-  </module>
-  <module>
-    <java>odmg.jar</java>
+    <java>hibernate3.jar</java>
   </module>
   <module>
     <java>spring.jar</java>
+  </module>
+  <module>
+    <java>spring-hibernate3.jar</java>
   </module>
 
   <module>

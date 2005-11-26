@@ -35,7 +35,7 @@ public interface CmtJtaNoSpringTx {
 
 	public String echo(String input);
 
-	public void testSameSessionReceivedInTwoHibernateCallbacks()
+	public void testSameSessionReceivedInTwoRequests()
 			throws TestFailureException;
 
 	public void throwExceptionSoSessionUnbindCanBeVerified()

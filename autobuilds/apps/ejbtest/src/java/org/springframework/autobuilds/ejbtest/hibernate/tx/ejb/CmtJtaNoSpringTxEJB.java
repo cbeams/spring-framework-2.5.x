@@ -22,12 +22,11 @@ import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.autobuilds.ejbtest.Constants;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 import org.springframework.dao.DataAccessException;
@@ -35,6 +34,7 @@ import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.ejb.support.AbstractStatelessSessionBean;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.HibernateTemplate;
+import org.springframework.orm.hibernate3.SessionFactoryUtils;
 
 /**
  * <p>EJB used just to test proper Hibernate Session binding and unbinding in 
@@ -95,55 +95,30 @@ public class CmtJtaNoSpringTxEJB extends AbstractStatelessSessionBean
 		super.ejbCreate();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.ejb.support.AbstractStatelessSessionBean#onEjbCreate()
-	 */
+	// javadoc in superclass
 	protected void onEjbCreate() throws CreateException {
 		sessionFactory = (SessionFactory) getBeanFactory().getBean(
 				SESSION_FACTORY_ID);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.autobuilds.ejbtest.hibernate.tx.CmtJtaNoSpringTx#testMethod(java.lang.String)
-	 */
+	// javadoc in superclass
 	public String echo(String input) {
 		return "hello " + input;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.autobuilds.ejbtest.hibernate.tx.ejb.CmtJtaNoSpringTx#testSaemSessionReceivedInTwoHibernateCallbacks()
-	 */
-	public void testSameSessionReceivedInTwoHibernateCallbacks()
-			throws TestFailureException {
+	// javadoc in superclass
+	public void testSameSessionReceivedInTwoRequests() throws TestFailureException {
 
-		HibernateTemplate h = new HibernateTemplate(sessionFactory, true);
-
-		Session sess1 = (Session) h.execute(new HibernateCallback() {
-
-			public Object doInHibernate(Session session)
-					throws HibernateException, SQLException {
-				return session;
-			}
-		});
-
-		Session sess2 = (Session) h.execute(new HibernateCallback() {
-
-			public Object doInHibernate(Session session)
-					throws HibernateException, SQLException {
-				return session;
-			}
-		});
-
+			
+		Session sess1 = SessionFactoryUtils.getSession(sessionFactory, true);
+		
+		Session sess2 = SessionFactoryUtils.getSession(sessionFactory, true);
+		
 		if (sess1 != sess2)
 			throw new TestFailureException(
 					"Should have received the same Session in each execute call since we are in one JTA transaction, but they were different.");
-
+		
+		sess1.close();
 	}
 
 	public void throwExceptionSoSessionUnbindCanBeVerified()
@@ -169,5 +144,7 @@ public class CmtJtaNoSpringTxEJB extends AbstractStatelessSessionBean
 			}
 		});
 	}
+
+	
 
 }

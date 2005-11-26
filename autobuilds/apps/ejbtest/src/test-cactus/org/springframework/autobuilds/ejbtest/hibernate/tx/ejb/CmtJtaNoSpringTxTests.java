@@ -66,7 +66,7 @@ public class CmtJtaNoSpringTxTests extends TestCase {
 
 	public void testSameSessionReceivedInTwoHibernateCallbacks()
 			throws TestFailureException {
-		ejb.testSameSessionReceivedInTwoHibernateCallbacks();
+		ejb.testSameSessionReceivedInTwoRequests();
 	}
 
 	public void testThrowExceptionSoSessionUnbindCanBeVerified() {

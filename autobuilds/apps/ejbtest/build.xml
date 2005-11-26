@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
-  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/ejbtest/build.xml,v 1.10 2005-11-24 22:57:51 colins Exp $"
+  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/ejbtest/build.xml,v 1.11 2005-11-26 04:05:31 colins Exp $"
   =======================================================================
   Build definition file for the 'ejbtest' project.
 
@@ -71,6 +71,14 @@
     <taskdef resource="cactus.tasks">
       <classpath refid="cactus.build.classpath"/>
     </taskdef>
+  </target>
+
+  <!-- we override normal build so that classes don't go into WEB-INF/classes, since
+       the EAR file is going to include a jar with them anyway -->
+  <target name="init_pre" depends="common-targets.init_pre">
+    <fileset id="classes.for.web.inf.classes.fileset" dir="${target.classes.dir}">
+      <include name="*!!!empty!!!" />
+    </fileset>
   </target>
   
   <!-- hook into statics for cactus artifacts -->

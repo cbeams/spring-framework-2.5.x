@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
-  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/ejbtest/deps.xml,v 1.2 2005-11-24 22:57:51 colins Exp $"
+  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/ejbtest/deps.xml,v 1.3 2005-11-26 04:05:31 colins Exp $"
 -->
 
 <project name="ejbtest-deps">
@@ -13,6 +13,7 @@
     <path id="ejbtest.deps.normal">
       <pathelement location="${AOPALLIANCE_JAR}"/>
       <pathelement location="${CGLIB2_JAR}"/>
+      <pathelement location="${COMMONS_CODEC_JAR}"/>
       <pathelement location="${COMMONS_COLLECTIONS_JAR}"/>
       <pathelement location="${COMMONS_DBCP_JAR}"/>
       <pathelement location="${COMMONS_LOGGING_JAR}"/>
@@ -24,6 +25,7 @@
       <pathelement location="${JUNIT_JAR}"/>
       <pathelement location="${JUNIT_ADDONS_JAR}"/>
       <pathelement location="${SPRING_JAR}"/>
+      <pathelement location="${SPRING_HIBERNATE_JAR}"/>
     </path>
 
 	<path id="ejbtest.deps.compileonly">

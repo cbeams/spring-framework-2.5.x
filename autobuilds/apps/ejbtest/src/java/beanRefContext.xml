@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: beanRefContext.xml,v 1.1 2004-04-18 03:28:54 colins Exp $ -->
+<!-- $Id: beanRefContext.xml,v 1.1 2005-11-26 04:05:32 colins Exp $ -->
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <!-- load a hierarchy of contexts, although there is just one here -->
@@ -10,7 +10,7 @@
   	    class="org.springframework.context.support.ClassPathXmlApplicationContext">
     <constructor-arg>
       <list>
-        <value>/servicelayer-applicationContext.xml</value>
+        <value>conf/services-applicationContext.xml</value>
       </list>
    	</constructor-arg>
   </bean>
