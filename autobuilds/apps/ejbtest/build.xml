@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
-  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/ejbtest/build.xml,v 1.11 2005-11-26 04:05:31 colins Exp $"
+  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/ejbtest/build.xml,v 1.12 2005-11-26 18:34:12 colins Exp $"
   =======================================================================
   Build definition file for the 'ejbtest' project.
 
@@ -48,6 +48,12 @@
   <property name="build.web" value="true"/>
   <property name="build.j2eeapp" value="true"/>
 
+  <!-- override normal build behaviour so that classes don't go into
+       WEB-INF/classes, since the EAR file is going to include a jar
+	   with them anyway -->
+  <fileset id="classes.for.web.inf.classes.fileset" dir="${target.classes.dir}">
+    <include name="*!!!empty!!!" />
+  </fileset>
 
   <!-- override normal init so cactus related setup can happen -->
   <target name="init" depends="common-targets.init">
@@ -73,14 +79,6 @@
     </taskdef>
   </target>
 
-  <!-- we override normal build so that classes don't go into WEB-INF/classes, since
-       the EAR file is going to include a jar with them anyway -->
-  <target name="init_pre" depends="common-targets.init_pre">
-    <fileset id="classes.for.web.inf.classes.fileset" dir="${target.classes.dir}">
-      <include name="*!!!empty!!!" />
-    </fileset>
-  </target>
-  
   <!-- hook into statics for cactus artifacts -->
   <target name="statics-reg" depends="common-targets.statics-reg">
     <!-- copy ejb manifest file. if XDoclet is brought in, then it will
