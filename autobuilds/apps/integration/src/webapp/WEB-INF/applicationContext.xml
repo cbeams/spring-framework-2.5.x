@@ -7,14 +7,4 @@
  
 <beans>
 	
-    <!-- can't have an empty context, so add an unused bean in here -->
-    <bean id="bogusBean" class="java.lang.String">
-    </bean>
-	
-	<!-- ========================= GENERAL DEFINITIONS ========================= -->
-
-	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
-  
-	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
-
 </beans>

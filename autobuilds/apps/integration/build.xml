@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
-  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/integration/build.xml,v 1.4 2004-11-14 17:19:14 colins Exp $"
+  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/integration/build.xml,v 1.5 2005-11-26 18:27:09 colins Exp $"
   =======================================================================
   Build definition file for the 'ejbtest' project.
 
@@ -57,6 +57,7 @@
     <path id="cactus.runtime.classpath">
         <pathelement location="${ASPECTJRT_JAR}"/>
         <pathelement location="${CACTUS_JAR}"/>
+        <pathelement location="${CARGO_JAR}"/>
         <pathelement location="${COMMONS_HTTPCLIENT_JAR}"/>
         <pathelement location="${COMMONS_LOGGING_JAR}"/>
         <pathelement location="${JUNIT_JAR}"/>
