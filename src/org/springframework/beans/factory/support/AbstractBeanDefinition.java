@@ -34,6 +34,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
  */

@@ -67,6 +67,7 @@ import org.springframework.beans.factory.config.InstantiationAwareBeanPostProces
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 13.02.2004
  * @see AutowireCapableBeanFactory
  * @see AbstractBeanFactory#createBean
