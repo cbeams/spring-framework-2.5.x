@@ -80,14 +80,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * Anything else represents false. Case seNsItive.
 	 */
 	public static final String TRUE_VALUE = "true";
-
-	/**
-	 * Values used to turn off a lifecycle method when using
-	 * defaults.
-	 */
-	public static final String NONE = "-";
 	public static final String DEFAULT_VALUE = "default";
-
 	public static final String DESCRIPTION_ELEMENT = "description";
 
 	public static final String AUTOWIRE_BY_NAME_VALUE = "byName";
@@ -177,6 +170,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	private String defaultDestroyMethod;
 
+
 	/**
 	 * Parses bean definitions according to the "spring-beans" DTD.
 	 * <p>Opens a DOM Document; then initializes the default settings
@@ -234,12 +228,10 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		setDefaultLazyInit(root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE));
 		setDefaultAutowire(root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE));
 		setDefaultDependencyCheck(root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE));
-
-		if(root.hasAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE)) {
+		if (root.hasAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE)) {
 			setDefaultInitMethod(root.getAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE));
 		}
-
-		if(root.hasAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE)) {
+		if (root.hasAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE)) {
 			setDefaultDestroyMethod(root.getAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE));
 		}
 	}
@@ -286,21 +278,34 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		return defaultDependencyCheck;
 	}
 
-	protected final String getDefaultInitMethod() {
-		return defaultInitMethod;
-	}
-
+	/**
+	 * Set the default dependency-init-method setting for the document that's currently parsed.
+	 */
 	protected final void setDefaultInitMethod(String defaultInitMethod) {
 		this.defaultInitMethod = defaultInitMethod;
 	}
 
+	/**
+	 * Return the default dependency-init-method setting for the document that's currently parsed.
+	 */
+	protected final String getDefaultInitMethod() {
+		return defaultInitMethod;
+	}
+
+	/**
+	 * Set the default dependency-destroy-method setting for the document that's currently parsed.
+	 */
+	protected final void setDefaultDestroyMethod(String defaultDestroyMethod) {
+		this.defaultDestroyMethod = defaultDestroyMethod;
+	}
+
+	/**
+	 * Return the default dependency-destroy-method setting for the document that's currently parsed.
+	 */
 	protected final String getDefaultDestroyMethod() {
 		return defaultDestroyMethod;
 	}
 
-	protected final void setDefaultDestroyMethod(String defaultDestroyMethod) {
-		this.defaultDestroyMethod = defaultDestroyMethod;
-	}
 
 	/**
 	 * Allow the XML to be extensible by processing any custom element types first,
@@ -485,21 +490,30 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 			bd.setAutowireMode(getAutowireMode(autowire));
 
-			boolean defaultInitMethod = false;
-			String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
-			if("".equals(initMethodName)) {
-				initMethodName = getDefaultInitMethod();
-				defaultInitMethod = true;
+			if (ele.hasAttribute(INIT_METHOD_ATTRIBUTE)) {
+				String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
+				if (!"".equals(initMethodName)) {
+					bd.setInitMethodName(initMethodName);
+				}
+			}
+			else {
+				if (getDefaultInitMethod() != null) {
+					bd.setInitMethodName(getDefaultInitMethod());
+					bd.setEnforceInitMethod(false);
+				}
 			}
 
-			if (!NONE.equals(initMethodName)) {
-				bd.setInitMethodName(initMethodName);
-				bd.setDefaultInitMethod(defaultInitMethod);
+			if (ele.hasAttribute(DESTROY_METHOD_ATTRIBUTE)) {
+				String destroyMethodName = ele.getAttribute(DESTROY_METHOD_ATTRIBUTE);
+				if (!"".equals(destroyMethodName)) {
+					bd.setDestroyMethodName(destroyMethodName);
+				}
 			}
-
-			String destroyMethodName = readAttributeWithDefault(ele, DESTROY_METHOD_ATTRIBUTE, getDefaultDestroyMethod());
-			if (!NONE.equals(destroyMethodName)) {
-				bd.setDestroyMethodName(destroyMethodName);
+			else {
+				if (getDefaultDestroyMethod() != null) {
+					bd.setDestroyMethodName(getDefaultDestroyMethod());
+					bd.setEnforceDestroyMethod(false);
+				}
 			}
 
 			parseLookupOverrideSubElements(ele, beanName, bd.getMethodOverrides());
@@ -990,8 +1004,4 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		return props;
 	}
 
-	private String readAttributeWithDefault(Element e, String attribute, String defaultValue) {
-		String value = e.getAttribute(attribute);
-		return ("".equals(value)) ? defaultValue : value;
-	}
 }

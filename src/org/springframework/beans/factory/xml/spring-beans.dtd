@@ -56,8 +56,8 @@
 <!ATTLIST beans default-lazy-init (true | false) "false">
 <!ATTLIST beans default-autowire (no | byName | byType | constructor | autodetect) "no">
 <!ATTLIST beans default-dependency-check (none | objects | simple | all) "none">
-<!ATTLIST beans default-init-method CDATA "-">
-<!ATTLIST beans default-destroy-method CDATA "-">
+<!ATTLIST beans default-init-method CDATA #IMPLIED>
+<!ATTLIST beans default-destroy-method CDATA #IMPLIED>
 
 <!--
 	Element containing informative text describing the purpose of the enclosing

@@ -1,7 +1,24 @@
+/*
+ * Copyright 2002-2005 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.beans.factory.xml;
 
-import org.springframework.core.io.ClassPathResource;
 import junit.framework.TestCase;
+
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rob Harrop
@@ -24,9 +41,9 @@ public class DefaultLifecycleMethodsTests extends TestCase {
 
 	public void testLifecycleMethodsDisabled() throws Exception {
 		LifecycleAwareBean bean = (LifecycleAwareBean) this.beanFactory.getBean("lifecycleMethodsDisabled");
-		assertFalse("Bean init method called incorrectly.", bean.isInitCalled());
+		assertFalse("Bean init method called incorrectly", bean.isInitCalled());
 		this.beanFactory.destroySingletons();
-		assertFalse("Bean destroy method called incorrectly.", bean.isDestroyCalled());
+		assertFalse("Bean destroy method called incorrectly", bean.isDestroyCalled());
 	}
 
 	public void testIgnoreDefaultLifecycleMethods() throws Exception {
@@ -34,9 +51,10 @@ public class DefaultLifecycleMethodsTests extends TestCase {
 			XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("ignoreDefaultLifecycleMethods.xml", getClass()));
 			bf.preInstantiateSingletons();
 			bf.destroySingletons();
-		} catch(Exception ex) {
+		}
+		catch (Exception ex) {
 			ex.printStackTrace();
-			fail("Should ignore non-existent default lifecycle methods.");
+			fail("Should ignore non-existent default lifecycle methods");
 		}
 	}
 
@@ -48,6 +66,7 @@ public class DefaultLifecycleMethodsTests extends TestCase {
 		assertFalse("Default destory method called incorrectly.", bean.isDestroyCalled());
 		assertTrue("Custom destory method not called.", bean.isCustomDestroyCalled());
 	}
+
 
 	public static class LifecycleAwareBean {
 

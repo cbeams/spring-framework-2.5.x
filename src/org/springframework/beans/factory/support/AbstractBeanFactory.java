@@ -933,7 +933,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 								logger.debug("Invoking custom destroy method on bean with name '" + beanName + "'");
 							}
 							invokeCustomDestroyMethod(beanName, bean, mergedBeanDefinition.getDestroyMethodName(),
-									mergedBeanDefinition.isDefaultDestroyMethod());
+									mergedBeanDefinition.isEnforceDestroyMethod());
 						}
 					}
 				});
@@ -1035,13 +1035,15 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param beanName the bean has in the factory. Used for debug output.
 	 * @param bean new bean instance we may need to notify of destruction
 	 * @param destroyMethodName the name of the custom destroy method
-	 * @param defaultDestoryMethod indicates whether or not the defined destroy method is the default.
+	 * @param enforceDestroyMethod indicates whether the defined destroy method needs to exist
 	 */
-	protected void invokeCustomDestroyMethod(String beanName, Object bean, String destroyMethodName, boolean defaultDestoryMethod) {
+	protected void invokeCustomDestroyMethod(
+			String beanName, Object bean, String destroyMethodName, boolean enforceDestroyMethod) {
+
 		Method destroyMethod =
 				BeanUtils.findDeclaredMethodWithMinimalParameters(bean.getClass(), destroyMethodName);
 		if (destroyMethod == null) {
-			if (!defaultDestoryMethod) {
+			if (enforceDestroyMethod) {
 				logger.error("Couldn't find a destroy method named '" + destroyMethodName +
 						"' on bean with name '" + beanName + "'");
 			}
