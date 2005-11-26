@@ -1,0 +1,20 @@
+<html>
+<body>
+
+Simplification layer over JdbcTemplate available on Java 5 and above.
+	<br>
+	</br>
+	
+JdbcTemplateHelper is a wrapper around JdbcTemplate that takes advantage
+	of var args and autoboxing. It also offers only a subset of the methods
+	available on JdbcTemplate--hence it does not implement the JdbcOperations
+	interface or extend JdbcTemplate, but implements the new
+	SimpleJdbcOperations interface.
+	<p>
+		If you need the full power of Spring JDBC for less common operations,
+		use the getJdbcTemplate() method of JdbcTemplateHelper and work
+		with it directly.
+	</p>
+
+</body>
+</html>
