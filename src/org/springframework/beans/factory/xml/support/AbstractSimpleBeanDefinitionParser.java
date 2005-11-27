@@ -44,8 +44,13 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
             mpvs.addPropertyValue(attribute.getLocalName(), attribute.getValue());
         }
         definition.setPropertyValues(mpvs);
-        return definition;
+		postProcess(definition, element);
+		return definition;
     }
 
     protected abstract Class getBeanClass(Element element);
+
+	protected void postProcess(RootBeanDefinition beanDefinition, Element element) {
+
+	}
 }
