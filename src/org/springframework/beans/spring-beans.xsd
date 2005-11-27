@@ -6,7 +6,8 @@
 
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
 
-    <xsd:element name="beans">
+	<!-- Top-level <beans> tag -->
+	<xsd:element name="beans">
         <xsd:complexType>
             <xsd:sequence>
                 <xsd:element ref="description" minOccurs="0" />
@@ -95,8 +96,8 @@
 
     <!-- definition of an attribute group -->
     <xsd:attributeGroup name="beanAttributes">
-        <xsd:attribute name="id" type="xsd:ID" />
-        <xsd:attribute name="name" type="xsd:string" />
+		<xsd:attribute name="id" type="xsd:ID"/>
+		<xsd:attribute name="name" type="xsd:string" />
         <xsd:attribute name="class" type="xsd:string" />
         <xsd:attribute name="parent" type="xsd:string" />
         <xsd:attribute name="abstract" default="false">
