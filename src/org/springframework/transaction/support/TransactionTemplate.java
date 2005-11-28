@@ -60,6 +60,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition implements
 
 	private PlatformTransactionManager transactionManager = null;
 
+
 	/**
 	 * Create a new TransactionTemplate instance.
 	 * Mainly targetted at configuration by a bean factory.
@@ -96,6 +97,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition implements
 			throw new IllegalArgumentException("transactionManager is required");
 		}
 	}
+
 
 	/**
 	 * Execute the action specified by the given callback object within a transaction.

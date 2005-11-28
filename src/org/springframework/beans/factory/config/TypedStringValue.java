@@ -37,6 +37,7 @@ public class TypedStringValue {
 
 	private Class targetType;
 
+
 	/**
 	 * Create a new TypedStrignValue for the given String
 	 * value and target type.
@@ -47,6 +48,7 @@ public class TypedStringValue {
 		setValue(value);
 		setTargetType(targetType);
 	}
+
 
 	/**
 	 * Set the String value.

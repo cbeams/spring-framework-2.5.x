@@ -641,8 +641,8 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		sb.append("; factoryMethodName=").append(this.factoryMethodName);
 		sb.append("; initMethodName=").append(this.initMethodName);
 		sb.append("; destroyMethodName=").append(this.destroyMethodName);
-		if (getResourceDescription() != null) {
-			sb.append("; defined in ").append(getResourceDescription());
+		if (this.resourceDescription != null) {
+			sb.append("; defined in ").append(this.resourceDescription);
 		}
 		return sb.toString();
 	}
