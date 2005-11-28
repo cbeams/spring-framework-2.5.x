@@ -509,6 +509,7 @@ public interface HibernateOperations {
 	 * one value to a "?" parameter in the query string.
 	 * A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @param value the value of the parameter
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
@@ -521,6 +522,7 @@ public interface HibernateOperations {
 	 * one value to a "?" parameter in the query string.
 	 * A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @param value the value of the parameter
 	 * @param type Hibernate type of the parameter (or <code>null</code>)
 	 * @return a List containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
