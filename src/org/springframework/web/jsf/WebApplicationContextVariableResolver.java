@@ -20,6 +20,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.el.EvaluationException;
 import javax.faces.el.VariableResolver;
 
+import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -67,7 +68,16 @@ public class WebApplicationContextVariableResolver extends VariableResolver {
 	 * @param originalVariableResolver the original VariableResolver
 	 */
 	public WebApplicationContextVariableResolver(VariableResolver originalVariableResolver) {
+		Assert.notNull(originalVariableResolver, "Original JSF VariableResolver must not be null");
 		this.originalVariableResolver = originalVariableResolver;
+	}
+
+	/**
+	 * Return the original JSF VariableResolver that this resolver delegates to.
+	 * Used to resolve standard JSF-managed beans.
+	 */
+	protected final VariableResolver getOriginalVariableResolver() {
+		return originalVariableResolver;
 	}
 
 
@@ -83,7 +93,7 @@ public class WebApplicationContextVariableResolver extends VariableResolver {
 			value = getWebApplicationContext(context);
 		}
 		if (value == null) {
-			value = this.originalVariableResolver.resolveVariable(context, name);
+			value = getOriginalVariableResolver().resolveVariable(context, name);
 		}
 		return value;
 	}
