@@ -18,8 +18,11 @@ package org.springframework.scheduling.concurrent;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -63,6 +66,10 @@ public class ThreadPoolExecutorBean implements Executor, TaskExecutor, Initializ
 
 	private int queueCapacity = Integer.MAX_VALUE;
 
+	private ThreadFactory threadFactory = Executors.defaultThreadFactory();
+
+	private RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.AbortPolicy();
+
 	private ThreadPoolExecutor executorService;
 
 
@@ -102,15 +109,36 @@ public class ThreadPoolExecutorBean implements Executor, TaskExecutor, Initializ
 		this.queueCapacity = queueCapacity;
 	}
 
+	/**
+	 * Set the ThreadFactory to use for the ThreadPoolExecutor's thread pool.
+	 * Default is the ThreadPoolExecutor's default thread factory.
+	 * @see java.util.concurrent.Executors#defaultThreadFactory()
+	 */
+	public void setThreadFactory(ThreadFactory threadFactory) {
+		this.threadFactory = (threadFactory != null ? threadFactory : Executors.defaultThreadFactory());
+	}
+
+	/**
+	 * Set the RejectedExecutionHandler to use for the ThreadPoolExecutor.
+	 * Default is the ThreadPoolExecutor's default abort policy.
+	 * @see java.util.concurrent.ThreadPoolExecutor.AbortPolicy
+	 */
+	public void setRejectedExecutionHandler(RejectedExecutionHandler rejectedExecutionHandler) {
+		this.rejectedExecutionHandler =
+				(rejectedExecutionHandler != null ? rejectedExecutionHandler : new ThreadPoolExecutor.AbortPolicy());
+	}
+
 
 	/**
 	 * Creates the BlockingQueue and the ThreadPoolExecutor.
 	 * @see #createQueue
 	 */
 	public void afterPropertiesSet() {
+		logger.info("Creating ThreadPoolExecutor");
 		BlockingQueue queue = createQueue(this.queueCapacity);
 		this.executorService = new ThreadPoolExecutor(
-				this.corePoolSize, this.maxPoolSize, this.keepAliveSeconds, TimeUnit.SECONDS, queue);
+				this.corePoolSize, this.maxPoolSize, this.keepAliveSeconds, TimeUnit.SECONDS,
+				queue, this.threadFactory, this.rejectedExecutionHandler);
 	}
 
 	/**
@@ -140,8 +168,7 @@ public class ThreadPoolExecutorBean implements Executor, TaskExecutor, Initializ
 	 * @see org.springframework.core.task.TaskExecutor#execute(Runnable)
 	 */
 	public void execute(Runnable task) {
-		Assert.notNull(this.executorService,
-				"ExecutorService must not be null - ThreadPoolExecutorBean not initialized");
+		Assert.notNull(this.executorService, "ThreadPoolExecutorBean not initialized");
 		this.executorService.execute(task);
 	}
 
