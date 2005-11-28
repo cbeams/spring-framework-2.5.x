@@ -54,10 +54,8 @@ public class DataSourceJtaTransactionTests extends TestCase {
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
-		if (!rollback) {
-			ut.getStatus();
-			utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
-		}
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		if (rollback) {
@@ -159,7 +157,7 @@ public class DataSourceJtaTransactionTests extends TestCase {
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, (rollback ? 2 : 3));
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		tm.suspend();
 		tmControl.setReturnValue(tx, 1);
 		ut.begin();

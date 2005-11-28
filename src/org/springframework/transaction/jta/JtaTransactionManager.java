@@ -798,7 +798,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	protected void doRollback(DefaultTransactionStatus status) {
 		JtaTransactionObject txObject = (JtaTransactionObject) status.getTransaction();
 		try {
-			txObject.getUserTransaction().rollback();
+			if (txObject.getUserTransaction().getStatus() != Status.STATUS_NO_TRANSACTION) {
+				txObject.getUserTransaction().rollback();
+			}
 		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on rollback", ex);

@@ -290,6 +290,8 @@ public class HibernateJtaTransactionTests extends TestCase {
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.begin();
 		utControl.setVoidCallable(1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		ut.rollback();
 		utControl.setVoidCallable(1);
 		utControl.replay();
@@ -382,6 +384,8 @@ public class HibernateJtaTransactionTests extends TestCase {
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.begin();
 		utControl.setVoidCallable(1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		ut.rollback();
 		utControl.setVoidCallable(1);
 		utControl.replay();
@@ -790,7 +794,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, rollback ? 1 : 3);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		ut.begin();
 		utControl.setVoidCallable(2);
 		tm.suspend();
@@ -925,7 +929,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, rollback ? 1 : 3);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		ut.begin();
 		utControl.setVoidCallable(2);
 		tm.getStatus();
