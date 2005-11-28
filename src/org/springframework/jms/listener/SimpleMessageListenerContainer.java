@@ -31,7 +31,8 @@ import javax.jms.Topic;
 import org.springframework.jms.support.JmsUtils;
 
 /**
- * Message listener container that uses plain JMS client API to
+ * Message listener container that the plain JMS client API's
+ * <code>MessageConsumer.setMessageListener()</code> method to
  * create concurrent MessageConsumers for the specified listeners.
  *
  * <p>This is the simplest form of a message listener container.
@@ -40,11 +41,17 @@ import org.springframework.jms.support.JmsUtils;
  * advantage is its low level of complexity and the minimum requirements
  * on the JMS provider: Not even the ServerSessionPool facility is required.
  *
- * <p>For more dynamic needs, consider using ServerMessageListenerContainer.
+ * <p>For a different style of MessageListener handling, through looped
+ * <code>MessageConsumer.receive()</code> calls that also allow for
+ * transactional reception of messages (registering them with XA transactions),
+ * see DefaultMessageListenerContainer. For dynamic adaptation of the active
+ * number of Sessions, consider using ServerSessionMessageListenerContainer.
  *
  * @author Juergen Hoeller
  * @since 1.3
- * @see org.springframework.jms.listener.server.ServerMessageListenerContainer
+ * @see javax.jms.MessageConsumer#setMessageListener
+ * @see DefaultMessageListenerContainer
+ * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
  */
 public class SimpleMessageListenerContainer extends AbstractMessageListenerContainer {
 
@@ -69,7 +76,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	/**
 	 * Return whether to inhibit the delivery of messages published by its own connection.
 	 */
-	public boolean isPubSubNoLocal() {
+	protected boolean isPubSubNoLocal() {
 		return pubSubNoLocal;
 	}
 

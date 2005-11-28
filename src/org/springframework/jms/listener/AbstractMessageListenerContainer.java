@@ -43,8 +43,9 @@ import org.springframework.jms.support.destination.JmsDestinationAccessor;
  * @see #setMessageListener
  * @see javax.jms.MessageListener
  * @see SessionAwareMessageListener
+ * @see DefaultMessageListenerContainer
  * @see SimpleMessageListenerContainer
- * @see org.springframework.jms.listener.server.ServerMessageListenerContainer
+ * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
  */
 public abstract class AbstractMessageListenerContainer extends JmsDestinationAccessor implements DisposableBean {
 
@@ -59,6 +60,10 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	private boolean autoStartup = true;
 
 	private Connection connection;
+
+	private boolean running;
+
+	private boolean active;
 
 
 	/**
@@ -204,6 +209,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 		// Create JMS Connection and Sessions with MessageConsumers.
 		try {
+			this.active = true;
 			this.connection = createConnection();
 			registerListener();
 
@@ -213,6 +219,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 		}
 		catch (JMSException ex) {
 			JmsUtils.closeConnection(this.connection);
+			this.active = false;
 			throw convertJmsAccessException(ex);
 		}
 	}
@@ -233,16 +240,17 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @see #destroyListener()
 	 * @see javax.jms.Connection#close()
 	 */
-	public final void destroy() {
+	public final void destroy() throws JmsException {
 		try {
+			this.active = false;
 			destroyListener();
 			logger.debug("Closing JMS Connection");
 			this.connection.close();
 		}
 		catch (JMSException ex) {
-				JmsUtils.closeConnection(this.connection);
-				throw convertJmsAccessException(ex);
-			}
+			JmsUtils.closeConnection(this.connection);
+			throw convertJmsAccessException(ex);
+		}
 	}
 
 
@@ -256,13 +264,14 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @throws JmsException if starting failed
 	 * @see javax.jms.Connection#start()
 	 */
-	public void start() throws JmsException {
+	public synchronized void start() throws JmsException {
 		try {
 			this.connection.start();
 		}
 		catch (JMSException ex) {
 			throw convertJmsAccessException(ex);
 		}
+		this.running = true;
 	}
 
 	/**
@@ -271,14 +280,32 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @throws JmsException if stopping failed
 	 * @see javax.jms.Connection#stop()
 	 */
-	public void stop() throws JmsException {
+	public synchronized void stop() throws JmsException {
 		try {
 			this.connection.stop();
 		}
 		catch (JMSException ex) {
 			throw convertJmsAccessException(ex);
 		}
+		this.running = false;
 	}
+
+	/**
+	 * Return whether this listener container is currently running,
+	 * that is, whether it has been started and not stopped yet.
+	 */
+	public boolean isRunning() {
+		return this.running;
+	}
+
+	/**
+	 * Return whether this listener container is currently active,
+	 * that is, whether it has been set up and not destroyed yet.
+	 */
+	public boolean isActive() {
+		return this.active;
+	}
+
 
 
 	//-------------------------------------------------------------------------
@@ -290,7 +317,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * committing or rolling back the transaction afterwards (if necessary).
 	 * @param session the JMS Session to work on
 	 * @param message the received JMS Message
-	 * @throws JmsException the converted JMS exception, if any
+	 * @throws org.springframework.jms.JmsException if listener execution failed
 	 * @see #invokeListener(javax.jms.Session, javax.jms.Message)
 	 * @see #commitIfNecessary
 	 * @see #rollbackOnExceptionIfNecessary
@@ -298,12 +325,31 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 */
 	protected void executeListener(Session session, Message message) throws JmsException {
 		try {
+			doExecuteListener(session, message);
+		}
+		catch (JMSException ex) {
+			convertJmsAccessException(ex);
+		}
+	}
+
+	/**
+	 * Execute the specified listener,
+	 * committing or rolling back the transaction afterwards (if necessary).
+	 * @param session the JMS Session to work on
+	 * @param message the received JMS Message
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see #invokeListener(javax.jms.Session, javax.jms.Message)
+	 * @see #commitIfNecessary
+	 * @see #rollbackOnExceptionIfNecessary
+	 * @see #convertJmsAccessException
+	 */
+	protected void doExecuteListener(Session session, Message message) throws JMSException {
+		try {
 			invokeListener(session, message);
-			commitIfNecessary(session, message);
 		}
 		catch (JMSException ex) {
 			rollbackOnExceptionIfNecessary(session, ex);
-			convertJmsAccessException(ex);
+			throw ex;
 		}
 		catch (RuntimeException ex) {
 			rollbackOnExceptionIfNecessary(session, ex);
@@ -313,6 +359,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 			rollbackOnExceptionIfNecessary(session, err);
 			throw err;
 		}
+		commitIfNecessary(session, message);
 	}
 
 	/**
