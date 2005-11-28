@@ -16,8 +16,8 @@
 
 package org.springframework.jdbc.command;
 
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.JdbcNamedParameterTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.ParsedSql;
 
@@ -38,12 +38,12 @@ public class SqlCommand implements org.springframework.jdbc.command.SqlCommandOp
     private String sql;
     private ParsedSql parsedSql;
     private SqlParameterTypes sqlTypes = new SqlParameterTypes();
-    private JdbcTemplate jdbcTemplate;
+    private JdbcNamedParameterTemplate jdbcTemplate;
 
     public SqlCommand(String sql, DataSource dataSource) {
         this.sql = sql;
         this.parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcNamedParameterTemplate(dataSource);
     }
 
     public Object executeScalar() {
@@ -51,16 +51,11 @@ public class SqlCommand implements org.springframework.jdbc.command.SqlCommandOp
     }
 
     public Object executeScalar(Map parameters) {
-        Object[] args = NamedParameterUtils.convertArgMapToArray(parameters, parsedSql);
-        String substitutedSql = NamedParameterUtils.substituteNamedParameters(sql, parameters);
-        return jdbcTemplate.queryForObject(substitutedSql, args, Object.class);
+        return jdbcTemplate.queryForObject(sql, parameters, Object.class);
     }
 
     public Object executeScalar(SqlNamedParameterHolder parameterHolder) {
-        Object[] args = NamedParameterUtils.convertArgMapToArray(parameterHolder.getValues(), parsedSql);
-        int[] argTypes = NamedParameterUtils.convertTypeMapToArray(sqlTypes.getTypes(), parsedSql);
-        String substitutedSql = NamedParameterUtils.substituteNamedParameters(sql, parameterHolder.getValues());
-        return jdbcTemplate.queryForObject(substitutedSql, args, argTypes, Object.class);
+        return jdbcTemplate.queryForObject(sql, parameterHolder, sqlTypes, Object.class);
     }
 
     public Object executeObject(RowMapper rowMapper) {
@@ -68,16 +63,11 @@ public class SqlCommand implements org.springframework.jdbc.command.SqlCommandOp
     }
 
     public Object executeObject(RowMapper rowMapper, Map parameters) {
-        Object[] args = NamedParameterUtils.convertArgMapToArray(parameters, parsedSql);
-        String substitutedSql = NamedParameterUtils.substituteNamedParameters(sql, parameters);
-        return jdbcTemplate.queryForObject(substitutedSql, args, rowMapper);
+        return jdbcTemplate.queryForObject(sql, parameters, rowMapper);
     }
 
     public Object executeObject(RowMapper rowMapper, SqlNamedParameterHolder parameterHolder) {
-        Object[] args = NamedParameterUtils.convertArgMapToArray(parameterHolder.getValues(), parsedSql);
-        int[] argTypes = NamedParameterUtils.convertTypeMapToArray(sqlTypes.getTypes(), parsedSql);
-        String substitutedSql = NamedParameterUtils.substituteNamedParameters(sql, parameterHolder.getValues());
-        return jdbcTemplate.queryForObject(substitutedSql, args, argTypes, rowMapper);
+        return jdbcTemplate.queryForObject(sql, parameterHolder, sqlTypes, rowMapper);
     }
 
     public List executeQuery() {
@@ -85,16 +75,11 @@ public class SqlCommand implements org.springframework.jdbc.command.SqlCommandOp
     }
 
     public List executeQuery(Map parameters) {
-        Object[] args = NamedParameterUtils.convertArgMapToArray(parameters, parsedSql);
-        String substitutedSql = NamedParameterUtils.substituteNamedParameters(sql, parameters);
-        return jdbcTemplate.queryForList(substitutedSql, args);
+        return jdbcTemplate.queryForList(sql, parameters);
     }
 
     public List executeQuery(SqlNamedParameterHolder parameterHolder) {
-        Object[] args = NamedParameterUtils.convertArgMapToArray(parameterHolder.getValues(), parsedSql);
-        int[] argTypes = NamedParameterUtils.convertTypeMapToArray(sqlTypes.getTypes(), parsedSql);
-        String substitutedSql = NamedParameterUtils.substituteNamedParameters(sql, parameterHolder.getValues());
-        return jdbcTemplate.queryForList(substitutedSql, args, argTypes);
+        return jdbcTemplate.queryForList(sql, parameterHolder, sqlTypes);
     }
 
     public List executeQuery(RowMapper rowMapper) {
@@ -102,16 +87,11 @@ public class SqlCommand implements org.springframework.jdbc.command.SqlCommandOp
     }
 
     public List executeQuery(RowMapper rowMapper, Map parameters) {
-        Object[] args = NamedParameterUtils.convertArgMapToArray(parameters, parsedSql);
-        String substitutedSql = NamedParameterUtils.substituteNamedParameters(sql, parameters);
-        return jdbcTemplate.query(substitutedSql, args, rowMapper);
+        return jdbcTemplate.query(sql, parameters, rowMapper);
     }
 
     public List executeQuery(RowMapper rowMapper, SqlNamedParameterHolder parameterHolder) {
-        Object[] args = NamedParameterUtils.convertArgMapToArray(parameterHolder.getValues(), parsedSql);
-        int[] argTypes = NamedParameterUtils.convertTypeMapToArray(sqlTypes.getTypes(), parsedSql);
-        String substitutedSql = NamedParameterUtils.substituteNamedParameters(sql, parameterHolder.getValues());
-        return jdbcTemplate.query(substitutedSql, args, argTypes, rowMapper);
+        return jdbcTemplate.query(sql, parameterHolder, sqlTypes, rowMapper);
     }
 
     public SqlRowSet executeRowSet() {
@@ -119,16 +99,11 @@ public class SqlCommand implements org.springframework.jdbc.command.SqlCommandOp
     }
 
     public SqlRowSet executeRowSet(Map parameters) {
-        Object[] args = NamedParameterUtils.convertArgMapToArray(parameters, parsedSql);
-        String substitutedSql = NamedParameterUtils.substituteNamedParameters(sql, parameters);
-        return jdbcTemplate.queryForRowSet(substitutedSql, args);
+        return jdbcTemplate.queryForRowSet(sql, parameters);
     }
 
     public SqlRowSet executeRowSet(SqlNamedParameterHolder parameterHolder) {
-        Object[] args = NamedParameterUtils.convertArgMapToArray(parameterHolder.getValues(), parsedSql);
-        int[] argTypes = NamedParameterUtils.convertTypeMapToArray(sqlTypes.getTypes(), parsedSql);
-        String substitutedSql = NamedParameterUtils.substituteNamedParameters(sql, parameterHolder.getValues());
-        return jdbcTemplate.queryForRowSet(substitutedSql, args, argTypes);
+        return jdbcTemplate.queryForRowSet(sql, parameterHolder, sqlTypes);
     }
 
     public int executeUpdate() {
@@ -136,16 +111,11 @@ public class SqlCommand implements org.springframework.jdbc.command.SqlCommandOp
     }
 
     public int executeUpdate(Map parameters) {
-        Object[] args = NamedParameterUtils.convertArgMapToArray(parameters, parsedSql);
-        String substitutedSql = NamedParameterUtils.substituteNamedParameters(sql, parameters);
-        return jdbcTemplate.update(substitutedSql, args);
+        return jdbcTemplate.update(sql, parameters);
     }
 
     public int executeUpdate(SqlNamedParameterHolder parameterHolder) {
-        Object[] args = NamedParameterUtils.convertArgMapToArray(parameterHolder.getValues(), parsedSql);
-        int[] argTypes = NamedParameterUtils.convertTypeMapToArray(sqlTypes.getTypes(), parsedSql);
-        String substitutedSql = NamedParameterUtils.substituteNamedParameters(sql, parameterHolder.getValues());
-        return jdbcTemplate.update(substitutedSql, args, argTypes);
+        return jdbcTemplate.update(sql, parameterHolder, sqlTypes);
     }
 
     public Map getSqlTypes() {
