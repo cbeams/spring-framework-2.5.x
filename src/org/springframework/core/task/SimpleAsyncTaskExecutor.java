@@ -40,6 +40,49 @@ public class SimpleAsyncTaskExecutor extends ConcurrencyThrottleSupport
 		implements TaskExecutor, Serializable {
 
 	/**
+	 * Default thread name prefix: "SimpleAsyncTaskExecutor-".
+	 */
+	public static final String DEFAULT_THREAD_NAME_PREFIX = "SimpleAsyncTaskExecutor-";
+
+
+	private String threadNamePrefix = DEFAULT_THREAD_NAME_PREFIX;
+
+	private int threadCount = 0;
+
+
+	/**
+	 * Create a new SimpleAsyncTaskExecutor with default thread name prefix.
+	 */
+	public SimpleAsyncTaskExecutor() {
+	}
+
+	/**
+	 * Create a new SimpleAsyncTaskExecutor with the given thread name prefix.
+	 * @param threadNamePrefix the prefix to use for the names of newly created threads
+	 */
+	public SimpleAsyncTaskExecutor(String threadNamePrefix) {
+		setThreadNamePrefix(threadNamePrefix);
+	}
+
+
+	/**
+	 * Specify the prefix to use for the names of newly created threads.
+	 * Default is "SimpleAsyncTaskExecutor-".
+	 */
+	public void setThreadNamePrefix(String threadNamePrefix) {
+		this.threadNamePrefix = (threadNamePrefix != null ? threadNamePrefix : DEFAULT_THREAD_NAME_PREFIX);
+	}
+
+	/**
+	 * Return the thread name prefix to use for the names of newly
+	 * created threads.
+	 */
+	protected String getThreadNamePrefix() {
+		return threadNamePrefix;
+	}
+
+
+	/**
 	 * Executes the given task, within a concurrency throttle
 	 * if configured (through the superclass's settings).
 	 * @see #beforeAccess()
@@ -62,7 +105,18 @@ public class SimpleAsyncTaskExecutor extends ConcurrencyThrottleSupport
 	 * @param task the Runnable to execute
 	 */
 	protected void doExecute(Runnable task) {
-		new Thread(task).start();
+		new Thread(task, getThreadName()).start();
+	}
+
+	/**
+	 * Return the thread name to use for a newly created thread.
+	 * <p>Default implementation returns the specified thread name prefix
+	 * with an increasing thread count appended: for example,
+	 * "SimpleAsyncTaskExecutor-0".
+	 * @see #getThreadNamePrefix()
+	 */
+	protected synchronized String getThreadName() {
+		return (getThreadNamePrefix() + (this.threadCount++));
 	}
 
 }
