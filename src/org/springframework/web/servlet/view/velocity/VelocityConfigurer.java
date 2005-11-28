@@ -41,7 +41,7 @@ import org.springframework.ui.velocity.VelocityEngineFactory;
  * using Spring's VelocityView for web MVC. It exists purely to configure Velocity;
  * it is not meant to be referenced by application components but just internally
  * by VelocityView. Implements VelocityConfig to be found by VelocityView without
- * depending on the bean name the configurer. Each DispatcherServlet can define
+ * depending on the bean name of the configurer. Each DispatcherServlet can define
  * its own VelocityConfigurer if desired.
  *
  * <p>Note that you can also refer to a preconfigured VelocityEngine instance, for
