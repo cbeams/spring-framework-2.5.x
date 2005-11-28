@@ -23,6 +23,8 @@ import javax.faces.el.VariableResolver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -38,7 +40,7 @@ import org.springframework.web.context.WebApplicationContext;
  * &lt;/application></pre>
  *
  * All your JSF expressions can then implicitly refer to the names of
- * Spring-managed middle tier beans, for example in property values of
+ * Spring-managed service layer beans, for example in property values of
  * JSF-managed beans:
  *
  * <pre>
@@ -60,13 +62,6 @@ import org.springframework.web.context.WebApplicationContext;
  *   ...
  * &lt;/bean></pre>
  *
- * <b>Note:</b> Spring's JSF support has been developed and tested against
- * JSF 1.1. Unfortunately, the JSF 1.1 RI (as of June 2004) does not apply a
- * custom VariableResolver to property values of JSF-managed beans: This has
- * to be considered a bug, as it is supposed to work according to the JSF spec.
- * It does work in <a href="http://www.marinschek.com/myfaces/tiki">MyFaces</a>
- * 1.0.5, for example.
- *
  * @author Juergen Hoeller
  * @since 1.1
  * @see WebApplicationContextVariableResolver
@@ -74,6 +69,7 @@ import org.springframework.web.context.WebApplicationContext;
  */
 public class DelegatingVariableResolver extends VariableResolver {
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	protected final VariableResolver originalVariableResolver;
@@ -87,11 +83,13 @@ public class DelegatingVariableResolver extends VariableResolver {
 	 * @param originalVariableResolver the original VariableResolver
 	 */
 	public DelegatingVariableResolver(VariableResolver originalVariableResolver) {
+		Assert.notNull(originalVariableResolver, "Original JSF VariableResolver must not be null");
 		this.originalVariableResolver = originalVariableResolver;
 	}
 
 	/**
-	 * Return the original VariableResolver that this resolver delegates to.
+	 * Return the original JSF VariableResolver that this resolver delegates to.
+	 * Used to resolve standard JSF-managed beans.
 	 */
 	protected final VariableResolver getOriginalVariableResolver() {
 		return originalVariableResolver;
@@ -103,7 +101,7 @@ public class DelegatingVariableResolver extends VariableResolver {
 	 * resolve the variable as Spring bean in the root WebApplicationContext.
 	 */
 	public Object resolveVariable(FacesContext facesContext, String name) throws EvaluationException {
-		// Ask original resolver.
+		// Ask original JSF variable resolver.
 		if (logger.isDebugEnabled()) {
 			logger.debug("Attempting to resolve variable '" + name + "' in via original VariableResolver");
 		}
@@ -112,22 +110,35 @@ public class DelegatingVariableResolver extends VariableResolver {
 			return originalResult;
 		}
 
-		// Ask Spring root context.
+		// Ask Spring root application context.
 		if (logger.isDebugEnabled()) {
 			logger.debug("Attempting to resolve variable '" + name + "' in root WebApplicationContext");
 		}
-		WebApplicationContext wac = getWebApplicationContext(facesContext);
-		if (wac.containsBean(name)) {
+		BeanFactory bf = getBeanFactory(facesContext);
+		if (bf.containsBean(name)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Successfully resolved variable '" + name + "' in root WebApplicationContext");
 			}
-			return wac.getBean(name);
+			return bf.getBean(name);
 		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Could not resolve variable '" + name + "'");
 		}
 		return null;
+	}
+
+	/**
+	 * Retrieve the Spring BeanFactory to delegate bean name resolution to.
+	 * <p>Default implementation delegates to <code>getWebApplicationContext</code>.
+	 * Can be overridden to provide an arbitrary BeanFactory reference to resolve
+	 * against; usually, this will be a full Spring ApplicationContext.
+	 * @param facesContext the current JSF context
+	 * @return the Spring BeanFactory (never <code>null</code>)
+	 * @see #getWebApplicationContext
+	 */
+	protected BeanFactory getBeanFactory(FacesContext facesContext) {
+		return getWebApplicationContext(facesContext);
 	}
 
 	/**
