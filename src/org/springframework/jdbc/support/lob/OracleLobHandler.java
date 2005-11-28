@@ -88,50 +88,18 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Class blobClass;
+	private NativeJdbcExtractor nativeJdbcExtractor;
 
-	private final Class clobClass;
+	private Boolean cache = Boolean.TRUE;
+
+	private Class blobClass;
+
+	private Class clobClass;
 
 	private final Map durationSessionConstants = new HashMap(2);
 
 	private final Map modeReadWriteConstants = new HashMap(2);
 
-	private NativeJdbcExtractor nativeJdbcExtractor;
-
-	private Boolean cache = Boolean.TRUE;
-
-
-	/**
-	 * This constructor retrieves the oracle.sql.BLOB and oracle.sql.CLOB
-	 * classes via reflection, and initializes the values for the
-	 * DURATION_SESSION and MODE_READWRITE constants defined there.
-	 * @see oracle.sql.BLOB#DURATION_SESSION
-	 * @see oracle.sql.BLOB#MODE_READWRITE
-	 * @see oracle.sql.CLOB#DURATION_SESSION
-	 * @see oracle.sql.CLOB#MODE_READWRITE
-	 */
-	public OracleLobHandler() {
-		try {
-			// Initialize oracle.sql.BLOB class
-			this.blobClass = getClass().getClassLoader().loadClass(BLOB_CLASS_NAME);
-			this.durationSessionConstants.put(
-					this.blobClass, new Integer(this.blobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null)));
-			this.modeReadWriteConstants.put(
-					this.blobClass, new Integer(this.blobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null)));
-
-			// Initialize oracle.sql.CLOB class
-			this.clobClass = getClass().getClassLoader().loadClass(CLOB_CLASS_NAME);
-			this.durationSessionConstants.put(
-					this.clobClass, new Integer(this.clobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null)));
-			this.modeReadWriteConstants.put(
-					this.clobClass, new Integer(this.clobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null)));
-		}
-		catch (Exception ex) {
-			throw new InvalidDataAccessApiUsageException(
-					"Couldn't initialize OracleLobHandler because Oracle driver classes are not available. " +
-					"Note that OracleLobHandler requires Oracle JDBC driver 9i or higher!", ex);
-		}
-	}
 
 	/**
 	 * Set an appropriate NativeJdbcExtractor to be able to retrieve the underlying
@@ -161,6 +129,43 @@ public class OracleLobHandler extends AbstractLobHandler {
 	 */
 	public void setCache(boolean cache) {
 		this.cache = new Boolean(cache);
+	}
+
+
+	/**
+	 * Retrieve the <code>oracle.sql.BLOB</code> and <code>oracle.sql.CLOB</code>
+	 * classes via reflection, and initialize the values for the
+	 * DURATION_SESSION and MODE_READWRITE constants defined there.
+	 * @param con the Oracle Connection, for using the exact same class loader
+	 * that the Oracle driver was loaded with
+	 * @see oracle.sql.BLOB#DURATION_SESSION
+	 * @see oracle.sql.BLOB#MODE_READWRITE
+	 * @see oracle.sql.CLOB#DURATION_SESSION
+	 * @see oracle.sql.CLOB#MODE_READWRITE
+	 */
+	protected synchronized void initOracleDriverClasses(Connection con) {
+		if (this.blobClass == null) {
+			try {
+				// Initialize oracle.sql.BLOB class
+				this.blobClass = con.getClass().getClassLoader().loadClass(BLOB_CLASS_NAME);
+				this.durationSessionConstants.put(
+						this.blobClass, new Integer(this.blobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null)));
+				this.modeReadWriteConstants.put(
+						this.blobClass, new Integer(this.blobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null)));
+
+				// Initialize oracle.sql.CLOB class
+				this.clobClass = con.getClass().getClassLoader().loadClass(CLOB_CLASS_NAME);
+				this.durationSessionConstants.put(
+						this.clobClass, new Integer(this.clobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null)));
+				this.modeReadWriteConstants.put(
+						this.clobClass, new Integer(this.clobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null)));
+			}
+			catch (Exception ex) {
+				throw new InvalidDataAccessApiUsageException(
+						"Couldn't initialize OracleLobHandler because Oracle driver classes are not available. " +
+						"Note that OracleLobHandler requires Oracle JDBC driver 9i or higher!", ex);
+			}
+		}
 	}
 
 
@@ -212,7 +217,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 				throws SQLException {
 
 			if (content != null) {
-				Blob blob = (Blob) createLob(ps, blobClass, new LobCallback() {
+				Blob blob = (Blob) createLob(ps, false, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
 						Method methodToInvoke = lob.getClass().getMethod("getBinaryOutputStream", new Class[0]);
 						OutputStream out = (OutputStream) methodToInvoke.invoke(lob, (Object[]) null);
@@ -235,7 +240,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 				throws SQLException {
 
 			if (binaryStream != null) {
-				Blob blob = (Blob) createLob(ps, blobClass, new LobCallback() {
+				Blob blob = (Blob) createLob(ps, false, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
 						Method methodToInvoke = lob.getClass().getMethod("getBinaryOutputStream", (Class[]) null);
 						OutputStream out = (OutputStream) methodToInvoke.invoke(lob, (Object[]) null);
@@ -257,7 +262,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		    throws SQLException {
 
 			if (content != null) {
-				Clob clob = (Clob) createLob(ps, clobClass, new LobCallback() {
+				Clob clob = (Clob) createLob(ps, true, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
 						Method methodToInvoke = lob.getClass().getMethod("getCharacterOutputStream", (Class[]) null);
 						Writer writer = (Writer) methodToInvoke.invoke(lob, (Object[]) null);
@@ -280,7 +285,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		    throws SQLException {
 
 			if (asciiStream != null) {
-				Clob clob = (Clob) createLob(ps, clobClass, new LobCallback() {
+				Clob clob = (Clob) createLob(ps, true, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
 						Method methodToInvoke = lob.getClass().getMethod("getAsciiOutputStream", (Class[]) null);
 						OutputStream out = (OutputStream) methodToInvoke.invoke(lob, (Object[]) null);
@@ -303,7 +308,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		    throws SQLException {
 
 			if (characterStream != null) {
-				Clob clob = (Clob) createLob(ps, clobClass, new LobCallback() {
+				Clob clob = (Clob) createLob(ps, true, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
 						Method methodToInvoke = lob.getClass().getMethod("getCharacterOutputStream", (Class[]) null);
 						Writer writer = (Writer) methodToInvoke.invoke(lob, (Object[]) null);
@@ -325,17 +330,20 @@ public class OracleLobHandler extends AbstractLobHandler {
 		 * Create a LOB instance for the given PreparedStatement,
 		 * populating it via the given callback.
 		 */
-		protected Object createLob(PreparedStatement ps, Class lobClass, LobCallback callback)
+		protected Object createLob(PreparedStatement ps, boolean clob, LobCallback callback)
 				throws SQLException {
 
 			Connection con = null;
 			try {
 				con = getOracleConnection(ps);
-				Object lob = prepareLob(con, lobClass);
+				initOracleDriverClasses(con);
+				Object lob = prepareLob(con, clob ? clobClass : blobClass);
 				callback.populateLob(lob);
 				lob.getClass().getMethod("close", (Class[]) null).invoke(lob, (Object[]) null);
 				this.createdLobs.add(lob);
-				logger.debug("Created new Oracle LOB");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Created new Oracle " + (clob ? "CLOB" : "BLOB"));
+				}
 				return lob;
 			}
 			catch (SQLException ex) {
