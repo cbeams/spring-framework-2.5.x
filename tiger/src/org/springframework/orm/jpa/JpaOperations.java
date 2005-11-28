@@ -17,6 +17,7 @@
 package org.springframework.orm.jpa;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.dao.DataAccessException;
 
@@ -69,14 +70,14 @@ public interface JpaOperations {
 
 	List find(String queryString) throws DataAccessException;
 
-	List find(String queryString, Object value) throws DataAccessException;
+	List find(String queryString, Object... values) throws DataAccessException;
 
-	List find(String queryString, Object[] values) throws DataAccessException;
+	List find(String queryString, Map<String,Object> params) throws DataAccessException;
 
 	List findByNamedQuery(String queryName) throws DataAccessException;
 
-	List findByNamedQuery(String queryName, Object value) throws DataAccessException;
+	List findByNamedQuery(String queryName, Object... values) throws DataAccessException;
 
-	List findByNamedQuery(String queryName, Object[] values) throws DataAccessException;
+	List findByNamedQuery(String queryName, Map<String,Object> params) throws DataAccessException;
 
 }
