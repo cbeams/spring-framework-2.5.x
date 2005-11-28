@@ -128,7 +128,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	}
 
 	public Class getObjectType() {
-		return (this.jobDetail != null) ? this.jobDetail.getClass() : JobDetail.class;
+		return JobDetail.class;
 	}
 
 	public boolean isSingleton() {
