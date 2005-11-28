@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.listener.server;
+package org.springframework.jms.listener.serversession;
 
 import javax.jms.JMSException;
 import javax.jms.ServerSession;
@@ -27,7 +27,7 @@ import org.springframework.jms.support.JmsUtils;
 /**
  * The simplest possible implementation of the ServerSessionFactory SPI:
  * creating a new ServerSession with a new JMS Session every time.
- * This is the default used by ServerMessageListenerContainer.
+ * This is the default used by ServerSessionMessageListenerContainer.
  *
  * <p>The execution of a ServerSession (and its MessageListener) gets delegated
  * to a TaskExecutor. By default, a SimpleAsyncTaskExecutor will be used,
@@ -45,11 +45,11 @@ import org.springframework.jms.support.JmsUtils;
  * @see org.springframework.core.task.SimpleAsyncTaskExecutor
  * @see org.springframework.scheduling.timer.TimerTaskExecutor
  * @see CommonsPoolServerSessionFactory
- * @see ServerMessageListenerContainer
+ * @see ServerSessionMessageListenerContainer
  */
 public class SimpleServerSessionFactory implements ServerSessionFactory {
 
-	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
+	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("SimpleServerSessionFactory");
 
 
 	/**

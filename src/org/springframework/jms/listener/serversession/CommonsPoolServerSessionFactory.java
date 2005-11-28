@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.listener.server;
+package org.springframework.jms.listener.serversession;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,6 +27,8 @@ import javax.jms.ServerSession;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
+
+import org.springframework.jms.listener.serversession.ListenerSessionManager;
 
 /**
  * ServerSessionFactory implementation that holds ServerSessions

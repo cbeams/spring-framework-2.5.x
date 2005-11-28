@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.listener.server;
+package org.springframework.jms.listener.serversession;
 
 import javax.jms.JMSException;
 import javax.jms.ServerSession;
+
+import org.springframework.jms.listener.serversession.ListenerSessionManager;
 
 /**
  * SPI interface to be implemented by components that manage
@@ -33,8 +35,8 @@ import javax.jms.ServerSession;
  *
  * @author Juergen Hoeller
  * @since 1.3
- * @see ListenerSessionManager
- * @see ServerMessageListenerContainer
+ * @see org.springframework.jms.listener.serversession.ListenerSessionManager
+ * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
  */
 public interface ServerSessionFactory {
 

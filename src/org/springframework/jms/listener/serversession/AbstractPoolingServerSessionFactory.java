@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.listener.server;
+package org.springframework.jms.listener.serversession;
 
 import javax.jms.JMSException;
 import javax.jms.ServerSession;
@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.jms.listener.serversession.ListenerSessionManager;
 import org.springframework.scheduling.timer.TimerTaskExecutor;
 
 /**
@@ -39,7 +40,7 @@ import org.springframework.scheduling.timer.TimerTaskExecutor;
  *
  * @author Juergen Hoeller
  * @since 1.3
- * @see CommonsPoolServerSessionFactory
+ * @see org.springframework.jms.listener.serversession.CommonsPoolServerSessionFactory
  */
 public abstract class AbstractPoolingServerSessionFactory implements ServerSessionFactory {
 

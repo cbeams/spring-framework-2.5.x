@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.listener.server;
+package org.springframework.jms.listener.serversession;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionConsumer;
@@ -27,6 +27,8 @@ import javax.jms.ServerSessionPool;
 import javax.jms.Session;
 
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
+import org.springframework.jms.listener.serversession.SimpleServerSessionFactory;
+import org.springframework.jms.listener.serversession.ListenerSessionManager;
 import org.springframework.jms.support.JmsUtils;
 
 /**
@@ -50,7 +52,7 @@ import org.springframework.jms.support.JmsUtils;
  * @since 1.3
  * @see org.springframework.jms.listener.SimpleMessageListenerContainer
  */
-public class ServerMessageListenerContainer extends AbstractMessageListenerContainer
+public class ServerSessionMessageListenerContainer extends AbstractMessageListenerContainer
 		implements ListenerSessionManager {
 
 	private ServerSessionFactory serverSessionFactory = new SimpleServerSessionFactory();
@@ -66,7 +68,7 @@ public class ServerMessageListenerContainer extends AbstractMessageListenerConta
 	 * Consider using a CommonsPoolServerSessionFactory to reuse JMS Sessions
 	 * and/or to limit the number of concurrent ServerSession executions.
 	 * @see SimpleServerSessionFactory
-	 * @see CommonsPoolServerSessionFactory
+	 * @see org.springframework.jms.listener.serversession.CommonsPoolServerSessionFactory
 	 */
 	public void setServerSessionFactory(ServerSessionFactory serverSessionFactory) {
 		this.serverSessionFactory =
@@ -137,7 +139,7 @@ public class ServerMessageListenerContainer extends AbstractMessageListenerConta
 		return new ServerSessionPool() {
 			public ServerSession getServerSession() throws JMSException {
 				logger.debug("JMS ConnectionConsumer requests ServerSession");
-				return getServerSessionFactory().getServerSession(ServerMessageListenerContainer.this);
+				return getServerSessionFactory().getServerSession(ServerSessionMessageListenerContainer.this);
 			}
 		};
 	}

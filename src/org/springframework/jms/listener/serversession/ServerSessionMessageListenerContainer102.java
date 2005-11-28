@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.listener.server;
+package org.springframework.jms.listener.serversession;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionConsumer;
@@ -29,16 +29,18 @@ import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 
+import org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer;
+
 /**
- * A subclass of ServerMessageListenerContainer that uses the JMS 1.0.2 specification,
- * rather than the JMS 1.1 methods used by ServerMessageListenerContainer itself.
+ * A subclass of ServerSessionMessageListenerContainer that uses the JMS 1.0.2 specification,
+ * rather than the JMS 1.1 methods used by ServerSessionMessageListenerContainer itself.
  * This class can be used for JMS 1.0.2 providers, offering the same facility as
- * ServerMessageListenerContainer does for JMS 1.1 providers.
+ * ServerSessionMessageListenerContainer does for JMS 1.1 providers.
  *
  * @author Juergen Hoeller
  * @since 1.3
  */
-public class ServerMessageListenerContainer102 extends ServerMessageListenerContainer {
+public class ServerSessionMessageListenerContainer102 extends ServerSessionMessageListenerContainer {
 
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
