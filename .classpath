@@ -95,7 +95,7 @@
 	<classpathentry kind="lib" path="lib/ehcache/ehcache-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/aspectwerkz/aspectwerkz-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/ejb.jar"/>
-	<classpathentry kind="lib" path="lib/j2ee/servlet-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/j2ee/servlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/jsp-api.jar"/>
 	<classpathentry kind="lib" path="lib/c3p0/c3p0-0.9.0.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/cglib/cglib-nodep-2.1_3.jar"/>
@@ -114,5 +114,6 @@
 	<classpathentry kind="src" path="samples/petclinic/test"/>
 	<classpathentry kind="lib" path="lib/antlr/antlr-2.7.5H3.jar"/>
 	<classpathentry kind="lib" path="lib/jpa/persistence.jar"/>
+	<classpathentry kind="src" path="tiger/test"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
