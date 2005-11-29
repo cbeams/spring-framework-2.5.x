@@ -33,8 +33,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
@@ -191,46 +193,46 @@ public abstract class AbstractAtAspectJAdvisorFactoryTest extends TestCase {
 		assertEquals(expectedResult, mva.mungeArgs(a, b, c, d, e));
 	}
 	
-//	public void testIntroductionOnTargetNotImplementingInterface() {
-//		NotLockable target = new NotLockable();
-//		NotLockable proxy = (NotLockable) createProxy(target,
-//				getFixture().getAdvisors(new MakeLockable()),
-//				NotLockable.class);
-//		System.out.println(((Advised) proxy).toProxyConfigString());
-//		assertTrue(proxy instanceof Lockable);
-//		Lockable lockable = (Lockable) proxy;
-//		assertFalse(lockable.isLocked());
-//		lockable.lock();
-//		assertTrue(lockable.isLocked());
-//	}
-//	
-//	public void testIntroductionAdvisorExcludedFromTargetImplementingInterface() {
-//		assertTrue(AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(new MakeLockable()), CannotBeUnlocked.class).isEmpty());
-//		assertEquals(1, AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(new MakeLockable()), NotLockable.class).size());
-//	}
-//	
-//	public void testIntroductionOnTargetImplementingInterface() {
-//		CannotBeUnlocked target = new CannotBeUnlocked();
-//		Lockable proxy = (Lockable) createProxy(target,
-//				// Ensure that we exclude
-//				AopUtils.findAdvisorsThatCanApply(
-//						getFixture().getAdvisors(new MakeLockable()),
-//						CannotBeUnlocked.class
-//				),
-//				CannotBeUnlocked.class);
-//		assertTrue(proxy instanceof Lockable);
-//		Lockable lockable = (Lockable) proxy;
-//		assertTrue("Already locked", lockable.isLocked());
-//		lockable.lock();
-//		assertTrue("Real target ignores locking", lockable.isLocked());
-//		try {
-//			lockable.unlock();
-//			fail();
-//		}
-//		catch (UnsupportedOperationException ex) {
-//			// Ok
-//		}
-//	}
+	public void testIntroductionOnTargetNotImplementingInterface() {
+		NotLockable target = new NotLockable();
+		NotLockable proxy = (NotLockable) createProxy(target,
+				getFixture().getAdvisors(new MakeLockable()),
+				NotLockable.class);
+		System.out.println(((Advised) proxy).toProxyConfigString());
+		assertTrue(proxy instanceof Lockable);
+		Lockable lockable = (Lockable) proxy;
+		assertFalse(lockable.isLocked());
+		lockable.lock();
+		assertTrue(lockable.isLocked());
+	}
+	
+	public void testIntroductionAdvisorExcludedFromTargetImplementingInterface() {
+		assertTrue(AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(new MakeLockable()), CannotBeUnlocked.class).isEmpty());
+		assertEquals(1, AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(new MakeLockable()), NotLockable.class).size());
+	}
+	
+	public void testIntroductionOnTargetImplementingInterface() {
+		CannotBeUnlocked target = new CannotBeUnlocked();
+		Lockable proxy = (Lockable) createProxy(target,
+				// Ensure that we exclude
+				AopUtils.findAdvisorsThatCanApply(
+						getFixture().getAdvisors(new MakeLockable()),
+						CannotBeUnlocked.class
+				),
+				CannotBeUnlocked.class);
+		assertTrue(proxy instanceof Lockable);
+		Lockable lockable = (Lockable) proxy;
+		assertTrue("Already locked", lockable.isLocked());
+		lockable.lock();
+		assertTrue("Real target ignores locking", lockable.isLocked());
+		try {
+			lockable.unlock();
+			fail();
+		}
+		catch (UnsupportedOperationException ex) {
+			// Ok
+		}
+	}
 	
 	
 	@Aspect

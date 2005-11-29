@@ -18,6 +18,7 @@ package org.springframework.aop.support.aspectj;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.aopalliance.aop.Advice;
+import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
@@ -201,14 +203,15 @@ public class ReflectiveAtAspectJAdvisorFactory implements AtAspectJAdvisorFactor
 			}
 		}, ReflectionUtils.DECLARED_METHODS);
 		
-		//	Find inner aspect classes
-		// TODO: need to go up tree? ReflectionUtils.doWithClasses
-		for (Class innerClass : aspectInstance.getClass().getClasses()) {
+		//	Find introduction fields
+		for (Field f : aspectInstance.getClass().getDeclaredFields()) {
 			//System.out.println(aspectInstance.getClass() + ": " +innerClass);
-			if (Modifier.isStatic(innerClass.getModifiers())) {
+			if (Modifier.isStatic(f.getModifiers()) && Modifier.isPublic(f.getModifiers())) {
 				// TODO do we really want new instances all the time?
-				Object innerInstance = BeanUtils.instantiateClass(innerClass);
-				advisors.addAll(getDeclareParentsAdvisors(innerClass, new SingletonAspectInstanceFactory(innerInstance)));
+				Advisor a = getDeclareParentsAdvisor(f, aspectInstance);
+				if (a != null) {
+					advisors.add(a);
+				}
 			}
 		}
 		
@@ -223,21 +226,17 @@ public class ReflectiveAtAspectJAdvisorFactory implements AtAspectJAdvisorFactor
 	/**
 	 * Resulting advisors will need to be evaluated for targets.
 	 * @param introductionInstance
-	 * @return
+	 * @return null if not an advisor
 	 */
-	// TODO is there any point passing in AIF instead of instance here?
-	private List<Advisor> getDeclareParentsAdvisors(Class clazz, final AspectInstanceFactory aif) {
-		List<Advisor> advisors = new LinkedList<Advisor>();
-		DeclareParents declareParentsHack = (DeclareParents) clazz.getAnnotation(DeclareParents.class);
-		if (declareParentsHack == null) {
-			throw new IllegalArgumentException("Class of type " + clazz + " doesn't have an introduction");
+	private Advisor getDeclareParentsAdvisor(Field f, Object aspectInstance) {
+		DeclareParents declareParents = (DeclareParents) f.getAnnotation(DeclareParents.class);
+		if (declareParents == null) {
+			// Not an introduction field
+			return null;
 		}
 		
 		// Work out where it matches, with the ClassFilter
-		// TODO
-		
-		// TODO validate them, can there be more than one?
-		final Class[] interfaces = clazz.getInterfaces();
+		final Class[] interfaces = new Class[] { f.getType() };
 		
 		ClassFilter patternFilter = ClassFilter.TRUE;
 		ClassFilter exclusion = new ClassFilter() {
@@ -252,11 +251,22 @@ public class ReflectiveAtAspectJAdvisorFactory implements AtAspectJAdvisorFactor
 		};
 		final ClassFilter classFilter = ClassFilters.intersection(patternFilter, exclusion);
 
-		// Do delegation
-		IntroductionAdvisor ia = new IntroductionAdvisorImpl(interfaces, classFilter, aif.getAspectInstance());//introductionInstance);
-		advisors.add(ia);
-		return advisors;
+		// Try to instantiate mixin instance and do delegation
+		Object introductionInstance;
+		try {
+			introductionInstance = f.get(aspectInstance);
+		} 
+		catch (IllegalArgumentException ex) {
+			throw new AspectException("Cannot evaluate introduction field " + f, ex);
+		} 
+		catch (IllegalAccessException ex) {
+			throw new AspectException("Cannot evaluate introduction field " + f, ex);
+		}
+		
+		IntroductionAdvisor ia = new IntroductionAdvisorImpl(interfaces, classFilter, introductionInstance);//introductionInstance);
+		return ia;
 	}
+	
 	
 	/**
 	 * 
