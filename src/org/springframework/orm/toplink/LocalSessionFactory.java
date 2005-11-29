@@ -18,9 +18,7 @@ package org.springframework.orm.toplink;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-
 import javax.sql.DataSource;
-
 import oracle.toplink.exceptions.TopLinkException;
 import oracle.toplink.internal.databaseaccess.DatabasePlatform;
 import oracle.toplink.jndi.JNDIConnector;
@@ -33,7 +31,6 @@ import oracle.toplink.tools.sessionconfiguration.XMLLoader;
 import oracle.toplink.tools.sessionmanagement.SessionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -265,7 +262,7 @@ public class LocalSessionFactory {
 
 		// Override default DatabaseLogin instance with specified one, if any.
 		if (this.databaseLogin != null) {
-			session.setLogin(this.databaseLogin);
+            this.reflectivelySetDatabaseLogin(session,this.databaseLogin);
 		}
 
 		// Override default connection pool with specified DataSource, if any.
@@ -290,7 +287,48 @@ public class LocalSessionFactory {
 		return newSessionFactory(session);
 	}
 
-	/**
+    /**
+     * handle differences between the Session.setLogin interface from 9.0.4 to 10.1.3.
+     * The Login interface was introduced in TopLink 10.1.3.
+     * 
+     * @param session the DatabaseSession being logged in 
+     * @param login the DatabaseLogin injected by Spring
+     * 
+     * @see Session.setLogin(Login) in 9.0.4
+     * @see Session.setLogin(DatabaseLogin) in 9.0.4
+     */
+	protected void reflectivelySetDatabaseLogin(DatabaseSession session, DatabaseLogin login)
+    {
+        Method setLoginMethod = null;
+        try {
+            // search for the new 10.1.3 Login interface 
+            Class loginClass = Class.forName("oracle.toplink.sessions.Login");
+            setLoginMethod = DatabaseSession.class.getMethod("setLogin", new Class[] {loginClass});
+            if (logger.isDebugEnabled()) {
+                logger.debug("Using TopLink 10.1.3 setLogin(Login) api");
+            }
+        }
+        catch (Exception ex) {
+            // TopLink 10.1.3 Login interface not found ->
+            // fall back to TopLink 9.0.4 setLogin(DatabaseLogin) api.
+            if (logger.isDebugEnabled()) {
+                logger.debug("Using TopLink 9.0.4 setLogin(DatabaseLogin) api");
+            }
+            session.setLogin(login);
+            return;
+        }
+
+        // invoke the 10.1.3 version of Session.setLogin.  
+        try {
+            setLoginMethod.invoke(session, new Object[] {login});
+        }
+        catch (Exception ex) {
+            ReflectionUtils.handleReflectionException(ex);
+            throw new IllegalStateException("Should never get here");
+        }
+    }
+
+    /**
 	 * Load the specified DatabaseSession from the TopLink <code>sessions.xml</code>
 	 * configuration file.
 	 * @param configLocation the class path location of the <code>sessions.xml</code> file
