@@ -44,14 +44,15 @@ import org.springframework.beans.TestBean;
  * Abstract tests for AspectJAdvisorFactory. See subclasses
  * for tests of concrete factories.
  * 
- * TODO introductions are broken due to Alex's changes.
- * Still processing the old way
- * 
  * @author Rod Johnson
  *
  */
 public abstract class AbstractAtAspectJAdvisorFactoryTest extends TestCase {
 	
+	/**
+	 * To be overridden by concrete test subclasses
+	 * @return the fixture
+	 */
 	protected abstract AtAspectJAdvisorFactory getFixture();
 	
 	@Aspect
