@@ -20,9 +20,14 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.RemoteException;
 import java.util.List;
 
+import javax.servlet.ServletException;
+
 import junit.framework.TestCase;
 
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -327,6 +332,64 @@ public abstract class AbstractAtAspectJAdvisorFactoryTest extends TestCase {
 		itb.setAge(newAge);
 		assertEquals(1, itb.getAge());
 	}
+
 	
+	public static class Echo {
+		public Object echo(Object o) throws Exception {
+			if (o instanceof Exception) {
+				throw (Exception) o;
+			}
+			return o;
+		}
+	}
+	
+	@Aspect
+	public static class ExceptionHandling {
+		public int successCount;
+		public int failureCount;
+		public int afterCount;
+		
+		@AfterReturning("execution(* echo(*))")
+		public void succeeded() {
+			++successCount;
+		}
+		
+		@AfterThrowing("execution(* echo(*))")
+		public void failed() {
+			++failureCount;
+		}
+		
+		@After("execution(* echo(*))")
+		public void invoked() {
+			++afterCount;
+		}
+	}
+	
+	public void testAfterAdviceTypes() throws Exception {
+		Echo target = new Echo();
+	
+		ExceptionHandling afterReturningAspect = new ExceptionHandling();
+		List<Advisor> advisors = getFixture().getAdvisors(afterReturningAspect);
+		Echo echo = (Echo) createProxy(target, 
+				advisors, 
+				Echo.class);
+		assertEquals(0, afterReturningAspect.successCount);
+		assertEquals("", echo.echo(""));
+		assertEquals(1, afterReturningAspect.successCount);
+		assertEquals(0, afterReturningAspect.failureCount);
+		try {
+			echo.echo(new ServletException());
+			fail();
+		}
+		catch (ServletException ex) {
+			// Ok
+		}
+		catch (Exception ex) {
+			fail();
+		}
+		assertEquals(1, afterReturningAspect.successCount);
+		assertEquals(1, afterReturningAspect.failureCount);
+		assertEquals(afterReturningAspect.failureCount + afterReturningAspect.successCount, afterReturningAspect.afterCount);
+	}
 
 }

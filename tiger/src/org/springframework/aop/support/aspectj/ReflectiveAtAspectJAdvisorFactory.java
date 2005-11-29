@@ -296,13 +296,11 @@ public class ReflectiveAtAspectJAdvisorFactory implements AtAspectJAdvisorFactor
 			springAdvice = new AspectJAfterAdvice(candidateAspectJAdviceMethod, ajexp.getPointcutExpression(), aif);				
 			break;
 		case AtAfterReturning:
-			throw new UnsupportedOperationException("Need to add after returning support!");
-//			springAdvice = new AspectJAfterAdvice(candidateAspectJAdviceMethod, ajexp.getPointcutExpression(), aif);				
-//			break;
+			springAdvice = new AspectJAfterReturningAdvice(candidateAspectJAdviceMethod, ajexp.getPointcutExpression(), aif);				
+			break;
 		case AtAfterThrowing:
-			throw new UnsupportedOperationException("Need to add after throwing support!");
-//			springAdvice = new AspectJAfterAdvice(candidateAspectJAdviceMethod, ajexp.getPointcutExpression(), aif);				
-//			break;
+			springAdvice = new AspectJAfterThrowingAdvice(candidateAspectJAdviceMethod, ajexp.getPointcutExpression(), aif);				
+			break;
 		case AtAround:
 			springAdvice = new AspectJAroundAdvice(candidateAspectJAdviceMethod, ajexp.getPointcutExpression(), aif);		
 			break;
@@ -486,6 +484,11 @@ public class ReflectiveAtAspectJAdvisorFactory implements AtAspectJAdvisorFactor
 		}
 		
 		protected Object invokeAdviceMethodWithGivenArgs(Object[] args) throws Throwable {
+			// TODO really a hack
+			if (aspectJAdviceMethod.getParameterTypes().length == 0) {
+				args = null;
+			}
+			
 			try {
 				// TODO AOPutils.InvokeJoinpointUsingReflection
 				return aspectJAdviceMethod.invoke(aif.getAspectInstance(), args);
@@ -535,14 +538,48 @@ public class ReflectiveAtAspectJAdvisorFactory implements AtAspectJAdvisorFactor
 		}
 	}
 	
-	private class AspectJAfterAdvice extends AbstractAspectJAdvice implements AfterReturningAdvice {
+	private class AspectJAfterAdvice extends AbstractAspectJAdvice implements MethodInterceptor {
 		
 		public AspectJAfterAdvice(Method aspectJBeforeAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif) {
 			super(aspectJBeforeAdviceMethod, pe, aif);
 		}
 		
+		public Object invoke(MethodInvocation mi) throws Throwable {
+			try {
+				return mi.proceed();
+			}
+			finally {
+				invokeAdviceMethod(mi.getArguments());
+			}
+		}
+	}
+	
+	private class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implements AfterReturningAdvice {
+		
+		public AspectJAfterReturningAdvice(Method aspectJBeforeAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif) {
+			super(aspectJBeforeAdviceMethod, pe, aif);
+		}
+		
 		public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
 			invokeAdviceMethod(args);
+		}
+	}
+	
+	private class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice implements MethodInterceptor {
+		
+		public AspectJAfterThrowingAdvice(Method aspectJBeforeAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif) {
+			super(aspectJBeforeAdviceMethod, pe, aif);
+		}
+		
+		public Object invoke(MethodInvocation mi) throws Throwable {
+			try {
+				return mi.proceed();
+			}
+			catch (Throwable t) {
+				// TODO need to check arguments
+				invokeAdviceMethod(mi.getArguments());
+				throw t;
+			}
 		}
 	}
 	
