@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd"
+>
+
+<beans>
+
+	<bean 
+		class="org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator" />
+	
+	<bean 
+		class="org.springframework.aop.support.aspectj.AbstractAtAspectJAdvisorFactoryTest$TwoAdviceAspect" 
+		singleton="false" />
+		
+	<bean id="adrian" class="org.springframework.beans.TestBean" singleton="false">
+		<property name="name" value="adrian" />
+		<property name="age" value="34" />
+	</bean>
+	
+	
+	
+</beans>

@@ -1,0 +1,71 @@
+/*
+ * Copyright 2002-2004 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.aop.support.aspectj;
+
+import java.lang.reflect.Method;
+import java.util.List;
+
+import org.springframework.aop.Advisor;
+import org.springframework.aop.framework.AopConfigException;
+import org.springframework.aop.support.aspectj.ReflectiveAtAspectJAdvisorFactory.AspectInstanceFactory;
+
+/**
+ * Interface for factories that can create Spring AOP Advisors from classes
+ * annotated with AspectJ annotation syntax.
+ * 
+ * @author Rod Johnson
+ * @since 1.3
+ */
+public interface AtAspectJAdvisorFactory {
+	
+	boolean isAspect(Class clazz);
+	
+	/**
+	 * Is it a valid aspect class?
+	 * @param aspectClass
+	 * @throws AopConfigException
+	 */
+	void validate(Class aspectClass) throws AopConfigException;
+
+	/**
+	 * Create Spring Advisors for all At AspectJ methods on the given aspect instance.
+	 * @param aspectInstance
+	 * @return a list of advisors for this class
+	 */
+	List<Advisor> getAdvisors(
+			final Object aspectInstance);
+
+	/**
+	 * Get a Spring Advisor from the given method given an aspect instance
+	 * @param aspectInstance aspect, already instantiated
+	 * @param candidateAspectJAdviceMethod advice method
+	 * @return a Spring advisor
+	 */
+	Advisor getAdvisor(final Object aspectInstance,
+			Method candidateAspectJAdviceMethod);
+
+	/**
+	 * 
+	 * @param aspectClass
+	 * @param candidateAspectJAdviceMethod
+	 * @param aif
+	 * @return null if the method is not an AspectJ advice method
+	 */
+	Advisor getAdvisor(Class aspectClass,
+			Method candidateAspectJAdviceMethod, AspectInstanceFactory aif);
+
+}

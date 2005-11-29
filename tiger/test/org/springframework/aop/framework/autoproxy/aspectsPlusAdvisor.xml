@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd"
+>
+
+<beans>
+
+	<bean 
+		class="org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator" />
+	
+	<bean 
+		class="org.springframework.aop.framework.autoproxy.MultiplyReturnValue" >
+		<property name="multiple" value="3" />
+	</bean>
+		
+	<bean id="adrian" class="org.springframework.beans.TestBean">
+		<property name="name" value="Adrian" />
+		<property name="age" value="34" />
+	</bean>
+	
+	
+	<bean 
+		class="org.springframework.aop.framework.autoproxy.TestBeanAdvisor" />
+	
+</beans>
