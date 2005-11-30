@@ -84,10 +84,9 @@ public abstract class AbstractAtAspectJAdvisorFactoryTest extends TestCase {
 		}
 	}
 	
-	// TODO fix me
-//	public void testNamedPointcutAspectWithoutFQN() {
-//		testNamedPointcuts(new NamedPointcutAspectWithoutFQN());
-//	}
+	public void testNamedPointcutAspectWithoutFQN() {
+		testNamedPointcuts(new NamedPointcutAspectWithoutFQN());
+	}
 	
 	@Aspect
 	public static class NamedPointcutAspectFromLibrary {
@@ -154,16 +153,15 @@ public abstract class AbstractAtAspectJAdvisorFactoryTest extends TestCase {
 		}
 	}
 
-	// TODO fix me, breaks unable to find referenced pointcut
-//	public void testBindingWithSingleArg() {
-//		TestBean target = new TestBean();
-//		ITestBean itb = (ITestBean) createProxy(target, 
-//				getFixture().getAdvisors(new BindingAspectWithSingleArg()), 
-//				ITestBean.class);
-//		itb.setAge(10);
-//		assertEquals("Around advice must apply", 20, itb.getAge());
-//		assertEquals(20,target.getAge());
-//	}
+	public void testBindingWithSingleArg() {
+		TestBean target = new TestBean();
+		ITestBean itb = (ITestBean) createProxy(target, 
+				getFixture().getAdvisors(new BindingAspectWithSingleArg()), 
+				ITestBean.class);
+		itb.setAge(10);
+		assertEquals("Around advice must apply", 20, itb.getAge());
+		assertEquals(20,target.getAge());
+	}
 	
 	
 	@Aspect
