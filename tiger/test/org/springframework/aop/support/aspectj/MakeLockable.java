@@ -18,6 +18,7 @@
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.DeclareParents;
+import org.springframework.aop.framework.Lockable;
 
 /**
  * Demonstrates introductions, AspectJ annotation style.
@@ -41,12 +42,12 @@ public class MakeLockable {
 			this.locked = false;
 		}
 
-		public boolean isLocked() {
+		public boolean locked() {
 			return this.locked;
 		}
 	}
 	
-	@DeclareParents("org.springframework.aop.support.aspectj.NotLockable")
+	@DeclareParents("org.springframework.aop.support.aspectj.*")
 	public static Lockable mixin = new DefaultLockable();
 
 }

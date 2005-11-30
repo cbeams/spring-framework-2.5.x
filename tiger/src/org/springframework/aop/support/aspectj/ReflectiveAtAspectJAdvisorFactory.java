@@ -44,6 +44,7 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.weaver.tools.PointcutExpression;
+import org.aspectj.weaver.tools.TypePatternMatcher;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.ClassFilter;
@@ -55,7 +56,7 @@ import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.aop.support.ClassFilters;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.beans.BeanUtils;
+import org.springframework.aop.support.TypePatternClassFilter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.AnnotationUtils;
@@ -205,9 +206,7 @@ public class ReflectiveAtAspectJAdvisorFactory implements AtAspectJAdvisorFactor
 		
 		//	Find introduction fields
 		for (Field f : aspectInstance.getClass().getDeclaredFields()) {
-			//System.out.println(aspectInstance.getClass() + ": " +innerClass);
 			if (Modifier.isStatic(f.getModifiers()) && Modifier.isPublic(f.getModifiers())) {
-				// TODO do we really want new instances all the time?
 				Advisor a = getDeclareParentsAdvisor(f, aspectInstance);
 				if (a != null) {
 					advisors.add(a);
@@ -238,7 +237,7 @@ public class ReflectiveAtAspectJAdvisorFactory implements AtAspectJAdvisorFactor
 		// Work out where it matches, with the ClassFilter
 		final Class[] interfaces = new Class[] { f.getType() };
 		
-		ClassFilter patternFilter = ClassFilter.TRUE;
+		ClassFilter typePatternFilter = new TypePatternClassFilter(declareParents.value());
 		ClassFilter exclusion = new ClassFilter() {
 			public boolean matches(Class clazz) {
 				for (Class introducedInterface : interfaces) {
@@ -249,7 +248,7 @@ public class ReflectiveAtAspectJAdvisorFactory implements AtAspectJAdvisorFactor
 				return true;
 			}
 		};
-		final ClassFilter classFilter = ClassFilters.intersection(patternFilter, exclusion);
+		final ClassFilter classFilter = ClassFilters.intersection(typePatternFilter, exclusion);
 
 		// Try to instantiate mixin instance and do delegation
 		Object introductionInstance;

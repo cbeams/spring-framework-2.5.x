@@ -34,6 +34,7 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
@@ -202,9 +203,9 @@ public abstract class AbstractAtAspectJAdvisorFactoryTest extends TestCase {
 		System.out.println(((Advised) proxy).toProxyConfigString());
 		assertTrue(proxy instanceof Lockable);
 		Lockable lockable = (Lockable) proxy;
-		assertFalse(lockable.isLocked());
+		assertFalse(lockable.locked());
 		lockable.lock();
-		assertTrue(lockable.isLocked());
+		assertTrue(lockable.locked());
 	}
 	
 	public void testIntroductionAdvisorExcludedFromTargetImplementingInterface() {
@@ -223,9 +224,9 @@ public abstract class AbstractAtAspectJAdvisorFactoryTest extends TestCase {
 				CannotBeUnlocked.class);
 		assertTrue(proxy instanceof Lockable);
 		Lockable lockable = (Lockable) proxy;
-		assertTrue("Already locked", lockable.isLocked());
+		assertTrue("Already locked", lockable.locked());
 		lockable.lock();
-		assertTrue("Real target ignores locking", lockable.isLocked());
+		assertTrue("Real target ignores locking", lockable.locked());
 		try {
 			lockable.unlock();
 			fail();
@@ -233,6 +234,17 @@ public abstract class AbstractAtAspectJAdvisorFactoryTest extends TestCase {
 		catch (UnsupportedOperationException ex) {
 			// Ok
 		}
+	}
+	
+	public void testIntroductionOnTargetExcludedByTypePattern() {
+		ITestBean target = new TestBean();
+		ITestBean proxy = (ITestBean) createProxy(target,
+				AopUtils.findAdvisorsThatCanApply(
+						getFixture().getAdvisors(new MakeLockable()),
+						ITestBean.class
+				),
+				CannotBeUnlocked.class);
+		assertFalse("Type pattern must have excluded mixin", proxy instanceof Lockable);
 	}
 	
 	
