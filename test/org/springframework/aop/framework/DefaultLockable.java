@@ -14,23 +14,29 @@
  * limitations under the License.
  */
  
-package org.springframework.aop.support.aspectj;
-
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.DeclareParents;
-import org.springframework.aop.framework.DefaultLockable;
-import org.springframework.aop.framework.Lockable;
+ package org.springframework.aop.framework;
 
 /**
- * Demonstrates introductions, AspectJ annotation style.
+ * Simple implementation of Lockable interface for use in
+ * mixins.
  * 
  * @author Rod Johnson
- * @since 1.3
+ *
  */
-@Aspect
-public class MakeLockable {
+public class DefaultLockable implements Lockable {
 	
-	@DeclareParents("org.springframework.aop.support.aspectj.*")
-	public static Lockable mixin = new DefaultLockable();
+	private boolean locked;
+
+	public void lock() {
+		this.locked = true;
+	}
+
+	public void unlock() {
+		this.locked = false;
+	}
+
+	public boolean locked() {
+		return this.locked;
+	}
 
 }
