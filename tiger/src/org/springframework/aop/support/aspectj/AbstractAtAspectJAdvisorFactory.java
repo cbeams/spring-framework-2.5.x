@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.aopalliance.aop.Advice;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.annotation.After;
@@ -33,7 +34,10 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.aop.ClassFilter;
+import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.framework.AopConfigException;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.AnnotationUtils;
@@ -133,6 +137,44 @@ public abstract class AbstractAtAspectJAdvisorFactory implements AtAspectJAdviso
 			return this.annotation.toString(); 
 		}
 	}
+	
+	/**
+	 * Introduction advisor delegating to the given object.
+	 */
+	protected final class DelegatingIntroductionAdvisor implements IntroductionAdvisor {
+		private final Class[] interfaces;
+
+		private final ClassFilter filter;
+		
+		private final Advice advice;
+
+		public DelegatingIntroductionAdvisor(Class[] interfaces, ClassFilter filter, Object instance) {
+			this.interfaces = interfaces;
+			this.filter = filter;
+			this.advice = new DelegatingIntroductionInterceptor(instance);
+		}
+
+		public ClassFilter getClassFilter() {
+			return filter;
+		}
+
+		public void validateInterfaces() throws IllegalArgumentException {			
+			// Do nothing
+		}
+
+		public boolean isPerInstance() {
+			return true;
+		}
+
+		public Advice getAdvice() {
+			return advice;
+		}
+
+		public Class[] getInterfaces() {
+			return interfaces;
+		}
+	}
+
 	
 	protected static final ParameterNameDiscoverer ASPECTJ_ANNOTATION_PARAMETER_NAME_DISCOVERER = new ParameterNameDiscoverer() {
 		public String[] getParameterNames(Constructor ctor) {

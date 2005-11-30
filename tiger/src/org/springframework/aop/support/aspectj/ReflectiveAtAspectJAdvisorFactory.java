@@ -41,7 +41,6 @@ import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.aop.support.ClassFilters;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.aop.support.TypePatternClassFilter;
 import org.springframework.util.ReflectionUtils;
 
@@ -129,7 +128,7 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 			throw new AspectException("Cannot evaluate introduction field " + f, ex);
 		}
 		
-		IntroductionAdvisor ia = new IntroductionAdvisorImpl(interfaces, classFilter, introductionInstance);//introductionInstance);
+		IntroductionAdvisor ia = new DelegatingIntroductionAdvisor(interfaces, classFilter, introductionInstance);//introductionInstance);
 		return ia;
 	}
 	
@@ -190,46 +189,6 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 		return new DefaultPointcutAdvisor(ajexp, springAdvice);
 	}
 	
-
-	/**
-	 * Introduction advisor delegating to the given object
-	 * 
-	 * @author Rod Johnson
-	 *
-	 */
-	private final class IntroductionAdvisorImpl implements IntroductionAdvisor {
-		private final Class[] interfaces;
-
-		private final ClassFilter filter;
-
-		private final Object instance;
-
-		private IntroductionAdvisorImpl(Class[] interfaces, ClassFilter filter, Object instance) {
-			this.interfaces = interfaces;
-			this.filter = filter;
-			this.instance = instance;
-		}
-
-		public ClassFilter getClassFilter() {
-			return filter;
-		}
-
-		public void validateInterfaces() throws IllegalArgumentException {				
-		}
-
-		public boolean isPerInstance() {
-			return true;
-		}
-
-		public Advice getAdvice() {
-			return new DelegatingIntroductionInterceptor(instance);
-		}
-
-		public Class[] getInterfaces() {
-			return interfaces;
-		}
-	}
-
 
 	/**
 	 * Superclass for Spring Advices wrapping an AspectJ aspect
