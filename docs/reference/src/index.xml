@@ -8,6 +8,7 @@
 <!ENTITY resources			SYSTEM "resources.xml">
 <!ENTITY validation			SYSTEM "validation.xml">
 <!ENTITY aop				SYSTEM "aop.xml">
+<!ENTITY ataspectj			SYSTEM "ataspectj.xml">
 <!ENTITY aspectj			SYSTEM "aspectj.xml">
 <!ENTITY transaction		SYSTEM "transaction.xml">
 <!ENTITY metadata			SYSTEM "metadata.xml">
@@ -20,7 +21,7 @@
 <!ENTITY remoting			SYSTEM "remoting.xml">
 <!ENTITY ejb				SYSTEM "ejb.xml">
 <!ENTITY jms				SYSTEM "jms.xml">
-<!ENTITY jmx        SYSTEM "jmx.xml">
+<!ENTITY jmx                SYSTEM "jmx.xml">
 <!ENTITY cci				SYSTEM "cci.xml">
 <!ENTITY mail				SYSTEM "mail.xml">
 <!ENTITY scheduling			SYSTEM "scheduling.xml">
@@ -36,7 +37,7 @@
         <subtitle>
           Reference Documentation
         </subtitle>
-        <releaseinfo>Version 1.3 RC1</releaseinfo>
+        <releaseinfo>Version 1.3 M1</releaseinfo>
         <pubdate>(Work in progress)</pubdate>
         
         <authorgroup>
@@ -102,8 +103,10 @@
 	    &validation;
 	    
 	    &aop;
+	
+		&ataspectj;
 		
-			&aspectj;
+		&aspectj;
 	    
 	    &transaction;
 	    

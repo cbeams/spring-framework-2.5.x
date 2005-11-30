@@ -41,6 +41,11 @@
     or use the full power of the Spring AOP framework to implement custom
     aspects.</para>
 
+    <para><emphasis>In Spring 1.3, it is possible to use the powerful AspectJ
+    pointcut expression language and the @AspectJ annotation-style syntax for
+    defining aspects, while still using Spring AOP for weaving. This is a very
+    important topic, and is discussed in the next chapter.</emphasis></para>
+
     <remark>If you are interested only in generic declarative services or
     other pre-packaged declarative middleware services such as pooling, you
     don't need to work directly with Spring AOP, and can skip most of this
@@ -354,7 +359,28 @@
       <para>Pointcuts can be composed using the static methods in the
       <emphasis>org.springframework.aop.support.Pointcuts</emphasis> class, or
       using the <emphasis>ComposablePointcut</emphasis> class in the same
-      package.</para>
+      package. However, using AspectJ pointcut expressions is usually a
+      simpler approach.</para>
+    </sect2>
+
+    <sect2>
+      <title>AspectJ expression pointcuts</title>
+
+      <para>Since 1.3, the most important type of pointcut used by Spring is
+      <literal>org.springframework.aop.support.aspectj.AspectJExpressionPointcut</literal>.
+      This is a pointcut that uses the AspectJ weaver to parse an AspectJ
+      pointcut expression string. </para>
+
+      <para>AspectJ provides a powerful pointcut expression language that is
+      capable of sophisticated wildcarding, argument binding, composition and
+      referencing named pointcuts. AspectJ views pointcuts as a first-class
+      citizen in the language.</para>
+
+      <para>Spring's <literal>AspectJExpressionPointcut</literal> allows use
+      of method execution pointcuts. </para>
+
+      <para>For further details on Spring AOP's integration with AspectJ, see
+      the next chapter.</para>
     </sect2>
 
     <sect2>
@@ -385,15 +411,15 @@
           possible.
           <literal>org.springframework.aop.support.Perl5RegexpMethodPointcut</literal>
           is a generic regular expression pointcut, using Perl 5 regular
-          expression syntax. the <literal>Perl5RegexpMethodPointcut</literal> class
-					depends on Jakarta ORO for regular expression matching. Spring also provides
-					the <literal>JdkRegexpMethodPointcut</literal> class that uses the regular
-					expression support in JDK 1.4+.</para>
+          expression syntax. the <literal>Perl5RegexpMethodPointcut</literal>
+          class depends on Jakarta ORO for regular expression matching. Spring
+          also provides the <literal>JdkRegexpMethodPointcut</literal> class
+          that uses the regular expression support in JDK 1.4+.</para>
 
           <para>Using the <literal>Perl5RegexpMethodPointcut</literal> class,
-					you can provide a list of pattern Strings. If any of these is a match,
-					the pointcut will evaluate to true. (So the result is effectively the
-					union of these pointcuts.)</para>
+          you can provide a list of pattern Strings. If any of these is a
+          match, the pointcut will evaluate to true. (So the result is
+          effectively the union of these pointcuts.)</para>
 
           <para>The usage is shown below:</para>
 
@@ -409,14 +435,16 @@
 
           <para>Spring provides a convenience class,
           <literal>RegexpMethodPointcutAdvisor</literal>, that allows us to
-          reference an Advice also (Remember that an Advice can be an interceptor,
-					before advice, throws advice etc.). Behind the scenes, Spring will use the
-					<literal>JdkRegexpMethodPointcut</literal> on J2SE 1.4 or above, and will
-					fall back to <literal>Perl5RegexpMethodPointcut</literal> on older VMs.
-					The use of <literal>Perl5RegexpMethodPointcut</literal> can be forced
-				  by setting the <literal>perl5</literal> property to true.
-					Using <literal>RegexpMethodPointcutAdvisor</literal> simplifies wiring,
-					as the one bean serves as both pointcut and advisor, as shown below:</para>
+          reference an Advice also (Remember that an Advice can be an
+          interceptor, before advice, throws advice etc.). Behind the scenes,
+          Spring will use the <literal>JdkRegexpMethodPointcut</literal> on
+          J2SE 1.4 or above, and will fall back to
+          <literal>Perl5RegexpMethodPointcut</literal> on older VMs. The use
+          of <literal>Perl5RegexpMethodPointcut</literal> can be forced by
+          setting the <literal>perl5</literal> property to true. Using
+          <literal>RegexpMethodPointcutAdvisor</literal> simplifies wiring, as
+          the one bean serves as both pointcut and advisor, as shown
+          below:</para>
 
           <para><programlisting>&lt;bean id="settersAndAbsquatulateAdvisor" 
     class="org.springframework.aop.support.RegexpMethodPointcutAdvisor"&gt;
@@ -503,12 +531,11 @@
     <sect2>
       <title>Custom pointcuts</title>
 
-      <para>Because pointcuts in Spring are Java classes, rather than language
-      features (as in AspectJ) it's possible to declare custom pointcuts,
-      whether static or dynamic. However, there is no support out of the box
-      for the sophisticated pointcut expressions that can be coded in AspectJ
-      syntax. However, custom pointcuts in Spring can be arbitrarily
-      complex.</para>
+      <para>Because pointcuts in Spring AOP are Java classes, rather than
+      language features (as in AspectJ) it's possible to declare custom
+      pointcuts, whether static or dynamic. Custom pointcuts in Spring can be
+      arbitrarily complex. However, using the AspectJ pointcut expression
+      language is recommended if possible.</para>
 
       <remark>Later versions of Spring may offer support for "semantic
       pointcuts" as offered by JAC: for example, "all methods that change
@@ -634,8 +661,8 @@
         passed directly to the client; otherwise it will be wrapped in an
         unchecked exception by the AOP proxy.</para>
 
-        <para>An example of a before advice in Spring, which counts all
-        method invocations:</para>
+        <para>An example of a before advice in Spring, which counts all method
+        invocations:</para>
 
         <programlisting>public class CountingBeforeAdvice implements MethodBeforeAdvice {
 
@@ -756,19 +783,29 @@
       </sect3>
 
       <sect3>
+         
+
         <title>Introduction advice</title>
+
+         
 
         <para>Spring treats introduction advice as a special kind of
         interception advice.</para>
+
+         
 
         <para>Introduction requires an <literal>IntroductionAdvisor</literal>,
         and an <literal>IntroductionInterceptor</literal>, implementing the
         following interface:</para>
 
+         
+
         <programlisting>public interface IntroductionInterceptor extends MethodInterceptor {
 
     boolean implementsInterface(Class intf);
 }</programlisting>
+
+         
 
         <para>The <literal>invoke() </literal>method inherited from the AOP
         Alliance <literal>MethodInterceptor</literal> interface must implement
@@ -776,10 +813,14 @@
         interface, the introduction interceptor is responsible for handling
         the method call--it cannot invoke <literal>proceed()</literal>.</para>
 
+         
+
         <para>Introduction advice cannot be used with any pointcut, as it
         applies only at class, rather than method, level. You can only use
-        introduction advice with the <literal>IntroductionAdvisor</literal>, which
-        has the following methods:</para>
+        introduction advice with the <literal>IntroductionAdvisor</literal>,
+        which has the following methods:</para>
+
+         
 
         <programlisting>public interface IntroductionAdvisor extends Advisor, IntroductionInfo {
 
@@ -793,24 +834,42 @@ public interface IntroductionInfo {
 	Class[] getInterfaces();
 }</programlisting>
 
+         
+
         <para>There is no <literal>MethodMatcher</literal>, and hence no
         <literal>Pointcut</literal>, associated with introduction advice. Only
         class filtering is logical.</para>
 
-        <para>The <literal>getInterfaces()</literal> method returns the
-        interfaces introduced by this advisor.</para> The <literal>validateInterfaces()</literal>
-		method is used internally to see whether or not the introduced interfaces can be
-		implemented by the configured <literal>IntroductionInterceptor</literal>.
+         
 
-		<para>Let's look at a simple example from the Spring test suite. Let's
+        <para>The <literal>getInterfaces()</literal> method returns the
+        interfaces introduced by this advisor.</para>
+
+         The 
+
+        <literal>validateInterfaces()</literal>
+
+         method is used internally to see whether or not the introduced interfaces can be implemented by the configured 
+
+        <literal>IntroductionInterceptor</literal>
+
+        . 
+
+        <para>Let's look at a simple example from the Spring test suite. Let's
         suppose we want to introduce the following interface to one or more
         objects:</para>
 
-        <para><programlisting>public interface Lockable {
+         
+
+        <para>
+          <programlisting>public interface Lockable {
     void lock();
     void unlock();
     boolean locked();
-}</programlisting></para>
+}</programlisting>
+        </para>
+
+         
 
         <para>This illustrates a <emphasis role="bold">mixin</emphasis>. We
         want to be able to cast advised objects to Lockable, whatever their
@@ -820,6 +879,8 @@ public interface IntroductionInfo {
         provides the ability to make objects immutable, without them having
         any knowledge of it: a good example of AOP.</para>
 
+         
+
         <para>Firstly, we'll need an
         <literal>IntroductionInterceptor</literal> that does the heavy
         lifting. In this case, we extend the
@@ -828,6 +889,8 @@ public interface IntroductionInfo {
         directly, but using
         <literal>DelegatingIntroductionInterceptor</literal> is best for most
         cases.</para>
+
+         
 
         <para>The <literal>DelegatingIntroductionInterceptor</literal> is
         designed to delegate an introduction to an actual implementation of
@@ -851,17 +914,24 @@ public interface IntroductionInfo {
         will conceal any implementation of the same interface by the
         target.</para>
 
+         
+
         <para>Thus LockMixin subclasses
         <literal>DelegatingIntroductionInterceptor</literal> and implements
         Lockable itself. The superclass automatically picks up that Lockable
         can be supported for introduction, so we don't need to specify that.
         We could introduce any number of interfaces in this way.</para>
 
+         
+
         <para>Note the use of the <literal>locked</literal> instance variable.
         This effectively adds additional state to that held in the target
         object.</para>
 
-        <para><programlisting>public class LockMixin extends DelegatingIntroductionInterceptor 
+         
+
+        <para>
+          <programlisting>public class LockMixin extends DelegatingIntroductionInterceptor 
     implements Lockable {
 
     private boolean locked;
@@ -884,7 +954,10 @@ public interface IntroductionInfo {
         return super.invoke(invocation);
     }
 
-}</programlisting></para>
+}</programlisting>
+        </para>
+
+         
 
         <para>Often it isn't necessary to override the <literal>invoke()
         </literal>method: the
@@ -893,6 +966,8 @@ public interface IntroductionInfo {
         introduced, otherwise proceeds towards the joinpoint--is usually
         sufficient. In the present case, we need to add a check: no setter
         method can be invoked if in locked mode.</para>
+
+         
 
         <para>The introduction advisor required is simple. All it needs to do
         is hold a distinct <literal>LockMixin</literal> instance, and specify
@@ -903,12 +978,18 @@ public interface IntroductionInfo {
         <literal>LockMixin</literal>, so we simply create it using
         <literal>new</literal>.</para>
 
-        <para><programlisting>public class LockMixinAdvisor extends DefaultIntroductionAdvisor {
+         
+
+        <para>
+          <programlisting>public class LockMixinAdvisor extends DefaultIntroductionAdvisor {
 
     public LockMixinAdvisor() {
         super(new LockMixin(), Lockable.class);
     }
-}</programlisting></para>
+}</programlisting>
+        </para>
+
+         
 
         <para>We can apply this advisor very simply: it requires no
         configuration. (However, it <emphasis>is</emphasis> necessary: It's
@@ -919,11 +1000,15 @@ public interface IntroductionInfo {
         hence <literal>LockMixin</literal>, for each advised object. The
         advisor comprises part of the advised object's state.</para>
 
+         
+
         <para>We can apply this advisor programmatically, using the
         <literal>Advised.addAdvisor() </literal>method, or (the recommended
         way) in XML configuration, like any other advisor. All proxy creation
         choices discussed below, including "auto proxy creators," correctly
         handle introductions and stateful mixins.</para>
+
+         
       </sect3>
     </sect2>
   </sect1>
@@ -1061,16 +1146,18 @@ public interface IntroductionInfo {
           interceptor or other advice names to apply. Ordering is significant.
           First come, first serve that is. The first interceptor in the list
           will be the first to be able to interceptor the invocation (of
-          course if it concerns a regular <literal>MethodInterceptor</literal> or
-          <literal>BeforeAdvice</literal>.</para>
-          <para>The names are bean names in the current factory, including bean
-          names from ancestor factories. You can't mention bean references
-          here since doing so would result in the ProxyFactoryBean ignoring
-          the singleton setting of the advise.</para>
-          <para>You can append an interceptor name with an asterisk (*).
-          This will result in the application of all advisor beans with names starting
-          with the part before the asterisk to be applied. An example of using
-          this feature can be found below.</para>
+          course if it concerns a regular <literal>MethodInterceptor</literal>
+          or <literal>BeforeAdvice</literal>.</para>
+
+          <para>The names are bean names in the current factory, including
+          bean names from ancestor factories. You can't mention bean
+          references here since doing so would result in the ProxyFactoryBean
+          ignoring the singleton setting of the advise.</para>
+
+          <para>You can append an interceptor name with an asterisk (*). This
+          will result in the application of all advisor beans with names
+          starting with the part before the asterisk to be applied. An example
+          of using this feature can be found below.</para>
         </listitem>
 
         <listitem>
@@ -1250,27 +1337,26 @@ public interface IntroductionInfo {
       However, this may change in the future. Performance should not be a
       decisive consideration in this case.</para>
     </sect2>
-    <sect2>
-        <title>Using 'global' advisors</title>
-        <para>
-            By appending an asterisk to an interceptor name, all advisors with
-            bean names matching the part before the asterisk, will be added
-            to the advisor chain. This can come in handy if you need to add a
-            standard set of 'global' advisors:
-<programlisting><![CDATA[
-<bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
-  <property name="target" ref="service"/>
-  <property name="interceptorNames">
-    <list>
-      <value>global*</value>
-    </list>
-  </property>
-</bean>
 
-<bean id="global_debug" class="org.springframework.aop.interceptor.DebugInterceptor"/>
-<bean id="global_performance" class="org.springframework.aop.interceptor.PerformanceMonitorInterceptor"/>
-]]></programlisting>
-        </para>
+    <sect2>
+      <title>Using 'global' advisors</title>
+
+      <para>By appending an asterisk to an interceptor name, all advisors with
+      bean names matching the part before the asterisk, will be added to the
+      advisor chain. This can come in handy if you need to add a standard set
+      of 'global' advisors: <programlisting>
+&lt;bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
+  &lt;property name="target" ref="service"/&gt;
+  &lt;property name="interceptorNames"&gt;
+    &lt;list&gt;
+      &lt;value&gt;global*&lt;/value&gt;
+    &lt;/list&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;
+
+&lt;bean id="global_debug" class="org.springframework.aop.interceptor.DebugInterceptor"/&gt;
+&lt;bean id="global_performance" class="org.springframework.aop.interceptor.PerformanceMonitorInterceptor"/&gt;
+</programlisting></para>
     </sect2>
   </sect1>
 
@@ -1453,13 +1539,14 @@ public interface IntroductionInfo {
     bean definition as <emphasis>abstract</emphasis> by using the
     <emphasis>abstract</emphasis> attribute, as described <link
     linkend="beans-child-bean-definitions">previously</link>, so that it may
-	not actually ever be instantiated. Application contexts (but not
-    simple bean factories) will by default pre-instantiate all singletons.
-    Therefore it is important (at least for singleton beans) that if you have
-    a (parent) bean definition which you intend to use only as a template, and
-    this definition specifies a class, you must make sure to set the
+    not actually ever be instantiated. Application contexts (but not simple
+    bean factories) will by default pre-instantiate all singletons. Therefore
+    it is important (at least for singleton beans) that if you have a (parent)
+    bean definition which you intend to use only as a template, and this
+    definition specifies a class, you must make sure to set the
     <emphasis>abstract</emphasis> attribute to <emphasis>true</emphasis>,
-    otherwise the application context will actually try to pre-instantiate it.</para>
+    otherwise the application context will actually try to pre-instantiate
+    it.</para>
   </sect1>
 
   <sect1 id="aop-prog">
@@ -1814,14 +1901,14 @@ assertEquals("Added two advisors",
       code must have been compiled using the Commons Attributes compilation
       task.)</para>
 
-			<para>The <literal>/annotation</literal> directory of the JPetStore
-			sample application contains an analogous example for auto-proxying
-			driven by JDK 1.5+ annotations. The following configuration enables
+      <para>The <literal>/annotation</literal> directory of the JPetStore
+      sample application contains an analogous example for auto-proxying
+      driven by JDK 1.5+ annotations. The following configuration enables
       automatic detection of Spring's <literal>Transactional</literal>
       annotation, leading to implicit proxies for beans containing that
       annotation:</para>
 
-			<para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
+      <para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
 
 &lt;bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
   &lt;property name="transactionInterceptor" ref="transactionInterceptor"/&gt;
@@ -2072,30 +2159,31 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
     </sect2>
 
     <sect2 id="aop-ts-threadlocal">
-        <title>ThreadLocal target sources</title>
-        <para>
-            ThreadLocal target sources are useful if you need an object to be created
-            for each incoming request (per thread that is). The concept of a
-            <literal>ThreadLocal</literal> provide a JDK-wide facility to transparently
-						store resource alongside a thread. Setting up a ThreadLocalTargetSource
-            is pretty much the same as was explained for the other target sources:
-        </para>
-        <para>
-            <programlisting>&lt;bean id="threadlocalTargetSource" class="org.springframework.aop.target.ThreadLocalTargetSource"&gt;
-  &lt;property name="targetBeanName" value="businessObjectTarget"/&gt;
-&lt;/bean&gt;</programlisting>
-        </para>
-        <para>
-            <emphasis>ThreadLocals come with serious issues (potentially resulting in memory leaks)
-            when incorrectly using them in a multi-threaded and multi-classloader environments. One should
-            always consider wrapping a threadlocal in some other class and never directly use the ThreadLocal
-            itself (except of course in the wrapper class). Also, one should always remember to correctly set and unset (where the
-            latter simply involved a call to ThreadLocal.set(null)) the resource local to the thread.
-            Unsetting should be done in any case since not unsetting it might result in problematic behavior.
-            Spring's ThreadLocal support is doing this for you and should always be considered in favor of
-            using ThreadLocals without other proper handling code.</emphasis>
-                                           </para>
+      <title>ThreadLocal target sources</title>
 
+      <para>ThreadLocal target sources are useful if you need an object to be
+      created for each incoming request (per thread that is). The concept of a
+      <literal>ThreadLocal</literal> provide a JDK-wide facility to
+      transparently store resource alongside a thread. Setting up a
+      ThreadLocalTargetSource is pretty much the same as was explained for the
+      other target sources:</para>
+
+      <para><programlisting>&lt;bean id="threadlocalTargetSource" class="org.springframework.aop.target.ThreadLocalTargetSource"&gt;
+  &lt;property name="targetBeanName" value="businessObjectTarget"/&gt;
+&lt;/bean&gt;</programlisting></para>
+
+      <para><emphasis>ThreadLocals come with serious issues (potentially
+      resulting in memory leaks) when incorrectly using them in a
+      multi-threaded and multi-classloader environments. One should always
+      consider wrapping a threadlocal in some other class and never directly
+      use the ThreadLocal itself (except of course in the wrapper class).
+      Also, one should always remember to correctly set and unset (where the
+      latter simply involved a call to ThreadLocal.set(null)) the resource
+      local to the thread. Unsetting should be done in any case since not
+      unsetting it might result in problematic behavior. Spring's ThreadLocal
+      support is doing this for you and should always be considered in favor
+      of using ThreadLocals without other proper handling
+      code.</emphasis></para>
     </sect2>
   </sect1>
 
@@ -2146,5 +2234,4 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
     take a look at the test suite. The test coverage is over 90%, and this
     illustrates advanced features not discussed in this document.</para>
   </sect1>
-
 </chapter>

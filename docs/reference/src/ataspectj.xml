@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="aspectj">
+  <title>AspectJ within Spring AOP</title>
+
+  <sect1>
+    <title>Overview: Using the AspectJ pointcut language with Spring
+    AOP</title>
+
+    <para>Motivation</para>
+
+    <para>GENERAL considerations</para>
+
+    <para>Limitations: Method execution pointcuts</para>
+  </sect1>
+
+  <sect1>
+    <title>AspectJExpressionPointcut</title>
+
+    <para>Demonstrate how it works</para>
+
+    <para>Show with ProxyFactory programmatic creation</para>
+
+    <para>Java 5</para>
+  </sect1>
+
+  <sect1>
+    <title>Using AspectJ pointcut expressions in Spring XML</title>
+
+    <para>TODO</para>
+  </sect1>
+
+  <sect1>
+    <title>Using the AspectJ 5 @AspectJ annotation-style syntax in Spring
+    AOP</title>
+
+    <sect2>
+      <title>Overview</title>
+
+      <para>s</para>
+    </sect2>
+
+    <sect2>
+      <title>Simple advice types</title>
+
+      <para>TODO</para>
+    </sect2>
+
+    <sect2>
+      <title>Argument binding</title>
+
+      <para>Major advantage</para>
+
+      <para>Description</para>
+    </sect2>
+
+    <sect2>
+      <title>Named pointcuts</title>
+
+      <para>TODO</para>
+    </sect2>
+
+    <sect2>
+      <title>Binding models</title>
+
+      <para>TODO</para>
+    </sect2>
+
+    <sect2>
+      <title>Introductions</title>
+
+      <para>TODO</para>
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>References</title>
+
+    <para>Where to look in AspectJ material</para>
+  </sect1>
+</chapter>
