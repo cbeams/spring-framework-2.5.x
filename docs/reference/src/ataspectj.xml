@@ -6,11 +6,30 @@
     <title>Overview: Using the AspectJ pointcut language with Spring
     AOP</title>
 
-    <para>Motivation</para>
+    <para>Spring AOP does not define a true pointcut expression language:
+    merely convenient pointcuts that work with regular expressions.</para>
 
-    <para>GENERAL considerations</para>
+    <para>AspectJ provides a powerful, well thought out pointcut expression
+    language.</para>
 
-    <para>Limitations: Method execution pointcuts</para>
+    <para>As of the AspectJ 5, the AspectJ weaver has been split from the
+    <code>ajc</code> compiler, making it available to back a generic Spring
+    AOP pointcut implementation. This
+    implementation--AspectJExpressionPointcut--is added to Spring in Spring
+    1.3. This enables Spring AOP to work with AspectJ pointcut
+    expressions.</para>
+
+    <para>Weaving is still proxy-based, using Spring AOP. This does impose
+    some limitations: notably, only method execution joinpoints are supported.
+    (It is impossible for a proxy-based framework to modify the callers of
+    methods.) However, a valuable subset of AspectJ pointcut expressions are
+    supported, including advanced features such as argument binding, pointcut
+    composition and references to named pointcuts.</para>
+
+    <para><remark>The functionality described in this chapter is only
+    available using AspectJ 5. Processing of the @AspectJ annotation-style
+    syntax is only available using Java 5 as well as AspectJ
+    5.</remark></para>
   </sect1>
 
   <sect1>
@@ -36,13 +55,27 @@
     <sect2>
       <title>Overview</title>
 
-      <para>s</para>
+      <para>AspectJ introduces a new annotation-style syntax, in addition to
+      the traditional AspectJ syntax. With the annotation style syntax,
+      aspects can be compiled by Javac.</para>
     </sect2>
 
     <sect2>
       <title>Simple advice types</title>
 
-      <para>TODO</para>
+      <para>In Spring AOP, an advice is an implementation of an interface such
+      as MethodInterceptor or MethodBeforeAdvice. A pointcut is an
+      implementation of a Java interface that identifies whether given
+      joinpoints match. An advice and pointcut--together making up an
+      aspect--are held together in an Advisor.</para>
+
+      <para>In @AspectJ, an aspect is a class annotated with an @Aspect
+      annotation. It can contain advice methods that are annotated with
+      AspectJ annotations such as @Before and @Around. Pointcuts are indicated
+      by the value of the expression string (the default value attribute) held
+      in these annotations. Classes annotated with @Aspect can also contain
+      named pointcuts (methods annotated with the @Pointcut annotation), and
+      introductions.</para>
     </sect2>
 
     <sect2>
@@ -51,12 +84,39 @@
       <para>Major advantage</para>
 
       <para>Description</para>
+
+      <para>Argument naming challenges: strategies</para>
+
+      <para>Choices, fallbacks</para>
     </sect2>
 
     <sect2>
       <title>Named pointcuts</title>
 
       <para>TODO</para>
+
+      <para>It is possible to reference named pointcuts in AspectJ aspects
+      available on the class path, even if they were authored with traditional
+      AspectJ syntax. This is accomplished using the FQN of the relevant
+      pointcut. For example, here is an AspectJ aspect:</para>
+
+      <programlisting>package org.springframework.aop.aspectj.support;
+
+public aspect CommonPointcuts {
+
+  public pointcut anyGetter() : execution(!void get*(..));
+  
+  public pointcut anyIntArg(int x) : args(x);
+
+}</programlisting>
+
+      <para>This aspect can be referenced as follows in @AspectJ
+      syntax:</para>
+
+      <programlisting>@Around(value="org.springframework.aop.aspectj.support.CommonPointcuts.anyIntArg(x)", argNames="x")
+public void doubleArg(ProceedingJoinPoint pjp, int x) throws Throwable {
+   pjp.proceed(new Object[]{x*2});
+}</programlisting>
     </sect2>
 
     <sect2>
@@ -70,11 +130,50 @@
 
       <para>TODO</para>
     </sect2>
+
+    <sect2>
+      <title>Mixing Spring AOP aspects and @AspectJ aspects</title>
+
+      <para>There is no conflict between Spring AOP and @AspectJ aspects. All
+      weaving is performed at runtime by Spring AOP, so as far as the core
+      Spring AOP runtime is concerned, it is merely working with pointcuts and
+      advices.</para>
+    </sect2>
+
+    <sect2>
+      <title>Auto proxy creation and @AspectJ</title>
+
+      <para>As you would expect, it is possible to use auto proxy creation
+      with @AspectJ syntax. This is achieved using
+      <literal>org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator</literal>.
+      This is a subclass of <literal>DefaultAdvisorAutoProxyCreator</literal>,
+      meaning that it will also apply any Spring AOP advisors found in the
+      application context to which it applies.</para>
+
+      <para>Usage is very simple. Just add the following definition to your
+      application context:<code></code><programlisting>&lt;bean 
+  class="org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator" /&gt;</programlisting></para>
+
+      <para>No configuration is usually required. See the documentation on
+      DefaultAutoProxyCreator and superclasses for the regular configuration
+      that applies to auto proxy creators.</para>
+
+      <para>The effect will be that any @AspectJ aspects will automatically be
+      recognized and applied, in addition to Spring advisors. You can use
+      AspectJAutoProxyCreator anywhere you would use
+      DefaultAutoProxyCreator.</para>
+
+      <para>@AspectJ aspects can be dependency injected, and will not
+      themselves be subjected to auto proxying, to avoid circular
+      dependencies.</para>
+    </sect2>
   </sect1>
 
   <sect1>
     <title>References</title>
 
-    <para>Where to look in AspectJ material</para>
+    <para>AspectJ is very well documented. The <emphasis>AspectJ 5 Developers
+    Notebook</emphasis>, included in the AspectJ 5 distribution, is an
+    excellent starting point.</para>
   </sect1>
 </chapter>
