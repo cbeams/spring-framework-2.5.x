@@ -44,7 +44,6 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.weaver.tools.PointcutExpression;
-import org.aspectj.weaver.tools.TypePatternMatcher;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.ClassFilter;
@@ -240,7 +239,7 @@ public class ReflectiveAtAspectJAdvisorFactory implements AtAspectJAdvisorFactor
 		ClassFilter typePatternFilter = new TypePatternClassFilter(declareParents.value());
 		ClassFilter exclusion = new ClassFilter() {
 			public boolean matches(Class clazz) {
-				for (Class introducedInterface : interfaces) {
+				for (Class<?> introducedInterface : interfaces) {
 					if (introducedInterface.isAssignableFrom(clazz)) {
 						return false;
 					}
@@ -275,7 +274,7 @@ public class ReflectiveAtAspectJAdvisorFactory implements AtAspectJAdvisorFactor
 	 * @return null if the method is not an AspectJ advice method or if it is a pointcut
 	 * that will be used by other advice but will not create a Springt advice in its own right
 	 */
-	public PointcutAdvisor getAdvisor(Class candidateAspectClass, Method candidateAspectJAdviceMethod, AspectInstanceFactory aif) {
+	public PointcutAdvisor getAdvisor(Class<?> candidateAspectClass, Method candidateAspectJAdviceMethod, AspectInstanceFactory aif) {
 		AspectJAnnotation<?> aspectJAnnotation = findAspectJAnnotationOnMethod(candidateAspectJAdviceMethod,candidateAspectClass);
 		
 		if (aspectJAnnotation == null) {
@@ -292,7 +291,7 @@ public class ReflectiveAtAspectJAdvisorFactory implements AtAspectJAdvisorFactor
 		log.debug("Found AspectJ method " + candidateAspectJAdviceMethod);
 
 		String[] argNames = this.parameterNameDiscoverer.getParameterNames(candidateAspectJAdviceMethod,candidateAspectClass);
-		AspectJExpressionPointcut ajexp = createPointcutExpression(candidateAspectJAdviceMethod,argNames);
+		AspectJExpressionPointcut ajexp = createPointcutExpression(candidateAspectJAdviceMethod,candidateAspectClass,argNames);
 		ajexp.setExpression(aspectJAnnotation.getPointcutExpression());
 
 		Advice springAdvice;	
@@ -364,7 +363,7 @@ public class ReflectiveAtAspectJAdvisorFactory implements AtAspectJAdvisorFactor
 	 * @param foundAnnotation
 	 * @return
 	 */
-	private AspectJExpressionPointcut createPointcutExpression(Method annotatedMethod, String[] pointcutParameterNames) {
+	private AspectJExpressionPointcut createPointcutExpression(Method annotatedMethod, Class declarationScope, String[] pointcutParameterNames) {
 		
 		Class<?> [] pointcutParameterTypes = new Class<?>[0];
 				
@@ -373,7 +372,7 @@ public class ReflectiveAtAspectJAdvisorFactory implements AtAspectJAdvisorFactor
 		}
 		
 		
-		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut(annotatedMethod.getClass(),pointcutParameterNames,pointcutParameterTypes);
+		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut(declarationScope,pointcutParameterNames,pointcutParameterTypes);
 		ajexp.setLocation(annotatedMethod.toString());
 		return ajexp;
 	}
@@ -624,13 +623,13 @@ public class ReflectiveAtAspectJAdvisorFactory implements AtAspectJAdvisorFactor
 		}
 	}
 
-	public boolean isAspect(Class clazz) {
+	public boolean isAspect(Class<?> clazz) {
 		return //clazz.isAnnotationPresent(Aspect.class);
 		clazz.getAnnotation(Aspect.class) != null;
 	}
 
 	// TODO add ASM check for code in pointcut, visibility rules
-	public void validate(Class aspectClass) throws AopConfigException {
+	public void validate(Class<?> aspectClass) throws AopConfigException {
 		// If the parent has the annotation and isn't abstract it's an error
 		if (aspectClass.getSuperclass().getAnnotation(Aspect.class) != null &&
 				!Modifier.isAbstract(aspectClass.getSuperclass().getModifiers())) {

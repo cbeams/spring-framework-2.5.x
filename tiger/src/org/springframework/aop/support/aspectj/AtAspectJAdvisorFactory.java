@@ -32,14 +32,14 @@ import org.springframework.aop.support.aspectj.ReflectiveAtAspectJAdvisorFactory
  */
 public interface AtAspectJAdvisorFactory {
 	
-	boolean isAspect(Class clazz);
+	boolean isAspect(Class<?> clazz);
 	
 	/**
 	 * Is it a valid aspect class?
 	 * @param aspectClass
 	 * @throws AopConfigException
 	 */
-	void validate(Class aspectClass) throws AopConfigException;
+	void validate(Class<?> aspectClass) throws AopConfigException;
 
 	/**
 	 * Create Spring Advisors for all At AspectJ methods on the given aspect instance.
@@ -65,7 +65,7 @@ public interface AtAspectJAdvisorFactory {
 	 * @param aif
 	 * @return null if the method is not an AspectJ advice method
 	 */
-	Advisor getAdvisor(Class aspectClass,
+	Advisor getAdvisor(Class<?> aspectClass,
 			Method candidateAspectJAdviceMethod, AspectInstanceFactory aif);
 
 }
