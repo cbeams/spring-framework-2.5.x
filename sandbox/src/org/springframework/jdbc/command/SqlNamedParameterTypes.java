@@ -9,8 +9,12 @@ public class SqlNamedParameterTypes {
     public SqlNamedParameterTypes() {
     }
 
+    public SqlNamedParameterTypes(Map sqlTypes) {
+        this.parameterTypes.putAll(sqlTypes);
+    }
+
     public SqlNamedParameterTypes(String parameterName, int sqlType) {
-        parameterTypes.put(parameterName, new Integer(sqlType));
+        this.parameterTypes.put(parameterName, new Integer(sqlType));
     }
 
     public SqlNamedParameterTypes addType(String parameterName, int sqlType) {

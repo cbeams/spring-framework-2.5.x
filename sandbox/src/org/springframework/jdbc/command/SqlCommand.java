@@ -132,5 +132,10 @@ public class SqlCommand implements org.springframework.jdbc.command.SqlCommandOp
     }
 
     public void setSqlTypes(Map types) {
+        this.sqlTypes = new SqlNamedParameterTypes(types);
+    }
+
+    public void setSqlTypes(SqlNamedParameterTypes namedTypes) {
+        this.sqlTypes = namedTypes;
     }
 }
