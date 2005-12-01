@@ -20,6 +20,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.JdbcNamedParameterTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.ParsedSql;
+import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -37,7 +38,7 @@ import java.util.Map;
 public class SqlCommand implements org.springframework.jdbc.command.SqlCommandOperations {
     private String sql;
     private ParsedSql parsedSql;
-    private SqlParameterTypes sqlTypes = new SqlParameterTypes();
+    private SqlNamedParameterTypes sqlTypes = new SqlNamedParameterTypes();
     private JdbcNamedParameterTemplate jdbcTemplate;
 
     public SqlCommand(String sql, DataSource dataSource) {
@@ -116,6 +117,14 @@ public class SqlCommand implements org.springframework.jdbc.command.SqlCommandOp
 
     public int executeUpdate(SqlNamedParameterHolder parameterHolder) {
         return jdbcTemplate.update(sql, parameterHolder, sqlTypes);
+    }
+
+    public int executeUpdate(SqlNamedParameterHolder parameterHolder, KeyHolder keyHolder) {
+        return executeUpdate(parameterHolder, keyHolder, null);
+    }
+
+    public int executeUpdate(SqlNamedParameterHolder parameterHolder, KeyHolder keyHolder, String[] keyColumnNames) {
+        return jdbcTemplate.update(sql, parameterHolder, sqlTypes, keyHolder, keyColumnNames);
     }
 
     public Map getSqlTypes() {
