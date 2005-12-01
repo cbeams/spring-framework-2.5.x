@@ -29,10 +29,11 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.command.SqlNamedParameterHolder;
-import org.springframework.jdbc.command.SqlNamedParameters;
+import org.springframework.jdbc.command.SqlNamedParameterValues;
 import org.springframework.jdbc.command.NamedParameterUtils;
-import org.springframework.jdbc.command.SqlParameterTypes;
+import org.springframework.jdbc.command.SqlNamedParameterTypes;
 import org.springframework.jdbc.support.ParsedSql;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
@@ -131,7 +132,7 @@ public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcName
 	}
 
 
-	public List query(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes, RowCallbackHandler rch)
+	public List query(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, RowCallbackHandler rch)
 			throws DataAccessException {
 		ArgMapPreparedStatementCreator ampsc = new ArgMapPreparedStatementCreator(sql, namedParameters, namedTypes);
 		// ToDo
@@ -145,7 +146,7 @@ public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcName
 		return (List) query(ampsc, ampsc, new RowCallbackHandlerResultSetExtractor(rch));
 	}
 
-	public List query(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes, RowMapper rowMapper)
+	public List query(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, RowMapper rowMapper)
 			throws DataAccessException {
 		return query(sql, namedParameters, namedTypes, new RowMapperResultReader(rowMapper));
 	}
@@ -155,7 +156,7 @@ public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcName
 		return query(sql, argMap, new RowMapperResultReader(rowMapper));
 	}
 
-	public Object queryForObject(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes, RowMapper rowMapper)
+	public Object queryForObject(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, RowMapper rowMapper)
 			throws DataAccessException {
 		List results = query(sql, namedParameters, namedTypes, new RowMapperResultReader(rowMapper, 1));
 		return DataAccessUtils.requiredUniqueResult(results);
@@ -166,7 +167,7 @@ public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcName
 		return DataAccessUtils.requiredUniqueResult(results);
 	}
 
-	public Object queryForObject(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes, Class requiredType)
+	public Object queryForObject(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, Class requiredType)
 			throws DataAccessException {
 		return queryForObject(sql, namedParameters, namedTypes, new SingleColumnRowMapper(requiredType));
 	}
@@ -175,7 +176,7 @@ public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcName
 		return queryForObject(sql, argMap, new SingleColumnRowMapper(requiredType));
 	}
 
-	public Map queryForMap(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes) throws DataAccessException {
+	public Map queryForMap(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) throws DataAccessException {
 		return (Map) queryForObject(sql, namedParameters, namedTypes, new ColumnMapRowMapper());
 	}
 
@@ -183,7 +184,7 @@ public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcName
 		return (Map) queryForObject(sql, argMap, new ColumnMapRowMapper());
 	}
 
-	public long queryForLong(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes) throws DataAccessException {
+	public long queryForLong(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) throws DataAccessException {
 		Number number = (Number) queryForObject(sql, namedParameters, namedTypes, Number.class);
 		return (number != null ? number.longValue() : 0);
 	}
@@ -193,7 +194,7 @@ public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcName
 		return (number != null ? number.longValue() : 0);
 	}
 
-	public int queryForInt(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes) throws DataAccessException {
+	public int queryForInt(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) throws DataAccessException {
 		Number number = (Number) queryForObject(sql, namedParameters, namedTypes, Number.class);
 		return (number != null ? number.intValue() : 0);
 	}
@@ -203,7 +204,7 @@ public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcName
 		return (number != null ? number.intValue() : 0);
 	}
 
-	public List queryForList(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes, Class elementType)
+	public List queryForList(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, Class elementType)
 			throws DataAccessException {
 		return query(sql, namedParameters, namedTypes, new SingleColumnRowMapper(elementType));
 	}
@@ -212,7 +213,7 @@ public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcName
 		return query(sql, argMap, new SingleColumnRowMapper(elementType));
 	}
 
-	public List queryForList(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes) throws DataAccessException {
+	public List queryForList(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) throws DataAccessException {
 		return query(sql, namedParameters, namedTypes, new ColumnMapRowMapper());
 	}
 
@@ -220,7 +221,7 @@ public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcName
 		return query(sql, argMap, new ColumnMapRowMapper());
 	}
 
-	public SqlRowSet queryForRowSet(String sql, final SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes) throws DataAccessException {
+	public SqlRowSet queryForRowSet(String sql, final SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) throws DataAccessException {
 		ArgMapPreparedStatementCreator ampsc = new ArgMapPreparedStatementCreator(sql, namedParameters, namedTypes);
 		// ToDo
 		return (SqlRowSet) query(ampsc, ampsc, new SqlRowSetResultSetExtractor());
@@ -232,7 +233,7 @@ public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcName
 		return (SqlRowSet) query(ampsc, ampsc, new SqlRowSetResultSetExtractor());
 	}
 
-	public int update(String sql, final SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes) throws DataAccessException {
+	public int update(String sql, final SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) throws DataAccessException {
 		ArgMapPreparedStatementCreator ampsc = new ArgMapPreparedStatementCreator(sql, namedParameters, namedTypes);
 		return update(ampsc, ampsc);
 	}
@@ -242,7 +243,20 @@ public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcName
 		return update(ampsc, ampsc);
 	}
 
-	/**
+    public int update(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, KeyHolder keyHolder, String[] keyColumnNames) {
+        ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+        int[] types = NamedParameterUtils.convertTypeMapToArray(namedTypes.getTypes(), parsedSql);
+        Object[] values = NamedParameterUtils.convertArgMapToArray(namedParameters.getValues(), parsedSql);
+        String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, namedParameters.getValues());
+        PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, types);
+        pscf.setReturnGeneratedKeys(true);
+        if (keyColumnNames != null) {
+            pscf.setGeneratedKeysColumnNames(keyColumnNames);
+        }
+        return update(pscf.newPreparedStatementCreator(values), keyHolder);
+    }
+
+    /**
 	 * Simple adapter for PreparedStatementSetter that applies
 	 * a given map of arguments.
 	 */
@@ -255,10 +269,10 @@ public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcName
 		private final int[] argTypes;
 
 		public ArgMapPreparedStatementCreator(String sql, Map argMap) {
-			this(sql, new SqlNamedParameters(argMap), new SqlParameterTypes());
+			this(sql, new SqlNamedParameterValues(argMap), new SqlNamedParameterTypes());
 		}
 
-		public ArgMapPreparedStatementCreator(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes) {
+		public ArgMapPreparedStatementCreator(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) {
 			this.sql = sql;
             sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, namedParameters.getValues());
             ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);

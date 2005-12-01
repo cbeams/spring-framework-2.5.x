@@ -21,8 +21,9 @@ import java.util.Map;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.command.SqlNamedParameterHolder;
-import org.springframework.jdbc.command.SqlParameterTypes;
+import org.springframework.jdbc.command.SqlNamedParameterTypes;
 
 /**
  * Interface specifying a basic set of JDBC operations.
@@ -36,8 +37,7 @@ import org.springframework.jdbc.command.SqlParameterTypes;
  * testing support provided in the org.springframework.test
  * package, shipped in spring-mock.jar.
  *
- * @author Rod Johnson
- * @author Juergen Hoeller
+ * @author Thomas Risberg
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
 public interface JdbcNamedParameterOperations extends JdbcOperations {
@@ -48,7 +48,8 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * with a RowCallbackHandler (potentially implementing the ResultReader
      * sub-interface that provides a result List).
      * @param sql SQL query to execute
-     * @param namedParameters Container of arguments and argument types to bind to the query
+     * @param namedParameters Container of arguments to bind to the query
+     * @param namedTypes Container of argument types to use for the query
      * @param rch object that will extract results (potentially a ResultReader),
      * one row at a time
      * @return the result List in case of a ResultReader, or null else
@@ -56,7 +57,7 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * @see ResultReader
      * @see java.sql.Types
      */
-    public List query(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes, RowCallbackHandler rch)
+    public List query(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, RowCallbackHandler rch)
             throws DataAccessException;
 
     /**
@@ -81,13 +82,14 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * of arguments to bind to the query, mapping each row to a Java object
      * via a RowMapper.
      * @param sql SQL query to execute
-     * @param namedParameters Container of arguments and argument types to bind to the query
+     * @param namedParameters Container of arguments to bind to the query
+     * @param namedTypes Container of argument types to use for the query
      * @param rowMapper object that will map one object per row
      * @return the result List, containing mapped objects
      * @throws org.springframework.dao.DataAccessException if the query fails
      * @see java.sql.Types
      */
-    List query(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes, RowMapper rowMapper)
+    List query(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, RowMapper rowMapper)
         throws DataAccessException;
 
     /**
@@ -109,15 +111,15 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * of arguments to bind to the query, mapping a single result row to a
      * Java object via a RowMapper.
      * @param sql SQL query to execute
-     * @param namedParameters Container of arguments and argument types to bind to the query
-     * (constants from <code>java.sql.Types</code>)
+     * @param namedParameters Container of arguments to bind to the query
+     * @param namedTypes Container of argument types to use for the query
      * @param rowMapper object that will map one object per row
      * @return the single mapped object
      * @throws org.springframework.dao.IncorrectResultSizeDataAccessException if the query does not
      * return exactly one row
      * @throws org.springframework.dao.DataAccessException if the query fails
      */
-    Object queryForObject(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes, RowMapper rowMapper)
+    Object queryForObject(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, RowMapper rowMapper)
             throws DataAccessException;
 
     /**
@@ -142,7 +144,8 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * <p>The query is expected to be a single row/single column query; the returned
      * result will be directly mapped to the corresponding object type.
      * @param sql SQL query to execute
-     * @param namedParameters Container of arguments and argument types to bind to the query
+     * @param namedParameters Container of arguments to bind to the query
+     * @param namedTypes Container of argument types to use for the query
      * @param requiredType the type that the result object is expected to match
      * @return the result object of the required type, or <code>null</code> in case of SQL NULL
      * @throws org.springframework.dao.IncorrectResultSizeDataAccessException if the query does not return
@@ -151,7 +154,7 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * @see #queryForObject(String, Class)
      * @see java.sql.Types
      */
-    Object queryForObject(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes, Class requiredType)
+    Object queryForObject(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, Class requiredType)
         throws DataAccessException;
 
     /**
@@ -178,7 +181,8 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * <p>The query is expected to be a single row query; the result row will be
      * mapped to a Map (one entry for each column, using the column name as the key).
      * @param sql SQL query to execute
-     * @param namedParameters Container of arguments and argument types to bind to the query
+     * @param namedParameters Container of arguments to bind to the query
+     * @param namedTypes Container of argument types to use for the query
      * @return the result Map (one entry for each column, using the
      * column name as the key)
      * @throws org.springframework.dao.IncorrectResultSizeDataAccessException if the query does not
@@ -188,7 +192,7 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * @see org.springframework.jdbc.core.ColumnMapRowMapper
      * @see java.sql.Types
      */
-    Map queryForMap(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes) throws DataAccessException;
+    Map queryForMap(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) throws DataAccessException;
 
     /**
      * Query given SQL to create a prepared statement from SQL and a
@@ -217,8 +221,8 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * <p>The query is expected to be a single row/single column query that
      * results in a long value.
      * @param sql SQL query to execute
-     * @param namedParameters Container of arguments and argument types to bind to the query
-     * (constants from <code>java.sql.Types</code>)
+     * @param namedParameters Container of arguments to bind to the query
+     * @param namedTypes Container of argument types to use for the query
      * @return the long value, or 0 in case of SQL NULL
      * @throws org.springframework.dao.IncorrectResultSizeDataAccessException if the query does not return
      * exactly one row, or does not return exactly one column in that row
@@ -226,7 +230,7 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * @see #queryForLong(String)
      * @see java.sql.Types
      */
-    long queryForLong(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes) throws DataAccessException;
+    long queryForLong(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) throws DataAccessException;
 
     /**
      * Query given SQL to create a prepared statement from SQL and a
@@ -250,7 +254,8 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * <p>The query is expected to be a single row/single column query that
      * results in an int value.
      * @param sql SQL query to execute
-     * @param namedParameters Container of arguments and argument types to bind to the query
+     * @param namedParameters Container of arguments to bind to the query
+     * @param namedTypes Container of argument types to use for the query
      * @return the int value, or 0 in case of SQL NULL
      * @throws org.springframework.dao.IncorrectResultSizeDataAccessException if the query does not return
      * exactly one row, or does not return exactly one column in that row
@@ -258,7 +263,7 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * @see #queryForInt(String)
      * @see java.sql.Types
      */
-    int queryForInt(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes) throws DataAccessException;
+    int queryForInt(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) throws DataAccessException;
 
     /**
      * Query given SQL to create a prepared statement from SQL and a
@@ -282,7 +287,8 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * <p>The results will be mapped to a List (one entry for each row) of
      * result objects, each of them matching the specified element type.
      * @param sql SQL query to execute
-     * @param namedParameters Container of arguments and argument types to bind to the query
+     * @param namedParameters Container of arguments to bind to the query
+     * @param namedTypes Container of argument types to use for the query
      * @param elementType the required type of element in the result list
      * (for example, <code>Integer.class</code>)
      * @return a List of objects that match the specified element type
@@ -290,7 +296,7 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * @see #queryForList(String, Class)
      * @see org.springframework.jdbc.core.SingleColumnRowMapper
      */
-    List queryForList(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes, Class elementType)
+    List queryForList(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, Class elementType)
             throws DataAccessException;
 
     /**
@@ -318,13 +324,14 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * Thus  Each element in the list will be of the form returned by this interface's
      * queryForMap() methods.
      * @param sql SQL query to execute
-     * @param namedParameters Container of arguments and argument types to bind to the query
+     * @param namedParameters Container of arguments to bind to the query
+     * @param namedTypes Container of argument types to use for the query
      * @return a List that contains a Map per row
      * @throws org.springframework.dao.DataAccessException if the query fails
      * @see #queryForList(String)
      * @see java.sql.Types
      */
-    List queryForList(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes) throws DataAccessException;
+    List queryForList(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) throws DataAccessException;
 
     /**
      * Query given SQL to create a prepared statement from SQL and a
@@ -352,7 +359,8 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * class is used, which is part of JDK 1.5+ and also available separately as part of
      * Sun's JDBC RowSet Implementations download (rowset.jar).
      * @param sql SQL query to execute
-     * @param namedParameters Container of arguments and argument types to bind to the query
+     * @param namedParameters Container of arguments to bind to the query
+     * @param namedTypes Container of argument types to use for the query
      * @return a SqlRowSet representation (possibly a wrapper around a
      * <code>javax.sql.rowset.CachedRowSet</code>)
      * @throws org.springframework.dao.DataAccessException if there is any problem executing the query
@@ -361,7 +369,7 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      * @see javax.sql.rowset.CachedRowSet
      * @see java.sql.Types
      */
-    SqlRowSet queryForRowSet(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes) throws DataAccessException;
+    SqlRowSet queryForRowSet(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) throws DataAccessException;
 
     /**
      * Query given SQL to create a prepared statement from SQL and a
@@ -387,12 +395,13 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
     /**
      * Issue an update via a prepared statement, binding the given arguments.
      * @param sql SQL, containing bind parameters
-     * @param namedParameters Container of arguments and argument types to bind to the query
+     * @param namedParameters Container of arguments to bind to the query
+     * @param namedTypes Container of argument types to use for the query
      * @return the number of rows affected
      * @throws org.springframework.dao.DataAccessException if there is any problem issuing the update
      * @see java.sql.Types
      */
-    int update(String sql, SqlNamedParameterHolder namedParameters, SqlParameterTypes namedTypes) throws DataAccessException;
+    int update(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) throws DataAccessException;
 
     /**
      * Issue an update via a prepared statement, binding the given arguments.
@@ -404,4 +413,14 @@ public interface JdbcNamedParameterOperations extends JdbcOperations {
      */
     int update(String sql, Map argMap) throws DataAccessException;
 
+    /**
+     * Issue an update via a prepared statement, binding the given arguments. Also populates the
+     * KeyHolder passed in with the generated key values.
+     * @param sql SQL, containing bind parameters
+     * @param namedParameters Container of arguments to bind to the query
+     * @param namedTypes Container of argument types to use for the query
+     * @return the number of rows affected
+     * @throws org.springframework.dao.DataAccessException if there is any problem issuing the update
+     */
+    int update(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, KeyHolder keyHolder, String[] keyColumnNames);
 }

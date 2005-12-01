@@ -3,17 +3,17 @@ package org.springframework.jdbc.command;
 import java.util.Map;
 import java.util.HashMap;
 
-public class SqlParameterTypes {
+public class SqlNamedParameterTypes {
     Map parameterTypes = new HashMap();
 
-    public SqlParameterTypes() {
+    public SqlNamedParameterTypes() {
     }
 
-    public SqlParameterTypes(String parameterName, int sqlType) {
+    public SqlNamedParameterTypes(String parameterName, int sqlType) {
         parameterTypes.put(parameterName, new Integer(sqlType));
     }
 
-    public SqlParameterTypes addType(String parameterName, int sqlType) {
+    public SqlNamedParameterTypes addType(String parameterName, int sqlType) {
         parameterTypes.put(parameterName, new Integer(sqlType));
         return this;
     }

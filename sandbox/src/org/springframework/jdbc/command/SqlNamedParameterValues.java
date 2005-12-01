@@ -27,17 +27,17 @@ import java.util.Map;
  * @author Thomas Risberg
  * @since 1.3
  */
-public class SqlNamedParameters implements SqlNamedParameterHolder {
+public class SqlNamedParameterValues implements SqlNamedParameterHolder {
 	private Map dataMap = new HashMap();
 
-	public SqlNamedParameters() {
+	public SqlNamedParameterValues() {
 	}
 
-	public SqlNamedParameters(Map dataMap) {
+	public SqlNamedParameterValues(Map dataMap) {
 		this.dataMap.putAll(dataMap);
 	}
 
-	public SqlNamedParameters(String columnName, Object value) {
+	public SqlNamedParameterValues(String columnName, Object value) {
 		this.dataMap.put(columnName, value);
 	}
 
