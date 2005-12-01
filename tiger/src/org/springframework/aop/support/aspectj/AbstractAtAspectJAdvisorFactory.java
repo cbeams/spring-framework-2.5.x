@@ -63,6 +63,10 @@ public abstract class AbstractAtAspectJAdvisorFactory implements AtAspectJAdviso
 		AtAround 
 	};
 
+	/**
+	 * Class modelling an AspectJ annotation, exposing its type enumeration and
+	 * pointcut String.
+	 */
 	protected static class AspectJAnnotation<A extends Annotation> {
 		private static Map<Class,AspectJAnnotationType> annotationTypes = new HashMap<Class,AspectJAnnotationType>();
 		static {
@@ -74,63 +78,50 @@ public abstract class AbstractAtAspectJAdvisorFactory implements AtAspectJAdviso
 			annotationTypes.put(Before.class,AspectJAnnotationType.AtBefore);			
 		}
 		
-		private A annotation;
+		private final A annotation;
 		private AspectJAnnotationType annotationType;
+		private final String expression;
+		private final String argNames;
 		
 		public AspectJAnnotation(A aspectjAnnotation) {
 			this.annotation = aspectjAnnotation;
 			for(Class c : annotationTypes.keySet()) {
 				if (c.isInstance(this.annotation)) {
 					this.annotationType = annotationTypes.get(c);
+					break;
 				}
 			}
 			if (this.annotationType == null) {
 				throw new IllegalStateException("unknown annotation type: " + this.annotation.toString());
 			}
+			
+			// We know these methods exist with the same name on each object,
+			// but need to invoke them reflectively as there isn't a common interfaces
+			try {
+				this.expression = (String) annotation.getClass().getMethod("value", (Class[]) null).
+					invoke(this.annotation);
+				this.argNames = (String) annotation.getClass().getMethod("argNames", (Class[]) null).
+					invoke(this.annotation);
+			} 
+			catch (Exception ex) {
+				throw new IllegalArgumentException(aspectjAnnotation + " cannot be an AspectJ annotation", ex);
+			}
 		}
 		
-		public AspectJAnnotationType getAnnotationType() { return this.annotationType; }
+		public AspectJAnnotationType getAnnotationType() { 
+			return this.annotationType; 
+		}
 		
 		public A getAnnotation() { 
 			return this.annotation; 
 		}
 		
 		public String getPointcutExpression() {
-			switch(this.annotationType) {
-			case AtPointcut:
-				return ((Pointcut)this.annotation).value();
-			case AtBefore:
-				return ((Before)this.annotation).value();				
-			case AtAfter:
-				return ((After)this.annotation).value();				
-			case AtAfterReturning:
-				return ((AfterReturning)this.annotation).value();				
-			case AtAfterThrowing:
-				return ((AfterThrowing)this.annotation).value();				
-			case AtAround:
-				return ((Around)this.annotation).value();				
-			default:
-				throw new UnsupportedOperationException("Unknown annotation type: " + this.annotationType);
-			}
+			return this.expression;
 		}
 		
 		public String getArgNames() {
-			switch(this.annotationType) {
-			case AtPointcut:
-				return ((Pointcut)this.annotation).argNames();
-			case AtBefore:
-				return ((Before)this.annotation).argNames();				
-			case AtAfter:
-				return ((After)this.annotation).argNames();				
-			case AtAfterReturning:
-				return ((AfterReturning)this.annotation).argNames();				
-			case AtAfterThrowing:
-				return ((AfterThrowing)this.annotation).argNames();				
-			case AtAround:
-				return ((Around)this.annotation).argNames();				
-			default:
-				throw new UnsupportedOperationException("Unknown annotation type: " + this.annotationType);
-			}			
+			return this.argNames;
 		}
 		
 		public String toString() { 
