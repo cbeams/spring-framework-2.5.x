@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.39 2005-08-29 20:27:58 aarendsen Exp $-->
+<!--$Id: views.xml,v 1.40 2005-12-01 18:56:23 colins Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -532,10 +532,10 @@ recommend sticking to 'spring' --&gt;
                 falling back to the value of the default parameter)</entry>
 
                 <entry><literal>#springMessageText($code
-                $default)</literal></entry>
+                $text)</literal></entry>
 
                 <entry><literal>&lt;@spring.messageText code,
-                default/&gt;</literal></entry>
+                text/&gt;</literal></entry>
               </row>
 
               <row>
