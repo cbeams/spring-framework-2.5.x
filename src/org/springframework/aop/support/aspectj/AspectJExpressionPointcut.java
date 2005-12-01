@@ -161,7 +161,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 
 	private void bindParameters(ReflectiveMethodInvocation invocation, PointcutParameter[] parameters) {
 		Map bindingsMap = invocation.getUserAttributes();
-		for(PointcutParameter p : parameters) {
+		for(int i = 0; i < parameters.length; i++) {
+			PointcutParameter p = parameters[i];
 			bindingsMap.put(p.getName(),p.getBinding());
 		}
 	}
