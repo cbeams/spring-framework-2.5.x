@@ -31,6 +31,7 @@ import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.TestDynamicMBean;
 import org.springframework.util.ObjectUtils;
+import org.springframework.core.JdkVersion;
 
 /**
  * @author Rob Harrop
@@ -105,6 +106,14 @@ public class JmxUtilsTests extends TestCase {
 		assertEquals("Domain of transformed name is incorrect", objectName.getDomain(), uniqueName.getDomain());
 		assertEquals("Type key is incorrect", objectName.getKeyProperty(typeProperty), uniqueName.getKeyProperty("type"));
 		assertEquals("Identity key is incorrect", ObjectUtils.getIdentityHexString(managedResource), uniqueName.getKeyProperty(JmxUtils.IDENTITY_OBJECT_NAME_KEY));
+	}
+
+	public void testLocatePlatformMBeanServer() {
+		if(JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+			return;
+		}
+
+		JmxUtils.locateMBeanServer();
 	}
 
 

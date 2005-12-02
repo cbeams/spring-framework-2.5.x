@@ -18,6 +18,8 @@ package org.springframework.jmx.support;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.management.ManagementFactory;
 import java.util.List;
 import java.util.Hashtable;
 
@@ -39,6 +41,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.core.JdkVersion;
 
 /**
  * Collection of generic utility methods to support Spring JMX.
@@ -55,6 +58,9 @@ public class JmxUtils {
 	 */
 	private static final Log logger = LogFactory.getLog(JmxUtils.class);
 
+	private static final String MANAGEMENT_FACTORY_CLASS = "java.lang.management.ManagementFactory";
+
+	private static final String GET_PLATFORM_MBEAN_SERVER_METHOD = "getPlatformMBeanServer";
 	/**
 	 * Suffix used to identify an MBean interface
 	 */
@@ -93,20 +99,30 @@ public class JmxUtils {
 	 */
 	public static MBeanServer locateMBeanServer(String agentId) throws MBeanServerNotFoundException {
 		List servers = MBeanServerFactory.findMBeanServer(agentId);
-		// Check to see if an MBeanServer is registered.
-		if (servers == null || servers.size() == 0) {
+
+		MBeanServer server = null;
+		if (servers != null && servers.size() > 0) {
+			// Check to see if an MBeanServer is registered.
+			if (servers.size() > 1 && logger.isWarnEnabled()) {
+				logger.warn("Found more than one MBeanServer instance" +
+						(agentId != null ? " with agent id [" + agentId + "]" : "") +
+						". Returning first from list.");
+			}
+			server = (MBeanServer) servers.get(0);
+		}
+		else if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
+			// attempt to load the PlatformMBeanServer
+			server = ManagementFactory.getPlatformMBeanServer();
+		}
+
+		if(server == null) {
 			throw new MBeanServerNotFoundException(
 					"Unable to locate an MBeanServer instance" +
 					(agentId != null ? " with agent id [" + agentId + "]" : ""));
 		}
-		if (servers.size() > 1) {
-			logger.warn("Found more than one MBeanServer instance" +
-					(agentId != null ? " with agent id [" + agentId + "]" : "") +
-					". Returning first from list.");
-		}
-		MBeanServer server = (MBeanServer) servers.get(0);
+
 		if (logger.isDebugEnabled()) {
-			logger.debug("Found MBeanServer: " + server);
+			logger.debug("Found MBeanServer: [" + server + "].");
 		}
 		return server;
 	}

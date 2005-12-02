@@ -16,12 +16,6 @@
 
 package org.springframework.aop.support.aspectj;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.aopalliance.aop.AspectException;
 import org.aspectj.weaver.tools.JoinPointMatch;
 import org.aspectj.weaver.tools.PointcutExpression;
@@ -35,15 +29,22 @@ import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AbstractExpressionPointcut;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Spring pointcut that uses AspectJ weaver.
  * The pointcut expression value is an AspectJ string. This
  * can reference other pointcuts and use composition and other
- * operations. 
- * <p>
+ * operations.
+ * <p/>
  * Naturally, as this is to be processed by Spring AOP's
  * proxy-based model, only method execution pointcuts are
- * supported. 
+ * supported.
+ *
  * @author Rob Harrop
  * @author Adrian Colyer
  * @author Rod Johnson
@@ -56,8 +57,11 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	private final Map shadowMapCache = new HashMap();
 
 	private PointcutParser pointcutParser;
+
 	private Class pointcutDeclarationScope;
+
 	private String[] pointcutParameterNames = new String[0];
+
 	private Class[] pointcutParameterTypes = new Class[0];
 
 	private PointcutExpression pointcutExpression;
@@ -67,14 +71,14 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.ARGS);
 		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.REFERENCE);
 		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.THIS);
-		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.TARGET);		
+		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.TARGET);
 	}
 
 	public AspectJExpressionPointcut() {
 		this.pointcutParser = PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingContextClassloaderForResolution(getSupportedPrimitives());
 	}
 
-	public AspectJExpressionPointcut(Class scope, String[] paramNames, Class<?>[] paramTypes) {
+	public AspectJExpressionPointcut(Class scope, String[] paramNames, Class[] paramTypes) {
 		this();
 		this.pointcutDeclarationScope = scope;
 		if (paramNames.length != paramTypes.length) {
@@ -83,7 +87,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		this.pointcutParameterNames = paramNames;
 		this.pointcutParameterTypes = paramTypes;
 	}
-	
+
 	public ClassFilter getClassFilter() {
 		checkReadyToMatch();
 		return this;
@@ -97,10 +101,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	public void onSetExpression(String expression) {
 		PointcutParameter[] pointcutParameters = new PointcutParameter[this.pointcutParameterNames.length];
 		for (int i = 0; i < pointcutParameters.length; i++) {
-			pointcutParameters[i] = this.pointcutParser.createPointcutParameter(this.pointcutParameterNames[i],this.pointcutParameterTypes[i]);
+			pointcutParameters[i] = this.pointcutParser.createPointcutParameter(this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
 		}
-		this.pointcutExpression = 
-			this.pointcutParser.parsePointcutExpression(expression,pointcutDeclarationScope,pointcutParameters);
+		this.pointcutExpression =
+				this.pointcutParser.parsePointcutExpression(expression, pointcutDeclarationScope, pointcutParameters);
 	}
 
 	public PointcutExpression getPointcutExpression() {
@@ -137,7 +141,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		Object target;
 		ReflectiveMethodInvocation invocation;
 		try {
-			invocation = (ReflectiveMethodInvocation) ExposeInvocationInterceptor.currentInvocation();		
+			invocation = (ReflectiveMethodInvocation) ExposeInvocationInterceptor.currentInvocation();
 			target = invocation.getThis();
 		}
 		catch (AspectException ex) {
@@ -146,27 +150,27 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 			target = null;
 			invocation = null;
 		}
-		
+
 		JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(target, target, args);
 		if (joinPointMatch.matches() && invocation != null) {
 			bindParameters(invocation, joinPointMatch.getParameterBindings());
 		}
 		return joinPointMatch.matches();
 	}
-	
+
 	public JoinPointMatch matchesWithBinding(Method method, Object targetObject, Object[] args) {
 		ShadowMatch shadowMatch = this.pointcutExpression.matchesMethodExecution(method);
-		return(shadowMatch.matchesJoinPoint(targetObject,targetObject,args));
+		return (shadowMatch.matchesJoinPoint(targetObject, targetObject, args));
 	}
 
 	private void bindParameters(ReflectiveMethodInvocation invocation, PointcutParameter[] parameters) {
 		Map bindingsMap = invocation.getUserAttributes();
-		for(int i = 0; i < parameters.length; i++) {
+		for (int i = 0; i < parameters.length; i++) {
 			PointcutParameter p = parameters[i];
-			bindingsMap.put(p.getName(),p.getBinding());
+			bindingsMap.put(p.getName(), p.getBinding());
 		}
 	}
-	
+
 	private ShadowMatch getShadowMatch(Method method) {
 		synchronized (shadowMapCache) {
 			ShadowMatch shadowMatch = (ShadowMatch) shadowMapCache.get(method);
