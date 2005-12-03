@@ -32,8 +32,10 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper class for resolving constructors and factory methods.
@@ -210,7 +212,7 @@ public abstract class ConstructorResolver {
 		this.beanFactory.initBeanWrapper(bw);
 
 		// Try all methods with this name to see if they match the given arguments.
-		Method[] candidates = factoryClass.getMethods();
+		Method[] candidates = ReflectionUtils.getAllDeclaredMethods(factoryClass);
 
 		Method factoryMethodToUse = null;
 		Object[] argsToUse = null;
@@ -218,7 +220,6 @@ public abstract class ConstructorResolver {
 
 		for (int i = 0; i < candidates.length; i++) {
 			Method factoryMethod = candidates[i];
-
 
 			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic &&
 					factoryMethod.getName().equals(mergedBeanDefinition.getFactoryMethodName()) &&
@@ -264,6 +265,14 @@ public abstract class ConstructorResolver {
 					minTypeDiffWeight = typeDiffWeight;
 				}
 			}
+		}
+		
+		if (factoryMethodToUse == null) {
+			throw new BeanDefinitionStoreException("No factory method: factory bean=" + mergedBeanDefinition.getFactoryBeanName() +
+					"; factory method=" + mergedBeanDefinition.getFactoryMethodName());
+		}
+		if (!factoryMethodToUse.isAccessible()) {
+			factoryMethodToUse.setAccessible(true);
 		}
 
 		Object beanInstance = this.instantiationStrategy.instantiate(

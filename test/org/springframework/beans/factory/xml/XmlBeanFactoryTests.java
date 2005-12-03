@@ -27,14 +27,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
 
 import javax.mail.Session;
 import javax.servlet.ServletException;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-import org.xml.sax.InputSource;
 
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.FatalBeanException;
@@ -50,8 +48,8 @@ import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.DummyFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MethodReplacer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -63,6 +61,7 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
+import org.xml.sax.InputSource;
 
 /**
  * Miscellaneous tests for XML bean definitions.
@@ -359,6 +358,17 @@ public class XmlBeanFactoryTests extends TestCase {
 		// properly create the remaining two instances
 		xbf.getBean("proxy2");
 		assertEquals(7, xbf.getSingletonCount());
+	}
+	
+	public void testNoSuchFactoryBeanMethod() {
+		try {
+			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("no-such-factory-method.xml", getClass()));
+			assertNotNull(xbf.getBean("defaultTestBean"));
+			fail("Should not get invalid bean");
+		}
+		catch (BeanCreationException ex) {
+			// Ok
+		}
 	}
 
 	public void testInitMethodIsInvoked() throws Exception {
@@ -1109,6 +1119,26 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals(27, fm.getNum());
 		assertEquals("gotchaAutowired", fm.getName());
 		assertEquals("Juergen", fm.getTestBean().getName());
+	}
+	
+	public void testProtectedFactoryMethod() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+
+		TestBean tb = (TestBean) xbf.getBean("defaultTestBean.protected");
+		assertEquals(1, tb.getAge());
+	}
+	
+	public void testPrivateFactoryMethod() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+
+		TestBean tb = (TestBean) xbf.getBean("defaultTestBean.private");
+		assertEquals(1, tb.getAge());
 	}
 
 	public void testFactoryMethodsPrototypeOnTargetClass() {

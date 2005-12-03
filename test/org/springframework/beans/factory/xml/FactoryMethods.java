@@ -89,6 +89,14 @@ public class FactoryMethods {
 		return this.tb;
 	}
 	
+	protected TestBean protectedGetTestBean() {
+		return this.tb;
+	}
+	
+	private TestBean privateGetTestBean() {
+		return this.tb;
+	}
+	
 	public int getNum() {
 		return num;
 	}
