@@ -43,11 +43,10 @@ public abstract class AnnotationUtils {
 		Method[] annotationProperties = ann.annotationType().getDeclaredMethods();
 
 		BeanWrapper bw = new BeanWrapperImpl(bean);
-		for (int i = 0; i < annotationProperties.length; i++) {
-			Method annotationProperty = annotationProperties[i];
+		for (Method annotationProperty : annotationProperties) {
 			String propertyName = annotationProperty.getName();
 
-			if((!excluded.contains(propertyName)) && bw.isWritableProperty(propertyName)) {
+			if ((!excluded.contains(propertyName)) && bw.isWritableProperty(propertyName)) {
 				Object value = ReflectionUtils.invokeMethod(annotationProperty, ann);
 				bw.setPropertyValue(propertyName, value);
 			}
@@ -76,7 +75,7 @@ public abstract class AnnotationUtils {
 				break;
 			}
 			try {
-				m = c.getDeclaredMethod(m.getName(), (Class[]) m.getParameterTypes());
+				m = c.getDeclaredMethod(m.getName(), m.getParameterTypes());
 				annotation = m.getAnnotation(annotationClass);
 			}
 			catch (NoSuchMethodException ex) {
