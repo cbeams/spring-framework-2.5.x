@@ -30,6 +30,7 @@ import org.w3c.dom.NodeList;
  * in particular for working with DOM Nodes and DOM Elements.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 1.2
  * @see org.w3c.dom.Node
  * @see org.w3c.dom.Element
@@ -48,11 +49,30 @@ public abstract class DomUtils {
 	 * @see org.w3c.dom.Element#getElementsByTagName
 	 */
 	public static List getChildElementsByTagName(Element ele, String childEleName) {
+		return getChildElementsByTagName(ele, childEleName, false);
+	}
+
+	/**
+	 * Retrieve all child elements of the given DOM element that match
+	 * the given element name. Only look at the direct child level of the
+	 * given element; do not go into further depth (in contrast to the
+	 * DOM API's <code>getElementsByTagName</code> method).
+	 * <p/>Can select whether or not to compare against the local name of
+	 * the {@link org.w3c.dom.Element}
+	 * @param ele the DOM element to analyze
+	 * @param childEleName the child element name to look for
+	 * @param localName whether to compare against the local node name
+	 * @return a List of child <code>org.w3c.dom.Element</code> instances
+	 * @see org.w3c.dom.Element
+	 * @see org.w3c.dom.Element#getElementsByTagName
+	 */
+	public static List getChildElementsByTagName(Element ele, String childEleName, boolean localName) {
 		NodeList nl = ele.getChildNodes();
 		List childEles = new ArrayList();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && childEleName.equals(node.getNodeName())) {
+			String name = (localName) ? node.getLocalName() : node.getNodeName();
+			if (node instanceof Element && childEleName.equals(name)) {
 				childEles.add(node);
 			}
 		}

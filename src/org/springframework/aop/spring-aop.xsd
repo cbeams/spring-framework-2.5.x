@@ -8,8 +8,8 @@
 
 	<xsd:element name="aspects">
 		<xsd:complexType>
-			<xsd:sequence minOccurs="1" maxOccurs="unbounded">
-				<xsd:element name="aspect" type="aspectType"/>
+			<xsd:sequence>
+				<xsd:element name="aspect" type="aspectType" minOccurs="1" maxOccurs="unbounded"/>
 			</xsd:sequence>
 		</xsd:complexType>
 	</xsd:element>
@@ -33,7 +33,7 @@
 			</xsd:simpleType>
 		</xsd:attribute>
 	</xsd:complexType>
-
+	
 	<xsd:complexType name="adviceType">
 		<xsd:attribute name="ref" type="xsd:string" use="required"/>
 	</xsd:complexType>

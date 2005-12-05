@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<xsd:schema xmlns="http://www.springframework.org/schema/tx"
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			targetNamespace="http://www.springframework.org/schema/tx"
+			elementFormDefault="qualified"
+			attributeFormDefault="unqualified">
+
+	<xsd:element name="advice">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="attributes" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+			</xsd:sequence>
+			<xsd:attribute name="id" type="xsd:ID" use="required"/>
+			<xsd:attribute name="transactionManager" type="xsd:string" default="transactionManager"/>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="metadata">
+		<xsd:simpleType>
+			<xsd:restriction base="xsd:string"/>
+		</xsd:simpleType>
+	</xsd:element>
+
+</xsd:schema>
