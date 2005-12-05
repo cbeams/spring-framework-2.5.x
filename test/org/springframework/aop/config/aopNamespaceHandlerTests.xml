@@ -7,11 +7,11 @@
 
 	<aop:aspects>
 		<aop:aspect id="countNameCalls">
-			<aop:pointcut expression="* getName()"/>
+			<aop:pointcut expression="execution(* *..ITestBean.getName(..))"/>
 			<aop:advice ref="getNameCounter"/>
 		</aop:aspect>
 		<aop:aspect id="countAgeCalls">
-			<aop:pointcut expression="* getAge()"/>
+			<aop:pointcut expression="execution(* *..ITestBean.getAge(..))"/>
 			<aop:advice ref="getAgeCounter"/>
 		</aop:aspect>
 	</aop:aspects>
@@ -19,6 +19,6 @@
 	<bean id="getNameCounter" class="org.springframework.aop.framework.CountingBeforeAdvice"/>
 	<bean id="getAgeCounter" class="org.springframework.aop.framework.CountingBeforeAdvice"/>
 
-
 	<bean id="testBean" class="org.springframework.beans.TestBean"/>
+
 </beans>

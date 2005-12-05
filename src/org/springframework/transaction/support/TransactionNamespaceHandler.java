@@ -40,27 +40,6 @@ public class TransactionNamespaceHandler extends NamespaceHandlerSupport {
 
 	public TransactionNamespaceHandler() {
 		registerBeanDefinitionParser("advice", new TxAdviceBeanDefinitionParser());
-		registerBeanDefinitionDecorator("metadata", new TxMetadataBeanDefinitionDecorator());
-	}
-
-
-	private static class TxMetadataBeanDefinitionDecorator implements BeanDefinitionDecorator {
-
-
-		public BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
-
-			String attributes = DomUtils.getTextValue(element);
-
-			// create the NameMatchTransactionAttributeSource bean
-			RootBeanDefinition metadataDefinition = new RootBeanDefinition(NameMatchTransactionAttributeSource.class);
-			metadataDefinition.setPropertyValues(new MutablePropertyValues());
-			metadataDefinition.getPropertyValues().addPropertyValue("properties", attributes);
-
-			String name = definition.getBeanName() + TransactionReactor.METADATA_SUFFIX;
-			registry.registerBeanDefinition(name, metadataDefinition);
-
-			return definition;
-		}
 	}
 
 	private static class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
