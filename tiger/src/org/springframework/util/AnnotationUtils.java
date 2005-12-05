@@ -64,12 +64,12 @@ public abstract class AnnotationUtils {
 	 * @return the annotation of the given type found,
 	 * or null
 	 */
-	public static<A extends Annotation> A findMethodAnnotation(Class<A> annotationClass, Method m, Class c) {
+	public static <A extends Annotation> A findMethodAnnotation(Class<A> annotationClass, Method m, Class c) {
 		if (!annotationClass.isAnnotation()) {
 			throw new IllegalArgumentException(annotationClass + " is not an annotation");
 		}
 		A annotation = m.getAnnotation(annotationClass);
-		
+
 		while (annotation == null) {
 			c = c.getSuperclass();
 			if (c == null || c.equals(Object.class)) {
