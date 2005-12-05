@@ -22,24 +22,32 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Base Controller interface, representing a component that receives HttpServletRequest
- * and HttpServletResponse like a <code>HttpServlet</code> but is able to participate in
- * an MVC workflow. Comparable to the notion of a Struts <code>Action</code>.
+ * Base Controller interface, representing a component that receives
+ * <code>HttpServletRequest</code> and <code>HttpServletResponse</code>
+ * instances just like a <code>HttpServlet</code> but is able to
+ * participate in an MVC workflow. Controllers are comparable to the
+ * notion of a Struts <code>Action</code>.
  *
  * <p>Any implementation of the Controller interface should be a
  * <i>reusable, thread-safe</i> class, capable of handling multiple
  * HTTP requests throughout the lifecycle of an application. To be able to
- * configure Controller in an easy way, Controllers are usually JavaBeans.</p>
+ * configure a Controller easily, Controller implementations are encouraged
+ * to be (and usually are) JavaBeans.
+ * </p>
  *
  * <p><b><a name="workflow">Workflow</a></b></p>
  *
- * <p>After the DispatcherServlet has received a request and has done its work
- * to resolve locales, themes and things a like, it tries to resolve a
- * Controller, using a {@link org.springframework.web.servlet.HandlerMapping
- * HandlerMapping}. When a Controller has been found, the
+ * <p>
+ * After a <cde>DispatcherServlet</code> has received a request and has
+ * done its work to resolve locales, themes and suchlike, it then tries
+ * to resolve a Controller, using a
+ * {@link org.springframework.web.servlet.HandlerMapping HandlerMapping}.
+ * When a Controller has been found to handle the request, the
  * {@link #handleRequest(HttpServletRequest, HttpServletResponse) handleRequest}
- * method will be invoked, which is responsible for handling the actual
- * request and - if applicable - returning an appropriate ModelAndView.
+ * method of the located Controller will be invoked; the located Controller
+ * is then responsible for handling the actual request and - if applicable -
+ * returning an appropriate
+ * {@link org.springframework.web.servlet.ModelAndView ModelAndView}.
  * So actually, this method is the main entrypoint for the
  * {@link org.springframework.web.servlet.DispatcherServlet DispatcherServlet}
  * which delegates requests to controllers. This method - and also this interface -
@@ -61,13 +69,15 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * <p>The Controller interface is explicitly designed to operate on HttpServletRequest
  * and HttpServletResponse objects, just like an HttpServlet. It does not aim to
- * decouple from the Servlet API, in contrast to, for example, WebWork, JSF or Tapestry.
+ * decouple itself from the Servlet API, in contrast to, for example, WebWork, JSF or Tapestry.
  * Instead, the full power of the Servlet API is available, allowing Controllers to be
- * general-purpose: not only to handle web user interface requests but also to process
- * remoting protocols or to generate reports on demand.</p>
+ * general-purpose: a Controller is able to not only handle web user interface
+ * requests but also to process remoting protocols or to generate reports on demand.</p>
  *
- * <p>Controllers can easily be tested through passing in mock objects for servlet
- * request and response. For convenience, Spring ships with a set of Servlet API mocks
+ * <p>Controllers can easily be tested by passing in mock objects for the
+ * HttpServletRequest and HttpServletResponse objects as parameters to the
+ * {@link #handleRequest(HttpServletRequest, HttpServletResponse) handleRequest}
+ * method. As a convenience, Spring ships with a set of Servlet API mocks
  * that are suitable for testing any kind of web components, but are particularly
  * suitable for testing Spring web controllers. In contrast to a Struts Action,
  * there is no need to mock the ActionServlet or any other infrastructure;
