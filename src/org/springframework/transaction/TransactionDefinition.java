@@ -54,7 +54,7 @@ public interface TransactionDefinition {
 	 * Analogous to EJB transaction attribute of the same name.
 	 * <p>Note: For transaction managers with transaction synchronization,
 	 * PROPAGATION_SUPPORTS is slightly different from no transaction at all,
-	 * as it defines a transaction scopp that synchronization will apply for.
+	 * as it defines a transaction scope that synchronization will apply for.
 	 * As a consequence, the same resources (JDBC Connection, Hibernate Session, etc)
 	 * will be shared for the entire specified scope. Note that this depends on
 	 * the actual synchronization configuration of the transaction manager.
@@ -71,7 +71,7 @@ public interface TransactionDefinition {
 	/**
 	 * Create a new transaction, suspend the current transaction if one exists.
 	 * Analogous to EJB transaction attribute of the same name.
-	 * <p>Note: Actual transaction suspension will not work on out-of-the-box
+	 * <p>Note: Actual transaction suspension will not work out-of-the-box
 	 * on all transaction managers. This in particular applies to JtaTransactionManager,
 	 * which requires the <code>javax.transaction.TransactionManager</code> to be
 	 * made available it to it (which is server-specific in standard J2EE).
