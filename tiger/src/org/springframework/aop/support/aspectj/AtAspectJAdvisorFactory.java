@@ -19,9 +19,9 @@ package org.springframework.aop.support.aspectj;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.aopalliance.aop.Advice;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.AopConfigException;
-import org.springframework.aop.support.aspectj.ReflectiveAtAspectJAdvisorFactory.AspectInstanceFactory;
 
 /**
  * Interface for factories that can create Spring AOP Advisors from classes
@@ -43,29 +43,22 @@ public interface AtAspectJAdvisorFactory {
 
 	/**
 	 * Create Spring Advisors for all At AspectJ methods on the given aspect instance.
-	 * @param aspectInstance
+	 * @param aif prevents eager instantiation. Should cache.
 	 * @return a list of advisors for this class
 	 */
-	List<Advisor> getAdvisors(
-			final Object aspectInstance);
-
-	/**
-	 * Get a Spring Advisor from the given method given an aspect instance
-	 * @param aspectInstance aspect, already instantiated
-	 * @param candidateAspectJAdviceMethod advice method
-	 * @return a Spring advisor
-	 */
-	Advisor getAdvisor(final Object aspectInstance,
-			Method candidateAspectJAdviceMethod);
-
+	List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory aif);
+	
+	
+	List<Advisor> getAdvisors(Object aspectInstance);
+	
 	/**
 	 * 
 	 * @param aspectClass
-	 * @param candidateAspectJAdviceMethod
 	 * @param aif
 	 * @return null if the method is not an AspectJ advice method
 	 */
-	Advisor getAdvisor(Class<?> aspectClass,
-			Method candidateAspectJAdviceMethod, AspectInstanceFactory aif);
+	Advisor getAdvisor(Method candidateAspectJAdviceMethod, MetadataAwareAspectInstanceFactory aif);
+	
+	Advice getAdvice(Method candidateAspectJAdviceMethod, MetadataAwareAspectInstanceFactory aif);
 
 }

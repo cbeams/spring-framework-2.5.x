@@ -17,17 +17,20 @@
 package org.springframework.aop.support.aspectj;
 
 /**
- * Tests for ReflectiveAtAspectJAdvisorFactory. 
- * Tests are inherited: we only set the test fixture here.
+ * Implementation of AspectInstanceFactory that wraps a singleton instance
  * @author Rod Johnson
  * @since 1.3
  */
-public class ReflectiveAtAspectJAdvisorFactoryTest extends
-		AbstractAtAspectJAdvisorFactoryTests {
-
-	@Override
-	protected AtAspectJAdvisorFactory getFixture() {
-		return new ReflectiveAtAspectJAdvisorFactory();
+public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
+	
+	private final AspectMetadata metadata;
+	
+	public SingletonMetadataAwareAspectInstanceFactory(Object aspectInstance) {
+		super(aspectInstance);
+		this.metadata = new AspectMetadata(aspectInstance.getClass());
 	}
-
+	
+	public AspectMetadata getAspectMetadata() {
+		return this.metadata;
+	}
 }

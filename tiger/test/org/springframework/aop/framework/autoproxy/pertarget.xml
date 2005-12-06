@@ -8,12 +8,17 @@
 		class="org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator" />
 	
 	<bean 
-		class="org.springframework.aop.support.aspectj.AbstractAtAspectJAdvisorFactoryTests$TwoAdviceAspect" 
-		singleton="true" />
+		class="org.springframework.aop.support.aspectj.AbstractAtAspectJAdvisorFactoryTests$PerTargetAspect" 
+		singleton="false" />
 		
 	<bean id="adrian" class="org.springframework.beans.TestBean" singleton="false">
 		<property name="name" value="adrian" />
 		<property name="age" value="34" />
+	</bean>
+	
+	<bean id="juergen" class="org.springframework.beans.TestBean" singleton="false">
+		<property name="name" value="juergen" />
+		<property name="age" value="30" />
 	</bean>
 	
 	

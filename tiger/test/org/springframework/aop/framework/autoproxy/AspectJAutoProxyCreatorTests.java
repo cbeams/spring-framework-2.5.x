@@ -1,12 +1,15 @@
 package org.springframework.aop.framework.autoproxy;
 
+import junit.framework.TestCase;
+
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.aop.support.aspectj.AbstractAtAspectJAdvisorFactoryTest.TwoAdviceAspect;
+import org.springframework.aop.support.aspectj.AspectMetadata;
+import org.springframework.aop.support.aspectj.AbstractAtAspectJAdvisorFactoryTests.PerTargetAspect;
+import org.springframework.aop.support.aspectj.AbstractAtAspectJAdvisorFactoryTests.TwoAdviceAspect;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.TestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import junit.framework.TestCase;
 
 public class AspectJAutoProxyCreatorTests extends TestCase {
 	
@@ -50,7 +53,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
 		assertTrue(AopUtils.isAopProxy(adrian1));
-		Advised advised1 = (Advised) adrian1;
+		
 		assertEquals(0, adrian1.getAge());
 		assertEquals(1, adrian1.getAge());
 		
@@ -62,6 +65,41 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals(2, adrian2.getAge());
 		assertEquals(3, adrian2.getAge());
 		assertEquals(2, adrian1.getAge());
+	}
+	
+	// TODO
+	public void xtestPerTargetAspect() throws SecurityException, NoSuchMethodException {
+		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
+				"/org/springframework/aop/framework/autoproxy/pertarget.xml");
+
+		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
+		assertTrue(AopUtils.isAopProxy(adrian1));
+		
+		// Does not trigger advice or count
+		adrian1.setAge(25);
+		
+		assertEquals("Setter does not initiate advice", 25, adrian1.getAge());
+		// Fire aspect
+		
+		AspectMetadata am = new AspectMetadata(PerTargetAspect.class);
+		assertTrue(am.getPerClausePointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
+		
+		adrian1.getSpouse();
+		
+		assertEquals("Advice has now fired", 0, adrian1.getAge());
+		adrian1.setAge(11);
+		assertEquals(1, adrian1.getAge());
+		
+		ITestBean adrian2 = (ITestBean) bf.getBean("adrian");
+		assertNotSame(adrian1, adrian2);
+		assertTrue(AopUtils.isAopProxy(adrian1));
+		assertEquals(0, adrian2.getAge());
+		assertEquals(1, adrian2.getAge());
+		assertEquals(2, adrian2.getAge());
+		assertEquals(3, adrian2.getAge());
+		assertEquals(2, adrian1.getAge());
+		
+		ITestBean juergen1 = (ITestBean) bf.getBean("juergen");
 	}
 	
 

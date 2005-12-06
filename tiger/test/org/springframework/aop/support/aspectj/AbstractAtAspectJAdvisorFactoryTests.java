@@ -33,7 +33,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
@@ -48,7 +48,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  *
  */
-public abstract class AbstractAtAspectJAdvisorFactoryTest extends TestCase {
+public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 	
 	/**
 	 * To be overridden by concrete test subclasses
@@ -56,14 +56,75 @@ public abstract class AbstractAtAspectJAdvisorFactoryTest extends TestCase {
 	 */
 	protected abstract AtAspectJAdvisorFactory getFixture();
 	
+	@Aspect("percflow(execution(* *(..)))")
+	public static class PerCflowAspect {	
+	}
+	
+	@Aspect("percflowbelow(execution(* *(..)))")
+	public static class PerCflowBelowAspect {	
+	}
+	
+	public void testRejectsPerCflowAspect() {
+		try {
+			getFixture().getAdvisors(new PerCflowAspect());
+			fail("Cannot accept cflow");
+		}
+		catch (AopConfigException ex) {
+			ex.printStackTrace();
+			assertTrue(ex.getMessage().indexOf("PERCFLOW") != -1);
+		}
+	}
+	
+	public void testRejectsPerCflowBelowAspect() {
+		try {
+			getFixture().getAdvisors(new PerCflowBelowAspect());
+			fail("Cannot accept cflowbelow");
+		}
+		catch (AopConfigException ex) {
+			assertTrue(ex.getMessage().indexOf("PERCFLOWBELOW") != -1);
+		}
+	}
+	
+	@Aspect("pertarget(execution(* *.getSpouse()))")
+	public static class PerTargetAspect {
+		public int count;
+		
+		@Around("execution(int *.getAge())")
+		public int returnCountAsAge() {
+			return count++;
+		}
+		
+		@Before("execution(void *.set*(int))")
+		public void countSetter() {
+			++count;
+		}
+	}
+	
+	
+	/**
+	 * Nothing terribly interesting happens here, but we do verify that
+	 * Spring doesn't complain about the per clause
+	 */
+	public void testPerTargetAspect() {
+		TestBean target = new TestBean();
+		int realAge = 65;
+		target.setAge(realAge);
+		TestBean itb = (TestBean) createProxy(target, 
+				getFixture().getAdvisors(new PerTargetAspect()), 
+				TestBean.class);
+		assertEquals("Around advice must apply", 0, itb.getAge());
+		assertEquals("Around advice must apply", 1, itb.getAge());
+	}
+	
+	
 	@Aspect
 	public static class NamedPointcutAspectWithFQN {
 		@Pointcut("execution(* getAge())")
 		public void getAge() {			
 		}
 		
-		@Around("org.springframework.aop.support.aspectj.AbstractAtAspectJAdvisorFactoryTest.NamedPointcutAspectWithFQN.getAge()")
-		public int changeReturnType(ProceedingJoinPoint pjp) {
+		@Around("org.springframework.aop.support.aspectj.AbstractAtAspectJAdvisorFactoryTests.NamedPointcutAspectWithFQN.getAge()")
+		public int changeReturnValue(ProceedingJoinPoint pjp) {
 			return -1;
 		}
 	}
@@ -79,7 +140,7 @@ public abstract class AbstractAtAspectJAdvisorFactoryTest extends TestCase {
 		}
 		
 		@Around("getAge()")
-		public int changeReturnType(ProceedingJoinPoint pjp) {
+		public int changeReturnValue(ProceedingJoinPoint pjp) {
 			return -1;
 		}
 	}
@@ -198,7 +259,6 @@ public abstract class AbstractAtAspectJAdvisorFactoryTest extends TestCase {
 		NotLockable proxy = (NotLockable) createProxy(target,
 				getFixture().getAdvisors(new MakeLockable()),
 				NotLockable.class);
-		System.out.println(((Advised) proxy).toProxyConfigString());
 		assertTrue(proxy instanceof Lockable);
 		Lockable lockable = (Lockable) proxy;
 		assertFalse(lockable.locked());

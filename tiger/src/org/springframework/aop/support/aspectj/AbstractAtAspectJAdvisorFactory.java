@@ -21,6 +21,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -34,6 +35,10 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.AjType;
+import org.aspectj.lang.reflect.AjTypeSystem;
+import org.aspectj.lang.reflect.PerClauseKind;
+import org.springframework.aop.Advisor;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.framework.AopConfigException;
@@ -238,7 +243,6 @@ public abstract class AbstractAtAspectJAdvisorFactory implements AtAspectJAdviso
 		clazz.getAnnotation(Aspect.class) != null;
 	}
 
-	// TODO add ASM check for code in pointcut, visibility rules
 	public void validate(Class<?> aspectClass) throws AopConfigException {
 		// If the parent has the annotation and isn't abstract it's an error
 		if (aspectClass.getSuperclass().getAnnotation(Aspect.class) != null &&
@@ -246,6 +250,53 @@ public abstract class AbstractAtAspectJAdvisorFactory implements AtAspectJAdviso
 			throw new AopConfigException(aspectClass.getName() + " cannot extend concrete aspect " + 
 					aspectClass.getSuperclass().getName());
 		}
+
+		AjType<?> ajType = AjTypeSystem.getAjType(aspectClass);
+		if (!ajType.isAspect()) {
+			throw new IllegalStateException("Cannot validate " + aspectClass.getName() + ": not an aspect");
+		}
+		if (ajType.getPerClause().getKind() == PerClauseKind.PERCFLOW) {
+			throw new AopConfigException(aspectClass.getName() + " uses percflow instantiation model: " +
+					"This is not supported in Spring AOP");
+		}
+		if (ajType.getPerClause().getKind() == PerClauseKind.PERCFLOWBELOW) {
+			throw new AopConfigException(aspectClass.getName() + " uses percflowbelow instantiation model: " +
+					"This is not supported in Spring AOP");
+		}	
+	}
+	
+	public final List<Advisor> getAdvisors(Object aspectInstance) {
+		return getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(aspectInstance));
+	}
+	
+	
+	/**
+	 * Caches once obtained
+	 */
+	protected static class StickyAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
+		private final MetadataAwareAspectInstanceFactory aif;
+		private Object materialized;
+		
+		public StickyAspectInstanceFactory(MetadataAwareAspectInstanceFactory aif) {
+			this.aif = aif;
+		}
+
+		public synchronized Object getAspectInstance() {
+			if (materialized == null) {
+				materialized = aif.getAspectInstance();
+			}
+			return materialized;
+		}
+		
+		public AspectMetadata getAspectMetadata() {
+			return aif.getAspectMetadata();
+		}
+		
+		@Override
+		public String toString() {
+			return "StickyAspectInstanceFactory: delegate=" + aif;
+		}
+		
 	}
 	
 	/**

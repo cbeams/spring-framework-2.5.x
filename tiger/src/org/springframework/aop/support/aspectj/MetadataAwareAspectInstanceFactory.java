@@ -17,17 +17,13 @@
 package org.springframework.aop.support.aspectj;
 
 /**
- * Tests for ReflectiveAtAspectJAdvisorFactory. 
- * Tests are inherited: we only set the test fixture here.
+ * Subinterface of AspectInstanceFactory that returns AspectMetadata.
+ * Ideally, AspectInstanceFactory would include this method, but because
+ * AspectMetadata uses Java 5-only AJType, we need to split out these interfaces.
  * @author Rod Johnson
  * @since 1.3
  */
-public class ReflectiveAtAspectJAdvisorFactoryTest extends
-		AbstractAtAspectJAdvisorFactoryTests {
-
-	@Override
-	protected AtAspectJAdvisorFactory getFixture() {
-		return new ReflectiveAtAspectJAdvisorFactory();
-	}
-
+public interface MetadataAwareAspectInstanceFactory extends AspectInstanceFactory {
+	
+	AspectMetadata getAspectMetadata();
 }
