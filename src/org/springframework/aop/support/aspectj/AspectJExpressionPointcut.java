@@ -72,6 +72,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.REFERENCE);
 		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.THIS);
 		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.TARGET);
+		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.WITHIN);
+		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_ANNOTATION);
+		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_WITHIN);
+		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_ARGS);
 	}
 
 	public AspectJExpressionPointcut() {
@@ -123,6 +127,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 
 
 	public boolean matches(Class targetClass) {
+		checkReadyToMatch();
 		return this.pointcutExpression.couldMatchJoinPointsInType(targetClass);
 	}
 
@@ -131,11 +136,13 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	}
 
 	public boolean matches(Method method, Class targetClass) {
+		checkReadyToMatch();
 		ShadowMatch shadowMatch = getShadowMatch(method);
 		return shadowMatch.maybeMatches();
 	}
 
 	public boolean matches(Method method, Class targetClass, Object[] args) {
+		checkReadyToMatch();
 		ShadowMatch shadowMatch = getShadowMatch(method);
 
 		Object target;
