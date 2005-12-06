@@ -112,7 +112,20 @@ public class JmxUtils {
 		}
 		else if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
 			// attempt to load the PlatformMBeanServer
-			server = ManagementFactory.getPlatformMBeanServer();
+
+			try {
+				Class managementFactoryClass = ClassUtils.forName(MANAGEMENT_FACTORY_CLASS);
+				Method getPlatformMBeanServer = managementFactoryClass.getMethod(GET_PLATFORM_MBEAN_SERVER_METHOD, null);
+				server = (MBeanServer) getPlatformMBeanServer.invoke(null, null);
+			}
+			catch (InvocationTargetException e) {
+				throw new IllegalArgumentException("Error invoking method ["
+						+ GET_PLATFORM_MBEAN_SERVER_METHOD + "] of class ["
+						+ MANAGEMENT_FACTORY_CLASS + "].");
+			}
+			catch(Exception ex) {
+				throw new IllegalStateException("Unable to locate Platform MBeanServer on JDK 1.5+.");
+			}
 		}
 
 		if(server == null) {
