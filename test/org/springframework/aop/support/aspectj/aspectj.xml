@@ -15,10 +15,10 @@
 
 	<bean id="proxyCreator" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
 
-	<bean id="advisor" class="org.springframework.aop.support.aspectj.AspectJExpressionPointcutAdvisor">
+	<bean id="advisor" class="org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor">
 		<property name="expression" value="execution(int org.springframework.beans.ITestBean.getAge())"/>
 		<property name="advice" ref="interceptor"/>
 	</bean>
 
-	<bean id="interceptor" class="org.springframework.aop.support.aspectj.CallCountingInterceptor"/>
+	<bean id="interceptor" class="org.springframework.aop.aspectj.CallCountingInterceptor"/>
 </beans>

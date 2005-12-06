@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.support.aspectj;
+package org.springframework.aop.aspectj;
+
+import org.springframework.aop.aspectj.AtAspectJAdvisorFactory;
+import org.springframework.aop.aspectj.ReflectiveAtAspectJAdvisorFactory;
 
 /**
  * Tests for ReflectiveAtAspectJAdvisorFactory. 

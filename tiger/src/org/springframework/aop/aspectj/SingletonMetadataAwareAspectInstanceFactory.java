@@ -13,24 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-package org.springframework.aop.support.aspectj;
 
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.DeclareParents;
-import org.springframework.aop.framework.DefaultLockable;
-import org.springframework.aop.framework.Lockable;
+package org.springframework.aop.aspectj;
+
+import org.springframework.aop.aspectj.SingletonAspectInstanceFactory;
 
 /**
- * Demonstrates introductions, AspectJ annotation style.
- * 
+ * Implementation of AspectInstanceFactory that wraps a singleton instance
  * @author Rod Johnson
  * @since 1.3
  */
-@Aspect
-public class MakeLockable {
+public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
 	
-	@DeclareParents("org.springframework.aop.support.aspectj.*")
-	public static Lockable mixin = new DefaultLockable();
-
+	private final AspectMetadata metadata;
+	
+	public SingletonMetadataAwareAspectInstanceFactory(Object aspectInstance) {
+		super(aspectInstance);
+		this.metadata = new AspectMetadata(aspectInstance.getClass());
+	}
+	
+	public AspectMetadata getAspectMetadata() {
+		return this.metadata;
+	}
 }

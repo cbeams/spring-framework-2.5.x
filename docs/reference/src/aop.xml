@@ -367,7 +367,7 @@
       <title>AspectJ expression pointcuts</title>
 
       <para>Since 1.3, the most important type of pointcut used by Spring is
-      <literal>org.springframework.aop.support.aspectj.AspectJExpressionPointcut</literal>.
+      <literal>org.springframework.aop.aspectj.AspectJExpressionPointcut</literal>.
       This is a pointcut that uses the AspectJ weaver to parse an AspectJ
       pointcut expression string. </para>
 

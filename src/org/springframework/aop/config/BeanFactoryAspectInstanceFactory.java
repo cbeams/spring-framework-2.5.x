@@ -16,7 +16,7 @@
 
 package org.springframework.aop.config;
 
-import org.springframework.aop.support.aspectj.AspectInstanceFactory;
+import org.springframework.aop.aspectj.AspectInstanceFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.InitializingBean;

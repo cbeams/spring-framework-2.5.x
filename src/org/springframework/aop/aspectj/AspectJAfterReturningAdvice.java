@@ -13,31 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.aop.support.aspectj;
+package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
 
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.weaver.tools.PointcutExpression;
+import org.springframework.aop.AfterReturningAdvice;
 
-/**
- * Spring AOP advice wrapping an AspectJ after advice method
- * @author Rod Johnson
- * @since 1.3
- */
-public class AspectJAfterAdvice extends AbstractAspectJAdvice implements MethodInterceptor {
-	
-	public AspectJAfterAdvice(Method aspectJBeforeAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif) {
+public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implements AfterReturningAdvice {
+
+	public AspectJAfterReturningAdvice(Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
+		super(aspectJBeforeAdviceMethod, pointcut.getPointcutExpression(), aif);
+	}
+
+	public AspectJAfterReturningAdvice(Method aspectJBeforeAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif) {
 		super(aspectJBeforeAdviceMethod, pe, aif);
 	}
 	
-	public Object invoke(MethodInvocation mi) throws Throwable {
-		try {
-			return mi.proceed();
-		}
-		finally {
-			invokeAdviceMethod(mi.getArguments());
-		}
+	public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
+		invokeAdviceMethod(args);
 	}
 }

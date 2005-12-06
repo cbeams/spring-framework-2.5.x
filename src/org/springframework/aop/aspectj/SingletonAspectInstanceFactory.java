@@ -14,31 +14,31 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.support.aspectj;
-
-import org.springframework.aop.framework.Lockable;
+package org.springframework.aop.aspectj;
 
 /**
- * 
- * 
+ * Simple implementation of AspectInstanceFactory backed
+ * by a singleton.
  * @author Rod Johnson
- *
+ * @since 1.3
  */
-public class CannotBeUnlocked implements Lockable, Comparable {
-
-	public void lock() {
+public class SingletonAspectInstanceFactory implements AspectInstanceFactory {
+	
+	private final Object aspectInstance;
+	
+	public SingletonAspectInstanceFactory(Object aspectInstance) {
+		if (aspectInstance == null) {
+			throw new IllegalStateException("AspectInstance may not be null");
+		}
+		this.aspectInstance = aspectInstance;
+	}
+	
+	public final Object getAspectInstance() {
+		return aspectInstance;
 	}
 
-	public void unlock() {
-		throw new UnsupportedOperationException();
+	public final int getInstantiationCount() {
+		return 1;
 	}
-
-	public boolean locked() {
-		return true;
-	}
-
-	public int compareTo(Object arg0) {
-		throw new UnsupportedOperationException();
-	}
-
+	
 }

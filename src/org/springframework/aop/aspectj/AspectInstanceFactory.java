@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.support.aspectj;
+package org.springframework.aop.aspectj;
+
 
 /**
- * Subinterface of AspectInstanceFactory that returns AspectMetadata.
- * Ideally, AspectInstanceFactory would include this method, but because
- * AspectMetadata uses Java 5-only AJType, we need to split out these interfaces.
+ * Interface implemented to provide instance of the AspectJ aspect on which the
+ * aspect method exists. Decouples from Spring IoC container.
  * @author Rod Johnson
  * @since 1.3
  */
-public interface MetadataAwareAspectInstanceFactory extends AspectInstanceFactory {
+public interface AspectInstanceFactory {
 	
-	AspectMetadata getAspectMetadata();
+	Object getAspectInstance();
+	
+	/**
+	 * Return the number of instantiations from this factory
+	 * @return the number of aspect instances created
+	 */
+	int getInstantiationCount();
+	
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.support.aspectj;
+package org.springframework.aop.aspectj;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -27,6 +27,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.beans.TestBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.JdbcTemplateHelper;
@@ -207,7 +208,7 @@ public class TigerAspectJExpressionPointcutTests extends TestCase {
 
 	
 	public void testAnnotationOnMethodArgumentsWithFQN() throws SecurityException, NoSuchMethodException {
-		String expression = "@args(*, org.springframework.aop.support.aspectj.TigerAspectJExpressionPointcutTests.EmptySpringAnnotation))";
+		String expression = "@args(*, org.springframework.aop.aspectj.TigerAspectJExpressionPointcutTests.EmptySpringAnnotation))";
 		AspectJExpressionPointcut takesSpringAnnotatedArgument2 = new AspectJExpressionPointcut();
 		takesSpringAnnotatedArgument2.setExpression(expression);
 		

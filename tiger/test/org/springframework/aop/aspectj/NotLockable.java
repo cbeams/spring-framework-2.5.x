@@ -1,4 +1,4 @@
-package org.springframework.aop.support.aspectj;
+package org.springframework.aop.aspectj;
 
 public class NotLockable {
 	

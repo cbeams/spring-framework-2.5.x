@@ -8,7 +8,7 @@
 		class="org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator" />
 	
 	<bean 
-		class="org.springframework.aop.support.aspectj.AbstractAtAspectJAdvisorFactoryTests$TwoAdviceAspect" 
+		class="org.springframework.aop.aspectj.AbstractAtAspectJAdvisorFactoryTests$TwoAdviceAspect" 
 		singleton="false" />
 		
 	<bean id="adrian" class="org.springframework.beans.TestBean" singleton="false">

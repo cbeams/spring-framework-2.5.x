@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.support.aspectj;
+package org.springframework.aop.aspectj;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -39,6 +39,7 @@ import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
+import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.core.ParameterNameDiscoverer;

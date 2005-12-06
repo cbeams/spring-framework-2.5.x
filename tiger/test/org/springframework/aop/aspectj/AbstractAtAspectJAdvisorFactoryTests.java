@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.support.aspectj;
+package org.springframework.aop.aspectj;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.RemoteException;
@@ -33,13 +33,17 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.aspectj.AtAspectJAdvisorFactory;
+import org.springframework.aop.aspectj.InstantiationModelAwarePointcutAdvisor;
+import org.springframework.aop.aspectj.MetadataAwareAspectInstanceFactory;
+import org.springframework.aop.aspectj.SingletonMetadataAwareAspectInstanceFactory;
+import org.springframework.aop.aspectj.ReflectiveAtAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.aop.support.aspectj.ReflectiveAtAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
@@ -199,7 +203,7 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 		public void getAge() {			
 		}
 		
-		@Around("org.springframework.aop.support.aspectj.AbstractAtAspectJAdvisorFactoryTests.NamedPointcutAspectWithFQN.getAge()")
+		@Around("org.springframework.aop.aspectj.AbstractAtAspectJAdvisorFactoryTests.NamedPointcutAspectWithFQN.getAge()")
 		public int changeReturnValue(ProceedingJoinPoint pjp) {
 			return -1;
 		}
@@ -343,7 +347,9 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 	}
 	
 	public void testIntroductionAdvisorExcludedFromTargetImplementingInterface() {
-		assertTrue(AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable())), CannotBeUnlocked.class).isEmpty());
+		assertTrue(AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(
+				new SingletonMetadataAwareAspectInstanceFactory(
+						new MakeLockable())), CannotBeUnlocked.class).isEmpty());
 		assertEquals(1, AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable())), NotLockable.class).size());
 	}
 	

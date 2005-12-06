@@ -16,8 +16,8 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import org.springframework.aop.support.aspectj.AspectMetadata;
-import org.springframework.aop.support.aspectj.MetadataAwareAspectInstanceFactory;
+import org.springframework.aop.aspectj.AspectMetadata;
+import org.springframework.aop.aspectj.MetadataAwareAspectInstanceFactory;
 import org.springframework.beans.factory.BeanFactory;
 
 /**

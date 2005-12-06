@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.support.aspectj;
+package org.springframework.aop.aspectj;
 
 import org.aopalliance.aop.AspectException;
 import org.aspectj.weaver.tools.JoinPointMatch;

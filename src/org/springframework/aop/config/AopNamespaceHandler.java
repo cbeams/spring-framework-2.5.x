@@ -16,12 +16,12 @@
 
 package org.springframework.aop.config;
 
+import org.springframework.aop.aspectj.AspectJAfterReturningAdvice;
+import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
+import org.springframework.aop.aspectj.AspectJAroundAdvice;
+import org.springframework.aop.aspectj.AspectJExpressionPointcut;
+import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.aop.support.aspectj.AspectJAfterReturningAdvice;
-import org.springframework.aop.support.aspectj.AspectJAfterThrowingAdvice;
-import org.springframework.aop.support.aspectj.AspectJAroundAdvice;
-import org.springframework.aop.support.aspectj.AspectJExpressionPointcut;
-import org.springframework.aop.support.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;

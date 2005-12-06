@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.support.aspectj;
+package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -31,6 +31,12 @@ import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.PointcutAdvisor;
+import org.springframework.aop.aspectj.AspectJAfterAdvice;
+import org.springframework.aop.aspectj.AspectJAfterReturningAdvice;
+import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
+import org.springframework.aop.aspectj.AspectJAroundAdvice;
+import org.springframework.aop.aspectj.AspectJExpressionPointcut;
+import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.ClassFilters;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
