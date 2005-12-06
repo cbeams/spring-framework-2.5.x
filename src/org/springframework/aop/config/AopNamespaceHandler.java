@@ -16,7 +16,6 @@
 
 package org.springframework.aop.config;
 
-import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.aspectj.AspectJExpressionPointcut;
 import org.springframework.beans.MutablePropertyValues;
@@ -29,12 +28,9 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.support.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.support.NamespaceHandlerSupport;
 import org.springframework.util.StringUtils;
-import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import java.util.List;
 
 /**
  * @author Rob Harrop
@@ -42,52 +38,98 @@ import java.util.List;
 public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 	public AopNamespaceHandler() {
-		registerBeanDefinitionParser("aspects", new AspectsBeanDefinitionParser());
+		registerBeanDefinitionParser("config", new ConfigBeanDefinitionParser());
 	}
 
-	private static class AspectsBeanDefinitionParser implements BeanDefinitionParser {
+	private static class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
-		public static final String AUTO_PROXY_CREATOR_BEAN_NAME = ".defaultAdvisorAutoProxyCreator";
+		private static final String ASPECT = "aspect";
 
-		public static final String ASPECT = "aspect";
-		public static final String EXPRESSION = "expression";
-		public static final String TYPE = "type";
-		public static final String ID = "id";
-		public static final String POINTCUT = "pointcut";
-		public static final String REF = "ref";
-		public static final String ADVICE = "advice";
+		private static final String EXPRESSION = "expression";
+
+		private static final String ID = "id";
+
+		private static final String POINTCUT = "pointcut";
+
+		private static final String ADVICE = "advice";
+
+		private static final String ADVISOR = "advisor";
+
+		private static final String ADVICE_REF = "advice-ref";
+
+		private static final String POINTCUT_REF = "pointcut-ref";
 
 		public void parse(Element element, BeanDefinitionRegistry registry) {
 			NodeList childNodes = element.getChildNodes();
 
-			registerAutoProxyCreator(registry);
+			NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
 
 			for (int i = 0; i < childNodes.getLength(); i++) {
 				Node node = childNodes.item(i);
-				if (node.getNodeType() == Node.ELEMENT_NODE && ASPECT.equals(node.getLocalName())) {
-					parseAspect((Element) node, registry);
+				if (node.getNodeType() == Node.ELEMENT_NODE) {
+					String localName = node.getLocalName();
+					if (POINTCUT.equals(localName)) {
+						parsePointcut((Element) node, registry);
+					}
+					else if (ADVISOR.equals(localName)) {
+						parseAdvisor((Element) node, registry);
+					}
+					else if (ASPECT.equals(localName)) {
+						parseAspect((Element) node, registry);
+					}
 				}
 			}
 		}
 
-		private void registerAutoProxyCreator(BeanDefinitionRegistry registry) {
-			// TODO: factory into reusable method
-			String[] beanDefinitionNames = registry.getBeanDefinitionNames();
-			for (int i = 0; i < beanDefinitionNames.length; i++) {
-				String beanDefinitionName = beanDefinitionNames[i];
-				AbstractBeanDefinition def = (AbstractBeanDefinition) registry.getBeanDefinition(beanDefinitionName);
+		/**
+		 * Parses the supplied <code>&lt;pointcut&gt;</code> and registers the resulting
+		 * {@link org.springframework.aop.Pointcut} with the {@link BeanDefinitionRegistry}.
+		 */
+		private void parsePointcut(Element pointcutElement, BeanDefinitionRegistry registry) {
+			BeanDefinition pointcutDefinition = createPointcutDefinition(pointcutElement.getAttribute(EXPRESSION));
+			String id = pointcutElement.getAttribute(ID);
 
-				if(DefaultAdvisorAutoProxyCreator.class.equals(def.getBeanClass())) {
-					// already registered
-					return;
-				}
+			if (!StringUtils.hasText(id)) {
+				id = BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) pointcutDefinition, registry, false);
 			}
-			RootBeanDefinition definition = new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class);
-			registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, definition);
+
+			registry.registerBeanDefinition(id, pointcutDefinition);
+		}
+
+
+		private void parseAdvisor(Element element, BeanDefinitionRegistry registry) {
+			RootBeanDefinition beanDefinition = new RootBeanDefinition(DefaultPointcutAdvisor.class);
+
+			MutablePropertyValues mpvs = new MutablePropertyValues();
+			beanDefinition.setPropertyValues(mpvs);
+
+			mpvs.addPropertyValue(ADVICE, new RuntimeBeanReference(element.getAttribute(ADVICE_REF)));
+
+			if (element.hasAttribute(POINTCUT) && element.hasAttribute(POINTCUT_REF)) {
+				throw new IllegalStateException("Cannot define both 'pointcut' and 'pointcut-ref' on 'advisor' tag.");
+			}
+			else if (element.hasAttribute(POINTCUT)) {
+				BeanDefinition pointcutDefinition = createPointcutDefinition(element.getAttribute(POINTCUT));
+				mpvs.addPropertyValue(POINTCUT, pointcutDefinition);
+			}
+			else if (element.hasAttribute(POINTCUT_REF)) {
+				mpvs.addPropertyValue(POINTCUT, new RuntimeBeanReference(element.getAttribute(POINTCUT_REF)));
+			}
+			else {
+				throw new IllegalStateException("Must define one of 'pointcut' or 'pointcut-ref' on 'advisor'.");
+			}
+
+			String id = element.getAttribute(ID);
+
+			if(!StringUtils.hasText(id)) {
+				id = BeanDefinitionReaderUtils.generateBeanName(beanDefinition, registry, false);
+			}
+
+			registry.registerBeanDefinition(id, beanDefinition);
 		}
 
 		private void parseAspect(Element aspectElement, BeanDefinitionRegistry registry) {
-			String aspectName = aspectElement.getAttribute(ID);
+			/*String aspectName = aspectElement.getAttribute(ID);
 
 			String pointcutBeanName = registerPointcutDefinition(aspectElement, registry);
 
@@ -112,61 +154,15 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 				String beanName = aspectName + "." + adviceRef;
 				registry.registerBeanDefinition(beanName, advisorDefinition);
-			}
+			}*/
 		}
 
-		/**
-		 * Parses a <code>&lt;pointcut&gt;</code> element, if one exists, and registers the
-		 * corresponding {@link org.springframework.aop.Pointcut} in the {@link BeanDefinitionRegistry}.
-		 * The schema constrains the element count for <code>&lt;pointcut&gt;</code> to either 0 or 1.
-		 * Returns the bean name of {@link org.springframework.aop.Pointcut} bean definition or
-		 * <code>null</code> if no <code>&lt;pointcut&gt;</code> element was found.
-		 */
-		private String registerPointcutDefinition(Element aspectElement, BeanDefinitionRegistry registry) {
-			List pointcutElements = DomUtils.getChildElementsByTagName(aspectElement, POINTCUT, true);
-
-			if (pointcutElements.size() > 1) {
-				throw new IllegalStateException("Multiple 'pointcut' elements not allowed inside 'aspect'.");
-			}
-			else if (pointcutElements.size() == 1) {
-				// pointcut defined
-				Element pointcutElement = (Element) pointcutElements.get(0);
-
-				BeanDefinition pointcutDefinition = createPointcutDefinition(pointcutElement);
-				String id = pointcutElement.getAttribute(ID);
-
-				if (!StringUtils.hasText(id)) {
-					id = BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) pointcutDefinition, registry, false);
-				}
-
-				registry.registerBeanDefinition(id, pointcutDefinition);
-
-				return id;
-			}
-
-			return null;
-		}
-
-		protected BeanDefinition createPointcutDefinition(Element element) {
+		protected BeanDefinition createPointcutDefinition(String expression) {
 			RootBeanDefinition beanDefinition = new RootBeanDefinition();
-
-			String type = element.getAttribute(TYPE);
-
-			if ("aspectj".equals(type)) {
-				beanDefinition.setBeanClass(AspectJExpressionPointcut.class);
-				beanDefinition.setPropertyValues(new MutablePropertyValues());
-				beanDefinition.getPropertyValues().addPropertyValue(EXPRESSION, element.getAttribute(EXPRESSION));
-			}
-			else {
-				throw new IllegalArgumentException("Pointcut type [" + type + "] is unrecognised.");
-			}
-
+			beanDefinition.setBeanClass(AspectJExpressionPointcut.class);
+			beanDefinition.setPropertyValues(new MutablePropertyValues());
+			beanDefinition.getPropertyValues().addPropertyValue(EXPRESSION, expression);
 			return beanDefinition;
-		}
-
-		private void parseAdvice(Element adviceElement, MutablePropertyValues mpvs) {
-			String adviceRef = adviceElement.getAttribute(REF);
-			mpvs.addPropertyValue(ADVICE, new RuntimeBeanReference(adviceRef));
 		}
 
 	}

@@ -6,10 +6,12 @@
 			elementFormDefault="qualified"
 			attributeFormDefault="unqualified">
 
-	<xsd:element name="aspects">
+	<xsd:element name="config">
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element name="aspect" type="aspectType" minOccurs="1" maxOccurs="unbounded"/>
+				<xsd:element name="pointcut" type="pointcutType"  minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="advisor" type="advisorType"  minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="aspect" type="aspectType"  minOccurs="0" maxOccurs="unbounded"/>
 			</xsd:sequence>
 		</xsd:complexType>
 	</xsd:element>
@@ -20,9 +22,11 @@
 			<xsd:element name="advice" type="adviceType" minOccurs="1" maxOccurs="unbounded"/>
 		</xsd:sequence>
 		<xsd:attribute name="id" type="xsd:ID"/>
+		<xsd:attribute name="bean" type="xsd:string"/>
 	</xsd:complexType>
 
 	<xsd:complexType name="pointcutType">
+		<xsd:attribute name="id" type="xsd:ID"/>
 		<xsd:attribute name="expression" use="required" type="xsd:string"/>
 		<xsd:attribute name="type" default="aspectj">
 			<xsd:simpleType>
@@ -35,7 +39,25 @@
 	</xsd:complexType>
 	
 	<xsd:complexType name="adviceType">
-		<xsd:attribute name="ref" type="xsd:string" use="required"/>
+		<xsd:attribute name="pointcut" type="xsd:string"/>
+		<xsd:attribute name="method" type="xsd:string" use="required"/>
+		<xsd:attribute name="kind" use="required">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="before"/>
+					<xsd:enumeration value="after"/>
+					<xsd:enumeration value="atound"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<!-- TODO: need to constrain this -->
+	<xsd:complexType name="advisorType">
+		<xsd:attribute name="id" type="xsd:string"/>
+		<xsd:attribute name="advice-ref" type="xsd:string" use="required"/>
+		<xsd:attribute name="pointcut" type="xsd:string"/>
+		<xsd:attribute name="pointcut-ref" type="xsd:string"/>
 	</xsd:complexType>
 
 </xsd:schema>

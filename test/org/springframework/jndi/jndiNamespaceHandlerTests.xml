@@ -5,6 +5,7 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/jndi http://www.springframework.org/schema/jndi/spring-jndi.xsd">
 
+	
 	<jndi:lookup id="simple" jndiName="jdbc/MyDataSource"/>
 
 	<jndi:lookup id="complex"

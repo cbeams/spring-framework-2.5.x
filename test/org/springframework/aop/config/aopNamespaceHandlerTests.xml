@@ -5,16 +5,14 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-	<aop:aspects>
-		<aop:aspect id="countNameCalls">
-			<aop:pointcut expression="execution(* *..ITestBean.getName(..))"/>
-			<aop:advice ref="getNameCounter"/>
-		</aop:aspect>
-		<aop:aspect id="countAgeCalls">
-			<aop:pointcut expression="execution(* *..ITestBean.getAge(..))"/>
-			<aop:advice ref="getAgeCounter"/>
-		</aop:aspect>
-	</aop:aspects>
+	<aop:config>
+		<aop:pointcut id="getNameCalls" expression="execution(* *..ITestBean.getName(..))"/>
+		<aop:advisor id="getAgeAdvisor" pointcut="execution(* *..ITestBean.getAge(..))" advice-ref="getAgeCounter"/>
+		<aop:advisor id="getNameAdvisor" pointcut-ref="getNameCalls" advice-ref="getNameCounter"/>
+		<!--<aop:aspect id="countAgeCalls" bean="myAspect">
+			<aop:advice pointcut="execution(* *..ITestBean.getAge(..))" method="doLogging" kind="before"/>
+		</aop:aspect>-->
+	</aop:config>
 
 	<bean id="getNameCounter" class="org.springframework.aop.framework.CountingBeforeAdvice"/>
 	<bean id="getAgeCounter" class="org.springframework.aop.framework.CountingBeforeAdvice"/>

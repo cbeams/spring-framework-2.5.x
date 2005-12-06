@@ -56,7 +56,6 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 		return (TransactionalTestBean)context.getBean("testBean");
 	}
 
-	@Transactional
 	public static class TransactionalTestBean {
 
 		@Transactional(readOnly = true)

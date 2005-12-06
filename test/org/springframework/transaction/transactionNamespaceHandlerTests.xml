@@ -8,12 +8,10 @@
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/transaction/spring-tx.xsd">
 
 
-	<aop:aspects>
-		<aop:aspect id="transactions">
-			<aop:pointcut expression="execution(* *..ITestBean.*(..))"/>
-			<aop:advice ref="txAdvice"/>
-		</aop:aspect>
-	</aop:aspects>
+	<aop:config>
+		<aop:advisor pointcut="execution(* *..ITestBean.*(..))"
+					 advice-ref="txAdvice"/>
+	</aop:config>
 
 	<tx:advice id="txAdvice">
 		<tx:attributes>

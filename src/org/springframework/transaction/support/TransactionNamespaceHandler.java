@@ -18,17 +18,17 @@ package org.springframework.transaction.support;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.support.AbstractSingleBeanDefinitionParser;
-import org.springframework.beans.factory.xml.support.BeanDefinitionDecorator;
+import org.springframework.beans.factory.xml.support.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.support.NamespaceHandlerSupport;
-import org.springframework.transaction.interceptor.NameMatchTransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
+import org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.xml.DomUtils;
+import org.springframework.aop.config.NamespaceHandlerUtils;
 import org.w3c.dom.Element;
 
 import java.util.List;
@@ -38,19 +38,58 @@ import java.util.List;
  */
 public class TransactionNamespaceHandler extends NamespaceHandlerSupport {
 
+	private static final String TRANSACTION_MANAGER = "transactionManager";
+
+	private static final String ANNOTATION_SOURCE_CLASS_NAME = "org.springframework.transaction.annotation.AnnotationTransactionAttributeSource";
+
 	public TransactionNamespaceHandler() {
 		registerBeanDefinitionParser("advice", new TxAdviceBeanDefinitionParser());
+		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenBeanDefinitionParser());
+	}
+
+	private static Class getAnnotationSourceClass() {
+		try {
+			return ClassUtils.forName(ANNOTATION_SOURCE_CLASS_NAME);
+		}
+		catch (ClassNotFoundException e) {
+			throw new IllegalStateException("Unable to locate AnnotationTransactionAttributeSource. Are you running on Java 1.5?");
+		}
+	}
+
+	private static class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
+
+		private static final String TRANSACTION_ATTRIBUTE_SOURCE = "transactionAttributeSource";
+
+		private static final String TRANSACTION_ATTRIBUTE_SOURCE_ADVISOR_NAME = ".transactionAttributeSourceAdvisor";
+
+		public static final String TRANSACTION_INTERCEPTOR = "transactionInterceptor";
+
+		public void parse(Element element, BeanDefinitionRegistry registry) {
+			// register the APC if needed
+			NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
+
+			String transactionManagerName = element.getAttribute(TRANSACTION_MANAGER);
+
+			// create the TransactionInterceptor definition
+			RootBeanDefinition interceptorDefinition = new RootBeanDefinition(TransactionInterceptor.class);
+			interceptorDefinition.setPropertyValues(new MutablePropertyValues());
+			interceptorDefinition.getPropertyValues().addPropertyValue(TRANSACTION_MANAGER, new RuntimeBeanReference(transactionManagerName));
+			interceptorDefinition.getPropertyValues().addPropertyValue(TRANSACTION_ATTRIBUTE_SOURCE, new RootBeanDefinition(getAnnotationSourceClass()));
+
+			// create the TransactionAttributeSourceAdvisor definition
+			RootBeanDefinition advisorDefinition = new RootBeanDefinition(TransactionAttributeSourceAdvisor.class);
+			advisorDefinition.setPropertyValues(new MutablePropertyValues());
+			advisorDefinition.getPropertyValues().addPropertyValue(TRANSACTION_INTERCEPTOR, interceptorDefinition);
+
+			registry.registerBeanDefinition(TRANSACTION_ATTRIBUTE_SOURCE_ADVISOR_NAME, advisorDefinition);
+		}
 	}
 
 	private static class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-		private static final String ANNOTATION_SOURCE_CLASS_NAME = "org.springframework.transaction.annotation.AnnotationTransactionAttributeSource";
+		private static final String TRANSACTION_ATTRIBUTES = "transactionAttributes";
 
-		public static final String TRANSACTION_ATTRIBUTES = "transactionAttributes";
-
-		public static final String TRANSACTION_MANAGER = "transactionManager";
-
-		public static final String ATTRIBUTES = "attributes";
+		private static final String ATTRIBUTES = "attributes";
 
 		protected BeanDefinition doParse(Element element) {
 			RootBeanDefinition definition = new RootBeanDefinition(TransactionInterceptor.class);
@@ -74,14 +113,7 @@ public class TransactionNamespaceHandler extends NamespaceHandlerSupport {
 			else {
 				// assume annotations source
 				// TODO: fix this to use direct class reference when building all on 1.5
-				// TODO: do we bother supporting Commons Attributes?
-				Class beanClass = null;
-				try {
-					beanClass = ClassUtils.forName(ANNOTATION_SOURCE_CLASS_NAME);
-				}
-				catch (ClassNotFoundException e) {
-					throw new IllegalStateException("Unable to locate AnnotationTransactionAttributeSource. Are you running on Java 1.5?");
-				}
+				Class beanClass = getAnnotationSourceClass();
 
 				mpvs.addPropertyValue("transactionAttributeSource", new RootBeanDefinition(beanClass));
 			}
