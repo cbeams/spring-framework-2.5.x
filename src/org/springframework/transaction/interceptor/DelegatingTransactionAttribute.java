@@ -29,12 +29,15 @@ public abstract class DelegatingTransactionAttribute implements TransactionAttri
 
 	private final TransactionAttribute targetAttribute;
 
+
 	/**
 	 * Create a DelegatingTransactionAttribute for the given target attribute.
+	 * @param targetAttribute the target TransactionAttribute to delegate to
 	 */
 	public DelegatingTransactionAttribute(TransactionAttribute targetAttribute) {
 		this.targetAttribute = targetAttribute;
 	}
+
 
 	public int getPropagationBehavior() {
 		return this.targetAttribute.getPropagationBehavior();
@@ -59,6 +62,7 @@ public abstract class DelegatingTransactionAttribute implements TransactionAttri
 	public boolean rollbackOn(Throwable ex) {
 		return this.targetAttribute.rollbackOn(ex);
 	}
+
 
 	public boolean equals(Object obj) {
 		return this.targetAttribute.equals(obj);
