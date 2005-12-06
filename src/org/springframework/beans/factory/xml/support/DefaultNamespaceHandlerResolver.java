@@ -147,8 +147,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
     }
 
     /**
-     * Locates the {@link NamespaceHandler} for the supplied namespace URI
-     * from the configured mappings.
+     * Locates the {@link NamespaceHandler} for the supplied namespace URI from the configured mappings.
      */
     public NamespaceHandler resolve(String namespaceUri) {
         NamespaceHandler namespaceHandler = (NamespaceHandler) this.handlerMappings.get(namespaceUri);

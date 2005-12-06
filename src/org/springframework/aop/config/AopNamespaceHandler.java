@@ -30,12 +30,11 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.xml.support.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.support.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.support.NamespaceHandlerSupport;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
-import org.springframework.util.StringUtils;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -85,9 +84,30 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionParser("spring-configured", new SpringConfiguredBeanDefinitionParser());
 	}
 
-	private static class SpringConfiguredBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+	private static class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 
 		private static final String BEAN_CONFIGURER = "org.springframework.beans.aspectj.config.BeanConfigurer";
+
+		private boolean registered;
+
+		public void parse(Element element, BeanDefinitionRegistry registry) {
+			if (this.registered) {
+				return;
+			}
+
+			try {
+				Class beanConfigurerClass = ClassUtils.forName(BEAN_CONFIGURER);
+				RootBeanDefinition definition = new RootBeanDefinition(beanConfigurerClass);
+				definition.setFactoryMethodName("aspectOf");
+
+				String id = BeanDefinitionReaderUtils.generateBeanName(definition, registry, false);
+				registry.registerBeanDefinition(id, definition);
+				this.registered = true;
+			}
+			catch (ClassNotFoundException e) {
+				throw new IllegalStateException("Unable to locate class [" + BEAN_CONFIGURER + "]. Cannot use @SpringConfigured.");
+			}
+		}
 
 		protected BeanDefinition doParse(Element element) {
 			try {
