@@ -27,6 +27,10 @@ import org.springframework.aop.framework.AopConfigException;
 /**
  * Metadata for an AspectJ aspect class, with an
  * additional Spring AOP pointcut for the per clause.
+ * Uses AspectJ 5 AJType reflection API, so is only supported on
+ * Java 5. Enables us to work with different AspectJ instantiation
+ * models such as singleton, pertarget and perthis.
+ * @see org.springframework.aop.aspectj.AspectJExpressionPointcut
  * @author Rod Johnson
  * @since 2.0
  */
@@ -34,10 +38,19 @@ public class AspectMetadata {
 	
 	private final AjType ajType;
 	
+	/**
+	 * Spring AOP pointcut corresponding to the per clause of the
+	 * aspect. Will be the Pointcut.TRUE canonical instance in the
+	 * case of a singleton, otherwise an AspectJExpressionPointcut.
+	 */
 	private final Pointcut perClausePointcut;
 	
 	public AspectMetadata(Class<?> aspectClass) {
 		this.ajType = AjTypeSystem.getAjType(aspectClass);
+		
+		if (!ajType.isAspect()) {
+			throw new IllegalArgumentException(aspectClass + " is not an @AspectJ aspect");
+		}
 		
 		switch (ajType.getPerClause().getKind()) {
 			case SINGLETON :
@@ -47,8 +60,6 @@ public class AspectMetadata {
 			case PERTARGET : case PERTHIS :
 				AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 				ajexp.setLocation("@Aspect annotation on " + aspectClass.getName());
-				
-				// TODO fragile, can't we use ajt to get it from PerClause
 				ajexp.setExpression(findPerClause(aspectClass));
 				this.perClausePointcut = ajexp;
 				return;
@@ -78,9 +89,12 @@ public class AspectMetadata {
 		return s;
 	}
 	
+	/**
+	 * Return AspectJ reflection information
+	 * @return information from AspectJ about the aspect
+	 */
 	public AjType getAjType() {
 		return this.ajType;
-		
 	}
 	
 	public Class<?> getAspectClass() {
