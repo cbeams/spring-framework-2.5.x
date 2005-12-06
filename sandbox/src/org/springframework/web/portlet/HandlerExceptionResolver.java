@@ -30,7 +30,7 @@ import javax.portlet.RenderResponse;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  */
 public interface HandlerExceptionResolver {
 

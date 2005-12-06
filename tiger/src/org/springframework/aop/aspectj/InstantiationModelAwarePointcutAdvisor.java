@@ -30,7 +30,7 @@ import org.springframework.aop.support.Pointcuts;
  * Internal implementation of AspectJPointcutAdvisor
  * Note that there will be one instance of this advisor for each target.
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 class InstantiationModelAwarePointcutAdvisor implements PointcutAdvisor {
 

@@ -34,7 +34,7 @@ import org.springframework.web.portlet.util.PortletUtils;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.web.portlet.util.PortletUtils#getParametersStartingWith
  */
 public class PortletRequestParameterPropertyValues extends MutablePropertyValues {

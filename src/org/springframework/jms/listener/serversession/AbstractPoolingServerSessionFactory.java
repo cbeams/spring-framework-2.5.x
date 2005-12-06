@@ -39,7 +39,7 @@ import org.springframework.scheduling.timer.TimerTaskExecutor;
  * (after removing an instance from the pool).
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.jms.listener.serversession.CommonsPoolServerSessionFactory
  */
 public abstract class AbstractPoolingServerSessionFactory implements ServerSessionFactory {

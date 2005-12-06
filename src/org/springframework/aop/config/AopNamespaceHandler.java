@@ -70,7 +70,7 @@ import java.util.List;
  *
  * @author Rob Harrop
  * @see ConfigBeanDefinitionParser
- * @since 1.3
+ * @since 2.0
  */
 public class AopNamespaceHandler extends NamespaceHandlerSupport {
 

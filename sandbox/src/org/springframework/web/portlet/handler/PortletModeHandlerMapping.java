@@ -46,7 +46,7 @@ import org.springframework.context.ApplicationContextException;
  *
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  */
 public class PortletModeHandlerMapping extends AbstractHandlerMapping {
 

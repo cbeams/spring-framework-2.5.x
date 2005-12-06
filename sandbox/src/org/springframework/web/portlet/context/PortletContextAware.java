@@ -25,7 +25,7 @@ import javax.portlet.PortletContext;
  *
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
- * @since 1.3
+ * @since 2.0
  * @see PortletConfigAware
  */
 public interface PortletContextAware {

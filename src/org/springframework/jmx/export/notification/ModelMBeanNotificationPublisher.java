@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  * and send {@link Notification Notifications} to those listeners.
  *
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  * @see ModelMBean
  * @see NotificationPublisherAware
  */

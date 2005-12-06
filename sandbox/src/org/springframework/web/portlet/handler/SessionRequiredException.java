@@ -22,7 +22,7 @@ import javax.portlet.PortletException;
  * Exception thrown when a web content generator requires a pre-existing session.
  *
  * @author John Lewis
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.web.portlet.handler.PortletContentGenerator
  */
 public class SessionRequiredException extends PortletException {

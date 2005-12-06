@@ -131,7 +131,7 @@ import org.springframework.web.portlet.handler.SessionRequiredException;
  * @author Juergen Hoeller
  * @author Rainer Schmitz
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  */
 public abstract class BaseCommandController extends AbstractController {
 

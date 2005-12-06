@@ -28,7 +28,7 @@ import org.springframework.web.portlet.util.PortletUtils;
  * Provides getApplicationContext, getServletContext, and getTempDir methods.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  */
 public abstract class PortletApplicationObjectSupport extends ApplicationObjectSupport
 		implements PortletContextAware {

@@ -38,7 +38,7 @@ import javax.management.Notification;
  * publication; this interface is intended for use only by Spring-created MBeans.
  *
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  * @see NotificationPublisherAware
  * @see org.springframework.jmx.export.MBeanExporter
  */

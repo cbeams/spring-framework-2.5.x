@@ -21,7 +21,7 @@ package org.springframework.jmx.export;
  * for example because of a naming conflict.
  *
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  */
 public class UnableToRegisterMBeanException extends MBeanExportException {
 

@@ -28,7 +28,7 @@ package org.springframework.core.task;
  * as well, as it defines the exact same method signature.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see java.util.concurrent.Executor
  */
 public interface TaskExecutor {

@@ -12,7 +12,7 @@ import org.springframework.dao.DataAccessException;
  * 
  * @author Rod Johnson
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  * @see JdbcTemplate
  */
 public interface SimpleJdbcOperations {

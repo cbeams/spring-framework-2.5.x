@@ -25,7 +25,7 @@ package org.springframework.jmx.export.notification;
  * as soon as they are registered with the {@link javax.management.MBeanServer}.
  *
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  * @see NotificationPublisher
  */
 public interface NotificationPublisherAware {

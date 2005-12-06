@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
  * Simple TimerListener adapter that delegates to a given Runnable.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see commonj.timers.TimerListener
  * @see java.lang.Runnable
  */

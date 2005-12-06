@@ -30,7 +30,7 @@ import javax.jms.Session;
  * listener and destination.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see ServerSessionFactory
  * @see ServerSessionMessageListenerContainer
  */

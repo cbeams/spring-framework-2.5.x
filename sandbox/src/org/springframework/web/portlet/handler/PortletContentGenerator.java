@@ -36,7 +36,7 @@ import org.springframework.web.portlet.context.PortletApplicationObjectSupport;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.web.portlet.mvc.AbstractController
  */
 public abstract class PortletContentGenerator extends PortletApplicationObjectSupport {

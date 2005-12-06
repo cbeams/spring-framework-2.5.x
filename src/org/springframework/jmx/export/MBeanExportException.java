@@ -22,7 +22,7 @@ import org.springframework.core.NestedRuntimeException;
  * Exception thrown in case of failure when exporting an MBean.
  *
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  * @see MBeanExportOperations
  */
 public class MBeanExportException extends NestedRuntimeException {

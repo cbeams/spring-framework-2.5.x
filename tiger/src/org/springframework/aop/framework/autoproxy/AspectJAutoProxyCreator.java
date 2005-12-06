@@ -43,7 +43,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
  * Processing of Spring Advisors follows the rules established in DefaultAdvisorAutoProxyCreator.
  * 
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator
  * @see org.springframework.aop.aspectj.AtAspectJAdvisorFactory
  * 

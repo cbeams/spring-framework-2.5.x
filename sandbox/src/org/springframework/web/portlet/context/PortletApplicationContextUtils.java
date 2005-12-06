@@ -27,7 +27,7 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.web.context.ContextLoader
  * @see org.springframework.web.context.support.WebApplicationContextUtils
  * @see org.springframework.web.portlet.FrameworkPortlet

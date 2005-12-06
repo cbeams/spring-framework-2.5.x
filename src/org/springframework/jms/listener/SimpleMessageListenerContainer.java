@@ -48,7 +48,7 @@ import org.springframework.jms.support.JmsUtils;
  * number of Sessions, consider using ServerSessionMessageListenerContainer.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see javax.jms.MessageConsumer#setMessageListener
  * @see DefaultMessageListenerContainer
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer

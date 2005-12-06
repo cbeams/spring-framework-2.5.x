@@ -31,7 +31,7 @@ import org.springframework.web.portlet.ModelAndView;
  *
  * @author Rainer Schmitz
  * @author John Lewis
- * @since 1.3
+ * @since 2.0
  * @see ParameterHandlerMapping
  */
 public class ParameterMappingInterceptor implements HandlerInterceptor {

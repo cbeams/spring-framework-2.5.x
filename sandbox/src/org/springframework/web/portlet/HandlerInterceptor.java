@@ -58,7 +58,7 @@ import javax.portlet.RenderResponse;
  *
  * @author Juergen Hoeller
  * @author John Lewis
- * @since 1.3
+ * @since 2.0
  * @see HandlerExecutionChain#getInterceptors
  * @see org.springframework.web.portlet.HandlerMapping
  * @see org.springframework.web.portlet.handler.AbstractHandlerMapping#setInterceptors

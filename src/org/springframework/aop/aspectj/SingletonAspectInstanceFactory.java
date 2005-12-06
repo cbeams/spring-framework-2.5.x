@@ -20,7 +20,7 @@ package org.springframework.aop.aspectj;
  * Simple implementation of AspectInstanceFactory backed
  * by a singleton.
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public class SingletonAspectInstanceFactory implements AspectInstanceFactory {
 	

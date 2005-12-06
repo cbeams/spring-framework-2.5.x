@@ -22,7 +22,7 @@ import org.springframework.core.NestedRuntimeException;
  * Exception thrown when we are unable to send a JMX notification.
  *
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  * @see NotificationPublisher
  */
 public class UnableToSendNotificationException extends NestedRuntimeException {

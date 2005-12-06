@@ -45,7 +45,7 @@ import org.springframework.jms.listener.serversession.ListenerSessionManager;
  * of configuration properties that are relevant to your chosen implementation.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see GenericObjectPool
  * @see #createObjectPool
  * @see #setMaxSize

@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  */
 public class PortletContextResourcePatternResolver extends PathMatchingResourcePatternResolver {
 

@@ -95,7 +95,7 @@ import org.springframework.web.servlet.ViewResolver;
  * @author Rod Johnson
  * @author Nick Lothian
  * @author Rainer Schmitz
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.web.context.ContextLoaderListener
  * @see HandlerMapping
  * @see org.springframework.web.portlet.handler.PortletModeHandlerMapping

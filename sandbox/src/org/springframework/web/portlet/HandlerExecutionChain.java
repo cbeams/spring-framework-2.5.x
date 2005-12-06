@@ -23,7 +23,7 @@ package org.springframework.web.portlet;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  * @see HandlerMapping#getHandler
  * @see HandlerInterceptor
  */

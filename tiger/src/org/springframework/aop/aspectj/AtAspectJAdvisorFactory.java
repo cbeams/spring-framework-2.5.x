@@ -28,7 +28,7 @@ import org.springframework.aop.framework.AopConfigException;
  * annotated with AspectJ annotation syntax.
  * 
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public interface AtAspectJAdvisorFactory {
 	

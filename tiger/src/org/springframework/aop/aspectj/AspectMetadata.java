@@ -28,7 +28,7 @@ import org.springframework.aop.framework.AopConfigException;
  * Metadata for an AspectJ aspect class, with an
  * additional Spring AOP pointcut for the per clause.
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public class AspectMetadata {
 	

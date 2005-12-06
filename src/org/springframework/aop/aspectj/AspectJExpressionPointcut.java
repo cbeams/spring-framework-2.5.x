@@ -48,7 +48,7 @@ import java.util.Set;
  * @author Rob Harrop
  * @author Adrian Colyer
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public class AspectJExpressionPointcut extends AbstractExpressionPointcut implements ClassFilter, MethodMatcher {
 

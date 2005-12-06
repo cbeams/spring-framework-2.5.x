@@ -27,7 +27,7 @@ import javax.management.ObjectName;
  * generation capabilities.
  *
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  * @see MBeanExporter
  */
 public interface MBeanExportOperations {

@@ -39,7 +39,7 @@ import org.springframework.jms.support.destination.JmsDestinationAccessor;
  * process is up to concrete subclasses.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see #setMessageListener
  * @see javax.jms.MessageListener
  * @see SessionAwareMessageListener

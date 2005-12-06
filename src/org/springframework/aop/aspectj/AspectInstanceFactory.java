@@ -21,7 +21,7 @@ package org.springframework.aop.aspectj;
  * Interface implemented to provide instance of the AspectJ aspect on which the
  * aspect method exists. Decouples from Spring IoC container.
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public interface AspectInstanceFactory {
 	

@@ -31,7 +31,7 @@ import org.springframework.util.ConcurrencyThrottleSupport;
  * implementation instead.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see #setConcurrencyLimit
  * @see SyncTaskExecutor
  * @see org.springframework.scheduling.timer.TimerTaskExecutor

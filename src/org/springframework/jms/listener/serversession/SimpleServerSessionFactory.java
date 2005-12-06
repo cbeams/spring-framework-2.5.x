@@ -40,7 +40,7 @@ import org.springframework.jms.support.JmsUtils;
  * for example, CommonsPoolServerSessionFactory.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.core.task.TaskExecutor
  * @see org.springframework.core.task.SimpleAsyncTaskExecutor
  * @see org.springframework.scheduling.timer.TimerTaskExecutor

@@ -31,7 +31,7 @@ import java.util.Map;
  * The model is a Map, allowing the use of multiple data objects keyed by name.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.web.portlet.DispatcherPortlet
  * @see org.springframework.web.servlet.ViewResolver
  * @see org.springframework.web.portlet.HandlerAdapter

@@ -54,7 +54,7 @@ import org.springframework.util.AnnotationUtils;
  * It does not actually generate Spring AOP Advisors, which is deferred to subclasses.
  * @author Rod Johnson
  * @author Adrian Colyer
- * @since 1.3
+ * @since 2.0
  */
 public abstract class AbstractAtAspectJAdvisorFactory implements AtAspectJAdvisorFactory {
 	

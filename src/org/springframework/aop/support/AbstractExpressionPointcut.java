@@ -20,7 +20,7 @@ package org.springframework.aop.support;
  * Abstract superclass for expression pointcuts
  * @author Rod Johnson
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  */
 public abstract class AbstractExpressionPointcut implements ExpressionPointcut {
 

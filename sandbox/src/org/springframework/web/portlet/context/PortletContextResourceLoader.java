@@ -31,7 +31,7 @@ import org.springframework.core.io.Resource;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  * @see #getResourceByPath
  * @see PortletContextResource
  * @see org.springframework.web.portlet.PortletBean

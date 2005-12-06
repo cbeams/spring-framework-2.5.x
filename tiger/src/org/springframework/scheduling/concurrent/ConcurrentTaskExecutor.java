@@ -32,7 +32,7 @@ import org.springframework.core.task.TaskExecutor;
  * with separate ConcurrentTaskExecutor adapter definition.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see java.util.concurrent.Executor
  * @see java.util.concurrent.ThreadPoolExecutor
  * @see java.util.concurrent.Executors

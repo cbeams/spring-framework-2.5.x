@@ -62,7 +62,7 @@ import org.springframework.web.portlet.ModelAndView;
  *
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  * @see SimpleControllerHandlerAdapter
  * @see AbstractController
  * @see AbstractCommandController

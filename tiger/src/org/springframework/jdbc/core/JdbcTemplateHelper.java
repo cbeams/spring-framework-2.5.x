@@ -21,7 +21,7 @@ import org.springframework.dao.DataAccessException;
  * 
  * @author Rod Johnson
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  */
 public class JdbcTemplateHelper implements SimpleJdbcOperations { 
 	

@@ -24,7 +24,7 @@ import javax.portlet.PortletException;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  */
 public class PortletRequestBindingException extends PortletException {
 

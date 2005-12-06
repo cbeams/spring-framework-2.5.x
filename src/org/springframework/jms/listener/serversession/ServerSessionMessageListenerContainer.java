@@ -49,7 +49,7 @@ import org.springframework.jms.support.JmsUtils;
  * SimpleMessageListenerContainer.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.jms.listener.SimpleMessageListenerContainer
  */
 public class ServerSessionMessageListenerContainer extends AbstractMessageListenerContainer

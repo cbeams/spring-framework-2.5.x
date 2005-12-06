@@ -60,7 +60,7 @@ import org.springframework.web.portlet.ModelAndView;
  * </p>
  *
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  */
 public class ParameterizableViewController extends AbstractController {
 	

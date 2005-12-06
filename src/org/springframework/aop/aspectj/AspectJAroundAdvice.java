@@ -30,7 +30,7 @@ import org.springframework.core.ParameterNameDiscoverer;
  * Spring AOP around advice (MethodInterceptor) that wraps
  * an AspectJ advice method. Exposes ProceedingJoinPoint.
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public class AspectJAroundAdvice extends AbstractAspectJAdvice implements MethodInterceptor {
 	

@@ -24,7 +24,7 @@ import org.aspectj.weaver.tools.PointcutExpression;
 /**
  * Spring AOP advice wrapping an AspectJ after advice method
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public class AspectJAfterAdvice extends AbstractAspectJAdvice implements MethodInterceptor {
 	

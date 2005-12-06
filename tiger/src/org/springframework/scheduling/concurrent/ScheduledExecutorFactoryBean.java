@@ -46,7 +46,7 @@ import org.springframework.beans.factory.InitializingBean;
  * the JDK 1.3 Timer mechanism.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see ScheduledExecutorTask
  * @see java.util.concurrent.ScheduledExecutorService
  * @see java.util.concurrent.ScheduledThreadPoolExecutor

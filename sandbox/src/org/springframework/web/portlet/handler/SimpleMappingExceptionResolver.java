@@ -41,7 +41,7 @@ import org.springframework.web.portlet.ModelAndView;
  *
  * @author Juergen Hoeller
  * @author John Lewis
- * @since 1.3
+ * @since 2.0
  */
 public class SimpleMappingExceptionResolver implements HandlerExceptionResolver, Ordered {
 

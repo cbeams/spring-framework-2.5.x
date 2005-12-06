@@ -34,7 +34,7 @@ import javax.jms.Session;
  * For maximum compatibility, implement a standard JMS MessageListener instead.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see AbstractMessageListenerContainer#setMessageListener
  * @see DefaultMessageListenerContainer
  * @see SimpleMessageListenerContainer

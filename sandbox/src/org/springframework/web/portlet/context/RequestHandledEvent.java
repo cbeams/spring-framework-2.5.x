@@ -25,7 +25,7 @@ import org.springframework.context.ApplicationEvent;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.web.portlet.FrameworkPortlet
  * @see org.springframework.context.ApplicationContext#publishEvent
  */

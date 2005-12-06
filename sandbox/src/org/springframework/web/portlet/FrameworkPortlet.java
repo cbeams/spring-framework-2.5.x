@@ -82,7 +82,7 @@ import org.springframework.web.portlet.context.XmlPortletApplicationContext;
  * @author John A. Lewis
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  * @see #doActionService
  * @see #doRenderService
  * @see #initFrameworkPortlet

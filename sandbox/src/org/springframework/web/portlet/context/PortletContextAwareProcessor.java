@@ -34,7 +34,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.web.portlet.context.PortletContextAware
  * @see org.springframework.web.portlet.context.XmlPortletApplicationContext#postProcessBeanFactory
  */

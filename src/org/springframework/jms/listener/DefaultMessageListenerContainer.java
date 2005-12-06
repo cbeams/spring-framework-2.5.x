@@ -58,7 +58,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  * ServerSessionMessageListenerContainer.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see javax.jms.MessageConsumer#receive(long)
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer

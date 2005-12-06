@@ -60,7 +60,7 @@ import org.springframework.core.Constants;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see #setServer
  * @see #setRegistrationBehaviorName
  */

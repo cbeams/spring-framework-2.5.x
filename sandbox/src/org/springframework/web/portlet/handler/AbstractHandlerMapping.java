@@ -30,7 +30,7 @@ import org.springframework.web.portlet.HandlerMapping;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  * @see #getHandlerInternal
  * @see org.springframework.web.portlet.HandlerInterceptor
  */

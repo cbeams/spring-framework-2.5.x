@@ -21,7 +21,7 @@ import org.springframework.aop.Pointcut;
 /**
  * Interface to be implemented by pointcuts that use String expressions.
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  */
 public interface ExpressionPointcut extends Pointcut {
 	

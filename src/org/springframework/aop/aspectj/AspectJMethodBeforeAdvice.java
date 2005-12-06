@@ -23,7 +23,7 @@ import org.springframework.aop.MethodBeforeAdvice;
 /**
  * Spring AOP advice that wraps an AspectJ before method.
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public class AspectJMethodBeforeAdvice extends AbstractAspectJAdvice implements MethodBeforeAdvice {
 

@@ -24,7 +24,7 @@ import javax.portlet.PortletConfig;
  * that it runs in.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see PortletContextAware
  */
 public interface PortletConfigAware {

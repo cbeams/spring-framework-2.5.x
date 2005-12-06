@@ -55,7 +55,7 @@ import org.springframework.web.portlet.context.PortletContextResourceLoader;
  * @author John A. Lewis
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  * @see #addRequiredProperty
  * @see #initPortletBean
  * @see #doDispatch

@@ -38,7 +38,7 @@ import org.springframework.jms.listener.serversession.ServerSessionMessageListen
  * ServerSessionMessageListenerContainer does for JMS 1.1 providers.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  */
 public class ServerSessionMessageListenerContainer102 extends ServerSessionMessageListenerContainer {
 

@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  */
 public abstract class Pluralizer {
 

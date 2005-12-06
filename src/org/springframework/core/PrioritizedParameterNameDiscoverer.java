@@ -28,7 +28,7 @@ import java.util.List;
  * If one returns null, the next will be tried.
  * The default behaviour is always to return null if no discoverer matches.
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscoverer {
 	

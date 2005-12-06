@@ -8,7 +8,7 @@ import org.springframework.beans.factory.FactoryBean;
  * interceptors--references, rather than interceptorNames,
  * as in ProxyFactoryBean--and provides consistent interface management.
  * TODO make this the parent of TransactionProxyFactoryBean
- * @since 1.3
+ * @since 2.0
  * @author Rod Johnson
  */
 public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig implements FactoryBean {

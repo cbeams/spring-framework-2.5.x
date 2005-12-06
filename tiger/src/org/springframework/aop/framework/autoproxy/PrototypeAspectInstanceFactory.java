@@ -23,7 +23,7 @@ import org.springframework.beans.factory.BeanFactory;
 /**
  * AspectInstanceFactory backed by Spring IoC prototype
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public class PrototypeAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
 

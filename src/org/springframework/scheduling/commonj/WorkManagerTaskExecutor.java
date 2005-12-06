@@ -47,7 +47,7 @@ import org.springframework.util.Assert;
  * server's JNDI environment, as defined in the server's management console.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  */
 public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		implements TaskExecutor, WorkManager, InitializingBean {

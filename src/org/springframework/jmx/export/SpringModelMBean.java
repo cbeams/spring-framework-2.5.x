@@ -34,7 +34,7 @@ import javax.management.modelmbean.RequiredModelMBean;
  * for the managed resources {@link ClassLoader} before any invocations occur.
  *
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  * @see RequiredModelMBean
  */
 public class SpringModelMBean extends RequiredModelMBean {

@@ -36,7 +36,7 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  */
 public abstract class PortletUtils {
 

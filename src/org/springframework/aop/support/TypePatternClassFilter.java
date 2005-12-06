@@ -23,7 +23,7 @@ import org.springframework.aop.ClassFilter;
 /**
  * Spring AOP ClassFilter implementation using AspectJ type matching.
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public class TypePatternClassFilter implements ClassFilter {
 	

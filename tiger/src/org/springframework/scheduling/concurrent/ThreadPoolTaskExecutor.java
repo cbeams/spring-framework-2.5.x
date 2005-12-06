@@ -47,7 +47,7 @@ import org.springframework.util.Assert;
  * To expose it as a Spring TaskExecutor, wrap it with a ConcurrentTaskExecutor adapter.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.core.task.TaskExecutor
  * @see java.util.concurrent.Executor
  * @see java.util.concurrent.ThreadPoolExecutor

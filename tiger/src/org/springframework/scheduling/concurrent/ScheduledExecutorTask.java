@@ -35,7 +35,7 @@ package org.springframework.scheduling.concurrent;
  * the JDK 1.3 Timer mechanism.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see java.util.concurrent.ScheduledExecutorService#scheduleWithFixedDelay(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
  * @see java.util.concurrent.ScheduledExecutorService#scheduleAtFixedRate(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
  * @see org.springframework.scheduling.timer.ScheduledTimerTask

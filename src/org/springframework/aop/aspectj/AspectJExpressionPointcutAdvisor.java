@@ -24,7 +24,7 @@ import org.aopalliance.aop.Advice;
  * Spring AOP Advisor that can be used for any AspectJ pointcut
  * expression
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  */
 public class AspectJExpressionPointcutAdvisor extends AspectJExpressionPointcut implements PointcutAdvisor {
 

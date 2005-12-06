@@ -32,7 +32,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  * @see #refresh
  * @see org.springframework.web.context.ContextLoader#createWebApplicationContext
  * @see org.springframework.web.portlet.FrameworkPortlet#createPortletApplicationContext

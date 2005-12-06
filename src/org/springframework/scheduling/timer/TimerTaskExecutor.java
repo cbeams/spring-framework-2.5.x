@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * execution on a single thread.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see java.util.Timer
  */
 public class TimerTaskExecutor implements TaskExecutor, InitializingBean, DisposableBean {

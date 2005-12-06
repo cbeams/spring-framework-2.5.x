@@ -47,7 +47,7 @@ import org.springframework.context.ApplicationContextException;
  * 
  * @author Rainer Schmitz
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  */
 public class ParameterHandlerMapping extends AbstractHandlerMapping {
 

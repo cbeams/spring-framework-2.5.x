@@ -24,7 +24,7 @@ import org.springframework.util.Assert;
  * Simple Work adapter that delegates to a given Runnable.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see commonj.work.Work
  * @see java.lang.Runnable
  */

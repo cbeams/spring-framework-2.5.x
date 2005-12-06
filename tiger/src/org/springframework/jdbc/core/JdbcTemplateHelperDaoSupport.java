@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
  * Only usable with Java 5 and above.
  * 
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public class JdbcTemplateHelperDaoSupport extends JdbcDaoSupport {
 	

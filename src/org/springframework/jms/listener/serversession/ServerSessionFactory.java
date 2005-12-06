@@ -34,7 +34,7 @@ import org.springframework.jms.listener.serversession.ListenerSessionManager;
  * but is not concerned about Session creation or execution.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.jms.listener.serversession.ListenerSessionManager
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
  */

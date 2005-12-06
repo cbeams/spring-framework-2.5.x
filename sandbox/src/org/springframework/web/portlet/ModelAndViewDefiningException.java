@@ -28,7 +28,7 @@ import javax.portlet.PortletException;
  * if certain parameters do not allow to proceed with the normal workflow.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  */
 public class ModelAndViewDefiningException extends PortletException {
 

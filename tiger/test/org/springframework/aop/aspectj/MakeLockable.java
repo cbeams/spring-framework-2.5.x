@@ -25,7 +25,7 @@ import org.springframework.aop.framework.Lockable;
  * Demonstrates introductions, AspectJ annotation style.
  * 
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 @Aspect
 public class MakeLockable {

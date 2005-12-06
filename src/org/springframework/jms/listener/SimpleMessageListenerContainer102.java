@@ -37,7 +37,7 @@ import javax.jms.TopicSession;
  * SimpleMessageListenerContainer does for JMS 1.1 providers.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  */
 public class SimpleMessageListenerContainer102 extends SimpleMessageListenerContainer {
 

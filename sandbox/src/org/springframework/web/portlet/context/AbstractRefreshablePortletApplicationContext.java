@@ -65,7 +65,7 @@ import org.springframework.web.context.support.ServletContextAwareProcessor;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  * @see #loadBeanDefinitions
  * @see #getConfigLocations
  * @see org.springframework.web.portlet.context.ConfigurablePortletApplicationContext#setConfigLocations

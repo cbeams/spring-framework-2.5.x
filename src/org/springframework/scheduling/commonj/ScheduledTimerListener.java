@@ -35,7 +35,7 @@ import commonj.timers.TimerListener;
  * instantiates a new Job for each execution.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see commonj.timers.TimerListener
  * @see commonj.timers.TimerManager#schedule(commonj.timers.TimerListener, long, long)
  * @see commonj.timers.TimerManager#scheduleAtFixedRate(commonj.timers.TimerListener, long, long)

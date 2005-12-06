@@ -44,7 +44,7 @@ import org.springframework.web.portlet.bind.PortletRequestDataBinder;
  *
  * @author John A. Lewis
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see #setCommandClass
  * @see #setCommandName
  * @see #setValidator

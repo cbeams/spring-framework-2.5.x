@@ -27,7 +27,7 @@ import org.aspectj.runtime.internal.AroundClosure;
  * wrapping an AOP Alliance MethodInvocation.
  * 
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint {
 	

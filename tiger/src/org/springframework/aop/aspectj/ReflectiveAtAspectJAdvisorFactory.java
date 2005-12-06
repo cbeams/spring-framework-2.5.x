@@ -48,7 +48,7 @@ import org.springframework.util.ReflectionUtils;
  * the AspectJ 5 annotation syntax, using reflection to invoke advice methods.
  * @author Rod Johnson
  * @author Adrian Colyer
- * @since 1.3
+ * @since 2.0
  */
 public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorFactory {
 	

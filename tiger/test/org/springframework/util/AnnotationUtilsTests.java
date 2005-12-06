@@ -27,7 +27,7 @@ import org.springframework.core.Order;
 /**
  * @author Rob Harrop
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public class AnnotationUtilsTests extends TestCase {
 

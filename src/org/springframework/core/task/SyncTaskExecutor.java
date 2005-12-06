@@ -29,7 +29,7 @@ import java.io.Serializable;
  * such scenarios.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see SimpleAsyncTaskExecutor
  * @see org.springframework.scheduling.timer.TimerTaskExecutor
  */

@@ -48,7 +48,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
- * @since 1.3
+ * @since 2.0
  * @see #setNamespace
  * @see #setConfigLocations
  * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver

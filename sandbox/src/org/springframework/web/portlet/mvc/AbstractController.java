@@ -124,7 +124,7 @@ import org.springframework.web.portlet.handler.PortletContentGenerator;
  * @author John A. Lewis
  * @author Rainer Schmitz
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  */
 public abstract class AbstractController extends PortletContentGenerator implements Controller {
 

@@ -42,7 +42,7 @@ import org.springframework.jndi.JndiLocatorSupport;
  * instantiates a new Job for each execution.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see ScheduledTimerListener
  * @see commonj.timers.TimerManager
  * @see commonj.timers.TimerListener

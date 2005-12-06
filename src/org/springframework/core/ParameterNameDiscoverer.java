@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
  * annotated methods.
  * @author Rod Johnson
  * @author Adrian Colyer
- * @since 1.3
+ * @since 2.0
  */
 public interface ParameterNameDiscoverer {
 	

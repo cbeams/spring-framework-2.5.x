@@ -21,7 +21,7 @@ import org.springframework.aop.aspectj.SingletonAspectInstanceFactory;
 /**
  * Implementation of AspectInstanceFactory that wraps a singleton instance
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
 	

@@ -39,7 +39,7 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  *
  * @author James Strachan
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see JmsInvokerClientInterceptor
  * @see JmsInvokerProxyFactoryBean
  */

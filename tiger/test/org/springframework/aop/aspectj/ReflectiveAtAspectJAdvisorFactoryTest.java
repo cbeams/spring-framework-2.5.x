@@ -23,7 +23,7 @@ import org.springframework.aop.aspectj.ReflectiveAtAspectJAdvisorFactory;
  * Tests for ReflectiveAtAspectJAdvisorFactory. 
  * Tests are inherited: we only set the test fixture here.
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public class ReflectiveAtAspectJAdvisorFactoryTest extends
 		AbstractAtAspectJAdvisorFactoryTests {

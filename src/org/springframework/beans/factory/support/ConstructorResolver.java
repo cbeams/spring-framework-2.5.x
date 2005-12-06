@@ -45,7 +45,7 @@ import org.springframework.util.ReflectionUtils;
  * Used by AbstractAutowireCapableBeanFactory.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see #autowireConstructor
  * @see #instantiateUsingFactoryMethod
  * @see AbstractAutowireCapableBeanFactory

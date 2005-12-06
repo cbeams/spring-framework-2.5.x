@@ -23,7 +23,7 @@ import org.springframework.aop.aspectj.AspectInstanceFactory;
  * Ideally, AspectInstanceFactory would include this method, but because
  * AspectMetadata uses Java 5-only AJType, we need to split out these interfaces.
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public interface MetadataAwareAspectInstanceFactory extends AspectInstanceFactory {
 	

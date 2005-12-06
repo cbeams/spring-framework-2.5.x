@@ -53,7 +53,7 @@ import org.springframework.web.portlet.context.PortletContextAware;
  * supporting both initialization styles.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see javax.portlet.Portlet
  * @see javax.portlet.PortletConfig
  * @see org.springframework.web.portlet.handler.SimplePortletHandlerAdapter

@@ -241,7 +241,7 @@ import org.springframework.web.portlet.handler.SessionRequiredException;
  * @see #showForm(RenderRequest, RenderResponse, BindException)
  * @see SimpleFormController
  * @see AbstractWizardFormController
- * @since 1.3
+ * @since 2.0
  */
 public abstract class AbstractFormController extends BaseCommandController {
 

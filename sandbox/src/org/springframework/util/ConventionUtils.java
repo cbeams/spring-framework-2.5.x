@@ -24,7 +24,7 @@ import java.util.Iterator;
  * throughout the framework.
  *
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  */
 public abstract class ConventionUtils {
 
