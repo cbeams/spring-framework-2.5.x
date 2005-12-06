@@ -108,7 +108,33 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 			pointcutParameters[i] = this.pointcutParser.createPointcutParameter(this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
 		}
 		this.pointcutExpression =
-				this.pointcutParser.parsePointcutExpression(expression, pointcutDeclarationScope, pointcutParameters);
+				this.pointcutParser.parsePointcutExpression(
+						convertAND(expression), pointcutDeclarationScope, pointcutParameters);
+	}
+	
+	/**
+	 * If a pointcut expression has been specified in xml, the user can't 
+	 * write and as "&&" (though &amp;&amp; will work). We also allow
+	 * ' AND ' between two pointcut sub-expressions. This method converts
+	 * AND back to && for the AspectJ pointcut parser.
+	 * @param pcExpr
+	 * @return
+	 */
+	private String convertAND(String pcExpr) {
+		// there's a single API call to do this replacement in JDK 1.4, but we're 
+		// coding to the 1.3 APIs... 
+		//return pcExpr.replaceAll(" AND "," && ");
+		final String AND = " AND ";
+		StringBuffer ret = new StringBuffer();
+		int nextIndex = 0;
+		int searchStart = 0;
+		while ((nextIndex = pcExpr.indexOf(AND,searchStart)) != -1) {
+			ret.append(pcExpr.substring(searchStart,nextIndex));
+			ret.append(" && ");
+			searchStart = nextIndex + AND.length();
+		}
+		ret.append(pcExpr.substring(searchStart));
+		return ret.toString();
 	}
 
 	public PointcutExpression getPointcutExpression() {
