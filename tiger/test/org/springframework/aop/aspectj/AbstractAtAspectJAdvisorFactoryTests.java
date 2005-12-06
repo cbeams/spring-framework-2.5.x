@@ -52,7 +52,7 @@ import org.springframework.beans.TestBean;
  * for tests of concrete factories.
  * 
  * @author Rod Johnson
- *
+ * @since 2.0
  */
 public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 	
@@ -76,7 +76,6 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 			fail("Cannot accept cflow");
 		}
 		catch (AopConfigException ex) {
-			ex.printStackTrace();
 			assertTrue(ex.getMessage().indexOf("PERCFLOW") != -1);
 		}
 	}
