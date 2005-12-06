@@ -26,7 +26,6 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.aspectj.AspectMetadata;
 import org.springframework.aop.support.aspectj.AtAspectJAdvisorFactory;
 import org.springframework.aop.support.aspectj.ReflectiveAtAspectJAdvisorFactory;
-import org.springframework.aop.support.aspectj.MetadataAwareAspectInstanceFactory;
 import org.springframework.aop.support.aspectj.SingletonMetadataAwareAspectInstanceFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -103,13 +102,15 @@ public class AspectJAutoProxyCreator extends DefaultAdvisorAutoProxyCreator {
 					logger.debug("Found aspect bean '" + beanName + "'");
 					AspectMetadata amd = new AspectMetadata(rbd.getBeanClass());
 					if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
+						// Default singleton binding
 						Object beanInstance = getBeanFactory().getBean(beanName);
 						List<Advisor> classAdvisors = this.aspectJAdvisorFactory.getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(beanInstance));
 						logger.debug("Found " + classAdvisors.size() + " AspectJ advice methods");
 						advisors.addAll(classAdvisors);
 					}
-					else {						
-						List<Advisor> classAdvisors = this.aspectJAdvisorFactory.getAdvisors(new PrototypeAspectInstanceFactory(beanName));
+					else {		
+						// Pertarget or per this
+						List<Advisor> classAdvisors = this.aspectJAdvisorFactory.getAdvisors(new PrototypeAspectInstanceFactory(getBeanFactory(), beanName));
 						logger.debug("Found " + classAdvisors.size() + " AspectJ advice methods");
 						advisors.addAll(classAdvisors);
 					}
@@ -123,30 +124,6 @@ public class AspectJAutoProxyCreator extends DefaultAdvisorAutoProxyCreator {
 		}
 		
 		return advisors;
-	}
-	
-	/**
-	 * Lazy, but caches once it's found
-	 *
-	 */
-	private class PrototypeAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
-		private final String name;
-		private final AspectMetadata am;
-		
-		public PrototypeAspectInstanceFactory(String name) {
-			// TODO assert that bean is a prototype
-			this.name = name;
-			// TODO could be null
-			am = new AspectMetadata(getBeanFactory().getType(name));
-		}
-		
-		public synchronized Object getAspectInstance() {
-			return getBeanFactory().getBean(name);
-		}
-		
-		public AspectMetadata getAspectMetadata() {
-			return this.am;
-		}
 	}
 
 }

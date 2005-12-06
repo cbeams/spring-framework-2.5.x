@@ -21,7 +21,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -38,7 +37,6 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
-import org.springframework.aop.Advisor;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.framework.AopConfigException;
@@ -265,19 +263,12 @@ public abstract class AbstractAtAspectJAdvisorFactory implements AtAspectJAdviso
 		}	
 	}
 	
-	public final List<Advisor> getAdvisors(Object aspectInstance) {
-		return getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(aspectInstance));
-	}
 	
-	
-	/**
-	 * Caches once obtained
-	 */
-	protected static class StickyAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
+	protected static class LazySingletonMetadataAwareAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
 		private final MetadataAwareAspectInstanceFactory aif;
 		private Object materialized;
 		
-		public StickyAspectInstanceFactory(MetadataAwareAspectInstanceFactory aif) {
+		public LazySingletonMetadataAwareAspectInstanceFactory(MetadataAwareAspectInstanceFactory aif) {
 			this.aif = aif;
 		}
 
@@ -292,9 +283,13 @@ public abstract class AbstractAtAspectJAdvisorFactory implements AtAspectJAdviso
 			return aif.getAspectMetadata();
 		}
 		
+		public int getInstantiationCount() {
+			return (materialized != null) ? 1 : 0;
+		}
+		
 		@Override
 		public String toString() {
-			return "StickyAspectInstanceFactory: delegate=" + aif;
+			return "LazySingletonMetadataAwareAspectInstanceFactory: delegate=" + aif;
 		}
 		
 	}

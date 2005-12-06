@@ -49,8 +49,6 @@ public interface AtAspectJAdvisorFactory {
 	List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory aif);
 	
 	
-	List<Advisor> getAdvisors(Object aspectInstance);
-	
 	/**
 	 * 
 	 * @param aspectClass

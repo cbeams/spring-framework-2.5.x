@@ -26,12 +26,15 @@ import org.aopalliance.aop.Advice;
 import org.aopalliance.aop.AspectException;
 import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.PerClauseKind;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
+import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.ClassFilters;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.TypePatternClassFilter;
 import org.springframework.util.ReflectionUtils;
 
@@ -53,7 +56,7 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 		final Class<?> aspectClass = aif.getAspectMetadata().getAspectClass();
 		validate(aspectClass);
 		
-		final MetadataAwareAspectInstanceFactory stickyAif = new StickyAspectInstanceFactory(aif);
+		final MetadataAwareAspectInstanceFactory stickyAif = new LazySingletonMetadataAwareAspectInstanceFactory(aif);
 		
 		final List<Advisor> advisors = new LinkedList<Advisor>();
 		//final AspectInstanceFactory aif = new AspectInstanceFactory.SingletonAspectInstanceFactory(aspectInstance);
@@ -69,6 +72,12 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 			}
 		}, ReflectionUtils.DECLARED_METHODS);
 		
+		// If it's a per target aspect, emit dummy instantiating aspect
+		if (!advisors.isEmpty() && stickyAif.getAspectMetadata().getAjType().getPerClause().getKind() == PerClauseKind.PERTARGET) {
+			Advisor instantiationAdvisor = new SyntheticInstantiationAdvisor(stickyAif);
+			advisors.add(0, instantiationAdvisor);
+		}
+		
 		//	Find introduction fields
 		for (Field f : aspectClass.getDeclaredFields()) {
 			if (Modifier.isStatic(f.getModifiers()) && Modifier.isPublic(f.getModifiers())) {
@@ -80,6 +89,21 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 		}
 		
 		return advisors;
+	}
+	
+	/**
+	 * Synthetic advisor that instantiates the aspect.
+	 */
+	protected static class SyntheticInstantiationAdvisor extends DefaultPointcutAdvisor {
+		
+		public SyntheticInstantiationAdvisor(final MetadataAwareAspectInstanceFactory aif) {
+			super(aif.getAspectMetadata().getPerClausePointcut(), new MethodBeforeAdvice() {
+				public void before(Method method, Object[] args, Object target) {
+					// Simply instantiate the aspect
+					aif.getAspectInstance();
+				}
+			});
+		}
 	}
 	
 	
@@ -127,6 +151,7 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 		return ia;
 	}
 	
+	
 	public InstantiationModelAwarePointcutAdvisor getAdvisor(Method candidateAspectJAdviceMethod, MetadataAwareAspectInstanceFactory aif) {
 		validate(aif.getAspectMetadata().getAspectClass());
 		
@@ -134,8 +159,6 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 		if (ajexp == null) {
 			return null;
 		}
-
-		//	TODO really don't want a distinct instance for each advice method
 		return new InstantiationModelAwarePointcutAdvisor(this, ajexp, aif, candidateAspectJAdviceMethod);
 	}
 	
@@ -158,7 +181,6 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 			//throw new IllegalStateException("Class " + aif.getAspectMetadata().getAspectClass() + " must be an aspect");
 			return null;
 		}
-		
 	
 		// If we get here, we know we have an AspectJ method. 
 		// Check that it's an AspectJ-annotated class

@@ -67,8 +67,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals(2, adrian1.getAge());
 	}
 	
-	// TODO
-	public void xtestPerTargetAspect() throws SecurityException, NoSuchMethodException {
+	public void testPerTargetAspect() throws SecurityException, NoSuchMethodException {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/framework/autoproxy/pertarget.xml");
 
@@ -76,9 +75,10 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertTrue(AopUtils.isAopProxy(adrian1));
 		
 		// Does not trigger advice or count
-		adrian1.setAge(25);
+		int explicitlySetAge = 25;
+		adrian1.setAge(explicitlySetAge);
 		
-		assertEquals("Setter does not initiate advice", 25, adrian1.getAge());
+		assertEquals("Setter does not initiate advice", explicitlySetAge, adrian1.getAge());
 		// Fire aspect
 		
 		AspectMetadata am = new AspectMetadata(PerTargetAspect.class);
@@ -86,20 +86,21 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		
 		adrian1.getSpouse();
 		
-		assertEquals("Advice has now fired", 0, adrian1.getAge());
+		assertEquals("Advice has now been instantiated", 0, adrian1.getAge());
 		adrian1.setAge(11);
-		assertEquals(1, adrian1.getAge());
+		assertEquals("Any int setter increments", 2, adrian1.getAge());
+		adrian1.setName("Adrian");
+		//assertEquals("Any other setter does not increment", 2, adrian1.getAge());
 		
 		ITestBean adrian2 = (ITestBean) bf.getBean("adrian");
 		assertNotSame(adrian1, adrian2);
 		assertTrue(AopUtils.isAopProxy(adrian1));
-		assertEquals(0, adrian2.getAge());
+		assertEquals(34, adrian2.getAge());
+		adrian2.getSpouse();
+		assertEquals("Aspect now fired", 0, adrian2.getAge());
 		assertEquals(1, adrian2.getAge());
 		assertEquals(2, adrian2.getAge());
-		assertEquals(3, adrian2.getAge());
-		assertEquals(2, adrian1.getAge());
-		
-		ITestBean juergen1 = (ITestBean) bf.getBean("juergen");
+		assertEquals(3, adrian1.getAge());
 	}
 	
 
