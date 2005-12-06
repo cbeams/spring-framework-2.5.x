@@ -23,6 +23,8 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
 
 import junit.framework.TestCase;
 
@@ -113,7 +115,15 @@ public class JmxUtilsTests extends TestCase {
 			return;
 		}
 
-		JmxUtils.locateMBeanServer();
+		MBeanServer server = null;
+		try {
+			server = JmxUtils.locateMBeanServer();
+		}
+		finally {
+			if (server != null) {
+				MBeanServerFactory.releaseMBeanServer(server);
+			}
+		}
 	}
 
 
