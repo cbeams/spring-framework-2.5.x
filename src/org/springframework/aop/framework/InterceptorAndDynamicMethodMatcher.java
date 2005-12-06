@@ -24,7 +24,7 @@ import org.springframework.aop.MethodMatcher;
  * Internal framework class.
  *
  * <p>This class is required because if we put an Interceptor that implements
- * InterceptionAdvice in the interceptor list passed to MethodInvocationImpl,
+ * InterceptionAdvice in the interceptor list passed to ReflectionMethodInvocation,
  * it may be mistaken for an advice that requires dynamic method matching.
  *
  * @author Rod Johnson

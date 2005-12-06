@@ -92,8 +92,8 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 
 
 	/**
-	 * Find all candidate advices to use in auto-proxying.
-	 * @return list of Advice
+	 * Find all candidate advisors to use in auto-proxying.
+	 * @return list of Advisor
 	 */
 	protected List findCandidateAdvisors() {
 		if (!(getBeanFactory() instanceof ListableBeanFactory)) {
