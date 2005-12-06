@@ -265,36 +265,6 @@ public abstract class AbstractAtAspectJAdvisorFactory implements AtAspectJAdviso
 	}
 	
 	
-	protected static class LazySingletonMetadataAwareAspectInstanceFactoryDecorator implements MetadataAwareAspectInstanceFactory {
-		private final MetadataAwareAspectInstanceFactory aif;
-		private Object materialized;
-		
-		public LazySingletonMetadataAwareAspectInstanceFactoryDecorator(MetadataAwareAspectInstanceFactory aif) {
-			this.aif = aif;
-		}
-
-		public synchronized Object getAspectInstance() {
-			if (materialized == null) {
-				materialized = aif.getAspectInstance();
-			}
-			return materialized;
-		}
-		
-		public AspectMetadata getAspectMetadata() {
-			return aif.getAspectMetadata();
-		}
-		
-		public int getInstantiationCount() {
-			return (materialized != null) ? 1 : 0;
-		}
-		
-		@Override
-		public String toString() {
-			return "LazySingletonMetadataAwareAspectInstanceFactory: delegate=" + aif;
-		}
-		
-	}
-	
 	/**
 	 * The pointcut and advice annotations both have an "argNames" member which contains a 
 	 * comma-separated list of the argument names. We use this (if non-empty) to build the

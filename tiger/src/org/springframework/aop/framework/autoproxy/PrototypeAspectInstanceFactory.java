@@ -21,9 +21,13 @@ import org.springframework.aop.aspectj.MetadataAwareAspectInstanceFactory;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
- * AspectInstanceFactory backed by Spring IoC prototype
+ * AspectInstanceFactory backed by Spring IoC prototype.
+ * Note that this may instantiate multiple times, which probably won't give
+ * the semantics you expect. Use a LazySingletonMetadataAwareAspectInstanceFactoryDecorator
+ * to wrap this to ensure only one new aspect comes back.
  * @author Rod Johnson
  * @since 2.0
+ * @see org.springframework.aop.aspectj.LazySingletonMetadataAwareAspectInstanceFactoryDecorator
  */
 public class PrototypeAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
 

@@ -31,12 +31,6 @@ import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.PointcutAdvisor;
-import org.springframework.aop.aspectj.AspectJAfterAdvice;
-import org.springframework.aop.aspectj.AspectJAfterReturningAdvice;
-import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
-import org.springframework.aop.aspectj.AspectJAroundAdvice;
-import org.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.ClassFilters;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -57,11 +51,13 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 	 * @param aspectInstance
 	 * @return a list of advisors for this class
 	 */
-	public List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory aif) {
-		final Class<?> aspectClass = aif.getAspectMetadata().getAspectClass();
+	public List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory maaif) {
+		final Class<?> aspectClass = maaif.getAspectMetadata().getAspectClass();
 		validate(aspectClass);
 		
-		final MetadataAwareAspectInstanceFactory lazySingletonAspectInstanceFactory = new LazySingletonMetadataAwareAspectInstanceFactoryDecorator(aif);
+		// We need to wrap the MetadataAwareAspectInstanceFactory with a decorator
+		// so that it will only instantiate once.
+		final MetadataAwareAspectInstanceFactory lazySingletonAspectInstanceFactory = new LazySingletonMetadataAwareAspectInstanceFactoryDecorator(maaif);
 		
 		final List<Advisor> advisors = new LinkedList<Advisor>();
 		//final AspectInstanceFactory aif = new AspectInstanceFactory.SingletonAspectInstanceFactory(aspectInstance);
