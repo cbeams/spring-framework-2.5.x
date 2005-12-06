@@ -53,4 +53,10 @@ public class PrototypeAspectInstanceFactory implements MetadataAwareAspectInstan
 	public int getInstantiationCount() {
 		return instantiations;
 	}
+	
+	@Override
+	public String toString() {
+		return "PrototypeAspectInstanceFactory: bean name='" + name + "'; " +
+			"instantiations=" + instantiations;
+	}
 }
