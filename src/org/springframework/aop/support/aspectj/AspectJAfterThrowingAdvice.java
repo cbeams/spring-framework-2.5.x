@@ -32,6 +32,10 @@ public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice implements
 	public AspectJAfterThrowingAdvice(Method aspectJBeforeAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif) {
 		super(aspectJBeforeAdviceMethod, pe, aif);
 	}
+
+	public AspectJAfterThrowingAdvice(Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
+		super(aspectJBeforeAdviceMethod, pointcut.getPointcutExpression(), aif);
+	}
 	
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		try {

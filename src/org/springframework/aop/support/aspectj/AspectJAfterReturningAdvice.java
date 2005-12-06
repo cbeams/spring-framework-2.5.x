@@ -21,7 +21,11 @@ import org.aspectj.weaver.tools.PointcutExpression;
 import org.springframework.aop.AfterReturningAdvice;
 
 public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implements AfterReturningAdvice {
-	
+
+	public AspectJAfterReturningAdvice(Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
+		super(aspectJBeforeAdviceMethod, pointcut.getPointcutExpression(), aif);
+	}
+
 	public AspectJAfterReturningAdvice(Method aspectJBeforeAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif) {
 		super(aspectJBeforeAdviceMethod, pe, aif);
 	}

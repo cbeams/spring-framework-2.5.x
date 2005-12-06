@@ -17,9 +17,14 @@
 package org.springframework.aop.config;
 
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.aspectj.AspectJAfterReturningAdvice;
+import org.springframework.aop.support.aspectj.AspectJAfterThrowingAdvice;
+import org.springframework.aop.support.aspectj.AspectJAroundAdvice;
 import org.springframework.aop.support.aspectj.AspectJExpressionPointcut;
+import org.springframework.aop.support.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
@@ -27,20 +32,59 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.support.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.support.NamespaceHandlerSupport;
+import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.StringUtils;
+import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.util.List;
+
 /**
+ * <code>NamespaceHandler</code> for the <code>aop</code> namespace.
+ * <p/>
+ * Provides a {@link BeanDefinitionParser} for the <code>&lt;aop:config&gt;</code> tag. A
+ * <code>config</code> tag can include nested <code>poincut</code>, <code>advisor</code> and
+ * <code>aspect</code> tags.
+ * <p/>
+ * The <code>pointcut</code> tag allows for creation of named {@link AspectJExpressionPointcut} beans
+ * using a simple syntax:
+ * <pre>
+ * &lt;aop:pointcut id=&quot;getNameCalls&quot; expression=&quot;execution(* *..ITestBean.getName(..))&quot;/&gt;
+ * </pre>
+ * <p/>
+ * Using the <code>advisor</code> tag you can configure an {@link org.springframework.aop.Advisor} and have it
+ * applied to all relevant beans in you {@link org.springframework.beans.factory.BeanFactory} automatically.
+ * The <code>advisor</code> tag supports both in-line and referenced
+ * {@link org.springframework.aop.Pointcut Pointcuts}:
+ * <pre>
+ * &lt;aop:advisor id=&quot;getAgeAdvisor&quot;
+ *              pointcut=&quot;execution(* *..ITestBean.getAge(..))&quot;
+ *              advice-ref=&quot;getAgeCounter&quot;/&gt;
+ * <p/>
+ * &lt;aop:advisor id=&quot;getNameAdvisor&quot;
+ *              pointcut-ref=&quot;getNameCalls&quot;
+ *              advice-ref=&quot;getNameCounter&quot;/&gt;
+ * </pre>
+ *
  * @author Rob Harrop
+ * @see ConfigBeanDefinitionParser
+ * @since 1.3
  */
 public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
+	/**
+	 * Constructs a new <code>AopNamespaceHandler</code> and registers the
+	 * {@link BeanDefinitionParser} for the <code>config</code> tag.
+	 */
 	public AopNamespaceHandler() {
 		registerBeanDefinitionParser("config", new ConfigBeanDefinitionParser());
 	}
 
+	/**
+	 * {@link BeanDefinitionParser} for the <code>&lt;aop:config&gt;</code> tag.
+	 */
 	private static class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 		private static final String ASPECT = "aspect";
@@ -59,12 +103,34 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 		private static final String POINTCUT_REF = "pointcut-ref";
 
+		public static final String BEAN = "bean";
+
+		public static final String KIND = "kind";
+
+		public static final String TYPE = "type";
+
+		public static final String BEFORE = "before";
+
+		public static final String AFTER = "after";
+
+		public static final String AROUND = "around";
+
+		public static final String THROWS = "throws";
+
+		public static final int METHOD_INDEX = 0;
+
+		public static final int POINTCUT_INDEX = 1;
+
+		public static final int ASPECT_INSTANCE_FACTORY_INDEX = 2;
+
+		public static final int PARAMETER_NAME_DISCOVERER = 3;
+
 		public void parse(Element element, BeanDefinitionRegistry registry) {
 			NodeList childNodes = element.getChildNodes();
 
 			NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
 
-			for (int i = 0; i < childNodes.getLength(); i++) {
+			for (int i = METHOD_INDEX; i < childNodes.getLength(); i++) {
 				Node node = childNodes.item(i);
 				if (node.getNodeType() == Node.ELEMENT_NODE) {
 					String localName = node.getLocalName();
@@ -96,7 +162,11 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 			registry.registerBeanDefinition(id, pointcutDefinition);
 		}
 
-
+		/**
+		 * Parses the supplied <code>&lt;advisor&gt;</code> element and registers the resulting
+		 * {@link org.springframework.aop.Advisor} and any resultant {@link org.springframework.aop.Pointcut}
+		 * with the supplied {@link BeanDefinitionRegistry}.
+		 */
 		private void parseAdvisor(Element element, BeanDefinitionRegistry registry) {
 			RootBeanDefinition beanDefinition = new RootBeanDefinition(DefaultPointcutAdvisor.class);
 
@@ -105,23 +175,11 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 			mpvs.addPropertyValue(ADVICE, new RuntimeBeanReference(element.getAttribute(ADVICE_REF)));
 
-			if (element.hasAttribute(POINTCUT) && element.hasAttribute(POINTCUT_REF)) {
-				throw new IllegalStateException("Cannot define both 'pointcut' and 'pointcut-ref' on 'advisor' tag.");
-			}
-			else if (element.hasAttribute(POINTCUT)) {
-				BeanDefinition pointcutDefinition = createPointcutDefinition(element.getAttribute(POINTCUT));
-				mpvs.addPropertyValue(POINTCUT, pointcutDefinition);
-			}
-			else if (element.hasAttribute(POINTCUT_REF)) {
-				mpvs.addPropertyValue(POINTCUT, new RuntimeBeanReference(element.getAttribute(POINTCUT_REF)));
-			}
-			else {
-				throw new IllegalStateException("Must define one of 'pointcut' or 'pointcut-ref' on 'advisor'.");
-			}
+			parsePointcutProperty(element, mpvs, registry);
 
 			String id = element.getAttribute(ID);
 
-			if(!StringUtils.hasText(id)) {
+			if (!StringUtils.hasText(id)) {
 				id = BeanDefinitionReaderUtils.generateBeanName(beanDefinition, registry, false);
 			}
 
@@ -129,32 +187,117 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		}
 
 		private void parseAspect(Element aspectElement, BeanDefinitionRegistry registry) {
-			/*String aspectName = aspectElement.getAttribute(ID);
+			String aspectName = aspectElement.getAttribute(BEAN);
 
-			String pointcutBeanName = registerPointcutDefinition(aspectElement, registry);
+			List pointcuts = DomUtils.getChildElementsByTagName(aspectElement, POINTCUT, true);
+			for (int i = 0; i < pointcuts.size(); i++) {
+				Element pointcutElement = (Element) pointcuts.get(i);
+				parsePointcut(pointcutElement, registry);
+			}
+			
+			List advice = DomUtils.getChildElementsByTagName(aspectElement, ADVICE, true);
+			for (int i = METHOD_INDEX; i < advice.size(); i++) {
+				Element adviceElement = (Element) advice.get(i);
+				parseAdvice(aspectName, adviceElement, registry);
+			}
+		}
 
-			List adviceElements = DomUtils.getChildElementsByTagName(aspectElement, ADVICE, true);
-			for (int i = 0; i < adviceElements.size(); i++) {
-				Element adviceElement = (Element) adviceElements.get(i);
+		private void parseAdvice(String aspectName, Element adviceElement, BeanDefinitionRegistry registry) {
 
-				// create the DefaultPointcutAdvisor definition
-				RootBeanDefinition advisorDefinition = new RootBeanDefinition(DefaultPointcutAdvisor.class);
+			// create the properties for the advisor
+			MutablePropertyValues advisorProperties = new MutablePropertyValues();
 
-				// create the property values
-				MutablePropertyValues mpvs = new MutablePropertyValues();
-				advisorDefinition.setPropertyValues(mpvs);
+			// register the pointcut
+			String pointcutBeanName = parsePointcutProperty(adviceElement, advisorProperties, registry);
 
-				if (pointcutBeanName != null) {
-					mpvs.addPropertyValue(POINTCUT, new RuntimeBeanReference(pointcutBeanName));
-				}
+			// create the method factory bean
+			RootBeanDefinition methodDefinition = new RootBeanDefinition(MethodLocatingFactoryBean.class);
+			methodDefinition.setPropertyValues(new MutablePropertyValues());
+			methodDefinition.getPropertyValues().addPropertyValue("beanName", aspectName);
+			methodDefinition.getPropertyValues().addPropertyValue("methodName", adviceElement.getAttribute("method"));
 
-				// add the advice ref to the properties
-				String adviceRef = adviceElement.getAttribute(REF);
-				mpvs.addPropertyValue(ADVICE, new RuntimeBeanReference(adviceRef));
+			// create instance factory definition
+			RootBeanDefinition instanceFactoryDefinition = new RootBeanDefinition(BeanFactoryAspectInstanceFactory.class);
+			instanceFactoryDefinition.setPropertyValues(new MutablePropertyValues());
+			instanceFactoryDefinition.getPropertyValues().addPropertyValue("beanName", aspectName);
 
-				String beanName = aspectName + "." + adviceRef;
-				registry.registerBeanDefinition(beanName, advisorDefinition);
-			}*/
+			// create the advice
+			String kind = adviceElement.getAttribute(KIND);
+			RootBeanDefinition adviceDefinition = new RootBeanDefinition(getAdviceClass(kind));
+
+			ConstructorArgumentValues cav = new ConstructorArgumentValues();
+			cav.addIndexedArgumentValue(METHOD_INDEX, methodDefinition);
+			cav.addIndexedArgumentValue(POINTCUT_INDEX, new RuntimeBeanReference(pointcutBeanName));
+			cav.addIndexedArgumentValue(ASPECT_INSTANCE_FACTORY_INDEX, instanceFactoryDefinition);
+
+			extendAdviceConstructorArgs(cav, kind);
+
+			adviceDefinition.setConstructorArgumentValues(cav);
+
+			// configure the advisor
+			RootBeanDefinition advisorDefinition = new RootBeanDefinition(DefaultPointcutAdvisor.class);
+			advisorDefinition.setPropertyValues(advisorProperties);
+			advisorDefinition.getPropertyValues().addPropertyValue(ADVICE, adviceDefinition);
+
+			// register the final advisor
+			String id = BeanDefinitionReaderUtils.generateBeanName(advisorDefinition, registry, false);
+			registry.registerBeanDefinition(id, advisorDefinition);
+		}
+
+		private void extendAdviceConstructorArgs(ConstructorArgumentValues cav, String kind) {
+			if (AROUND.equals(kind)) {
+				RootBeanDefinition discovererDefinition = new RootBeanDefinition(PrioritizedParameterNameDiscoverer.class);
+				cav.addIndexedArgumentValue(PARAMETER_NAME_DISCOVERER, discovererDefinition);
+			}
+		}
+
+		private Class getAdviceClass(String kind) {
+			if (BEFORE.equals(kind)) {
+				return AspectJMethodBeforeAdvice.class;
+			}
+			else if (AFTER.equals(kind)) {
+				return AspectJAfterReturningAdvice.class;
+			}
+			else if (AROUND.equals(kind)) {
+				return AspectJAroundAdvice.class;
+			}
+			else if (THROWS.equals(kind)) {
+				return AspectJAfterThrowingAdvice.class;
+			}
+			else {
+				throw new IllegalArgumentException("Unknown advice kind [" + kind + "].");
+			}
+		}
+
+		/**
+		 * Parses the <code>pointcut</code> or <code>pointcut-ref</code> attributes of the supplied
+		 * {@link Element} and add a <code>pointcut</code> property as appropriate. Generates a
+		 * {@link org.springframework.beans.factory.config.BeanDefinition} for the pointcut if
+		 * necessary and returns its bean name, otherwise returns the bean name of the referred
+		 * pointcut.
+		 * @throws IllegalStateException if the {@link Element} includes both <code>pointcut</code> and
+		 * <code>pointcut-ref</code> attributes.
+		 */
+		private String parsePointcutProperty(Element element, MutablePropertyValues mpvs, BeanDefinitionRegistry registry) {
+			if (element.hasAttribute(POINTCUT) && element.hasAttribute(POINTCUT_REF)) {
+				throw new IllegalStateException("Cannot define both 'pointcut' and 'pointcut-ref' on 'advisor' tag.");
+			}
+			else if (element.hasAttribute(POINTCUT)) {
+				// create a pointcut for the anonymous pc and register it
+				BeanDefinition pointcutDefinition = createPointcutDefinition(element.getAttribute(POINTCUT));
+				String pointcutName = BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition)pointcutDefinition, registry, false);
+				registry.registerBeanDefinition(pointcutName, pointcutDefinition);
+				mpvs.addPropertyValue(POINTCUT, new RuntimeBeanReference(pointcutName));
+				return pointcutName;
+			}
+			else if (element.hasAttribute(POINTCUT_REF)) {
+				String pointcutRef = element.getAttribute(POINTCUT_REF);
+				mpvs.addPropertyValue(POINTCUT, new RuntimeBeanReference(pointcutRef));
+				return pointcutRef;
+			}
+			else {
+				throw new IllegalStateException("Must define one of 'pointcut' or 'pointcut-ref' on 'advisor'.");
+			}
 		}
 
 		protected BeanDefinition createPointcutDefinition(String expression) {

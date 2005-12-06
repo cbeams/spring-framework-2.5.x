@@ -40,13 +40,14 @@
 	
 	<xsd:complexType name="adviceType">
 		<xsd:attribute name="pointcut" type="xsd:string"/>
+		<xsd:attribute name="pointcut-ref" type="xsd:string"/>		
 		<xsd:attribute name="method" type="xsd:string" use="required"/>
 		<xsd:attribute name="kind" use="required">
 			<xsd:simpleType>
 				<xsd:restriction base="xsd:string">
 					<xsd:enumeration value="before"/>
 					<xsd:enumeration value="after"/>
-					<xsd:enumeration value="atound"/>
+					<xsd:enumeration value="around"/>
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>
