@@ -16,6 +16,8 @@
 
 package org.springframework.aop.config;
 
+import org.aspectj.lang.ProceedingJoinPoint;
+
 /**
  * @author Rob Harrop
  */
@@ -25,19 +27,30 @@ public class CountingAspectJAdvice {
 
 	private int afterCount;
 
+	private int aroundCount;
+
 	public void myBeforeAdvice() throws Throwable {
-		beforeCount++;
+		this.beforeCount++;
 	}
 
 	public void myAfterAdvice() throws Throwable {
-		afterCount++;
+		this.afterCount++;
+	}
+
+	public void myAroundAdvice(ProceedingJoinPoint pjp) throws Throwable {
+		this.aroundCount++;
+		pjp.proceed(pjp.getArgs());
 	}
 
 	public int getBeforeCount() {
-		return beforeCount;
+		return this.beforeCount;
 	}
 
 	public int getAfterCount() {
-		return afterCount;
+		return this.afterCount;
+	}
+
+	public int getAroundCount() {
+		return this.aroundCount;
 	}
 }

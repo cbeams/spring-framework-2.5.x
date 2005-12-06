@@ -36,6 +36,11 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 	
 	private final ParameterNameDiscoverer parameterNameDiscoverer;
 
+	public AspectJAroundAdvice(Method aspectJAroundAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif, ParameterNameDiscoverer parameterNameDiscoverer) {
+		super(aspectJAroundAdviceMethod, pointcut.getPointcutExpression(), aif);
+		this.parameterNameDiscoverer = parameterNameDiscoverer;
+	}
+
 	public AspectJAroundAdvice(Method aspectJAroundAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif, ParameterNameDiscoverer parameterNameDiscoverer) {
 		super(aspectJAroundAdviceMethod, pe, aif);
 		this.parameterNameDiscoverer = parameterNameDiscoverer;

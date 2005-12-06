@@ -26,7 +26,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
- * @author robh
+ * @author Rob Harrop
  */
 public class AopNamespaceHandlerTests extends TestCase {
 
@@ -45,7 +45,7 @@ public class AopNamespaceHandlerTests extends TestCase {
 		Advised advised = (Advised) bean;
 		Advisor[] advisors = advised.getAdvisors();
 
-		assertEquals("Incorrect number of advisors applied.", 4, advisors.length);
+		assertEquals("Incorrect number of advisors applied.", 5, advisors.length);
 	}
 
 	public void testAdviceInvokedCorrectly() throws Exception {
@@ -68,10 +68,6 @@ public class AopNamespaceHandlerTests extends TestCase {
 		assertEquals("Incorrect getName count on getAge counter", 0, getAgeCounter.getCalls("getName"));
 	}
 
-	private ITestBean getTestBean() {
-		return (ITestBean) this.context.getBean("testBean");
-	}
-
 	public void testAspectApplied() throws Exception {
 		ITestBean testBean = getTestBean();
 
@@ -89,6 +85,10 @@ public class AopNamespaceHandlerTests extends TestCase {
 
 		assertEquals("Incorrect before count", 1, advice.getBeforeCount());
 		assertEquals("Incorrect after count", 1, advice.getAfterCount());
+	}
+
+	private ITestBean getTestBean() {
+		return (ITestBean) this.context.getBean("testBean");
 	}
 
 }
