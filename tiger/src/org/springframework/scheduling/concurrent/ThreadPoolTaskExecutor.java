@@ -37,13 +37,14 @@ import org.springframework.util.Assert;
 /**
  * JavaBean that allows for configuring a JDK 1.5 ThreadPoolExecutor in bean style
  * (through "corePoolSize", "maxPoolSize", "keepAliveSeconds", "queueCapacity" properties),
- * exposing it as JDK 1.5 Executor and Spring TaskExecutor. This is an alternative
+ * exposing it as both Spring TaskExecutor and JDK 1.5 Executor. This is an alternative
  * to configuring a ThreadPoolExecutor instance directly using constructor injection,
  * with a separate ConcurrentTaskExecutor adapter if necessary.
  *
  * <p>For any custom needs, in particular for defining a ScheduledThreadPoolExecutor,
  * it is recommended to use a straight definition of the JDK 1.5 Executor implementation
  * instance or a factory method definition that points to the JDK 1.5 Executors class.
+ * To expose it as a Spring TaskExecutor, wrap it with a ConcurrentTaskExecutor adapter.
  *
  * @author Juergen Hoeller
  * @since 1.3
@@ -54,7 +55,7 @@ import org.springframework.util.Assert;
  * @see java.util.concurrent.Executors
  * @see ConcurrentTaskExecutor
  */
-public class ThreadPoolExecutorBean implements Executor, TaskExecutor, InitializingBean, DisposableBean {
+public class ThreadPoolTaskExecutor implements TaskExecutor, Executor, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -168,7 +169,7 @@ public class ThreadPoolExecutorBean implements Executor, TaskExecutor, Initializ
 	 * @see org.springframework.core.task.TaskExecutor#execute(Runnable)
 	 */
 	public void execute(Runnable task) {
-		Assert.notNull(this.executorService, "ThreadPoolExecutorBean not initialized");
+		Assert.notNull(this.executorService, "ThreadPoolTaskExecutor not initialized");
 		this.executorService.execute(task);
 	}
 

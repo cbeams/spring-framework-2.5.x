@@ -25,9 +25,9 @@ import org.springframework.core.task.TaskExecutor;
  * Adapter that takes a JDK 1.5 <code>java.util.concurrent.Executor</code>
  * and exposes a Spring TaskExecutor for it.
  *
- * <p>Note that there is a pre-built ThreadPoolExecutorBean that allows
+ * <p>Note that there is a pre-built ThreadPoolTaskExecutor that allows
  * for defining a JDK 1.5 ThreadPoolExecutor in bean style, exposing
- * it as both a JDK 1.5 Executor and a Spring TaskExecutor. This is a
+ * it as both Spring TaskExecutor and JDK 1.5 Executor. This is a
  * convenient alternative to a direct ThreadPoolExecutor definition
  * with separate ConcurrentTaskExecutor adapter definition.
  *
@@ -36,7 +36,7 @@ import org.springframework.core.task.TaskExecutor;
  * @see java.util.concurrent.Executor
  * @see java.util.concurrent.ThreadPoolExecutor
  * @see java.util.concurrent.Executors
- * @see ThreadPoolExecutorBean
+ * @see ThreadPoolTaskExecutor
  */
 public class ConcurrentTaskExecutor implements TaskExecutor, Executor {
 
