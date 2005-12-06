@@ -19,14 +19,7 @@ package org.springframework.aop.aspectj;
 import junit.framework.TestCase;
 
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.springframework.aop.aspectj.AspectMetadata;
-import org.springframework.aop.aspectj.AtAspectJAdvisorFactory;
-import org.springframework.aop.aspectj.InstantiationModelAwarePointcutAdvisor;
-import org.springframework.aop.aspectj.ReflectiveAtAspectJAdvisorFactory;
-import org.springframework.aop.aspectj.SingletonMetadataAwareAspectInstanceFactory;
 import org.springframework.aop.framework.AopConfigException;
-import org.springframework.aop.support.aspectj.AspectJExpressionPointcutTests;
 import org.springframework.beans.TestBean;
 
 /**

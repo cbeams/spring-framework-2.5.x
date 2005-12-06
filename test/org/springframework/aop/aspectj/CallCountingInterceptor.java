@@ -1,5 +1,5 @@
 
-package org.springframework.aop.support.aspectj;
+package org.springframework.aop.aspectj;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.support.aspectj;
+package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
 
+import org.aspectj.weaver.tools.PointcutExpression;
 import org.aspectj.weaver.tools.PointcutPrimitive;
 import org.aspectj.weaver.tools.UnsupportedPointcutPrimitiveException;
 import org.springframework.aop.ClassFilter;
@@ -309,6 +310,20 @@ public class AspectJExpressionPointcutTests extends TestCase {
 
 	}
 
+	public void testAndSubstitution() {
+		Pointcut pc = getPointcut("execution(* *(..)) AND args(String)");
+		PointcutExpression expr = 
+			((AspectJExpressionPointcut) pc).getPointcutExpression();
+		assertEquals("execution(* *(..)) && args(String)",expr.getPointcutExpression());
+	}
+	
+	public void testMultipleAndSubstitutions() {
+		Pointcut pc = getPointcut("execution(* *(..)) AND args(String) AND this(Object)");
+		PointcutExpression expr = 
+			((AspectJExpressionPointcut) pc).getPointcutExpression();
+		assertEquals("execution(* *(..)) && args(String) && this(Object)",expr.getPointcutExpression());		
+	}
+	
 	private Pointcut getPointcut(String expression) {
 		AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
 		pointcut.setExpression(expression);

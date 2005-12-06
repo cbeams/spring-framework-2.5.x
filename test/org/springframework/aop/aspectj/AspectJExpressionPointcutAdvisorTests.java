@@ -1,5 +1,5 @@
 
-package org.springframework.aop.support.aspectj;
+package org.springframework.aop.aspectj;
 
 import org.springframework.beans.ITestBean;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
@@ -34,6 +34,6 @@ public class AspectJExpressionPointcutAdvisorTests extends AbstractDependencyInj
 	}
 
 	protected String[] getConfigLocations() {
-		return new String[]{"org/springframework/aop/support/aspectj/aspectj.xml"};
+		return new String[]{"org/springframework/aop/aspectj/aspectj.xml"};
 	}
 }
