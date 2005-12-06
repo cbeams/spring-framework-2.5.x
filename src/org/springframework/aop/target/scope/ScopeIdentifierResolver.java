@@ -12,7 +12,7 @@ public interface ScopeIdentifierResolver {
 	/**
 	 * Canonical scope identifier value used when no scope
 	 * identifier is required by a ScopeMap implementation,
-	 * but the current scope can be dervied from the context.
+	 * but the current scope can be derived from the context.
 	 */
 	Object CONTEXT_BASED_SCOPE = new Object();
 
