@@ -45,6 +45,7 @@ public class BeansDtdResolver implements EntityResolver {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+
 	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Trying to resolve XML entity with public ID [" + publicId +

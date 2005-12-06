@@ -16,9 +16,9 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -38,10 +38,10 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.core.Constants;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.core.Constants;
 import org.springframework.util.xml.SimpleSaxErrorHandler;
 
 /**
@@ -52,35 +52,37 @@ import org.springframework.util.xml.SimpleSaxErrorHandler;
  * <p>This class loads a DOM document and applies the bean definition parser to it.
  * The parser will register each bean definition with the given bean factory,
  * relying on the latter's implementation of the BeanDefinitionRegistry interface.
-
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @since 26.11.2003
  * @see #setParserClass
  * @see XmlBeanDefinitionParser
  * @see DefaultXmlBeanDefinitionParser
  * @see org.springframework.beans.factory.support.BeanDefinitionRegistry
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
+ * @since 26.11.2003
  */
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
-    public static final int VALIDATION_AUTO = 0;
+	public static final int VALIDATION_AUTO = 0;
 
-    public static final int VALIDATION_DTD = 1;
+	public static final int VALIDATION_DTD = 1;
 
-    public static final int VALIDATION_XSD = 2;
+	public static final int VALIDATION_XSD = 2;
 
-    private static final String SCHEMA_LANGUAGE_ATTRIBUTE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
+	private static final String SCHEMA_LANGUAGE_ATTRIBUTE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
 
-    private static final String XSD_SCHEMA_LANGUAGE = "http://www.w3.org/2001/XMLSchema";
+	private static final String XSD_SCHEMA_LANGUAGE = "http://www.w3.org/2001/XMLSchema";
 
-    private static final int MAX_PEEK_LINES = 5;
+	private static final int MAX_PEEK_LINES = 5;
 
-    private static final Constants constants = new Constants(XmlBeanDefinitionReader.class);
 
-    private boolean validating = true;
+	private static final Constants constants = new Constants(XmlBeanDefinitionReader.class);
 
 	private boolean namespaceAware = false;
+
+	private boolean validating = true;
+
+	private int validationMode = VALIDATION_AUTO;
 
 	private ErrorHandler errorHandler = new SimpleSaxErrorHandler(logger);
 
@@ -88,38 +90,22 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private Class parserClass = DefaultXmlBeanDefinitionParser.class;
 
-    private int validationMode = VALIDATION_AUTO;
 
-    /**
-     * Create new XmlBeanDefinitionReader for the given bean factory.
-     */
-    public XmlBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
-        super(beanFactory);
-
-        // Determine EntityResolver to use.
-        if (getResourceLoader() != null) {
-            this.entityResolver = new ResourceEntityResolver(getResourceLoader());
-        }
-        else {
-            this.entityResolver = new DelegatingEntityResolver();
-        }
-    }
-
-    public void setValidationMode(int validationMode) {
-        this.validationMode = validationMode;
-    }
-
-    public void setValidationModeName(String validationModeName) {
-        setValidationMode(constants.asNumber(validationModeName).intValue());
-    }
-
-    /**
-	 * Set if the XML parser should validate the document and thus enforce a DTD.
-	 * Default is "true".
+	/**
+	 * Create new XmlBeanDefinitionReader for the given bean factory.
 	 */
-	public void setValidating(boolean validating) {
-		this.validating = validating;
+	public XmlBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
+		super(beanFactory);
+
+		// Determine EntityResolver to use.
+		if (getResourceLoader() != null) {
+			this.entityResolver = new ResourceEntityResolver(getResourceLoader());
+		}
+		else {
+			this.entityResolver = new DelegatingEntityResolver();
+		}
 	}
+
 
 	/**
 	 * Set whether or not the XML parser should be XML namespace aware.
@@ -130,6 +116,22 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
+	 * Set if the XML parser should validate the document and thus enforce a DTD.
+	 * Default is "true".
+	 */
+	public void setValidating(boolean validating) {
+		this.validating = validating;
+	}
+
+	public void setValidationMode(int validationMode) {
+		this.validationMode = validationMode;
+	}
+
+	public void setValidationModeName(String validationModeName) {
+		setValidationMode(constants.asNumber(validationModeName).intValue());
+	}
+
+	/**
 	 * Set an implementation of the <code>org.xml.sax.ErrorHandler</code>
 	 * interface for custom handling of XML parsing errors and warnings.
 	 * <p>If not set, a default SimpleSaxErrorHandler is used that simply
@@ -137,7 +139,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * and rethrows errors to discontinue the XML transformation.
 	 * @see org.springframework.util.xml.SimpleSaxErrorHandler
 	 */
- 	public void setErrorHandler(ErrorHandler errorHandler) {
+	public void setErrorHandler(ErrorHandler errorHandler) {
 		this.errorHandler = errorHandler;
 	}
 
@@ -205,8 +207,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			}
 		}
 		catch (IOException ex) {
-			throw new BeanDefinitionStoreException(
-					"IOException parsing XML document from " + encodedResource.getResource(), ex);
+			throw new BeanDefinitionStoreException("IOException parsing XML document from " + encodedResource.getResource(), ex);
 		}
 	}
 
@@ -251,11 +252,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			return registerBeanDefinitions(doc, resource);
 		}
 		catch (ParserConfigurationException ex) {
-			throw new BeanDefinitionStoreException("Parser configuration exception parsing XML from " + resource, ex);
+			throw new BeanDefinitionStoreException(
+					"Parser configuration exception parsing XML from " + resource, ex);
 		}
 		catch (SAXParseException ex) {
 			throw new BeanDefinitionStoreException(
-			    "Line " + ex.getLineNumber() + " in XML document from " + resource + " is invalid", ex);
+					"Line " + ex.getLineNumber() + " in XML document from " + resource + " is invalid", ex);
 		}
 		catch (SAXException ex) {
 			throw new BeanDefinitionStoreException("XML document from " + resource + " is invalid", ex);
@@ -265,66 +267,68 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 	}
 
-    protected DocumentBuilderFactory createDocumentBuilderFactory(Resource resource) throws ParserConfigurationException {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setValidating(this.validating);
-        dbf.setNamespaceAware(this.namespaceAware);
+	protected DocumentBuilderFactory createDocumentBuilderFactory(Resource resource)
+			throws ParserConfigurationException {
 
-        if (this.validating) {
-            // now see how validation should be configured
-            int validationMode = getValidationModeForResource(resource);
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setValidating(this.validating);
+		dbf.setNamespaceAware(this.namespaceAware);
 
-            if (validationMode == VALIDATION_XSD) {
-                // force namespace aware for XSD
-                dbf.setNamespaceAware(true);
-                dbf.setAttribute(SCHEMA_LANGUAGE_ATTRIBUTE, XSD_SCHEMA_LANGUAGE);
-            }
-        }
+		if (this.validating) {
+			// now see how validation should be configured
+			int validationMode = getValidationModeForResource(resource);
 
-        return dbf;
-    }
+			if (validationMode == VALIDATION_XSD) {
+				// enforce namespace aware for XSD
+				dbf.setNamespaceAware(true);
+				dbf.setAttribute(SCHEMA_LANGUAGE_ATTRIBUTE, XSD_SCHEMA_LANGUAGE);
+			}
+		}
 
-    private int getValidationModeForResource(Resource resource) {
-        return this.validationMode != VALIDATION_AUTO ? this.validationMode : detectValidationMode(resource);
-    }
+		return dbf;
+	}
 
-    private int detectValidationMode(Resource resource) {
-        //peek into the file to look for DOCTYPE
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
+	private int getValidationModeForResource(Resource resource) {
+		return this.validationMode != VALIDATION_AUTO ? this.validationMode : detectValidationMode(resource);
+	}
 
-            boolean isDtdValidated = false;
+	private int detectValidationMode(Resource resource) {
+		//peek into the file to look for DOCTYPE
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
 
-            for(int x = 0; x < MAX_PEEK_LINES; x++) {
-                String line = reader.readLine();
+			boolean isDtdValidated = false;
 
-                if(line == null) {
-                    // end of stream
-                    break;
-                }
-                else if(line.indexOf("DOCTYPE") > -1) {
-                    isDtdValidated = true;
-                    break;
-                }
-            }
-            return (isDtdValidated) ? VALIDATION_DTD : VALIDATION_XSD;
-        }
-        catch (IOException ex) {
-            throw new FatalBeanException("Unable to determine validation mode for resource [" + resource +
-                    "]. Did you attempt to load directly from SAX InputSource?", ex);
-        }
-        finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                }
-                catch (IOException e) {
-                    logger.warn("Unable to close BufferedReader for resource [" + resource + "].");
-                }
-            }
-        }
-    }
+			for (int x = 0; x < MAX_PEEK_LINES; x++) {
+				String line = reader.readLine();
+
+				if (line == null) {
+					// end of stream
+					break;
+				}
+				else if (line.indexOf("DOCTYPE") > -1) {
+					isDtdValidated = true;
+					break;
+				}
+			}
+			return (isDtdValidated) ? VALIDATION_DTD : VALIDATION_XSD;
+		}
+		catch (IOException ex) {
+			throw new FatalBeanException("Unable to determine validation mode for resource [" + resource +
+					"]. Did you attempt to load directly from SAX InputSource?", ex);
+		}
+		finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				}
+				catch (IOException e) {
+					logger.warn("Unable to close BufferedReader for resource [" + resource + "].");
+				}
+			}
+		}
+	}
 
 	/**
 	 * Create a JAXP DocumentBuilder that this bean definition reader

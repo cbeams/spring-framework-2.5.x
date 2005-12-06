@@ -37,6 +37,7 @@ public class TopLinkClinic extends TopLinkDaoSupport implements Clinic {
 	/** Prepared TopLink query object for the findOwners method */
 	private final ReadAllQuery findOwnersQuery;
 
+
 	public TopLinkClinic() {
 		// Prepare TopLink query object for the getVets method.
 		this.getVetsQuery = new ReadAllQuery(Vet.class);
@@ -58,6 +59,7 @@ public class TopLinkClinic extends TopLinkDaoSupport implements Clinic {
 				builder.get("lastName").like(builder.getParameter("LastName")));
 		this.findOwnersQuery.conformResultsInUnitOfWork();
 	}
+
 
 	/**
 	 * Return all Vet objects from the shared cache.

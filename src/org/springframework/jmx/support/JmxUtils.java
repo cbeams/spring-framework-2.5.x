@@ -17,11 +17,10 @@
 package org.springframework.jmx.support;
 
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.management.ManagementFactory;
-import java.util.List;
+import java.lang.reflect.Method;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.management.DynamicMBean;
 import javax.management.MBeanParameterInfo;
@@ -35,13 +34,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.core.JdkVersion;
 import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.jmx.export.metadata.ManagedNotification;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.core.JdkVersion;
+import org.springframework.util.StringUtils;
 
 /**
  * Collection of generic utility methods to support Spring JMX.
@@ -51,16 +50,14 @@ import org.springframework.core.JdkVersion;
  * @author Juergen Hoeller
  * @since 1.2
  */
-public class JmxUtils {
+public abstract class JmxUtils {
 
-	/**
-	 * Log instance for this class.
-	 */
 	private static final Log logger = LogFactory.getLog(JmxUtils.class);
 
 	private static final String MANAGEMENT_FACTORY_CLASS = "java.lang.management.ManagementFactory";
 
 	private static final String GET_PLATFORM_MBEAN_SERVER_METHOD = "getPlatformMBeanServer";
+
 	/**
 	 * Suffix used to identify an MBean interface
 	 */
@@ -111,31 +108,30 @@ public class JmxUtils {
 			server = (MBeanServer) servers.get(0);
 		}
 		else if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
-			// attempt to load the PlatformMBeanServer
-
+			// Attempt to load the PlatformMBeanServer.
 			try {
 				Class managementFactoryClass = ClassUtils.forName(MANAGEMENT_FACTORY_CLASS);
 				Method getPlatformMBeanServer = managementFactoryClass.getMethod(GET_PLATFORM_MBEAN_SERVER_METHOD, null);
 				server = (MBeanServer) getPlatformMBeanServer.invoke(null, null);
 			}
-			catch (InvocationTargetException e) {
-				throw new IllegalArgumentException("Error invoking method ["
-						+ GET_PLATFORM_MBEAN_SERVER_METHOD + "] of class ["
-						+ MANAGEMENT_FACTORY_CLASS + "].");
+			catch (InvocationTargetException ex) {
+				throw new MBeanServerNotFoundException(
+						"ManagementFactory.getPlatformMBeanServer() threw exception", ex.getTargetException());
 			}
-			catch(Exception ex) {
-				throw new IllegalStateException("Unable to locate Platform MBeanServer on JDK 1.5+.");
+			catch (Exception ex) {
+				throw new MBeanServerNotFoundException(
+						"Could not invoke ManagementFactory.getPlatformMBeanServer()", ex);
 			}
 		}
 
-		if(server == null) {
+		if (server == null) {
 			throw new MBeanServerNotFoundException(
 					"Unable to locate an MBeanServer instance" +
 					(agentId != null ? " with agent id [" + agentId + "]" : ""));
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Found MBeanServer: [" + server + "].");
+			logger.debug("Found MBeanServer: " + server);
 		}
 		return server;
 	}
@@ -289,21 +285,25 @@ public class JmxUtils {
 	}
 
 	/**
-	 * Appends an additional key/value pair to an existing {@link ObjectName} with the key being
+	 * Append an additional key/value pair to an existing {@link ObjectName} with the key being
 	 * the static value <code>identity</code> and the value being the identity hash code of the
-	 * managed resource being exposed on the supplied {@link ObjectName}. This can be used to provide
-	 * a unique {@link ObjectName} for each distinct instance of a particular bean or class. Useful when
-	 * generating {@link ObjectName ObjectNames} at runtime for a set of managed resources based on
-	 * the template value supplied by a {@link org.springframework.jmx.export.naming.ObjectNamingStrategy}.
+	 * managed resource being exposed on the supplied {@link ObjectName}. This can be used to
+	 * provide a unique {@link ObjectName} for each distinct instance of a particular bean or
+	 * class. Useful when generating {@link ObjectName ObjectNames} at runtime for a set of
+	 * managed resources based on the template value supplied by a
+	 * {@link org.springframework.jmx.export.naming.ObjectNamingStrategy}.
 	 */
-	public static ObjectName appendIdentityToObjectName(ObjectName objectName, Object managedResource) throws MalformedObjectNameException {
+	public static ObjectName appendIdentityToObjectName(ObjectName objectName, Object managedResource)
+			throws MalformedObjectNameException {
+
 		Hashtable keyProperties = objectName.getKeyPropertyList();
 		keyProperties.put(IDENTITY_OBJECT_NAME_KEY, ObjectUtils.getIdentityHexString(managedResource));
 		return ObjectNameManager.getInstance(objectName.getDomain(), keyProperties);
 	}
 
 	/**
-	 * Converts the supplied {@link ManagedNotification} into the corresponding {@link ModelMBeanNotificationInfo}.
+	 * Convert the supplied {@link ManagedNotification} into the corresponding
+	 * {@link ModelMBeanNotificationInfo}.
 	 */
 	public static ModelMBeanNotificationInfo convertToModelMBeanNotificationInfo(ManagedNotification notificationInfo) {
 		String name = notificationInfo.getName();
@@ -312,12 +312,11 @@ public class JmxUtils {
 		}
 
 		String[] notifTypes = notificationInfo.getNotificationTypes();
-		if(notifTypes == null || notifTypes.length == 0) {
+		if (notifTypes == null || notifTypes.length == 0) {
 			throw new IllegalArgumentException("Must specify at least one notification type.");
 		}
 
 		String description = notificationInfo.getDescription();
-
 		return new ModelMBeanNotificationInfo(notifTypes, name, description);
 	}
 

@@ -53,8 +53,9 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 
 	private final ResourceLoader resourceLoader;
 
+
 	/**
-	 * Creae a ResourceEntityResolver for the specified ResourceLoader
+	 * Create a ResourceEntityResolver for the specified ResourceLoader
 	 * (usually, an ApplicationContext).
 	 * @param resourceLoader the ResourceLoader (or ApplicationContext)
 	 * to load XML entity includes with
@@ -62,6 +63,7 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 	public ResourceEntityResolver(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
+
 
 	public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
 		InputSource source = super.resolveEntity(publicId, systemId);
