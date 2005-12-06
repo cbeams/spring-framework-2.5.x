@@ -45,7 +45,7 @@ public class AopNamespaceHandlerTests extends TestCase {
 		Advised advised = (Advised) bean;
 		Advisor[] advisors = advised.getAdvisors();
 
-		assertEquals("Incorrect number of advisors applied.", 5, advisors.length);
+		assertEquals("Incorrect number of advisors applied.", 4, advisors.length);
 	}
 
 	public void testAdviceInvokedCorrectly() throws Exception {
