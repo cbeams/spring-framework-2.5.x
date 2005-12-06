@@ -41,6 +41,10 @@ abstract class AbstractAspectJAdvice {
 		this.aif = aif;
 	}
 	
+	public Method getAspectJAdviceMethod() {
+		return this.aspectJAdviceMethod;
+	}
+	
 	/**
 	 * Take the arguments in the call to the advised method and output a set of arguments
 	 * to the advice method

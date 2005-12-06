@@ -36,5 +36,9 @@ public class SingletonAspectInstanceFactory implements AspectInstanceFactory {
 	public final Object getAspectInstance() {
 		return aspectInstance;
 	}
+
+	public final int getInstantiationCount() {
+		return 1;
+	}
 	
 }

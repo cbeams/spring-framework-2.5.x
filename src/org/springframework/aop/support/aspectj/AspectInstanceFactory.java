@@ -27,4 +27,10 @@ public interface AspectInstanceFactory {
 	
 	Object getAspectInstance();
 	
+	/**
+	 * Return the number of instantiations from this factory
+	 * @return the number of aspect instances created
+	 */
+	int getInstantiationCount();
+	
 }
