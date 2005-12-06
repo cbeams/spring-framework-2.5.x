@@ -21,7 +21,7 @@ package org.springframework.beans.factory.xml.support;
  * locate a {@link NamespaceHandler} implementation for a particular namespace URI.
  *
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  * @see NamespaceHandler
  * @see org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser
  */

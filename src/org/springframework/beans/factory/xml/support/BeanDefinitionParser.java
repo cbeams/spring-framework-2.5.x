@@ -27,7 +27,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  * namespace in which the custom tag resides.
  *
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  * @see NamespaceHandler
  * @see BeanDefinitionDecorator
  */

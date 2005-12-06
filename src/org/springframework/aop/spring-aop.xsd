@@ -16,6 +16,8 @@
 		</xsd:complexType>
 	</xsd:element>
 
+	<xsd:element name="spring-configured"/>
+	
 	<xsd:complexType name="aspectType">
 		<xsd:sequence>
 			<xsd:element name="pointcut" type="pointcutType" minOccurs="0" maxOccurs="1"/>

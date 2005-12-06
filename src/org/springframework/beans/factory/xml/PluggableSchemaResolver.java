@@ -26,7 +26,7 @@ import org.springframework.core.io.Resource;
 
 /**
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  */
 public class PluggableSchemaResolver implements EntityResolver {
 

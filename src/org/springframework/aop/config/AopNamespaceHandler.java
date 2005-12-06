@@ -30,10 +30,12 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.support.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.support.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.support.NamespaceHandlerSupport;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.StringUtils;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -80,6 +82,24 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 	 */
 	public AopNamespaceHandler() {
 		registerBeanDefinitionParser("config", new ConfigBeanDefinitionParser());
+		registerBeanDefinitionParser("spring-configured", new SpringConfiguredBeanDefinitionParser());
+	}
+
+	private static class SpringConfiguredBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+
+		private static final String BEAN_CONFIGURER = "org.springframework.beans.aspectj.config.BeanConfigurer";
+
+		protected BeanDefinition doParse(Element element) {
+			try {
+				Class beanConfigurerClass = ClassUtils.forName(BEAN_CONFIGURER);
+				RootBeanDefinition definition = new RootBeanDefinition(beanConfigurerClass);
+				definition.setFactoryMethodName("aspectOf");
+				return definition;
+			}
+			catch (ClassNotFoundException e) {
+				throw new IllegalStateException("Unable to locate class [" + BEAN_CONFIGURER + "]. Cannot use @SpringConfigured.");
+			}
+		}
 	}
 
 	/**
@@ -194,7 +214,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 				Element pointcutElement = (Element) pointcuts.get(i);
 				parsePointcut(pointcutElement, registry);
 			}
-			
+
 			List advice = DomUtils.getChildElementsByTagName(aspectElement, ADVICE, true);
 			for (int i = METHOD_INDEX; i < advice.size(); i++) {
 				Element adviceElement = (Element) advice.get(i);
@@ -275,6 +295,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		 * {@link org.springframework.beans.factory.config.BeanDefinition} for the pointcut if
 		 * necessary and returns its bean name, otherwise returns the bean name of the referred
 		 * pointcut.
+		 *
 		 * @throws IllegalStateException if the {@link Element} includes both <code>pointcut</code> and
 		 * <code>pointcut-ref</code> attributes.
 		 */
@@ -285,7 +306,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 			else if (element.hasAttribute(POINTCUT)) {
 				// create a pointcut for the anonymous pc and register it
 				BeanDefinition pointcutDefinition = createPointcutDefinition(element.getAttribute(POINTCUT));
-				String pointcutName = BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition)pointcutDefinition, registry, false);
+				String pointcutName = BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) pointcutDefinition, registry, false);
 				registry.registerBeanDefinition(pointcutName, pointcutDefinition);
 				mpvs.addPropertyValue(POINTCUT, new RuntimeBeanReference(pointcutName));
 				return pointcutName;

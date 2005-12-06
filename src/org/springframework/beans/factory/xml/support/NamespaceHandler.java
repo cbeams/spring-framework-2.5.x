@@ -29,7 +29,7 @@ import org.w3c.dom.Element;
  *
  * @author Rob Harrop
  * @author Erik Wiersma
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser
  * @see NamespaceHandlerResolver
  */

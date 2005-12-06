@@ -40,7 +40,7 @@ import org.w3c.dom.Element;
  * namespace in which the custom tag resides.
  *
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  * @see NamespaceHandler
  * @see BeanDefinitionParser
  */

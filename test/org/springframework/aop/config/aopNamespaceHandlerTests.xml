@@ -16,10 +16,11 @@
 			<aop:pointcut id="setCalls" expression="execution(* *..ITestBean.set*(..))"/>
 			<aop:advice pointcut="execution(* *..ITestBean.set*(..))" method="myBeforeAdvice" kind="before"/>
 			<aop:advice pointcut-ref="setCalls" method="myAfterAdvice" kind="after"/>
-			<aop:advice pointcut-ref="setCalls" method="myAroundAdvice" kind="around"/>
+			<!--<aop:advice pointcut-ref="setCalls" method="myAroundAdvice" kind="around"/>-->
 		</aop:aspect>
 
 	</aop:config>
+
 
 	<bean id="getNameCounter" class="org.springframework.aop.framework.CountingBeforeAdvice"/>
 	<bean id="getAgeCounter" class="org.springframework.aop.framework.CountingBeforeAdvice"/>

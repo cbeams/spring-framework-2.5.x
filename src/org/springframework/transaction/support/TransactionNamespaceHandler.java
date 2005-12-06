@@ -35,6 +35,7 @@ import java.util.List;
 
 /**
  * @author Rob Harrop
+ * @since 2.0
  */
 public class TransactionNamespaceHandler extends NamespaceHandlerSupport {
 

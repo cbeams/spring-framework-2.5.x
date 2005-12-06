@@ -40,7 +40,7 @@ import java.util.Properties;
  * {@link #DefaultNamespaceHandlerResolver(String)} constructor.
  *
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  * @see NamespaceHandler
  * @see org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser
  */

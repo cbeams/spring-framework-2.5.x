@@ -10,6 +10,7 @@ import org.w3c.dom.NodeList;
 
 /**
  * @author Rob Harrop
+ * @since 2.0
  */
 public class JndiNamespaceHandler extends NamespaceHandlerSupport {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.beans.factory.BeanFactory} using a configured bean name.
  *
  * @author Rob Harrop
+ * @since 2.0
  */
 public class BeanFactoryAspectInstanceFactory implements AspectInstanceFactory, BeanFactoryAware, InitializingBean {
 
@@ -37,10 +38,18 @@ public class BeanFactoryAspectInstanceFactory implements AspectInstanceFactory, 
 
 	private BeanFactory beanFactory;
 
+	/**
+	 * Sets the name of the aspect bean. This is the bean that is returned when calling
+	 * {@link #getAspectInstance()}.
+	 */
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
+	/**
+	 * Looks up the aspect bean from the {@link BeanFactory} and returns it.
+	 * @see #setBeanName(String)
+	 */
 	public Object getAspectInstance() {
 		count++;
 		return this.beanFactory.getBean(this.beanName);
@@ -54,6 +63,9 @@ public class BeanFactoryAspectInstanceFactory implements AspectInstanceFactory, 
 		this.beanFactory = beanFactory;
 	}
 
+	/**
+	 * Checks to make sure that the <code>beanName</code> property has been specified.
+	 */
 	public void afterPropertiesSet() throws Exception {
 		if(!StringUtils.hasText(this.beanName)) {
 			throw new IllegalArgumentException("Property [beanName] is required.");
