@@ -51,8 +51,7 @@
 		</fileset>
 
 	</path>
-
-
+	
 	<path id="attribute-compiler-classpath">
 
 		<fileset dir="lib/jakarta-commons">
@@ -184,13 +183,37 @@
 
 	</target>
 
+	<!--
+		Compile the AspectJ source tree.
+	-->
+	<target name="buildaspects" depends="buildmain" if="tiger.available"
+					description="Compile AspectJ source tree java and aj files into class files">
+
+	  <taskdef 
+	      resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties">
+	    <classpath>
+	      <pathelement location="${lib.dir}/aspectj/aspectjtools.jar"/>
+	    </classpath>
+	  </taskdef>
+
+	  <iajc
+	  	sourceroots="${aspectj.src.dir}"
+	  	target="1.5"
+	  	source="1.5"
+		destDir="${target.classes.dir}">
+	  	<classpath>
+	  		<path refid="all-libs"/>
+  			<path location="${target.classes.dir}"/>
+	  	</classpath>
+	  </iajc>
+		
+	</target>
 
 	<!--
 		Compile the main and the JDK 1.5 source tree.
 	-->
-	<target name="build" depends="buildmain,buildtiger" if="tiger.available"
-					description="Compile main and JDK 1.5 sources"/>
-
+	<target name="build" depends="buildmain,buildtiger,buildaspects" if="tiger.available"
+					description="Compile main, JDK 1.5, and AspectJ sources"/>
 
 	<target name="initdist" description="Initialize the distribution directory">
 
@@ -359,6 +382,17 @@
 		<jar jarfile="${dist.dir}/spring-hibernate3.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/orm/hibernate3/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-aspects.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/beans/factory/aspectj/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -682,6 +716,35 @@
 
 	</target>
 
+	
+	<!--
+		Compile the AspectJ test tree.
+	-->
+	<target name="buildaspecttests" depends="buildmaintests" if="tiger.available"
+					description="Compile AspectJ test source tree java and aj files into class files">
+
+	  <taskdef 
+	      resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties">
+	    <classpath>
+	      <pathelement location="${lib.dir}/aspectj/aspectjtools.jar"/>
+	    </classpath>
+	  </taskdef>
+
+	  <iajc
+	  	sourceroots="${aspectj.src.dir}"
+	  	target="1.5"
+	  	source="1.5"
+		destDir="${target.testclasses.dir}">
+	  	<classpath>
+	  		<path refid="all-libs"/>
+  			<path location="${target.classes.dir}"/>
+	  		<path location="${target.mockclasses.dir}"/>
+	  	</classpath>
+	  </iajc>
+		
+	</target>
+
+	
 
 	<!--
 		Compile the main and the JDK 1.5 test source tree.
