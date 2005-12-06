@@ -52,31 +52,47 @@ class InstantiationModelAwarePointcutAdvisor implements PointcutAdvisor {
 		this.atAspectJAdvisorFactory = af;
 		this.aif = aif;
 		
-		if (isPerInstance()) {
+		if (aif.getAspectMetadata().isPerThisOrPerTarget()) {
 			// Static part of the pointcut is either pertarget or this
 			final Pointcut preInstantiationORPointcut = Pointcuts.union(aif.getAspectMetadata().getPerClausePointcut(), this.declaredPointcut);
 			
 			// Make it dynamic: must mutate from pre-instantiation to post-instantiation state.
 			// If it's not a dynamic pointcut, it may be optimized out 
 			// by the Spring AOP infrastructure after the first evaluation
-			this.pointcut = new DynamicMethodMatcherPointcut() {
-				@Override
-				public boolean matches(Method method, Class targetClass) {
-					// We're either instantiated, matching on declared pointcut, or uninstantiated matching on either pointcut
-					return (aif.getInstantiationCount() > 0 && declaredPointcut.matches(method, targetClass)) ||
-						preInstantiationORPointcut.getMethodMatcher().matches(method, targetClass);
-				}
-				
-				public boolean matches(Method method, Class targetClass, Object[] args) {
-					// This can match only on declared pointcut
-					return aif.getInstantiationCount() > 0 && declaredPointcut.matches(method, targetClass);
-				}
-			};
+			this.pointcut = new PerTargetInstantiationModelPointcut(declaredPointcut, preInstantiationORPointcut, aif);
 		}
 		else {
 			// A singleton aspect.
 			this.instantiatedAdvice = instantiateAdvice();
 			this.pointcut = declaredPointcut;
+		}
+	}
+	
+	
+	private class PerTargetInstantiationModelPointcut extends DynamicMethodMatcherPointcut {
+		private final AspectJExpressionPointcut pointcut;
+
+		private final Pointcut pointcut2;
+
+		private final MetadataAwareAspectInstanceFactory aif;
+
+		private PerTargetInstantiationModelPointcut(AspectJExpressionPointcut pointcut, Pointcut pointcut2, MetadataAwareAspectInstanceFactory aif) {
+			super();
+			this.pointcut = pointcut;
+			this.pointcut2 = pointcut2;
+			this.aif = aif;
+		}
+
+		@Override
+		public boolean matches(Method method, Class targetClass) {
+			// We're either instantiated, matching on declared pointcut, or uninstantiated matching on either pointcut
+			return (aif.getInstantiationCount() > 0 && pointcut.matches(method, targetClass)) ||
+				pointcut2.getMethodMatcher().matches(method, targetClass);
+		}
+
+		public boolean matches(Method method, Class targetClass, Object[] args) {
+			// This can match only on declared pointcut
+			return aif.getInstantiationCount() > 0 && pointcut.matches(method, targetClass);
 		}
 	}
 	
@@ -89,9 +105,14 @@ class InstantiationModelAwarePointcutAdvisor implements PointcutAdvisor {
 	}
 	
 
+	/**
+	 * This is only of interest for Spring AOP:
+	 * AspectJ instantiation semantics are much richer.
+	 * In AspectJ terminology, all a return of true means here is that the
+	 * aspect is not a SINGLETON. 
+	 */
 	public boolean isPerInstance() {
-		// TODO or perthis etc.
-		return getAspectMetadata().getAjType().getPerClause().getKind() == PerClauseKind.PERTARGET;
+		return getAspectMetadata().getAjType().getPerClause().getKind() != PerClauseKind.SINGLETON;
 	}
 	
 	public AspectMetadata getAspectMetadata() {
@@ -115,6 +136,15 @@ class InstantiationModelAwarePointcutAdvisor implements PointcutAdvisor {
 
 	public AspectJExpressionPointcut getDeclaredPointcut() {
 		return this.declaredPointcut;
+	}
+	
+	@Override
+	public String toString() {
+		return "InstantiationModelAwarePointcutAdvisor: expr='" + getDeclaredPointcut().getExpression() +
+			"' advice method=" + this.method + "; perClauseKind=" +
+			aif.getAspectMetadata().getAjType().getPerClause().getKind() +
+			"; instantiationCount=" + aif.getInstantiationCount();
+			                                                 
 	}
 
 }

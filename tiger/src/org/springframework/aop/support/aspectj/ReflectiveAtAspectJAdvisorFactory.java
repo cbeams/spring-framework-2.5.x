@@ -26,7 +26,6 @@ import org.aopalliance.aop.Advice;
 import org.aopalliance.aop.AspectException;
 import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.PerClauseKind;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
@@ -56,7 +55,7 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 		final Class<?> aspectClass = aif.getAspectMetadata().getAspectClass();
 		validate(aspectClass);
 		
-		final MetadataAwareAspectInstanceFactory stickyAif = new LazySingletonMetadataAwareAspectInstanceFactory(aif);
+		final MetadataAwareAspectInstanceFactory lazySingletonAspectInstanceFactory = new LazySingletonMetadataAwareAspectInstanceFactoryDecorator(aif);
 		
 		final List<Advisor> advisors = new LinkedList<Advisor>();
 		//final AspectInstanceFactory aif = new AspectInstanceFactory.SingletonAspectInstanceFactory(aspectInstance);
@@ -64,7 +63,7 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 			public void doWith(Method m) throws IllegalArgumentException, IllegalAccessException {
 				// Exclude pointcuts
 				if (m.getAnnotation(Pointcut.class) == null) {
-					PointcutAdvisor pa = getAdvisor(m, stickyAif);
+					PointcutAdvisor pa = getAdvisor(m, lazySingletonAspectInstanceFactory);
 					if (pa != null) {
 						advisors.add(pa);
 					}
@@ -73,15 +72,15 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 		}, ReflectionUtils.DECLARED_METHODS);
 		
 		// If it's a per target aspect, emit dummy instantiating aspect
-		if (!advisors.isEmpty() && stickyAif.getAspectMetadata().getAjType().getPerClause().getKind() == PerClauseKind.PERTARGET) {
-			Advisor instantiationAdvisor = new SyntheticInstantiationAdvisor(stickyAif);
+		if (!advisors.isEmpty() && lazySingletonAspectInstanceFactory.getAspectMetadata().isPerThisOrPerTarget()) {
+			Advisor instantiationAdvisor = new SyntheticInstantiationAdvisor(lazySingletonAspectInstanceFactory);
 			advisors.add(0, instantiationAdvisor);
 		}
 		
 		//	Find introduction fields
 		for (Field f : aspectClass.getDeclaredFields()) {
 			if (Modifier.isStatic(f.getModifiers()) && Modifier.isPublic(f.getModifiers())) {
-				Advisor a = getDeclareParentsAdvisor(f, stickyAif.getAspectInstance());
+				Advisor a = getDeclareParentsAdvisor(f, lazySingletonAspectInstanceFactory.getAspectInstance());
 				if (a != null) {
 					advisors.add(a);
 				}
@@ -93,6 +92,8 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 	
 	/**
 	 * Synthetic advisor that instantiates the aspect.
+	 * Triggered by perclause pointcut on non-singleton aspect.
+	 * The advice has no effect.
 	 */
 	protected static class SyntheticInstantiationAdvisor extends DefaultPointcutAdvisor {
 		

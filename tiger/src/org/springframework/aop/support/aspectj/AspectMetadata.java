@@ -19,6 +19,7 @@ package org.springframework.aop.support.aspectj;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
+import org.aspectj.lang.reflect.PerClauseKind;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.AopConfigException;
 
@@ -55,6 +56,11 @@ public class AspectMetadata {
 				throw new AopConfigException("PerClause " + ajType.getPerClause().getKind() + " not supported by Spring AOP for class " +
 						aspectClass.getName());
 		}
+	}
+	
+	public boolean isPerThisOrPerTarget() {
+		PerClauseKind kind = getAjType().getPerClause().getKind();
+		return (kind == PerClauseKind.PERTARGET || kind == PerClauseKind.PERTHIS);
 	}
 
 	/**

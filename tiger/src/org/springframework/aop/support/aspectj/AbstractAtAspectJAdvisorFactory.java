@@ -264,11 +264,11 @@ public abstract class AbstractAtAspectJAdvisorFactory implements AtAspectJAdviso
 	}
 	
 	
-	protected static class LazySingletonMetadataAwareAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
+	protected static class LazySingletonMetadataAwareAspectInstanceFactoryDecorator implements MetadataAwareAspectInstanceFactory {
 		private final MetadataAwareAspectInstanceFactory aif;
 		private Object materialized;
 		
-		public LazySingletonMetadataAwareAspectInstanceFactory(MetadataAwareAspectInstanceFactory aif) {
+		public LazySingletonMetadataAwareAspectInstanceFactoryDecorator(MetadataAwareAspectInstanceFactory aif) {
 			this.aif = aif;
 		}
 
