@@ -1,4 +1,4 @@
 http\://www.springframework.org/schema/jndi=org.springframework.jndi.JndiNamespaceHandler
 http\://www.springframework.org/schema/util=org.springframework.beans.factory.config.UtilNamespaceHandler
 http\://www.springframework.org/schema/aop=org.springframework.aop.config.AopNamespaceHandler
-http\://www.springframework.org/schema/tx=org.springframework.transaction.TransactionNamespaceHandler
+http\://www.springframework.org/schema/tx=org.springframework.transaction.support.TransactionNamespaceHandler
