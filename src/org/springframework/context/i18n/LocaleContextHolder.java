@@ -39,6 +39,7 @@ public abstract class LocaleContextHolder {
 
 	private static ThreadLocal localeContextHolder = new InheritableThreadLocal();
 
+
 	/**
 	 * Associate the given LocaleContext with the current thread.
 	 * @param localeContext the current LocaleContext, or <code>null</code> to reset
