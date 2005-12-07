@@ -66,6 +66,7 @@ public class RowMapperResultReader implements ResultReader {
 	/** The counter used to count rows */
 	private int rowNum = 0;
 
+
 	/**
 	 * Create a new RowMapperResultReader.
 	 * @param rowMapper the RowMapper which creates an object for each row
@@ -86,6 +87,7 @@ public class RowMapperResultReader implements ResultReader {
 		this.results = (rowsExpected > 0) ? (List) new ArrayList(rowsExpected) : (List) new LinkedList();
 		this.rowMapper = rowMapper;
 	}
+	
 
 	public void processRow(ResultSet rs) throws SQLException {
 		this.results.add(this.rowMapper.mapRow(rs, this.rowNum++));

@@ -43,10 +43,10 @@ public interface RowMapper {
 	
 	/** 
 	 * Implementations must implement this method to map each row of data
-	 * in the ResultSet. This method should not call next() on the ResultSet,
-	 * but extract the current values. 
+	 * in the ResultSet. This method should not call <code>next()</code>
+	 * on the ResultSet; it should only extract the values of the current row.
 	 * @param rs the ResultSet to map
-	 * @param rowNum The number of the current row
+	 * @param rowNum the number of the current row
 	 * @throws SQLException if a SQLException is encountered getting
 	 * column values (that is, there's no need to catch SQLException)
 	 */
