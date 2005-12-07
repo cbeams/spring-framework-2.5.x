@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.aspectj.lang.reflect.PerClauseKind;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.aspectj.ExposeJoinPointInterceptor;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.aspectj.annotation.AtAspectJAdvisorFactory;
 import org.springframework.aop.aspectj.annotation.ReflectiveAtAspectJAdvisorFactory;
@@ -68,6 +69,7 @@ public class AspectJAutoProxyCreator extends DefaultAdvisorAutoProxyCreator {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected List findCandidateAdvisors() {
 		List<Advisor> advisors = new LinkedList<Advisor>();
@@ -121,6 +123,7 @@ public class AspectJAutoProxyCreator extends DefaultAdvisorAutoProxyCreator {
 		// AspectJ expression pointcuts
 		if (!advisors.isEmpty()) {
 			advisors.add(0, new DefaultPointcutAdvisor(ExposeInvocationInterceptor.INSTANCE));
+			advisors.add(1, new DefaultPointcutAdvisor(ExposeJoinPointInterceptor.INSTANCE));
 		}
 		
 		return advisors;

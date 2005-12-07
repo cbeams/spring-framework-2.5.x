@@ -47,7 +47,7 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 	}
 
 	public Object invoke(MethodInvocation mi) throws Throwable {
-		ProceedingJoinPoint pjp = new MethodInvocationProceedingJoinPoint(mi);
+		ProceedingJoinPoint pjp = ExposeJoinPointInterceptor.currentProceedingJoinPoint();
 		Object[] formals = argBinding(mi.getArguments());
 		if (formals == null) {
 			formals = new Object[0];

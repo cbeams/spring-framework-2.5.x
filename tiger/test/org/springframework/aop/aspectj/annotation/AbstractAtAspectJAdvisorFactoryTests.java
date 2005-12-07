@@ -34,6 +34,7 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.aspectj.ExposeJoinPointInterceptor;
 import org.springframework.aop.aspectj.annotation.ReflectiveAtAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AopConfigException;
@@ -113,11 +114,9 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals("Around advice must NOT apply", realAge, itb.getAge());
 		
 		Advised advised = (Advised) itb;
-		// Will be ExposeInvocationInterceptor, synthetic instantiation advisor, 2 method advisors
-		assertEquals(4, advised.getAdvisors().length);
-		SyntheticInstantiationAdvisor sia = (SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
+		SyntheticInstantiationAdvisor sia = (SyntheticInstantiationAdvisor) advised.getAdvisors()[2];
 		assertTrue(sia.getPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
-		InstantiationModelAwarePointcutAdvisor imapa = (InstantiationModelAwarePointcutAdvisor) advised.getAdvisors()[2];
+		InstantiationModelAwarePointcutAdvisor imapa = (InstantiationModelAwarePointcutAdvisor) advised.getAdvisors()[3];
 		MetadataAwareAspectInstanceFactory maaif = imapa.getAspectInstanceFactory();
 		assertEquals(0, maaif.getInstantiationCount());
 		
@@ -138,6 +137,9 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 	public static class PerThisAspect {
 		public int count;
 		
+		/**
+		 * Just to check that this doesn't cause problems with introduction processing
+		 */
 		private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
 		
 		@Around("execution(int *.getAge())")
@@ -162,11 +164,11 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals("Around advice must NOT apply", realAge, itb.getAge());
 		
 		Advised advised = (Advised) itb;
-		// Will be ExposeInvocationInterceptor, synthetic instantiation advisor, 2 method advisors
-		assertEquals(4, advised.getAdvisors().length);
-		SyntheticInstantiationAdvisor sia = (SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
+		// Will be ExposeInvocationInterceptor, ExposeJoinPointInterceptor, synthetic instantiation advisor, 2 method advisors
+		assertEquals(5, advised.getAdvisors().length);
+		SyntheticInstantiationAdvisor sia = (SyntheticInstantiationAdvisor) advised.getAdvisors()[2];
 		assertTrue(sia.getPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
-		InstantiationModelAwarePointcutAdvisor imapa = (InstantiationModelAwarePointcutAdvisor) advised.getAdvisors()[2];
+		InstantiationModelAwarePointcutAdvisor imapa = (InstantiationModelAwarePointcutAdvisor) advised.getAdvisors()[3];
 		MetadataAwareAspectInstanceFactory maaif = imapa.getAspectInstanceFactory();
 		assertEquals(0, maaif.getInstantiationCount());
 		
@@ -459,6 +461,7 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 		
 		// TODO this has to go in everywhere we use AspectJ proxies
 		pf.addAdvice(ExposeInvocationInterceptor.INSTANCE);
+		pf.addAdvice(ExposeJoinPointInterceptor.INSTANCE);
 		
 		for (Advisor a : advisors) {
 			pf.addAdvisor(a);

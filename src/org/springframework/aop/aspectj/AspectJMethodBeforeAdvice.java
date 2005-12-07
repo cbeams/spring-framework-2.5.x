@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.weaver.tools.PointcutExpression;
 import org.springframework.aop.MethodBeforeAdvice;
-import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 
 /**
  * Spring AOP advice that wraps an AspectJ before method.
@@ -37,14 +36,11 @@ public class AspectJMethodBeforeAdvice extends AbstractAspectJAdvice implements 
 		super(aspectJBeforeAdviceMethod, pe, aif);
 	}
 	
-	private JoinPoint createJoinpoint() {
-		return new JoinPointImpl(aspectJAdviceMethod, ExposeInvocationInterceptor.currentInvocation().getThis(), ExposeInvocationInterceptor.currentInvocation().getArguments());
-	}
 	
 	public void before(Method method, Object[] args, Object target) throws Throwable {
 		// TODO utterly filthy and foul, but the test suite must pass
 		if (this.aspectJAdviceMethod.getParameterTypes().length > 0 && JoinPoint.class.isAssignableFrom(aspectJAdviceMethod.getParameterTypes()[0])) {
-			invokeAdviceMethodWithGivenArgs(new Object[] { createJoinpoint() });
+			invokeAdviceMethodWithGivenArgs(new Object[] { ExposeJoinPointInterceptor.currentJoinPoint() });
 		}
 		else {
 			invokeAdviceMethod(args);
