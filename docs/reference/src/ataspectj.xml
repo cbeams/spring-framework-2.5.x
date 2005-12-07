@@ -100,7 +100,7 @@
       AspectJ syntax. This is accomplished using the FQN of the relevant
       pointcut. For example, here is an AspectJ aspect:</para>
 
-      <programlisting>package org.springframework.aop.aspectj.support;
+      <programlisting>package org.springframework.aop.aspectj.annotation.annotation.support;
 
 public aspect CommonPointcuts {
 
@@ -113,7 +113,7 @@ public aspect CommonPointcuts {
       <para>This aspect can be referenced as follows in @AspectJ
       syntax:</para>
 
-      <programlisting>@Around(value="org.springframework.aop.aspectj.support.CommonPointcuts.anyIntArg(x)", argNames="x")
+      <programlisting>@Around(value="org.springframework.aop.aspectj.annotation.annotation.support.CommonPointcuts.anyIntArg(x)", argNames="x")
 public void doubleArg(ProceedingJoinPoint pjp, int x) throws Throwable {
    pjp.proceed(new Object[]{x*2});
 }</programlisting>
