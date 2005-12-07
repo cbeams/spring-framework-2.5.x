@@ -48,6 +48,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 */
 	public static final String ALREADY_FILTERED_SUFFIX = ".FILTERED";
 
+
 	/**
 	 * This doFilter implementation stores a request attribute for
 	 * "already filtered", proceeding without filtering again if the
@@ -99,6 +100,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
 		return false;
 	}
+
 
 	/**
 	 * Same contract as for doFilter, but guaranteed to be just invoked once per
