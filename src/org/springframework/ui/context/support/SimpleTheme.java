@@ -28,14 +28,21 @@ import org.springframework.ui.context.Theme;
  */
 public class SimpleTheme implements Theme {
 
-	private String name;
+	private final String name;
 
-	private MessageSource messageSource;
+	private final MessageSource messageSource;
 
+
+	/**
+	 * Create a SimpleTheme.
+	 * @param name the name of the theme
+	 * @param messageSource the MessageSource that resolves theme messages
+	 */
 	public SimpleTheme(String name, MessageSource messageSource) {
 		this.name = name;
 		this.messageSource = messageSource;
 	}
+
 
 	public String getName() {
 		return name;
