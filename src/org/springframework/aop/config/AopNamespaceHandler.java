@@ -21,7 +21,9 @@ import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
 import org.springframework.aop.aspectj.AspectJAroundAdvice;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
+import org.springframework.aop.aspectj.AspectJAfterAdvice;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.target.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -93,8 +95,54 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class ScopeBeanDefinitionDefinition implements BeanDefinitionDecorator {
 
+		private static String REQUEST_SCOPE_MAP = "org.springframework.web.context.scope.RequestScopeMap";
+
+		private static String SESSION_SCOPE_MAP = "org.springframework.web.context.scope.SessionScopeMap";
+
 		public BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
-			throw new UnsupportedOperationException();
+
+			String originalBeanName = definition.getBeanName();
+			String targetBeanName = "__" + originalBeanName;
+
+			RootBeanDefinition scopeFactoryDefinition = new RootBeanDefinition(ScopedProxyFactoryBean.class);
+
+			MutablePropertyValues mpvs = new MutablePropertyValues();
+			scopeFactoryDefinition.setPropertyValues(mpvs);
+
+			// target bean name
+			mpvs.addPropertyValue("targetBeanName", targetBeanName);
+
+			// scope key
+			mpvs.addPropertyValue("scopeKey", originalBeanName);
+
+			// scope map
+			String type = element.getAttribute("type");
+
+			String scopeMapClassName;
+			if("request".equals(type)) {
+				scopeMapClassName = REQUEST_SCOPE_MAP;
+
+			} else if("session".equals(type)) {
+				scopeMapClassName = SESSION_SCOPE_MAP;
+			} else {
+				throw new IllegalStateException("Scope [" + type + "] is not recognised.");
+			}
+
+			Class scopeMapClass;
+			try {
+				scopeMapClass = ClassUtils.forName(scopeMapClassName);
+			}
+			catch (ClassNotFoundException e) {
+				throw new IllegalStateException("Unable to locate ScopeMap class [" + scopeMapClassName + "].");
+			}
+
+			mpvs.addPropertyValue("scopeMap", new RootBeanDefinition(scopeMapClass));
+
+			// register the scope factory
+			registry.registerBeanDefinition(originalBeanName, scopeFactoryDefinition);
+
+			// switch the old definition
+			return new BeanDefinitionHolder(definition.getBeanDefinition(), targetBeanName);
 		}
 	}
 
@@ -319,7 +367,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 			}
 			else if (AFTER.equals(kind)) {
 				// XXX Rob : should be AspectJAfterAdvice.class
-				return AspectJAfterReturningAdvice.class;
+				return AspectJAfterAdvice.class;
 			}
 			else if (AFTER_RETURNING.equals(kind)) {
 				return AspectJAfterReturningAdvice.class;
