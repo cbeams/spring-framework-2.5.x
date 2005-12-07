@@ -19,7 +19,8 @@ package org.springframework.aop.aspectj.annotation;
 import org.springframework.aop.aspectj.AspectInstanceFactory;
 
 /**
- * Subinterface of AspectInstanceFactory that returns AspectMetadata.
+ * Subinterface of AspectInstanceFactory that returns AspectMetadata
+ * associated with AspectJ 5 annotated classes.
  * Ideally, AspectInstanceFactory would include this method, but because
  * AspectMetadata uses Java 5-only AJType, we need to split out these interfaces.
  * @author Rod Johnson
