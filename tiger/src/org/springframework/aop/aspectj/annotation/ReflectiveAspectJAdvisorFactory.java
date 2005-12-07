@@ -76,7 +76,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 					}
 				}
 			}
-		}, ReflectionUtils.DECLARED_METHODS);
+		});
 		
 		// If it's a per target aspect, emit the dummy instantiating aspect
 		if (!advisors.isEmpty() && lazySingletonAspectInstanceFactory.getAspectMetadata().isPerThisOrPerTarget()) {
