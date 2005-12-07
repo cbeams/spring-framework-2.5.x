@@ -44,7 +44,6 @@ public class ReflectionUtilsTests extends TestCase {
 		}
 	}
 	
-	
 	public void testRejectsNullSrc() {
 		TestBean src = null;
 		String dest = new String();
@@ -167,7 +166,7 @@ public class ReflectionUtilsTests extends TestCase {
 	
 	public void testDuplicatesFound() {
 		ListSavingMethodCallback mc = new ListSavingMethodCallback();
-		ReflectionUtils.doWithMethods(TestBeanSubclass.class, mc, ReflectionUtils.DECLARED_METHODS);
+		ReflectionUtils.doWithMethods(TestBeanSubclass.class, mc);
 		int absquatulateCount = 0;
 		for (Iterator it = mc.getMethodNames().iterator(); it.hasNext() ;) {
 			String name = (String) it.next();
@@ -177,4 +176,5 @@ public class ReflectionUtilsTests extends TestCase {
 		}
 		assertEquals("Found 2 absquatulates", 2, absquatulateCount);
 	}
+
 }
