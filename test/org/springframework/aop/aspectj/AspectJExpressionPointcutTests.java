@@ -311,14 +311,14 @@ public class AspectJExpressionPointcutTests extends TestCase {
 	}
 
 	public void testAndSubstitution() {
-		Pointcut pc = getPointcut("execution(* *(..)) AND args(String)");
+		Pointcut pc = getPointcut("execution(* *(..)) and args(String)");
 		PointcutExpression expr = 
 			((AspectJExpressionPointcut) pc).getPointcutExpression();
 		assertEquals("execution(* *(..)) && args(String)",expr.getPointcutExpression());
 	}
 	
 	public void testMultipleAndSubstitutions() {
-		Pointcut pc = getPointcut("execution(* *(..)) AND args(String) AND this(Object)");
+		Pointcut pc = getPointcut("execution(* *(..)) and args(String) and this(Object)");
 		PointcutExpression expr = 
 			((AspectJExpressionPointcut) pc).getPointcutExpression();
 		assertEquals("execution(* *(..)) && args(String) && this(Object)",expr.getPointcutExpression());		

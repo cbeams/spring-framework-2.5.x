@@ -28,6 +28,7 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AbstractExpressionPointcut;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -77,7 +78,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_WITHIN);
 		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_ARGS);
 	}
-	         
+
 	public AspectJExpressionPointcut() {
 		this.pointcutParser = PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingContextClassloaderForResolution(getSupportedPrimitives());
 	}
@@ -108,7 +109,23 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 			pointcutParameters[i] = this.pointcutParser.createPointcutParameter(this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
 		}
 		this.pointcutExpression =
-				this.pointcutParser.parsePointcutExpression(expression, pointcutDeclarationScope, pointcutParameters);
+				this.pointcutParser.parsePointcutExpression(
+						replaceBooleanOperators(expression), pointcutDeclarationScope, pointcutParameters);
+	}
+	
+	/**
+	 * If a pointcut expression has been specified in xml, the user can't 
+	 * write and as "&&" (though &amp;&amp; will work). We also allow
+	 * ' and ' between two pointcut sub-expressions. This method converts
+	 * and back to && for the AspectJ pointcut parser.
+	 * @param pcExpr
+	 * @return
+	 */
+	private String replaceBooleanOperators(String pcExpr) {
+		pcExpr = StringUtils.replace(pcExpr," and "," && ");
+		pcExpr = StringUtils.replace(pcExpr, " or ", " || ");
+		pcExpr = StringUtils.replace(pcExpr, " not ", " ! ");
+		return pcExpr;
 	}
 
 	public PointcutExpression getPointcutExpression() {
