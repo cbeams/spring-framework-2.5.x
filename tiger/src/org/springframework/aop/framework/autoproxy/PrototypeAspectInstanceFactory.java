@@ -16,8 +16,8 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import org.springframework.aop.aspectj.AspectMetadata;
-import org.springframework.aop.aspectj.MetadataAwareAspectInstanceFactory;
+import org.springframework.aop.aspectj.annotation.AspectMetadata;
+import org.springframework.aop.aspectj.annotation.MetadataAwareAspectInstanceFactory;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
@@ -27,7 +27,7 @@ import org.springframework.beans.factory.BeanFactory;
  * to wrap this to ensure only one new aspect comes back.
  * @author Rod Johnson
  * @since 2.0
- * @see org.springframework.aop.aspectj.LazySingletonMetadataAwareAspectInstanceFactoryDecorator
+ * @see org.springframework.aop.aspectj.annotation.LazySingletonMetadataAwareAspectInstanceFactoryDecorator
  */
 public class PrototypeAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
 

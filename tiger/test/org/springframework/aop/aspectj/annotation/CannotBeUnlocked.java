@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.aspectj;
+package org.springframework.aop.aspectj.annotation;
 
-import org.springframework.aop.aspectj.SingletonAspectInstanceFactory;
+import org.springframework.aop.framework.Lockable;
 
 /**
- * Implementation of AspectInstanceFactory that wraps a singleton instance
+ * 
+ * 
  * @author Rod Johnson
- * @since 2.0
+ *
  */
-public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
-	
-	private final AspectMetadata metadata;
-	
-	public SingletonMetadataAwareAspectInstanceFactory(Object aspectInstance) {
-		super(aspectInstance);
-		this.metadata = new AspectMetadata(aspectInstance.getClass());
+public class CannotBeUnlocked implements Lockable, Comparable {
+
+	public void lock() {
 	}
-	
-	public AspectMetadata getAspectMetadata() {
-		return this.metadata;
+
+	public void unlock() {
+		throw new UnsupportedOperationException();
 	}
+
+	public boolean locked() {
+		return true;
+	}
+
+	public int compareTo(Object arg0) {
+		throw new UnsupportedOperationException();
+	}
+
 }

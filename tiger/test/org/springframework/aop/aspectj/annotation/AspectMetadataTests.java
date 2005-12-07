@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.aspectj;
+package org.springframework.aop.aspectj.annotation;
 
 import junit.framework.TestCase;
 
 import org.aspectj.lang.reflect.PerClauseKind;
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.aspectj.AbstractAtAspectJAdvisorFactoryTests.ExceptionAspect;
-import org.springframework.aop.aspectj.AbstractAtAspectJAdvisorFactoryTests.PerTargetAspect;
-import org.springframework.aop.aspectj.AbstractAtAspectJAdvisorFactoryTests.PerThisAspect;
+import org.springframework.aop.aspectj.annotation.AspectMetadata;
+import org.springframework.aop.aspectj.annotation.AbstractAtAspectJAdvisorFactoryTests.ExceptionAspect;
+import org.springframework.aop.aspectj.annotation.AbstractAtAspectJAdvisorFactoryTests.PerTargetAspect;
+import org.springframework.aop.aspectj.annotation.AbstractAtAspectJAdvisorFactoryTests.PerThisAspect;
 
 /**
  * 

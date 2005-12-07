@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.aspectj;
+package org.springframework.aop.aspectj.annotation;
 
 import junit.framework.TestCase;
 
 import org.springframework.aop.Pointcut;
+import org.springframework.aop.aspectj.AspectJExpressionPointcut;
+import org.springframework.aop.aspectj.AspectJExpressionPointcutTests;
+import org.springframework.aop.aspectj.annotation.AspectMetadata;
+import org.springframework.aop.aspectj.annotation.AtAspectJAdvisorFactory;
+import org.springframework.aop.aspectj.annotation.InstantiationModelAwarePointcutAdvisor;
+import org.springframework.aop.aspectj.annotation.ReflectiveAtAspectJAdvisorFactory;
+import org.springframework.aop.aspectj.annotation.SingletonMetadataAwareAspectInstanceFactory;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.beans.TestBean;
 

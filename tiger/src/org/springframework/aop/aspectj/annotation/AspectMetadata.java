@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.aspectj;
+package org.springframework.aop.aspectj.annotation;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.AjType;

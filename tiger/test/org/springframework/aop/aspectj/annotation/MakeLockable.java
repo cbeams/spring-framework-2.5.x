@@ -13,32 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
+package org.springframework.aop.aspectj.annotation;
 
-package org.springframework.aop.aspectj;
-
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.DeclareParents;
+import org.springframework.aop.framework.DefaultLockable;
 import org.springframework.aop.framework.Lockable;
 
 /**
- * 
+ * Demonstrates introductions, AspectJ annotation style.
  * 
  * @author Rod Johnson
- *
+ * @since 2.0
  */
-public class CannotBeUnlocked implements Lockable, Comparable {
-
-	public void lock() {
-	}
-
-	public void unlock() {
-		throw new UnsupportedOperationException();
-	}
-
-	public boolean locked() {
-		return true;
-	}
-
-	public int compareTo(Object arg0) {
-		throw new UnsupportedOperationException();
-	}
+@Aspect
+public class MakeLockable {
+	
+	@DeclareParents("org.springframework.aop.aspectj.annotation.*")
+	public static Lockable mixin = new DefaultLockable();
 
 }

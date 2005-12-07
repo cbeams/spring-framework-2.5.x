@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-package org.springframework.aop.aspectj;
 
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.DeclareParents;
-import org.springframework.aop.framework.DefaultLockable;
-import org.springframework.aop.framework.Lockable;
+package org.springframework.aop.aspectj.annotation;
+
+import org.springframework.aop.aspectj.annotation.AtAspectJAdvisorFactory;
+import org.springframework.aop.aspectj.annotation.ReflectiveAtAspectJAdvisorFactory;
 
 /**
- * Demonstrates introductions, AspectJ annotation style.
- * 
+ * Tests for ReflectiveAtAspectJAdvisorFactory. 
+ * Tests are inherited: we only set the test fixture here.
  * @author Rod Johnson
  * @since 2.0
  */
-@Aspect
-public class MakeLockable {
-	
-	@DeclareParents("org.springframework.aop.aspectj.*")
-	public static Lockable mixin = new DefaultLockable();
+public class ReflectiveAtAspectJAdvisorFactoryTest extends
+		AbstractAtAspectJAdvisorFactoryTests {
+
+	@Override
+	protected AtAspectJAdvisorFactory getFixture() {
+		return new ReflectiveAtAspectJAdvisorFactory();
+	}
 
 }
