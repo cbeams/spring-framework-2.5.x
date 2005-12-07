@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.ClassFilter;
-import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.aspectj.AspectJAfterAdvice;
@@ -79,7 +78,7 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 			}
 		}, ReflectionUtils.DECLARED_METHODS);
 		
-		// If it's a per target aspect, emit dummy instantiating aspect
+		// If it's a per target aspect, emit the dummy instantiating aspect
 		if (!advisors.isEmpty() && lazySingletonAspectInstanceFactory.getAspectMetadata().isPerThisOrPerTarget()) {
 			Advisor instantiationAdvisor = new SyntheticInstantiationAdvisor(lazySingletonAspectInstanceFactory);
 			advisors.add(0, instantiationAdvisor);
@@ -88,7 +87,7 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 		//	Find introduction fields
 		for (Field f : aspectClass.getDeclaredFields()) {
 			if (Modifier.isStatic(f.getModifiers()) && Modifier.isPublic(f.getModifiers())) {
-				Advisor a = getDeclareParentsAdvisor(f, lazySingletonAspectInstanceFactory.getAspectInstance());
+				Advisor a = getDeclareParentsAdvisor(f);
 				if (a != null) {
 					advisors.add(a);
 				}
@@ -121,16 +120,15 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 	 * @param introductionInstance
 	 * @return null if not an advisor
 	 */
-	private Advisor getDeclareParentsAdvisor(Field f, Object aspectInstance) {
-		DeclareParents declareParents = (DeclareParents) f.getAnnotation(DeclareParents.class);
+	private Advisor getDeclareParentsAdvisor(Field introductionField) {
+		DeclareParents declareParents = (DeclareParents) introductionField.getAnnotation(DeclareParents.class);
 		if (declareParents == null) {
 			// Not an introduction field
 			return null;
 		}
 		
 		// Work out where it matches, with the ClassFilter
-		final Class[] interfaces = new Class[] { f.getType() };
-		
+		final Class[] interfaces = new Class[] { introductionField.getType() };
 		ClassFilter typePatternFilter = new TypePatternClassFilter(declareParents.value());
 		ClassFilter exclusion = new ClassFilter() {
 			public boolean matches(Class clazz) {
@@ -145,19 +143,21 @@ public class ReflectiveAtAspectJAdvisorFactory extends AbstractAtAspectJAdvisorF
 		final ClassFilter classFilter = ClassFilters.intersection(typePatternFilter, exclusion);
 
 		// Try to instantiate mixin instance and do delegation
-		Object introductionInstance;
+		Object meaninglessStaticDummyIntroductionInstanceUsedToDetermineConcreteClassWithNoArgConstructor;
 		try {
-			introductionInstance = f.get(aspectInstance);
+			meaninglessStaticDummyIntroductionInstanceUsedToDetermineConcreteClassWithNoArgConstructor = introductionField.get(null);
+			Object newIntroductionInstanceToUse = meaninglessStaticDummyIntroductionInstanceUsedToDetermineConcreteClassWithNoArgConstructor.getClass().newInstance(); 
+			return new DelegatingIntroductionAdvisor(interfaces, classFilter, newIntroductionInstanceToUse);
 		} 
 		catch (IllegalArgumentException ex) {
-			throw new AspectException("Cannot evaluate introduction field " + f, ex);
+			throw new AspectException("Cannot evaluate static introduction field " + introductionField, ex);
 		} 
 		catch (IllegalAccessException ex) {
-			throw new AspectException("Cannot evaluate introduction field " + f, ex);
+			throw new AspectException("Cannot evaluate static introduction field " + introductionField, ex);
+		} 
+		catch (InstantiationException ex) {
+			throw new AspectException("Cannot instantiate class determined from static introduction field " + introductionField, ex);
 		}
-		
-		IntroductionAdvisor ia = new DelegatingIntroductionAdvisor(interfaces, classFilter, introductionInstance);//introductionInstance);
-		return ia;
 	}
 	
 	

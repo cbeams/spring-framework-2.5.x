@@ -33,10 +33,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.aspectj.annotation.AtAspectJAdvisorFactory;
-import org.springframework.aop.aspectj.annotation.InstantiationModelAwarePointcutAdvisor;
-import org.springframework.aop.aspectj.annotation.MetadataAwareAspectInstanceFactory;
-import org.springframework.aop.aspectj.annotation.SingletonMetadataAwareAspectInstanceFactory;
 import org.springframework.aop.aspectj.annotation.ReflectiveAtAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AopConfigException;
@@ -116,8 +112,6 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals("Around advice must NOT apply", realAge, itb.getAge());
 		
 		Advised advised = (Advised) itb;
-		System.out.println(advised.toProxyConfigString());
-		Advisor[] advisors =  advised.getAdvisors();
 		// Will be ExposeInvocationInterceptor, synthetic instantiation advisor, 2 method advisors
 		assertEquals(4, advised.getAdvisors().length);
 		SyntheticInstantiationAdvisor sia = (SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
@@ -125,7 +119,6 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 		InstantiationModelAwarePointcutAdvisor imapa = (InstantiationModelAwarePointcutAdvisor) advised.getAdvisors()[2];
 		MetadataAwareAspectInstanceFactory maaif = imapa.getAspectInstanceFactory();
 		assertEquals(0, maaif.getInstantiationCount());
-		
 		
 		// Check that the perclause pointcut is valid
 		assertTrue(maaif.getAspectMetadata().getPerClausePointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
@@ -136,9 +129,6 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 		
 		assertEquals(1, maaif.getInstantiationCount());
 		
-//		assertTrue(imapa.getDeclaredPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getAge"), null));
-//		assertSame("Pointcut must have changed", imapa.getDeclaredPointcut(), imapa.getPointcut());
-		
 		assertEquals("Around advice must apply", 0, itb.getAge());
 		assertEquals("Around advice must apply", 1, itb.getAge());
 	}
@@ -146,6 +136,8 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 	@Aspect("perthis(execution(* *.getSpouse()))")
 	public static class PerThisAspect {
 		public int count;
+		
+		private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
 		
 		@Around("execution(int *.getAge())")
 		public int returnCountAsAge() {
@@ -169,7 +161,6 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals("Around advice must NOT apply", realAge, itb.getAge());
 		
 		Advised advised = (Advised) itb;
-		System.out.println(advised.toProxyConfigString());
 		// Will be ExposeInvocationInterceptor, synthetic instantiation advisor, 2 method advisors
 		assertEquals(4, advised.getAdvisors().length);
 		SyntheticInstantiationAdvisor sia = (SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
@@ -177,7 +168,6 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 		InstantiationModelAwarePointcutAdvisor imapa = (InstantiationModelAwarePointcutAdvisor) advised.getAdvisors()[2];
 		MetadataAwareAspectInstanceFactory maaif = imapa.getAspectInstanceFactory();
 		assertEquals(0, maaif.getInstantiationCount());
-		
 		
 		// Check that the perclause pointcut is valid
 		assertTrue(maaif.getAspectMetadata().getPerClausePointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
@@ -188,9 +178,8 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 		
 		assertEquals(1, maaif.getInstantiationCount());
 		
-//		assertTrue(imapa.getDeclaredPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getAge"), null));
-//		assertSame("Pointcut must have changed", imapa.getDeclaredPointcut(), imapa.getPointcut());
-		
+		assertTrue(imapa.getDeclaredPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getAge"), null));
+	
 		assertEquals("Around advice must apply", 0, itb.getAge());
 		assertEquals("Around advice must apply", 1, itb.getAge());
 	}
@@ -198,6 +187,9 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 	
 	@Aspect
 	public static class NamedPointcutAspectWithFQN {
+		
+		private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
+		
 		@Pointcut("execution(* getAge())")
 		public void getAge() {			
 		}
@@ -333,16 +325,33 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals(expectedResult, mva.mungeArgs(a, b, c, d, e));
 	}
 	
+	/**
+	 * In this case the introduction will be made.
+	 */
 	public void testIntroductionOnTargetNotImplementingInterface() {
-		NotLockable target = new NotLockable();
-		NotLockable proxy = (NotLockable) createProxy(target,
-				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable())),
+		NotLockable notLockableTarget = new NotLockable();
+		assertFalse(notLockableTarget instanceof Lockable);
+		NotLockable notLockable1 = (NotLockable) createProxy(notLockableTarget,
+				getFixture().getAdvisors(
+						new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable())),
 				NotLockable.class);
-		assertTrue(proxy instanceof Lockable);
-		Lockable lockable = (Lockable) proxy;
+		assertTrue(notLockable1 instanceof Lockable);
+		Lockable lockable = (Lockable) notLockable1;
 		assertFalse(lockable.locked());
 		lockable.lock();
 		assertTrue(lockable.locked());
+		
+		NotLockable notLockable2Target = new NotLockable();
+		NotLockable notLockable2 = (NotLockable) createProxy(notLockable2Target,
+				getFixture().getAdvisors(
+						new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable())),
+				NotLockable.class);
+		assertTrue(notLockable2 instanceof Lockable);
+		Lockable lockable2 = (Lockable) notLockable2;
+		assertFalse(lockable2.locked());
+		lockable2.lock();
+		assertTrue(lockable2.locked());
+		
 	}
 	
 	public void testIntroductionAdvisorExcludedFromTargetImplementingInterface() {

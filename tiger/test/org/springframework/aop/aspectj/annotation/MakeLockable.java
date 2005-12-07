@@ -34,3 +34,27 @@ public class MakeLockable {
 	public static Lockable mixin = new DefaultLockable();
 
 }
+
+/*
+ * 
+ * public aspect MakeLockable {
+ *   
+ *  declare parents org....* implements Lockable;
+ *   
+ *  private boolean Lockable.locked;
+	
+ *	public void Lockable.lock() {
+		this.locked = true;
+	}
+	
+ *	public void Lockable.unlock() {
+		this.locked = false;
+	}
+	
+ *	public boolean Lockable.locked() {
+		return this.locked;
+	}
+ * 
+ * 
+ * }
+ */
