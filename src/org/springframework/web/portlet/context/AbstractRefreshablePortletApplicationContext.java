@@ -76,7 +76,7 @@ import org.springframework.web.context.support.ServletContextAwareProcessor;
  * @see org.springframework.context.support.GenericApplicationContext
  */
 public abstract class AbstractRefreshablePortletApplicationContext extends AbstractRefreshableApplicationContext
-		implements ConfigurablePortletApplicationContext {
+		implements WebApplicationContext, ConfigurablePortletApplicationContext {
 
 	/** Servlet context that this context runs in */
 	private ServletContext servletContext;
@@ -103,6 +103,10 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 		if (parent instanceof WebApplicationContext) {
 			this.servletContext = ((WebApplicationContext) parent).getServletContext();
 		}
+	}
+
+	public ServletContext getServletContext() {
+		return servletContext;
 	}
 
 	public void setPortletContext(PortletContext portletContext) {

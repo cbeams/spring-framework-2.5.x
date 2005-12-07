@@ -20,6 +20,7 @@ import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
 
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Interface to be implemented by configurable portlet application contexts.
@@ -38,7 +39,8 @@ import org.springframework.context.ConfigurableApplicationContext;
  * @see org.springframework.web.portlet.FrameworkPortlet#createPortletApplicationContext
  * @see org.springframework.web.context.ConfigurableWebApplicationContext
  */
-public interface ConfigurablePortletApplicationContext extends ConfigurableApplicationContext {
+public interface ConfigurablePortletApplicationContext
+		extends WebApplicationContext, ConfigurableApplicationContext {
 
 	/**
 	 * Any number of these characters are considered delimiters between

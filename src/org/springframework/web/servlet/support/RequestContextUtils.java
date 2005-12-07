@@ -23,6 +23,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.ui.context.Theme;
+import org.springframework.ui.context.ThemeSource;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -90,58 +91,69 @@ public abstract class RequestContextUtils {
 	 * Return the LocaleResolver that has been bound to the request by the
 	 * DispatcherServlet.
 	 * @param request current HTTP request
-	 * @return the current LocaleResolver
-	 * @throws IllegalStateException if no LocaleResolver has been found
+	 * @return the current LocaleResolver, or <code>null</code> if not found
 	 */
-	public static LocaleResolver getLocaleResolver(HttpServletRequest request) throws IllegalStateException {
-		LocaleResolver localeResolver =
-				(LocaleResolver) request.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE);
-		if (localeResolver == null) {
-			throw new IllegalStateException("No LocaleResolver found: not in a DispatcherServlet request?");
-		}
-		return localeResolver;
+	public static LocaleResolver getLocaleResolver(HttpServletRequest request) {
+		return (LocaleResolver) request.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE);
 	}
 
 	/**
 	 * Retrieves the current locale from the given request,
-	 * using the LocaleResolver bound to the request by the DispatcherServlet.
+	 * using the LocaleResolver bound to the request by the DispatcherServlet
+	 * (if available), falling back to the request's accept-header Locale.
 	 * @param request current HTTP request
-	 * @return the current locale
-	 * @throws IllegalStateException if no LocaleResolver has been found
+	 * @return the current locale, either from the LocaleResolver or from
+	 * the plain request
 	 * @see #getLocaleResolver
+	 * @see javax.servlet.http.HttpServletRequest#getLocale()
 	 */
-	public static Locale getLocale(HttpServletRequest request) throws IllegalStateException {
-		return getLocaleResolver(request).resolveLocale(request);
+	public static Locale getLocale(HttpServletRequest request) {
+		LocaleResolver localeResolver = getLocaleResolver(request);
+		if (localeResolver != null) {
+			return localeResolver.resolveLocale(request);
+		}
+		else {
+			return request.getLocale();
+		}
 	}
 
 	/**
 	 * Return the ThemeResolver that has been bound to the request by the
 	 * DispatcherServlet.
 	 * @param request current HTTP request
-	 * @return the current ThemeResolver
-	 * @throws IllegalStateException if no ThemeResolver has been found
+	 * @return the current ThemeResolver, or <code>null</code> if not found
 	 */
-	public static ThemeResolver getThemeResolver(HttpServletRequest request) throws IllegalStateException {
-		ThemeResolver themeResolver =
-				(ThemeResolver) request.getAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE);
-		if (themeResolver == null) {
-			throw new IllegalStateException("No ThemeResolver found: not in a DispatcherServlet request?");
-		}
-		return themeResolver;
+	public static ThemeResolver getThemeResolver(HttpServletRequest request) {
+		return (ThemeResolver) request.getAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE);
 	}
 
 	/**
-	 * Retrieves the current theme from the given request, using the
-	 * ThemeResolver bound to the request by the DispatcherServlet.
+	 * Return the ThemeSource that has been bound to the request by the
+	 * DispatcherServlet.
 	 * @param request current HTTP request
-	 * @return the current theme
-	 * @throws IllegalStateException if no ThemeResolver has been found
+	 * @return the current ThemeSource
+	 */
+	public static ThemeSource getThemeSource(HttpServletRequest request) {
+		return (ThemeSource) request.getAttribute(DispatcherServlet.THEME_SOURCE_ATTRIBUTE);
+	}
+
+	/**
+	 * Retrieves the current theme from the given request, using the ThemeResolver
+	 * and ThemeSource bound to the request by the DispatcherServlet.
+	 * @param request current HTTP request
+	 * @return the current theme, or <code>null</code> if not found
 	 * @see #getThemeResolver
 	 */
-	public static Theme getTheme(HttpServletRequest request) throws IllegalStateException {
-		WebApplicationContext context = getWebApplicationContext(request);
-		String themeName = getThemeResolver(request).resolveThemeName(request);
-		return context.getTheme(themeName);
+	public static Theme getTheme(HttpServletRequest request) {
+		ThemeResolver themeResolver = getThemeResolver(request);
+		ThemeSource themeSource = getThemeSource(request);
+		if (themeResolver != null && themeSource != null) {
+			String themeName = themeResolver.resolveThemeName(request);
+			return themeSource.getTheme(themeName);
+		}
+		else {
+			return null;
+		}
 	}
 
 }

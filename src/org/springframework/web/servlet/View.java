@@ -43,6 +43,15 @@ import javax.servlet.http.HttpServletResponse;
 public interface View {
 
 	/**
+	 * Return the content type of the view, if predetermined.
+	 * <p>Can be used to check the content type upfront,
+	 * before the actual rendering process.
+	 * @return the content type String (optionally including a character set),
+	 * or <code>null</code> if not predetermined.
+	 */
+	String getContentType();
+
+	/**
 	 * Render the view given the specified model.
 	 * <p>The first step will be preparing the request: In the JSP case,
 	 * this would mean setting model objects as request attributes.

@@ -48,7 +48,7 @@ public class ThemeTag extends MessageTag {
 	 */
 	protected MessageSource getMessageSource() {
 		Theme theme = getRequestContext().getTheme();
-		return (theme != null) ? theme.getMessageSource() : null;
+		return theme.getMessageSource();
 	}
 
 	/**

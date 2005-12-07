@@ -46,6 +46,7 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.ui.context.ThemeSource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.scope.RequestContextHolder;
@@ -183,23 +184,29 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String HANDLER_EXECUTION_CHAIN_ATTRIBUTE = DispatcherServlet.class.getName() + ".HANDLER";
 
 	/**
-	 * Request attribute to hold current web application context.
+	 * Request attribute to hold the current web application context.
 	 * Otherwise only the global web app context is obtainable by tags etc.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getWebApplicationContext
 	 */
 	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = DispatcherServlet.class.getName() + ".CONTEXT";
 
 	/**
-	 * Request attribute to hold current locale, retrievable by views.
+	 * Request attribute to hold the current LocaleResolver, retrievable by views.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocaleResolver
 	 */
-	public static final String LOCALE_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".LOCALE";
+	public static final String LOCALE_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".LOCALE_RESOLVER";
 
 	/**
-	 * Request attribute to hold current theme, retrievable by views.
+	 * Request attribute to hold the current ThemeResolver, retrievable by views.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeResolver
 	 */
-	public static final String THEME_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME";
+	public static final String THEME_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_RESOLVER";
+
+	/**
+	 * Request attribute to hold the current ThemeSource, retrievable by views.
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeSource
+	 */
+	public static final String THEME_SOURCE_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_SOURCE";
 
 
 	/**
@@ -561,6 +568,21 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 	}
 
+	/**
+	 * Return this servlet's ThemeSource, if any; else return <code>null</code>.
+	 * <p>Default is to return the WebApplicationContext as ThemeSource,
+	 * provided that it implements the ThemeSource interface.
+	 * @see #getWebApplicationContext()
+	 */
+	public ThemeSource getThemeSource() {
+		if (getWebApplicationContext() instanceof ThemeSource) {
+			return (ThemeSource) getWebApplicationContext();
+		}
+		else {
+			return null;
+		}
+	}
+
 
 	/**
 	 * Return the default strategy object for the given strategy interface.
@@ -584,8 +606,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Create a List of default strategy objects for the given strategy interface.
 	 * <p>The default implementation uses the "DispatcherServlet.properties" file
 	 * (in the same package as the DispatcherServlet class) to determine the class names.
-	 * It instantiates the strategy objects and satisifies ApplicationContextAware
-	 * if necessary.
+	 * It instantiates the strategy objects through the context's BeanFactory.
 	 * @param strategyInterface the strategy interface
 	 * @return the List of corresponding strategy objects
 	 * @throws BeansException if initialization failed
@@ -656,10 +677,11 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
-		// Make framework objects available for handlers.
+		// Make framework objects available to handlers and view objects.
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
+		request.setAttribute(THEME_SOURCE_ATTRIBUTE, getThemeSource());
 
 		try {
 			doDispatch(request, response);

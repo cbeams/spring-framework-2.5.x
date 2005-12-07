@@ -55,6 +55,9 @@ public class ThemeChangeInterceptor extends HandlerInterceptorAdapter {
 			throws ServletException {
 
 		ThemeResolver themeResolver = RequestContextUtils.getThemeResolver(request);
+		if (themeResolver == null) {
+			throw new IllegalStateException("No ThemeResolver found: not in a DispatcherServlet request?");
+		}
 		String newTheme = request.getParameter(this.paramName);
 		if (newTheme != null) {
 			themeResolver.setThemeName(request, response, newTheme);

@@ -50,6 +50,7 @@ public abstract class AbstractTagTests extends TestCase {
 			request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, lr);
 			ThemeResolver tr = new FixedThemeResolver();
 			request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, tr);
+			request.setAttribute(DispatcherServlet.THEME_SOURCE_ATTRIBUTE, wac);
 		}
 		else {
 			sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);

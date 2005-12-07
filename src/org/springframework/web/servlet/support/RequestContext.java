@@ -28,10 +28,13 @@ import javax.servlet.http.HttpSession;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.ui.context.Theme;
+import org.springframework.ui.context.ThemeSource;
+import org.springframework.ui.context.support.ResourceBundleThemeSource;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.EscapedErrors;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
@@ -203,21 +206,20 @@ public class RequestContext {
 		this.webApplicationContext = RequestContextUtils.getWebApplicationContext(request, servletContext);
 
 		// Determine locale to use for this RequestContext.
-		try {
-			// Try LocaleResolver (will work within a DispatcherServlet request).
-			this.locale = RequestContextUtils.getLocale(request);
+		LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
+		if (localeResolver != null) {
+			// Try LocaleResolver (we're within a DispatcherServlet request).
+			this.locale = localeResolver.resolveLocale(request);
 		}
-		catch (IllegalStateException ex) {
+		else {
 			// No LocaleResolver available -> try fallback.
 			this.locale = getFallbackLocale();
 		}
 
 		// Determine theme to use for this RequestContext.
-		try {
-			this.theme = RequestContextUtils.getTheme(request);
-		}
-		catch (IllegalStateException ex) {
-			// No ThemeResolver available -> try fallback.
+		this.theme = RequestContextUtils.getTheme(request);
+		if (this.theme == null) {
+			// No ThemeResolver and ThemeSource available -> try fallback.
 			this.theme = getFallbackTheme();
 		}
 
@@ -266,10 +268,14 @@ public class RequestContext {
 	/**
 	 * Determine the fallback theme for this context.
 	 * <p>Default implementation returns the default theme (with name "theme").
-	 * @return the fallback theme (never <code>null</code>)
+	 * @return the fallback theme, or <code>null
 	 */
 	protected Theme getFallbackTheme() {
-		return getWebApplicationContext().getTheme(DEFAULT_THEME_NAME);
+		ThemeSource themeSource = RequestContextUtils.getThemeSource(getRequest());
+		if (themeSource == null) {
+			themeSource = new ResourceBundleThemeSource();
+		}
+		return themeSource.getTheme(DEFAULT_THEME_NAME);
 	}
 
 

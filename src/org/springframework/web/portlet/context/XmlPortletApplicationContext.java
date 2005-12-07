@@ -60,7 +60,6 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
  * @see org.springframework.web.portlet.FrameworkPortlet#initPortletApplicationContext
  * @see org.springframework.web.portlet.FrameworkPortlet#setContextClass
  */
-
 public class XmlPortletApplicationContext extends AbstractRefreshablePortletApplicationContext {
 
 	/** Default config location for the root context */

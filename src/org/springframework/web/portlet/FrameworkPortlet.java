@@ -30,7 +30,6 @@ import javax.portlet.RenderResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.StringUtils;
@@ -81,7 +80,6 @@ import org.springframework.web.portlet.context.XmlPortletApplicationContext;
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
  * @author Juergen Hoeller
- * @author Rod Johnson
  * @since 2.0
  * @see #doActionService
  * @see #doRenderService
@@ -90,7 +88,6 @@ import org.springframework.web.portlet.context.XmlPortletApplicationContext;
  * @see #setContextConfigLocation
  * @see #setNamespace
  */
-
 public abstract class FrameworkPortlet extends PortletBean {
 
 	/**
@@ -150,9 +147,9 @@ public abstract class FrameworkPortlet extends PortletBean {
 	private String[] userinfoUsernameAttributes = DEFAULT_USERINFO_ATTRIBUTE_NAMES;
 
 	/**
-	 * PortletApplicationContext for this portlet
+	 * WebApplicationContext for this portlet
 	 */
-	private ApplicationContext portletApplicationContext;
+	private WebApplicationContext portletApplicationContext;
 
 
 	/**
@@ -294,11 +291,11 @@ public abstract class FrameworkPortlet extends PortletBean {
 	 * @throws BeansException if the context couldn't be initialized
 	 * @see #createPortletApplicationContext
 	 */
-	protected ApplicationContext initPortletApplicationContext() throws BeansException {
+	protected WebApplicationContext initPortletApplicationContext() throws BeansException {
 		getPortletContext().log("Loading PortletApplicationContext for Spring FrameworkPortlet '" + getPortletName() + "'");
 
 		WebApplicationContext parent = PortletApplicationContextUtils.getWebApplicationContext(getPortletContext());
-		ApplicationContext pac = createPortletApplicationContext(parent);
+		WebApplicationContext pac = createPortletApplicationContext(parent);
 		if (logger.isInfoEnabled()) {
 			logger.info("Using context class '" + pac.getClass().getName() + "' for portlet '" +
 					getPortletName() + "'");
@@ -327,7 +324,7 @@ public abstract class FrameworkPortlet extends PortletBean {
 	 * @see #setContextClass
 	 * @see org.springframework.web.portlet.context.XmlPortletApplicationContext
 	 */
-	protected ApplicationContext createPortletApplicationContext(WebApplicationContext parent)
+	protected WebApplicationContext createPortletApplicationContext(WebApplicationContext parent)
 			throws BeansException {
 
 		if (logger.isDebugEnabled()) {
@@ -368,7 +365,7 @@ public abstract class FrameworkPortlet extends PortletBean {
 	/**
 	 * Return this portlet's ApplicationContext.
 	 */
-	public final ApplicationContext getPortletApplicationContext() {
+	public final WebApplicationContext getPortletApplicationContext() {
 		return portletApplicationContext;
 	}
 

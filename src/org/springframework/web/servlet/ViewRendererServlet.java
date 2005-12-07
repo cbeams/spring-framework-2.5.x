@@ -45,6 +45,13 @@ import org.springframework.web.util.NestedServletException;
  */
 public class ViewRendererServlet extends HttpServlet {
 
+	/**
+	 * Request attribute to hold current web application context.
+	 * Otherwise only the global web app context is obtainable by tags etc.
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getWebApplicationContext
+	 */
+	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE;
+
 	/** Name of request attribute that holds the View object */
 	public static final String VIEW_ATTRIBUTE = ViewRendererServlet.class.getName() + ".VIEW";
 

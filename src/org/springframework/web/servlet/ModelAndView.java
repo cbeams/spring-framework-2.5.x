@@ -40,14 +40,8 @@ import java.util.Map;
  */
 public class ModelAndView {
 
-	/** View if we hold an object reference */
-	private View view;
-
-	/**
-	 * View name if we hold a view name that will be resolved
-	 * by the DispatcherServlet via a ViewResolver
-	 */
-	private String viewName;
+	/** View instance or view name String */
+	private Object view;
 
 	/** Model */
 	private Map model;
@@ -80,7 +74,7 @@ public class ModelAndView {
 	 * @see #addObject
 	 */
 	public ModelAndView(String viewName) {
-		this.viewName = viewName;
+		this.view = viewName;
 	}
 
 	/**
@@ -104,7 +98,7 @@ public class ModelAndView {
 	 * may be <code>null</code> if there is no model data.
 	 */
 	public ModelAndView(String viewName, Map model) {
-		this.viewName = viewName;
+		this.view = viewName;
 		this.model = model;
 	}
 
@@ -127,7 +121,7 @@ public class ModelAndView {
 	 * @param modelObject the single model object
 	 */
 	public ModelAndView(String viewName, String modelName, Object modelObject) {
-		this.viewName = viewName;
+		this.view = viewName;
 		addObject(modelName, modelObject);
 	}
 
@@ -138,7 +132,6 @@ public class ModelAndView {
 	 */
 	public void setView(View view) {
 		this.view = view;
-		this.viewName = null;
 	}
 
 	/**
@@ -146,7 +139,7 @@ public class ModelAndView {
 	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 */
 	public View getView() {
-		return view;
+		return (this.view instanceof View ? (View) this.view : null);
 	}
 
 	/**
@@ -155,8 +148,7 @@ public class ModelAndView {
 	 * pre-existing view name or View.
 	 */
 	public void setViewName(String viewName) {
-		this.viewName = viewName;
-		this.view = null;
+		this.view = viewName;
 	}
 
 	/**
@@ -164,7 +156,7 @@ public class ModelAndView {
 	 * via a ViewResolver, or <code>null</code> if we are using a View object.
 	 */
 	public String getViewName() {
-		return viewName;
+		return (this.view instanceof String ? (String) this.view : null);
 	}
 
 	/**
@@ -173,7 +165,7 @@ public class ModelAndView {
 	 * DispatcherServlet via a ViewResolver.
 	 */
 	public boolean isReference() {
-		return (this.viewName != null);
+		return (this.view instanceof String);
 	}
 
 	/**
@@ -228,7 +220,6 @@ public class ModelAndView {
 	 */
 	public void clear() {
 		this.view = null;
-		this.viewName = null;
 		this.model = null;
 	}
 
@@ -238,7 +229,7 @@ public class ModelAndView {
 	 * @see #clear()
 	 */
 	public boolean isEmpty() {
-		return (this.view == null && this.viewName == null && this.model == null);
+		return (this.view == null && this.model == null);
 	}
 
 
@@ -248,7 +239,7 @@ public class ModelAndView {
 	public String toString() {
 		StringBuffer buf = new StringBuffer("ModelAndView: ");
 		if (isReference()) {
-			buf.append("reference to view with name '").append(this.viewName).append("'");
+			buf.append("reference to view with name '").append(this.view).append("'");
 		}
 		else {
 			buf.append("materialized View is [").append(this.view).append(']');

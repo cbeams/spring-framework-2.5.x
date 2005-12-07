@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.tags;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class ThemeTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		ThemeTag tag = new ThemeTag() {
-			protected void writeMessage(String msg) throws IOException {
+			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
 		};

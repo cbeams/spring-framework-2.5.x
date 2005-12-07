@@ -26,6 +26,7 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.ui.context.Theme;
+import org.springframework.ui.context.ThemeSource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
@@ -74,7 +75,7 @@ public class ResourceBundleMessageSourceTests extends AbstractApplicationContext
 		wac.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/test-servlet.xml"});
 		wac.refresh();
 
-		Theme theme = wac.getTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME);
+		Theme theme = ((ThemeSource) wac).getTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME);
 		assertNotNull(theme);
 		assertTrue("Theme name has to be the default theme name", AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME.equals(theme.getName()));
 		themeMsgSource = theme.getMessageSource();
@@ -255,7 +256,7 @@ public class ResourceBundleMessageSourceTests extends AbstractApplicationContext
 
 	public void testThemeSourceNesting() throws NoSuchMessageException {
 		String overriddenMsg = getThemeMessage("theme.example2", null, null, Locale.UK);
-		MessageSource ms = root.getTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME).getMessageSource();
+		MessageSource ms = ((ThemeSource) root).getTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME).getMessageSource();
 		String originalMsg = ms.getMessage("theme.example2", null, Locale.UK);
 		assertTrue("correct overridden msg", "test-message2".equals(overriddenMsg));
 		assertTrue("correct original msg", "message2".equals(originalMsg));

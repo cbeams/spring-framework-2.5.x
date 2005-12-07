@@ -39,11 +39,8 @@ import java.util.Map;
  */
 public class ModelAndView {
 
-	/**
-	 * View name if we hold a view name that will be resolved
-	 * by the DispatcherServlet via a ViewResolver
-	 */
-	private String viewName;
+	/** View instance or view name String */
+	private Object view;
 
 	/** Model */
 	private Map model;
@@ -52,9 +49,20 @@ public class ModelAndView {
 	/**
 	 * Default constructor for bean-style usage: populating bean
 	 * properties instead of passing in constructor arguments.
+	 * @see #setView(Object)
 	 * @see #setViewName(String)
 	 */
 	public ModelAndView() {
+	}
+
+	/**
+	 * Convenient constructor when there is no model data to expose.
+	 * Can also be used in conjunction with <code>addObject</code>.
+	 * @param view View object to render (usually a Servlet MVC View object)
+	 * @see #addObject
+	 */
+	public ModelAndView(Object view) {
+		this.view = view;
 	}
 
 	/**
@@ -65,10 +73,22 @@ public class ModelAndView {
 	 * @see #addObject
 	 */
 	public ModelAndView(String viewName) {
-		this.viewName = viewName;
+		this.view = viewName;
 	}
 
-	/** 
+	/**
+	 * Creates new ModelAndView given a View object and a model.
+	 * @param view View object to render (usually a Servlet MVC View object)
+	 * @param model Map of model names (Strings) to model objects
+	 * (Objects). Model entries may not be <code>null</code>, but the model Map
+	 * may be <code>null</code> if there is no model data.
+	 */
+	public ModelAndView(Object view, Map model) {
+		this.view = view;
+		this.model = model;
+	}
+
+	/**
 	 * Creates new ModelAndView given a view name and a model.
 	 * @param viewName name of the View to render, to be resolved
 	 * by the DispatcherServlet
@@ -77,8 +97,19 @@ public class ModelAndView {
 	 * may be <code>null</code> if there is no model data.
 	 */
 	public ModelAndView(String viewName, Map model) {
-		this.viewName = viewName;
+		this.view = viewName;
 		this.model = model;
+	}
+
+	/**
+	 * Convenient constructor to take a single model object.
+	 * @param view View object to render (usually a Servlet MVC View object)
+	 * @param modelName name of the single entry in the model
+	 * @param modelObject the single model object
+	 */
+	public ModelAndView(Object view, String modelName, Object modelObject) {
+		this.view = view;
+		addObject(modelName, modelObject);
 	}
 
 	/**
@@ -89,10 +120,29 @@ public class ModelAndView {
 	 * @param modelObject the single model object
 	 */
 	public ModelAndView(String viewName, String modelName, Object modelObject) {
-		this.viewName = viewName;
+		this.view = viewName;
 		addObject(modelName, modelObject);
 	}
 
+
+	/**
+	 * Set a View object for this ModelAndView. Will override any
+	 * pre-existing view name or View.
+	 * <p>The given View object will usually be a Servlet MVC View object.
+	 * This is nevertheless typed as Object to avoid a Servlet API dependency
+	 * in the Portlet ModelAndView class.
+	 */
+	public void setView(Object view) {
+		this.view = view;
+	}
+
+	/**
+	 * Return the View object, or <code>null</code> if we are using a view name
+	 * to be resolved by the DispatcherServlet via a ViewResolver.
+	 */
+	public Object getView() {
+		return (!(this.view instanceof String) ? this.view : null);
+	}
 
 	/**
 	 * Set a view name for this ModelAndView, to be resolved by the
@@ -100,7 +150,7 @@ public class ModelAndView {
 	 * pre-existing view name or View.
 	 */
 	public void setViewName(String viewName) {
-		this.viewName = viewName;
+		this.view = viewName;
 	}
 
 	/**
@@ -108,7 +158,16 @@ public class ModelAndView {
 	 * via a ViewResolver, or <code>null</code> if we are using a View object.
 	 */
 	public String getViewName() {
-		return viewName;
+		return (this.view instanceof String ? (String) this.view : null);
+	}
+
+	/**
+	 * Return whether we use a view reference, i.e. true if the
+	 * view has been specified via a name to be resolved by the
+	 * DispatcherServlet via a ViewResolver.
+	 */
+	public boolean isReference() {
+		return (this.view instanceof String);
 	}
 
 	/**
@@ -162,7 +221,7 @@ public class ModelAndView {
 	 * @see org.springframework.web.portlet.HandlerInterceptor#postHandle
 	 */
 	public void clear() {
-		this.viewName = null;
+		this.view = null;
 		this.model = null;
 	}
 
@@ -172,7 +231,7 @@ public class ModelAndView {
 	 * @see #clear()
 	 */
 	public boolean isEmpty() {
-		return (this.viewName == null && this.model == null);
+		return (this.view == null && this.model == null);
 	}
 
 
@@ -181,7 +240,12 @@ public class ModelAndView {
 	 */
 	public String toString() {
 		StringBuffer buf = new StringBuffer("ModelAndView: ");
-		buf.append("reference to view with name '").append(this.viewName).append("'");
+		if (isReference()) {
+			buf.append("reference to view with name '").append(this.view).append("'");
+		}
+		else {
+			buf.append("materialized View is [").append(this.view).append(']');
+		}
 		buf.append("; model is ").append(this.model);
 		return buf.toString();
 	}

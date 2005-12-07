@@ -76,7 +76,7 @@ import org.springframework.web.context.ServletContextAware;
  * @see org.springframework.context.support.GenericApplicationContext
  */
 public abstract class AbstractRefreshableWebApplicationContext extends AbstractRefreshableApplicationContext
-		implements ConfigurableWebApplicationContext{
+		implements ConfigurableWebApplicationContext, ThemeSource {
 
 	/** Servlet context that this context runs in */
 	private ServletContext servletContext;

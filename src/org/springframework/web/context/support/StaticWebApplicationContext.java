@@ -47,7 +47,7 @@ import org.springframework.web.context.ServletContextAware;
  * @see org.springframework.ui.context.ThemeSource
  */
 public class StaticWebApplicationContext extends StaticApplicationContext
-		implements ConfigurableWebApplicationContext {
+		implements ConfigurableWebApplicationContext, ThemeSource {
 
 	private ServletContext servletContext;
 

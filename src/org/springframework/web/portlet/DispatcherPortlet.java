@@ -92,7 +92,6 @@ import org.springframework.web.servlet.ViewResolver;
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
  * @author Juergen Hoeller
- * @author Rod Johnson
  * @author Nick Lothian
  * @author Rainer Schmitz
  * @since 2.0
@@ -116,7 +115,6 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @see #setDetectAllViewResolvers
 	 */
 	public static final String HANDLER_MAPPING_BEAN_NAME = "handlerMapping";
-
 
 	/**
 	 * Well-known name for the HandlerAdapter object in the bean factory for this namespace.
@@ -143,18 +141,11 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 */
 	public static final String DEFAULT_VIEW_RENDERER_URL = "/WEB-INF/servlet/view";
 
-
 	/**
 	 * Request attribute to hold the currently chosen HandlerExecutionChain.
 	 * Only used for internal optimizations.
 	 */
 	public static final String HANDLER_EXECUTION_CHAIN_ATTRIBUTE = DispatcherPortlet.class.getName() + ".HANDLER";
-
-	/**
-	 * Request attribute to hold current portlet application context.
-	 * Otherwise only the global web app context is obtainable by tags etc.
-	 */
-	public static final String PORTLET_APPLICATION_CONTEXT_ATTRIBUTE = DispatcherPortlet.class.getName() + ".CONTEXT";
 
 
 	/**
@@ -461,7 +452,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	protected Object getDefaultStrategy(Class strategyInterface) throws BeansException {
 		List strategies = getDefaultStrategies(strategyInterface);
 		if (strategies.size() != 1) {
-			throw new BeanInitializationException("DispatcherPortlet needs exactly 1 strategy for interface [" + strategyInterface.getName() + "]");
+			throw new BeanInitializationException(
+					"DispatcherPortlet needs exactly 1 strategy for interface [" + strategyInterface.getName() + "]");
 		}
 		return strategies.get(0);
 	}
@@ -496,7 +488,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			return strategies;
 		}
 		catch (ClassNotFoundException ex) {
-			throw new BeanInitializationException("Could not find DispatcherPortlet's default strategy class for interface [" + key + "]", ex);
+			throw new BeanInitializationException(
+					"Could not find DispatcherPortlet's default strategy class for interface [" + key + "]", ex);
 		}
 	}
 
@@ -784,7 +777,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @return a corresponding ModelAndView to forward to
 	 * @throws Exception if no error ModelAndView found
 	 */
-	protected ModelAndView processHandlerException(RenderRequest request, RenderResponse response, Object handler, Exception ex)
+	protected ModelAndView processHandlerException(
+			RenderRequest request, RenderResponse response, Object handler, Exception ex)
 			throws Exception {
 
 		ModelAndView exMv = null;
@@ -813,21 +807,62 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @param response current portlet render response
 	 * @throws Exception if there's a problem rendering the view
 	 */
-	protected void render(ModelAndView mv, RenderRequest request, RenderResponse response)
-			throws Exception {
+	protected void render(ModelAndView mv, RenderRequest request, RenderResponse response) throws Exception {
+		View view = null;
+		if (mv.isReference()) {
+			// We need to resolve the view name.
+			view = resolveViewName(mv.getViewName(), mv.getModelInternal(), request);
+			if (view == null) {
+				throw new PortletException("Could not resolve view with name '" + mv.getViewName() +
+						"' in portlet with name '" + getPortletName() + "'");
+			}
+		}
+		else {
+			// No need to lookup: the ModelAndView object contains the actual View object.
+			Object viewObject = mv.getView();
+			if (viewObject == null) {
+				throw new PortletException("ModelAndView [" + mv + "] neither contains a view name nor a " +
+						"View object in portlet with name '" + getPortletName() + "'");
+			}
+			if (!(viewObject instanceof View)) {
+				throw new PortletException(
+						"View object [" + viewObject + "] is not an instance of [org.springframework.web.servlet.View] - " +
+						"DispatcherPortlet does not support any other view types");
+			}
+		}
 
-		// We need to resolve the view name.
-		View view = resolveViewName(mv.getViewName(), mv.getModel(), request);
 		if (view == null) {
 			throw new PortletException("Could not resolve view with name '" + mv.getViewName() +
 					"' in portlet with name '" + getPortletName() + "'");
 		}
 
-		// These attributes are required by the ViewRendererServlet
+		// Set the content type on the response if needed and if possible.
+		// The Portlet spec requires the content type to be set on the RenderResponse;
+		// it's not sufficient to let the View set it on the ServletResponse.
+		if (response.getContentType() != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Portlet response content type already set to [" + response.getContentType() + "]");
+			}
+		}
+		else {
+			// No Portlet content type specified yet -> use the view-determined type.
+			String contentType = view.getContentType();
+			if (contentType != null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Setting portlet response content type to view-determined type [" + contentType + "]");
+				}
+				response.setContentType(contentType);
+			}
+		}
+
+		// Expose Portlet ApplicationContext to view objects.
+		request.setAttribute(ViewRendererServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, getPortletApplicationContext());
+
+		// These attributes are required by the ViewRendererServlet.
 		request.setAttribute(ViewRendererServlet.VIEW_ATTRIBUTE, view);
 		request.setAttribute(ViewRendererServlet.MODEL_ATTRIBUTE, mv.getModel());
 
-		// include the content of the view in the render response
+		// Unclude the content of the view in the render response.
 		getPortletContext().getRequestDispatcher(this.viewRendererUrl).include(request, response);
 	}
 

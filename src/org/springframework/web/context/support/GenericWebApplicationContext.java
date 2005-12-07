@@ -51,7 +51,8 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Juergen Hoeller
  * @since 1.2
  */
-public class GenericWebApplicationContext extends GenericApplicationContext implements WebApplicationContext {
+public class GenericWebApplicationContext extends GenericApplicationContext
+		implements WebApplicationContext, ThemeSource {
 
 	private ServletContext servletContext;
 

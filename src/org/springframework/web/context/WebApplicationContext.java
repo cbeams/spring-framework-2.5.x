@@ -19,7 +19,6 @@ package org.springframework.web.context;
 import javax.servlet.ServletContext;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.ui.context.ThemeSource;
 
 /** 
  * Interface to provide configuration for a web application. This is read-only while
@@ -42,7 +41,7 @@ import org.springframework.ui.context.ThemeSource;
  * @since January 19, 2001
  * @see ServletContextAware#setServletContext
  */
-public interface WebApplicationContext extends ApplicationContext, ThemeSource {
+public interface WebApplicationContext extends ApplicationContext {
 
 	/**
 	 * Context attribute to bind root WebApplicationContext to on successful startup.
