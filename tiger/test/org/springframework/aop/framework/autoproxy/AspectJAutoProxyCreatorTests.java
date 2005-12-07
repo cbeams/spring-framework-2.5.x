@@ -2,6 +2,7 @@ package org.springframework.aop.framework.autoproxy;
 
 import junit.framework.TestCase;
 
+import org.aspectj.lang.Aspects;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.aspectj.annotation.AbstractAtAspectJAdvisorFactoryTests.PerTargetAspect;
 import org.springframework.aop.aspectj.annotation.AbstractAtAspectJAdvisorFactoryTests.TwoAdviceAspect;
@@ -122,6 +123,16 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		ITestBean adrian2 = (ITestBean) bf.getBean("adrian");
 		assertNotSame(adrian1, adrian2);
 		testPrototype(adrian2, aspectSingleton ? 2 : 0);
+	}
+	
+	public void testAdviceUsingJoinPoint() {
+		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
+				"/org/springframework/aop/framework/autoproxy/usesJoinPointAspect.xml");
+
+		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
+		adrian1.getAge();
+		AdviceUsingThisJoinPoint aspectInstance = (AdviceUsingThisJoinPoint) Aspects.aspectOf(AdviceUsingThisJoinPoint.class);
+		assertEquals("method-execution(int TestBean.getAge())",aspectInstance.getLastMethodEntered());		
 	}
 
 	private void testPrototype(ITestBean adrian1, int start) {
