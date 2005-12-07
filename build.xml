@@ -394,6 +394,7 @@
 		<jar jarfile="${dist.dir}/spring-aspects.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/beans/factory/aspectj/**"/>
+				<include name="META-INF/aop.xml"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>

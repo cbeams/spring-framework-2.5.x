@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<aspectj>
+    <aspect name="org.springframework.beans.factory.aspectj.BeanConfigurer"/>
+</aspectj>
