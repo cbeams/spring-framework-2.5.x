@@ -6,21 +6,20 @@
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
 	<aop:config>
-		<aop:pointcut id="getNameCalls" expression="execution(* *..ITestBean.getName(..))"/>
-		<aop:advisor id="getAgeAdvisor"
-					 pointcut="execution(* *..ITestBean.getAge(..))"
-					 advice-ref="getAgeCounter"/>
+		<aop:pointcut id="getNameCalls" expression="execution(* getName(..)) and within(*..ITestBean+)"/>
+		<aop:advisor id="getAgeAdvisor" pointcut="execution(* *..ITestBean.getAge(..))" advice-ref="getAgeCounter"/>
 		<aop:advisor id="getNameAdvisor" pointcut-ref="getNameCalls" advice-ref="getNameCounter"/>
 
 		<aop:aspect id="countAgeCalls" bean="countingAdvice">
 			<aop:pointcut id="setCalls" expression="execution(* *..ITestBean.set*(..))"/>
 			<aop:advice pointcut="execution(* *..ITestBean.set*(..))" method="myBeforeAdvice" kind="before"/>
 			<aop:advice pointcut-ref="setCalls" method="myAfterAdvice" kind="after"/>
-			<!--<aop:advice pointcut-ref="setCalls" method="myAroundAdvice" kind="around"/>-->
+			<aop:advice pointcut-ref="setCalls" method="myAroundAdvice" kind="around"/>
 		</aop:aspect>
 
 	</aop:config>
 
+	<aop:spring-configured/>
 
 	<bean id="getNameCounter" class="org.springframework.aop.framework.CountingBeforeAdvice"/>
 	<bean id="getAgeCounter" class="org.springframework.aop.framework.CountingBeforeAdvice"/>

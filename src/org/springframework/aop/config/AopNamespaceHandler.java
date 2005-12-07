@@ -16,7 +16,6 @@
 
 package org.springframework.aop.config;
 
-import org.springframework.aop.aspectj.AspectJAfterAdvice;
 import org.springframework.aop.aspectj.AspectJAfterReturningAdvice;
 import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
 import org.springframework.aop.aspectj.AspectJAroundAdvice;
@@ -110,33 +109,22 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 				throw new IllegalStateException("Unable to locate class [" + BEAN_CONFIGURER + "]. Cannot use @SpringConfigured.");
 			}
 		}
-
-		protected BeanDefinition doParse(Element element) {
-			try {
-				Class beanConfigurerClass = ClassUtils.forName(BEAN_CONFIGURER);
-				RootBeanDefinition definition = new RootBeanDefinition(beanConfigurerClass);
-				definition.setFactoryMethodName("aspectOf");
-				return definition;
-			}
-			catch (ClassNotFoundException e) {
-				throw new IllegalStateException("Unable to locate class [" + BEAN_CONFIGURER + "]. Cannot use @SpringConfigured.");
-			}
-		}
 	}
 
 	private static class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 
-		private static final String AJ_AUTOPROXY_CREATOR = "org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator";
+		private static final String ASPECTJ_AUTOPROXY_CREATOR = "org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator";
 
 		private boolean registered;
 
+		// TODO: introduce once per parse BeanDefinitionParser base class
 		public void parse(Element element, BeanDefinitionRegistry registry) {
 			if (this.registered) {
 				return;
 			}
 
 			try {
-				Class autoProxyClass = ClassUtils.forName(AJ_AUTOPROXY_CREATOR);
+				Class autoProxyClass = ClassUtils.forName(ASPECTJ_AUTOPROXY_CREATOR);
 				RootBeanDefinition definition = new RootBeanDefinition(autoProxyClass);
 
 				String id = BeanDefinitionReaderUtils.generateBeanName(definition, registry, false);
@@ -144,18 +132,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 				this.registered = true;
 			}
 			catch (ClassNotFoundException e) {
-				throw new IllegalStateException("Unable to locate class [" + AJ_AUTOPROXY_CREATOR + "]. Cannot use @AspectJ auto-proxying.");
-			}
-		}
-
-		protected BeanDefinition doParse(Element element) {
-			try {
-				Class autoProxyClass = ClassUtils.forName(AJ_AUTOPROXY_CREATOR);
-				RootBeanDefinition definition = new RootBeanDefinition(autoProxyClass);
-				return definition;
-			}
-			catch (ClassNotFoundException e) {
-				throw new IllegalStateException("Unable to locate class [" + AJ_AUTOPROXY_CREATOR + "]. Cannot use @AspectJ auto-proxying.");
+				throw new IllegalStateException("Unable to locate class [" + ASPECTJ_AUTOPROXY_CREATOR + "]. Cannot use @AspectJ auto-proxying.");
 			}
 		}
 	}
@@ -190,9 +167,9 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		public static final String BEFORE = "before";
 
 		public static final String AFTER = "after";
-		
+
 		public static final String AFTER_RETURNING = "afterReturning";
-		
+
 		public static final String AFTER_THROWING = "afterThrowing";
 
 		public static final String AROUND = "around";
@@ -338,7 +315,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 			else if (AFTER.equals(kind)) {
 				// XXX Rob : should be AspectJAfterAdvice.class
 				return AspectJAfterReturningAdvice.class;
-			} 
+			}
 			else if (AFTER_RETURNING.equals(kind)) {
 				return AspectJAfterReturningAdvice.class;
 			}

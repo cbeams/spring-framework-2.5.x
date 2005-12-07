@@ -27,7 +27,11 @@ import org.aspectj.weaver.tools.PointcutExpression;
  * @since 2.0
  */
 public class AspectJAfterAdvice extends AbstractAspectJAdvice implements MethodInterceptor {
-	
+
+	public AspectJAfterAdvice(Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
+		super(aspectJBeforeAdviceMethod, pointcut.getPointcutExpression(), aif);
+	}
+
 	public AspectJAfterAdvice(Method aspectJBeforeAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif) {
 		super(aspectJBeforeAdviceMethod, pe, aif);
 	}

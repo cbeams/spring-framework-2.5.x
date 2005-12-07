@@ -48,6 +48,7 @@
 
 		<fileset dir="${lib.dir}">
 			<include name="**/*.jar"/>
+			<exclude name="aspectj/aspectjtools.jar"/>
 		</fileset>
 
 	</path>

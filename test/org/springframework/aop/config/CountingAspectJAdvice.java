@@ -37,9 +37,9 @@ public class CountingAspectJAdvice {
 		this.afterCount++;
 	}
 
-	public void myAroundAdvice(ProceedingJoinPoint pjp) throws Throwable {
+	public void myAroundAdvice(ProceedingJoinPoint pjp, Object value) throws Throwable {
 		this.aroundCount++;
-		pjp.proceed(pjp.getArgs());
+		pjp.proceed();
 	}
 
 	public int getBeforeCount() {
