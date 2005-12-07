@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2005 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.aop.target.scope;
 
 /**
@@ -6,52 +22,50 @@ package org.springframework.aop.target.scope;
  * storage mechanism, such as HTTP Session or Request. The scope
  * identifier passed in to this class's get and put methods will
  * identifier the scope in which the map applies.
- * <p>
- * ScopeMaps are expected to be threadsafe. One ScopeMap
+ *
+ * <p>ScopeMaps are expected to be threadsafe. One ScopeMap
  * can be used with multiple ScopedTargetSources.
- * <p>
- *  A ThreadLocal
+ *
+ * <p>A ThreadLocal
  * strategy may be used to populate this. Alternatively the implementation
  * may look at the current proxy. If the proxy config's exposeProxy
  * flag is set to true, the proxy will have been bound to the thread
  * before the TargetSource and ScopeMap are invoked.
- * <p>
- * Can be implemented over the top of a session API
- * such as the HttpSession interface. 
- * @see org.springframework.aop.target.scope.ScopedTargetSource
+ *
+ * <p>Can be implemented over the top of a session API
+ * such as the HttpSession interface.
+ *
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
+ * @see org.springframework.aop.target.scope.ScopedTargetSource
  */
 public interface ScopeMap {
-	
+
+	/**
+	 * Is this scope persistent? Can we reconnect to objects from it?
+	 * @return whether or not this scope is persistent, meaning
+	 * that the handle will be usable to reconnect to the object
+	 */
+	boolean isPersistent();
+
 	/**
 	 * Return the object or null if not found in the session
-	 * @param name name to bind with
-	 * @return object value or null
+	 * @param name the name to bind with
+	 * @return object the associated value, or <code>null</code>
 	 */
-	Object get(Object scopeIdentifier, String name);
+	Object get(String name);
 	
 	/**
 	 * Bind into the underlying session
-	 * @param name name to bind with
-	 * @param o object to bind
+	 * @param name the name to bind with
+	 * @param value the object to bind
 	 */
-	void put(Object scopeIdentifier, String name, Object o);
-	
-	/**
-	 * Is this scope persistent? Can we reconnect to objects
-	 * from it?
-	 * @param scopeIdentifier scope identifier
-	 * @return whether or not this scope is persistent, meaning
-	 * that the handle will be usable to reconnect to the object.
-	 */
-	boolean isPersistent(Object scopeIdentifier);
+	void put(String name, Object value);
 
 	/**
 	 * Remove the object with the given name in the specified scope
-	 * @param scopeIdentifier identifier of the scope in which to perform the removal
-	 * @param name name of the object to remove
+	 * @param name the name of the object to remove
 	 */
-	void remove(Object scopeIdentifier, String name);
+	void remove(String name);
 	
 }

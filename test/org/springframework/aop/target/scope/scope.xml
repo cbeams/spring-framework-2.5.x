@@ -3,20 +3,14 @@
 
 <beans>
 
-  <bean id="scopedBean"
-        class="org.springframework.aop.target.scope.ScopedProxyFactoryBean">
-		
+  <bean id="scopedBean" class="org.springframework.aop.target.scope.ScopedProxyFactoryBean">
 		<!-- <property name="sessionKey" value="sessionKey" /> -->
 		<property name="targetBeanName" value="_scopedBean" /> 
 		<property name="scopeMap">
-			<bean class="org.springframework.aop.target.scope.ScopedTargetSourceTests$HashMapScopeMap" />
+			<bean class="org.springframework.aop.target.scope.HashMapScopeMap"/>
 		</property>
-		<property name="scopeIdentifierResolver">
-			<bean class="org.springframework.aop.target.scope.ScopedTargetSourceTests$MapScopeIdentiferResolver" />
-		</property>
-    </bean>
+	</bean>
 	
-	<bean id="_scopedBean" singleton="false" 
-		class="org.springframework.beans.TestBean" />
+	<bean id="_scopedBean" singleton="false" class="org.springframework.beans.TestBean"/>
   
 </beans>

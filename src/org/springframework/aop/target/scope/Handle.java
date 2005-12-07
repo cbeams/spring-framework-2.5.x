@@ -6,13 +6,9 @@ import java.io.Serializable;
  * Identifier for a scoped object, which may be
  * able to be used to reconnect to it.
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  */
 public interface Handle extends Serializable {
-	
-	Object getScopeIdentifier();
-	
-	String getTargetBeanName();
 	
 	/**
 	 * Can the object be reloaded from the handle?

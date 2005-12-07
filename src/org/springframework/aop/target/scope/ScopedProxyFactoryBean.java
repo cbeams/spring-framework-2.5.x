@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2005 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.aop.target.scope;
 
 import org.springframework.aop.framework.AbstractSingletonProxyFactoryBean;
@@ -10,96 +26,82 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * Convenient proxy factory bean for scoped objets,
- * using ScopedTargetSource. 
- * <p>
- * By default, this factory bean will create proxies that
- * proxy target class. This will require CGLIB, as of Spring 1.3.
- * Most of the properties are shared with ScopedTargetSource--
- * refer to that class for extensive documentation.
- * <p>
- * Proxies returned by this class implement the ScopedObject interface.
+ * Convenient proxy factory bean for scoped objects, using ScopedTargetSource.
+ *
+ * <p>By default, this factory bean will create proxies that proxy target class.
+ * This will require CGLIB, as of Spring 1.3. Most of the properties are shared
+ * with ScopedTargetSource; refer to that class for extensive documentation.
+ *
+ * <p>Proxies returned by this class implement the ScopedObject interface.
  * This provides the ability to obtain a "handle" for the objects.
  * If the handle is persistent, which will depend on the backing ScopeMap
- * implementation, it will be possible to reconnect to the
- * particular instance using the reconnect(Handle) method in this class.
- * This is similar to reconnecting to a stateful session bean using its
- * handle.
- * <p>
- * Proxies creating using this factory bean are threadsafe singletons,
- * and may be injected, with transparent scoping behavior. The behavior
- * of the backing ScopeMap is driven by that of the ScopeIdentifierResolver,
- * which identifies which scope the object should be taken from. 
- * <br>If a caller calls the reconnect() method with a handle, 
- * the result will be a distinct proxy, with a fixed scope.
+ * implementation, it will be possible to reconnect to the particular instance
+ * using the <code>reconnect(Handle)</code> method in this class. This is
+ * similar to reconnecting to a stateful session bean using its handle.
+ *
+ * <p>Proxies creating using this factory bean are thread-safe singletons,
+ * and may be injected, with transparent scoping behavior.
+ *
+ * <p>If a caller calls the reconnect() method with a handle, the result
+ * will be a distinct proxy, with a fixed scope.
+ *
  * @author Rod Johnson
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.aop.target.scope.ScopedTargetSource
  */
 public class ScopedProxyFactoryBean extends AbstractSingletonProxyFactoryBean 
 		implements InitializingBean, BeanFactoryAware, ScopingConfig {
 
-	private static final long serialVersionUID = 3947369008083198726L;
-
-	/**
-	 * The cached singleton proxy
-	 */
+	/** The cached singleton proxy */
 	private Object proxy;
 	
-	/**
-	 * TargetSource that manages scoping.
-	 */
+	/** TargetSource that manages scoping */
 	private ScopedTargetSource scopedTargetSource = new ScopedTargetSource();
-	
+
+
 	public ScopedProxyFactoryBean() {
 		// Change default to proxy target class
 		setProxyTargetClass(true);
 	}
 
 	public void setScopeMap(ScopeMap scopeMap) {
-		scopedTargetSource.setScopeMap(scopeMap);
+		this.scopedTargetSource.setScopeMap(scopeMap);
 	}
 
-	public void setScopeIdentifierResolver(ScopeIdentifierResolver scopeIdentifierResolver) {
-		scopedTargetSource.setScopeIdentifierResolver(scopeIdentifierResolver);
-	}
-	
-	public ScopeIdentifierResolver getScopeIdentifierResolver() {
-		return scopedTargetSource.getScopeIdentifierResolver();
-	}
-	
-	public void setSessionKey(String sessionKey) {
-		scopedTargetSource.setSessionKey(sessionKey);
+	public void setScopeKey(String scopeKey) {
+		this.scopedTargetSource.setScopeKey(scopeKey);
 	}
 	
 	public void setTargetBeanName(String targetBeanName) {
-		scopedTargetSource.setTargetBeanName(targetBeanName);
+		this.scopedTargetSource.setTargetBeanName(targetBeanName);
 	}
 	
-
-	public void afterPropertiesSet() throws Exception {
-		Handle handle = new DefaultHandle(getScopeIdentifierResolver(), getScopeMap(), getTargetBeanName());
-		this.proxy = createProxyFactory(handle).getProxy(); 
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		scopedTargetSource.setBeanFactory(beanFactory);
 	}
 
-	private ProxyFactory createProxyFactory(Handle handle) {
-		//	Object sampleInstance = scopedTargetSource.getBeanFactory().getBean(scopedTargetSource.getTargetBeanName());
-		//System.out.println(sampleInstance);
-		ProxyFactory pf = new ProxyFactory(); //new ProxyFactory(sampleInstance);
+
+	public void afterPropertiesSet() throws Exception {
+		DefaultHandle handle = new DefaultHandle(getTargetBeanName(), getScopeMap().isPersistent());
+		this.proxy = createProxyFactory(handle).getProxy();
+	}
+
+	private ProxyFactory createProxyFactory(DefaultHandle handle) {
+		ProxyFactory pf = new ProxyFactory();
 		pf.copyFrom(this);
-		pf.setTargetSource(scopedTargetSource);
+		pf.setTargetSource(this.scopedTargetSource);
 		
-		if (scopedTargetSource.getTargetClass().isInterface()) {
-			pf.addInterface(scopedTargetSource.getTargetClass());
+		if (this.scopedTargetSource.getTargetClass().isInterface()) {
+			pf.addInterface(this.scopedTargetSource.getTargetClass());
 			pf.setProxyTargetClass(false);
 		}
 		
-		// Add an introduction that implements only the
-		// methods on ScopedObject
-		pf.addAdvice(new DelegatingIntroductionInterceptor(new DefaultScopedObject(handle)));						
+		// Add an introduction that implements only the methods on ScopedObject.
+		pf.addAdvice(new DelegatingIntroductionInterceptor(new DefaultScopedObject(handle)));
 		return pf;
 	}
-	
+
+
 	/**
 	 * Callers can use this method to reobtain an object from a persistent handle.
 	 * @param handle handle that must be persistent and compatible to this factory bean,
@@ -114,63 +116,57 @@ public class ScopedProxyFactoryBean extends AbstractSingletonProxyFactoryBean
 		if (!handle.isPersistent()) {
 			throw new HandleNotPersistentException(handle);
 		}
-		
-		if (!handle.getTargetBeanName().equals(getTargetBeanName())) {
-			throw new IncompatibleHandleException(handle, getTargetBeanName());
+		if (!(handle instanceof DefaultHandle)) {
+			throw new IncompatibleHandleException(handle, "Handle is not a ScopedProxyFactoryBean handle");
+		}
+		DefaultHandle defHandle = (DefaultHandle) handle;
+		if (!defHandle.getTargetBeanName().equals(getTargetBeanName())) {
+			throw new IncompatibleHandleException(
+					handle, "Handle does not point to target bean '" + getTargetBeanName() + "'");
 		}
 		
-		// Only ScopeIdentifierResolver differs, taking a fixed value
-		ProxyFactory reconnectedProxyFactory = createProxyFactory(handle);
+		ProxyFactory reconnectedProxyFactory = createProxyFactory(defHandle);
 		ScopedTargetSource reconnectedTargetSource = new ScopedTargetSource();
 		reconnectedTargetSource.copyFrom(this.scopedTargetSource);
-		reconnectedTargetSource.setScopeIdentifierResolver(
-				new ScopeIdentifierResolver.FixedScopeIdentifierResolver(handle.getScopeIdentifier()));
 		reconnectedProxyFactory.setTargetSource(reconnectedTargetSource);
 		return reconnectedProxyFactory.getProxy();
 	}
-	
-	public Object getObject() throws Exception {
-		return this.proxy;
+
+
+	public ScopeMap getScopeMap() {
+		return scopedTargetSource.getScopeMap();
 	}
 
-	public Class getObjectType() {
-		if (isProxyTargetClass()) {
-			return scopedTargetSource.getBeanFactory().getType(scopedTargetSource.getTargetBeanName());
-		}
-		else {
-			Advised advised = (Advised) proxy;
-			if (advised.getProxiedInterfaces().length == 1) {
-				return advised.getProxiedInterfaces()[0];
-			}
-			else {
-				// Can't tell
-				return null;
-			}
-		}
+	public String getScopeKey() {
+		return scopedTargetSource.getScopeKey();
 	}
-
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		scopedTargetSource.setBeanFactory(beanFactory);
-	}
-
-	public String getSessionKey() {
-		return scopedTargetSource.getSessionKey();
-	}
-
 
 	public String getTargetBeanName() {
 		return scopedTargetSource.getTargetBeanName();
 	}
 
-	public ScopeMap getScopeMap() {
-		return scopedTargetSource.getScopeMap();
+
+	public Object getObject() {
+		return this.proxy;
 	}
-	
+
+	public Class getObjectType() {
+		if (isProxyTargetClass()) {
+			return this.scopedTargetSource.getBeanFactory().getType(this.scopedTargetSource.getTargetBeanName());
+		}
+		Advised advised = (Advised) proxy;
+		if (advised.getProxiedInterfaces().length == 1) {
+			return advised.getProxiedInterfaces()[0];
+		}
+		return null;
+	}
+
+
 	private class DefaultScopedObject implements ScopedObject {
 		
-		private Handle handle;
+		private DefaultHandle handle;
 		
-		public DefaultScopedObject(Handle handle) {
+		public DefaultScopedObject(DefaultHandle handle) {
 			this.handle = handle;
 		}
 		
@@ -178,8 +174,8 @@ public class ScopedProxyFactoryBean extends AbstractSingletonProxyFactoryBean
 			return scopedTargetSource.getScopeMap();
 		}
 		
-		public String getSessionKey() {
-			return scopedTargetSource.getSessionKey();
+		public String getScopeKey() {
+			return scopedTargetSource.getScopeKey();
 		}
 		
 		public String getTargetBeanName() {
@@ -191,33 +187,27 @@ public class ScopedProxyFactoryBean extends AbstractSingletonProxyFactoryBean
 		}
 		
 		public void remove() {
-			getScopeMap().remove(handle.getScopeIdentifier(), handle.getTargetBeanName());
+			getScopeMap().remove(handle.getTargetBeanName());
 		}
 	}
 	
 	
-	public static class DefaultHandle implements Handle {
+	private class DefaultHandle implements Handle {
 		
-		private final Object scopeIdentifier;
 		private final String targetBeanName;
 		private final boolean persistent;
-		
-		public DefaultHandle(ScopeIdentifierResolver sir, ScopeMap scopeMap, String targetBeanName) {
-			this.scopeIdentifier = sir.getScopeIdentifier();
+
+		public DefaultHandle(String targetBeanName, boolean persistent) {
 			this.targetBeanName = targetBeanName;
-			this.persistent = scopeMap.isPersistent(scopeIdentifier);
-		}
-
-		public Object getScopeIdentifier() {
-			return scopeIdentifier;
-		}
-
-		public String getTargetBeanName() {
-			return targetBeanName;
+			this.persistent = persistent;
 		}
 
 		public boolean isPersistent() {
 			return persistent;
+		}
+
+		public String getTargetBeanName() {
+			return targetBeanName;
 		}
 	}
 

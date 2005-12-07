@@ -1,12 +1,24 @@
-package org.springframework.aop.target.scope;
+/*
+ * Copyright 2002-2005 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import java.util.HashMap;
+package org.springframework.aop.target.scope;
 
 import junit.framework.TestCase;
 
 import org.springframework.aop.framework.Advised;
-import org.springframework.aop.target.scope.ScopedTargetSourceTests.HashMapScopeMap;
-import org.springframework.aop.target.scope.ScopedTargetSourceTests.MapScopeIdentiferResolver;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -17,10 +29,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Tests execute against both local construction of the ProxyFactoryBean,
- * and loading an XML file.
- * Instance variables must be populated in each case.
+ * and loading an XML file. Instance variables must be populated in each case.
+ *
  * @author Rod Johnson
- * @since 1.3
  */
 public class ScopedProxyFactoryBeanTests extends TestCase {
 	
@@ -33,7 +44,7 @@ public class ScopedProxyFactoryBeanTests extends TestCase {
 	public void testPrototypeNotFound() throws Exception {
 		// Don't add to bean factory
 		spfb = new ScopedProxyFactoryBean();
-		spfb.setSessionKey("sessionKey");
+		spfb.setScopeKey("sessionKey");
 		String targetBeanName = "targetBeanName";
 		spfb.setTargetBeanName(targetBeanName);
 		spfb.setScopeMap(new HashMapScopeMap(true));
@@ -52,7 +63,7 @@ public class ScopedProxyFactoryBeanTests extends TestCase {
 	
 	public void testSingletonNotAccepted() throws Exception {
 		ScopedProxyFactoryBean spfb = new ScopedProxyFactoryBean();
-		spfb.setSessionKey("sessionKey");
+		spfb.setScopeKey("sessionKey");
 		String targetBeanName = "targetBeanName";
 		spfb.setTargetBeanName(targetBeanName);
 		spfb.setScopeMap(new HashMapScopeMap(true));
@@ -70,12 +81,11 @@ public class ScopedProxyFactoryBeanTests extends TestCase {
 			// Ok
 		}
 	}
-	
-	
+
 	private void initLocal() throws Exception {
 		spfb = new ScopedProxyFactoryBean();
 		String sessionKey = "sessionKey";
-		spfb.setSessionKey(sessionKey);
+		spfb.setScopeKey(sessionKey);
 		String targetBeanName = "targetBeanName";
 		spfb.setTargetBeanName(targetBeanName);
 		HashMapScopeMap hashMapScopeMap = new HashMapScopeMap(true);
@@ -86,9 +96,6 @@ public class ScopedProxyFactoryBeanTests extends TestCase {
 		bd.getPropertyValues().addPropertyValue(new PropertyValue("name", name));
 		bf.registerBeanDefinition(targetBeanName, bd);
 		
-		MapScopeIdentiferResolver sir = new MapScopeIdentiferResolver();
-		spfb.setScopeIdentifierResolver(sir);
-		
 		assertEquals(targetBeanName, spfb.getTargetBeanName());
 		spfb.setProxyTargetClass(true);
 		spfb.setBeanFactory(bf);
@@ -97,9 +104,7 @@ public class ScopedProxyFactoryBeanTests extends TestCase {
 	}
 	
 	/**
-	 * Run scoping tests, initializing instance variables from
-	 * local method.
-	 * @throws Exception
+	 * Run scoping tests, initializing instance variables from local method.
 	 */
 	public void testPrototypesObeyScopeLocal() throws Exception {
 		initLocal();
@@ -107,12 +112,11 @@ public class ScopedProxyFactoryBeanTests extends TestCase {
 	}
 	
 	/**
-	 * Run scoping tests, initializing instance variables from XML
-	 * definitions.
-	 * @throws Exception
+	 * Run scoping tests, initializing instance variables from XML definitions.
 	 */
 	public void testPrototypesObeyScopeXml() throws Exception {
-		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext("org/springframework/aop/target/scope/scope.xml");
+		ClassPathXmlApplicationContext ac =
+				new ClassPathXmlApplicationContext("org/springframework/aop/target/scope/scope.xml");
 		String scopedBeanName = "scopedBean";
 		spfb = (ScopedProxyFactoryBean) ac.getBean("&" + scopedBeanName);
 		proxy = ac.getBean(scopedBeanName);
@@ -120,25 +124,20 @@ public class ScopedProxyFactoryBeanTests extends TestCase {
 	}
 	
 	/**
-	 * Relies on instance fields having been set
-	 * @throws Exception
+	 * Relies on instance fields having been set.
 	 */
 	private void doTestPrototypesObeyScope() throws Exception {
-		
 		Advised advised = (Advised) proxy;
-		//System.out.println(advised.toProxyConfigString());
-		
+
 		TestBean proxy = (TestBean) advised;
 		assertEquals("Must be a singleton FactoryBean", proxy, spfb.getObject());
 		
-		assertNull("Target must be lazily initialized", spfb.getScopeMap().get(spfb.getScopeIdentifierResolver().getScopeIdentifier(), spfb.getSessionKey()));
-		
-		Object scopeIdentifierA = spfb.getScopeIdentifierResolver().getScopeIdentifier();
-		assertSame(scopeIdentifierA, spfb.getScopeIdentifierResolver().getScopeIdentifier());
+		((HashMapScopeMap) spfb.getScopeMap()).initScope();
+		assertNull("Target must be lazily initialized", spfb.getScopeMap().get(spfb.getScopeKey()));
 		
 		assertEquals(0, proxy.getAge());
 		// This will work only after we've invoked the target source
-		TestBean scopeA = (TestBean) spfb.getScopeMap().get(spfb.getScopeIdentifierResolver().getScopeIdentifier(), spfb.getSessionKey());
+		TestBean scopeA = (TestBean) spfb.getScopeMap().get(spfb.getScopeKey());
 		assertEquals(0, scopeA.getAge());
 		assertSame(scopeA, advised.getTargetSource().getTarget());
 		
@@ -149,14 +148,12 @@ public class ScopedProxyFactoryBeanTests extends TestCase {
 		assertEquals(1, proxy.getAge());
 		assertEquals(1, scopeA.getAge());
 		
-		((MapScopeIdentiferResolver) spfb.getScopeIdentifierResolver()).setMap(new HashMap());
-		assertNotSame(scopeIdentifierA, spfb.getScopeIdentifierResolver().getScopeIdentifier());
-		
-		assertNull("Target must be lazily initialized", spfb.getScopeMap().get(spfb.getScopeIdentifierResolver().getScopeIdentifier(), spfb.getSessionKey()));
+		((HashMapScopeMap) spfb.getScopeMap()).initScope();
+		assertNull("Target must be lazily initialized", spfb.getScopeMap().get(spfb.getScopeKey()));
 		
 		assertEquals(0, proxy.getAge());
 		// This will work only after we've invoked the target source
-		TestBean scopeB = (TestBean) spfb.getScopeMap().get(spfb.getScopeIdentifierResolver().getScopeIdentifier(), spfb.getSessionKey());
+		TestBean scopeB = (TestBean) spfb.getScopeMap().get(spfb.getScopeKey());
 		assertEquals(0, scopeB.getAge());
 		assertNotSame(scopeA, advised.getTargetSource().getTarget());
 		assertSame(scopeB, advised.getTargetSource().getTarget());
@@ -171,7 +168,7 @@ public class ScopedProxyFactoryBeanTests extends TestCase {
 		
 		assertEquals("ScopeA is unchanged", 1, scopeA.getAge());
 		
-		((MapScopeIdentiferResolver) spfb.getScopeIdentifierResolver()).setMap(new HashMap());
+		((HashMapScopeMap) spfb.getScopeMap()).initScope();
 		assertEquals(0, proxy.getAge());
 	}
 	
@@ -186,14 +183,14 @@ public class ScopedProxyFactoryBeanTests extends TestCase {
 	public void doTestIntroductionOfScopedObjectInterface(final boolean persistent) throws Exception {
 		ScopedProxyFactoryBean spfb = new ScopedProxyFactoryBean();
 		String sessionKey = "xfsessionKey";
-		spfb.setSessionKey(sessionKey);
+		spfb.setScopeKey(sessionKey);
 		String targetBeanName = "targetBeanName";
 		spfb.setTargetBeanName(targetBeanName);
 		HashMapScopeMap hashMapScopeMap = new HashMapScopeMap(persistent);
 		spfb.setScopeMap(hashMapScopeMap);
-		MapScopeIdentiferResolver sir = new MapScopeIdentiferResolver();
-		spfb.setScopeIdentifierResolver(sir);
-		
+
+		((HashMapScopeMap) spfb.getScopeMap()).initScope();
+
 		String name = "steven";
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, false);
 		bd.getPropertyValues().addPropertyValue(new PropertyValue("name", name));
@@ -210,10 +207,8 @@ public class ScopedProxyFactoryBeanTests extends TestCase {
 		
 		ScopedObject so = (ScopedObject) proxy;
 		assertEquals(targetBeanName, so.getTargetBeanName());
-		assertEquals(sessionKey, so.getSessionKey());
+		assertEquals(sessionKey, so.getScopeKey());
 		assertEquals(hashMapScopeMap, so.getScopeMap());
-		assertSame(sir.getScopeIdentifier(), so.getHandle().getScopeIdentifier());
-		assertSame(targetBeanName, so.getHandle().getTargetBeanName());
 		assertEquals(persistent, so.getHandle().isPersistent());
 		
 		if (!persistent) {
@@ -229,7 +224,6 @@ public class ScopedProxyFactoryBeanTests extends TestCase {
 			// Check we can recreate from the handle
 			TestBean reconnected = (TestBean) spfb.reconnect(so.getHandle());
 			ScopedObject soReconnected = (ScopedObject) reconnected;
-			assertEquals(so.getHandle().getScopeIdentifier(), soReconnected.getHandle().getScopeIdentifier());
 			assertEquals(so.getHandle(), soReconnected.getHandle());
 			assertEquals(newAge, reconnected.getAge());
 			Advised advProxy = (Advised) proxy;
@@ -252,13 +246,16 @@ public class ScopedProxyFactoryBeanTests extends TestCase {
 	
 	public void testIncompatibleHandle() throws Exception {
 		initLocal();
-		Handle h = new ScopedProxyFactoryBean.DefaultHandle(ScopeIdentifierResolver.CONTEXT_BASED_SCOPE_IDENTIFIER_RESOLVER, 
-				new ScopedTargetSourceTests.HashMapScopeMap(true), "tt");
+		Handle h = new Handle() {
+			public boolean isPersistent() {
+				return false;
+			}
+		};
 		try {
 			spfb.reconnect(h);
 			fail("Should reject null handle");
 		}
-		catch (IncompatibleHandleException ex) {
+		catch (HandleNotPersistentException ex) {
 			// Ok
 		}
 	}

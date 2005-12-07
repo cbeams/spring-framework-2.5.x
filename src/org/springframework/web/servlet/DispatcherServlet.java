@@ -48,6 +48,7 @@ import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.scope.RequestContextHolder;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
@@ -694,6 +695,9 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		});
 
+		// Expose current request to current thread.
+		RequestContextHolder.setRequest(request);
+
 		try {
 			ModelAndView mv = null;
 			try {
@@ -771,6 +775,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (processedRequest instanceof MultipartHttpServletRequest && processedRequest != request) {
 				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
 			}
+
+			// Reset thread-bound request.
+			RequestContextHolder.setRequest(null);
+
 			// Reset thread-bound LocaleContext.
 			LocaleContextHolder.setLocaleContext(null);
 		}
