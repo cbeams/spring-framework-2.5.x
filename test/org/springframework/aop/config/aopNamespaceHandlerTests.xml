@@ -19,8 +19,6 @@
 
 	</aop:config>
 
-	<!-- <aop:spring-configured/> -->
-
 	<bean id="getNameCounter" class="org.springframework.aop.framework.CountingBeforeAdvice"/>
 	<bean id="getAgeCounter" class="org.springframework.aop.framework.CountingBeforeAdvice"/>
 

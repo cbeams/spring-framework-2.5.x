@@ -11,12 +11,23 @@ Overall
 * repackaged "spring-hibernate.jar" into "spring-hibernate2.jar" and "spring-hibernate3.jar"
 * neither the Hibernate 2.1 support nor the Hibernate 3.x support is included in "spring.jar" anymore
 
+Package org.springframework.aop
+* added AopNamespaceHandler to support custom <aop:*/> XML tags
+* added NamespaceHandlerUtils for ensuring unique registration of auto proxy creators
+* added spring-aop.xsd for schema validation of custom tags
+* added @SpringConfigured and BeanConfigurer aspect to allow injection on any arbitrary object
+
 Package org.springframework.beans
 * added intelligent error messages to BeanWrapperImpl when properties are not found
 * changed MutablePropertyValues.addPropertyValue(String, Object) to return 'this'
 * removed deprecated "getBeanDefinitionNames(type)" method from ListableBeanFactory and BeanFactoryUtils
 * added "createBean" and "instantiateBean" methods to AutowireCapableBeanFactory interface
 * PropertiesBeanDefinitionReader trims String values for special keys such as "(class)", "(parent)", etc
+* added NamespaceHandler extension point to the DefaultXmlBeanDefinitionParser
+* added schema validation capabilities to DefaultXmlBeanDefintionParser
+* added spring-beans.xsd
+* added XSD/DTD validation detection to XmlBeanDefinitionReader
+* added validationMode to XmlBeanDefinitionReader
 
 Package org.springframework.core
 * introduced TaskExecutor abstraction, as strategy interface for the execution of Runnables
@@ -35,6 +46,7 @@ Package org.springframework.jdbc
 * factored out protected "getColumnMapRowMapper" and "getSingleColumnRowMapper" hooks within JdbcTemplate
 * SingleColumnRowMapper throws specific IncorrectResultSetColumnCountException in case of invalid column count
 * SingleColumnRowMapper explicitly calls "ResultSet.getBigDecimal()" if the required type is BigDecimal
+* added SimpleJdbcTemplate providing Java 5-style access to JdbcTempplate functionality
 
 Package org.springframework.jms
 * added SimpleMessageListenerContainer mechanism for async JMS message reception via the plain JMS MessageConsumer API
@@ -44,6 +56,12 @@ Package org.springframework.jmx
 * introduced MBeanExportOperations interface, providing a programmatic facility for registering MBeans on MBeanExporter
 * introduced MBeanExportException as unified exception hierarchy for MBeanExporter and MBeanExportOperations
 * MBeanExporter no longer ignores autodetected MBeans with invalid object names: specify appropriate "excludedBeans"
+* added support for registering NotificationListeners with the MBeanServer
+* added @ManagedNotification(s) annotation (and corresponding Commons attributes) for describing notification MBeanInfo
+* extended static MBeanInfoAssemblers to support configuration of Notification metadata
+* added NotificationPublisher and NotificationPublisherAware to support publication of JMX Notifications from Spring-managed beans
+* added "ensureUniqueRuntimeObjectNames" property to MBeanExporter to have Spring extend ObjectNames to ensure they are unique per-instance
+* added "exposeManagedResourceClassLoader" property to MBeanExporter to have Spring expose the ClassLoader of the managed resource before invocations via the MBean
 
 Package org.springframework.orm
 * added support for the Java Persistence API (JPA) preview, in the form of the "org.springframework.orm.jpa" package

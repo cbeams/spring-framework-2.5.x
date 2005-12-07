@@ -73,7 +73,9 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see #findCandidateAdvisors
 	 */
 	protected List findEligibleAdvisors(Class clazz) {
-		return AopUtils.findAdvisorsThatCanApply(findCandidateAdvisors(), clazz);
+		List eligibleAdvisors = AopUtils.findAdvisorsThatCanApply(findCandidateAdvisors(), clazz);
+		extendCandidateAdvisors(eligibleAdvisors);
+		return eligibleAdvisors;
 	}
 
 	/**
@@ -106,4 +108,6 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 */
 	protected abstract List findCandidateAdvisors();
 
+	protected void extendCandidateAdvisors(List candidateAdvisors) {
+	}
 }

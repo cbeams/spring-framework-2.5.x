@@ -24,12 +24,14 @@ import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.support.BeanDefinitionDecorator;
 import org.springframework.beans.factory.xml.support.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.support.NamespaceHandlerSupport;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
@@ -75,6 +77,8 @@ import java.util.List;
  */
 public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
+	private static final String ASPECTJ_AUTOPROXY_CREATOR = "org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator";
+
 	/**
 	 * Constructs a new <code>AopNamespaceHandler</code> and registers the
 	 * {@link BeanDefinitionParser} for the <code>config</code> tag.
@@ -83,8 +87,20 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionParser("config", new ConfigBeanDefinitionParser());
 		registerBeanDefinitionParser("spring-configured", new SpringConfiguredBeanDefinitionParser());
 		registerBeanDefinitionParser("aspectj-autoproxy", new AspectJAutoProxyBeanDefinitionParser());
+
+		registerBeanDefinitionDecorator("scope", new ScopeBeanDefinitionDefinition());
 	}
 
+	private static class ScopeBeanDefinitionDefinition implements BeanDefinitionDecorator {
+
+		public BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	/**
+	 * Parses the <code></code>
+	 */
 	private static class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 
 		private static final String BEAN_CONFIGURER = "org.springframework.beans.factory.aspectj.BeanConfigurer";
@@ -113,7 +129,6 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 
-		private static final String ASPECTJ_AUTOPROXY_CREATOR = "org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator";
 
 		private boolean registered;
 
@@ -123,17 +138,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 				return;
 			}
 
-			try {
-				Class autoProxyClass = ClassUtils.forName(ASPECTJ_AUTOPROXY_CREATOR);
-				RootBeanDefinition definition = new RootBeanDefinition(autoProxyClass);
-
-				String id = BeanDefinitionReaderUtils.generateBeanName(definition, registry, false);
-				registry.registerBeanDefinition(id, definition);
-				this.registered = true;
-			}
-			catch (ClassNotFoundException e) {
-				throw new IllegalStateException("Unable to locate class [" + ASPECTJ_AUTOPROXY_CREATOR + "]. Cannot use @AspectJ auto-proxying.");
-			}
+			NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(registry);
 		}
 	}
 

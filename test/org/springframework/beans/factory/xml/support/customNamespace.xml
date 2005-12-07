@@ -13,7 +13,7 @@
 
     <bean id="debuggingTestBean" class="org.springframework.beans.TestBean">
         <test:debug/>
-        <property name="name" value="Rob Harrop"/>
+		<property name="name" value="Rob Harrop"/>
         <property name="age" value="23"/>
     </bean>
 

@@ -16,49 +16,46 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.aspectj.lang.reflect.PerClauseKind;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.aspectj.ExposeJoinPointInterceptor;
-import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.aspectj.annotation.AspectJAdvisorFactory;
+import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory;
 import org.springframework.aop.aspectj.annotation.SingletonMetadataAwareAspectInstanceFactory;
-import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
-import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
- * DefaultAdvisorAutoProxyCreator subclasses that processes all AspectJ annotation classes
- * in the current application context, as well as Spring Advisors. 
- * <br>
+ * {@link InvocationContextExposingAdvisorAutoProxyCreator} subclass that processes all
+ * AspectJ annotation classes in the current application context, as well as Spring Advisors.
+ * <p/>
  * Any AspectJ annotated classes will automatically be recognized, and their advice
  * applied if Spring AOP's proxy-based model is capable of applying it.
  * This covers method execution joinpoints.
- * <br>
- * Processing of Spring Advisors follows the rules established in DefaultAdvisorAutoProxyCreator.
- * 
+ * <p/>
+ * Processing of Spring Advisors follows the rules established in {@link DefaultAdvisorAutoProxyCreator}
+ *
  * @author Rod Johnson
- * @since 2.0
- * @see org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator
+ * @see DefaultAdvisorAutoProxyCreator
  * @see org.springframework.aop.aspectj.annotation.AspectJAdvisorFactory
- * 
- * TODO consider with BeanName APC? Or does that defeat the purpose
- * Consider renaming AspectJAdvisorAutoProxyCreator
+ * @since 2.0
  */
-public class AspectJAutoProxyCreator extends DefaultAdvisorAutoProxyCreator {
-	
+public class AspectJAutoProxyCreator extends InvocationContextExposingAdvisorAutoProxyCreator {
+
+	// TODO: Consider with BeanName APC? Or does that defeat the purpose
+    // TODO: Consider renaming AspectJAdvisorAutoProxyCreator
+
 	private AspectJAdvisorFactory aspectJAdvisorFactory = new ReflectiveAspectJAdvisorFactory();
 
 	public void setAspectJAdvisorFactory(AspectJAdvisorFactory aspectJAdvisorFactory) {
 		this.aspectJAdvisorFactory = aspectJAdvisorFactory;
 	}
-	
+
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		// TODO if scoped != singleton and singleton or reverse
@@ -73,10 +70,10 @@ public class AspectJAutoProxyCreator extends DefaultAdvisorAutoProxyCreator {
 	@Override
 	protected List findCandidateAdvisors() {
 		List<Advisor> advisors = new LinkedList<Advisor>();
-		
+
 		// Add all the Spring advisors found according to superclass rules
 		advisors.addAll(super.findCandidateAdvisors());
-		
+
 		if (!(getBeanFactory() instanceof BeanDefinitionRegistry)) {
 			throw new IllegalStateException(
 					"Cannot use " + getClass().getName() + " without a BeanDefinitionRegistry");
@@ -87,45 +84,38 @@ public class AspectJAutoProxyCreator extends DefaultAdvisorAutoProxyCreator {
 		// Create a Spring Advisor for each advice method
 		for (String beanName : owningFactory.getBeanDefinitionNames()) {
 			//if (getBeanFactory().isSingleton(beanName)) {
-				// We must be careful not to instantiate beans eagerly as in this
-				// case they would be cached by the Spring container but would not
-				// have bean weaved
-				// TODO pull out into helper, findBeansWithAnnotation
-				BeanDefinition bd = owningFactory.getBeanDefinition(beanName);
-				if (!(bd instanceof RootBeanDefinition)) {
-					continue;
-				}
-				RootBeanDefinition rbd = (RootBeanDefinition) bd;
-				if (rbd.getBeanClass() == null) {
-					continue;
-				}
+			// We must be careful not to instantiate beans eagerly as in this
+			// case they would be cached by the Spring container but would not
+			// have bean weaved
+			// TODO pull out into helper, findBeansWithAnnotation
+			BeanDefinition bd = owningFactory.getBeanDefinition(beanName);
+			if (!(bd instanceof RootBeanDefinition)) {
+				continue;
+			}
+			RootBeanDefinition rbd = (RootBeanDefinition) bd;
+			if (rbd.getBeanClass() == null) {
+				continue;
+			}
 
-				if (aspectJAdvisorFactory.isAspect(rbd.getBeanClass())) {
-					logger.debug("Found aspect bean '" + beanName + "'");
-					AspectMetadata amd = new AspectMetadata(rbd.getBeanClass());
-					if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
-						// Default singleton binding
-						Object beanInstance = getBeanFactory().getBean(beanName);
-						List<Advisor> classAdvisors = this.aspectJAdvisorFactory.getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(beanInstance));
-						logger.debug("Found " + classAdvisors.size() + " AspectJ advice methods");
-						advisors.addAll(classAdvisors);
-					}
-					else {		
-						// Pertarget or per this
-						List<Advisor> classAdvisors = this.aspectJAdvisorFactory.getAdvisors(new PrototypeAspectInstanceFactory(getBeanFactory(), beanName));
-						logger.debug("Found " + classAdvisors.size() + " AspectJ advice methods");
-						advisors.addAll(classAdvisors);
-					}
+			if (aspectJAdvisorFactory.isAspect(rbd.getBeanClass())) {
+				logger.debug("Found aspect bean '" + beanName + "'");
+				AspectMetadata amd = new AspectMetadata(rbd.getBeanClass());
+				if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
+					// Default singleton binding
+					Object beanInstance = getBeanFactory().getBean(beanName);
+					List<Advisor> classAdvisors = this.aspectJAdvisorFactory.getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(beanInstance));
+					logger.debug("Found " + classAdvisors.size() + " AspectJ advice methods");
+					advisors.addAll(classAdvisors);
 				}
+				else {
+					// Pertarget or per this
+					List<Advisor> classAdvisors = this.aspectJAdvisorFactory.getAdvisors(new PrototypeAspectInstanceFactory(getBeanFactory(), beanName));
+					logger.debug("Found " + classAdvisors.size() + " AspectJ advice methods");
+					advisors.addAll(classAdvisors);
+				}
+			}
 		}
-		
-		// Need this to expose target and invocation context data to
-		// AspectJ expression pointcuts
-		if (!advisors.isEmpty()) {
-			advisors.add(0, new DefaultPointcutAdvisor(ExposeInvocationInterceptor.INSTANCE));
-			advisors.add(1, new DefaultPointcutAdvisor(ExposeJoinPointInterceptor.INSTANCE));
-		}
-		
+
 		return advisors;
 	}
 
