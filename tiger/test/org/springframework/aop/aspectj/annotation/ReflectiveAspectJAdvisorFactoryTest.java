@@ -16,8 +16,8 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import org.springframework.aop.aspectj.annotation.AtAspectJAdvisorFactory;
-import org.springframework.aop.aspectj.annotation.ReflectiveAtAspectJAdvisorFactory;
+import org.springframework.aop.aspectj.annotation.AspectJAdvisorFactory;
+import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory;
 
 /**
  * Tests for ReflectiveAtAspectJAdvisorFactory. 
@@ -25,12 +25,12 @@ import org.springframework.aop.aspectj.annotation.ReflectiveAtAspectJAdvisorFact
  * @author Rod Johnson
  * @since 2.0
  */
-public class ReflectiveAtAspectJAdvisorFactoryTest extends
-		AbstractAtAspectJAdvisorFactoryTests {
+public class ReflectiveAspectJAdvisorFactoryTest extends
+		AbstractAspectJAdvisorFactoryTests {
 
 	@Override
-	protected AtAspectJAdvisorFactory getFixture() {
-		return new ReflectiveAtAspectJAdvisorFactory();
+	protected AspectJAdvisorFactory getFixture() {
+		return new ReflectiveAspectJAdvisorFactory();
 	}
 
 }

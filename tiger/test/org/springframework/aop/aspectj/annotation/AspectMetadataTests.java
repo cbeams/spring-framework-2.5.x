@@ -21,9 +21,9 @@ import junit.framework.TestCase;
 import org.aspectj.lang.reflect.PerClauseKind;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
-import org.springframework.aop.aspectj.annotation.AbstractAtAspectJAdvisorFactoryTests.ExceptionAspect;
-import org.springframework.aop.aspectj.annotation.AbstractAtAspectJAdvisorFactoryTests.PerTargetAspect;
-import org.springframework.aop.aspectj.annotation.AbstractAtAspectJAdvisorFactoryTests.PerThisAspect;
+import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.ExceptionAspect;
+import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.PerTargetAspect;
+import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.PerThisAspect;
 
 /**
  * 

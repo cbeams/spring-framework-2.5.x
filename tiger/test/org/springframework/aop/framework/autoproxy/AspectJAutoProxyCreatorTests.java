@@ -18,8 +18,8 @@ package org.springframework.aop.framework.autoproxy;
 import junit.framework.TestCase;
 
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
-import org.springframework.aop.aspectj.annotation.AbstractAtAspectJAdvisorFactoryTests.PerTargetAspect;
-import org.springframework.aop.aspectj.annotation.AbstractAtAspectJAdvisorFactoryTests.TwoAdviceAspect;
+import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.PerTargetAspect;
+import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.TwoAdviceAspect;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;

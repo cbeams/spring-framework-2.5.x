@@ -23,8 +23,8 @@ import org.aspectj.lang.reflect.PerClauseKind;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.ExposeJoinPointInterceptor;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
-import org.springframework.aop.aspectj.annotation.AtAspectJAdvisorFactory;
-import org.springframework.aop.aspectj.annotation.ReflectiveAtAspectJAdvisorFactory;
+import org.springframework.aop.aspectj.annotation.AspectJAdvisorFactory;
+import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory;
 import org.springframework.aop.aspectj.annotation.SingletonMetadataAwareAspectInstanceFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -46,16 +46,16 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
  * @author Rod Johnson
  * @since 2.0
  * @see org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator
- * @see org.springframework.aop.aspectj.annotation.AtAspectJAdvisorFactory
+ * @see org.springframework.aop.aspectj.annotation.AspectJAdvisorFactory
  * 
  * TODO consider with BeanName APC? Or does that defeat the purpose
  * Consider renaming AspectJAdvisorAutoProxyCreator
  */
 public class AspectJAutoProxyCreator extends DefaultAdvisorAutoProxyCreator {
 	
-	private AtAspectJAdvisorFactory aspectJAdvisorFactory = new ReflectiveAtAspectJAdvisorFactory();
+	private AspectJAdvisorFactory aspectJAdvisorFactory = new ReflectiveAspectJAdvisorFactory();
 
-	public void setAspectJAdvisorFactory(AtAspectJAdvisorFactory aspectJAdvisorFactory) {
+	public void setAspectJAdvisorFactory(AspectJAdvisorFactory aspectJAdvisorFactory) {
 		this.aspectJAdvisorFactory = aspectJAdvisorFactory;
 	}
 	

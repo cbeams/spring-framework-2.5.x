@@ -22,9 +22,9 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcutTests;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
-import org.springframework.aop.aspectj.annotation.AtAspectJAdvisorFactory;
+import org.springframework.aop.aspectj.annotation.AspectJAdvisorFactory;
 import org.springframework.aop.aspectj.annotation.InstantiationModelAwarePointcutAdvisor;
-import org.springframework.aop.aspectj.annotation.ReflectiveAtAspectJAdvisorFactory;
+import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory;
 import org.springframework.aop.aspectj.annotation.SingletonMetadataAwareAspectInstanceFactory;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.beans.TestBean;
@@ -34,14 +34,14 @@ import org.springframework.beans.TestBean;
  */
 public class AspectJPointcutAdvisorTests extends TestCase {
 	
-	private AtAspectJAdvisorFactory af = new ReflectiveAtAspectJAdvisorFactory();
+	private AspectJAdvisorFactory af = new ReflectiveAspectJAdvisorFactory();
 
 	public void testSingleton() throws SecurityException, NoSuchMethodException {
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(AspectJExpressionPointcutTests.MATCH_ALL_METHODS);
 		
 		InstantiationModelAwarePointcutAdvisor ajpa = new InstantiationModelAwarePointcutAdvisor(af, ajexp, 
-				new SingletonMetadataAwareAspectInstanceFactory(new AbstractAtAspectJAdvisorFactoryTests.ExceptionAspect(null)), 
+				new SingletonMetadataAwareAspectInstanceFactory(new AbstractAspectJAdvisorFactoryTests.ExceptionAspect(null)), 
 				TestBean.class.getMethod("getAge", (Class[]) null));
 		assertSame(Pointcut.TRUE, ajpa.getAspectMetadata().getPerClausePointcut());
 		assertFalse(ajpa.isPerInstance());
@@ -52,7 +52,7 @@ public class AspectJPointcutAdvisorTests extends TestCase {
 		ajexp.setExpression(AspectJExpressionPointcutTests.MATCH_ALL_METHODS);
 		
 		InstantiationModelAwarePointcutAdvisor ajpa = new InstantiationModelAwarePointcutAdvisor(af, ajexp, 
-				new SingletonMetadataAwareAspectInstanceFactory(new AbstractAtAspectJAdvisorFactoryTests.PerTargetAspect()), null);
+				new SingletonMetadataAwareAspectInstanceFactory(new AbstractAspectJAdvisorFactoryTests.PerTargetAspect()), null);
 		assertNotSame(Pointcut.TRUE, ajpa.getAspectMetadata().getPerClausePointcut());
 		assertTrue(ajpa.getAspectMetadata().getPerClausePointcut() instanceof AspectJExpressionPointcut);
 		assertTrue(ajpa.isPerInstance());
@@ -69,11 +69,11 @@ public class AspectJPointcutAdvisorTests extends TestCase {
 	
 	
 	public void testPerCflowTarget() {
-		testIllegalInstantiationModel(AbstractAtAspectJAdvisorFactoryTests.PerCflowAspect.class);
+		testIllegalInstantiationModel(AbstractAspectJAdvisorFactoryTests.PerCflowAspect.class);
 	}
 	
 	public void testPerCflowBelowTarget() {
-		testIllegalInstantiationModel(AbstractAtAspectJAdvisorFactoryTests.PerCflowBelowAspect.class);
+		testIllegalInstantiationModel(AbstractAspectJAdvisorFactoryTests.PerCflowBelowAspect.class);
 	}
 	
 	private void testIllegalInstantiationModel(Class c) {

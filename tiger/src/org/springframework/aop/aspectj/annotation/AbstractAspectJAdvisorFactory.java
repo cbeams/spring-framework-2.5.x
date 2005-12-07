@@ -56,7 +56,7 @@ import org.springframework.util.AnnotationUtils;
  * @author Adrian Colyer
  * @since 2.0
  */
-public abstract class AbstractAtAspectJAdvisorFactory implements AtAspectJAdvisorFactory {
+public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFactory {
 	
 	protected enum AspectJAnnotationType { 
 		AtPointcut, 
@@ -231,7 +231,7 @@ public abstract class AbstractAtAspectJAdvisorFactory implements AtAspectJAdviso
 	protected final ParameterNameDiscoverer parameterNameDiscoverer;
 	
 	
-	protected AbstractAtAspectJAdvisorFactory() {
+	protected AbstractAspectJAdvisorFactory() {
 		PrioritizedParameterNameDiscoverer prioritizedParameterNameDiscoverer = new PrioritizedParameterNameDiscoverer();
 		prioritizedParameterNameDiscoverer.addDiscoverer(ASPECTJ_ANNOTATION_PARAMETER_NAME_DISCOVERER);
 		this.parameterNameDiscoverer = prioritizedParameterNameDiscoverer;

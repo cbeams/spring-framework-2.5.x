@@ -35,7 +35,7 @@ import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.ExposeJoinPointInterceptor;
-import org.springframework.aop.aspectj.annotation.ReflectiveAtAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
+import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.Lockable;
@@ -52,13 +52,13 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @since 2.0
  */
-public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
+public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 	
 	/**
 	 * To be overridden by concrete test subclasses
 	 * @return the fixture
 	 */
-	protected abstract AtAspectJAdvisorFactory getFixture();
+	protected abstract AspectJAdvisorFactory getFixture();
 	
 	@Aspect("percflow(execution(* *(..)))")
 	public static class PerCflowAspect {	
@@ -197,7 +197,7 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 		public void getAge() {			
 		}
 		
-		@Around("org.springframework.aop.aspectj.annotation.AbstractAtAspectJAdvisorFactoryTests.NamedPointcutAspectWithFQN.getAge()")
+		@Around("org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.NamedPointcutAspectWithFQN.getAge()")
 		public int changeReturnValue(ProceedingJoinPoint pjp) {
 			return -1;
 		}
@@ -352,16 +352,23 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 		assertTrue(notLockable2 instanceof Lockable);
 		Lockable lockable2 = (Lockable) notLockable2;
 		assertFalse(lockable2.locked());
+		notLockable2.setIntValue(1);
 		lockable2.lock();
+		try {
+			notLockable2.setIntValue(32);
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			
+		}
 		assertTrue(lockable2.locked());
-		
 	}
 	
 	public void testIntroductionAdvisorExcludedFromTargetImplementingInterface() {
 		assertTrue(AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(
 				new SingletonMetadataAwareAspectInstanceFactory(
 						new MakeLockable())), CannotBeUnlocked.class).isEmpty());
-		assertEquals(1, AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable())), NotLockable.class).size());
+		assertEquals(2, AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable())), NotLockable.class).size());
 	}
 	
 	public void testIntroductionOnTargetImplementingInterface() {
@@ -466,6 +473,9 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 		for (Advisor a : advisors) {
 			pf.addAdvisor(a);
 		}
+		
+		pf.setExposeProxy(true);
+		
 		return pf.getProxy();
 	}
 	

@@ -42,11 +42,11 @@ class InstantiationModelAwarePointcutAdvisor implements PointcutAdvisor {
 	
 	private final Method method;
 	
-	private final AtAspectJAdvisorFactory atAspectJAdvisorFactory;
+	private final AspectJAdvisorFactory atAspectJAdvisorFactory;
 	
 	private Advice instantiatedAdvice;
 	
-	public InstantiationModelAwarePointcutAdvisor(AtAspectJAdvisorFactory af, AspectJExpressionPointcut ajexp, 
+	public InstantiationModelAwarePointcutAdvisor(AspectJAdvisorFactory af, AspectJExpressionPointcut ajexp, 
 				final MetadataAwareAspectInstanceFactory aif, Method method) {
 		this.declaredPointcut = ajexp;
 		this.method = method;
