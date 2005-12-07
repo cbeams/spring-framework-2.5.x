@@ -207,7 +207,13 @@
   			<path location="${target.classes.dir}"/>
 	  	</classpath>
 	  </iajc>
-		
+
+  	  <copy todir="${target.classes.dir}/META-INF" preservelastmodified="true">
+		<fileset dir="${aspectj.src.dir}/META-INF">
+			<include name="aop.xml"/>
+		</fileset>
+	  </copy>
+
 	</target>
 
 	<!--
@@ -394,7 +400,7 @@
 		<jar jarfile="${dist.dir}/spring-aspects.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/beans/factory/aspectj/**"/>
-				<include name="META-INF/aop.xml"/>
+				<include name="META-INF/aop.xml"/>			<include name="META-INF/aop.xml"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
