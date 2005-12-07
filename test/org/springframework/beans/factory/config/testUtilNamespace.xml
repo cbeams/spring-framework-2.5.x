@@ -8,4 +8,5 @@
 	<util:properties id="myProperties"
 					 location="classpath:org/springframework/beans/factory/config/util.properties"/>
 
+	
 </beans>

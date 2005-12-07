@@ -9,15 +9,14 @@
 
 
 	<aop:config>
-		<aop:advisor pointcut="execution(* *..ITestBean.*(..))"
-					 advice-ref="txAdvice"/>
+		<aop:advisor pointcut="execution(* *..ITestBean.*(..))" advice-ref="txAdvice"/>
 	</aop:config>
 
 	<tx:advice id="txAdvice">
 		<tx:attributes>
-			get*=PROPAGATION_REQUIRED,readOnly
-			set*=PROPAGATION_REQUIRED
-			exceptional=PROPAGATION_REQUIRED
+			<tx:method name="get*" read-only="true"/>
+			<tx:method name="set*"/>
+			<tx:method name="exceptional"/>
 		</tx:attributes>
 	</tx:advice>
 

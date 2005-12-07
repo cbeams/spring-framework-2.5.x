@@ -9,7 +9,7 @@
 	<xsd:element name="advice">
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element name="attributes" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="attributes" type="attributesType" minOccurs="0" maxOccurs="1"/>
 			</xsd:sequence>
 			<xsd:attribute name="id" type="xsd:ID" use="required"/>
 			<xsd:attribute name="transactionManager" type="xsd:string" default="transactionManager"/>
@@ -22,4 +22,39 @@
 		</xsd:complexType>
 	</xsd:element>
 
+	<xsd:complexType name="attributesType">
+		<xsd:sequence>
+			<xsd:element name="method" minOccurs="1" maxOccurs="unbounded">
+				<xsd:complexType>
+					<xsd:attribute name="name" type="xsd:string" use="required"/>
+					<xsd:attribute name="propagation" default="REQUIRED">
+						 <xsd:simpleType>
+							 <xsd:restriction base="xsd:string">
+								 <xsd:enumeration value="REQUIRED"/>
+								 <xsd:enumeration value="SUPPORTS"/>
+								 <xsd:enumeration value="MANDATORY"/>
+								 <xsd:enumeration value="REQUIRES_NEW"/>
+								 <xsd:enumeration value="NOT_SUPPORTED"/>
+								 <xsd:enumeration value="NEVER"/>
+								 <xsd:enumeration value="NESTED"/>
+							 </xsd:restriction>
+						 </xsd:simpleType>
+					</xsd:attribute>
+					<xsd:attribute name="isolation" default="DEFAULT">
+						 <xsd:simpleType>
+							 <xsd:restriction base="xsd:string">
+								 <xsd:enumeration value="DEFAULT"/>
+								 <xsd:enumeration value="READ_UNCOMMITTED"/>
+								 <xsd:enumeration value="READ_COMMITTED"/>
+								 <xsd:enumeration value="REPEATABLE_READ"/>
+								 <xsd:enumeration value="SERIALIZABLE"/>
+							 </xsd:restriction>
+						 </xsd:simpleType>
+					</xsd:attribute>
+					<xsd:attribute name="timeout" type="xsd:integer" default="-1"/>
+					<xsd:attribute name="read-only" type="xsd:boolean" default="false"/>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
 </xsd:schema>

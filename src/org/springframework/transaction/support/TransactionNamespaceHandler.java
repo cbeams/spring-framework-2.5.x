@@ -26,12 +26,17 @@ import org.springframework.beans.factory.xml.support.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.support.NamespaceHandlerSupport;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor;
+import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
+import org.springframework.transaction.interceptor.NameMatchTransactionAttributeSource;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.aop.config.NamespaceHandlerUtils;
 import org.w3c.dom.Element;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * @author Rob Harrop
@@ -40,6 +45,8 @@ import java.util.List;
 public class TransactionNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static final String TRANSACTION_MANAGER = "transactionManager";
+
+	private static final String TRANSACTION_ATTRIBUTE_SOURCE = "transactionAttributeSource";
 
 	private static final String ANNOTATION_SOURCE_CLASS_NAME = "org.springframework.transaction.annotation.AnnotationTransactionAttributeSource";
 
@@ -58,8 +65,6 @@ public class TransactionNamespaceHandler extends NamespaceHandlerSupport {
 	}
 
 	private static class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
-
-		private static final String TRANSACTION_ATTRIBUTE_SOURCE = "transactionAttributeSource";
 
 		private static final String TRANSACTION_ATTRIBUTE_SOURCE_ADVISOR_NAME = ".transactionAttributeSourceAdvisor";
 
@@ -88,9 +93,17 @@ public class TransactionNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-		private static final String TRANSACTION_ATTRIBUTES = "transactionAttributes";
-
 		private static final String ATTRIBUTES = "attributes";
+
+		public static final String TIMEOUT = "timeout";
+
+		public static final String READ_ONLY = "read-only";
+
+		public static final String NAME_MAP = "nameMap";
+
+		public static final String PROPAGATION = "propagation";
+
+		public static final String ISOLATION = "isolation";
 
 		protected BeanDefinition doParse(Element element) {
 			RootBeanDefinition definition = new RootBeanDefinition(TransactionInterceptor.class);
@@ -108,17 +121,42 @@ public class TransactionNamespaceHandler extends NamespaceHandlerSupport {
 			}
 			else if (txAttributes.size() == 1) {
 				// using Attributes source
-				String attributes = DomUtils.getTextValue((Element) txAttributes.get(0));
-				mpvs.addPropertyValue(TRANSACTION_ATTRIBUTES, attributes);
+				parseAttributes((Element) txAttributes.get(0), mpvs);
 			}
 			else {
 				// assume annotations source
 				// TODO: fix this to use direct class reference when building all on 1.5
 				Class beanClass = getAnnotationSourceClass();
 
-				mpvs.addPropertyValue("transactionAttributeSource", new RootBeanDefinition(beanClass));
+				mpvs.addPropertyValue(TRANSACTION_ATTRIBUTE_SOURCE, new RootBeanDefinition(beanClass));
 			}
 			return definition;
+		}
+
+		private void parseAttributes(Element attributesElement, MutablePropertyValues mpvs) {
+			List methods = DomUtils.getChildElementsByTagName(attributesElement, "method", true);
+
+			Map transactionAttributeMap = new HashMap(methods.size());
+
+			for (int i = 0; i < methods.size(); i++) {
+				Element methodElement = (Element) methods.get(i);
+
+				String name = methodElement.getAttribute("name");
+
+				RuleBasedTransactionAttribute attribute = new RuleBasedTransactionAttribute();
+				attribute.setPropagationBehaviorName(TransactionDefinition.PROPAGATION_CONSTANT_PREFIX + methodElement.getAttribute(PROPAGATION));
+				attribute.setIsolationLevelName(TransactionDefinition.ISOLATION_CONSTANT_PREFIX + methodElement.getAttribute(ISOLATION));
+				attribute.setTimeout(Integer.parseInt(methodElement.getAttribute(TIMEOUT)));
+				attribute.setReadOnly(Boolean.valueOf(methodElement.getAttribute(READ_ONLY)).booleanValue());
+
+				transactionAttributeMap.put(name, attribute);
+			}
+
+			RootBeanDefinition attributeSourceDefinition = new RootBeanDefinition(NameMatchTransactionAttributeSource.class);
+			attributeSourceDefinition.setPropertyValues(new MutablePropertyValues());
+			attributeSourceDefinition.getPropertyValues().addPropertyValue(NAME_MAP, transactionAttributeMap);
+
+			mpvs.addPropertyValue(TRANSACTION_ATTRIBUTE_SOURCE, attributeSourceDefinition);
 		}
 	}
 }

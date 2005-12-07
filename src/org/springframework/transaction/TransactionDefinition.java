@@ -37,9 +37,9 @@ import java.sql.Connection;
  */
 public interface TransactionDefinition {
 
-	String PROPAGATION_CONSTANT_PREFIX = "PROPAGATION";
+	String PROPAGATION_CONSTANT_PREFIX = "PROPAGATION_";
 
-	String ISOLATION_CONSTANT_PREFIX = "ISOLATION";
+	String ISOLATION_CONSTANT_PREFIX = "ISOLATION_";
 
 
 	/**
