@@ -51,6 +51,7 @@ public class AspectMetadata {
 		if (!ajType.isAspect()) {
 			throw new IllegalArgumentException(aspectClass + " is not an @AspectJ aspect");
 		}
+		validate();
 		
 		switch (ajType.getPerClause().getKind()) {
 			case SINGLETON :
@@ -67,6 +68,12 @@ public class AspectMetadata {
 			default :
 				throw new AopConfigException("PerClause " + ajType.getPerClause().getKind() + " not supported by Spring AOP for class " +
 						aspectClass.getName());
+		}
+	}
+	
+	private void validate() throws IllegalArgumentException {
+		if (this.ajType.getDeclarePrecedence().length > 0) {
+			throw new IllegalArgumentException("DeclarePrecendence not presently supported in Spring AOP");
 		}
 	}
 	

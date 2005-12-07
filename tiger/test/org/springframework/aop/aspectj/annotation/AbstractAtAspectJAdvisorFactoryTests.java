@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.ReflectiveAtAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
@@ -555,5 +556,85 @@ public abstract class AbstractAtAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals(1, afterReturningAspect.failureCount);
 		assertEquals(afterReturningAspect.failureCount + afterReturningAspect.successCount, afterReturningAspect.afterCount);
 	}
+	
+	
+	
+	@Aspect
+	public static class NoDeclarePrecedenceShouldFail {
+		
+		@Pointcut("execution(int *.getAge())")
+		public void getAge() {
+		}
+		
+		@Before("getAge()")
+		public void blowUpButDoesntMatterBecauseAroundAdviceWontLetThisBeInvoked() {
+			throw new IllegalStateException();
+		}
+		
+		@Around("getAge()")
+		public int preventExecution(ProceedingJoinPoint pjp) {
+			return 666;
+		}
+	}
+	
+	@Aspect
+	@DeclarePrecedence("org.springframework..*")
+	public static class DeclarePrecedenceShouldSucceed {
+		
+		@Pointcut("execution(int *.getAge())")
+		public void getAge() {
+		}
+		
+//		@Before("getAge()")
+//		public void blowUpButDoesntMatterBecauseAroundAdviceWontLetThisBeInvoked() {
+//			throw new IllegalStateException();
+//		}
+//		
+//		@Around("getAge()")
+//
+//		public int preventExecution(ProceedingJoinPoint pjp) {
+//			return 666;
+//		}
+	}
+	
+	public void testFailureWithoutExplicitDeclarePrecedence() {
+		TestBean target = new TestBean();
+		ITestBean itb = (ITestBean) createProxy(target, 
+				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new NoDeclarePrecedenceShouldFail())), 
+				ITestBean.class);
+		try {
+			itb.getAge();
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			
+		}
+	}
+	
+	
+	public void testDeclarePrecedenceNotSupported() {
+		TestBean target = new TestBean();
+		try {
+			ITestBean itb = (ITestBean) createProxy(target, 
+				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(
+						new DeclarePrecedenceShouldSucceed())), 
+				ITestBean.class);
+			fail();
+		}
+		catch (IllegalArgumentException ex) {
+			// Not supported in M1
+		}
+	}
+	
+	
+	// TODO in 2.0M1 precedence is out of scope
+//	public void testExplicitDeclarePrecedencePreventsFailure() {
+//		TestBean target = new TestBean();
+//		ITestBean itb = (ITestBean) createProxy(target, 
+//				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(
+//						new DeclarePrecedenceShouldSucceed())), 
+//				ITestBean.class);
+//		assertEquals(666, itb.getAge());
+//	}
 
 }
