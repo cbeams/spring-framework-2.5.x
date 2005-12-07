@@ -22,6 +22,12 @@
 		</xsd:simpleType>
 	</xsd:element>
 
+	<xsd:element name="aspectj-autoproxy">
+		<xsd:simpleType>
+			<xsd:restriction base="xsd:string"/>
+		</xsd:simpleType>
+	</xsd:element>
+	
 	<xsd:complexType name="aspectType">
 		<xsd:sequence>
 			<xsd:element name="pointcut" type="pointcutType" minOccurs="0" maxOccurs="1"/>
@@ -53,6 +59,8 @@
 				<xsd:restriction base="xsd:string">
 					<xsd:enumeration value="before"/>
 					<xsd:enumeration value="after"/>
+					<xsd:enumeration value="afterReturning"/>
+					<xsd:enumeration value="afterThrowing"/>
 					<xsd:enumeration value="around"/>
 				</xsd:restriction>
 			</xsd:simpleType>
