@@ -27,17 +27,17 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.beans.TestBean;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.JdbcTemplateHelper;
+import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSourceTests;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSourceTests.TestBean3;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSourceTests.TestBean4;
+import org.springframework.transaction.annotation.Transactional;
 
 /** 
- * Java 5-specific AspectJExpressionPointcutTests
+ * Java5-specific AspectJExpressionPointcutTests.
+ *
  * @author Rod Johnson
  */
 public class TigerAspectJExpressionPointcutTests extends TestCase {
@@ -120,8 +120,8 @@ public class TigerAspectJExpressionPointcutTests extends TestCase {
 				JdbcTemplate.class));
 		
 		assertTrue(jdbcVarArgs.matches(
-				JdbcTemplateHelper.class.getMethod("queryForInt", String.class, Object[].class),
-				JdbcTemplateHelper.class));
+				SimpleJdbcTemplate.class.getMethod("queryForInt", String.class, Object[].class),
+				SimpleJdbcTemplate.class));
 		
 		Method takesGenericList = methodsOnHasGeneric.get("setFriends");
 		assertFalse(jdbcVarArgs.matches(takesGenericList, HasGeneric.class));
@@ -253,7 +253,6 @@ public class TigerAspectJExpressionPointcutTests extends TestCase {
 		assertFalse(takesSpringAnnotatedArgument2.matches(
 				ProcessesSpringAnnotatedParameters.class.getMethod("takesNoAnnotatedParameters", TestBean.class, TestBean3.class),
 				ProcessesSpringAnnotatedParameters.class));
-		
-		
 	}
+
 }

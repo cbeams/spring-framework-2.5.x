@@ -1,28 +1,46 @@
-package org.springframework.jdbc.core;
+/*
+ * Copyright 2002-2005 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.jdbc.core.simple;
 
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcOperations;
 
 /**
- * Interface usable on Java 5 and above exposing a set of
- * common JDBC operations, whose interface is simplified thorugh
- * the use of var args and autoboxing.
+ * JDBC operations nterface usable on Java 5 and above, exposing a
+ * set of common JDBC operations, whose interface is simplified
+ * through the use of varargs and autoboxing.
  * 
  * @author Rod Johnson
  * @author Rob Harrop
  * @since 2.0
- * @see JdbcTemplate
+ * @see SimpleJdbcTemplate
+ * @see org.springframework.jdbc.core.JdbcOperations
  */
 public interface SimpleJdbcOperations {
 
 	/**
 	 * Expose the classic Spring JdbcTemplate to allow invocation of less
-	 * commonly used methods. Can also be used to obtain the DataSource.
-	 * @return {@link JdbcTemplate} wrapped by this class.
+	 * commonly used methods.
 	 */
 	JdbcOperations getJdbcOperations();
+
 
 	/**
 	 * Query for an <code>int</code> passing in a SQL query and a variable
@@ -53,8 +71,8 @@ public interface SimpleJdbcOperations {
 	 * @param sql the SQL query to run.
 	 * @param rm the @{@link ParameterizedRowMapper} to use for result mapping
 	 * @param args the args for the query.
-	 * @see JdbcOperations#queryForObject(String, RowMapper)
-	 * @see JdbcOperations#queryForObject(String, Object[], RowMapper)
+	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
+	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
 	<T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Object... args)
 			throws DataAccessException;
@@ -65,8 +83,8 @@ public interface SimpleJdbcOperations {
 	 * @param sql the SQL query to run.
 	 * @param rm the @{@link ParameterizedRowMapper} to use for result mapping
 	 * @param args the args for the query.
-	 * @see JdbcOperations#queryForObject(String, RowMapper)
-	 * @see JdbcOperations#queryForObject(String, Object[], RowMapper)
+	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
+	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
 	<T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Object... args)
 			throws DataAccessException;

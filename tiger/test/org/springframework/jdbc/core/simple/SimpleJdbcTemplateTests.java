@@ -1,8 +1,20 @@
-package org.springframework.jdbc.core;
+/*
+ * Copyright 2002-2005 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-import org.easymock.internal.ArrayMatcher;
+package org.springframework.jdbc.core.simple;
 
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
@@ -11,16 +23,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import junit.framework.TestCase;
+import org.easymock.MockControl;
+import org.easymock.internal.ArrayMatcher;
+
+import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
+import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.jdbc.core.JdbcOperations;
+
 /**
  * @author Rod Johnson
  * @author Rob Harrop
  */
-public class JdbcTemplateHelperTests extends TestCase {
+public class SimpleJdbcTemplateTests extends TestCase {
 
-
-	/*
-	 * Test method for 'org.springframework.jdbc.core.JdbcTemplateHelper.queryForInt(String, Object...)'
-	 */
 	public void testQueryForIntWithoutArgs() {
 		String sql = "SELECT COUNT(0) FROM BAR";
 		int expectedResult = 666;
@@ -31,7 +47,7 @@ public class JdbcTemplateHelperTests extends TestCase {
 		mc.setReturnValue(expectedResult);
 		mc.replay();
 
-		JdbcTemplateHelper jth = new JdbcTemplateHelper(jo);
+		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
 
 		assertSame(jo, jth.getJdbcOperations());
 
@@ -54,7 +70,7 @@ public class JdbcTemplateHelperTests extends TestCase {
 		mc.setReturnValue(expectedResult);
 		mc.replay();
 
-		JdbcTemplateHelper jth = new JdbcTemplateHelper(jo);
+		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
 		int result = jth.queryForInt(sql, arg1, arg2);
 		assertEquals(expectedResult, result);
 		mc.verify();
@@ -70,7 +86,7 @@ public class JdbcTemplateHelperTests extends TestCase {
 		mc.setReturnValue(expectedResult);
 		mc.replay();
 
-		JdbcTemplateHelper jth = new JdbcTemplateHelper(jo);
+		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
 		long result = jth.queryForLong(sql);
 		assertEquals(expectedResult, result);
 
@@ -91,7 +107,7 @@ public class JdbcTemplateHelperTests extends TestCase {
 		mc.setReturnValue(expectedResult);
 		mc.replay();
 
-		JdbcTemplateHelper jth = new JdbcTemplateHelper(jo);
+		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
 		long result = jth.queryForLong(sql, arg1, arg2, arg3);
 		assertEquals(expectedResult, result);
 		mc.verify();
@@ -111,7 +127,7 @@ public class JdbcTemplateHelperTests extends TestCase {
 		mc.setReturnValue(expectedResult);
 		mc.replay();
 
-		JdbcTemplateHelper jth = new JdbcTemplateHelper(jo);
+		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
 		Date result = jth.queryForObject(sql, Date.class, arg1, arg2, arg3);
 		assertEquals(expectedResult, result);
 		mc.verify();
@@ -127,7 +143,7 @@ public class JdbcTemplateHelperTests extends TestCase {
 		mc.setReturnValue(expectedResult);
 		mc.replay();
 
-		JdbcTemplateHelper jth = new JdbcTemplateHelper(jo);
+		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
 		Date result = jth.queryForObject(sql, Date.class);
 		assertEquals(expectedResult, result);
 		mc.verify();
@@ -153,7 +169,7 @@ public class JdbcTemplateHelperTests extends TestCase {
 		mc.setReturnValue(expectedResult);
 		mc.replay();
 
-		JdbcTemplateHelper jth = new JdbcTemplateHelper(jo);
+		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
 		Date result = jth.queryForObject(sql, rm, arg1, arg2, arg3);
 		assertEquals(expectedResult, result);
 		mc.verify();
@@ -175,7 +191,7 @@ public class JdbcTemplateHelperTests extends TestCase {
 		mc.setReturnValue(expectedResult);
 		mc.replay();
 
-		JdbcTemplateHelper jth = new JdbcTemplateHelper(jo);
+		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
 		Date result = jth.queryForObject(sql, rm);
 		assertEquals(expectedResult, result);
 		mc.verify();
@@ -257,9 +273,9 @@ public class JdbcTemplateHelperTests extends TestCase {
 		}
 		mc.replay();
 
-		JdbcTemplateHelper jth = new JdbcTemplateHelper(jo);
+		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
 
-		Method jthMethod = JdbcTemplateHelper.class.getMethod(methodName, unifiedTypes2);
+		Method jthMethod = SimpleJdbcTemplate.class.getMethod(methodName, unifiedTypes2);
 		Object result = jthMethod.invoke(jth, unifiedArgs2);
 
 		assertEquals(expectedResult, result);
