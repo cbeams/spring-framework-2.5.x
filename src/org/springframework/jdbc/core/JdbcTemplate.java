@@ -811,8 +811,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		CallableStatement cs = null;
 		try {
 			Connection conToUse = con;
-			if (this.nativeJdbcExtractor != null &&
-					this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeCallableStatements()) {
+			if (this.nativeJdbcExtractor != null) {
 				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
 			}
 			cs = csc.createCallableStatement(conToUse);
