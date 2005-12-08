@@ -17,7 +17,8 @@
 package org.springframework.aop.support;
 
 /**
- * Abstract superclass for expression pointcuts
+ * Abstract superclass for expression pointcuts.
+ *
  * @author Rod Johnson
  * @author Rob Harrop
  * @since 2.0
@@ -28,26 +29,22 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut {
 	
 	private String location;
 
-	/**
-	 * Return location information about the pointcut expression
-	 * if available. This is useful in debugging.
-	 * @return location information as a human-readable String,
-	 * or null if none is available
-	 */
-	public String getLocation() {
-		return location;
-	}
 
 	/**
-	 * Set the location for debugging
-	 * @param location
+	 * Set the location for debugging.
 	 */
 	public void setLocation(String location) {
 		this.location = location;
 	}
 
-	public String getExpression() {
-		return expression;
+	/**
+	 * Return location information about the pointcut expression
+	 * if available. This is useful in debugging.
+	 * @return location information as a human-readable String,
+	 * or <code>null</code> if none is available
+	 */
+	public String getLocation() {
+		return location;
 	}
 
 	public void setExpression(String expression) {
@@ -57,16 +54,21 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut {
 		}
 		catch (IllegalArgumentException ex) {
 			// Fill in location information if possible
-			if (location != null) {
+			if (this.location != null) {
 				String msg = ex.getMessage();
-				msg += "; Location is '" + location + "'";
-				throw new IllegalArgumentException(msg, ex.getCause());
+				msg += "; location is [" + this.location + "]";
+				throw new IllegalArgumentException(msg);
 			}
 			else {
 				throw ex;
 			}
 		}
 	}
+
+	public String getExpression() {
+		return expression;
+	}
+
 
 	/**
 	 * Set the pointcut expression. The expression should be parsed
@@ -75,4 +77,5 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut {
 	 * @throws IllegalArgumentException if the expression is invalid
 	 */
 	protected abstract void onSetExpression(String expression) throws IllegalArgumentException;
+
 }

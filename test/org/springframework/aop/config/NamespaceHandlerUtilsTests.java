@@ -17,12 +17,11 @@
 package org.springframework.aop.config;
 
 import junit.framework.TestCase;
+
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.JdkVersion;
-import org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvisorAutoProxyCreator;
 
 /**
  * @author Rob Harrop
@@ -30,6 +29,10 @@ import org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvi
 public class NamespaceHandlerUtilsTests extends TestCase {
 
 	public void testRegisterAutoProxyCreator() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+			return;
+		}
+
 		BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
 
 		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
@@ -40,7 +43,7 @@ public class NamespaceHandlerUtilsTests extends TestCase {
 	}
 
 	public void testRegisterAspectJAutoProxyCreator() throws Exception {
-		if(JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
 			return;
 		}
 
@@ -57,7 +60,7 @@ public class NamespaceHandlerUtilsTests extends TestCase {
 	}
 
 	public void testRegisterAspectJAutoProxyCreatorWithExistingAutoProxyCreator() throws Exception {
-		if(JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
 			return;
 		}
 
@@ -76,7 +79,7 @@ public class NamespaceHandlerUtilsTests extends TestCase {
 	}
 
 	public void testRegisterAutoProxyCreatorWhenAspectJAutoProxyCreatorAlreadyExists() throws Exception {
-		if(JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
 			return;
 		}
 
@@ -93,4 +96,5 @@ public class NamespaceHandlerUtilsTests extends TestCase {
 		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		assertEquals("Incorrect APC class", NamespaceHandlerUtils.ASPECTJ_AUTO_PROXY_CREATOR, definition.getBeanClassName());
 	}
+
 }
