@@ -18,6 +18,7 @@ package org.springframework.beans.factory.xml.support;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.UtilNamespaceHandler;
@@ -40,8 +41,8 @@ public class DefaultNamespaceHandlerResolverTests extends TestCase {
 			new DefaultNamespaceHandlerResolver(mappingPath);
 			fail("Should not be able to map a URI to a non-existent class");
 		}
-		catch (Throwable e) {
-			assertEquals("Incorrect root cause.", ClassNotFoundException.class, e.getCause().getClass());
+		catch (FatalBeanException ex) {
+			assertEquals("Incorrect root cause.", ClassNotFoundException.class, ex.getCause().getClass());
 		}
 	}
 
@@ -51,8 +52,9 @@ public class DefaultNamespaceHandlerResolverTests extends TestCase {
 			new DefaultNamespaceHandlerResolver(mappingPath);
 			fail("Should not be able to map a class that doesn't implement NamespaceHandler");
 		}
-		catch (Throwable e) {
+		catch (Throwable ex) {
 			// success
 		}
 	}
+
 }
