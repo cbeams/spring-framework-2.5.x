@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,21 +37,23 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
+import org.springframework.beans.support.annotation.AnnotationUtils;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
-import org.springframework.util.AnnotationUtils;
 
 /**
- * Abstract base class for factories that can create Spring AOP Advisors given AspectJ classes from classes honouring
- * the AspectJ 5 annotation syntax.
- * <br>
- * This class handles annotation parsing and validation functionality. 
+ * Abstract base class for factories that can create Spring AOP Advisors
+ * given AspectJ classes from classes honoring the AspectJ 5 annotation syntax.
+ *
+ * <p>This class handles annotation parsing and validation functionality.
  * It does not actually generate Spring AOP Advisors, which is deferred to subclasses.
+ *
  * @author Rod Johnson
  * @author Adrian Colyer
  * @since 2.0

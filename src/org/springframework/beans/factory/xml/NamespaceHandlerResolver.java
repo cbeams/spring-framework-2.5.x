@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.xml.support;
+package org.springframework.beans.factory.xml;
+
+import org.springframework.beans.factory.xml.NamespaceHandler;
 
 /**
  * Used by the {@link org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser} to

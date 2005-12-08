@@ -33,9 +33,10 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.xml.support.BeanDefinitionDecorator;
-import org.springframework.beans.factory.xml.support.BeanDefinitionParser;
-import org.springframework.beans.factory.xml.support.NamespaceHandlerSupport;
+import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -49,7 +50,7 @@ import java.util.List;
 /**
  * <code>NamespaceHandler</code> for the <code>aop</code> namespace.
  * <p/>
- * Provides a {@link BeanDefinitionParser} for the <code>&lt;aop:config&gt;</code> tag. A
+ * Provides a {@link org.springframework.beans.factory.xml.BeanDefinitionParser} for the <code>&lt;aop:config&gt;</code> tag. A
  * <code>config</code> tag can include nested <code>poincut</code>, <code>advisor</code> and
  * <code>aspect</code> tags.
  * <p/>
@@ -83,7 +84,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 	/**
 	 * Constructs a new <code>AopNamespaceHandler</code> and registers the
-	 * {@link BeanDefinitionParser} for the <code>config</code> tag.
+	 * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} for the <code>config</code> tag.
 	 */
 	public AopNamespaceHandler() {
 		registerBeanDefinitionParser("config", new ConfigBeanDefinitionParser());
@@ -191,7 +192,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 	}
 
 	/**
-	 * {@link BeanDefinitionParser} for the <code>&lt;aop:config&gt;</code> tag.
+	 * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} for the <code>&lt;aop:config&gt;</code> tag.
 	 */
 	private static class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 

@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.xml.support;
+package org.springframework.beans.factory.xml;
 
 import org.w3c.dom.Element;
+
+import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
 
 /**
  * Base interface used by the {@link org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser}
  * handling custom namespaces in a Spring XML configuration file. Implementations are expected
- * to return implementations of the {@link BeanDefinitionParser} interface for custom top-level
+ * to return implementations of the {@link org.springframework.beans.factory.xml.BeanDefinitionParser} interface for custom top-level
  * tags and implementations of the {@link BeanDefinitionDecorator} interface for custom nested tags.
  * <p>The parser will call {@link #findParserForElement} when it encounters a custom tag directly
  * under the <code>&lt;beans&gt;</code> tags and {@link #findDecoratorForElement} when it encounters
@@ -41,7 +44,7 @@ public interface NamespaceHandler {
     BeanDefinitionParser findParserForElement(Element element);
 
     /**
-     * Find the {@link BeanDefinitionDecorator} for the specified {@link Element}.
+     * Find the {@link org.springframework.beans.factory.xml.BeanDefinitionDecorator} for the specified {@link Element}.
      */
     BeanDefinitionDecorator findDecoratorForElement(Element element);
 

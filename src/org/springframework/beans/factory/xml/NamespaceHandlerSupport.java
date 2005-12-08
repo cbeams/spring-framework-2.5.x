@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.xml.support;
+package org.springframework.beans.factory.xml;
 
 import org.w3c.dom.Element;
 
 import java.util.Map;
 import java.util.HashMap;
+
+import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.NamespaceHandler;
 
 /**
  * Support class for implementing custom {@link NamespaceHandler NamespaceHandlers}. Provides

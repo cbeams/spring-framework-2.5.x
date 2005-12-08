@@ -1,9 +1,12 @@
-package org.springframework.jndi;
+package org.springframework.jndi.support;
 
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.xml.support.AbstractSimpleBeanDefinitionParser;
-import org.springframework.beans.factory.xml.support.NamespaceHandlerSupport;
+import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.util.xml.DomUtils;
+import org.springframework.jndi.JndiObjectFactoryBean;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

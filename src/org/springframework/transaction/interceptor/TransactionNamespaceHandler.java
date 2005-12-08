@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.transaction.support;
+package org.springframework.transaction.interceptor;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.xml.support.AbstractSingleBeanDefinitionParser;
-import org.springframework.beans.factory.xml.support.BeanDefinitionParser;
-import org.springframework.beans.factory.xml.support.NamespaceHandlerSupport;
+import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;

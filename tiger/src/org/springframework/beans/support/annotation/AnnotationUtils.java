@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.util;
+package org.springframework.beans.support.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -24,12 +24,14 @@ import java.util.Set;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * General utility methods for working with annotations.
  *
  * @author Rob Harrop
  * @author Rod Johnson
+ * @since 2.0
  */
 public abstract class AnnotationUtils {
 
@@ -55,13 +57,11 @@ public abstract class AnnotationUtils {
 	
 	/**
 	 * Annotations on methods are not inherited by default,
-	 * so we need to handle this explicitly
+	 * so we need to handle this explicitly.
 	 * @param m method to look for annotations on
-	 * @param c clazz to start with in the hierarchy. Will
-	 * go up inheritance hierarchy looking for annotations
-	 * on superclasses.
-	 * @return the annotation of the given type found,
-	 * or null
+	 * @param c clazz to start with in the hierarchy. Will go up
+	 * inheritance hierarchy looking for annotations on superclasses.
+	 * @return the annotation of the given type found, or <code>null</code>
 	 */
 	public static <A extends Annotation> A findMethodAnnotation(Class<A> annotationClass, Method m, Class c) {
 		if (!annotationClass.isAnnotation()) {
@@ -84,4 +84,5 @@ public abstract class AnnotationUtils {
 		}
 		return annotation;
 	}
+
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.xml.support;
+package org.springframework.beans.factory.xml;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

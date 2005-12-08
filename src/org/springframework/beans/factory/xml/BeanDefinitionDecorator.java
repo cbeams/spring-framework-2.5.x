@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.xml.support;
+package org.springframework.beans.factory.xml;
 
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -33,7 +33,7 @@ import org.w3c.dom.Element;
  * a {@link org.springframework.aop.framework.ProxyFactoryBean} definition allowing for custom
  * {@link org.aopalliance.intercept.MethodInterceptor interceptors} to be added.
  * <p>{@link BeanDefinitionDecorator BeanDefinitionDecorators} that wish to add an interceptor to the
- * enclosing bean should extend {@link AbstractInterceptorDrivenBeanDefinitionDecorator} which handles
+ * enclosing bean should extend {@link org.springframework.aop.config.AbstractInterceptorDrivenBeanDefinitionDecorator} which handles
  * the chaining ensuring that only one proxy is created and that it contains all interceptors from the
  * chain.
  * <p>The parser locates a {@link BeanDefinitionDecorator} from the {@link NamespaceHandler} for the

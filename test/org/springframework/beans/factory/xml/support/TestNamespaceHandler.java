@@ -7,8 +7,13 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
+import org.springframework.aop.config.AbstractInterceptorDrivenBeanDefinitionDecorator;
+
 import org.w3c.dom.Element;
 
 /**

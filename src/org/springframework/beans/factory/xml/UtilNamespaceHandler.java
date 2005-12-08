@@ -14,24 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.xml.support;
+package org.springframework.beans.factory.xml;
 
 import org.w3c.dom.Element;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.config.BeanDefinition;
+
+import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.springframework.beans.factory.config.PropertiesFactoryBean;
 
 /**
  * @author Rob Harrop
+ * @since 2.0
  */
-public abstract class AbstractSingleBeanDefinitionParser implements BeanDefinitionParser {
+public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
-    public static final String ID_ATTRIBUTE = "id";
+	public UtilNamespaceHandler() {
+		registerBeanDefinitionParser("properties", new PropertiesBeanDefinitionParser());
+	}
+	
 
-    public final void parse(Element element, BeanDefinitionRegistry registry) {
-        String id = element.getAttribute(ID_ATTRIBUTE);
-        BeanDefinition definition = doParse(element);
-        registry.registerBeanDefinition(id, definition);
-    }
+	public static class PropertiesBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
-    protected abstract BeanDefinition doParse(Element element);
+		protected Class getBeanClass(Element element) {
+			return PropertiesFactoryBean.class;
+		}
+	}
+	
 }

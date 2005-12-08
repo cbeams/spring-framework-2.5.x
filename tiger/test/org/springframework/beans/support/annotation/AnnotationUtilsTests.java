@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.util;
+package org.springframework.beans.support.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -22,12 +22,11 @@ import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
 
-import org.springframework.core.Order;
+import org.springframework.beans.support.annotation.AnnotationUtils;
 
 /**
  * @author Rob Harrop
  * @author Rod Johnson
- * @since 2.0
  */
 public class AnnotationUtilsTests extends TestCase {
 
@@ -49,73 +48,6 @@ public class AnnotationUtilsTests extends TestCase {
 		assertEquals("Age copied", 30, foo.getAge());
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface FooAnnotation {
-
-		String name();
-
-		int age();
-	}
-
-	@FooAnnotation(name = "Rob Harrop", age = 23)
-	public static class Foo {
-
-		private String name;
-
-		private int age;
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public int getAge() {
-			return age;
-		}
-
-		public void setAge(int age) {
-			this.age = age;
-		}
-	}
-	
-	
-	public interface AnnotatedInterface {
-		@Order(0)
-		void fromInterfaceImplementedByRoot();
-	}
-	
-	public static class Root implements AnnotatedInterface {
-		
-		@Order(27)
-		public void annotatedOnRoot() {}
-		
-		public void overrideToAnnotate() {}
-		
-		@Order(27)
-		public void overrideWithoutNewAnnotation() {}
-		
-		public void notAnnotated() {}
-		
-		public void fromInterfaceImplementedByRoot() {}
-		
-	}
-	
-	public static class Leaf extends Root {
-		
-		@Order(25)
-		public void annotatedOnLeaf() {}
-		
-		@Override
-		@Order(1)
-		public void overrideToAnnotate() { }
-		
-		@Override
-		public void overrideWithoutNewAnnotation() {}
-	}
-	
 	public void testFindMethodAnnotationOnLeaf() throws SecurityException, NoSuchMethodException {
 		Method m = Leaf.class.getMethod("annotatedOnLeaf", (Class[]) null);
 		Order o = AnnotationUtils.findMethodAnnotation(Order.class, m, Leaf.class);
@@ -146,4 +78,75 @@ public class AnnotationUtilsTests extends TestCase {
 //		Order o = AnnotationUtils.findMethodAnnotation(Order.class, m, Leaf.class);
 //		assertNotNull(o);
 //	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface FooAnnotation {
+
+		String name();
+
+		int age();
+	}
+
+
+	@FooAnnotation(name = "Rob Harrop", age = 23)
+	public static class Foo {
+
+		private String name;
+
+		private int age;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public int getAge() {
+			return age;
+		}
+
+		public void setAge(int age) {
+			this.age = age;
+		}
+	}
+
+
+	public interface AnnotatedInterface {
+		@Order(0)
+		void fromInterfaceImplementedByRoot();
+	}
+
+
+	public static class Root implements AnnotatedInterface {
+
+		@Order(27)
+		public void annotatedOnRoot() {}
+
+		public void overrideToAnnotate() {}
+
+		@Order(27)
+		public void overrideWithoutNewAnnotation() {}
+
+		public void notAnnotated() {}
+
+		public void fromInterfaceImplementedByRoot() {}
+	}
+
+
+	public static class Leaf extends Root {
+
+		@Order(25)
+		public void annotatedOnLeaf() {}
+
+		@Override
+		@Order(1)
+		public void overrideToAnnotate() { }
+
+		@Override
+		public void overrideWithoutNewAnnotation() {}
+	}
+
 }

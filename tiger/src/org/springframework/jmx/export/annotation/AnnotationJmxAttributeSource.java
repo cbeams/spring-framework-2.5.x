@@ -21,13 +21,14 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.jmx.export.metadata.*;
+import org.springframework.beans.support.annotation.AnnotationUtils;
+import org.springframework.jmx.export.metadata.InvalidMetadataException;
+import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.export.metadata.ManagedAttribute;
 import org.springframework.jmx.export.metadata.ManagedNotification;
 import org.springframework.jmx.export.metadata.ManagedOperation;
-import org.springframework.jmx.export.metadata.ManagedResource;
 import org.springframework.jmx.export.metadata.ManagedOperationParameter;
-import org.springframework.util.AnnotationUtils;
+import org.springframework.jmx.export.metadata.ManagedResource;
 
 /**
  * Implementation of the <code>JmxAttributeSource</code> interface that

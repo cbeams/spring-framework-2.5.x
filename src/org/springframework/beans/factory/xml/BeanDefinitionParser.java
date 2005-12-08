@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.xml.support;
+package org.springframework.beans.factory.xml;
 
 import org.w3c.dom.Element;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -29,7 +29,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  * @author Rob Harrop
  * @since 2.0
  * @see NamespaceHandler
- * @see BeanDefinitionDecorator
+ * @see org.springframework.beans.factory.xml.BeanDefinitionDecorator
  */
 public interface BeanDefinitionParser {
 
