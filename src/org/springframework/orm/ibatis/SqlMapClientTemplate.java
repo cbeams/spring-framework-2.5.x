@@ -69,9 +69,6 @@ import org.springframework.util.Assert;
  * property. Can additionally be configured with a DataSource for fetching Connections,
  * although this is not necessary if a DataSource is specified for the SqlMapClient itself.
  *
- * <p>NOTE: The SqlMapClient/SqlMapSession API is the API of iBATIS SQL Maps 2.
- * With SQL Maps 1.x, the SqlMap/MappedStatement API has to be used.
- *
  * @author Juergen Hoeller
  * @since 24.02.2004
  * @see #execute

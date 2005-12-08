@@ -43,9 +43,6 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * preferable to per-DAO DataSource references, as it allows for lazy loading
  * and avoids repeated DataSource references.
  *
- * <p>NOTE: The SqlMapClient/SqlMapSession API is the API of iBATIS SQL Maps 2.
- * With SQL Maps 1.x, the SqlMap/MappedStatement API has to be used.
- *
  * @author Juergen Hoeller
  * @since 24.02.2004
  * @see #setConfigLocation
