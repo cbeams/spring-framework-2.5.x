@@ -89,6 +89,10 @@ public class AbstractModelAndViewTest extends TestCase {
 		return o;
 	}
 	
+	/**
+	 * Checks to see if the view name in the ModelAndView matches the
+	 * given String.
+	 */
 	protected void assertViewName(ModelAndView mav, String name) {
 		assertEquals("View name is not equal to '" + name + "' but was '" + mav.getViewName() + "'",
 				name, mav.getViewName());
