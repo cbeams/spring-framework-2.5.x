@@ -91,6 +91,9 @@ Package org.springframework.web
 * FixedLocaleResolver returns the JVM's default Locale if no explicit default Locale specified
 * VelocityView converts Velocity's MethodInvocationException to a Spring NestedServletException with original root cause
 
+Package org.springframework.samples
+* Migrated JPetStore to use the tx, jndi and aop namespaces added in Spring 2.0.
+
 
 Changes in version 1.2.6 (14.11.2005)
 -------------------------------------
