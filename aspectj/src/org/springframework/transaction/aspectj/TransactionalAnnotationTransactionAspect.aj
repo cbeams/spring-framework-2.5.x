@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
  * validation.
  * @author Rod Johnson
  * @author Ramnivas Laddad
+ * @author Adrian Colyer
  * @since 2.0
  * @see AbstractTransactionAspect
  */
@@ -35,9 +36,28 @@ public aspect TransactionalAnnotationTransactionAspect extends AbstractTransacti
 		super(new AnnotationTransactionAttributeSource());
 	}
 	
+	/**
+	 * Matches the execution of any public method in a type with the
+	 * Transactional annotation, or any subtype of a type with the
+	 * Transactional annotation.
+	 */
+	private pointcut executionOfAnyPublicMethodInAtTransactionalType() :
+		execution(public * (@Transactional *+).*(..));
+	
+	/**
+	 * Matches the execution of any public method with the 
+	 * Transactional annotation.
+	 */
+	private pointcut executionOfTransactionalPublicMethod() :
+		execution(public * *(..)) && @annotation(Transactional);
+	
+	/**
+	 * Definition of pointcut from super aspect - matched join points
+	 * will have Spring transaction management applied.
+	 */	
 	protected pointcut transactionalMethodExecution(Object txObject) :
-		(execution(public * (@Transactional *+).*(..))
-		 || (execution(public * *(..))) && @annotation(Transactional))
+		(executionOfAnyPublicMethodInAtTransactionalType() 
+		 || executionOfTransactionalPublicMethod())
 		&& this(txObject);
 
 }
