@@ -251,6 +251,7 @@
 
 		<jar jarfile="${dist.dir}/spring-beans.jar">
 			<fileset dir="${target.classes.dir}">
+				<include name="META-INF/spring.handlers"/>
 				<include name="org/springframework/beans/**"/>
 			</fileset>
 			<manifest>
