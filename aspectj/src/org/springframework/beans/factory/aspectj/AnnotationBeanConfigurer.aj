@@ -33,10 +33,10 @@ public aspect AnnotationBeanConfigurer extends AbstractBeanConfigurer {
 		// the Configurable annotation
 		setBeanWiringInfoResolver(new BeanWiringInfoResolver() {
 			public BeanWiringInfo resolve(Object instance) {
-				Class clazz = instance.getClass();
-				Configurable springAnnotation = (Configurable) clazz.getAnnotation(Configurable.class);
-				if (springAnnotation != null) {
-					String beanName = springAnnotation.value();
+				Class<?> clazz = instance.getClass();
+				Configurable configurableAnnotation = clazz.getAnnotation(Configurable.class);
+				if (configurableAnnotation != null) {
+					String beanName = configurableAnnotation.value();
 					if ("".equals(beanName)) {
 						beanName = clazz.getName();
 					}
