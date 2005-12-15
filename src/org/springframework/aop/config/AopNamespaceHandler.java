@@ -152,7 +152,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 	 */
 	private static class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 
-		private static final String BEAN_CONFIGURER = "org.springframework.beans.factory.aspectj.BeanConfigurer";
+		private static final String BEAN_CONFIGURER = "org.springframework.beans.factory.aspectj.AnnotationBeanConfigurer";
 
 		private boolean registered;
 
