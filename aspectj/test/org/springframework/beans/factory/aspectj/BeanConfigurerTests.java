@@ -47,7 +47,7 @@ public class BeanConfigurerTests extends TestCase {
 		new ClassPathXmlApplicationContext("org/springframework/beans/factory/aspectj/beanConfigurerTests.xml");
 	}
 	
-	@SpringConfigured("beanOne")
+	@Configurable("beanOne")
 	private static class ShouldBeConfiguredBySpring {
 		
 		private String name;
@@ -76,7 +76,7 @@ public class BeanConfigurerTests extends TestCase {
 
 	}
 	
-	@SpringConfigured
+	@Configurable
 	private static class ShouldBeConfiguredBySpringUsingTypeNameAsBeanName {
 		
 		private String name;

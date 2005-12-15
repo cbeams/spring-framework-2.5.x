@@ -2,6 +2,7 @@
 <aspectj>
   <aspects>
     <aspect name="org.springframework.beans.factory.aspectj.BeanConfigurer"/>
+	<aspect name="org.springframework.transaction.aspectj.TransactionalAnnotationTransactionAspect"/>
   </aspects>
   <weaver>
     <exclude within="org.springframework..*"/>

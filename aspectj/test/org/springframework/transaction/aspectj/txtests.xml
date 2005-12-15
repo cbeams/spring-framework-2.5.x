@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<!-- Root application context -->
+
+<beans>
+
+	<bean id="transactionManager"
+		class="org.springframework.transaction.CallCountingTransactionManager" />
+	
+	<bean class="org.springframework.transaction.aspectj.TransactionalAnnotationTransactionAspect"
+		factory-method="aspectOf">
+		<property name="transactionManager" ref="transactionManager" />
+			
+<!--		<autoprops="transactionManager,eriu" />	 -->
+			
+	</bean>
+	
+	<bean class="org.springframework.transaction.aspectj.TransactionalAnnotationOnlyOnClassWithNoInterface" />
+
+	
+
+
+</beans>
