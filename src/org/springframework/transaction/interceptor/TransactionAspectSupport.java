@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,12 @@ package org.springframework.transaction.interceptor;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
 import org.aopalliance.aop.AspectException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -59,7 +57,7 @@ import org.springframework.util.ClassUtils;
  * @see #setTransactionAttributes
  * @see #setTransactionAttributeSource
  */
-public class TransactionAspectSupport implements InitializingBean, Serializable {
+public class TransactionAspectSupport implements InitializingBean {
 
 	/**
 	 * Holder to support the currentTransactionStatus() method, and communication
