@@ -67,7 +67,10 @@ public class SimpleMessageConverter implements MessageConverter {
 	 * @see #createMessageForSerializable
 	 */
 	public Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
-		if (object instanceof String) {
+		if (object instanceof Message) {
+			return (Message) object;
+		}
+		else if (object instanceof String) {
 			return createMessageForString((String) object, session);
 		}
 		else if (object instanceof byte[]) {
@@ -87,7 +90,8 @@ public class SimpleMessageConverter implements MessageConverter {
 	/**
 	 * This implementation converts a TextMessage back to a String, a
 	 * ByteMessage back to a byte array, a MapMessage back to a Map,
-	 * and an ObjectMessage back to a Serializable object.
+	 * and an ObjectMessage back to a Serializable object. Returns
+	 * the plain Message object in case of an unknown message type.
 	 * @see #extractStringFromMessage
 	 * @see #extractByteArrayFromMessage
 	 * @see #extractMapFromMessage
@@ -107,7 +111,7 @@ public class SimpleMessageConverter implements MessageConverter {
 			return extractSerializableFromMessage((ObjectMessage) message);
 		}
 		else {
-			throw new MessageConversionException("Cannot convert JMS message [" + message + "] to object");
+			return message;
 		}
 	}
 
