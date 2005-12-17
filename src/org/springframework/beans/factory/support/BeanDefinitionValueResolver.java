@@ -47,7 +47,7 @@ import org.springframework.core.CollectionFactory;
  * @since 1.2
  * @see AbstractAutowireCapableBeanFactory
  */
-public class BeanDefinitionValueResolver {
+class BeanDefinitionValueResolver {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 

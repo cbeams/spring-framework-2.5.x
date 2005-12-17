@@ -50,7 +50,7 @@ import org.springframework.util.ReflectionUtils;
  * @see #instantiateUsingFactoryMethod
  * @see AbstractAutowireCapableBeanFactory
  */
-public abstract class ConstructorResolver {
+abstract class ConstructorResolver {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -268,7 +268,8 @@ public abstract class ConstructorResolver {
 		}
 		
 		if (factoryMethodToUse == null) {
-			throw new BeanDefinitionStoreException("No factory method: factory bean=" + mergedBeanDefinition.getFactoryBeanName() +
+			throw new BeanDefinitionStoreException("No factory method: factory bean=" +
+					mergedBeanDefinition.getFactoryBeanName() +
 					"; factory method=" + mergedBeanDefinition.getFactoryMethodName());
 		}
 		if (!factoryMethodToUse.isAccessible()) {
@@ -362,7 +363,8 @@ public abstract class ConstructorResolver {
 				usedValueHolders.add(valueHolder);
 				args.rawArguments[j] = valueHolder.getValue();
 				try {
-					args.arguments[j] = this.beanFactory.doTypeConversionIfNecessary(args.rawArguments[j], argTypes[j], bw);
+					args.arguments[j] =
+							this.beanFactory.doTypeConversionIfNecessary(args.rawArguments[j], argTypes[j], bw);
 				}
 				catch (TypeMismatchException ex) {
 					throw new UnsatisfiedDependencyException(

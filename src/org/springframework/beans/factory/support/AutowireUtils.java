@@ -36,7 +36,7 @@ import org.springframework.util.ClassUtils;
  * @since 1.1.2
  * @see AbstractAutowireCapableBeanFactory
  */
-public abstract class AutowireUtils {
+abstract class AutowireUtils {
 
 	/**
 	 * Sort the given constructors, preferring public constructors and "greedy" ones
