@@ -354,7 +354,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		ProxyFactory proxyFactory = new ProxyFactory();
 		// Copy our properties (proxyTargetClass) inherited from ProxyConfig.
 		proxyFactory.copyFrom(this);
-
+		
 		if (!isProxyTargetClass()) {
 			// Must allow for introductions; can't just set interfaces to
 			// the target's interfaces only.

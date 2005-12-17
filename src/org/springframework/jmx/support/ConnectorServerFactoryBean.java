@@ -28,13 +28,11 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.jmx.export.MBeanRegistrationSupport;
 
 /**
  * <code>FactoryBean</code> that creates a JSR-160 <code>JMXConnectorServer</code>,
@@ -54,17 +52,12 @@ import org.springframework.core.NestedRuntimeException;
  * @see JMXConnectorServer
  * @see MBeanServer
  */
-public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+public class ConnectorServerFactoryBean extends MBeanRegistrationSupport implements FactoryBean, InitializingBean, DisposableBean {
 
 	/**
 	 * The default service URL.
 	 */
 	public static final String DEFAULT_SERVICE_URL = "service:jmx:jmxmp://localhost:9875";
-
-
-	protected final Log logger = LogFactory.getLog(getClass());
-
-	private MBeanServer server;
 
 	private String serviceUrl = DEFAULT_SERVICE_URL;
 
@@ -77,15 +70,6 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 	private boolean daemon = false;
 
 	private JMXConnectorServer connectorServer;
-
-
-	/**
-	 * Set the <code>MBeanServer</code> that the <code>JMXConnectorServer</code>
-	 * should expose.
-	 */
-	public void setServer(MBeanServer server) {
-		this.server = server;
-	}
 
 	/**
 	 * Set the service URL for the <code>JMXConnectorServer</code>.
@@ -157,7 +141,7 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 
 		// Do we want to register the connector with the MBean server?
 		if (this.objectName != null) {
-			this.server.registerMBean(this.connectorServer, this.objectName);
+			doRegister(this.connectorServer, this.objectName);
 		}
 
 		try {
@@ -190,7 +174,7 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 
 		catch (IOException ex) {
 			// Unregister the connector server if startup failed.
-			unregisterConnectorServer();
+			unregisterBeans();
 			throw ex;
 		}
 	}
@@ -222,22 +206,7 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 			this.connectorServer.stop();
 		}
 		finally {
-			unregisterConnectorServer();
-		}
-	}
-
-	/**
-	 * Unregister the connection server from the <code>MBeanServer</code>.
-	 * Logs an exception instead of rethrowing it.
-	 */
-	private void unregisterConnectorServer() {
-		if (this.objectName != null) {
-			try {
-				this.server.unregisterMBean(this.objectName);
-			}
-			catch (JMException ex) {
-				logger.error("Could not unregister JMX connector server", ex);
-			}
+			unregisterBeans();
 		}
 	}
 

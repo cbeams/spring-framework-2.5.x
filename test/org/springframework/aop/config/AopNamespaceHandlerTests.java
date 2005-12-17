@@ -22,8 +22,12 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.scope.RequestContextHolder;
 
 /**
  * @author Rob Harrop

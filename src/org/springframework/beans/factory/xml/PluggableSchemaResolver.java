@@ -17,37 +17,82 @@
 package org.springframework.beans.factory.xml;
 
 import java.io.IOException;
+import java.util.Properties;
 
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.PropertiesMergeUtils;
+import org.springframework.util.Assert;
+import org.springframework.beans.FatalBeanException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
+ * {@link EntityResolver} implementation that attempts to resolve schema URLs into
+ * local {@link ClassPathResource classpath resources} using a set of mappings files.
+ * <p/>
+ * By default, this class will look for mapping files using the pattern:
+ * <code>META-INF/spring.schemas</code> allowing for multiple files to exist on the
+ * classpath at any one time.
+ * <p/>
+ * The pattern for the mapping files can be overidden using the
+ * {@link #PluggableSchemaResolver(String, ClassLoader)} constructor
+ *
  * @author Rob Harrop
  * @since 2.0
  */
 public class PluggableSchemaResolver implements EntityResolver {
 
-	private static final String SPRING_SCHEMA_PREFIX = "http://www.springframework.org/schema/";
+	/**
+	 * The location to look for the mapping files. Can be present in multiple
+	 * JAR files.
+	 */
+	private static final String SPRING_SCHEMA_MAPPINGS_LOCATION = "META-INF/spring.schemas";
 
-	private static final String PACKAGE_PREFIX = "org/springframework/";
+	/**
+	 * <code>Log</code> instance of this class.
+	 */
+	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * The currently configured mapping file location.
+	 */
+	private String schemaMappingsLocation = SPRING_SCHEMA_MAPPINGS_LOCATION;
+
+	/**
+	 * Stores the mapping of schema URL -> local schema path.
+	 */
+	private Properties schemaMappings;
+
+	/**
+	 * {@link ClassLoader} instance used to load mapping resources.
+	 */
+	private ClassLoader classLoader;
+
+	public PluggableSchemaResolver(ClassLoader classLoader) {
+		Assert.notNull(classLoader, "'classLoader' cannot be null.");
+		this.classLoader = classLoader;
+		initMappings();
+	}
+
+	public PluggableSchemaResolver(String schemaMappingsLocation, ClassLoader classLoader) {
+		Assert.hasText(schemaMappingsLocation, "'schemaMappingsLocation' cannot be null or empty.");
+		Assert.notNull(classLoader, "'classLoader' cannot be null.");
+		this.schemaMappingsLocation = schemaMappingsLocation;
+		this.classLoader = classLoader;
+		initMappings();
+	}
 
 	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
 		if (systemId != null) {
-			Resource schemaResource;
-			if (isSpringSchema(systemId)) {
-				// It's a Spring schema.
-				schemaResource = resolveSpringSchema(systemId);
-			}
-			else {
-				// Some 3rd party schema.
-				schemaResource = resolveThirdPartySchema(systemId);
-			}
-			if (schemaResource != null) {
-				InputSource source = new InputSource(schemaResource.getInputStream());
+			String resourceLocation = this.schemaMappings.getProperty(systemId);
+
+			if(resourceLocation != null) {
+				Resource resource = new ClassPathResource(resourceLocation);
+				InputSource source = new InputSource(resource.getInputStream());
 				source.setPublicId(publicId);
 				source.setSystemId(systemId);
 				return source;
@@ -56,17 +101,19 @@ public class PluggableSchemaResolver implements EntityResolver {
 		return null;
 	}
 
-	private boolean isSpringSchema(String systemId) {
-		return (systemId.indexOf(SPRING_SCHEMA_PREFIX) > -1);
-	}
+	/**
+	 * Loads the schema URL -> schema file location mappings using the configured mapping
+	 * file pattern.
+	 * @see PropertiesMergeUtils#findMergedProperties(String, ClassLoader) 
+	 */
+	private void initMappings() {
+		try {
+			this.schemaMappings = PropertiesMergeUtils.findMergedProperties(this.schemaMappingsLocation, this.classLoader);
+		}
+		catch (IOException e) {
+			throw new FatalBeanException("Unable to load schema mappings from location [" + this.schemaMappingsLocation + "].", e);
+		}
 
-	private Resource resolveSpringSchema(String systemId) {
-		String path = PACKAGE_PREFIX + systemId.substring(SPRING_SCHEMA_PREFIX.length());
-		return new ClassPathResource(path);
-	}
-
-	private Resource resolveThirdPartySchema(String systemId) {
-		throw new UnsupportedOperationException();
 	}
 
 }

@@ -5,8 +5,6 @@ import org.springframework.jmx.JmxTestBean;
 
 import javax.management.Attribute;
 import javax.management.AttributeChangeNotification;
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
 import javax.management.Notification;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
@@ -34,7 +32,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
 		exporter.setBeans(beans);
-		exporter.setNotificationListeners(notificationListeners);
+		exporter.setNotificationListenerMappings(notificationListeners);
 		exporter.afterPropertiesSet();
 
 		// update the attribute
@@ -59,7 +57,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
 		exporter.setBeans(beans);
-		exporter.setNotificationListeners(notificationListeners);
+		exporter.setNotificationListenerMappings(notificationListeners);
 		exporter.afterPropertiesSet();
 
 		// update the attribute

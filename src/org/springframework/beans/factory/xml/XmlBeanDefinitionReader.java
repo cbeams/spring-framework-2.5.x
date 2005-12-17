@@ -75,7 +75,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private static final int MAX_PEEK_LINES = 5;
 
-
 	private static final Constants constants = new Constants(XmlBeanDefinitionReader.class);
 
 	private boolean namespaceAware = false;
@@ -367,9 +366,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see XmlBeanDefinitionParser#registerBeanDefinitions
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeansException {
-		XmlBeanDefinitionParser parser =
-				(XmlBeanDefinitionParser) BeanUtils.instantiateClass(this.parserClass);
+		XmlBeanDefinitionParser parser = createXmlBeanDefinitionParser();
 		return parser.registerBeanDefinitions(this, doc, resource);
+	}
+
+	protected XmlBeanDefinitionParser createXmlBeanDefinitionParser() {
+		return (XmlBeanDefinitionParser) BeanUtils.instantiateClass(this.parserClass);
 	}
 
 }

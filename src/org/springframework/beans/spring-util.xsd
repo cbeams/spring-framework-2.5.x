@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <xsd:schema xmlns="http://www.springframework.org/schema/util"
-            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="http://www.springframework.org/schema/util"
-            elementFormDefault="qualified"
-            attributeFormDefault="unqualified">
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			targetNamespace="http://www.springframework.org/schema/util"
+			elementFormDefault="qualified"
+			attributeFormDefault="unqualified">
 
-    <!-- TODO: need base complex type for things with an ID attribute -->
-    <xsd:element name="properties">
-        <xsd:complexType>
-            <xsd:attribute name="id" type="xsd:string" use="required" />
-            <xsd:attribute name="location" type="xsd:string" use="required" />
-        </xsd:complexType>
-    </xsd:element>
+	<!-- TODO: need base complex type for things with an ID attribute -->
+	<xsd:element name="properties">
+		<xsd:complexType>
+			<xsd:attribute name="id" type="xsd:string" use="required"/>
+			<xsd:attribute name="location" type="xsd:string" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="constant">
+		<xsd:complexType>
+			<xsd:attribute name="id" type="xsd:string" use="required"/>
+			<xsd:attribute name="staticField" type="xsd:string" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
 </xsd:schema>

@@ -175,12 +175,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	private String defaultDestroyMethod;
 
-
-	public DefaultXmlBeanDefinitionParser() {
-		this.namespaceHandlerResolver = createNamespaceHandlerResolver();
-	}
-
-
 	/**
 	 * Parses bean definitions according to the "spring-beans" DTD.
 	 * <p>Opens a DOM Document; then initializes the default settings
@@ -334,7 +328,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	}
 
 	protected NamespaceHandlerResolver createNamespaceHandlerResolver() {
-		return new DefaultNamespaceHandlerResolver();
+		ClassLoader classLoader = this.beanDefinitionReader.getBeanClassLoader();
+		if(classLoader == null) {
+			classLoader = Thread.currentThread().getContextClassLoader();
+		}
+		return new DefaultNamespaceHandlerResolver(classLoader);
 	}
 
 	/**
@@ -391,7 +389,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	protected int parseCustomElement(Element ele) {
 		String namespaceUri = ele.getNamespaceURI();
-		NamespaceHandler handler = this.namespaceHandlerResolver.resolve(namespaceUri);
+		NamespaceHandler handler = getNamespaceHandlerResolver().resolve(namespaceUri);
 
 		if (handler == null) {
 			throw new BeanDefinitionStoreException("Unable to locate NamespaceHandler for namespace ["
@@ -401,6 +399,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		BeanDefinitionParser parser = handler.findParserForElement(ele);
 		parser.parse(ele, this.beanDefinitionReader.getBeanFactory());
 		return (getBeanDefinitionCount() - countBefore);
+	}
+
+	private NamespaceHandlerResolver getNamespaceHandlerResolver() {
+		if(this.namespaceHandlerResolver == null) {
+			this.namespaceHandlerResolver = createNamespaceHandlerResolver();
+		}
+		return this.namespaceHandlerResolver;
 	}
 
 	private int decorateAndRegisterBeanDefinition(Element element, BeanDefinitionHolder definitionHolder) {
@@ -414,7 +419,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			if (node.getNodeType() == Node.ELEMENT_NODE && !isDefaultNamespace(uri)) {
 				Element childElement = (Element) node;
 				// a node from a namespace outside of the standard - should map to a decorator
-				NamespaceHandler handler = this.namespaceHandlerResolver.resolve(uri);
+				NamespaceHandler handler = getNamespaceHandlerResolver().resolve(uri);
 				BeanDefinitionDecorator decorator = handler.findDecoratorForElement(childElement);
 				int countBefore = getBeanDefinitionCount();
 				rootDefinition = decorator.decorate(childElement, rootDefinition, this.beanDefinitionReader.getBeanFactory());

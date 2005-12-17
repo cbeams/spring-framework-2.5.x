@@ -152,6 +152,7 @@
 			<fileset dir="${src.dir}">
 				<include name="**/*.properties"/>
 				<include name="**/*.handlers"/>
+				<include name="**/*.schemas"/>
 				<include name="**/*.xml"/>
 				<include name="**/*.dtd"/>
 				<include name="**/*.xsd"/>

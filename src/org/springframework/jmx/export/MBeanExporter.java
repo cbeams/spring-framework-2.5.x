@@ -266,7 +266,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * Sets the {@link NotificationListenerBean NotificationListenerBeans} containing the
 	 * {@link javax.management.NotificationListener NotificationListeners} that will be registered
 	 * with the {@link MBeanServer}.
-	 * @see #setNotificationListeners(java.util.Map)
+	 * @see #setNotificationListenerMappings(java.util.Map)
 	 * @see NotificationListenerBean
 	 */
 	public void setNotificationListeners(NotificationListenerBean[] notificationListeners) {
@@ -286,7 +286,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * @throws MalformedObjectNameException if one of the supplied
 	 * {@link ObjectName ObjectName} instances is malformed
 	 */
-	public void setNotificationListeners(Map listeners) throws MalformedObjectNameException {
+	public void setNotificationListenerMappings(Map listeners) throws MalformedObjectNameException {
 		List notificationListeners = new ArrayList();
 		for (Iterator iterator = listeners.entrySet().iterator(); iterator.hasNext();) {
 			Map.Entry entry = (Map.Entry) iterator.next();

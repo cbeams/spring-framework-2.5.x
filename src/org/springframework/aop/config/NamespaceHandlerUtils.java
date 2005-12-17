@@ -17,9 +17,16 @@
 package org.springframework.aop.config;
 
 import org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvisorAutoProxyCreator;
+import org.springframework.aop.framework.autoproxy.target.ConfigurableTargetSourceCreator;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -31,52 +38,38 @@ public abstract class NamespaceHandlerUtils {
 	// TODO: How eagerly should this try to look for user-registered auto proxy creators?
 	public static final String AUTO_PROXY_CREATOR_BEAN_NAME = "org.springframework.aop.config.internalAutoProxyCreator";
 
+	public static final String CONFIGURABLE_TARGET_SOURCE_CREATOR_NAME = "org.springframework.aop.framework.target.internalTargetSourceCreator";
+
 	public static final String ASPECTJ_AUTO_PROXY_CREATOR = "org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator";
 
 	public static void registerAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
-		Class apcClass = InvocationContextExposingAdvisorAutoProxyCreator.class;
-		Class ajApcClass = getAspectJAutoProxyCreatorClassIfPossible();
-
-		String[] beanDefinitionNames = registry.getBeanDefinitionNames();
-
-
-		for (int i = 0; i < beanDefinitionNames.length; i++) {
-			String beanDefinitionName = beanDefinitionNames[i];
-			AbstractBeanDefinition def = (AbstractBeanDefinition) registry.getBeanDefinition(beanDefinitionName);
-
-			if (apcClass.equals(def.getBeanClass()) || (ajApcClass != null && ajApcClass.equals(def.getBeanClass()))) {
-				// already registered
-				return;
-			}
+		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
+			// already have the apc
+			return;
 		}
-		RootBeanDefinition definition = new RootBeanDefinition(apcClass);
+		RootBeanDefinition definition = new RootBeanDefinition(InvocationContextExposingAdvisorAutoProxyCreator.class);
+		definition.setPropertyValues(new MutablePropertyValues());
+		definition.getPropertyValues().addPropertyValue("proxyTargetClass", Boolean.TRUE);
 		registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, definition);
 	}
 
-	public static void  registerAspectJAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
+	public static void registerAspectJAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
 		Class baseApcClass = InvocationContextExposingAdvisorAutoProxyCreator.class;
 		Class ajApcClass = getAspectJAutoProxyCreatorClassIfPossible();
 
-		if(ajApcClass == null) {
+		if (ajApcClass == null) {
 			throw new IllegalStateException("Unable to register AspectJ AutoProxyCreator. Cannot find class ["
 					+ ASPECTJ_AUTO_PROXY_CREATOR + "]. Are you running on Java 5.0+?");
 		}
 
 
-		String[] beanDefinitionNames = registry.getBeanDefinitionNames();
-
-		for (int i = 0; i < beanDefinitionNames.length; i++) {
-			String beanDefinitionName = beanDefinitionNames[i];
-			AbstractBeanDefinition def = (AbstractBeanDefinition) registry.getBeanDefinition(beanDefinitionName);
-
-			if (baseApcClass.equals(def.getBeanClass())) {
-				// switch the definition to an AJ APC
-				def.setBeanClass(ajApcClass);
-				return;
-			} else if(ajApcClass.equals(def.getBeanClass())) {
-				// already registered
-				return;
+		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
+			AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
+			if (baseApcClass.equals(definition.getBeanClass())) {
+				// switch APC type
+				definition.setBeanClass(ajApcClass);
 			}
+			return;
 		}
 
 		RootBeanDefinition definition = new RootBeanDefinition(ajApcClass);

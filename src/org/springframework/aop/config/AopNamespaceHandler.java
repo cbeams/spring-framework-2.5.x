@@ -36,7 +36,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -80,7 +79,6 @@ import java.util.List;
  */
 public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
-	private static final String ASPECTJ_AUTOPROXY_CREATOR = "org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator";
 
 	/**
 	 * Constructs a new <code>AopNamespaceHandler</code> and registers the
@@ -122,7 +120,6 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 			String scopeMapClassName;
 			if("request".equals(type)) {
 				scopeMapClassName = REQUEST_SCOPE_MAP;
-
 			} else if("session".equals(type)) {
 				scopeMapClassName = SESSION_SCOPE_MAP;
 			} else {
@@ -143,6 +140,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 			registry.registerBeanDefinition(originalBeanName, scopeFactoryDefinition);
 
 			// switch the old definition
+			((AbstractBeanDefinition)definition.getBeanDefinition()).setSingleton(false);
 			return new BeanDefinitionHolder(definition.getBeanDefinition(), targetBeanName);
 		}
 	}
@@ -178,15 +176,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 
-
-		private boolean registered;
-
-		// TODO: introduce once per parse BeanDefinitionParser base class
 		public void parse(Element element, BeanDefinitionRegistry registry) {
-			if (this.registered) {
-				return;
-			}
-
 			NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(registry);
 		}
 	}
@@ -212,7 +202,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 		private static final String POINTCUT_REF = "pointcut-ref";
 
-		public static final String BEAN = "bean";
+		public static final String REF = "ref";
 
 		public static final String KIND = "kind";
 
@@ -298,7 +288,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		}
 
 		private void parseAspect(Element aspectElement, BeanDefinitionRegistry registry) {
-			String aspectName = aspectElement.getAttribute(BEAN);
+			String aspectName = aspectElement.getAttribute(REF);
 
 			List pointcuts = DomUtils.getChildElementsByTagName(aspectElement, POINTCUT, true);
 			for (int i = 0; i < pointcuts.size(); i++) {

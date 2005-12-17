@@ -29,7 +29,7 @@ import org.springframework.beans.factory.xml.UtilNamespaceHandler;
 public class DefaultNamespaceHandlerResolverTests extends TestCase {
 
 	public void testResolvedMappedHandler() {
-		DefaultNamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver();
+		DefaultNamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver(getClass().getClassLoader());
 		NamespaceHandler handler = resolver.resolve("http://www.springframework.org/schema/util");
 		assertNotNull("Handler should not be null.", handler);
 		assertEquals("Incorrect handler loaded", UtilNamespaceHandler.class, handler.getClass());
@@ -38,7 +38,7 @@ public class DefaultNamespaceHandlerResolverTests extends TestCase {
 	public void testNonExistentHandlerClass() throws Exception {
 		String mappingPath = "org/springframework/beans/factory/xml/support/nonExistent.properties";
 		try {
-			new DefaultNamespaceHandlerResolver(mappingPath);
+			new DefaultNamespaceHandlerResolver(mappingPath, getClass().getClassLoader());
 			fail("Should not be able to map a URI to a non-existent class");
 		}
 		catch (FatalBeanException ex) {
@@ -49,7 +49,7 @@ public class DefaultNamespaceHandlerResolverTests extends TestCase {
 	public void testResolveInvalidHandler() throws Exception {
 		String mappingPath = "org/springframework/beans/factory/xml/support/invalid.properties";
 		try {
-			new DefaultNamespaceHandlerResolver(mappingPath);
+			new DefaultNamespaceHandlerResolver(mappingPath, getClass().getClassLoader());
 			fail("Should not be able to map a class that doesn't implement NamespaceHandler");
 		}
 		catch (Throwable ex) {

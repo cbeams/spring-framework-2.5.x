@@ -31,7 +31,7 @@ import java.lang.reflect.Method;
  * @author Rob Harrop
  * @since 2.0
  */
-class MethodLocatingFactoryBean implements FactoryBean, BeanFactoryAware, InitializingBean {
+public class MethodLocatingFactoryBean implements FactoryBean, BeanFactoryAware, InitializingBean {
 
 	private BeanFactory beanFactory;
 

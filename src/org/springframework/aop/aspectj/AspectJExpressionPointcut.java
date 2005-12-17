@@ -118,8 +118,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	 * write and as "&&" (though &amp;&amp; will work). We also allow
 	 * ' and ' between two pointcut sub-expressions. This method converts
 	 * and back to && for the AspectJ pointcut parser.
-	 * @param pcExpr
-	 * @return
 	 */
 	private String replaceBooleanOperators(String pcExpr) {
 		pcExpr = StringUtils.replace(pcExpr," and "," && ");
@@ -149,6 +147,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	}
 
 	public boolean isRuntime() {
+		checkReadyToMatch();
 		return this.pointcutExpression.mayNeedDynamicTest();
 	}
 

@@ -23,8 +23,6 @@ import org.springframework.aop.Advisor;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.core.ControlFlow;
-import org.springframework.core.ControlFlowFactory;
 
 /**
  * BeanPostProcessor implementation that creates AOP proxies based on all candidate

@@ -17,20 +17,23 @@
 package org.springframework.beans.factory.xml.support;
 
 import junit.framework.TestCase;
-
-import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
-import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.aop.framework.Advised;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
+import org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser;
+import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
+import org.springframework.beans.factory.xml.PluggableSchemaResolver;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.xml.sax.InputSource;
+
+import java.io.IOException;
 
 /**
  * @author Rob Harrop
@@ -44,6 +47,20 @@ public class CustomNamespaceHandlerTests extends TestCase {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setParserClass(TestParser.class);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_XSD);
+		reader.setEntityResolver(new PluggableSchemaResolver(getClass().getClassLoader()) {
+			public InputSource resolveEntity(String publicId, String systemId) throws IOException {
+				InputSource source = super.resolveEntity(publicId, systemId);
+
+				if (source == null) {
+					Resource resource = new ClassPathResource("org/springframework/beans/factory/xml/support/spring-test.xsd");
+					source = new InputSource(resource.getInputStream());
+					source.setPublicId(publicId);
+					source.setSystemId(systemId);
+				}
+
+				return source;
+			}
+		});
 		reader.loadBeanDefinitions(getResource());
 	}
 
@@ -89,7 +106,7 @@ public class CustomNamespaceHandlerTests extends TestCase {
 
 		protected NamespaceHandlerResolver createNamespaceHandlerResolver() {
 			String location = "org/springframework/beans/factory/xml/support/customNamespace.properties";
-			return new DefaultNamespaceHandlerResolver(location);
+			return new DefaultNamespaceHandlerResolver(location, getClass().getClassLoader());
 		}
 	}
 }

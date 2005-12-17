@@ -48,7 +48,7 @@
 			<xsd:element name="advice" type="adviceType" minOccurs="1" maxOccurs="unbounded"/>
 		</xsd:sequence>
 		<xsd:attribute name="id" type="xsd:ID"/>
-		<xsd:attribute name="bean" type="xsd:string"/>
+		<xsd:attribute name="ref" type="xsd:string"/>
 	</xsd:complexType>
 
 	<xsd:complexType name="pointcutType">

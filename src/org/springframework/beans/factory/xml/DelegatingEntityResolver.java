@@ -49,14 +49,26 @@ public class DelegatingEntityResolver implements EntityResolver {
 
 	private final EntityResolver schemaResolver;
 
+	/**
+	 * Create a new DelegatingEntityResolver that delegates to
+	 * a default BeansDtdResolver and a default PluggableSchemaResolver.
+	 * Configures the {@link PluggableSchemaResolver} with the context
+	 * {@link ClassLoader}
+	 */
+	public DelegatingEntityResolver() {
+		this.dtdResolver = new BeansDtdResolver();
+		this.schemaResolver = new PluggableSchemaResolver(Thread.currentThread().getContextClassLoader());
+	}
 
 	/**
 	 * Create a new DelegatingEntityResolver that delegates to
 	 * a default BeansDtdResolver and a default PluggableSchemaResolver.
+	 * Configures the {@link PluggableSchemaResolver} with the supplied
+	 * {@link ClassLoader}
 	 */
-	public DelegatingEntityResolver() {
+	public DelegatingEntityResolver(ClassLoader classLoader) {
 		this.dtdResolver = new BeansDtdResolver();
-		this.schemaResolver = new PluggableSchemaResolver();
+		this.schemaResolver = new PluggableSchemaResolver(classLoader);
 	}
 
 	/**
@@ -83,7 +95,7 @@ public class DelegatingEntityResolver implements EntityResolver {
 			else if (systemId.endsWith(XSD_SUFFIX)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Attempting to resolve XML Schema [" + systemId + "] using ["
-							+ this.dtdResolver.getClass().getName() + "].");
+							+ this.schemaResolver.getClass().getName() + "].");
 				}
 				return this.schemaResolver.resolveEntity(publicId, systemId);
 			}

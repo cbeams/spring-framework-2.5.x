@@ -21,6 +21,9 @@ import org.w3c.dom.Element;
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
  * @author Rob Harrop
@@ -30,8 +33,9 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
 	public UtilNamespaceHandler() {
 		registerBeanDefinitionParser("properties", new PropertiesBeanDefinitionParser());
+		registerBeanDefinitionParser("constant", new ConstantBeanDefinitionParser());
 	}
-	
+
 
 	public static class PropertiesBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
@@ -39,5 +43,12 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			return PropertiesFactoryBean.class;
 		}
 	}
-	
+
+	public static class ConstantBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
+
+		protected Class getBeanClass(Element element) {
+			return FieldRetrievingFactoryBean.class;
+		}
+	}
+
 }
