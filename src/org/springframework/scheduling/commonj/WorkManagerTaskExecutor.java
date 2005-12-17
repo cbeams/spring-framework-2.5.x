@@ -29,6 +29,7 @@ import commonj.work.WorkManager;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jndi.JndiLocatorSupport;
+import org.springframework.scheduling.SchedulingException;
 import org.springframework.util.Assert;
 
 /**
@@ -99,8 +100,7 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 			this.workManager.schedule(new DelegatingWork(task));
 		}
 		catch (WorkException ex) {
-			// TODO
-			ex.printStackTrace();
+			throw new SchedulingException("Could not schedule work on CommonJ WorkManager", ex);
 		}
 	}
 

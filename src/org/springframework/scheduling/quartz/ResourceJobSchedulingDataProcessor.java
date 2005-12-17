@@ -22,9 +22,9 @@ import java.io.InputStream;
 import org.quartz.xml.JobSchedulingDataProcessor;
 
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.scheduling.SchedulingException;
 
 /**
  * Subclass of Quartz' JobSchedulingDataProcessor that considers
@@ -50,18 +50,7 @@ public class ResourceJobSchedulingDataProcessor extends JobSchedulingDataProcess
 			return this.resourceLoader.getResource(fileName).getInputStream();
 		}
 		catch (IOException ex) {
-			throw new JobSchedulingDataInitializationException(ex);
-		}
-	}
-
-
-	/**
-	 * Exception to be thrown if a resource cannot be loaded.
-	 */
-	public static class JobSchedulingDataInitializationException extends NestedRuntimeException {
-
-		private JobSchedulingDataInitializationException(IOException ex) {
-			super("Could not load job scheduling data XML file", ex);
+			throw new SchedulingException("Could not load job scheduling data XML file", ex);
 		}
 	}
 
