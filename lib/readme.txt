@@ -52,7 +52,7 @@ distribution/website before using any of them in your own applications.
 - required for building and running Tiles Example
 
 * easymock/easymock.jar, easymock/easymockclassextension.jar
-- EasyMock 1.2RC2 (JDK 1.3 version) (http://www.easymock.org)
+- EasyMock 1.2 (JDK 1.3 version) (http://www.easymock.org)
 - required for building and running the framework test suite
 
 * ehcache/ehcache-1.1.jar
@@ -84,11 +84,6 @@ distribution/website before using any of them in your own applications.
 * hsqldb/hsqldb.jar
 - HSQLDB 1.8.0.1 (http://hsqldb.sourceforge.net)
 - required for running JPetStore and PetClinic
-
-* ibatis/ibatis-sqlmap.jar
-- iBATIS SQL Maps 1.3.1 (http://www.ibatis.com)
-- required for building the framework
-- required at runtime when using Spring's iBATIS SQL Maps 1.3 support
 
 * ibatis/ibatis-sqlmap-2.jar, ibatis/ibatis-common-2.jar
 - iBATIS SQL Maps 2.1.5 (http://www.ibatis.com)
@@ -318,8 +313,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's VelocityView
 
-* velocity/velocity-tools-generic-1.1.jar, velocity/velocity-tools-view-1.1.jar
-- Velocity Tools 1.1 (http://jakarta.apache.org/velocity/tools)
+* velocity/velocity-tools-generic-1.2.jar, velocity/velocity-tools-view-1.2.jar
+- Velocity Tools 1.2 (http://jakarta.apache.org/velocity/tools)
 - required for building the framework
 - required at runtime when using VelocityView's support for Velocity Tools
 
