@@ -105,34 +105,17 @@ public class TimerManagerFactoryBean extends JndiLocatorSupport implements Facto
 			if (scheduledTask.getPeriod() > 0) {
 				// repeated task execution
 				if (scheduledTask.isFixedRate()) {
-					if (scheduledTask.getFirstTime() != null) {
-						this.timerManager.scheduleAtFixedRate(
-								scheduledTask.getTimerListener(), scheduledTask.getFirstTime(), scheduledTask.getPeriod());
-					}
-					else {
-						this.timerManager.scheduleAtFixedRate(
-								scheduledTask.getTimerListener(), scheduledTask.getDelay(), scheduledTask.getPeriod());
-					}
+					this.timerManager.scheduleAtFixedRate(
+							scheduledTask.getTimerListener(), scheduledTask.getDelay(), scheduledTask.getPeriod());
 				}
 				else {
-					if (scheduledTask.getFirstTime() != null) {
-						this.timerManager.schedule(
-								scheduledTask.getTimerListener(), scheduledTask.getFirstTime(), scheduledTask.getPeriod());
-					}
-					else {
-						this.timerManager.schedule(
-								scheduledTask.getTimerListener(), scheduledTask.getDelay(), scheduledTask.getPeriod());
-					}
+					this.timerManager.schedule(
+							scheduledTask.getTimerListener(), scheduledTask.getDelay(), scheduledTask.getPeriod());
 				}
 			}
 			else {
 				// one-time task execution
-				if (scheduledTask.getFirstTime() != null) {
-					this.timerManager.schedule(scheduledTask.getTimerListener(), scheduledTask.getFirstTime());
-				}
-				else {
-					this.timerManager.schedule(scheduledTask.getTimerListener(), scheduledTask.getDelay());
-				}
+				this.timerManager.schedule(scheduledTask.getTimerListener(), scheduledTask.getDelay());
 			}
 		}
 	}

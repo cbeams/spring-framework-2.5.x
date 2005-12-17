@@ -16,8 +16,6 @@
 
 package org.springframework.scheduling.commonj;
 
-import java.util.Date;
-
 import commonj.timers.TimerListener;
 
 /**
@@ -43,8 +41,6 @@ import commonj.timers.TimerListener;
 public class ScheduledTimerListener {
 
 	private TimerListener timerListener;
-
-	private Date firstTime;
 
 	private long delay = 0;
 
@@ -153,24 +149,6 @@ public class ScheduledTimerListener {
 	 */
 	public TimerListener getTimerListener() {
 		return timerListener;
-	}
-
-	/**
-	 * Set the first time for starting the task.
-	 * Default is to immediately start the task after successful scheduling.
-	 * <p>If this property is specified, the "delay" property will be ignored.
-	 * Specify one or the other, not both.
-	 * @see #setDelay
-	 */
-	public void setFirstTime(Date firstTime) {
-		this.firstTime = firstTime;
-	}
-
-	/**
-	 * Return the first time for starting the task.
-	 */
-	public Date getFirstTime() {
-		return firstTime;
 	}
 
 	/**
