@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.view;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -43,7 +42,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	private boolean cache = true;
 
 	/** View name --> View instance */
-	private final Map viewCache = Collections.synchronizedMap(new HashMap());
+	private final Map viewCache = new HashMap();
 
 
 	/**
@@ -73,16 +72,18 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 		else {
 			String cacheKey = getCacheKey(viewName, locale);
 			// No synchronization, as we can live with occasional double caching.
-			View view = (View) this.viewCache.get(cacheKey);
-			if (view == null) {
-				// Ask the subclass to create the View object.
-				view = createView(viewName, locale);
-				this.viewCache.put(cacheKey, view);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Cached view '" + cacheKey + "'");
+			synchronized (this.viewCache) {
+				View view = (View) this.viewCache.get(cacheKey);
+				if (view == null) {
+					// Ask the subclass to create the View object.
+					view = createView(viewName, locale);
+					this.viewCache.put(cacheKey, view);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Cached view '" + cacheKey + "'");
+					}
 				}
+				return view;
 			}
-			return view;
 		}
 	}
 	
@@ -101,8 +102,12 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 		}
 		else {
 			String cacheKey = getCacheKey(viewName, locale);
-			if (viewCache.remove(cacheKey) == null) {
-				// some debug output might be useful
+			Object cachedView = null;
+			synchronized (this.viewCache) {
+				this.viewCache.remove(cacheKey);
+			}
+			if (cachedView == null) {
+				// Some debug output might be useful...
 				if (logger.isDebugEnabled()) {
 					logger.debug("No cached instance for view '" + cacheKey + "' was found");
 				}
