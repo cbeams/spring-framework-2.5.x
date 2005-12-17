@@ -17,6 +17,8 @@
 package org.springframework.orm.hibernate3;
 
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.hibernate.engine.FilterDefinition;
@@ -41,7 +43,7 @@ import org.springframework.beans.factory.InitializingBean;
  *     &lt;list&gt;
  *       &lt;bean class="org.springframework.orm.hibernate3.FilterDefinitionFactoryBean"&gt;
  *         &lt;property name="filterName" value="myFilter"/&gt;
- *         &lt;property name="parameterTypes"&gt;
+ *         &lt;property name="parameterTypeMap"&gt;
  *           &lt;props&gt;
  *             &lt;prop key="myParam"&gt;string&lt;/prop&gt;
  *             &lt;prop key="myOtherParam"&gt;long&lt;/prop&gt;
@@ -56,6 +58,12 @@ import org.springframework.beans.factory.InitializingBean;
  * Alternatively, specify a bean id (or name) attribute for the inner bean,
  * instead of the "filterName" property.
  *
+ * <p><b>NOTE:</b> As of Spring 2.0, this FactoryBean uses Hibernate 3.1 API.
+ * (Unfortunately, Hibernate 3.1 changed its FilterDefinition class in a
+ * non-backwards-compatible fashion.) Consider defining filters within Hibernate's
+ * own configuration file instead of through this FactoryBean, if you need to
+ * keep running on Hibernate 3.0.
+ *
  * @author Juergen Hoeller
  * @since 1.2
  * @see LocalSessionFactoryBean#setFilterDefinitions(org.hibernate.engine.FilterDefinition[])
@@ -64,7 +72,7 @@ public class FilterDefinitionFactoryBean implements FactoryBean, BeanNameAware, 
 
 	private String filterName;
 
-	private Properties parameterTypes;
+	private Map parameterTypeMap = new HashMap();
 
 	private String defaultFilterCondition;
 
@@ -73,7 +81,6 @@ public class FilterDefinitionFactoryBean implements FactoryBean, BeanNameAware, 
 
 	/**
 	 * Set the name of the filter.
-	 * @see org.hibernate.engine.FilterDefinition#FilterDefinition(String)
 	 */
 	public void setFilterName(String filterName) {
 		this.filterName = filterName;
@@ -82,16 +89,24 @@ public class FilterDefinitionFactoryBean implements FactoryBean, BeanNameAware, 
 	/**
 	 * Set the parameter types for the filter,
 	 * with parameter names as keys and type names as values.
-	 * @see org.hibernate.engine.FilterDefinition#addParameterType(String, org.hibernate.type.Type)
 	 * @see org.hibernate.type.TypeFactory#heuristicType(String)
 	 */
 	public void setParameterTypes(Properties parameterTypes) {
-		this.parameterTypes = parameterTypes;
+		if (parameterTypes != null) {
+			this.parameterTypeMap = new HashMap(parameterTypes.size());
+			for (Enumeration names = parameterTypes.propertyNames(); names.hasMoreElements();) {
+				String paramName = (String) names.nextElement();
+				String typeName = parameterTypes.getProperty(paramName);
+				this.parameterTypeMap.put(paramName, TypeFactory.heuristicType(typeName));
+			}
+		}
+		else {
+			this.parameterTypeMap = new HashMap();
+		}
 	}
 
 	/**
 	 * Specify a default filter condition for the filter, if any.
-	 * @see org.hibernate.engine.FilterDefinition#setDefaultFilterCondition
 	 */
 	public void setDefaultFilterCondition(String defaultFilterCondition) {
 		this.defaultFilterCondition = defaultFilterCondition;
@@ -109,15 +124,8 @@ public class FilterDefinitionFactoryBean implements FactoryBean, BeanNameAware, 
 	}
 
 	public void afterPropertiesSet() {
-		this.filterDefinition = new FilterDefinition(this.filterName);
-		for (Enumeration names = this.parameterTypes.propertyNames(); names.hasMoreElements();) {
-			String paramName = (String) names.nextElement();
-			String typeName = this.parameterTypes.getProperty(paramName);
-			this.filterDefinition.addParameterType(paramName, TypeFactory.heuristicType(typeName));
-		}
-		if (this.defaultFilterCondition != null) {
-			this.filterDefinition.setDefaultFilterCondition(this.defaultFilterCondition);
-		}
+		this.filterDefinition =
+				new FilterDefinition(this.filterName, this.defaultFilterCondition, this.parameterTypeMap);
 	}
 
 

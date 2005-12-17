@@ -315,15 +315,6 @@ public interface HibernateOperations {
 	Serializable save(Object entity) throws DataAccessException;
 
 	/**
-	 * Persist the given transient instance with the given identifier.
-	 * @param entity the transient instance to persist
-	 * @param id the identifier to assign
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#save(Object, java.io.Serializable)
-	 */
-	void save(Object entity, Serializable id) throws DataAccessException;
-
-	/**
 	 * Persist the given transient instance.
 	 * @param entityName the name of a persistent entity
 	 * @param entity the transient instance to persist
@@ -332,16 +323,6 @@ public interface HibernateOperations {
 	 * @see org.hibernate.Session#save(Object)
 	 */
 	Serializable save(String entityName, Object entity) throws DataAccessException;
-
-	/**
-	 * Persist the given transient instance with the given identifier.
-	 * @param entityName the name of a persistent entity
-	 * @param entity the transient instance to persist
-	 * @param id the identifier to assign
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#save(Object, java.io.Serializable)
-	 */
-	void save(String entityName, Object entity, Serializable id) throws DataAccessException;
 
 	/**
 	 * Update the given persistent instance,

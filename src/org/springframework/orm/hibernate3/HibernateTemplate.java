@@ -617,32 +617,11 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		}, true);
 	}
 
-	public void save(final Object entity, final Serializable id) throws DataAccessException {
-		execute(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				checkWriteOperationAllowed(session);
-				session.save(entity, id);
-				return null;
-			}
-		}, true);
-	}
-
 	public Serializable save(final String entityName, final Object entity) throws DataAccessException {
 		return (Serializable) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				return session.save(entityName, entity);
-			}
-		}, true);
-	}
-
-	public void save(final String entityName, final Object entity, final Serializable id)
-			throws DataAccessException {
-		execute(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				checkWriteOperationAllowed(session);
-				session.save(entityName, entity, id);
-				return null;
 			}
 		}, true);
 	}

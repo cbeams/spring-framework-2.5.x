@@ -1117,27 +1117,6 @@ public class HibernateTemplateTests extends TestCase {
 		assertEquals("Correct return value", ht.save(tb), new Integer(0));
 	}
 
-	public void testSaveWithId() throws HibernateException {
-		TestBean tb = new TestBean();
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.AUTO);
-		session.save(tb, "id");
-		sessionControl.setVoidCallable(1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		sfControl.replay();
-		sessionControl.replay();
-
-		HibernateTemplate ht = new HibernateTemplate(sf);
-		ht.save(tb, "id");
-	}
-
 	public void testSaveWithEntityName() throws HibernateException {
 		TestBean tb = new TestBean();
 		sf.openSession();
@@ -1157,27 +1136,6 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		assertEquals("Correct return value", ht.save("myEntity", tb), new Integer(0));
-	}
-
-	public void testSaveWithEntityNameAndId() throws HibernateException {
-		TestBean tb = new TestBean();
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.AUTO);
-		session.save("myEntity", tb, "id");
-		sessionControl.setVoidCallable(1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		sfControl.replay();
-		sessionControl.replay();
-
-		HibernateTemplate ht = new HibernateTemplate(sf);
-		ht.save("myEntity", tb, "id");
 	}
 
 	public void testUpdate() throws HibernateException {
