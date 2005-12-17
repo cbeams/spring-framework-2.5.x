@@ -42,6 +42,7 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Abstract BeanFactory superclass that implements default bean creation,
@@ -410,7 +411,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// If all factory methods have the same return type, return that type.
 		// Can't clearly figure out exact method due to type converting / autowiring!
 		int minNrOfArgs = mergedBeanDefinition.getConstructorArgumentValues().getArgumentCount();
-		Method[] candidates = factoryClass.getMethods();
+		Method[] candidates = ReflectionUtils.getAllDeclaredMethods(factoryClass);
 		Set returnTypes = new HashSet(1);
 		for (int i = 0; i < candidates.length; i++) {
 			Method factoryMethod = candidates[i];

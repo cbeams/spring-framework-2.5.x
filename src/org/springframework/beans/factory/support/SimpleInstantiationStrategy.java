@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,7 +40,9 @@ import org.springframework.util.StringUtils;
  */
 public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
+
 
 	public Object instantiate(
 			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
@@ -99,6 +102,10 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
 		try {
 			// It's a static method if the target is null.
+			if (!Modifier.isPublic(factoryMethod.getModifiers()) ||
+					!Modifier.isPublic(factoryMethod.getDeclaringClass().getModifiers())) {
+				factoryMethod.setAccessible(true);
+			}
 			return factoryMethod.invoke(factoryBean, args);
 		}
 		catch (IllegalArgumentException ex) {

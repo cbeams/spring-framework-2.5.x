@@ -139,7 +139,6 @@ public abstract class ReflectionUtils {
 					continue;
 				}
 				try {
-					fields[i].setAccessible(true);
 					fc.doWith(fields[i]);
 				}
 				catch (IllegalAccessException ex) {
@@ -183,18 +182,14 @@ public abstract class ReflectionUtils {
 				if (mf != null && !mf.matches(methods[i])) {
 					continue;
 				}
-
 				try {
-					if (!methods[i].isAccessible()) {
-						methods[i].setAccessible(true);
-					}
 					mc.doWith(methods[i]);
 				}
 				catch (IllegalAccessException ex) {
-					throw new IllegalStateException("Shouldn't be illegal to access method '" + methods[i].getName() + "': " + ex);
+					throw new IllegalStateException(
+							"Shouldn't be illegal to access method '" + methods[i].getName() + "': " + ex);
 				}
 			}
-
 			targetClass = targetClass.getSuperclass();
 		}
 		while (targetClass != null);
@@ -233,6 +228,9 @@ public abstract class ReflectionUtils {
 		}
 		doWithFields(src.getClass(), new ReflectionUtils.FieldCallback() {
 			public void doWith(Field f) throws IllegalArgumentException, IllegalAccessException {
+				if (!f.isAccessible()) {
+					f.setAccessible(true);
+				}
 				Object srcValue = f.get(src);
 				f.set(dest, srcValue);
 			}

@@ -42,21 +42,21 @@ public class FactoryMethods {
 		return new FactoryMethods(tb, "default", 0);
 	}
 	
-	public static FactoryMethods newInstance(TestBean tb, int num, String name) {
+	protected static FactoryMethods newInstance(TestBean tb, int num, String name) {
 		if (name == null) {
 			throw new IllegalStateException("Should never be called with null value");
 		}
 		return new FactoryMethods(tb, name, num);
 	}
 	
-	public static FactoryMethods newInstance(TestBean tb, int num, Integer something) {
+	static FactoryMethods newInstance(TestBean tb, int num, Integer something) {
 		if (something != null) {
 			throw new IllegalStateException("Should never be called with non-null value");
 		}
 		return new FactoryMethods(tb, null, num);
 	}
 
-	public static List listInstance() {
+	private static List listInstance() {
 		return Collections.EMPTY_LIST;
 	}
 
