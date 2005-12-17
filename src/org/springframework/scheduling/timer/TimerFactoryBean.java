@@ -49,7 +49,7 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 
 	private ScheduledTimerTask[] scheduledTimerTasks;
 
-	private boolean daemon = true;
+	private boolean daemon = false;
 
 	private Timer timer;
 
@@ -69,8 +69,10 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 	/**
 	 * Set whether the timer should use a daemon thread,
 	 * just executing as long as the application itself is running.
-	 * <p>Default is "true": In a J2EE environment, the container is in
-	 * control of the application lifecycle.
+	 * <p>Default is "false": The timer will automatically get cancelled on
+	 * destruction of this FactoryBean. Hence, if the application shuts down,
+	 * tasks will by default finish their execution. Specify "true" for eager
+	 * shutdown of threads that execute tasks.
 	 * @see java.util.Timer#Timer(boolean)
 	 */
 	public void setDaemon(boolean daemon) {
