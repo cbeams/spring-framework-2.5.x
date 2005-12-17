@@ -18,6 +18,7 @@ package org.springframework.core.task;
 
 import java.io.Serializable;
 
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrencyThrottleSupport;
 
 /**
@@ -42,10 +43,17 @@ public class SimpleAsyncTaskExecutor extends ConcurrencyThrottleSupport
 	/**
 	 * Default thread name prefix: "SimpleAsyncTaskExecutor-".
 	 */
-	public static final String DEFAULT_THREAD_NAME_PREFIX = "SimpleAsyncTaskExecutor-";
+	public static final String DEFAULT_THREAD_NAME_PREFIX =
+			ClassUtils.getShortName(SimpleAsyncTaskExecutor.class) + "-";
 
+
+	private final Object monitor = new Object();
 
 	private String threadNamePrefix = DEFAULT_THREAD_NAME_PREFIX;
+
+	private int threadPriority = Thread.NORM_PRIORITY;
+
+	private boolean daemon = false;
 
 	private int threadCount = 0;
 
@@ -81,6 +89,42 @@ public class SimpleAsyncTaskExecutor extends ConcurrencyThrottleSupport
 		return threadNamePrefix;
 	}
 
+	/**
+	 * Set the priority of the threads that this executor creates.
+	 * Default is 5.
+	 * @see java.lang.Thread#NORM_PRIORITY
+	 */
+	public void setThreadPriority(int threadPriority) {
+		this.threadPriority = threadPriority;
+	}
+
+	/**
+	 * Return the priority of the threads that this executor creates.
+	 */
+	protected int getThreadPriority() {
+		return threadPriority;
+	}
+
+	/**
+	 * Set whether this executor should create daemon threads,
+	 * just executing as long as the application itself is running.
+	 * <p>Default is "false": Tasks passed to this executor should be either
+	 * short-lived or support explicit cancelling. Hence, if the application
+	 * shuts down, tasks will by default finish their execution. Specify
+	 * "true" for eager shutdown of threads that execute tasks.
+	 * @see java.lang.Thread#setDaemon
+	 */
+	public void setDaemon(boolean daemon) {
+		this.daemon = daemon;
+	}
+
+	/**
+	 * Return whether this executor should create daemon threads.
+	 */
+	protected boolean isDaemon() {
+		return daemon;
+	}
+
 
 	/**
 	 * Executes the given task, within a concurrency throttle
@@ -91,21 +135,32 @@ public class SimpleAsyncTaskExecutor extends ConcurrencyThrottleSupport
 	 */
 	public final void execute(Runnable task) {
 		beforeAccess();
-		try {
-			doExecute(task);
-		}
-		finally {
-			afterAccess();
-		}
+		doExecute(new ConcurrencyThrottlingRunnable(task));
 	}
 
 	/**
 	 * Template method for the actual execution of a task.
 	 * <p>Default implementation creates a new Thread and starts it.
 	 * @param task the Runnable to execute
+	 * @see #createThread
+	 * @see java.lang.Thread#start()
 	 */
 	protected void doExecute(Runnable task) {
-		new Thread(task, getThreadName()).start();
+		createThread(task).start();
+	}
+
+	/**
+	 * Template method for creation of a Thread.
+	 * <p>Default implementation creates a new Thread for the given
+	 * Runnable, applying an appropriate thread name.
+	 * @param task the Runnable to execute
+	 * @see #nextThreadName()
+	 */
+	protected Thread createThread(Runnable task) {
+		Thread thread = new Thread(task, nextThreadName());
+		thread.setPriority(getThreadPriority());
+		thread.setDaemon(isDaemon());
+		return thread;
 	}
 
 	/**
@@ -115,8 +170,36 @@ public class SimpleAsyncTaskExecutor extends ConcurrencyThrottleSupport
 	 * "SimpleAsyncTaskExecutor-0".
 	 * @see #getThreadNamePrefix()
 	 */
-	protected synchronized String getThreadName() {
-		return (getThreadNamePrefix() + (this.threadCount++));
+	protected String nextThreadName() {
+		int threadNumber = 0;
+		synchronized (this.monitor) {
+			this.threadCount++;
+			threadNumber = this.threadCount;
+		}
+		return getThreadNamePrefix() + threadNumber;
+	}
+
+
+	/**
+	 * This Runnable calls <code>afterAccess()</code> after the
+	 * target Runnable finished its execution.
+	 */
+	private class ConcurrencyThrottlingRunnable implements Runnable {
+
+		private final Runnable target;
+
+		public ConcurrencyThrottlingRunnable(Runnable target) {
+			this.target = target;
+		}
+
+		public void run() {
+			try {
+				this.target.run();
+			}
+			finally {
+				afterAccess();
+			}
+		}
 	}
 
 }
