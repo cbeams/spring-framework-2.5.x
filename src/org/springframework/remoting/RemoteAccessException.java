@@ -29,7 +29,7 @@ import org.springframework.core.NestedRuntimeException;
  * A client object simply receives an implementation for the interface that
  * it needs via a bean reference, like it does for local beans too.
  *
- * <p>A client can catch RemoteAccessException if it wants too, but as
+ * <p>A client can catch RemoteAccessException if it wants to, but as
  * remote access errors are typically unrecoverable, it will probably let
  * such exceptions propagate to a higher level that handles them generically.
  * In this case, the client code doesn't show any signs of being involved in
@@ -50,7 +50,7 @@ public class RemoteAccessException extends NestedRuntimeException {
 
 	/**
 	 * Constructor for RemoteAccessException.
-	 * @param msg message
+	 * @param msg the detail message
 	 */
 	public RemoteAccessException(String msg) {
 		super(msg);
@@ -58,8 +58,9 @@ public class RemoteAccessException extends NestedRuntimeException {
 
 	/**
 	 * Constructor for RemoteAccessException.
-	 * @param msg message
-	 * @param ex root cause from remoting API in use
+	 * @param msg the detail message
+	 * @param ex root cause (usually from using a underlying
+	 * remoting API such as RMI)
 	 */
 	public RemoteAccessException(String msg, Throwable ex) {
 		super(msg, ex);
