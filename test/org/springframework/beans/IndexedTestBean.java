@@ -43,6 +43,7 @@ public class IndexedTestBean {
 
 	private Map map;
 
+
 	public IndexedTestBean() {
 		this(true);
 	}
@@ -80,6 +81,7 @@ public class IndexedTestBean {
 		list.add(tbY);
 		this.map.put("key4", list);
 	}
+
 
 	public TestBean[] getArray() {
 		return array;

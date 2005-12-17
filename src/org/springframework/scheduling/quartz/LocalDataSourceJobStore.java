@@ -74,7 +74,9 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 	 */
 	public static final String NON_TX_DATA_SOURCE_PREFIX = "springNonTxDataSource.";
 
+
 	private DataSource dataSource;
+
 
 	public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler)
 	    throws SchedulerConfigException {
@@ -84,7 +86,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 		if (this.dataSource == null) {
 			throw new SchedulerConfigException(
 			    "No local DataSource found for configuration - " +
-			    "dataSource property must be set on SchedulerFactoryBean");
+			    "'dataSource' property must be set on SchedulerFactoryBean");
 		}
 
 		// Configure transactional connection settings for Quartz.

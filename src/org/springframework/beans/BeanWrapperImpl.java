@@ -684,7 +684,9 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 					oldValue = readMethod.invoke(this.object, new Object[0]);
 				}
 				catch (Exception ex) {
-					logger.debug("Could not read previous value of property '" + this.nestedPath + propertyName, ex);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Could not read previous value of property '" + this.nestedPath + propertyName + "'", ex);
+					}
 				}
 			}
 
@@ -939,7 +941,9 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 								return enumField.get(null);
 							}
 							catch (Exception ex) {
-								logger.debug("Field [" + convertedValue + "] isn't an enum value", ex);
+								if (logger.isDebugEnabled()) {
+									logger.debug("Field [" + convertedValue + "] isn't an enum value", ex);
+								}
 							}
 						}
 

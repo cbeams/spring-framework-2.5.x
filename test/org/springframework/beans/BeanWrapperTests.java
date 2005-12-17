@@ -1095,9 +1095,9 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals(Double.MAX_VALUE, bean.getMyDouble().doubleValue(), 0.001);
 
 	}
-	
+
 	public void testAlternativesForTypo() {
-		IntelliBean ib = new IntelliBean();		
+		IntelliBean ib = new IntelliBean();
 		BeanWrapper bw = new BeanWrapperImpl(ib);
 
 		try {
@@ -1106,11 +1106,11 @@ public class BeanWrapperTests extends TestCase {
 			e.printStackTrace();
 			assertNotNull("Possible matches not determined", e.getPossibleMatches());
 			assertEquals("Invalid amount of alternatives", 1, e.getPossibleMatches().length);
-		}	
+		}
 	}
-	
+
 	public void testAlternativesForTypos() {
-		IntelliBean ib = new IntelliBean();		
+		IntelliBean ib = new IntelliBean();
 		BeanWrapper bw = new BeanWrapperImpl(ib);
 
 		try {
@@ -1119,7 +1119,7 @@ public class BeanWrapperTests extends TestCase {
 			e.printStackTrace();
 			assertNotNull("Possible matches not determined", e.getPossibleMatches());
 			assertEquals("Invalid amount of alternatives", 3, e.getPossibleMatches().length);
-		}	
+		}
 	}
 
 
@@ -1332,18 +1332,19 @@ public class BeanWrapperTests extends TestCase {
 			this.myDouble = myDouble;
 		}
 	}
-	
+
+
 	private static class IntelliBean {
-		
+
 		public void setName(String name) {}
-		
+
 		public void setMyString(String string) {}
-		
+
 		public void setMyStrings(String string) {}
-		
+
 		public void setMyStriNg(String string) {}
-		
+
 		public void setMyStringss(String string) {}
-		
 	}
+
 }

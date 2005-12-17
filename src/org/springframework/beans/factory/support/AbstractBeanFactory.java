@@ -215,7 +215,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			// Create bean instance.
 			if (mergedBeanDefinition.isSingleton()) {
 				synchronized (this.singletonCache) {
-					// re-check singleton cache within synchronized block
+					// Re-check singleton cache within synchronized block.
 					sharedInstance = this.singletonCache.get(beanName);
 					if (sharedInstance == null) {
 						if (logger.isDebugEnabled()) {

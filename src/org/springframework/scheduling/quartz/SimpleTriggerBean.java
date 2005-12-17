@@ -56,6 +56,7 @@ public class SimpleTriggerBean extends SimpleTrigger
     implements JobDetailAwareTrigger, BeanNameAware, InitializingBean {
 
 	private static final Constants constants = new Constants(SimpleTrigger.class);
+	
 
 	private long startDelay = 0;
 
