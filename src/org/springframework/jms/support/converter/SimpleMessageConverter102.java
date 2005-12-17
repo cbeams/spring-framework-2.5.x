@@ -34,11 +34,20 @@ import javax.jms.JMSException;
  *
  * @author Juergen Hoeller
  * @since 1.1.1
+ * @see javax.jms.BytesMessage#getBodyLength()
  */
 public class SimpleMessageConverter102 extends SimpleMessageConverter {
 
 	public static final int BUFFER_SIZE = 4096;
 
+
+	/**
+	 * Overrides superclass method to copy bytes from the message into a
+	 * ByteArrayOutputStream, using a buffer, to avoid using the
+	 * <code>getBodyLength()</code> method which has been introduced in
+	 * JMS 1.1 and is therefore not available on a JMS 1.0.2 provider.
+	 * @see javax.jms.BytesMessage#getBodyLength()
+	 */
 	protected byte[] extractByteArrayFromMessage(BytesMessage message) throws JMSException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(BUFFER_SIZE);
 		byte[] buffer = new byte[BUFFER_SIZE];
