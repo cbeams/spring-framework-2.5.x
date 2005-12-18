@@ -29,37 +29,46 @@ import javax.portlet.PortletException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.web.portlet.context.PortletConfigAware;
 import org.springframework.web.portlet.context.PortletContextAware;
 
 /**
  * Bean post-processor that applies initialization and destruction callbacks
- * to beans that implement the Servlet interface.
+ * to beans that implement the Portlet interface.
  *
- * <p>After initialization of the bean instance, the Servlet <code>init</code>
- * method will be called with a ServletConfig that contains the bean name
- * of the Servlet and the ServletContext that it is running in.
+ * <p>After initialization of the bean instance, the Portlet <code>init</code>
+ * method will be called with a PortletConfig that contains the bean name
+ * of the Portlet and the PortletContext that it is running in.
  *
- * <p>Before destruction of the bean instance, the Servlet <code>destroy</code>
+ * <p>Before destruction of the bean instance, the Portlet <code>destroy</code>
  * will be called.
  *
- * <p><b>Note that this post-processor does not support Servlet initialization
- * parameters.</b> Bean instances that implement the Servlet interface are
+ * <p><b>Note that this post-processor does not support Portlet initialization
+ * parameters.</b> Bean instances that implement the Portlet interface are
  * supposed to be configured like any other Spring bean, that is, through
  * constructor arguments or bean properties.
  *
- * <p>For reuse of a Servlet implementation in a plain Servlet container and as
- * a bean in a Spring context, consider deriving from Spring's HttpServletBean
- * base class that applies Servlet initialization parameters as bean properties,
+ * <p>For reuse of a Portlet implementation in a plain Portlet container and as
+ * a bean in a Spring context, consider deriving from Spring's PortletBean
+ * base class that applies Portlet initialization parameters as bean properties,
  * supporting both initialization styles.
  *
+ * <p><b>Alternatively, consider wrapping a Portlet with Spring's
+ * PortletWrappingController.</b> This is particularly appropriate for
+ * existing Portlet classes, allowing to specify Portlet initialization
+ * parameters etc.
+ *
  * @author Juergen Hoeller
+ * @author John A. Lewis
  * @since 2.0
  * @see javax.portlet.Portlet
  * @see javax.portlet.PortletConfig
- * @see org.springframework.web.portlet.handler.SimplePortletHandlerAdapter
+ * @see SimplePortletHandlerAdapter
  * @see org.springframework.web.portlet.PortletBean
+ * @see org.springframework.web.portlet.mvc.PortletWrappingController
  */
-public class SimplePortletPostProcessor implements DestructionAwareBeanPostProcessor, PortletContextAware {
+public class SimplePortletPostProcessor
+	implements DestructionAwareBeanPostProcessor, PortletContextAware, PortletConfigAware {
 
 	private boolean useSharedPortletConfig = true;
 
@@ -72,7 +81,7 @@ public class SimplePortletPostProcessor implements DestructionAwareBeanPostProce
 	 * Set whether to use the shared PortletConfig object passed in
 	 * through <code>setPortletConfig</code>, if available.
 	 * <p>Default is "true". Turn this setting to "false" to pass in
-	 * a mock PortletConfig object with the bean name as servlet name,
+	 * a mock PortletConfig object with the bean name as portlet name,
 	 * holding the current PortletContext.
 	 * @see #setPortletConfig
 	 */
@@ -97,7 +106,7 @@ public class SimplePortletPostProcessor implements DestructionAwareBeanPostProce
 		if (bean instanceof Portlet) {
 			PortletConfig config = this.portletConfig;
 			if (config == null || !this.useSharedPortletConfig) {
-				config = new DelegatingPortletConfig(beanName, this.portletContext);
+				config = new DelegatingPortletConfig(beanName, this.portletContext, this.portletConfig);
 			}
 			try {
 				((Portlet) bean).init(config);
@@ -126,9 +135,12 @@ public class SimplePortletPostProcessor implements DestructionAwareBeanPostProce
 
 		private final PortletContext portletContext;
 
-		public DelegatingPortletConfig(String portletName, PortletContext portletContext) {
+        private final PortletConfig portletConfig;
+
+        public DelegatingPortletConfig(String portletName, PortletContext portletContext, PortletConfig portletConfig) {
 			this.portletName = portletName;
 			this.portletContext = portletContext;
+            this.portletConfig = portletConfig;
 		}
 
 		public String getPortletName() {
@@ -148,7 +160,7 @@ public class SimplePortletPostProcessor implements DestructionAwareBeanPostProce
 		}
 
 		public ResourceBundle getResourceBundle(Locale locale) {
-			return null;
+            return portletConfig == null ? null : portletConfig.getResourceBundle(locale);
 		}
 	}
 

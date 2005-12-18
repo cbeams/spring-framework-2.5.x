@@ -29,7 +29,7 @@ import org.springframework.web.portlet.ModelAndView;
  *
  * <p>This is an SPI class, not used directly by application code.
  *
- * @author John Lewis
+ * @author John A. Lewis
  * @since 2.0
  * @see org.springframework.web.portlet.DispatcherPortlet
  * @see Controller

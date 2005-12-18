@@ -57,7 +57,7 @@ import javax.portlet.RenderResponse;
  * servlet requests), so for portlet requests interceptors are essential. 
  *
  * @author Juergen Hoeller
- * @author John Lewis
+ * @author John A. Lewis
  * @since 2.0
  * @see HandlerExecutionChain#getInterceptors
  * @see org.springframework.web.portlet.HandlerMapping

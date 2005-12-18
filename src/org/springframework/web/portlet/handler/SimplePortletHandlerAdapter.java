@@ -26,17 +26,28 @@ import org.springframework.web.portlet.HandlerAdapter;
 import org.springframework.web.portlet.ModelAndView;
 
 /**
- * Adapter to delegate out to standard JSR-168 Portlets from the generic DispatcherPortlet.
- * This may be useful so that pre-existing portlets can be used with an overall Spring
- * configuration.  This will allow HandlerInteceptors and HandlerExceptionResovlers to be 
- * applied.  
+ * Adapter to use the Portlet interface with the generic DispatcherPortlet.
+ * Calls the Portlet's <code>render</code> and <code>processAction</code>
+ * methods to handle a request.
  *
- * <p>This is an SPI class, not used directly by application code.
+ * <p>This adapter is not activated by default; it needs to be defined as a
+ * bean in the DispatcherPortlet context. It will automatically apply to
+ * mapped handler beans that implement the Portlet interface then.
  *
- * @author John Lewis
+ * <p>Note that Portlet instances defined as bean will not receive initialization
+ * and destruction callbacks, unless a special post-processor such as
+ * SimplePortletPostProcessor is defined in the DispatcherPortlet context.
+ *
+ * <p><b>Alternatively, consider wrapping a Portlet with Spring's
+ * PortletWrappingController.</b> This is particularly appropriate for
+ * existing Portlet classes, allowing to specify Portlet initialization
+ * parameters, etc.
+ *
+ * @author John A. Lewis
  * @since 2.0
- * @see org.springframework.web.portlet.DispatcherPortlet
- * @see Portlet
+ * @see javax.portlet.Portlet
+ * @see SimplePortletPostProcessor
+ * @see org.springframework.web.portlet.mvc.PortletWrappingController
  */
 public class SimplePortletHandlerAdapter implements HandlerAdapter {
 	

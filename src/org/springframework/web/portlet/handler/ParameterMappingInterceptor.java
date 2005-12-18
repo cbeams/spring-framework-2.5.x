@@ -30,7 +30,7 @@ import org.springframework.web.portlet.ModelAndView;
  * Interceptor to foward mapping request parameters to the render action.
  *
  * @author Rainer Schmitz
- * @author John Lewis
+ * @author John A. Lewis
  * @since 2.0
  * @see ParameterHandlerMapping
  */

@@ -39,7 +39,7 @@ import javax.portlet.RenderResponse;
  * specify a sorting order and thus a priority for getting applied by
  * DispatcherPortlet. Non-Ordered instances get treated as lowest priority.
  *
- * @author John Lewis
+ * @author John A. Lewis
  * @since 2.0
  * @see org.springframework.web.portlet.mvc.SimpleControllerHandlerAdapter
  */
