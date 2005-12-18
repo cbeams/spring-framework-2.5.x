@@ -17,7 +17,6 @@
 package org.springframework.orm.jdo;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
@@ -34,6 +33,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 /**
@@ -166,14 +166,10 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 		Properties props = new Properties();
 
 		if (this.configLocation != null) {
-			// Load JDO properties from the given location.
-			InputStream is = this.configLocation.getInputStream();
-			try {
-				props.load(is);
+			if (logger.isInfoEnabled()) {
+				logger.info("Loading JDO config from [" + this.configLocation + "]");
 			}
-			finally {
-				is.close();
-			}
+			PropertiesLoaderUtils.fillProperties(props, this.configLocation);
 		}
 
 		if (this.jdoProperties != null) {

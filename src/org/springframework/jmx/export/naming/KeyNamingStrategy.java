@@ -17,7 +17,6 @@
 package org.springframework.jmx.export.naming;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -29,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.jmx.support.ObjectNameManager;
 
 /**
@@ -125,13 +125,7 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 				if (logger.isInfoEnabled()) {
 					logger.info("Loading JMX object name mappings file from " + location);
 				}
-				InputStream is = location.getInputStream();
-				try {
-					this.mergedMappings.load(is);
-				}
-				finally {
-					is.close();
-				}
+				PropertiesLoaderUtils.fillProperties(this.mergedMappings, location);
 			}
 		}
 	}

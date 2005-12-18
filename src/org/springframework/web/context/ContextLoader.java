@@ -17,7 +17,6 @@
 package org.springframework.web.context;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -33,6 +32,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
@@ -120,7 +120,7 @@ public class ContextLoader {
 	private static final String DEFAULT_STRATEGIES_PATH = "ContextLoader.properties";
 
 
-	private static final Properties defaultStrategies = new Properties();
+	private static final Properties defaultStrategies;
 
 	static {
 		// Load default strategy implementations from properties file.
@@ -128,13 +128,7 @@ public class ContextLoader {
 		// by application developers.
 		try {
 			ClassPathResource resource = new ClassPathResource(DEFAULT_STRATEGIES_PATH, ContextLoader.class);
-			InputStream is = resource.getInputStream();
-			try {
-				defaultStrategies.load(is);
-			}
-			finally {
-				is.close();
-			}
+			defaultStrategies = PropertiesLoaderUtils.loadProperties(resource);
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException("Could not load 'ContextLoader.properties': " + ex.getMessage());

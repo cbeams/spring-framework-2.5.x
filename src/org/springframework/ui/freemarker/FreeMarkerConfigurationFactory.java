@@ -18,7 +18,6 @@ package org.springframework.ui.freemarker;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 
 /**
  * Factory that configures a FreeMarker Configuration. Can be used standalone, but
@@ -219,13 +219,7 @@ public class FreeMarkerConfigurationFactory {
 			if (logger.isInfoEnabled()) {
 				logger.info("Loading FreeMarker config from [" + this.configLocation + "]");
 			}
-			InputStream is = this.configLocation.getInputStream();
-			try {
-				props.load(is);
-			}
-			finally {
-				is.close();
-			}
+			PropertiesLoaderUtils.fillProperties(props, this.configLocation);
 		}
 
 		// Merge local properties if set.

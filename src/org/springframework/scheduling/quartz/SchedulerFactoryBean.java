@@ -17,7 +17,6 @@
 package org.springframework.scheduling.quartz;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -53,6 +52,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.Lifecycle;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.SchedulingException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -601,14 +601,10 @@ public class SchedulerFactoryBean
 			}
 
 			if (this.configLocation != null) {
-				// Load Quartz properties from given location.
-				InputStream is = this.configLocation.getInputStream();
-				try {
-					props.load(is);
+				if (logger.isInfoEnabled()) {
+					logger.info("Loading Quartz config from [" + this.configLocation + "]");
 				}
-				finally {
-					is.close();
-				}
+				PropertiesLoaderUtils.fillProperties(props, this.configLocation);
 			}
 
 			if (this.quartzProperties != null) {

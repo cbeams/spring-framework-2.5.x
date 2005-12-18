@@ -38,7 +38,8 @@ public class PathMatchingResourcePatternResolverTests extends TestCase {
 	private static final String[] CLASSES_IN_CORE_IO_SUPPORT =
 			new String[] {"EncodedResource.class", "LocalizedResourceHelper.class",
 										"PathMatchingResourcePatternResolver.class",
-										"PropertiesLoaderSupport.class", "ResourceArrayPropertyEditor.class",
+										"PropertiesLoaderSupport.class", "PropertiesLoaderUtils.class",
+										"ResourceArrayPropertyEditor.class",
 										"ResourcePatternResolver.class", "ResourcePatternUtils.class"};
 
 	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT =

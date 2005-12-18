@@ -17,7 +17,6 @@
 package org.springframework.web.portlet;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -47,6 +46,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewRendererServlet;
@@ -188,7 +188,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 */
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
 
-	private static final Properties defaultStrategies = new Properties();
+	private static final Properties defaultStrategies;
 
 	static {
 		// Load default strategy implementations from properties file.
@@ -196,13 +196,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		// by application developers.
 		try {
 			ClassPathResource resource = new ClassPathResource(DEFAULT_STRATEGIES_PATH, DispatcherPortlet.class);
-			InputStream is = resource.getInputStream();
-			try {
-				defaultStrategies.load(is);
-			}
-			finally {
-				is.close();
-			}
+			defaultStrategies = PropertiesLoaderUtils.loadProperties(resource);
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException("Could not load 'DispatcherPortlet.properties': " + ex.getMessage());

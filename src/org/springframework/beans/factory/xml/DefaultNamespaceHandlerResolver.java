@@ -16,24 +16,25 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.FatalBeanException;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.PropertiesMergeUtils;
-
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.FatalBeanException;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+
 /**
  * Default implementation of the {@link NamespaceHandler}. Resolves namespace URIs
  * to implementation classes based on the mappings contained in mapping file.
- * <p/>
+ *
  * <p>By default, this implementation looks for the mapping file at
  * <code>META-INF/spring.handlers</code>, but this can be changed using the
  * {@link #DefaultNamespaceHandlerResolver(String, ClassLoader)} constructor.
@@ -50,6 +51,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * JAR files.
 	 */
 	private static final String SPRING_HANDLER_MAPPINGS_LOCATION = "META-INF/spring.handlers";
+
 
 	/**
 	 * <code>Log</code> instance of this class.
@@ -125,7 +127,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 
 	private Properties loadMappings() {
 		try {
-			return PropertiesMergeUtils.findMergedProperties(this.handlerMappingsLocation, this.classLoader);
+			return PropertiesLoaderUtils.loadAllProperties(this.handlerMappingsLocation, this.classLoader);
 		}
 		catch (IOException e) {
 			throw new FatalBeanException("Unable to load NamespaceHandler mappings using mapping location ["

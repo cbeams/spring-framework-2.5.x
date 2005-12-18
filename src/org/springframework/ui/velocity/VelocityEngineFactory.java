@@ -18,7 +18,6 @@ package org.springframework.ui.velocity;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -33,6 +32,7 @@ import org.apache.velocity.runtime.RuntimeConstants;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 
 /**
  * Factory that configures a VelocityEngine. Can be used standalone, but
@@ -215,13 +215,7 @@ public class VelocityEngineFactory {
 			if (logger.isInfoEnabled()) {
 				logger.info("Loading Velocity config from [" + this.configLocation + "]");
 			}
-			InputStream is = this.configLocation.getInputStream();
-			try {
-				props.load(is);
-			}
-			finally {
-				is.close();
-			}
+			PropertiesLoaderUtils.fillProperties(props, this.configLocation);
 		}
 
 		// Merge local properties if set.
