@@ -43,11 +43,13 @@ public class DelegatingEntityResolver implements EntityResolver {
 	public static final String XSD_SUFFIX = ".xsd";
 
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final EntityResolver dtdResolver;
 
 	private final EntityResolver schemaResolver;
+
 
 	/**
 	 * Create a new DelegatingEntityResolver that delegates to
