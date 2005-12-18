@@ -51,8 +51,10 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.NestedRuntimeException;
+import org.springframework.context.Lifecycle;
 import org.springframework.core.io.Resource;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.SchedulingException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
@@ -98,16 +100,31 @@ import org.springframework.util.ReflectionUtils;
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
 public class SchedulerFactoryBean
-    implements FactoryBean, ApplicationContextAware, InitializingBean, DisposableBean {
+    implements FactoryBean, ApplicationContextAware, InitializingBean, Lifecycle, DisposableBean {
 
 	public static final String PROP_THREAD_COUNT = "org.quartz.threadPool.threadCount";
 
 	public static final int DEFAULT_THREAD_COUNT = 10;
 
 
+	private static ThreadLocal configTimeTaskExecutorHolder = new ThreadLocal();
+
 	private static ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
 
 	private static ThreadLocal configTimeNonTransactionalDataSourceHolder = new ThreadLocal();
+
+	/**
+	 * Return the TaskExecutor for the currently configured Quartz Scheduler,
+	 * to be used by LocalTaskExecutorThreadPool.
+	 * <p>This instance will be set before initialization of the corresponding
+	 * Scheduler, and reset immediately afterwards. It is thus only available
+	 * during configuration.
+	 * @see #setDataSource
+	 * @see LocalDataSourceJobStore
+	 */
+	public static TaskExecutor getConfigTimeTaskExecutor() {
+		return (TaskExecutor) configTimeTaskExecutorHolder.get();
+	}
 
 	/**
 	 * Return the DataSource for the currently configured Quartz Scheduler,
@@ -146,6 +163,9 @@ public class SchedulerFactoryBean
 	private Resource configLocation;
 
 	private Properties quartzProperties;
+
+
+	private TaskExecutor taskExecutor;
 
 	private DataSource dataSource;
 
@@ -240,6 +260,23 @@ public class SchedulerFactoryBean
 		this.quartzProperties = quartzProperties;
 	}
 
+
+	/**
+	 * Set the Spring TaskExecutor to use as Quartz backend.
+	 * Exposed as thread pool through the Quartz SPI.
+	 * <p>Can be used to assign a JDK 1.5 ThreadPoolExecutor or a CommonJ
+	 * WorkManager as Quartz backend, to avoid Quartz's manual thread creation.
+	 * <p>By default, a Quartz SimpleThreadPool will be used, configured through
+	 * the corresponding Quartz properties.
+	 * @see #setQuartzProperties
+	 * @see LocalTaskExecutorThreadPool
+	 * @see org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+	 * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
+	 */
+	public void setTaskExecutor(TaskExecutor taskExecutor) {
+		this.taskExecutor = taskExecutor;
+	}
+
 	/**
 	 * Set the default DataSource to be used by the Scheduler. If set,
 	 * this will override corresponding settings in Quartz properties.
@@ -258,7 +295,7 @@ public class SchedulerFactoryBean
 	 * @see #setNonTransactionalDataSource
 	 * @see #setQuartzProperties
 	 * @see #setTransactionManager
-	 * @see org.springframework.scheduling.quartz.LocalDataSourceJobStore
+	 * @see LocalDataSourceJobStore
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
@@ -494,6 +531,10 @@ public class SchedulerFactoryBean
 
 		initSchedulerFactory(schedulerFactory);
 
+		if (this.taskExecutor != null) {
+			// Make given TaskExecutor available for SchedulerFactory configuration.
+			configTimeTaskExecutorHolder.set(this.taskExecutor);
+		}
 		if (this.dataSource != null) {
 			// Make given DataSource available for SchedulerFactory configuration.
 			configTimeDataSourceHolder.set(this.dataSource);
@@ -505,13 +546,20 @@ public class SchedulerFactoryBean
 
 
 		// Get Scheduler instance from SchedulerFactory.
-		this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
-
-		if (this.dataSource != null) {
-			configTimeDataSourceHolder.set(null);
+		try {
+			this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
 		}
-		if (this.nonTransactionalDataSource != null) {
-			configTimeNonTransactionalDataSourceHolder.set(null);
+
+		finally {
+			if (this.taskExecutor != null) {
+				configTimeTaskExecutorHolder.set(null);
+			}
+			if (this.dataSource != null) {
+				configTimeDataSourceHolder.set(null);
+			}
+			if (this.nonTransactionalDataSource != null) {
+				configTimeNonTransactionalDataSourceHolder.set(null);
+			}
 		}
 
 		populateSchedulerContext();
@@ -544,8 +592,13 @@ public class SchedulerFactoryBean
 
 			// Set necessary default properties here, as Quartz will not apply
 			// its default configuration when explicitly given properties.
-			props.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, SimpleThreadPool.class.getName());
-			props.setProperty(PROP_THREAD_COUNT, Integer.toString(DEFAULT_THREAD_COUNT));
+			if (this.taskExecutor != null) {
+				props.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, LocalTaskExecutorThreadPool.class.getName());
+			}
+			else {
+				props.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, SimpleThreadPool.class.getName());
+				props.setProperty(PROP_THREAD_COUNT, Integer.toString(DEFAULT_THREAD_COUNT));
+			}
 
 			if (this.configLocation != null) {
 				// Load Quartz properties from given location.
@@ -593,6 +646,7 @@ public class SchedulerFactoryBean
 	 */
 	protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
 			throws SchedulerException {
+
 		// StdSchedulerFactory's default "getScheduler" implementation
 		// uses the scheduler name specified in the Quartz properties,
 		// which we have set before (in "initSchedulerFactory").
@@ -803,12 +857,15 @@ public class SchedulerFactoryBean
 	 */
 	protected void startScheduler(final Scheduler scheduler, final int startupDelay) throws SchedulerException {
 		if (startupDelay <= 0) {
-			logger.info("Starting Quartz scheduler now");
+			logger.info("Starting Quartz Scheduler now");
 			scheduler.start();
 		}
 		else {
-			logger.info("Will start Quartz scheduler in " + startupDelay + " seconds");
-			new Thread() {
+			if (logger.isInfoEnabled()) {
+				logger.info("Will start Quartz Scheduler [" + scheduler.getSchedulerName() +
+						"] in " + startupDelay + " seconds");
+			}
+			Thread schedulerThread = new Thread() {
 				public void run() {
 					try {
 						Thread.sleep(startupDelay * 1000);
@@ -816,18 +873,26 @@ public class SchedulerFactoryBean
 					catch (InterruptedException ex) {
 						// simply proceed
 					}
-					logger.info("Starting Quartz scheduler now, after delay of " + startupDelay + " seconds");
+					if (logger.isInfoEnabled()) {
+						logger.info("Starting Quartz Scheduler now, after delay of " + startupDelay + " seconds");
+					}
 					try {
 						scheduler.start();
 					}
 					catch (SchedulerException ex) {
-						throw new DelayedSchedulerStartException(ex);
+						throw new SchedulingException("Could not start Quartz Scheduler after delay", ex);
 					}
 				}
-			}.start();
+			};
+			schedulerThread.setName("Quartz Scheduler [" + scheduler.getSchedulerName() + "]");
+			schedulerThread.start();
 		}
 	}
 
+
+	//---------------------------------------------------------------------
+	// Implementation of FactoryBean interface
+	//---------------------------------------------------------------------
 
 	public Object getObject() {
 		return this.scheduler;
@@ -842,25 +907,56 @@ public class SchedulerFactoryBean
 	}
 
 
+	//---------------------------------------------------------------------
+	// Implementation of Lifecycle interface
+	//---------------------------------------------------------------------
+
+	public void start() throws SchedulingException {
+		if (this.scheduler != null) {
+			try {
+				this.scheduler.start();
+			}
+			catch (SchedulerException ex) {
+				throw new SchedulingException("Could not start Quartz Scheduler", ex);
+			}
+		}
+	}
+
+	public void stop() throws SchedulingException {
+		if (this.scheduler != null) {
+			try {
+				this.scheduler.standby();
+			}
+			catch (SchedulerException ex) {
+				throw new SchedulingException("Could not stop Quartz Scheduler", ex);
+			}
+		}
+	}
+
+	public boolean isRunning() throws SchedulingException {
+		if (this.scheduler != null) {
+			try {
+				return !this.scheduler.isInStandbyMode();
+			}
+			catch (SchedulerException ex) {
+				return false;
+			}
+		}
+		return false;
+	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of DisposableBean interface
+	//---------------------------------------------------------------------
+
 	/**
 	 * Shut down the Quartz scheduler on bean factory shutdown,
 	 * stopping all scheduled jobs.
 	 */
 	public void destroy() throws SchedulerException {
-		logger.info("Shutting down Quartz scheduler");
+		logger.info("Shutting down Quartz Scheduler");
 		this.scheduler.shutdown(this.waitForJobsToCompleteOnShutdown);
-	}
-
-
-	/**
-	 * Exception to be thrown if the Quartz scheduler cannot be started
-	 * after the specified delay has passed.
-	 */
-	public static class DelayedSchedulerStartException extends NestedRuntimeException {
-
-		private DelayedSchedulerStartException(SchedulerException ex) {
-			super("Could not start Quartz scheduler after delay", ex);
-		}
 	}
 
 }
