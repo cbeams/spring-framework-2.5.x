@@ -30,6 +30,9 @@ import org.apache.commons.logging.LogFactory;
  * appropriate points of its workflow. Note that <code>afterAccess</code>
  * should usually be called in a finally block!.
  *
+ * <p>The default concurrency limit of this support class is -1.
+ * Subclasses may override this default; check the concrete class's javadoc.
+ *
  * <p>This class is designed for serializablility, to allow for serializing
  * interceptors that derive from it. Note that the subclass needs to explicitly
  * implement the Serializable marker interface if it is actually serializable.
@@ -50,14 +53,14 @@ public abstract class ConcurrencyThrottleSupport {
 	/** Transient to optimize serialization */
 	private transient Object monitor = new Object();
 
-	private int concurrencyLimit = 1;
+	private int concurrencyLimit = -1;
 
 	private int concurrencyCount = 0;
 
 
 	/**
 	 * Set the maximum number of parallel accesses allowed.
-	 * -1 indicates no concurrency limit at all. Default is 1.
+	 * -1 indicates no concurrency limit at all.
 	 * <p>This limit can in principle be changed at runtime,
 	 * although it is generally designed as config time setting.
 	 * NOTE: Do not switch between -1 and any concrete limit at runtime,

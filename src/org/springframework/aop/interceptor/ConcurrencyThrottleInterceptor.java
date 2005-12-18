@@ -32,12 +32,19 @@ import org.springframework.util.ConcurrencyThrottleSupport;
  * throttle concurrency for a specific service rather than restricting
  * the entire thread pool (e.g. the web container's thread pool).
  *
+ * <p>The default concurrency limit of this interceptor is 1.
+ * Specify the "concurrencyLimit" bean property to change this value.
+ *
  * @author Juergen Hoeller
  * @since 11.02.2004
  * @see #setConcurrencyLimit
  */
 public class ConcurrencyThrottleInterceptor extends ConcurrencyThrottleSupport
 		implements MethodInterceptor, Serializable {
+
+	public ConcurrencyThrottleInterceptor() {
+		setConcurrencyLimit(1);
+	}
 
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		beforeAccess();
