@@ -30,6 +30,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.ClassUtils;
 
 /**
  * Message listener container that uses plain JMS client API, specifically
@@ -66,16 +67,24 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class DefaultMessageListenerContainer extends AbstractMessageListenerContainer {
 
 	/**
+	 * Default thread name prefix: "SimpleAsyncTaskExecutor-".
+	 */
+	public static final String DEFAULT_THREAD_NAME_PREFIX =
+			ClassUtils.getShortName(DefaultMessageListenerContainer.class) + "-";
+
+	/**
 	 * The default receive timeout: 1000 ms = 1 second.
 	 */
 	public static final long DEFAULT_RECEIVE_TIMEOUT = 1000;
 
 
+	private final Object monitor = new Object();
+
 	private boolean pubSubNoLocal = false;
 
 	private int concurrentConsumers = 1;
 
-	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("DefaultMessageListenerContainer");
+	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor(DEFAULT_THREAD_NAME_PREFIX);
 
 	private TransactionTemplate transactionTemplate = new TransactionTemplate();
 
@@ -294,7 +303,9 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	private class AsyncMessageListenerInvoker implements Runnable {
 
 		public void run() {
-			listenersRunning++;
+			synchronized (monitor) {
+				listenersRunning++;
+			}
 			Session session = null;
 			MessageConsumer consumer = null;
 			try {
@@ -310,7 +321,9 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 			finally {
 				JmsUtils.closeMessageConsumer(consumer);
 				JmsUtils.closeSession(session);
-				listenersRunning--;
+				synchronized (monitor) {
+					listenersRunning--;
+				}
 			}
 		}
 	}
