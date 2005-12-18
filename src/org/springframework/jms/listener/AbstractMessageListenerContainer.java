@@ -24,6 +24,7 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.context.Lifecycle;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
@@ -47,7 +48,8 @@ import org.springframework.jms.support.destination.JmsDestinationAccessor;
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
  */
-public abstract class AbstractMessageListenerContainer extends JmsDestinationAccessor implements DisposableBean {
+public abstract class AbstractMessageListenerContainer extends JmsDestinationAccessor
+		implements DisposableBean, Lifecycle {
 
 	private Object destination;
 
@@ -61,9 +63,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	private Connection connection;
 
-	private boolean running;
+	private boolean running = false;
 
-	private boolean active;
+	private volatile boolean active = false;
 
 
 	/**
@@ -194,10 +196,10 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 
 	/**
-	 * Create a JMS Connection, register the given listener object,
-	 * and start the Connection (if "autoStartup" hasn't been turned off).
+	 * Validate configuration and call <code>initialize</code>.
+	 * @see #initialize()
 	 */
-	public final void afterPropertiesSet() {
+	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 
 		if (this.destination == null) {
@@ -207,7 +209,15 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 			throw new IllegalArgumentException("messageListener is required");
 		}
 
-		// Create JMS Connection and Sessions with MessageConsumers.
+		initialize();
+	}
+
+	/**
+	 * Initialize this message listener container.
+	 * <p>Creates a JMS Connection, register the given listener object,
+	 * and start the Connection (if "autoStartup" hasn't been turned off).
+	 */
+	public void initialize() {
 		try {
 			this.active = true;
 			this.connection = createConnection();
@@ -215,6 +225,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 			if (this.autoStartup) {
 				this.connection.start();
+				this.running = true;
 			}
 		}
 		catch (JMSException ex) {
@@ -240,7 +251,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @see #destroyListener()
 	 * @see javax.jms.Connection#close()
 	 */
-	public final void destroy() throws JmsException {
+	public void destroy() throws JmsException {
 		try {
 			this.active = false;
 			destroyListener();
@@ -267,11 +278,14 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	public synchronized void start() throws JmsException {
 		try {
 			this.connection.start();
+			this.running = true;
+		}
+		catch (javax.jms.IllegalStateException ex) {
+			// Ignore: already started.
 		}
 		catch (JMSException ex) {
 			throw convertJmsAccessException(ex);
 		}
-		this.running = true;
 	}
 
 	/**
@@ -283,18 +297,21 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	public synchronized void stop() throws JmsException {
 		try {
 			this.connection.stop();
+			this.running = false;
+		}
+		catch (javax.jms.IllegalStateException ex) {
+			// Ignore: not started yet.
 		}
 		catch (JMSException ex) {
 			throw convertJmsAccessException(ex);
 		}
-		this.running = false;
 	}
 
 	/**
 	 * Return whether this listener container is currently running,
 	 * that is, whether it has been started and not stopped yet.
 	 */
-	public boolean isRunning() {
+	public final synchronized boolean isRunning() {
 		return this.running;
 	}
 
@@ -302,7 +319,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * Return whether this listener container is currently active,
 	 * that is, whether it has been set up and not destroyed yet.
 	 */
-	public boolean isActive() {
+	public final boolean isActive() {
 		return this.active;
 	}
 

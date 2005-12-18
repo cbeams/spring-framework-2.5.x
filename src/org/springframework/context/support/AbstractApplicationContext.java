@@ -46,6 +46,7 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.HierarchicalMessageSource;
+import org.springframework.context.Lifecycle;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.MessageSourceResolvable;
@@ -176,7 +177,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	//---------------------------------------------------------------------
-	// Implementation of ApplicationContext
+	// Implementation of ApplicationContext interface
 	//---------------------------------------------------------------------
 
 	/**
@@ -251,7 +252,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	//---------------------------------------------------------------------
-	// Implementation of ConfigurableApplicationContext
+	// Implementation of ConfigurableApplicationContext interface
 	//---------------------------------------------------------------------
 
 	public void setParent(ApplicationContext parent) {
@@ -606,7 +607,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	//---------------------------------------------------------------------
-	// Implementation of BeanFactory
+	// Implementation of BeanFactory interface
 	//---------------------------------------------------------------------
 
 	public Object getBean(String name) throws BeansException {
@@ -635,7 +636,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	//---------------------------------------------------------------------
-	// Implementation of ListableBeanFactory
+	// Implementation of ListableBeanFactory interface
 	//---------------------------------------------------------------------
 
 	public boolean containsBeanDefinition(String name) {
@@ -670,7 +671,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	//---------------------------------------------------------------------
-	// Implementation of HierarchicalBeanFactory
+	// Implementation of HierarchicalBeanFactory interface
 	//---------------------------------------------------------------------
 
 	public BeanFactory getParentBeanFactory() {
@@ -689,7 +690,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	//---------------------------------------------------------------------
-	// Implementation of MessageSource
+	// Implementation of MessageSource interface
 	//---------------------------------------------------------------------
 
 	public String getMessage(String code, Object args[], String defaultMessage, Locale locale) {
@@ -728,11 +729,55 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	//---------------------------------------------------------------------
-	// Implementation of ResourcePatternResolver
+	// Implementation of ResourcePatternResolver interface
 	//---------------------------------------------------------------------
 
 	public Resource[] getResources(String locationPattern) throws IOException {
 		return this.resourcePatternResolver.getResources(locationPattern);
+	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of Lifecycle interface
+	//---------------------------------------------------------------------
+
+	public void start() {
+		Iterator it = getLifecycleBeans().iterator();
+		while (it.hasNext()) {
+			Lifecycle lifecycle = (Lifecycle) it.next();
+			if (!lifecycle.isRunning()) {
+				lifecycle.start();
+			}
+		}
+	}
+
+	public void stop() {
+		Iterator it = getLifecycleBeans().iterator();
+		while (it.hasNext()) {
+			Lifecycle lifecycle = (Lifecycle) it.next();
+			if (lifecycle.isRunning()) {
+				lifecycle.stop();
+			}
+		}
+	}
+
+	public boolean isRunning() {
+		Iterator it = getLifecycleBeans().iterator();
+		while (it.hasNext()) {
+			Lifecycle lifecycle = (Lifecycle) it.next();
+			if (!lifecycle.isRunning()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Return a Collection of all singleton beans that implement the
+	 * Lifecycle interface in this context.
+	 */
+	protected Collection getLifecycleBeans() {
+		return getBeanFactory().getBeansOfType(Lifecycle.class, false, false).values();
 	}
 
 

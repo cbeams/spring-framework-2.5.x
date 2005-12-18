@@ -32,7 +32,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  * @author Juergen Hoeller
  * @since 03.11.2003
  */
-public interface ConfigurableApplicationContext extends ApplicationContext {
+public interface ConfigurableApplicationContext extends ApplicationContext, Lifecycle {
 
 	/**
 	 * Set the parent of this application context.
