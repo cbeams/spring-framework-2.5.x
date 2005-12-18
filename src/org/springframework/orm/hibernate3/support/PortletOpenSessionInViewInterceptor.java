@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.portlet.support.hibernate3;
+package org.springframework.orm.hibernate3.support;
 
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
@@ -75,6 +75,7 @@ import org.springframework.web.portlet.ModelAndView;
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
+ * @since 2.0
  * @see #setSingleSession
  * @see #setFlushMode
  * @see org.springframework.orm.hibernate3.HibernateInterceptor
@@ -82,7 +83,7 @@ import org.springframework.web.portlet.ModelAndView;
  * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
-public class OpenSessionInViewInterceptor extends HibernateAccessor implements HandlerInterceptor {
+public class PortletOpenSessionInViewInterceptor extends HibernateAccessor implements HandlerInterceptor {
 
 	/**
 	 * Suffix that gets appended to the SessionFactory toString representation
@@ -96,11 +97,11 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 
 
 	/**
-	 * Create a new OpenSessionInViewInterceptor,
+	 * Create a new PortletOpenSessionInViewInterceptor,
 	 * turning the default flushMode to FLUSH_NEVER.
 	 * @see #setFlushMode
 	 */
-	public OpenSessionInViewInterceptor() {
+	public PortletOpenSessionInViewInterceptor() {
 		setFlushMode(FLUSH_NEVER);
 	}
 
@@ -146,7 +147,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 		else {
 			if (isSingleSession()) {
 				// single session mode
-				logger.debug("Opening single Hibernate Session in OpenSessionInViewInterceptor");
+				logger.debug("Opening single Hibernate Session in PortletOpenSessionInViewInterceptor");
 				Session session = SessionFactoryUtils.getSession(
 						getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator());
 				applyFlushMode(session, false);
@@ -176,7 +177,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 			// only potentially flush in single session mode
 			SessionHolder sessionHolder =
 					(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
-			logger.debug("Flushing single Hibernate Session in OpenSessionInViewInterceptor");
+			logger.debug("Flushing single Hibernate Session in PortletOpenSessionInViewInterceptor");
 			try {
 				flushIfNecessary(sessionHolder.getSession(), false);
 			}
@@ -214,7 +215,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 				// single session mode
 				SessionHolder sessionHolder =
 						(SessionHolder) TransactionSynchronizationManager.unbindResource(getSessionFactory());
-				logger.debug("Closing single Hibernate Session in OpenSessionInViewInterceptor");
+				logger.debug("Closing single Hibernate Session in PortletOpenSessionInViewInterceptor");
 				SessionFactoryUtils.releaseSession(sessionHolder.getSession(), getSessionFactory());
 			}
 			else {
