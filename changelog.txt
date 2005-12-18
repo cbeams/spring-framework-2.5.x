@@ -3,13 +3,14 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.3 RC1 (2.12.2005)
+Changes in version 2.0 M1 (19.12.2005)
 --------------------------------------
 
 Overall
 * removed all deprecated classes and methods
-* repackaged "spring-hibernate.jar" into "spring-hibernate2.jar" and "spring-hibernate3.jar"
-* neither the Hibernate 2.1 support nor the Hibernate 3.x support is included in "spring.jar" anymore
+* removed support for iBATIS SQL Maps 1.3 (if you haven't done so already, upgrade to iBATIS SQL Maps 2.0/2.1!)
+* added explicit support for Hibernate 3.1 while remaining compatible with Hibernate 3.0 (as far as possible)
+* factored out "spring-hibernate2/3.jar" and "spring-toplink.jar", not contained in "spring.jar" anymore
 
 Package org.springframework.aop
 * added AopNamespaceHandler to support custom <aop:*/> XML tags
@@ -19,15 +20,12 @@ Package org.springframework.aop
 
 Package org.springframework.beans
 * added intelligent error messages to BeanWrapperImpl when properties are not found
-* changed MutablePropertyValues.addPropertyValue(String, Object) to return 'this'
+* changed "MutablePropertyValues.addPropertyValue(String, Object)" to return 'this'
 * removed deprecated "getBeanDefinitionNames(type)" method from ListableBeanFactory and BeanFactoryUtils
 * added "createBean" and "instantiateBean" methods to AutowireCapableBeanFactory interface
+* DefaultListableBeanFactory is able to call non-public factory methods as well
 * PropertiesBeanDefinitionReader trims String values for special keys such as "(class)", "(parent)", etc
-* added NamespaceHandler extension point to the DefaultXmlBeanDefinitionParser
-* added schema validation capabilities to DefaultXmlBeanDefintionParser
-* added spring-beans.xsd
-* added XSD/DTD validation detection to XmlBeanDefinitionReader
-* added validationMode to XmlBeanDefinitionReader
+* added "default-init-method" and "default-destroy-method" attributes to the XML bean definition format
 
 Package org.springframework.core
 * introduced TaskExecutor abstraction, as strategy interface for the execution of Runnables
@@ -43,14 +41,18 @@ Package org.springframework.dao
 * introduced EmptyResultDataAccessException as specific subclass of IncorrectResultSizeDataAccessException
 
 Package org.springframework.jdbc
+* OracleLobHandler lazily initializes Oracle driver classes, always loading via the actual Connection's class loader
+* fixed JdbcTemplate to extract the JDBC Connection for CallableStatementCreators if a NativeJdbcExtractor has been set
 * factored out protected "getColumnMapRowMapper" and "getSingleColumnRowMapper" hooks within JdbcTemplate
 * SingleColumnRowMapper throws specific IncorrectResultSetColumnCountException in case of invalid column count
 * SingleColumnRowMapper explicitly calls "ResultSet.getBigDecimal()" if the required type is BigDecimal
-* added SimpleJdbcTemplate providing Java 5-style access to JdbcTempplate functionality
+* added SimpleJdbcTemplate with ParameterizableRowMapper for Java 5, leveraging varargs and generics
 
 Package org.springframework.jms
-* added SimpleMessageListenerContainer mechanism for async JMS message reception via the plain JMS MessageConsumer API
-* added ServerMessageListenerContainer mechanism for async JMS message reception via the JMS ServerSessionPool API
+* SimpleMessageConverter accepts a passed-in raw JMS Message and returns a raw JMS Message if content type is unknown
+* added DefaultMessageListenerContainer mechanism for async message reception via the plain JMS MessageConsumer API
+* added SimpleMessageListenerContainer mechanism for async message reception via the plain JMS MessageListener API
+* added ServerSessionMessageListenerContainer mechanism for async message reception via the JMS ServerSessionPool API
 
 Package org.springframework.jmx
 * introduced MBeanExportOperations interface, providing a programmatic facility for registering MBeans on MBeanExporter
@@ -59,35 +61,47 @@ Package org.springframework.jmx
 * added support for registering NotificationListeners with the MBeanServer
 * added @ManagedNotification(s) annotation (and corresponding Commons attributes) for describing notification MBeanInfo
 * extended static MBeanInfoAssemblers to support configuration of Notification metadata
-* added NotificationPublisher and NotificationPublisherAware to support publication of JMX Notifications from Spring-managed beans
-* added "ensureUniqueRuntimeObjectNames" property to MBeanExporter to have Spring extend ObjectNames to ensure they are unique per-instance
-* added "exposeManagedResourceClassLoader" property to MBeanExporter to have Spring expose the ClassLoader of the managed resource before invocations via the MBean
+* added NotificationPublisher(Aware) to support publication of JMX Notifications from Spring-managed beans
+* added MBeanExporter option to have Spring extend ObjectNames to ensure they are unique per-instance
+* added MBeanExporter option to have Spring expose the ClassLoader of the managed resource before MBean invocations
 
 Package org.springframework.orm
-* added support for the Java Persistence API (JPA) preview, in the form of the "org.springframework.orm.jpa" package
 * JdoTransactionManager does explicit "isActive()" check before attempting a rollback, to avoid illegal state exception
 * HibernateTransactionManager autodetects Hibernate 3.1 to support its native transaction timeout
+* removed "save" operations with explicit id argument from HibernateTemplate (following Hibernate 3.1's removal)
+* upgraded FilterDefinitionFactoryBean to Hibernate 3.1 (which changed its FilterDefinition in an incompatible fashion)
 * upgraded IdTransferringMergeEventListener to Hibernate 3.1 (which changed its listener API in an incompatible fashion)
 
 Package org.springframework.remoting
+* JaxRpcPortClientInterceptor/ProxyFactoryBean apply given JaxRpcServicePostProcessors to existing JAX-RPC Service too
 * HttpInvokerServiceExporter, HessianServiceExporter and BurlapServiceExporter implement Handler instead of Controller
 * HttpInvokerRequestExecutor is allowed to throw any Exception, not just IOException and ClassNotFoundException
 
 Package org.springframework.scheduling
+* TimerFactoryBean creates a non-daemon Timer by default, to let running tasks finish after Timer was cancelled
 * added TimerTaskExecutor adapter for accessing a "java.util.Timer" through the TaskExecutor interface
+* added "taskExecutor" property to Quartz SchedulerFactoryBean, for replacing Quartz's default thread pool
+* added SimpleThreadPoolTaskExecutor for Quartz, allowing to define Quartz's default thread pool as Spring TaskExecutor
 * added scheduling-style support for the JDK 1.5 ThreadPoolExecutor mechanism in the "java.util.concurrent" package
 * added ConcurrentTaskExecutor adapter for accessing a JDK 1.5 Executor through the TaskExecutor interface
 * added scheduling-style support for the CommonJ TimerManager API, as supported by WebLogic 9 and WebSphere 6
 * added WorkManagerTaskExecutor adapter for accessing a CommonJ WorkManager through the TaskExecutor interface
 
+Package org.springframework.transaction
+* JtaTransactionManager only invokes rollback if transaction is still active (some JTA providers eagerly terminate)
+
 Package org.springframework.util
 * added "setPathSeparator" method to AntPathMatcher, allowing to override the default path separator "/"
+* WeakReferenceMonitor uses a daemon thread, to avoid a hanging thread even if weak references have not been released
 
 Package org.springframework.web
+* WebApplicationContext interface does not extend ThemeSource anymore; implementing ThemeSource is now optional
 * introduced ServletConfigAware interface, for getting access to a Framework/DispatcherServlet's ServletConfig object
 * SimpleServletPostProcessor configures Servlets with DispatcherServlet's ServletConfig by default (can be turned off)
 * introduced Handler interface as alternative to Controller, with no ModelAndView and only throwing Servlet/IOException
+* AbstractCachingViewResolver guarantees at-most-once instantiation of each View instance (-> extended synchronization)
 * added "currentFormObject" template method to AbstractFormController, for post-processing of a session form object
+* "RequestContextUtils.getLocale(request)" falls back to the accept-header Locale if no LocaleResolver found
 * FixedLocaleResolver returns the JVM's default Locale if no explicit default Locale specified
 * VelocityView converts Velocity's MethodInvocationException to a Spring NestedServletException with original root cause
 

@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.3 RC1 (December 2005)
------------------------------------------------------
+THE SPRING FRAMEWORK, release 2.0 M1 (December 2005)
+----------------------------------------------------
 http://www.springframework.org
 
 
@@ -56,7 +56,7 @@ required for building the framework; for the full build including Tiger support,
 J2EE 1.2 (Servlet 2.2, JSP 1.1) is sufficient when not using Spring's JSP tag libraries or the EJB support.
 
 Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1, JMX 1.0/1.2, JCA 1.0,
-Hibernate 2.1/3.0/3.1, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, JPA 1.0, Apache OJB 1.0, iBATIS SQL Maps 1.3/2.0,
+Hibernate 2.1/3.0/3.1, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, JPA 1.0, Apache OJB 1.0, iBATIS SQL Maps 2.0/2.1,
 Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.4/1.5, EHCache 1.1, JSTL 1.0, Velocity 1.4,
 FreeMarker 2.3, JasperReports 1.0/1.1, Struts/Tiles 1.1/1.2, JSF 1.1, Jakarta Commons FileUpload 1.0, etc.
 
@@ -88,65 +88,85 @@ The "dist" directory contains the following distinct jar files for use in applic
 jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-core" (~120 KB)
+FULL JAR (dist):
+
+* "spring" (~1815 KB)
+- Convenient jar file that combines all standard modules (see "module jars" below)
+- Note: Does not include extension modules!
+
+MODULE JARS (dist/modules):
+
+* "spring-core" (~130 KB)
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~225 KB)
+* "spring-beans" (~255 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
-* "spring-aop" (~155 KB)
+* "spring-aop" (~225 KB)
 - Contents: AOP framework, source-level metadata support, AOP Alliance interfaces
 - Dependencies: spring-core, (spring-beans, CGLIB, Commons Attributes)
 
-* "spring-context" (~110 KB)
+* "spring-context" (~115 KB)
 - Contents: application context, validation, JNDI, UI context support
 - Dependencies: spring-beans, (spring-aop, Velocity, FreeMarker, JasperReports)
 
-* "spring-dao" (~95 KB)
+* "spring-dao" (~105 KB)
 - Contents: DAO support, transaction infrastructure
 - Dependencies: spring-core, (spring-beans, spring-aop, spring-context, JTA)
 
-* "spring-jdbc" (~180 KB)
+* "spring-jdbc" (~185 KB)
 - Contents: JDBC support
 - Dependencies: spring-dao, spring-beans
 
-* "spring-support" (~175 KB)
+* "spring-support" (~190 KB)
 - Contents: JMX support, JCA support, scheduling support, mail support, caching support
 - Dependencies: spring-beans, (spring-dao, spring-context, spring-jdbc, JMX, Quartz, JavaMail, EHCache)
 
-* "spring-web" (~135 KB)
+* "spring-web" (~140 KB)
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
 - Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts, JSF)
 
-* "spring-webmvc" (~205 KB)
+* "spring-webmvc" (~210 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI, Velocity, FreeMarker, JasperReports)
 
-* "spring-remoting" (~160 KB)
+* "spring-remoting" (~165 KB)
 - Contents: remoting support, EJB support, JMS support
 - Dependencies: spring-aop, spring-beans, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB, JMS)
 
-* "spring-orm" (~215 KB)
-- Contents: iBATIS SQL Maps support, Apache OJB support, TopLink support, JDO support, JPA support
-- Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, iBATIS SQL Maps, Apache OJB, TopLink, JDO, JPA)
+* "spring-orm" (~110 KB)
+- Contents: JDO support, iBATIS SQL Maps support, OJB support
+- Dependencies: spring-dao, spring-beans, spring-jdbc, (spring-aop, spring-web, JDO, iBATIS SQL Maps)
 
-* "spring" (~1755 KB)
-- Contents: all of the above (note: Hibernate support and mocks not included)
-- Dependencies: all of the above
+EXTENSION MODULE JARS (dist/extmodules):
 
 * "spring-hibernate2" (~85 KB)
 - Contents: Hibernate 2.1 support
-- Dependencies: spring-dao, spring-aop, Hibernate2, (spring-web)
+- Dependencies: spring-dao, spring-aop, spring-jdbc, Hibernate2, (spring-web)
 
-* "spring-hibernate3" (~105 KB)
-- Contents: Hibernate 3.x support
-- Dependencies: spring-dao, spring-aop, Hibernate3, (spring-web)
+* "spring-hibernate3" (~100 KB)
+- Contents: Hibernate 3.0/3.1 support
+- Dependencies: spring-dao, spring-aop, spring-jdbc, Hibernate3, (spring-web)
+
+* "spring-toplink" (~55 KB)
+- Contents: TopLink support
+- Dependencies: spring-dao, spring-jdbc, TopLink
+
+* "spring-portlet" (~85 KB)
+- Contents: framework portlets, portlet MVC
+- Dependencies: spring-web, spring-webmvc, (Portlet)
 
 * "spring-mock" (~45 KB)
 - Contents: JNDI mocks, Servlet API mocks, JUnit support
 - Dependencies: spring-core
+
+ASPECTS JAR (dist/aspects)
+
+* "spring-aspects" (~5 KB)
+- Contains AspectJ aspects, for explicitly linking aspects into an IDE (Eclipse AJDT)
+- Not needed for deployment, since its classes are also in "spring" and "spring-aop"
 
 Note: The above lists of third-party libraries assume J2SE 1.4 as foundation. For J2SE 1.3, an XML parser like
 Xerces, the JDBC 2.0 standard extension interfaces, and JNDI have to be added when using XML bean definitions,
