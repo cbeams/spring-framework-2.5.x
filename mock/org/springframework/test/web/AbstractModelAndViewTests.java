@@ -1,4 +1,20 @@
-package org.springframework.web.servlet.test;
+/*
+ * Copyright 2002-2005 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.test.web;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,17 +29,18 @@ import junit.framework.TestCase;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Convenience super class for classes dealing with
- * and Spring MVC ModelAndView objects.
+ * Convenient base class for tests dealing with
+ * Spring web MVC ModelAndView objects.
  * 
  * @author Alef Arendsen
  * @author Bram Smeets
  * @since 2.0
+ * @see org.springframework.web.servlet.ModelAndView
  */
-public class AbstractModelAndViewTest extends TestCase {
+public abstract class AbstractModelAndViewTests extends TestCase {
 	
 	/**
-	 * Asserts whether or not a model attribute is available 
+	 * Assert whether or not a model attribute is available.
 	 */
 	protected void assertModelAttributeAvailable(ModelAndView mav, Object key) {
 		assertNotNull("Model is null", mav.getModel());
@@ -32,42 +49,38 @@ public class AbstractModelAndViewTest extends TestCase {
 	}	
 	
 	/**
-	 * Compares each individual entry in a list, not sorting the lists first.
+	 * Compare each individual entry in a list, not sorting the lists first.
 	 */
 	protected void assertCompareListModelAttribute(ModelAndView mav, Object key, List assertionList) {
-		
 		List modelList = (List)assertAndReturnModelAttributeOfType(mav, key, List.class);
-		
-		assertEquals("Size of model list is '" + modelList.size() + 
+		assertEquals("Size of model list is '" + modelList.size() +
 				"' while size of assertion list is '" + assertionList.size() + "'",
 				assertionList.size(), modelList.size());		
-		
 		assertEquals("List in model under key '" + key + "' is not equals to given list", assertionList, modelList);
-		
 	}
 	
 	/**
-	 * Compares each individual entry in a list after
-	 * having sorted both lists (optionally using a comparator)
-	 * @param comp if not specifying the comparator, both lists will be sorted
-	 * not using any comparator.
+	 * Compare each individual entry in a list after having sorted both lists
+	 * (optionally using a comparator).
+	 * @param comp the comparator to use. If not specifying the comparator,
+	 * both lists will be sorted not using any comparator.
 	 */
-	protected void assertSortAndCompareListModelAttribute(ModelAndView mav, Object key, List assertionList, Comparator comp) {
-		
+	protected void assertSortAndCompareListModelAttribute(
+			ModelAndView mav, Object key, List assertionList, Comparator comp) {
+
 		List modelList = (List)assertAndReturnModelAttributeOfType(mav, key, List.class);
-		
-		assertEquals("Size of model list is '" + modelList.size() + 
+		assertEquals("Size of model list is '" + modelList.size() +
 				"' while size of assertion list is '" + assertionList.size() + "'",
 				assertionList.size(), modelList.size());
-		
+
 		if (comp != null) {
 			Collections.sort(modelList, comp);
 			Collections.sort(assertionList, comp);
-		} else {
+		}
+		else {
 			Collections.sort(modelList);
 			Collections.sort(assertionList);
 		}		
-		
 		assertEquals("List in model under key '" + key + "' is not equals to given list", assertionList, modelList);
 	}
 	
@@ -78,20 +91,15 @@ public class AbstractModelAndViewTest extends TestCase {
 	 */
 	protected Object assertAndReturnModelAttributeOfType(ModelAndView mav, Object key, Class type) {
 		assertNotNull("Model is null", mav.getModel());
-		assertNotNull("Model attribute with key '" + key + "' is null", 
-				mav.getModel().get(key));
-		
-		Object o = mav.getModel().get(key);
-		
-		assertTrue("Model attribute is not of type '" + type.getName() + "' but is a '" + o.getClass().getName() + "'", 
-				type.isAssignableFrom(o.getClass()));
-		
-		return o;
+		assertNotNull("Model attribute with key '" + key + "' is null", mav.getModel().get(key));
+		Object obj = mav.getModel().get(key);
+		assertTrue("Model attribute is not of type '" + type.getName() + "' but is a '" +
+				obj.getClass().getName() + "'", type.isAssignableFrom(obj.getClass()));
+		return obj;
 	}
 	
 	/**
-	 * Checks to see if the view name in the ModelAndView matches the
-	 * given String.
+	 * Check to see if the view name in the ModelAndView matches the given String.
 	 */
 	protected void assertViewName(ModelAndView mav, String name) {
 		assertEquals("View name is not equal to '" + name + "' but was '" + mav.getViewName() + "'",
@@ -99,7 +107,7 @@ public class AbstractModelAndViewTest extends TestCase {
 	}
 	
 	/**
-	 * Compares a given Object to the value from the model bound under the given key. 
+	 * Compare a given Object to the value from the model bound under the given key.
 	 */
 	protected void assertModelAttributeValue(ModelAndView mav, Object key, Object value) {
 		Object modelValue = assertAndReturnModelAttributeOfType(mav, key, Object.class);
@@ -108,49 +116,48 @@ public class AbstractModelAndViewTest extends TestCase {
 	}
 	
 	/**
-	 * Inspects the given model to see if all elements in the model appear and are equal 
+	 * Inspect the given model to see if all elements in the model appear and are equal
 	 */
 	protected void assertModelAttributeValues(ModelAndView mav, Map assertionModel) {
 		assertNotNull(mav.getModel());
 		
 		if (!mav.getModel().keySet().equals(assertionModel.keySet())) {
-			StringBuffer buffy = new StringBuffer("Keyset of given model does not match.\n");
-			appendNonMatchingSetsErrorMessage(assertionModel.keySet(), mav.getModel().keySet(), buffy);
-			fail(buffy.toString());			
+			StringBuffer buf = new StringBuffer("Keyset of given model does not match.\n");
+			appendNonMatchingSetsErrorMessage(assertionModel.keySet(), mav.getModel().keySet(), buf);
+			fail(buf.toString());
 		}
 		
-		StringBuffer buffy = new StringBuffer();
+		StringBuffer buf = new StringBuffer();
 		Iterator it = mav.getModel().keySet().iterator();
 		while (it.hasNext()) {
 			Object key = (Object) it.next();
 			Object assertionValue = assertionModel.get(key);
 			Object mavValue = mav.getModel().get(key);
 			if (!assertionValue.equals(mavValue)) {
-				buffy.append("Value under key '" + key + "' differs, should have been '" + assertionValue + "' but was '" + mavValue +"'\n");
+				buf.append("Value under key '" + key + "' differs, should have been '" +
+						assertionValue + "' but was '" + mavValue +"'\n");
 			}
 		}
 
-		if (buffy.length() != 0) {
-			 buffy.insert(0, "Values of given model do not match.\n");
-			 fail(buffy.toString());
+		if (buf.length() != 0) {
+			 buf.insert(0, "Values of given model do not match.\n");
+			 fail(buf.toString());
 		}
 	}
 
-	private void appendNonMatchingSetsErrorMessage(Set assertionSet, Set incorrectSet, StringBuffer buffy) {
-		
-		// first check for extra values in mavModel assertionModel
+	private void appendNonMatchingSetsErrorMessage(Set assertionSet, Set incorrectSet, StringBuffer buf) {
 		Set tempSet = new HashSet();
 		tempSet.addAll(incorrectSet);
 		tempSet.removeAll(assertionSet);
 		
 		if (tempSet.size() > 0) {
-			buffy.append("Set has too many elements:\n");
+			buf.append("Set has too many elements:\n");
 			Iterator it = tempSet.iterator();
 			while (it.hasNext()) {
 				Object o = (Object) it.next();
-				buffy.append('-');
-				buffy.append(o.toString());
-				buffy.append('\n');
+				buf.append('-');
+				buf.append(o.toString());
+				buf.append('\n');
 			}
 		}
 		
@@ -159,13 +166,13 @@ public class AbstractModelAndViewTest extends TestCase {
 		tempSet.removeAll(incorrectSet);
 		
 		if (tempSet.size() > 0) {
-			buffy.append("Set is missing elements:\n");
+			buf.append("Set is missing elements:\n");
 			Iterator it = tempSet.iterator();
 			while (it.hasNext()) {
 				Object o = (Object) it.next();
-				buffy.append('-');
-				buffy.append(o.toString());
-				buffy.append('\n');
+				buf.append('-');
+				buf.append(o.toString());
+				buf.append('\n');
 			}
 		}	 
 	}
