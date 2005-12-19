@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class AspectJMethodBeforeAdvice extends AbstractAspectJAdvice implements 
 	
 	
 	public void before(Method method, Object[] args, Object target) throws Throwable {
-		// TODO utterly filthy and foul, but the test suite must pass
+		// TODO binding not properly implemented; will be post 2.0 M1
 		if (this.aspectJAdviceMethod.getParameterTypes().length > 0 && JoinPoint.class.isAssignableFrom(aspectJAdviceMethod.getParameterTypes()[0])) {
 			invokeAdviceMethodWithGivenArgs(new Object[] { ExposeJoinPointInterceptor.currentJoinPoint() });
 		}
