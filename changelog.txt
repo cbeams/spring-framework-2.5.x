@@ -3,19 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 M1 (19.12.2005)
+Changes in version 2.0 M1 (20.12.2005)
 --------------------------------------
 
 Overall
 * removed all deprecated classes and methods
 * removed support for iBATIS SQL Maps 1.3 (if you haven't done so already, upgrade to iBATIS SQL Maps 2.0/2.1!)
 * added explicit support for Hibernate 3.1 while remaining compatible with Hibernate 3.0 (as far as possible)
-* factored out "spring-hibernate2/3.jar" and "spring-toplink.jar", not contained in "spring.jar" anymore
+* factored out "spring-jdo", "spring-hibernate2/3","spring-toplink", "spring-ojb" jars (not in "spring.jar" anymore!)
 
 Package org.springframework.aop
 * added AopNamespaceHandler to support custom <aop:*/> XML tags
-* added NamespaceHandlerUtils for ensuring unique registration of auto proxy creators
-* added spring-aop.xsd for schema validation of custom tags
 * added @SpringConfigured and BeanConfigurer aspect to allow injection on any arbitrary object
 
 Package org.springframework.beans
@@ -93,6 +91,7 @@ Package org.springframework.transaction
 Package org.springframework.util
 * added "setPathSeparator" method to AntPathMatcher, allowing to override the default path separator "/"
 * WeakReferenceMonitor uses a daemon thread, to avoid a hanging thread even if weak references have not been released
+* changed ConcurrencyThrottleSupport's default "concurrencyLimit" to -1 (keeping ConcurrencyThrottleInterceptor at 1)
 
 Package org.springframework.web
 * WebApplicationContext interface does not extend ThemeSource anymore; implementing ThemeSource is now optional

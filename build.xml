@@ -244,6 +244,8 @@
 			<fileset dir="${target.classes.dir}">
 				<include name="META-INF/**"/>
 				<include name="org/springframework/**"/>
+				<exclude name="org/springframework/orm/jdo/**"/>
+				<exclude name="org/springframework/orm/ojb/**"/>
 				<exclude name="org/springframework/orm/hibernate/**"/>
 				<exclude name="org/springframework/orm/hibernate3/**"/>
 				<exclude name="org/springframework/orm/toplink/**"/>
@@ -335,6 +337,8 @@
 		<jar jarfile="${dist.dir}/modules/spring-jdbc.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/jdbc/**"/>
+				<include name="org/springframework/orm/*"/>
+				<include name="org/springframework/orm/ibatis/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -396,20 +400,6 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-orm.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/**"/>
-				<exclude name="org/springframework/orm/hibernate/**"/>
-				<exclude name="org/springframework/orm/hibernate3/**"/>
-				<exclude name="org/springframework/orm/toplink/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
 	</target>
 
 
@@ -421,6 +411,29 @@
 				<include name="ext/*.jar"/>
 			</fileset>
 		</delete>
+
+		<jar jarfile="${dist.dir}/extmodules/spring-portlet.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="META-INF/*.tld"/>
+				<include name="org/springframework/web/portlet/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/extmodules/spring-jdo.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/orm/jdo/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
 
 		<jar jarfile="${dist.dir}/extmodules/spring-hibernate2.jar">
 			<fileset dir="${target.classes.dir}">
@@ -455,10 +468,9 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/extmodules/spring-portlet.jar">
+		<jar jarfile="${dist.dir}/extmodules/spring-ojb.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="META-INF/*.tld"/>
-				<include name="org/springframework/web/portlet/**"/>
+				<include name="org/springframework/orm/ojb/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>

@@ -90,9 +90,9 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~1815 KB)
+* "spring" (~1730 KB)
 - Convenient jar file that combines all standard modules (see "module jars" below)
-- Note: Does not include extension modules!
+- Note: Does NOT include extension modules! (see "extension module jars" below)
 
 MODULE JARS (dist/modules):
 
@@ -116,9 +116,9 @@ MODULE JARS (dist/modules):
 - Contents: DAO support, transaction infrastructure
 - Dependencies: spring-core, (spring-beans, spring-aop, spring-context, JTA)
 
-* "spring-jdbc" (~185 KB)
-- Contents: JDBC support
-- Dependencies: spring-dao, spring-beans
+* "spring-jdbc" (~210 KB)
+- Contents: JDBC support, iBATIS SQL Maps support
+- Dependencies: spring-dao, spring-beans, (iBATIS SQL Maps)
 
 * "spring-support" (~190 KB)
 - Contents: JMX support, JCA support, scheduling support, mail support, caching support
@@ -136,30 +136,34 @@ MODULE JARS (dist/modules):
 - Contents: remoting support, EJB support, JMS support
 - Dependencies: spring-aop, spring-beans, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB, JMS)
 
-* "spring-orm" (~110 KB)
-- Contents: JDO support, iBATIS SQL Maps support, OJB support
-- Dependencies: spring-dao, spring-beans, spring-jdbc, (spring-aop, spring-web, JDO, iBATIS SQL Maps)
-
 EXTENSION MODULE JARS (dist/extmodules):
+
+* "spring-portlet" (~90 KB)
+- Contents: framework portlets, portlet MVC
+- Dependencies: spring-web, spring-webmvc, (Portlet)
+
+* "spring-jdo" (~65 KB)
+- Contents: JDO 1.0/2.0 support
+- Dependencies: spring-dao, spring-aop, spring-jdbc, JDO, (spring-web, spring-portlet)
 
 * "spring-hibernate2" (~85 KB)
 - Contents: Hibernate 2.1 support
-- Dependencies: spring-dao, spring-aop, spring-jdbc, Hibernate2, (spring-web)
+- Dependencies: spring-dao, spring-aop, spring-jdbc, Hibernate2, (spring-web, spring-portlet)
 
-* "spring-hibernate3" (~100 KB)
+* "spring-hibernate3" (~105 KB)
 - Contents: Hibernate 3.0/3.1 support
-- Dependencies: spring-dao, spring-aop, spring-jdbc, Hibernate3, (spring-web)
+- Dependencies: spring-dao, spring-aop, spring-jdbc, Hibernate3, (spring-web, spring-portlet)
 
 * "spring-toplink" (~55 KB)
 - Contents: TopLink support
 - Dependencies: spring-dao, spring-jdbc, TopLink
 
-* "spring-portlet" (~85 KB)
-- Contents: framework portlets, portlet MVC
-- Dependencies: spring-web, spring-webmvc, (Portlet)
+* "spring-ojb" (~30 KB)
+- Contents: OJB 1.0 support
+- Dependencies: spring-dao, spring-jdbc, OJB
 
-* "spring-mock" (~45 KB)
-- Contents: JNDI mocks, Servlet API mocks, JUnit support
+* "spring-mock" (~70 KB)
+- Contents: JNDI mocks, Servlet API mocks, Portlet API mocks, JUnit support
 - Dependencies: spring-core
 
 ASPECTS JAR (dist/aspects)
