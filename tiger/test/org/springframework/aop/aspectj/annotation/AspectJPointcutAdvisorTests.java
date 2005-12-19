@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,6 @@ import junit.framework.TestCase;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcutTests;
-import org.springframework.aop.aspectj.annotation.AspectMetadata;
-import org.springframework.aop.aspectj.annotation.AspectJAdvisorFactory;
-import org.springframework.aop.aspectj.annotation.InstantiationModelAwarePointcutAdvisor;
-import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory;
-import org.springframework.aop.aspectj.annotation.SingletonMetadataAwareAspectInstanceFactory;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.beans.TestBean;
 

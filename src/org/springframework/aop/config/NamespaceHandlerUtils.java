@@ -30,15 +30,16 @@ import org.springframework.util.ClassUtils;
 public abstract class NamespaceHandlerUtils {
 
 	// TODO: Can short-circuit these methods when previously registered via this class.
-	// TODO: How eagerly should this try to look for user-registered auto proxy creators?
+	// TODO: How eagerly should this try to look for user-registered auto-proxy creators?
+
 	public static final String AUTO_PROXY_CREATOR_BEAN_NAME =
 			"org.springframework.aop.config.internalAutoProxyCreator";
 
 	public static final String CONFIGURABLE_TARGET_SOURCE_CREATOR_NAME =
 			"org.springframework.aop.framework.target.internalTargetSourceCreator";
 
-	public static final String ASPECTJ_AUTO_PROXY_CREATOR =
-			"org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator";
+	public static final String ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME =
+			"org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator";
 
 
 	public static void registerAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
@@ -59,7 +60,7 @@ public abstract class NamespaceHandlerUtils {
 		if (ajApcClass == null) {
 			throw new IllegalStateException(
 					"Unable to register AspectJ AutoProxyCreator. Cannot find class [" +
-					ASPECTJ_AUTO_PROXY_CREATOR + "]. Are you running on Java 5.0+?");
+					ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME + "]. Are you running on Java 5.0+?");
 		}
 
 
@@ -79,7 +80,7 @@ public abstract class NamespaceHandlerUtils {
 
 	private static Class getAspectJAutoProxyCreatorClassIfPossible() {
 		try {
-			return ClassUtils.forName(ASPECTJ_AUTO_PROXY_CREATOR);
+			return ClassUtils.forName(ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME);
 		}
 		catch (ClassNotFoundException ex) {
 			return null;

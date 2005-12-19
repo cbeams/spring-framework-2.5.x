@@ -19,31 +19,34 @@ package org.springframework.aop.aspectj.annotation;
 /**
  * Decorator to cause a MetadataAwareAspectInstanceFactory to instantiate
  * only once.
+ *
  * @author Rod Johnson
  * @since 2.0
  */
 public class LazySingletonMetadataAwareAspectInstanceFactoryDecorator implements MetadataAwareAspectInstanceFactory {
 	
 	private final MetadataAwareAspectInstanceFactory maaif;
+
 	private Object materialized;
-	
+
+
 	public LazySingletonMetadataAwareAspectInstanceFactoryDecorator(MetadataAwareAspectInstanceFactory aif) {
 		this.maaif = aif;
 	}
 
 	public synchronized Object getAspectInstance() {
-		if (materialized == null) {
-			materialized = maaif.getAspectInstance();
+		if (this.materialized == null) {
+			this.materialized = maaif.getAspectInstance();
 		}
-		return materialized;
+		return this.materialized;
 	}
 	
 	public AspectMetadata getAspectMetadata() {
-		return maaif.getAspectMetadata();
+		return this.maaif.getAspectMetadata();
 	}
 	
 	public int getInstantiationCount() {
-		return (materialized != null) ? 1 : 0;
+		return (this.materialized != null ? 1 : 0);
 	}
 	
 	@Override

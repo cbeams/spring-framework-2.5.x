@@ -145,14 +145,14 @@ public void doubleArg(ProceedingJoinPoint pjp, int x) throws Throwable {
 
       <para>As you would expect, it is possible to use auto proxy creation
       with @AspectJ syntax. This is achieved using
-      <literal>org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator</literal>.
+      <literal>org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator</literal>.
       This is a subclass of <literal>DefaultAdvisorAutoProxyCreator</literal>,
       meaning that it will also apply any Spring AOP advisors found in the
       application context to which it applies.</para>
 
       <para>Usage is very simple. Just add the following definition to your
       application context:<code></code><programlisting>&lt;bean 
-  class="org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator" /&gt;</programlisting></para>
+  class="org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator" /&gt;</programlisting></para>
 
       <para>No configuration is usually required. See the documentation on
       DefaultAutoProxyCreator and superclasses for the regular configuration

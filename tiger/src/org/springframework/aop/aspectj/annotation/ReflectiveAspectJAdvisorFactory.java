@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.aopalliance.aop.Advice;
 import org.aopalliance.aop.AspectException;
 import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.Pointcut;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodBeforeAdvice;
@@ -45,6 +46,7 @@ import org.springframework.util.ReflectionUtils;
 /**
  * Factory that can create Spring AOP Advisors given AspectJ classes from classes honouring
  * the AspectJ 5 annotation syntax, using reflection to invoke advice methods.
+ *
  * @author Rod Johnson
  * @author Adrian Colyer
  * @since 2.0
@@ -53,7 +55,6 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	
 	/**
 	 * Create Spring Advisors for all At AspectJ methods on the given aspect instance.
-	 * @param aspectInstance
 	 * @return a list of advisors for this class
 	 */
 	public List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory maaif) {
@@ -62,7 +63,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		
 		// We need to wrap the MetadataAwareAspectInstanceFactory with a decorator
 		// so that it will only instantiate once.
-		final MetadataAwareAspectInstanceFactory lazySingletonAspectInstanceFactory = new LazySingletonMetadataAwareAspectInstanceFactoryDecorator(maaif);
+		final MetadataAwareAspectInstanceFactory lazySingletonAspectInstanceFactory =
+				new LazySingletonMetadataAwareAspectInstanceFactoryDecorator(maaif);
 		
 		final List<Advisor> advisors = new LinkedList<Advisor>();
 		//final AspectInstanceFactory aif = new AspectInstanceFactory.SingletonAspectInstanceFactory(aspectInstance);
@@ -98,27 +100,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	}
 	
 	/**
-	 * Synthetic advisor that instantiates the aspect.
-	 * Triggered by perclause pointcut on non-singleton aspect.
-	 * The advice has no effect.
-	 */
-	protected static class SyntheticInstantiationAdvisor extends DefaultPointcutAdvisor {
-		
-		public SyntheticInstantiationAdvisor(final MetadataAwareAspectInstanceFactory aif) {
-			super(aif.getAspectMetadata().getPerClausePointcut(), new MethodBeforeAdvice() {
-				public void before(Method method, Object[] args, Object target) {
-					// Simply instantiate the aspect
-					aif.getAspectInstance();
-				}
-			});
-		}
-	}
-	
-	
-	/**
 	 * Resulting advisors will need to be evaluated for targets.
-	 * @param introductionInstance
-	 * @return null if not an advisor
+	 * @return <code>null</code> if not an advisor
 	 */
 	private Advisor getDeclareParentsAdvisor(Field introductionField) {
 		DeclareParents declareParents = (DeclareParents) introductionField.getAnnotation(DeclareParents.class);
@@ -146,7 +129,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		Object meaninglessStaticDummyIntroductionInstanceUsedToDetermineConcreteClassWithNoArgConstructor;
 		try {
 			meaninglessStaticDummyIntroductionInstanceUsedToDetermineConcreteClassWithNoArgConstructor = introductionField.get(null);
-			Object newIntroductionInstanceToUse = meaninglessStaticDummyIntroductionInstanceUsedToDetermineConcreteClassWithNoArgConstructor.getClass().newInstance(); 
+			Object newIntroductionInstanceToUse =
+					meaninglessStaticDummyIntroductionInstanceUsedToDetermineConcreteClassWithNoArgConstructor.getClass().newInstance();
 			return new DelegatingIntroductionAdvisor(interfaces, classFilter, newIntroductionInstanceToUse);
 		} 
 		catch (IllegalArgumentException ex) {
@@ -160,24 +144,20 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		}
 	}
 	
-	
-	public InstantiationModelAwarePointcutAdvisor getAdvisor(Method candidateAspectJAdviceMethod, MetadataAwareAspectInstanceFactory aif) {
+	public InstantiationModelAwarePointcutAdvisor getAdvisor(
+			Method candidateAspectJAdviceMethod, MetadataAwareAspectInstanceFactory aif) {
 		validate(aif.getAspectMetadata().getAspectClass());
 		
-		AspectJExpressionPointcut ajexp = getPointcut(candidateAspectJAdviceMethod, aif.getAspectMetadata().getAspectClass());
+		AspectJExpressionPointcut ajexp =
+				getPointcut(candidateAspectJAdviceMethod, aif.getAspectMetadata().getAspectClass());
 		if (ajexp == null) {
 			return null;
 		}
 		return new InstantiationModelAwarePointcutAdvisor(this, ajexp, aif, candidateAspectJAdviceMethod);
 	}
 	
-	
 	/**
-	 * 
-	 * @param candidateAspectClass
-	 * @param candidateAspectJAdviceMethod
-	 * @param aif
-	 * @return null if the method is not an AspectJ advice method or if it is a pointcut
+	 * @return <code>null</code> if the method is not an AspectJ advice method or if it is a pointcut
 	 * that will be used by other advice but will not create a Springt advice in its own right
 	 */
 	public Advice getAdvice(Method candidateAspectJAdviceMethod, MetadataAwareAspectInstanceFactory aif) {
@@ -185,7 +165,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		
 		validate(aif.getAspectMetadata().getAspectClass());
 		
-		AspectJAnnotation<?> aspectJAnnotation = AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAspectJAdviceMethod, candidateAspectClass);
+		AspectJAnnotation<?> aspectJAnnotation =
+				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAspectJAdviceMethod, candidateAspectClass);
 		if (aspectJAnnotation == null) {
 			//throw new IllegalStateException("Class " + aif.getAspectMetadata().getAspectClass() + " must be an aspect");
 			return null;
@@ -198,7 +179,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 					"Offending method '" + candidateAspectJAdviceMethod + "' in class " + candidateAspectClass.getName());
 		}
 		
-		log.debug("Found AspectJ method " + candidateAspectJAdviceMethod);
+		logger.debug("Found AspectJ method " + candidateAspectJAdviceMethod);
 
 		AspectJExpressionPointcut ajexp = getPointcut(candidateAspectJAdviceMethod, candidateAspectClass);
 		
@@ -218,10 +199,11 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 			springAdvice = new AspectJAfterThrowingAdvice(candidateAspectJAdviceMethod, ajexp.getPointcutExpression(), aif);				
 			break;
 		case AtAround:
-			springAdvice = new AspectJAroundAdvice(candidateAspectJAdviceMethod, ajexp.getPointcutExpression(), aif, parameterNameDiscoverer);		
+			springAdvice = new AspectJAroundAdvice(
+					candidateAspectJAdviceMethod, ajexp.getPointcutExpression(), aif, parameterNameDiscoverer);
 			break;
 		case AtPointcut:
-			log.debug("Processing pointcut '" + candidateAspectJAdviceMethod.getName() + "'");
+			logger.debug("Processing pointcut '" + candidateAspectJAdviceMethod.getName() + "'");
 			return null;
 		default:
 			throw new UnsupportedOperationException("Unsupported advice type on method " + candidateAspectJAdviceMethod);			
@@ -230,9 +212,9 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		return springAdvice;
 	}
 
-
 	private AspectJExpressionPointcut getPointcut(Method candidateAspectJAdviceMethod, Class<?> candidateAspectClass) {
-		AspectJAnnotation<?> aspectJAnnotation = AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAspectJAdviceMethod,candidateAspectClass);
+		AspectJAnnotation<?> aspectJAnnotation =
+				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAspectJAdviceMethod,candidateAspectClass);
 		if (aspectJAnnotation == null) {
 			return null;
 		}
@@ -242,4 +224,23 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		ajexp.setExpression(aspectJAnnotation.getPointcutExpression());
 		return ajexp;
 	}
+
+
+	/**
+	 * Synthetic advisor that instantiates the aspect.
+	 * Triggered by perclause pointcut on non-singleton aspect.
+	 * The advice has no effect.
+	 */
+	protected static class SyntheticInstantiationAdvisor extends DefaultPointcutAdvisor {
+
+		public SyntheticInstantiationAdvisor(final MetadataAwareAspectInstanceFactory aif) {
+			super(aif.getAspectMetadata().getPerClausePointcut(), new MethodBeforeAdvice() {
+				public void before(Method method, Object[] args, Object target) {
+					// Simply instantiate the aspect
+					aif.getAspectInstance();
+				}
+			});
+		}
+	}
+
 }

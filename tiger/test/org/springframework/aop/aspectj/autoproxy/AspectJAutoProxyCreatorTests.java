@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.aop.framework.autoproxy;
+
+package org.springframework.aop.aspectj.autoproxy;
 
 import junit.framework.TestCase;
 
-import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.PerTargetAspect;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.TwoAdviceAspect;
+import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
@@ -30,7 +31,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 	
 	public void testAspectsAreApplied() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-				"/org/springframework/aop/framework/autoproxy/aspects.xml");
+				"/org/springframework/aop/aspectj/autoproxy/aspects.xml");
 
 		ITestBean adrian = (ITestBean) bf.getBean("adrian");
 		
@@ -44,7 +45,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 	
 	public void testAspectsAndAdvisorAreApplied() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-				"/org/springframework/aop/framework/autoproxy/aspectsPlusAdvisor.xml");
+				"/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
 
 		TestBeanAdvisor tba = (TestBeanAdvisor) bf.getBean(TestBeanAdvisor.class.getName());
 		
@@ -64,7 +65,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 	
 	public void testPerThisAspect() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-				"/org/springframework/aop/framework/autoproxy/perthis.xml");
+				"/org/springframework/aop/aspectj/autoproxy/perthis.xml");
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
 		assertTrue(AopUtils.isAopProxy(adrian1));
@@ -84,7 +85,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 	
 	public void testPerTargetAspect() throws SecurityException, NoSuchMethodException {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-				"/org/springframework/aop/framework/autoproxy/pertarget.xml");
+				"/org/springframework/aop/aspectj/autoproxy/pertarget.xml");
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
 		assertTrue(AopUtils.isAopProxy(adrian1));
@@ -129,7 +130,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 	
 	private void testTwoAdviceAspectWith(String location) {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-				"/org/springframework/aop/framework/autoproxy/" + location);
+				"/org/springframework/aop/aspectj/autoproxy/" + location);
 		boolean aspectSingleton = bf.isSingleton(TwoAdviceAspect.class.getName());
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
@@ -141,11 +142,11 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 	
 	public void testAdviceUsingJoinPoint() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-				"/org/springframework/aop/framework/autoproxy/usesJoinPointAspect.xml");
+				"/org/springframework/aop/aspectj/autoproxy/usesJoinPointAspect.xml");
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
 		adrian1.getAge();
-		AdviceUsingThisJoinPoint aspectInstance = (AdviceUsingThisJoinPoint) bf.getBean(AdviceUsingThisJoinPoint.class.getName()); 
+		AdviceUsingThisJoinPoint aspectInstance = (AdviceUsingThisJoinPoint) bf.getBean(AdviceUsingThisJoinPoint.class.getName());
 			//(AdviceUsingThisJoinPoint) Aspects.aspectOf(AdviceUsingThisJoinPoint.class);
 		//assertEquals("method-execution(int TestBean.getAge())",aspectInstance.getLastMethodEntered());		
 		assertTrue(aspectInstance.getLastMethodEntered().indexOf("TestBean.getAge())") != 0);		

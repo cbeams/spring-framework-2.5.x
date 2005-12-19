@@ -69,6 +69,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		AtAround 
 	};
 
+
 	/**
 	 * Class modelling an AspectJ annotation, exposing its type enumeration and
 	 * pointcut String.
@@ -134,11 +135,13 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			return this.annotation.toString(); 
 		}
 	}
-	
+
+
 	/**
 	 * Introduction advisor delegating to the given object.
 	 */
 	protected final class DelegatingIntroductionAdvisor implements IntroductionAdvisor {
+
 		private final Class[] interfaces;
 
 		private final ClassFilter filter;
@@ -195,10 +198,8 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	};
 	
 	/**
-	 * find and return the first AspectJ annotation on the given method
+	 * Find and return the first AspectJ annotation on the given method
 	 * (there <i>should</i> only be one anyway....)
-	 * @param aMethod
-	 * @return
 	 */
 	protected static AspectJAnnotation findAspectJAnnotationOnMethod(Method aMethod, Class clazz) {
 		Class<? extends Annotation>[] classesToLookFor = (Class<? extends Annotation>[]) new Class[] {
@@ -226,9 +227,10 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			return null;
 		}
 	}
-	
+
+
 	/** Logger available to subclasses */
-	protected final Log log = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 	
 	protected final ParameterNameDiscoverer parameterNameDiscoverer;
 	
@@ -240,8 +242,8 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	}
 
 	public boolean isAspect(Class<?> clazz) {
-		return //clazz.isAnnotationPresent(Aspect.class);
-		clazz.getAnnotation(Aspect.class) != null;
+		// return clazz.isAnnotationPresent(Aspect.class);
+		return (clazz.getAnnotation(Aspect.class) != null);
 	}
 
 	public void validate(Class<?> aspectClass) throws AopConfigException {
@@ -265,23 +267,22 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 					"This is not supported in Spring AOP");
 		}	
 	}
-	
-	
+
 	/**
 	 * The pointcut and advice annotations both have an "argNames" member which contains a 
 	 * comma-separated list of the argument names. We use this (if non-empty) to build the
 	 * formal parameters for the pointcut.
-	 * @param annotatedMethod
-	 * @param foundAnnotation
-	 * @return
 	 */
-	protected AspectJExpressionPointcut createPointcutExpression(Method annotatedMethod, Class declarationScope, String[] pointcutParameterNames) {
+	protected AspectJExpressionPointcut createPointcutExpression(
+			Method annotatedMethod, Class declarationScope, String[] pointcutParameterNames) {
+
 		Class<?> [] pointcutParameterTypes = new Class<?>[0];
 		if (pointcutParameterNames != null) {
 			pointcutParameterTypes = extractPointcutParameterTypes(pointcutParameterNames,annotatedMethod);
 		}
 		
-		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut(declarationScope,pointcutParameterNames,pointcutParameterTypes);
+		AspectJExpressionPointcut ajexp =
+				new AspectJExpressionPointcut(declarationScope,pointcutParameterNames,pointcutParameterTypes);
 		ajexp.setLocation(annotatedMethod.toString());
 		return ajexp;
 	}
@@ -291,9 +292,6 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 * and the argument types that are available from the adviceMethod. Needs to take into
 	 * account (ignore) any JoinPoint based arguments as these are not pointcut context but
 	 * rather part of the advice execution context (thisJoinPoint, thisJoinPointStaticPart)
-	 * @param argNames
-	 * @param adviceMethod
-	 * @return
 	 */
 	private Class<?>[] extractPointcutParameterTypes(String[] argNames, Method adviceMethod) {
 		Class<?>[] ret = new Class<?>[argNames.length];

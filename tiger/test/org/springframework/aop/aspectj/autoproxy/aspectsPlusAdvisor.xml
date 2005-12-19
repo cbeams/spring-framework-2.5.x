@@ -5,10 +5,10 @@
 <beans>
 
 	<bean 
-		class="org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator" />
+		class="org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator" />
 	
 	<bean 
-		class="org.springframework.aop.framework.autoproxy.MultiplyReturnValue" >
+		class="org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue" >
 		<property name="multiple" value="3" />
 	</bean>
 		
@@ -19,6 +19,6 @@
 	
 	
 	<bean 
-		class="org.springframework.aop.framework.autoproxy.TestBeanAdvisor" />
+		class="org.springframework.aop.aspectj.autoproxy.TestBeanAdvisor" />
 	
 </beans>

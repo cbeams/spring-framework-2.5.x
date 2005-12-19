@@ -8,13 +8,13 @@
      
     <!--
 	<bean 
-		class="org.springframework.aop.framework.autoproxy.AspectJAutoProxyCreator" />
+		class="org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator" />
 	-->
 	
 	<aop:aspectj-autoproxy/>
 	
 	<bean 
-		class="org.springframework.aop.framework.autoproxy.MultiplyReturnValue" >
+		class="org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue" >
 		<property name="multiple" value="2" />
 	</bean>
 		

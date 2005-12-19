@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,9 @@
 package org.springframework.aop.aspectj.annotation;
 
 import junit.framework.TestCase;
-
 import org.aspectj.lang.reflect.PerClauseKind;
+
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.ExceptionAspect;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.PerTargetAspect;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.PerThisAspect;

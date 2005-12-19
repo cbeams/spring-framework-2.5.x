@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.framework.autoproxy;
+package org.springframework.aop.aspectj.autoproxy;
 
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.aspectj.annotation.MetadataAwareAspectInstanceFactory;
@@ -25,6 +25,7 @@ import org.springframework.beans.factory.BeanFactory;
  * Note that this may instantiate multiple times, which probably won't give
  * the semantics you expect. Use a LazySingletonMetadataAwareAspectInstanceFactoryDecorator
  * to wrap this to ensure only one new aspect comes back.
+ *
  * @author Rod Johnson
  * @since 2.0
  * @see org.springframework.aop.aspectj.annotation.LazySingletonMetadataAwareAspectInstanceFactoryDecorator
@@ -32,14 +33,19 @@ import org.springframework.beans.factory.BeanFactory;
 public class PrototypeAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
 
 	private final BeanFactory beanFactory;
+
 	private final String name;
+
 	private final AspectMetadata am;
+
 	private int instantiations;
-	
+
+
 	public PrototypeAspectInstanceFactory(BeanFactory beanFactory, String name) {
 		this.beanFactory = beanFactory;
 		if (beanFactory.isSingleton(name)) {
-			throw new IllegalArgumentException("Cannot use PrototypeAspectInstanceFactory with bean named '" + name + "': not a prototype");
+			throw new IllegalArgumentException(
+					"Cannot use PrototypeAspectInstanceFactory with bean named '" + name + "': not a prototype");
 		}
 		this.name = name;
 		am = new AspectMetadata(beanFactory.getType(name));
@@ -63,4 +69,5 @@ public class PrototypeAspectInstanceFactory implements MetadataAwareAspectInstan
 		return "PrototypeAspectInstanceFactory: bean name='" + name + "'; " +
 			"instantiations=" + instantiations;
 	}
+
 }

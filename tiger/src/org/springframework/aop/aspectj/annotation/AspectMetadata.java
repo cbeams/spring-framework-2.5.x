@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
+
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopConfigException;
@@ -30,9 +31,10 @@ import org.springframework.aop.framework.AopConfigException;
  * Uses AspectJ 5 AJType reflection API, so is only supported on
  * Java 5. Enables us to work with different AspectJ instantiation
  * models such as singleton, pertarget and perthis.
- * @see org.springframework.aop.aspectj.AspectJExpressionPointcut
+ *
  * @author Rod Johnson
  * @since 2.0
+ * @see org.springframework.aop.aspectj.AspectJExpressionPointcut
  */
 public class AspectMetadata {
 	
@@ -44,7 +46,8 @@ public class AspectMetadata {
 	 * case of a singleton, otherwise an AspectJExpressionPointcut.
 	 */
 	private final Pointcut perClausePointcut;
-	
+
+
 	public AspectMetadata(Class<?> aspectClass) {
 		this.ajType = AjTypeSystem.getAjType(aspectClass);
 		

@@ -14,22 +14,28 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.aspectj.annotation;
+package org.springframework.aop.aspectj.autoproxy;
 
-import org.springframework.aop.aspectj.AspectInstanceFactory;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
 
-/**
- * Subinterface of AspectInstanceFactory that returns AspectMetadata
- * associated with AspectJ 5 annotated classes.
- *
- * <p>Ideally, AspectInstanceFactory would include this method, but because
- * AspectMetadata uses Java 5-only AJType, we need to split out these interfaces.
- *
- * @author Rod Johnson
- * @since 2.0
- */
-public interface MetadataAwareAspectInstanceFactory extends AspectInstanceFactory {
-	
-	AspectMetadata getAspectMetadata();
+@Aspect
+public class AdviceUsingThisJoinPoint {
+
+  private String lastEntry = "";	
+
+  public String getLastMethodEntered() {
+	  return this.lastEntry;
+  }
+  
+  @Pointcut("execution(* *(..))")
+  public void methodExecution() {}
+			  
+  @Before("methodExecution()")
+  public void entryTrace(JoinPoint jp) {
+	  this.lastEntry = jp.toString();
+  }
 
 }
