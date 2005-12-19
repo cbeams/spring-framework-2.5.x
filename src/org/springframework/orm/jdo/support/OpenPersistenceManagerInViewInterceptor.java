@@ -92,7 +92,7 @@ public class OpenPersistenceManagerInViewInterceptor extends HandlerInterceptorA
 	    throws DataAccessException {
 
 		if (TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory())) {
-			// do not modify the PersistenceManager: just mark the request accordingly
+			// Do not modify the PersistenceManager: just mark the request accordingly.
 			String participateAttributeName = getParticipateAttributeName();
 			Integer count = (Integer) request.getAttribute(participateAttributeName);
 			int newCount = (count != null) ? count.intValue() + 1 : 1;
@@ -117,7 +117,7 @@ public class OpenPersistenceManagerInViewInterceptor extends HandlerInterceptorA
 		String participateAttributeName = getParticipateAttributeName();
 		Integer count = (Integer) request.getAttribute(participateAttributeName);
 		if (count != null) {
-			// do not modify the PersistenceManager: just clear the marker
+			// Do not modify the PersistenceManager: just clear the marker.
 			if (count.intValue() > 1) {
 				request.setAttribute(participateAttributeName, new Integer(count.intValue() - 1));
 			}

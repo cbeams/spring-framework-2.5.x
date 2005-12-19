@@ -33,7 +33,7 @@ import org.springframework.web.portlet.HandlerInterceptor;
 import org.springframework.web.portlet.ModelAndView;
 
 /**
- * Spring web HandlerInterceptor that binds a Hibernate Session to the thread for the
+ * Spring Portlet HandlerInterceptor that binds a Hibernate Session to the thread for the
  * entire processing of the request. Intended for the "Open Session in View" pattern,
  * i.e. to allow for lazy loading in web views despite the original transactions
  * already being completed.
@@ -137,7 +137,7 @@ public class PortletOpenSessionInViewInterceptor extends HibernateAccessor imple
 
 		if ((isSingleSession() && TransactionSynchronizationManager.hasResource(getSessionFactory())) ||
 		    SessionFactoryUtils.isDeferredCloseActive(getSessionFactory())) {
-			// do not modify the Session: just mark the request accordingly
+			// Do not modify the Session: just mark the request accordingly.
 			String participateAttributeName = getParticipateAttributeName();
 			Integer count = (Integer) request.getAttribute(participateAttributeName);
 			int newCount = (count != null) ? count.intValue() + 1 : 1;

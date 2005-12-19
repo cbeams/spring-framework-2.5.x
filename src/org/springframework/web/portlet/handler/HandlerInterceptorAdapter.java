@@ -36,23 +36,21 @@ public abstract class HandlerInterceptorAdapter implements HandlerInterceptor {
 	/**
 	 * This implementation always returns true.
 	 */
-	public boolean preHandle(PortletRequest request, PortletResponse response,
-			Object handler) throws Exception {
+	public boolean preHandle(PortletRequest request, PortletResponse response, Object handler) throws Exception {
 		return true;
 	}
 
 	/**
 	 * This implementation is empty.
 	 */
-	public void postHandle(RenderRequest request, RenderResponse response,
-			Object handler, ModelAndView modelAndView) throws Exception {
+	public void postHandle(RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView)
+			throws Exception {
 	}
 	
 	/**
 	 * This implementation is empty.
 	 */
-	public void afterCompletion(PortletRequest request,
-			PortletResponse response, Object handler, Exception ex)
+	public void afterCompletion(PortletRequest request, PortletResponse response, Object handler, Exception ex)
 			throws Exception {
 	}
 
