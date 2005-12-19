@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,12 @@
 
 package org.springframework.aop.aspectj;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.aopalliance.aop.AspectException;
 import org.aspectj.weaver.tools.JoinPointMatch;
 import org.aspectj.weaver.tools.PointcutExpression;
@@ -23,6 +29,7 @@ import org.aspectj.weaver.tools.PointcutParameter;
 import org.aspectj.weaver.tools.PointcutParser;
 import org.aspectj.weaver.tools.PointcutPrimitive;
 import org.aspectj.weaver.tools.ShadowMatch;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
@@ -30,21 +37,14 @@ import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AbstractExpressionPointcut;
 import org.springframework.util.StringUtils;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 /**
- * Spring pointcut that uses AspectJ weaver.
- * The pointcut expression value is an AspectJ string. This
- * can reference other pointcuts and use composition and other
- * operations.
- * <p/>
- * Naturally, as this is to be processed by Spring AOP's
- * proxy-based model, only method execution pointcuts are
- * supported.
+ * Spring pointcut that uses the AspectJ weaver.
+ *
+ * <p>The pointcut expression value is an AspectJ string. This can reference
+ * other pointcuts and use composition and other operations.
+ *
+ * <p>Naturally, as this is to be processed by Spring AOP's
+ * proxy-based model, only method execution pointcuts are supported.
  *
  * @author Rob Harrop
  * @author Adrian Colyer
@@ -54,18 +54,6 @@ import java.util.Set;
 public class AspectJExpressionPointcut extends AbstractExpressionPointcut implements ClassFilter, MethodMatcher {
 
 	private static final Set DEFAULT_SUPPORTED_PRIMITIVES = new HashSet();
-
-	private final Map shadowMapCache = new HashMap();
-
-	private PointcutParser pointcutParser;
-
-	private Class pointcutDeclarationScope;
-
-	private String[] pointcutParameterNames = new String[0];
-
-	private Class[] pointcutParameterTypes = new Class[0];
-
-	private PointcutExpression pointcutExpression;
 
 	static {
 		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.EXECUTION);
@@ -79,19 +67,37 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_ARGS);
 	}
 
+
+	private final Map shadowMapCache = new HashMap();
+
+	private PointcutParser pointcutParser;
+
+	private Class pointcutDeclarationScope;
+
+	private String[] pointcutParameterNames = new String[0];
+
+	private Class[] pointcutParameterTypes = new Class[0];
+
+	private PointcutExpression pointcutExpression;
+
+
 	public AspectJExpressionPointcut() {
-		this.pointcutParser = PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingContextClassloaderForResolution(getSupportedPrimitives());
+		this.pointcutParser =
+				PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingContextClassloaderForResolution(
+						getSupportedPrimitives());
 	}
 
 	public AspectJExpressionPointcut(Class scope, String[] paramNames, Class[] paramTypes) {
 		this();
 		this.pointcutDeclarationScope = scope;
 		if (paramNames.length != paramTypes.length) {
-			throw new IllegalStateException("Number of pointcut parameter names must match number of pointcut parameter types");
+			throw new IllegalStateException(
+					"Number of pointcut parameter names must match number of pointcut parameter types");
 		}
 		this.pointcutParameterNames = paramNames;
 		this.pointcutParameterTypes = paramTypes;
 	}
+
 
 	public ClassFilter getClassFilter() {
 		checkReadyToMatch();
@@ -106,7 +112,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	public void onSetExpression(String expression) {
 		PointcutParameter[] pointcutParameters = new PointcutParameter[this.pointcutParameterNames.length];
 		for (int i = 0; i < pointcutParameters.length; i++) {
-			pointcutParameters[i] = this.pointcutParser.createPointcutParameter(this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
+			pointcutParameters[i] = this.pointcutParser.createPointcutParameter(
+					this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
 		}
 		this.pointcutExpression =
 				this.pointcutParser.parsePointcutExpression(
@@ -205,5 +212,5 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 			return shadowMatch;
 		}
 	}
-}
 
+}

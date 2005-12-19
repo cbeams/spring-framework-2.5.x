@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,23 @@ package org.springframework.aop.aspectj;
 /**
  * Simple implementation of AspectInstanceFactory backed
  * by a singleton.
+ *
  * @author Rod Johnson
  * @since 2.0
  */
 public class SingletonAspectInstanceFactory implements AspectInstanceFactory {
 	
 	private final Object aspectInstance;
-	
+
+
 	public SingletonAspectInstanceFactory(Object aspectInstance) {
 		if (aspectInstance == null) {
 			throw new IllegalStateException("AspectInstance may not be null");
 		}
 		this.aspectInstance = aspectInstance;
 	}
-	
+
+
 	public final Object getAspectInstance() {
 		return aspectInstance;
 	}

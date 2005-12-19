@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.aop.aspectj;
 
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 import org.aopalliance.aop.AspectException;
@@ -28,9 +27,11 @@ import org.aspectj.lang.ProceedingJoinPoint;
 /**
  * Interceptor that exposes an AspectJ JoinPoint.
  * Only necessary for using AspectJ advice.
- * <p>If used, this interceptor must be the second
- * in the interceptor chain, after the ExposeInvocationInterceptor,
- * which is also required for working with AspectJ advice.
+ *
+ * <p>If used, this interceptor must be the second in the interceptor chain,
+ * after the ExposeInvocationInterceptor, which is also required for working
+ * with AspectJ advice.
+ *
  * @author Rod Johnson
  * @since 2.0
  */
@@ -40,7 +41,8 @@ public class ExposeJoinPointInterceptor implements MethodInterceptor, Serializab
 	public static final ExposeJoinPointInterceptor INSTANCE = new ExposeJoinPointInterceptor();
 
 	private static ThreadLocal joinpointHolder = new ThreadLocal();
-	
+
+
 	/**
 	 * Return the AOP Alliance MethodInvocation object associated with the current
 	 * invocation. 
@@ -62,7 +64,8 @@ public class ExposeJoinPointInterceptor implements MethodInterceptor, Serializab
 					"and that the ExposeJoinPointInterceptor is in the interceptor chain");
 		return jp;
 	}
-	
+
+
 	/**
 	 * Ensure that only the canonical instance can be created.
 	 */
@@ -86,7 +89,7 @@ public class ExposeJoinPointInterceptor implements MethodInterceptor, Serializab
 	 * on deserialization, protecting Singleton pattern.
 	 * Alternative to overriding the <code>equals</code> method.
 	 */
-	private Object readResolve() throws ObjectStreamException {
+	private Object readResolve() {
 		return INSTANCE;
 	}
 

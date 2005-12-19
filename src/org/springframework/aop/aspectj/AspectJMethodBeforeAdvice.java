@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,37 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.weaver.tools.PointcutExpression;
+
 import org.springframework.aop.MethodBeforeAdvice;
 
 /**
  * Spring AOP advice that wraps an AspectJ before method.
+ *
  * @author Rod Johnson
  * @since 2.0
  */
 public class AspectJMethodBeforeAdvice extends AbstractAspectJAdvice implements MethodBeforeAdvice {
 
-	public AspectJMethodBeforeAdvice(Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
+	public AspectJMethodBeforeAdvice(
+			Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
 		super(aspectJBeforeAdviceMethod, pointcut.getPointcutExpression(), aif);
 	}
 
-	public AspectJMethodBeforeAdvice(Method aspectJBeforeAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif) {
+	public AspectJMethodBeforeAdvice(
+			Method aspectJBeforeAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif) {
 		super(aspectJBeforeAdviceMethod, pe, aif);
 	}
 	
 	
 	public void before(Method method, Object[] args, Object target) throws Throwable {
 		// TODO binding not properly implemented; will be post 2.0 M1
-		if (this.aspectJAdviceMethod.getParameterTypes().length > 0 && JoinPoint.class.isAssignableFrom(aspectJAdviceMethod.getParameterTypes()[0])) {
+		if (this.aspectJAdviceMethod.getParameterTypes().length > 0 &&
+				JoinPoint.class.isAssignableFrom(aspectJAdviceMethod.getParameterTypes()[0])) {
 			invokeAdviceMethodWithGivenArgs(new Object[] { ExposeJoinPointInterceptor.currentJoinPoint() });
 		}
 		else {
 			invokeAdviceMethod(args);
 		}
 	}
+
 }

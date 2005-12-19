@@ -23,12 +23,14 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.weaver.tools.PointcutExpression;
+
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.core.ParameterNameDiscoverer;
 
 /**
  * Spring AOP around advice (MethodInterceptor) that wraps
  * an AspectJ advice method. Exposes ProceedingJoinPoint.
+ *
  * @author Rod Johnson
  * @since 2.0
  */
@@ -36,12 +38,18 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 	
 	private final ParameterNameDiscoverer parameterNameDiscoverer;
 
-	public AspectJAroundAdvice(Method aspectJAroundAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif, ParameterNameDiscoverer parameterNameDiscoverer) {
+	public AspectJAroundAdvice(
+			Method aspectJAroundAdviceMethod, AspectJExpressionPointcut pointcut,
+			AspectInstanceFactory aif, ParameterNameDiscoverer parameterNameDiscoverer) {
+
 		super(aspectJAroundAdviceMethod, pointcut.getPointcutExpression(), aif);
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
 	}
 
-	public AspectJAroundAdvice(Method aspectJAroundAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif, ParameterNameDiscoverer parameterNameDiscoverer) {
+	public AspectJAroundAdvice(
+			Method aspectJAroundAdviceMethod, PointcutExpression pe,
+			AspectInstanceFactory aif, ParameterNameDiscoverer parameterNameDiscoverer) {
+
 		super(aspectJAroundAdviceMethod, pe, aif);
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
 	}
@@ -56,7 +64,8 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 		args[0] = pjp;
 		ReflectiveMethodInvocation invocation = (ReflectiveMethodInvocation) mi;
 
-		String[] argNames = parameterNameDiscoverer.getParameterNames(aspectJAdviceMethod,aspectJAdviceMethod.getDeclaringClass());
+		String[] argNames = this.parameterNameDiscoverer.getParameterNames(
+				this.aspectJAdviceMethod, this.aspectJAdviceMethod.getDeclaringClass());
 		if (argNames == null) {
 			// basic mapping applies
 			System.arraycopy(formals, 0, args, 1, formals.length);				
@@ -71,4 +80,5 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 				
 		return invokeAdviceMethodWithGivenArgs(args);
 	}
+
 }

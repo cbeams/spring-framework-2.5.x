@@ -48,41 +48,41 @@ import java.util.List;
 
 /**
  * <code>NamespaceHandler</code> for the <code>aop</code> namespace.
- * <p/>
- * Provides a {@link org.springframework.beans.factory.xml.BeanDefinitionParser} for the <code>&lt;aop:config&gt;</code> tag. A
- * <code>config</code> tag can include nested <code>poincut</code>, <code>advisor</code> and
- * <code>aspect</code> tags.
- * <p/>
- * The <code>pointcut</code> tag allows for creation of named {@link AspectJExpressionPointcut} beans
- * using a simple syntax:
+ *
+ * <p>Provides a {@link org.springframework.beans.factory.xml.BeanDefinitionParser} for the
+ * <code>&lt;aop:config&gt;</code> tag. A <code>config</code> tag can include nested
+ * <code>pointcut</code>, <code>advisor</code> and <code>aspect</code> tags.
+ *
+ * <p>The <code>pointcut</code> tag allows for creation of named
+ * {@link AspectJExpressionPointcut} beans using a simple syntax:
  * <pre>
  * &lt;aop:pointcut id=&quot;getNameCalls&quot; expression=&quot;execution(* *..ITestBean.getName(..))&quot;/&gt;
  * </pre>
- * <p/>
- * Using the <code>advisor</code> tag you can configure an {@link org.springframework.aop.Advisor} and have it
- * applied to all relevant beans in you {@link org.springframework.beans.factory.BeanFactory} automatically.
- * The <code>advisor</code> tag supports both in-line and referenced
+ *
+ * <p>Using the <code>advisor</code> tag you can configure an {@link org.springframework.aop.Advisor}
+ * and have it applied to all relevant beans in you {@link org.springframework.beans.factory.BeanFactory}
+ * automatically. The <code>advisor</code> tag supports both in-line and referenced
  * {@link org.springframework.aop.Pointcut Pointcuts}:
+ *
  * <pre>
  * &lt;aop:advisor id=&quot;getAgeAdvisor&quot;
  *              pointcut=&quot;execution(* *..ITestBean.getAge(..))&quot;
  *              advice-ref=&quot;getAgeCounter&quot;/&gt;
- * <p/>
+ *
  * &lt;aop:advisor id=&quot;getNameAdvisor&quot;
  *              pointcut-ref=&quot;getNameCalls&quot;
  *              advice-ref=&quot;getNameCounter&quot;/&gt;
  * </pre>
  *
  * @author Rob Harrop
- * @see ConfigBeanDefinitionParser
  * @since 2.0
  */
 public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
-
 	/**
-	 * Constructs a new <code>AopNamespaceHandler</code> and registers the
-	 * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} for the <code>config</code> tag.
+	 * Construct a new <code>AopNamespaceHandler</code> and register the
+	 * {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
+	 * for the <code>config</code> tag.
 	 */
 	public AopNamespaceHandler() {
 		registerBeanDefinitionParser("config", new ConfigBeanDefinitionParser());
@@ -91,6 +91,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 		registerBeanDefinitionDecorator("scope", new ScopeBeanDefinitionDefinition());
 	}
+
 
 	private static class ScopeBeanDefinitionDefinition implements BeanDefinitionDecorator {
 
@@ -174,6 +175,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 
+
 	private static class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 
 		public void parse(Element element, BeanDefinitionRegistry registry) {
@@ -181,50 +183,32 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 
+
 	/**
 	 * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} for the <code>&lt;aop:config&gt;</code> tag.
 	 */
 	private static class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 		private static final String ASPECT = "aspect";
-
 		private static final String EXPRESSION = "expression";
-
 		private static final String ID = "id";
-
 		private static final String POINTCUT = "pointcut";
-
 		private static final String ADVICE = "advice";
-
 		private static final String ADVISOR = "advisor";
-
 		private static final String ADVICE_REF = "advice-ref";
-
 		private static final String POINTCUT_REF = "pointcut-ref";
-
-		public static final String REF = "ref";
-
-		public static final String KIND = "kind";
-
-		public static final String TYPE = "type";
-
-		public static final String BEFORE = "before";
-
-		public static final String AFTER = "after";
-
-		public static final String AFTER_RETURNING = "afterReturning";
-
-		public static final String AFTER_THROWING = "afterThrowing";
-
-		public static final String AROUND = "around";
-
-		public static final int METHOD_INDEX = 0;
-
-		public static final int POINTCUT_INDEX = 1;
-
-		public static final int ASPECT_INSTANCE_FACTORY_INDEX = 2;
-
-		public static final int PARAMETER_NAME_DISCOVERER = 3;
+		private static final String REF = "ref";
+		private static final String KIND = "kind";
+		private static final String TYPE = "type";
+		private static final String BEFORE = "before";
+		private static final String AFTER = "after";
+		private static final String AFTER_RETURNING = "afterReturning";
+		private static final String AFTER_THROWING = "afterThrowing";
+		private static final String AROUND = "around";
+		private static final int METHOD_INDEX = 0;
+		private static final int POINTCUT_INDEX = 1;
+		private static final int ASPECT_INSTANCE_FACTORY_INDEX = 2;
+		private static final int PARAMETER_NAME_DISCOVERER = 3;
 
 		public void parse(Element element, BeanDefinitionRegistry registry) {
 			NodeList childNodes = element.getChildNodes();
@@ -413,6 +397,6 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 			beanDefinition.getPropertyValues().addPropertyValue(EXPRESSION, expression);
 			return beanDefinition;
 		}
-
 	}
+
 }

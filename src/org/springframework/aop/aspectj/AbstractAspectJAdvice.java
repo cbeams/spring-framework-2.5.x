@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.aspectj.weaver.tools.PointcutExpression;
+
 import org.springframework.aop.framework.AopConfigException;
 
 /**
  * Superclass for Spring Advices wrapping an AspectJ aspect
  * or annotated advice method
+ *
  * @author Rod Johnson
+ * @since 2.0
  */
 abstract class AbstractAspectJAdvice {
 	
@@ -34,7 +37,8 @@ abstract class AbstractAspectJAdvice {
 	private final PointcutExpression pointcutExpression;
 	
 	private final AspectInstanceFactory aif;
-	
+
+
 	public AbstractAspectJAdvice(Method aspectJAdviceMethod, PointcutExpression pointcutExpression, AspectInstanceFactory aif) {
 		this.aspectJAdviceMethod = aspectJAdviceMethod;
 		this.pointcutExpression = pointcutExpression;
@@ -44,7 +48,8 @@ abstract class AbstractAspectJAdvice {
 	public Method getAspectJAdviceMethod() {
 		return this.aspectJAdviceMethod;
 	}
-	
+
+
 	/**
 	 * Take the arguments in the call to the advised method and output a set of arguments
 	 * to the advice method
@@ -61,13 +66,10 @@ abstract class AbstractAspectJAdvice {
 		return availableArgs;
 	}
 	
-	
 	/**
-	 * Invoke the advice method
+	 * Invoke the advice method.
 	 * @param argsInCall arguments to the method being invoked, which is adviced by the
 	 * advice
-	 * @return
-	 * @throws Throwable
 	 */
 	protected Object invokeAdviceMethod(Object[] argsInCall) throws Throwable {
 		return invokeAdviceMethodWithGivenArgs(argBinding(argsInCall));

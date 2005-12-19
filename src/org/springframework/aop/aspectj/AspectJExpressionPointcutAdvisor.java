@@ -16,13 +16,14 @@
 
 package org.springframework.aop.aspectj;
 
-import org.springframework.aop.PointcutAdvisor;
-import org.springframework.aop.Pointcut;
 import org.aopalliance.aop.Advice;
 
+import org.springframework.aop.Pointcut;
+import org.springframework.aop.PointcutAdvisor;
+
 /**
- * Spring AOP Advisor that can be used for any AspectJ pointcut
- * expression
+ * Spring AOP Advisor that can be used for any AspectJ pointcut expression.
+ * 
  * @author Rob Harrop
  * @since 2.0
  */
@@ -45,4 +46,5 @@ public class AspectJExpressionPointcutAdvisor extends AspectJExpressionPointcut 
 	public void setAdvice(Advice advice) {
 		this.advice = advice;
 	}
+
 }

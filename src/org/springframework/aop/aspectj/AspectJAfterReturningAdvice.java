@@ -13,24 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
 
 import org.aspectj.weaver.tools.PointcutExpression;
+
 import org.springframework.aop.AfterReturningAdvice;
 
+/**
+ * Spring AOP advice wrapping an AspectJ after-returning advice method.
+ *
+ * @author Rod Johnson
+ * @since 2.0
+ */
 public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implements AfterReturningAdvice {
 
-	public AspectJAfterReturningAdvice(Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
+	public AspectJAfterReturningAdvice(
+			Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
 		super(aspectJBeforeAdviceMethod, pointcut.getPointcutExpression(), aif);
 	}
 
-	public AspectJAfterReturningAdvice(Method aspectJBeforeAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif) {
+	public AspectJAfterReturningAdvice(
+			Method aspectJBeforeAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif) {
 		super(aspectJBeforeAdviceMethod, pe, aif);
 	}
 	
 	public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
 		invokeAdviceMethod(args);
 	}
+
 }
