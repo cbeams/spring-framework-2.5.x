@@ -152,7 +152,7 @@ public abstract class RequestUtils {
 	}
 
 	/**
-	 * Get an int parameter, with a fallback value. Never throws an exception.
+	 * Get a long parameter, with a fallback value. Never throws an exception.
 	 * Can pass a distinguished value as default to enable checks of whether it was supplied.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
@@ -227,7 +227,7 @@ public abstract class RequestUtils {
 	}
 
 	/**
-	 * Get a double parameter, with a fallback value. Never throws an exception.
+	 * Get a float parameter, with a fallback value. Never throws an exception.
 	 * Can pass a distinguished value as default to enable checks of whether it was supplied.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
@@ -257,7 +257,7 @@ public abstract class RequestUtils {
 	}
 
 	/**
-	 * Get a double parameter, throwing an exception if it isn't found or isn't a number.
+	 * Get a float parameter, throwing an exception if it isn't found or isn't a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @throws ServletRequestBindingException a subclass of ServletException,
@@ -318,7 +318,7 @@ public abstract class RequestUtils {
 	}
 
 	/**
-	 * Get an array of float parameters, return an empty array if not found.
+	 * Get an array of double parameters, return an empty array if not found.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter with multiple possible values
 	 */
@@ -413,7 +413,7 @@ public abstract class RequestUtils {
 	}
 
 	/**
-	 * Get an array of boolean parameters, throwing an exception if it isn't found
+	 * Get a boolean parameter, throwing an exception if it isn't found
 	 * or isn't a boolean.
 	 * <p>Accepts "true", "on", "yes" (any case) and "1" as values for true;
 	 * treats every other non-empty value as false (i.e. parses leniently).
@@ -464,7 +464,7 @@ public abstract class RequestUtils {
 	}
 
 	/**
-	 * Get a string parameter, with a fallback value. Never throws an exception.
+	 * Get a String parameter, with a fallback value. Never throws an exception.
 	 * Can pass a distinguished value to default to enable checks of whether it was supplied.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
@@ -494,7 +494,7 @@ public abstract class RequestUtils {
 	}
 
 	/**
-	 * Get a string parameter, throwing an exception if it isn't found or is empty.
+	 * Get a String parameter, throwing an exception if it isn't found or is empty.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @throws ServletRequestBindingException a subclass of ServletException,
@@ -507,7 +507,7 @@ public abstract class RequestUtils {
 	}
 
 	/**
-	 * Get an array of string parameters, throwing an exception if not found or one is empty.
+	 * Get an array of String parameters, throwing an exception if not found or one is empty.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @throws ServletRequestBindingException a subclass of ServletException,
