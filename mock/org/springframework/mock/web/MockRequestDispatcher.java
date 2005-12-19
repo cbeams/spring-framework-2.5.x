@@ -39,9 +39,11 @@ public class MockRequestDispatcher implements RequestDispatcher {
 
 	private final String url;
 
+
 	public MockRequestDispatcher(String url) {
 		this.url = url;
 	}
+
 
 	public void forward(ServletRequest servletRequest, ServletResponse servletResponse) {
 		if (servletResponse.isCommitted()) {

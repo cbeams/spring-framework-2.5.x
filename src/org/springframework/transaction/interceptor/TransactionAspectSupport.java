@@ -24,6 +24,7 @@ import java.util.Properties;
 import org.aopalliance.aop.AspectException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -57,15 +58,16 @@ import org.springframework.util.ClassUtils;
  * @see #setTransactionAttributes
  * @see #setTransactionAttributeSource
  */
-public class TransactionAspectSupport implements InitializingBean {
+public abstract class TransactionAspectSupport implements InitializingBean {
 
 	/**
-	 * Holder to support the currentTransactionStatus() method, and communication
-	 * between different cooperating advices (e.g. before and after advice)
-	 * if the aspect involves more than a single method (as will be the case for
-	 * around advice).
+	 * Holder to support the <code>currentTransactionStatus()</code> method,
+	 * and to support communication between different cooperating advices
+	 * (e.g. before and after advice) if the aspect involves more than a
+	 * single method (as will be the case for around advice).
 	 */
 	private static ThreadLocal currentTransactionInfo = new ThreadLocal();
+
 
 	/**
 	 * Return the transaction status of the current method invocation.
@@ -104,6 +106,7 @@ public class TransactionAspectSupport implements InitializingBean {
 		return info;
 	}
 
+
 	/**
 	 * Transient to avoid serialization. Not static as we want it
 	 * to be the correct logger for subclasses. Reconstituted in
@@ -112,10 +115,10 @@ public class TransactionAspectSupport implements InitializingBean {
 	protected transient Log logger = LogFactory.getLog(getClass());
 
 	/** Delegate used to create, commit and rollback transactions */
-	protected PlatformTransactionManager transactionManager;
+	private PlatformTransactionManager transactionManager;
 
 	/** Helper used to find transaction attributes */
-	protected TransactionAttributeSource transactionAttributeSource;
+	private TransactionAttributeSource transactionAttributeSource;
 
 
 	/**
