@@ -30,10 +30,11 @@ import javax.portlet.ActionRequest;
  * Mock implementation of the ActionRequest interface.
  *
  * @author John A. Lewis
+ * @since 2.0
  */
 public class MockActionRequest extends MockPortletRequest implements ActionRequest {
 
-    private String characterEncoding;
+	private String characterEncoding;
 
 	private byte[] content;
 
@@ -44,12 +45,14 @@ public class MockActionRequest extends MockPortletRequest implements ActionReque
 	// ActionRequest methods
 	//---------------------------------------------------------------------
 
-    public InputStream getPortletInputStream() throws IOException {
-		if (this.content != null)
+	public InputStream getPortletInputStream() throws IOException {
+		if (this.content != null) {
 			return new ByteArrayInputStream(this.content);
-		else
+		}
+		else {
 			return null;
     }
+	}
 
 	public void setCharacterEncoding(String characterEncoding) {
 		this.characterEncoding = characterEncoding;
@@ -62,8 +65,9 @@ public class MockActionRequest extends MockPortletRequest implements ActionReque
 			    new InputStreamReader(sourceStream, this.characterEncoding) : new InputStreamReader(sourceStream);
 			return new BufferedReader(sourceReader);
 		}
-		else
+		else {
 			return null;
+		}
 	}
 
 	public String getCharacterEncoding() {

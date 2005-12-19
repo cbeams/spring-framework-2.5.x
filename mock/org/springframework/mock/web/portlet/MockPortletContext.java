@@ -32,6 +32,7 @@ import javax.portlet.PortletRequestDispatcher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -40,7 +41,8 @@ import org.springframework.web.util.WebUtils;
 /**
  * Mock implementation of the PortletContext interface.
  *
- * @author John Lewis
+ * @author John A. Lewis
+ * @since 2.0
  */
 public class MockPortletContext implements PortletContext {
 
@@ -110,8 +112,10 @@ public class MockPortletContext implements PortletContext {
 	}
 
 	public PortletRequestDispatcher getRequestDispatcher(String path) {
-		if (!path.startsWith("/"))
-			throw new IllegalArgumentException("PortletRequestDispatcher path at PortletContext level must start with '/'");
+		if (!path.startsWith("/")) {
+			throw new IllegalArgumentException(
+					"PortletRequestDispatcher path at PortletContext level must start with '/'");
+		}
 		return new MockPortletRequestDispatcher(path);
 	}
 

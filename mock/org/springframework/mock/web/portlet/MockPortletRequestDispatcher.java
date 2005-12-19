@@ -30,12 +30,14 @@ import org.apache.commons.logging.LogFactory;
  * Mock implementation of the PortletRequestDispatcher interface.
  *
  * @author John A. Lewis
+ * @since 2.0
  */
 public class MockPortletRequestDispatcher implements PortletRequestDispatcher {
 
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private final String url;
+
 
 	public MockPortletRequestDispatcher(String url) {
 		this.url = url;
@@ -46,13 +48,14 @@ public class MockPortletRequestDispatcher implements PortletRequestDispatcher {
 	// PortletRequestDispatcher methods
 	//---------------------------------------------------------------------
 	
-    public void include(RenderRequest request, RenderResponse response)
-            throws PortletException, IOException {
-		if (!(response instanceof MockRenderResponse))
+	public void include(RenderRequest request, RenderResponse response) throws PortletException, IOException {
+		if (!(response instanceof MockRenderResponse)) {
 			throw new IllegalArgumentException("MockPortletRequestDispatcher requires MockRenderResponse");
+		}
 		((MockRenderResponse) response).setIncludedUrl(this.url);
-		if (logger.isDebugEnabled())
+		if (logger.isDebugEnabled()) {
 			logger.debug("MockPortletRequestDispatcher: including URL [" + this.url + "]");
     }
-    
+	}
+
 }

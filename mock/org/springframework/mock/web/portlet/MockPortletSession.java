@@ -26,6 +26,7 @@ import javax.portlet.PortletSession;
  * Mock implementation of the PortletSession interface.
  *
  * @author John A. Lewis
+ * @since 2.0
  */
 public class MockPortletSession implements PortletSession {
 
@@ -53,6 +54,7 @@ public class MockPortletSession implements PortletSession {
 
 	/**
 	 * Create a new MockPortletSession.
+	 *
 	 * @param portletContext the PortletContext that the session runs in
 	 */
 	public MockPortletSession(PortletContext portletContext) {
@@ -61,6 +63,7 @@ public class MockPortletSession implements PortletSession {
 
 	/**
 	 * Create a new MockHttpSession with a MockServletContext.
+	 *
 	 * @see MockPortletContext
 	 */
 	public MockPortletSession() {
@@ -73,29 +76,33 @@ public class MockPortletSession implements PortletSession {
 	//---------------------------------------------------------------------
 	
 	public Object getAttribute(String name) {
-	    return this.portletAttributes.get(name);
+		return this.portletAttributes.get(name);
 	}
 
 	public Object getAttribute(String name, int scope) {
-	    if (scope == PortletSession.PORTLET_SCOPE)
-	        return this.portletAttributes.get(name);
-	    else if (scope == PortletSession.APPLICATION_SCOPE)
-	        return this.applicationAttributes.get(name);
-        return null;
+		if (scope == PortletSession.PORTLET_SCOPE) {
+			return this.portletAttributes.get(name);
+		}
+		else if (scope == PortletSession.APPLICATION_SCOPE) {
+			return this.applicationAttributes.get(name);
+		}
+		return null;
 	}
 
 	public Enumeration getAttributeNames() {
 		return this.portletAttributes.keys();
 	}
-	
+
 	public Enumeration getAttributeNames(int scope) {
-	    if (scope == PortletSession.PORTLET_SCOPE)
-	        return this.portletAttributes.keys();
-	    else if (scope == PortletSession.APPLICATION_SCOPE)
-	        return this.applicationAttributes.keys();
-        return null;
+		if (scope == PortletSession.PORTLET_SCOPE) {
+			return this.portletAttributes.keys();
+		}
+		else if (scope == PortletSession.APPLICATION_SCOPE) {
+			return this.applicationAttributes.keys();
+		}
+		return null;
 	}
-	
+
 	public long getCreationTime() {
 		return this.creationTime;
 	}
@@ -127,27 +134,42 @@ public class MockPortletSession implements PortletSession {
 	}
 
 	public void removeAttribute(String name, int scope) {
-	    if (scope == PortletSession.PORTLET_SCOPE)
-	        this.portletAttributes.remove(name);
-	    else if (scope == PortletSession.APPLICATION_SCOPE)
-	        this.applicationAttributes.remove(name);
+		if (scope == PortletSession.PORTLET_SCOPE) {
+			this.portletAttributes.remove(name);
+		}
+		else if (scope == PortletSession.APPLICATION_SCOPE) {
+			this.applicationAttributes.remove(name);
+		}
 	}
 
 	public void setAttribute(String name, Object value) {
-		if (value != null) this.portletAttributes.put(name, value);
-		else this.portletAttributes.remove(name);
+		if (value != null) {
+			this.portletAttributes.put(name, value);
+		}
+		else {
+			this.portletAttributes.remove(name);
+		}
 	}
 
 	public void setAttribute(String name, Object value, int scope) {
-	    if (scope == PortletSession.PORTLET_SCOPE) {
-			if (value != null) this.portletAttributes.put(name, value);
-			else this.portletAttributes.remove(name);
-	    } else if (scope == PortletSession.APPLICATION_SCOPE) {
-			if (value != null) this.applicationAttributes.put(name, value);
-			else this.applicationAttributes.remove(name);
-	    }
+		if (scope == PortletSession.PORTLET_SCOPE) {
+			if (value != null) {
+				this.portletAttributes.put(name, value);
+			}
+			else {
+				this.portletAttributes.remove(name);
+			}
+		}
+		else if (scope == PortletSession.APPLICATION_SCOPE) {
+			if (value != null) {
+				this.applicationAttributes.put(name, value);
+			}
+			else {
+				this.applicationAttributes.remove(name);
+			}
+		}
 	}
-	
+
 	public void setMaxInactiveInterval(int interval) {
 		this.maxInactiveInterval = interval;
 	}

@@ -29,24 +29,25 @@ import javax.portlet.WindowState;
  * Mock implementation of the PortalContext interface.
  *
  * @author John A. Lewis
+ * @since 2.0
  */
 public class MockPortalContext implements PortalContext {
 
 	private final Properties properties = new Properties();
 
 	private final ArrayList portletModes = new ArrayList();
-	
-	private final ArrayList windowStates = new ArrayList();
-	
 
-    public MockPortalContext() {
-        portletModes.add(PortletMode.VIEW);
-        portletModes.add(PortletMode.EDIT);
-        portletModes.add(PortletMode.HELP);
-        windowStates.add(WindowState.NORMAL);
-        windowStates.add(WindowState.MAXIMIZED);
-        windowStates.add(WindowState.MINIMIZED);
-    }
+	private final ArrayList windowStates = new ArrayList();
+
+
+	public MockPortalContext() {
+		this.portletModes.add(PortletMode.VIEW);
+		this.portletModes.add(PortletMode.EDIT);
+		this.portletModes.add(PortletMode.HELP);
+		this.windowStates.add(WindowState.NORMAL);
+		this.windowStates.add(WindowState.MAXIMIZED);
+		this.windowStates.add(WindowState.MINIMIZED);
+	}
 
     
 	//---------------------------------------------------------------------
@@ -55,22 +56,22 @@ public class MockPortalContext implements PortalContext {
 	
 	public String getPortalInfo() {
 		return "MockPortal/1.0";
-    }
-    
-    public String getProperty(String name) {
+	}
+
+	public String getProperty(String name) {
 		return this.properties.getProperty(name);
 	}
-    
-    public Enumeration getPropertyNames() {
+
+	public Enumeration getPropertyNames() {
 		return this.properties.propertyNames();
-    }
+	}
 
-    public Enumeration getSupportedPortletModes() {
-        return Collections.enumeration(this.portletModes);
-    }
+	public Enumeration getSupportedPortletModes() {
+		return Collections.enumeration(this.portletModes);
+	}
 
-    public Enumeration getSupportedWindowStates() {
-        return Collections.enumeration(this.windowStates);
-    }
-    
+	public Enumeration getSupportedWindowStates() {
+		return Collections.enumeration(this.windowStates);
+	}
+
 }

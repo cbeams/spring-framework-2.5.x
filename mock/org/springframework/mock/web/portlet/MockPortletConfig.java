@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
  * Mock implementation of the PortletConfig interface.
  * 
  * @author John A. Lewis
+ * @since 2.0
  */
 public class MockPortletConfig implements PortletConfig {
 

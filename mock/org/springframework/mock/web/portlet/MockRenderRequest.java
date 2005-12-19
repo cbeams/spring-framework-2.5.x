@@ -19,9 +19,10 @@ package org.springframework.mock.web.portlet;
 import javax.portlet.RenderRequest;
 
 /**
- * Mock implementation of the ActionRequest interface.
+ * Mock implementation of the RenderRequest interface.
  *
  * @author John A. Lewis
+ * @since 2.0
  */
 public class MockRenderRequest extends MockPortletRequest implements RenderRequest {
     

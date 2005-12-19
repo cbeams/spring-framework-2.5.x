@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
  * Mock implementation of the PortletResponse interface.
  *
  * @author John A. Lewis
+ * @since 2.0
  */
 public class MockPortletResponse implements PortletResponse {
 
@@ -41,25 +42,27 @@ public class MockPortletResponse implements PortletResponse {
 	// PortletResponse methods
 	//---------------------------------------------------------------------
 
-    public void addProperty(String key, String value) {
+	public void addProperty(String key, String value) {
 		Assert.notNull(key, "key must not be null");
-        Object oldValue = this.properties.get(key);
-        if (oldValue instanceof String) {
-            ArrayList list = new ArrayList();
-            list.add(oldValue);
-            list.add(value);
-            this.properties.put(key, list);
-        }
-        else if (oldValue instanceof List) 
-            ((List)oldValue).add(value);
-        else
-            this.properties.put(key, value);
-    }
+		Object oldValue = this.properties.get(key);
+		if (oldValue instanceof String) {
+			ArrayList list = new ArrayList();
+			list.add(oldValue);
+			list.add(value);
+			this.properties.put(key, list);
+		}
+		else if (oldValue instanceof List) {
+			((List) oldValue).add(value);
+		}
+		else {
+			this.properties.put(key, value);
+		}
+	}
 
-    public void setProperty(String key, String value) {
+	public void setProperty(String key, String value) {
 		Assert.notNull(key, "key must not be null");
-        this.properties.put(key, value);
-    }
+		this.properties.put(key, value);
+	}
 
 	public String encodeURL(String path) {
 		return path;
@@ -70,35 +73,38 @@ public class MockPortletResponse implements PortletResponse {
 	// MockPortletResponse methods
 	//---------------------------------------------------------------------
 
-    public String getProperty(String key) {
+	public String getProperty(String key) {
 		Assert.notNull(key, "key must not be null");
 		Object value = this.properties.get(key);
 		if (value instanceof List) {
-		    List list = (List) value;
-		    if (list.size() < 1) return null;
-		    Object element = list.get(0);
+			List list = (List) value;
+			if (list.size() < 1) {
+				return null;
+			}
+			Object element = list.get(0);
 			return (element != null ? element.toString() : null);
 		}
 		return (value != null ? value.toString() : null);
-    }
+	}
 
-    public Enumeration getProperties(String key) {
+	public Enumeration getProperties(String key) {
 		Assert.notNull(key, "key must not be null");
 		Object value = this.properties.get(key);
-		if (value instanceof List)
+		if (value instanceof List) {
 			return Collections.enumeration((List) value);
+		}
 		else if (value != null) {
 			Vector vector = new Vector(1);
 			vector.add(value.toString());
 			return vector.elements();
 		}
-		else
+		else {
 			return Collections.enumeration(Collections.EMPTY_SET);
-    }
+		}
+	}
 
-    public Enumeration getPropertyNames() {
+	public Enumeration getPropertyNames() {
 		return this.properties.keys();
-    }
-    
+	}
 
 }

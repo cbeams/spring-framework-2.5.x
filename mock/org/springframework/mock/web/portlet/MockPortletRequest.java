@@ -46,21 +46,22 @@ import org.springframework.util.Assert;
  * Mock implementation of the PortletRequest interface.
  *
  * @author John A. Lewis
+ * @since 2.0
  */
 public class MockPortletRequest implements PortletRequest {
 
 	private final PortalContext portalContext;
-	
+
 	private final PortletContext portletContext;
-	
+
 	private PortletSession session = null;
 
 	private WindowState windowState = WindowState.NORMAL;
-	
+
 	private PortletMode portletMode = PortletMode.VIEW;
-	
+
 	private PortletPreferences portletPreferences = new MockPortletPreferences();
-	
+
 	private final Hashtable properties = new Hashtable();
 
 	private final Hashtable attributes = new Hashtable();
@@ -91,9 +92,10 @@ public class MockPortletRequest implements PortletRequest {
 
 	private int serverPort = 80;
 
-	
+
 	/**
 	 * Create a new MockPortletRequest.
+	 *
 	 * @param portalContext the PortalContext that the request runs in
 	 * @param portletContext the PortletContext that the request runs in
 	 */
@@ -106,14 +108,16 @@ public class MockPortletRequest implements PortletRequest {
 
 	/**
 	 * Create a new MockPortletRequest.
+	 *
 	 * @param portletContext the PortletContext that the request runs in
 	 */
 	public MockPortletRequest(PortletContext portletContext) {
-	    this(new MockPortalContext(), portletContext);
+		this(new MockPortalContext(), portletContext);
 	}
 
 	/**
 	 * Create a new MockPortletRequest with a MockPortletContext.
+	 *
 	 * @see MockPortletContext
 	 */
 	public MockPortletRequest() {
@@ -125,83 +129,97 @@ public class MockPortletRequest implements PortletRequest {
 	// PortletRequest methods
 	//---------------------------------------------------------------------
 
-    public boolean isWindowStateAllowed(WindowState state) {
-        if (state == null) return false;
-        Enumeration states = this.portalContext.getSupportedWindowStates();
-        while (states.hasMoreElements())
-            if (state.equals(states.nextElement()))
-                return true;
-        return false;
-    }
+	public boolean isWindowStateAllowed(WindowState state) {
+		if (state == null) {
+			return false;
+		}
+		Enumeration states = this.portalContext.getSupportedWindowStates();
+		while (states.hasMoreElements()) {
+			if (state.equals(states.nextElement())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-    public boolean isPortletModeAllowed(PortletMode mode) {
-        if (mode == null) return false;
-        Enumeration modes = this.portalContext.getSupportedPortletModes();
-        while (modes.hasMoreElements())
-            if (mode.equals(modes.nextElement()))
-                return true;
-        return false;
-    }
+	public boolean isPortletModeAllowed(PortletMode mode) {
+		if (mode == null) {
+			return false;
+		}
+		Enumeration modes = this.portalContext.getSupportedPortletModes();
+		while (modes.hasMoreElements()) {
+			if (mode.equals(modes.nextElement())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-    public PortletMode getPortletMode() {
-        return this.portletMode;
-    }
-    
-    public WindowState getWindowState() {
-        return this.windowState;
-    }
-    
-    public PortletPreferences getPreferences() {
-        return this.portletPreferences;
-    }
-    
-    public PortletSession getPortletSession() {
-        return getPortletSession(true);
-    }
+	public PortletMode getPortletMode() {
+		return this.portletMode;
+	}
 
-    public PortletSession getPortletSession(boolean create) {
-		// reset session if invalidated
-		if (this.session instanceof MockPortletSession && ((MockPortletSession) this.session).isInvalid())
+	public WindowState getWindowState() {
+		return this.windowState;
+	}
+
+	public PortletPreferences getPreferences() {
+		return this.portletPreferences;
+	}
+
+	public PortletSession getPortletSession() {
+		return getPortletSession(true);
+	}
+
+	public PortletSession getPortletSession(boolean create) {
+		// Reset session if invalidated.
+		if (this.session instanceof MockPortletSession && ((MockPortletSession) this.session).isInvalid()) {
 			this.session = null;
-		// create new session if necessary
-		if (this.session == null && create)
+		}
+		// Create new session if necessary.
+		if (this.session == null && create) {
 			this.session = new MockPortletSession(this.portletContext);
+		}
 		return this.session;
-    }
-    
-    public String getProperty(String name) {
+	}
+
+	public String getProperty(String name) {
 		Assert.notNull(name, "name must not be null");
 		Object value = this.properties.get(name);
 		if (value instanceof List) {
-		    List list = (List) value;
-		    if (list.size() < 1) return null;
-		    Object element = list.get(0);
+			List list = (List) value;
+			if (list.size() < 1) {
+				return null;
+			}
+			Object element = list.get(0);
 			return (element != null ? element.toString() : null);
 		}
 		return (value != null ? value.toString() : null);
-    }
+	}
 
-    public Enumeration getProperties(String name) {
+	public Enumeration getProperties(String name) {
 		Assert.notNull(name, "name must not be null");
 		Object value = this.properties.get(name);
-		if (value instanceof List)
+		if (value instanceof List) {
 			return Collections.enumeration((List) value);
+		}
 		else if (value != null) {
 			Vector vector = new Vector(1);
 			vector.add(value.toString());
 			return vector.elements();
 		}
-		else
+		else {
 			return Collections.enumeration(Collections.EMPTY_SET);
-    }
+		}
+	}
 
-    public Enumeration getPropertyNames() {
+	public Enumeration getPropertyNames() {
 		return this.properties.keys();
-    }
-    
-    public PortalContext getPortalContext() {
-        return this.portalContext;
-    }
+	}
+
+	public PortalContext getPortalContext() {
+		return this.portalContext;
+	}
 
 	public String getAuthType() {
 		return this.authType;
@@ -253,10 +271,12 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public void setAttribute(String name, Object value) {
-		if (value != null)
+		if (value != null) {
 			this.attributes.put(name, value);
-		else
+		}
+		else {
 			this.attributes.remove(name);
+		}
 	}
 
 	public void removeAttribute(String name) {
@@ -272,13 +292,13 @@ public class MockPortletRequest implements PortletRequest {
 		return this.requestedSessionIdValid;
 	}
 
-    public String getResponseContentType() {
+	public String getResponseContentType() {
 		return (String) this.responseContentTypes.get(0);
-    }
+	}
 
-    public Enumeration getResponseContentTypes() {
+	public Enumeration getResponseContentTypes() {
 		return this.responseContentTypes.elements();
-    }
+	}
 
 	public Locale getLocale() {
 		return (Locale) this.locales.get(0);
@@ -313,18 +333,18 @@ public class MockPortletRequest implements PortletRequest {
 		}
 	}
 
-    public void setPortletMode(PortletMode portletMode) {
-        this.portletMode = portletMode;
-    }
+	public void setPortletMode(PortletMode portletMode) {
+		this.portletMode = portletMode;
+	}
 
-    public void setWindowState(WindowState windowState) {
-        this.windowState = windowState;
-    }
-	
-    public void setPreferences(PortletPreferences preferences) {
-        this.portletPreferences = preferences;
-    }
-    
+	public void setWindowState(WindowState windowState) {
+		this.windowState = windowState;
+	}
+
+	public void setPreferences(PortletPreferences preferences) {
+		this.portletPreferences = preferences;
+	}
+
 	/**
 	 * Add a property entry for the given name.
 	 * <p>If there was no entry for that property name before,
@@ -336,6 +356,7 @@ public class MockPortletRequest implements PortletRequest {
 	 * As alternative to repeated <code>addHeader</code> calls for
 	 * individual elements, you can use a single call with an entire
 	 * array or Collection of values as parameter.
+	 *
 	 * @see #getProperty
 	 * @see #getProperties
 	 * @see #getPropertyNames
@@ -359,8 +380,9 @@ public class MockPortletRequest implements PortletRequest {
 			addPropertyValue(list, value);
 			this.properties.put(name, list);
 		}
-		else
+		else {
 			this.properties.put(name, value);
+		}
 	}
 
 	private void addPropertyValue(List list, Object value) {
@@ -380,38 +402,39 @@ public class MockPortletRequest implements PortletRequest {
 				list.add(element.toString());
 			}
 		}
-		else
+		else {
 			list.add(value);
+		}
 	}
 
-    public void setParameters(Map parameters) {
-        Assert.notNull(parameters);
-        for (Iterator it = parameters.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)it.next();
-            Assert.notNull(entry.getKey());
-            Assert.notNull(entry.getValue());
-        }
-        this.parameters.clear();
-        for (Iterator it = parameters.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)it.next();
-            this.parameters.put(entry.getKey(), entry.getValue());
-        }
-    }
-    
-    public void setParameter(String key, String value) {
-        Assert.notNull(key);
-        Assert.notNull(value);
-        this.parameters.put(key, new String[] {value});
-    }
-    
-    public void setParameter(String key, String[] values) {
-        Assert.notNull(key);
-        Assert.notNull(values);
-        this.parameters.put(key, values);
-    }
+	public void setParameters(Map parameters) {
+		Assert.notNull(parameters);
+		for (Iterator it = parameters.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			Assert.notNull(entry.getKey());
+			Assert.notNull(entry.getValue());
+		}
+		this.parameters.clear();
+		for (Iterator it = parameters.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			this.parameters.put(entry.getKey(), entry.getValue());
+		}
+	}
+
+	public void setParameter(String key, String value) {
+		Assert.notNull(key);
+		Assert.notNull(value);
+		this.parameters.put(key, new String[]{value});
+	}
+
+	public void setParameter(String key, String[] values) {
+		Assert.notNull(key);
+		Assert.notNull(values);
+		this.parameters.put(key, values);
+	}
 
 	public void addParameter(String name, String value) {
-		addParameter(name, new String[] {value});
+		addParameter(name, new String[]{value});
 	}
 
 	public void addParameter(String name, String[] values) {
@@ -422,8 +445,9 @@ public class MockPortletRequest implements PortletRequest {
 			System.arraycopy(values, 0, newArr, oldArr.length, values.length);
 			this.parameters.put(name, newArr);
 		}
-		else
+		else {
 			this.parameters.put(name, values);
+		}
 	}
 
 	public void setAuthType(String authType) {

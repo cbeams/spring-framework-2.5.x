@@ -32,8 +32,9 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Mock implementation of the RenderResponse interface.
- * 
+ *
  * @author John A. Lewis
+ * @since 2.0
  */
 public class MockRenderResponse extends MockPortletResponse implements RenderResponse {
 
@@ -66,23 +67,27 @@ public class MockRenderResponse extends MockPortletResponse implements RenderRes
 		return this.contentType;
 	}
 
-    public PortletURL createRenderURL() {
-        PortletURL url = new MockPortletURL("render");
-        return url;
-    }
-    
+	public PortletURL createRenderURL() {
+		PortletURL url = new MockPortletURL("render");
+		return url;
+	}
+
 	public PortletURL createActionURL() {
-        PortletURL url = new MockPortletURL("action");
-        return url;
-    }
-	
-    public String getNamespace() {
-        return this.namespace;
-    }
-    
-    public void setTitle(String title) {
-        this.title = title;
-    }
+		PortletURL url = new MockPortletURL("action");
+		return url;
+	}
+
+	public String getNamespace() {
+		return this.namespace;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getTitle() {
+		return title;
+	}
 
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
@@ -95,8 +100,8 @@ public class MockRenderResponse extends MockPortletResponse implements RenderRes
 	public PrintWriter getWriter() throws UnsupportedEncodingException {
 		if (this.writer == null) {
 			Writer targetWriter = (this.characterEncoding != null
-			        ? new OutputStreamWriter(this.outputStream, this.characterEncoding) 
-			        : new OutputStreamWriter(this.outputStream));
+					? new OutputStreamWriter(this.outputStream, this.characterEncoding)
+					: new OutputStreamWriter(this.outputStream));
 			this.writer = new PrintWriter(targetWriter);
 		}
 		return this.writer;
@@ -115,8 +120,9 @@ public class MockRenderResponse extends MockPortletResponse implements RenderRes
 	}
 
 	public void flushBuffer() {
-		if (this.writer != null)
+		if (this.writer != null) {
 			this.writer.flush();
+		}
 		if (this.outputStream != null) {
 			try {
 				this.outputStream.flush();
@@ -129,8 +135,9 @@ public class MockRenderResponse extends MockPortletResponse implements RenderRes
 	}
 
 	public void resetBuffer() {
-		if (this.committed)
+		if (this.committed) {
 			throw new IllegalStateException("Cannot reset buffer - response is already committed");
+		}
 		this.outputStream.reset();
 	}
 
@@ -144,13 +151,13 @@ public class MockRenderResponse extends MockPortletResponse implements RenderRes
 		this.contentType = null;
 		this.locale = null;
 	}
-    
-    public OutputStream getPortletOutputStream() throws IOException {
-        return this.outputStream;
-    }
 
-    
-    //---------------------------------------------------------------------
+	public OutputStream getPortletOutputStream() throws IOException {
+		return this.outputStream;
+	}
+
+
+	//---------------------------------------------------------------------
 	// MockRenderReponse methods
 	//---------------------------------------------------------------------
 
