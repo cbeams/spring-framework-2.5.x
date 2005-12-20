@@ -16,12 +16,18 @@
 
 package org.springframework.aop.config;
 
+import java.util.List;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import org.springframework.aop.aspectj.AspectJAfterAdvice;
 import org.springframework.aop.aspectj.AspectJAfterReturningAdvice;
 import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
 import org.springframework.aop.aspectj.AspectJAroundAdvice;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
-import org.springframework.aop.aspectj.AspectJAfterAdvice;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.target.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.MutablePropertyValues;
@@ -40,11 +46,6 @@ import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import java.util.List;
 
 /**
  * <code>NamespaceHandler</code> for the <code>aop</code> namespace.
@@ -99,7 +100,8 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 		private static String SESSION_SCOPE_MAP = "org.springframework.web.context.scope.SessionScopeMap";
 
-		public BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
+		public BeanDefinitionHolder decorate(
+				Element element, BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
 
 			String originalBeanName = definition.getBeanName();
 			String targetBeanName = "__" + originalBeanName;
@@ -140,18 +142,17 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 			// register the scope factory
 			registry.registerBeanDefinition(originalBeanName, scopeFactoryDefinition);
 
-			// switch the old definition
-			((AbstractBeanDefinition)definition.getBeanDefinition()).setSingleton(false);
+			// Switch the old definition to prototype.
+			((AbstractBeanDefinition) definition.getBeanDefinition()).setSingleton(false);
 			return new BeanDefinitionHolder(definition.getBeanDefinition(), targetBeanName);
 		}
 	}
 
-	/**
-	 * Parses the <code></code>
-	 */
+
 	private static class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 
-		private static final String BEAN_CONFIGURER = "org.springframework.beans.factory.aspectj.AnnotationBeanConfigurer";
+		private static final String BEAN_CONFIGURER =
+				"org.springframework.beans.factory.aspectj.AnnotationBeanConfigurer";
 
 		private boolean registered;
 
@@ -169,8 +170,9 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 				registry.registerBeanDefinition(id, definition);
 				this.registered = true;
 			}
-			catch (ClassNotFoundException e) {
-				throw new IllegalStateException("Unable to locate class [" + BEAN_CONFIGURER + "]. Cannot use @SpringConfigured.");
+			catch (ClassNotFoundException ex) {
+				throw new IllegalStateException(
+						"Unable to locate class [" + BEAN_CONFIGURER + "]: cannot use @Configurable");
 			}
 		}
 	}
@@ -364,18 +366,20 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		 * {@link org.springframework.beans.factory.config.BeanDefinition} for the pointcut if
 		 * necessary and returns its bean name, otherwise returns the bean name of the referred
 		 * pointcut.
-		 *
-		 * @throws IllegalStateException if the {@link Element} includes both <code>pointcut</code> and
-		 * <code>pointcut-ref</code> attributes.
+		 * @throws IllegalStateException if the {@link Element} includes both <code>pointcut</code>
+		 * and <code>pointcut-ref</code> attributes.
 		 */
-		private String parsePointcutProperty(Element element, MutablePropertyValues mpvs, BeanDefinitionRegistry registry) {
+		private String parsePointcutProperty(
+				Element element, MutablePropertyValues mpvs, BeanDefinitionRegistry registry) {
+
 			if (element.hasAttribute(POINTCUT) && element.hasAttribute(POINTCUT_REF)) {
 				throw new IllegalStateException("Cannot define both 'pointcut' and 'pointcut-ref' on 'advisor' tag.");
 			}
 			else if (element.hasAttribute(POINTCUT)) {
 				// create a pointcut for the anonymous pc and register it
 				BeanDefinition pointcutDefinition = createPointcutDefinition(element.getAttribute(POINTCUT));
-				String pointcutName = BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) pointcutDefinition, registry, false);
+				String pointcutName =
+						BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) pointcutDefinition, registry, false);
 				registry.registerBeanDefinition(pointcutName, pointcutDefinition);
 				mpvs.addPropertyValue(POINTCUT, new RuntimeBeanReference(pointcutName));
 				return pointcutName;

@@ -122,8 +122,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * operations for those purposes, for example <code>initializeBean</code>.
 	 * @param beanClass the class of the bean to instantiate
 	 * @param autowireMode by name or type, using the constants in this interface
-	 * @param dependencyCheck whether to perform a dependency check for objects
-	 * (not applicable to autowiring a constructor, thus ignored there)
+	 * @param dependencyCheck whether to perform a dependency check for object
+	 * references in the bean instance (not applicable to autowiring a constructor,
+	 * thus ignored there)
 	 * @return the new bean instance
 	 * @throws BeansException if instantiation or wiring failed
 	 * @see #AUTOWIRE_NO
@@ -143,6 +144,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @param existingBean the existing bean instance
 	 * @param autowireMode by name or type, using the constants in this interface
 	 * @param dependencyCheck whether to perform a dependency check for object
+	 * references in the bean instance
 	 * @throws BeansException if wiring failed
 	 * @see #AUTOWIRE_BY_NAME
 	 * @see #AUTOWIRE_BY_TYPE
