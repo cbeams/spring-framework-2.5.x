@@ -16,12 +16,13 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.Properties;
+
 import junit.framework.TestCase;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
-
-import java.util.Properties;
 
 /**
  * @author Rob Harrop
@@ -32,17 +33,18 @@ public class UtilNamespaceHandlerTests extends TestCase {
 
 	public void setUp() {
 		this.beanFactory = new DefaultListableBeanFactory();
-        XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
-        reader.loadBeanDefinitions(new ClassPathResource("testUtilNamespace.xml", getClass()));
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
+		reader.loadBeanDefinitions(new ClassPathResource("testUtilNamespace.xml", getClass()));
 	}
 	
 	public void testLoadProperties() throws Exception {
-        Properties props = (Properties) this.beanFactory.getBean("myProperties");
-        assertEquals("Incorrect property value", "bar", props.get("foo"));
-    }
+		Properties props = (Properties) this.beanFactory.getBean("myProperties");
+		assertEquals("Incorrect property value", "bar", props.get("foo"));
+	}
 
 	public void testConstant() throws Exception {
 		Integer min = (Integer) this.beanFactory.getBean("min");
 		assertEquals(Integer.MIN_VALUE, min.intValue());
 	}
+
 }

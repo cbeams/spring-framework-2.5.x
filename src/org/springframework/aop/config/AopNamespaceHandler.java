@@ -123,9 +123,11 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 			String scopeMapClassName;
 			if("request".equals(type)) {
 				scopeMapClassName = REQUEST_SCOPE_MAP;
-			} else if("session".equals(type)) {
+			}
+			else if("session".equals(type)) {
 				scopeMapClassName = SESSION_SCOPE_MAP;
-			} else {
+			}
+			else {
 				throw new IllegalStateException("Scope [" + type + "] is not recognised.");
 			}
 
@@ -201,12 +203,12 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		private static final String POINTCUT_REF = "pointcut-ref";
 		private static final String REF = "ref";
 		private static final String KIND = "kind";
-		private static final String TYPE = "type";
 		private static final String BEFORE = "before";
 		private static final String AFTER = "after";
 		private static final String AFTER_RETURNING = "afterReturning";
 		private static final String AFTER_THROWING = "afterThrowing";
 		private static final String AROUND = "around";
+
 		private static final int METHOD_INDEX = 0;
 		private static final int POINTCUT_INDEX = 1;
 		private static final int ASPECT_INSTANCE_FACTORY_INDEX = 2;
