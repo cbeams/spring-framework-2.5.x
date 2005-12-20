@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-package org.springframework.beans.factory.aspectj;
+
+package org.springframework.orm.jpa.aspectj;
 
 import javax.persistence.Entity;
 
-
 /**
  * Concrete aspect that uses the Java Persistence API Entity annotation to identify
- * which classes need autowiring. The bean name to look up will be
- * taken from the Configurable annotation's "name" attribute if specified, otherwise
- * the default will be the FQN of the class being configured.
- * @see javax.persistence.Entity
+ * which classes need autowiring. The bean name to look up will be taken from the
+ * Configurable annotation's "name" attribute if specified, otherwise the default
+ * will be the fully-qualified name of the class being configured.
+ *
  * @author Rod Johnson
  * @since 2.0
+ * @see javax.persistence.Entity
  */
 public aspect EntityBeanConfigurer extends AbstractBeanConfigurer {
 	
@@ -50,9 +50,9 @@ public aspect EntityBeanConfigurer extends AbstractBeanConfigurer {
 	}
 
 	/**
-     * The creation of a new bean (an object with the @Entity annotation)
-     */
-    protected pointcut beanCreation(Object beanInstance) :
-        initialization((@Entity *).new(..)) &&
-        	this(beanInstance);
+	 * The creation of a new bean (an object with the @Entity annotation)
+	 */
+	protected pointcut beanCreation(Object beanInstance) :
+		initialization((@Entity *).new(..)) && this(beanInstance);
+
 }
