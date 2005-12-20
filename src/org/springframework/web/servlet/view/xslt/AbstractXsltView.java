@@ -51,20 +51,16 @@ import org.springframework.web.util.NestedServletException;
 
 /**
  * Convenient superclass for views rendered using an XSLT stylesheet.
- * Subclasses must <b>either</b> provide the XML W3C Document or Node to
- * transform by overriding <code>createDomNode()</code>, <b>or</b> provide the
- * <code>Source</code> to transform by overriding <code>createXsltSource()</code>.
+ * Subclasses must provide the {@link Source} to transform by overriding
+ * {@link #createXsltSource}.
  *
- * <p>Note that <code>createXsltSource()</code> is the preferred method which all
- * new subclasses should override since Spring 1.2. <code>createDomNode()</code>
- * has been deprecated and may be removed in a future version.
  *
  * <p>Subclasses do not need to concern themselves with XSLT other than providing
  * a valid stylesheet location.
  *
  * <p>Properties:
  * <ul>
- * <li>stylesheetLocation: a Spring <code>Resource</code> pointing to the
+ * <li>stylesheetLocation: a javax.swing.Spring <code>Resource</code> pointing to the
  * XSLT stylesheet
  * <li>root: name of the root element, defaults to "DocRoot"
  * <li>uriResolver: URIResolver used in the transform
