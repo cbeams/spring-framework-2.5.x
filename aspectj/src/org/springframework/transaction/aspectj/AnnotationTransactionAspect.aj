@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,22 +20,22 @@ import org.springframework.transaction.annotation.AnnotationTransactionAttribute
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Concrete AspectJ transaction aspect using Java 5 annotations, and Spring
- * transactional annotation. 
- * <p>
- * validation.
+ * Concrete AspectJ transaction aspect using Spring Transactional annotation
+ * for JDK 1.5+.
+ *
  * @author Rod Johnson
  * @author Ramnivas Laddad
  * @author Adrian Colyer
  * @since 2.0
- * @see AbstractTransactionAspect
+ * @see org.springframework.transaction.annotation.Transactional
  */
-public aspect TransactionalAnnotationTransactionAspect extends AbstractTransactionAspect {
+public aspect AnnotationTransactionAspect extends AbstractTransactionAspect {
 	
-	public TransactionalAnnotationTransactionAspect() {
+	public AnnotationTransactionAspect() {
 		super(new AnnotationTransactionAttributeSource());
 	}
-	
+
+
 	/**
 	 * Matches the execution of any public method in a type with the
 	 * Transactional annotation, or any subtype of a type with the
@@ -58,6 +58,6 @@ public aspect TransactionalAnnotationTransactionAspect extends AbstractTransacti
 	protected pointcut transactionalMethodExecution(Object txObject) :
 		(executionOfAnyPublicMethodInAtTransactionalType() 
 		 || executionOfTransactionalPublicMethod())
-		&& this(txObject);
+		 && this(txObject);
 
 }
