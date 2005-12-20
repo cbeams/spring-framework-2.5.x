@@ -13,6 +13,7 @@
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
+
 	<!-- ========================= GENERAL DEFINITIONS ========================= -->
 
 	<!-- Configurer that replaces ${...} placeholders with values from properties files -->
@@ -81,6 +82,7 @@
 		<property name="itemDao" ref="itemDao"/>
 		<property name="orderDao" ref="orderDao"/>
 	</bean>
+
 
 	<!-- ========================= REMOTE EXPORTER DEFINITIONS ======================== -->
 
