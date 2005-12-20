@@ -31,8 +31,7 @@ import javax.management.remote.JMXServiceURL;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.NestedRuntimeException;
-import org.springframework.jmx.export.MBeanRegistrationSupport;
+import org.springframework.jmx.JmxException;
 
 /**
  * <code>FactoryBean</code> that creates a JSR-160 <code>JMXConnectorServer</code>,
@@ -52,12 +51,12 @@ import org.springframework.jmx.export.MBeanRegistrationSupport;
  * @see JMXConnectorServer
  * @see MBeanServer
  */
-public class ConnectorServerFactoryBean extends MBeanRegistrationSupport implements FactoryBean, InitializingBean, DisposableBean {
+public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
+		implements FactoryBean, InitializingBean, DisposableBean {
 
-	/**
-	 * The default service URL.
-	 */
+	/** The default service URL */
 	public static final String DEFAULT_SERVICE_URL = "service:jmx:jmxmp://localhost:9875";
+
 
 	private String serviceUrl = DEFAULT_SERVICE_URL;
 
@@ -70,6 +69,7 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport impleme
 	private boolean daemon = false;
 
 	private JMXConnectorServer connectorServer;
+
 
 	/**
 	 * Set the service URL for the <code>JMXConnectorServer</code>.
@@ -153,7 +153,7 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport impleme
 							connectorServer.start();
 						}
 						catch (IOException ex) {
-							throw new DelayedConnectorStartException(ex);
+							throw new JmxException("Could not start JMX connector server after delay", ex);
 						}
 					}
 				};
@@ -207,18 +207,6 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport impleme
 		}
 		finally {
 			unregisterBeans();
-		}
-	}
-
-
-	/**
-	 * Exception to be thrown if the JMX connector server cannot be started
-	 * (in a concurrent thread).
-	 */
-	public static class DelayedConnectorStartException extends NestedRuntimeException {
-
-		private DelayedConnectorStartException(IOException ex) {
-			super("Could not start JMX connector server after delay", ex);
 		}
 	}
 

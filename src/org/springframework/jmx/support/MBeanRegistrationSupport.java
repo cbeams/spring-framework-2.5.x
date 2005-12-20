@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jmx.export;
+package org.springframework.jmx.support;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.Constants;
 
 /**
- * Provides suporting infrastructure for registering MBeans with an
+ * Provides supporting infrastructure for registering MBeans with an
  * {@link javax.management.MBeanServer}. The behavior when encountering
  * an existing MBean at a given {@link ObjectName} is fully configurable
  * allowing for flexible registration settings.
@@ -63,6 +63,7 @@ import org.springframework.core.Constants;
  * @since 2.0
  * @see #setServer
  * @see #setRegistrationBehaviorName
+ * @see org.springframework.jmx.export.MBeanExporter
  */
 public class MBeanRegistrationSupport {
 
@@ -89,7 +90,7 @@ public class MBeanRegistrationSupport {
 	/**
 	 * Constants for this class.
 	 */
-	private static final Constants constants = new Constants(MBeanExporter.class);
+	private static final Constants constants = new Constants(MBeanRegistrationSupport.class);
 
 	/**
 	 * <code>Log</code> instance for this class.

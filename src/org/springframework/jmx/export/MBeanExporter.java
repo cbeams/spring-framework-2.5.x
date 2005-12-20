@@ -54,6 +54,7 @@ import org.springframework.jmx.export.naming.SelfNaming;
 import org.springframework.jmx.export.notification.ModelMBeanNotificationPublisher;
 import org.springframework.jmx.export.notification.NotificationPublisherAware;
 import org.springframework.jmx.support.JmxUtils;
+import org.springframework.jmx.support.MBeanRegistrationSupport;
 import org.springframework.util.ObjectUtils;
 
 /**
