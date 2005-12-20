@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
-<beans>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
-	<description>
-		This file illustrates reliance on declarative transaction management
-		provided by the auto-proxy definitions in declarativeServices.xml.
-		There's no need to use a TransactionFactoryProxyBean: Any bean with
-		source-level transaction annotations will automatically benefit from
-		declarative transaction management.
-		
-		The application context must define a bean of type PlatformTransactionManager
-		for this to work (see dataAccessContext-local/jta.xml).
-	</description>
 
 	<!-- ========================= GENERAL DEFINITIONS ========================= -->
 
@@ -26,6 +20,7 @@
 		</property>
 	</bean>
 
+
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
 
 	<!-- Generic validator for Account objects, to be used for example by the Spring web tier -->
@@ -34,12 +29,20 @@
 	<!-- Generic validator for Order objects, to be used for example by the Spring web tier -->
 	<bean id="orderValidator" class="org.springframework.samples.jpetstore.domain.logic.OrderValidator"/>
 
-	<!-- 
+	<!--
+		This marker creates the full auto-proxy infrastructure
+		that is necessary for applying Spring's Transactional annotation
+		(as contained in the PetStoreAnnotationImpl class). By default,
+		it will refer to the transaction manager bean named "transactionManager".
+	-->
+	<tx:annotation-driven/>
+
+	<!--
 		JPetStore primary business object: default implementation,
 		Note that this is just a POJO definition in this file:
 		there's no need to use a TransactionFactoryProxyBean if the class has
-		source-level transaction annotations; the inherited auto-proxy
-		bean definition will apply transaction advice automatically.
+		source-level transaction annotations; the "tx:annotation-driven"
+		marker above will apply transaction advice automatically.
 	-->
 	<bean id="petStore" class="org.springframework.samples.jpetstore.domain.logic.PetStoreAnnotationImpl">
 		<property name="accountDao" ref="accountDao"/>
