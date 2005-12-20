@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,33 +17,26 @@
 package org.springframework.beans.factory.aspectj;
 
 /**
- * Interface to be implemented by objects than can resolve bean name
- * information, given a newly instantiated object. Invocations to the
- * resolve() method on this interface will be driven by the AspectJ pointcut
- * in the relevant concrete aspect. Metadata resolution strategy can be
- * pluggable, but a good default, in the canonical CLASSNAME_WIRING_INFO_RESOLVER
- * instance, is to return the FQN.
- * 
+ * Strategy interface to be implemented by objects than can resolve bean name
+ * information, given a newly instantiated bean object. Invocations to the
+ * <code>resolve(Object)<</code> method on this interface will be driven by
+ * the AspectJ pointcut in the relevant concrete aspect.
+ *
+ * <p>Metadata resolution strategy can be pluggable. A good default is
+ * ClassNameBeanWiringInfoResolver, which uses the fully-qualified class
+ * name as bean name.
+ *
  * @author Rod Johnson
+ * @since 2.0
+ * @see ClassNameBeanWiringInfoResolver
  */
 public interface BeanWiringInfoResolver {
 	
 	/**
-	 * Resolve the BeanWiringInfo for this instance, or null if not found
-	 * @param instance bean instance to resolve info for
-	 * @return BeanWiringInfo, or null if not found
+	 * Resolve the BeanWiringInfo for the given bean instance.
+	 * @param beanInstance the bean instance to resolve info for
+	 * @return the BeanWiringInfo, or <code>null</code> if not found
 	 */
-	BeanWiringInfo resolve(Object instance);
+	BeanWiringInfo resolveWiringInfo(Object beanInstance);
 	
-	/** 
-	 * Simple  default implementation, which looks for a bean with the same name as the
-	 * FQN. This is the default name of the bean in a Spring XML file if the id
-	 * attribute is not used.
-	 */
-	BeanWiringInfoResolver CLASSNAME_WIRING_INFO_RESOLVER = new BeanWiringInfoResolver() {
-		public BeanWiringInfo resolve(Object instance) {
-			return new BeanWiringInfo(instance.getClass().getName());
-		}
-	};
-
 }

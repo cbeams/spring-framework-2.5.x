@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,18 @@ package org.springframework.beans.factory.aspectj;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
  * Abstract superaspect for AspectJ aspects that can perform Dependency Injection on
  * objects, however they may be created. Define the beanCreation() pointcut
  * in subaspects.
- * <p>
- * Subaspects may also need a metadata resolution strategy, in the BeanWiringInfoResolver
+
+ * <p>Subaspects may also need a metadata resolution strategy, in the BeanWiringInfoResolver
  * interface. The default implementation looks for a bean with the same name as the
  * FQN. This is the default name of the bean in a Spring XML file if the id
  * attribute is not used.
+
  * @author Rob Harrop
  * @author Rod Johnson
  * @author Adrian Colyer
@@ -37,12 +37,10 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  */
 public abstract aspect AbstractBeanConfigurer implements BeanFactoryAware {
 
-	/**
-	 * Owning bean factory
-	 */
+	private BeanWiringInfoResolver beanWiringInfoResolver = new ClassNameBeanWiringInfoResolver();
+
 	private ConfigurableListableBeanFactory beanFactory;
-	
-	private BeanWiringInfoResolver beanWiringInfoResolver = BeanWiringInfoResolver.CLASSNAME_WIRING_INFO_RESOLVER;
+
 	
 	/**
 	 * Set a custom BeanWiringInfoResolver. Default behaviour will be to look
@@ -53,56 +51,53 @@ public abstract aspect AbstractBeanConfigurer implements BeanFactoryAware {
 	}
     
 	/**
-     * DI the Spring application context in which this aspect should configure beans.
-     */
-    public void setBeanFactory(BeanFactory beanFactory) {
-    	if(!(beanFactory instanceof ConfigurableListableBeanFactory)) {
-    		throw new IllegalArgumentException("Must run in a ConfigurableListableBeanFactory.");
-    	}
-    	this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
-    }
+	 * DI the Spring application context in which this aspect should configure beans.
+	 */
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
+			throw new IllegalArgumentException(
+ 				"Bean configurer aspect needs to run in a ConfigurableListableBeanFactory, not in [" + beanFactory + "]");
+		}
+		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+	}
+
+
 	/**
-     * The creation of a new bean. Subaspects are responsible for
-     * matching strategy, which may include an annotation but may match
-     * existing objects, and may work without requiring Java 5 or AspectJ 5.
-     */
-    protected abstract pointcut beanCreation(Object beanInstance);
+	 * Configure the bean instance using the given bean name. Sub-aspects can
+	 * override to provide custom configuration logic.
+	 */
+	protected void configureBean(Object bean, BeanWiringInfo bwi) {
+		if (this.beanFactory == null) {
+			throw new IllegalStateException(
+					"BeanFactory has not be set on aspect [" + this.getClass().getName() + "]: " +
+					"This aspect should normally be added to a Spring container, for example in an XML bean definition");
+		}
 
-    /**
-     * All beans should be configured after construction.
-     */
-    after(Object beanInstance) returning :
-      beanCreation(beanInstance) {
-    	BeanWiringInfo bwi = beanWiringInfoResolver.resolve(beanInstance);
-    	if (bwi != null) {
-    		configureBean(beanInstance, bwi);
-    	}
-    }
+		if (bwi.indicatesAutowiring()) {
+			// Perform autowiring.
+			this.beanFactory.autowireBeanProperties(bean, bwi.getAutowireMode(), bwi.getDependencyCheck());
+		}
+		else {
+			// Perform explicit wiring.
+			this.beanFactory.applyBeanPropertyValues(bean, bwi.getBeanName());
+		}
+	}
 
-    /**
-     * Configure the bean instance using the given bean name. Sub-aspects can
-     * override to provide custom configuration logic.
-     */
-    private void configureBean(Object bean, BeanWiringInfo bwi) {
-    	if (this.beanFactory == null) {
-    		throw new IllegalStateException("BeanFactory has not be set on aspect " + this.getClass().getName() + ": " +
-    				"This aspect should normally be added to a Spring container, for example in an XML bean definition");
-    	}
-    	
-    	if (bwi.hasBeanName()) {
-    		// Do explicit wiring
-    		this.beanFactory.applyBeanPropertyValues(bean, bwi.getBeanName());
-    	}
-    	else {
-    		// Do autowire
-    		if (this.beanFactory instanceof AutowireCapableBeanFactory) {
-    			AutowireCapableBeanFactory aacbf = (AutowireCapableBeanFactory) this.beanFactory;
-    			aacbf.autowireBeanProperties(bean, bwi.getAutowireMode(), bwi.getDependencyCheck());
-    		}
-    		else {
-    			throw new IllegalArgumentException("Cannot autowire with factory " + this.beanFactory + "; " +
-    					"Found autowire annotation on class " + bean.getClass().getName());
-    		}
-    	}
-    }
+
+	/**
+	 * The creation of a new bean (an object with the @Configurable annotation)
+	 */
+	protected abstract pointcut beanCreation(Object beanInstance);
+
+
+	/**
+	 * All beans should be configured after construction.
+	 */
+	after(Object beanInstance) returning : beanCreation(beanInstance) {
+		BeanWiringInfo bwi = beanWiringInfoResolver.resolveWiringInfo(beanInstance);
+		if (bwi != null) {
+			configureBean(beanInstance, bwi);
+		}
+	}
+
 }

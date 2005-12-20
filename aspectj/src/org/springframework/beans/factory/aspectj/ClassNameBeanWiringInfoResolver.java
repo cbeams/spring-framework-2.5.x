@@ -13,30 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package org.springframework.beans.factory.aspectj;
 
+import org.springframework.util.Assert;
+
 /**
- * Concrete aspect that uses the Configurable annotation to identify
- * which classes need autowiring. The bean name to look up will be
- * taken from the Configurable annotation if specified, otherwise
- * the default will be the FQN of the class being configured.
+ * Simple default implementation, which looks for a bean with the same name as
+ * the fully-qualified class name. This is the default name of the bean in a
+ * Spring XML file if the id attribute is not used.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
- * @see Configurable
- * @see AnnotationBeanWiringInfoResolver
  */
-public aspect AnnotationBeanConfigurer extends AbstractBeanConfigurer {
-	
-	public AnnotationBeanConfigurer() {
-		setBeanWiringInfoResolver(new AnnotationBeanWiringInfoResolver());
-	}
+public class ClassNameBeanWiringInfoResolver implements BeanWiringInfoResolver {
 
-	/**
-	 * The creation of a new bean (an object with the @SpringConfigured annotation)
-	 */
-	protected pointcut beanCreation(Object beanInstance) :
-		initialization((@Configurable *).new(..)) && this(beanInstance);
+	public BeanWiringInfo resolveWiringInfo(Object beanInstance) {
+		Assert.notNull(beanInstance, "Bean instance must not be null");
+		return new BeanWiringInfo(beanInstance.getClass().getName());
+	}
 
 }
