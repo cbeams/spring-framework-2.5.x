@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,35 +24,26 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
 
 /**
  * Abstract superaspect for AspectJ transaction aspects. Concrete
- * subaspects will implement the transactionalMethodExecution() pointcut
- * using a strategy such as Java 5 annotations.
- * <p> 
- * Suitable for use inside or outside the Spring
- * IoC container. Set the transactionManager property appropriately, allowing
+ * subaspects will implement the <code>transactionalMethodExecution()</code>
+ * pointcut using a strategy such as Java 5 annotations.
+ *
+ * <p>Suitable for use inside or outside the Spring IoC container.
+ * Set the "transactionManager" property appropriately, allowing
  * use of any transaction implementation supported by Spring.
- * <p>
- * <b>NB:</b> If a method implements an interface that is itself transactionally annotated,
- * the relevant Spring transaction attribute will <i>not</i> be resolved. This behaviour
- * will vary from that of Spring AOP if proxying an interface (but not when proxying
- * a class). We recommend that transaction annotations should be added to classes, rather
- * than business interfaces, as they are an implementation detail rather than a contract
- * specification.
- * validation.
+ *
+ * <p><b>NB:</b> If a method implements an interface that is itself
+ * transactionally annotated, the relevant Spring transaction attribute
+ * will <i>not</i> be resolved. This behavior will vary from that of Spring AOP
+ * if proxying an interface (but not when proxying a class). We recommend that
+ * transaction annotations should be added to classes, rather than business
+ * interfaces, as they are an implementation detail rather than a contract
+ * specification validation.
+ *
  * @author Rod Johnson
  * @author Ramnivas Laddad
  * @since 2.0
  */
 public abstract aspect AbstractTransactionAspect extends TransactionAspectSupport {
-	
-	/**
-	 * Concrete subaspects must implement this pointcut, to identify
-	 * transactional methods. For each selected joinpoint, TransactionMetadata
-	 * will be retrieved using Spring's TransactionAttributeSource interface.
-	 */
-	protected abstract pointcut transactionalMethodExecution(Object txObject);
-	
-	// TODO extend TransactionAttributeSource to support join points besides
-	// methods
 	
 	/**
 	 * Construct object using the given transaction metadata retrieval strategy.
@@ -70,7 +61,9 @@ public abstract aspect AbstractTransactionAspect extends TransactionAspectSuppor
 		Method method = methodSignature.getMethod();
 		//  Create transaction if necessary.
 		TransactionInfo txInfo = createTransactionIfNecessary(method, txObject.getClass());
-		logger.info("Aspect-created transaction: " + txInfo);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Aspect-created transaction: " + txInfo);
+		}
 	}
 	
 	after(Object txObject) throwing(Throwable t) : transactionalMethodExecution(txObject) {
@@ -84,5 +77,15 @@ public abstract aspect AbstractTransactionAspect extends TransactionAspectSuppor
 	after(Object txObject) : transactionalMethodExecution(txObject) {
 		doFinally(TransactionAspectSupport.currentTransactionInfo());
 	}
+
+
+	// TODO extend TransactionAttributeSource to support join points besides methods
+
+	/**
+	 * Concrete subaspects must implement this pointcut, to identify
+	 * transactional methods. For each selected joinpoint, TransactionMetadata
+	 * will be retrieved using Spring's TransactionAttributeSource interface.
+	 */
+	protected abstract pointcut transactionalMethodExecution(Object txObject);
 
 }
