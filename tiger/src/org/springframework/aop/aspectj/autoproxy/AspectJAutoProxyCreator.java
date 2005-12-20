@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.reflect.PerClauseKind;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.AspectJAdvisorFactory;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
@@ -54,20 +53,17 @@ public class AspectJAutoProxyCreator extends InvocationContextExposingAdvisorAut
 	
 	private static final Log staticLogger = LogFactory.getLog(AspectJAutoProxyCreator.class);
 
-	// TODO: Consider with BeanName APC? Or does that defeat the purpose
-    // TODO: Consider renaming AspectJAdvisorAutoProxyCreator
-
-
 	/**
 	 * Look for AspectJ annotated aspect classes in the current bean factory,
-	 * and add to a list of Spring AOP advisors representing them.
+	 * and return to a list of Spring AOP advisors representing them.
 	 * Create a Spring Advisor for each advice method
 	 * @param aspectJAdvisorFactory AdvisorFactory to use
-	 * @param advisors list of Advisors to add to
 	 * @param beanFactory BeanFactory to look for AspectJ annotated aspects in
+	 * @return a list of Spring AOP advisors resulting from AspectJ annotated
+	 * classes in the current Spring bean factory
 	 */
-	public static void addAspectJAdvisors(
-			AspectJAdvisorFactory aspectJAdvisorFactory, List<Advisor> advisors, BeanFactory beanFactory)
+	public static List<Advisor> createAspectJAdvisors(
+			AspectJAdvisorFactory aspectJAdvisorFactory, BeanFactory beanFactory)
 			throws BeansException, IllegalStateException {
 
 		if (!(beanFactory instanceof BeanDefinitionRegistry)) {
@@ -75,6 +71,8 @@ public class AspectJAutoProxyCreator extends InvocationContextExposingAdvisorAut
 					"Cannot look for AspectJ aspects without a BeanDefinitionRegistry");
 		}
 		BeanDefinitionRegistry owningFactory = (BeanDefinitionRegistry) beanFactory;
+		
+		List<Advisor> advisors = new LinkedList<Advisor>();
 
 		for (String beanName : owningFactory.getBeanDefinitionNames()) {
 			// We must be careful not to instantiate beans eagerly as in this
@@ -114,6 +112,7 @@ public class AspectJAutoProxyCreator extends InvocationContextExposingAdvisorAut
 				}
 			}
 		}
+		return advisors;
 	}
 
 
@@ -132,7 +131,7 @@ public class AspectJAutoProxyCreator extends InvocationContextExposingAdvisorAut
 		// Add all the Spring advisors found according to superclass rules
 		advisors.addAll(super.findCandidateAdvisors());
 
-		addAspectJAdvisors(aspectJAdvisorFactory, advisors, getBeanFactory());
+		advisors.addAll(createAspectJAdvisors(aspectJAdvisorFactory, getBeanFactory()));
 		return advisors;
 	}
 
