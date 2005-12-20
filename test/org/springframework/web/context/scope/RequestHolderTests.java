@@ -27,7 +27,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
  */
 public class RequestHolderTests extends TestCase {
 	
-	protected void tearDown() {
+	protected void setUp() {
 		RequestContextHolder.setRequest(null);
 	}
 	

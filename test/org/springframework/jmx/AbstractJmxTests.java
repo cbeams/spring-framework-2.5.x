@@ -10,7 +10,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * Base JMX test class that pre-loads an ApplicationContext from a user-configurable file. Override the
  * {@link #getApplicationContextPath()} method to control the configuration file location.
- * 
+ *
  * @author Rob Harrop
  */
 public abstract class AbstractJmxTests extends AbstractMBeanServerTests {
@@ -20,6 +20,12 @@ public abstract class AbstractJmxTests extends AbstractMBeanServerTests {
 
 	protected final void onSetUp() throws Exception {
 		ctx = new ClassPathXmlApplicationContext(getApplicationContextPath());
+	}
+
+	protected final void onTearDown() throws Exception {
+		if (ctx != null) {
+			ctx.close();
+		}
 	}
 
 	protected String getApplicationContextPath() {

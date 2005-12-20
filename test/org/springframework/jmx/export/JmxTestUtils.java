@@ -14,28 +14,23 @@
  * the License.
  */
 
-package org.springframework.jmx.export.assembler;
+package org.springframework.jmx.export;
 
-import junit.framework.TestCase;
-import org.apache.commons.attributes.Attributes;
-
-import org.springframework.jmx.JmxTestBean;
+import org.springframework.metadata.commons.CommonsAttributeCompilerUtils;
 
 /**
  * @author Rob Harrop
  */
-public abstract class AbstractAutodetectTests extends TestCase {
+public class JmxTestUtils {
 
-	public void testAutodetect() throws Exception {
-		if(Attributes.getAttributes(JmxTestBean.class).size() == 0) {
-			return;
+	private static boolean attributesCompiled = false;
+
+	public static synchronized void compileCommonsAttributesIfNecessary() {
+
+		if (!attributesCompiled) {
+			// If we're within an IDE, compile the attributes programmatically.
+			CommonsAttributeCompilerUtils.compileAttributesIfNecessary("**/jmx/**/*.java");
+			attributesCompiled = true;
 		}
-		JmxTestBean bean = new JmxTestBean();
-
-		AutodetectCapableMBeanInfoAssembler assembler = getAssembler();
-		assertTrue("The bean should be included", assembler.includeBean(bean.getClass(), "testBean"));
 	}
-
-	protected abstract AutodetectCapableMBeanInfoAssembler getAssembler();
-
 }

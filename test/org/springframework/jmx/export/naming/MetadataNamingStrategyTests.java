@@ -18,6 +18,7 @@ package org.springframework.jmx.export.naming;
 
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.metadata.AttributesJmxAttributeSource;
+import org.springframework.jmx.export.JmxTestUtils;
 import org.springframework.metadata.commons.CommonsAttributes;
 
 /**
@@ -25,6 +26,10 @@ import org.springframework.metadata.commons.CommonsAttributes;
  */
 public class MetadataNamingStrategyTests extends AbstractNamingStrategyTests {
 
+	static {
+		JmxTestUtils.compileCommonsAttributesIfNecessary();
+	}
+	
 	private static final String OBJECT_NAME = "spring:bean=test";
 
 	protected ObjectNamingStrategy getStrategy() throws Exception {

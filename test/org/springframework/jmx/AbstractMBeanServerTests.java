@@ -1,10 +1,10 @@
 package org.springframework.jmx;
 
-import junit.framework.TestCase;
-
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
+
+import junit.framework.TestCase;
 
 /**
  * @author Rob Harrop
@@ -15,14 +15,28 @@ public abstract class AbstractMBeanServerTests extends TestCase {
 
 	public final void setUp() throws Exception {
 		this.server = MBeanServerFactory.createMBeanServer();
-		onSetUp();
+		try {
+			onSetUp();
+		}
+		catch (Exception e) {
+			releaseServer();
+			throw e;
+		}
 	}
 
 	protected void tearDown() throws Exception {
+		releaseServer();
+		onTearDown();
+	}
+
+	private void releaseServer() {
 		MBeanServerFactory.releaseMBeanServer(this.getServer());
 	}
 
-	protected void onSetUp() throws Exception{
+	protected void onTearDown() throws Exception {
+	}
+
+	protected void onSetUp() throws Exception {
 	}
 
 	public MBeanServer getServer() {

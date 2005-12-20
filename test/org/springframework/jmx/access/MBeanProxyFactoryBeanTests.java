@@ -24,7 +24,7 @@ import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jmx.AbstractJmxTests;
 import org.springframework.jmx.IJmxTestBean;
-import org.springframework.jmx.AbstractMBeanServerTests;
+import org.springframework.jmx.export.JmxTestUtils;
 import org.springframework.jmx.support.ObjectNameManager;
 
 /**
@@ -34,6 +34,10 @@ import org.springframework.jmx.support.ObjectNameManager;
  */
 public class MBeanProxyFactoryBeanTests extends AbstractJmxTests {
 
+	static {
+		JmxTestUtils.compileCommonsAttributesIfNecessary();
+	}
+	
 	private static final String OBJECT_NAME = "bean:name=testBean1";
 
 	protected ObjectName getObjectName() throws Exception {

@@ -16,6 +16,7 @@
 
 package org.springframework.jmx.export.assembler;
 
+import org.springframework.jmx.export.JmxTestUtils;
 import org.springframework.jmx.export.metadata.AttributesJmxAttributeSource;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.metadata.commons.CommonsAttributes;
@@ -24,6 +25,10 @@ import org.springframework.metadata.commons.CommonsAttributes;
  * @author Rob Harrop
  */
 public class CommonsAttributesMetadataAssemblerTests extends AbstractMetadataAssemblerTests {
+
+	static {
+		JmxTestUtils.compileCommonsAttributesIfNecessary();
+	}
 
 	private static final String OBJECT_NAME = "bean:name=testBean3";
 

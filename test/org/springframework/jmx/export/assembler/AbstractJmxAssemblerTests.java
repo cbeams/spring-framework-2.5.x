@@ -63,11 +63,6 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 				getExpectedAttributeCount(), inf.getAttributes().length);
 	}
 
-	protected IJmxTestBean getBean() {
-		Object bean = getContext().getBean("testBean");
-		return (IJmxTestBean) bean;
-	}
-
 	public void testGetMBeanInfo() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		assertNotNull("MBeanInfo should not be null", info);
@@ -179,6 +174,11 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 		IJmxTestBean bean = getBean();
 		ModelMBeanInfo info = getAssembler().getMBeanInfo(bean, getObjectName());
 		return info;
+	}
+
+	protected IJmxTestBean getBean() {
+		Object bean = getContext().getBean("testBean");
+		return (IJmxTestBean) bean;
 	}
 
 	protected MBeanInfo getMBeanInfo() throws Exception {

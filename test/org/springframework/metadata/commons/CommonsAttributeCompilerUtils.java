@@ -17,7 +17,6 @@
 package org.springframework.metadata.commons;
 
 import java.io.File;
-import java.net.URL;
 
 import org.apache.commons.attributes.compiler.AttributeCompiler;
 import org.apache.tools.ant.Project;
@@ -38,7 +37,7 @@ import org.springframework.core.ControlFlowFactory;
  */
 public class CommonsAttributeCompilerUtils {
 
-	public static final String MARKER_FILE = "/org.springframework.test.marker";
+	public static final String MARKER_FILE = "/org/springframework/beans/BeanFactory.class";
 	
 	public static void compileAttributesIfNecessary(String testWildcards) {
 		if (inIde()) {
@@ -47,7 +46,11 @@ public class CommonsAttributeCompilerUtils {
 	}
 
 	public static boolean inIde() {
-		return inEclipse();
+		return inEclipse() || inIdea();
+	}
+
+	private static boolean inIdea() {
+		return ControlFlowFactory.createControlFlow().underToken("com.intellij");
 	}
 
 	public static boolean inEclipse() {
@@ -59,10 +62,10 @@ public class CommonsAttributeCompilerUtils {
 		System.out.println("Compiling attributes under IDE");
 		Project project = new Project();
 		
-		URL markerUrl = CommonsAttributeCompilerUtils.class.getResource(MARKER_FILE);
-		File markerFile = new File(markerUrl.getFile());
+		//URL markerUrl = CommonsAttributeCompilerUtils.class.getResource(MARKER_FILE);
+		//File markerFile = new File(markerUrl.getFile());
 		// we know marker is in /target/test-classes
-		File root = markerFile.getParentFile().getParentFile().getParentFile();
+		File root = new File("./");
 		
 		project.setBaseDir(root);
 		project.init();
@@ -92,7 +95,12 @@ public class CommonsAttributeCompilerUtils {
 
 		// Couldn't get this to work: trying to use Eclipse
 		//javac.setCompiler("org.eclipse.jdt.core.JDTCompilerAdapter");
-		javac.setDestdir(new File(root.getPath() + File.separator + "target/test-classes"));
+		File destDir = new File(root.getPath() + File.separator + "target/test-classes");
+		if(!destDir.exists()) {
+			destDir.mkdir();
+		}
+
+		javac.setDestdir(destDir);
 		javac.setIncludes(attributeClasses);
 		javac.execute();
 	}

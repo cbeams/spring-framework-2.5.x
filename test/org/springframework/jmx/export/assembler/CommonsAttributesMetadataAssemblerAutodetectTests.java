@@ -18,6 +18,7 @@ package org.springframework.jmx.export.assembler;
 
 import org.springframework.jmx.export.metadata.AttributesJmxAttributeSource;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
+import org.springframework.jmx.export.JmxTestUtils;
 import org.springframework.metadata.commons.CommonsAttributes;
 
 /**
@@ -26,6 +27,10 @@ import org.springframework.metadata.commons.CommonsAttributes;
 public class CommonsAttributesMetadataAssemblerAutodetectTests
 		extends AbstractMetadataAssemblerAutodetectTests {
 
+	static {
+		JmxTestUtils.compileCommonsAttributesIfNecessary();
+	}
+	
 	protected JmxAttributeSource getAttributeSource() {
 		return new AttributesJmxAttributeSource(new CommonsAttributes());
 	}
