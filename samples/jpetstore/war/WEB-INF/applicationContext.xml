@@ -11,7 +11,7 @@
 	   xmlns:tx="http://www.springframework.org/schema/tx"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
-       http://www.springframework.org/schema/tx http://www.springframework.org/schema/transaction/spring-tx.xsd">
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
 	<!-- ========================= GENERAL DEFINITIONS ========================= -->
 
@@ -27,11 +27,12 @@
 	</bean>
 	
 	<!-- MailSender used by EmailAdvice -->
-	
+	<!--
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
 		<property name="host" value="${mail.host}"/>
 	</bean>
-	
+	-->
+
 
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ======================== -->
 
@@ -46,12 +47,22 @@
 	<bean id="emailAdvice" class="org.springframework.samples.jpetstore.domain.logic.SendOrderConfirmationEmailAdvice">
 		<property name="mailSender" ref="mailSender"/>
 	</bean>-->
-	
+
+	<!--
+		This definition creates auto-proxy infrastructure based on the given pointcut,
+		expressed in AspectJ pointcut language. Here: applying the advice named
+		"txAdvice" to all methods on classes named PetStoreImpl.
+	-->
 	<aop:config>
-		<aop:advisor pointcut="execution(* *..PetStore.*(..))"
-					 advice-ref="txAdvice"/>
-	</aop:config>	
-	
+		<aop:advisor pointcut="execution(* *..PetStoreImpl.*(..))" advice-ref="txAdvice"/>
+	</aop:config>
+
+	<!--
+		Transaction advice definition, based on method name patterns.
+		Defaults to PROPAGATION_REQUIRED for all methods whose name starts with
+		"insert" or "update", and to PROPAGATION_REQUIRED with read-only hint
+		for all other methods.
+	-->
 	<tx:advice id="txAdvice">
 		<tx:attributes>
 			<tx:method name="insert*"/>
@@ -59,7 +70,7 @@
 			<tx:method name="*" read-only="true"/>
 		</tx:attributes>
 	</tx:advice>
-	
+
 	<!--
 	  - JPetStore primary business object (default implementation)
 		-->
