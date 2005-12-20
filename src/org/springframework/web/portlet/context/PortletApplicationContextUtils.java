@@ -18,6 +18,7 @@ package org.springframework.web.portlet.context;
 
 import javax.portlet.PortletContext;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -42,9 +43,11 @@ public abstract class PortletApplicationContextUtils {
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param pc PortletContext to find the web application context for
 	 * @return the root WebApplicationContext for this web app, or <code>null</code> if none
+	 * (typed to ApplicationContext to avoid a Servlet API dependency; can usually
+	 * be casted to WebApplicationContext, but there shouldn't be a need to)
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
-	public static WebApplicationContext getWebApplicationContext(PortletContext pc) {
+	public static ApplicationContext getWebApplicationContext(PortletContext pc) {
 		Object attr = pc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		if (attr == null) {
 			return null;
@@ -55,10 +58,10 @@ public abstract class PortletApplicationContextUtils {
 		if (attr instanceof Error) {
 			throw (Error) attr;
 		}
-		if (!(attr instanceof WebApplicationContext)) {
+		if (!(attr instanceof ApplicationContext)) {
 			throw new IllegalStateException("Root context attribute is not of type WebApplicationContext: " + attr);
 		}
-		return (WebApplicationContext) attr;
+		return (ApplicationContext) attr;
 	}
 
 	/**
@@ -68,13 +71,15 @@ public abstract class PortletApplicationContextUtils {
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param pc PortletContext to find the web application context for
 	 * @return the root WebApplicationContext for this web app
+	 * (typed to ApplicationContext to avoid a Servlet API dependency; can usually
+	 * be casted to WebApplicationContext, but there shouldn't be a need to)
 	 * @throws IllegalStateException if the root WebApplicationContext could not be found
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
-	public static WebApplicationContext getRequiredWebApplicationContext(PortletContext pc)
+	public static ApplicationContext getRequiredWebApplicationContext(PortletContext pc)
 	    throws IllegalStateException {
 
-		WebApplicationContext wac = getWebApplicationContext(pc);
+		ApplicationContext wac = getWebApplicationContext(pc);
 		if (wac == null) {
 			throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
 		}

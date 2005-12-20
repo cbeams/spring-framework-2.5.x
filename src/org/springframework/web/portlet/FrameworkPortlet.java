@@ -30,10 +30,10 @@ import javax.portlet.RenderResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
 import org.springframework.web.portlet.context.PortletApplicationContextUtils;
 import org.springframework.web.portlet.context.RequestHandledEvent;
@@ -45,7 +45,7 @@ import org.springframework.web.portlet.context.XmlPortletApplicationContext;
  *
  * <p>This class offers the following functionality:
  * <ul>
- * <li>Uses a PortletApplicationContext to access a BeanFactory. The portlet's
+ * <li>Uses a Portlet ApplicationContext to access a BeanFactory. The portlet's
  * configuration is determined by beans in the portlet's namespace.
  * <li>Publishes events on request processing, whether or not a request is
  * successfully handled.
@@ -97,14 +97,14 @@ public abstract class FrameworkPortlet extends PortletBean {
 	public static final Class DEFAULT_CONTEXT_CLASS = XmlPortletApplicationContext.class;
 
 	/**
-	 * Suffix for PortletApplicationContext namespaces. If a portlet of this class is
+	 * Suffix for Portlet ApplicationContext namespaces. If a portlet of this class is
 	 * given the name "test" in a context, the namespace used by the portlet will
 	 * resolve to "test-portlet".
 	 */
 	public static final String DEFAULT_NAMESPACE_SUFFIX = "-portlet";
 
 	/**
-	 * Prefix for the PortletContext attribute for the PortletApplicationContext.
+	 * Prefix for the PortletContext attribute for the Portlet ApplicationContext.
 	 * The completion is the portlet name.
 	 */
 	public static final String PORTLET_CONTEXT_PREFIX = FrameworkPortlet.class.getName() + ".CONTEXT.";
@@ -117,7 +117,7 @@ public abstract class FrameworkPortlet extends PortletBean {
 
 
 	/**
-	 * PortletApplicationContext implementation class to use
+	 * Portlet ApplicationContext implementation class to use
 	 */
 	private Class contextClass = DEFAULT_CONTEXT_CLASS;
 
@@ -147,13 +147,13 @@ public abstract class FrameworkPortlet extends PortletBean {
 	private String[] userinfoUsernameAttributes = DEFAULT_USERINFO_ATTRIBUTE_NAMES;
 
 	/**
-	 * WebApplicationContext for this portlet
+	 * ApplicationContext for this portlet
 	 */
-	private WebApplicationContext portletApplicationContext;
+	private ApplicationContext portletApplicationContext;
 
 
 	/**
-	 * Set a custom context class. This class must be of type PortletApplicationContext;
+	 * Set a custom context class. This class must be of type ApplicationContext;
 	 * when using the default FrameworkPortlet implementation, the context class
 	 * must also implement ConfigurablePortletApplicationContext.
 	 * @see #createPortletApplicationContext
@@ -256,7 +256,7 @@ public abstract class FrameworkPortlet extends PortletBean {
 
 	/**
 	 * Overridden method of PortletBean, invoked after any bean properties
-	 * have been set. Creates this portlet's PortletApplicationContext.
+	 * have been set. Creates this portlet's ApplicationContext.
 	 */
 	protected final void initPortletBean() throws PortletException, BeansException {
 		long startTime = System.currentTimeMillis();
@@ -287,21 +287,21 @@ public abstract class FrameworkPortlet extends PortletBean {
 	 * Initialize and publish the PortletApplicationContext for this portlet.
 	 * Delegates to createPortletApplicationContext for actual creation.
 	 * Can be overridden in subclasses.
-	 * @return the PortletApplicationContext for this portlet
+	 * @return the Portlet ApplicationContext for this portlet
 	 * @throws BeansException if the context couldn't be initialized
 	 * @see #createPortletApplicationContext
 	 */
-	protected WebApplicationContext initPortletApplicationContext() throws BeansException {
+	protected ApplicationContext initPortletApplicationContext() throws BeansException {
 		getPortletContext().log("Loading PortletApplicationContext for Spring FrameworkPortlet '" + getPortletName() + "'");
 
-		WebApplicationContext parent = PortletApplicationContextUtils.getWebApplicationContext(getPortletContext());
-		WebApplicationContext pac = createPortletApplicationContext(parent);
+		ApplicationContext parent = PortletApplicationContextUtils.getWebApplicationContext(getPortletContext());
+		ApplicationContext pac = createPortletApplicationContext(parent);
 		if (logger.isInfoEnabled()) {
 			logger.info("Using context class '" + pac.getClass().getName() + "' for portlet '" +
 					getPortletName() + "'");
 		}
 
-		if (this.publishContext) {
+		if (isPublishContext()) {
 			// publish the context as a portlet context attribute
 			String attName = getPortletContextAttributeName();
 			getPortletContext().setAttribute(attName, pac);
@@ -319,12 +319,12 @@ public abstract class FrameworkPortlet extends PortletBean {
 	 * expects custom contexts to implement ConfigurablePortletApplicationContext.
 	 * Can be overridden in subclasses.
 	 * @param parent the parent ApplicationContext to use, or null if none
-	 * @return the PortletApplicationContext for this portlet
+	 * @return the Portlet ApplicationContext for this portlet
 	 * @throws BeansException if the context couldn't be initialized
 	 * @see #setContextClass
 	 * @see org.springframework.web.portlet.context.XmlPortletApplicationContext
 	 */
-	protected WebApplicationContext createPortletApplicationContext(WebApplicationContext parent)
+	protected ApplicationContext createPortletApplicationContext(ApplicationContext parent)
 			throws BeansException {
 
 		if (logger.isDebugEnabled()) {
@@ -365,7 +365,7 @@ public abstract class FrameworkPortlet extends PortletBean {
 	/**
 	 * Return this portlet's ApplicationContext.
 	 */
-	public final WebApplicationContext getPortletApplicationContext() {
+	public final ApplicationContext getPortletApplicationContext() {
 		return portletApplicationContext;
 	}
 
