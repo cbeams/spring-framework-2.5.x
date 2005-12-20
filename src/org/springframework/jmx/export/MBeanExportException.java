@@ -16,7 +16,7 @@
 
 package org.springframework.jmx.export;
 
-import org.springframework.core.NestedRuntimeException;
+import org.springframework.jmx.JmxException;
 
 /**
  * Exception thrown in case of failure when exporting an MBean.
@@ -25,7 +25,7 @@ import org.springframework.core.NestedRuntimeException;
  * @since 2.0
  * @see MBeanExportOperations
  */
-public class MBeanExportException extends NestedRuntimeException {
+public class MBeanExportException extends JmxException {
 
 	/**
 	 * Create a new <code>MBeanExportException</code> with the

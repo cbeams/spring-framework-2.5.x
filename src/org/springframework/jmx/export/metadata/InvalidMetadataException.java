@@ -16,7 +16,7 @@
 
 package org.springframework.jmx.export.metadata;
 
-import javax.management.JMRuntimeException;
+import org.springframework.jmx.JmxException;
 
 /**
  * Thrown by the <code>JmxAttributeSource</code> when it encounters
@@ -27,7 +27,7 @@ import javax.management.JMRuntimeException;
  * @see JmxAttributeSource
  * @see org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler
  */
-public class InvalidMetadataException extends JMRuntimeException {
+public class InvalidMetadataException extends JmxException {
 
 	/**
 	 * Create a new <code>InvalidMetadataException</code> with the supplied

@@ -16,7 +16,7 @@
 
 package org.springframework.jmx.export.notification;
 
-import org.springframework.core.NestedRuntimeException;
+import org.springframework.jmx.JmxException;
 
 /**
  * Exception thrown when we are unable to send a JMX notification.
@@ -25,7 +25,7 @@ import org.springframework.core.NestedRuntimeException;
  * @since 2.0
  * @see NotificationPublisher
  */
-public class UnableToSendNotificationException extends NestedRuntimeException {
+public class UnableToSendNotificationException extends JmxException {
 
 	/**
 	 * Create a new <code>UnableToSendNotificationException</code> with the

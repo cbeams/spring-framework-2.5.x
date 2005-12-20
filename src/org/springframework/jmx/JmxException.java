@@ -19,32 +19,28 @@ package org.springframework.jmx;
 import org.springframework.core.NestedRuntimeException;
 
 /**
- * Exception thrown when we cannot locate an instance of an <code>MBeanServer</code>,
- * or when more than one instance is found.
+ * General base exception to be thrown on JMX errors.
+ * Unchecked since JMX failures are usually fatal.
  *
- * @author Rob Harrop
  * @author Juergen Hoeller
- * @since 1.2
- * @see org.springframework.jmx.support.JmxUtils#locateMBeanServer
+ * @since 2.0
  */
-public class MBeanServerNotFoundException extends JmxException {
+public class JmxException extends NestedRuntimeException {
 
 	/**
-	 * Create a new <code>MBeanServerNotFoundException</code> with the
-	 * supplied error message.
-	 * @param msg the error message
+	 * Constructor for JmxException.
+	 * @param msg the detail message
 	 */
-	public MBeanServerNotFoundException(String msg) {
+	public JmxException(String msg) {
 		super(msg);
 	}
 
 	/**
-	 * Create a new <code>MBeanServerNotFoundException</code> with the
-	 * specified error message and root cause.
-	 * @param msg the error message
-	 * @param ex the root cause
+	 * Constructor for JmxException.
+	 * @param msg the detail message
+	 * @param ex root cause (usually a raw JMX API exception)
 	 */
-	public MBeanServerNotFoundException(String msg, Throwable ex) {
+	public JmxException(String msg, Throwable ex) {
 		super(msg, ex);
 	}
 

@@ -16,7 +16,7 @@
 
 package org.springframework.jmx.access;
 
-import org.springframework.core.NestedRuntimeException;
+import org.springframework.jmx.JmxException;
 
 /**
  * Thrown if an exception is encountered when trying to retrieve
@@ -28,7 +28,7 @@ import org.springframework.core.NestedRuntimeException;
  * @see MBeanClientInterceptor
  * @see MBeanProxyFactoryBean
  */
-public class MBeanInfoRetrievalException extends NestedRuntimeException {
+public class MBeanInfoRetrievalException extends JmxException {
 
 	/**
 	 * Create a new <code>MBeanInfoRetrievalException</code> with the

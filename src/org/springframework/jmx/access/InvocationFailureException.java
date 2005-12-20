@@ -16,7 +16,7 @@
 
 package org.springframework.jmx.access;
 
-import org.springframework.core.NestedRuntimeException;
+import org.springframework.jmx.JmxException;
 
 /**
  * Thrown when trying to invoke an operation on a proxy that is not exposed
@@ -26,7 +26,7 @@ import org.springframework.core.NestedRuntimeException;
  * @since 1.2
  * @see MBeanClientInterceptor
  */
-public class InvocationFailureException extends NestedRuntimeException {
+public class InvocationFailureException extends JmxException {
 
 	/**
 	 * Create a new <code>InvocationFailureException</code> with the supplied
