@@ -1134,7 +1134,7 @@ public class ExampleBean {
         Spring to inject/override this method to return a particular bean from
         the container, by using the <literal>lookup-method</literal> element
         inside the bean definition. For example:<programlisting>&lt;!-- a stateful bean deployed as a prototype (non-singleton) --&gt;
-&lt;bean id="singleShotHelper class="..." singleton="false"&gt;
+&lt;bean id="singleShotHelper" class="..." singleton="false"&gt;
 &lt;/bean&gt;
 
 &lt;!-- myBean uses singleShotHelper --&gt;
