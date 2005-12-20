@@ -119,8 +119,9 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 				this.handlerMappings.put(namespaceUri, BeanUtils.instantiateClass(handlerClass));
 			}
 			catch (ClassNotFoundException ex) {
-				throw new FatalBeanException("Unable to locate NamespaceHandler class ["
-						+ className + "] for namespace URI [" + namespaceUri + "]", ex);
+				if(logger.isInfoEnabled()) {
+					logger.info("Ignoring handler [" + className + "]. Class not found.");
+				}
 			}
 		}
 	}

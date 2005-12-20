@@ -18,7 +18,6 @@ package org.springframework.beans.factory.xml.support;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.UtilNamespaceHandler;
@@ -39,10 +38,10 @@ public class DefaultNamespaceHandlerResolverTests extends TestCase {
 		String mappingPath = "org/springframework/beans/factory/xml/support/nonExistent.properties";
 		try {
 			new DefaultNamespaceHandlerResolver(mappingPath, getClass().getClassLoader());
-			fail("Should not be able to map a URI to a non-existent class");
+			// pass
 		}
-		catch (FatalBeanException ex) {
-			assertEquals("Incorrect root cause.", ClassNotFoundException.class, ex.getCause().getClass());
+		catch (Throwable t) {
+			fail("Non-existent handler classes should be ignored");
 		}
 	}
 
