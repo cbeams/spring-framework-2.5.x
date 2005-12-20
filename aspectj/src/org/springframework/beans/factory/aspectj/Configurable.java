@@ -23,7 +23,11 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 
+import org.springframework.beans.factory.config.Autowire;
+
 /**
+ * Annotation for 
+ * @author Rod Johnson
  * @author Rob Harrop
  * @author Adrian Colyer
  */
@@ -34,4 +38,8 @@ import java.lang.annotation.Inherited;
 public @interface Configurable {
 
 	String value() default "";
+	
+	Autowire autowire() default Autowire.NO;
+	
+	boolean dependencyCheck() default false;
 }

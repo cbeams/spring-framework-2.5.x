@@ -17,28 +17,55 @@ package org.springframework.beans.factory.aspectj;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.config.Autowire;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Adrian Colyer
- *
+ * @author Rod Johnson
  */
 public class BeanConfigurerTests extends TestCase {
 
-	public void testSpringConfiguredWithExplicitBeanName() {
+	public void testConfiburableWithExplicitBeanName() {
 		ShouldBeConfiguredBySpring myObject = new ShouldBeConfiguredBySpring();
 		assertEquals("Rod",myObject.getName());
 	}
 	
-	public void testNoSpringConfigurationWithoutAnnotation() {
+	public void testWithoutAnnotation() {
 		ShouldNotBeConfiguredBySpring myObject = new ShouldNotBeConfiguredBySpring();
 		assertNull("Name should not have been set",myObject.getName());
 	}
 	
-	public void testSpringConfiguredWithImplicitBeanName() {
+	public void testConfigurableWithImplicitBeanName() {
 		ShouldBeConfiguredBySpringUsingTypeNameAsBeanName myObject =
 			new ShouldBeConfiguredBySpringUsingTypeNameAsBeanName();
 		assertEquals("Rob",myObject.getName());
+	}
+	
+	public void testConfigurableUsingAutowireByType() {
+		ShouldBeConfiguredBySpringUsingAutowireByType myObject =
+			new ShouldBeConfiguredBySpringUsingAutowireByType();
+		assertNotNull(myObject.getFriend());
+		assertEquals("Ramnivas", myObject.getFriend().getName());
+	}
+	
+	public void testConfigurableUsingAutowireByName() {
+		ValidAutowireByName myObject =
+			new ValidAutowireByName();
+		assertNotNull(myObject.getRamnivas());
+		assertEquals("Ramnivas", myObject.getRamnivas().getName());
+	}
+	
+	public void testInvalidAutowireByName() {
+		try {
+			new InvalidAutowireByName();
+			fail("Autowire by name cannot work");
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			// Ok
+		}
 	}
 	
 	@Override
@@ -59,7 +86,6 @@ public class BeanConfigurerTests extends TestCase {
 		public String getName() {
 			return this.name;
 		}
-		
 	}
 	
 	private static class ShouldNotBeConfiguredBySpring {
@@ -73,7 +99,6 @@ public class BeanConfigurerTests extends TestCase {
 		public String getName() {
 			return this.name;
 		}
-
 	}
 	
 	@Configurable
@@ -88,8 +113,86 @@ public class BeanConfigurerTests extends TestCase {
 		public String getName() {
 			return this.name;
 		}
+	}
+	
+	@Configurable(autowire=Autowire.BY_TYPE)
+	private static class ShouldBeConfiguredBySpringUsingAutowireByType {
+		
+		private TestBean friend;
+
+		public TestBean getFriend() {
+			return friend;
+		}
+
+		public void setFriend(TestBean friend) {
+			this.friend = friend;
+		}
+	}
+	
+	@Configurable(autowire=Autowire.BY_NAME)
+	private static class ValidAutowireByName {
+		
+		private TestBean friend;
+
+		public TestBean getRamnivas() {
+			return friend;
+		}
+
+		public void setRamnivas(TestBean friend) {
+			this.friend = friend;
+		}
+	}
+	
+	@Configurable(autowire=Autowire.BY_NAME, dependencyCheck=true)
+	private static class InvalidAutowireByName {
+		
+		private TestBean friend;
+
+		public TestBean getFriend() {
+			return friend;
+		}
+
+		public void setFriend(TestBean friend) {
+			this.friend = friend;
+		}
+	}
+	
+	private static class ArbitraryExistingPojo {
+		private TestBean friend;
+		public void setFriend(TestBean f) {
+			this.friend = f;
+		}
+	}
+	
+	private static aspect WireArbitraryExistingPojo extends AbstractBeanConfigurer {
+		protected pointcut beanCreation(Object beanInstance) :
+			  initialization(ArbitraryExistingPojo.new(..)) &&
+	        	this(beanInstance);
+	}
+	
+	public void testNewAspectAppliesToArbitraryNonAnnotatedPojo() {
+		ArbitraryExistingPojo aep = new ArbitraryExistingPojo();
+		assertNotNull(aep.friend);
+		assertEquals("Ramnivas", aep.friend.getName());
+	}
+	
+	private static aspect AspectThatWillNotBeUsed extends AbstractBeanConfigurer {
+		protected pointcut beanCreation(Object beanInstance) :
+			  initialization(ClassThatWillNotActuallyBeWired.new(..)) &&
+	        	this(beanInstance);
+	}
+	
+	private static class ClassThatWillNotActuallyBeWired {
 		
 	}
-
+	
+	public void testNewAspectThatWasNotAddedToSpringContainer() {
+		try{
+			new ClassThatWillNotActuallyBeWired();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue(ex.getMessage().indexOf("BeanFactory") != -1);
+		}
+	}
 }
 

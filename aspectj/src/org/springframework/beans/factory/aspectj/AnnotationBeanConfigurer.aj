@@ -16,7 +16,6 @@
  
 package org.springframework.beans.factory.aspectj;
 
-
 /**
  * Concrete aspect that uses the Configurable annotation to identify
  * which classes need autowiring. The bean name to look up will be
@@ -36,11 +35,14 @@ public aspect AnnotationBeanConfigurer extends AbstractBeanConfigurer {
 				Class<?> clazz = instance.getClass();
 				Configurable configurableAnnotation = clazz.getAnnotation(Configurable.class);
 				if (configurableAnnotation != null) {
-					String beanName = configurableAnnotation.value();
-					if ("".equals(beanName)) {
-						beanName = clazz.getName();
+					if (configurableAnnotation.autowire().isAutowire()) {
+						return new BeanWiringInfo(configurableAnnotation.autowire().value(), configurableAnnotation.dependencyCheck());
 					}
-					return new BeanWiringInfo(beanName);
+					else {
+						// Bean name may be explicit or defaulted to FQN
+						String beanName = ("".equals(configurableAnnotation.value())) ? clazz.getName() : configurableAnnotation.value();
+						return new BeanWiringInfo(beanName);
+					}
 				}
 				return null;
 			}

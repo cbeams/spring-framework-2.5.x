@@ -18,6 +18,7 @@ package org.springframework.beans.factory.aspectj;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
@@ -61,7 +62,9 @@ public abstract aspect AbstractBeanConfigurer implements BeanFactoryAware {
     	this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
     }
 	/**
-     * The creation of a new bean (an object with the @SpringConfigured annotation)
+     * The creation of a new bean. Subaspects are responsible for
+     * matching strategy, which may include an annotation but may match
+     * existing objects, and may work without requiring Java 5 or AspectJ 5.
      */
     protected abstract pointcut beanCreation(Object beanInstance);
 
@@ -72,7 +75,7 @@ public abstract aspect AbstractBeanConfigurer implements BeanFactoryAware {
       beanCreation(beanInstance) {
     	BeanWiringInfo bwi = beanWiringInfoResolver.resolve(beanInstance);
     	if (bwi != null) {
-    		configureBean(beanInstance, bwi.getBeanName());
+    		configureBean(beanInstance, bwi);
     	}
     }
 
@@ -80,7 +83,26 @@ public abstract aspect AbstractBeanConfigurer implements BeanFactoryAware {
      * Configure the bean instance using the given bean name. Sub-aspects can
      * override to provide custom configuration logic.
      */
-    protected void configureBean(Object bean, String beanName) {;
-        this.beanFactory.applyBeanPropertyValues(bean, beanName);
+    private void configureBean(Object bean, BeanWiringInfo bwi) {
+    	if (this.beanFactory == null) {
+    		throw new IllegalStateException("BeanFactory has not be set on aspect " + this.getClass().getName() + ": " +
+    				"This aspect should normally be added to a Spring container, for example in an XML bean definition");
+    	}
+    	
+    	if (bwi.hasBeanName()) {
+    		// Do explicit wiring
+    		this.beanFactory.applyBeanPropertyValues(bean, bwi.getBeanName());
+    	}
+    	else {
+    		// Do autowire
+    		if (this.beanFactory instanceof AutowireCapableBeanFactory) {
+    			AutowireCapableBeanFactory aacbf = (AutowireCapableBeanFactory) this.beanFactory;
+    			aacbf.autowireBeanProperties(bean, bwi.getAutowireMode(), bwi.getDependencyCheck());
+    		}
+    		else {
+    			throw new IllegalArgumentException("Cannot autowire with factory " + this.beanFactory + "; " +
+    					"Found autowire annotation on class " + bean.getClass().getName());
+    		}
+    	}
     }
 }

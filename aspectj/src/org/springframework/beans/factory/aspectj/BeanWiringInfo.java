@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.aspectj;
 
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+
 /**
  * Class holding wiring metadata information about a bean definition.
  * 
@@ -25,14 +27,38 @@ public class BeanWiringInfo {
 	
 	private final String beanName;
 	
+	private final int autowireMode;
+	
+	private final boolean dependencyCheck;
+	
 	public BeanWiringInfo(String beanName) {
+		this(beanName, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
+	}
+	
+	public BeanWiringInfo(int autowireMode, boolean dependencyCheck) {
+		this(null, autowireMode, dependencyCheck);
+	}
+	
+	private BeanWiringInfo(String beanName, int autowireMode, boolean dependencyCheck) {
 		this.beanName = beanName;
+		this.autowireMode = autowireMode;
+		this.dependencyCheck = dependencyCheck;
+	}
+	
+	public boolean hasBeanName() {
+		return beanName != null;
 	}
 
 	public String getBeanName() {
 		return beanName;
 	}
-
 	
+	public int getAutowireMode() {
+		return autowireMode;
+	}
+	
+	public boolean getDependencyCheck() {
+		return dependencyCheck;
+	}
 
 }
