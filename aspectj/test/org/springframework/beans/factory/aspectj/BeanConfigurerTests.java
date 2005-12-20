@@ -17,6 +17,8 @@ package org.springframework.beans.factory.aspectj;
 
 import junit.framework.TestCase;
 
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.Autowire;
@@ -164,10 +166,12 @@ public class BeanConfigurerTests extends TestCase {
 		}
 	}
 	
-	private static aspect WireArbitraryExistingPojo extends AbstractBeanConfigurer {
-		protected pointcut beanCreation(Object beanInstance) :
-			  initialization(ArbitraryExistingPojo.new(..)) &&
-	        	this(beanInstance);
+	@Aspect
+	private static class WireArbitraryExistingPojo extends AbstractBeanConfigurer {
+		@Pointcut("initialization(ArbitraryExistingPojo.new(..)) && this(beanInstance)")
+		protected void beanCreation(Object beanInstance){
+			
+		}
 	}
 	
 	public void testNewAspectAppliesToArbitraryNonAnnotatedPojo() {
@@ -176,10 +180,17 @@ public class BeanConfigurerTests extends TestCase {
 		assertEquals("Ramnivas", aep.friend.getName());
 	}
 	
-	private static aspect AspectThatWillNotBeUsed extends AbstractBeanConfigurer {
-		protected pointcut beanCreation(Object beanInstance) :
-			  initialization(ClassThatWillNotActuallyBeWired.new(..)) &&
-	        	this(beanInstance);
+//	private static aspect AspectThatWillNotBeUsed extends AbstractBeanConfigurer {
+//		protected pointcut beanCreation(Object beanInstance) :
+//			  initialization(ClassThatWillNotActuallyBeWired.new(..)) &&
+//	        	this(beanInstance);
+//	}
+	
+	@Aspect
+	private static class AspectThatWillNotBeUsed extends AbstractBeanConfigurer {
+		@Pointcut("initialization(ClassThatWillNotActuallyBeWired.new(..)) && this(beanInstance)")
+		protected void beanCreation(Object beanInstance){
+		}
 	}
 	
 	private static class ClassThatWillNotActuallyBeWired {
