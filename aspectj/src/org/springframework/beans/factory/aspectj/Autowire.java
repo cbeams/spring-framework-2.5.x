@@ -14,36 +14,34 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.config;
+package org.springframework.beans.factory.aspectj;
 
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 /**
- * Enumeration determining autowiring status: 
- * that is, whether a bean should have its dependencies automatically injected
- * by the Spring container using setter injection. This is a core concept in Spring DI.
- * Note that constructor autowiring is not available as bean creation methods will themselves
- * invoke bean constructors.
+ * Enumeration determining autowiring status: that is, whether a bean should
+ * have its dependencies automatically injected by the Spring container using
+ * setter injection. This is a core concept in Spring DI.
+ *
+ * <p>Note that constructor autowiring is not available here,
+ * as bean creation methods will themselves invoke bean constructors.
+ *
  * @author Rod Johnson
  * @since 2.0
  * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
  */
 public enum Autowire {
 	
-	UNSPECIFIED(-1),
-	NO(AbstractBeanDefinition.AUTOWIRE_NO),
-	BY_TYPE(AbstractBeanDefinition.AUTOWIRE_BY_TYPE),
-	BY_NAME(AbstractBeanDefinition.AUTOWIRE_BY_NAME),
-	AUTODETECT(AbstractBeanDefinition.AUTOWIRE_AUTODETECT);
+	NO(AutowireCapableBeanFactory.AUTOWIRE_NO),
+	BY_NAME(AutowireCapableBeanFactory.AUTOWIRE_BY_NAME),
+	BY_TYPE(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+
 
 	private final int value;
+
 
 	Autowire(int value) { this.value = value; }
 	
 	public int value() { return value; }
-	
-	public boolean isAutowire() {
-		return !(value == UNSPECIFIED.value || value == NO.value);
-	}
 
 }
