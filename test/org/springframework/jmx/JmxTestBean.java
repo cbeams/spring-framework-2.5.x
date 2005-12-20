@@ -22,7 +22,7 @@ package org.springframework.jmx;
  *    log=true, logFile="jmx.log", currencyTimeLimit=15, persistPolicy="OnUpdate",
  *    persistPeriod=200, persistLocation="./foo", persistName="bar.jmx")
  * @@org.springframework.jmx.export.metadata.ManagedNotification
- *    (name="My Notification", description="A Notification", notificationTypes="type.foo,type.bar")
+ *    (name="My Notification", description="A Notification", notificationType="type.foo,type.bar")
  * @author Rob Harrop
  */
 public class JmxTestBean implements IJmxTestBean {
@@ -34,6 +34,7 @@ public class JmxTestBean implements IJmxTestBean {
 	private int age;
 
 	private boolean isSuperman;
+
 
 	/**
 	 * @@org.springframework.jmx.export.metadata.ManagedAttribute

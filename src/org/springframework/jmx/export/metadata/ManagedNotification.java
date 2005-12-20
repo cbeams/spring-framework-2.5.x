@@ -16,6 +16,8 @@
 
 package org.springframework.jmx.export.metadata;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Metadata that indicates a JMX notification emitted by a bean.
  *
@@ -30,6 +32,14 @@ public class ManagedNotification {
 
 	private String description;
 
+
+	/**
+	 * Set a single notification type, or a list of notifcation types
+	 * as comma-delimited String.
+	 */
+	public void setNotificationType(String notificationType) {
+		this.notificationTypes = StringUtils.commaDelimitedListToStringArray(notificationType);
+	}
 
 	public void setNotificationTypes(String[] notificationTypes) {
 		this.notificationTypes = notificationTypes;
