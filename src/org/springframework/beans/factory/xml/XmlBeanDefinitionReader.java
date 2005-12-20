@@ -284,8 +284,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 					dbf.setAttribute(SCHEMA_LANGUAGE_ATTRIBUTE, XSD_SCHEMA_LANGUAGE);
 				}
 				catch (IllegalArgumentException e) {
-					throw new FatalBeanException("Unable to validate using XSD - your XML parser does not support XML Schema." +
-							"Are you running on Java 1.4 or below with Apache Crimson?" +
+					throw new FatalBeanException("Unable to validate using XSD - your XML parser does not support XML Schema. " +
+							"Are you running on Java 1.4 or below with Apache Crimson? " +
 							"Ugrade to Apache Xerces for full XSD support.");
 				}
 			}
