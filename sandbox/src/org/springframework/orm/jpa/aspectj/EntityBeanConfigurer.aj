@@ -27,26 +27,12 @@ import javax.persistence.Entity;
  * @author Rod Johnson
  * @since 2.0
  * @see javax.persistence.Entity
+ * @see EntityBeanWiringInfoResolver
  */
 public aspect EntityBeanConfigurer extends AbstractBeanConfigurer {
 	
 	public EntityBeanConfigurer() {
-		// Set a custom BeanWiringInfoResolver that is aware of 
-		// the Entity annotation
-		setBeanWiringInfoResolver(new BeanWiringInfoResolver() {
-			public BeanWiringInfo resolve(Object instance) {
-				Class<?> clazz = instance.getClass();
-				Entity entityAnnotation = clazz.getAnnotation(Entity.class);
-				if (entityAnnotation != null) {
-					String beanName = entityAnnotation.name();
-					if ("".equals(beanName)) {
-						beanName = clazz.getName();
-					}
-					return new BeanWiringInfo(beanName);
-				}
-				return null;
-			}
-		});
+		setBeanWiringInfoResolver(new EntityBeanWiringInfoResolver());
 	}
 
 	/**
