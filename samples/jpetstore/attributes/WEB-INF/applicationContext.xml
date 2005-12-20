@@ -38,8 +38,8 @@
 		JPetStore primary business object: default implementation,
 		Note that this is just a POJO definition in this file:
 		there's no need to use a TransactionFactoryProxyBean if the class has
-		source-level transaction attributes; the inherited auto-proxy
-		bean definition will apply transaction advice automatically.
+		source-level transaction attributes; the auto-proxy bean definition in
+		"declarativeServices.xml" will apply transaction advice automatically.
 	-->
 	<bean id="petStore" class="org.springframework.samples.jpetstore.domain.logic.PetStoreImpl">
 		<property name="accountDao" ref="accountDao"/>
