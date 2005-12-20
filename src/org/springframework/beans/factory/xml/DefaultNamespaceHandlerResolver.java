@@ -119,8 +119,8 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 				this.handlerMappings.put(namespaceUri, BeanUtils.instantiateClass(handlerClass));
 			}
 			catch (ClassNotFoundException ex) {
-				if(logger.isInfoEnabled()) {
-					logger.info("Ignoring handler [" + className + "]. Class not found.");
+				if (logger.isInfoEnabled()) {
+					logger.info("Ignoring handler [" + className + "]: class not found");
 				}
 			}
 		}
@@ -130,9 +130,9 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 		try {
 			return PropertiesLoaderUtils.loadAllProperties(this.handlerMappingsLocation, this.classLoader);
 		}
-		catch (IOException e) {
+		catch (IOException ex) {
 			throw new FatalBeanException("Unable to load NamespaceHandler mappings using mapping location ["
-					+ this.handlerMappingsLocation + "].", e);
+					+ this.handlerMappingsLocation + "].", ex);
 		}
 	}
 
