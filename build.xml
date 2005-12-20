@@ -809,8 +809,17 @@
 	    </classpath>
 	  </taskdef>
 
+	  <!-- note that this actually recompiles the aspects in the 
+	       aspectj source tree too, so that the test classes get
+	       woven. It would be nicer to depend on a pre-built jar,
+	       but that's a bigger change and there aren't many aspects
+	       so the overhead here is neglible.
+	       TODO: create spring-aspects.jar as an independent target.
+	       Have this task depend on it (and also modulejars).
+	       Then we can switch to just putting spring-aspects.jar
+	       on the aspectpath and avoid the recompilation -->
 	  <iajc
-	  	sourceroots="${aspectj.src.dir}"
+	  	sourceroots="${aspectj.test.dir}:${aspectj.src.dir}"
 	  	target="1.5"
 	  	source="1.5"
 		destDir="${target.testclasses.dir}">
@@ -818,6 +827,7 @@
 	  		<path refid="all-libs"/>
   			<path location="${target.classes.dir}"/>
 	  		<path location="${target.mockclasses.dir}"/>
+	  		<path location="${target.testclasses.dir}"/>
 	  	</classpath>
 	  </iajc>
 		
@@ -828,7 +838,7 @@
 	<!--
 		Compile the main and the JDK 1.5 test source tree.
 	-->
-	<target name="buildtests" depends="buildmaintests,buildtigertests"
+	<target name="buildtests" depends="buildmaintests,buildtigertests,buildaspecttests"
 					description="Compile main and JDK 1.5 test source tree"/>
 
 
