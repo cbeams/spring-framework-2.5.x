@@ -728,7 +728,10 @@
 	<target name="javadoc" depends="javadoc14,javadoc15" description="Generate framework Javadocs"/>
 
 
-	<target name="compiletestattr" depends="buildmock">
+	<!--
+		Use Jakarta Commons Attributes to compile the attributes for the test source tree.
+	-->
+	<target name="compiletestattr" description="Apply Commmons Attributes compiler to main source tree">
 
 		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
 			<classpath refid="attribute-compiler-classpath"/>
@@ -748,7 +751,7 @@
 		This task depends on the Commons Attributes compile step,
 		as some tests require source-level attribute support.
 	-->
-	<target name="buildmaintests" depends="compiletestattr"
+	<target name="buildmaintests" depends="buildmock,compiletestattr"
 					description="Compile test source tree java files into class files">
 
 		<mkdir dir="${target.testclasses.dir}"/>
@@ -770,10 +773,6 @@
 				<include name="**/*.xml"/>
 				<include name="**/*.types"/>
 			</fileset>
-			<fileset dir="${tiger.test.dir}">
-				<include name="**/*.properties"/>
-				<include name="**/*.xml"/>
-			</fileset>
 		</copy>
 
 	</target>
@@ -793,47 +792,58 @@
 			<classpath location="${target.mockclasses.dir}"/>
 		</javac>
 
+		<!-- Pick up logging config from test directory -->
+		<copy todir="${target.testclasses.dir}" preservelastmodified="true">
+			<fileset dir="${tiger.test.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+
 	</target>
 
 	
 	<!--
 		Compile the AspectJ test tree.
 	-->
-	<target name="buildaspecttests" depends="buildmaintests" if="tiger.available"
+	<target name="buildaspecttests" depends="buildmaintests" if="aspectj.available"
 					description="Compile AspectJ test source tree java and aj files into class files">
 
-	  <taskdef 
-	      resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties">
+	  <taskdef resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties">
 	    <classpath>
 	      <pathelement location="${lib.dir}/aspectj/aspectjtools.jar"/>
 	    </classpath>
 	  </taskdef>
 
-	  <!-- note that this actually recompiles the aspects in the 
+	  <!-- Note that this actually recompiles the aspects in the
 	       aspectj source tree too, so that the test classes get
 	       woven. It would be nicer to depend on a pre-built jar,
 	       but that's a bigger change and there aren't many aspects
-	       so the overhead here is neglible.
+	       so the overhead here is negligible.
 	       TODO: create spring-aspects.jar as an independent target.
 	       Have this task depend on it (and also modulejars).
 	       Then we can switch to just putting spring-aspects.jar
 	       on the aspectpath and avoid the recompilation -->
-	  <iajc
-	  	sourceroots="${aspectj.test.dir}:${aspectj.src.dir}"
-	  	target="1.5"
-	  	source="1.5"
-		destDir="${target.testclasses.dir}">
+	  <iajc sourceroots="${aspectj.test.dir}:${aspectj.src.dir}"
+					source="1.5" target="1.5" destDir="${target.testclasses.dir}">
 	  	<classpath>
 	  		<path refid="all-libs"/>
   			<path location="${target.classes.dir}"/>
 	  		<path location="${target.mockclasses.dir}"/>
-	  		<path location="${target.testclasses.dir}"/>
+				<path location="${target.testclasses.dir}"/>
 	  	</classpath>
 	  </iajc>
-		
+
+		<!-- Pick up logging config from test directory -->
+		<copy todir="${target.testclasses.dir}" preservelastmodified="true">
+			<fileset dir="${aspectj.test.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+
 	</target>
 
-	
 
 	<!--
 		Compile the main and the JDK 1.5 test source tree.
