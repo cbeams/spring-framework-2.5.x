@@ -28,7 +28,6 @@ import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.modelmbean.ModelMBeanNotificationInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,7 +35,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.JdkVersion;
 import org.springframework.jmx.MBeanServerNotFoundException;
-import org.springframework.jmx.export.metadata.ManagedNotification;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -300,25 +298,5 @@ public abstract class JmxUtils {
 		keyProperties.put(IDENTITY_OBJECT_NAME_KEY, ObjectUtils.getIdentityHexString(managedResource));
 		return ObjectNameManager.getInstance(objectName.getDomain(), keyProperties);
 	}
-
-	/**
-	 * Convert the supplied {@link ManagedNotification} into the corresponding
-	 * {@link ModelMBeanNotificationInfo}.
-	 */
-	public static ModelMBeanNotificationInfo convertToModelMBeanNotificationInfo(ManagedNotification notificationInfo) {
-		String name = notificationInfo.getName();
-		if(!StringUtils.hasText(name)) {
-			throw new IllegalArgumentException("Must specify notification name.");
-		}
-
-		String[] notifTypes = notificationInfo.getNotificationTypes();
-		if (notifTypes == null || notifTypes.length == 0) {
-			throw new IllegalArgumentException("Must specify at least one notification type.");
-		}
-
-		String description = notificationInfo.getDescription();
-		return new ModelMBeanNotificationInfo(notifTypes, name, description);
-	}
-
 
 }

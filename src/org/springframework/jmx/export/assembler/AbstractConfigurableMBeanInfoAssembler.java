@@ -1,32 +1,54 @@
+/*
+ * Copyright 2002-2005 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.jmx.export.assembler;
 
-import org.springframework.jmx.export.metadata.ManagedNotification;
-import org.springframework.jmx.support.JmxUtils;
-import org.springframework.util.StringUtils;
-
-import javax.management.JMException;
-import javax.management.modelmbean.ModelMBeanNotificationInfo;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
+
+import javax.management.modelmbean.ModelMBeanNotificationInfo;
+
+import org.springframework.jmx.export.metadata.JmxMetadataUtils;
+import org.springframework.jmx.export.metadata.ManagedNotification;
+import org.springframework.util.StringUtils;
 
 /**
+ * Base class for MBeanInfoAssemblers that support configurable
+ * JMX notification behavior.
+ *
  * @author Rob Harrop
+ * @author Juergen Hoeller
+ * @since 2.0
  */
 public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssembler {
 
 	private ModelMBeanNotificationInfo[] notificationInfos;
 
-	private Map notificationInfoMappings = new HashMap();
+	private final Map notificationInfoMappings = new HashMap();
+
 
 	public void setNotificationInfos(ManagedNotification[] notificationInfos) {
 		ModelMBeanNotificationInfo[] infos = new ModelMBeanNotificationInfo[notificationInfos.length];
 		for (int i = 0; i < notificationInfos.length; i++) {
 			ManagedNotification notificationInfo = notificationInfos[i];
-			infos[i] = JmxUtils.convertToModelMBeanNotificationInfo(notificationInfo);
+			infos[i] = JmxMetadataUtils.convertToModelMBeanNotificationInfo(notificationInfo);
 		}
 		this.notificationInfos = infos;
 	}
@@ -36,16 +58,14 @@ public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractRef
 		while (entries.hasNext()) {
 			Map.Entry entry = (Map.Entry) entries.next();
 			if (!(entry.getKey() instanceof String)) {
-				throw new IllegalArgumentException("Property [notificationInfoMappings] only accepts Strings for Map keys.");
+				throw new IllegalArgumentException("Property [notificationInfoMappings] only accepts Strings for Map keys");
 			}
-
-
 			this.notificationInfoMappings.put(entry.getKey(), extractNotificationMetdata(entry.getValue()));
 		}
 	}
 
 
-	protected ModelMBeanNotificationInfo[] getNotificationInfo(Object managedBean, String beanKey) throws JMException {
+	protected ModelMBeanNotificationInfo[] getNotificationInfo(Object managedBean, String beanKey) {
 		ModelMBeanNotificationInfo[] result = null;
 
 		if (StringUtils.hasText(beanKey)) {
@@ -61,7 +81,8 @@ public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractRef
 
 	private ModelMBeanNotificationInfo[] extractNotificationMetdata(Object mapValue) {
 		if (mapValue instanceof ManagedNotification) {
-			return new ModelMBeanNotificationInfo[]{JmxUtils.convertToModelMBeanNotificationInfo((ManagedNotification) mapValue)};
+			ManagedNotification mn = (ManagedNotification) mapValue;
+			return new ModelMBeanNotificationInfo[] {JmxMetadataUtils.convertToModelMBeanNotificationInfo(mn)};
 		}
 		else if (mapValue instanceof Collection) {
 			Collection col = (Collection) mapValue;
@@ -69,14 +90,18 @@ public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractRef
 			for (Iterator iterator = col.iterator(); iterator.hasNext();) {
 				Object colValue = iterator.next();
 				if (!(colValue instanceof ManagedNotification)) {
-					throw new IllegalArgumentException("Property [notificationInfoMappings] only accepts ManagedNotifications for Map values.");
+					throw new IllegalArgumentException(
+							"Property 'notificationInfoMappings' only accepts ManagedNotifications for Map values");
 				}
-				result.add(JmxUtils.convertToModelMBeanNotificationInfo((ManagedNotification)colValue));
+				ManagedNotification mn = (ManagedNotification) colValue;
+				result.add(JmxMetadataUtils.convertToModelMBeanNotificationInfo(mn));
 			}
 			return (ModelMBeanNotificationInfo[]) result.toArray(new ModelMBeanNotificationInfo[result.size()]);
 		}
 		else {
-			throw new IllegalArgumentException("Property [notificationInfoMappings] only accepts ManagedNotifications for Map values.");
+			throw new IllegalArgumentException(
+					"Property 'notificationInfoMappings' only accepts ManagedNotifications for Map values");
 		}
 	}
+
 }
