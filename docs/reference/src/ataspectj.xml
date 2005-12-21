@@ -16,7 +16,7 @@
     <code>ajc</code> compiler, making it available to back a generic Spring
     AOP pointcut implementation. This
     implementation--AspectJExpressionPointcut--is added to Spring in Spring
-    1.3. This enables Spring AOP to work with AspectJ pointcut
+    2.0. This enables Spring AOP to work with AspectJ pointcut
     expressions.</para>
 
     <para>Weaving is still proxy-based, using Spring AOP. This does impose
