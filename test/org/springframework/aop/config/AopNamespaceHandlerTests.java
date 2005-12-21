@@ -17,17 +17,14 @@
 package org.springframework.aop.config;
 
 import junit.framework.TestCase;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.mock.web.MockHttpSession;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.web.context.scope.RequestContextHolder;
 
 /**
  * @author Rob Harrop
@@ -37,7 +34,11 @@ public class AopNamespaceHandlerTests extends TestCase {
 	private ApplicationContext context;
 
 	public void setUp() {
-		this.context = new ClassPathXmlApplicationContext("org/springframework/aop/config/aopNamespaceHandlerTests.xml");
+		this.context = new ClassPathXmlApplicationContext(getConfigLocation());
+	}
+
+	protected String getConfigLocation() {
+		return "org/springframework/aop/config/aopNamespaceHandlerTests.xml";
 	}
 
 	public void testIsProxy() throws Exception {
@@ -91,7 +92,7 @@ public class AopNamespaceHandlerTests extends TestCase {
 		assertEquals("Incorrect after count", 1, advice.getAfterCount());
 	}
 
-	private ITestBean getTestBean() {
+	protected ITestBean getTestBean() {
 		return (ITestBean) this.context.getBean("testBean");
 	}
 

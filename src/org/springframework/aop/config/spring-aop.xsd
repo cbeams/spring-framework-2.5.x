@@ -13,6 +13,7 @@
 				<xsd:element name="advisor" type="advisorType" minOccurs="0" maxOccurs="unbounded"/>
 				<xsd:element name="aspect" type="aspectType" minOccurs="0" maxOccurs="unbounded"/>
 			</xsd:sequence>
+			<xsd:attribute name="proxyTargetClass" type="xsd:boolean" default="false"/>
 		</xsd:complexType>
 	</xsd:element>
 

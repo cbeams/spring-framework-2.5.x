@@ -211,6 +211,8 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		private static final String AFTER_RETURNING = "afterReturning";
 		private static final String AFTER_THROWING = "afterThrowing";
 		private static final String AROUND = "around";
+		private static final String PROXY_TARGET_CLASS = "proxyTargetClass";
+		private static final String TRUE = "true";
 
 		private static final int METHOD_INDEX = 0;
 		private static final int POINTCUT_INDEX = 1;
@@ -220,7 +222,13 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		public void parse(Element element, BeanDefinitionRegistry registry) {
 			NodeList childNodes = element.getChildNodes();
 
+
 			NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
+
+			boolean proxyTargetClass = TRUE.equals(element.getAttribute(PROXY_TARGET_CLASS));
+			if(proxyTargetClass) {
+				NamespaceHandlerUtils.forceAutoProxyCreatorToUseClassProxying(registry);
+			}
 
 			for (int i = METHOD_INDEX; i < childNodes.getLength(); i++) {
 				Node node = childNodes.item(i);
