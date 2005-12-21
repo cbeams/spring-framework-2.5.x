@@ -157,17 +157,30 @@ public class StringUtilsTests extends TestCase {
 	}
 
 
-	public void testUnqualify() throws Exception {
+	public void testQuote() {
+		assertEquals("'myString'", StringUtils.quote("myString"));
+		assertEquals("''", StringUtils.quote(""));
+		assertNull(StringUtils.quote(null));
+	}
+
+	public void testQuoteIfString() {
+		assertEquals("'myString'", StringUtils.quoteIfString("myString"));
+		assertEquals("''", StringUtils.quoteIfString(""));
+		assertEquals(new Integer(5), StringUtils.quoteIfString(new Integer(5)));
+		assertNull(StringUtils.quoteIfString(null));
+	}
+
+	public void testUnqualify() {
 		String qualified = "i.am.not.unqualified";
 		assertEquals("unqualified", StringUtils.unqualify(qualified));
 	}
 
-	public void testUncapitalize() throws Exception {
+	public void testUncapitalize() {
 		String capitalized = "I am capitalized";
 		assertEquals("i am capitalized", StringUtils.uncapitalize(capitalized));
 	}
 
-	public void testCapitalize() throws Exception {
+	public void testCapitalize() {
 		String capitalized = "i am not capitalized";
 		assertEquals("I am not capitalized", StringUtils.capitalize(capitalized));
 	}
@@ -217,6 +230,24 @@ public class StringUtilsTests extends TestCase {
 						"/dummy1/dummy2/dummy4"));
 	}
 
+
+	public void testSortStringArray() {
+		String[] input = new String[] {"myString2"};
+		input = StringUtils.addStringToArray(input, "myString1");
+		assertEquals("myString2", input[0]);
+		assertEquals("myString1", input[1]);
+
+		StringUtils.sortStringArray(input);
+		assertEquals("myString1", input[0]);
+		assertEquals("myString2", input[1]);
+	}
+
+	public void testRemoveDuplicateStrings() {
+		String[] input = new String[] {"myString2", "myString1", "myString2"};
+		input = StringUtils.removeDuplicateStrings(input);
+		assertEquals("myString1", input[0]);
+		assertEquals("myString2", input[1]);
+	}
 
 	public void testSplitArrayElementsIntoProperties() {
 		String[] input = new String[] {"key1=value1 ", "key2 =\"value2\""};
