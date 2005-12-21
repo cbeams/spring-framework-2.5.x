@@ -17,10 +17,10 @@
 package org.springframework.aop.config;
 
 import org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvisorAutoProxyCreator;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -48,8 +48,6 @@ public abstract class NamespaceHandlerUtils {
 			return;
 		}
 		RootBeanDefinition definition = new RootBeanDefinition(InvocationContextExposingAdvisorAutoProxyCreator.class);
-		definition.setPropertyValues(new MutablePropertyValues());
-		definition.getPropertyValues().addPropertyValue("proxyTargetClass", Boolean.TRUE);
 		registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, definition);
 	}
 
@@ -76,6 +74,19 @@ public abstract class NamespaceHandlerUtils {
 
 		RootBeanDefinition definition = new RootBeanDefinition(ajApcClass);
 		registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, definition);
+	}
+
+	public static void forceAutoProxyCreatorToUseClassProxying(BeanDefinitionRegistry registry) {
+		 if(registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
+			 AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
+
+			 if(definition.getPropertyValues() == null) {
+				 definition.setPropertyValues(new MutablePropertyValues());
+			 }
+
+			 definition.getPropertyValues().addPropertyValue("proxyTargetClass", Boolean.TRUE);
+
+		 }
 	}
 
 	private static Class getAspectJAutoProxyCreatorClassIfPossible() {

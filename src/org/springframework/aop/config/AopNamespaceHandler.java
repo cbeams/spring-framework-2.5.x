@@ -103,6 +103,9 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		public BeanDefinitionHolder decorate(
 				Element element, BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
 
+			// must use class proxying for any AOP advice now
+			NamespaceHandlerUtils.forceAutoProxyCreatorToUseClassProxying(registry);
+
 			String originalBeanName = definition.getBeanName();
 			String targetBeanName = "__" + originalBeanName;
 
