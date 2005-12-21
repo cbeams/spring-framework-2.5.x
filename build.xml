@@ -1505,9 +1505,11 @@
 
 	</target>
 
+
 	<target name="sandbox.clean_tests" depends="sandbox.clean, sandbox.tests"/>
 
-	<target name="sandbox.javadoc" description="Generate framework Javadocs.">
+
+	<target name="sandbox.javadoc" description="Generate framework Javadocs">
 
 		<mkdir dir="${sandbox.javadoc.dir}"/>
 
@@ -1560,7 +1562,28 @@
 		</javadoc>
 
 	</target>
-	
+
+
+	<target name="jasperreports-compile" description="Compile JasperReports test files in Spring test suite">
+		<delete>
+			<fileset dir="${test.dir}">
+				<include name="**/*.jasper"/>
+			</fileset>
+		</delete>
+		<taskdef name="jrc" classname="net.sf.jasperreports.ant.JRAntCompileTask">
+			<classpath>
+				<fileset dir="./lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+		</taskdef>
+		<jrc>
+			<src location="${test.dir}/org/springframework/ui/jasperreports/DataSourceReport.jrxml"/>
+			<src location="${test.dir}/org/springframework/ui/jasperreports/subReportParent.jrxml"/>
+			<src location="${test.dir}/org/springframework/ui/jasperreports/subReportChild.jrxml"/>
+		</jrc>
+	</target>
+
 
 	<!--
 		 Targets for the automated build.
@@ -1633,27 +1656,6 @@
 			<report format="frames" todir="${target.junit.reports.html.dir}"/>
 		</junitreport>
 
-	</target>
-
-
-	<target name="compile-jasper-reports">
-		<delete>
-			<fileset dir="${test.dir}">
-				<include name="**/*.jasper"/>
-			</fileset>
-		</delete>
-		<taskdef name="jrc" classname="net.sf.jasperreports.ant.JRAntCompileTask">
-			<classpath>
-				<fileset dir="./lib">
-					<include name="**/*.jar"/>
-				</fileset>
-			</classpath>
-		</taskdef>
-		<jrc>
-			<src location="${test.dir}/org/springframework/ui/jasperreports/DataSourceReport.jrxml"/>
-			<src location="${test.dir}/org/springframework/ui/jasperreports/subReportParent.jrxml"/>
-			<src location="${test.dir}/org/springframework/ui/jasperreports/subReportChild.jrxml"/>
-		</jrc>
 	</target>
 
 </project>
