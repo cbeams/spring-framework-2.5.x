@@ -41,6 +41,11 @@
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/dist/extmodules">
+			<include name="spring-hibernate3.jar"/>
+			<include name="spring-ojb.jar"/>
+			<include name="spring-toplink.jar"/>
+		</fileset>
 
 	</path>
 
@@ -97,11 +102,7 @@
 			<include name="toplink.jar"/>
 			<include name="xmlparserv2.jar"/>
 		</fileset>
-
-		<!--
-			Contains org.springframework.test package.
-		-->
-		<fileset dir="${spring.root}/dist">
+		<fileset dir="${spring.root}/dist/extmodules">
 			<include name="spring-mock.jar"/>
 		</fileset>
 
@@ -219,6 +220,11 @@
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/dist/extmodules">
+				<include name="spring-hibernate3.jar"/>
+				<include name="spring-ojb.jar"/>
+				<include name="spring-toplink.jar"/>
 			</fileset>
 		</copy>
 
