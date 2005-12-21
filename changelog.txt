@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 M1 (20.12.2005)
+Changes in version 2.0 M1 (21.12.2005)
 --------------------------------------
 
 Overall
@@ -13,8 +13,10 @@ Overall
 * factored out "spring-jdo", "spring-hibernate2/3","spring-toplink", "spring-ojb" jars (not in "spring.jar" anymore!)
 
 Package org.springframework.aop
-* added AopNamespaceHandler to support custom <aop:*/> XML tags
-* added @SpringConfigured and BeanConfigurer aspect to allow injection on any arbitrary object
+* added support for AspectJ pointcut expressions, specified in AspectJ pointcut language
+* added support for AspectJ aspect implementations, both for classic AspectJ style and the AspectJ 5 annotation style
+* added @Configurable annotation plus BeanConfigurer aspect to allow injection on any arbitrary object through AspectJ
+* added AopNamespaceHandler to support dedicated "aop:*" XML tags
 
 Package org.springframework.beans
 * added intelligent error messages to BeanWrapperImpl when properties are not found
@@ -24,6 +26,8 @@ Package org.springframework.beans
 * DefaultListableBeanFactory is able to call non-public factory methods as well
 * PropertiesBeanDefinitionReader trims String values for special keys such as "(class)", "(parent)", etc
 * added "default-init-method" and "default-destroy-method" attributes to the XML bean definition format
+* added support for XSD-driven XML bean definitions, with pluggable namespace handlers
+* added UtilNamespaceHandler to support dedicated "util:*" XML tags
 
 Package org.springframework.core
 * introduced TaskExecutor abstraction, as strategy interface for the execution of Runnables
@@ -63,6 +67,9 @@ Package org.springframework.jmx
 * added MBeanExporter option to have Spring extend ObjectNames to ensure they are unique per-instance
 * added MBeanExporter option to have Spring expose the ClassLoader of the managed resource before MBean invocations
 
+Package org.springframework.jndi
+* added JndiNamespaceHandler to support dedicated "jndi:*" XML tags
+
 Package org.springframework.orm
 * JdoTransactionManager does explicit "isActive()" check before attempting a rollback, to avoid illegal state exception
 * HibernateTransactionManager autodetects Hibernate 3.1 to support its native transaction timeout
@@ -71,6 +78,7 @@ Package org.springframework.orm
 * upgraded IdTransferringMergeEventListener to Hibernate 3.1 (which changed its listener API in an incompatible fashion)
 
 Package org.springframework.remoting
+* RmiServiceExporter performs explicit RMI unexport if binding to the registry failed, to avoid dangling exports
 * JaxRpcPortClientInterceptor/ProxyFactoryBean apply given JaxRpcServicePostProcessors to existing JAX-RPC Service too
 * HttpInvokerServiceExporter, HessianServiceExporter and BurlapServiceExporter implement Handler instead of Controller
 * HttpInvokerRequestExecutor is allowed to throw any Exception, not just IOException and ClassNotFoundException
@@ -85,8 +93,15 @@ Package org.springframework.scheduling
 * added scheduling-style support for the CommonJ TimerManager API, as supported by WebLogic 9 and WebSphere 6
 * added WorkManagerTaskExecutor adapter for accessing a CommonJ WorkManager through the TaskExecutor interface
 
+Package org.springframework.samples
+* upgraded JPetStore (standard and annotation version) to use the new XML schema namespaces "aop", "tx" and "jndi"
+
+Package org.springframework.test
+* added AbstractModelAndViewTests, a convenience super class for testing ModelAndView objects
+
 Package org.springframework.transaction
 * JtaTransactionManager only invokes rollback if transaction is still active (some JTA providers eagerly terminate)
+* added TransactionNamespaceHandler to support dedicated "tx:*" XML tags
 
 Package org.springframework.util
 * added "setPathSeparator" method to AntPathMatcher, allowing to override the default path separator "/"
@@ -103,12 +118,6 @@ Package org.springframework.web
 * "RequestContextUtils.getLocale(request)" falls back to the accept-header Locale if no LocaleResolver found
 * FixedLocaleResolver returns the JVM's default Locale if no explicit default Locale specified
 * VelocityView converts Velocity's MethodInvocationException to a Spring NestedServletException with original root cause
-
-Package org.springframework.samples
-* Migrated JPetStore to use the tx, jndi and aop namespaces added in Spring 2.0.
-
-Package org.springframework.web.servlet.test
-* Added AbstractModelAndViewTest, a convenience super class for testing ModelAndView objects
 
 
 Changes in version 1.2.6 (14.11.2005)
