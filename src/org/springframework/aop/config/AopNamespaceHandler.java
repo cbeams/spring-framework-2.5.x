@@ -305,13 +305,13 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 			// create the method factory bean
 			RootBeanDefinition methodDefinition = new RootBeanDefinition(MethodLocatingFactoryBean.class);
 			methodDefinition.setPropertyValues(new MutablePropertyValues());
-			methodDefinition.getPropertyValues().addPropertyValue("beanName", aspectName);
+			methodDefinition.getPropertyValues().addPropertyValue("targetBeanName", aspectName);
 			methodDefinition.getPropertyValues().addPropertyValue("methodName", adviceElement.getAttribute("method"));
 
 			// create instance factory definition
 			RootBeanDefinition instanceFactoryDefinition = new RootBeanDefinition(BeanFactoryAspectInstanceFactory.class);
 			instanceFactoryDefinition.setPropertyValues(new MutablePropertyValues());
-			instanceFactoryDefinition.getPropertyValues().addPropertyValue("beanName", aspectName);
+			instanceFactoryDefinition.getPropertyValues().addPropertyValue("aspectBeanName", aspectName);
 
 			// create the advice
 			String kind = adviceElement.getAttribute(KIND);

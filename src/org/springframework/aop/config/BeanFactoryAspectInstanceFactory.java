@@ -17,10 +17,8 @@
 package org.springframework.aop.config;
 
 import org.springframework.aop.aspectj.AspectInstanceFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.StringUtils;
 
 /**
@@ -30,45 +28,42 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @since 2.0
  */
-public class BeanFactoryAspectInstanceFactory implements AspectInstanceFactory, BeanFactoryAware, InitializingBean {
+public class BeanFactoryAspectInstanceFactory implements AspectInstanceFactory, BeanFactoryAware {
 
-	private int count;
-
-	private String beanName;
+	private String aspectBeanName;
 
 	private BeanFactory beanFactory;
 
-	/**
-	 * Sets the name of the aspect bean. This is the bean that is returned when calling
-	 * {@link #getAspectInstance()}.
-	 */
-	public void setBeanName(String beanName) {
-		this.beanName = beanName;
-	}
+	private int instantiationCount;
+
 
 	/**
-	 * Looks up the aspect bean from the {@link BeanFactory} and returns it.
-	 * @see #setBeanName(String)
+	 * Set the name of the aspect bean. This is the bean that is returned when calling
+	 * {@link #getAspectInstance()}.
+	 */
+	public void setAspectBeanName(String aspectBeanName) {
+		this.aspectBeanName = aspectBeanName;
+	}
+
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+		if (!StringUtils.hasText(this.aspectBeanName)) {
+			throw new IllegalArgumentException("Property 'aspectBeanName' is required");
+		}
+	}
+
+
+	/**
+	 * Look up the aspect bean from the {@link BeanFactory} and returns it.
+	 * @see #setAspectBeanName
 	 */
 	public Object getAspectInstance() {
-		count++;
-		return this.beanFactory.getBean(this.beanName);
+		this.instantiationCount++;
+		return this.beanFactory.getBean(this.aspectBeanName);
 	}
 
 	public int getInstantiationCount() {
-		return count;
+		return instantiationCount;
 	}
 
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
-	}
-
-	/**
-	 * Checks to make sure that the <code>beanName</code> property has been specified.
-	 */
-	public void afterPropertiesSet() throws Exception {
-		if(!StringUtils.hasText(this.beanName)) {
-			throw new IllegalArgumentException("Property [beanName] is required.");
-		}
-	}
 }

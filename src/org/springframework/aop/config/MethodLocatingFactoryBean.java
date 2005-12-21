@@ -16,14 +16,13 @@
 
 package org.springframework.aop.config;
 
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.util.StringUtils;
-
 import java.lang.reflect.Method;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link FactoryBean} implementation that locates a {@link Method} on a specified bean.
@@ -31,29 +30,49 @@ import java.lang.reflect.Method;
  * @author Rob Harrop
  * @since 2.0
  */
-public class MethodLocatingFactoryBean implements FactoryBean, BeanFactoryAware, InitializingBean {
+public class MethodLocatingFactoryBean implements FactoryBean, BeanFactoryAware {
 
-	private BeanFactory beanFactory;
-
-	private String beanName;
+	private String targetBeanName;
 
 	private String methodName;
 
 	private Method method;
 
+
 	/**
-	 * Sets the name of the bean to locate the {@link Method} on.
+	 * Set the name of the bean to locate the {@link Method} on.
 	 */
-	public void setBeanName(String beanName) {
-		this.beanName = beanName;
+	public void setTargetBeanName(String targetBeanName) {
+		this.targetBeanName = targetBeanName;
 	}
 
 	/**
-	 * Sets the name of the {@link Method} to locate.
+	 * Set the name of the {@link Method} to locate.
 	 */
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;
 	}
+
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (!StringUtils.hasText(this.targetBeanName)) {
+			throw new IllegalArgumentException("Property 'targetBeanName' is required");
+		}
+		if (!StringUtils.hasText(this.methodName)) {
+			throw new IllegalArgumentException("Property 'methodName' is required");
+		}
+
+		Class beanClass = beanFactory.getType(this.targetBeanName);
+		if (beanClass == null) {
+			throw new IllegalArgumentException("Can't determine type of bean with name '" + this.targetBeanName + "'");
+		}
+		this.method = BeanUtils.findMethodWithMinimalParameters(beanClass, this.methodName);
+
+		if (this.method == null) {
+			throw new IllegalArgumentException("Unable to locate method [" + this.methodName +
+					"] on bean [" + this.targetBeanName + "]");
+		}
+	}
+
 
 	public Object getObject() throws Exception {
 		return this.method;
@@ -67,32 +86,4 @@ public class MethodLocatingFactoryBean implements FactoryBean, BeanFactoryAware,
 		return true;
 	}
 
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
-	}
-
-	public void afterPropertiesSet() throws Exception {
-		if(!StringUtils.hasText(this.beanName)) {
-			throw new IllegalArgumentException("Property [beanName] is required.");
-		}
-
-		if(!StringUtils.hasText(this.methodName)) {
-			throw new IllegalArgumentException("Property [methodName] is required.");
-		}
-
-		Class beanClass = this.beanFactory.getBean(this.beanName).getClass();
-
-		Method[] methods = beanClass.getMethods();
-		for (int i = 0; i < methods.length; i++) {
-			Method method = methods[i];
-			if(this.methodName.equals(method.getName())) {
-				this.method = method;
-			}
-		}
-
-		if(this.method == null) {
-			throw new IllegalArgumentException("Unable to locate method [" 
-					+ this.methodName + "] on bean [" + this.beanName + "].");
-		}
-	}
 }
