@@ -36,10 +36,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.support.AbstractBeanFactory;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.*;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
 import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
@@ -50,8 +47,31 @@ import org.springframework.beans.propertyeditors.CustomNumberEditor;
  * @author Rod Johnson
  */
 public class DefaultListableBeanFactoryTests extends TestCase {
+    
+   public void testCanReferenceParentBeanFromChildViaAlias() throws Exception {
 
-	public void testUnreferencedSingletonWasInstantiated() {
+        final String PARENTS_ALIAS = "alias";
+        final String EXPECTED_NAME = "Juergen";
+        final int EXPECTED_AGE = 41;
+
+        RootBeanDefinition parentDefinition = new RootBeanDefinition(TestBean.class);
+        parentDefinition.setAbstract(true);
+        parentDefinition.getPropertyValues().addPropertyValue("name", EXPECTED_NAME);
+        parentDefinition.getPropertyValues().addPropertyValue("age", new Integer(EXPECTED_AGE));
+
+        ChildBeanDefinition childDefinition = new ChildBeanDefinition(PARENTS_ALIAS);
+
+        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+        factory.registerBeanDefinition("parent", parentDefinition);
+        factory.registerBeanDefinition("child", childDefinition);
+        factory.registerAlias("parent", PARENTS_ALIAS);
+
+        TestBean child = (TestBean) factory.getBean("child");
+        assertEquals(EXPECTED_NAME, child.getName());
+        assertEquals(EXPECTED_AGE, child.getAge());
+    } 
+
+    public void testUnreferencedSingletonWasInstantiated() {
 		KnowsIfInstantiated.clearInstantiationRecord();
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		Properties p = new Properties();

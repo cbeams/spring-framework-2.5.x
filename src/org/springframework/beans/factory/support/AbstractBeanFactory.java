@@ -673,7 +673,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	protected RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors)
 	    throws BeansException {
 		try {
-			return getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
+			return getMergedBeanDefinition(beanName, getBeanDefinition(transformedBeanName(beanName)));
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			if (includingAncestors && getParentBeanFactory() instanceof AbstractBeanFactory) {
