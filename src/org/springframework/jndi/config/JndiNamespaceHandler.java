@@ -1,4 +1,4 @@
-package org.springframework.jndi.support;
+package org.springframework.jndi.config;
 
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.transaction.interceptor;
+package org.springframework.transaction.config;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -43,7 +43,7 @@ import java.util.HashMap;
  * @author Rob Harrop
  * @since 2.0
  */
-public class TransactionNamespaceHandler extends NamespaceHandlerSupport {
+public class TxNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static final String TRANSACTION_MANAGER = "transactionManager";
 
@@ -51,7 +51,7 @@ public class TransactionNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static final String ANNOTATION_SOURCE_CLASS_NAME = "org.springframework.transaction.annotation.AnnotationTransactionAttributeSource";
 
-	public TransactionNamespaceHandler() {
+	public TxNamespaceHandler() {
 		registerBeanDefinitionParser("advice", new TxAdviceBeanDefinitionParser());
 		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenBeanDefinitionParser());
 	}

@@ -22,7 +22,6 @@
 		</xsd:simpleType>
 	</xsd:element>
 
-
 	<xsd:element name="scope">
 		<xsd:complexType>
 			<xsd:attribute name="type" use="required">
