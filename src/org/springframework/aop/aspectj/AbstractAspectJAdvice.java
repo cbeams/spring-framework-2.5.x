@@ -39,7 +39,9 @@ abstract class AbstractAspectJAdvice {
 	private final AspectInstanceFactory aif;
 
 
-	public AbstractAspectJAdvice(Method aspectJAdviceMethod, PointcutExpression pointcutExpression, AspectInstanceFactory aif) {
+	public AbstractAspectJAdvice(
+			Method aspectJAdviceMethod, PointcutExpression pointcutExpression, AspectInstanceFactory aif) {
+
 		this.aspectJAdviceMethod = aspectJAdviceMethod;
 		this.pointcutExpression = pointcutExpression;
 		this.aif = aif;
@@ -77,20 +79,21 @@ abstract class AbstractAspectJAdvice {
 	
 	protected Object invokeAdviceMethodWithGivenArgs(Object[] args) throws Throwable {
 		// TODO really a hack
-		if (aspectJAdviceMethod.getParameterTypes().length == 0) {
+		if (this.aspectJAdviceMethod.getParameterTypes().length == 0) {
 			args = null;
 		}
 		
 		try {
-			// TODO AOPutils.InvokeJoinpointUsingReflection
-			return aspectJAdviceMethod.invoke(aif.getAspectInstance(), args);
+			// TODO AopUtils.invokeJoinpointUsingReflection
+			return this.aspectJAdviceMethod.invoke(aif.getAspectInstance(), args);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new AopConfigException("Mismatch on arguments to advice method " + aspectJAdviceMethod + "; " +
-					"pointcut expression='" + pointcutExpression.getPointcutExpression() + "'", ex);
+			throw new AopConfigException("Mismatch on arguments to advice method [" + this.aspectJAdviceMethod + "]; " +
+					"pointcut expression = [" + this.pointcutExpression.getPointcutExpression() + "]", ex);
 		}
 		catch (InvocationTargetException ex) {
 			throw ex.getTargetException();
 		}
 	}
+
 }

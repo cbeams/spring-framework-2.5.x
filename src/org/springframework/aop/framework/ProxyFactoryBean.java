@@ -536,7 +536,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 		
 		public PrototypePlaceholderAdvisor(String beanName) {
 			this.beanName = beanName;
-			this.message = "Placeholder for prototype Advisor/Advice with bean name ='" + beanName + "'";
+			this.message = "Placeholder for prototype Advisor/Advice with bean name '" + beanName + "'";
 		}
 		
 		public String getBeanName() {
