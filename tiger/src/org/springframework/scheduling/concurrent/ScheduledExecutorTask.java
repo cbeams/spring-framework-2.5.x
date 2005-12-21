@@ -16,7 +16,7 @@
 
 package org.springframework.scheduling.concurrent;
 
-
+import java.util.concurrent.TimeUnit;
 
 /**
  * JavaBean that describes a scheduled executor task, consisting of
@@ -47,6 +47,8 @@ public class ScheduledExecutorTask {
 	private long delay = 0;
 
 	private long period = 0;
+
+	private TimeUnit timeUnit = TimeUnit.MILLISECONDS;
 
 	private boolean fixedRate = false;
 
@@ -144,6 +146,23 @@ public class ScheduledExecutorTask {
 	 */
 	public long getPeriod() {
 		return period;
+	}
+
+	/**
+	 * Specify the time unit for the delay and period values.
+	 * Default is milliseconds (<code>TimeUnit.MILLISECONDS</code>).
+	 * @see java.util.concurrent.TimeUnit#MILLISECONDS
+	 * @see java.util.concurrent.TimeUnit#SECONDS
+	 */
+	public void setTimeUnit(TimeUnit timeUnit) {
+		this.timeUnit = (timeUnit != null ? timeUnit : TimeUnit.MILLISECONDS);
+	}
+
+	/**
+	 * Return the time unit for the delay and period values.
+	 */
+	public TimeUnit getTimeUnit() {
+		return timeUnit;
 	}
 
 	/**

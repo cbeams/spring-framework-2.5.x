@@ -16,9 +16,12 @@
 
 package org.springframework.scheduling.concurrent;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,6 +63,10 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBe
 
 	private int poolSize = 1;
 
+	private ThreadFactory threadFactory = Executors.defaultThreadFactory();
+
+	private RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.AbortPolicy();
+
 	private ScheduledExecutorService executor;
 
 
@@ -83,10 +90,29 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBe
 		this.poolSize = poolSize;
 	}
 
+	/**
+	 * Set the ThreadFactory to use for the ThreadPoolExecutor's thread pool.
+	 * Default is the ThreadPoolExecutor's default thread factory.
+	 * @see java.util.concurrent.Executors#defaultThreadFactory()
+	 */
+	public void setThreadFactory(ThreadFactory threadFactory) {
+		this.threadFactory = (threadFactory != null ? threadFactory : Executors.defaultThreadFactory());
+	}
+
+	/**
+	 * Set the RejectedExecutionHandler to use for the ThreadPoolExecutor.
+	 * Default is the ThreadPoolExecutor's default abort policy.
+	 * @see java.util.concurrent.ThreadPoolExecutor.AbortPolicy
+	 */
+	public void setRejectedExecutionHandler(RejectedExecutionHandler rejectedExecutionHandler) {
+		this.rejectedExecutionHandler =
+				(rejectedExecutionHandler != null ? rejectedExecutionHandler : new ThreadPoolExecutor.AbortPolicy());
+	}
+
 
 	public void afterPropertiesSet() {
 		logger.info("Initializing SchedulerExecutorService");
-		this.executor = createExecutor(this.poolSize);
+		this.executor = createExecutor(this.poolSize, this.threadFactory, this.rejectedExecutionHandler);
 
 		// register all ScheduledExecutorTasks
 		for (int i = 0; i < this.scheduledExecutorTasks.length; i++) {
@@ -96,17 +122,18 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBe
 				if (scheduledTask.isFixedRate()) {
 					this.executor.scheduleAtFixedRate(
 							scheduledTask.getRunnable(), scheduledTask.getDelay(), scheduledTask.getPeriod(),
-							TimeUnit.MILLISECONDS);
+							scheduledTask.getTimeUnit());
 				}
 				else {
 					this.executor.scheduleWithFixedDelay(
 							scheduledTask.getRunnable(), scheduledTask.getDelay(), scheduledTask.getPeriod(),
-							TimeUnit.MILLISECONDS);
+							scheduledTask.getTimeUnit());
 				}
 			}
 			else {
 				// one-time task execution
-				this.executor.schedule(scheduledTask.getRunnable(), scheduledTask.getDelay(), TimeUnit.MILLISECONDS);
+				this.executor.schedule(
+						scheduledTask.getRunnable(), scheduledTask.getDelay(), scheduledTask.getTimeUnit());
 			}
 		}
 	}
@@ -118,12 +145,16 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBe
 	 * Can be overridden in subclasses to provide custom
 	 * ScheduledExecutorService instances.
 	 * @param poolSize the specified pool size
+	 * @param threadFactory the ThreadFactory to use
+	 * @param rejectedExecutionHandler the RejectedExecutionHandler to use
 	 * @return a new ScheduledExecutorService instance
 	 * @see #afterPropertiesSet()
-	 * @see java.util.concurrent.ScheduledThreadPoolExecutor#ScheduledThreadPoolExecutor(int)
+	 * @see java.util.concurrent.ScheduledThreadPoolExecutor#ScheduledThreadPoolExecutor
 	 */
-	protected ScheduledExecutorService createExecutor(int poolSize) {
-		return new ScheduledThreadPoolExecutor(poolSize);
+	protected ScheduledExecutorService createExecutor(
+			int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
+
+		return new ScheduledThreadPoolExecutor(poolSize, threadFactory, rejectedExecutionHandler);
 	}
 
 
