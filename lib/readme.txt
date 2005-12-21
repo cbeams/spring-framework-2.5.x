@@ -7,8 +7,8 @@ distribution/website before using any of them in your own applications.
 - Ant 1.6.5 (http://ant.apache.org)
 - used to build the framework and the sample apps
 
-* antlr/antlr-2.7.5H3.jar
-- ANTLR 2.7.5 with Hibernate3 patch (http://www.antlr.org)
+* antlr/antlr-2.7.6rc1.jar
+- ANTLR 2.7.6 RC1 (http://www.antlr.org)
 - required for running PetClinic (by Hibernate3)
 
 * aopalliance/aopalliance.jar
@@ -192,7 +192,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's CommonsMultipartResolver
 
 * jakarta-commons/commons-httpclient.jar
-- Commons HttpClient 3.0 RC4 (http://jakarta.apache.org/commons/httpclient)
+- Commons HttpClient 3.0 (http://jakarta.apache.org/commons/httpclient)
 - required for building the framework
 - required at runtime when using Spring's CommonsHttpInvokerRequestExecutor
 
