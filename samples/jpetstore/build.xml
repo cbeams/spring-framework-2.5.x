@@ -101,9 +101,6 @@
 				<include name="burlap*.jar"/>
 				<include name="hessian*.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/cglib">
-				<include name="cglib*.jar"/>
-			</fileset>
 			<fileset dir="${spring.root}/lib/hsqldb">
 				<include name="hsqldb.jar"/>
 			</fileset>
