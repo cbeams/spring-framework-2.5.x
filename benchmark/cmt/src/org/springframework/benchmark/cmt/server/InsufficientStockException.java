@@ -11,6 +11,8 @@ package org.springframework.benchmark.cmt.server;
  */
 public class InsufficientStockException extends Exception {
 	
+	private static final long serialVersionUID = -4316068024274819159L;
+
 	private int stock;
 	
 	private int requested;

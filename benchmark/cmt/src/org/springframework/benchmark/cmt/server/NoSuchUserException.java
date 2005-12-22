@@ -11,6 +11,8 @@ package org.springframework.benchmark.cmt.server;
  */
 public class NoSuchUserException extends Exception {
 	
+	private static final long serialVersionUID = 1849150985978495525L;
+	
 	private long id;
 	
 	public NoSuchUserException(long id) {

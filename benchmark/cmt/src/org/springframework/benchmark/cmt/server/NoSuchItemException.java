@@ -11,6 +11,8 @@ package org.springframework.benchmark.cmt.server;
  */
 public class NoSuchItemException extends Exception {
 	
+	private static final long serialVersionUID = 5774997739392295541L;
+	
 	private final long id;
 	
 	public NoSuchItemException(long id) {

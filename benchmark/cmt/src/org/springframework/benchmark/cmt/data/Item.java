@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class Item implements Serializable {
 	
+	private static final long serialVersionUID = -4732637468796964793L;
+
 	private String name;
 	
 	private int stock;

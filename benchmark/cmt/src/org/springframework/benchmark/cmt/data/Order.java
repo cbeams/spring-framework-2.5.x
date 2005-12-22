@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class Order implements Serializable {
 	
+	private static final long serialVersionUID = 5578599792267875866L;
+
 	private int quantity;
 	
 	private long itemId;
