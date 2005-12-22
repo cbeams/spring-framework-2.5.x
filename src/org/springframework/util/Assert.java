@@ -46,6 +46,7 @@ import java.util.Map;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
+ * @author Erwin Vervaet
  * @since 1.1.2
  */
 public abstract class Assert {
@@ -102,6 +103,30 @@ public abstract class Assert {
 		notNull(object, "[Assertion failed] - this argument is required; it cannot be null");
 	}
 
+	/**
+	 * Assert that an object is null.
+	 * <pre>
+	 * Assert.isNull(value, "The value must be null");</pre>
+	 * @param object the object to check
+	 * @param message the exception message to use if the assertion fails
+	 * @throws IllegalArgumentException if the object is not <code>null</code>
+	 */
+	public static void isNull(Object object, String message) {
+		if (object != null) {
+			throw new IllegalArgumentException(message);
+		}
+	}
+
+	/**
+	 * Assert that an object is null.
+	 * <pre>
+	 * Assert.isNull(value);</pre>
+	 * @param object the object to check
+	 * @throws IllegalArgumentException if the object is not <code>null</code>
+	 */
+	public static void isNull(Object object) {
+		isNull(object, "[Assertion failed] - the object argument must be null");
+	}
 
 	/**
 	 * Assert that a string is not empty; that is, it must not be <code>null</code> and not empty.
