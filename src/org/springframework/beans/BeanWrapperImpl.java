@@ -24,6 +24,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -496,11 +497,16 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 		if (pd == null || pd.getReadMethod() == null) {
 			throw new NotReadablePropertyException(getRootClass(), this.nestedPath + propertyName);
 		}
-		if (logger.isDebugEnabled())
-			logger.debug("About to invoke read method [" + pd.getReadMethod() + "] on object of class [" +
+		Method readMethod = pd.getReadMethod();
+		if (logger.isDebugEnabled()) {
+			logger.debug("About to invoke read method [" + readMethod + "] on object of class [" +
 					this.object.getClass().getName() + "]");
+		}
 		try {
-			Object value = pd.getReadMethod().invoke(this.object, (Object[]) null);
+			if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+				readMethod.setAccessible(true);
+			}
+			Object value = readMethod.invoke(this.object, (Object[]) null);
 			if (tokens.keys != null) {
 				// apply indexes and map keys
 				for (int i = 0; i < tokens.keys.length; i++) {
@@ -685,6 +691,9 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 			Object oldValue = null;
 
 			if (this.extractOldValueForEditor && readMethod != null) {
+				if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+					readMethod.setAccessible(true);
+				}
 				try {
 					oldValue = readMethod.invoke(this.object, new Object[0]);
 				}
@@ -707,6 +716,9 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 				if (logger.isDebugEnabled()) {
 					logger.debug("About to invoke write method [" + writeMethod + "] on object of class [" +
 							this.object.getClass().getName() + "]");
+				}
+				if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
+					writeMethod.setAccessible(true);
 				}
 				writeMethod.invoke(this.object, new Object[] {convertedValue});
 				if (logger.isDebugEnabled()) {

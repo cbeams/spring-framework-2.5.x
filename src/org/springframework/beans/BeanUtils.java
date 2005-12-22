@@ -476,8 +476,16 @@ public abstract class BeanUtils {
 				PropertyDescriptor sourcePd = getPropertyDescriptor(source.getClass(), targetPd.getName());
 				if (sourcePd != null && sourcePd.getReadMethod() != null) {
 					try {
-						Object value = sourcePd.getReadMethod().invoke(source, new Object[0]);
-						targetPd.getWriteMethod().invoke(target, new Object[] {value});
+						Method readMethod = sourcePd.getReadMethod();
+						if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+							readMethod.setAccessible(true);
+						}
+						Object value = readMethod.invoke(source, new Object[0]);
+						Method writeMethod = targetPd.getWriteMethod();
+						if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
+							writeMethod.setAccessible(true);
+						}
+						writeMethod.invoke(target, new Object[] {value});
 					}
 					catch (Exception ex) {
 						throw new FatalBeanException("Could not copy properties from source to target", ex);

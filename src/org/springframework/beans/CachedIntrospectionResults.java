@@ -178,17 +178,6 @@ final class CachedIntrospectionResults {
 							"; editor [" + pds[i].getPropertyEditorClass().getName() + "]" : ""));
 				}
 
-				// Set methods accessible if declaring class is not public, for example
-				// in case of package-protected base classes that define bean properties.
-				Method readMethod = pds[i].getReadMethod();
-				if (readMethod != null && !Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
-					readMethod.setAccessible(true);
-				}
-				Method writeMethod = pds[i].getWriteMethod();
-				if (writeMethod != null && !Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
-					writeMethod.setAccessible(true);
-				}
-
 				this.propertyDescriptorCache.put(pds[i].getName(), pds[i]);
 			}
 		}
