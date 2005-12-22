@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
  */
 public class ExposeJoinPointInterceptor implements MethodInterceptor, Serializable {
 	
+	private static final long serialVersionUID = 3217342685702867514L;
+
 	/** Singleton instance of this class */
 	public static final ExposeJoinPointInterceptor INSTANCE = new ExposeJoinPointInterceptor();
 
@@ -74,7 +76,7 @@ public class ExposeJoinPointInterceptor implements MethodInterceptor, Serializab
 
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		Object old = joinpointHolder.get();
-		// TODO make lazy
+		// TODO could make lazy
 		joinpointHolder.set(new MethodInvocationProceedingJoinPoint(mi));
 		try {
 			return mi.proceed();
