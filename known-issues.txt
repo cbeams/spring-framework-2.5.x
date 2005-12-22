@@ -5,9 +5,9 @@ Spring Framework 2.0 M1
 -----------------------
 
 Package org.springframework.aop
-* Argument binding in AspectJ expression pointcuts is not fully functional
-* AspectJ-style introductions is not supported - all code is experimental and incomplete
-* Aspect precedence is not implemented
+* argument binding in AspectJ expression pointcuts is not fully functional
+* AspectJ-style introductions are not supported: all code is experimental and incomplete
+* Aspect precedence is not implemented yet
 
 Package org.springframework.beans
-* Using a BeanDefinitionDecorator that switches the TargetSource will generate class proxies too eagerly. This behaviour will be fixed in M2.
+* using a BeanDefinitionDecorator that switches the TargetSource will generate class proxies too eagerly

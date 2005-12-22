@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 M1 (21.12.2005)
+Changes in version 2.0 M1 (22.12.2005)
 --------------------------------------
 
 Overall
@@ -20,9 +20,12 @@ Package org.springframework.aop
 
 Package org.springframework.beans
 * added intelligent error messages to BeanWrapperImpl when properties are not found
+* fixed BeanWrapperImpl to pass its "extractOldValueForEditor" setting on to nested BeanWrappers
+* refined BeanWrapperImpl to perform the accessible checking for read/write methods before every invocation
 * changed "MutablePropertyValues.addPropertyValue(String, Object)" to return 'this'
 * removed deprecated "getBeanDefinitionNames(type)" method from ListableBeanFactory and BeanFactoryUtils
 * added "createBean" and "instantiateBean" methods to AutowireCapableBeanFactory interface
+* fixed AbstractBeanFactory to allow child bean definitions to refer to a parent via its alias name
 * DefaultListableBeanFactory is able to call non-public factory methods as well
 * PropertiesBeanDefinitionReader trims String values for special keys such as "(class)", "(parent)", etc
 * added "default-init-method" and "default-destroy-method" attributes to the XML bean definition format
@@ -43,7 +46,9 @@ Package org.springframework.dao
 * introduced EmptyResultDataAccessException as specific subclass of IncorrectResultSizeDataAccessException
 
 Package org.springframework.jdbc
+* added further error codes for Oracle and MySQL to default "sql-error-codes.xml" file
 * OracleLobHandler lazily initializes Oracle driver classes, always loading via the actual Connection's class loader
+* fixed DataSourceUtils to correctly re-suspend a Connection even if the Connection hasn't been used since resume
 * fixed JdbcTemplate to extract the JDBC Connection for CallableStatementCreators if a NativeJdbcExtractor has been set
 * factored out protected "getColumnMapRowMapper" and "getSingleColumnRowMapper" hooks within JdbcTemplate
 * SingleColumnRowMapper throws specific IncorrectResultSetColumnCountException in case of invalid column count
@@ -76,6 +81,7 @@ Package org.springframework.orm
 * removed "save" operations with explicit id argument from HibernateTemplate (following Hibernate 3.1's removal)
 * upgraded FilterDefinitionFactoryBean to Hibernate 3.1 (which changed its FilterDefinition in an incompatible fashion)
 * upgraded IdTransferringMergeEventListener to Hibernate 3.1 (which changed its listener API in an incompatible fashion)
+* Hibernate LocalSessionFactoryBean exposes its DataSource on "SessionFactory.close()", for potential schema export
 
 Package org.springframework.remoting
 * RmiServiceExporter performs explicit RMI unexport if binding to the registry failed, to avoid dangling exports
@@ -104,10 +110,11 @@ Package org.springframework.transaction
 * added TransactionNamespaceHandler to support dedicated "tx:*" XML tags
 
 Package org.springframework.util
+* added "isNull()" methods to Assert class
 * added "setPathSeparator" method to AntPathMatcher, allowing to override the default path separator "/"
+* fixed AntPathMatcher to correctly treat "*" right after separator, i.e. to accept path "/test/" for pattern "/test/*"
 * WeakReferenceMonitor uses a daemon thread, to avoid a hanging thread even if weak references have not been released
 * changed ConcurrencyThrottleSupport's default "concurrencyLimit" to -1 (keeping ConcurrencyThrottleInterceptor at 1)
-* added isNull() methods to Assert class
 
 Package org.springframework.web
 * WebApplicationContext interface does not extend ThemeSource anymore; implementing ThemeSource is now optional
