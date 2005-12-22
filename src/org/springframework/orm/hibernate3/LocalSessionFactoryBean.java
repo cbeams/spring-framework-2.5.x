@@ -990,7 +990,20 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 */
 	public void destroy() throws HibernateException {
 		logger.info("Closing Hibernate SessionFactory");
-		this.sessionFactory.close();
+		if (this.dataSource != null) {
+			// Make given DataSource available for potential SchemaExport,
+			// which unfortunately reinstantiates a ConnectionProvider.
+			configTimeDataSourceHolder.set(this.dataSource);
+		}
+		try {
+			this.sessionFactory.close();
+		}
+		finally {
+			if (this.dataSource != null) {
+				// Reset DataSource holder.
+				configTimeDataSourceHolder.set(null);
+			}
+		}
 	}
 
 
