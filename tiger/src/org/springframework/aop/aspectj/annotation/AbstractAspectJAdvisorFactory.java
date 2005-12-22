@@ -242,8 +242,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	}
 
 	public boolean isAspect(Class<?> clazz) {
-		// return clazz.isAnnotationPresent(Aspect.class);
-		return (clazz.getAnnotation(Aspect.class) != null);
+		return AjTypeSystem.getAjType(clazz).isAspect();
 	}
 
 	public void validate(Class<?> aspectClass) throws AopConfigException {
