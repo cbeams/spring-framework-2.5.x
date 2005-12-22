@@ -32,7 +32,7 @@ import org.springframework.beans.factory.xml.NamespaceHandler;
  * a specific element.
  *
  * @author Rob Harrop
- * @since 1.3
+ * @since 2.0
  * @see #registerBeanDefinitionParser(String, BeanDefinitionParser)
  * @see #registerBeanDefinitionDecorator(String, BeanDefinitionDecorator)
  */
