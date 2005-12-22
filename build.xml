@@ -76,8 +76,8 @@
 	<target name="usage">
 
 		<echo message=""/>
-		<echo message="${name} build file"/>
-		<echo message="------------------------------------------------------"/>
+		<echo message="Spring Framework build script"/>
+		<echo message="-----------------------------------------"/>
 		<echo message=""/>
 		<echo message="Among the available targets are:"/>
 		<echo message=""/>
