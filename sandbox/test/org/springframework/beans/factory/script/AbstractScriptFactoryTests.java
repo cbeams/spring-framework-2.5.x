@@ -28,9 +28,11 @@ import junit.framework.TestCase;
  * 
  * @author Rod Johnson
  */
-public class AbstractScriptFactoryTests extends TestCase {
+public abstract class AbstractScriptFactoryTests extends TestCase {
 
 	protected ClassPathXmlApplicationContext applicationContext;
+	
+	protected abstract void setUp();
 
 	public void testBadSyntax() {
 		try {
