@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.springframework.util.ClassUtils;
 
 /**
  * Static convenience methods for JavaBeans: for instantiating beans,
@@ -187,6 +189,63 @@ public abstract class BeanUtils {
 			throw new FatalBeanException("Could not instantiate class [" + ctor.getDeclaringClass().getName() +
 					"]; constructor threw exception", ex.getTargetException());
 		}
+	}
+
+	/**
+	 * Parses a method signature in the form <code>methodName[([arg_list])]</code>,
+	 * where <code>arg_list</code> is an optional, comma-separated list of fully-qualified
+	 * type names, and attempts to resolve that signature against the supplied
+	 * <code>Class</code>.
+	 * <p/>
+	 * When not supplying an argument list (<code>methodName</code>) the method whose name
+	 * matches and has the least number of parameters will be returned. When supplying an
+	 * argument type list, only the method whose name and argument types match will be returned.
+	 * <p/>
+	 * Note then that <code>methodName</code> and <code>methodName()</code> are <strong>not</strong>
+	 * resolved in the same way. The signature <code>methodName</code> means the method called
+	 * <code>methodName</code> with the least number of arguments, whereas <code>methodName()</code>
+	 * means the method called <code>methodName</code> with exactly 0 arguments.
+	 * <p/>
+	 * If no method can found then <code>null</code> is returned.
+	 * @see #findMethod
+	 * @see #findMethodWithMinimalParameters
+	 */
+	public static Method resolveSignature(String signature, Class clazz) {
+		Assert.hasText(signature, "signature must not be null or zero-length");
+		Assert.notNull(clazz, "clazz must not be null");
+
+		int firstParen = signature.indexOf("(");
+		int lastParen = signature.indexOf(")");
+
+		if(firstParen > -1 && lastParen == -1) {
+			throw new IllegalArgumentException("Invalid method signature '"
+					+ signature + "'. Expected closing ')' for args list.");
+		}
+		else if(lastParen > -1 && firstParen == -1) {
+			throw new IllegalArgumentException("Invalid method signature '"
+					+ signature + "'. Expected opening '(' for args list.");
+		}
+		else if(firstParen == -1 && lastParen == -1) {
+			return findMethodWithMinimalParameters(clazz, signature);
+		}
+		else {
+			String methodName = signature.substring(0, firstParen);
+			String[] parameterTypeNames =
+					StringUtils.commaDelimitedListToStringArray(signature.substring(firstParen + 1, lastParen));
+			Class[] parameterTypes = new Class[parameterTypeNames.length];
+			for (int i = 0; i < parameterTypeNames.length; i++) {
+				String parameterTypeName = parameterTypeNames[i].trim();
+				try {
+					parameterTypes[i] = ClassUtils.forName(parameterTypeName);
+				}
+				catch (ClassNotFoundException e) {
+					throw new IllegalArgumentException("Invalid method signature. Unable to locate type ["
+							+ parameterTypeName + "] for argument [" + i + "].");
+				}
+			}
+			return findMethod(clazz, methodName, parameterTypes);
+		}
+
 	}
 
 	/**

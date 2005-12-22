@@ -65,7 +65,7 @@ public class MethodLocatingFactoryBean implements FactoryBean, BeanFactoryAware 
 		if (beanClass == null) {
 			throw new IllegalArgumentException("Can't determine type of bean with name '" + this.targetBeanName + "'");
 		}
-		this.method = BeanUtils.findMethodWithMinimalParameters(beanClass, this.methodName);
+		this.method = BeanUtils.resolveSignature(this.methodName, beanClass);
 
 		if (this.method == null) {
 			throw new IllegalArgumentException("Unable to locate method [" + this.methodName +

@@ -16,17 +16,19 @@
 
 package org.springframework.beans;
 
+import junit.framework.TestCase;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
-
-import org.springframework.beans.propertyeditors.CustomDateEditor;
-
 /**
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 19.05.2003
  */
 public class BeanUtilsTests extends TestCase {
@@ -157,7 +159,7 @@ public class BeanUtilsTests extends TestCase {
 		assertTrue("Touchy empty", tb2.getTouchy() == null);
 
 		// "spouse", "touchy", "age" should not be copied
-		BeanUtils.copyProperties(tb, tb2, new String[] {"spouse", "touchy", "age"});
+		BeanUtils.copyProperties(tb, tb2, new String[]{"spouse", "touchy", "age"});
 		assertTrue("Name copied", tb2.getName() == null);
 		assertTrue("Age still empty", tb2.getAge() == 0);
 		assertTrue("Touchy still empty", tb2.getTouchy() == null);
@@ -167,10 +169,70 @@ public class BeanUtilsTests extends TestCase {
 		NameAndSpecialProperty source = new NameAndSpecialProperty();
 		source.setName("name");
 		TestBean target = new TestBean();
-		BeanUtils.copyProperties(source, target, new String[] {"specialProperty"});
+		BeanUtils.copyProperties(source, target, new String[]{"specialProperty"});
 		assertEquals(target.getName(), "name");
 	}
 
+	public void testResolveSimpleSignature() throws Exception {
+		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomething", null);
+		assertSignatureEquals(desiredMethod, "doSomething");
+		assertSignatureEquals(desiredMethod, "doSomething()");
+	}
+
+	public void testResolveInvalidSignature() throws Exception {
+		try {
+			BeanUtils.resolveSignature("doSomething(", MethodSignatureBean.class);
+			fail("Should not be able to parse with opening but no closing paren.");
+		}
+		catch (IllegalArgumentException ex) {
+			// success
+		}
+
+		try {
+			BeanUtils.resolveSignature("doSomething)", MethodSignatureBean.class);
+			fail("Should not be able to parse with closing but no opening paren.");
+		}
+		catch (IllegalArgumentException ex) {
+			// success
+		}
+	}
+
+	public void testResolveWithAndWithoutArgList() throws Exception {
+		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingElse", new Class[]{String.class, int.class});
+		assertSignatureEquals(desiredMethod, "doSomethingElse");
+		assertNull(BeanUtils.resolveSignature("doSomethingElse()", MethodSignatureBean.class));
+	}
+
+	public void testResolveTypedSignature() throws Exception {
+		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingElse", new Class[]{String.class, int.class});
+		assertSignatureEquals(desiredMethod, "doSomethingElse(java.lang.String, int)");
+	}
+
+	public void testResolveOverloadedSignature() throws Exception {
+		// test resolve with no args
+		Method desiredMethod = MethodSignatureBean.class.getMethod("overloaded", null);
+		assertSignatureEquals(desiredMethod, "overloaded()");
+
+		// resolve with single arg
+		desiredMethod = MethodSignatureBean.class.getMethod("overloaded", new Class[]{String.class});
+		assertSignatureEquals(desiredMethod, "overloaded(java.lang.String)");
+
+		// resolve with two args
+		desiredMethod = MethodSignatureBean.class.getMethod("overloaded", new Class[]{String.class, BeanFactory.class});
+		assertSignatureEquals(desiredMethod, "overloaded(java.lang.String, org.springframework.beans.factory.BeanFactory)");
+	}
+
+	public void testResolveSignatureWithArray() throws Exception {
+		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingWithAnArray", new Class[]{String[].class});
+		assertSignatureEquals(desiredMethod, "doSomethingWithAnArray(java.lang.String[])");
+
+		desiredMethod = MethodSignatureBean.class.getMethod("doSomethingWithAMultiDimensionalArray", new Class[]{String[][].class});
+		assertSignatureEquals(desiredMethod, "doSomethingWithAMultiDimensionalArray(java.lang.String[][])");
+	}
+
+	private void assertSignatureEquals(Method desiredMethod, String signature) {
+		assertEquals(desiredMethod, BeanUtils.resolveSignature(signature, MethodSignatureBean.class));
+	}
 
 	private static class NameAndSpecialProperty {
 
@@ -209,6 +271,7 @@ public class BeanUtilsTests extends TestCase {
 	}
 
 	private static class ContainedBean {
+
 		private String name;
 
 		public String getName() {
@@ -220,4 +283,35 @@ public class BeanUtilsTests extends TestCase {
 		}
 	}
 
+
+	private static class MethodSignatureBean {
+
+		public void doSomething() {
+
+		}
+
+		public void doSomethingElse(String s, int x) {
+
+		}
+
+		public void overloaded() {
+
+		}
+
+		public void overloaded(String s) {
+
+		}
+
+		public void overloaded(String s, BeanFactory beanFactory) {
+
+		}
+
+		public void doSomethingWithAnArray(String[] strings) {
+
+		}
+
+		public void doSomethingWithAMultiDimensionalArray(String[][] strings) {
+
+		}
+	}
 }
