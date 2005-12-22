@@ -159,8 +159,9 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	 * @param nestedPath the nested path of the object
 	 * @param superBw the containing BeanWrapper (must not be <code>null</code>)
 	 */
-	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl superBw) {
+	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapper superBw) {
 		setWrappedInstance(object, nestedPath, superBw.getWrappedInstance());
+		setExtractOldValueForEditor(superBw.isExtractOldValueForEditor());
 	}
 
 
@@ -240,6 +241,10 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 
 	public void setExtractOldValueForEditor(boolean extractOldValueForEditor) {
 		this.extractOldValueForEditor = extractOldValueForEditor;
+	}
+
+	public boolean isExtractOldValueForEditor() {
+		return extractOldValueForEditor;
 	}
 
 
@@ -427,7 +432,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	 * @param object object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
 	 * @return the nested BeanWrapper instance
-	 * @see #BeanWrapperImpl(Object, String, BeanWrapperImpl)
+	 * @see #BeanWrapperImpl(Object, String, BeanWrapper)
 	 */
 	protected BeanWrapperImpl newNestedBeanWrapper(Object object, String nestedPath) {
 		return new BeanWrapperImpl(object, nestedPath, this);
