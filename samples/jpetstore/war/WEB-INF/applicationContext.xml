@@ -57,7 +57,19 @@
 	<aop:config>
 		<aop:advisor pointcut="execution(* *..PetStoreImpl.*(..))" advice-ref="txAdvice"/>
 	</aop:config>
-
+	
+	<!--
+		This definition creates auto-proxy infrastructure based on the given pointcut,
+		expressed in AspectJ pointcut language. Here: applying the advice named
+		"emailAdvice" to insertOrder(Order) method of PetStoreImpl
+	-->
+	<!--
+	<aop:config>
+		<aop:advisor pointcut="execution(* *..PetStoreImpl.insertOrder(*..Order))" 
+					 advice-ref="emailAdvice"/>
+	</aop:config>
+	-->
+	
 	<!--
 		Transaction advice definition, based on method name patterns.
 		Defaults to PROPAGATION_REQUIRED for all methods whose name starts with
