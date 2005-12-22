@@ -57,6 +57,9 @@
 		<property name="dataIntegrityViolationCodes">
 			<value>1062</value>
 		</property>
+		<property name="cannotAcquireLockCodes">
+			<value>1205</value>
+		</property>
 		<property name="deadlockLoserCodes">
 			<value>1213</value>
 		</property>
@@ -70,7 +73,7 @@
 			<value>17003</value>
 		</property>
 		<property name="dataAccessResourceFailureCodes">
-			<value>17002</value>
+			<value>17002,17447</value>
 		</property>
 		<property name="dataIntegrityViolationCodes">
 			<value>1,1400,1722,2291</value>
