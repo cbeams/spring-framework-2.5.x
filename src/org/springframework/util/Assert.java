@@ -150,7 +150,8 @@ public abstract class Assert {
 	 * @see StringUtils#hasLength
 	 */
 	public static void hasLength(String text) {
-		hasLength(text, "[Assertion failed] - this String argument must have length; it cannot be <code>null</code> or empty");
+		hasLength(text,
+				"[Assertion failed] - this String argument must have length; it cannot be <code>null</code> or empty");
 	}
 
 	/**
