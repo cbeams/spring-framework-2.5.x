@@ -98,7 +98,11 @@ public class AntPathMatcher implements PathMatcher {
 		}
 
 		if (strIdxStart > strIdxEnd) {
-			// String is exhausted, only match if rest of pattern is **'s
+			// String is exhausted, only match if rest of pattern is * or **'s
+			if (patIdxStart == patIdxEnd && patDirs[patIdxStart].equals("*") &&
+					str.endsWith(this.pathSeparator)) {
+				return true;
+			}
 			for (int i = patIdxStart; i <= patIdxEnd; i++) {
 				if (!patDirs[i].equals("**")) {
 					return false;

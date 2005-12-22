@@ -48,6 +48,9 @@ public class PathMatcherTests extends TestCase {
 		assertTrue(pathMatcher.match("*", "test"));
 		assertTrue(pathMatcher.match("test*", "test"));
 		assertTrue(pathMatcher.match("test*", "testTest"));
+		assertTrue(pathMatcher.match("test/*", "test/Test"));
+		assertTrue(pathMatcher.match("test/*", "test/t"));
+		assertTrue(pathMatcher.match("test/*", "test/"));
 		assertTrue(pathMatcher.match("*test*", "AnothertestTest"));
 		assertTrue(pathMatcher.match("*test", "Anothertest"));
 		assertTrue(pathMatcher.match("*.*", "test."));
@@ -56,6 +59,7 @@ public class PathMatcherTests extends TestCase {
 		assertTrue(pathMatcher.match("test*aaa", "testblaaaa"));
 		assertFalse(pathMatcher.match("test*", "tst"));
 		assertFalse(pathMatcher.match("test*", "tsttest"));
+		assertFalse(pathMatcher.match("test/*", "test"));
 		assertFalse(pathMatcher.match("*test*", "tsttst"));
 		assertFalse(pathMatcher.match("*test", "tsttst"));
 		assertFalse(pathMatcher.match("*.*", "tsttst"));
@@ -99,11 +103,6 @@ public class PathMatcherTests extends TestCase {
 
 		assertFalse(pathMatcher.match("/x/x/x/", "/x/x/**/bla"));
 
-		assertTrue(pathMatcher.match("", ""));
-		assertTrue(pathMatcher.match("", ""));
-		assertTrue(pathMatcher.match("", ""));
-		assertTrue(pathMatcher.match("", ""));
-		assertTrue(pathMatcher.match("", ""));
 		assertTrue(pathMatcher.match("", ""));
 	}
 
