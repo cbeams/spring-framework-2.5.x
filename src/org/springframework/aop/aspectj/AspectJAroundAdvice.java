@@ -36,7 +36,11 @@ import org.springframework.core.ParameterNameDiscoverer;
  */
 public class AspectJAroundAdvice extends AbstractAspectJAdvice implements MethodInterceptor {
 	
+	// TODO pull up
 	private final ParameterNameDiscoverer parameterNameDiscoverer;
+	
+	// TODO pull up
+	private final String[] argNames;
 
 	public AspectJAroundAdvice(
 			Method aspectJAroundAdviceMethod, AspectJExpressionPointcut pointcut,
@@ -44,6 +48,8 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 
 		super(aspectJAroundAdviceMethod, pointcut.getPointcutExpression(), aif);
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
+		this.argNames = this.parameterNameDiscoverer.getParameterNames(
+				this.aspectJAdviceMethod, this.aspectJAdviceMethod.getDeclaringClass());
 	}
 
 	public AspectJAroundAdvice(
@@ -52,6 +58,8 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 
 		super(aspectJAroundAdviceMethod, pe, aif);
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
+		this.argNames = this.parameterNameDiscoverer.getParameterNames(
+				this.aspectJAdviceMethod, this.aspectJAdviceMethod.getDeclaringClass());
 	}
 
 	public Object invoke(MethodInvocation mi) throws Throwable {
@@ -64,12 +72,11 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 		args[0] = pjp;
 		ReflectiveMethodInvocation invocation = (ReflectiveMethodInvocation) mi;
 
-		String[] argNames = this.parameterNameDiscoverer.getParameterNames(
-				this.aspectJAdviceMethod, this.aspectJAdviceMethod.getDeclaringClass());
 		if (argNames == null) {
 			// basic mapping applies
 			System.arraycopy(formals, 0, args, 1, formals.length);				
-		} else {
+		} 
+		else {
 			// map based on bindings
 			Map bindingMap = invocation.getUserAttributes();
 			for (int i = 1; i < args.length; i++) {
