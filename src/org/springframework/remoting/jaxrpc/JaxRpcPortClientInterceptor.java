@@ -309,6 +309,9 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		if (this.jaxRpcService == null) {
 			this.jaxRpcService = createJaxRpcService();
 		}
+		else {
+			postProcessJaxRpcService(this.jaxRpcService);
+		}
 
 		// Determine interface to use at the JAX-RPC port level:
 		// Use portInterface if specified, else fall back to serviceInterface.

@@ -46,6 +46,7 @@ import java.util.Map;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
+ * @author Erwin Vervaet
  * @since 1.1.2
  */
 public abstract class Assert {
@@ -75,6 +76,31 @@ public abstract class Assert {
 	 */
 	public static void isTrue(boolean expression) {
 		isTrue(expression, "[Assertion failed] - this expression must be true");
+	}
+
+	/**
+	 * Assert that an object is null.
+	 * <pre>
+	 * Assert.isNull(value, "The value must be null");</pre>
+	 * @param object the object to check
+	 * @param message the exception message to use if the assertion fails
+	 * @throws IllegalArgumentException if the object is not <code>null</code>
+	 */
+	public static void isNull(Object object, String message) {
+		if (object != null) {
+			throw new IllegalArgumentException(message);
+		}
+	}
+
+	/**
+	 * Assert that an object is null.
+	 * <pre>
+	 * Assert.isNull(value);</pre>
+	 * @param object the object to check
+	 * @throws IllegalArgumentException if the object is not <code>null</code>
+	 */
+	public static void isNull(Object object) {
+		isNull(object, "[Assertion failed] - the object argument must be null");
 	}
 
 	/**
@@ -125,7 +151,8 @@ public abstract class Assert {
 	 * @see StringUtils#hasLength
 	 */
 	public static void hasLength(String text) {
-		hasLength(text, "[Assertion failed] - this String argument must have length; it cannot be <code>null</code> or empty");
+		hasLength(text,
+				"[Assertion failed] - this String argument must have length; it cannot be <code>null</code> or empty");
 	}
 
 	/**

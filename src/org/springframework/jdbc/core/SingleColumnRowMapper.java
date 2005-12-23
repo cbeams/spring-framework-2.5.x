@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.core;
 
+import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.ResultSet;
@@ -165,6 +166,9 @@ public class SingleColumnRowMapper implements RowMapper {
 			}
 			else if (java.sql.Timestamp.class.equals(requiredType) || java.util.Date.class.equals(requiredType)) {
 				return rs.getTimestamp(index);
+			}
+			else if (BigDecimal.class.equals(requiredType)) {
+				return rs.getBigDecimal(index);
 			}
 			else if (Blob.class.equals(requiredType)) {
 				return rs.getBlob(index);

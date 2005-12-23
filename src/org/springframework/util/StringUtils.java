@@ -106,13 +106,33 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Trim leading and trailing whitespace from the given String.
+	 * @param str the String to check
+	 * @return the trimmed String
+	 * @see java.lang.Character#isWhitespace
+	 */
+	public static String trimWhitespace(String str) {
+		if (!hasLength(str)) {
+			return str;
+		}
+		StringBuffer buf = new StringBuffer(str);
+		while (buf.length() > 0 && Character.isWhitespace(buf.charAt(0))) {
+			buf.deleteCharAt(0);
+		}
+		while (buf.length() > 0 && Character.isWhitespace(buf.charAt(buf.length() - 1))) {
+			buf.deleteCharAt(buf.length() - 1);
+		}
+		return buf.toString();
+	}
+
+	/**
 	 * Trim leading whitespace from the given String.
 	 * @param str the String to check
 	 * @return the trimmed String
 	 * @see java.lang.Character#isWhitespace
 	 */
 	public static String trimLeadingWhitespace(String str) {
-		if (str.length() == 0) {
+		if (!hasLength(str)) {
 			return str;
 		}
 		StringBuffer buf = new StringBuffer(str);
@@ -129,7 +149,7 @@ public abstract class StringUtils {
 	 * @see java.lang.Character#isWhitespace
 	 */
 	public static String trimTrailingWhitespace(String str) {
-		if (str.length() == 0) {
+		if (!hasLength(str)) {
 			return str;
 		}
 		StringBuffer buf = new StringBuffer(str);
@@ -269,6 +289,27 @@ public abstract class StringUtils {
 	//---------------------------------------------------------------------
 
 	/**
+	 * Quote the given String with single quotes.
+	 * @param str the input String (e.g. "myString")
+	 * @return the quoted String (e.g. "'myString'"),
+	 * or <code>null<code> if the input was <code>null</code>
+	 */
+	public static String quote(String str) {
+		return (str != null ? "'" + str + "'" : null);
+	}
+
+	/**
+	 * Turn the given Object into a String with single quotes
+	 * if it is a String; keeping the Object as-is else.
+	 * @param obj the input Object (e.g. "myString")
+	 * @return the quoted String (e.g. "'myString'"),
+	 * or the input object as-is if not a String
+	 */
+	public static Object quoteIfString(Object obj) {
+		return (obj instanceof String ? quote((String) obj) : obj);
+	}
+
+	/**
 	 * Unqualify a string qualified by a '.' dot character. For example,
 	 * "this.name.is.qualified", returns "qualified".
 	 * @param qualifiedName the qualified name
@@ -361,7 +402,7 @@ public abstract class StringUtils {
 	 * Normalize the path by suppressing sequences like "path/.." and
 	 * inner simple dots.
 	 * <p>The result is convenient for path comparison. For other uses,
-	 * notice that Windows separators ("\") are replaced by simple dashes.
+	 * notice that Windows separators ("\") are replaced by simple slashes.
 	 * @param path the original path
 	 * @return the normalized path
 	 */
@@ -461,6 +502,23 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Remove duplicate Strings from the given array.
+	 * Also sorts the array, as it uses a TreeSet.
+	 * @param array the String array
+	 * @return an array without duplicates, in natural sort order
+	 */
+	public static String[] removeDuplicateStrings(String[] array) {
+		if (ObjectUtils.isEmpty(array)) {
+			return array;
+		}
+		Set set = new TreeSet();
+		for (int i = 0; i < array.length; i++) {
+			set.add(array[i]);
+		}
+		return (String[]) set.toArray(new String[set.size()]);
+	}
+
+	/**
 	 * Split a String at the first occurrence of the delimiter.
 	 * Does not include the delimiter in the result.
 	 * @param toSplit the string to split
@@ -478,7 +536,7 @@ public abstract class StringUtils {
 		}
 		String beforeDelimiter = toSplit.substring(0, offset);
 		String afterDelimiter = toSplit.substring(offset + delimiter.length());
-		return new String[]{beforeDelimiter, afterDelimiter};
+		return new String[] {beforeDelimiter, afterDelimiter};
 	}
 
 	/**

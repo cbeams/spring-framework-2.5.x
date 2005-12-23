@@ -31,6 +31,7 @@ import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.support.WebContentGenerator;
+import org.springframework.web.util.NestedServletException;
 
 /**
  * Web controller that exports the specified service bean as Hessian service
@@ -95,7 +96,7 @@ public class HessianServiceExporter extends RemoteExporter implements Controller
 		}
 		catch (Throwable ex) {
 			// Should never happen: There are no Throwables other than Exceptions and Errors.
-		  throw new ServletException(ex);
+		  throw new NestedServletException("Hessian skeleton invocation failed", ex);
 		}
 	}
 

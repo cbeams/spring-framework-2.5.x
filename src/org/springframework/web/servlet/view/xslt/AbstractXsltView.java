@@ -47,6 +47,7 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
 import org.springframework.util.xml.SimpleTransformErrorListener;
 import org.springframework.web.servlet.view.AbstractView;
+import org.springframework.web.util.NestedServletException;
 
 /**
  * Convenient superclass for views rendered using an XSLT stylesheet.
@@ -477,11 +478,11 @@ public abstract class AbstractXsltView extends AbstractView {
 			}
 		}
 		catch (TransformerConfigurationException ex) {
-			throw new ServletException("Couldn't create XSLT transformer for stylesheet [" +
+			throw new NestedServletException("Couldn't create XSLT transformer for stylesheet [" +
 					this.stylesheetLocation + "] in XSLT view with name [" + getBeanName() + "]", ex);
 		}
 		catch (TransformerException ex) {
-			throw new ServletException("Couldn't perform transform with stylesheet [" +
+			throw new NestedServletException("Couldn't perform transform with stylesheet [" +
 					this.stylesheetLocation + "] in XSLT view with name [" + getBeanName() + "]", ex);
 		}
 	}

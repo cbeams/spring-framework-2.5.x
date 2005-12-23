@@ -92,6 +92,7 @@ public class WeakReferenceMonitor {
 		synchronized (WeakReferenceMonitor.class) {
 			if (!isMonitoringThreadRunning()) {
 				monitoringThread = new Thread(new MonitoringProcess(), WeakReferenceMonitor.class.getName());
+				monitoringThread.setDaemon(true);
 				monitoringThread.start();
 			}
 		}

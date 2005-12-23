@@ -41,6 +41,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.servlet.support.SessionRequiredException;
+import org.springframework.web.util.NestedServletException;
 
 /**
  * Controller implementation that allows multiple request types to be
@@ -527,7 +528,7 @@ public class MultiActionController extends AbstractController implements LastMod
 			throws Exception {
 
 		if (handler == null) {
-			throw new ServletException("No handler for exception", ex);
+			throw new NestedServletException("No handler for exception", ex);
 		}
 
 		// If we get here, we have a handler.
@@ -547,7 +548,7 @@ public class MultiActionController extends AbstractController implements LastMod
 				throw (Error) targetEx;
 			}
 			// shouldn't happen
-			throw new ServletException("Unknown Throwable type encountered", targetEx);
+			throw new NestedServletException("Unknown Throwable type encountered", targetEx);
 		}
 	}
 	

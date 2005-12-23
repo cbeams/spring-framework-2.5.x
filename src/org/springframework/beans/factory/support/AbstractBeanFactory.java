@@ -215,7 +215,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			// Create bean instance.
 			if (mergedBeanDefinition.isSingleton()) {
 				synchronized (this.singletonCache) {
-					// re-check singleton cache within synchronized block
+					// Re-check singleton cache within synchronized block.
 					sharedInstance = this.singletonCache.get(beanName);
 					if (sharedInstance == null) {
 						if (logger.isDebugEnabled()) {
@@ -668,7 +668,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	protected RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors)
 	    throws BeansException {
 		try {
-			return getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
+			return getMergedBeanDefinition(beanName, getBeanDefinition(transformedBeanName(beanName)));
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			if (includingAncestors && getParentBeanFactory() instanceof AbstractBeanFactory) {

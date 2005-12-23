@@ -32,6 +32,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -76,7 +77,7 @@ public abstract class ComponentControllerSupport extends ControllerSupport {
 			throw ex;
 		}
 		catch (Exception ex) {
-			throw new ServletException(ex.getMessage(), ex);
+			throw new NestedServletException(ex.getMessage(), ex);
 		}
 	}
 

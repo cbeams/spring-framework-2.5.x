@@ -357,7 +357,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public Map queryForMap(String sql) throws DataAccessException {
-		return (Map) queryForObject(sql, new ColumnMapRowMapper());
+		return (Map) queryForObject(sql, getColumnMapRowMapper());
 	}
 
 	public Object queryForObject(String sql, RowMapper rowMapper) throws DataAccessException {
@@ -366,7 +366,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public Object queryForObject(String sql, Class requiredType) throws DataAccessException {
-		return queryForObject(sql, new SingleColumnRowMapper(requiredType));
+		return queryForObject(sql, getSingleColumnRowMapper(requiredType));
 	}
 
 	public long queryForLong(String sql) throws DataAccessException {
@@ -380,11 +380,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public List queryForList(String sql, Class elementType) throws DataAccessException {
-		return query(sql, new SingleColumnRowMapper(elementType));
+		return query(sql, getSingleColumnRowMapper(elementType));
 	}
 
 	public List queryForList(String sql) throws DataAccessException {
-		return query(sql, new ColumnMapRowMapper());
+		return query(sql, getColumnMapRowMapper());
 	}
 
 	public SqlRowSet queryForRowSet(String sql) throws DataAccessException {
@@ -622,19 +622,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	public Object queryForObject(String sql, Object[] args, int[] argTypes, Class requiredType)
 			throws DataAccessException {
-		return queryForObject(sql, args, argTypes, new SingleColumnRowMapper(requiredType));
+		return queryForObject(sql, args, argTypes, getSingleColumnRowMapper(requiredType));
 	}
 
 	public Object queryForObject(String sql, Object[] args, Class requiredType) throws DataAccessException {
-		return queryForObject(sql, args, new SingleColumnRowMapper(requiredType));
+		return queryForObject(sql, args, getSingleColumnRowMapper(requiredType));
 	}
 
 	public Map queryForMap(String sql, Object[] args, int[] argTypes) throws DataAccessException {
-		return (Map) queryForObject(sql, args, argTypes, new ColumnMapRowMapper());
+		return (Map) queryForObject(sql, args, argTypes, getColumnMapRowMapper());
 	}
 
 	public Map queryForMap(String sql, Object[] args) throws DataAccessException {
-		return (Map) queryForObject(sql, args, new ColumnMapRowMapper());
+		return (Map) queryForObject(sql, args, getColumnMapRowMapper());
 	}
 
 	public long queryForLong(String sql, Object[] args, int[] argTypes) throws DataAccessException {
@@ -659,19 +659,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	public List queryForList(String sql, Object[] args, int[] argTypes, Class elementType)
 			throws DataAccessException {
-		return query(sql, args, argTypes, new SingleColumnRowMapper(elementType));
+		return query(sql, args, argTypes, getSingleColumnRowMapper(elementType));
 	}
 
 	public List queryForList(String sql, final Object[] args, Class elementType) throws DataAccessException {
-		return query(sql, args, new SingleColumnRowMapper(elementType));
+		return query(sql, args, getSingleColumnRowMapper(elementType));
 	}
 
 	public List queryForList(String sql, Object[] args, int[] argTypes) throws DataAccessException {
-		return query(sql, args, argTypes, new ColumnMapRowMapper());
+		return query(sql, args, argTypes, getColumnMapRowMapper());
 	}
 
 	public List queryForList(String sql, final Object[] args) throws DataAccessException {
-		return query(sql, args, new ColumnMapRowMapper());
+		return query(sql, args, getColumnMapRowMapper());
 	}
 
 	public SqlRowSet queryForRowSet(String sql, final Object[] args, int[] argTypes) throws DataAccessException {
@@ -730,7 +730,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				ResultSet keys = ps.getGeneratedKeys();
 				if (keys != null) {
 					try {
-						ColumnMapRowMapper rowMapper = new ColumnMapRowMapper();
+						RowMapper rowMapper = getColumnMapRowMapper();
 						RowMapperResultReader resultReader = new RowMapperResultReader(rowMapper, 1);
 						while (keys.next()) {
 							resultReader.processRow(keys);
@@ -811,8 +811,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		CallableStatement cs = null;
 		try {
 			Connection conToUse = con;
-			if (this.nativeJdbcExtractor != null &&
-					this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeCallableStatements()) {
+			if (this.nativeJdbcExtractor != null) {
 				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
 			}
 			cs = csc.createCallableStatement(conToUse);
@@ -992,8 +991,27 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 
 	//-------------------------------------------------------------------------
-	// General helper methods
+	// Implementation hooks and helper methods
 	//-------------------------------------------------------------------------
+
+	/**
+	 * Create a new RowMapper for reading columns as key-value pairs.
+	 * @return the RowMapper to use
+	 * @see ColumnMapRowMapper
+	 */
+	protected RowMapper getColumnMapRowMapper() {
+		return new ColumnMapRowMapper();
+	}
+
+	/**
+	 * Create a new RowMapper for reading result objects from a single column.
+	 * @param requiredType the type that each result object is expected to match
+	 * @return the RowMapper to use
+	 * @see SingleColumnRowMapper
+	 */
+	protected RowMapper getSingleColumnRowMapper(Class requiredType) {
+		return new SingleColumnRowMapper(requiredType);
+	}
 
 	/**
 	 * Prepare the given JDBC Statement (or PreparedStatement or CallableStatement),
@@ -1021,7 +1039,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	private void throwExceptionOnWarningIfNotIgnoringWarnings(SQLWarning warning) throws SQLWarningException {
 		if (warning != null) {
 			if (isIgnoreWarnings()) {
-				logger.warn("SQLWarning ignored: " + warning);
+				if (logger.isWarnEnabled()) {
+					logger.warn("SQLWarning ignored: " + warning);
+				}
 			}
 			else {
 				throw new SQLWarningException("Warning not ignored", warning);

@@ -16,6 +16,7 @@
 
 package org.springframework.remoting.rmi;
 
+import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -193,7 +194,8 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 
 
 	/**
-	 * Register the service as RMI object.
+	 * Initialize this service exporter.
+	 * <p>Registers the service as RMI object.
 	 * Creates an RMI registry on the specified port if none exists.
 	 */
 	public void afterPropertiesSet() throws RemoteException {
@@ -236,6 +238,8 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 			logger.info("Binding RMI service '" + this.serviceName +
 					"' to registry at port '" + this.registryPort + "'");
 		}
+
+		// Export RMI object.
 		if (this.clientSocketFactory != null) {
 			UnicastRemoteObject.exportObject(
 					this.exportedObject, this.servicePort, this.clientSocketFactory, this.serverSocketFactory);
@@ -243,7 +247,16 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 		else {
 			UnicastRemoteObject.exportObject(this.exportedObject, this.servicePort);
 		}
-		this.registry.rebind(this.serviceName, this.exportedObject);
+
+		// Bind RMI object to registry.
+		try {
+			this.registry.rebind(this.serviceName, this.exportedObject);
+		}
+		catch (RemoteException ex) {
+			// Registry binding failed: let's unexport the RMI object as well.
+			unexportObjectSilently();
+			throw ex;
+		}
 	}
 
 
@@ -351,13 +364,37 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	/**
 	 * Unbind the RMI service from the registry on bean factory shutdown.
 	 */
-	public void destroy() throws RemoteException, NotBoundException {
+	public void destroy() throws RemoteException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Unbinding RMI service '" + this.serviceName +
 					"' from registry at port '" + this.registryPort + "'");
 		}
-		this.registry.unbind(this.serviceName);
-		UnicastRemoteObject.unexportObject(this.exportedObject, true);
+		try {
+			this.registry.unbind(this.serviceName);
+		}
+		catch (NotBoundException ex) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("RMI service '" + this.serviceName + "' is not bound to registry at port '" +
+						this.registryPort + "' anymore", ex);
+			}
+		}
+		finally {
+			unexportObjectSilently();
+		}
+	}
+
+	/**
+	 * Unexport the registered RMI object, logging any exception that arises.
+	 */
+	private void unexportObjectSilently() {
+		try {
+			UnicastRemoteObject.unexportObject(this.exportedObject, true);
+		}
+		catch (NoSuchObjectException ex) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("RMI object for service '" + this.serviceName + "' isn't exported anymore", ex);
+			}
+		}
 	}
 
 }

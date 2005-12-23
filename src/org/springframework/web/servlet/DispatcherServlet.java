@@ -51,6 +51,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -754,8 +755,8 @@ public class DispatcherServlet extends FrameworkServlet {
 			throw ex;
 		}
 		catch (Error err) {
-			ServletException ex =
-					new ServletException("Error occured during request processing: " + err.getMessage(), err);
+			NestedServletException ex =
+					new NestedServletException("Error occured during request processing: " + err.getMessage(), err);
 			// Trigger after-completion for thrown exception.
 			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
 			throw ex;

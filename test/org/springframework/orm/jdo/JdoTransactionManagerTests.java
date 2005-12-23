@@ -136,8 +136,64 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmControl.setVoidCallable(1);
 		tx.begin();
 		txControl.setVoidCallable(1);
+		tx.isActive();
+		txControl.setReturnValue(true, 1);
 		tx.rollback();
 		txControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
+		txControl.replay();
+
+		PlatformTransactionManager tm = new JdoTransactionManager(pmf);
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		try {
+			tt.execute(new TransactionCallback() {
+				public Object doInTransaction(TransactionStatus status) {
+					assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
+					JdoTemplate jt = new JdoTemplate(pmf);
+					return jt.execute(new JdoCallback() {
+						public Object doInJdo(PersistenceManager pm) {
+							throw new RuntimeException("application exception");
+						}
+					});
+				}
+			});
+			fail("Should have thrown RuntimeException");
+		}
+		catch (RuntimeException ex) {
+			// expected
+		}
+
+		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		pmfControl.verify();
+		pmControl.verify();
+		txControl.verify();
+	}
+
+	public void testTransactionRollbackWithAlreadyRolledBack() {
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
+		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
+		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+		MockControl txControl = MockControl.createControl(Transaction.class);
+		Transaction tx = (Transaction) txControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm, 1);
+		pm.currentTransaction();
+		pmControl.setReturnValue(tx, 2);
+		pm.close();
+		pmControl.setVoidCallable(1);
+		tx.begin();
+		txControl.setVoidCallable(1);
+		tx.isActive();
+		txControl.setReturnValue(false, 1);
 		pmfControl.replay();
 		pmControl.replay();
 		txControl.replay();
@@ -192,6 +248,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmControl.setVoidCallable(1);
 		tx.begin();
 		txControl.setVoidCallable(1);
+		tx.isActive();
+		txControl.setReturnValue(true, 1);
 		tx.rollback();
 		txControl.setVoidCallable(1);
 		pmfControl.replay();
@@ -312,7 +370,7 @@ public class JdoTransactionManagerTests extends TestCase {
 				public Object doInTransaction(TransactionStatus status) {
 					txControl.reset();
 					tx.isActive();
-					txControl.setReturnValue(true, 1);
+					txControl.setReturnValue(true, 2);
 					tx.rollback();
 					txControl.setVoidCallable(1);
 					txControl.replay();
@@ -374,7 +432,7 @@ public class JdoTransactionManagerTests extends TestCase {
 				public Object doInTransaction(TransactionStatus status) {
 					txControl.reset();
 					tx.isActive();
-					txControl.setReturnValue(true, 1);
+					txControl.setReturnValue(true, 2);
 					tx.rollback();
 					txControl.setVoidCallable(1);
 					txControl.replay();

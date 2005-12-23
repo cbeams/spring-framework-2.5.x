@@ -36,6 +36,7 @@ import java.beans.PropertyDescriptor;
  * (the wrapped Java Bean instance) changing.
  * 
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 13 April 2001
  * @see PropertyAccessor
  * @see PropertyEditorRegistry
@@ -71,6 +72,12 @@ public interface BeanWrapper extends PropertyAccessor, PropertyEditorRegistry {
 	 * Turn this to "true" to expose previous property values to custom editors.
 	 */
 	void setExtractOldValueForEditor(boolean extractOldValueForEditor);
+
+	/**
+	 * Return whether to extract the old property value when applying a
+	 * property editor to a new value for a property.
+	 */
+	boolean isExtractOldValueForEditor();
 
 
 	/**

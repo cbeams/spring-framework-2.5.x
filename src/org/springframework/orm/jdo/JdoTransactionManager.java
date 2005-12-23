@@ -19,6 +19,7 @@ package org.springframework.orm.jdo;
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
+import javax.jdo.Transaction;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -372,7 +373,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 					txObject.getPersistenceManagerHolder().getPersistenceManager() + "]");
 		}
 		try {
-			txObject.getPersistenceManagerHolder().getPersistenceManager().currentTransaction().commit();
+			Transaction tx = txObject.getPersistenceManagerHolder().getPersistenceManager().currentTransaction();
+			tx.commit();
 		}
 		catch (JDOException ex) {
 			// assumably failed to flush changes to database
@@ -387,7 +389,10 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 					txObject.getPersistenceManagerHolder().getPersistenceManager() + "]");
 		}
 		try {
-			txObject.getPersistenceManagerHolder().getPersistenceManager().currentTransaction().rollback();
+			Transaction tx = txObject.getPersistenceManagerHolder().getPersistenceManager().currentTransaction();
+			if (tx.isActive()) {
+				tx.rollback();
+			}
 		}
 		catch (JDOException ex) {
 			throw new TransactionSystemException("Could not roll back JDO transaction", ex);

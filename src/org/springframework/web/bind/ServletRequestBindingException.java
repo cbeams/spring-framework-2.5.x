@@ -16,20 +16,34 @@
 
 package org.springframework.web.bind;
 
-import javax.servlet.ServletException;
+import org.springframework.web.util.NestedServletException;
 
 /**
  * Fatal binding exception, thrown when we want to
  * treat binding exceptions as unrecoverable.
  *
+ * <p>Extends ServletException for convenient throwing in any Servlet resource
+ * (such as a Filter), and NestedServletException for proper root cause handling
+ * (as the plain ServletException doesn't expose its root cause at all).
+ *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
-public class ServletRequestBindingException extends ServletException {
+public class ServletRequestBindingException extends NestedServletException {
 
+	/**
+	 * Constructor for ServletRequestBindingException.
+	 * @param msg the detail message
+	 */
 	public ServletRequestBindingException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for ServletRequestBindingException.
+	 * @param msg the detail message
+	 * @param ex the nested exception
+	 */
 	public ServletRequestBindingException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

@@ -33,6 +33,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.RequestHandledEvent;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
+import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -405,7 +406,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		}
 		catch (Exception ex) {
 			failureCause = ex;
-			throw new ServletException(ex.getMessage(), ex);
+			throw new NestedServletException(ex.getMessage(), ex);
 		}
 		finally {
 			if (failureCause != null) {

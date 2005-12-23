@@ -32,13 +32,18 @@ package org.springframework.util;
  *
  * <p>Some examples:<br>
  * <ul>
- * <li>com/t?st.jsp - matches test.jsp but also tast.jsp or txst.jsp</li>
- * <li>com/*.jsp - matches all .jsp files in the com directory</li>
- * <li>com/&#42;&#42;/test.jsp - matches all test.jsp path underneath the com path</li>
- * <li>org/springframework/&#42;&#42;/*.jsp - matches all .jsp files underneath the
- * org/springframework path</li>
- * <li>org/&#42;&#42;/servlet/bla.jsp - matches org/springframework/servlet/bla.jsp
- * but also org/springframework/testing/servlet/bla.jsp and com/servlet/bla.jsp</li>
+ * <li><code>com/t?st.jsp</code> - matches <code>test.jsp</code> but also
+ * <code>tast.jsp</code> or <code>txst.jsp</code></li>
+ * <li><code>com/*.jsp</code> - matches all <code>.jsp</code> files in the
+ * <code>com</code> directory</li>
+ * <li><code>com/&#42;&#42;/test.jsp</code> - matches all <code>test.jsp</code>
+ * files underneath the <code>com</code> path</li>
+ * <li><code>org/springframework/&#42;&#42;/*.jsp</code> - matches all <code>.jsp</code>
+ * files underneath the <code>org/springframework</code> path</li>
+ * <li><code>org/&#42;&#42;/servlet/bla.jsp</code> - matches
+ * <code>org/springframework/servlet/bla.jsp</code> but also
+ * <code>org/springframework/testing/servlet/bla.jsp</code> and
+ * <code>org/servlet/bla.jsp</code></li>
  * </ul>
  *
  * @author Alef Arendsen
@@ -47,17 +52,32 @@ package org.springframework.util;
  */
 public class AntPathMatcher implements PathMatcher {
 
+	/** Default path separator: "/" */
+	public static final String DEFAULT_PATH_SEPARATOR = "/";
+
+	private String pathSeparator = DEFAULT_PATH_SEPARATOR;
+
+
+	/**
+	 * Set the path separator to use for pattern parsing.
+	 * Default is "/", as in Ant.
+	 */
+	public void setPathSeparator(String pathSeparator) {
+		this.pathSeparator = (pathSeparator != null ? pathSeparator : DEFAULT_PATH_SEPARATOR);
+	}
+
+
 	public boolean isPattern(String str) {
 		return (str.indexOf('*') != -1 || str.indexOf('?') != -1);
 	}
 
 	public boolean match(String pattern, String str) {
-		if (str.startsWith("/") != pattern.startsWith("/")) {
+		if (str.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}
 
-		String[] patDirs = StringUtils.tokenizeToStringArray(pattern, "/");
-		String[] strDirs = StringUtils.tokenizeToStringArray(str, "/");
+		String[] patDirs = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
+		String[] strDirs = StringUtils.tokenizeToStringArray(str, this.pathSeparator);
 
 		int patIdxStart = 0;
 		int patIdxEnd = patDirs.length - 1;
@@ -78,7 +98,11 @@ public class AntPathMatcher implements PathMatcher {
 		}
 
 		if (strIdxStart > strIdxEnd) {
-			// String is exhausted, only match if rest of pattern is **'s
+			// String is exhausted, only match if rest of pattern is * or **'s
+			if (patIdxStart == patIdxEnd && patDirs[patIdxStart].equals("*") &&
+					str.endsWith(this.pathSeparator)) {
+				return true;
+			}
 			for (int i = patIdxStart; i <= patIdxEnd; i++) {
 				if (!patDirs[i].equals("**")) {
 					return false;

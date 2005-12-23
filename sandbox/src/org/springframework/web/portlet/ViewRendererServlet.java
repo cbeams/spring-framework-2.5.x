@@ -27,6 +27,7 @@ import org.springframework.web.context.support.RequestHandledEvent;
 import org.springframework.web.portlet.context.PortletApplicationContext;
 import org.springframework.web.servlet.HttpServletBean;
 import org.springframework.web.servlet.View;
+import org.springframework.web.util.NestedServletException;
 
 
 /**
@@ -91,7 +92,7 @@ public class ViewRendererServlet extends HttpServletBean {
 		}
 		catch (Exception ex) {
 			failureCause = ex;
-			throw new ServletException(ex.getMessage(), ex);
+			throw new NestedServletException(ex.getMessage(), ex);
 		}
 		finally {
 			long processingTime = System.currentTimeMillis() - startTime;
