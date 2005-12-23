@@ -24,6 +24,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 
 /**
@@ -32,7 +33,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
  *
  * <p>If used, this interceptor must be the second in the interceptor chain,
  * after the ExposeInvocationInterceptor, which is also required for working
- * with AspectJ advice.
+ * with AspectJ advice. 
  *
  * @author Rod Johnson
  * @since 2.0
@@ -68,10 +69,11 @@ public class ExposeJoinPointInterceptor implements MethodInterceptor, Serializab
 	
 	public static ProceedingJoinPoint currentProceedingJoinPoint() throws AspectException {
 		ProceedingJoinPoint jp = (ProceedingJoinPoint) joinpointHolder.get();
-		if (jp == null)
-			throw new AspectException(
-					"No AspectJ JoinPoint found: check that an AOP invocation is in progress, " +
-					"and that the ExposeJoinPointInterceptor is in the interceptor chain");
+		// Initialize lazily
+		if (jp == null) {
+			jp = new MethodInvocationProceedingJoinPoint(ExposeInvocationInterceptor.currentInvocation());
+			joinpointHolder.set(jp);
+		}
 		return jp;
 	}
 
@@ -84,8 +86,9 @@ public class ExposeJoinPointInterceptor implements MethodInterceptor, Serializab
 
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		Object old = joinpointHolder.get();
-		// TODO could make lazy
-		joinpointHolder.set(new MethodInvocationProceedingJoinPoint(mi));
+		// Put placeholder to ensure integrity of ThreadLocal state
+		// The actual instance will be instantiated lazily if necessary.
+		joinpointHolder.set(null);
 		try {
 			return mi.proceed();
 		}
