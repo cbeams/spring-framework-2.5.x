@@ -26,15 +26,14 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
- * Tests for AspectJ auto proxying. Includes mixing wiht Spring AOP 
- * autoproxying.
+ * Tests for AspectJ auto proxying. Includes mixing with Spring AOP 
+ * Advisors to demonstrate that existing autoproxying contract is honoured.
  * 
  * @author Rod Johnson
  *
@@ -49,7 +48,6 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		
 		assertTrue(AopUtils.isAopProxy(adrian));
 		Advised advised = (Advised) adrian;
-		System.out.println(advised.toProxyConfigString());
 		assertEquals(68, adrian.getAge());
 	}
 	
