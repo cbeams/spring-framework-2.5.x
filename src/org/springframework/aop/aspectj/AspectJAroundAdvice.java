@@ -37,9 +37,6 @@ import org.springframework.core.ParameterNameDiscoverer;
 public class AspectJAroundAdvice extends AbstractAspectJAdvice implements MethodInterceptor {
 	
 	// TODO pull up
-	private final ParameterNameDiscoverer parameterNameDiscoverer;
-	
-	// TODO pull up
 	private final String[] argNames;
 
 	public AspectJAroundAdvice(
@@ -47,8 +44,7 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 			AspectInstanceFactory aif, ParameterNameDiscoverer parameterNameDiscoverer) {
 
 		super(aspectJAroundAdviceMethod, pointcut.getPointcutExpression(), aif);
-		this.parameterNameDiscoverer = parameterNameDiscoverer;
-		this.argNames = this.parameterNameDiscoverer.getParameterNames(
+		this.argNames = parameterNameDiscoverer.getParameterNames(
 				this.aspectJAdviceMethod, this.aspectJAdviceMethod.getDeclaringClass());
 	}
 
@@ -57,8 +53,7 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 			AspectInstanceFactory aif, ParameterNameDiscoverer parameterNameDiscoverer) {
 
 		super(aspectJAroundAdviceMethod, pe, aif);
-		this.parameterNameDiscoverer = parameterNameDiscoverer;
-		this.argNames = this.parameterNameDiscoverer.getParameterNames(
+		this.argNames = parameterNameDiscoverer.getParameterNames(
 				this.aspectJAdviceMethod, this.aspectJAdviceMethod.getDeclaringClass());
 	}
 
