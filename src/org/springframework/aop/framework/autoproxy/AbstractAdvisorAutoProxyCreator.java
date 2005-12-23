@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,8 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
-	 * Sort advisors based on ordering.
+	 * Sort advisors based on ordering. Subclasses may choose to override this
+	 * method to customize the sorting strategy.
 	 * @see org.springframework.core.Ordered
 	 * @see org.springframework.core.OrderComparator
 	 */
@@ -108,6 +109,16 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 */
 	protected abstract List findCandidateAdvisors();
 
+	/**
+	 * Extension hook that subclasses can choose to use to additional Advisors,
+	 * given the sorted Advisors obtained to date.
+	 * <br>
+	 * Typically used to add Advisors that expose contextual information required
+	 * by some of the later advisors.
+	 * @param candidateAdvisors Advisors that have already been identified as
+	 * applying to a given bean
+	 */
 	protected void extendCandidateAdvisors(List candidateAdvisors) {
+		// No default implementation
 	}
 }
