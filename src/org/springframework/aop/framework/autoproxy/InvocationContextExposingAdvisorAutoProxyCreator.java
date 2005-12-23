@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 package org.springframework.aop.framework.autoproxy;
 
+import java.util.List;
+
 import org.springframework.aop.aspectj.ExposeJoinPointInterceptor;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
-import org.springframework.aop.support.DefaultPointcutAdvisor;
-
-import java.util.List;
 
 /**
  * Extension of {@link DefaultAdvisorAutoProxyCreator} that adds an {@link ExposeInvocationInterceptor} and
@@ -35,8 +34,8 @@ public class InvocationContextExposingAdvisorAutoProxyCreator extends DefaultAdv
 
 	protected void extendCandidateAdvisors(List candidateAdvisors) {
 		if (!candidateAdvisors.isEmpty()) {
-			candidateAdvisors.add(0, new DefaultPointcutAdvisor(ExposeInvocationInterceptor.INSTANCE));
-			candidateAdvisors.add(1, new DefaultPointcutAdvisor(ExposeJoinPointInterceptor.INSTANCE));
+			candidateAdvisors.add(0, ExposeInvocationInterceptor.ADVISOR);
+			candidateAdvisors.add(1, ExposeJoinPointInterceptor.ADVISOR);
 		}
 	}
 }

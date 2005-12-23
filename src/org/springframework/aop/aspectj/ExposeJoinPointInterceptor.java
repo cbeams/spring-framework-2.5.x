@@ -23,6 +23,8 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 
 /**
  * Interceptor that exposes an AspectJ JoinPoint.
@@ -41,6 +43,12 @@ public class ExposeJoinPointInterceptor implements MethodInterceptor, Serializab
 
 	/** Singleton instance of this class */
 	public static final ExposeJoinPointInterceptor INSTANCE = new ExposeJoinPointInterceptor();
+	
+	/** 
+	 * Singleton advisor for this class. Use in preference to INSTANCE when using
+	 * Spring AOP, as it prevents the need to create a new Advisor to wrap the instance.
+	 */
+	public static final Advisor ADVISOR = new DefaultPointcutAdvisor(INSTANCE);
 
 	private static ThreadLocal joinpointHolder = new ThreadLocal();
 

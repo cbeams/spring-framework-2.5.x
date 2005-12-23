@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,13 @@
 
 package org.springframework.aop.aspectj;
 
+import java.lang.reflect.Method;
+
 import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
+import org.aspectj.lang.JoinPoint.StaticPart;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.aspectj.runtime.internal.AroundClosure;
 
@@ -29,9 +33,19 @@ import org.aspectj.runtime.internal.AroundClosure;
  * @author Rod Johnson
  * @since 2.0
  */
-public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint {
+public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint, StaticPart {
 	
 	private final MethodInvocation methodInvocation;
+
+	/**
+	 * Lazily initialized signature object.
+	 */
+	private Signature signature;
+	
+	/**
+	 * Lazily initialized.
+	 */
+	private SourceLocation sourceLocation;
 
 
 	public MethodInvocationProceedingJoinPoint(MethodInvocation methodInvocation) {
@@ -41,7 +55,6 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint 
 	public void set$AroundClosure(AroundClosure aroundClosure) {
 		throw new UnsupportedOperationException();
 	}
-
 
 	public Object proceed() throws Throwable {
 		return methodInvocation.proceed();
@@ -75,12 +88,18 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint 
 		return methodInvocation.getArguments();
 	}
 
-	public Signature getSignature() {
-		throw new UnsupportedOperationException();
+	public synchronized Signature getSignature() {
+		if (signature == null) {
+			signature = new MethodSignatureImpl();
+		}
+		return signature;
 	}
 
-	public SourceLocation getSourceLocation() {
-		throw new UnsupportedOperationException();
+	public synchronized SourceLocation getSourceLocation() {
+		if (sourceLocation == null) {
+			sourceLocation = new SourceLocationImpl();
+		}
+		return sourceLocation;
 	}
 
 	public String getKind() {
@@ -88,7 +107,82 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint 
 	}
 
 	public StaticPart getStaticPart() {
-		throw new UnsupportedOperationException();
+		return this;
+	}
+	
+	
+	/**
+	 * Lazily initialzed MethodSignature.
+	 */
+	private class MethodSignatureImpl implements Signature, MethodSignature {
+
+		public String toShortString() {
+			return methodInvocation.getMethod().getName();
+		}
+
+		public String toLongString() {
+			return methodInvocation.getMethod().toString();
+		}
+
+		public String getName() {
+			return methodInvocation.getMethod().getName();
+		}
+
+		public int getModifiers() {
+			return methodInvocation.getMethod().getModifiers();
+		}
+
+		public Class getDeclaringType() {
+			return methodInvocation.getMethod().getDeclaringClass();
+		}
+
+		public String getDeclaringTypeName() {
+			return methodInvocation.getMethod().getDeclaringClass().getName();
+		}
+
+		public Class getReturnType() {
+			return methodInvocation.getMethod().getReturnType();
+		}
+
+		public Method getMethod() {
+			return methodInvocation.getMethod();
+		}
+
+		public Class[] getParameterTypes() {
+			return methodInvocation.getMethod().getParameterTypes();
+		}
+
+		public String[] getParameterNames() {
+			// TODO consider allowing use of ParameterNameDiscoverer, or tying into
+			// parameter names exposed for argument binding
+			throw new UnsupportedOperationException("Parameter names cannot be determined unless compiled by AspectJ compiler");
+		}
+
+		public Class[] getExceptionTypes() {
+			return methodInvocation.getMethod().getExceptionTypes();
+		}
+	}
+	
+	private class SourceLocationImpl implements SourceLocation {
+
+		public Class getWithinType() {
+			if (methodInvocation.getThis() == null) {
+				throw new UnsupportedOperationException("No source location joinpoint available: target is null");
+			}
+			return methodInvocation.getThis().getClass();
+		}
+
+		public String getFileName() {
+			throw new UnsupportedOperationException();
+		}
+
+		public int getLine() {
+			throw new UnsupportedOperationException();
+		}
+
+		public int getColumn() {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 }

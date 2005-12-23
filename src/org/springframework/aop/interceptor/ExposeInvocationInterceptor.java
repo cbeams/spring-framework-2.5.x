@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.io.Serializable;
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 
 /**
  * Interceptor that exposes the current MethodInvocation.
@@ -40,8 +42,16 @@ import org.aopalliance.intercept.MethodInvocation;
  */
 public class ExposeInvocationInterceptor implements MethodInterceptor, Serializable {
 	
+	private static final long serialVersionUID = -9148187649646413932L;
+
 	/** Singleton instance of this class */
 	public static final ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();
+	
+	/** 
+	 * Singleton advisor for this class. Use in preference to INSTANCE when using
+	 * Spring AOP, as it prevents the need to create a new Advisor to wrap the instance.
+	 */
+	public static final Advisor ADVISOR = new DefaultPointcutAdvisor(INSTANCE);
 
 	private static ThreadLocal invocation = new ThreadLocal();
 	
