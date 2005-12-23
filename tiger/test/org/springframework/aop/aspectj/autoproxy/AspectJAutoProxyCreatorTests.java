@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,27 @@ package org.springframework.aop.aspectj.autoproxy;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.PerTargetAspect;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.TwoAdviceAspect;
-import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 
+/**
+ * Tests for AspectJ auto proxying. Includes mixing wiht Spring AOP 
+ * autoproxying.
+ * 
+ * @author Rod Johnson
+ *
+ */
 public class AspectJAutoProxyCreatorTests extends TestCase {
 	
 	public void testAspectsAreApplied() {
@@ -36,29 +48,49 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		ITestBean adrian = (ITestBean) bf.getBean("adrian");
 		
 		assertTrue(AopUtils.isAopProxy(adrian));
-		
 		Advised advised = (Advised) adrian;
 		System.out.println(advised.toProxyConfigString());
-		
 		assertEquals(68, adrian.getAge());
 	}
 	
 	public void testAspectsAndAdvisorAreApplied() {
-		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-				"/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
-
-		TestBeanAdvisor tba = (TestBeanAdvisor) bf.getBean(TestBeanAdvisor.class.getName());
+		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(
+			"/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
+		ITestBean shouldBeWeaved = (ITestBean) ac.getBean("adrian");
+		testAspectsAndAdvisorAreApplied(ac, shouldBeWeaved);
+	}
+	
+	public void testAspectsAndAdvisorAreAppliedEvenIfComingFromParentFactory() {
+		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(
+			"/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
+		GenericApplicationContext childAc = new GenericApplicationContext(ac);
+		// Create a child factory with a bean that should be weaved
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, true);
+		bd.getPropertyValues().addPropertyValue(new PropertyValue("name", "Adrian")).
+			addPropertyValue(new PropertyValue("age", new Integer(34)));
+		childAc.registerBeanDefinition("adrian2", bd);
+		// Register the advisor auto proxy creator with subclass
+		childAc.registerBeanDefinition(AspectJAutoProxyCreator.class.getName(), new RootBeanDefinition(AspectJAutoProxyCreator.class));
+		childAc.refresh();
 		
-		MultiplyReturnValue mrv = (MultiplyReturnValue) bf.getBean(MultiplyReturnValue.class.getName());
+		ITestBean beanFromChildContextThatShouldBeWeaved = (ITestBean) childAc.getBean("adrian2");
+		//testAspectsAndAdvisorAreApplied(childAc, (ITestBean) ac.getBean("adrian"));
+		testAspectsAndAdvisorAreApplied(childAc, beanFromChildContextThatShouldBeWeaved);
+	}
+	
+	protected void testAspectsAndAdvisorAreApplied(ApplicationContext ac, ITestBean shouldBeWeaved) {
+		TestBeanAdvisor tba = (TestBeanAdvisor) ac.getBean(TestBeanAdvisor.class.getName());
+		
+		MultiplyReturnValue mrv = (MultiplyReturnValue) ac.getBean(MultiplyReturnValue.class.getName());
 		assertEquals(3, mrv.getMultiple());
 		
 		tba.count = 0;
 		mrv.invocations = 0;
-		ITestBean adrian = (ITestBean) bf.getBean("adrian");
-		assertTrue(AopUtils.isAopProxy(adrian));
-		assertEquals("Adrian", adrian.getName());
+		
+		assertTrue("Autoproxying must apply from @AspectJ aspect", AopUtils.isAopProxy(shouldBeWeaved));
+		assertEquals("Adrian", shouldBeWeaved.getName());
 		assertEquals(0, mrv.invocations);
-		assertEquals(34 * mrv.getMultiple(), adrian.getAge());
+		assertEquals(34 * mrv.getMultiple(), shouldBeWeaved.getAge());
 		assertEquals("Spring advisor must be invoked", 2, tba.count);
 		assertEquals("Must be able to hold state in aspect", 1, mrv.invocations);
 	}

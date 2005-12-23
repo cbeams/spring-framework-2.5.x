@@ -30,9 +30,8 @@ import org.springframework.aop.aspectj.annotation.SingletonMetadataAwareAspectIn
 import org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvisorAutoProxyCreator;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.ListableBeanFactory;
 
 /**
  * {@link org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvisorAutoProxyCreator} subclass that processes all
@@ -66,30 +65,23 @@ public class AspectJAutoProxyCreator extends InvocationContextExposingAdvisorAut
 			AspectJAdvisorFactory aspectJAdvisorFactory, BeanFactory beanFactory)
 			throws BeansException, IllegalStateException {
 
-		if (!(beanFactory instanceof BeanDefinitionRegistry)) {
-			throw new IllegalStateException(
-					"Cannot look for AspectJ aspects without a BeanDefinitionRegistry");
-		}
-		BeanDefinitionRegistry owningFactory = (BeanDefinitionRegistry) beanFactory;
-		
 		List<Advisor> advisors = new LinkedList<Advisor>();
 
-		for (String beanName : owningFactory.getBeanDefinitionNames()) {
+		// Safety of cast is already enforced by superclass
+		String[] beanDefinitionNames = BeanFactoryUtils.beanNamesIncludingAncestors((ListableBeanFactory) beanFactory);		
+		
+		for (String beanName : beanDefinitionNames) {
 			// We must be careful not to instantiate beans eagerly as in this
 			// case they would be cached by the Spring container but would not
 			// have bean weaved
-			BeanDefinition bd = owningFactory.getBeanDefinition(beanName);
-			if (!(bd instanceof RootBeanDefinition)) {
-				continue;
-			}
-			RootBeanDefinition rbd = (RootBeanDefinition) bd;
-			if (rbd.getBeanClass() == null) {
+			Class<?> beanType = beanFactory.getType(beanName);
+			if (beanType == null) {
 				continue;
 			}
 
-			if (aspectJAdvisorFactory.isAspect(rbd.getBeanClass())) {
+			if (aspectJAdvisorFactory.isAspect(beanType)) {
 				//logger.debug("Found aspect bean '" + beanName + "'");
-				AspectMetadata amd = new AspectMetadata(rbd.getBeanClass());
+				AspectMetadata amd = new AspectMetadata(beanType);
 				if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
 					// Default singleton binding
 					Object beanInstance = beanFactory.getBean(beanName);
@@ -100,7 +92,7 @@ public class AspectJAutoProxyCreator extends InvocationContextExposingAdvisorAut
 				}
 				else {
 					// Pertarget or per this
-					if (rbd.isSingleton()) {
+					if (beanFactory.isSingleton(beanName)) {
 						throw new IllegalArgumentException(
 								"Bean with name '" + beanName + "' is a singleton, but aspect instantiation model is not singleton");
 					}
