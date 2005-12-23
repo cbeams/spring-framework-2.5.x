@@ -116,7 +116,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		Advised advised = (Advised) itb;
 		SyntheticInstantiationAdvisor sia = (SyntheticInstantiationAdvisor) advised.getAdvisors()[2];
 		assertTrue(sia.getPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
-		InstantiationModelAwarePointcutAdvisor imapa = (InstantiationModelAwarePointcutAdvisor) advised.getAdvisors()[3];
+		InstantiationModelAwarePointcutAdvisorImpl imapa = (InstantiationModelAwarePointcutAdvisorImpl) advised.getAdvisors()[3];
 		MetadataAwareAspectInstanceFactory maaif = imapa.getAspectInstanceFactory();
 		assertEquals(0, maaif.getInstantiationCount());
 		
@@ -168,7 +168,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals(5, advised.getAdvisors().length);
 		SyntheticInstantiationAdvisor sia = (SyntheticInstantiationAdvisor) advised.getAdvisors()[2];
 		assertTrue(sia.getPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
-		InstantiationModelAwarePointcutAdvisor imapa = (InstantiationModelAwarePointcutAdvisor) advised.getAdvisors()[3];
+		InstantiationModelAwarePointcutAdvisorImpl imapa = (InstantiationModelAwarePointcutAdvisorImpl) advised.getAdvisors()[3];
 		MetadataAwareAspectInstanceFactory maaif = imapa.getAspectInstanceFactory();
 		assertEquals(0, maaif.getInstantiationCount());
 		

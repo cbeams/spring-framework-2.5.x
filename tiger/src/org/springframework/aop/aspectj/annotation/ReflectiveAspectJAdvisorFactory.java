@@ -144,7 +144,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		}
 	}
 	
-	public InstantiationModelAwarePointcutAdvisor getAdvisor(
+	public InstantiationModelAwarePointcutAdvisorImpl getAdvisor(
 			Method candidateAspectJAdviceMethod, MetadataAwareAspectInstanceFactory aif) {
 		validate(aif.getAspectMetadata().getAspectClass());
 		
@@ -153,7 +153,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		if (ajexp == null) {
 			return null;
 		}
-		return new InstantiationModelAwarePointcutAdvisor(this, ajexp, aif, candidateAspectJAdviceMethod);
+		return new InstantiationModelAwarePointcutAdvisorImpl(this, ajexp, aif, candidateAspectJAdviceMethod);
 	}
 	
 	/**

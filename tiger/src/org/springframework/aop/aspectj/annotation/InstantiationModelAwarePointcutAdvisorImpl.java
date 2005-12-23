@@ -20,21 +20,20 @@ import java.lang.reflect.Method;
 
 import org.aopalliance.aop.Advice;
 import org.aspectj.lang.reflect.PerClauseKind;
-
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
+import org.springframework.aop.aspectj.InstantiationModelAwarePointcutAdvisor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcut;
 import org.springframework.aop.support.Pointcuts;
 
 /**
  * Internal implementation of AspectJPointcutAdvisor
- * Note that there will be one instance of this advisor for each target.
+ * Note that there will be one instance of this advisor for each target method.
  *
  * @author Rod Johnson
  * @since 2.0
  */
-class InstantiationModelAwarePointcutAdvisor implements PointcutAdvisor {
+class InstantiationModelAwarePointcutAdvisorImpl implements InstantiationModelAwarePointcutAdvisor {
 
 	private final AspectJExpressionPointcut declaredPointcut;
 	
@@ -44,12 +43,14 @@ class InstantiationModelAwarePointcutAdvisor implements PointcutAdvisor {
 	
 	private final Method method;
 	
+	private final boolean lazy;
+	
 	private final AspectJAdvisorFactory atAspectJAdvisorFactory;
 	
 	private Advice instantiatedAdvice;
 
 
-	public InstantiationModelAwarePointcutAdvisor(
+	public InstantiationModelAwarePointcutAdvisorImpl(
 			AspectJAdvisorFactory af, AspectJExpressionPointcut ajexp, MetadataAwareAspectInstanceFactory aif, Method method) {
 
 		this.declaredPointcut = ajexp;
@@ -66,11 +67,13 @@ class InstantiationModelAwarePointcutAdvisor implements PointcutAdvisor {
 			// If it's not a dynamic pointcut, it may be optimized out 
 			// by the Spring AOP infrastructure after the first evaluation
 			this.pointcut = new PerTargetInstantiationModelPointcut(declaredPointcut, preInstantiationORPointcut, aif);
+			this.lazy = true;
 		}
 		else {
 			// A singleton aspect.
 			this.instantiatedAdvice = instantiateAdvice();
 			this.pointcut = declaredPointcut;
+			this.lazy = false;
 		}
 	}
 	
@@ -96,12 +99,24 @@ class InstantiationModelAwarePointcutAdvisor implements PointcutAdvisor {
 		return this.aif.getAspectMetadata();
 	}
 
+	/**
+	 * Lazily instantiate advice if necessary
+	 */
 	public synchronized Advice getAdvice() {
 		if (instantiatedAdvice == null) {
 			instantiatedAdvice = instantiateAdvice();
 		}
 		return instantiatedAdvice;
 	}
+	
+	public boolean isLazy() {
+		return this.lazy;
+	}
+
+	public synchronized boolean isAdviceInstantiated() {
+		return instantiatedAdvice != null;
+	}
+
 
 	private Advice instantiateAdvice() {
 		return this.atAspectJAdvisorFactory.getAdvice(method, aif);
@@ -125,32 +140,37 @@ class InstantiationModelAwarePointcutAdvisor implements PointcutAdvisor {
 	}
 
 
+	/**
+	 * Pointcut implementation that changes its behaviour when the advice is instantiated.
+	 * Note that this is a <i>dynamic</i> pointcut. Otherwise it might
+	 * be optimized out if it does not at first match satically.
+	 */
 	private class PerTargetInstantiationModelPointcut extends DynamicMethodMatcherPointcut {
 
-		private final AspectJExpressionPointcut pointcut;
+		private final AspectJExpressionPointcut declaredPointcut;
 
-		private final Pointcut pointcut2;
+		private final Pointcut preInstantiationORPointcut;
 
 		private final MetadataAwareAspectInstanceFactory aif;
 
 		private PerTargetInstantiationModelPointcut(
-				AspectJExpressionPointcut pointcut, Pointcut pointcut2, MetadataAwareAspectInstanceFactory aif) {
+				AspectJExpressionPointcut declaredPointcut, Pointcut preInstantiationORPointcut, MetadataAwareAspectInstanceFactory aif) {
 			super();
-			this.pointcut = pointcut;
-			this.pointcut2 = pointcut2;
+			this.declaredPointcut = declaredPointcut;
+			this.preInstantiationORPointcut = preInstantiationORPointcut;
 			this.aif = aif;
 		}
 
 		@Override
 		public boolean matches(Method method, Class targetClass) {
 			// We're either instantiated, matching on declared pointcut, or uninstantiated matching on either pointcut
-			return (aif.getInstantiationCount() > 0 && pointcut.matches(method, targetClass)) ||
-				pointcut2.getMethodMatcher().matches(method, targetClass);
+			return (aif.getInstantiationCount() > 0 && declaredPointcut.matches(method, targetClass)) ||
+				preInstantiationORPointcut.getMethodMatcher().matches(method, targetClass);
 		}
 
 		public boolean matches(Method method, Class targetClass, Object[] args) {
 			// This can match only on declared pointcut
-			return aif.getInstantiationCount() > 0 && pointcut.matches(method, targetClass);
+			return aif.getInstantiationCount() > 0 && declaredPointcut.matches(method, targetClass);
 		}
 	}
 

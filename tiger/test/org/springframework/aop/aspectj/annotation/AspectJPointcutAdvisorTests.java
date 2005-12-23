@@ -35,7 +35,7 @@ public class AspectJPointcutAdvisorTests extends TestCase {
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(AspectJExpressionPointcutTests.MATCH_ALL_METHODS);
 		
-		InstantiationModelAwarePointcutAdvisor ajpa = new InstantiationModelAwarePointcutAdvisor(af, ajexp, 
+		InstantiationModelAwarePointcutAdvisorImpl ajpa = new InstantiationModelAwarePointcutAdvisorImpl(af, ajexp, 
 				new SingletonMetadataAwareAspectInstanceFactory(new AbstractAspectJAdvisorFactoryTests.ExceptionAspect(null)), 
 				TestBean.class.getMethod("getAge", (Class[]) null));
 		assertSame(Pointcut.TRUE, ajpa.getAspectMetadata().getPerClausePointcut());
@@ -46,7 +46,7 @@ public class AspectJPointcutAdvisorTests extends TestCase {
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(AspectJExpressionPointcutTests.MATCH_ALL_METHODS);
 		
-		InstantiationModelAwarePointcutAdvisor ajpa = new InstantiationModelAwarePointcutAdvisor(af, ajexp, 
+		InstantiationModelAwarePointcutAdvisorImpl ajpa = new InstantiationModelAwarePointcutAdvisorImpl(af, ajexp, 
 				new SingletonMetadataAwareAspectInstanceFactory(new AbstractAspectJAdvisorFactoryTests.PerTargetAspect()), null);
 		assertNotSame(Pointcut.TRUE, ajpa.getAspectMetadata().getPerClausePointcut());
 		assertTrue(ajpa.getAspectMetadata().getPerClausePointcut() instanceof AspectJExpressionPointcut);

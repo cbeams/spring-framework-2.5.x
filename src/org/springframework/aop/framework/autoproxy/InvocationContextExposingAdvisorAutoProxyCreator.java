@@ -18,6 +18,7 @@ package org.springframework.aop.framework.autoproxy;
 
 import java.util.List;
 
+import org.springframework.aop.aspectj.AspectJProxyUtils;
 import org.springframework.aop.aspectj.ExposeJoinPointInterceptor;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 
@@ -33,9 +34,6 @@ import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 public class InvocationContextExposingAdvisorAutoProxyCreator extends DefaultAdvisorAutoProxyCreator {
 
 	protected void extendCandidateAdvisors(List candidateAdvisors) {
-		if (!candidateAdvisors.isEmpty()) {
-			candidateAdvisors.add(0, ExposeInvocationInterceptor.ADVISOR);
-			candidateAdvisors.add(1, ExposeJoinPointInterceptor.ADVISOR);
-		}
+		AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(candidateAdvisors);
 	}
 }
