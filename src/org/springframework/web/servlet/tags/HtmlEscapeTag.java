@@ -35,6 +35,7 @@ public class HtmlEscapeTag extends RequestContextAwareTag {
 
 	private String defaultHtmlEscape;
 
+
 	/**
 	 * Set the default value for HTML escaping,
 	 * to be put into the current PageContext.
@@ -42,6 +43,7 @@ public class HtmlEscapeTag extends RequestContextAwareTag {
 	public void setDefaultHtmlEscape(String defaultHtmlEscape) {
 		this.defaultHtmlEscape = defaultHtmlEscape;
 	}
+
 
 	protected int doStartTagInternal() throws JspException {
 		boolean resolvedDefaultHtmlEscape =
