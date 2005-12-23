@@ -3,6 +3,46 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 1.2.7 (23.12.2005)
+-------------------------------------
+
+Package org.springframework.beans
+* fixed BeanWrapperImpl to pass its "extractOldValueForEditor" setting on to nested BeanWrappers
+* refined BeanWrapperImpl to perform the accessible checking for read/write methods before every invocation
+* fixed AbstractBeanFactory to allow child bean definitions to refer to a parent via its alias name
+* DefaultListableBeanFactory is able to call non-public factory methods as well
+
+Package org.springframework.jdbc
+* added further error codes for Oracle and MySQL to default "sql-error-codes.xml" file
+* OracleLobHandler lazily initializes Oracle driver classes, always loading via the actual Connection's class loader
+* fixed DataSourceUtils to correctly re-suspend a Connection even if the Connection hasn't been used since resume
+* fixed JdbcTemplate to extract the JDBC Connection for CallableStatementCreators if a NativeJdbcExtractor has been set
+* factored out protected "getColumnMapRowMapper" and "getSingleColumnRowMapper" hooks within JdbcTemplate
+* SingleColumnRowMapper explicitly calls "ResultSet.getBigDecimal()" if the required type is BigDecimal
+
+Package org.springframework.orm
+* JdoTransactionManager does explicit "isActive()" check before attempting a rollback, to avoid illegal state exception
+* Hibernate LocalSessionFactoryBean exposes its DataSource on "SessionFactory.close()", for potential schema export
+
+Package org.springframework.remoting
+* RmiServiceExporter performs explicit RMI unexport if binding to the registry failed, to avoid dangling exports
+* JaxRpcPortClientInterceptor/ProxyFactoryBean apply given JaxRpcServicePostProcessors to existing JAX-RPC Service too
+
+Package org.springframework.transaction
+* JtaTransactionManager only invokes rollback if transaction is still active (some JTA providers eagerly terminate)
+
+Package org.springframework.util
+* added "isNull()" methods to Assert class
+* added "setPathSeparator" method to AntPathMatcher, allowing to override the default path separator "/"
+* fixed AntPathMatcher to correctly treat "*" right after separator, i.e. to accept path "/test/" for pattern "/test/*"
+* WeakReferenceMonitor uses a daemon thread, to avoid a hanging thread even if weak references have not been released
+
+Package org.springframework.web
+* added "currentFormObject" template method to AbstractFormController, for post-processing of a session form object
+* FixedLocaleResolver returns the JVM's default Locale if no explicit default Locale specified
+* VelocityView converts Velocity's MethodInvocationException to a Spring NestedServletException with original root cause
+
+
 Changes in version 1.2.6 (14.11.2005)
 -------------------------------------
 
