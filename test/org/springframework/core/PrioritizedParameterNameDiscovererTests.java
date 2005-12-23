@@ -20,6 +20,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.springframework.beans.TestBean;
+
 import junit.framework.TestCase;
 
 public class PrioritizedParameterNameDiscovererTests extends TestCase {
@@ -48,30 +50,37 @@ public class PrioritizedParameterNameDiscovererTests extends TestCase {
 		}
 	};
 	
+	private final Method anyMethod;
+	private final Class anyClass = Object.class;
+	
+	public PrioritizedParameterNameDiscovererTests() throws SecurityException, NoSuchMethodException {
+		anyMethod = TestBean.class.getMethod("getAge", (Class[]) null);
+	}
+	
 	public void testNoParametersDiscoverers() {
 		ParameterNameDiscoverer pnd = new PrioritizedParameterNameDiscoverer();
 		assertNull(pnd.getParameterNames(null));
-		assertNull(pnd.getParameterNames(null, null));
+		assertNull(pnd.getParameterNames(anyMethod, anyClass));
 	}
 	
 	public void testOrderedParameterDiscoverers1() {
 		PrioritizedParameterNameDiscoverer pnd = new PrioritizedParameterNameDiscoverer();
 		pnd.addDiscoverer(returnsFooBar);
 		assertTrue(Arrays.equals(FOO_BAR, pnd.getParameterNames(null)));
-		assertTrue(Arrays.equals(FOO_BAR, pnd.getParameterNames(null, null)));
+		assertTrue(Arrays.equals(FOO_BAR, pnd.getParameterNames(anyMethod, anyClass)));
 		pnd.addDiscoverer(returnsSomethingElse);
 		assertTrue(Arrays.equals(FOO_BAR, pnd.getParameterNames(null)));
-		assertTrue(Arrays.equals(FOO_BAR, pnd.getParameterNames(null, null)));
+		assertTrue(Arrays.equals(FOO_BAR, pnd.getParameterNames(anyMethod, anyClass)));
 	}
 	
 	public void testOrderedParameterDiscoverers2() {
 		PrioritizedParameterNameDiscoverer pnd = new PrioritizedParameterNameDiscoverer();
 		pnd.addDiscoverer(returnsSomethingElse);
 		assertTrue(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames(null)));
-		assertTrue(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames(null, null)));
+		assertTrue(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames(anyMethod, anyClass)));
 		pnd.addDiscoverer(returnsFooBar);
 		assertTrue(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames(null)));
-		assertTrue(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames(null, null)));
+		assertTrue(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames(anyMethod, anyClass)));
 	}
 
 }
