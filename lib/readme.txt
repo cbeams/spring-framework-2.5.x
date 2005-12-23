@@ -52,7 +52,7 @@ distribution/website before using any of them in your own applications.
 - required for building and running Tiles Example
 
 * easymock/easymock.jar, easymock/easymockclassextension.jar
-- EasyMock 1.2RC2 (JDK 1.3 version) (http://www.easymock.org)
+- EasyMock 1.2 (JDK 1.3 version) (http://www.easymock.org)
 - required for building and running the framework test suite
 
 * ehcache/ehcache-1.1.jar
@@ -197,7 +197,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's CommonsMultipartResolver
 
 * jakarta-commons/commons-httpclient.jar
-- Commons HttpClient 3.0 RC4 (http://jakarta.apache.org/commons/httpclient)
+- Commons HttpClient 3.0 (http://jakarta.apache.org/commons/httpclient)
 - required for building the framework
 - required at runtime when using Spring's CommonsHttpInvokerRequestExecutor
 
@@ -318,8 +318,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's VelocityView
 
-* velocity/velocity-tools-generic-1.1.jar, velocity/velocity-tools-view-1.1.jar
-- Velocity Tools 1.1 (http://jakarta.apache.org/velocity/tools)
+* velocity/velocity-tools-generic-1.2.jar, velocity/velocity-tools-view-1.2.jar
+- Velocity Tools 1.2 (http://jakarta.apache.org/velocity/tools)
 - required for building the framework
 - required at runtime when using VelocityView's support for Velocity Tools
 
