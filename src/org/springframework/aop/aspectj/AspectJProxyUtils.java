@@ -32,7 +32,7 @@ public abstract class AspectJProxyUtils {
 	/**
 	 * Add special advisors if necessary to work with a proxy chain
 	 * that contains AspectJ advisors. This will expose the current Spring AOP invocation
-	 * (necessary for some AspectJ pointcut matching) and expose the current AspectJ
+	 * (necessary for some AspectJ pointcut matching) and make available the current AspectJ
 	 * JoinPoint. The call will have no effect if there are no AspectJ advisors
 	 * in the advisor chain.
 	 * @param advisors Advisors available
@@ -52,7 +52,6 @@ public abstract class AspectJProxyUtils {
 			}
 			if (foundAspectJAdvice && !advisors.contains(ExposeInvocationInterceptor.ADVISOR)) {
 				advisors.add(0, ExposeInvocationInterceptor.ADVISOR);
-				advisors.add(1, ExposeJoinPointInterceptor.ADVISOR);
 			}
 		}
 	}

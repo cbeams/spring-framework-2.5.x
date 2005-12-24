@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.aop.aspectj;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.weaver.tools.PointcutExpression;
-
 import org.springframework.aop.framework.AopConfigException;
+import org.springframework.aop.framework.ReflectiveMethodInvocation;
+import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 
 /**
  * Superclass for Spring Advices wrapping an AspectJ aspect
@@ -32,6 +34,30 @@ import org.springframework.aop.framework.AopConfigException;
  */
 abstract class AbstractAspectJAdvice {
 	
+	/**
+	 * Key used in ReflectiveMethodInvocation userAtributes map for the current
+	 * joinpoint.
+	 */
+	protected final static String JOIN_POINT_KEY = JoinPoint.class.getName();
+	
+	/**
+	 * Lazily instantiate joinpoint for the current invocation.
+	 * Requires MethodInvocation to be bound with ExposeInvocationInterceptor.
+	 * <br>Do not use if access is available to the current ReflectiveMethodInvocation
+	 * (in an around advice).
+	 * @return current AspectJ joinpoint, or through an exception if we're not in a
+	 * Spring AOP invocation.
+	 */
+	public static JoinPoint currentJoinPoint() {
+		ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) ExposeInvocationInterceptor.currentInvocation();
+		JoinPoint jp = (JoinPoint) rmi.getUserAttributes().get(JOIN_POINT_KEY);
+		if (jp == null) {
+			jp = new MethodInvocationProceedingJoinPoint(rmi);
+			rmi.getUserAttributes().put(JOIN_POINT_KEY, jp);
+		}
+		return jp;
+	}
+	
 	protected final Method aspectJAdviceMethod;
 	
 	private final PointcutExpression pointcutExpression;
@@ -39,7 +65,7 @@ abstract class AbstractAspectJAdvice {
 	private final AspectInstanceFactory aif;
 
 
-	public AbstractAspectJAdvice(
+	protected AbstractAspectJAdvice(
 			Method aspectJAdviceMethod, PointcutExpression pointcutExpression, AspectInstanceFactory aif) {
 
 		this.aspectJAdviceMethod = aspectJAdviceMethod;

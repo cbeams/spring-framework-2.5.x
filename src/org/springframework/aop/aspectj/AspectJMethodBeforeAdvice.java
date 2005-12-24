@@ -46,7 +46,7 @@ public class AspectJMethodBeforeAdvice extends AbstractAspectJAdvice implements 
 		// TODO binding not properly implemented; will be post 2.0 M1
 		if (this.aspectJAdviceMethod.getParameterTypes().length > 0 &&
 				JoinPoint.class.isAssignableFrom(aspectJAdviceMethod.getParameterTypes()[0])) {
-			invokeAdviceMethodWithGivenArgs(new Object[] { ExposeJoinPointInterceptor.currentJoinPoint() });
+			invokeAdviceMethodWithGivenArgs(new Object[] { currentJoinPoint() });
 		}
 		else {
 			invokeAdviceMethod(args);

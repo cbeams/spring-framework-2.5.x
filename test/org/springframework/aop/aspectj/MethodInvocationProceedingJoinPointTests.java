@@ -42,7 +42,7 @@ public class MethodInvocationProceedingJoinPointTests extends TestCase {
 	
 	public void testingBindingWithJoinPoint() {
 		try {
-			ExposeJoinPointInterceptor.currentJoinPoint();
+			AbstractAspectJAdvice.currentJoinPoint();
 			fail("Needs to be bound by interceptor action");
 		}
 		catch (AspectException ex) {
@@ -51,7 +51,7 @@ public class MethodInvocationProceedingJoinPointTests extends TestCase {
 	
 	public void testingBindingWithProceedingJoinPoint() {
 		try {
-			ExposeJoinPointInterceptor.currentProceedingJoinPoint();
+			AbstractAspectJAdvice.currentJoinPoint();
 			fail("Needs to be bound by interceptor action");
 		}
 		catch (AspectException ex) {
@@ -62,19 +62,18 @@ public class MethodInvocationProceedingJoinPointTests extends TestCase {
 		final Object raw = new TestBean();
 		ProxyFactory pf = new ProxyFactory(raw);
 		pf.addAdvisor(ExposeInvocationInterceptor.ADVISOR);
-		pf.addAdvisor(ExposeJoinPointInterceptor.ADVISOR);
 		pf.addAdvice(new MethodBeforeAdvice() {
 			public void before(Method method, Object[] args, Object target) throws Throwable {
-				assertSame(target, ExposeJoinPointInterceptor.currentProceedingJoinPoint().getTarget());
-				assertSame(target, ExposeJoinPointInterceptor.currentProceedingJoinPoint().getThis());
+				assertSame(target, AbstractAspectJAdvice.currentJoinPoint().getTarget());
+				assertSame(target, AbstractAspectJAdvice.currentJoinPoint().getThis());
 				assertSame(target, raw);
 				
-				assertSame(method.getName(), ExposeJoinPointInterceptor.currentProceedingJoinPoint().getSignature().getName());
-				assertEquals(method.getModifiers(), ExposeJoinPointInterceptor.currentProceedingJoinPoint().getSignature().getModifiers());
+				assertSame(method.getName(), AbstractAspectJAdvice.currentJoinPoint().getSignature().getName());
+				assertEquals(method.getModifiers(), AbstractAspectJAdvice.currentJoinPoint().getSignature().getModifiers());
 				
-				MethodSignature msig = (MethodSignature) ExposeJoinPointInterceptor.currentJoinPoint().getSignature();
-				assertSame("Return same MethodSignature repeatedly", msig, ExposeJoinPointInterceptor.currentJoinPoint().getSignature());
-				assertSame("Return same JoinPoint repeatedly", ExposeJoinPointInterceptor.currentJoinPoint(), ExposeJoinPointInterceptor.currentJoinPoint());
+				MethodSignature msig = (MethodSignature) AbstractAspectJAdvice.currentJoinPoint().getSignature();
+				assertSame("Return same MethodSignature repeatedly", msig, AbstractAspectJAdvice.currentJoinPoint().getSignature());
+				assertSame("Return same JoinPoint repeatedly", AbstractAspectJAdvice.currentJoinPoint(), AbstractAspectJAdvice.currentJoinPoint());
 				assertEquals(method.getDeclaringClass(), msig.getDeclaringType());
 				assertTrue(Arrays.equals(method.getParameterTypes(), msig.getParameterTypes()));
 				assertEquals(method.getReturnType(), msig.getReturnType());
@@ -99,11 +98,10 @@ public class MethodInvocationProceedingJoinPointTests extends TestCase {
 		final Object raw = new TestBean();
 		ProxyFactory pf = new ProxyFactory(raw);
 		pf.addAdvisor(ExposeInvocationInterceptor.ADVISOR);
-		pf.addAdvisor(ExposeJoinPointInterceptor.ADVISOR);
 		pf.addAdvice(new MethodBeforeAdvice() {
 			public void before(Method method, Object[] args, Object target) throws Throwable {
-				SourceLocation sloc = ExposeJoinPointInterceptor.currentJoinPoint().getSourceLocation();
-				assertEquals("Same source location must be returned on subsequent requests",  sloc, ExposeJoinPointInterceptor.currentJoinPoint().getSourceLocation());
+				SourceLocation sloc = AbstractAspectJAdvice.currentJoinPoint().getSourceLocation();
+				assertEquals("Same source location must be returned on subsequent requests",  sloc, AbstractAspectJAdvice.currentJoinPoint().getSourceLocation());
 				assertEquals(TestBean.class, sloc.getWithinType());
 				try {
 					sloc.getLine();
@@ -131,14 +129,13 @@ public class MethodInvocationProceedingJoinPointTests extends TestCase {
 		final Object raw = new TestBean();
 		ProxyFactory pf = new ProxyFactory(raw);
 		pf.addAdvisor(ExposeInvocationInterceptor.ADVISOR);
-		pf.addAdvisor(ExposeJoinPointInterceptor.ADVISOR);
 		pf.addAdvice(new MethodBeforeAdvice() {
 			public void before(Method method, Object[] args, Object target) throws Throwable {
-				StaticPart staticPart = ExposeJoinPointInterceptor.currentJoinPoint().getStaticPart();
-				assertEquals("Same static part must be returned on subsequent requests",  staticPart, ExposeJoinPointInterceptor.currentJoinPoint().getStaticPart());
+				StaticPart staticPart = AbstractAspectJAdvice.currentJoinPoint().getStaticPart();
+				assertEquals("Same static part must be returned on subsequent requests",  staticPart, AbstractAspectJAdvice.currentJoinPoint().getStaticPart());
 				assertEquals(ProceedingJoinPoint.METHOD_EXECUTION, staticPart.getKind());
-				assertSame(ExposeJoinPointInterceptor.currentJoinPoint().getSignature(), staticPart.getSignature());
-				assertEquals(ExposeJoinPointInterceptor.currentJoinPoint().getSourceLocation(), staticPart.getSourceLocation());
+				assertSame(AbstractAspectJAdvice.currentJoinPoint().getSignature(), staticPart.getSignature());
+				assertEquals(AbstractAspectJAdvice.currentJoinPoint().getSourceLocation(), staticPart.getSourceLocation());
 			}
 		});
 		ITestBean itb = (ITestBean) pf.getProxy();

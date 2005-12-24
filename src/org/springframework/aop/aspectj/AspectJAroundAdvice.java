@@ -23,7 +23,6 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.weaver.tools.PointcutExpression;
-
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.core.ParameterNameDiscoverer;
 
@@ -58,15 +57,15 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 	}
 
 	public Object invoke(MethodInvocation mi) throws Throwable {
-		ProceedingJoinPoint pjp = ExposeJoinPointInterceptor.currentProceedingJoinPoint();
+		ReflectiveMethodInvocation invocation = (ReflectiveMethodInvocation) mi;
+		ProceedingJoinPoint pjp = lazyGetProceedingJoinPoint(invocation);
 		Object[] formals = argBinding(mi.getArguments());
 		if (formals == null) {
 			formals = new Object[0];
 		}
 		Object[] args = new Object[formals.length + 1];
 		args[0] = pjp;
-		ReflectiveMethodInvocation invocation = (ReflectiveMethodInvocation) mi;
-
+	
 		if (argNames == null) {
 			// basic mapping applies
 			System.arraycopy(formals, 0, args, 1, formals.length);				
@@ -81,6 +80,24 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 		}
 				
 		return invokeAdviceMethodWithGivenArgs(args);
+	}
+	
+	
+	/**
+	 * Return the ProceedingJoinPoint for the current invocation,
+	 * instantiating it lazily if it hasn't already been bound to the
+	 * thread
+	 * @param rmi current Spring AOP ReflectiveMethodInvocation, which we'll
+	 * use for attribute binding
+	 * @return the ProceedingJoinPoint to make available to advice methods
+	 */
+	protected ProceedingJoinPoint lazyGetProceedingJoinPoint(ReflectiveMethodInvocation rmi) {
+		ProceedingJoinPoint pjp = (ProceedingJoinPoint) rmi.getUserAttributes().get(JOIN_POINT_KEY);
+		if (pjp == null) {
+			pjp = new MethodInvocationProceedingJoinPoint(rmi);
+			rmi.getUserAttributes().put(JOIN_POINT_KEY, pjp);
+		}
+		return pjp;
 	}
 
 }

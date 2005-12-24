@@ -19,7 +19,6 @@ package org.springframework.aop.framework.autoproxy;
 import java.util.List;
 
 import org.springframework.aop.aspectj.AspectJProxyUtils;
-import org.springframework.aop.aspectj.ExposeJoinPointInterceptor;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 
 /**
