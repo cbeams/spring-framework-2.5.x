@@ -445,12 +445,18 @@ public abstract class FrameworkPortlet extends PortletBean {
 			if (isPublishEvents()) {
 				// Whether or not we succeeded, publish an event.
 				long processingTime = System.currentTimeMillis() - startTime;
+                String portletName = null;
+                String portletMode = null;
+                String requestType = null;
+                String sessionId = null;
+                String userName = null;
+				try { portletName = getPortletConfig().getPortletName(); } catch (Exception ex) {}
+                try { portletMode = request.getPortletMode().toString(); } catch (Exception ex) {}
+                try { requestType = request instanceof ActionRequest ? "action" : "render"; } catch (Exception ex) {}
+                try { sessionId = request.getRequestedSessionId(); } catch (Exception ex) {}
+                try { userName = getUsernameForRequest(request); } catch (Exception ex) {}
 				this.portletApplicationContext.publishEvent(new RequestHandledEvent(this, processingTime,
-						getPortletConfig().getPortletName(),
-						request.getPortletMode().toString(),
-						(request instanceof ActionRequest ? "action" : "render"),
-						request.getRequestedSessionId(),
-						getUsernameForRequest(request), failureCause));
+						portletName, portletMode, requestType, sessionId, userName, failureCause));
 			}
 		}
 	}
