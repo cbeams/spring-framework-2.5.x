@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,15 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.IntroductionInfo;
+import org.springframework.core.CollectionFactory;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -48,6 +49,12 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 
 	/** Set of Class */
 	protected Set publishedInterfaces = new HashSet();
+	
+	/** 
+	 * Methods we know we should implement here:
+	 * key is method, value is Boolean 
+	 **/
+	private transient Map rememberedMethods = createRememberedMethodMap();
 
 	/**
 	 * Suppress the specified interface, which will have been
@@ -57,6 +64,10 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 	 */
 	public void suppressInterface(Class intf) {
 		this.publishedInterfaces.remove(intf);
+	}
+
+	private Map createRememberedMethodMap() {
+		return CollectionFactory.createIdentityMapIfPossible(32);
 	}
 
 	public Class[] getInterfaces() {
@@ -83,7 +94,16 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 	 * @return whether the method is on an introduced interface
 	 */
 	protected final boolean isMethodOnIntroducedInterface(MethodInvocation mi) {
-		return implementsInterface(mi.getMethod().getDeclaringClass());
+		Boolean rememberedResult = (Boolean) rememberedMethods.get(mi.getMethod());
+		if (rememberedResult != null) {
+			return rememberedResult.booleanValue();
+		}
+		else {
+			// Work it out and cache it
+			boolean result = implementsInterface(mi.getMethod().getDeclaringClass());
+			rememberedMethods.put(mi.getMethod(), Boolean.valueOf(result));
+			return result;
+		}
 	}
 
 	/**
@@ -104,6 +124,7 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 		
 		// Initialize transient fields.
 		this.logger = LogFactory.getLog(getClass());
+		this.rememberedMethods = createRememberedMethodMap();
 	}
 
 }
