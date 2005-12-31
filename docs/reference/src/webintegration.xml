@@ -803,8 +803,8 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
             element of an &lt;action&gt; element.</para>
 			</listitem>
 		</itemizedlist>
-		<para>All of these strategies are explained in further detail in 
-    <ulink url="http://wiki.opensymphony.com/display/WW/WebWork+2+Spring+Integration">
+		<para>All of these strategies are explained in further detail in
+    <ulink url="http://wiki.opensymphony.com/display/WW/Other+Spring+Integration">
     WebWork's Documentation</ulink>.</para>
 	</sect1>
 </chapter>
