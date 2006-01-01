@@ -32,11 +32,11 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * <p>Variant of SingletonBeanFactoryLocator which creates its internal bean
  * factory reference definition as an ApplicationContext instead of
  * SingletonBeanFactoryLocator's BeanFactory. For almost all usage scenarios, this
- * will not make a difference, since withing that ApplicationContext or BeanFactory
+ * will not make a difference, since within that ApplicationContext or BeanFactory
  * you are still free to create either BeanFactories or ApplicationContexts. The
  * main reason one would need to use this class is if BeanPostProcessing (or other
  * ApplicationContext specific features are needed in the bean reference definition
- * itself.</p>
+ * itself).</p>
  *
  * <p><strong>Note:</strong> This class uses <strong>classpath*:beanRefContext.xml</strong>
  * as the default name for the bean factory reference definition. It is not possible
