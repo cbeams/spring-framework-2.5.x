@@ -169,7 +169,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	private Class configurationClass = Configuration.class;
 
-	private Resource configLocation;
+	private Resource[] configLocations;
 
 	private Resource[] mappingLocations;
 
@@ -236,14 +236,25 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	}
 
 	/**
-	 * Set the location of the Hibernate XML config file, for example as
+	 * Set the location of a single Hibernate XML config file, for example as
 	 * classpath resource "classpath:hibernate.cfg.xml".
 	 * <p>Note: Can be omitted when all necessary properties and mapping
 	 * resources are specified locally via this bean.
 	 * @see org.hibernate.cfg.Configuration#configure(java.net.URL)
 	 */
 	public void setConfigLocation(Resource configLocation) {
-		this.configLocation = configLocation;
+		this.configLocations = new Resource[] {configLocation};
+	}
+
+	/**
+	 * Set the locations of multiple Hibernate XML config files, for example as
+	 * classpath resources "classpath:hibernate.cfg.xml,classpath:extension.cfg.xml".
+	 * <p>Note: Can be omitted when all necessary properties and mapping
+	 * resources are specified locally via this bean.
+	 * @see org.hibernate.cfg.Configuration#configure(java.net.URL)
+	 */
+	public void setConfigLocations(Resource[] configLocations) {
+		this.configLocations = configLocations;
 	}
 
 	/**
@@ -633,9 +644,11 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 				}
 			}
 
-			if (this.configLocation != null) {
-				// Load Hibernate configuration from given location.
-				config.configure(this.configLocation.getURL());
+			if (this.configLocations != null) {
+				for (int i = 0; i < this.configLocations.length; i++) {
+					// Load Hibernate configuration from given location.
+					config.configure(this.configLocations[i].getURL());
+				}
 			}
 
 			if (this.hibernateProperties != null) {
