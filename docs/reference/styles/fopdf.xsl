@@ -191,6 +191,7 @@
         <fo:block  end-indent="{$toc.indent.width}pt"
                    last-line-end-indent="-{$toc.indent.width}pt"
                    white-space-treatment="preserve"
+                   text-align="left"
                    white-space-collapse="false">
             <fo:inline keep-with-next.within-line="always">
                 <!-- print Chapters in bold style -->
@@ -281,7 +282,7 @@
     ################################################### -->      
 
     <!-- Left aligned text and no hyphenation -->
-    <xsl:param name="alignment">left</xsl:param>
+    <xsl:param name="alignment">justify</xsl:param>
     <xsl:param name="hyphenate">false</xsl:param>
 
     <!-- Default Font size -->
@@ -484,5 +485,24 @@
         <xsl:attribute name="space-after.minimum">0.1em</xsl:attribute>
         <xsl:attribute name="space-after.maximum">0.1em</xsl:attribute>
     </xsl:attribute-set>
+    
+<!--###################################################
+              colored and hyphenated links 
+    ################################################### --> 
+	<xsl:template match="ulink"> 
+	<fo:basic-link external-destination="{@url}" 
+			xsl:use-attribute-sets="xref.properties" 
+			text-decoration="underline" 
+			color="blue"> 
+			<xsl:choose> 
+			<xsl:when test="count(child::node())=0"> 
+			<xsl:value-of select="@url"/> 
+			</xsl:when> 
+			<xsl:otherwise> 
+			<xsl:apply-templates/> 
+			</xsl:otherwise> 
+			</xsl:choose> 
+			</fo:basic-link> 
+	</xsl:template> 
     
 </xsl:stylesheet>
