@@ -3,8 +3,11 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.7 (23.12.2005)
--------------------------------------
+Changes in version 1.2.7 (9.1.2006)
+-----------------------------------
+
+Package org.springframework.aop
+* refined ThreadLocalTargetSource's synchronization to guarantee thread-safe destruction on shutdown
 
 Package org.springframework.beans
 * fixed BeanWrapperImpl to pass its "extractOldValueForEditor" setting on to nested BeanWrappers
@@ -23,6 +26,7 @@ Package org.springframework.jdbc
 Package org.springframework.orm
 * JdoTransactionManager does explicit "isActive()" check before attempting a rollback, to avoid illegal state exception
 * Hibernate LocalSessionFactoryBean exposes its DataSource on "SessionFactory.close()", for potential schema export
+* added "configLocations" property to LocalSessionFactoryBean for Hibernate3, allowing to load multiple config files
 
 Package org.springframework.remoting
 * RmiServiceExporter performs explicit RMI unexport if binding to the registry failed, to avoid dangling exports
@@ -38,6 +42,7 @@ Package org.springframework.util
 * WeakReferenceMonitor uses a daemon thread, to avoid a hanging thread even if weak references have not been released
 
 Package org.springframework.web
+* "contextConfigLocation" params in "web.xml" support "${...}" style placeholders for system properties
 * added "currentFormObject" template method to AbstractFormController, for post-processing of a session form object
 * FixedLocaleResolver returns the JVM's default Locale if no explicit default Locale specified
 * VelocityView converts Velocity's MethodInvocationException to a Spring NestedServletException with original root cause
