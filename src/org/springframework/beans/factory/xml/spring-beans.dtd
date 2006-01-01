@@ -119,7 +119,8 @@
 
 <!--
 	Optional. Can be used to create one or more aliases illegal in an id.
-	Multiple aliases can be separated by any number of spaces or commas.
+	Multiple aliases can be separated by any number of spaces, commas, or
+	semi-colons (or indeed any mixture of the three).
 -->
 <!ATTLIST bean name CDATA #IMPLIED>
 
