@@ -17,12 +17,11 @@
     The <ulink
     url="http://www.springframework.org/docs/api/org/springframework/context/ApplicationContext.html">ApplicationContext</ulink>
     builds on top of the BeanFactory (it's a subclass) and adds other
-    functionality such as easier integration with Springs AOP features,
+    functionality such as easier integration with Spring's AOP features,
     message resource handling (for use in internationalization), event
     propagation, declarative mechanisms to create the ApplicationContext and
     optional parent contexts, and application-layer specific contexts such as
-    the <literal>WebApplicationContext</literal>, among other
-    enhancements.</para>
+    the <literal>WebApplicationContext</literal>.</para>
 
     <para>In short, the <literal>BeanFactory</literal> provides the
     configuration framework and basic functionality, while the
@@ -33,10 +32,10 @@
     to apply to ApplicationContexts as well.</para>
 
     <para>Users are sometimes unsure whether a BeanFactory or an
-    ApplicationContext are best suited for use in a particular situation.
+    ApplicationContext is best suited for use in a particular situation.
     Normally when building most applications in a J2EE-environment,
     <emphasis>the best option is to use the ApplicationContext</emphasis>,
-    since it offers all the features of the BeanFactory and adds on to it in
+    since it offers all the features of the BeanFactory and adds to it in
     terms of features, while also allowing a more declarative approach to use
     of some functionality, which is generally desirable. The main usage
     scenario when you might prefer to use the BeanFactory is when memory usage
@@ -72,7 +71,7 @@
       which there are multiple implementations. The most commonly used simple
       BeanFactory implementation is
       <literal>org.springframework.beans.factory.xml.XmlBeanFactory</literal>.
-      (This should be qualified with the reminder that ApplicationContexts are
+      (This is qualified with the reminder that ApplicationContexts are
       a subclass of BeanFactory, and most users end up using XML variants of
       ApplicationContext).</para>
 
@@ -100,7 +99,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       location path as a classpath location), but may also be used with
       special prefixes to force loading of definitions from the classpath or a
       URL, regardless of the actual context type. Another special prefix,
-      <literal>classpath*:</literal>, allows all context definiton files of
+      <literal>classpath*:</literal>, allows all context definition files of
       the same name on the classpath to be found and combined to build a
       context. Please see the chapter referenced above for much more
       information on the topic of <literal>Resource</literal>s.</para>
@@ -109,8 +108,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       the BeanFactory or ApplicationContext, since Spring Framework code will
       do it. For example, the web layer provides support code to load a Spring
       ApplicationContext automatically as part of the normal startup process
-      of a J2EE web-app. This declarative process is described <link
-      linkend="context-create">here</link>:</para>
+      of a J2EE web-app (see <xref linkend="context-create"/>).</para>
 
       <para>While programmatic manipulation of BeanFactories will be described
       later, the following sections will concentrate on describing the
@@ -121,7 +119,8 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       XmlBeanFactory, these are configured as one or more
       <literal>bean</literal> elements inside a top-level
       <literal>beans</literal> element.<programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd"&gt;
+&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
+    "http://www.springframework.org/dtd/spring-beans.dtd"&gt;
 
 &lt;beans&gt;
   
@@ -253,17 +252,17 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
           </tgroup>
         </table></para>
 
-      <para>Note that a bean definition is represented by the real interface
-      <literal>org.springframework.beans.factory.config.BeanDefinition</literal>,
+      <para>A bean definition is represented internally by the
+      <literal>org.springframework.beans.factory.config.BeanDefinition</literal> interface,
       and its various implementations (Root/ChildBeanDefinition). However, it
       is rare that user code works directly with BeanDefinition objects:
-      Usually, bean definitions will be expressed in a metadata format (such
+      usually, bean definitions will be expressed in a metadata format (such
       as XML), which will be loaded on startup. The internal representation of
       such bean definitions are BeanDefinition objects in the factory.</para>
 
       <para>Besides bean definitions which contain information on how to
-      create a specific bean, a BeanFactory can also allow to register
-      existing bean objects that have been created outside the factory (by
+      create a specific bean, certain BeanFactory implementations also permit the registration of
+      existing objects that have been created outside the factory (by
       custom code). DefaultListableBeanFactory supports this through the
       <literal>registerSingleton</literal> method, as defined by the
       <literal>org.springframework.beans.factory.config.ConfigurableBeanFactory</literal>
@@ -276,7 +275,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
 
       <para>The <literal>class</literal> attribute is normally mandatory (see
       <xref linkend="beans-instance-factory-method" /> and <xref
-      linkend="beans-child-bean-definitions" /> for the two exception) and is
+      linkend="beans-child-bean-definitions" /> for the two exceptions) and is
       used for one of two purposes. In the much more common case where the
       BeanFactory itself directly creates the bean by calling its constructor
       (equivalent to Java code calling <emphasis>new</emphasis>), the class
@@ -284,7 +283,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       common case where the BeanFactory calls a static, so-called
       <emphasis>factory</emphasis> method on a class to create the bean, the
       class attribute specifies the actual class containing the static factory
-      method. (the type of the returned bean from the static factory method
+      method (the type of the returned bean from the static factory method
       may be the same class or another class entirely, it doesn't
       matter).</para>
 
@@ -292,7 +291,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
         <title>Bean creation via constructor</title>
 
         <para>When creating a bean using the constructor approach, all normal
-        classes are usable by Spring and compatible with Spring. That is, the
+        classes are usable by and compatible with Spring. That is, the
         class being created does not need to implement any specific interfaces
         or be coded in a specific fashion. Just specifying the bean class
         should be enough. However, depending on what type of IoC you are going
@@ -304,17 +303,15 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
         <emphasis>any</emphasis> class you want it to manage. Most people
         using Spring prefer to have actual JavaBeans (having just a default
         (no-argument) constructor and appropriate setters and getters modeled
-        after the properties) in the BeanFactory, but it it's also possible to
+        after the properties) in the BeanFactory, but it is also possible to
         have more exotic non-bean-style classes in your BeanFactory. If, for
         example, you need to use a legacy connection pool that absolutely does
-        not adhere to the JavaBean specification, no worries, Spring can
-        manage it as well.</para>
+        not adhere to the JavaBean specification, Spring can manage it as well.</para>
 
         <para>Using the XmlBeanFactory you can specify your bean class as
-        follows: <programlisting>&lt;bean id="exampleBean"
-      class="examples.ExampleBean"/&gt;
-&lt;bean name="anotherExample"
-      class="examples.ExampleBeanTwo"/&gt; </programlisting></para>
+        follows: <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"/&gt;
+
+&lt;bean name="anotherExample" class="examples.ExampleBeanTwo"/&gt; </programlisting></para>
 
         <para>The mechanism for supplying (optional) arguments to the
         constructor, or setting properties of the object instance after it has
@@ -335,7 +332,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
         use for such a bean definition is to call static factories in legacy
         code.</para>
 
-        <para>Following is an example of a bean definition which specifies
+        <para>The following example shows a bean definition which specifies
         that the bean is to be created by calling a factory-method. Note that
         the definition does not specify the type (class) of the returned
         object, only the class containing the factory method. In this example,
@@ -362,29 +359,26 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
         must specify the name of a bean in the current or an ancestor bean
         factory which contains the factory method. The factory method itself
         should still be set via the <literal>factory-method</literal>
-        attribute.</para>
+        attribute (as seen in the example below).</para>
 
-        <para>Following is an example:<programlisting>&lt;!-- The factory bean, which contains a method called
+        <programlisting>&lt;!-- The factory bean, which contains a method called
      createInstance --&gt;
-&lt;bean id="myFactoryBean"
-      class="..."&gt;
+&lt;bean id="myFactoryBean" class="..."&gt;
   ...
 &lt;/bean&gt;
 &lt;!-- The bean to be created via the factory bean --&gt;
 &lt;bean id="exampleBean"
       factory-bean="myFactoryBean"
-      factory-method="createInstance"/&gt;</programlisting></para>
+      factory-method="createInstance"/&gt;</programlisting>
 
         <para>Although the mechanisms for setting bean properties are still to
         be discussed, one implication of this approach is that the factory
-        bean itself can be managed and configured via Dependency Injection, by
-        the container.</para>
+        bean itself can be managed and configured via Dependency Injection.</para>
       </sect3>
     </sect2>
 
     <sect2 id="beans-beanname">
-      <title>The bean identifiers (<literal>id</literal> and
-      <literal>name</literal>)</title>
+      <title>The bean identifiers (<literal>id</literal> and <literal>name</literal>)</title>
 
       <para>Every bean has one or more ids (also called identifiers, or names;
       these terms refer to the same thing). These ids must be unique within
@@ -394,8 +388,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
 
       <para>In an XmlBeanFactory (including ApplicationContext variants), you
       use the <literal>id</literal> or <literal>name</literal> attributes to
-      specify the bean id(s), and at least one id must be specified in one or
-      both of these attributes. The <literal>id</literal> attribute allows you
+      specify the bean id(s). The <literal>id</literal> attribute allows you
       to specify one id, and as it is marked in the XML DTD (definition
       document) as a real XML element ID attribute, the parser is able to do
       some extra validation when other elements point back to this one. As
@@ -403,9 +396,26 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       spec does limit the characters which are legal in XML IDs. This is
       usually not really a constraint, but if you have a need to use one of
       these characters, or want to introduce other aliases to the bean, you
-      may also or instead specify one or more bean ids (separated by a comma
-      (<literal>,</literal>) or semicolon (<literal>;</literal>) via the
-      <literal>name</literal> attribute.</para>
+      may also or instead specify one or more bean ids, separated by a comma
+      (<literal>,</literal>), semicolon (<literal>;</literal>), or whitespace
+      via the <literal>name</literal> attribute.</para>
+
+      <para>Please note that you are not required to supply a name for a bean. If
+      no name is supplied explicitly, the container will generate a (unique) name
+      for said bean. The motivations for not supplying a name for a bean will be
+      discussed later (one use case is inner beans).</para>
+      
+      <para>Finally, please do take some care to be consistent when naming beans.
+      The convention (at least amongst the Spring development team) is to use
+      the standard Java convention for instance field names when naming beans. That is,
+      bean names start with a lowercase letter, and are camel-cased from then on.
+      Examples of such names would be (sans quotes) <literal>'accountManager'</literal>,
+      <literal>'accountService'</literal>, <literal>'userDao'</literal>,
+      <literal>'loginController'</literal>etc. Adopting a standard way of
+      naming your beans will go a long way towards making your configuration
+      easy to read and understand; adopting such naming standards is not hard to do,
+      and if you are using SpringAOP it can pay off handsomely when it comes to applying
+      advice to a set of beans related by name.</para>
     </sect2>
 
     <sect2 id="beans-factory-modes">
@@ -421,7 +431,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
 
       <para>The non-singleton, prototype mode of a bean deployment results in
       the <emphasis>creation of a new bean instance</emphasis> every time a
-      request for that specific bean is done. This is ideal for situations
+      request for that specific bean is made. This is ideal for situations
       where for example each user needs an independent user object or
       something similar.</para>
 
@@ -443,11 +453,10 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       class="examples.ExampleBeanTwo" singleton="true"/&gt;</programlisting></para>
 
       <para>Note: when deploying a bean in the prototype mode, the lifecycle
-      of the bean changes slightly. By definition, Spring cannot manage the
-      complete lifecycle of a non-singleton/prototype bean, since after it is
-      created, it is given to the client and the container does not keep track
-      of it at all any longer. You can think of Spring's role when talking
-      about a non-singleton/prototype bean as a replacement for the 'new'
+      of the bean changes slightly. Spring cannot manage the complete lifecycle of a
+      prototype bean, since after it is created, it is given to the client and the
+      container does not keep track of it at all any longer. You can think of Spring's
+      role when talking about a prototype bean as a replacement for the 'new'
       operator. Any lifecycle aspects past that point have to be handled by
       the client. The lifecycle of a bean in the BeanFactory is further
       described in <xref linkend="beans-factory-lifecycle" />.</para>
@@ -455,8 +464,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
   </sect1>
 
   <sect1 id="beans-dependencies">
-    <title>Properties, collaborators, autowiring and dependency
-    checking</title>
+    <title>Properties, collaborators, autowiring and dependency checking</title>
 
     <sect2 id="beans-factory-collaborators">
       <title>Setting bean properties and collaborators</title>
@@ -473,7 +481,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       dependencies on its own using direct construction of classes, or
       something like the <emphasis>Service Locator</emphasis> pattern. While
       we will not elaborate too much on the advantages of Dependency
-      Injection, it becomes evident upon usage that code gets much cleaner and
+      Injection, it becomes evident upon usage that code gets much cleaner, and
       reaching a higher grade of decoupling is much easier when beans do not
       look up their dependencies, but are provided with them, and additionally
       do not even know where the dependencies are located and of what actual
@@ -488,7 +496,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
             no-argument constructor or no-argument static factory method to
             instantiate your bean. Beans defined in the BeanFactory that use
             setter-based dependency injection are <emphasis>true
-            JavaBeans</emphasis>. Spring generally advocates usage of
+            JavaBeans</emphasis>. Spring generally advocates the usage of
             setter-based dependency injection, since a large number of
             constructor arguments can get unwieldy, especially when some
             properties are optional.</para>
@@ -497,7 +505,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
           <listitem>
             <para><emphasis>constructor-based</emphasis> dependency injection
             is realized by invoking a constructor with a number of arguments,
-            each representing a collaborator or property. Additionally,
+            each representing a collaborator. Additionally,
             calling a static factory method with specific arguments, to
             construct the bean, can be considered almost equivalent, and the
             rest of this text will consider arguments to a constructor and
@@ -2149,8 +2157,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting></para>
   </sect1>
 
   <sect1 id="context-functionality">
-    <title>Added functionality of the
-    <literal>ApplicationContext</literal></title>
+    <title>Added functionality of the <literal>ApplicationContext</literal></title>
 
     <para>As already stated in the previous section, the ApplicationContext
     has a couple of features that distinguish it from the BeanFactory. Let us
@@ -2211,7 +2218,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting></para>
       <literal>NestingMessageSource</literal> in order to do nested messaging.
       The StaticMessageSource is hardly ever used but provides programmatic
       ways to add messages to the source. The ResourceBundleMessageSource is
-      more interesting and is the one we will provides an example for:
+      more interesting and is the one we will provide an example for:
       <programlisting>&lt;beans&gt;
   &lt;bean id="messageSource"
         class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
@@ -2229,8 +2236,70 @@ dataSource.url=jdbc:mysql:mydb</programlisting></para>
       classpath called <literal>format</literal>,
       <literal>exceptions</literal> and <literal>windows</literal>. Using the
       JDK standard way of resolving messages through ResourceBundles, any
-      request to resolve a message will be handled. TODO: SHOW AN
-      EXAMPLE</para>
+      request to resolve a message will be handled. For the purposes of the example,
+      lets assume the contents of two of the above resource bundle files are...</para>
+      <programlisting><![CDATA[# in 'format.properties'
+message=Alligators rock!]]></programlisting>
+      <programlisting><![CDATA[# in 'exceptions.properties'
+argument.required=The '{0}' argument is required.]]></programlisting>
+		<para>Some (admittedly trivial) driver code to exercise the
+		<classname>MessageSource</classname> functionality can be found below. Remember
+		that all <classname>ApplicationContext</classname> implementations are also
+		<classname>MessageSource</classname> implementations and so can be cast to the
+		<classname>MessageSource</classname> interface.</para>
+		<programlisting><![CDATA[public static void main(String[] args) {
+    MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
+    String message = resources.getMessage("message", null, "Default", null);
+    System.out.println(message);
+}]]></programlisting>
+		<para>The resulting output from the runnning of the above program will be...</para>
+		<programlisting><![CDATA[Alligators rock!]]></programlisting>
+		<para>So to summarise, the <classname>MessageSource</classname> is defined in a file
+		called <literal>'beans.xml'</literal> (this file exists at the root of your classpath).
+		The <literal>'messageSource'</literal> bean definition refers to a number
+		of resource bundles via it's <literal>basenames</literal> property; the three files
+		that are passed in the list to the <literal>basenames</literal> property exist as files
+		at the root of your classpath (and are called
+		<literal>format.properties</literal>, <literal>exceptions.properties</literal>,
+		and <literal>windows.properties</literal> respectively).</para>
+		<para>Lets look at another example, and this time we will look at passing arguments
+		to the message lookup; these arguments will be converted into strings and inserted
+		into placeholders in the lookup message. Ths is perhaps best explained with an
+		example; to wit...</para>
+		<programlisting><![CDATA[public static void main(final String[] args) {
+    MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
+    String message = resources.getMessage("argument.required",
+        new Object [] {"userDao"}, "Required", null);
+    System.out.println(message);
+}]]></programlisting>
+		<para>The resulting output from the runnning of the above program will be...</para>
+		<programlisting><![CDATA[The 'userDao' argument is required.]]></programlisting>
+		<para>With regard to internationalization (i18N), Spring's various
+		<classname>MessageResource</classname> implementations follow the same locale resolution
+		and fallback rules as the standard JDK ResourceBundle. In short, and continuing with
+		the example <literal>'messageSource'</literal> defined previously, if you want to resolve
+		messages against the British (en-GB) locale, one would create files called
+		<literal>format_en_GB.properties</literal>, <literal>exceptions_en_GB.properties</literal>,
+		and <literal>windows_en_GB.properties</literal> respectively.</para>
+		<para>Locale resolution is typically going to be managed by the surrounding environment
+		of the application. For the prupose of this example though, we'll just manually
+		specify the locale that we want to resolve our (British) messages against.</para>
+      <programlisting><![CDATA[# in 'exceptions_en_GB.properties'
+argument.required=Ebagum lad, the '{0}' argument is required, I say, I say, required.]]></programlisting>
+		<programlisting><![CDATA[public static void main(final String[] args) {
+    MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
+    String message = resources.getMessage("argument.required",
+        new Object [] {"userDao"}, "Required", Locale.UK);
+    System.out.println(message);
+}]]></programlisting>
+		<para>The resulting output from the runnning of the above program will be...</para>
+		<programlisting><![CDATA[Ebagum lad, the 'userDao' argument is required, I say, I say, required.]]></programlisting>
+		<para>The <classname>MessageSourceAware</classname> interface can also be used to acquire
+		a reference to any <classname>MessageSource</classname> that has been defined. Any bean
+		that is defined in an <classname>ApplicationContext</classname> that implements the
+		<classname>MessageSourceAware</classname> interface will be injected with the
+		application context's <classname>MessageSource</classname> when it (the bean) is being
+		created and configured.</para>
     </sect2>
 
     <sect2 id="context-functionality-events">
@@ -2416,8 +2485,7 @@ public class BlackListNotifier implement ApplicationListener {
     added for customizing behavior of beans and the container.</para>
 
     <sect2 id="beans-context-applicationcontextaware">
-      <title><literal>ApplicationContextAware</literal> marker
-      interface</title>
+      <title><literal>ApplicationContextAware</literal> marker interface</title>
 
       <para>All marker interfaces available with BeanFactories still work. The
       ApplicationContext does add one extra marker interface which beans may
@@ -2541,8 +2609,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
   </sect1>
 
   <sect1>
-    <title>Setting a bean property or constructor arg from a property
-    expression</title>
+    <title>Setting a bean property or constructor arg from a property expression</title>
 
     <para><literal>PropertyPathFactoryBean</literal> is a
     <literal>FactoryBean</literal> that evaluates a property path on a given
@@ -2597,8 +2664,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
   </sect1>
 
   <sect1>
-    <title>Setting a bean property or constructor arg from a field
-    value</title>
+    <title>Setting a bean property or constructor arg from a field value</title>
 
     <para>FieldRetrievingFactoryBean is a FactoryBean which retrieves a static
     or non-static field value. It is typically used for retrieving public
@@ -2633,8 +2699,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
   </sect1>
 
   <sect1>
-    <title>Invoking another method and optionally using the return
-    value.</title>
+    <title>Invoking another method and optionally using the return value.</title>
 
     <para>it is sometimes necessary to call a static or non-static method in
     one class, just to perform some sort of initialization, before some other
@@ -2855,7 +2920,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     which take a long time to initialize (i.e. a Hibernate SessionFactory),
     and possible issues due to side-effects. As an alternative, classes such
     as <literal><ulink
-    url="???">ContextSingletonBeanFactoryLocator</ulink></literal> or
+    url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink></literal> or
     <literal><ulink
     url="http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink></literal>
     may be used to demand load multiple hierarchical (i.e. one is a parent of
@@ -2865,13 +2930,12 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     are loaded only as needed, and loaded only once.</para>
 
     <sect2>
-      <title>Using SingletonBeanFactoryLocator and
-      ContextSingletonBeanFactoryLocator</title>
+      <title>Using SingletonBeanFactoryLocator and ContextSingletonBeanFactoryLocator</title>
 
       <para>You can see a detailed example of using <literal><ulink
       url="http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink></literal>
       and <literal><ulink
-      url="???">ContextSingletonBeanFactoryLocator</ulink></literal> by
+      url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink></literal> by
       viewing their respective JavaDocs.</para>
 
       <para>As mentioned in the chapter on EJBs, the Spring convenience base
