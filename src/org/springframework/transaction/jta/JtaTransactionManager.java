@@ -102,7 +102,9 @@ import org.springframework.transaction.support.TransactionSynchronization;
  * <li>"java:comp/UserTransaction" for Resin 2.x, Oracle OC4J (Orion),
  * JOnAS (JOTM), BEA WebLogic
  * <li>"java:comp/TransactionManager" for Resin 3.x
- * <li>"java:/TransactionManager" for JBoss
+ * <li>"java:pm/TransactionManager" for Borland Enterprise Server and
+ * Sun Application Server (Sun ONE 7 and later)
+ * <li>"java:/TransactionManager" for JBoss Application Server
  * </ul>
  *
  * <p>All of these cases are autodetected by JtaTransactionManager (since Spring 1.2),
