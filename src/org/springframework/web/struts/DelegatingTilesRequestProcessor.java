@@ -58,6 +58,7 @@ public class DelegatingTilesRequestProcessor extends TilesRequestProcessor {
 
 	private WebApplicationContext webApplicationContext;
 
+
 	public void init(ActionServlet actionServlet, ModuleConfig moduleConfig) throws ServletException {
 		super.init(actionServlet, moduleConfig);
 		if (actionServlet != null) {

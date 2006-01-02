@@ -60,7 +60,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  *   &lt;set-property property="contextConfigLocation" value="/WEB-INF/action-servlet.xml /WEB-INF/myContext.xml"/&gt;
  * &lt;/plug-in&gt;</pre>
  *
- * Beans defined in the ContextLoaderPlugin context can be accessed
+ * Beans defined in the ContextLoaderPlugIn context can be accessed
  * from conventional Struts Actions, via fetching the WebApplicationContext
  * reference from the ServletContext. ActionSupport and DispatchActionSupport
  * are pre-built convenience classes that provide easy access to the context.
@@ -68,7 +68,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  * <p>It is normally preferable to access Spring's root WebApplicationContext
  * in such scenarios, though: A shared middle tier should be defined there
  * rather than in a ContextLoaderPlugin context, for access by any web component.
- * ActionSupport and DispatchActionSupport auto-detect the root context too.
+ * ActionSupport and DispatchActionSupport autodetect the root context too.
  *
  * <p>A special usage of this PlugIn is to define Struts Actions themselves
  * as beans, typically wiring them with middle tier components defined in the
@@ -85,8 +85,8 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  * Don Brown's <a href="http://struts.sourceforge.net/struts-spring">Spring Struts Plugin</a>.
  * ContextLoaderPlugIn and DelegatingActionProxy constitute a clean-room
  * implementation of the same idea, essentially superseding the original plugin.
- * Many thanks to Don Brown and Matt Raible for the original work, and for the
- * agreement to reimplement the idea in standard Spring!
+ * Many thanks to Don Brown and Matt Raible for the original work and for the
+ * agreement to reimplement the idea in Spring proper!
  *
  * @author Juergen Hoeller
  * @since 1.0.1
