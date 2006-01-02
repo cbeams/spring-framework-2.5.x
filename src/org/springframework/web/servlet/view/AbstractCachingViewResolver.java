@@ -66,7 +66,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 
 
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
-		if (!this.cache) {
+		if (!isCache()) {
 			logger.warn("View caching is SWITCHED OFF -- DEVELOPMENT SETTING ONLY: This can severely impair performance");
 			return createView(viewName, locale);
 		}
