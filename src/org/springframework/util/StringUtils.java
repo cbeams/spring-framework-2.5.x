@@ -660,21 +660,27 @@ public abstract class StringUtils {
 			return new String[0];
 		}
 		if (delimiter == null) {
-			return new String[]{str};
+			return new String[] {str};
 		}
 
 		List result = new ArrayList();
-		int pos = 0;
-		int delPos = 0;
-		while ((delPos = str.indexOf(delimiter, pos)) != -1) {
-			result.add(str.substring(pos, delPos));
-			pos = delPos + delimiter.length();
+		if ("".equals(delimiter)) {
+			for (int i = 0; i < str.length(); i++) {
+				result.add(str.substring(i, i + 1));
+			}
 		}
-		if (str.length() > 0 && pos <= str.length()) {
-			// Add rest of String, but not in case of empty input.
-			result.add(str.substring(pos));
+		else {
+			int pos = 0;
+			int delPos = 0;
+			while ((delPos = str.indexOf(delimiter, pos)) != -1) {
+				result.add(str.substring(pos, delPos));
+				pos = delPos + delimiter.length();
+			}
+			if (str.length() > 0 && pos <= str.length()) {
+				// Add rest of String, but not in case of empty input.
+				result.add(str.substring(pos));
+			}
 		}
-
 		return (String[]) result.toArray(new String[result.size()]);
 	}
 

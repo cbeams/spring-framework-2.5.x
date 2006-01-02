@@ -21,7 +21,7 @@ import javax.servlet.jsp.JspException;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 
 /**
- * Superclass for tags that emit content that might get HTML-escaped.
+ * Superclass for tags that output content that might get HTML-escaped.
  *
  * <p>Provides a "htmlEscape" property for explicitly specifying whether to
  * apply HTML escaping. If not set, a page-level default (e.g. from the
@@ -38,6 +38,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
 public abstract class HtmlEscapingAwareTag extends RequestContextAwareTag {
 
 	private Boolean htmlEscape;
+
 
 	/**
 	 * Set HTML escaping for this tag, as boolean value.

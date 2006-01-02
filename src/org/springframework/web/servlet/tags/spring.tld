@@ -92,6 +92,12 @@
 		</attribute>
 
 		<attribute>
+			<name>argumentSeparator</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
 			<name>text</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>

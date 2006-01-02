@@ -21,23 +21,49 @@ import java.beans.PropertyEditorSupport;
 import org.springframework.util.StringUtils;
 
 /**
- * Editor for String arrays. Strings must be in CSV format.
+ * Editor for String arrays. Strings must be in CSV format,
+ * with customizable separator.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see org.springframework.util.StringUtils#commaDelimitedListToStringArray
- * @see org.springframework.util.StringUtils#arrayToCommaDelimitedString
+ * @see org.springframework.util.StringUtils#delimitedListToStringArray
+ * @see org.springframework.util.StringUtils#arrayToDelimitedString
  */
 public class StringArrayPropertyEditor extends PropertyEditorSupport {
 
-	public void setAsText(String s) throws IllegalArgumentException {
-		String[] array = StringUtils.commaDelimitedListToStringArray(s);
+	/**
+	 * Default separator for splitting a String: a comma (",")
+	 */
+	public static final String DEFAULT_SEPARATOR = ",";
+
+	private final String separator;
+
+
+	/**
+	 * Create a new StringArrayPropertyEditor with the default separator:
+	 * a comma (",")
+	 */
+	public StringArrayPropertyEditor() {
+		this.separator = DEFAULT_SEPARATOR;
+	}
+
+	/**
+	 * Create a new StringArrayPropertyEditor with the given separator.
+	 * @param separator the separator to use for splitting a String
+	 */
+	public StringArrayPropertyEditor(String separator) {
+		this.separator = separator;
+	}
+
+
+	public void setAsText(String text) throws IllegalArgumentException {
+		String[] array = StringUtils.delimitedListToStringArray(text, this.separator);
 		setValue(array);
 	}
 
 	public String getAsText() {
 		String[] array = (String[]) this.getValue();
-		return StringUtils.arrayToCommaDelimitedString(array);
+		return StringUtils.arrayToDelimitedString(array, this.separator);
 	}
 
 }

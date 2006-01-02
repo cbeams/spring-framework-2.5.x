@@ -27,7 +27,9 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.SystemPropertyUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
@@ -129,8 +131,11 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 		return this.namespace;
 	}
 
-	public void setConfigLocations(String[] configLocations) {
-		this.configLocations = configLocations;
+	public void setConfigLocations(String[] locations) {
+		this.configLocations = new String[locations.length];
+		for (int i = 0; i < locations.length; i++) {
+			this.configLocations[i] = resolvePath(locations[i]);
+		}
 	}
 
 	protected String[] getConfigLocations() {
@@ -144,7 +149,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	 * @see #setConfigLocations
 	 */
 	public void refresh() throws BeansException {
-		if (this.configLocations == null || this.configLocations.length == 0) {
+		if (ObjectUtils.isEmpty(getConfigLocations())) {
 			setConfigLocations(getDefaultConfigLocations());
 		}
 		super.refresh();
@@ -168,6 +173,17 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 		beanFactory.ignoreDependencyInterface(ServletConfigAware.class);
+	}
+
+	/**
+	 * Resolve the given path, replacing placeholders with corresponding
+	 * system property values if necessary. Applied to config locations.
+	 * @param path the original file path
+	 * @return the resolved file path
+	 * @see org.springframework.util.SystemPropertyUtils#resolvePlaceholders
+	 */
+	protected String resolvePath(String path) {
+		return SystemPropertyUtils.resolvePlaceholders(path);
 	}
 
 	/**

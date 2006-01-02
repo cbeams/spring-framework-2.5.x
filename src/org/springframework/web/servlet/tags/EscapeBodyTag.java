@@ -49,6 +49,7 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 
 	private BodyContent bodyContent;
 
+
 	/**
 	 * Set JavaScript escaping for this tag, as boolean value.
 	 * Default is "false".
@@ -57,6 +58,7 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 		this.javaScriptEscape =
 				ExpressionEvaluationUtils.evaluateBoolean("javaScriptEscape", javaScriptEscape, pageContext);
 	}
+
 
 	protected int doStartTagInternal() {
 		// do nothing

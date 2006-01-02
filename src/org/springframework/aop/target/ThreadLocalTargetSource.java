@@ -37,12 +37,16 @@ import org.springframework.beans.factory.DisposableBean;
  * However, state can be relied on during the operations of a single thread:
  * for example, if one caller makes repeated calls on the AOP proxy.
  *
- * <p>Cleanup is performed in the destroy() method from DisposableBean.
+ * <p>Cleanup of thread-bound objects is performed on BeanFactory destruction,
+ * calling their <code>DisposableBean.destroy()</code> method if available.
+ * Be aware that many thread-bound objects can be around until the application
+ * actually shuts down.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @see #destroy
+ * @see ThreadLocalTargetSourceStats
+ * @see org.springframework.beans.factory.DisposableBean#destroy()
  */
 public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 		implements ThreadLocalTargetSourceStats, DisposableBean {
@@ -62,7 +66,8 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 	private int invocationCount;
 	
 	private int hitCount;
-	
+
+
 	/**
 	 * Implementation of abstract getTarget() method.
 	 * We look for a target held in a ThreadLocal. If we don't find one,
@@ -73,10 +78,10 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 		Object target = this.targetInThread.get();
 		if (target == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No target for prototype '" + getTargetBeanName() + "' found in thread: " +
+				logger.debug("No target for prototype '" + getTargetBeanName() + "' bound to thread: " +
 				    "creating one and binding it to thread '" + Thread.currentThread().getName() + "'");
 			}
-			// associate target with ThreadLocal
+			// Associate target with ThreadLocal.
 			target = newPrototypeInstance();
 			this.targetInThread.set(target);
 			this.targetSet.add(target);
@@ -92,26 +97,28 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 	 */
 	public void destroy() {
 		logger.info("Destroying ThreadLocalTargetSource bindings");
-		for (Iterator it = this.targetSet.iterator(); it.hasNext(); ) {
-			Object target = it.next();
-			if (target instanceof DisposableBean) {
-				try {
-					((DisposableBean) target).destroy();
-				}
-				catch (Exception ex) {
-					// do nothing
-					if (logger.isWarnEnabled()) {
-						logger.warn("Thread-bound target of class [" + target.getClass() +
-								"] threw exception from destroy() method", ex);
+		synchronized (this.targetSet) {
+			for (Iterator it = this.targetSet.iterator(); it.hasNext(); ) {
+				Object target = it.next();
+				if (target instanceof DisposableBean) {
+					try {
+						((DisposableBean) target).destroy();
+					}
+					catch (Exception ex) {
+						// do nothing
+						if (logger.isWarnEnabled()) {
+							logger.warn("Thread-bound target of class [" + target.getClass() +
+									"] threw exception from destroy() method", ex);
+						}
 					}
 				}
 			}
+			this.targetSet.clear();
 		}
-		this.targetSet.clear();
-		
-		// clear ThreadLocal
+		// Clear ThreadLocal.
 		this.targetInThread.set(null);
 	}
+
 
 	public int getInvocationCount() {
 		return invocationCount;
@@ -124,6 +131,7 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 	public int getObjectCount() {
 		return this.targetSet.size();
 	}
+
 
 	/**
 	 * Return an introduction advisor mixin that allows the AOP proxy to be

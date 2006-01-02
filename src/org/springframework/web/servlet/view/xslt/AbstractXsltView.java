@@ -88,6 +88,8 @@ public abstract class AbstractXsltView extends AbstractView {
 
 	private String root = DEFAULT_ROOT;
 
+	private boolean useSingleModelNameAsRoot = true;
+
 	private URIResolver uriResolver;
 
 	private ErrorListener errorListener = new SimpleTransformErrorListener(logger);
@@ -119,11 +121,25 @@ public abstract class AbstractXsltView extends AbstractView {
 	/**
 	 * Document root element name. Default is "DocRoot".
 	 * Only used if we're not passed a single Node as model.
-	 * @param root document root element name
+	 * @param root the document root element name
 	 * @see #DEFAULT_ROOT
 	 */
 	public void setRoot(String root) {
 		this.root = root;
+	}
+
+	/**
+	 * Set whether to use the name of a given single model object
+	 * as document root element name.
+	 * <p>Default is "true": If you pass in a model with a single object
+	 * named "myElement", then the document root will be named "myElement"
+	 * as well. Set this flag to "false" if you want to pass in a single
+	 * model object while still using the root element name configured
+	 * through the "root" property.
+	 * @see #setRoot
+	 */
+	public void setUseSingleModelNameAsRoot(boolean useSingleModelNameAsRoot) {
+		this.useSingleModelNameAsRoot = useSingleModelNameAsRoot;
 	}
 
 	/**
@@ -264,7 +280,7 @@ public abstract class AbstractXsltView extends AbstractView {
 		// Value of a single element in the map, if there is one.
 		Object singleModel = null;
 
-		if (model.size() == 1) {
+		if (this.useSingleModelNameAsRoot && model.size() == 1) {
 			docRoot = (String) model.keySet().iterator().next();
 			if (logger.isDebugEnabled()) {
 				logger.debug("Single model object received, key [" + docRoot + "] will be used as root tag");
@@ -273,7 +289,7 @@ public abstract class AbstractXsltView extends AbstractView {
 		}
 
 		// Handle special case when we have a single node.
-		if (singleModel != null && (singleModel instanceof Node || singleModel instanceof Source)) {
+		if (singleModel instanceof Node || singleModel instanceof Source) {
 			// Don't domify if the model is already an XML node/source.
 			// We don't need to worry about model name, either:
 			// we leave the Node alone.
@@ -283,7 +299,7 @@ public abstract class AbstractXsltView extends AbstractView {
 		else {
 			// docRoot local variable takes precedence
 			source = createXsltSource(model, (docRoot != null ? docRoot : this.root), request, response);
-		}
+			}
 
 		doTransform(model, source, request, response);
 	}

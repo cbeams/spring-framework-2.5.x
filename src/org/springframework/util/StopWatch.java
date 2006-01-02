@@ -33,6 +33,7 @@ import java.util.List;
  * and in development, rather than as part of production applications.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since May 2, 2001
  */
 public class StopWatch {
@@ -184,7 +185,7 @@ public class StopWatch {
 	 * Return a short description of the total running time.
 	 */
 	public String shortSummary() {
-		return "StopWatch '" + this.id + "': running time (millis) = " + getTotalTimeMillis() + "\n";
+		return "StopWatch '" + this.id + "': running time (millis) = " + getTotalTimeMillis();
 	}
 
 	/**
@@ -193,6 +194,7 @@ public class StopWatch {
 	 */
 	public String prettyPrint() {
 		StringBuffer sb = new StringBuffer(shortSummary());
+		sb.append('\n');
 		if (!this.keepTaskList) {
 			sb.append("No task info kept");
 		}
@@ -225,16 +227,13 @@ public class StopWatch {
 		if (this.keepTaskList) {
 			TaskInfo[] tasks = getTaskInfo();
 			for (int i = 0; i < tasks.length; i++) {
-				if (i > 0) {
-					sb.append("; ");
-				}
-				sb.append("[" + tasks[i].getTaskName() + "] took " + tasks[i].getTimeMillis());
+				sb.append("; [" + tasks[i].getTaskName() + "] took " + tasks[i].getTimeMillis());
 				long percent = Math.round((100.0 * tasks[i].getTimeSeconds()) / getTotalTimeSeconds());
-				sb.append("=" + percent + "%");
+				sb.append(" = " + percent + "%");
 			}
 		}
 		else {
-			sb.append("Not keeping task info");
+			sb.append("; no task info kept");
 		}
 		return sb.toString();
 	}

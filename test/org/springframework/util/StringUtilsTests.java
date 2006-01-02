@@ -304,6 +304,34 @@ public class StringUtilsTests extends TestCase {
 				Arrays.asList(reverse));
 	}
 
+	public void testDelimitedListToStringArrayWithComma() {
+		String[] sa = StringUtils.delimitedListToStringArray("a,b", ",");
+		assertEquals(2, sa.length);
+		assertEquals("a", sa[0]);
+		assertEquals("b", sa[1]);
+	}
+
+	public void testDelimitedListToStringArrayWithSemicolon() {
+		String[] sa = StringUtils.delimitedListToStringArray("a;b", ";");
+		assertEquals(2, sa.length);
+		assertEquals("a", sa[0]);
+		assertEquals("b", sa[1]);
+	}
+
+	public void testDelimitedListToStringArrayWithEmptyString() {
+		String[] sa = StringUtils.delimitedListToStringArray("a,b", "");
+		assertEquals(3, sa.length);
+		assertEquals("a", sa[0]);
+		assertEquals(",", sa[1]);
+		assertEquals("b", sa[2]);
+	}
+
+	public void testDelimitedListToStringArrayWithNullDelimiter() {
+		String[] sa = StringUtils.delimitedListToStringArray("a,b", null);
+		assertEquals(1, sa.length);
+		assertEquals("a,b", sa[0]);
+	}
+
 	public void testCommaDelimitedListToStringArrayMatchWords() {
 		// Could read these from files
 		String[] sa = new String[] {"foo", "bar", "big"};
