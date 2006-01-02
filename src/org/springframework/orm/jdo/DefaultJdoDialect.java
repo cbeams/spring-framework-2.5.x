@@ -227,25 +227,33 @@ public class DefaultJdoDialect implements JdoDialect {
 	}
 
 	/**
-	 * This implementation delegates to JDO 2.0's <code>attachCopy</code> method,
-	 * passing in "true" for the "makeTransactional" argument.
+	 * This implementation delegates to JDO 2.0's <code>makePersistent</code> method,
+	 * which also serves as facility for reattaching objects as of JDO 2.0 final draft.
 	 * <p>To be overridden for pre-JDO2 implementations, using the corresponding
 	 * vendor-specific mechanism there.
-	 * @see javax.jdo.PersistenceManager#attachCopy(Object, boolean)
+	 * <p>Note that previous JDO 2.0 drafts specified a dedicated <code>attachCopy</code>
+	 * method for this purpose, which Spring's DefaultJdoDialect used to delegate to.
+	 * As of Spring 2.0, this has been adapted to the final JDO 2.0 API. You can still
+	 * create a custom JdoDialect that uses the pre-final API methods, of course.
+	 * @see javax.jdo.PersistenceManager#makePersistent(Object)
 	 */
 	public Object attachCopy(PersistenceManager pm, Object detachedEntity) throws JDOException {
-		return pm.attachCopy(detachedEntity, true);
+		return pm.makePersistent(detachedEntity);
 	}
 
 	/**
-	 * This implementation delegates to JDO 2.0's <code>attachCopyAll</code> method,
-	 * passing in "true" for the "makeTransactional" argument.
+	 * This implementation delegates to JDO 2.0's <code>makePersistentAll</code> method,
+	 * which also serves as facility for reattaching objects as of JDO 2.0 final draft.
 	 * <p>To be overridden for pre-JDO2 implementations, using the corresponding
 	 * vendor-specific mechanism there.
-	 * @see javax.jdo.PersistenceManager#attachCopyAll(java.util.Collection, boolean)
+	 * <p>Note that previous JDO 2.0 drafts specified a dedicated <code>attachCopy</code>
+	 * method for this purpose, which Spring's DefaultJdoDialect used to delegate to.
+	 * As of Spring 2.0, this has been adapted to the final JDO 2.0 API. You can still
+	 * create a custom JdoDialect that uses the pre-final API methods, of course.
+	 * @see javax.jdo.PersistenceManager#makePersistentAll(java.util.Collection)
 	 */
 	public Collection attachCopyAll(PersistenceManager pm, Collection detachedEntities) throws JDOException {
-		return pm.attachCopyAll(detachedEntities, true);
+		return pm.makePersistentAll(detachedEntities);
 	}
 
 	/**

@@ -222,9 +222,13 @@ public interface JdoOperations {
 	 * the current JDO transaction, merging its changes into the current persistence
 	 * instance that represents the corresponding entity.
 	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
+	 * Note that as of JDO 2.0 final, this operation is equivalent to a
+	 * <code>makePersistent</code> call. This dedicated reattach operation
+	 * now solely serves as distinction point for custom JdoDialects.
+	 * It is still recommended to call this operation for enhanced adaptability.
 	 * @param detachedEntity the detached instance to attach
 	 * @return the corresponding persistent instance
-	 * @see javax.jdo.PersistenceManager#attachCopy(Object, boolean)
+	 * @see javax.jdo.PersistenceManager#makePersistent(Object)
 	 */
 	Object attachCopy(Object detachedEntity);
 
@@ -233,9 +237,13 @@ public interface JdoOperations {
 	 * the current JDO transaction, merging their changes into the current persistence
 	 * instances that represent the corresponding entities.
 	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
+	 * Note that as of JDO 2.0 final, this operation is equivalent to a
+	 * <code>makePersistentAll</code> call. This dedicated reattach operation
+	 * now solely serves as distinction point for custom JdoDialects.
+	 * It is still recommended to call this operation for enhanced adaptability.
 	 * @param detachedEntities the detached instances to reattach
 	 * @return the corresponding persistent instances
-	 * @see javax.jdo.PersistenceManager#attachCopyAll(java.util.Collection, boolean)
+	 * @see javax.jdo.PersistenceManager#makePersistentAll(java.util.Collection)
 	 */
 	Collection attachCopyAll(Collection detachedEntities);
 

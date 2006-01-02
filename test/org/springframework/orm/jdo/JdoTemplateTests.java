@@ -269,7 +269,7 @@ public class JdoTemplateTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		pm.makePersistent("0");
-		pmControl.setVoidCallable(1);
+		pmControl.setReturnValue(null, 1);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		pmfControl.replay();
@@ -285,7 +285,7 @@ public class JdoTemplateTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		pm.makePersistentAll(coll);
-		pmControl.setVoidCallable(1);
+		pmControl.setReturnValue(null, 1);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		pmfControl.replay();
@@ -359,7 +359,7 @@ public class JdoTemplateTests extends TestCase {
 	public void testAttachCopy() {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
-		pm.attachCopy("0x", true);
+		pm.makePersistent("0x");
 		pmControl.setReturnValue("0", 1);
 		pm.close();
 		pmControl.setVoidCallable(1);
@@ -376,7 +376,7 @@ public class JdoTemplateTests extends TestCase {
 
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
-		pm.attachCopyAll(detached, true);
+		pm.makePersistentAll(detached);
 		pmControl.setReturnValue(attached, 1);
 		pm.close();
 		pmControl.setVoidCallable(1);
