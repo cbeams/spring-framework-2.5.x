@@ -1,10 +1,14 @@
 <?xml version="1.0"?>
+
 <aspectj>
-  <aspects>
-    <aspect name="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurer"/>
-	<aspect name="org.springframework.transaction.aspectj.AnnotationTransactionAspect"/>
-  </aspects>
-  <weaver>
-    <exclude within="org.springframework..*"/>
-  </weaver>
+
+	<aspects>
+		<aspect name="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurer"/>
+		<aspect name="org.springframework.transaction.aspectj.AnnotationTransactionAspect"/>
+	</aspects>
+
+	<weaver>
+		<exclude within="org.springframework..*"/>
+	</weaver>
+
 </aspectj>
