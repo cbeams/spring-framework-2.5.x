@@ -13,6 +13,7 @@ Package org.springframework.beans
 * added overloaded constructor to StringArrayPropertyEditor, allowing to specify a custom separator for String splitting
 
 Package org.springframework.orm
+* updated Spring's JDO 2.0 support to JPOX JDO 2.0 API snapshot-9 (corresponding to JDO 2.0 final draft)
 * added "configLocations" property to LocalSessionFactoryBean for Hibernate3, allowing to load multiple config files
 
 Package org.springframework.util
@@ -23,6 +24,7 @@ Package org.springframework.web
 * "contextConfigLocation" params in "web.xml" support "${...}" style placeholders for system properties
 * added "argumentSeparator" property to MessageTag, allowing to specify a custom separator instead of the default comma
 * added "useSingleModelNameAsRoot" property to AbstractXlstView, allowing to enforce the value of the "root" property
+* PortletBean ignores init-params that do not match bean properties, analogous to HttpServletBean
 
 
 Changes in version 2.0 M1 (22.12.2005)
