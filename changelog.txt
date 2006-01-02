@@ -25,6 +25,7 @@ Package org.springframework.jdbc
 * SingleColumnRowMapper explicitly calls "ResultSet.getBigDecimal()" if the required type is BigDecimal
 
 Package org.springframework.orm
+* updated Spring's JDO support to be compatible with JPOX JDO 2.0 API snapshot-9 (corresponding to JDO 2.0 final draft)
 * JdoTransactionManager does explicit "isActive()" check before attempting a rollback, to avoid illegal state exception
 * Hibernate LocalSessionFactoryBean exposes its DataSource on "SessionFactory.close()", for potential schema export
 * added "configLocations" property to LocalSessionFactoryBean for Hibernate3, allowing to load multiple config files
