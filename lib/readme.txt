@@ -16,6 +16,11 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - included in spring.jar and spring-aop.jar
 
+* aspectj/aspectjweaver.jar, aspectj/aspectjrt.jar, aspectj/aspectjtools.jar
+- AspectJ 1.5.0 (http://www.aspectj.org)
+- required for building the framework
+- required at runtime when using Spring's AspectJ support
+
 * axis/axis.jar, axis/saaj.jar, axis/wsdl4j.jar
 - Apache Axis 1.3 (http://ws.apache.org/axis)
 - required for running JPetStore
@@ -29,17 +34,22 @@ distribution/website before using any of them in your own applications.
 * caucho/burlap-2.1.12.jar
 - Burlap 2.1.12 (http://www.caucho.com/burlap)
 - required for building the framework
-- required at runtime when Spring's Burlap remoting support
+- required at runtime when using Spring's Burlap remoting support
 
 * caucho/hessian-2.1.12.jar
 - Hessian 2.1.12 (http://www.caucho.com/hessian)
 - required for building the framework
-- required at runtime when Spring's Hessian remoting support
+- required at runtime when using Spring's Hessian remoting support
 
 * cglib/cglib-nodep-2.1_3.jar
 - CGLIB 2.1_3 with ObjectWeb ASM 1.5.3 (http://cglib.sourceforge.net)
 - required for building the framework
 - required at runtime when proxying full target classes via Spring AOP
+
+* commonj/commonj-twm.jar
+- CommonJ TimerManager and WorkManager API 1.1 (http://dev2dev.bea.com/wlplatform/commonj/twm.html)
+- required for building the framework
+- required at runtime when using Spring's CommonJ support
 
 * cos/cos.jar
 - Jason Hunter's COS 05Nov02 (http://www.servlets.com/cos)
@@ -72,7 +82,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's Hibernate 2.1 support
 
 * hibernate/hibernate3.jar
-- Hibernate 3.1 RC3 (http://www.hibernate.org)
+- Hibernate 3.1 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate 3.x support
 
@@ -229,7 +239,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's JasperReports support
 
 * jdo/jdo2.jar
-- JDO API 2.0 beta (http://www.jpox.org, "snapshot-4")
+- JDO API 2.0 beta (http://www.jpox.org, "snapshot-9")
 - required for building the framework
 - required at runtime when using Spring's JDO support
 
@@ -272,8 +282,8 @@ distribution/website before using any of them in your own applications.
 - JUnit 3.8.1 (http://www.junit.org)
 - required for building the test suite
 
-* log4j/log4j-1.2.9.jar
-- Log4J 1.2.9 (http://logging.apache.org/log4j)
+* log4j/log4j-1.2.13.jar
+- Log4J 1.2.13 (http://logging.apache.org/log4j)
 - required for building the framework
 - required at runtime when using Spring's Log4jConfigurer
 
@@ -291,6 +301,11 @@ distribution/website before using any of them in your own applications.
 - Apache POI 2.5.1 (http://jakarta.apache.org/poi)
 - required for building the framework
 - required at runtime when using Spring's AbstractExcelView
+
+* portlet/portlet-api.jar
+- Portlet API 1.0 (http://jcp.org/aboutJava/communityprocess/final/jsr168)
+- required for building the framework
+- required at runtime when using Spring's Portlet support
 
 * quartz/quartz-1.5.1.jar
 - Quartz 1.5.1 (http://www.opensymphony.com/quartz)
