@@ -67,6 +67,15 @@ public class PathMatchingResourcePatternResolverTests extends TestCase {
 
 	public void testClasspathStarWithPatternOnFileSystem() throws IOException {
 		Resource[] resources = resolver.getResources("classpath*:org/springframework/core/io/sup*/*.class");
+		// Have to exclude Clover-generated class files here,
+		// as we might be running as part of a Clover test run.
+		List noCloverResources = new ArrayList();
+		for (int i = 0; i < resources.length; i++) {
+			if (resources[i].getFilename().indexOf("$__CLOVER_") == -1) {
+				noCloverResources.add(resources[i]);
+			}
+		}
+		resources = (Resource[]) noCloverResources.toArray(new Resource[noCloverResources.size()]);
 		assertProtocolAndFilenames(resources, "file", CLASSES_IN_CORE_IO_SUPPORT, TEST_CLASSES_IN_CORE_IO_SUPPORT);
 	}
 
