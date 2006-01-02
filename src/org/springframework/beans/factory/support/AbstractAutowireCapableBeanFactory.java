@@ -183,7 +183,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		else {
 			Object bean = this.instantiationStrategy.instantiate(bd, null, this);
-			populateBean(bean.getClass().getName(), bd, new BeanWrapperImpl(bean));
+			populateBean(beanClass.getName(), bd, new BeanWrapperImpl(bean));
 			return bean;
 		}
 	}
