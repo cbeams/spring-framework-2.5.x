@@ -16,6 +16,7 @@
 
 package org.springframework.remoting.caucho;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 
 import javax.servlet.ServletException;
@@ -77,7 +78,9 @@ public class BurlapServiceExporter extends RemoteExporter implements Controller,
 	/**
 	 * Process the incoming Burlap request and create a Burlap response.
 	 */
-	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
 		if (!WebContentGenerator.METHOD_POST.equals(request.getMethod())) {
 			throw new ServletException("BurlapServiceExporter only supports POST requests");
 		}
@@ -88,14 +91,7 @@ public class BurlapServiceExporter extends RemoteExporter implements Controller,
 		  this.skeleton.invoke(in, out);
 			return null;
 		}
-		catch (Exception ex) {
-			throw ex;
-		}
-		catch (Error ex) {
-			throw ex;
-		}
 		catch (Throwable ex) {
-			// Should never happen: There are no Throwables other than Exceptions and Errors.
 		  throw new NestedServletException("Burlap skeleton invocation failed", ex);
 		}
 	}

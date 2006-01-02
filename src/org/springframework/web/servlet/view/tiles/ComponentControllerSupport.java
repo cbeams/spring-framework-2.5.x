@@ -56,6 +56,7 @@ public abstract class ComponentControllerSupport extends ControllerSupport {
 
 	private MessageSourceAccessor messageSourceAccessor;
 
+
 	/**
 	 * This implementation delegates to <code>execute</code>,
 	 * converting non-Servlet/IO Exceptions to ServletException.
@@ -76,8 +77,8 @@ public abstract class ComponentControllerSupport extends ControllerSupport {
 		catch (IOException ex) {
 			throw ex;
 		}
-		catch (Exception ex) {
-			throw new NestedServletException(ex.getMessage(), ex);
+		catch (Throwable ex) {
+			throw new NestedServletException("Execution of component controller failed", ex);
 		}
 	}
 
@@ -102,6 +103,7 @@ public abstract class ComponentControllerSupport extends ControllerSupport {
 		}
 		doPerform(componentContext, request, response);
 	}
+
 
 	/**
 	 * Subclasses can override this for custom initialization behavior.
@@ -149,6 +151,7 @@ public abstract class ComponentControllerSupport extends ControllerSupport {
 	protected final File getTempDir() {
 		return WebUtils.getTempDir(getServletContext());
 	}
+
 
 	/**
 	 * Perform the preparation for the component, allowing for any Exception to be thrown.

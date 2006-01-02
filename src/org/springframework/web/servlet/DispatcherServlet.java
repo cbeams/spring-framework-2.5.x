@@ -755,8 +755,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			throw ex;
 		}
 		catch (Error err) {
-			NestedServletException ex =
-					new NestedServletException("Error occured during request processing: " + err.getMessage(), err);
+			ServletException ex = new NestedServletException("Handler processing failed", err);
 			// Trigger after-completion for thrown exception.
 			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
 			throw ex;
