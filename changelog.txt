@@ -3,6 +3,28 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0 M2 (16.1.2006)
+-------------------------------------
+
+Package org.springframework.aop
+* refined ThreadLocalTargetSource's synchronization to guarantee thread-safe destruction on shutdown
+
+Package org.springframework.beans
+* added overloaded constructor to StringArrayPropertyEditor, allowing to specify a custom separator for String splitting
+
+Package org.springframework.orm
+* added "configLocations" property to LocalSessionFactoryBean for Hibernate3, allowing to load multiple config files
+
+Package org.springframework.util
+* fixed "StringUtils.delimitedListToStringArray" to properly handle an empty String as delimiter
+* refined StopWatch to not add new lines for "shortSummary()" but rather only for "prettyPrint()"
+
+Package org.springframework.web
+* "contextConfigLocation" params in "web.xml" support "${...}" style placeholders for system properties
+* added "argumentSeparator" property to MessageTag, allowing to specify a custom separator instead of the default comma
+* added "useSingleModelNameAsRoot" property to AbstractXlstView, allowing to enforce the value of the "root" property
+
+
 Changes in version 2.0 M1 (22.12.2005)
 --------------------------------------
 

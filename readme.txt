@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.0 M1 (December 2005)
-----------------------------------------------------
+THE SPRING FRAMEWORK, release 2.0 M2 (January 2006)
+---------------------------------------------------
 http://www.springframework.org
 
 
@@ -90,7 +90,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~1730 KB)
+* "spring" (~1735 KB)
 - Convenient jar file that combines all standard modules (see "module jars" below)
 - Note: Does NOT include extension modules! (see "extension module jars" below)
 
@@ -100,11 +100,11 @@ MODULE JARS (dist/modules):
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~255 KB)
+* "spring-beans" (~260 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
-* "spring-aop" (~225 KB)
+* "spring-aop" (~230 KB)
 - Contents: AOP framework, source-level metadata support, AOP Alliance interfaces
 - Dependencies: spring-core, (spring-beans, CGLIB, Commons Attributes)
 
@@ -132,13 +132,13 @@ MODULE JARS (dist/modules):
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI, Velocity, FreeMarker, JasperReports)
 
-* "spring-remoting" (~165 KB)
+* "spring-remoting" (~170 KB)
 - Contents: remoting support, EJB support, JMS support
 - Dependencies: spring-aop, spring-beans, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB, JMS)
 
 EXTENSION MODULE JARS (dist/extmodules):
 
-* "spring-portlet" (~90 KB)
+* "spring-portlet" (~100 KB)
 - Contents: framework portlets, portlet MVC
 - Dependencies: spring-web, spring-webmvc, (Portlet)
 
