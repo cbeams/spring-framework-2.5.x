@@ -129,6 +129,22 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "test arg1 message arg2", message.toString());
 	}
 
+	public void testMessageTagWithCodeAndStringArgumentWithCustomSeparator() throws JspException {
+		PageContext pc = createPageContext();
+		final StringBuffer message = new StringBuffer();
+		MessageTag tag = new MessageTag() {
+			protected void writeMessage(String msg) {
+				message.append(msg);
+			}
+		};
+		tag.setPageContext(pc);
+		tag.setCode("testArgs");
+		tag.setArguments("arg1,1;arg2,2");
+		tag.setArgumentSeparator(";");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct message", "test arg1,1 message arg2,2", message.toString());
+	}
+
 	public void testMessageTagWithCodeAndArrayArgument() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();

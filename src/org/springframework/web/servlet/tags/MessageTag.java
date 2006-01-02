@@ -53,11 +53,19 @@ import org.springframework.web.util.TagUtils;
  */
 public class MessageTag extends HtmlEscapingAwareTag {
 
+	/**
+	 * Default separator for splitting an arguments String: a comma (",")
+	 */
+	public static final String DEFAULT_ARGUMENT_SEPARATOR = ",";
+
+
 	private Object message;
 
 	private String code;
 
 	private Object arguments;
+
+	private String argumentSeparator = DEFAULT_ARGUMENT_SEPARATOR;
 
 	private String text;
 	
@@ -93,6 +101,15 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	 */
 	public void setArguments(Object arguments) {
 		this.arguments = arguments;
+	}
+
+	/**
+	 * Set the separator to use for splitting an arguments String.
+	 * Default is a comma (",");
+	 * @see #setArguments
+	 */
+	public void setArgumentSeparator(String argumentSeparator) {
+		this.argumentSeparator = argumentSeparator;
 	}
 
 	/**
@@ -200,7 +217,8 @@ public class MessageTag extends HtmlEscapingAwareTag {
 			// We have a code that we need to resolve.
 			Object[] argumentsArray = null;
 			if (this.arguments instanceof String) {
-				String[] stringArray = StringUtils.commaDelimitedListToStringArray((String) this.arguments);
+				String[] stringArray =
+						StringUtils.delimitedListToStringArray((String) this.arguments, this.argumentSeparator);
 				argumentsArray = new Object[stringArray.length];
 				for (int i = 0; i < stringArray.length; i++) {
 					argumentsArray[i] =
