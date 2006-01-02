@@ -146,6 +146,13 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	}
 
 	/**
+	 * Return the prefix that gets prepended to view names when building a URL.
+	 */
+	protected String getPrefix() {
+		return prefix;
+	}
+
+	/**
 	 * Set the suffix that gets appended to view names when building a URL.
 	 */
 	public void setSuffix(String suffix) {
@@ -153,12 +160,26 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	}
 
 	/**
+	 * Return the suffix that gets appended to view names when building a URL.
+	 */
+	protected String getSuffix() {
+		return suffix;
+	}
+
+	/**
 	 * Set the content type for all views.
-	 * May be ignored by view classes if the view itself is assumed
+	 * <p>May be ignored by view classes if the view itself is assumed
 	 * to set the content type, e.g. in case of JSPs.
 	 */
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
+	}
+
+	/**
+	 * Return the content type for all views, if any.
+	 */
+	protected String getContentType() {
+		return contentType;
 	}
 
 	/**
@@ -175,6 +196,15 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	 */
 	public void setRedirectContextRelative(boolean redirectContextRelative) {
 		this.redirectContextRelative = redirectContextRelative;
+	}
+
+	/**
+	 * Return whether to interpret a given redirect URL that starts with a
+	 * slash ("/") as relative to the current ServletContext, i.e. as
+	 * relative to the web application root.
+	 */
+	protected boolean isRedirectContextRelative() {
+		return redirectContextRelative;
 	}
 
 	/**
@@ -196,12 +226,26 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	}
 
 	/**
+	 * Return whether redirects should stay compatible with HTTP 1.0 clients.
+	 */
+	protected boolean isRedirectHttp10Compatible() {
+		return redirectHttp10Compatible;
+	}
+
+	/**
 	 * Set the name of the RequestContext attribute for all views.
 	 * @param requestContextAttribute name of the RequestContext attribute
 	 * @see AbstractView#setRequestContextAttribute
 	 */
 	public void setRequestContextAttribute(String requestContextAttribute) {
 		this.requestContextAttribute = requestContextAttribute;
+	}
+
+	/**
+	 * Return the name of the RequestContext attribute for all views, if any.
+	 */
+	protected String getRequestContextAttribute() {
+		return requestContextAttribute;
 	}
 
 	/**
@@ -245,7 +289,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 
 	protected void initApplicationContext() {
 		super.initApplicationContext();
-		if (this.viewClass == null) {
+		if (getViewClass() == null) {
 			throw new IllegalArgumentException("viewClass is required");
 		}
 	}
@@ -272,7 +316,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
 			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
 			return new RedirectView(
-			    redirectUrl, this.redirectContextRelative, this.redirectHttp10Compatible);
+			    redirectUrl, isRedirectContextRelative(), isRedirectHttp10Compatible());
 		}
 		// Check for special "forward:" prefix.
 		if (viewName.startsWith(FORWARD_URL_PREFIX)) {
@@ -314,14 +358,15 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	 * @see #loadView(String, java.util.Locale)
 	 */
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
-		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(this.viewClass);
+		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(getViewClass());
 		view.setBeanName(viewName);
-		view.setUrl(this.prefix + viewName + this.suffix);
-		if (this.contentType != null) {
-			view.setContentType(this.contentType);
+		view.setUrl(getPrefix() + viewName + getSuffix());
+		String contentType = getContentType();
+		if (contentType != null) {
+			view.setContentType(contentType);
 		}
-		view.setRequestContextAttribute(this.requestContextAttribute);
-		view.setAttributesMap(this.staticAttributes);
+		view.setRequestContextAttribute(getRequestContextAttribute());
+		view.setAttributesMap(getAttributesMap());
 		return view;
 	}
 
