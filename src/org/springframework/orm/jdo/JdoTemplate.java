@@ -86,6 +86,13 @@ import org.springframework.util.ClassUtils;
  * Furthermore, some operations just make sense within transactions,
  * for example: <code>evict</code>, <code>evictAll</code>, <code>flush</code>.
  *
+ * <p><b>NOTE:</b> This class is compatible with both JDO 1.0 and JDO 2.0,
+ * as far as possible. It uses reflection to adapt to the actual API present
+ * on the class path (concretely: for the <code>newObjectIdInstance</code>,
+ * <code>makePersistent</code> and <code>makePersistentAll</code> methods).
+ * Make sure that the JDO API jar on your class path matches the one that
+ * your JDO provider has been compiled against!
+ *
  * @author Juergen Hoeller
  * @since 03.06.2003
  * @see #setPersistenceManagerFactory
@@ -103,6 +110,10 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 	private static Method newObjectIdInstanceMethod;
 
+	private static Method makePersistentMethod;
+
+	private static Method makePersistentAllMethod;
+
 	static {
 		// Determine whether the JDO 1.0 newObjectIdInstance(Class, String) method
 		// is available, for use in JdoTemplate's getObjectById implementation.
@@ -112,6 +123,26 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		}
 		catch (NoSuchMethodException ex) {
 			newObjectIdInstanceMethod = null;
+		}
+		// Fetch makePersistent(Object) method through reflection
+		// for use in JdoTemplate's makePersistent implementation.
+		// Return value is void in JDO 1.0 but Object in JDO 2.0.
+		try {
+			makePersistentMethod = PersistenceManager.class.getMethod(
+					"makePersistent", new Class[] {Object.class});
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("JDO makePersistent(Object) method not available");
+		}
+		// Fetch makePersistent(Object) method through reflection
+		// for use in JdoTemplate's makePersistent implementation.
+		// Return value is void in JDO 1.0 but Collection in JDO 2.0.
+		try {
+			makePersistentAllMethod = PersistenceManager.class.getMethod(
+					"makePersistentAll", new Class[] {Collection.class});
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("JDO makePersistentAll(Collection) method not available");
 		}
 	}
 
@@ -371,8 +402,17 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public void makePersistent(final Object entity) throws DataAccessException {
 		execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				pm.makePersistent(entity);
-				return null;
+				try {
+					return makePersistentMethod.invoke(pm, new Object[] {entity});
+				}
+				catch (InvocationTargetException ex) {
+					throw new InvalidDataAccessResourceUsageException(
+							"Could not invoke JDO makePersistent(Object) method", ex.getTargetException());
+				}
+				catch (Exception ex) {
+					throw new InvalidDataAccessResourceUsageException(
+							"Could not invoke JDO makePersistent(Object) method", ex);
+				}
 			}
 		}, true);
 	}
@@ -380,8 +420,17 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public void makePersistentAll(final Collection entities) throws DataAccessException {
 		execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				pm.makePersistentAll(entities);
-				return null;
+				try {
+					return makePersistentAllMethod.invoke(pm, new Object[] {entities});
+				}
+				catch (InvocationTargetException ex) {
+					throw new InvalidDataAccessResourceUsageException(
+							"Could not invoke JDO makePersistentAll(Collection) method", ex.getTargetException());
+				}
+				catch (Exception ex) {
+					throw new InvalidDataAccessResourceUsageException(
+							"Could not invoke JDO makePersistentAll(Collection) method", ex);
+				}
 			}
 		}, true);
 	}
