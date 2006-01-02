@@ -23,6 +23,10 @@ Package org.springframework.jdbc
 * fixed JdbcTemplate to extract the JDBC Connection for CallableStatementCreators if a NativeJdbcExtractor has been set
 * factored out protected "getColumnMapRowMapper" and "getSingleColumnRowMapper" hooks within JdbcTemplate
 * SingleColumnRowMapper explicitly calls "ResultSet.getBigDecimal()" if the required type is BigDecimal
+* added "trackRowsAffected" property to BatchSqlUpdate, allowing to turn off the row counts list to save memory
+
+Package org.springframework.mock
+* added "set/removeParameter" methods to MockHttpServletRequest, allowing to replace/remove existing parameters
 
 Package org.springframework.orm
 * updated Spring's JDO support to be compatible with JPOX JDO 2.0 API snapshot-9 (corresponding to JDO 2.0 final draft)
@@ -49,6 +53,7 @@ Package org.springframework.web
 * "contextConfigLocation" params in "web.xml" support "${...}" style placeholders for system properties
 * added "currentFormObject" template method to AbstractFormController, for post-processing of a session form object
 * FixedLocaleResolver returns the JVM's default Locale if no explicit default Locale specified
+* added protected accessors for UrlBasedViewResolver's bean properties, allowing subclasses to access the settings
 * added "argumentSeparator" property to MessageTag, allowing to specify a custom separator instead of the default comma
 * VelocityView converts Velocity's MethodInvocationException to a Spring NestedServletException with original root cause
 * added "useSingleModelNameAsRoot" property to AbstractXlstView, allowing to enforce the value of the "root" property
