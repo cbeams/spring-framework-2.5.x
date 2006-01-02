@@ -33,6 +33,7 @@ import java.util.TreeSet;
 import junit.framework.TestCase;
 import org.hibernate.FlushMode;
 
+import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
 import org.springframework.util.StringUtils;
@@ -345,7 +346,7 @@ public class BeanWrapperTests extends TestCase {
 		PropsTest pt = new PropsTest();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
 
-		bw.setPropertyValue("stringArray", new String[]{"foo", "fi", "fi", "fum"});
+		bw.setPropertyValue("stringArray", new String[] {"foo", "fi", "fi", "fum"});
 		assertTrue("stringArray length = 4", pt.stringArray.length == 4);
 		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
 				pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
@@ -422,7 +423,16 @@ public class BeanWrapperTests extends TestCase {
 				pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
 	}
 
-	public void testStringArrayPropertyWithCustomStringArrayEditor() throws Exception {
+	public void testStringArrayPropertyWithCustomStringDelimiter() throws Exception {
+		PropsTest pt = new PropsTest();
+		BeanWrapper bw = new BeanWrapperImpl(pt);
+		bw.registerCustomEditor(String[].class, "stringArray", new StringArrayPropertyEditor("-"));
+		bw.setPropertyValue("stringArray", "a1-b2");
+		assertTrue("stringArray length = 2", pt.stringArray.length == 2);
+		assertTrue("correct values", pt.stringArray[0].equals("a1") && pt.stringArray[1].equals("b2"));
+	}
+
+	public void testStringPropertyWithCustomEditor() throws Exception {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, "name", new PropertyEditorSupport() {
@@ -443,12 +453,12 @@ public class BeanWrapperTests extends TestCase {
 		PropsTest pt = new PropsTest();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
 
-		bw.setPropertyValue("intArray", new int[]{4, 5, 2, 3});
+		bw.setPropertyValue("intArray", new int[] {4, 5, 2, 3});
 		assertTrue("intArray length = 4", pt.intArray.length == 4);
 		assertTrue("correct values", pt.intArray[0] == 4 && pt.intArray[1] == 5 &&
 				pt.intArray[2] == 2 && pt.intArray[3] == 3);
 
-		bw.setPropertyValue("intArray", new String[]{"4", "5", "2", "3"});
+		bw.setPropertyValue("intArray", new String[] {"4", "5", "2", "3"});
 		assertTrue("intArray length = 4", pt.intArray.length == 4);
 		assertTrue("correct values", pt.intArray[0] == 4 && pt.intArray[1] == 5 &&
 				pt.intArray[2] == 2 && pt.intArray[3] == 3);
@@ -476,7 +486,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("correct values", result.contains(new Integer(4)) && result.contains(new Integer(5)) &&
 				result.contains(new Integer(3)));
 
-		bw.setPropertyValue("intArray", new Integer[]{new Integer(1)});
+		bw.setPropertyValue("intArray", new Integer[] {new Integer(1)});
 		assertTrue("intArray length = 4", pt.intArray.length == 1);
 		assertTrue("correct values", pt.intArray[0] == 1);
 
@@ -484,7 +494,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("intArray length = 4", pt.intArray.length == 1);
 		assertTrue("correct values", pt.intArray[0] == 1);
 
-		bw.setPropertyValue("intArray", new String[]{"1"});
+		bw.setPropertyValue("intArray", new String[] {"1"});
 		assertTrue("intArray length = 4", pt.intArray.length == 1);
 		assertTrue("correct values", pt.intArray[0] == 1);
 
@@ -502,12 +512,12 @@ public class BeanWrapperTests extends TestCase {
 			}
 		});
 
-		bw.setPropertyValue("intArray", new int[]{4, 5, 2, 3});
+		bw.setPropertyValue("intArray", new int[] {4, 5, 2, 3});
 		assertTrue("intArray length = 4", pt.intArray.length == 4);
 		assertTrue("correct values", pt.intArray[0] == 4 && pt.intArray[1] == 5 &&
 				pt.intArray[2] == 2 && pt.intArray[3] == 3);
 
-		bw.setPropertyValue("intArray", new String[]{"3", "4", "1", "2"});
+		bw.setPropertyValue("intArray", new String[] {"3", "4", "1", "2"});
 		assertTrue("intArray length = 4", pt.intArray.length == 4);
 		assertTrue("correct values", pt.intArray[0] == 4 && pt.intArray[1] == 5 &&
 				pt.intArray[2] == 2 && pt.intArray[3] == 3);
@@ -516,7 +526,7 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("intArray length = 4", pt.intArray.length == 1);
 		assertTrue("correct values", pt.intArray[0] == 1);
 
-		bw.setPropertyValue("intArray", new String[]{"0"});
+		bw.setPropertyValue("intArray", new String[] {"0"});
 		assertTrue("intArray length = 4", pt.intArray.length == 1);
 		assertTrue("correct values", pt.intArray[0] == 1);
 
@@ -876,7 +886,7 @@ public class BeanWrapperTests extends TestCase {
 	public void testPrimitiveArray() {
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
-		bw.setPropertyValue("array", new String[]{"1", "2"});
+		bw.setPropertyValue("array", new String[] {"1", "2"});
 		assertEquals(2, tb.getArray().length);
 		assertEquals(1, tb.getArray()[0]);
 		assertEquals(2, tb.getArray()[1]);
