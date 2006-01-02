@@ -12,6 +12,7 @@ Package org.springframework.aop
 Package org.springframework.beans
 * fixed BeanWrapperImpl to pass its "extractOldValueForEditor" setting on to nested BeanWrappers
 * refined BeanWrapperImpl to perform the accessible checking for read/write methods before every invocation
+* added overloaded constructor to StringArrayPropertyEditor, allowing to specify a custom separator for String splitting
 * fixed AbstractBeanFactory to allow child bean definitions to refer to a parent via its alias name
 * DefaultListableBeanFactory is able to call non-public factory methods as well
 
@@ -37,15 +38,19 @@ Package org.springframework.transaction
 
 Package org.springframework.util
 * added "isNull()" methods to Assert class
+* fixed "StringUtils.delimitedListToStringArray" to properly handle an empty String as delimiter
 * added "setPathSeparator" method to AntPathMatcher, allowing to override the default path separator "/"
 * fixed AntPathMatcher to correctly treat "*" right after separator, i.e. to accept path "/test/" for pattern "/test/*"
 * WeakReferenceMonitor uses a daemon thread, to avoid a hanging thread even if weak references have not been released
+* refined StopWatch to not add new lines for "shortSummary()" but rather only for "prettyPrint()"
 
 Package org.springframework.web
 * "contextConfigLocation" params in "web.xml" support "${...}" style placeholders for system properties
 * added "currentFormObject" template method to AbstractFormController, for post-processing of a session form object
 * FixedLocaleResolver returns the JVM's default Locale if no explicit default Locale specified
+* added "argumentSeparator" property to MessageTag, allowing to specify a custom separator instead of the default comma
 * VelocityView converts Velocity's MethodInvocationException to a Spring NestedServletException with original root cause
+* added "useSingleModelNameAsRoot" property to AbstractXlstView, allowing to enforce the value of the "root" property
 
 
 Changes in version 1.2.6 (14.11.2005)
