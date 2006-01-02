@@ -103,7 +103,7 @@ public abstract class PortletBean extends GenericPortlet {
 			ResourceLoader resourceLoader = new PortletContextResourceLoader(getPortletContext());
 			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader));
 			initBeanWrapper(bw);
-			bw.setPropertyValues(pvs);
+			bw.setPropertyValues(pvs, true);
 		}
 		catch (BeansException ex) {
 			logger.error("Failed to set bean properties on portlet '" + getPortletName() + "'", ex);
