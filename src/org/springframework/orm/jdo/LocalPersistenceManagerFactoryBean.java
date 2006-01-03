@@ -56,6 +56,13 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  * JdoTransactionManager is much more convenient than setting up your
  * JDO provider for JTA transactions (which might involve JCA).
  *
+ * <p><b>NOTE:</b> This class is compatible with both JDO 1.0 and JDO 2.0,
+ * as far as possible. It uses reflection to adapt to the actual API present
+ * on the class path (concretely: for the <code>getPersistenceManagerFactory</code>
+ * method with either a <code>Properties</code> or a <code>Map</code> argument).
+ * Make sure that the JDO API jar on your class path matches the one that
+ * your JDO provider has been compiled against!
+ *
  * <p>As alternative to the properties-driven approach that this FactoryBean offers
  * (which is analogous to using the standard JDOHelper class with a Properties
  * object that is populated with standard JDO properties), you can set up an
@@ -71,8 +78,8 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  *
  * <p><pre>
  * &lt;bean id="persistenceManagerFactory" class="org.jpox.PersistenceManagerFactoryImpl" destroy-method="close"&gt;
- *   &lt;property name="connectionFactory"&gt;&lt;ref bean="dataSource"/&gt;&lt;/property&gt;
- *   &lt;property name="nontransactionalRead"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
+ *   &lt;property name="connectionFactory" ref="dataSource"/&gt;
+ *   &lt;property name="nontransactionalRead" value="true"/&gt;
  * &lt;/bean&gt;
  * </pre>
  *
@@ -81,7 +88,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  * into a JDO PersistenceManagerFactory. With the standard properties-driven approach,
  * you can only use an internal connection pool or a JNDI DataSource.
  *
- * <p>The "close" method is standardized as of JDO 1.0.1; don't forget to
+ * <p>The <code>close()</code> method is standardized as of JDO 1.0.1; don't forget to
  * specify it as "destroy-method" for any PersistenceManagerFactory instance.
  * Note that this FactoryBean will automatically invoke <code>close</code> for
  * the PersistenceManagerFactory it creates, without any special configuration.
