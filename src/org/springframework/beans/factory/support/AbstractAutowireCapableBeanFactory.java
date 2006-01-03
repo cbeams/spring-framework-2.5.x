@@ -220,12 +220,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Apply InstantiationAwareBeanPostProcessors to the given existing bean instance,
-	 * invoking their <code>postProcessBeforeInstantiation</code> methods.
-	 * The returned bean instance may be a wrapper around the original.
+	 * Apply InstantiationAwareBeanPostProcessors to the speified bean definition
+	 * (by class and name), invoking their <code>postProcessBeforeInstantiation</code> methods.
+	 * Any returned object will be used as the bean instead of actually instantiating the target
+	 * bean. A null return value from the post-processor will result in the target bean being
+	 * instantiated.
 	 * @param beanClass the class of the bean to be instantiated
 	 * @param beanName the name of the bean
-	 * @return the bean object to use instead of a default instance of the target bean
+	 * @return the bean object to use instead of a default instance of the target bean, or null
 	 * @throws BeansException if any post-processing failed
 	 * @see InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation
 	 */
