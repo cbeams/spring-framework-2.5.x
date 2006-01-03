@@ -159,11 +159,15 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Set the XmlBeanDefinitionParser implementation to use,
 	 * responsible for the actual parsing of XML bean definitions.
 	 * Default is DefaultXmlBeanDefinitionParser.
+     * 
+     * @param parserClass the desired XmlBeanDefinitionParser implementation class
+     * @throws IllegalArgumentException if the specified parserClass is
+     *                  either <code>null</code> or is not an implementation of the XmlBeanDefinitionParser interface.
 	 * @see XmlBeanDefinitionParser
 	 * @see DefaultXmlBeanDefinitionParser
 	 */
 	public void setParserClass(Class parserClass) {
-		if (this.parserClass == null || !XmlBeanDefinitionParser.class.isAssignableFrom(parserClass)) {
+		if (parserClass == null || !XmlBeanDefinitionParser.class.isAssignableFrom(parserClass)) {
 			throw new IllegalArgumentException("parserClass must be an XmlBeanDefinitionParser");
 		}
 		this.parserClass = parserClass;
