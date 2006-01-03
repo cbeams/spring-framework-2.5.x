@@ -20,29 +20,33 @@ import java.io.IOException;
 
 import javax.servlet.ServletException;
 
-import org.springframework.beans.BeansException;
-
 import junit.framework.TestCase;
+
+import org.springframework.beans.FatalBeanException;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class ObjectUtilsTests extends TestCase {
 
 	public void testIsCheckedException() {
 		assertTrue(ObjectUtils.isCheckedException(new Exception()));
 		assertTrue(ObjectUtils.isCheckedException(new ServletException()));
+
 		assertFalse(ObjectUtils.isCheckedException(new RuntimeException()));
-		assertFalse(ObjectUtils.isCheckedException(new BeansException("", null) {
-		}));
-		assertFalse(ObjectUtils.isCheckedException(new Throwable()));
+		assertFalse(ObjectUtils.isCheckedException(new FatalBeanException("")));
+
+		// Any Throwable other than RuntimeException and Error
+		// has to be considered checked according to the JLS.
+		assertTrue(ObjectUtils.isCheckedException(new Throwable()));
 	}
 
 	public void testIsCompatibleWithThrowsClause() {
 		Class[] empty = new Class[0];
-		Class[] exception = new Class[] { Exception.class };
-		Class[] servletAndIO = new Class[] { ServletException.class, IOException.class };
-		Class[] throwable = new Class[] { Throwable.class };
+		Class[] exception = new Class[] {Exception.class};
+		Class[] servletAndIO = new Class[] {ServletException.class, IOException.class};
+		Class[] throwable = new Class[] {Throwable.class};
 
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException(), null));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException(), empty));
@@ -70,11 +74,12 @@ public class ObjectUtilsTests extends TestCase {
 	}
 
 	public void testToObjectArray() {
-		int[] a = new int[] { 1, 2, 3, 4, 5 };
+		int[] a = new int[] {1, 2, 3, 4, 5};
 		Integer[] wrapper = (Integer[])ObjectUtils.toObjectArray(a);
 		assertTrue(wrapper.length == 5);
 		for (int i = 0; i < wrapper.length; i++) {
 			assertEquals(a[i], wrapper[i].intValue());
 		}
 	}
+
 }
