@@ -93,8 +93,11 @@ public interface Advised {
 	
 	/**
 	 * Add the given AOP Alliance advice to the tail of the advice (interceptor) chain.
-	 * This will be wrapped in a DefaultPointcutAdvisor with a pointcut that always
-	 * applies, and returned from the getAdvisors() method in this wrapped form.
+	 * <p>This will be wrapped in a DefaultPointcutAdvisor with a pointcut that always
+	 * applies, and returned from the <code>getAdvisors()</code> method in this wrapped form.
+	 * <p>Note that the given advice will apply to all invocations on the proxy,
+	 * even to the <code>toString()</code> method! Use appropriate advice implementations
+	 * or specify appropriate pointcuts to apply to a narrower set of methods.
 	 * @param advice advice to add to the tail of the chain
 	 * @see #addAdvice(int, Advice)
 	 * @see org.springframework.aop.support.DefaultPointcutAdvisor
@@ -103,6 +106,11 @@ public interface Advised {
 
 	/**
 	 * Add the given AOP Alliance Advice at the specified position in the advice chain.
+	 * <p>This will be wrapped in a DefaultPointcutAdvisor with a pointcut that always
+	 * applies, and returned from the <code>getAdvisors()</code> method in this wrapped form.
+	 * <p>Note that the given advice will apply to all invocations on the proxy,
+	 * even to the <code>toString()</code> method! Use appropriate advice implementations
+	 * or specify appropriate pointcuts to apply to a narrower set of methods.
 	 * @param pos index from 0 (head)
 	 * @param advice advice to add at the specified position in the advice chain
 	 */
