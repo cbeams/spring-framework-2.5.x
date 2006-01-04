@@ -3,10 +3,10 @@ package org.springframework.aop.framework.asm;
 
 import java.lang.reflect.Method;
 
-import org.objectweb.asm.CodeVisitor;
-import org.objectweb.asm.Constants;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 import org.springframework.aop.framework.AdvisedSupport;
 
@@ -15,7 +15,7 @@ import org.springframework.aop.framework.AdvisedSupport;
  */
 public class AdvisedCodeGenerationStrategy extends AbstractMethodProxyCodeGenerationStrategy {
 
-	protected void generateMethod(CodeVisitor cv, Method method, AdvisedSupport advised, String proxyInternalName, String targetInternalName, String targetDescriptor) {
+	protected void generateMethod(MethodVisitor mv, Method method, AdvisedSupport advised, String proxyInternalName, String targetInternalName, String targetDescriptor) {
 
 		boolean exposeProxy = advised.isExposeProxy();
 		boolean staticTargetSource = advised.getTargetSource().isStatic();
@@ -54,145 +54,145 @@ public class AdvisedCodeGenerationStrategy extends AbstractMethodProxyCodeGenera
 
 		// create a holder for the old proxy if needed
 		if (exposeProxy) {
-			cv.visitInsn(Constants.ACONST_NULL);
-			cv.visitVarInsn(Constants.ASTORE, localOldProxy);
+			mv.visitInsn(Opcodes.ACONST_NULL);
+			mv.visitVarInsn(Opcodes.ASTORE, localOldProxy);
 		}
 
 		// load this
-		cv.visitVarInsn(Constants.ALOAD, localThis);
+		mv.visitVarInsn(Opcodes.ALOAD, localThis);
 
 		// load advised
-		cv.visitFieldInsn(Constants.GETFIELD, proxyInternalName, ADVISED_FIELD_NAME, ADVISED_SUPPORT_DESCRIPTOR);
-		cv.visitVarInsn(Constants.ASTORE, localAdvised);
+		mv.visitFieldInsn(Opcodes.GETFIELD, proxyInternalName, ADVISED_FIELD_NAME, ADVISED_SUPPORT_DESCRIPTOR);
+		mv.visitVarInsn(Opcodes.ASTORE, localAdvised);
 
 		// load the target source
-		cv.visitVarInsn(Constants.ALOAD, localAdvised);
-		cv.visitMethodInsn(Constants.INVOKEVIRTUAL, ADVISED_SUPPORT_INTERNAL_NAME, GET_TARGET_SOURCE_METHOD, GET_TARGET_SOURCE_DESCRIPTOR);
-		cv.visitVarInsn(Constants.ASTORE, localTargetSource);
+		mv.visitVarInsn(Opcodes.ALOAD, localAdvised);
+		mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, ADVISED_SUPPORT_INTERNAL_NAME, GET_TARGET_SOURCE_METHOD, GET_TARGET_SOURCE_DESCRIPTOR);
+		mv.visitVarInsn(Opcodes.ASTORE, localTargetSource);
 
 		// load the target class
-		cv.visitVarInsn(Constants.ALOAD, localTargetSource);
-		cv.visitMethodInsn(Constants.INVOKEINTERFACE, TARGET_SOURCE_INTERNAL_NAME, GET_TARGET_CLASS_METHOD, GET_TARGET_CLASS_DESCRIPTOR);
-		cv.visitVarInsn(Constants.ASTORE, localTargetClass);
+		mv.visitVarInsn(Opcodes.ALOAD, localTargetSource);
+		mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, TARGET_SOURCE_INTERNAL_NAME, GET_TARGET_CLASS_METHOD, GET_TARGET_CLASS_DESCRIPTOR);
+		mv.visitVarInsn(Opcodes.ASTORE, localTargetClass);
 
 		// try to get target early (otherwise set to null)
 		if (staticTargetSource) {
 			// load the target directly
-			cv.visitVarInsn(Constants.ALOAD, localThis);
-			cv.visitFieldInsn(Constants.GETFIELD, proxyInternalName, TARGET_FIELD_NAME, targetDescriptor);
+			mv.visitVarInsn(Opcodes.ALOAD, localThis);
+			mv.visitFieldInsn(Opcodes.GETFIELD, proxyInternalName, TARGET_FIELD_NAME, targetDescriptor);
 		}
 		else {
-			cv.visitInsn(Constants.ACONST_NULL);
+			mv.visitInsn(Opcodes.ACONST_NULL);
 		}
-		cv.visitVarInsn(Constants.ASTORE, localTarget);
+		mv.visitVarInsn(Opcodes.ASTORE, localTarget);
 
 		// start the try block
 		Label openTry = new Label();
-		cv.visitLabel(openTry);
+		mv.visitLabel(openTry);
 
 		// load the target from target source inside catch block if needed
 		if (!staticTargetSource) {
 			// load the target from the target source
-			cv.visitVarInsn(Constants.ALOAD, localAdvised);
-			cv.visitMethodInsn(Constants.INVOKEVIRTUAL, ADVISED_SUPPORT_INTERNAL_NAME, GET_TARGET_SOURCE_METHOD, GET_TARGET_SOURCE_DESCRIPTOR);
-			cv.visitMethodInsn(Constants.INVOKEINTERFACE, TARGET_SOURCE_INTERNAL_NAME, GET_TARGET_METHOD, GET_TARGET_DESCRIPTOR);
-			cv.visitTypeInsn(Constants.CHECKCAST, targetInternalName);
-			cv.visitVarInsn(Constants.ASTORE, localTarget);
+			mv.visitVarInsn(Opcodes.ALOAD, localAdvised);
+			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, ADVISED_SUPPORT_INTERNAL_NAME, GET_TARGET_SOURCE_METHOD, GET_TARGET_SOURCE_DESCRIPTOR);
+			mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, TARGET_SOURCE_INTERNAL_NAME, GET_TARGET_METHOD, GET_TARGET_DESCRIPTOR);
+			mv.visitTypeInsn(Opcodes.CHECKCAST, targetInternalName);
+			mv.visitVarInsn(Opcodes.ASTORE, localTarget);
 		}
 
 		// bundle up the arguments into an object[]
-		bundleArgs(cv, parameterTypes, localArgs);
+		bundleArgs(mv, parameterTypes, localArgs);
 
 		// create the arg types array
-		bundleArgTypes(cv, parameterTypes, localArgTypes);
+		bundleArgTypes(mv, parameterTypes, localArgTypes);
 
 		// now get the method via reflection
-		cv.visitVarInsn(Constants.ALOAD, localTargetClass);
-		cv.visitLdcInsn(methodName);
-		cv.visitVarInsn(Constants.ALOAD, localArgTypes);
-		cv.visitMethodInsn(Constants.INVOKEVIRTUAL, CLASS_INTERNAL_NAME, GET_METHOD_METHOD, GET_METHOD_DESCRIPTOR);
-		cv.visitVarInsn(Constants.ASTORE, localMethod);
+		mv.visitVarInsn(Opcodes.ALOAD, localTargetClass);
+		mv.visitLdcInsn(methodName);
+		mv.visitVarInsn(Opcodes.ALOAD, localArgTypes);
+		mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, CLASS_INTERNAL_NAME, GET_METHOD_METHOD, GET_METHOD_DESCRIPTOR);
+		mv.visitVarInsn(Opcodes.ASTORE, localMethod);
 
 		// get the AdvisorChainFactory
-		cv.visitVarInsn(Constants.ALOAD, localAdvised);
-		cv.visitMethodInsn(Constants.INVOKEVIRTUAL, ADVISED_SUPPORT_INTERNAL_NAME, GET_ADVISOR_CHAIN_FACTORY_METHOD, GET_ADVISOR_CHAIN_FACTORY_DESCRIPTOR);
+		mv.visitVarInsn(Opcodes.ALOAD, localAdvised);
+		mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, ADVISED_SUPPORT_INTERNAL_NAME, GET_ADVISOR_CHAIN_FACTORY_METHOD, GET_ADVISOR_CHAIN_FACTORY_DESCRIPTOR);
 
 		// get the advice chain
-		cv.visitVarInsn(Constants.ALOAD, localAdvised);
-		cv.visitInsn(Constants.ACONST_NULL);
-		cv.visitVarInsn(Constants.ALOAD, localMethod);
-		cv.visitVarInsn(Constants.ALOAD, localTargetClass);
-		cv.visitMethodInsn(Constants.INVOKEINTERFACE, "org/springframework/aop/framework/AdvisorChainFactory", "getInterceptorsAndDynamicInterceptionAdvice", "(Lorg/springframework/aop/framework/Advised;Ljava/lang/Object;Ljava/lang/reflect/Method;Ljava/lang/Class;)Ljava/util/List;");
-		cv.visitVarInsn(Constants.ASTORE, localAdviceChain);
+		mv.visitVarInsn(Opcodes.ALOAD, localAdvised);
+		mv.visitInsn(Opcodes.ACONST_NULL);
+		mv.visitVarInsn(Opcodes.ALOAD, localMethod);
+		mv.visitVarInsn(Opcodes.ALOAD, localTargetClass);
+		mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "org/springframework/aop/framework/AdvisorChainFactory", "getInterceptorsAndDynamicInterceptionAdvice", "(Lorg/springframework/aop/framework/Advised;Ljava/lang/Object;Ljava/lang/reflect/Method;Ljava/lang/Class;)Ljava/util/List;");
+		mv.visitVarInsn(Opcodes.ASTORE, localAdviceChain);
 
 		// create the ReflectiveMethodInvocation object
-		cv.visitTypeInsn(Constants.NEW, "org/springframework/aop/framework/ReflectiveMethodInvocation");
-		cv.visitInsn(Constants.DUP);
+		mv.visitTypeInsn(Opcodes.NEW, "org/springframework/aop/framework/ReflectiveMethodInvocation");
+		mv.visitInsn(Opcodes.DUP);
 
 		// load the args
-		cv.visitVarInsn(Constants.ALOAD, localThis);
-		cv.visitVarInsn(Constants.ALOAD, localTarget);
-		cv.visitVarInsn(Constants.ALOAD, localMethod);
-		cv.visitVarInsn(Constants.ALOAD, localArgs);
-		cv.visitVarInsn(Constants.ALOAD, localTargetClass);
-		cv.visitVarInsn(Constants.ALOAD, localAdviceChain);
+		mv.visitVarInsn(Opcodes.ALOAD, localThis);
+		mv.visitVarInsn(Opcodes.ALOAD, localTarget);
+		mv.visitVarInsn(Opcodes.ALOAD, localMethod);
+		mv.visitVarInsn(Opcodes.ALOAD, localArgs);
+		mv.visitVarInsn(Opcodes.ALOAD, localTargetClass);
+		mv.visitVarInsn(Opcodes.ALOAD, localAdviceChain);
 
 		// create invoke the constructor
-		cv.visitMethodInsn(Constants.INVOKESPECIAL, "org/springframework/aop/framework/ReflectiveMethodInvocation", "<init>", "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;Ljava/lang/Class;Ljava/util/List;)V");
-		cv.visitVarInsn(Constants.ASTORE, localMethodInvocation);
+		mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "org/springframework/aop/framework/ReflectiveMethodInvocation", "<init>", "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;Ljava/lang/Class;Ljava/util/List;)V");
+		mv.visitVarInsn(Opcodes.ASTORE, localMethodInvocation);
 
 		// expose proxy if needed
 		if (exposeProxy) {
-			cv.visitVarInsn(Constants.ALOAD, localThis);
-			cv.visitMethodInsn(Constants.INVOKESTATIC, AOP_CONTEXT_INTERNAL_NAME, SET_CURRENT_PROXY_METHOD, SET_CURRENT_PROXY_DESCRIPTOR);
-			cv.visitVarInsn(Constants.ASTORE, localOldProxy);
+			mv.visitVarInsn(Opcodes.ALOAD, localThis);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, AOP_CONTEXT_INTERNAL_NAME, SET_CURRENT_PROXY_METHOD, SET_CURRENT_PROXY_DESCRIPTOR);
+			mv.visitVarInsn(Opcodes.ASTORE, localOldProxy);
 		}
 
 		// invoke proceed
-		cv.visitVarInsn(Constants.ALOAD, localMethodInvocation);
-		cv.visitMethodInsn(Constants.INVOKEINTERFACE, "org/aopalliance/intercept/MethodInvocation", "proceed", "()Ljava/lang/Object;");
+		mv.visitVarInsn(Opcodes.ALOAD, localMethodInvocation);
+		mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "org/aopalliance/intercept/MethodInvocation", "proceed", "()Ljava/lang/Object;");
 
 		// cast return value if required else pop
 		Class returnType = method.getReturnType();
 
 
 		if (returnType == void.class) {
-			cv.visitInsn(Constants.POP);
+			mv.visitInsn(Opcodes.POP);
 		}
 		else {
 			if (returnType.isPrimitive()) {
-				visitUnwrapPrimtiveType(cv, returnType);
+				visitUnwrapPrimtiveType(mv, returnType);
 			}
 			else {
-				cv.visitTypeInsn(Constants.CHECKCAST, Type.getInternalName(returnType));
+				mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(returnType));
 			}
 
 			if (requiresFinally) {
-				cv.visitVarInsn(getStoreOpcodeForType(returnType), localReturnValue);
+				mv.visitVarInsn(getStoreOpcodeForType(returnType), localReturnValue);
 			}
 		}
 
 
 		// close the try block
 		Label closeTry = new Label();
-		cv.visitLabel(closeTry);
+		mv.visitLabel(closeTry);
 
 		// create the first finally block if needed
 		if (requiresFinally) {
 			if (exposeProxy) {
-				cv.visitVarInsn(Constants.ALOAD, localOldProxy);
-				cv.visitMethodInsn(Constants.INVOKESTATIC, AOP_CONTEXT_INTERNAL_NAME, SET_CURRENT_PROXY_METHOD, SET_CURRENT_PROXY_DESCRIPTOR);
-				cv.visitInsn(Constants.POP);
+				mv.visitVarInsn(Opcodes.ALOAD, localOldProxy);
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC, AOP_CONTEXT_INTERNAL_NAME, SET_CURRENT_PROXY_METHOD, SET_CURRENT_PROXY_DESCRIPTOR);
+				mv.visitInsn(Opcodes.POP);
 			}
 
 			if (!staticTargetSource) {
-				cv.visitVarInsn(Constants.ALOAD, localTargetSource);
-				cv.visitVarInsn(Constants.ALOAD, localTarget);
-				cv.visitMethodInsn(Constants.INVOKEINTERFACE, TARGET_SOURCE_INTERNAL_NAME, "releaseTarget", "(Ljava/lang/Object;)V");
+				mv.visitVarInsn(Opcodes.ALOAD, localTargetSource);
+				mv.visitVarInsn(Opcodes.ALOAD, localTarget);
+				mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, TARGET_SOURCE_INTERNAL_NAME, "releaseTarget", "(Ljava/lang/Object;)V");
 			}
 
 			if (returnType != void.class) {
-				cv.visitVarInsn(getLoadOpcodeForType(returnType), localReturnValue);
+				mv.visitVarInsn(getLoadOpcodeForType(returnType), localReturnValue);
 			}
 		}
 
@@ -201,10 +201,10 @@ public class AdvisedCodeGenerationStrategy extends AbstractMethodProxyCodeGenera
 
 		// return if required
 		if (returnType != void.class) {
-			cv.visitInsn(getReturnOpcodeForType(returnType));
+			mv.visitInsn(getReturnOpcodeForType(returnType));
 		}
 		else {
-			cv.visitJumpInsn(Constants.GOTO, exit);
+			mv.visitJumpInsn(Opcodes.GOTO, exit);
 		}
 
 		// create the catch blocks for the exceptions on the method
@@ -217,14 +217,14 @@ public class AdvisedCodeGenerationStrategy extends AbstractMethodProxyCodeGenera
 
 		// create the catch block for NoSuchMethodException
 		Label catchNoSuchMethodException = new Label();
-		cv.visitLabel(catchNoSuchMethodException);
-		cv.visitVarInsn(Constants.ASTORE, stackThrowable);
-		cv.visitTypeInsn(Constants.NEW, "java/lang/IllegalStateException");
-		cv.visitInsn(Constants.DUP);
-		cv.visitLdcInsn("Unable to access joinpoint via reflection");
-		cv.visitVarInsn(Constants.ALOAD, stackThrowable);
-		cv.visitMethodInsn(Constants.INVOKESPECIAL, "java/lang/IllegalStateException", "<init>", "(Ljava/lang/String;Ljava/lang/Throwable;)V");
-		cv.visitInsn(Constants.ATHROW);
+		mv.visitLabel(catchNoSuchMethodException);
+		mv.visitVarInsn(Opcodes.ASTORE, stackThrowable);
+		mv.visitTypeInsn(Opcodes.NEW, "java/lang/IllegalStateException");
+		mv.visitInsn(Opcodes.DUP);
+		mv.visitLdcInsn("Unable to access joinpoint via reflection");
+		mv.visitVarInsn(Opcodes.ALOAD, stackThrowable);
+		mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/IllegalStateException", "<init>", "(Ljava/lang/String;Ljava/lang/Throwable;)V");
+		mv.visitInsn(Opcodes.ATHROW);
 
 		// create the catch block for remaining Throwable
 		Class[] exceptionTypes = method.getExceptionTypes();
@@ -232,152 +232,152 @@ public class AdvisedCodeGenerationStrategy extends AbstractMethodProxyCodeGenera
 
 		for (int i = 0; i < exceptionTypes.length; i++) {
 			Label handlerLabel = new Label();
-			cv.visitLabel(handlerLabel);
-			cv.visitVarInsn(Constants.ASTORE, stackThrowable);
-			cv.visitVarInsn(Constants.ALOAD, stackThrowable);
-			cv.visitInsn(Constants.ATHROW);
+			mv.visitLabel(handlerLabel);
+			mv.visitVarInsn(Opcodes.ASTORE, stackThrowable);
+			mv.visitVarInsn(Opcodes.ALOAD, stackThrowable);
+			mv.visitInsn(Opcodes.ATHROW);
 			handlerLabels[i] = handlerLabel;
 		}
 
 		// catch runtime exceptions and throw them as they are
 		Label catchRuntimeException = new Label();
-		cv.visitLabel(catchRuntimeException);
-		cv.visitVarInsn(Constants.ASTORE, stackThrowable);
-		cv.visitVarInsn(Constants.ALOAD, stackThrowable);
-		cv.visitInsn(Constants.ATHROW);
+		mv.visitLabel(catchRuntimeException);
+		mv.visitVarInsn(Opcodes.ASTORE, stackThrowable);
+		mv.visitVarInsn(Opcodes.ALOAD, stackThrowable);
+		mv.visitInsn(Opcodes.ATHROW);
 
 		Label catchThrowable = new Label();
-		cv.visitLabel(catchThrowable);
-		cv.visitVarInsn(Constants.ASTORE, stackThrowable);
-		cv.visitTypeInsn(Constants.NEW, "java/lang/reflect/UndeclaredThrowableException");
-		cv.visitInsn(Constants.DUP);
-		cv.visitVarInsn(Constants.ALOAD, stackThrowable);
-		cv.visitMethodInsn(Constants.INVOKESPECIAL, "java/lang/reflect/UndeclaredThrowableException", "<init>", "(Ljava/lang/Throwable;)V");
-		cv.visitInsn(Constants.ATHROW);
+		mv.visitLabel(catchThrowable);
+		mv.visitVarInsn(Opcodes.ASTORE, stackThrowable);
+		mv.visitTypeInsn(Opcodes.NEW, "java/lang/reflect/UndeclaredThrowableException");
+		mv.visitInsn(Opcodes.DUP);
+		mv.visitVarInsn(Opcodes.ALOAD, stackThrowable);
+		mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/reflect/UndeclaredThrowableException", "<init>", "(Ljava/lang/Throwable;)V");
+		mv.visitInsn(Opcodes.ATHROW);
 
 		Label catchForFinally = null;
 		Label execptionalFinally = null;
 
 		if (requiresFinally) {
 			catchForFinally = new Label();
-			cv.visitLabel(catchForFinally);
-			cv.visitVarInsn(Constants.ASTORE, stackThrowable);
+			mv.visitLabel(catchForFinally);
+			mv.visitVarInsn(Opcodes.ASTORE, stackThrowable);
 
 			execptionalFinally = new Label();
-			cv.visitLabel(execptionalFinally);
+			mv.visitLabel(execptionalFinally);
 
 			if (exposeProxy) {
-				cv.visitVarInsn(Constants.ALOAD, localOldProxy);
-				cv.visitMethodInsn(Constants.INVOKESTATIC, AOP_CONTEXT_INTERNAL_NAME, SET_CURRENT_PROXY_METHOD, SET_CURRENT_PROXY_DESCRIPTOR);
-				cv.visitInsn(Constants.POP);
+				mv.visitVarInsn(Opcodes.ALOAD, localOldProxy);
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC, AOP_CONTEXT_INTERNAL_NAME, SET_CURRENT_PROXY_METHOD, SET_CURRENT_PROXY_DESCRIPTOR);
+				mv.visitInsn(Opcodes.POP);
 			}
 
 			if (!staticTargetSource) {
 
 				// TODO: need embedded try/catch block here
-				cv.visitVarInsn(Constants.ALOAD, localTargetSource);
-				cv.visitVarInsn(Constants.ALOAD, localTarget);
-				cv.visitMethodInsn(Constants.INVOKEINTERFACE, TARGET_SOURCE_INTERNAL_NAME, "releaseTarget", "(Ljava/lang/Object;)V");
+				mv.visitVarInsn(Opcodes.ALOAD, localTargetSource);
+				mv.visitVarInsn(Opcodes.ALOAD, localTarget);
+				mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, TARGET_SOURCE_INTERNAL_NAME, "releaseTarget", "(Ljava/lang/Object;)V");
 			}
 
-			cv.visitVarInsn(Constants.ALOAD, stackThrowable);
-			cv.visitInsn(Constants.ATHROW);
+			mv.visitVarInsn(Opcodes.ALOAD, stackThrowable);
+			mv.visitInsn(Opcodes.ATHROW);
 		}
 
 		// close
-		cv.visitLabel(exit);
+		mv.visitLabel(exit);
 
 		// return now for void
 		if (returnType == void.class) {
-			cv.visitInsn(getReturnOpcodeForType(method.getReturnType()));
+			mv.visitInsn(getReturnOpcodeForType(method.getReturnType()));
 		}
 
 		for (int i = 0; i < handlerLabels.length; i++) {
-			cv.visitTryCatchBlock(openTry, closeTry, handlerLabels[i], Type.getInternalName(exceptionTypes[i]));
+			mv.visitTryCatchBlock(openTry, closeTry, handlerLabels[i], Type.getInternalName(exceptionTypes[i]));
 		}
 
-		cv.visitTryCatchBlock(openTry, closeTry, catchNoSuchMethodException, Type.getInternalName(NoSuchMethodException.class));
-		cv.visitTryCatchBlock(openTry, closeTry, catchRuntimeException, Type.getInternalName(RuntimeException.class));
-		cv.visitTryCatchBlock(openTry, closeTry, catchThrowable, Type.getInternalName(Throwable.class));
+		mv.visitTryCatchBlock(openTry, closeTry, catchNoSuchMethodException, Type.getInternalName(NoSuchMethodException.class));
+		mv.visitTryCatchBlock(openTry, closeTry, catchRuntimeException, Type.getInternalName(RuntimeException.class));
+		mv.visitTryCatchBlock(openTry, closeTry, catchThrowable, Type.getInternalName(Throwable.class));
 
 		if (requiresFinally) {
-			cv.visitTryCatchBlock(openTry, closeTry, catchForFinally, null);
+			mv.visitTryCatchBlock(openTry, closeTry, catchForFinally, null);
 
 			// TODO: test expose proxy with declared exceptions
-			cv.visitTryCatchBlock(catchNoSuchMethodException, execptionalFinally, catchForFinally, null);
+			mv.visitTryCatchBlock(catchNoSuchMethodException, execptionalFinally, catchForFinally, null);
 		}
 
-		cv.visitMaxs(0, 0);
+		mv.visitMaxs(0, 0);
 	}
 
-	private void bundleArgTypes(CodeVisitor cv, Class[] parameterTypes, int stackIndex) {
+	private void bundleArgTypes(MethodVisitor mv, Class[] parameterTypes, int stackIndex) {
 		int size = parameterTypes.length;
 
 		if (size == 0) {
-			cv.visitInsn(Constants.ACONST_NULL);
-			cv.visitVarInsn(Constants.ASTORE, stackIndex);
+			mv.visitInsn(Opcodes.ACONST_NULL);
+			mv.visitVarInsn(Opcodes.ASTORE, stackIndex);
 		}
 		else {
-			visitIntegerInsn(size, cv);
-			cv.visitTypeInsn(Constants.ANEWARRAY, CLASS_INTERNAL_NAME);
-			cv.visitVarInsn(Constants.ASTORE, stackIndex);
+			visitIntegerInsn(size, mv);
+			mv.visitTypeInsn(Opcodes.ANEWARRAY, CLASS_INTERNAL_NAME);
+			mv.visitVarInsn(Opcodes.ASTORE, stackIndex);
 
 			for (int i = 0; i < parameterTypes.length; i++) {
 				Class parameterType = parameterTypes[i];
 
 				// load the array
-				cv.visitVarInsn(Constants.ALOAD, stackIndex);
+				mv.visitVarInsn(Opcodes.ALOAD, stackIndex);
 
 				// load the index
-				visitIntegerInsn(i, cv);
+				visitIntegerInsn(i, mv);
 
 				// load the class
 				if (parameterType.isPrimitive()) {
-					visitGetPrimitiveType(cv, parameterType);
+					visitGetPrimitiveType(mv, parameterType);
 				}
 				else {
-					cv.visitLdcInsn(Type.getType(parameterType));
+					mv.visitLdcInsn(Type.getType(parameterType));
 				}
 
 				// store in array
-				cv.visitInsn(Constants.AASTORE);
+				mv.visitInsn(Opcodes.AASTORE);
 			}
 		}
 	}
 
-	private void bundleArgs(CodeVisitor cv, Class[] parameterTypes, int stackIndex) {
+	private void bundleArgs(MethodVisitor mv, Class[] parameterTypes, int stackIndex) {
 		// create the object array
 		int size = parameterTypes.length;
 
 		if (size == 0) {
-			cv.visitInsn(Constants.ACONST_NULL);
-			cv.visitVarInsn(Constants.ASTORE, stackIndex);
+			mv.visitInsn(Opcodes.ACONST_NULL);
+			mv.visitVarInsn(Opcodes.ASTORE, stackIndex);
 		}
 		else {
-			visitIntegerInsn(size, cv);
-			cv.visitTypeInsn(Constants.ANEWARRAY, OBJECT_INTERNAL_NAME);
-			cv.visitVarInsn(Constants.ASTORE, stackIndex);
+			visitIntegerInsn(size, mv);
+			mv.visitTypeInsn(Opcodes.ANEWARRAY, OBJECT_INTERNAL_NAME);
+			mv.visitVarInsn(Opcodes.ASTORE, stackIndex);
 
 			int stackCount = 1;
 			for (int i = 0; i < parameterTypes.length; i++) {
 				Class parameterType = parameterTypes[i];
 
 				// load the array
-				cv.visitVarInsn(Constants.ALOAD, stackIndex);
+				mv.visitVarInsn(Opcodes.ALOAD, stackIndex);
 
 				// load the index
-				visitIntegerInsn(i, cv);
+				visitIntegerInsn(i, mv);
 
 				// load the argument
-				cv.visitVarInsn(getLoadOpcodeForType(parameterType), stackCount);
+				mv.visitVarInsn(getLoadOpcodeForType(parameterType), stackCount);
 
 				if (parameterType.isPrimitive()) {
 					// wrap primtive
-					visitWrapPrimitive(cv, parameterType);
+					visitWrapPrimitive(mv, parameterType);
 				}
 
 				// store in array
-				cv.visitInsn(Constants.AASTORE);
+				mv.visitInsn(Opcodes.AASTORE);
 
 				stackCount += getLocalsSizeForType(parameterType);
 

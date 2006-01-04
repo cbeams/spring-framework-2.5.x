@@ -3,10 +3,10 @@ package org.springframework.aop.framework.asm;
 
 import java.lang.reflect.Method;
 
-import org.objectweb.asm.CodeVisitor;
-import org.objectweb.asm.Constants;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.MethodVisitor;
 
 import org.springframework.aop.framework.AdvisedSupport;
 
@@ -15,20 +15,20 @@ import org.springframework.aop.framework.AdvisedSupport;
  */
 public class NonStaticTargetSourceCodeGenerationStrategy extends AbstractMethodProxyCodeGenerationStrategy {
 
-	protected void generateMethod(CodeVisitor cv, Method method, AdvisedSupport advised, String proxyInternalName, String targetInternalName, String targetDescriptor) {
+	protected void generateMethod(MethodVisitor mv, Method method, AdvisedSupport advised, String proxyInternalName, String targetInternalName, String targetDescriptor) {
 		int initialLocalsOffset = calculateInitialLocalsOffset(method.getParameterTypes());
 
 		if (method.getReturnType() == void.class) {
-			doWithVoidReturn(cv, method, proxyInternalName, targetInternalName, initialLocalsOffset);
+			doWithVoidReturn(mv, method, proxyInternalName, targetInternalName, initialLocalsOffset);
 		}
 		else {
-			doWithReturn(cv, method, advised, proxyInternalName, targetInternalName, targetDescriptor, initialLocalsOffset);
+			doWithReturn(mv, method, advised, proxyInternalName, targetInternalName, targetDescriptor, initialLocalsOffset);
 		}
 
-		cv.visitMaxs(0, 0);
+		mv.visitMaxs(0, 0);
 	}
 
-	private void doWithVoidReturn(CodeVisitor cv, Method method, String proxyInternalName, String targetInternalName, int initialLocalsOffset) {
+	private void doWithVoidReturn(MethodVisitor cv, Method method, String proxyInternalName, String targetInternalName, int initialLocalsOffset) {
 
 		int localsCounter = initialLocalsOffset;
 		int localsTarget = ++localsCounter;
@@ -60,7 +60,7 @@ public class NonStaticTargetSourceCodeGenerationStrategy extends AbstractMethodP
 		visitInvokeTargetMethod(cv, targetInternalName, method, localsTarget);
 
 		// goto normal finally block
-		cv.visitJumpInsn(Constants.GOTO, finallyJumpPoint);
+		cv.visitJumpInsn(Opcodes.GOTO, finallyJumpPoint);
 
 		// start the catch block
 		cv.visitLabel(startCatch);
@@ -74,10 +74,10 @@ public class NonStaticTargetSourceCodeGenerationStrategy extends AbstractMethodP
 
 		// start the finally block
 		cv.visitLabel(startFinally);
-		cv.visitVarInsn(Constants.ASTORE, localsJumpReturnAddress);
+		cv.visitVarInsn(Opcodes.ASTORE, localsJumpReturnAddress);
 		cv.visitLabel(startNestedTry);
 		visitReleaseTarget(cv, localsTargetSource, localsTarget);
-		cv.visitJumpInsn(Constants.GOTO, finallyReturnPoint);
+		cv.visitJumpInsn(Opcodes.GOTO, finallyReturnPoint);
 
 		// start the nested catch block
 		cv.visitLabel(startNestedCatch);
@@ -85,17 +85,17 @@ public class NonStaticTargetSourceCodeGenerationStrategy extends AbstractMethodP
 
 		// return from all JSRs
 		cv.visitLabel(finallyReturnPoint);
-		cv.visitVarInsn(Constants.RET, localsJumpReturnAddress);
+		cv.visitVarInsn(Opcodes.RET, localsJumpReturnAddress);
 
 		// visit the standard finally jump marker
 		cv.visitLabel(finallyJumpPoint);
 
 		// jump to finally block
-		cv.visitJumpInsn(Constants.JSR, startFinally);
+		cv.visitJumpInsn(Opcodes.JSR, startFinally);
 
 		// mark the exit and return
 		cv.visitLabel(exitPoint);
-		cv.visitInsn(Constants.RETURN);
+		cv.visitInsn(Opcodes.RETURN);
 
 		// mark the try/catch blocks
 		cv.visitTryCatchBlock(startTry, startCatch, startCatch, EXCEPTION_INTERNAL_NAME);
@@ -107,7 +107,7 @@ public class NonStaticTargetSourceCodeGenerationStrategy extends AbstractMethodP
 	}
 
 
-	private void doWithReturn(CodeVisitor cv, Method method, AdvisedSupport advised, String proxyInternalName, String targetInternalName, String targetDescriptor, int initialLocalsOffset) {
+	private void doWithReturn(MethodVisitor cv, Method method, AdvisedSupport advised, String proxyInternalName, String targetInternalName, String targetDescriptor, int initialLocalsOffset) {
 		String descriptor = Type.getMethodDescriptor(method);
 		String methodName = method.getName();
 
@@ -141,10 +141,10 @@ public class NonStaticTargetSourceCodeGenerationStrategy extends AbstractMethodP
 		visitInvokeTargetMethod(cv, targetInternalName, method, localsTarget);
 
 		// store the return value
-		cv.visitVarInsn(Constants.ASTORE, localsReturnValue);
+		cv.visitVarInsn(Opcodes.ASTORE, localsReturnValue);
 
 		// jump to finally block
-		cv.visitJumpInsn(Constants.JSR, startFinally);
+		cv.visitJumpInsn(Opcodes.JSR, startFinally);
 
 		// mark the end of the try block (including the call to finally)
 		cv.visitLabel(endTry);
@@ -164,12 +164,12 @@ public class NonStaticTargetSourceCodeGenerationStrategy extends AbstractMethodP
 
 		// visit the finally block
 		cv.visitLabel(startFinally);
-		cv.visitVarInsn(Constants.ASTORE, localsJumpReturnAddress);
+		cv.visitVarInsn(Opcodes.ASTORE, localsJumpReturnAddress);
 
 		// start the nested try block
 		cv.visitLabel(startNestedTry);
 		visitReleaseTarget(cv, localsTargetSource, localsTarget);
-		cv.visitJumpInsn(Constants.GOTO, exitPoint);
+		cv.visitJumpInsn(Opcodes.GOTO, exitPoint);
 
 		// start the nested catch block
 		cv.visitLabel(startNestedCatch);
@@ -177,7 +177,7 @@ public class NonStaticTargetSourceCodeGenerationStrategy extends AbstractMethodP
 
 		// mark the exit point
 		cv.visitLabel(exitPoint);
-		cv.visitVarInsn(Constants.RET, localsJumpReturnAddress);
+		cv.visitVarInsn(Opcodes.RET, localsJumpReturnAddress);
 
 		// visit try/catch blocks
 		cv.visitTryCatchBlock(startTry, startCatch, startCatch, EXCEPTION_INTERNAL_NAME);
@@ -188,23 +188,23 @@ public class NonStaticTargetSourceCodeGenerationStrategy extends AbstractMethodP
 
 	}
 
-	private void visitReleaseTarget(CodeVisitor cv, int localsTargetSource, int localsTarget) {
-		cv.visitVarInsn(Constants.ALOAD, localsTargetSource);
-		cv.visitVarInsn(Constants.ALOAD, localsTarget);
-		cv.visitMethodInsn(Constants.INVOKEINTERFACE, TARGET_SOURCE_INTERNAL_NAME, RELEASE_TARGET_METHOD, RELEASE_TARGET_DESCRIPTOR);
+	private void visitReleaseTarget(MethodVisitor cv, int localsTargetSource, int localsTarget) {
+		cv.visitVarInsn(Opcodes.ALOAD, localsTargetSource);
+		cv.visitVarInsn(Opcodes.ALOAD, localsTarget);
+		cv.visitMethodInsn(Opcodes.INVOKEINTERFACE, TARGET_SOURCE_INTERNAL_NAME, RELEASE_TARGET_METHOD, RELEASE_TARGET_DESCRIPTOR);
 	}
 
-	private void visitExecuteFinallyAndThrow(CodeVisitor cv, Label finallyBlock, int localsException) {
-		cv.visitVarInsn(Constants.ASTORE, localsException);
-		cv.visitJumpInsn(Constants.JSR, finallyBlock);
-		cv.visitVarInsn(Constants.ALOAD, localsException);
-		cv.visitInsn(Constants.ATHROW);
+	private void visitExecuteFinallyAndThrow(MethodVisitor cv, Label finallyBlock, int localsException) {
+		cv.visitVarInsn(Opcodes.ASTORE, localsException);
+		cv.visitJumpInsn(Opcodes.JSR, finallyBlock);
+		cv.visitVarInsn(Opcodes.ALOAD, localsException);
+		cv.visitInsn(Opcodes.ATHROW);
 	}
 
-	private void visitWrapAndThrow(CodeVisitor cv, String message, int localsWrappedException) {
-		cv.visitVarInsn(Constants.ASTORE, localsWrappedException);
-		cv.visitTypeInsn(Constants.NEW, UNDECLARED_THROWABLE_EXCEPTION_INTERNAL_NAME);
-		cv.visitInsn(Constants.DUP);
+	private void visitWrapAndThrow(MethodVisitor cv, String message, int localsWrappedException) {
+		cv.visitVarInsn(Opcodes.ASTORE, localsWrappedException);
+		cv.visitTypeInsn(Opcodes.NEW, UNDECLARED_THROWABLE_EXCEPTION_INTERNAL_NAME);
+		cv.visitInsn(Opcodes.DUP);
 
 		String exceptionConstructorDescriptor = SINGLE_ARG_EXCEPTION_CONSTRUCTOR_DESCRIPTOR;
 		if (message != null) {
@@ -212,14 +212,14 @@ public class NonStaticTargetSourceCodeGenerationStrategy extends AbstractMethodP
 			exceptionConstructorDescriptor = EXCEPTION_CONSTRUCTOR_DESCRIPTOR;
 		}
 
-		cv.visitVarInsn(Constants.ALOAD, localsWrappedException);
-		cv.visitMethodInsn(Constants.INVOKESPECIAL, UNDECLARED_THROWABLE_EXCEPTION_INTERNAL_NAME, CONSTRUCTOR_INTERNAL_NAME, exceptionConstructorDescriptor);
-		cv.visitInsn(Constants.ATHROW);
+		cv.visitVarInsn(Opcodes.ALOAD, localsWrappedException);
+		cv.visitMethodInsn(Opcodes.INVOKESPECIAL, UNDECLARED_THROWABLE_EXCEPTION_INTERNAL_NAME, CONSTRUCTOR_INTERNAL_NAME, exceptionConstructorDescriptor);
+		cv.visitInsn(Opcodes.ATHROW);
 	}
 
-	private void visitInvokeTargetMethod(CodeVisitor cv, String targetInternalName, Method method, int localsTarget) {
+	private void visitInvokeTargetMethod(MethodVisitor cv, String targetInternalName, Method method, int localsTarget) {
 		// get the target back
-		cv.visitVarInsn(Constants.ALOAD, localsTarget);
+		cv.visitVarInsn(Opcodes.ALOAD, localsTarget);
 
 		// load args
 		Class[] parameterTypes = method.getParameterTypes();
@@ -237,27 +237,27 @@ public class NonStaticTargetSourceCodeGenerationStrategy extends AbstractMethodP
 		// invoke
 		String methodName = method.getName();
 		String methodDescriptor = Type.getMethodDescriptor(method);
-		cv.visitMethodInsn(Constants.INVOKEVIRTUAL, targetInternalName, methodName, methodDescriptor);
+		cv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, targetInternalName, methodName, methodDescriptor);
 	}
 
-	private void visitLoadTargetFromTargetSource(CodeVisitor cv, String targetInternalName, int localsTargetSource, int localsTarget) {
+	private void visitLoadTargetFromTargetSource(MethodVisitor cv, String targetInternalName, int localsTargetSource, int localsTarget) {
 		// get the target from the target source
-		cv.visitVarInsn(Constants.ALOAD, localsTargetSource);
-		cv.visitMethodInsn(Constants.INVOKEVIRTUAL, TARGET_SOURCE_INTERNAL_NAME, GET_TARGET_METHOD, GET_TARGET_DESCRIPTOR);
+		cv.visitVarInsn(Opcodes.ALOAD, localsTargetSource);
+		cv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TARGET_SOURCE_INTERNAL_NAME, GET_TARGET_METHOD, GET_TARGET_DESCRIPTOR);
 
 		// cast to appropriate type
-		cv.visitTypeInsn(Constants.CHECKCAST, targetInternalName); // TODO: try removing this cast for optimization
+		cv.visitTypeInsn(Opcodes.CHECKCAST, targetInternalName); // TODO: try removing this cast for optimization
 
 		// save for later
-		cv.visitVarInsn(Constants.ASTORE, localsTarget);
+		cv.visitVarInsn(Opcodes.ASTORE, localsTarget);
 	}
 
-	private void visitInitTargetAndTargetSource(CodeVisitor cv, String proxyInternalName, int localsTarget, int localsTargetSource) {
-		cv.visitInsn(Constants.ACONST_NULL);
-		cv.visitVarInsn(Constants.ASTORE, localsTarget);
-		cv.visitVarInsn(Constants.ALOAD, 0); // load this
-		cv.visitFieldInsn(Constants.GETFIELD, proxyInternalName, ADVISED_FIELD_NAME, ADVISED_SUPPORT_DESCRIPTOR);
-		cv.visitMethodInsn(Constants.INVOKEVIRTUAL, ADVISED_SUPPORT_INTERNAL_NAME, GET_TARGET_SOURCE_METHOD, GET_TARGET_SOURCE_DESCRIPTOR);
-		cv.visitVarInsn(Constants.ASTORE, localsTargetSource);
+	private void visitInitTargetAndTargetSource(MethodVisitor cv, String proxyInternalName, int localsTarget, int localsTargetSource) {
+		cv.visitInsn(Opcodes.ACONST_NULL);
+		cv.visitVarInsn(Opcodes.ASTORE, localsTarget);
+		cv.visitVarInsn(Opcodes.ALOAD, 0); // load this
+		cv.visitFieldInsn(Opcodes.GETFIELD, proxyInternalName, ADVISED_FIELD_NAME, ADVISED_SUPPORT_DESCRIPTOR);
+		cv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, ADVISED_SUPPORT_INTERNAL_NAME, GET_TARGET_SOURCE_METHOD, GET_TARGET_SOURCE_DESCRIPTOR);
+		cv.visitVarInsn(Opcodes.ASTORE, localsTargetSource);
 	}
 }

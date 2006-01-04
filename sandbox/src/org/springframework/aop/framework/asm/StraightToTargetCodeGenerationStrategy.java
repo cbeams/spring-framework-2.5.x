@@ -3,9 +3,9 @@ package org.springframework.aop.framework.asm;
 
 import java.lang.reflect.Method;
 
-import org.objectweb.asm.CodeVisitor;
-import org.objectweb.asm.Constants;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 import org.springframework.aop.framework.AdvisedSupport;
 
@@ -14,15 +14,15 @@ import org.springframework.aop.framework.AdvisedSupport;
  */
 public class StraightToTargetCodeGenerationStrategy extends AbstractMethodProxyCodeGenerationStrategy {
 
-	protected void generateMethod(CodeVisitor cv, Method method, AdvisedSupport advised, String proxyInternalName, String targetInternalName, String targetDescriptor) {
+	protected void generateMethod(MethodVisitor cv, Method method, AdvisedSupport advised, String proxyInternalName, String targetInternalName, String targetDescriptor) {
 		String descriptor = Type.getMethodDescriptor(method);
 		String methodName = method.getName();
 
 		// load this
-		cv.visitVarInsn(Constants.ALOAD, 0);
+		cv.visitVarInsn(Opcodes.ALOAD, 0);
 
 		if (advised.getTargetSource().isStatic()) {
-			cv.visitFieldInsn(Constants.GETFIELD, proxyInternalName, TARGET_FIELD_NAME, targetDescriptor);
+			cv.visitFieldInsn(Opcodes.GETFIELD, proxyInternalName, TARGET_FIELD_NAME, targetDescriptor);
 		}
 
 		// load args
@@ -39,7 +39,7 @@ public class StraightToTargetCodeGenerationStrategy extends AbstractMethodProxyC
 		}
 
 		// invoke super
-		cv.visitMethodInsn(Constants.INVOKEVIRTUAL, targetInternalName, methodName, descriptor);
+		cv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, targetInternalName, methodName, descriptor);
 
 		// return
 		cv.visitInsn(getReturnOpcodeForType(method.getReturnType()));

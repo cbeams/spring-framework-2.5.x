@@ -3,9 +3,9 @@ package org.springframework.aop.framework.asm;
 
 import java.lang.reflect.Method;
 
-import org.objectweb.asm.CodeVisitor;
-import org.objectweb.asm.Constants;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 import org.springframework.aop.framework.AdvisedSupport;
 
@@ -14,13 +14,13 @@ import org.springframework.aop.framework.AdvisedSupport;
  */
 public class AdvisedMixinCodeGenerationStrategy extends AbstractMethodProxyCodeGenerationStrategy {
 
-	protected void generateMethod(CodeVisitor cv, Method method, AdvisedSupport advised, String proxyInternalName, String targetInternalName, String targetDescriptor) {
+	protected void generateMethod(MethodVisitor cv, Method method, AdvisedSupport advised, String proxyInternalName, String targetInternalName, String targetDescriptor) {
 		String methodName = method.getName();
 		String methodDescriptor = Type.getMethodDescriptor(method);
 		Class returnType = method.getReturnType();
 
-		cv.visitVarInsn(Constants.ALOAD, 0);
-		cv.visitFieldInsn(Constants.GETFIELD, proxyInternalName, ADVISED_FIELD_NAME, ADVISED_SUPPORT_DESCRIPTOR);
+		cv.visitVarInsn(Opcodes.ALOAD, 0);
+		cv.visitFieldInsn(Opcodes.GETFIELD, proxyInternalName, ADVISED_FIELD_NAME, ADVISED_SUPPORT_DESCRIPTOR);
 
 		// load args
 		Class[] parameterTypes = method.getParameterTypes();
@@ -35,7 +35,7 @@ public class AdvisedMixinCodeGenerationStrategy extends AbstractMethodProxyCodeG
 			}
 		}
 
-		cv.visitMethodInsn(Constants.INVOKEVIRTUAL, ADVISED_SUPPORT_INTERNAL_NAME, methodName, methodDescriptor);
+		cv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, ADVISED_SUPPORT_INTERNAL_NAME, methodName, methodDescriptor);
 		cv.visitInsn(getReturnOpcodeForType(returnType));
 		cv.visitMaxs(0, 0);
 	}

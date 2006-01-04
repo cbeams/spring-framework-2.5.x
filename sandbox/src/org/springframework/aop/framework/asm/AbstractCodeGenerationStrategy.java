@@ -1,14 +1,12 @@
-
 package org.springframework.aop.framework.asm;
 
-import java.lang.reflect.UndeclaredThrowableException;
-
-import org.objectweb.asm.CodeVisitor;
-import org.objectweb.asm.Constants;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.AopContext;
+
+import java.lang.reflect.UndeclaredThrowableException;
 
 /**
  * @author robh
@@ -84,63 +82,63 @@ public abstract class AbstractCodeGenerationStrategy implements CodeGenerationSt
 	protected int getLoadOpcodeForType(Class type) {
 		if (type.isPrimitive()) {
 			if (type == double.class) {
-				return Constants.DLOAD;
+				return Opcodes.DLOAD;
 			}
 			else if (type == float.class) {
-				return Constants.FLOAD;
+				return Opcodes.FLOAD;
 			}
 			else if (type == long.class) {
-				return Constants.LLOAD;
+				return Opcodes.LLOAD;
 			}
 			else {
-				return Constants.ILOAD;
+				return Opcodes.ILOAD;
 			}
 		}
 		else {
-			return Constants.ALOAD;
+			return Opcodes.ALOAD;
 		}
 	}
 
 	protected int getStoreOpcodeForType(Class type) {
 		if (type.isPrimitive()) {
 			if (type == double.class) {
-				return Constants.DSTORE;
+				return Opcodes.DSTORE;
 			}
 			else if (type == float.class) {
-				return Constants.FSTORE;
+				return Opcodes.FSTORE;
 			}
 			else if (type == long.class) {
-				return Constants.LSTORE;
+				return Opcodes.LSTORE;
 			}
 			else {
-				return Constants.ISTORE;
+				return Opcodes.ISTORE;
 			}
 		}
 		else {
-			return Constants.ASTORE;
+			return Opcodes.ASTORE;
 		}
 	}
 
 	protected int getReturnOpcodeForType(Class type) {
 		if (type.isPrimitive()) {
 			if (type == double.class) {
-				return Constants.DRETURN;
+				return Opcodes.DRETURN;
 			}
 			else if (type == float.class) {
-				return Constants.FRETURN;
+				return Opcodes.FRETURN;
 			}
 			else if (type == long.class) {
-				return Constants.LRETURN;
+				return Opcodes.LRETURN;
 			}
 			else if (type == void.class) {
-				return Constants.RETURN;
+				return Opcodes.RETURN;
 			}
 			else {
-				return Constants.IRETURN;
+				return Opcodes.IRETURN;
 			}
 		}
 		else {
-			return Constants.ARETURN;
+			return Opcodes.ARETURN;
 		}
 	}
 
@@ -161,134 +159,134 @@ public abstract class AbstractCodeGenerationStrategy implements CodeGenerationSt
 		}
 	}
 
-	protected void visitWrapPrimitive(CodeVisitor cv, Class parameterType) {
+	protected void visitWrapPrimitive(MethodVisitor mv, Class parameterType) {
 		if (byte.class == parameterType) {
-			cv.visitMethodInsn(Constants.INVOKESTATIC, Type.getInternalName(Byte.class), VALUE_OF_METHOD, "(B)Ljava/lang/Byte;");
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(Byte.class), VALUE_OF_METHOD, "(B)Ljava/lang/Byte;");
 		}
 		else if (short.class == parameterType) {
-			cv.visitMethodInsn(Constants.INVOKESTATIC, Type.getInternalName(Short.class), VALUE_OF_METHOD, "(S)Ljava/lang/Short;");
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(Short.class), VALUE_OF_METHOD, "(S)Ljava/lang/Short;");
 		}
 		else if (int.class == parameterType) {
-			cv.visitMethodInsn(Constants.INVOKESTATIC, Type.getInternalName(Integer.class), VALUE_OF_METHOD, "(I)Ljava/lang/Integer;");
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(Integer.class), VALUE_OF_METHOD, "(I)Ljava/lang/Integer;");
 		}
 		else if (long.class == parameterType) {
-			cv.visitMethodInsn(Constants.INVOKESTATIC, Type.getInternalName(Long.class), VALUE_OF_METHOD, "(J)Ljava/lang/Long;");
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(Long.class), VALUE_OF_METHOD, "(J)Ljava/lang/Long;");
 		}
 		else if (float.class == parameterType) {
-			cv.visitMethodInsn(Constants.INVOKESTATIC, Type.getInternalName(Float.class), VALUE_OF_METHOD, "(F)Ljava/lang/Float;");
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(Float.class), VALUE_OF_METHOD, "(F)Ljava/lang/Float;");
 		}
 		else if (double.class == parameterType) {
-			cv.visitMethodInsn(Constants.INVOKESTATIC, Type.getInternalName(Double.class), VALUE_OF_METHOD, "(D)Ljava/lang/Double;");
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(Double.class), VALUE_OF_METHOD, "(D)Ljava/lang/Double;");
 		}
 		else if (char.class == parameterType) {
-			cv.visitMethodInsn(Constants.INVOKESTATIC, Type.getInternalName(Character.class), VALUE_OF_METHOD, "(C)Ljava/lang/Character;");
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(Character.class), VALUE_OF_METHOD, "(C)Ljava/lang/Character;");
 		}
 		else if (boolean.class == parameterType) {
-			cv.visitMethodInsn(Constants.INVOKESTATIC, Type.getInternalName(Boolean.class), VALUE_OF_METHOD, "(Z)Ljava/lang/Boolean;");
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(Boolean.class), VALUE_OF_METHOD, "(Z)Ljava/lang/Boolean;");
 		}
 		else {
 			throw new IllegalArgumentException("Cannot wrap non-primitive value: " + parameterType.getName());
 		}
 	}
 
-	protected void visitGetPrimitiveType(CodeVisitor cv, Class parameterType) {
+	protected void visitGetPrimitiveType(MethodVisitor mv, Class parameterType) {
 		if (byte.class == parameterType) {
-			cv.visitFieldInsn(Constants.GETSTATIC, Type.getInternalName(Byte.class), TYPE_FIELD, CLASS_DESCRIPTOR);
+			mv.visitFieldInsn(Opcodes.GETSTATIC, Type.getInternalName(Byte.class), TYPE_FIELD, CLASS_DESCRIPTOR);
 		}
 		else if (short.class == parameterType) {
-			cv.visitFieldInsn(Constants.GETSTATIC, Type.getInternalName(Short.class), TYPE_FIELD, CLASS_DESCRIPTOR);
+			mv.visitFieldInsn(Opcodes.GETSTATIC, Type.getInternalName(Short.class), TYPE_FIELD, CLASS_DESCRIPTOR);
 		}
 		else if (int.class == parameterType) {
-			cv.visitFieldInsn(Constants.GETSTATIC, Type.getInternalName(Integer.class), TYPE_FIELD, CLASS_DESCRIPTOR);
+			mv.visitFieldInsn(Opcodes.GETSTATIC, Type.getInternalName(Integer.class), TYPE_FIELD, CLASS_DESCRIPTOR);
 		}
 		else if (long.class == parameterType) {
-			cv.visitFieldInsn(Constants.GETSTATIC, Type.getInternalName(Long.class), TYPE_FIELD, CLASS_DESCRIPTOR);
+			mv.visitFieldInsn(Opcodes.GETSTATIC, Type.getInternalName(Long.class), TYPE_FIELD, CLASS_DESCRIPTOR);
 		}
 		else if (float.class == parameterType) {
-			cv.visitFieldInsn(Constants.GETSTATIC, Type.getInternalName(Float.class), TYPE_FIELD, CLASS_DESCRIPTOR);
+			mv.visitFieldInsn(Opcodes.GETSTATIC, Type.getInternalName(Float.class), TYPE_FIELD, CLASS_DESCRIPTOR);
 		}
 		else if (double.class == parameterType) {
-			cv.visitFieldInsn(Constants.GETSTATIC, Type.getInternalName(Double.class), TYPE_FIELD, CLASS_DESCRIPTOR);
+			mv.visitFieldInsn(Opcodes.GETSTATIC, Type.getInternalName(Double.class), TYPE_FIELD, CLASS_DESCRIPTOR);
 		}
 		else if (char.class == parameterType) {
-			cv.visitFieldInsn(Constants.GETSTATIC, Type.getInternalName(Character.class), TYPE_FIELD, CLASS_DESCRIPTOR);
+			mv.visitFieldInsn(Opcodes.GETSTATIC, Type.getInternalName(Character.class), TYPE_FIELD, CLASS_DESCRIPTOR);
 		}
 		else if (boolean.class == parameterType) {
-			cv.visitFieldInsn(Constants.GETSTATIC, Type.getInternalName(Boolean.class), TYPE_FIELD, CLASS_DESCRIPTOR);
+			mv.visitFieldInsn(Opcodes.GETSTATIC, Type.getInternalName(Boolean.class), TYPE_FIELD, CLASS_DESCRIPTOR);
 		}
 		else {
 			throw new IllegalArgumentException("Cannot get type for non-primitive value: " + parameterType.getName());
 		}
 	}
 
-	protected void visitUnwrapPrimtiveType(CodeVisitor cv, Class parameterType) {
+	protected void visitUnwrapPrimtiveType(MethodVisitor mv, Class parameterType) {
 		if (byte.class == parameterType) {
 			String wrapperInternalName = Type.getInternalName(Byte.class);
-			cv.visitTypeInsn(Constants.CHECKCAST, wrapperInternalName);
-			cv.visitMethodInsn(Constants.INVOKEVIRTUAL, wrapperInternalName, "byteValue", "()B");
+			mv.visitTypeInsn(Opcodes.CHECKCAST, wrapperInternalName);
+			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, wrapperInternalName, "byteValue", "()B");
 		}
 		else if (short.class == parameterType) {
 			String wrapperInternalName = Type.getInternalName(Short.class);
-			cv.visitTypeInsn(Constants.CHECKCAST, wrapperInternalName);
-			cv.visitMethodInsn(Constants.INVOKEVIRTUAL, wrapperInternalName, "shortValue", "()S");
+			mv.visitTypeInsn(Opcodes.CHECKCAST, wrapperInternalName);
+			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, wrapperInternalName, "shortValue", "()S");
 		}
 		else if (int.class == parameterType) {
 			String wrapperInternalName = Type.getInternalName(Integer.class);
-			cv.visitTypeInsn(Constants.CHECKCAST, wrapperInternalName);
-			cv.visitMethodInsn(Constants.INVOKEVIRTUAL, wrapperInternalName, "intValue", "()I");
+			mv.visitTypeInsn(Opcodes.CHECKCAST, wrapperInternalName);
+			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, wrapperInternalName, "intValue", "()I");
 		}
 		else if (long.class == parameterType) {
 			String wrapperInternalName = Type.getInternalName(Long.class);
-			cv.visitTypeInsn(Constants.CHECKCAST, wrapperInternalName);
-			cv.visitMethodInsn(Constants.INVOKEVIRTUAL, wrapperInternalName, "longValue", "()J");
+			mv.visitTypeInsn(Opcodes.CHECKCAST, wrapperInternalName);
+			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, wrapperInternalName, "longValue", "()J");
 		}
 		else if (float.class == parameterType) {
 			String wrapperInternalName = Type.getInternalName(Float.class);
-			cv.visitTypeInsn(Constants.CHECKCAST, wrapperInternalName);
-			cv.visitMethodInsn(Constants.INVOKEVIRTUAL, wrapperInternalName, "floatValue", "()F");
+			mv.visitTypeInsn(Opcodes.CHECKCAST, wrapperInternalName);
+			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, wrapperInternalName, "floatValue", "()F");
 		}
 		else if (double.class == parameterType) {
 			String wrapperInternalName = Type.getInternalName(Double.class);
-			cv.visitTypeInsn(Constants.CHECKCAST, wrapperInternalName);
-			cv.visitMethodInsn(Constants.INVOKEVIRTUAL, wrapperInternalName, "doubleValue", "()D");
+			mv.visitTypeInsn(Opcodes.CHECKCAST, wrapperInternalName);
+			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, wrapperInternalName, "doubleValue", "()D");
 		}
 		else if (char.class == parameterType) {
 			String wrapperInternalName = Type.getInternalName(Character.class);
-			cv.visitTypeInsn(Constants.CHECKCAST, wrapperInternalName);
-			cv.visitMethodInsn(Constants.INVOKEVIRTUAL, wrapperInternalName, "charValue", "()C");
+			mv.visitTypeInsn(Opcodes.CHECKCAST, wrapperInternalName);
+			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, wrapperInternalName, "charValue", "()C");
 		}
 		else if (boolean.class == parameterType) {
 			String wrapperInternalName = Type.getInternalName(Boolean.class);
-			cv.visitTypeInsn(Constants.CHECKCAST, wrapperInternalName);
-			cv.visitMethodInsn(Constants.INVOKEVIRTUAL, wrapperInternalName, "booleanValue", "()Z");
+			mv.visitTypeInsn(Opcodes.CHECKCAST, wrapperInternalName);
+			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, wrapperInternalName, "booleanValue", "()Z");
 		}
 		else {
 			throw new IllegalArgumentException("Cannot unwrap non-primitive value: " + parameterType.getName());
 		}
 	}
 
-	protected void visitIntegerInsn(int intValue, CodeVisitor cv) {
+	protected void visitIntegerInsn(int intValue, MethodVisitor mv) {
 		switch (intValue) {
 			case 0:
-				cv.visitInsn(Constants.ICONST_0);
+				mv.visitInsn(Opcodes.ICONST_0);
 				break;
 			case 1:
-				cv.visitInsn(Constants.ICONST_1);
+				mv.visitInsn(Opcodes.ICONST_1);
 				break;
 			case 2:
-				cv.visitInsn(Constants.ICONST_2);
+				mv.visitInsn(Opcodes.ICONST_2);
 				break;
 			case 3:
-				cv.visitInsn(Constants.ICONST_3);
+				mv.visitInsn(Opcodes.ICONST_3);
 				break;
 			case 4:
-				cv.visitInsn(Constants.ICONST_4);
+				mv.visitInsn(Opcodes.ICONST_4);
 				break;
 			case 5:
-				cv.visitInsn(Constants.ICONST_5);
+				mv.visitInsn(Opcodes.ICONST_5);
 				break;
 			default:
-				cv.visitIntInsn(Constants.BIPUSH, intValue);
+				mv.visitIntInsn(Opcodes.BIPUSH, intValue);
 		}
 	}
 

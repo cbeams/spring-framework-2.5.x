@@ -4,8 +4,8 @@ import org.aopalliance.aop.AspectException;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Constants;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.util.ASMifierClassVisitor;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.AopConfigException;
@@ -115,7 +115,7 @@ public class AsmAopProxy implements AopProxy {
 		String superName = (emptyTargetSource) ? OBJECT_INTERNAL_NAME : targetInternalName;
 		ClassWriter cw = new ClassWriter(true);
 
-		cw.visit(Constants.V1_5, Constants.ACC_PUBLIC + Constants.ACC_SUPER, proxyInternalName, superName, proxyInterfaceTypes, null);
+		cw.visit(Opcodes.V1_5, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, proxyInternalName, superName, null, proxyInterfaceTypes);
 		generateConstructor(cw, proxyInternalName, targetDescriptor, targetInternalName);
 		proxyMethods(cw, targetClass, proxyInterfaces, proxyInternalName, targetInternalName, targetDescriptor);
 		cw.visitEnd();
