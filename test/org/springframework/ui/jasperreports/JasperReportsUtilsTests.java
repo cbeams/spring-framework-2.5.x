@@ -16,6 +16,27 @@
 
 package org.springframework.ui.jasperreports;
 
+import junit.framework.TestCase;
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.export.JRCsvExporterParameter;
+import net.sf.jasperreports.engine.export.JRExportProgressMonitor;
+import net.sf.jasperreports.engine.export.JRHtmlExporter;
+import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
+import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+import net.sf.jasperreports.engine.util.JRLoader;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.core.io.ClassPathResource;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
@@ -25,23 +46,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
-
-import junit.framework.TestCase;
-import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JRParameter;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import net.sf.jasperreports.engine.export.JRHtmlExporter;
-import net.sf.jasperreports.engine.export.JRPdfExporter;
-import net.sf.jasperreports.engine.util.JRLoader;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-
-import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rob Harrop
@@ -56,56 +60,100 @@ public class JasperReportsUtilsTests extends TestCase {
 		String output = writer.getBuffer().toString();
 		assertCsvOutputCorrect(output);
 	}
-	
+
 	public void testRenderAsCsvWithCollection() throws Exception {
 		StringWriter writer = new StringWriter();
 		JasperReportsUtils.renderAsCsv(getReport(), getParameters(), getData(), writer);
 		String output = writer.getBuffer().toString();
 		assertCsvOutputCorrect(output);
 	}
-	
+
+	public void testRenderAsCsvWithExporterParameters() throws Exception {
+		StringWriter writer = new StringWriter();
+		Map exporterParameters = new HashMap();
+		exporterParameters.put(JRCsvExporterParameter.FIELD_DELIMITER, "~");
+		JasperReportsUtils.renderAsCsv(getReport(), getParameters(), getData(), writer, exporterParameters);
+		String output = writer.getBuffer().toString();
+		assertCsvOutputCorrect(output);
+		assertTrue("Delimiter is incorrect", output.indexOf("~") > -1);
+	}
+
 	public void testRenderAsHtmlWithDataSource() throws Exception {
 		StringWriter writer = new StringWriter();
 		JasperReportsUtils.renderAsHtml(getReport(), getParameters(), getDataSource(), writer);
 		String output = writer.getBuffer().toString();
 		assertHtmlOutputCorrect(output);
 	}
-	
+
 	public void testRenderAsHtmlWithCollection() throws Exception {
 		StringWriter writer = new StringWriter();
 		JasperReportsUtils.renderAsHtml(getReport(), getParameters(), getData(), writer);
 		String output = writer.getBuffer().toString();
 		assertHtmlOutputCorrect(output);
 	}
-	
+
+	public void testRenderAsHtmlWithExporterParameters() throws Exception {
+		StringWriter writer = new StringWriter();
+		Map exporterParameters = new HashMap();
+		String uri = "/my/uri";
+		exporterParameters.put(JRHtmlExporterParameter.IMAGES_URI, uri);
+		JasperReportsUtils.renderAsHtml(getReport(), getParameters(), getData(), writer, exporterParameters);
+		String output = writer.getBuffer().toString();
+		assertHtmlOutputCorrect(output);
+		assertTrue("URI not included", output.indexOf(uri) > -1);
+	}
+
 	public void testRenderAsPdfWithDataSource() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperReportsUtils.renderAsPdf(getReport(), getParameters(), getDataSource(), os);
 		byte[] output = os.toByteArray();
 		assertPdfOutputCorrect(output);
 	}
-	
+
 	public void testRenderAsPdfWithCollection() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperReportsUtils.renderAsPdf(getReport(), getParameters(), getData(), os);
 		byte[] output = os.toByteArray();
 		assertPdfOutputCorrect(output);
 	}
-	
+
+	public void testRenderAsPdfWithExporterParameters() throws Exception {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		Map exporterParameters = new HashMap();
+		exporterParameters.put(JRPdfExporterParameter.PDF_VERSION, JRPdfExporterParameter.PDF_VERSION_1_6);
+		JasperReportsUtils.renderAsPdf(getReport(), getParameters(), getData(), os, exporterParameters);
+		byte[] output = os.toByteArray();
+		assertPdfOutputCorrect(output);
+		assertTrue(new String(output).indexOf("PDF-1.6") > -1);
+	}
+
 	public void testRenderAsXlsWithDataSource() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperReportsUtils.renderAsXls(getReport(), getParameters(), getDataSource(), os);
 		byte[] output = os.toByteArray();
 		assertXlsOutputCorrect(output);
 	}
-	
+
 	public void testRenderAsXlsWithCollection() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperReportsUtils.renderAsXls(getReport(), getParameters(), getData(), os);
 		byte[] output = os.toByteArray();
 		assertXlsOutputCorrect(output);
 	}
-	
+
+	public void testRenderAsXlsWithExporterParameters() throws Exception {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		Map exporterParameters = new HashMap();
+
+		SimpleProgressMonitor monitor = new SimpleProgressMonitor();
+		exporterParameters.put(JRXlsExporterParameter.PROGRESS_MONITOR, monitor);
+
+		JasperReportsUtils.renderAsXls(getReport(), getParameters(), getData(), os, exporterParameters);
+		byte[] output = os.toByteArray();
+		assertXlsOutputCorrect(output);
+		assertTrue(monitor.isInvoked());
+	}
+
 	public void testRenderWithWriter() throws Exception {
 		StringWriter writer = new StringWriter();
 		JasperPrint print = JasperFillManager.fillReport(getReport(), getParameters(), getDataSource());
@@ -113,7 +161,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		String output = writer.getBuffer().toString();
 		assertHtmlOutputCorrect(output);
 	}
-	
+
 	public void testRenderWithOutputStream() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperPrint print = JasperFillManager.fillReport(getReport(), getParameters(), getDataSource());
@@ -121,41 +169,41 @@ public class JasperReportsUtilsTests extends TestCase {
 		byte[] output = os.toByteArray();
 		assertPdfOutputCorrect(output);
 	}
-	
+
 	private void assertCsvOutputCorrect(String output) {
-		assertTrue("Output length should be greater than 0", (output.length()  > 0));
+		assertTrue("Output length should be greater than 0", (output.length() > 0));
 		assertTrue("Output should start with Dear Lord!", output.startsWith("Dear Lord!"));
 		assertTrue("Output should contain 'MeineSeite'", output.indexOf("MeineSeite") > -1);
 	}
-	
+
 	private void assertHtmlOutputCorrect(String output) {
-		assertTrue("Output length should be greater than 0", (output.length()  > 0));
+		assertTrue("Output length should be greater than 0", (output.length() > 0));
 		assertTrue("Output should contain <html>", output.indexOf("<html>") > -1);
 		assertTrue("Output should contain 'MeineSeite'", output.indexOf("MeineSeite") > -1);
 	}
-	
+
 	private void assertPdfOutputCorrect(byte[] output) throws Exception {
-		assertTrue("Output length should be greater than 0", (output.length  > 0));
-		
+		assertTrue("Output length should be greater than 0", (output.length > 0));
+
 		String translated = new String(output, "US-ASCII");
 		assertTrue("Output should start with %PDF", translated.startsWith("%PDF"));
 	}
-	
+
 	private void assertXlsOutputCorrect(byte[] output) throws Exception {
 		HSSFWorkbook workbook = new HSSFWorkbook(new ByteArrayInputStream(output));
 		HSSFSheet sheet = workbook.getSheetAt(0);
 		assertNotNull("Sheet should not be null", sheet);
 		HSSFRow row = sheet.getRow(3);
-		HSSFCell cell = row.getCell((short)1);
+		HSSFCell cell = row.getCell((short) 1);
 		assertNotNull("Cell should not be null", cell);
 		assertEquals("Cell content should be Dear Lord!", "Dear Lord!", cell.getStringCellValue());
 	}
-	
+
 	private JasperReport getReport() throws Exception {
 		ClassPathResource resource = new ClassPathResource("DataSourceReport.jasper", getClass());
 		return (JasperReport) JRLoader.loadObject(resource.getInputStream());
 	}
-	
+
 	private Map getParameters() {
 		Map model = new HashMap();
 		model.put("ReportTitle", "Dear Lord!");
@@ -166,7 +214,7 @@ public class JasperReportsUtilsTests extends TestCase {
 	}
 
 	private JRDataSource getDataSource() {
-		return  new JRBeanCollectionDataSource(getData());
+		return new JRBeanCollectionDataSource(getData());
 	}
 
 	private List getData() {
@@ -181,4 +229,16 @@ public class JasperReportsUtilsTests extends TestCase {
 		return list;
 	}
 
+	private static class SimpleProgressMonitor implements JRExportProgressMonitor {
+
+		private boolean invoked = false;
+
+		public void afterPageExport() {
+			this.invoked = true;
+		}
+
+		public boolean isInvoked() {
+			return invoked;
+		}
+	}
 }
