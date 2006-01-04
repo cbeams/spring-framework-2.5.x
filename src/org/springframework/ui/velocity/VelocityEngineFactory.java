@@ -64,6 +64,7 @@ import org.springframework.core.io.ResourceLoader;
  * @see CommonsLoggingLogSystem
  * @see VelocityEngineFactoryBean
  * @see org.springframework.web.servlet.view.velocity.VelocityConfigurer
+ * @see org.apache.velocity.app.VelocityEngine
  */
 public class VelocityEngineFactory {
 
