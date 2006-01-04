@@ -71,6 +71,20 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 
 	/**
+	 * Default constructor for AbstractTransactionalSpringContextTests.
+	 */
+	public AbstractTransactionalSpringContextTests() {
+	}
+
+	/**
+	 * Constructor for AbstractTransactionalSpringContextTests with a JUnit name.
+	 */
+	public AbstractTransactionalSpringContextTests(String name) {
+		super(name);
+	}
+
+
+	/**
 	 * Subclasses can set this value in their constructor to change
 	 * default, which is always to roll the transaction back
 	 */

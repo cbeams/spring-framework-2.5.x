@@ -105,6 +105,20 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 
 
 	/**
+	 * Default constructor for AbstractDependencyInjectionSpringContextTests.
+	 */
+	public AbstractDependencyInjectionSpringContextTests() {
+	}
+
+	/**
+	 * Constructor for AbstractDependencyInjectionSpringContextTests with a JUnit name.
+	 */
+	public AbstractDependencyInjectionSpringContextTests(String name) {
+		super(name);
+	}
+
+
+	/**
 	 * Set whether to populate protected variables of this test case.
 	 * Default is "false".
 	 */

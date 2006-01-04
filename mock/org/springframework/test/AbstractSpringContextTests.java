@@ -61,6 +61,20 @@ public abstract class AbstractSpringContextTests extends TestCase {
 
 
 	/**
+	 * Default constructor for AbstractSpringContextTests.
+	 */
+	public AbstractSpringContextTests() {
+	}
+
+	/**
+	 * Constructor for AbstractSpringContextTests with a JUnit name.
+	 */
+	public AbstractSpringContextTests(String name) {
+		super(name);
+	}
+
+
+	/**
 	 * Set custom locations dirty. This will cause them to be reloaded
 	 * from the cache before the next test case is executed.
 	 * <p>Call this method only if you change the state of a singleton
