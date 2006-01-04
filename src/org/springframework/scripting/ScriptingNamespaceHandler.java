@@ -16,20 +16,25 @@
 
 package org.springframework.scripting;
 
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.w3c.dom.Element;
+
 /**
- * Interface that defines a script-based resounce that can be used
- * to create an arbitrary java <code>Object</code>. Created by a
- * {@link AbstractScriptFactory factory} object.
- *
  * @author Rob Harrop
- * @author Rod Johnson
  * @since 2.0M2
  */
-public interface Script {
+public class ScriptingNamespaceHandler extends NamespaceHandlerSupport {
 
-	/**
-	 * Creates the instance of the scripted object.
-	 */
-	Object createObject() throws Exception;
+	public ScriptingNamespaceHandler() {
+		registerBeanDefinitionParser("groovy", new GroovyBeanDefinitionParser());
+	}
 
+	private static class GroovyBeanDefinitionParser implements BeanDefinitionParser {
+
+		public void parse(Element element, BeanDefinitionRegistry registry) {
+			throw new UnsupportedOperationException();
+		}
+	}
 }

@@ -6,6 +6,11 @@
 
 	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
 
+	<!-- base types -->
+	<xsd:complexType name="identifiedType" abstract="true">
+		<xsd:attribute name="id" type="xsd:ID"/>
+	</xsd:complexType>
+
 	<!-- Top-level <beans> tag -->
 	<xsd:element name="beans">
 		<xsd:complexType>
@@ -96,7 +101,7 @@
 
 	<!-- definition of an attribute group -->
 	<xsd:attributeGroup name="beanAttributes">
-		<xsd:attribute name="id" type="xsd:ID"/>
+		<!--<xsd:attribute name="id" type="xsd:ID"/>-->
 		<xsd:attribute name="name" type="xsd:string"/>
 		<xsd:attribute name="class" type="xsd:string"/>
 		<xsd:attribute name="parent" type="xsd:string"/>
@@ -156,12 +161,18 @@
 		<xsd:anyAttribute processContents="strict" namespace="##other"/>
 	</xsd:attributeGroup>
 
+	<!-- the <bean> element -->
 	<xsd:element name="bean">
 		<xsd:complexType>
-			<xsd:group ref="beanElements"/>
-			<xsd:attributeGroup ref="beanAttributes"/>
+			<xsd:complexContent>
+				<xsd:extension base="identifiedType">
+					<xsd:group ref="beanElements"/>
+					<xsd:attributeGroup ref="beanAttributes"/>
+				</xsd:extension>
+			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
+
 	<xsd:element name="constructor-arg">
 		<xsd:complexType>
 			<xsd:sequence>

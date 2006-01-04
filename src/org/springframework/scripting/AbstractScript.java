@@ -23,6 +23,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
+ * Abstract implementation of the {@link Script} interface.
+ * Provides base configuration of the underlying
+ * {@link ScriptSource} and handles the opening/closing of
+ * the {@link InputStream} for the script.
+ *
  * @author Rob Harrop
  * @author Rod Johnson
  * @since 2.0M2
@@ -31,6 +36,9 @@ public abstract class AbstractScript implements Script {
 
     protected Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * {@link ScriptSource} for this <code>Script</code> instance.
+	 */
 	private ScriptSource scriptSource;
 
 	protected AbstractScript(ScriptSource scriptSource) {
