@@ -90,5 +90,4 @@ public interface JmsAdmin {
 	 */
 	void setJndiEnvironment(Properties jndiEnvironment);
 
-
 }
