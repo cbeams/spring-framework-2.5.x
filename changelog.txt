@@ -29,6 +29,7 @@ Package org.springframework.mock
 * added "set/removeParameter" methods to MockHttpServletRequest, allowing to replace/remove existing parameters
 
 Package org.springframework.orm
+* SqlMapClientTemplate always works with SqlMapSession and provided Connection to enable proper batching in all cases
 * updated Spring's JDO support to be compatible with JPOX JDO 2.0 API snapshot-9 (corresponding to JDO 2.0 final draft)
 * JdoTransactionManager does explicit "isActive()" check before attempting a rollback, to avoid illegal state exception
 * Hibernate LocalSessionFactoryBean exposes its DataSource on "SessionFactory.close()", for potential schema export
@@ -38,8 +39,14 @@ Package org.springframework.remoting
 * RmiServiceExporter performs explicit RMI unexport if binding to the registry failed, to avoid dangling exports
 * JaxRpcPortClientInterceptor/ProxyFactoryBean apply given JaxRpcServicePostProcessors to existing JAX-RPC Service too
 
+Package org.springframework.test
+* added overloaded constructors that take a JUnit TestCase name to all of the provided TestCase subclasses
+
 Package org.springframework.transaction
 * JtaTransactionManager only invokes rollback if transaction is still active (some JTA providers eagerly terminate)
+
+Package org.springframework.ui
+* added "defaultEncoding" bean property to FreeMarkerConfigurationFactory(Bean), inherited by FreeMarkerConfigurer
 
 Package org.springframework.util
 * added "isNull()" methods to Assert class
