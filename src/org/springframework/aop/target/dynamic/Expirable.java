@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,20 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.factory.dynamic.persist;
-
-import org.springframework.dao.DataAccessException;
-import org.springframework.aop.target.dynamic.Refreshable;
+package org.springframework.aop.target.dynamic;
 
 /**
- * Interface to be implemented by objects that are backed by an object
- * mapped to an RDBMS row.
+ * Interface to be implemented by objects that can go stale.
+ *
  * @author Rod Johnson
+ * @author Rob Harrop
+ * @since 2.0M2
  */
-public interface DatabaseBean extends Refreshable {
-
-	long getPrimaryKey();
-
-	void setPrimaryKey(long pk) throws DataAccessException;
-
+public interface Expirable {
+	
 	/**
-	 * Return a readable String showing the details where this definition comes from,
-	 * for use in logging etc.
-	 * @return
+	 * Checks whether the object has expired.
 	 */
-	String getStoreDetails();
+	boolean isModified();
+
 }

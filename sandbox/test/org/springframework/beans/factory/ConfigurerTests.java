@@ -27,9 +27,6 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.script.DynamicScript;
-import org.springframework.beans.factory.script.Hello;
-import org.springframework.beans.factory.script.groovy.GroovyScriptFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -82,7 +79,7 @@ public class ConfigurerTests extends TestCase {
 		assertTrue(tb instanceof Advised);
 	}
 	
-	public void testGroovyScript() {
+	/*public void testGroovyScript() {
 		GenericApplicationContext bf = new GenericApplicationContext();
 		Configurer cfg = new Configurer(bf);
 		
@@ -102,7 +99,7 @@ public class ConfigurerTests extends TestCase {
 		assertTrue("Not a script", hello instanceof DynamicScript);
 		
 		assertEquals(propVal, hello.sayHello());
-	}
+	}*/
 
 	public void testGetter() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();

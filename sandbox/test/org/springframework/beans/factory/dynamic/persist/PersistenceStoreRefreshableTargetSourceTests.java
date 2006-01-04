@@ -17,8 +17,8 @@
 package org.springframework.beans.factory.dynamic.persist;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.dynamic.DynamicObject;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
@@ -57,16 +57,16 @@ public class PersistenceStoreRefreshableTargetSourceTests extends AbstractDepend
 		assertSame("Populated by autowiring", applicationContext.getBean("tb"), dotb.getTestBean());
 		
 		// Now try casts...
-		DynamicObject dyno = (DynamicObject) dotb;
-		assertEquals(1, dyno.getLoadCount());
+		Refreshable dyno = (Refreshable) dotb;
+		assertEquals(1, dyno.getRefreshCount());
 	}
 	
 	public void testChangePrimaryKeyToValidValue() {
 		assertEquals("Equals to original", dependsOnTestBean1.getState(), dotb.getState());
 		assertSame("Populated by autowiring", applicationContext.getBean("tb"), dotb.getTestBean());
 		
-		DynamicObject dyno = (DynamicObject) dotb;
-		assertEquals(1, dyno.getLoadCount());
+		Refreshable dyno = (Refreshable) dotb;
+		assertEquals(1, dyno.getRefreshCount());
 		
 		// TODO What about prototype references from the factory? They'll change...
 		// Document or allow only singletons?
@@ -75,7 +75,7 @@ public class PersistenceStoreRefreshableTargetSourceTests extends AbstractDepend
 		assertEquals("Now behaves like new", dependsOnTestBean2.getState(), dotb.getState());
 		assertSame("Populated by autowiring", applicationContext.getBean("tb"), dotb.getTestBean());
 		
-		assertEquals(2, dyno.getLoadCount());
+		assertEquals(2, dyno.getRefreshCount());
 		
 		// We modified context
 		setDirty();

@@ -69,4 +69,8 @@ public class HibernateTargetSource extends AbstractPersistenceStoreRefreshableTa
 		return "HIBERNATE";
 	}
 
+	public boolean isModified() {
+		return true;
+	}
+
 }

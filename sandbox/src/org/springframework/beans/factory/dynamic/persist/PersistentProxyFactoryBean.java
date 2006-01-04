@@ -17,8 +17,8 @@
 package org.springframework.beans.factory.dynamic.persist;
 
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.target.dynamic.AbstractRefreshableTargetSource;
 import org.springframework.aop.framework.ProxyFactoryBean;
-import org.springframework.beans.factory.dynamic.AbstractRefreshableTargetSource;
 
 /**
  * Special ProxyBean to use with persistent beans.
@@ -51,7 +51,7 @@ public class PersistentProxyFactoryBean extends ProxyFactoryBean {
 			throw new IllegalArgumentException("PersistentProxyFactoryBean must be used with an AbstractPersistenceStoreRefreshableTargetSource");
 		}
 		AbstractPersistenceStoreRefreshableTargetSource arts = (AbstractPersistenceStoreRefreshableTargetSource) ts;
-		addAdvisor(arts.getIntroductionAdvisor());
+		//addAdvisor(arts.getIntroductionAdvisor());
 		super.setTargetSource(arts);
 		this.persistentClass = arts.getPersistentClass();
 	}

@@ -49,4 +49,8 @@ public class MapPersistenceStoreRefreshableTargetSource extends AbstractPersiste
 		return "MAP";
 	}
 
+	public boolean isModified() {
+		return true;
+	}
+
 }

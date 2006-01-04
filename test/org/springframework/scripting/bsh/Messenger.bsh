@@ -1,0 +1,9 @@
+String message;
+
+String getMessage() {
+ return message;
+}
+
+void setMessage(String aMessage) {
+ message = aMessage;
+}

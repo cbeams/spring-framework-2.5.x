@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+    <bean id="staticScriptFactory" class="org.springframework.scripting.bsh.BshScriptFactory">
+        <property name="enableRefresh" value="false" />
+    </bean>
+
+    <bean id="refreshingScriptFactory" class="org.springframework.scripting.bsh.BshScriptFactory"/>
+
+    <bean id="calculator" factory-bean="staticScriptFactory" factory-method="createObject">
+        <constructor-arg index="0" value="classpath:org/springframework/scripting/bsh/Calculator.bsh" />
+        <constructor-arg index="1" value="org.springframework.scripting.Calculator" />
+    </bean>
+
+    <bean id="messenger" factory-bean="refreshingScriptFactory" factory-method="createObject">
+        <constructor-arg index="0" value="classpath:org/springframework/scripting/bsh/Messenger.bsh" />
+        <constructor-arg index="1" value="org.springframework.scripting.Messenger" />
+        <property name="message" value="Hello World!" />
+    </bean>
+</beans>

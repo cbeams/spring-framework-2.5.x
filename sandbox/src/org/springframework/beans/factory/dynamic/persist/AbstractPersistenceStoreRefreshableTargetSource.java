@@ -19,38 +19,38 @@ package org.springframework.beans.factory.dynamic.persist;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.beans.factory.dynamic.AbstractRefreshableTargetSource;
 import org.springframework.dao.DataAccessException;
+import org.springframework.aop.target.dynamic.AbstractRefreshableTargetSource;
 
 /**
  * 
  * @author Rod Johnson
  */
-public abstract class AbstractPersistenceStoreRefreshableTargetSource extends AbstractRefreshableTargetSource 
+public abstract class AbstractPersistenceStoreRefreshableTargetSource extends AbstractRefreshableTargetSource
 		implements DatabaseBean, BeanFactoryAware  {
 
 	// TODO non-object PK support
 	private long pk;
-	
+
 	private int autowireMode = AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
-	
+
 	private Class persistentClass;
-	
+
 	private AutowireCapableBeanFactory aabf;
-	
+
 	public AbstractPersistenceStoreRefreshableTargetSource() {
 		// Don't want introduction to expose this SPI interface
-		suppressInterface(BeanFactoryAware.class);
+		//suppressInterface(BeanFactoryAware.class);
 	}
-	
-	
+
+
 	/**
 	 * @return Returns the autowireMode.
 	 */
 	public int getAutowireMode() {
 		return autowireMode;
 	}
-	
+
 	/**
 	 * Set the type of autowiring to apply to the bean once it's
 	 * returned from the persistent store.
@@ -65,16 +65,16 @@ public abstract class AbstractPersistenceStoreRefreshableTargetSource extends Ab
 		this.autowireMode = autowireMode;
 	}
 
-	
+
 	public void setBeanFactory(BeanFactory bf) {
 		if (bf instanceof AutowireCapableBeanFactory) {
 			aabf = (AutowireCapableBeanFactory) bf;
-			log.info("Will autowire instances: running in an AutowireCapableBeanFactory");
+			logger.info("Will autowire instances: running in an AutowireCapableBeanFactory");
 		}
 		else {
-			log.warn("Cannot autowire bean instances: not in an AutowireCapableBeanFactory");
+			logger.warn("Cannot autowire bean instances: not in an AutowireCapableBeanFactory");
 		}
-		
+
 		refresh();
 	}
 
@@ -84,12 +84,12 @@ public abstract class AbstractPersistenceStoreRefreshableTargetSource extends Ab
 	public Class getPersistentClass() {
 		return persistentClass;
 	}
-	
+
 	public final String getStoreDetails() {
 		return "class=" + persistentClass + "; pk=" + pk + "; " + storeDetails();
 	}
-	
-	protected abstract String storeDetails(); 
+
+	protected abstract String storeDetails();
 
 	/**
 	 * @param persistentClass The persistentClass to set.
@@ -104,23 +104,14 @@ public abstract class AbstractPersistenceStoreRefreshableTargetSource extends Ab
 
 	public synchronized void setPrimaryKey(long pk) throws DataAccessException {
 		this.pk = pk;
-		
-		if (isLoaded()) {
-			// We're changing the target, not setting the pk
-			// for the first time
-			markModified();
-			// if refresh on changePK?
-			refresh();
-		}
 	}
 
 	/**
-	 * @see org.springframework.beans.factory.dynamic.AbstractRefreshableTargetSource#refreshedTarget()
 	 */
-	protected Object refreshedTarget() throws DataAccessException {
+	protected Object freshTarget() throws DataAccessException {
 		// Use Hibernate to load the object
-		
-		log.info("Loading persistent object with class=" + persistentClass.getName() + " and pk=" + pk);
+
+		logger.info("Loading persistent object with class=" + persistentClass.getName() + " and pk=" + pk);
 		Object o = loadFromPersistentStore();
 
 		// If we have an autowire capable factory and autowiring is not switched off, 
@@ -128,18 +119,18 @@ public abstract class AbstractPersistenceStoreRefreshableTargetSource extends Ab
 		if (aabf != null && autowireMode != 0) {
 			// TODO What if duping between ORM populated and BF populated??
 			// BF will win
-			log.info("Autowiring properties of persistent object with class=" + persistentClass.getName() + " and pk=" + pk);
+			logger.info("Autowiring properties of persistent object with class=" + persistentClass.getName() + " and pk=" + pk);
 			aabf.autowireBeanProperties(o, autowireMode, false);
 		}
-		
+
 		// TODO what about publishing with the factory the dependencies of the persistent object?
 		return o;
 	}
-	
+
 	/**
 	 * Subclasses must implement this using Hibernate/another ORM tool.
 	 * @return
 	 */
 	protected abstract Object loadFromPersistentStore() throws DataAccessException;
-	
+
 }
