@@ -247,7 +247,25 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Add a single value for an HTTP parameter.
+	 * Set a single value for the specified HTTP parameter.
+	 * <p>If there are already one or more values registered for the given
+	 * parameter name, they will be replaced.
+	 */
+	public void setParameter(String name, String value) {
+		setParameter(name, new String[] {value});
+	}
+
+	/**
+	 * Set an array of values for the specified HTTP parameter.
+	 * <p>If there are already one or more values registered for the given
+	 * parameter name, they will be replaced.
+	 */
+	public void setParameter(String name, String[] values) {
+		this.parameters.put(name, values);
+	}
+
+	/**
+	 * Add a single value for the specified HTTP parameter.
 	 * <p>If there are already one or more values registered for the given
 	 * parameter name, the given value will be added to the end of the list.
 	 */
@@ -256,7 +274,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Add an array of values for an HTTP parameter.
+	 * Add an array of values for the specified HTTP parameter.
 	 * <p>If there are already one or more values registered for the given
 	 * parameter name, the given values will be added to the end of the list.
 	 */
@@ -271,6 +289,13 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		else {
 			this.parameters.put(name, values);
 		}
+	}
+
+	/**
+	 * Remove already registered values for the specified HTTP parameter, if any.
+	 */
+	public void removeParameter(String name) {
+		this.parameters.remove(name);
 	}
 
 	public String getParameter(String name) {

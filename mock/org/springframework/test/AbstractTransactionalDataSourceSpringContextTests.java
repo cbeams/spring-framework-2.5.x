@@ -35,12 +35,25 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 
 	protected JdbcTemplate jdbcTemplate;
 
-
 	/**
 	 * Did this test delete any tables? If so, we forbid transaction completion,
 	 * and only allow rollback.
 	 */
 	private boolean zappedTables;
+
+
+	/**
+	 * Default constructor for AbstractTransactionalDataSourceSpringContextTests.
+	 */
+	public AbstractTransactionalDataSourceSpringContextTests() {
+	}
+
+	/**
+	 * Constructor for AbstractTransactionalDataSourceSpringContextTests with a JUnit name.
+	 */
+	public AbstractTransactionalDataSourceSpringContextTests(String name) {
+		super(name);
+	}
 
 
 	/**

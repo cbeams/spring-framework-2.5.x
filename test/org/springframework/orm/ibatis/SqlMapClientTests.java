@@ -102,21 +102,6 @@ public class SqlMapClientTests extends TestCase {
 		smcControl.verify();
 	}
 
-	public void testQueryForObjectOnSqlMapClient() throws SQLException {
-		DataSource dataSource = new TransactionAwareDataSourceProxy(new DriverManagerDataSource());
-		MockControl clientControl = MockControl.createControl(SqlMapClient.class);
-		SqlMapClient client = (SqlMapClient) clientControl.getMock();
-		client.getDataSource();
-		clientControl.setReturnValue(dataSource, 2);
-		client.queryForObject("myStatement", "myParameter");
-		clientControl.setReturnValue("myResult", 1);
-		clientControl.replay();
-		SqlMapClientTemplate template = new SqlMapClientTemplate();
-		template.setSqlMapClient(client);
-		assertEquals("myResult", template.queryForObject("myStatement", "myParameter"));
-		clientControl.verify();
-	}
-
 	public void testQueryForObjectOnSqlMapSession() throws SQLException {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
@@ -132,7 +117,7 @@ public class SqlMapClientTests extends TestCase {
 		con.close();
 		conControl.setVoidCallable(1);
 		client.getDataSource();
-		clientControl.setReturnValue(ds, 3);
+		clientControl.setReturnValue(ds, 2);
 		client.openSession();
 		clientControl.setReturnValue(session, 1);
 		session.setUserConnection(con);

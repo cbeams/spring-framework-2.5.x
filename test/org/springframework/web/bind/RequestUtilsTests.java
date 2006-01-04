@@ -87,7 +87,7 @@ public class RequestUtilsTests extends TestCase {
 
 	public void testIntParameters() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addParameter("param", new String[] { "1", "2", "3" });
+		request.addParameter("param", new String[] {"1", "2", "3"});
 
 		request.addParameter("param2", "1");
 		request.addParameter("param2", "2");
@@ -150,9 +150,10 @@ public class RequestUtilsTests extends TestCase {
 
 	public void testLongParameters() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addParameter("param", new String[] { "1", "2", "3" });
+		request.setParameter("param", new String[] {"1", "2", "3"});
 
-		request.addParameter("param2", "1");
+		request.setParameter("param2", "0");
+		request.setParameter("param2", "1");
 		request.addParameter("param2", "2");
 		request.addParameter("param2", "bogus");
 
@@ -163,6 +164,21 @@ public class RequestUtilsTests extends TestCase {
 			assertEquals(array[i], values[i]);
 		}
 
+		try {
+			RequestUtils.getRequiredLongParameters(request, "param2");
+			fail("Should have thrown ServletRequestBindingException");
+		}
+		catch (ServletRequestBindingException ex) {
+			// expected
+		}
+
+		request.setParameter("param2", new String[] {"1", "2"});
+		values = RequestUtils.getRequiredLongParameters(request, "param2");
+		assertEquals(2, values.length);
+		assertEquals(1, values[0]);
+		assertEquals(2, values[1]);
+
+		request.removeParameter("param2");
 		try {
 			RequestUtils.getRequiredLongParameters(request, "param2");
 			fail("Should have thrown ServletRequestBindingException");
@@ -212,7 +228,7 @@ public class RequestUtilsTests extends TestCase {
 
 	public void testFloatParameters() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addParameter("param", new String[] { "1.5", "2.5", "3" });
+		request.addParameter("param", new String[] {"1.5", "2.5", "3"});
 
 		request.addParameter("param2", "1.5");
 		request.addParameter("param2", "2");
@@ -274,7 +290,7 @@ public class RequestUtilsTests extends TestCase {
 
 	public void testDoubleParameters() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addParameter("param", new String[] { "1.5", "2.5", "3" });
+		request.addParameter("param", new String[] {"1.5", "2.5", "3"});
 
 		request.addParameter("param2", "1.5");
 		request.addParameter("param2", "2");
@@ -337,7 +353,7 @@ public class RequestUtilsTests extends TestCase {
 
 	public void testBooleanParameters() throws ServletRequestBindingException {
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addParameter("param", new String[] { "true", "yes", "off", "1", "bogus" });
+		request.addParameter("param", new String[] {"true", "yes", "off", "1", "bogus"});
 
 		request.addParameter("param2", "false");
 		request.addParameter("param2", "true");

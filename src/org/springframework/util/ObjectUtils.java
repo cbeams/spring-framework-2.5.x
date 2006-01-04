@@ -44,23 +44,24 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Return a hex string form of an object's identity hash code.
-	 * @param o the object
+	 * @param obj the object
 	 * @return the object's identity code in hex
 	 */
-	public static String getIdentityHexString(Object o) {
-		return Integer.toHexString(System.identityHashCode(o));
+	public static String getIdentityHexString(Object obj) {
+		return Integer.toHexString(System.identityHashCode(obj));
 	}
 
 	/**
-	 * Return whether the given throwable is a checked exception,
-	 * i.e. an Exception but not a RuntimeException.
+	 * Return whether the given throwable is a checked exception:
+	 * that is, neither a RuntimeException nor an Error.
 	 * @param ex the throwable to check
 	 * @return whether the throwable is a checked exception
 	 * @see java.lang.Exception
 	 * @see java.lang.RuntimeException
+	 * @see java.lang.Error
 	 */
 	public static boolean isCheckedException(Throwable ex) {
-		return (ex instanceof Exception) && (!(ex instanceof RuntimeException));
+		return !(ex instanceof RuntimeException || ex instanceof Error);
 	}
 
 	/**
@@ -71,7 +72,7 @@ public abstract class ObjectUtils {
 	 * @return whether the given exception is compatible
 	 */
 	public static boolean isCompatibleWithThrowsClause(Throwable ex, Class[] declaredExceptions) {
-		if (ex instanceof RuntimeException) {
+		if (!isCheckedException(ex)) {
 			return true;
 		}
 		if (declaredExceptions != null) {
@@ -104,9 +105,9 @@ public abstract class ObjectUtils {
 		}
 		Class clazz = primitiveArray.getClass();
 		Assert.isTrue(clazz.isArray(),
-				"The specified parameter is not an array - it must be a primitive array.");
+				"The specified parameter is not an array - it must be a primitive array");
 		Assert.isTrue(clazz.getComponentType().isPrimitive(),
-				"The specified parameter is not a primitive array.");
+				"The specified parameter is not a primitive array");
 		int length = Array.getLength(primitiveArray);
 		if (length == 0) {
 			return new Object[0];

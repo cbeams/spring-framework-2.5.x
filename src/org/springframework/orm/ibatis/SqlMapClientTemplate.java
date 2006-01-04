@@ -34,7 +34,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.util.Assert;
 
@@ -150,43 +149,30 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	 */
 	public Object execute(SqlMapClientCallback action) throws DataAccessException {
 		Assert.notNull(this.sqlMapClient, "No SqlMapClient specified");
-		DataSource dataSource = getDataSource();
 
-		// Use direct SqlMapClient access if the SqlMapClient itself is
-		// configured with a TransactionAwareDataSourceProxy: In this case,
-		// there is no need to explicitly pass a transactional Connection in.
-		if (dataSource instanceof TransactionAwareDataSourceProxy &&
-				dataSource == this.sqlMapClient.getDataSource()) {
-			logger.debug("Executing action directly on SqlMapClient");
+		// We always needs to use a SqlMapSession, as we need to pass a Spring-managed
+		// Connection (potentially transactional) in. This shouldn't be necessary if
+		// we run against a TransactionAwareDataSourceProxy underneath, but unfortunately
+		// we still need it to make iBATIS batch execution work properly: If iBATIS
+		// doesn't recognize an existing transaction, it automatically executes the
+		// batch for every single statement...
+
+		SqlMapSession session = this.sqlMapClient.openSession();
+		try {
+			Connection con = DataSourceUtils.getConnection(getDataSource());
 			try {
-				return action.doInSqlMapClient(this.sqlMapClient);
+				session.setUserConnection(con);
+				return action.doInSqlMapClient(session);
 			}
 			catch (SQLException ex) {
 				throw getExceptionTranslator().translate("SqlMapClient operation", null, ex);
 			}
-		}
-
-		else {
-			// Use a SqlMapSession, as we need to pass a Spring-managed Connection
-			// (potentially transactional) in.
-			logger.debug("Executing action on SqlMapSession with Spring-managed JDBC connection");
-			SqlMapSession session = this.sqlMapClient.openSession();
-			try {
-				Connection con = DataSourceUtils.getConnection(getDataSource());
-				try {
-					session.setUserConnection(con);
-					return action.doInSqlMapClient(session);
-				}
-				catch (SQLException ex) {
-					throw getExceptionTranslator().translate("SqlMapClient operation", null, ex);
-				}
-				finally {
-					DataSourceUtils.releaseConnection(con, getDataSource());
-				}
-			}
 			finally {
-				session.close();
+				DataSourceUtils.releaseConnection(con, getDataSource());
 			}
+		}
+		finally {
+			session.close();
 		}
 	}
 
