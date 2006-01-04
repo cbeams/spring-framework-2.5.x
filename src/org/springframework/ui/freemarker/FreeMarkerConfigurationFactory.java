@@ -67,6 +67,9 @@ import org.springframework.core.io.ResourceLoader;
  * @see #setFreemarkerVariables
  * @see #setTemplateLoaderPath
  * @see #createConfiguration
+ * @see FreeMarkerConfigurationFactoryBean
+ * @see org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer
+ * @see freemarker.template.Configuration
  */
 public class FreeMarkerConfigurationFactory {
 
@@ -77,6 +80,8 @@ public class FreeMarkerConfigurationFactory {
 	private Properties freemarkerSettings;
 
 	private Map freemarkerVariables;
+
+	private String defaultEncoding;
 
 	private final List templateLoaders = new ArrayList();
 
@@ -113,6 +118,18 @@ public class FreeMarkerConfigurationFactory {
 	 */
 	public void setFreemarkerVariables(Map variables) {
 		this.freemarkerVariables = variables;
+	}
+
+	/**
+	 * Set the default encoding for the FreeMarker configuration.
+	 * If not specified, FreeMarker will use the platform file encoding.
+	 * <p>Used for template rendering unless there is an explicit encoding specified
+	 * for the rendering process (for example, on Spring's FreeMarkerView).
+	 * @see freemarker.template.Configuration#setDefaultEncoding
+	 * @see org.springframework.web.servlet.view.freemarker.FreeMarkerView#setEncoding
+	 */
+	public void setDefaultEncoding(String defaultEncoding) {
+		this.defaultEncoding = defaultEncoding;
 	}
 
 	/**
@@ -240,6 +257,10 @@ public class FreeMarkerConfigurationFactory {
 		}
 		if (this.freemarkerVariables != null && this.freemarkerVariables.size() > 0) {
 			config.setAllSharedVariables(new SimpleHash(this.freemarkerVariables));
+		}
+
+		if (this.defaultEncoding != null) {
+			config.setDefaultEncoding(this.defaultEncoding);
 		}
 
 		if (this.templateLoaderPaths != null) {
