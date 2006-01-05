@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.Visit;
-import org.springframework.web.bind.RequestUtils;
+import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -24,7 +24,7 @@ public class AddVisitForm extends AbstractClinicForm {
 
 	/** Method creates a new <code>Visit</code> with the correct <code>Pet</code> info */
 	protected Object formBackingObject(HttpServletRequest request) throws ServletException {
-		Pet pet = getClinic().loadPet(RequestUtils.getRequiredIntParameter(request, "petId"));
+		Pet pet = getClinic().loadPet(ServletRequestUtils.getRequiredIntParameter(request, "petId"));
 		Visit visit = new Visit();
 		pet.addVisit(visit);
 		return visit;

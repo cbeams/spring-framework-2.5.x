@@ -29,21 +29,9 @@ import javax.servlet.http.HttpServletRequest;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Keith Donald
+ * @deprecated since Spring 2.0: use ServletRequestUtils instead
  */
 public abstract class RequestUtils {
-
-	private static final IntParser INT_PARSER = new IntParser();
-
-	private static final LongParser LONG_PARSER = new LongParser();
-
-	private static final FloatParser FLOAT_PARSER = new FloatParser();
-
-	private static final DoubleParser DOUBLE_PARSER = new DoubleParser();
-
-	private static final BooleanParser BOOLEAN_PARSER = new BooleanParser();
-
-	private static final StringParser STRING_PARSER = new StringParser();
-
 
 	/**
 	 * Throw a ServletException if the given HTTP request method should be rejected.
@@ -116,7 +104,7 @@ public abstract class RequestUtils {
 	public static int getRequiredIntParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		return INT_PARSER.parseInt(name, request.getParameter(name));
+		return ServletRequestUtils.getRequiredIntParameter(request, name);
 	}
 
 	/**
@@ -129,7 +117,7 @@ public abstract class RequestUtils {
 	public static int[] getRequiredIntParameters(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		return INT_PARSER.parseInts(name, request.getParameterValues(name));
+		return ServletRequestUtils.getRequiredIntParameters(request, name);
 	}
 
 
@@ -191,7 +179,7 @@ public abstract class RequestUtils {
 	public static long getRequiredLongParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		return LONG_PARSER.parseLong(name, request.getParameter(name));
+		return ServletRequestUtils.getRequiredLongParameter(request, name);
 	}
 
 	/**
@@ -204,7 +192,7 @@ public abstract class RequestUtils {
 	public static long[] getRequiredLongParameters(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		return LONG_PARSER.parseLongs(name, request.getParameterValues(name));
+		return ServletRequestUtils.getRequiredLongParameters(request, name);
 	}
 
 
@@ -266,7 +254,7 @@ public abstract class RequestUtils {
 	public static float getRequiredFloatParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		return FLOAT_PARSER.parseFloat(name, request.getParameter(name));
+		return ServletRequestUtils.getRequiredFloatParameter(request, name);
 	}
 
 	/**
@@ -279,7 +267,7 @@ public abstract class RequestUtils {
 	public static float[] getRequiredFloatParameters(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		return FLOAT_PARSER.parseFloats(name, request.getParameterValues(name));
+		return ServletRequestUtils.getRequiredFloatParameters(request, name);
 	}
 
 
@@ -341,7 +329,7 @@ public abstract class RequestUtils {
 	public static double getRequiredDoubleParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		return DOUBLE_PARSER.parseDouble(name, request.getParameter(name));
+		return ServletRequestUtils.getRequiredDoubleParameter(request, name);
 	}
 
 	/**
@@ -354,7 +342,7 @@ public abstract class RequestUtils {
 	public static double[] getRequiredDoubleParameters(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		return DOUBLE_PARSER.parseDoubles(name, request.getParameterValues(name));
+		return ServletRequestUtils.getRequiredDoubleParameters(request, name);
 	}
 
 
@@ -425,7 +413,7 @@ public abstract class RequestUtils {
 	public static boolean getRequiredBooleanParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		return BOOLEAN_PARSER.parseBoolean(name, request.getParameter(name));
+		return ServletRequestUtils.getRequiredBooleanParameter(request, name);
 	}
 
 	/**
@@ -441,7 +429,7 @@ public abstract class RequestUtils {
 	public static boolean[] getRequiredBooleanParameters(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		return BOOLEAN_PARSER.parseBooleans(name, request.getParameterValues(name));
+		return ServletRequestUtils.getRequiredBooleanParameters(request, name);
 	}
 
 
@@ -503,7 +491,7 @@ public abstract class RequestUtils {
 	public static String getRequiredStringParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		return STRING_PARSER.validateRequiredString(name, request.getParameter(name));
+		return ServletRequestUtils.getRequiredStringParameter(request, name);
 	}
 
 	/**
@@ -516,190 +504,7 @@ public abstract class RequestUtils {
 	public static String[] getRequiredStringParameters(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		return STRING_PARSER.validateRequiredStrings(name, request.getParameterValues(name));
-	}
-
-
-	private abstract static class ParameterParser {
-
-		protected final Object parse(String name, String parameter) throws ServletRequestBindingException {
-			validateRequiredParameter(name, parameter);
-			try {
-				return doParse(parameter);
-			}
-			catch (NumberFormatException ex) {
-				throw new ServletRequestBindingException("Required " + getType() + " parameter '" + name
-						+ "' with value of '" + parameter + "' is not a valid number");
-			}
-		}
-
-		protected final void validateRequiredParameter(String name, Object parameter)
-				throws ServletRequestBindingException {
-
-			if (parameter == null) {
-				throw new ServletRequestBindingException("Required " + getType() + " parameter '" + name
-						+ "' is not present");
-			}
-			if ("".equals(parameter)) {
-				throw new ServletRequestBindingException("Required " + getType() + " parameter '" + name
-						+ "' contains no value");
-			}
-		}
-
-		protected abstract String getType();
-
-		protected abstract Object doParse(String parameter) throws NumberFormatException;
-	}
-
-
-	private static class IntParser extends ParameterParser {
-
-		protected String getType() {
-			return "int";
-		}
-
-		protected Object doParse(String s) throws NumberFormatException {
-			return Integer.valueOf(s);
-		}
-
-		public int parseInt(String name, String parameter) throws ServletRequestBindingException {
-			return ((Number) parse(name, parameter)).intValue();
-		}
-
-		public int[] parseInts(String name, String[] values) throws ServletRequestBindingException {
-			validateRequiredParameter(name, values);
-			int[] parameters = new int[values.length];
-			for (int i = 0; i < values.length; i++) {
-				parameters[i] = parseInt(name, values[i]);
-			}
-			return parameters;
-		}
-	}
-
-
-	private static class LongParser extends ParameterParser {
-
-		protected String getType() {
-			return "long";
-		}
-
-		protected Object doParse(String parameter) throws NumberFormatException {
-			return Long.valueOf(parameter);
-		}
-
-		public long parseLong(String name, String parameter) throws ServletRequestBindingException {
-			return ((Number) parse(name, parameter)).longValue();
-		}
-
-		public long[] parseLongs(String name, String[] values) throws ServletRequestBindingException {
-			validateRequiredParameter(name, values);
-			long[] parameters = new long[values.length];
-			for (int i = 0; i < values.length; i++) {
-				parameters[i] = parseLong(name, values[i]);
-			}
-			return parameters;
-		}
-	}
-
-
-	private static class FloatParser extends ParameterParser {
-
-		protected String getType() {
-			return "float";
-		}
-
-		protected Object doParse(String parameter) throws NumberFormatException {
-			return Float.valueOf(parameter);
-		}
-
-		public float parseFloat(String name, String parameter) throws ServletRequestBindingException {
-			return ((Number) parse(name, parameter)).floatValue();
-		}
-
-		public float[] parseFloats(String name, String[] values) throws ServletRequestBindingException {
-			validateRequiredParameter(name, values);
-			float[] parameters = new float[values.length];
-			for (int i = 0; i < values.length; i++) {
-				parameters[i] = parseFloat(name, values[i]);
-			}
-			return parameters;
-		}
-	}
-
-
-	private static class DoubleParser extends ParameterParser {
-
-		protected String getType() {
-			return "double";
-		}
-
-		protected Object doParse(String parameter) throws NumberFormatException {
-			return Double.valueOf(parameter);
-		}
-
-		public double parseDouble(String name, String parameter) throws ServletRequestBindingException {
-			return ((Number) parse(name, parameter)).doubleValue();
-		}
-
-		public double[] parseDoubles(String name, String[] values) throws ServletRequestBindingException {
-			validateRequiredParameter(name, values);
-			double[] parameters = new double[values.length];
-			for (int i = 0; i < values.length; i++) {
-				parameters[i] = parseDouble(name, values[i]);
-			}
-			return parameters;
-		}
-	}
-
-
-	private static class BooleanParser extends ParameterParser {
-
-		protected String getType() {
-			return "boolean";
-		}
-
-		protected Object doParse(String parameter) throws NumberFormatException {
-			return (parameter.equalsIgnoreCase("true") || parameter.equalsIgnoreCase("on") ||
-					parameter.equalsIgnoreCase("yes") || parameter.equals("1") ? Boolean.TRUE : Boolean.FALSE);
-		}
-
-		public boolean parseBoolean(String name, String parameter) throws ServletRequestBindingException {
-			return ((Boolean) parse(name, parameter)).booleanValue();
-		}
-
-		public boolean[] parseBooleans(String name, String[] values) throws ServletRequestBindingException {
-			validateRequiredParameter(name, values);
-			boolean[] parameters = new boolean[values.length];
-			for (int i = 0; i < values.length; i++) {
-				parameters[i] = parseBoolean(name, values[i]);
-			}
-			return parameters;
-		}
-	}
-
-
-	private static class StringParser extends ParameterParser {
-
-		protected String getType() {
-			return "string";
-		}
-
-		protected Object doParse(String parameter) throws NumberFormatException {
-			return parameter;
-		}
-
-		public String validateRequiredString(String name, String value) throws ServletRequestBindingException {
-			validateRequiredParameter(name, value);
-			return value;
-		}
-
-		public String[] validateRequiredStrings(String name, String[] values) throws ServletRequestBindingException {
-			validateRequiredParameter(name, values);
-			for (int i = 0; i < values.length; i++) {
-				validateRequiredParameter(name, values[i]);
-			}
-			return values;
-		}
+		return ServletRequestUtils.getRequiredStringParameters(request, name);
 	}
 
 }

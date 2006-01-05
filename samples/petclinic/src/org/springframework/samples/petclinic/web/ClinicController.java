@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Owner;
-import org.springframework.web.bind.RequestUtils;
+import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 
@@ -59,7 +59,7 @@ public class ClinicController extends MultiActionController implements Initializ
 	 * @return a ModelAndView to render the response
 	 */
 	public ModelAndView ownerHandler(HttpServletRequest request, HttpServletResponse response) throws ServletException {
-		Owner owner = this.clinic.loadOwner(RequestUtils.getIntParameter(request, "ownerId", 0));
+		Owner owner = this.clinic.loadOwner(ServletRequestUtils.getIntParameter(request, "ownerId", 0));
 		if (owner == null) {
 			return new ModelAndView("findOwnersRedirect");
 		}
