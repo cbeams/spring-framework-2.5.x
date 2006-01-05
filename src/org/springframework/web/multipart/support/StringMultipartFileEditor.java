@@ -33,9 +33,11 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class StringMultipartFileEditor extends PropertyEditorSupport {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	/** Static to avoid creating a new logger every time */
+	private static final Log logger = LogFactory.getLog(StringMultipartFileEditor.class);
 
 	private String charsetName;
+
 
 	/**
 	 * Create a new StringMultipartFileEditor, using the default charset.
@@ -51,6 +53,7 @@ public class StringMultipartFileEditor extends PropertyEditorSupport {
 	public StringMultipartFileEditor(String charsetName) {
 		this.charsetName = charsetName;
 	}
+
 
 	public void setAsText(String text) {
 		setValue(text);

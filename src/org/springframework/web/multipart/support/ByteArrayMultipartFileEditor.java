@@ -32,7 +32,9 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class ByteArrayMultipartFileEditor extends ByteArrayPropertyEditor {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	/** Static to avoid creating a new logger every time */
+	private static final Log logger = LogFactory.getLog(ByteArrayMultipartFileEditor.class);
+
 
 	public void setValue(Object value) {
 		if (value instanceof MultipartFile) {
