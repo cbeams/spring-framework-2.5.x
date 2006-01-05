@@ -43,7 +43,7 @@ import javax.servlet.http.HttpServletRequest;
  * supported in case of an actual multipart request.
  *
  * <pre>
- * ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) {
+ * public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) {
  *   MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
  *   MultipartFile multipartFile = multipartRequest.getFile("image");
  *   ...
@@ -77,7 +77,7 @@ import javax.servlet.http.HttpServletRequest;
 public interface MultipartResolver {
 
 	/**
-	 * Determine if the request contains multipart content.
+	 * Determine if the given request contains multipart content.
 	 * <p>Will typically check for content type "multipart/form-data", but the actually
 	 * accepted requests might depend on the capabilities of the resolver implementation.
 	 * @param request the servlet request to be evaluated

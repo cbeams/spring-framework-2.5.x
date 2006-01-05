@@ -43,7 +43,7 @@ import java.lang.reflect.Modifier;
 public class MethodInvoker {
 
 	/**
-	 * Marker now used only by MethodInvokingFactoryBean, but left here for compatibility
+	 * Marker now used only by MethodInvokingFactoryBean, but left here for general use.
 	 */
 	public static final VoidType VOID = new VoidType();
 
@@ -56,7 +56,7 @@ public class MethodInvoker {
 
 	private Object[] arguments;
 
-	// the method we will call
+	/** The method we will call */
 	private Method methodObject;
 
 
