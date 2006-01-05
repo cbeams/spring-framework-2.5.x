@@ -30,6 +30,7 @@ import org.springframework.validation.Validator;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 10.03.2003
+ * @deprecated since Spring 2.0: prefer direct ServletRequestDataBinder usage
  */
 public abstract class BindUtils {
 
@@ -57,8 +58,10 @@ public abstract class BindUtils {
 	 * @return the binder used (can be treated as BindException or Errors instance)
 	 * @throws ServletException if thrown by the BindInitializer
 	 */
-	public static BindException bind(ServletRequest request, Object object, String objectName,
-																	 BindInitializer initializer) throws ServletException  {
+	public static BindException bind(
+			ServletRequest request, Object object, String objectName,
+			BindInitializer initializer) throws ServletException  {
+
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(object, objectName);
 		if (initializer != null) {
 			initializer.initBinder(request, binder);
@@ -76,8 +79,9 @@ public abstract class BindUtils {
 	 * @param validator validator to be invoked, or <code>null</code> if no validation
 	 * @return the binder used (can be treated as Errors instance)
 	 */
-	public static BindException bindAndValidate(ServletRequest request, Object object, String objectName,
-																							Validator validator) {
+	public static BindException bindAndValidate(
+			ServletRequest request, Object object, String objectName, Validator validator) {
+
 		BindException binder = bind(request, object, objectName);
 		ValidationUtils.invokeValidator(validator, object, binder);
 		return binder;
@@ -91,13 +95,15 @@ public abstract class BindUtils {
 	 * @param object object to bind the parameters to
 	 * @param objectName name of the bind object
 	 * @param validator validator to be invoked, or <code>null</code> if no validation
-	 * @param initializer Implementation of the BindInitializer interface which will be able to set custom editors
+	 * @param initializer implementation of the BindInitializer interface
+	 * which will be able to set custom editors
 	 * @return the binder used (can be treated as Errors instance)
 	 * @throws ServletException if thrown by the BindInitializer
 	 */
-	public static BindException bindAndValidate(ServletRequest request,	Object object, String objectName,
-																							Validator validator, BindInitializer initializer)
-	    throws ServletException  {
+	public static BindException bindAndValidate(
+			ServletRequest request,	Object object, String objectName,
+			Validator validator, BindInitializer initializer) throws ServletException  {
+
 		BindException binder = bind(request, object, objectName, initializer);
 		ValidationUtils.invokeValidator(validator, object, binder);
 		return binder;

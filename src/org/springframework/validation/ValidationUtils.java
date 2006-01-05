@@ -33,11 +33,11 @@ import org.springframework.util.StringUtils;
  * @since 06.05.2003
  * @see Validator
  * @see Errors
- * @see org.springframework.web.bind.BindUtils#bindAndValidate
  */
 public abstract class ValidationUtils {
 
 	private static Log logger = LogFactory.getLog(ValidationUtils.class);
+
 
 	/**
 	 * Invoke the given validator for the given object and Errors instance.
@@ -110,6 +110,7 @@ public abstract class ValidationUtils {
 	 */
 	public static void rejectIfEmpty(
 			Errors errors, String field, String errorCode, Object[] errorArgs, String defaultMessage) {
+
 		Object value = errors.getFieldValue(field);
 		if (value == null || !StringUtils.hasLength(value.toString())) {
 			errors.rejectValue(field, errorCode, errorArgs, defaultMessage);
@@ -143,6 +144,7 @@ public abstract class ValidationUtils {
 	 */
 	public static void rejectIfEmptyOrWhitespace(
 			Errors errors, String field, String errorCode, String defaultMessage) {
+
 		rejectIfEmptyOrWhitespace(errors, field, errorCode, null, defaultMessage);
 	}
 
@@ -161,6 +163,7 @@ public abstract class ValidationUtils {
 	 */
 	public static void rejectIfEmptyOrWhitespace(
 			Errors errors, String field, String errorCode, Object[] errorArgs, String defaultMessage) {
+
 		Object value = errors.getFieldValue(field);
 		if (value == null ||!StringUtils.hasText(value.toString())) {
 			errors.rejectValue(field, errorCode, errorArgs, defaultMessage);

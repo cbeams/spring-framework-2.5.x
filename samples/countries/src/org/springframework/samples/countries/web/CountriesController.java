@@ -12,7 +12,7 @@ import org.springframework.beans.support.RefreshablePagedListHolder;
 import org.springframework.samples.countries.Country;
 import org.springframework.samples.countries.CountryService;
 import org.springframework.validation.BindException;
-import org.springframework.web.bind.BindUtils;
+import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -99,17 +99,22 @@ public class CountriesController extends MultiActionController {
 	public ModelAndView handleMain(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		RefreshablePagedListHolder listHolder =
 				(RefreshablePagedListHolder) request.getSession(true).getAttribute(COUNTRIES_ATTR);
-		if (null == listHolder) {
+		if (listHolder == null) {
 			listHolder = new RefreshablePagedListHolder();
 			listHolder.setSourceProvider(new CountriesProvider());
 			listHolder.setFilter(new CountriesFilter());
 			request.getSession(true).setAttribute(COUNTRIES_ATTR, listHolder);
 		}
-		BindException ex = BindUtils.bind(request, listHolder, "countries");
+
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(listHolder, "countries");
+		binder.bind(request);
+		BindException ex = binder.getErrors();
+
 		listHolder.setLocale(RequestContextUtils.getLocale(request));
 		boolean forceRefresh = request.getParameter("forceRefresh") != null;
 		listHolder.refresh(forceRefresh);
-		return new ModelAndView(mainView, ex.getModel());
+
+		return new ModelAndView(this.mainView, ex.getModel());
 	}
 
 	/**
