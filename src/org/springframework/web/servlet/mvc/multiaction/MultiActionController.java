@@ -400,7 +400,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @param command command object, that must be a JavaBean
 	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected void bind(ServletRequest request, Object command) throws Exception {
+	protected void bind(HttpServletRequest request, Object command) throws Exception {
 		logger.debug("Binding request parameters onto MultiActionController command");
 		ServletRequestDataBinder binder = createBinder(request, command);
 		binder.bind(request);
@@ -419,8 +419,8 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * <p>Called by <code>bind</code>. Can be overridden to plug in custom
 	 * ServletRequestDataBinder subclasses.
 	 * <p>Default implementation creates a standard ServletRequestDataBinder,
-	 * sets the specified MessageCodesResolver (if any), and invokes initBinder.
-	 * Note that <code>initBinder</code> will not be invoked if you override this method!
+	 * and invokes <code>initBinder</code>. Note that <code>initBinder</code>
+	 * will not be invoked if you override this method!
 	 * @param request current HTTP request
 	 * @param command the command to bind onto
 	 * @return the new binder instance
@@ -428,7 +428,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @see #bind
 	 * @see #initBinder
 	 */
-	protected ServletRequestDataBinder createBinder(ServletRequest request, Object command)
+	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command)
 	    throws Exception {
 
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName(command));
@@ -463,6 +463,17 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @see #createBinder
 	 * @see org.springframework.validation.DataBinder#registerCustomEditor
 	 * @see org.springframework.beans.propertyeditors.CustomDateEditor
+	 */
+	protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder)
+	    throws Exception {
+
+		initBinder((ServletRequest) request, binder);
+	}
+
+	/**
+	 * Initialize the given binder instance, for example with custom editors.
+	 * @deprecated since Spring 2.0:
+	 * use <code>initBinder(HttpServletRequest, ServletRequestDataBinder) instead
 	 */
 	protected void initBinder(ServletRequest request, ServletRequestDataBinder binder)
 	    throws Exception {
