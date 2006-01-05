@@ -30,7 +30,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.RequestHandledEvent;
+import org.springframework.web.context.support.ServletRequestHandledEvent;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.util.NestedServletException;
@@ -115,7 +115,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	/** Should we publish the context as a ServletContext attribute? */
 	private boolean publishContext = true;
 
-	/** Should we publish a RequestHandledEvent at the end of each request? */
+	/** Should we publish a ServletRequestHandledEvent at the end of each request? */
 	private boolean publishEvents = true;
 
 	/** WebApplicationContext for this servlet */
@@ -189,16 +189,17 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Set whether this servlet should publish a RequestHandlerEvent at the end
+	 * Set whether this servlet should publish a ServletRequestHandledEvent at the end
 	 * of each request. Default is "true"; can be turned off for a slight performance
 	 * improvement, provided that no ApplicationListeners rely on such events.
+	 * @see org.springframework.web.context.support.ServletRequestHandledEvent
 	 */
 	public void setPublishEvents(boolean publishEvents) {
 		this.publishEvents = publishEvents;
 	}
 
 	/**
-	 * Return whether this servlet should publish a RequestHandlerEvent at the end
+	 * Return whether this servlet should publish a ServletRequestHandledEvent at the end
 	 * of each request.
 	 */
 	public boolean isPublishEvents() {
@@ -418,9 +419,11 @@ public abstract class FrameworkServlet extends HttpServletBean {
 				// Whether or not we succeeded, publish an event.
 				long processingTime = System.currentTimeMillis() - startTime;
 				this.webApplicationContext.publishEvent(
-						new RequestHandledEvent(this, request.getRequestURI(), processingTime, request.getRemoteAddr(),
-								request.getMethod(), getServletConfig().getServletName(), WebUtils.getSessionId(request),
-								getUsernameForRequest(request), failureCause));
+						new ServletRequestHandledEvent(this,
+								request.getRequestURI(), request.getRemoteAddr(),
+								request.getMethod(), getServletConfig().getServletName(),
+								WebUtils.getSessionId(request), getUsernameForRequest(request),
+								processingTime, failureCause));
 			}
 		}
 	}

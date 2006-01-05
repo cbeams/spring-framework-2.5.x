@@ -48,9 +48,8 @@ public class PerformanceMonitorListener implements ApplicationListener {
 			// Could use one monitor per URL.
 			this.responseTimeMonitor.recordResponseTime(rhe.getProcessingTimeMillis());
 			if (logger.isTraceEnabled()) {
-				// Stringifying objects is expensive. Don't do it unless it will show.
 				logger.trace("PerformanceMonitorListener: last=[" + rhe.getProcessingTimeMillis() + "ms]; " +
-						this.responseTimeMonitor + "; client=[" + rhe.getClientAddress() + "]");
+						this.responseTimeMonitor + "; " + rhe.getShortDescription());
 			}
 		}
 	}

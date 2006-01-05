@@ -36,7 +36,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
 import org.springframework.web.portlet.context.PortletApplicationContextUtils;
-import org.springframework.web.portlet.context.RequestHandledEvent;
+import org.springframework.web.portlet.context.PortletRequestHandledEvent;
 import org.springframework.web.portlet.context.XmlPortletApplicationContext;
 
 /**
@@ -137,7 +137,7 @@ public abstract class FrameworkPortlet extends PortletBean {
 	private boolean publishContext = true;
 
 	/**
-	 * Should we publish a RequestHandledEvent at the end of each request?
+	 * Should we publish a PortletRequestHandledEvent at the end of each request?
 	 */
 	private boolean publishEvents = true;
 
@@ -219,16 +219,17 @@ public abstract class FrameworkPortlet extends PortletBean {
 	}
 
 	/**
-	 * Set whether this portlet should publish a RequestHandledEvent at the end
+	 * Set whether this portlet should publish a PortletRequestHandledEvent at the end
 	 * of each request. Default is true; can be turned off for a slight performance
 	 * improvement, provided that no ApplicationListeners rely on such events.
+	 * @see org.springframework.web.portlet.context.PortletRequestHandledEvent
 	 */
 	public void setPublishEvents(boolean publishEvents) {
 		this.publishEvents = publishEvents;
 	}
 
 	/**
-	 * Return whether this portlet should publish a RequestHandledEvent at the end
+	 * Return whether this portlet should publish a PortletRequestHandledEvent at the end
 	 * of each request.
 	 */
 	public boolean isPublishEvents() {
@@ -445,18 +446,12 @@ public abstract class FrameworkPortlet extends PortletBean {
 			if (isPublishEvents()) {
 				// Whether or not we succeeded, publish an event.
 				long processingTime = System.currentTimeMillis() - startTime;
-                String portletName = null;
-                String portletMode = null;
-                String requestType = null;
-                String sessionId = null;
-                String userName = null;
-				try { portletName = getPortletConfig().getPortletName(); } catch (Exception ex) {}
-                try { portletMode = request.getPortletMode().toString(); } catch (Exception ex) {}
-                try { requestType = request instanceof ActionRequest ? "action" : "render"; } catch (Exception ex) {}
-                try { sessionId = request.getRequestedSessionId(); } catch (Exception ex) {}
-                try { userName = getUsernameForRequest(request); } catch (Exception ex) {}
-				this.portletApplicationContext.publishEvent(new RequestHandledEvent(this, processingTime,
-						portletName, portletMode, requestType, sessionId, userName, failureCause));
+				this.portletApplicationContext.publishEvent(
+						new PortletRequestHandledEvent(this,
+								getPortletConfig().getPortletName(), request.getPortletMode().toString(),
+								(request instanceof ActionRequest ? "action" : "render"),
+								request.getRequestedSessionId(), getUsernameForRequest(request),
+								processingTime, failureCause));
 			}
 		}
 	}

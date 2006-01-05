@@ -35,17 +35,17 @@ public class PerformanceMonitorListenerTests extends TestCase {
 	}
 
 	public void testOnApplicationEvent()  throws FileNotFoundException {
-		PerformanceMonitorListener l = new PerformanceMonitorListener();
-		l.onApplicationEvent(new ContextRefreshedEvent(new StaticApplicationContext()));
-		assertEquals(0, l.responseTimeMonitor.getAccessCount());
+		PerformanceMonitorListener listener = new PerformanceMonitorListener();
+		listener.onApplicationEvent(new ContextRefreshedEvent(new StaticApplicationContext()));
+		assertEquals(0, listener.responseTimeMonitor.getAccessCount());
 		
-		RequestHandledEvent evt = new RequestHandledEvent(new Object(), 
-			"http://www.springframework.org", 200, "192.168.1.122", "GET", "servlet");
-		l.onApplicationEvent(evt);
-		assertEquals(1, l.responseTimeMonitor.getAccessCount());
-		assertEquals(200, l.responseTimeMonitor.getAverageResponseTimeMillis());
-		assertEquals(200, l.responseTimeMonitor.getBestResponseTimeMillis());
-		assertEquals(200, l.responseTimeMonitor.getWorstResponseTimeMillis());	
+		RequestHandledEvent evt = new ServletRequestHandledEvent(new Object(),
+			"http://www.springframework.org", "192.168.1.122", "GET", "servlet", "", "", 200);
+		listener.onApplicationEvent(evt);
+		assertEquals(1, listener.responseTimeMonitor.getAccessCount());
+		assertEquals(200, listener.responseTimeMonitor.getAverageResponseTimeMillis());
+		assertEquals(200, listener.responseTimeMonitor.getBestResponseTimeMillis());
+		assertEquals(200, listener.responseTimeMonitor.getWorstResponseTimeMillis());
 	}
 
 }
