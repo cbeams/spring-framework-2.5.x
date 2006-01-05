@@ -20,12 +20,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 /**
- * Interface to discover parameter names for methods
- * and constructors. This is not always possible, but various
- * strategies are available to try, such as looking for debug
- * information that may have been emitted at compile time, and
- * looking for argname annotation values optionally accompanying AspectJ
- * annotated methods.
+ * Interface to discover parameter names for methods and constructors.
+ * This is not always possible, but various strategies are available
+ * to try, such as looking for debug information that may have been
+ * emitted at compile time, and looking for argname annotation values
+ * optionally accompanying AspectJ annotated methods.
+ *
  * @author Rod Johnson
  * @author Adrian Colyer
  * @since 2.0
@@ -33,21 +33,21 @@ import java.lang.reflect.Method;
 public interface ParameterNameDiscoverer {
 	
 	/**
-	 * Return parameter names or null for this method if
-	 * they cannot be determined
-	 * @param m method to find parameter names for
+	 * Return parameter names or <code>null</code> for this method
+	 * if they cannot be determined.
+	 * @param method method to find parameter names for
 	 * @param clazz leaf class to look at in hierarchy
-	 * @return null if the parameter names cannot be resolved,
-	 * an array of parameter names if they can be
+	 * @return an array of parameter names if the names can be resolved,
+	 * <code>null</code> if they cannot
 	 */
-	String[] getParameterNames(Method m, Class clazz);
+	String[] getParameterNames(Method method, Class clazz);
 	
 	/**
-	 * Return parameter names or null for this constructor if
-	 * they cannot be determined
+	 * Return parameter names or <code>null</code> for this constructor
+	 * if they cannot be determined.
 	 * @param ctor constructor to find parameter names for
-	 * @return null if the parameter names cannot be resolved,
-	 * an array of parameter names if they can be
+	 * @return an array of parameter names if the names can be resolved,
+	 * <code>null</code> if they cannot
 	 */
 	String[] getParameterNames(Constructor ctor);
 

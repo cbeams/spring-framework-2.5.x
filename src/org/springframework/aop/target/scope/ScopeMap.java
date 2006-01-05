@@ -49,21 +49,22 @@ public interface ScopeMap {
 	boolean isPersistent();
 
 	/**
-	 * Return the object or null if not found in the session
+	 * Return the object from the underlying scope,
+	 * or <code>null</code> if not found.
 	 * @param name the name to bind with
 	 * @return object the associated value, or <code>null</code>
 	 */
 	Object get(String name);
 	
 	/**
-	 * Bind into the underlying session
+	 * Bind the object to the underlying scope.
 	 * @param name the name to bind with
 	 * @param value the object to bind
 	 */
 	void put(String name, Object value);
 
 	/**
-	 * Remove the object with the given name in the specified scope
+	 * Remove the object with the given name from the underlying scope.
 	 * @param name the name of the object to remove
 	 */
 	void remove(String name);

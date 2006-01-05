@@ -24,39 +24,34 @@ import java.util.List;
 
 /**
  * ParameterNameDiscoverer implementation that tries several ParameterNameDiscoverers
- * in succession. Those added first in the addDiscoverer() method have highest priority.
- * If one returns null, the next will be tried.
- * The default behaviour is always to return null if no discoverer matches.
+ * in succession. Those added first in the <code>addDiscoverer</code> method have
+ * highest priority. If one returns <code>null</code>, the next will be tried.
+ *
+ * <p>The default behavior is always to return <code>null</code>
+ * if no discoverer matches.
+ *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscoverer {
 	
-	private static ParameterNameDiscoverer RETURNS_NULL = new ParameterNameDiscoverer() {
-		public String[] getParameterNames(Method m, Class clazz) {
-			return null;
-		}
-		
-		public String[] getParameterNames(Constructor ctor) {
-			return null;
-		}
-	};
-	
-	private List parameterNameDiscoverers = new LinkedList();
-	
-	public PrioritizedParameterNameDiscoverer() {
-		parameterNameDiscoverers.add(RETURNS_NULL);
-	}
-	
+	private final List parameterNameDiscoverers = new LinkedList();
+
+
+	/**
+	 * Add a further ParameterNameDiscoverer to the list of discoverers
+	 * that this PrioritizedParameterNameDiscoverer checks.
+	 */
 	public void addDiscoverer(ParameterNameDiscoverer pnd) {
-		// Add just before returnsNull
-		this.parameterNameDiscoverers.add(parameterNameDiscoverers.size() - 1, pnd);
+		this.parameterNameDiscoverers.add(pnd);
 	}
 
-	public String[] getParameterNames(Method m, Class clazz) {
-		for (Iterator it = parameterNameDiscoverers.iterator(); it.hasNext(); ) {
+
+	public String[] getParameterNames(Method method, Class clazz) {
+		for (Iterator it = this.parameterNameDiscoverers.iterator(); it.hasNext(); ) {
 			ParameterNameDiscoverer pmd = (ParameterNameDiscoverer) it.next();
-			String[] result = pmd.getParameterNames(m, clazz);
+			String[] result = pmd.getParameterNames(method, clazz);
 			if (result != null) {
 				return result;
 			}
@@ -65,7 +60,7 @@ public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscover
 	}
 
 	public String[] getParameterNames(Constructor ctor) {
-		for (Iterator it = parameterNameDiscoverers.iterator(); it.hasNext(); ) {
+		for (Iterator it = this.parameterNameDiscoverers.iterator(); it.hasNext(); ) {
 			ParameterNameDiscoverer pmd = (ParameterNameDiscoverer) it.next();
 			String[] result = pmd.getParameterNames(ctor);
 			if (result != null) {
