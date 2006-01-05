@@ -66,7 +66,7 @@ public class BeanFactoryBootstrapTests extends TestCase {
 	public void testGetInstanceWithUnknownBeanFactoryClassFails() throws BeansException {
         System.setProperties(null);
 		Properties p = new Properties();
-		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class",
+		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".(class)",
 		"org.springframework.beans.factory.support.xxxxXmlBeanFactory");
 		
 		System.setProperties(p);
@@ -83,7 +83,7 @@ public class BeanFactoryBootstrapTests extends TestCase {
 	public void testGetInstanceWithMistypedBeanFactoryClassFails() throws BeansException {
         System.setProperties(null);
 		Properties p = new Properties();
-		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class",
+		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".(class)",
 		"java.awt.Point");
 		
 		System.setProperties(p);
@@ -135,7 +135,7 @@ public class BeanFactoryBootstrapTests extends TestCase {
 
 	public void testDummyBeanFactory() throws Exception {
         Properties p = new Properties();
-		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class",
+		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".(class)",
 		"org.springframework.beans.factory.access.BeanFactoryBootstrapTests$DummyBeanFactory");
 		
 		System.setProperties(p);

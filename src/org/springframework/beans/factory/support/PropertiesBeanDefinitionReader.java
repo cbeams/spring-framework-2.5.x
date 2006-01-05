@@ -32,6 +32,7 @@ import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.DefaultPropertiesPersister;
@@ -62,6 +63,9 @@ import org.springframework.util.StringUtils;
  * techie.manager(ref)=jeff       // reference to another bean
  * techie.department=Engineering  // real property
  * techie.usesDialUp=true         // real property (overriding parent value)</pre>
+ *
+ * ceo.$0(ref)=secretary          // inject 'secretary' bean as 0th constructor arg
+ * ceo.$1=1000000                 // inject value '1000000' at 1st constructor arg
  *
  * <em><b>Note:</b> As of Spring 1.2.6, the use of <code>class</code> and
  * <code>parent</code> has been deprecated in favor of <code>(class)</code> and
@@ -96,21 +100,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public static final String CLASS_KEY = "(class)";
 
 	/**
-	 * Prefix for the class property of a root bean definition.
-	 * Deprecated in favor of {@link #CLASS_KEY}
-	 */
-	private static final String DEPRECATED_CLASS_KEY = "class";
-
-	/**
 	 * Special string added to distinguish owner.(parent)=parentBeanName
 	 */
 	public static final String PARENT_KEY = "(parent)";
-
-	/**
-	 * Reserved "property" to indicate the parent of a child bean definition.
-	 * Deprecated in favor of {@link #PARENT_KEY}
-	 */
-	private static final String DEPRECATED_PARENT_KEY = "parent";
 
 	/**
 	 * Special string added to distinguish owner.(abstract)=true
@@ -143,6 +135,10 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 */
 	public static final String REF_PREFIX = "*";
 
+	/**
+	 * Prefix used to denote a constructor arg definition
+	 */
+	public static final String CONSTRUCTOR_ARG_PREFIX = "$";
 
 	private String defaultParentBean;
 
@@ -407,15 +403,16 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		boolean lazyInit = false;
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
+		ConstructorArgumentValues cvs = new ConstructorArgumentValues();
 		for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			String key = StringUtils.trimWhitespace((String) entry.getKey());
 			if (key.startsWith(prefix + SEPARATOR)) {
 				String property = key.substring(prefix.length() + SEPARATOR.length());
-				if (isClassKey(property)) {
+				if (CLASS_KEY.equals(property)) {
 					className = StringUtils.trimWhitespace((String) entry.getValue());
 				}
-				else if (isParentKey(property)) {
+				else if (PARENT_KEY.equals(property)) {
 					parent = StringUtils.trimWhitespace((String) entry.getValue());
 				}
 				else if (ABSTRACT_KEY.equals(property)) {
@@ -430,6 +427,16 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 					String val = StringUtils.trimWhitespace((String) entry.getValue());
 					lazyInit = TRUE_VALUE.equals(val);
 				}
+				else if (property.startsWith(CONSTRUCTOR_ARG_PREFIX)) {
+					if (property.endsWith(REF_SUFFIX)) {
+						int index = Integer.parseInt(property.substring(1, property.length() - REF_SUFFIX.length()));
+						cvs.addIndexedArgumentValue(index, new RuntimeBeanReference(entry.getValue().toString()));
+					}
+					else {
+						int index = Integer.parseInt(property.substring(1));
+						cvs.addIndexedArgumentValue(index, readValue(entry));
+					}
+				}
 				else if (property.endsWith(REF_SUFFIX)) {
 					// This isn't a real property, but a reference to another prototype
 					// Extract property name: property is of form dog(ref)
@@ -443,23 +450,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				}
 				else{
 					// It's a normal bean property.
-					Object val = entry.getValue();
-					if (val instanceof String) {
-						String strVal = (String) val;
-						// If it starts with a reference prefix...
-						if (strVal.startsWith(REF_PREFIX)) {
-							// Expand the reference.
-							String targetName = strVal.substring(1);
-							if (targetName.startsWith(REF_PREFIX)) {
-								// Escaped prefix -> use plain value.
-								val = targetName;
-							}
-							else {
-								val = new RuntimeBeanReference(targetName);
-							}
-						}
-					}
-					pvs.addPropertyValue(new PropertyValue(property, val));
+					pvs.addPropertyValue(new PropertyValue(property, readValue(entry)));
 				}
 			}
 		}
@@ -477,7 +468,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 		try {
 			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
-					className, parent, null, pvs, getBeanClassLoader());
+					className, parent, cvs, pvs, getBeanClassLoader());
 			bd.setAbstract(isAbstract);
 			bd.setSingleton(singleton);
 			bd.setLazyInit(lazyInit);
@@ -494,37 +485,27 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	}
 
 	/**
-	 * Indicates that whether the supplied property matches the class property of
-	 * the bean definition.
+	 * Reads the value of the entry. Correctly interprets bean references for
+	 * values that are prefixed with an asterisk.
 	 */
-	private boolean isClassKey(String property) {
-		if (CLASS_KEY.equals(property)) {
-			return true;
-		}
-		else if (DEPRECATED_CLASS_KEY.equals(property)) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Use of 'class' property in " + getClass().getName() + " is deprecated in favor of '(class)'.");
+	private Object readValue(Map.Entry entry) {
+		Object val = entry.getValue();
+		if (val instanceof String) {
+			String strVal = (String) val;
+			// If it starts with a reference prefix...
+			if (strVal.startsWith(REF_PREFIX)) {
+				// Expand the reference.
+				String targetName = strVal.substring(1);
+				if (targetName.startsWith(REF_PREFIX)) {
+					// Escaped prefix -> use plain value.
+					val = targetName;
+				}
+				else {
+					val = new RuntimeBeanReference(targetName);
+				}
 			}
-			return true;
 		}
-		return false;
-	}
-
-	/**
-	 * Indicates that whether the supplied property matches the parent property of
-	 * the bean definition.
-	 */
-	private boolean isParentKey(String property) {
-		if (PARENT_KEY.equals(property)) {
-			return true;
-		}
-		else if (DEPRECATED_PARENT_KEY.equals(property)) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Use of 'parent' property in " + getClass().getName() + " is deprecated in favor of '(parent)'.");
-			}
-			return true;
-		}
-		return false;
+		return val;
 	}
 
 }

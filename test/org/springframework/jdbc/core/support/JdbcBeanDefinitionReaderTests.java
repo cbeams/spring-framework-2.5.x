@@ -40,7 +40,7 @@ public class JdbcBeanDefinitionReaderTests extends AbstractJdbcTests {
 
 		// first row
 		ctrlResultSet.expectAndReturn(mockResultSet.getString(1), "one");
-		ctrlResultSet.expectAndReturn(mockResultSet.getString(2), "class");
+		ctrlResultSet.expectAndReturn(mockResultSet.getString(2), "(class)");
 		ctrlResultSet.expectAndReturn(mockResultSet.getString(3), "org.springframework.beans.TestBean");
 
 		// second row

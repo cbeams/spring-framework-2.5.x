@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.StringUtils;
+import org.springframework.beans.factory.support.Mergable;
 
 /**
  * Default implementation of the PropertyValues interface.
@@ -146,12 +147,28 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		for (int i = 0; i < this.propertyValueList.size(); i++) {
 			PropertyValue currentPv = (PropertyValue) this.propertyValueList.get(i);
 			if (currentPv.getName().equals(pv.getName())) {
+				mergeIfRequired(pv, currentPv);
 				setPropertyValueAt(pv, i);
 				return this;
 			}
 		}
 		this.propertyValueList.add(pv);
 		return this;
+	}
+
+	/**
+	 * Merges the value of the supplied 'new' {@link PropertyValue} with that of
+	 * the current {@link PropertyValue} if merging is supported and enabled.
+	 * @see Mergable
+	 */
+	private void mergeIfRequired(PropertyValue newPv, PropertyValue currentPv) {
+		Object value = newPv.getValue();
+		if (value instanceof Mergable) {
+			Mergable m = (Mergable) value;
+			if (m.isMergeEnabled()) {
+				m.merge(currentPv.getValue());
+			}
+		}
 	}
 
 	/**

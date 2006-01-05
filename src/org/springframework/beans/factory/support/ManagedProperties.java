@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,27 +16,18 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Properties;
 
 /**
- * Tag subclass used to hold managed List elements, which may
- * include runtime bean references.
+ * Represents a Spring-managed {@link Properties} instance that supports
+ * merging of parent/child definitions.
  *
- * @author Rod Johnson
  * @author Rob Harrop
- * @since 27.05.2003
+ * @since 2.0M2
  */
-public class ManagedList extends ArrayList implements Mergable {
+public class ManagedProperties extends Properties implements Mergable {
 
 	private boolean mergeEnabled;
-
-	public ManagedList() {
-	}
-
-	public ManagedList(int initialCapacity) {
-		super(initialCapacity);
-	}
 
 	public boolean isMergeEnabled() {
 		return mergeEnabled;
@@ -46,12 +37,14 @@ public class ManagedList extends ArrayList implements Mergable {
 		this.mergeEnabled = mergeEnabled;
 	}
 
-	public synchronized void merge(Object parent) {
-		if(parent instanceof List) {
-			List temp = new ArrayList((List) parent);
-			temp.addAll(this);
+	public void merge(Object parent) {
+		if(parent instanceof Properties) {
+			Properties parentProperties = (Properties) parent;
+			Properties temp = new Properties();
+			temp.putAll(parentProperties);
+			temp.putAll(this);
 			this.clear();
-			this.addAll(temp);
+			this.putAll(temp);
 		}
 	}
 }

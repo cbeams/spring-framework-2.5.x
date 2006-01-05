@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,15 @@ import org.springframework.core.CollectionFactory;
  * (that is, if running on JDK 1.4 or if Commons Collections 3.x is available).
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 27.05.2003
  * @see org.springframework.core.CollectionFactory#createLinkedMapIfPossible
  */
-public class ManagedMap implements Map {
+public class ManagedMap implements Map, Mergable {
 
-	private final Map targetMap;
+	private Map targetMap;
+
+	private boolean mergeEnabled;
 
 	public ManagedMap() {
 		this(16);
@@ -107,6 +110,24 @@ public class ManagedMap implements Map {
 
 	public String toString() {
 		return this.targetMap.toString();
+	}
+
+	public boolean isMergeEnabled() {
+		return mergeEnabled;
+	}
+
+	public void setMergeEnabled(boolean mergeEnabled) {
+		this.mergeEnabled = mergeEnabled;
+	}
+
+	public void merge(Object parent) {
+		if(parent instanceof Map) {
+			Map parentMap = (Map)parent;
+			Map temp = CollectionFactory.createLinkedMapIfPossible(parentMap.size() + this.size());
+			temp.putAll(parentMap);
+			temp.putAll(this);
+			this.targetMap = temp;
+		}
 	}
 
 }

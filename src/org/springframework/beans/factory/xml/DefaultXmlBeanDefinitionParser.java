@@ -48,6 +48,7 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
+import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.ClassUtils;
@@ -100,6 +101,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE = "default-dependency-check";
 	public static final String DEFAULT_INIT_METHOD_ATTRIBUTE = "default-init-method";
 	public static final String DEFAULT_DESTROY_METHOD_ATTRIBUTE = "default-destroy-method";
+	public static final String DEFAULT_MERGE_ATTRIBUTE = "default-merge";
 
 	public static final String IMPORT_ELEMENT = "import";
 	public static final String RESOURCE_ATTRIBUTE = "resource";
@@ -155,6 +157,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String VALUE_REF_ATTRIBUTE = "value-ref";
 	public static final String PROPS_ELEMENT = "props";
 	public static final String PROP_ELEMENT = "prop";
+	public static final String MERGE_ATTRIBUTE = "merge";
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -174,6 +177,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	private String defaultInitMethod;
 
 	private String defaultDestroyMethod;
+
+	private String defaultMerge;
 
 	/**
 	 * Parses bean definitions according to the "spring-beans" DTD.
@@ -239,6 +244,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		if (root.hasAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE)) {
 			setDefaultDestroyMethod(root.getAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE));
 		}
+		setDefaultMerge(root.getAttribute(DEFAULT_MERGE_ATTRIBUTE));
 	}
 
 	/**
@@ -284,33 +290,46 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	}
 
 	/**
-	 * Set the default dependency-init-method setting for the document that's currently parsed.
+	 * Set the default init-method setting for the document that's currently parsed.
 	 */
 	protected final void setDefaultInitMethod(String defaultInitMethod) {
 		this.defaultInitMethod = defaultInitMethod;
 	}
 
 	/**
-	 * Return the default dependency-init-method setting for the document that's currently parsed.
+	 * Return the default init-method setting for the document that's currently parsed.
 	 */
 	protected final String getDefaultInitMethod() {
 		return defaultInitMethod;
 	}
 
 	/**
-	 * Set the default dependency-destroy-method setting for the document that's currently parsed.
+	 * Set the default destroy-method setting for the document that's currently parsed.
 	 */
 	protected final void setDefaultDestroyMethod(String defaultDestroyMethod) {
 		this.defaultDestroyMethod = defaultDestroyMethod;
 	}
 
 	/**
-	 * Return the default dependency-destroy-method setting for the document that's currently parsed.
+	 * Return the default destroy-method setting for the document that's currently parsed.
 	 */
 	protected final String getDefaultDestroyMethod() {
 		return defaultDestroyMethod;
 	}
 
+	/**
+	 * Set the default merge setting for the document that's currently parsed.
+	 */
+	protected final void setDefaultMerge(String defaultMerge) {
+		this.defaultMerge = defaultMerge;
+	}
+
+	/**
+	 * Return the default merge setting for the document that's currently parsed.
+	 */
+	protected final String getDefaultMerge() {
+		return defaultMerge;
+	}
 
 	/**
 	 * Allow the XML to be extensible by processing any custom element types first,
@@ -937,6 +956,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	protected List parseListElement(Element collectionEle, String beanName) throws BeanDefinitionStoreException {
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedList list = new ManagedList(nl.getLength());
+		list.setMergeEnabled(parseMergeAttribute(collectionEle));
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
 				Element ele = (Element) nl.item(i);
@@ -952,6 +972,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	protected Set parseSetElement(Element collectionEle, String beanName) throws BeanDefinitionStoreException {
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedSet set = new ManagedSet(nl.getLength());
+		set.setMergeEnabled(parseMergeAttribute(collectionEle));
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
 				Element ele = (Element) nl.item(i);
@@ -966,7 +987,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 */
 	protected Map parseMapElement(Element mapEle, String beanName) throws BeanDefinitionStoreException {
 		List entryEles = DomUtils.getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
-		Map map = new ManagedMap(entryEles.size());
+		ManagedMap map = new ManagedMap(entryEles.size());
+		map.setMergeEnabled(parseMergeAttribute(mapEle));
 
 		for (Iterator it = entryEles.iterator(); it.hasNext();) {
 			Element entryEle = (Element) it.next();
@@ -1076,7 +1098,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * Parse a props element.
 	 */
 	protected Properties parsePropsElement(Element propsEle, String beanName) throws BeanDefinitionStoreException {
-		Properties props = new Properties();
+		ManagedProperties props = new ManagedProperties();
+		props.setMergeEnabled(parseMergeAttribute(propsEle));
 		List propEles = DomUtils.getChildElementsByTagName(propsEle, PROP_ELEMENT);
 		for (Iterator it = propEles.iterator(); it.hasNext();) {
 			Element propEle = (Element) it.next();
@@ -1089,4 +1112,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		return props;
 	}
 
+	protected boolean parseMergeAttribute(Element collectionElement) {
+		String value = collectionElement.getAttribute(MERGE_ATTRIBUTE);
+
+		if(DEFAULT_VALUE.equals(value)) {
+			value = getDefaultMerge();
+		}
+
+		return TRUE_VALUE.equals(value);
+	}
 }
