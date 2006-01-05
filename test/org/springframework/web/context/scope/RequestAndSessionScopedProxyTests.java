@@ -30,12 +30,12 @@ import org.springframework.mock.web.MockHttpServletRequest;
 /**
  * @author Rod Johnson
  */
-public class HttpRequestAndSessionScopedProxyTests extends TestCase {
+public class RequestAndSessionScopedProxyTests extends TestCase {
 
 	public void testPutBeanInRequest() throws Exception {
 		String targetBeanName = "target";
 		HttpServletRequest request = new MockHttpServletRequest();
-		RequestContextHolder.setRequest(request);
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, false);
 		bd.getPropertyValues().addPropertyValue("name", "abc");
@@ -51,13 +51,13 @@ public class HttpRequestAndSessionScopedProxyTests extends TestCase {
 		assertEquals("abc", target.getName());
 		target = (TestBean)request.getAttribute(targetBeanName);
 		assertEquals("abc", target.getName());
-		RequestContextHolder.setRequest(null);
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(null));
 	}
 	
 	public void testPutBeanInSession() throws Exception {
 		String targetBeanName = "target";
 		HttpServletRequest request = new MockHttpServletRequest();
-		RequestContextHolder.setRequest(request);
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, false);
 		bd.getPropertyValues().addPropertyValue("name", "abc");
@@ -73,7 +73,7 @@ public class HttpRequestAndSessionScopedProxyTests extends TestCase {
 		assertEquals("abc", target.getName());
 		target = (TestBean)request.getSession().getAttribute(targetBeanName);
 		assertEquals("abc", target.getName());
-		RequestContextHolder.setRequest(null);
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(null));
 	}
 
 }

@@ -50,6 +50,7 @@ import org.springframework.ui.context.ThemeSource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.scope.RequestContextHolder;
+import org.springframework.web.context.scope.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
@@ -256,6 +257,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/** Perform cleanup of request attributes after include request? */
 	private boolean cleanupAfterInclude = true;
+
 
 	/** MultipartResolver used by this servlet */
 	private MultipartResolver multipartResolver;
@@ -711,9 +713,13 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		});
 
-		// Expose current request to current thread.
-		RequestContextHolder.setRequest(request);
+		// Expose current RequestAttributes to current thread.
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
+		if (logger.isDebugEnabled()) {
+			logger.debug("Bound request context to thread: " + request);
+		}
+		
 		try {
 			ModelAndView mv = null;
 			try {
@@ -792,11 +798,15 @@ public class DispatcherServlet extends FrameworkServlet {
 				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
 			}
 
-			// Reset thread-bound request.
-			RequestContextHolder.setRequest(null);
+			// Reset thread-bound RequestAttributes.
+			RequestContextHolder.setRequestAttributes(null);
 
 			// Reset thread-bound LocaleContext.
 			LocaleContextHolder.setLocaleContext(null);
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cleared thread-bound request context: " + request);
+			}
 		}
 	}
 

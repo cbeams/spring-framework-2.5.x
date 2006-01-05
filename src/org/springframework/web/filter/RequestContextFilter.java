@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.context.scope.RequestContextHolder;
+import org.springframework.web.context.scope.ServletRequestAttributes;
 
 /**
  * Servlet filter that exposes the request to the current thread,
@@ -52,17 +53,17 @@ public class RequestContextFilter extends OncePerRequestFilter {
 
 		try {
 			LocaleContextHolder.setLocale(request.getLocale());
-			RequestContextHolder.setRequest(request);
+			RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 			if (logger.isDebugEnabled()) {
-				logger.debug("Bound request to thread: " + request);
+				logger.debug("Bound request context to thread: " + request);
 			}
 			filterChain.doFilter(request, response);
 		}
 		finally {
-			RequestContextHolder.setRequest(null);
+			RequestContextHolder.setRequestAttributes(null);
 			LocaleContextHolder.setLocale(null);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Cleared thread-bound request: " + request);
+				logger.debug("Cleared thread-bound request context: " + request);
 			}
 		}
 	}

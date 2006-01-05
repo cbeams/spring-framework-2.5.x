@@ -17,14 +17,16 @@
 package org.springframework.aop.config;
 
 import junit.framework.TestCase;
-import org.springframework.aop.support.AopUtils;
+
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.web.context.scope.RequestContextHolder;
+import org.springframework.web.context.scope.ServletRequestAttributes;
 
 /**
  * @author Rob Harrop
@@ -42,7 +44,7 @@ public class AopNamespaceHandlerScopeTests extends TestCase {
 		MockHttpServletRequest oldRequest = new MockHttpServletRequest();
 		MockHttpServletRequest newRequest = new MockHttpServletRequest();
 
-		RequestContextHolder.setRequest(oldRequest);
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(oldRequest));
 
 		ITestBean scoped = getTestBean("requestScoped");
 
@@ -52,9 +54,9 @@ public class AopNamespaceHandlerScopeTests extends TestCase {
 		assertTrue("Should be AOP proxy", AopUtils.isAopProxy(scoped));
 		assertEquals(rob, scoped.getName());
 		scoped.setName(bram);
-		RequestContextHolder.setRequest(newRequest);
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(newRequest));
 		assertEquals(rob, scoped.getName());
-		RequestContextHolder.setRequest(oldRequest);
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(oldRequest));
 		assertEquals(bram, scoped.getName());
 
 		assertTrue("Should have advisors", ((Advised)scoped).getAdvisors().length > 0);
@@ -66,7 +68,7 @@ public class AopNamespaceHandlerScopeTests extends TestCase {
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(oldSession);
-		RequestContextHolder.setRequest(request);
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
 		ITestBean scoped = getTestBean("sessionScoped");
 

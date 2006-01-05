@@ -20,6 +20,9 @@ import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.i18n.LocaleContextHolder;
 
 /**
@@ -28,16 +31,20 @@ import org.springframework.context.i18n.LocaleContextHolder;
  *
  * <p>Alternatively, Spring's RequestContextFilter and Spring's DispatcherServlet
  * also expose the same request context to the current thread.
- * 
+ *
  * @author Steven Devijver
- * @since 2.0
  * @see javax.servlet.ServletRequestListener
  * @see org.springframework.context.i18n.LocaleContextHolder
  * @see org.springframework.web.context.scope.RequestContextHolder
  * @see org.springframework.web.filter.RequestContextFilter
  * @see org.springframework.web.servlet.DispatcherServlet
+ * @since 2.0
  */
 public class RequestContextListener implements ServletRequestListener {
+
+	/** Logger available to subclasses */
+	protected final Log logger = LogFactory.getLog(getClass());
+
 
 	public void requestInitialized(ServletRequestEvent requestEvent) {
 		if (!(requestEvent.getServletRequest() instanceof HttpServletRequest)) {
@@ -46,12 +53,18 @@ public class RequestContextListener implements ServletRequestListener {
 		}
 		HttpServletRequest request = (HttpServletRequest) requestEvent.getServletRequest();
 		LocaleContextHolder.setLocale(request.getLocale());
-		RequestContextHolder.setRequest(request);
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+		if (logger.isDebugEnabled()) {
+			logger.debug("Bound request context to thread: " + request);
+		}
 	}
 
 	public void requestDestroyed(ServletRequestEvent requestEvent) {
-		RequestContextHolder.setRequest(null);
+		RequestContextHolder.setRequestAttributes(null);
 		LocaleContextHolder.setLocale(null);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Cleared thread-bound request context: " + requestEvent.getServletRequest());
+		}
 	}
 
 }

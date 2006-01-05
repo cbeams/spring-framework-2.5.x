@@ -19,13 +19,23 @@ package org.springframework.web.context.scope;
 import org.springframework.aop.target.scope.ScopeMap;
 
 /**
- * HttpServletRequest-backed ScopeMap implementation. Relies
- * on a thread-bound request, which can be exported through
- * RequestContextListener, RequestContextFilter or .
+ * Request-backed ScopeMap implementation. Relies on a thread-bound
+ * RequestAttributes instance, which can be exported through
+ * RequestContextListener, RequestContextFilter or DispatcherServlet.
+ *
+ * <p>This ScopeMap will also work for Portlet environments,
+ * through an alternate RequestAttributes implementation
+ * (as exposed out-of-the-box by Spring's DispatcherPortlet).
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
- * @see RequestContextHolder#currentRequest()
+ * @see RequestContextHolder#currentRequestAttributes()
+ * @see RequestAttributes#SCOPE_REQUEST
+ * @see RequestContextListener
+ * @see org.springframework.web.filter.RequestContextFilter
+ * @see org.springframework.web.servlet.DispatcherServlet
+ * @see org.springframework.web.portlet.DispatcherPortlet
  */
 public class RequestScopeMap implements ScopeMap {
 
@@ -34,15 +44,15 @@ public class RequestScopeMap implements ScopeMap {
 	}
 
 	public Object get(String name) {
-		return RequestContextHolder.currentRequest().getAttribute(name);
+		return RequestContextHolder.currentRequestAttributes().getAttribute(name, RequestAttributes.SCOPE_REQUEST);
 	}
 
 	public void put(String name, Object value) {
-		RequestContextHolder.currentRequest().setAttribute(name, value);
+		RequestContextHolder.currentRequestAttributes().setAttribute(name, value, RequestAttributes.SCOPE_REQUEST);
 	}
 
 	public void remove(String name) {
-		RequestContextHolder.currentRequest().removeAttribute(name);
+		RequestContextHolder.currentRequestAttributes().removeAttribute(name, RequestAttributes.SCOPE_REQUEST);
 	}
 
 }

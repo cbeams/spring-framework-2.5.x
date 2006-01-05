@@ -29,10 +29,12 @@ import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.web.context.scope.RequestAttributes;
 import org.springframework.web.context.scope.RequestContextHolder;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class RequestContextFilterTests extends TestCase {
 
@@ -45,8 +47,8 @@ public class RequestContextFilterTests extends TestCase {
 	}
 		
 	public void testFilterInvocation(final ServletException sex) throws Exception {
-		
 		final MockHttpServletRequest req = new MockHttpServletRequest();
+		req.setAttribute("myAttr", "myValue");
 		final MockHttpServletResponse resp = new MockHttpServletResponse();
 		
 		// Expect one invocation by the filter being tested
@@ -55,7 +57,8 @@ public class RequestContextFilterTests extends TestCase {
 			public void doFilter(ServletRequest req, ServletResponse resp) throws IOException, ServletException {
 				++invocations;
 				if (invocations == 1) {
-					assertSame(req, RequestContextHolder.currentRequest());
+					assertSame("myValue",
+							RequestContextHolder.currentRequestAttributes().getAttribute("myAttr", RequestAttributes.SCOPE_REQUEST));
 					if (sex != null) {
 						throw sex;
 					}
@@ -84,7 +87,7 @@ public class RequestContextFilterTests extends TestCase {
 		}
 		
 		try {
-			RequestContextHolder.currentRequest();
+			RequestContextHolder.currentRequestAttributes();
 			fail();
 		}
 		catch (IllegalStateException ex) {

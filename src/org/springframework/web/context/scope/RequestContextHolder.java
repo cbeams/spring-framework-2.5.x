@@ -16,9 +16,6 @@
 
 package org.springframework.web.context.scope;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 /**
  * Helper class to manage a thread-bound HttpServletRequest.
  *
@@ -31,44 +28,38 @@ import javax.servlet.http.HttpSession;
 public abstract class RequestContextHolder  {
 	
 	/** ThreadLocal that holds the current request */
-	public static ThreadLocal requestHolder = new InheritableThreadLocal();
+	public static ThreadLocal attributeAccessorHolder = new InheritableThreadLocal();
 
 
-	public static void setRequest(HttpServletRequest request) {
-		RequestContextHolder.requestHolder.set(request);
+	/**
+	 * Bind the given RequestAttributes to the current thread.
+	 * @param accessor the RequestAttributes to expose
+	 */
+	public static void setRequestAttributes(RequestAttributes accessor) {
+		RequestContextHolder.attributeAccessorHolder.set(accessor);
 	}
 
 	/**
-	 * Return the request currently bound to the thread.
-	 * @return the request currently bound to the thread, or <code>null</code>
+	 * Return the RequestAttributes currently bound to the thread.
+	 * @return the RequestAttributes currently bound to the thread,
+	 * or <code>null</code>
 	 */
-	public static HttpServletRequest getRequest() throws IllegalStateException {
-		return (HttpServletRequest) requestHolder.get();
+	public static RequestAttributes getRequestAttributes() {
+		return (RequestAttributes) attributeAccessorHolder.get();
 	}
 
 	/**
-	 * Return the request currently bound to the thread.
-	 * @return the request currently bound to the thread
-	 * @throws IllegalStateException if no request is bound to the
-	 * current thread
+	 * Return the RequestAttributes currently bound to the thread.
+	 * @return the RequestAttributes currently bound to the thread
+	 * @throws IllegalStateException if no RequestAttributes is bound
+	 * to the current thread
 	 */
-	public static HttpServletRequest currentRequest() throws IllegalStateException {
-		HttpServletRequest request = (HttpServletRequest) requestHolder.get();
-		if (request == null) {
+	public static RequestAttributes currentRequestAttributes() throws IllegalStateException {
+		RequestAttributes accessor = (RequestAttributes) attributeAccessorHolder.get();
+		if (accessor == null) {
 			throw new IllegalStateException("No thread-bound request: use RequestContextFilter");
 		}
-		return request;
-	}
-
-	/**
-	 * Convenient method to return the session associated with the current request,
-	 * creating one if none exists.
-	 * @return the Session to which the current request belongs.
-	 * @throws IllegalStateException if no request is bound to the
-	 * current thread
-	 */
-	public static HttpSession currentSession() throws IllegalStateException {
-		return currentRequest().getSession(true);
+		return accessor;
 	}
 
 }
