@@ -22,6 +22,8 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.framework.Advised;
 
 /**
  * Base <code>MethodInterceptor</code> implementation for tracing.
@@ -49,6 +51,11 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 */
 	protected transient Log defaultLogger = LogFactory.getLog(getClass());
 
+	/**
+	 * Indicates whether or not proxy class names should be hidden when using dynamic loggers.
+	 * @see #setUseDynamicLogger
+	 */
+	private boolean hideProxyClassNames = false;
 
 	/**
 	 * Set whether to use a dynamic logger or a static logger.
@@ -81,6 +88,13 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 		this.defaultLogger = LogFactory.getLog(loggerName);
 	}
 
+	/**
+	 * Set to <code>true</code> to have {@link #setUseDynamicLogger dynamic loggers} hide
+	 * proxy class names wherever possible. Default is <code>false</code>.
+	 */
+	public void setHideProxyClassNames(boolean hideProxyClassNames) {
+		this.hideProxyClassNames = hideProxyClassNames;
+	}
 
 	/**
 	 * Determines whether or not logging is enabled for the particular <code>MethodInvocation</code>.
@@ -109,8 +123,28 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 * @see #setUseDynamicLogger
 	 */
 	protected Log getLoggerForInvocation(MethodInvocation invocation) {
-		return (this.defaultLogger != null ?
-				this.defaultLogger : LogFactory.getLog(invocation.getThis().getClass()));
+		if (this.defaultLogger != null) {
+			return this.defaultLogger;
+		}
+		else {
+			Object target = invocation.getThis();
+			Class cls = target.getClass();
+
+			if (this.hideProxyClassNames) {
+				if (AopUtils.isJdkDynamicProxy(target) && (target instanceof Advised)) {
+					Class targetClass = ((Advised)target).getTargetSource().getTargetClass();
+					if(targetClass != null) {
+						cls = targetClass;
+					}
+				} else {
+					while(AopUtils.isCglibProxyClass(cls)) {
+						cls = cls.getSuperclass();
+					}
+				}
+			}
+
+			return LogFactory.getLog(cls);
+		}
 	}
 
 	/**
