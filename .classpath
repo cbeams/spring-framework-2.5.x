@@ -102,8 +102,6 @@
 	<classpathentry kind="lib" path="lib/ojb/db-ojb-1.0.3.jar"/>
 	<classpathentry kind="lib" path="lib/toplink/toplink-api.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/hibernate-annotations.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/asm/asm-2.1.jar"/>
-	<classpathentry kind="lib" path="lib/asm/asm-util-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/aspectj/aspectjweaver.jar"/>
 	<classpathentry kind="lib" path="lib/jexcelapi/jxl.jar"/>
 	<classpathentry kind="lib" path="lib/commonj/commonj-twm.jar"/>
@@ -116,5 +114,8 @@
 	<classpathentry kind="lib" path="lib/log4j/log4j-1.2.13.jar"/>
 	<classpathentry kind="lib" path="lib/jruby/jruby.jar"/>
 	<classpathentry kind="lib" path="lib/innovation/HTTPClient-0.3-3.jar"/>
+	<classpathentry kind="lib" path="lib/asm/asm-commons-2.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/asm/asm-2.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/asm/asm-util-2.2.1.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
