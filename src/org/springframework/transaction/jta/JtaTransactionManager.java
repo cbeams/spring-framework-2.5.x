@@ -36,6 +36,7 @@ import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.NestedIOException;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.HeuristicCompletionException;
@@ -885,9 +886,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			ois.defaultReadObject();
 		}
 		catch (ClassNotFoundException ex) {
-			throw new IOException(
-					"Failed to deserialize JtaTransactionManager - check that JTA and Spring transaction " +
-					"libraries are available on the client side: " + ex.getMessage());
+			throw new NestedIOException("Failed to deserialize [" + getClass().getName() + "] - " +
+					"check that JTA and Spring transaction libraries are available on the client side", ex);
 		}
 
 		// Do client-side JNDI lookup.

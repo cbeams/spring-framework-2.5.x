@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.Constants;
+import org.springframework.core.NestedIOException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.NestedTransactionNotSupportedException;
@@ -759,25 +760,6 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 
 	//---------------------------------------------------------------------
-	// Serialization support
-	//---------------------------------------------------------------------
-
-	private void readObject(ObjectInputStream ois) throws IOException {
-		// Rely on default serialization, just initialize state after deserialization.
-		try {
-			ois.defaultReadObject();
-		}
-		catch (ClassNotFoundException ex) {
-			throw new IOException("Failed to deserialize [" + getClass().getName() + "] - " +
-					"check that Spring transaction libraries are available on the client side: " + ex.getMessage());
-		}
-
-		// Initialize transient fields.
-		this.logger = LogFactory.getLog(getClass());
-	}
-
-
-	//---------------------------------------------------------------------
 	// Template methods to be implemented in subclasses
 	//---------------------------------------------------------------------
 
@@ -1006,6 +988,25 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @param transaction transaction object returned by doGetTransaction
 	 */
 	protected void doCleanupAfterCompletion(Object transaction) {
+	}
+
+
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	private void readObject(ObjectInputStream ois) throws IOException {
+		// Rely on default serialization, just initialize state after deserialization.
+		try {
+			ois.defaultReadObject();
+		}
+		catch (ClassNotFoundException ex) {
+			throw new NestedIOException("Failed to deserialize [" + getClass().getName() + "] - " +
+					"check that Spring transaction libraries are available on the client side", ex);
+		}
+
+		// Initialize transient fields.
+		this.logger = LogFactory.getLog(getClass());
 	}
 
 

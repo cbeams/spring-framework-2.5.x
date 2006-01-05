@@ -16,21 +16,22 @@
 
 package org.springframework.web.multipart;
 
-import org.springframework.web.util.NestedServletException;
+import org.springframework.core.NestedIOException;
 
 /**
  * Exception thrown on multipart resolution.
  *
- * <p>Extends ServletException for convenient throwing in any Servlet resource
- * (such as a Filter), and NestedServletException for proper root cause handling
- * (as the plain ServletException doesn't expose its root cause at all).
+ * <p>Extends IOException for convenient throwing in any Servlet/Portlet resource
+ * (such as a Filter), and NestedIOException for proper root cause handling.
  *
  * @author Trevor D. Cook
+ * @author Juergen Hoeller
  * @since 29.09.2003
  * @see MultipartResolver#resolveMultipart
  * @see org.springframework.web.multipart.support.MultipartFilter
+ * @see org.springframework.core.NestedIOException
  */
-public class MultipartException extends NestedServletException {
+public class MultipartException extends NestedIOException {
 
 	/**
 	 * Constructor for MultipartException.
