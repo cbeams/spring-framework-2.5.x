@@ -38,6 +38,7 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 
 	private Map multipartFiles;
 
+
 	/**
 	 * Wrap the given HttpServletRequest in a MultipartHttpServletRequest.
 	 * @param request the request to wrap
@@ -53,6 +54,7 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 	protected void setMultipartFiles(Map multipartFiles) {
 		this.multipartFiles = Collections.unmodifiableMap(multipartFiles);
 	}
+
 
 	public Iterator getFileNames() {
 		return this.multipartFiles.keySet().iterator();
