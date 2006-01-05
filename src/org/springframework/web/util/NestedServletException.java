@@ -78,8 +78,8 @@ public class NestedServletException extends ServletException {
 			return super.getMessage();
 		}
 		else {
-			return super.getMessage() + "; nested exception is " + getRootCause().getClass().getName() +
-					": " + getRootCause().getMessage();
+			return super.getMessage() + "; nested exception is " + getCause().getClass().getName() +
+					": " + getCause().getMessage();
 		}
 	}
 

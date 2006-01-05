@@ -55,13 +55,13 @@ public abstract class WebUtils {
 
 	/**
 	 * HTML escape parameter at the servlet context level
-	 * (i.e. a context-param in web.xml): "defaultHtmlEscape".
+	 * (i.e. a context-param in <code>web.xml</code>): "defaultHtmlEscape".
 	 */
 	public static final String HTML_ESCAPE_CONTEXT_PARAM = "defaultHtmlEscape";
 
 	/**
 	 * Web app root key parameter at the servlet context level
-	 * (i.e. a context-param in web.xml): "webAppRootKey".
+	 * (i.e. a context-param in <code>web.xml</code>): "webAppRootKey".
 	 */
 	public static final String WEB_APP_ROOT_KEY_PARAM = "webAppRootKey";
 
@@ -75,7 +75,7 @@ public abstract class WebUtils {
 	/**
 	 * Set a system property to the web application root directory.
 	 * The key of the system property can be defined with the "webAppRootKey"
-	 * context-param in web.xml. Default is "webapp.root".
+	 * context-param in <code>web.xml</code>. Default is "webapp.root".
 	 * <p>Can be used for tools that support substition with <code>System.getProperty</code>
 	 * values, like Log4J's "${key}" syntax within log file locations.
 	 * @param servletContext the servlet context of the web application
@@ -119,7 +119,8 @@ public abstract class WebUtils {
 
 	/**
 	 * Return whether default HTML escaping is enabled for the web application,
-	 * i.e. the value of the "defaultHtmlEscape" context-param in web.xml (if any).
+	 * i.e. the value of the "defaultHtmlEscape" context-param in <code>web.xml</code>
+	 * (if any).
 	 * @param servletContext the servlet context of the web application
 	 * @return whether default HTML escaping is enabled (default is false)
 	 */

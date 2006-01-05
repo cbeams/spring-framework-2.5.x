@@ -362,8 +362,9 @@ public abstract class BaseCommandController extends AbstractController {
 	 * <p>Called by <code>bindAndValidate</code>. Can be overridden to plug in
 	 * custom ServletRequestDataBinder subclasses.
 	 * <p>Default implementation creates a standard ServletRequestDataBinder,
-	 * sets the specified MessageCodesResolver (if any), and invokes initBinder.
-	 * Note that <code>initBinder</code> will not be invoked if you override this method!
+	 * sets the specified MessageCodesResolver and BindingErrorProcessor (if any),
+	 * and invokes <code>initBinder</code>. Note that <code>initBinder</code>
+	 * will not be invoked if you override this method!
 	 * @param request current HTTP request
 	 * @param command the command to bind onto
 	 * @return the new binder instance

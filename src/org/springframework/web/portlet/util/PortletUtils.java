@@ -191,24 +191,27 @@ public abstract class PortletUtils {
 	 * @param session current portlet session
 	 * @param name the name of the session attribute
 	 * @param clazz the class to instantiate for a new attribute
-	 * @param scope session scope of this attribute
+	 * @param scope the session scope of this attribute
 	 * @return the value of the session attribute, newly created if not found
 	 * @throws IllegalArgumentException if the session attribute could not be instantiated
 	 */
 	public static Object getOrCreateSessionAttribute(PortletSession session, String name, Class clazz, int scope)
 			throws IllegalArgumentException {
+
 		Object sessionObject = session.getAttribute(name, scope);
 		if (sessionObject == null) {
 			try {
 				sessionObject = clazz.newInstance();
 			}
 			catch (InstantiationException ex) {
-				throw new IllegalArgumentException("Could not instantiate class [" + clazz.getName() +
-				                                   "] for session attribute '" + name + "': " + ex.getMessage());
+				throw new IllegalArgumentException(
+						"Could not instantiate class [" + clazz.getName() +
+						"] for session attribute '" + name + "': " + ex.getMessage());
 			}
 			catch (IllegalAccessException ex) {
-				throw new IllegalArgumentException("Could not access default constructor of class [" + clazz.getName() +
-				                                   "] for session attribute '" + name + "': " + ex.getMessage());
+				throw new IllegalArgumentException(
+						"Could not access default constructor of class [" + clazz.getName() +
+						"] for session attribute '" + name + "': " + ex.getMessage());
 			}
 			session.setAttribute(name, sessionObject, scope);
 		}
@@ -224,6 +227,7 @@ public abstract class PortletUtils {
 	 */
 	public static void exposeRequestAttributes(PortletRequest request, Map attributes)
 			throws IllegalArgumentException {
+
 		Iterator it = attributes.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();
