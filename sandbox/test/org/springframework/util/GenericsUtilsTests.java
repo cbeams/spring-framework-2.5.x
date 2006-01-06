@@ -16,10 +16,6 @@
 
 package org.springframework.util;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Map;
-
 import junit.framework.TestCase;
 
 /**
@@ -28,6 +24,7 @@ import junit.framework.TestCase;
  */
 public class GenericsUtilsTests extends TestCase {
 
+	/*
 	public void testDetermineCollectionType() throws Exception {
 		Method method = getClass().getMethod("testMethod1", new Class[] {Collection.class});
 		assertEquals(String.class, GenericsUtils.determineCollectionType(method, 0));
@@ -61,5 +58,6 @@ public class GenericsUtilsTests extends TestCase {
 
 	public void testMethod4(Map arg) {
 	}
+	*/
 
 }
