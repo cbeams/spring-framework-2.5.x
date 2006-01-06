@@ -16,9 +16,6 @@
 
 package org.springframework.util;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -47,11 +44,9 @@ import org.apache.commons.logging.LogFactory;
  */
 public abstract class ConcurrencyThrottleSupport {
 
-	/** Transient to optimize serialization */
-	protected transient Log logger = LogFactory.getLog(getClass());
+	protected Log logger = LogFactory.getLog(getClass());
 
-	/** Transient to optimize serialization */
-	private transient Object monitor = new Object();
+	private Object monitor = new Object();
 
 	private int concurrencyLimit = -1;
 
@@ -122,25 +117,6 @@ public abstract class ConcurrencyThrottleSupport {
 				this.monitor.notify();
 			}
 		}
-	}
-
-
-	//---------------------------------------------------------------------
-	// Serialization support
-	//---------------------------------------------------------------------
-
-	private void readObject(ObjectInputStream ois) throws IOException {
-		// Rely on default serialization, just initialize state after deserialization.
-		try {
-			ois.defaultReadObject();
-		}
-		catch (ClassNotFoundException ex) {
-			throw new IOException("Failed to deserialize [" + getClass().getName() + "]: " + ex.getMessage());
-		}
-
-		// Initialize transient fields.
-		this.logger = LogFactory.getLog(getClass());
-		this.monitor = new Object();
 	}
 
 }
