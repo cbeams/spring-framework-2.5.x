@@ -16,6 +16,7 @@ Package org.springframework.core
 * added NestedIOException, deriving from java.io.IOException and adding NestedCheckedException-style root cause handling
 
 Package org.springframework.jdbc
+* DataSourceTransactionManager only attempts to release Connection if not pre-bound (to avoid inappropriate log message)
 * turned visibility of jdbc.core.StatementCreatorUtils to package-protected
 * removed ResultReader interface (sub-interface of RowCallbackHandler): use RowMapper instead
 * reworked RowMapperResultReader adapter into RowMapperResultSetExtractor
@@ -26,6 +27,8 @@ Package org.springframework.jdbc
 Package org.springframework.orm
 * SqlMapClientTemplate always works with SqlMapSession and provided Connection to enable proper batching in all cases
 * added "configLocations" property to LocalSessionFactoryBean for Hibernate3, allowing to load multiple config files
+* added optional SpringSessionContext for Hibernate 3.1, to plug Spring into "getCurrentSession()" without proxying
+* added "replicate" convenience methods to HibernateTemplate for both Hibernate2 and Hibernate3
 * updated Spring's JDO 2.0 support to JPOX JDO 2.0 API snapshot-9 (corresponding to JDO 2.0 final draft)
 * added full support for Java Persistence API 1.0 (JPA), in package "orm.jpa"
 
