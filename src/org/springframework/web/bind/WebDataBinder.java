@@ -17,10 +17,13 @@
 package org.springframework.web.bind;
 
 import java.lang.reflect.Array;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.validation.DataBinder;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Special DataBinder to perform data binding from web request parameters
@@ -57,6 +60,8 @@ public class WebDataBinder extends DataBinder {
 
 
 	private String fieldMarkerPrefix = DEFAULT_FIELD_MARKER_PREFIX;
+
+	private boolean bindEmptyMultipartFiles = true;
 
 
 	/**
@@ -109,6 +114,25 @@ public class WebDataBinder extends DataBinder {
 	 */
 	public String getFieldMarkerPrefix() {
 		return fieldMarkerPrefix;
+	}
+
+	/**
+	 * Set whether to bind empty MultipartFile parameters. Default is "true".
+	 * <p>Turn this off if you want to keep an already bound MultipartFile
+	 * when the user resubmits the form without choosing a different file.
+	 * Else, the already bound MultipartFile will be replaced by an empty
+	 * MultipartFile holder.
+	 * @see org.springframework.web.multipart.MultipartFile
+	 */
+	public void setBindEmptyMultipartFiles(boolean bindEmptyMultipartFiles) {
+		this.bindEmptyMultipartFiles = bindEmptyMultipartFiles;
+	}
+
+	/**
+	 * Return whether to bind empty MultipartFile parameters.
+	 */
+	public boolean isBindEmptyMultipartFiles() {
+		return bindEmptyMultipartFiles;
 	}
 
 
@@ -171,6 +195,28 @@ public class WebDataBinder extends DataBinder {
 		else {
 			// Default value: try null.
 			return null;
+		}
+	}
+
+
+	/**
+	 * Bind the multipart files contained in the given request, if any
+	 * (in case of a multipart request).
+	 * <p>Multipart files will only be added to the property values if they
+	 * are not empty or if we're configured to bind empty multipart files too.
+	 * @param multipartFiles Map of field name String to MultipartFile object
+	 * @param mpvs the property values to be bound (can be modified)
+	 * @see org.springframework.web.multipart.MultipartFile
+	 * @see #setBindEmptyMultipartFiles
+	 */
+	protected void bindMultipartFiles(Map multipartFiles, MutablePropertyValues mpvs) {
+		for (Iterator it = multipartFiles.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			String key = (String) entry.getKey();
+			MultipartFile value = (MultipartFile) entry.getValue();
+			if (isBindEmptyMultipartFiles() || !value.isEmpty()) {
+				mpvs.addPropertyValue(key, value);
+			}
 		}
 	}
 

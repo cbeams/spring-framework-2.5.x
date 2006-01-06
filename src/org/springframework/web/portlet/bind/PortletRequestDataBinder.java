@@ -20,6 +20,7 @@ import javax.portlet.PortletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.portlet.multipart.MultipartActionRequest;
 
 /**
  * Special DataBinder to perform data binding from PortletRequest parameters
@@ -82,15 +83,29 @@ public class PortletRequestDataBinder extends WebDataBinder {
 
 
 	/**
-	 * Bind the parameters of the given request to this binder's target.
+	 * Bind the parameters of the given request to this binder's target,
+	 * also binding multipart files in case of a multipart request.
 	 * <p>This call can create field errors, representing basic binding
 	 * errors like a required field (code "required"), or type mismatch
 	 * between value and bean property (code "typeMismatch").
-	 * @param request request with parameters to bind
+	 * <p>Multipart files are bound via their parameter name, just like normal
+	 * HTTP parameters: i.e. "uploadedFile" to an "uploadedFile" bean property,
+	 * invoking a "setUploadedFile" setter method.
+	 * <p>The type of the target property for a multipart file can be MultipartFile,
+	 * byte[], or String. The latter two receive the contents of the uploaded file;
+	 * all metadata like original file name, content type, etc are lost in those cases.
+	 * @param request request with parameters to bind (can be multipart)
+	 * @see org.springframework.web.portlet.multipart.MultipartActionRequest
+	 * @see org.springframework.web.multipart.MultipartFile
+	 * @see #bindMultipartFiles
 	 * @see #bind(org.springframework.beans.PropertyValues)
 	 */
 	public void bind(PortletRequest request) {
 		MutablePropertyValues mpvs = new PortletRequestParameterPropertyValues(request);
+		if (request instanceof MultipartActionRequest) {
+			MultipartActionRequest multipartRequest = (MultipartActionRequest) request;
+			bindMultipartFiles(multipartRequest.getFileMap(), mpvs);
+		}
 		doBind(mpvs);
 	}
 

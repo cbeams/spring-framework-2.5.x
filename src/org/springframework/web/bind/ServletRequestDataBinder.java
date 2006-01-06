@@ -16,13 +16,9 @@
 
 package org.springframework.web.bind;
 
-import java.util.Iterator;
-import java.util.Map;
-
 import javax.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 /**
@@ -62,12 +58,8 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  * @see #setRequiredFields
  * @see #setFieldMarkerPrefix
  * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
- * @see org.springframework.web.servlet.mvc.multiaction.MultiActionController#initBinder
  */
 public class ServletRequestDataBinder extends WebDataBinder {
-
-	private boolean bindEmptyMultipartFiles = true;
-	
 
 	/**
 	 * Create a new ServletRequestDataBinder instance, with default object name.
@@ -89,25 +81,6 @@ public class ServletRequestDataBinder extends WebDataBinder {
 
 
 	/**
-	 * Set whether to bind empty MultipartFile parameters. Default is "true".
-	 * <p>Turn this off if you want to keep an already bound MultipartFile
-	 * when the user resubmits the form without choosing a different file.
-	 * Else, the already bound MultipartFile will be replaced by an empty
-	 * MultipartFile holder.
-	 */
-	public void setBindEmptyMultipartFiles(boolean bindEmptyMultipartFiles) {
-		this.bindEmptyMultipartFiles = bindEmptyMultipartFiles;
-	}
-
-	/**
-	 * Return whether to bind empty MultipartFile parameters.
-	 */
-	public boolean isBindEmptyMultipartFiles() {
-		return bindEmptyMultipartFiles;
-	}
-	
-
-	/**
 	 * Bind the parameters of the given request to this binder's target,
 	 * also binding multipart files in case of a multipart request.
 	 * <p>This call can create field errors, representing basic binding
@@ -122,39 +95,16 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	 * @param request request with parameters to bind (can be multipart)
 	 * @see org.springframework.web.multipart.MultipartHttpServletRequest
 	 * @see org.springframework.web.multipart.MultipartFile
-	 * @see #checkMultipartFiles
+	 * @see #bindMultipartFiles
 	 * @see #bind(org.springframework.beans.PropertyValues)
 	 */
 	public void bind(ServletRequest request) {
 		MutablePropertyValues mpvs = new ServletRequestParameterPropertyValues(request);
-		checkMultipartFiles(request, mpvs);
-		doBind(mpvs);
-	}
-
-	/**
-	 * Check the multipart files contained in the given request, if any
-	 * (in case of a multipart request).
-	 * <p>Multipart files will only be added to the property values if they
-	 * are not empty or if we're configured to bind empty multipart files too.
-	 * @param request current request (can be multipart)
-	 * @param mpvs the property values to be bound (can be modified)
-	 * @see org.springframework.web.multipart.MultipartHttpServletRequest
-	 * @see org.springframework.web.multipart.MultipartFile
-	 * @see #isBindEmptyMultipartFiles
-	 */
-	protected void checkMultipartFiles(ServletRequest request, MutablePropertyValues mpvs) {
 		if (request instanceof MultipartHttpServletRequest) {
 			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-			Map fileMap = multipartRequest.getFileMap();
-			for (Iterator it = fileMap.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String key = (String) entry.getKey();
-				MultipartFile value = (MultipartFile) entry.getValue();
-				if (isBindEmptyMultipartFiles() || !value.isEmpty()) {
-					mpvs.addPropertyValue(key, value);
-				}
-			}
+			bindMultipartFiles(multipartRequest.getFileMap(), mpvs);
 		}
+		doBind(mpvs);
 	}
 
 	/**
