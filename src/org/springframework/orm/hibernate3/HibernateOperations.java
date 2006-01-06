@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.hibernate.Filter;
 import org.hibernate.LockMode;
+import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.DetachedCriteria;
 
 import org.springframework.dao.DataAccessException;
@@ -301,7 +302,7 @@ public interface HibernateOperations {
 	 * @param lockMode the lock mode to obtain
 	 * @throws org.springframework.orm.ObjectOptimisticLockingFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#lock(Object, org.hibernate.LockMode)
+	 * @see org.hibernate.Session#lock(String, Object, org.hibernate.LockMode)
 	 */
 	void lock(String entityName, Object entity, LockMode lockMode) throws DataAccessException;
 
@@ -320,7 +321,7 @@ public interface HibernateOperations {
 	 * @param entity the transient instance to persist
 	 * @return the generated identifier
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#save(Object)
+	 * @see org.hibernate.Session#save(String, Object)
 	 */
 	Serializable save(String entityName, Object entity) throws DataAccessException;
 
@@ -353,7 +354,7 @@ public interface HibernateOperations {
 	 * @param entityName the name of a persistent entity
 	 * @param entity the persistent instance to update
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#update(Object)
+	 * @see org.hibernate.Session#update(String, Object)
 	 */
 	void update(String entityName, Object entity) throws DataAccessException;
 
@@ -368,7 +369,7 @@ public interface HibernateOperations {
 	 * @param lockMode the lock mode to obtain
 	 * @throws org.springframework.orm.ObjectOptimisticLockingFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#update(Object)
+	 * @see org.hibernate.Session#update(String, Object)
 	 */
 	void update(String entityName, Object entity, LockMode lockMode) throws DataAccessException;
 
@@ -391,7 +392,7 @@ public interface HibernateOperations {
 	 * @param entity the persistent instance to save or update
 	 * (to be associated with the Hibernate Session)
 	 * @throws DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#saveOrUpdate(Object)
+	 * @see org.hibernate.Session#saveOrUpdate(String, Object)
 	 */
 	void saveOrUpdate(String entityName, Object entity) throws DataAccessException;
 
@@ -405,6 +406,25 @@ public interface HibernateOperations {
 	 * @see org.hibernate.Session#saveOrUpdate(Object)
 	 */
 	void saveOrUpdateAll(Collection entities) throws DataAccessException;
+
+	/**
+	 * Persist the state of the given detached instance according to the
+	 * given replication mode, reusing the current identifier value.
+	 * @param entity the persistent object to replicate
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.Session#replicate(Object, org.hibernate.ReplicationMode)
+	 */
+	void replicate(Object entity, ReplicationMode replicationMode) throws DataAccessException;
+
+	/**
+	 * Persist the state of the given detached instance according to the
+	 * given replication mode, reusing the current identifier value.
+	 * @param entityName the name of a persistent entity
+	 * @param entity the persistent object to replicate
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.Session#replicate(String, Object, org.hibernate.ReplicationMode)
+	 */
+	void replicate(String entityName, Object entity, ReplicationMode replicationMode) throws DataAccessException;
 
 	/**
 	 * Persist the given transient instance. Follows JSR-220 semantics.
@@ -424,7 +444,7 @@ public interface HibernateOperations {
 	 * @param entityName the name of a persistent entity
 	 * @param entity the persistent instance to persist
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#persist(Object)
+	 * @see org.hibernate.Session#persist(String, Object)
 	 * @see #save
 	 */
 	void persist(String entityName, Object entity) throws DataAccessException;
@@ -462,7 +482,7 @@ public interface HibernateOperations {
 	 * @param entity the object to merge with the corresponding persistence instance
 	 * @return the updated, registered persistent instance
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#merge(Object)
+	 * @see org.hibernate.Session#merge(String, Object)
 	 * @see #saveOrUpdate
 	 */
 	Object merge(String entityName, Object entity) throws DataAccessException;

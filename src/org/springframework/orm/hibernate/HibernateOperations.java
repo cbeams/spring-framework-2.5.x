@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.sf.hibernate.LockMode;
+import net.sf.hibernate.ReplicationMode;
 import net.sf.hibernate.type.Type;
 
 import org.springframework.dao.DataAccessException;
@@ -302,6 +303,15 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#saveOrUpdateCopy(Object)
 	 */
 	Object saveOrUpdateCopy(Object entity) throws DataAccessException;
+
+	/**
+	 * Persist the state of the given detached instance according to the
+	 * given replication mode, reusing the current identifier value.
+	 * @param entity the persistent object to replicate
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#replicate(Object, net.sf.hibernate.ReplicationMode)
+	 */
+	void replicate(Object entity, ReplicationMode replicationMode) throws DataAccessException;
 
 	/**
 	 * Delete the given persistent instance.

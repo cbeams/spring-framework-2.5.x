@@ -32,6 +32,7 @@ import net.sf.hibernate.Hibernate;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.LockMode;
 import net.sf.hibernate.Query;
+import net.sf.hibernate.ReplicationMode;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.type.Type;
@@ -611,6 +612,18 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				return session.saveOrUpdateCopy(entity);
+			}
+		}, true);
+	}
+
+	public void replicate(final Object entity, final ReplicationMode replicationMode)
+			throws DataAccessException {
+
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
+				session.replicate(entity, replicationMode);
+				return null;
 			}
 		}, true);
 	}
