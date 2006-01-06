@@ -48,6 +48,11 @@ import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.scope.RequestContextHolder;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.portlet.context.PortletRequestAttributes;
+import org.springframework.web.portlet.multipart.MultipartActionRequest;
+import org.springframework.web.portlet.multipart.PortletMultipartResolver;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewRendererServlet;
 import org.springframework.web.servlet.ViewResolver;
@@ -108,6 +113,11 @@ import org.springframework.web.servlet.ViewResolver;
  * @see org.springframework.web.servlet.ViewRendererServlet
  */
 public class DispatcherPortlet extends FrameworkPortlet {
+
+	/**
+	 * Well-known name for the MultipartResolver object in the bean factory for this namespace.
+	 */
+	public static final String MULTIPART_RESOLVER_BEAN_NAME = "multipartResolver";
 
 	/**
 	 * Well-known name for the HandlerMapping object in the bean factory for this namespace.
@@ -219,6 +229,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	/** URL that points to the ViewRendererServlet */
 	private String viewRendererUrl = DEFAULT_VIEW_RENDERER_URL;
 
+
+	/** MultipartResolver used by this servlet */
+	private PortletMultipartResolver multipartResolver;
+
 	/** List of HandlerMappings used by this portlet */
 	private List handlerMappings;
 
@@ -292,10 +306,34 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * ViewResolver and a LocaleResolver.
 	 */
 	protected void initFrameworkPortlet() throws PortletException, BeansException {
+		initMultipartResolver();
 		initHandlerMappings();
 		initHandlerAdapters();
 		initHandlerExceptionResolvers();
 		initViewResolvers();
+	}
+
+	/**
+	 * Initialize the MultipartResolver used by this class.
+	 * If no bean is defined with the given name in the BeanFactory
+	 * for this namespace, no multipart handling is provided.
+	 */
+	private void initMultipartResolver() throws BeansException {
+		try {
+			this.multipartResolver =
+					(PortletMultipartResolver) getPortletApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME);
+			if (logger.isInfoEnabled()) {
+				logger.info("Using MultipartResolver [" + this.multipartResolver + "]");
+			}
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Default is no multipart resolver.
+			this.multipartResolver = null;
+			if (logger.isInfoEnabled()) {
+				logger.info("Unable to locate MultipartResolver with name '"	+ MULTIPART_RESOLVER_BEAN_NAME +
+						"': no multipart request handling provided");
+			}
+		}
 	}
 
 	/**
@@ -307,7 +345,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		if (this.detectAllHandlerMappings) {
 			// Find all HandlerMappings in the ApplicationContext,
 			// including ancestor contexts.
-			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getPortletApplicationContext(), HandlerMapping.class, true, false);
+			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+					getPortletApplicationContext(), HandlerMapping.class, true, false);
 			if (!matchingBeans.isEmpty()) {
 				this.handlerMappings = new ArrayList(matchingBeans.values());
 				// We keep HandlerMappings in sorted order.
@@ -380,7 +419,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		if (this.detectAllHandlerExceptionResolvers) {
 			// Find all HandlerExceptionResolvers in the ApplicationContext,
 			// including ancestor contexts.
-			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getPortletApplicationContext(), HandlerExceptionResolver.class, true, false);
+			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+					getPortletApplicationContext(), HandlerExceptionResolver.class, true, false);
 			this.handlerExceptionResolvers = new ArrayList(matchingBeans.values());
 			// We keep HandlerExceptionResolvers in sorted order.
 			Collections.sort(this.handlerExceptionResolvers, new OrderComparator());
@@ -406,7 +446,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		if (this.detectAllViewResolvers) {
 			// Find all ViewResolvers in the ApplicationContext,
 			// including ancestor contexts.
-			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getPortletApplicationContext(), ViewResolver.class, true, false);
+			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+					getPortletApplicationContext(), ViewResolver.class, true, false);
 			if (!matchingBeans.isEmpty()) {
 				this.viewResolvers = new ArrayList(matchingBeans.values());
 				// We keep ViewResolvers in sorted order.
@@ -523,7 +564,16 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		// Expose current Locale as LocaleContext.
 		LocaleContextHolder.setLocaleContext(new SimpleLocaleContext(request.getLocale()));
 
+		// Expose current RequestAttributes to current thread.
+		RequestContextHolder.setRequestAttributes(new PortletRequestAttributes(request));
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Bound request context to thread: " + request);
+		}
+
 		try {
+			processedRequest = checkMultipart(request);
+
 			// Determine handler for the current request.
 			mappedHandler = getHandler(processedRequest, false);
 			if (mappedHandler == null || mappedHandler.getHandler() == null) {
@@ -569,8 +619,20 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		}
 
 		finally {
+			// Clean up any resources used by a multipart request.
+			if (processedRequest instanceof MultipartActionRequest && processedRequest != request) {
+				this.multipartResolver.cleanupMultipart((MultipartActionRequest) processedRequest);
+			}
+
+			// Reset thread-bound RequestAttributes.
+			RequestContextHolder.setRequestAttributes(null);
+
 			// Reset thread-bound LocaleContext.
 			LocaleContextHolder.setLocaleContext(null);
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cleared thread-bound request context: " + request);
+			}
 		}
 	}
 
@@ -687,6 +749,25 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		}
 	}
 
+
+	/**
+	 * Convert the request into a multipart request, and make multipart resolver available.
+	 * If no multipart resolver is set, simply use the existing request.
+	 * @param request current HTTP request
+	 * @return the processed request (multipart wrapper if necessary)
+	 */
+	protected ActionRequest checkMultipart(ActionRequest request) throws MultipartException {
+		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
+			if (request instanceof MultipartActionRequest) {
+				logger.debug("Request is already a MultipartActionRequest - probably in a forward");
+			}
+			else {
+				return this.multipartResolver.resolveMultipart(request);
+			}
+		}
+		// If not returned before: return original request.
+		return request;
+	}
 
 	/**
 	 * Return the HandlerExecutionChain for this request.
