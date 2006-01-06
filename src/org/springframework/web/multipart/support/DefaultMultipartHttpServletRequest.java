@@ -36,20 +36,22 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
 
-	private final Map multipartParams;
+	private final Map multipartParameters;
 
 
 	/**
 	 * Wrap the given HttpServletRequest in a MultipartHttpServletRequest.
 	 * @param request the servlet request to wrap
 	 * @param multipartFiles a map of the multipart files
-	 * @param multipartParams a map of the parameters to expose,
+	 * @param multipartParameters a map of the parameters to expose,
 	 * with Strings as keys and String arrays as values
 	 */
-	public DefaultMultipartHttpServletRequest(HttpServletRequest request, Map multipartFiles, Map multipartParams) {
+	public DefaultMultipartHttpServletRequest(
+			HttpServletRequest request, Map multipartFiles, Map multipartParameters) {
+		
 		super(request);
 		setMultipartFiles(multipartFiles);
-		this.multipartParams = multipartParams;
+		this.multipartParameters = multipartParameters;
 	}
 
 
@@ -59,12 +61,12 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 		while (paramEnum.hasMoreElements()) {
 			paramNames.add(paramEnum.nextElement());
 		}
-		paramNames.addAll(this.multipartParams.keySet());
+		paramNames.addAll(this.multipartParameters.keySet());
 		return Collections.enumeration(paramNames);
 	}
 
 	public String getParameter(String name) {
-		String[] values = (String[]) this.multipartParams.get(name);
+		String[] values = (String[]) this.multipartParameters.get(name);
 		if (values != null) {
 			return (values.length > 0 ? values[0] : null);
 		}
@@ -72,7 +74,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 	}
 
 	public String[] getParameterValues(String name) {
-		String[] values = (String[]) this.multipartParams.get(name);
+		String[] values = (String[]) this.multipartParameters.get(name);
 		if (values != null) {
 			return values;
 		}
@@ -82,7 +84,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 	public Map getParameterMap() {
 		Map paramMap = new HashMap();
 		paramMap.putAll(getRequest().getParameterMap());
-		paramMap.putAll(this.multipartParams);
+		paramMap.putAll(this.multipartParameters);
 		return paramMap;
 	}
 
