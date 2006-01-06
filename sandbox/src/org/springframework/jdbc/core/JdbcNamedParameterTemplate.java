@@ -16,9 +16,7 @@
 
 package org.springframework.jdbc.core;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -26,14 +24,13 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.support.DataAccessUtils;
-import org.springframework.jdbc.command.SqlNamedParameterHolder;
-import org.springframework.jdbc.command.SqlNamedParameterValues;
 import org.springframework.jdbc.command.NamedParameterUtils;
+import org.springframework.jdbc.command.SqlNamedParameterHolder;
 import org.springframework.jdbc.command.SqlNamedParameterTypes;
-import org.springframework.jdbc.support.ParsedSql;
+import org.springframework.jdbc.command.SqlNamedParameterValues;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.ParsedSql;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
@@ -77,93 +74,74 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  * @see org.springframework.jdbc.datasource
  * @see org.springframework.jdbc.object
  */
-public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcNamedParameterOperations {
+public class JdbcNamedParameterTemplate implements JdbcNamedParameterOperations {
 
-//	/** Custom NativeJdbcExtractor */
-//	private NativeJdbcExtractor nativeJdbcExtractor;
-//
-//	/** If this variable is false, we will throw exceptions on SQL warnings */
-//	private boolean ignoreWarnings = true;
-//
-//	/**
-//	 * If this variable is set to a non-zero value, it will be used for setting the
-//	 * fetchSize property on statements used for query processing.
-//	 */
-//	private int fetchSize = 0;
-//
-//	/**
-//	 * If this variable is set to a non-zero value, it will be used for setting the
-//	 * maxRows property on statements used for query processing.
-//	 */
-//	private int maxRows = 0;
-//
+	/** The JdbcTemplate we are wrapping */
+	private final JdbcOperations classicJdbcTemplate;
+
 
 	/**
-	 * Construct a new JdbcTemplate for bean usage.
-	 * Note: The DataSource has to be set before using the instance.
-	 * This constructor can be used to prepare a JdbcTemplate via a BeanFactory,
-	 * typically setting the DataSource via setDataSource.
-	 * @see #setDataSource
-	 */
-	public JdbcNamedParameterTemplate() {
-	}
-
-	/**
-	 * Construct a new JdbcTemplate, given a DataSource to obtain connections from.
-	 * Note: This will not trigger initialization of the exception translator.
-	 * @param dataSource JDBC DataSource to obtain connections from
+	 * Create a new SimpleJdbcTemplate for the given DataSource.
+	 * <p>Creates a classic Spring JdbcTemplate and wraps it.
+	 * @param dataSource the JDBC DataSource to access
 	 */
 	public JdbcNamedParameterTemplate(DataSource dataSource) {
-		setDataSource(dataSource);
-		afterPropertiesSet();
+		this.classicJdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	/**
-	 * Construct a new JdbcTemplate, given a DataSource to obtain connections from.
-	 * Note: Depending on the "lazyInit" flag, initialization of the exception translator
-	 * will be triggered.
-	 * @param dataSource JDBC DataSource to obtain connections from
-	 * @param lazyInit whether to lazily initialize the SQLExceptionTranslator
+	 * Create a new SimpleJdbcTemplate for the given classic Spring JdbcTemplate.
+	 * @param classicJdbcTemplate the classic Spring JdbcTemplate to wrap
 	 */
-	public JdbcNamedParameterTemplate(DataSource dataSource, boolean lazyInit) {
-		setDataSource(dataSource);
-		setLazyInit(lazyInit);
-		afterPropertiesSet();
+	public JdbcNamedParameterTemplate(JdbcOperations classicJdbcTemplate) {
+		this.classicJdbcTemplate = classicJdbcTemplate;
+	}
+
+	/**
+	 * Expose the classic Spring JdbcTemplate to allow invocation of
+	 * less commonly used methods.
+	 */
+	public JdbcOperations getJdbcOperations() {
+		return this.classicJdbcTemplate;
 	}
 
 
-	public List query(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, RowCallbackHandler rch)
+	public void query(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, RowCallbackHandler rch)
 			throws DataAccessException {
-		ArgMapPreparedStatementCreator ampsc = new ArgMapPreparedStatementCreator(sql, namedParameters, namedTypes);
+		ArgMapPreparedStatementSetter ampsc = new ArgMapPreparedStatementSetter(sql, namedParameters, namedTypes);
 		// ToDo
-		return (List) query(ampsc, ampsc, new RowCallbackHandlerResultSetExtractor(rch));
+		getJdbcOperations().query(sql, ampsc, rch);
 	}
 
-	public List query(String sql, Map argMap, RowCallbackHandler rch)
+	public void query(String sql, Map argMap, RowCallbackHandler rch)
 			throws DataAccessException {
-		ArgMapPreparedStatementCreator ampsc = new ArgMapPreparedStatementCreator(sql, argMap);
+		ArgMapPreparedStatementSetter ampsc = new ArgMapPreparedStatementSetter(sql, argMap);
 		// ToDo
-		return (List) query(ampsc, ampsc, new RowCallbackHandlerResultSetExtractor(rch));
+		getJdbcOperations().query(sql, ampsc, rch);
 	}
 
 	public List query(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, RowMapper rowMapper)
 			throws DataAccessException {
-		return query(sql, namedParameters, namedTypes, new RowMapperResultReader(rowMapper));
+		ArgMapPreparedStatementSetter ampsc = new ArgMapPreparedStatementSetter(sql, namedParameters, namedTypes);
+		return (List) getJdbcOperations().query(sql, ampsc, new RowMapperResultSetExtractor(rowMapper));
 	}
 
 	public List query(String sql, Map argMap, RowMapper rowMapper)
 			throws DataAccessException {
-		return query(sql, argMap, new RowMapperResultReader(rowMapper));
+		ArgMapPreparedStatementSetter ampsc = new ArgMapPreparedStatementSetter(sql, argMap);
+		return (List) getJdbcOperations().query(sql, ampsc, new RowMapperResultSetExtractor(rowMapper));
 	}
 
 	public Object queryForObject(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, RowMapper rowMapper)
 			throws DataAccessException {
-		List results = query(sql, namedParameters, namedTypes, new RowMapperResultReader(rowMapper, 1));
+		ArgMapPreparedStatementSetter ampsc = new ArgMapPreparedStatementSetter(sql, namedParameters, namedTypes);
+		List results = (List) getJdbcOperations().query(sql, ampsc, new RowMapperResultSetExtractor(rowMapper, 1));
 		return DataAccessUtils.requiredUniqueResult(results);
 	}
 
 	public Object queryForObject(String sql, Map argMap, RowMapper rowMapper) throws DataAccessException {
-		List results = query(sql, argMap, new RowMapperResultReader(rowMapper, 1));
+		ArgMapPreparedStatementSetter ampsc = new ArgMapPreparedStatementSetter(sql, argMap);
+		List results = (List) getJdbcOperations().query(sql, ampsc, new RowMapperResultSetExtractor(rowMapper, 1));
 		return DataAccessUtils.requiredUniqueResult(results);
 	}
 
@@ -222,61 +200,57 @@ public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcName
 	}
 
 	public SqlRowSet queryForRowSet(String sql, final SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) throws DataAccessException {
-		ArgMapPreparedStatementCreator ampsc = new ArgMapPreparedStatementCreator(sql, namedParameters, namedTypes);
+		ArgMapPreparedStatementSetter ampsc = new ArgMapPreparedStatementSetter(sql, namedParameters, namedTypes);
 		// ToDo
-		return (SqlRowSet) query(ampsc, ampsc, new SqlRowSetResultSetExtractor());
+		return (SqlRowSet) getJdbcOperations().query(sql, ampsc, new SqlRowSetResultSetExtractor());
 	}
 
 	public SqlRowSet queryForRowSet(String sql, final Map argMap) throws DataAccessException {
-		ArgMapPreparedStatementCreator ampsc = new ArgMapPreparedStatementCreator(sql, argMap);
+		ArgMapPreparedStatementSetter ampsc = new ArgMapPreparedStatementSetter(sql, argMap);
 		// ToDo
-		return (SqlRowSet) query(ampsc, ampsc, new SqlRowSetResultSetExtractor());
+		return (SqlRowSet) getJdbcOperations().query(sql, ampsc, new SqlRowSetResultSetExtractor());
 	}
 
 	public int update(String sql, final SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) throws DataAccessException {
-		ArgMapPreparedStatementCreator ampsc = new ArgMapPreparedStatementCreator(sql, namedParameters, namedTypes);
-		return update(ampsc, ampsc);
+		ArgMapPreparedStatementSetter ampsc = new ArgMapPreparedStatementSetter(sql, namedParameters, namedTypes);
+		return getJdbcOperations().update(sql, ampsc);
 	}
 
 	public int update(String sql, final Map argMap) throws DataAccessException {
-		ArgMapPreparedStatementCreator ampsc = new ArgMapPreparedStatementCreator(sql, argMap);
-		return update(ampsc, ampsc);
+		ArgMapPreparedStatementSetter ampsc = new ArgMapPreparedStatementSetter(sql, argMap);
+		return getJdbcOperations().update(sql, ampsc);
 	}
 
-    public int update(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, KeyHolder keyHolder, String[] keyColumnNames) {
-        ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-        int[] types = NamedParameterUtils.convertTypeMapToArray(namedTypes.getTypes(), parsedSql);
-        Object[] values = NamedParameterUtils.convertArgMapToArray(namedParameters.getValues(), parsedSql);
-        String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, namedParameters.getValues());
-        PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, types);
-        pscf.setReturnGeneratedKeys(true);
-        if (keyColumnNames != null) {
-            pscf.setGeneratedKeysColumnNames(keyColumnNames);
-        }
-        return update(pscf.newPreparedStatementCreator(values), keyHolder);
-    }
+	public int update(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, KeyHolder keyHolder, String[] keyColumnNames) {
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		int[] types = NamedParameterUtils.convertTypeMapToArray(namedTypes.getTypes(), parsedSql);
+		Object[] values = NamedParameterUtils.convertArgMapToArray(namedParameters.getValues(), parsedSql);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, namedParameters.getValues());
+		PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, types);
+		pscf.setReturnGeneratedKeys(true);
+		if (keyColumnNames != null) {
+				pscf.setGeneratedKeysColumnNames(keyColumnNames);
+		}
+		return getJdbcOperations().update(pscf.newPreparedStatementCreator(values), keyHolder);
+	}
 
-    /**
+
+	/**
 	 * Simple adapter for PreparedStatementSetter that applies
 	 * a given map of arguments.
 	 */
-	private static class ArgMapPreparedStatementCreator implements PreparedStatementCreator, PreparedStatementSetter, ParameterDisposer {
+	private static class ArgMapPreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
 
 		private final Object[] args;
-		private final String sql;
-		private final String sqlToUse;
-		//private final ParsedSql parsedSql;
 		private final int[] argTypes;
 
-		public ArgMapPreparedStatementCreator(String sql, Map argMap) {
+		public ArgMapPreparedStatementSetter(String sql, Map argMap) {
 			this(sql, new SqlNamedParameterValues(argMap), new SqlNamedParameterTypes());
 		}
 
-		public ArgMapPreparedStatementCreator(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) {
-			this.sql = sql;
-            sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, namedParameters.getValues());
-            ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-            this.args = NamedParameterUtils.convertArgMapToArray(namedParameters.getValues(), parsedSql);
+		public ArgMapPreparedStatementSetter(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) {
+			ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+			this.args = NamedParameterUtils.convertArgMapToArray(namedParameters.getValues(), parsedSql);
 			this.argTypes = NamedParameterUtils.convertTypeMapToArray(namedTypes.getTypes(), parsedSql);
 			//this.argTypes = new int[] {};
 		}
@@ -301,71 +275,6 @@ public class JdbcNamedParameterTemplate extends JdbcTemplate implements JdbcName
 		public void cleanupParameters() {
 			StatementCreatorUtils.cleanupParameters(this.args);
 		}
-
-		public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-			return con.prepareStatement(sqlToUse);
-		}
-
-		public String getSql() {
-			return sql;
-		}
 	}
 
-	/**
-	 * Simple adapter for PreparedStatementSetter that applies
-	 * given arrays of arguments and JDBC argument types.
-	 */
-	private static class ArgTypePreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
-
-		private final Object[] args;
-
-		private final int[] argTypes;
-
-		public ArgTypePreparedStatementSetter(Object[] args, int[] argTypes) {
-			if ((args != null && argTypes == null) || (args == null && argTypes != null) ||
-					(args != null && args.length != argTypes.length)) {
-				throw new InvalidDataAccessApiUsageException("args and argTypes parameters must match");
-			}
-			this.args = args;
-			this.argTypes = argTypes;
-		}
-
-		public void setValues(PreparedStatement ps) throws SQLException {
-			if (this.args != null) {
-				for (int i = 0; i < this.args.length; i++) {
-					StatementCreatorUtils.setParameterValue(ps, i + 1, this.argTypes[i], null, this.args[i]);
-				}
-			}
-		}
-
-		public void cleanupParameters() {
-			StatementCreatorUtils.cleanupParameters(this.args);
-		}
-	}
-
-	/**
-	 * Adapter to enable use of a RowCallbackHandler inside a ResultSetExtractor.
-	 * <p>Uses a regular ResultSet, so we have to be careful when using it:
-	 * We don't use it for navigating since this could lead to unpredictable consequences.
-	 */
-	private static class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor {
-
-		private final RowCallbackHandler rch;
-
-		public RowCallbackHandlerResultSetExtractor(RowCallbackHandler rch) {
-			this.rch = rch;
-		}
-
-		public Object extractData(ResultSet rs) throws SQLException {
-			while (rs.next()) {
-				this.rch.processRow(rs);
-			}
-			if (this.rch instanceof ResultReader) {
-				return ((ResultReader) this.rch).getResults();
-			}
-			else {
-				return null;
-			}
-		}
-	}
 }
