@@ -21,7 +21,6 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-import org.aopalliance.aop.AspectException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -141,27 +140,15 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	// Serialization support
 	//---------------------------------------------------------------------
 	
-	private void readObject(ObjectInputStream ois) throws IOException {
-		// Rely on default serialization, just initialize state after deserialization.
-		try {
-			ois.defaultReadObject();
-		}
-		catch (ClassNotFoundException ex) {
-			throw new AspectException("Failed to deserialize AOP regular expression pointcut: " +
-					"Check that Spring AOP libraries are available on the client side", ex);
-		}
-		
-		// initialize transient fields
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization; just initialize state after deserialization.
+		ois.defaultReadObject();
+
+		// Initialize transient fields.
 		this.logger = LogFactory.getLog(getClass());
 
-		// ask subclass to reinitialize
-		try {
-			initPatternRepresentation(this.patterns);
-		}
-		catch (Throwable ex) {
-			throw new AspectException("Failed to deserialize AOP regular expression pointcut: " +
-					"Check that the necessary regular expression libraries are available on the client side", ex);
-		}
+		// Ask subclass to reinitialize.
+		initPatternRepresentation(this.patterns);
 	}
 	
 }

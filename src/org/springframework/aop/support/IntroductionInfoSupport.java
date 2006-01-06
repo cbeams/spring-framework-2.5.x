@@ -24,10 +24,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.IntroductionInfo;
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.ClassUtils;
@@ -52,9 +52,10 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 	
 	/** 
 	 * Methods we know we should implement here:
-	 * key is method, value is Boolean 
+	 * key is Method, value is Boolean.
 	 **/
 	private transient Map rememberedMethods = createRememberedMethodMap();
+
 
 	/**
 	 * Suppress the specified interface, which will have been
@@ -94,34 +95,32 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 	 * @return whether the method is on an introduced interface
 	 */
 	protected final boolean isMethodOnIntroducedInterface(MethodInvocation mi) {
-		Boolean rememberedResult = (Boolean) rememberedMethods.get(mi.getMethod());
+		Boolean rememberedResult = (Boolean) this.rememberedMethods.get(mi.getMethod());
 		if (rememberedResult != null) {
 			return rememberedResult.booleanValue();
 		}
 		else {
-			// Work it out and cache it
+			// Work it out and cache it.
 			boolean result = implementsInterface(mi.getMethod().getDeclaringClass());
-			rememberedMethods.put(mi.getMethod(), Boolean.valueOf(result));
+			this.rememberedMethods.put(mi.getMethod(), Boolean.valueOf(result));
 			return result;
 		}
 	}
+
+
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
 
 	/**
 	 * This method is implemented only to restore the logger.
 	 * We don't make the logger static as that would mean that subclasses
 	 * would use this class's log category.
 	 */
-	private void readObject(ObjectInputStream ois) throws IOException {
-		// Rely on default serialization, just initialize state after deserialization.
-		try {
-			ois.defaultReadObject();
-		}
-		catch (ClassNotFoundException ex) {
-			throw new AspectException("Failed to deserialize Spring DelegatingIntroductionInterceptor: " +
-					"check that Spring AOP libraries and implementation class for the introduction are " +
-					"available on the client side");
-		}
-		
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization; just initialize state after deserialization.
+		ois.defaultReadObject();
+
 		// Initialize transient fields.
 		this.logger = LogFactory.getLog(getClass());
 		this.rememberedMethods = createRememberedMethodMap();
