@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,14 @@ import java.util.Iterator;
  * throughout the framework.
  *
  * @author Rob Harrop
- * @since 2.0
+ * @since 2.0M2
  */
 public abstract class ConventionUtils {
+
+	/**
+	 * Suffix added to names when a
+	 */
+	private static final String PLURAL_SUFFIX = "List";
 
 	/**
 	 * Retrieves the conventional variable name for the supplied <code>Object</code> based on its concrete type.
@@ -63,7 +68,7 @@ public abstract class ConventionUtils {
 	 * Pluralize the given name.
 	 */
 	private static String pluralize(String name) {
-		return Pluralizer.pluralize(name);
+		return name + PLURAL_SUFFIX;
 	}
 
 	/**

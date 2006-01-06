@@ -54,6 +54,7 @@ import org.springframework.web.util.UrlPathHelper;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  */
 public class DispatcherServletTests extends TestCase {
 	
@@ -733,6 +734,23 @@ public class DispatcherServletTests extends TestCase {
 		}
 	}
 
+	public void testWithNoView() throws Exception {
+		MockServletContext servletContext = new MockServletContext();
+		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "/noview.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		complexDispatcherServlet.service(request, response);
+		assertEquals("noview.jsp", response.getForwardedUrl());
+	}
+
+	public void testWithNoViewNested() throws Exception {
+		MockServletContext servletContext = new MockServletContext();
+		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "/noview/simple.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		complexDispatcherServlet.service(request, response);
+		assertEquals("noview/simple.jsp", response.getForwardedUrl());
+	}
 
 	public static class ControllerFromParent implements Controller {
 

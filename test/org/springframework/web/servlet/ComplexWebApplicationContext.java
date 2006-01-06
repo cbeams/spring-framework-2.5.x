@@ -87,13 +87,15 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(
-				"mappings", "/form.do=formHandler\n/head.do=headController\nbody.do=bodyController");
+				"mappings", "/form.do=formHandler\n/head.do=headController\n" +
+				"body.do=bodyController\n/noview.do=noviewController\n/noview/simple.do=noviewController");
 		pvs.addPropertyValue("order", "1");
 		registerSingleton("handlerMapping", SimpleUrlHandlerMapping.class, pvs);
 
 		registerSingleton("myDummyAdapter", MyDummyAdapter.class);
 		registerSingleton("myHandlerAdapter", MyHandlerAdapter.class);
 		registerSingleton("standardHandlerAdapter", SimpleControllerHandlerAdapter.class);
+		registerSingleton("noviewController", NoViewController.class);
 
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("order", new Integer(0));
@@ -191,6 +193,12 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		}
 	}
 
+	public static class NoViewController implements Controller {
+
+		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+			return new ModelAndView();
+		}
+	}
 
 	public static class MyServlet implements Servlet {
 

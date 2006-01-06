@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import java.util.Map;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @see DispatcherServlet
  * @see ViewResolver
  * @see HandlerAdapter#handle
@@ -46,6 +47,10 @@ public class ModelAndView {
 	/** Model */
 	private Map model;
 
+	/**
+	 * Indicates whether or not this instance has been cleared with a call to {@link #clear()}.
+	 */
+	private boolean cleared;
 
 	/**
 	 * Default constructor for bean-style usage: populating bean
@@ -160,6 +165,14 @@ public class ModelAndView {
 	}
 
 	/**
+	 * Indicates whether or not this <code>ModelAndView</code> has a view, either
+	 * as direct {@link View} instance or as a view name.
+	 */
+	public boolean hasView() {
+		return (this.view != null);
+	}
+
+	/**
 	 * Return whether we use a view reference, i.e. true if the
 	 * view has been specified via a name to be resolved by the
 	 * DispatcherServlet via a ViewResolver.
@@ -221,17 +234,27 @@ public class ModelAndView {
 	public void clear() {
 		this.view = null;
 		this.model = null;
+		this.cleared = true;
 	}
 
 	/**
-	 * Return whether this ModelAndView object is empty,
+	 * Return whether this ModelAndView object is empty
 	 * i.e. whether it does not hold any view and does not contain a model.
-	 * @see #clear()
 	 */
 	public boolean isEmpty() {
 		return (this.view == null && this.model == null);
 	}
 
+	/**
+	 * Return whether this ModelAndView object is empty as a result of a call to {@link #clear}
+	 * i.e. whether it does not hold any view and does not contain a model.
+	 * Returns <code>false</code> if any additional state was added to the instance
+	 * <strong>after</strong> the call to {@link #clear}.
+	 * @see #clear()
+	 */
+	public boolean wasCleared() {
+		return (this.cleared && isEmpty());
+	}
 
 	/**
 	 * Return diagnostic information about this model and view.

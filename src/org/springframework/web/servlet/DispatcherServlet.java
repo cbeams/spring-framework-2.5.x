@@ -91,6 +91,11 @@ import org.springframework.web.util.UrlPathHelper;
  * Additional ViewResolver objects can be added through the application context.
  * ViewResolvers can be given any bean name (tested by type).
  *
+ * <li>If a {@link View} or view name is not supplied by the user, then the configured
+ * RequestToViewNameTranslator will translate the current {@link HttpServletRequest}
+ * into a view name. The default implementation is
+ * {@link org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator}
+ *
  * <li>Its strategy for resolving multipart requests is determined by a MultipartResolver
  * implementation. Implementations for Jakarta Commons FileUpload and Jason Hunter's COS
  * are included. The MultipartResolver bean name is "multipartResolver"; default is none.
@@ -115,6 +120,7 @@ import org.springframework.web.util.UrlPathHelper;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @see org.springframework.web.context.ContextLoaderListener
  * @see HandlerMapping
  * @see org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping
@@ -125,6 +131,8 @@ import org.springframework.web.util.UrlPathHelper;
  * @see org.springframework.web.servlet.handler.SimpleMappingExceptionResolver
  * @see ViewResolver
  * @see org.springframework.web.servlet.view.InternalResourceViewResolver
+ * @see RequestToViewNameTranslator
+ * @see org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator
  * @see MultipartResolver
  * @see org.springframework.web.multipart.commons.CommonsMultipartResolver
  * @see LocaleResolver
@@ -177,6 +185,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
 
+	/**
+	 * Well-known name for the RequestToViewNameTranslator object in the bean factory for this namespace.
+	 */
+	public static final String REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME = "viewNameTranslator";
 
 	/**
 	 * Request attribute to hold the currently chosen HandlerExecutionChain.
@@ -268,6 +280,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** ThemeResolver used by this servlet */
 	private ThemeResolver themeResolver;
 
+	/** RequestToViewNameTranslator used by this servlet */
+	private RequestToViewNameTranslator viewNameTranslator;
+
 	/** List of HandlerMappings used by this servlet */
 	private List handlerMappings;
 
@@ -357,6 +372,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		initHandlerAdapters();
 		initHandlerExceptionResolvers();
 		initViewResolvers();
+		initRequestToViewNameTranslator();
 	}
 
 	/**
@@ -565,6 +581,30 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
+	 * Initialize the RequestToViewNameTranslator used by this servlet instance. If no
+	 * implementation is configured then we default to DefaultRequestToViewNameTranslator.
+	 */
+	private void initRequestToViewNameTranslator() {
+		try {
+			this.viewNameTranslator = (RequestToViewNameTranslator) getWebApplicationContext().getBean(
+					REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME);
+			if (logger.isInfoEnabled()) {
+				logger.info("Using RequestToViewNameTranslator [" + this.viewNameTranslator + "]");
+			}
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// We need to use the default.
+			this.viewNameTranslator =
+					(RequestToViewNameTranslator) getDefaultStrategy(RequestToViewNameTranslator.class);
+			if (logger.isInfoEnabled()) {
+				logger.info("Unable to locate RequestToViewNameTranslator with name '" +
+						REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME +
+						"': using default [" + this.viewNameTranslator + "]");
+			}
+		}
+	}
+
+	/**
 	 * Return this servlet's ThemeSource, if any; else return <code>null</code>.
 	 * <p>Default is to return the WebApplicationContext as ThemeSource,
 	 * provided that it implements the ThemeSource interface.
@@ -766,7 +806,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 
 			// Did the handler return a view to render?
-			if (mv != null && !mv.isEmpty()) {
+			if (mv != null && !mv.wasCleared()) {
 				render(mv, processedRequest, response);
 			}
 			else {
@@ -975,6 +1015,12 @@ public class DispatcherServlet extends FrameworkServlet {
 		response.setLocale(locale);
 
 		View view = null;
+
+		// do we need view name translation
+		if (!mv.hasView()) {
+			translateRequestIntoViewName(request, mv);
+		}
+
 		if (mv.isReference()) {
 			// We need to resolve the view name.
 			view = resolveViewName(mv.getViewName(), mv.getModelInternal(), locale, request);
@@ -997,6 +1043,22 @@ public class DispatcherServlet extends FrameworkServlet {
 			logger.debug("Rendering view [" + view + "] in DispatcherServlet with name '" + getServletName() + "'");
 		}
 		view.render(mv.getModelInternal(), request, response);
+	}
+
+	/**
+	 * Translates the supplied {@link HttpServletRequest} into a view name and sets it on the supplied
+	 * {@link ModelAndView}.
+	 */
+	protected void translateRequestIntoViewName(HttpServletRequest request, ModelAndView mv) throws ServletException {
+		String viewName = this.viewNameTranslator.translate(request);
+
+		if (viewName == null) {
+			throw new ServletException("Could not translate request [" +
+					request + "] into view name using [" +
+					this.viewNameTranslator.getClass().getName() + "].");
+		}
+
+		mv.setViewName(viewName);
 	}
 
 	/**
