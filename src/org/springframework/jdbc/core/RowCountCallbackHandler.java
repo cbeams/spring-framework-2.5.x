@@ -55,13 +55,18 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	 */
 	private int[] columnTypes;
 	
+	/**
+	 * Indexed from 0. Column name as returned by ResultSetMetaData object.
+	 */
 	private String[] columnNames;
+
 
 	/**
 	 * Implementation of ResultSetCallbackHandler.
-	 * Work out column size if this is the first row,* otherwise just count rows.
+	 * Work out column size if this is the first row, otherwise just count rows.
 	 * <p>Subclasses can perform custom extraction or processing
-	 * by overriding the processRow(ResultSet, int) method.
+	 * by overriding the <code>processRow(ResultSet, int)</code> method.
+	 * @see #processRow(java.sql.ResultSet, int)
 	 */
 	public final void processRow(ResultSet rs) throws SQLException {
 		if (this.rowCount == 0) {
@@ -88,7 +93,8 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	protected void processRow(ResultSet rs, int rowNum) throws SQLException {
 	}
 
-	/** 
+
+	/**
 	 * Return the types of the columns as java.sql.Types constants
 	 * Valid after processRow is invoked the first time.
 	 * @return the types of the columns as java.sql.Types constants.
