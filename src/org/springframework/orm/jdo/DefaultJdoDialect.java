@@ -183,7 +183,7 @@ public class DefaultJdoDialect implements JdoDialect {
 	 * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
 	 */
-	public ConnectionHandle getJdbcConnection(final PersistenceManager pm, boolean readOnly)
+	public ConnectionHandle getJdbcConnection(PersistenceManager pm, boolean readOnly)
 			throws JDOException, SQLException {
 
 		return new DataStoreConnectionHandle(pm);
