@@ -17,10 +17,12 @@
 package org.springframework.scripting.jruby;
 
 import junit.framework.TestCase;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.JdkVersion;
 import org.springframework.scripting.Calculator;
 import org.springframework.scripting.Messenger;
 
@@ -30,11 +32,19 @@ import org.springframework.scripting.Messenger;
 public class JRubyScriptFactoryTests extends TestCase {
 
 	public void testStatic() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		Calculator calc = getCalculator();
 		assertFalse("Scripted object should not be instance of Refreshable", calc instanceof Refreshable);
 	}
 
 	public void testNonStatic() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		Messenger messenger = getMessenger();
 
 		assertTrue("Should be a proxy for refreshable scripts", AopUtils.isAopProxy(messenger));

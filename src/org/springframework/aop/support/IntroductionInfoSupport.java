@@ -102,7 +102,7 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 		else {
 			// Work it out and cache it.
 			boolean result = implementsInterface(mi.getMethod().getDeclaringClass());
-			this.rememberedMethods.put(mi.getMethod(), Boolean.valueOf(result));
+			this.rememberedMethods.put(mi.getMethod(), (result ? Boolean.TRUE : Boolean.FALSE));
 			return result;
 		}
 	}

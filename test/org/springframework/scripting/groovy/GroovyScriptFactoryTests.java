@@ -17,11 +17,12 @@
 package org.springframework.scripting.groovy;
 
 import junit.framework.TestCase;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.scripting.AbstractScriptFactory;
+import org.springframework.core.JdkVersion;
 import org.springframework.scripting.Calculator;
 import org.springframework.scripting.Messenger;
 
@@ -31,6 +32,10 @@ import org.springframework.scripting.Messenger;
 public class GroovyScriptFactoryTests extends TestCase {
 
 	public void testStatic() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		Calculator calc = getCalculator();
 
 		assertFalse("Shouldn't get proxy when refresh is disabled", AopUtils.isAopProxy(calc));
@@ -38,6 +43,10 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testNonStatic() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		Messenger messenger = getMessenger();
 
 		assertTrue("Should be a proxy for refreshable scripts", AopUtils.isAopProxy(messenger));
