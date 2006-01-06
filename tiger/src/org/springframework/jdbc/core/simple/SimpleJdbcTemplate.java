@@ -61,73 +61,72 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 
 	/**
 	 * Create a new SimpleJdbcTemplate for the given classic Spring JdbcTemplate.
-	 * @param jdbcTemplate the classic Spring JdbcTemplate to wrap
+	 * @param classicJdbcTemplate the classic Spring JdbcTemplate to wrap
 	 */
-	public SimpleJdbcTemplate(JdbcOperations jdbcTemplate) {
-		this.classicJdbcTemplate = jdbcTemplate;
+	public SimpleJdbcTemplate(JdbcOperations classicJdbcTemplate) {
+		this.classicJdbcTemplate = classicJdbcTemplate;
 	}
-
 
 	/**
 	 * Expose the classic Spring JdbcTemplate to allow invocation of
 	 * less commonly used methods.
 	 */
 	public JdbcOperations getJdbcOperations() {
-		return classicJdbcTemplate;
+		return this.classicJdbcTemplate;
 	}
 	
 	
 	public int queryForInt(String sql, Object... args) throws DataAccessException {
 		return args == null || args.length == 0 ?
-					classicJdbcTemplate.queryForInt(sql) :
-					classicJdbcTemplate.queryForInt(sql, args);
+					getJdbcOperations().queryForInt(sql) :
+					getJdbcOperations().queryForInt(sql, args);
 	}
 	
 	public long queryForLong(String sql, Object... args) throws DataAccessException {
 		return (args == null || args.length == 0) ?
-					classicJdbcTemplate.queryForLong(sql) :
-					classicJdbcTemplate.queryForLong(sql, args);
+					getJdbcOperations().queryForLong(sql) :
+					getJdbcOperations().queryForLong(sql, args);
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T queryForObject(String sql, Class<T> requiredType, Object... args) throws DataAccessException {
 		return (T)((args == null || args.length == 0) ?
-				classicJdbcTemplate.queryForObject(sql, requiredType) :
-				classicJdbcTemplate.queryForObject(sql, args, requiredType));
+				getJdbcOperations().queryForObject(sql, requiredType) :
+				getJdbcOperations().queryForObject(sql, args, requiredType));
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException {
 		return (T)((args == null || args.length == 0)?
-				classicJdbcTemplate.queryForObject(sql, rm):
-				classicJdbcTemplate.queryForObject(sql, args, rm));
+				getJdbcOperations().queryForObject(sql, rm):
+				getJdbcOperations().queryForObject(sql, args, rm));
 	}
 	
 	@SuppressWarnings("unchecked")
 	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException {
 		return (List<T>)((args == null || args.length == 0) ?
-				classicJdbcTemplate.query(sql, rm) :
-				classicJdbcTemplate.query(sql, args, rm));
+				getJdbcOperations().query(sql, rm) :
+				getJdbcOperations().query(sql, args, rm));
 	}
 
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> queryForMap(String sql, Object... args) throws DataAccessException {
 		return (args == null || args.length == 0) ?
-				classicJdbcTemplate.queryForMap(sql) :
-				classicJdbcTemplate.queryForMap(sql, args);
+				getJdbcOperations().queryForMap(sql) :
+				getJdbcOperations().queryForMap(sql, args);
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<Map<String, Object>> queryForList(String sql, Object... args) throws DataAccessException {
 		return (args == null || args.length == 0) ?
-				classicJdbcTemplate.queryForList(sql) :
-				classicJdbcTemplate.queryForList(sql, args);
+				getJdbcOperations().queryForList(sql) :
+				getJdbcOperations().queryForList(sql, args);
 	}
 
 	public int update(String sql, Object ... args) throws DataAccessException {
 		return (args == null || args.length == 0) ?
-				classicJdbcTemplate.update(sql) :
-				classicJdbcTemplate.update(sql, args);
+				getJdbcOperations().update(sql) :
+				getJdbcOperations().update(sql, args);
 	}
 
 }
