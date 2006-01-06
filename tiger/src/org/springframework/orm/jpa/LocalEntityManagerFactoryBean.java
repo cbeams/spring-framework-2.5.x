@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ import org.springframework.util.ClassUtils;
  * EntityManagerFactory through JNDI (-> JndiObjectFactoryBean).
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see JpaTemplate#setEntityManagerFactory
  * @see JpaTransactionManager#setEntityManagerFactory
  * @see org.springframework.jndi.JndiObjectFactoryBean
@@ -249,16 +249,23 @@ public class LocalEntityManagerFactoryBean implements FactoryBean, InitializingB
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on EntityManagerFactory interface coming in...
 
-			if (method.getName().equals("doGetEntityManager")) {
-				// Handle doGetEntityManager method: return transactional EntityManager, if any.
+			if (method.getName().equals("getEntityManager")) {
+				// Handle getEntityManager method: return transactional EntityManager, if any.
 				try {
 					return EntityManagerFactoryUtils.doGetEntityManager((EntityManagerFactory) proxy);
 				}
-				catch (IllegalStateException ex) {
+				catch (IllegalStateException springEx) {
 					// Not within a Spring-managed transaction with Spring synchronization:
 					// delegate to persistence provider's own synchronization mechanism.
 					// Will throw IllegalStateException if not supported by persistence provider.
-					return this.target.getEntityManager();
+					try {
+						return this.target.getEntityManager();
+					}
+					catch (IllegalStateException jpaEx) {
+						throw new IllegalStateException(
+								"Could not obtain transactional EntityManager: neither from Spring [" +
+								springEx.getMessage() + "] nor from JPA provider [" + jpaEx.getMessage() + "]");
+					}
 				}
 			}
 			else if (method.getName().equals("equals")) {

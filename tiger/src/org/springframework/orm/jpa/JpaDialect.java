@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,9 @@
 package org.springframework.orm.jpa;
 
 import java.sql.SQLException;
-import java.util.Collection;
 
-import javax.persistence.EntityTransaction;
-import javax.persistence.PersistenceException;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
@@ -29,21 +27,8 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
 /**
- * SPI strategy that encapsulates certain functionality that standard JPA 1.0 does
- * not offer despite being relevant in the context of O/R mapping, like access to
- * the underlying JDBC Connection and explicit flushing of changes to the database.
- * Also defines various further hooks that even go beyond standard JPA 2.0.
- *
- * <p>To be implemented for specific JPA implementations such as JPOX, Kodo, Lido,
- * Versant Open Access. Almost every O/R-based JPA implementation offers proprietary
- * means to access the underlying JDBC Connection and to explicitly flush changes;
- * hence, this would be the minimum functionality level that should be supported.
- *
- * <p>JPA 2.0 defines standard ways for most of the functionality covered here.
- * Hence, Spring's DefaultJpaDialect uses the corresponding JPA 2.0 methods
- * by default, to be overridden in a vendor-specific fashion if necessary.
- * Vendor-specific subclasses of DefaultJpaDialect are still required for special
- * transaction semantics and more sophisticated exception translation (if needed).
+ * SPI strategy that encapsulates certain functionality that standard JPA 1.0
+ * does not offer, like access to the underlying JDBC Connection.
  *
  * <p>In general, it is recommended to derive from DefaultJpaDialect instead of
  * implementing this interface directly. This allows for inheriting common
@@ -51,7 +36,7 @@ import org.springframework.transaction.TransactionException;
  * specific hooks to plug in concrete vendor-specific behavior.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see JpaTransactionManager#setJpaDialect
  * @see JpaAccessor#setJpaDialect
  * @see DefaultJpaDialect
@@ -76,7 +61,7 @@ public interface JpaDialect {
 	 * <p>Implementations can also use the Spring transaction name, as exposed by the
 	 * passed-in TransactionDefinition, to optimize for specific data access use cases
 	 * (effectively using the current transaction name as use case identifier).
-	 * @param transaction the JPA transaction to begin
+	 * @param entityManager the EntityManager to begin a JPA transaction on
 	 * @param definition the Spring transaction definition that defines semantics
 	 * @return an arbitrary object that holds transaction data, if any
 	 * (to be passed into cleanupTransaction)

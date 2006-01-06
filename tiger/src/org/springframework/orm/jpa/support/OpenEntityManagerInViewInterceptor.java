@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  * It derives from JpaAccessor to inherit common JPA configuration properties.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter
  * @see org.springframework.orm.jpa.JpaInterceptor
  * @see org.springframework.orm.jpa.JpaTransactionManager

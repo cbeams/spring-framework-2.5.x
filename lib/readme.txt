@@ -277,6 +277,11 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's XAPoolNativeJdbcExtractor
 
+* jpa/persistence.jar
+- Java Persistence API 1.0 M4 (http://glassfish.dev.java.net/javaee5/persistence)
+- required for building the framework
+- required at runtime when using Spring's JPA support
+
 * jsf/jsf-api.jar
 - JSF API 1.1 (http://java.sun.com/j2ee/javaserverfaces)
 - required for building the framework

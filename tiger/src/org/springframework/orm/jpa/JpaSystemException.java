@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.dao.UncategorizedDataAccessException;
  * <code>org.springframework.dao</code> exceptions.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see EntityManagerFactoryUtils#convertJpaAccessException
  */
 public class JpaSystemException extends UncategorizedDataAccessException {
