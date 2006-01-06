@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.support;
+package org.springframework.beans;
 
 /**
  * Interface representing an object whose value set can be merged with
  * that of a parent object.
  *
  * @author Rob Harrop
- * @since 2.0M2
- * @see ManagedList
- * @see ManagedMap
- * @see ManagedSet
+ * @since 2.0
+ * @see org.springframework.beans.factory.support.ManagedSet
+ * @see org.springframework.beans.factory.support.ManagedList
+ * @see org.springframework.beans.factory.support.ManagedMap
+ * @see org.springframework.beans.factory.support.ManagedProperties
  */
 public interface Mergable {
 
@@ -35,9 +36,10 @@ public interface Mergable {
 
 	/**
 	 * Merge the current value set with that of the supplied object.
-	 * The supplied object is considered the parent, and values in
-	 * the callee's value set should override those of the supplied
-	 * object.
+	 * <p>The supplied object is considered the parent, and values in
+	 * the callee's value set should override those of the supplied object.
+	 * @param parent the object to merge with
 	 */
 	void merge(Object parent);
+
 }

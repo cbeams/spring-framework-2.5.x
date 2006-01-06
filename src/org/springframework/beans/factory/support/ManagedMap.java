@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.Mergable;
 import org.springframework.core.CollectionFactory;
 
 /**
@@ -40,6 +41,7 @@ public class ManagedMap implements Map, Mergable {
 
 	private boolean mergeEnabled;
 
+
 	public ManagedMap() {
 		this(16);
 	}
@@ -51,6 +53,26 @@ public class ManagedMap implements Map, Mergable {
 	public ManagedMap(Map targetMap) {
 		this.targetMap = targetMap;
 	}
+
+
+	public void setMergeEnabled(boolean mergeEnabled) {
+		this.mergeEnabled = mergeEnabled;
+	}
+
+	public boolean isMergeEnabled() {
+		return mergeEnabled;
+	}
+
+	public void merge(Object parent) {
+		if (parent instanceof Map) {
+			Map parentMap = (Map)parent;
+			Map temp = CollectionFactory.createLinkedMapIfPossible(parentMap.size() + this.size());
+			temp.putAll(parentMap);
+			temp.putAll(this);
+			this.targetMap = temp;
+		}
+	}
+
 
 	public int size() {
 		return this.targetMap.size();
@@ -110,24 +132,6 @@ public class ManagedMap implements Map, Mergable {
 
 	public String toString() {
 		return this.targetMap.toString();
-	}
-
-	public boolean isMergeEnabled() {
-		return mergeEnabled;
-	}
-
-	public void setMergeEnabled(boolean mergeEnabled) {
-		this.mergeEnabled = mergeEnabled;
-	}
-
-	public void merge(Object parent) {
-		if(parent instanceof Map) {
-			Map parentMap = (Map)parent;
-			Map temp = CollectionFactory.createLinkedMapIfPossible(parentMap.size() + this.size());
-			temp.putAll(parentMap);
-			temp.putAll(this);
-			this.targetMap = temp;
-		}
 	}
 
 }

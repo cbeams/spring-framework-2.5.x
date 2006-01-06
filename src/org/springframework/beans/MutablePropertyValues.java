@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.StringUtils;
-import org.springframework.beans.factory.support.Mergable;
 
 /**
  * Default implementation of the PropertyValues interface.
@@ -31,6 +30,8 @@ import org.springframework.beans.factory.support.Mergable;
  * to support deep copy and construction from a Map.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 13 May 2001
  */
 public class MutablePropertyValues implements PropertyValues, Serializable {
@@ -137,6 +138,19 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
+	 * Overloaded version of addPropertyValue that takes
+	 * a property name and a property value.
+	 * @param propertyName name of the property
+	 * @param propertyValue value of the property
+	 * @return this object to allow creating objects, adding multiple
+	 * PropertyValues in a single statement
+	 * @see #addPropertyValue(PropertyValue)
+	 */
+	public MutablePropertyValues addPropertyValue(String propertyName, Object propertyValue) {
+		return addPropertyValue(new PropertyValue(propertyName, propertyValue));
+	}
+
+	/**
 	 * Add a PropertyValue object, replacing any existing one
 	 * for the corresponding property.
 	 * @param pv PropertyValue object to add
@@ -164,32 +178,11 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	private void mergeIfRequired(PropertyValue newPv, PropertyValue currentPv) {
 		Object value = newPv.getValue();
 		if (value instanceof Mergable) {
-			Mergable m = (Mergable) value;
-			if (m.isMergeEnabled()) {
-				m.merge(currentPv.getValue());
+			Mergable mergable = (Mergable) value;
+			if (mergable.isMergeEnabled()) {
+				mergable.merge(currentPv.getValue());
 			}
 		}
-	}
-
-	/**
-	 * Overloaded version of addPropertyValue that takes
-	 * a property name and a property value.
-	 * @param propertyName name of the property
-	 * @param propertyValue value of the property
-	 * @return this object to allow creating objects, adding multiple
-	 * PropertyValues in a single statement
-	 * @see #addPropertyValue(PropertyValue)
-	 */
-	public MutablePropertyValues addPropertyValue(String propertyName, Object propertyValue) {
-		return addPropertyValue(new PropertyValue(propertyName, propertyValue));
-	}
-
-	/**
-	 * Remove the given PropertyValue, if contained.
-	 * @param pv the PropertyValue to remove
-	 */
-	public void removePropertyValue(PropertyValue pv) {
-		this.propertyValueList.remove(pv);
 	}
 
 	/**
@@ -199,6 +192,14 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 */
 	public void removePropertyValue(String propertyName) {
 		removePropertyValue(getPropertyValue(propertyName));
+	}
+
+	/**
+	 * Remove the given PropertyValue, if contained.
+	 * @param pv the PropertyValue to remove
+	 */
+	public void removePropertyValue(PropertyValue pv) {
+		this.propertyValueList.remove(pv);
 	}
 
 	/**

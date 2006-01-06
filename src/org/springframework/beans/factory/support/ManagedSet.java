@@ -16,29 +16,31 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.core.CollectionFactory;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.springframework.beans.Mergable;
+import org.springframework.core.CollectionFactory;
+
 /**
  * Tag collection class used to hold managed Set values,
  * which may include runtime bean references.
- * <p/>
+ *
  * <p>Wraps a target Set, which will be a linked set if possible
  * (that is, if running on JDK 1.4 or if Commons Collections 3.x is available).
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @see org.springframework.core.CollectionFactory#createLinkedSetIfPossible
  * @since 21.01.2004
+ * @see org.springframework.core.CollectionFactory#createLinkedSetIfPossible
  */
 public class ManagedSet implements Set, Mergable {
 
 	private Set targetSet;
 
 	private boolean mergeEnabled;
+
 
 	public ManagedSet() {
 		this(16);
@@ -51,6 +53,26 @@ public class ManagedSet implements Set, Mergable {
 	public ManagedSet(Set targetSet) {
 		this.targetSet = targetSet;
 	}
+
+
+	public void setMergeEnabled(boolean mergeEnabled) {
+		this.mergeEnabled = mergeEnabled;
+	}
+
+	public boolean isMergeEnabled() {
+		return mergeEnabled;
+	}
+
+	public void merge(Object other) {
+		if (other instanceof Set) {
+			Set otherSet = (Set) other;
+			Set temp = CollectionFactory.createLinkedSetIfPossible(otherSet.size() + this.size());
+			temp.addAll(otherSet);
+			temp.addAll(this);
+			this.targetSet = temp;
+		}
+	}
+
 
 	public int size() {
 		return this.targetSet.size();
@@ -114,24 +136,6 @@ public class ManagedSet implements Set, Mergable {
 
 	public String toString() {
 		return this.targetSet.toString();
-	}
-
-	public boolean isMergeEnabled() {
-		return mergeEnabled;
-	}
-
-	public void merge(Object other) {
-		if (other instanceof Set) {
-			Set otherSet = (Set) other;
-			Set temp = CollectionFactory.createLinkedSetIfPossible(otherSet.size() + this.size());
-			temp.addAll(otherSet);
-			temp.addAll(this);
-			this.targetSet = temp;
-		}
-	}
-
-	public void setMergeEnabled(boolean mergeEnabled) {
-		this.mergeEnabled = mergeEnabled;
 	}
 
 }

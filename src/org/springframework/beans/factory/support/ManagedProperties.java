@@ -18,27 +18,31 @@ package org.springframework.beans.factory.support;
 
 import java.util.Properties;
 
+import org.springframework.beans.Mergable;
+
 /**
  * Represents a Spring-managed {@link Properties} instance that supports
  * merging of parent/child definitions.
  *
  * @author Rob Harrop
- * @since 2.0M2
+ * @since 2.0
  */
 public class ManagedProperties extends Properties implements Mergable {
 
 	private boolean mergeEnabled;
 
-	public boolean isMergeEnabled() {
-		return mergeEnabled;
-	}
 
 	public void setMergeEnabled(boolean mergeEnabled) {
 		this.mergeEnabled = mergeEnabled;
 	}
 
+	public boolean isMergeEnabled() {
+		return mergeEnabled;
+	}
+
+
 	public void merge(Object parent) {
-		if(parent instanceof Properties) {
+		if (parent instanceof Properties) {
 			Properties parentProperties = (Properties) parent;
 			Properties temp = new Properties();
 			temp.putAll(parentProperties);
@@ -47,4 +51,5 @@ public class ManagedProperties extends Properties implements Mergable {
 			this.putAll(temp);
 		}
 	}
+
 }

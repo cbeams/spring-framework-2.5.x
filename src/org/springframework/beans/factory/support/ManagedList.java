@@ -19,6 +19,8 @@ package org.springframework.beans.factory.support;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.Mergable;
+
 /**
  * Tag subclass used to hold managed List elements, which may
  * include runtime bean references.
@@ -31,6 +33,7 @@ public class ManagedList extends ArrayList implements Mergable {
 
 	private boolean mergeEnabled;
 
+
 	public ManagedList() {
 	}
 
@@ -38,20 +41,23 @@ public class ManagedList extends ArrayList implements Mergable {
 		super(initialCapacity);
 	}
 
-	public boolean isMergeEnabled() {
-		return mergeEnabled;
-	}
 
 	public void setMergeEnabled(boolean mergeEnabled) {
 		this.mergeEnabled = mergeEnabled;
 	}
 
+	public boolean isMergeEnabled() {
+		return mergeEnabled;
+	}
+
+
 	public synchronized void merge(Object parent) {
-		if(parent instanceof List) {
+		if (parent instanceof List) {
 			List temp = new ArrayList((List) parent);
 			temp.addAll(this);
 			this.clear();
 			this.addAll(temp);
 		}
 	}
+
 }
