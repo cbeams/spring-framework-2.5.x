@@ -46,6 +46,7 @@ public abstract class JdbcUtils {
 
 	private static final Log logger = LogFactory.getLog(JdbcUtils.class);
 
+
 	/**
 	 * Close the given JDBC Connection and ignore any thrown exception.
 	 * This is useful for typical finally blocks in manual JDBC code.
@@ -59,7 +60,8 @@ public abstract class JdbcUtils {
 			catch (SQLException ex) {
 				logger.error("Could not close JDBC Connection", ex);
 			}
-			catch (RuntimeException ex) {
+			catch (Throwable ex) {
+				// We don't trust the JDBC driver: It might throw RuntimeException or Error.
 				logger.error("Unexpected exception on closing JDBC Connection", ex);
 			}
 		}
@@ -78,7 +80,8 @@ public abstract class JdbcUtils {
 			catch (SQLException ex) {
 				logger.warn("Could not close JDBC Statement", ex);
 			}
-			catch (RuntimeException ex) {
+			catch (Throwable ex) {
+				// We don't trust the JDBC driver: It might throw RuntimeException or Error.
 				logger.error("Unexpected exception on closing JDBC Statement", ex);
 			}
 		}
@@ -97,7 +100,8 @@ public abstract class JdbcUtils {
 			catch (SQLException ex) {
 				logger.warn("Could not close JDBC ResultSet", ex);
 			}
-			catch (RuntimeException ex) {
+			catch (Throwable ex) {
+				// We don't trust the JDBC driver: It might throw RuntimeException or Error.
 				logger.error("Unexpected exception on closing JDBC ResultSet", ex);
 			}
 		}
