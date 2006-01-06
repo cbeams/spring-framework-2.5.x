@@ -42,16 +42,19 @@ public class JtaTransactionManagerSerializationTests extends TestCase {
 		JtaTransactionManager jtam = new JtaTransactionManager();
 		jtam.setUserTransaction(ut);
 		jtam.setTransactionManager(tm);
+		jtam.setRollbackOnCommitFailure(true);
 		jtam.afterPropertiesSet();
 
 		SimpleNamingContextBuilder jndiEnv = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 		jndiEnv.bind(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut2);
-		JtaTransactionManager jtam2 = (JtaTransactionManager) SerializationTestUtils.serializeAndDeserialize(jtam);
+		JtaTransactionManager serializedJtatm =
+				(JtaTransactionManager) SerializationTestUtils.serializeAndDeserialize(jtam);
 		
 		// should do client-side lookup
-		assertNotNull("Logger must survive serialization", jtam2.logger);
-		assertTrue("UserTransaction looked up on client", jtam2.getUserTransaction() == ut2);
-		assertNull("TransactionManager didn't survive", jtam2.getTransactionManager());
+		assertNotNull("Logger must survive serialization", serializedJtatm.logger);
+		assertTrue("UserTransaction looked up on client", serializedJtatm.getUserTransaction() == ut2);
+		assertNull("TransactionManager didn't survive", serializedJtatm.getTransactionManager());
+		assertEquals(true, serializedJtatm.isRollbackOnCommitFailure());
 	}
 
 }

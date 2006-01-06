@@ -18,6 +18,7 @@ package org.springframework.transaction.support;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.Constants;
-import org.springframework.core.NestedIOException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.NestedTransactionNotSupportedException;
@@ -82,7 +82,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
  * @see org.springframework.orm.jdo.JdoTransactionManager
  */
-public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager {
+public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager, Serializable {
 
 	/**
 	 * Always activate transaction synchronization, even for "empty" transactions
@@ -995,15 +995,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	// Serialization support
 	//---------------------------------------------------------------------
 
-	private void readObject(ObjectInputStream ois) throws IOException {
-		// Rely on default serialization, just initialize state after deserialization.
-		try {
-			ois.defaultReadObject();
-		}
-		catch (ClassNotFoundException ex) {
-			throw new NestedIOException("Failed to deserialize [" + getClass().getName() + "] - " +
-					"check that Spring transaction libraries are available on the client side", ex);
-		}
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization; just initialize state after deserialization.
+		ois.defaultReadObject();
 
 		// Initialize transient fields.
 		this.logger = LogFactory.getLog(getClass());
