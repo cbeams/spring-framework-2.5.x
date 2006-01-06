@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public abstract class AbstractCommandController extends BaseCommandController {
 	}
 
 
-	protected final ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
 		Object command = getCommand(request);
