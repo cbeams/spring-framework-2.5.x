@@ -48,7 +48,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 	 */
 	public DefaultMultipartHttpServletRequest(
 			HttpServletRequest request, Map multipartFiles, Map multipartParameters) {
-		
+
 		super(request);
 		setMultipartFiles(multipartFiles);
 		this.multipartParameters = multipartParameters;
@@ -57,7 +57,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 
 	public Enumeration getParameterNames() {
 		Set paramNames = new HashSet();
-		Enumeration paramEnum = getRequest().getParameterNames();
+		Enumeration paramEnum = super.getParameterNames();
 		while (paramEnum.hasMoreElements()) {
 			paramNames.add(paramEnum.nextElement());
 		}
@@ -70,7 +70,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 		if (values != null) {
 			return (values.length > 0 ? values[0] : null);
 		}
-		return getRequest().getParameter(name);
+		return super.getParameter(name);
 	}
 
 	public String[] getParameterValues(String name) {
@@ -78,12 +78,12 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 		if (values != null) {
 			return values;
 		}
-		return getRequest().getParameterValues(name);
+		return super.getParameterValues(name);
 	}
 
 	public Map getParameterMap() {
 		Map paramMap = new HashMap();
-		paramMap.putAll(getRequest().getParameterMap());
+		paramMap.putAll(super.getParameterMap());
 		paramMap.putAll(this.multipartParameters);
 		return paramMap;
 	}
