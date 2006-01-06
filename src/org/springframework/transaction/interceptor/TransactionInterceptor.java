@@ -16,6 +16,9 @@
 
 package org.springframework.transaction.interceptor;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Properties;
 
@@ -107,5 +110,30 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		doCommitTransactionAfterReturning(txInfo);
 		return retVal;
 	}
-	
+
+
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization, although this class itself doesn't carry state anyway...
+		ois.defaultReadObject();
+
+		// Serialize all relevant superclass fields.
+		// Superclass can't implement Serializable because it also serves as base class
+		// for AspectJ aspects (which are not allowed to implement Serializable)!
+		setTransactionManager((PlatformTransactionManager) ois.readObject());
+		setTransactionAttributeSource((TransactionAttributeSource) ois.readObject());
+	}
+
+	private void writeObject(ObjectOutputStream oos) throws IOException {
+		// Rely on default serialization, although this class itself doesn't carry state anyway...
+		oos.defaultWriteObject();
+
+		// Deserialize superclass fields.
+		oos.writeObject(getTransactionManager());
+		oos.writeObject(getTransactionAttributeSource());
+	}
+
 }

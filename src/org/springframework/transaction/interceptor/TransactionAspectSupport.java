@@ -16,12 +16,9 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
-import org.aopalliance.aop.AspectException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -59,6 +56,9 @@ import org.springframework.util.ClassUtils;
  * @see #setTransactionAttributeSource
  */
 public abstract class TransactionAspectSupport implements InitializingBean {
+
+	// NOTE: This class must not implement Serializable because it serves as base
+	// class for AspectJ aspects (which are not allowed to implement Serializable)!
 
 	/**
 	 * Holder to support the <code>currentTransactionStatus()</code> method,
@@ -107,12 +107,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 	}
 
 
-	/**
-	 * Transient to avoid serialization. Not static as we want it
-	 * to be the correct logger for subclasses. Reconstituted in
-	 * readObject().
-	 */
-	protected transient Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Delegate used to create, commit and rollback transactions */
 	private PlatformTransactionManager transactionManager;
@@ -317,25 +312,6 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 	}
 
 	
-	//---------------------------------------------------------------------
-	// Serialization support
-	//---------------------------------------------------------------------
-	
-	private void readObject(ObjectInputStream ois) throws IOException {
-		// Rely on default serialization, just initialize state after deserialization.
-		try {
-			ois.defaultReadObject();
-		}
-		catch (ClassNotFoundException ex) {
-			throw new AspectException("Failed to deserialize Spring AOP transaction aspect:" +
-					"Check that Spring AOP libraries are available on the client side", ex);
-		}
-		
-		// Initialize transient fields
-		this.logger = LogFactory.getLog(getClass());
-	}
-
-
 	/**
 	 * Opaque object used to hold Transaction information. Subclasses
 	 * must pass it back to methods on this class, but not see its internals.
