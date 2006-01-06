@@ -16,11 +16,11 @@
 
 package org.springframework.jdbc.command;
 
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
  * Interface specifying a basic set of JDBC operations expressed as a command object.
@@ -34,43 +34,40 @@ import java.util.Map;
  */
 public interface SqlCommandOperations {
 
-    Object executeScalar();
+	Object executeScalar();
 
-    Object executeScalar(Map parameters);
+	Object executeScalar(Map parameters);
 
-    Object executeScalar(SqlNamedParameterHolder parameters);
+	Object executeScalar(SqlNamedParameterHolder parameters);
 
-    Object executeObject(RowMapper rowMapper);
+	Object executeObject(RowMapper rowMapper);
 
-    Object executeObject(RowMapper rowMapper, Map parameters);
+	Object executeObject(RowMapper rowMapper, Map parameters);
 
-    Object executeObject(RowMapper rowMapper, SqlNamedParameterHolder parameters);
+	Object executeObject(RowMapper rowMapper, SqlNamedParameterHolder parameters);
 
-    List executeQuery();
+	List executeQuery();
 
-    List executeQuery(Map parameters);
+	List executeQuery(Map parameters);
 
-    List executeQuery(SqlNamedParameterHolder parameters);
+	List executeQuery(SqlNamedParameterHolder parameters);
 
-    List executeQuery(RowMapper rowMapper);
+	List executeQuery(RowMapper rowMapper);
 
-    List executeQuery(RowMapper rowMapper, Map parameters);
+	List executeQuery(RowMapper rowMapper, Map parameters);
 
-    List executeQuery(RowMapper rowMapper, SqlNamedParameterHolder parameters);
+	List executeQuery(RowMapper rowMapper, SqlNamedParameterHolder parameters);
 
-    SqlRowSet executeRowSet();
+	SqlRowSet executeRowSet();
 
-    SqlRowSet executeRowSet(Map parameters);
+	SqlRowSet executeRowSet(Map parameters);
 
-    SqlRowSet executeRowSet(SqlNamedParameterHolder parameters);
+	SqlRowSet executeRowSet(SqlNamedParameterHolder parameters);
 
-    int executeUpdate();
+	int executeUpdate();
 
-    int executeUpdate(Map parameters);
+	int executeUpdate(Map parameters);
 
-    int executeUpdate(SqlNamedParameterHolder parameters);
+	int executeUpdate(SqlNamedParameterHolder parameters);
 
-    public Map getSqlTypes();
-
-    public void setSqlTypes(Map sqlTypes);
 }
