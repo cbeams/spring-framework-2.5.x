@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 M2 (16.1.2006)
+Changes in version 2.0 M2 (30.1.2006)
 -------------------------------------
 
 Package org.springframework.aop
@@ -12,19 +12,54 @@ Package org.springframework.aop
 Package org.springframework.beans
 * added overloaded constructor to StringArrayPropertyEditor, allowing to specify a custom separator for String splitting
 
+Package org.springframework.core
+* added NestedIOException, deriving from java.io.IOException and adding NestedCheckedException-style root cause handling
+
+Package org.springframework.jdbc
+* turned visibility of jdbc.core.StatementCreatorUtils to package-protected
+* removed ResultReader interface (sub-interface of RowCallbackHandler): use RowMapper instead
+* reworked RowMapperResultReader adapter into RowMapperResultSetExtractor
+* reworked ResultSetSupportingSqlParameter to expose a RowMapper directly through a "getRowMapper()" method
+* reworked SqlQuery and subclasses to work with a RowMapper instead of a ResultReader -> "newRowMapper" template method
+* added "trackRowsAffected" property to BatchSqlUpdate, allowing to turn off the row counts list to save memory
+
 Package org.springframework.orm
-* updated Spring's JDO 2.0 support to JPOX JDO 2.0 API snapshot-9 (corresponding to JDO 2.0 final draft)
+* SqlMapClientTemplate always works with SqlMapSession and provided Connection to enable proper batching in all cases
 * added "configLocations" property to LocalSessionFactoryBean for Hibernate3, allowing to load multiple config files
+* updated Spring's JDO 2.0 support to JPOX JDO 2.0 API snapshot-9 (corresponding to JDO 2.0 final draft)
+* added full support for Java Persistence API 1.0 (JPA), in package "orm.jpa"
+
+Package org.springframework.transaction
+* fixed AbstractPlatformTransactionManager to serialize all relevant state
+* fixed TransactionInterceptor to correctly serialize TransactionAspectSupport state
+
+Package org.springframework.ui
+* added "defaultEncoding" bean property to FreeMarkerConfigurationFactory(Bean), inherited by FreeMarkerConfigurer
 
 Package org.springframework.util
 * fixed "StringUtils.delimitedListToStringArray" to properly handle an empty String as delimiter
 * refined StopWatch to not add new lines for "shortSummary()" but rather only for "prettyPrint()"
+* fixed ConcurrencyThrottleSupport to serialize all relevant state
 
 Package org.springframework.web
 * "contextConfigLocation" params in "web.xml" support "${...}" style placeholders for system properties
+* deprecated BindUtils and BindInitializer in package "web.bind" in favor of direct ServletRequestDataBinder usage
+* deprecated RequestUtils in package "web.bind" in favor of ServletRequestUtils
+* renamed RequestUtils in package "web.portlet.bind" to PortletRequestUtils
+* reworked MultipartException to derive from NestedIOException instead of NestedServletException, for Portlet reuse
+* upgraded CommonsMultipartResolver to Commons FileUpload 1.1 (not using deprecated FileUpload 1.0 API anymore)
+* added PortletMultipartResolver abstraction, with CommonsPortletMultipartResolver implementation as default
+* added multipart support to PortletRequestDataBinder, with factored-out common functionality in WebDataBinder
+* reworked RequestContextHolder to hold a RequestAttributes facade instead of a full HttpServletRequest
+* added RequestContextHolder support to DispatcherPortlet, to enable Request/SessionScopeMap with portlets
+* refactored RequestHandledEvent into RequestHandledEvent base class and ServletRequestHandledEvent subclass
+* renamed FrameworkPortlet's RequestHandledEvent to PortletRequestHandledEvent, a subclass of RequestHandledEvent
+* PortletBean ignores init-params that do not match bean properties, analogous to HttpServletBean
+* reworked MultiActionController's "bind" and "createBinder" to work on HttpServletRequest instead of ServletRequest
+* deprecated MultiActionController's "initBinder(ServletRequest...)" in favor of "initBinder(HttpServletRequest...)"
+* added protected accessors for UrlBasedViewResolver's bean properties, allowing subclasses to access the settings
 * added "argumentSeparator" property to MessageTag, allowing to specify a custom separator instead of the default comma
 * added "useSingleModelNameAsRoot" property to AbstractXlstView, allowing to enforce the value of the "root" property
-* PortletBean ignores init-params that do not match bean properties, analogous to HttpServletBean
 
 
 Changes in version 2.0 M1 (22.12.2005)
