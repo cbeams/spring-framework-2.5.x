@@ -348,12 +348,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return execute(new QueryStatementCallback());
 	}
 
-	public List query(String sql, RowCallbackHandler rch) throws DataAccessException {
-		return (List) query(sql, new RowCallbackHandlerResultSetExtractor(rch));
+	public void query(String sql, RowCallbackHandler rch) throws DataAccessException {
+		query(sql, new RowCallbackHandlerResultSetExtractor(rch));
 	}
 
 	public List query(String sql, RowMapper rowMapper) throws DataAccessException {
-		return query(sql, new RowMapperResultReader(rowMapper));
+		return (List) query(sql, new RowMapperResultSetExtractor(rowMapper));
 	}
 
 	public Map queryForMap(String sql) throws DataAccessException {
@@ -570,53 +570,53 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(sql, new ArgPreparedStatementSetter(args), rse);
 	}
 
-	public List query(PreparedStatementCreator psc, RowCallbackHandler rch) throws DataAccessException {
-		return (List) query(psc, new RowCallbackHandlerResultSetExtractor(rch));
+	public void query(PreparedStatementCreator psc, RowCallbackHandler rch) throws DataAccessException {
+		query(psc, new RowCallbackHandlerResultSetExtractor(rch));
 	}
 
-	public List query(String sql, PreparedStatementSetter pss, final RowCallbackHandler rch)
+	public void query(String sql, PreparedStatementSetter pss, final RowCallbackHandler rch)
 			throws DataAccessException {
-		return (List) query(sql, pss, new RowCallbackHandlerResultSetExtractor(rch));
+		query(sql, pss, new RowCallbackHandlerResultSetExtractor(rch));
 	}
 
-	public List query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rch)
+	public void query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rch)
 			throws DataAccessException {
-		return query(sql, new ArgTypePreparedStatementSetter(args, argTypes), rch);
+		query(sql, new ArgTypePreparedStatementSetter(args, argTypes), rch);
 	}
 
-	public List query(String sql, Object[] args, RowCallbackHandler rch)
+	public void query(String sql, Object[] args, RowCallbackHandler rch)
 			throws DataAccessException {
-		return query(sql, new ArgPreparedStatementSetter(args), rch);
+		query(sql, new ArgPreparedStatementSetter(args), rch);
 	}
 
 	public List query(PreparedStatementCreator psc, RowMapper rowMapper)
 			throws DataAccessException {
-		return query(psc, new RowMapperResultReader(rowMapper));
+		return (List) query(psc, new RowMapperResultSetExtractor(rowMapper));
 	}
 
 	public List query(String sql, PreparedStatementSetter pss, RowMapper rowMapper)
 			throws DataAccessException {
-		return query(sql, pss, new RowMapperResultReader(rowMapper));
+		return (List) query(sql, pss, new RowMapperResultSetExtractor(rowMapper));
 	}
 
 	public List query(String sql, Object[] args, int[] argTypes, RowMapper rowMapper)
 			throws DataAccessException {
-		return query(sql, args, argTypes, new RowMapperResultReader(rowMapper));
+		return (List) query(sql, args, argTypes, new RowMapperResultSetExtractor(rowMapper));
 	}
 
 	public List query(String sql, Object[] args, RowMapper rowMapper)
 			throws DataAccessException {
-		return query(sql, args, new RowMapperResultReader(rowMapper));
+		return (List) query(sql, args, new RowMapperResultSetExtractor(rowMapper));
 	}
 
 	public Object queryForObject(String sql, Object[] args, int[] argTypes, RowMapper rowMapper)
 			throws DataAccessException {
-		List results = query(sql, args, argTypes, new RowMapperResultReader(rowMapper, 1));
+		List results = (List) query(sql, args, argTypes, new RowMapperResultSetExtractor(rowMapper, 1));
 		return DataAccessUtils.requiredUniqueResult(results);
 	}
 
 	public Object queryForObject(String sql, Object[] args, RowMapper rowMapper) throws DataAccessException {
-		List results = query(sql, args, new RowMapperResultReader(rowMapper, 1));
+		List results = (List) query(sql, args, new RowMapperResultSetExtractor(rowMapper, 1));
 		return DataAccessUtils.requiredUniqueResult(results);
 	}
 
@@ -731,11 +731,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				if (keys != null) {
 					try {
 						RowMapper rowMapper = getColumnMapRowMapper();
-						RowMapperResultReader resultReader = new RowMapperResultReader(rowMapper, 1);
-						while (keys.next()) {
-							resultReader.processRow(keys);
-						}
-						generatedKeys.addAll(resultReader.getResults());
+						RowMapperResultSetExtractor rse = new RowMapperResultSetExtractor(rowMapper, 1);
+						generatedKeys.addAll((List) rse.extractData(keys));
 					}
 					finally {
 						JdbcUtils.closeResultSet(keys);
@@ -965,20 +962,17 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			if (this.nativeJdbcExtractor != null) {
 				rsToUse = this.nativeJdbcExtractor.getNativeResultSet(rs);
 			}
-			if (param.isRowCallbackHandlerSupported()) {
-				// It's a RowCallbackHandler or RowMapper.
-				// We'll get a RowCallbackHandler to use in both cases.
+			if (param.getRowMapper() != null) {
+				RowMapper rowMapper = param.getRowMapper();
+				Object result = (new RowMapperResultSetExtractor(rowMapper)).extractData(rsToUse);
+				returnedResults.put(param.getName(), result);
+			}
+			if (param.getRowCallbackHandler() != null) {
 				RowCallbackHandler rch = param.getRowCallbackHandler();
 				(new RowCallbackHandlerResultSetExtractor(rch)).extractData(rsToUse);
-				if (rch instanceof ResultReader) {
-					returnedResults.put(param.getName(), ((ResultReader) rch).getResults());
-				}
-				else {
-					returnedResults.put(param.getName(), "ResultSet returned from stored procedure was processed.");
-				}
+				returnedResults.put(param.getName(), "ResultSet returned from stored procedure was processed");
 			}
-			else {
-				// It's a ResultSetExtractor - simply apply it.
+			else if (param.getResultSetExtractor() != null) {
 				Object result = param.getResultSetExtractor().extractData(rsToUse);
 				returnedResults.put(param.getName(), result);
 			}
@@ -1239,12 +1233,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			while (rs.next()) {
 				this.rch.processRow(rs);
 			}
-			if (this.rch instanceof ResultReader) {
-				return ((ResultReader) this.rch).getResults();
-			}
-			else {
-				return null;
-			}
+			return null;
 		}
 	}
 

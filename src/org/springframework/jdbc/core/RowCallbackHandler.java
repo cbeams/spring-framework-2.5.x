@@ -30,21 +30,9 @@ import java.sql.SQLException;
  * available for later inspection. See RowCountCallbackHandler's javadoc
  * for a usage example with JdbcTemplate.
  *
- * <p>The ResultReader subinterface allows to make a results list available
- * in a uniform manner. JdbcTemplate's query methods will return the results
- * list in that case, else returning null (-> result state is solely
- * available from RowCallbackHandler object).
- *
- * <p>A convenient out-of-the-box implementation of RowCallbackHandler is the
- * RowMapperResultReader adapter which delegates row mapping to a RowMapper.
- * Note that a RowMapper object is typically stateless and thus reusable;
- * just the RowMapperResultReader adapter is stateful.
- *
  * @author Rod Johnson
  * @see ResultSetExtractor
  * @see RowCountCallbackHandler
- * @see ResultReader
- * @see RowMapperResultReader
  * @see RowMapper
  */
 public interface RowCallbackHandler {

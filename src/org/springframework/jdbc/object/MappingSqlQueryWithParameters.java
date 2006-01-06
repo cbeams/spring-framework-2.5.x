@@ -18,14 +18,11 @@ package org.springframework.jdbc.object;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.springframework.jdbc.core.ResultReader;
+import org.springframework.jdbc.core.RowMapper;
 
 /**
  * Reusable RDBMS query in which concrete subclasses must implement
@@ -73,8 +70,8 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 	 * Implementation of protected abstract method. This invokes the subclass's
 	 * implementation of the mapRow() method.
 	 */
-	protected ResultReader newResultReader(int rowsExpected, Object[] parameters, Map context) {
-		return new ResultReaderImpl(rowsExpected, parameters, context);
+	protected RowMapper newRowMapper(Object[] parameters, Map context) {
+		return new RowMapperImpl(parameters, context);
 	}
 
 	/**
@@ -97,36 +94,25 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 
 
 	/**
-	 * Implementation of ResultReader that calls the enclosing
+	 * Implementation of RowMapper that calls the enclosing
 	 * class's <code>mapRow</code> method for each row.
 	 */
-	protected class ResultReaderImpl implements ResultReader {
-
-		/** List to save results in */
-		private final List results;
+	protected class RowMapperImpl implements RowMapper {
 
 		private final Object[] params;
 
 		private final Map context;
 
-		private int rowNum = 0;
-
 		/**
 		 * Use an array results. More efficient if we know how many results to expect.
 		 */
-		public ResultReaderImpl(int rowsExpected, Object[] parameters, Map context) {
-			// use the more efficient collection if we know how many rows to expect
-			this.results = (rowsExpected > 0) ? (List) new ArrayList(rowsExpected) : (List) new LinkedList();
+		public RowMapperImpl(Object[] parameters, Map context) {
 			this.params = parameters;
 			this.context = context;
 		}
 
-		public void processRow(ResultSet rs) throws SQLException {
-			this.results.add(mapRow(rs, this.rowNum++, this.params, this.context));
-		}
-
-		public List getResults() {
-			return this.results;
+		public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+			return MappingSqlQueryWithParameters.this.mapRow(rs, rowNum, this.params, this.context);
 		}
 	}
 

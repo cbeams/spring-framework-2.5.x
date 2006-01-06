@@ -111,14 +111,6 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	}
 
 	/**
-	 * Does this parameter support a RowCallbackHandler,
-	 * i.e. does it hold a RowCallbackHandler or RowMapper?
-	 */
-	public boolean isRowCallbackHandlerSupported() {
-		return (this.rowCallbackHandler != null || this.rowMapper != null);
-	}
-
-	/**
 	 * Return the ResultSetExtractor held by this parameter, if any.
 	 */
 	public ResultSetExtractor getResultSetExtractor() {
@@ -126,19 +118,17 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	}
 
 	/**
-	 * Return a new instance of the implementation of a RowCallbackHandler,
-	 * usable for returned ResultSets. This implementation invokes a given
-	 * RowMapper via the RowMapperResultReader adapter, of returns a given
-	 * RowCallbackHandler directly.
-	 * @see RowMapperResultReader
+	 * Return the RowCallbackHandler held by this parameter, if any.
 	 */
 	public RowCallbackHandler getRowCallbackHandler() {
-		if (this.rowMapper != null) {
-			return new RowMapperResultReader(this.rowMapper, this.rowsExpected);
-		}
-		else {
-			return this.rowCallbackHandler;
-		}
+		return this.rowCallbackHandler;
+	}
+
+	/**
+	 * Return the RowMapper held by this parameter, if any.
+	 */
+	public RowMapper getRowMapper() {
+		return this.rowMapper;
 	}
 
 }

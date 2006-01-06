@@ -30,7 +30,7 @@ import org.springframework.dao.DataAccessException;
  *
  * <p>This interface is mainly used within the JDBC framework.
  * A RowCallbackHandler is usually a simpler choice for ResultSet processing,
- * in particular a RowMapperResultReader in combination with a RowMapper.
+ * in particular a RowMapperResultSetExtractor in combination with a RowMapper.
  *
  * <p>Note: In contrast to a RowCallbackHandler, a ResultSetExtractor object
  * is typically stateless and thus reusable, as long as it doesn't access
@@ -41,7 +41,7 @@ import org.springframework.dao.DataAccessException;
  * @since April 24, 2003
  * @see JdbcTemplate
  * @see RowCallbackHandler
- * @see RowMapperResultReader
+ * @see RowMapperResultSetExtractor
  * @see org.springframework.jdbc.core.support.AbstractLobStreamingResultSetExtractor
  */
 public interface ResultSetExtractor {

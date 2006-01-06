@@ -26,7 +26,7 @@ import java.sql.SQLException;
  * will be caught and handled correctly by the JdbcTemplate class.
  *
  * <p>Typically used either for JdbcTemplate's query methods (with
- * RowMapperResultReader adapters) or for out parameters of stored procedures.
+ * RowMapperResultSetExtractor adapters) or for out parameters of stored procedures.
  * RowMapper objects are typically stateless and thus reusable; they are
  * ideal choices for implementing row-mapping logic in a single place.
  *
@@ -36,7 +36,7 @@ import java.sql.SQLException;
  *
  * @author Thomas Risberg
  * @see JdbcTemplate
- * @see RowMapperResultReader
+ * @see RowMapperResultSetExtractor
  * @see org.springframework.jdbc.object.MappingSqlQuery
  */
 public interface RowMapper {

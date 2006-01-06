@@ -18,14 +18,11 @@ package org.springframework.jdbc.object;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.springframework.jdbc.core.ResultReader;
+import org.springframework.jdbc.core.RowMapper;
 
 /**
  * Reusable RDBMS query in which concrete subclasses must implement
@@ -58,11 +55,11 @@ public abstract class UpdatableSqlQuery extends SqlQuery {
 	}
 
 	/**
-	 * Implementation of protected abstract method. This invokes the subclass's
-	 * implementation of the updateRow() method.
+	 * Implementation of the superclass template method. This invokes the subclass's
+	 * implementation of the <code>updateRow()</code> method.
 	 */
-	protected ResultReader newResultReader(int rowsExpected, Object[] parameters, Map context) {
-		return new ResultReaderImpl(rowsExpected, context);
+	protected RowMapper newRowMapper(Object[] parameters, Map context) {
+		return new RowMapperImpl(context);
 	}
 
 	/**
@@ -84,34 +81,21 @@ public abstract class UpdatableSqlQuery extends SqlQuery {
 
 
 	/**
-	 * Implementation of ResultReader that calls the enclosing
-	 * class's updateRow() method for each row.
+	 * Implementation of RowMapper that calls the enclosing
+	 * class's <code>updateRow()</code> method for each row.
 	 */
-	protected class ResultReaderImpl implements ResultReader {
-
-		/** List to save results in */
-		private final List results;
+	protected class RowMapperImpl implements RowMapper {
 
 		private final Map context;
 
-		private int rowNum = 0;
-
-		/**
-		 * Use an array results. More efficient if we know how many results to expect.
-		 */
-		public ResultReaderImpl(int rowsExpected, Map context) {
-			// use the more efficient collection if we know how many rows to expect
-			this.results = (rowsExpected > 0) ? (List) new ArrayList(rowsExpected) : (List) new LinkedList();
+		public RowMapperImpl(Map context) {
 			this.context = context;
 		}
 
-		public void processRow(ResultSet rs) throws SQLException {
-			this.results.add(updateRow(rs, this.rowNum++, this.context));
+		public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+			Object result = updateRow(rs, rowNum, this.context);
 			rs.updateRow();
-		}
-
-		public List getResults() {
-			return this.results;
+			return result;
 		}
 	}
 

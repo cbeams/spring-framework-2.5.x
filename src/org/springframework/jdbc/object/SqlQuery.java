@@ -23,16 +23,16 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
-import org.springframework.jdbc.core.ResultReader;
+import org.springframework.jdbc.core.RowMapper;
 
 /**
  * Reusable object to represent a SQL query. Like all RdbsOperation
  * objects, SqlQuery objects are threadsafe after their initialization is
  * complete. That is, after they are constructed and configured via their
  * setter methods, they can be used safely from multiple threads.
- * <p>
- * Subclasses must implement the <code>newResultReader</code> method to provide an object
- * that can save the results of iterating over the ResultSet.
+ *
+ * <p>Subclasses must implement the <code>newRowMapper</code> method to provide an object
+ * that can extract the results of iterating over the ResultSet.
  *
  * <p>This class provides a number of public <code>execute</code> methods that are
  * analogous to the different convenient JDO query execute methods. Subclasses
@@ -110,8 +110,8 @@ public abstract class SqlQuery extends SqlOperation {
 	 */
 	public List execute(final Object[] parameters, Map context) throws DataAccessException {
 		validateParameters(parameters);
-		ResultReader rr = newResultReader(getRowsExpected(), parameters, context);
-		return getJdbcTemplate().query(newPreparedStatementCreator(parameters), rr);
+		RowMapper rowMapper = newRowMapper(parameters, context);
+		return getJdbcTemplate().query(newPreparedStatementCreator(parameters), rowMapper);
 	}
 
 	/**
@@ -295,16 +295,13 @@ public abstract class SqlQuery extends SqlOperation {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Subclasses must implement this method to save a List of objects
-	 * returned by the execute method.
-	 * @param rowsExpected If 0, we don't know how many rows to expect.
-	 * This parameter can be ignored, but may help some implementations
-	 * choose the most efficient Collection type: e.g. ArrayList
-	 * instead of LinkedList for large result sets.
-	 * @param parameters parameters to the execute() method, in case subclass
-	 * is interested. May be <code>null</code> if there were no parameters.
+	 * Subclasses must implement this method to extract an object per row,
+	 * to be returned by the execute method as aggregated List.
+	 * @param parameters parameters to the <code>execute()</code> method,
+	 * in case subclass is interested. May be <code>null</code> if there
+	 * were no parameters.
 	 * @see #execute
 	 */
-	protected abstract ResultReader newResultReader(int rowsExpected, Object[] parameters, Map context);
+	protected abstract RowMapper newRowMapper(Object[] parameters, Map context);
 
 }
