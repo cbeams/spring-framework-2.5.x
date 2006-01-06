@@ -34,45 +34,8 @@ import org.springframework.jdbc.support.ParsedSql;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
- * <b>This is the central class in the JDBC core package.</b>
- * It simplifies the use of JDBC and helps to avoid common errors.
- * It executes core JDBC workflow, leaving application code to provide SQL
- * and extract results. This class executes SQL queries or updates, initiating
- * iteration over ResultSets and catching JDBC exceptions and translating
- * them to the generic, more informative exception hierarchy defined in the
- * <code>org.springframework.dao</code> package.
- *
- * <p>Code using this class need only implement callback interfaces, giving
- * them a clearly defined contract. The PreparedStatementCreator callback
- * interface creates a prepared statement given a Connection provided by this
- * class, providing SQL and any necessary parameters. The RowCallbackHandler
- * interface extracts values from each row of a ResultSet.
- *
- * <p>Can be used within a service implementation via direct instantiation
- * with a DataSource reference, or get prepared in an application context
- * and given to services as bean reference. Note: The DataSource should
- * always be configured as a bean in the application context, in the first case
- * given to the service directly, in the second case to the prepared template.
- *
- * <p>The motivation and design of this class is discussed
- * in detail in
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
- * by Rod Johnson (Wrox, 2002).
- *
- * <p>Because this class is parameterizable by the callback interfaces and
- * the SQLExceptionTranslator interface, it isn't necessary to subclass it.
- * All operations performed by this class are logged at debug level.
- *
- * @author Rod Johnson
- * @author Juergen Hoeller
  * @author Thomas Risberg
- * @since May 3, 2001
- * @see org.springframework.jdbc.core.ResultSetExtractor
- * @see org.springframework.jdbc.core.RowCallbackHandler
- * @see org.springframework.jdbc.core.RowMapper
- * @see org.springframework.dao
- * @see org.springframework.jdbc.datasource
- * @see org.springframework.jdbc.object
+ * @author Juergen Hoeller
  */
 public class JdbcNamedParameterTemplate implements JdbcNamedParameterOperations {
 

@@ -26,21 +26,18 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
- * Interface specifying a basic set of JDBC operations.
- * Implemented by JdbcTemplate. Not often used directly, but a useful option
- * to enhance testability, as it can easily be mocked or stubbed.
- *
- * <p>Alternatively, the standard JDBC infrastructure can be mocked.
- * However, mocking this interface constitutes significantly less work.
- * As an alternative to a mock objects approach to testing
- * data access code, consider the powerful integration
- * testing support provided in the org.springframework.test
- * package, shipped in spring-mock.jar.
- *
  * @author Thomas Risberg
- * @see org.springframework.jdbc.core.JdbcTemplate
+ * @author Juergen Hoeller
+ * @see JdbcNamedParameterTemplate
  */
 public interface JdbcNamedParameterOperations {
+
+	/**
+	 * Expose the classic Spring JdbcTemplate to allow invocation of
+	 * classic JDBC operations.
+	 */
+	JdbcOperations getJdbcOperations();
+
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
