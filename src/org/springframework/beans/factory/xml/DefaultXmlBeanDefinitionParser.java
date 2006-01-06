@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,10 +45,10 @@ import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
+import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
-import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.ClassUtils;
@@ -60,7 +60,7 @@ import org.springframework.util.xml.DomUtils;
  * Default implementation of the XmlBeanDefinitionParser interface.
  * Parses bean definitions according to the "spring-beans" DTD,
  * that is, Spring's default XML bean definition format.
- * <p/>
+ *
  * <p>The structure, elements and attribute names of the required XML document
  * are hard-coded in this class. (Of course a transform could be run if necessary
  * to produce this format). <code>&lt;beans&gt;</code> doesn't need to be the root
@@ -1114,11 +1114,10 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	protected boolean parseMergeAttribute(Element collectionElement) {
 		String value = collectionElement.getAttribute(MERGE_ATTRIBUTE);
-
-		if(DEFAULT_VALUE.equals(value)) {
+		if (DEFAULT_VALUE.equals(value)) {
 			value = getDefaultMerge();
 		}
-
 		return TRUE_VALUE.equals(value);
 	}
+
 }
