@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -286,14 +286,16 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			}
 			DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
 		}
-		catch (SQLException ex) {
-			logger.info("Could not reset JDBC Connection after transaction", ex);
+		catch (Throwable ex) {
+			logger.debug("Could not reset JDBC Connection after transaction", ex);
 		}
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Releasing JDBC Connection [" + con + "] after transaction");
+		if (txObject.isNewConnectionHolder()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Releasing JDBC Connection [" + con + "] after transaction");
+			}
+			DataSourceUtils.releaseConnection(con, this.dataSource);
 		}
-		DataSourceUtils.releaseConnection(con, this.dataSource);
 
 		txObject.getConnectionHolder().clear();
 	}
@@ -314,9 +316,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 		private boolean mustRestoreAutoCommit;
 
-		public void setConnectionHolder(ConnectionHolder connectionHolder, boolean newConnection) {
+		public void setConnectionHolder(ConnectionHolder connectionHolder, boolean newConnectionHolder) {
 			super.setConnectionHolder(connectionHolder);
-			this.newConnectionHolder = newConnection;
+			this.newConnectionHolder = newConnectionHolder;
 		}
 
 		public boolean isNewConnectionHolder() {
