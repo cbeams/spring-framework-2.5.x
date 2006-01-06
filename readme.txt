@@ -90,7 +90,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~1735 KB)
+* "spring" (~1815 KB)
 - Convenient jar file that combines all standard modules (see "module jars" below)
 - Note: Does NOT include extension modules! (see "extension module jars" below)
 
@@ -108,8 +108,8 @@ MODULE JARS (dist/modules):
 - Contents: AOP framework, source-level metadata support, AOP Alliance interfaces
 - Dependencies: spring-core, (spring-beans, CGLIB, Commons Attributes)
 
-* "spring-context" (~115 KB)
-- Contents: application context, validation, JNDI, UI context support
+* "spring-context" (~130 KB)
+- Contents: application context, validation, JNDI, UI context support, scripting
 - Dependencies: spring-beans, (spring-aop, Velocity, FreeMarker, JasperReports)
 
 * "spring-dao" (~105 KB)
@@ -124,7 +124,7 @@ MODULE JARS (dist/modules):
 - Contents: JMX support, JCA support, scheduling support, mail support, caching support
 - Dependencies: spring-beans, (spring-dao, spring-context, spring-jdbc, JMX, Quartz, JavaMail, EHCache)
 
-* "spring-web" (~140 KB)
+* "spring-web" (~145 KB)
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
 - Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts, JSF)
 
@@ -138,13 +138,13 @@ MODULE JARS (dist/modules):
 
 EXTENSION MODULE JARS (dist/extmodules):
 
-* "spring-portlet" (~100 KB)
-- Contents: framework portlets, portlet MVC
-- Dependencies: spring-web, spring-webmvc, (Portlet)
-
 * "spring-jdo" (~65 KB)
 - Contents: JDO 1.0/2.0 support
 - Dependencies: spring-dao, spring-aop, spring-jdbc, JDO, (spring-web, spring-portlet)
+
+* "spring-jpa" (~40 KB)
+- Contents: JPA 1.0 support
+- Dependencies: spring-dao, spring-aop, spring-jdbc, JPA, (spring-web, spring-portlet)
 
 * "spring-hibernate2" (~85 KB)
 - Contents: Hibernate 2.1 support
@@ -161,6 +161,10 @@ EXTENSION MODULE JARS (dist/extmodules):
 * "spring-ojb" (~30 KB)
 - Contents: OJB 1.0 support
 - Dependencies: spring-dao, spring-jdbc, OJB
+
+* "spring-portlet" (~105 KB)
+- Contents: framework portlets, portlet MVC
+- Dependencies: spring-web, spring-webmvc, (Portlet)
 
 * "spring-mock" (~70 KB)
 - Contents: JNDI mocks, Servlet API mocks, Portlet API mocks, JUnit support
