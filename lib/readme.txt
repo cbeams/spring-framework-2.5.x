@@ -197,7 +197,7 @@ distribution/website before using any of them in your own applications.
 - required for running JPetStore (by Axis)
 
 * jakarta-commons/commons-fileupload.jar
-- Commons FileUpload 1.0 (http://jakarta.apache.org/commons/fileupload)
+- Commons FileUpload 1.1 (http://jakarta.apache.org/commons/fileupload)
 - required for building the framework
 - required at runtime when using Spring's CommonsMultipartResolver
 
@@ -205,6 +205,10 @@ distribution/website before using any of them in your own applications.
 - Commons HttpClient 3.0 (http://jakarta.apache.org/commons/httpclient)
 - required for building the framework
 - required at runtime when using Spring's CommonsHttpInvokerRequestExecutor
+
+* jakarta-commons/commons-io.jar
+- Commons IO 1.1 (http://jakarta.apache.org/commons/io)
+- required at runtime when using Spring's CommonsMultipartResolver (by Commons FileUpload)
 
 * jakarta-commons/commons-lang.jar
 - Commons Lang 2.1 (http://jakarta.apache.org/commons/lang)

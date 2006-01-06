@@ -38,8 +38,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
-import org.apache.commons.fileupload.DiskFileUpload;
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileUpload;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.mock.web.MockFilterConfig;
@@ -69,15 +71,14 @@ public class CommonsMultipartResolverTests extends TestCase {
 		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
 		wac.refresh();
 		MockCommonsMultipartResolver resolver = new MockCommonsMultipartResolver();
-		DiskFileUpload fileUpload = resolver.getFileUpload();
 		resolver.setMaxUploadSize(1000);
 		resolver.setMaxInMemorySize(100);
 		resolver.setDefaultEncoding("enc");
 		resolver.setServletContext(wac.getServletContext());
-		assertEquals(1000, fileUpload.getSizeMax());
-		assertEquals(100, fileUpload.getSizeThreshold());
-		assertEquals("enc", fileUpload.getHeaderEncoding());
-		assertTrue(fileUpload.getRepositoryPath().endsWith("mytemp"));
+		assertEquals(1000, resolver.getFileUpload().getSizeMax());
+		assertEquals(100, resolver.getFileItemFactory().getSizeThreshold());
+		assertEquals("enc", resolver.getFileUpload().getHeaderEncoding());
+		assertTrue(resolver.getFileItemFactory().getRepository().getAbsolutePath().endsWith("mytemp"));
 
 		MockHttpServletRequest originalRequest = new MockHttpServletRequest();
 		originalRequest.setContentType("multipart/form-data");
@@ -231,7 +232,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 		wac.refresh();
 		wac.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		CommonsMultipartResolver resolver = new CommonsMultipartResolver(wac.getServletContext());
-		assertTrue(resolver.getFileUpload().getRepositoryPath().endsWith("mytemp"));
+		assertTrue(resolver.getFileItemFactory().getRepository().getAbsolutePath().endsWith("mytemp"));
 
 		MockFilterConfig filterConfig = new MockFilterConfig(wac.getServletContext(), "filter");
 		filterConfig.addInitParameter("class", "notWritable");
@@ -274,7 +275,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
 		wac.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		CommonsMultipartResolver resolver = new CommonsMultipartResolver(wac.getServletContext());
-		assertTrue(resolver.getFileUpload().getRepositoryPath().endsWith("mytemp"));
+		assertTrue(resolver.getFileItemFactory().getRepository().getAbsolutePath().endsWith("mytemp"));
 
 		MockFilterConfig filterConfig = new MockFilterConfig(wac.getServletContext(), "filter");
 		filterConfig.addInitParameter("multipartResolverBeanName", "myMultipartResolver");
@@ -323,8 +324,8 @@ public class CommonsMultipartResolverTests extends TestCase {
 			this.empty = empty;
 		}
 
-		protected DiskFileUpload newFileUpload() {
-			return new DiskFileUpload() {
+		protected FileUpload newFileUpload(FileItemFactory fileItemFactory) {
+			return new ServletFileUpload() {
 				public List parseRequest(HttpServletRequest request) {
 					if (request instanceof MultipartHttpServletRequest) {
 						throw new IllegalStateException("Already a multipart request");

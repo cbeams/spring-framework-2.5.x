@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 
-import org.apache.commons.fileupload.DefaultFileItem;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,6 +32,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * MultipartFile implementation for Jakarta Commons FileUpload.
+ *
+ * <p><b>NOTE:</b> As of Spring 2.0, this class requires
+ * Commons FileUpload 1.1 or higher. The implementation does not use
+ * any deprecated FileUpload 1.0 API anymore, to be compatible with
+ * future Commons FileUpload releases.
  *
  * @author Trevor D. Cook
  * @author Juergen Hoeller
@@ -46,11 +51,12 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 
 	private final long size;
 
+
 	/**
 	 * Create an instance wrapping the given FileItem.
 	 * @param fileItem the FileItem to wrap
 	 */
-	protected CommonsMultipartFile(FileItem fileItem) {
+	public CommonsMultipartFile(FileItem fileItem) {
 		this.fileItem = fileItem;
 		this.size = this.fileItem.getSize();
 	}
@@ -62,6 +68,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 	public FileItem getFileItem() {
 		return fileItem;
 	}
+
 
 	public String getName() {
 		return this.fileItem.getFieldName();
@@ -159,8 +166,8 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 			return true;
 		}
 		// Check actual existence of temporary file.
-		if (this.fileItem instanceof DefaultFileItem) {
-			return ((DefaultFileItem) this.fileItem).getStoreLocation().exists();
+		if (this.fileItem instanceof DiskFileItem) {
+			return ((DiskFileItem) this.fileItem).getStoreLocation().exists();
 		}
 		// Check whether current file size is different than original one.
 		return (this.fileItem.getSize() == this.size);
@@ -171,12 +178,12 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 	 * Tries to be as specific as possible: mentions the file location in case
 	 * of a temporary file.
 	 */
-	protected String getStorageDescription() {
+	public String getStorageDescription() {
 		if (this.fileItem.isInMemory()) {
 			return "in memory";
 		}
-		else if (this.fileItem instanceof DefaultFileItem) {
-			return "at [" + ((DefaultFileItem) this.fileItem).getStoreLocation().getAbsolutePath() + "]";
+		else if (this.fileItem instanceof DiskFileItem) {
+			return "at [" + ((DiskFileItem) this.fileItem).getStoreLocation().getAbsolutePath() + "]";
 		}
 		else {
 			return "on disk";
