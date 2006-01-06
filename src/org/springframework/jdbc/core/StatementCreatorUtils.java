@@ -47,7 +47,7 @@ import org.apache.commons.logging.LogFactory;
  * @see SqlTypeValue
  * @see org.springframework.jdbc.core.support.SqlLobValue
  */
-public class StatementCreatorUtils {
+class StatementCreatorUtils {
 
 	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
 
