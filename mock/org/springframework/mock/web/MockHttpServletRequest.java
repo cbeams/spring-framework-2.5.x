@@ -226,7 +226,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public int getContentLength() {
-		return (this.content != null ? content.length : -1);
+		return (this.content != null ? this.content.length : -1);
 	}
 
 	public void setContentType(String contentType) {
