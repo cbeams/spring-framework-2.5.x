@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ public abstract class DataSourceUtils {
 				}
 				con.setReadOnly(true);
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				// SQLException or UnsupportedOperationException
 				// -> ignore, it's just a hint anyway.
 				logger.debug("Could not set JDBC Connection read-only", ex);
@@ -194,7 +194,7 @@ public abstract class DataSourceUtils {
 				con.setReadOnly(false);
 			}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			logger.debug("Could not reset JDBC Connection after transaction", ex);
 		}
 	}
