@@ -431,17 +431,18 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * Furthermore, <code>getCurrentSession()</code> will also seamlessly work with
 	 * a request-scoped Session managed by OpenSessionInViewFilter/Interceptor.
 	 * <p>Turn this flag off to expose the plain Hibernate SessionFactory with
-	 * Hibernate's default <code>getCurrentSession()</code> behavior, which only
-	 * supports plain JTA synchronization through the JTA TransactionManager.
-	 * <p><b>NOTE:</b> The <code>SessionFactory.getCurrentSession</code> method
-	 * is only available in Hibernate 3.0.1 and later. Before its introduction,
-	 * DAOs coded against the plain Hibernate API had to manually open and close
-	 * Sessions and care for transaction/request scoping.
+	 * Hibernate's default <code>getCurrentSession()</code> behavior, where
+	 * Hibernate 3.0.x only supports plain JTA synchronization. On Hibernate 3.1+,
+	 * such a plain SessionFactory will by default have a SpringSessionContext
+	 * registered to nevertheless provide Spring-managed Sessions; this can be
+	 * overridden through the corresponding Hibernate property
+	 * "hibernate.current_session_context_class".
 	 * @see org.hibernate.SessionFactory#getCurrentSession()
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 * @see HibernateTransactionManager
 	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewFilter
 	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor
+	 * @see SpringSessionContext
 	 */
 	public void setExposeTransactionAwareSessionFactory(boolean exposeTransactionAwareSessionFactory) {
 		this.exposeTransactionAwareSessionFactory = exposeTransactionAwareSessionFactory;
@@ -624,6 +625,15 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			// However, for Spring's resource management (in particular for
 			// HibernateTransactionManager), "on_close" is the better default.
 			config.setProperty(Environment.RELEASE_CONNECTIONS, ConnectionReleaseMode.ON_CLOSE.toString());
+
+			if (!this.exposeTransactionAwareSessionFactory) {
+				// Not exposing a SessionFactory proxy with transaction-aware
+				// getCurrentSession() method -> set Hibernate 3.1 CurrentSessionContext
+				// implementation instead, providing the Spring-managed Session that way.
+				// Can be overridden by a custom value for corresponding Hibernate property.
+				config.setProperty(Environment.CURRENT_SESSION_CONTEXT_CLASS,
+						"org.springframework.orm.hibernate3.SpringSessionContext");
+			}
 
 			if (this.entityInterceptor != null) {
 				// Set given entity interceptor at SessionFactory level.
