@@ -88,7 +88,7 @@ The "dist" directory contains the following distinct jar files for use in applic
 jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-core" (~115 KB)
+* "spring-core" (~120 KB)
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
@@ -108,11 +108,11 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: DAO support, transaction infrastructure
 - Dependencies: spring-core, (spring-beans, spring-aop, spring-context, JTA)
 
-* "spring-jdbc" (~180 KB)
+* "spring-jdbc" (~185 KB)
 - Contents: JDBC support
 - Dependencies: spring-dao, spring-beans
 
-* "spring-support" (~160 KB)
+* "spring-support" (~165 KB)
 - Contents: JMX support, JCA support, scheduling support, mail support, caching support
 - Dependencies: spring-beans, (spring-dao, spring-context, spring-jdbc, JMX, Quartz, JavaMail, EHCache)
 
@@ -128,11 +128,11 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: remoting support, EJB support, JMS support
 - Dependencies: spring-aop, spring-beans, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB, JMS)
 
-* "spring-orm" (~175 KB)
+* "spring-orm" (~180 KB)
 - Contents: iBATIS SQL Maps support, Apache OJB support, TopLink support, JDO support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, iBATIS SQL Maps, Apache OJB, TopLink, JDO)
 
-* "spring-hibernate" (~185 KB)
+* "spring-hibernate" (~190 KB)
 - Contents: Hibernate 2.1 support, Hibernate 3.x support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, Hibernate2, Hibernate3)
 
