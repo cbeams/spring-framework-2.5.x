@@ -356,7 +356,25 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 			// Initialize the bean instance.
 			errorMessage = "Initialization of bean failed";
-			populateBean(beanName, mergedBeanDefinition, instanceWrapper);
+			
+			// Give any InstantiationAwareBeanPostProcessors the opportunity to modify the state
+			// of the bean before properties are set. This can be used, for example,
+			// to support styles of field injection.
+			boolean continueWithPropertyPopulation = true;
+			for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext(); ) {
+				BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
+				if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
+					if (!((InstantiationAwareBeanPostProcessor) beanProcessor).postProcessAfterInstantiation(
+							bean, beanName)) {
+						continueWithPropertyPopulation = false;
+						break;
+					}
+				}
+			}
+			
+			if (continueWithPropertyPopulation) {
+				populateBean(beanName, mergedBeanDefinition, instanceWrapper);
+			}
 
 			originalBean = bean;
 			bean = initializeBean(beanName, bean, mergedBeanDefinition);

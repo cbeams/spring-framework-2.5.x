@@ -12,6 +12,7 @@ Package org.springframework.aop
 Package org.springframework.beans
 * fixed PropertyAccessorUtils's "getLastNestedPropertySeparatorIndex" to correctly handle property paths without dot
 * added overloaded constructor to StringArrayPropertyEditor, allowing to specify a custom separator for String splitting
+* added postProcessAfterInstantiation method to InstantiationAwareBeanPostProcessor
 
 Package org.springframework.core
 * added NestedIOException, deriving from java.io.IOException and adding NestedCheckedException-style root cause handling

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,17 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.BeansException;
 
 /**
- * Subinterface of BeanPostProcessor that adds a before-instantiation callback.
+ * Subinterface of BeanPostProcessor that adds a before-instantiation callback,
+ * and a callback after instantiation but before explicit properties are set or
+ * autowiring occurs.
  *
  * <p>Typically used to suppress default instantiation for specific target beans,
  * for example to create proxies with special TargetSources (pooling targets,
- * lazily initializing targets, etc).
+ * lazily initializing targets, etc), or to implement additional injection strategies
+ * such as field injection.
  *
  * @author Juergen Hoeller
+ * @author Rod Johnson
  * @since 1.2
  * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#setCustomTargetSourceCreators
  * @see org.springframework.aop.framework.autoproxy.target.AbstractPoolingTargetSourceCreator
@@ -52,5 +56,18 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#getFactoryMethodName
 	 */
 	Object postProcessBeforeInstantiation(Class beanClass, String beanName) throws BeansException;
+	
+	/**
+	 * Perform operations after the bean has been instantiated, via a constructor or factory method,
+	 * but before Spring property population (from explicit properties or autowiring) occurs.
+	 * @param bean bean instance created, but whose properties have not yet been set
+	 * @param beanName the name of the bean
+	 * @return true if properties should be set on the bean; false if property population
+	 * should be skipped. Normal implementations should return true. Returning false will
+	 * also prevent any subsequent InstantiationAwareBeanPostProcessor instances
+	 * being invoked on this bean instance.
+	 * @throws BeansException in the case of errors
+	 */
+	boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException;
 
 }
