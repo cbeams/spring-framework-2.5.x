@@ -10,6 +10,7 @@ Package org.springframework.aop
 * refined ThreadLocalTargetSource's synchronization to guarantee thread-safe destruction on shutdown
 
 Package org.springframework.beans
+* fixed PropertyAccessorUtils's "getLastNestedPropertySeparatorIndex" to correctly handle property paths without dot
 * added overloaded constructor to StringArrayPropertyEditor, allowing to specify a custom separator for String splitting
 
 Package org.springframework.core
@@ -22,6 +23,7 @@ Package org.springframework.jdbc
 * reworked RowMapperResultReader adapter into RowMapperResultSetExtractor
 * reworked ResultSetSupportingSqlParameter to expose a RowMapper directly through a "getRowMapper()" method
 * reworked SqlQuery and subclasses to work with a RowMapper instead of a ResultReader -> "newRowMapper" template method
+* fixed BatchSqlUpdate's constructor that takes a "batchSize" argument to correctly interpret it as batch size
 * added "trackRowsAffected" property to BatchSqlUpdate, allowing to turn off the row counts list to save memory
 
 Package org.springframework.orm
@@ -31,6 +33,13 @@ Package org.springframework.orm
 * added "replicate" convenience methods to HibernateTemplate for both Hibernate2 and Hibernate3
 * updated Spring's JDO 2.0 support to JPOX JDO 2.0 API snapshot-9 (corresponding to JDO 2.0 final draft)
 * added full support for Java Persistence API 1.0 (JPA), in package "orm.jpa"
+
+Package org.springframework.samples
+* renamed PetClinic's "Entity" base class to "BaseEntity", to avoid name collision with the JPA Entity annotation
+
+Package org.springframework.scheduling
+* removed special Quartz 1.3 check from SchedulerFactoryBean: requires Quartz 1.4 or higher now
+* added support for Quartz 1.5's merged JobDataMap to QuartzJobBean, falling back to plain JobDataMap on Quartz 1.4
 
 Package org.springframework.transaction
 * fixed AbstractPlatformTransactionManager to serialize all relevant state
@@ -58,6 +67,7 @@ Package org.springframework.web
 * refactored RequestHandledEvent into RequestHandledEvent base class and ServletRequestHandledEvent subclass
 * renamed FrameworkPortlet's RequestHandledEvent to PortletRequestHandledEvent, a subclass of RequestHandledEvent
 * PortletBean ignores init-params that do not match bean properties, analogous to HttpServletBean
+* turned AbstractCommandController's and AbstractFormController's "handleRequestInternal" methods non-final
 * reworked MultiActionController's "bind" and "createBinder" to work on HttpServletRequest instead of ServletRequest
 * deprecated MultiActionController's "initBinder(ServletRequest...)" in favor of "initBinder(HttpServletRequest...)"
 * added protected accessors for UrlBasedViewResolver's bean properties, allowing subclasses to access the settings
