@@ -55,6 +55,9 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 	}
 
 	public void testStartupWithSuppliedServer() throws Exception {
+		//Added a brief snooze here - seems to fix occasional 
+		//java.net.BindException: Address already in use errors
+		Thread.sleep(1); 
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			// to avoid NoClassDefFoundError for JSSE
 			return;
@@ -73,6 +76,9 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 	}
 
 	public void testRegisterWithMBeanServer() throws Exception {
+		//Added a brief snooze here - seems to fix occasional 
+		//java.net.BindException: Address already in use errors
+		Thread.sleep(1); 
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
 		bean.setObjectName(OBJECT_NAME);
 		bean.afterPropertiesSet();
