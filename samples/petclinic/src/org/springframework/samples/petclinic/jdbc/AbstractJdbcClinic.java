@@ -19,7 +19,7 @@ import org.springframework.jdbc.object.MappingSqlQuery;
 import org.springframework.jdbc.object.SqlUpdate;
 import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.samples.petclinic.Clinic;
-import org.springframework.samples.petclinic.Entity;
+import org.springframework.samples.petclinic.BaseEntity;
 import org.springframework.samples.petclinic.Owner;
 import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.PetType;
@@ -173,15 +173,15 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 
 	/**
-	 * Method maps a List of Entity objects keyed to their ids.
-	 * @param list List containing Entity objects
-	 * @return Map containing Entity objects
+	 * Method maps a List of BaseEntity objects keyed to their ids.
+	 * @param list List containing BaseEntity objects
+	 * @return Map containing BaseEntity objects
 	 */
 	protected final Map mapEntityList(List list) {
 		Map map = new HashMap();
 		Iterator iterator = list.iterator();
 		while (iterator.hasNext()) {
-			Entity entity = (Entity) iterator.next();
+			BaseEntity entity = (BaseEntity) iterator.next();
 			map.put(entity.getId(), entity);
 		}
 		return map;
@@ -235,7 +235,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	 * @param entity the entity object to retrieved the id for
 	 * @see #getIdentityQuery
 	 */
-	protected void retrieveIdentity(Entity entity) {
+	protected void retrieveIdentity(BaseEntity entity) {
 		entity.setId(new Integer(getJdbcTemplate().queryForInt(getIdentityQuery())));
 	}
 

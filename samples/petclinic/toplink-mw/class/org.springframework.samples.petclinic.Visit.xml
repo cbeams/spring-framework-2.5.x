@@ -2,7 +2,7 @@
 <class>
    <name>org.springframework.samples.petclinic.Visit</name>
    <modifier>1</modifier>
-   <superclass>org.springframework.samples.petclinic.Entity</superclass>
+   <superclass>org.springframework.samples.petclinic.BaseEntity</superclass>
    <attributes>
       <class-attribute>
          <name>date</name>

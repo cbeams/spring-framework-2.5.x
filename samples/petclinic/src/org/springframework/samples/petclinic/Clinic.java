@@ -56,7 +56,7 @@ public interface Clinic {
 	 * Save an <code>Owner</code> to the datastore,
 	 * either inserting or updating it.
 	 * @param owner the <code>Owner</code> to save
-	 * @see Entity#isNew
+	 * @see BaseEntity#isNew
 	 */
 	void storeOwner(Owner owner) throws DataAccessException;
 
@@ -64,7 +64,7 @@ public interface Clinic {
 	 * Save a <code>Pet</code> to the datastore,
 	 * either inserting or updating it.
 	 * @param pet the <code>Pet</code> to save
-	 * @see Entity#isNew
+	 * @see BaseEntity#isNew
 	 */
 	void storePet(Pet pet) throws DataAccessException;
 
@@ -72,7 +72,7 @@ public interface Clinic {
 	 * Save a <code>Visit</code> to the datastore,
 	 * either inserting or updating it.
 	 * @param visit the <code>Visit</code> to save
-	 * @see Entity#isNew
+	 * @see BaseEntity#isNew
 	 */
 	void storeVisit(Visit visit) throws DataAccessException;
 

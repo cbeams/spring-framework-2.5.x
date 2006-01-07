@@ -42,13 +42,13 @@
          <read-only>false</read-only>
          <get-method-handle>
             <method-handle>
-               <method-declaring-type>org.springframework.samples.petclinic.Entity</method-declaring-type>
+               <method-declaring-type>org.springframework.samples.petclinic.BaseEntity</method-declaring-type>
                <method-signature>getId()</method-signature>
             </method-handle>
          </get-method-handle>
          <set-method-handle>
             <method-handle>
-               <method-declaring-type>org.springframework.samples.petclinic.Entity</method-declaring-type>
+               <method-declaring-type>org.springframework.samples.petclinic.BaseEntity</method-declaring-type>
                <method-signature>setId(int)</method-signature>
             </method-handle>
          </set-method-handle>

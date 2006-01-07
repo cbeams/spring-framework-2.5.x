@@ -1,6 +1,6 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <class>
-   <name>org.springframework.samples.petclinic.Entity</name>
+   <name>org.springframework.samples.petclinic.BaseEntity</name>
    <modifier>1</modifier>
    <superclass>java.lang.Object</superclass>
    <attributes>
