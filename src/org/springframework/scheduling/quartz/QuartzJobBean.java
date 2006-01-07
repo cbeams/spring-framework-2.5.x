@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,10 @@ import org.springframework.beans.MutablePropertyValues;
  * i.e. a method "setMyParam(int)". This will also work for complex
  * types like business objects etc.
  *
+ * <p>This version of QuartzJobBean will automatically use the merged
+ * JobDataMap (from Trigger and JobDetail) if running on Quartz 1.5,
+ * falling back to the plain JobDetail JobDataMap on Quartz 1.4.
+ *
  * @author Juergen Hoeller
  * @since 18.02.2004
  * @see org.quartz.JobDetail#getJobDataMap
@@ -46,6 +50,21 @@ import org.springframework.beans.MutablePropertyValues;
  * @see SchedulerFactoryBean#setSchedulerContextAsMap
  */
 public abstract class QuartzJobBean implements Job {
+
+	private static boolean getMergedJobDataMapAvailable;
+
+	static {
+		// Determine whether the Quartz 1.5 JobExecutionContext.getMergedJobDataMap()
+		// method is available.
+		try {
+			JobExecutionContext.class.getMethod("getMergedJobDataMap", new Class[0]);
+			getMergedJobDataMapAvailable = true;
+		}
+		catch (NoSuchMethodException ex) {
+			getMergedJobDataMapAvailable = false;
+		}
+	}
+
 
 	/**
 	 * This implementation applies the passed-in job data map as bean
@@ -57,7 +76,12 @@ public abstract class QuartzJobBean implements Job {
 			BeanWrapper bw = new BeanWrapperImpl(this);
 			MutablePropertyValues pvs = new MutablePropertyValues();
 			pvs.addPropertyValues(context.getScheduler().getContext());
-			pvs.addPropertyValues(context.getJobDetail().getJobDataMap());
+			if (getMergedJobDataMapAvailable) {
+				pvs.addPropertyValues(context.getMergedJobDataMap());
+			}
+			else {
+				pvs.addPropertyValues(context.getJobDetail().getJobDataMap());
+			}
 			bw.setPropertyValues(pvs, true);
 		}
 		catch (SchedulerException ex) {
