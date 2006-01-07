@@ -44,7 +44,8 @@ public class ResourceBundleViewResolverTests extends TestCase {
 	private ResourceBundleViewResolver rb;
 	
 	private StaticWebApplicationContext wac;
-	
+
+
 	public ResourceBundleViewResolverTests() {
 		rb = new ResourceBundleViewResolver();
 		rb.setBasename(PROPS_FILE);
@@ -66,6 +67,7 @@ public class ResourceBundleViewResolverTests extends TestCase {
 	protected boolean getCache() {
 		return true;
 	}
+
 
 	public void testParentsAreAbstract() throws Exception {
 		try {
