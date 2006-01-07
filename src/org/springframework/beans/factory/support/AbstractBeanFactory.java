@@ -192,24 +192,24 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		}
 
 		else {
-			// Check if bean definition exists in this factory.
-			RootBeanDefinition mergedBeanDefinition = null;
-			try {
-				mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
-			}
-			catch (NoSuchBeanDefinitionException ex) {
+			// Efficiently check whether bean definition exists in this factory.
+			if (this.parentBeanFactory != null && !containsBeanDefinition(beanName)) {
 				// Not found -> check parent.
 				if (this.parentBeanFactory instanceof AbstractBeanFactory) {
 					// Delegation to parent with args only possible for AbstractBeanFactory.
 					return ((AbstractBeanFactory) this.parentBeanFactory).getBean(name, requiredType, args);
 				}
-				else if (this.parentBeanFactory != null && args == null) {
+				else if (args == null) {
 					// No args -> delegate to standard getBean method.
 					return this.parentBeanFactory.getBean(name, requiredType);
 				}
-				throw ex;
+				else {
+					throw new NoSuchBeanDefinitionException(beanName,
+							"Cannot delegate to parent BeanFactory because it does not supported passed-in arguments");
+				}
 			}
 
+			RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
 			checkMergedBeanDefinition(mergedBeanDefinition, beanName, requiredType, args);
 
 			// Create bean instance.
@@ -266,41 +266,41 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
-		try {
-			Class beanClass = null;
-			boolean singleton = true;
+		Class beanClass = null;
+		boolean singleton = true;
 
-			Object beanInstance = null;
-			synchronized (this.singletonCache) {
-				beanInstance = this.singletonCache.get(beanName);
-			}
-			if (beanInstance != null && beanInstance != CURRENTLY_IN_CREATION) {
-				beanClass = beanInstance.getClass();
-				singleton = true;
-			}
-			else {
-				RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
-				if (bd.hasBeanClass()) {
-					beanClass = bd.getBeanClass();
-				}
-				singleton = bd.isSingleton();
-			}
-
-			// In case of FactoryBean, return singleton status of created object if not a dereference.
-			if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass) &&
-					!isFactoryDereference(name)) {
-				FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
-				return factoryBean.isSingleton();
-			}
-			return singleton;
+		Object beanInstance = null;
+		synchronized (this.singletonCache) {
+			beanInstance = this.singletonCache.get(beanName);
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Not found -> check parent.
-			if (this.parentBeanFactory != null) {
+
+		if (beanInstance != null && beanInstance != CURRENTLY_IN_CREATION) {
+			beanClass = beanInstance.getClass();
+			singleton = true;
+		}
+
+		else {
+			// No singleton instance found -> check bean definition.
+			if (this.parentBeanFactory != null && !containsBeanDefinition(beanName)) {
+				// No bean definition found in this factory -> delegate to parent.
 				return this.parentBeanFactory.isSingleton(name);
 			}
-			throw ex;
+
+			RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+			if (bd.hasBeanClass()) {
+				beanClass = bd.getBeanClass();
+			}
+			singleton = bd.isSingleton();
 		}
+
+		// In case of FactoryBean, return singleton status of created object if not a dereference.
+		if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass) &&
+				!isFactoryDereference(name)) {
+			FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
+			return factoryBean.isSingleton();
+		}
+
+		return singleton;
 	}
 
 	public Class getType(String name) throws NoSuchBeanDefinitionException {
@@ -316,12 +316,18 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			if (beanInstance == CURRENTLY_IN_CREATION) {
 				throw new BeanCurrentlyInCreationException(beanName);
 			}
+
 			if (beanInstance != null) {
 				beanClass = beanInstance.getClass();
 			}
 
 			else {
-				// OK, let's assume it's a bean definition.
+				// No singleton instance found -> check bean definition.
+				if (this.parentBeanFactory != null && !containsBeanDefinition(beanName)) {
+					// No bean definition found in this factory -> delegate to parent.
+					return this.parentBeanFactory.getType(name);
+				}
+
 				RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
 
 				// Delegate to getTypeForFactoryMethod in case of factory method.
@@ -344,13 +350,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 			return beanClass;
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Not found -> check parent.
-			if (this.parentBeanFactory != null) {
-				return this.parentBeanFactory.getType(name);
-			}
-			throw ex;
-		}
+
 		catch (BeanCreationException ex) {
 			if (ex.contains(BeanCurrentlyInCreationException.class) ||
 					ex.contains(FactoryBeanNotInitializedException.class)) {
@@ -667,15 +667,15 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	protected RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors)
 	    throws BeansException {
-		try {
-			return getMergedBeanDefinition(beanName, getBeanDefinition(transformedBeanName(beanName)));
+
+		// Efficiently check whether bean definition exists in this factory.
+		if (includingAncestors && !containsBeanDefinition(beanName) &&
+				this.parentBeanFactory instanceof AbstractBeanFactory) {
+			return ((AbstractBeanFactory) this.parentBeanFactory).getMergedBeanDefinition(beanName, true);
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			if (includingAncestors && getParentBeanFactory() instanceof AbstractBeanFactory) {
-				return ((AbstractBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName, true);
-			}
-			throw ex;
-		}
+
+		// Resolve merged bean definition locally.
+		return getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
 	}
 
 	/**
@@ -703,8 +703,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 					pbd = getMergedBeanDefinition(cbd.getParentName(), true);
 				}
 				else {
-					if (getParentBeanFactory() instanceof AbstractBeanFactory) {
-						AbstractBeanFactory parentFactory = (AbstractBeanFactory) getParentBeanFactory();
+					if (this.parentBeanFactory instanceof AbstractBeanFactory) {
+						AbstractBeanFactory parentFactory = (AbstractBeanFactory) this.parentBeanFactory;
 						pbd = parentFactory.getMergedBeanDefinition(cbd.getParentName(), true);
 					}
 					else {
@@ -839,28 +839,28 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	public boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
-		try {
-			Object beanInstance = null;
-			synchronized (this.singletonCache) {
-				beanInstance = this.singletonCache.get(beanName);
-			}
-			if (beanInstance == CURRENTLY_IN_CREATION) {
-				throw new BeanCurrentlyInCreationException(beanName);
-			}
-			if (beanInstance != null) {
-				return (beanInstance instanceof FactoryBean);
-			}
-			else {
-				RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
-				return (bd.hasBeanClass() && FactoryBean.class.equals(bd.getBeanClass()));
-			}
+		Object beanInstance = null;
+
+		synchronized (this.singletonCache) {
+			beanInstance = this.singletonCache.get(beanName);
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Not found -> check parent.
-			if (this.parentBeanFactory != null) {
-				return this.parentBeanFactory.isSingleton(name);
+		if (beanInstance == CURRENTLY_IN_CREATION) {
+			throw new BeanCurrentlyInCreationException(beanName);
+		}
+
+		if (beanInstance != null) {
+			return (beanInstance instanceof FactoryBean);
+		}
+
+		else {
+			// No singleton instance found -> check bean definition.
+			if (!containsBeanDefinition(beanName) && this.parentBeanFactory instanceof AbstractBeanFactory) {
+				// No bean definition found in this factory -> delegate to parent.
+				return ((AbstractBeanFactory) this.parentBeanFactory).isFactoryBean(name);
 			}
-			throw ex;
+
+			RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+			return (bd.hasBeanClass() && FactoryBean.class.equals(bd.getBeanClass()));
 		}
 	}
 
