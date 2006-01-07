@@ -18,6 +18,7 @@ package org.springframework.transaction.support;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -81,7 +82,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
  * @see org.springframework.orm.jdo.JdoTransactionManager
  */
-public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager {
+public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager, Serializable {
 
 	/**
 	 * Always activate transaction synchronization, even for "empty" transactions
@@ -759,25 +760,6 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 
 	//---------------------------------------------------------------------
-	// Serialization support
-	//---------------------------------------------------------------------
-
-	private void readObject(ObjectInputStream ois) throws IOException {
-		// Rely on default serialization, just initialize state after deserialization.
-		try {
-			ois.defaultReadObject();
-		}
-		catch (ClassNotFoundException ex) {
-			throw new IOException("Failed to deserialize [" + getClass().getName() + "] - " +
-					"check that Spring transaction libraries are available on the client side: " + ex.getMessage());
-		}
-
-		// Initialize transient fields.
-		this.logger = LogFactory.getLog(getClass());
-	}
-
-
-	//---------------------------------------------------------------------
 	// Template methods to be implemented in subclasses
 	//---------------------------------------------------------------------
 
@@ -1006,6 +988,25 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @param transaction transaction object returned by doGetTransaction
 	 */
 	protected void doCleanupAfterCompletion(Object transaction) {
+	}
+
+
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	private void readObject(ObjectInputStream ois) throws IOException {
+		// Rely on default serialization, just initialize state after deserialization.
+		try {
+			ois.defaultReadObject();
+		}
+		catch (ClassNotFoundException ex) {
+			throw new IOException("Failed to deserialize [" + getClass().getName() + "] - " +
+					"check that Spring transaction libraries are available on the client side: " + ex.getMessage());
+		}
+
+		// Initialize transient fields.
+		this.logger = LogFactory.getLog(getClass());
 	}
 
 

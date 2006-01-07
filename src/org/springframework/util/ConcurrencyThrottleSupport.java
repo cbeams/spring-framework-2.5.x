@@ -18,6 +18,7 @@ package org.springframework.util;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,7 +43,7 @@ import org.apache.commons.logging.LogFactory;
  * @see org.springframework.aop.interceptor.ConcurrencyThrottleInterceptor
  * @see java.io.Serializable
  */
-public abstract class ConcurrencyThrottleSupport {
+public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 	/** Transient to optimize serialization */
 	protected transient Log logger = LogFactory.getLog(getClass());

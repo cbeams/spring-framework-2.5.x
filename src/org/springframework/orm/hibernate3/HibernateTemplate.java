@@ -33,6 +33,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
+import org.hibernate.ReplicationMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
@@ -600,6 +601,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public void lock(final String entityName, final Object entity, final LockMode lockMode)
 			throws DataAccessException {
+
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				session.lock(entityName, entity, lockMode);
@@ -638,6 +640,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public void save(final String entityName, final Object entity, final Serializable id)
 			throws DataAccessException {
+
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
@@ -710,6 +713,30 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				for (Iterator it = entities.iterator(); it.hasNext();) {
 					session.saveOrUpdate(it.next());
 				}
+				return null;
+			}
+		}, true);
+	}
+
+	public void replicate(final Object entity, final ReplicationMode replicationMode)
+			throws DataAccessException {
+
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
+				session.replicate(entity, replicationMode);
+				return null;
+			}
+		}, true);
+	}
+
+	public void replicate(final String entityName, final Object entity, final ReplicationMode replicationMode)
+			throws DataAccessException {
+
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
+				session.replicate(entityName, entity, replicationMode);
 				return null;
 			}
 		}, true);

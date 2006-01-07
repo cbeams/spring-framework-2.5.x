@@ -236,7 +236,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see #showNewForm
 	 * @see #processFormSubmission
 	 */
-	protected final ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
 		// Form submission or new form to show?

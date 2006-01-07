@@ -20,7 +20,9 @@ import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
@@ -36,10 +38,24 @@ public class ConcurrencyThrottleInterceptorTests extends TestCase {
 	public static final int NR_OF_THREADS = 100;
 
 	public static final int NR_OF_ITERATIONS = 1000;
-	
+
+
 	public void testSerializable() throws Exception {
+		DerivedTestBean tb = new DerivedTestBean();
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setInterfaces(new Class[] {ITestBean.class});
 		ConcurrencyThrottleInterceptor cti = new ConcurrencyThrottleInterceptor();
-		SerializationTestUtils.testSerialization(cti);
+		proxyFactory.addAdvice(cti);
+		proxyFactory.setTarget(tb);
+		ITestBean proxy = (ITestBean) proxyFactory.getProxy();
+		proxy.getAge();
+
+		ITestBean serializedProxy = (ITestBean) SerializationTestUtils.serializeAndDeserialize(proxy);
+		Advised advised = (Advised) serializedProxy;
+		ConcurrencyThrottleInterceptor serializedCti =
+				(ConcurrencyThrottleInterceptor) advised.getAdvisors()[0].getAdvice();
+		assertEquals(cti.getConcurrencyLimit(), serializedCti.getConcurrencyLimit());
+		serializedProxy.getAge();
 	}
 
 	public void testMultipleThreadsWithLimit1() {

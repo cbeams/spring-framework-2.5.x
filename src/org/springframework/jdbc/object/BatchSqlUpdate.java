@@ -106,7 +106,8 @@ public class BatchSqlUpdate extends SqlUpdate {
 	 * @see java.sql.Types
 	 */
 	public BatchSqlUpdate(DataSource ds, String sql, int[] types, int batchSize) {
-		super(ds, sql, types, batchSize);
+		super(ds, sql, types);
+		setBatchSize(batchSize);
 	}
 
 

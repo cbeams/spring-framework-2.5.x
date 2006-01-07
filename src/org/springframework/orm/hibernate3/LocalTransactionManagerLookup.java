@@ -46,6 +46,7 @@ public class LocalTransactionManagerLookup implements TransactionManagerLookup {
 
 	private final TransactionManager transactionManager;
 
+
 	public LocalTransactionManagerLookup() {
 		TransactionManager tm = LocalSessionFactoryBean.getConfigTimeTransactionManager();
 		// absolutely needs thread-bound DataSource to initialize

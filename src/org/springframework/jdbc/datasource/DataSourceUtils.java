@@ -146,7 +146,7 @@ public abstract class DataSourceUtils {
 				}
 				con.setReadOnly(true);
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				// SQLException or UnsupportedOperationException
 				// -> ignore, it's just a hint anyway.
 				logger.debug("Could not set JDBC Connection read-only", ex);
@@ -194,7 +194,7 @@ public abstract class DataSourceUtils {
 				con.setReadOnly(false);
 			}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			logger.debug("Could not reset JDBC Connection after transaction", ex);
 		}
 	}

@@ -71,9 +71,11 @@ public abstract class AbstractCommandController extends BaseCommandController {
 		setCommandClass(commandClass);
 		setCommandName(commandName);
 	}
-	
-	protected final ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
+
+
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
+
 		Object command = getCommand(request);
 		ServletRequestDataBinder binder = bindAndValidate(request, command);
 		return handle(request, response, command, binder.getErrors());

@@ -38,6 +38,7 @@ import org.hibernate.ObjectNotFoundException;
 import org.hibernate.PersistentObjectException;
 import org.hibernate.Query;
 import org.hibernate.QueryException;
+import org.hibernate.ReplicationMode;
 import org.hibernate.SessionFactory;
 import org.hibernate.StaleObjectStateException;
 import org.hibernate.StaleStateException;
@@ -1358,6 +1359,48 @@ public class HibernateTemplateTests extends TestCase {
 		tbs.add(tb1);
 		tbs.add(tb2);
 		ht.saveOrUpdateAll(tbs);
+	}
+
+	public void testReplicate() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
+		session.replicate(tb, ReplicationMode.LATEST_VERSION);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.replicate(tb, ReplicationMode.LATEST_VERSION);
+	}
+
+	public void testReplicateWithEntityName() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
+		session.replicate("myEntity", tb, ReplicationMode.LATEST_VERSION);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.replicate("myEntity", tb, ReplicationMode.LATEST_VERSION);
 	}
 
 	public void testPersist() throws HibernateException {

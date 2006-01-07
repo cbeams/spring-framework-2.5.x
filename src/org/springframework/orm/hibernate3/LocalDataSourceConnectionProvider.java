@@ -41,6 +41,7 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 
 	private DataSource dataSourceToUse;
 
+
 	public void configure(Properties props) throws HibernateException {
 		this.dataSource = LocalSessionFactoryBean.getConfigTimeDataSource();
 		// absolutely needs thread-bound DataSource to initialize

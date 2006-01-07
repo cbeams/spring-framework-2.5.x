@@ -38,6 +38,7 @@ import net.sf.hibernate.ObjectNotFoundException;
 import net.sf.hibernate.PersistentObjectException;
 import net.sf.hibernate.Query;
 import net.sf.hibernate.QueryException;
+import net.sf.hibernate.ReplicationMode;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.StaleObjectStateException;
@@ -1055,6 +1056,27 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.saveOrUpdateCopy(tb);
+	}
+
+	public void testReplicate() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
+		session.replicate(tb, ReplicationMode.LATEST_VERSION);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.replicate(tb, ReplicationMode.LATEST_VERSION);
 	}
 
 	public void testDelete() throws HibernateException {
