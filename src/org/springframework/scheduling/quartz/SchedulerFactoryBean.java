@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package org.springframework.scheduling.quartz;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -59,7 +57,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * FactoryBean that sets up a Quartz Scheduler and exposes it for bean references.
@@ -88,8 +85,7 @@ import org.springframework.util.ReflectionUtils;
  * automatically apply to Scheduler operations performed within those scopes.
  * Alternatively, define a TransactionProxyFactoryBean for the Scheduler itself.
  *
- * <p>SchedulerFactoryBean is fully compatible with both Quartz 1.3
- * and 1.4 (through special checks where necessary).
+ * <p>This version of SchedulerFactoryBean requires Quartz 1.4 or higher.
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
@@ -739,7 +735,7 @@ public class SchedulerFactoryBean
 				for (Iterator it = this.calendars.keySet().iterator(); it.hasNext();) {
 					String calendarName = (String) it.next();
 					Calendar calendar = (Calendar) this.calendars.get(calendarName);
-					addCalendarToScheduler(calendarName, calendar);
+					this.scheduler.addCalendar(calendarName, calendar, true, true);
 				}
 			}
 
@@ -806,42 +802,6 @@ public class SchedulerFactoryBean
 		}
 		else {
 			return false;
-		}
-	}
-
-	/**
-	 * Add the given calendar to the Scheduler, checking for the
-	 * corresponding Quartz 1.4 or Quartz 1.3 method
-	 * (which differ in 1.4's additional "updateTriggers" flag).
-	 * @param calendarName the name of the calendar
-	 * @param calendar the Calendar object
-	 * @see org.quartz.Scheduler#addCalendar
-	 */
-	private void addCalendarToScheduler(String calendarName, Calendar calendar) throws SchedulerException {
-		try {
-			try {
-				// Try Quartz 1.4 (with "updateTriggers" flag).
-				Method addCalendarMethod = this.scheduler.getClass().getMethod(
-						"addCalendar", new Class[] {String.class, Calendar.class, boolean.class, boolean.class});
-				addCalendarMethod.invoke(
-						this.scheduler, new Object[] {calendarName, calendar, Boolean.TRUE, Boolean.TRUE});
-			}
-			catch (NoSuchMethodException ex) {
-				// Try Quartz 1.3 (without "updateTriggers" flag).
-				Method addCalendarMethod = this.scheduler.getClass().getMethod(
-						"addCalendar", new Class[] {String.class, Calendar.class, boolean.class});
-				addCalendarMethod.invoke(
-						this.scheduler, new Object[] {calendarName, calendar, Boolean.TRUE});
-			}
-		}
-		catch (InvocationTargetException ex) {
-			if (ex.getTargetException() instanceof SchedulerException) {
-				throw (SchedulerException) ex.getTargetException();
-			}
-			ReflectionUtils.handleInvocationTargetException(ex);
-		}
-		catch (Exception ex) {
-			ReflectionUtils.handleReflectionException(ex);
 		}
 	}
 
