@@ -3,8 +3,8 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.7 (9.1.2006)
------------------------------------
+Changes in version 1.2.7 (16.1.2006)
+------------------------------------
 
 Package org.springframework.aop
 * refined ThreadLocalTargetSource's synchronization to guarantee thread-safe destruction on shutdown
@@ -12,6 +12,7 @@ Package org.springframework.aop
 Package org.springframework.beans
 * fixed BeanWrapperImpl to pass its "extractOldValueForEditor" setting on to nested BeanWrappers
 * refined BeanWrapperImpl to perform the accessible checking for read/write methods before every invocation
+* fixed PropertyAccessorUtils's "getLastNestedPropertySeparatorIndex" to correctly handle property paths without dot
 * added overloaded constructor to StringArrayPropertyEditor, allowing to specify a custom separator for String splitting
 * fixed AbstractBeanFactory to allow child bean definitions to refer to a parent via its alias name
 * DefaultListableBeanFactory is able to call non-public factory methods as well
@@ -20,9 +21,11 @@ Package org.springframework.jdbc
 * added further error codes for Oracle and MySQL to default "sql-error-codes.xml" file
 * OracleLobHandler lazily initializes Oracle driver classes, always loading via the actual Connection's class loader
 * fixed DataSourceUtils to correctly re-suspend a Connection even if the Connection hasn't been used since resume
+* DataSourceTransactionManager only attempts to release Connection if not pre-bound (to avoid inappropriate log message)
 * fixed JdbcTemplate to extract the JDBC Connection for CallableStatementCreators if a NativeJdbcExtractor has been set
 * factored out protected "getColumnMapRowMapper" and "getSingleColumnRowMapper" hooks within JdbcTemplate
 * SingleColumnRowMapper explicitly calls "ResultSet.getBigDecimal()" if the required type is BigDecimal
+* fixed BatchSqlUpdate's constructor that takes a "batchSize" argument to correctly interpret it as batch size
 * added "trackRowsAffected" property to BatchSqlUpdate, allowing to turn off the row counts list to save memory
 
 Package org.springframework.mock
@@ -34,15 +37,20 @@ Package org.springframework.orm
 * JdoTransactionManager does explicit "isActive()" check before attempting a rollback, to avoid illegal state exception
 * Hibernate LocalSessionFactoryBean exposes its DataSource on "SessionFactory.close()", for potential schema export
 * added "configLocations" property to LocalSessionFactoryBean for Hibernate3, allowing to load multiple config files
+* added "replicate" convenience methods to HibernateTemplate for both Hibernate2 and Hibernate3
 
 Package org.springframework.remoting
 * RmiServiceExporter performs explicit RMI unexport if binding to the registry failed, to avoid dangling exports
 * JaxRpcPortClientInterceptor/ProxyFactoryBean apply given JaxRpcServicePostProcessors to existing JAX-RPC Service too
 
+Package org.springframework.scheduling
+* added support for Quartz 1.5's merged JobDataMap to QuartzJobBean, falling back to plain JobDataMap on Quartz 1.4
+
 Package org.springframework.test
 * added overloaded constructors that take a JUnit TestCase name to all of the provided TestCase subclasses
 
 Package org.springframework.transaction
+* fixed AbstractPlatformTransactionManager to serialize all relevant state
 * JtaTransactionManager only invokes rollback if transaction is still active (some JTA providers eagerly terminate)
 
 Package org.springframework.ui
@@ -55,11 +63,13 @@ Package org.springframework.util
 * fixed AntPathMatcher to correctly treat "*" right after separator, i.e. to accept path "/test/" for pattern "/test/*"
 * WeakReferenceMonitor uses a daemon thread, to avoid a hanging thread even if weak references have not been released
 * refined StopWatch to not add new lines for "shortSummary()" but rather only for "prettyPrint()"
+* fixed ConcurrencyThrottleSupport to serialize all relevant state
 
 Package org.springframework.web
 * "contextConfigLocation" params in "web.xml" support "${...}" style placeholders for system properties
 * added "currentFormObject" template method to AbstractFormController, for post-processing of a session form object
 * FixedLocaleResolver returns the JVM's default Locale if no explicit default Locale specified
+* turned AbstractCommandController's and AbstractFormController's "handleRequestInternal" methods non-final
 * added protected accessors for UrlBasedViewResolver's bean properties, allowing subclasses to access the settings
 * added "argumentSeparator" property to MessageTag, allowing to specify a custom separator instead of the default comma
 * VelocityView converts Velocity's MethodInvocationException to a Spring NestedServletException with original root cause
