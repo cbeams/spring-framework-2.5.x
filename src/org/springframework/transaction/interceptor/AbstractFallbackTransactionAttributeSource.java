@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,15 +51,22 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	
 	/**
 	 * Canonical value held in cache to indicate no transaction attribute was
-	 * found for this method, and we don't need to look again
+	 * found for this method, and we don't need to look again.
 	 */
 	private final static Object NULL_TRANSACTION_ATTRIBUTE = new Object();
 	
 	
+	/**
+	 * Logger available to subclasses.
+	 * <p>As this base class is not marked Serializable, the logger will be recreated
+	 * after serialization - provided that the concrete subclass is Serializable.
+	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * Cache of TransactionAttributes, keyed by Method and target class
+	 * Cache of TransactionAttributes, keyed by Method and target class.
+	 * <p>As this base class is not marked Serializable, the cache will be recreated
+	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
 	private Map cache = new HashMap();
 
