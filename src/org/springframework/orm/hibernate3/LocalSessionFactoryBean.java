@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.lob.LobHandler;
+import org.springframework.util.StringUtils;
 
 /**
  * FactoryBean that creates a local Hibernate SessionFactory instance.
@@ -503,16 +504,18 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	/**
 	 * Specify the cache strategies for entities (persistent classes or named entities).
-	 * This configuration setting corresponds to the &lt;class-cache> entry
+	 * This configuration setting corresponds to the &lt;class-cache&gt; entry
 	 * in the "hibernate.cfg.xml" configuration format.
 	 * <p>For example:
 	 * <pre>
-	 * &lt;property name="entityCacheStrategies">
-	 *   &lt;props>
-	 *     &lt;prop key="com.mycompany.Customer">read-write</prop>
-	 *     &lt;prop key="com.mycompany.Product">read-only</prop>
-	 *   &lt;/props>
-	 * &lt;/property></pre>
+	 * &lt;property name="entityCacheStrategies"&gt;
+	 *   &lt;props&gt;
+	 *     &lt;prop key="com.mycompany.Customer"&gt;read-write&lt;/prop&gt;
+	 *     &lt;prop key="com.mycompany.Product"&gt;read-only,myRegion&lt;/prop&gt;
+	 *   &lt;/props&gt;
+	 * &lt;/property&gt;</pre>
+	 * Note that appending a cache region name (with a comma separator) is only
+	 * supported on Hibernate 3.1, where this functionality is publically available.
 	 * @param entityCacheStrategies properties that define entity cache strategies,
 	 * with class names as keys and cache concurrency strategies as values
 	 * @see org.hibernate.cfg.Configuration#setCacheConcurrencyStrategy(String, String)
@@ -523,15 +526,18 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	/**
 	 * Specify the cache strategies for persistent collections (with specific roles).
-	 * This configuration setting corresponds to the &lt;collection-cache> entry
+	 * This configuration setting corresponds to the &lt;collection-cache&gt; entry
 	 * in the "hibernate.cfg.xml" configuration format.
 	 * <p>For example:
 	 * <pre>
-	 * &lt;property name="collectionCacheStrategies">
-	 *   &lt;props>
-	 *     &lt;prop key="com.mycompany.Order.items">read-only</prop>
-	 *   &lt;/props>
-	 * &lt;/property></pre>
+	 * &lt;property name="collectionCacheStrategies"&gt;
+	 *   &lt;props&gt;
+	 *     &lt;prop key="com.mycompany.Order.items">read-write&lt;/prop&gt;
+	 *     &lt;prop key="com.mycompany.Product.categories"&gt;read-only,myRegion&lt;/prop&gt;
+	 *   &lt;/props&gt;
+	 * &lt;/property&gt;</pre>
+	 * Note that appending a cache region name (with a comma separator) is only
+	 * supported on Hibernate 3.1, where this functionality is publically available.
 	 * @param collectionCacheStrategies properties that define collection cache strategies,
 	 * with collection roles as keys and cache concurrency strategies as values
 	 * @see org.hibernate.cfg.Configuration#setCollectionCacheConcurrencyStrategy(String, String)
@@ -721,7 +727,14 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 				// Register cache strategies for mapped entities.
 				for (Enumeration classNames = this.entityCacheStrategies.propertyNames(); classNames.hasMoreElements();) {
 					String className = (String) classNames.nextElement();
-					config.setCacheConcurrencyStrategy(className, this.entityCacheStrategies.getProperty(className));
+					String[] strategyAndRegion =
+							StringUtils.commaDelimitedListToStringArray(this.entityCacheStrategies.getProperty(className));
+					if (strategyAndRegion.length > 1) {
+						config.setCacheConcurrencyStrategy(className, strategyAndRegion[0], strategyAndRegion[1]);
+					}
+					else if (strategyAndRegion.length > 0) {
+						config.setCacheConcurrencyStrategy(className, strategyAndRegion[0]);
+					}
 				}
 			}
 
@@ -729,8 +742,14 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 				// Register cache strategies for mapped collections.
 				for (Enumeration collRoles = this.collectionCacheStrategies.propertyNames(); collRoles.hasMoreElements();) {
 					String collRole = (String) collRoles.nextElement();
-					config.setCollectionCacheConcurrencyStrategy(
-							collRole, this.collectionCacheStrategies.getProperty(collRole));
+					String[] strategyAndRegion =
+							StringUtils.commaDelimitedListToStringArray(this.collectionCacheStrategies.getProperty(collRole));
+					if (strategyAndRegion.length > 1) {
+						config.setCollectionCacheConcurrencyStrategy(collRole, strategyAndRegion[0], strategyAndRegion[1]);
+					}
+					else if (strategyAndRegion.length > 0) {
+						config.setCollectionCacheConcurrencyStrategy(collRole, strategyAndRegion[0]);
+					}
 				}
 			}
 
@@ -791,6 +810,20 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		}
 	}
 	
+
+	private String[] parseCacheStrategy(Properties strategies, String key) {
+		String strategy = null;
+		String region = null;
+		String attribute = strategies.getProperty(key);
+		String[] tokens = StringUtils.commaDelimitedListToStringArray(attribute);
+		if (tokens.length > 0) {
+			strategy = tokens[0];
+		}
+		if (tokens.length > 1) {
+			region = tokens[1];
+		}
+		return new String[] {strategy, region};
+	}
 
 	/**
 	 * Subclasses can override this method to perform custom initialization

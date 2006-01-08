@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -373,6 +373,39 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		sfb.setEntityCacheStrategies(classCache);
 		Properties collectionCache = new Properties();
 		collectionCache.setProperty("org.springframework.beans.TestBean.friends", "read-only");
+		sfb.setCollectionCacheStrategies(collectionCache);
+		sfb.afterPropertiesSet();
+
+		assertEquals(classCache, registeredClassCache);
+		assertEquals(collectionCache, registeredCollectionCache);
+	}
+
+	public void testLocalSessionFactoryBeanWithCacheStrategiesAndRegions() throws Exception {
+		final Properties registeredClassCache = new Properties();
+		final Properties registeredCollectionCache = new Properties();
+		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
+			protected Configuration newConfiguration() {
+				return new Configuration() {
+					public void setCacheConcurrencyStrategy(String clazz, String concurrencyStrategy, String regionName) {
+						registeredClassCache.setProperty(clazz, concurrencyStrategy + "," + regionName);
+					}
+					public void setCollectionCacheConcurrencyStrategy(String collectionRole, String concurrencyStrategy, String regionName) {
+						registeredCollectionCache.setProperty(collectionRole, concurrencyStrategy + "," + regionName);
+					}
+				};
+			}
+			protected SessionFactory newSessionFactory(Configuration config) {
+				return null;
+			}
+		};
+
+		sfb.setMappingResources(new String[0]);
+		sfb.setDataSource(new DriverManagerDataSource());
+		Properties classCache = new Properties();
+		classCache.setProperty("org.springframework.beans.TestBean", "read-write,myRegion");
+		sfb.setEntityCacheStrategies(classCache);
+		Properties collectionCache = new Properties();
+		collectionCache.setProperty("org.springframework.beans.TestBean.friends", "read-only,myRegion");
 		sfb.setCollectionCacheStrategies(collectionCache);
 		sfb.afterPropertiesSet();
 
