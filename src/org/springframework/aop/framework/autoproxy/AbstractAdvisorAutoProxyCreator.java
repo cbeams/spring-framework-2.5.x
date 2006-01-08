@@ -112,13 +112,13 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	/**
 	 * Extension hook that subclasses can choose to use to additional Advisors,
 	 * given the sorted Advisors obtained to date.
-	 * <br>
-	 * Typically used to add Advisors that expose contextual information required
-	 * by some of the later advisors.
+	 * <p>Typically used to add Advisors that expose contextual information
+	 * required by some of the later advisors.
 	 * @param candidateAdvisors Advisors that have already been identified as
 	 * applying to a given bean
 	 */
 	protected void extendCandidateAdvisors(List candidateAdvisors) {
-		// No default implementation
+		// Empty default implementation.
 	}
+
 }
