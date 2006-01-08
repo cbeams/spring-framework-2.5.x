@@ -17,6 +17,7 @@
 package org.springframework.core.io;
 
 import java.beans.PropertyEditorSupport;
+import java.io.IOException;
 
 import org.springframework.util.SystemPropertyUtils;
 
@@ -74,6 +75,20 @@ public class ResourceEditor extends PropertyEditorSupport {
 	 */
 	protected String resolvePath(String path) {
 		return SystemPropertyUtils.resolvePlaceholders(path);
+	}
+
+
+	public String getAsText() {
+		Resource value = (Resource) getValue();
+		try {
+			// Try to determine URL for resource.
+			return (value != null ? value.getURL().toExternalForm() : "");
+		}
+		catch (IOException ex) {
+			// Couldn't determine resource URL - return null to indicate
+			// that there is no appropriate text representation.
+			return null;
+		}
 	}
 
 }
