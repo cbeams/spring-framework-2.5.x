@@ -28,7 +28,7 @@ public class DataRetrievalFailureException extends DataAccessException {
 
 	/**
 	 * Constructor for DataRetrievalFailureException.
-	 * @param msg message
+	 * @param msg the detail message
 	 */
 	public DataRetrievalFailureException(String msg) {
 		super(msg);
@@ -36,7 +36,7 @@ public class DataRetrievalFailureException extends DataAccessException {
 
 	/**
 	 * Constructor for DataRetrievalFailureException.
-	 * @param msg message
+	 * @param msg the detail message
 	 * @param ex root cause from data access API in use
 	 */
 	public DataRetrievalFailureException(String msg, Throwable ex) {

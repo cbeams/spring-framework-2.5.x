@@ -27,7 +27,7 @@ public class TransactionUsageException extends TransactionException {
 
 	/**
 	 * Constructor for TransactionUsageException.
-	 * @param msg message
+	 * @param msg the detail message
 	 */
 	public TransactionUsageException(String msg) {
 		super(msg);
@@ -35,7 +35,7 @@ public class TransactionUsageException extends TransactionException {
 
 	/**
 	 * Constructor for TransactionUsageException.
-	 * @param msg message
+	 * @param msg the detail message
 	 * @param ex root cause from transaction API in use
 	 */
 	public TransactionUsageException(String msg, Throwable ex) {

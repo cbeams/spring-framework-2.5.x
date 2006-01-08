@@ -26,7 +26,7 @@ public class MailAuthenticationException extends MailException {
 
 	/**
 	 * Constructor for MailAuthenticationException.
-	 * @param msg message
+	 * @param msg the detail message
 	 */
 	public MailAuthenticationException(String msg) {
 		super(msg);
@@ -34,7 +34,7 @@ public class MailAuthenticationException extends MailException {
 
 	/**
 	 * Constructor for MailAuthenticationException.
-	 * @param msg message
+	 * @param msg the detail message
 	 * @param ex root cause from remoting API in use
 	 */
 	public MailAuthenticationException(String msg, Throwable ex) {

@@ -42,7 +42,7 @@ public class IncorrectResultSizeDataAccessException extends DataRetrievalFailure
 
 	/**
 	 * Constructor for IncorrectResultSizeDataAccessException.
-	 * @param msg message
+	 * @param msg the detail message
 	 * @param expectedSize the expected result size
 	 * @param actualSize the actual result size (or -1 if unknown)
 	 */

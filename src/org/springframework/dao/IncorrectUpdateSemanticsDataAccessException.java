@@ -28,7 +28,7 @@ public class IncorrectUpdateSemanticsDataAccessException extends InvalidDataAcce
 
 	/**
 	 * Constructor for IncorrectUpdateSemanticsDataAccessException.
-	 * @param msg message
+	 * @param msg the detail message
 	 */
 	public IncorrectUpdateSemanticsDataAccessException(String msg) {
 		super(msg);
@@ -36,7 +36,7 @@ public class IncorrectUpdateSemanticsDataAccessException extends InvalidDataAcce
 
 	/**
 	 * Constructor for IncorrectUpdateSemanticsDataAccessException.
-	 * @param msg message
+	 * @param msg the detail message
 	 * @param ex root cause from the underlying API, such as JDBC
 	 */
 	public IncorrectUpdateSemanticsDataAccessException(String msg, Throwable ex) {

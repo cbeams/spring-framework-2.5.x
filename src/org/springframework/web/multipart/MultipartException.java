@@ -34,7 +34,7 @@ public class MultipartException extends NestedServletException {
 
 	/**
 	 * Constructor for MultipartException.
-	 * @param msg message
+	 * @param msg the detail message
 	 */
 	public MultipartException(String msg) {
 		super(msg);
@@ -42,7 +42,7 @@ public class MultipartException extends NestedServletException {
 
 	/**
 	 * Constructor for MultipartException.
-	 * @param msg message
+	 * @param msg the detail message
 	 * @param ex root cause from multipart parsing API in use
 	 */
 	public MultipartException(String msg, Throwable ex) {

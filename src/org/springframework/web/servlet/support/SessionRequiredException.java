@@ -19,13 +19,20 @@ package org.springframework.web.servlet.support;
 import javax.servlet.ServletException;
 
 /**
- * Exception thrown when a web content generator requires a pre-existing session.
+ * Exception thrown when a handler requires a pre-existing session
+ * or specific pre-existing state in the session.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see WebContentGenerator
+ * @see org.springframework.web.servlet.mvc.AbstractFormController#getCommand
  */
 public class SessionRequiredException extends ServletException {
 
+	/**
+	 * Create a new SessionRequiredException.
+	 * @param msg the detail message
+	 */
 	public SessionRequiredException(String msg) {
 		super(msg);
 	}

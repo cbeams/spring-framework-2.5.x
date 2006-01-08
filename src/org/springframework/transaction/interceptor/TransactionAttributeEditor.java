@@ -49,13 +49,13 @@ public class TransactionAttributeEditor extends PropertyEditorSupport {
 	 * Null or the empty string means that the method is non transactional.
 	 * @see java.beans.PropertyEditor#setAsText(java.lang.String)
 	 */
-	public void setAsText(String s) throws IllegalArgumentException {
-		if (s == null || "".equals(s)) {
+	public void setAsText(String text) throws IllegalArgumentException {
+		if (text == null || "".equals(text)) {
 			setValue(null);
 		}
 		else {	
 			// tokenize it with ","
-			String[] tokens = StringUtils.commaDelimitedListToStringArray(s);
+			String[] tokens = StringUtils.commaDelimitedListToStringArray(text);
 			RuleBasedTransactionAttribute attr = new RuleBasedTransactionAttribute();
 
 			for (int i = 0; i < tokens.length; i++) {

@@ -26,7 +26,7 @@ public class MailParseException extends MailException {
 
 	/**
 	 * Constructor for MailParseException.
-	 * @param msg message
+	 * @param msg the detail message
 	 */
 	public MailParseException(String msg) {
 		super(msg);
@@ -34,7 +34,7 @@ public class MailParseException extends MailException {
 
 	/**
 	 * Constructor for MailParseException.
-	 * @param msg message
+	 * @param msg the detail message
 	 * @param ex root cause from remoting API in use
 	 */
 	public MailParseException(String msg, Throwable ex) {

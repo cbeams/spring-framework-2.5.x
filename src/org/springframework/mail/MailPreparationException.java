@@ -29,7 +29,7 @@ public class MailPreparationException extends MailException {
 
 	/**
 	 * Constructor for MailPreparationException.
-	 * @param msg message
+	 * @param msg the detail message
 	 */
 	public MailPreparationException(String msg) {
 		super(msg);
@@ -37,7 +37,7 @@ public class MailPreparationException extends MailException {
 
 	/**
 	 * Constructor for MailPreparationException.
-	 * @param msg message
+	 * @param msg the detail message
 	 * @param ex root cause from remoting API in use
 	 */
 	public MailPreparationException(String msg, Throwable ex) {

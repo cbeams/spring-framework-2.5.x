@@ -28,7 +28,7 @@ public class InvalidIsolationLevelException extends TransactionUsageException {
 
 	/**
 	 * Constructor for InvalidIsolationLevelException.
-	 * @param msg message
+	 * @param msg the detail message
 	 */
 	public InvalidIsolationLevelException(String msg) {
 		super(msg);
