@@ -27,6 +27,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.support.SessionRequiredException;
 
 /**
  * <p>Form controller that autopopulates a form bean from the request.
@@ -241,22 +242,19 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 		// Form submission or new form to show?
 		if (isFormSubmission(request)) {
-
-			// Form submission: in session-form mode, we need to find
-			// the form object in the HTTP session.
-			if (isSessionForm()) {
-				HttpSession session = request.getSession(false);
-				if (session == null || session.getAttribute(getFormSessionAttributeName(request)) == null) {
-					// Cannot submit a session form if no form object is in the session.
-					return handleInvalidSubmit(request, response);
-				}
+			// Fetch form object from HTTP session, bind, validate, process submission.
+			try {
+				Object command = getCommand(request);
+				ServletRequestDataBinder binder = bindAndValidate(request, command);
+				return processFormSubmission(request, response, command, binder.getErrors());
 			}
-
-			// Found form object in HTTP session: fetch form object,
-			// bind, validate, process submission.
-			Object command = getCommand(request);
-			ServletRequestDataBinder binder = bindAndValidate(request, command);
-			return processFormSubmission(request, response, command, binder.getErrors());
+			catch (SessionRequiredException ex) {
+				// Cannot submit a session form if no form object is in the session.
+				if (logger.isDebugEnabled()) {
+					logger.debug("Invalid submit detected: " + ex.getMessage());
+				}
+				return handleInvalidSubmit(request, response);
+			}
 		}
 
 		else {
@@ -403,6 +401,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * form for resubmission.
 	 * @param request current HTTP request
 	 * @return object form to bind onto
+	 * @throws org.springframework.web.servlet.support.SessionRequiredException
+	 * if a session was expected but no active session (or session form object) found
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #formBackingObject
 	 */
@@ -415,12 +415,12 @@ public abstract class AbstractFormController extends BaseCommandController {
 		// Session-form mode: retrieve form object from HTTP session attribute.
 		HttpSession session = request.getSession(false);
 		if (session == null) {
-			throw new ServletException("Must have session when trying to bind (in session-form mode)");
+			throw new SessionRequiredException("Must have session when trying to bind (in session-form mode)");
 		}
 		String formAttrName = getFormSessionAttributeName(request);
 		Object sessionFormObject = session.getAttribute(formAttrName);
 		if (sessionFormObject == null) {
-			throw new ServletException("Form object not found in session (in session-form mode)");
+			throw new SessionRequiredException("Form object not found in session (in session-form mode)");
 		}
 
 		// Remove form object from HTTP session: we might finish the form workflow
