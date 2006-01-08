@@ -632,10 +632,12 @@
 		<javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" windowtitle="Spring Framework"
 						 source="1.3" access="package" author="true" version="true" use="true" defaultexcludes="true">
 			<arg value="-breakiterator"/>
+			<arg value="-J-Xmx128m"/>
+			<arg value="-J-XX:MaxPermSize=128m"/>
 			<arg value="${javadoc.proxyhost}"/>
 			<arg value="${javadoc.proxyport}"/>
 			<doctitle><![CDATA[<h1>Spring Framework</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Copyright (c) 2002-2005 The Spring Framework Project.</i>]]></bottom>
+			<bottom><![CDATA[<i>Copyright (c) 2002-2006 The Spring Framework Project.</i>]]></bottom>
 			<classpath refid="all-libs"/>
 			<packageset dir="${src.dir}">
 				<include name="org/springframework/**"/>
@@ -694,10 +696,12 @@
 		<javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" windowtitle="Spring Framework"
 						 source="1.5" access="package" author="true" version="true" use="true" defaultexcludes="true">
 			<arg value="-breakiterator"/>
+			<arg value="-J-Xmx128m"/>
+			<arg value="-J-XX:MaxPermSize=128m"/>
 			<arg value="${javadoc.proxyhost}"/>
 			<arg value="${javadoc.proxyport}"/>
 			<doctitle><![CDATA[<h1>Spring Framework</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Copyright (c) 2002-2005 The Spring Framework Project.</i>]]></bottom>
+			<bottom><![CDATA[<i>Copyright (c) 2002-2006 The Spring Framework Project.</i>]]></bottom>
 			<classpath refid="all-libs"/>
 			<packageset dir="${src.dir}">
 				<include name="org/springframework/**"/>
@@ -894,7 +898,7 @@
 
 		<junit forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
-			<jvmarg line="-Djava.awt.headless=true -XX:MaxPermSize=128m -Xmx128m"/>
+			<jvmarg line="-Djava.awt.headless=true -Xmx128m -XX:MaxPermSize=128m"/>
 
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
