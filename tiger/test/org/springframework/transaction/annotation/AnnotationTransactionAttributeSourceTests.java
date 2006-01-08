@@ -8,20 +8,50 @@
 package org.springframework.transaction.annotation;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Colin Sampaleanu
+ * @author Juergen Hoeller
  */
 public class AnnotationTransactionAttributeSourceTests extends TestCase {
 	
+	public void testSerializable() throws Exception {
+		TestBean1 tb = new TestBean1();
+		CallCountingTransactionManager ptm = new CallCountingTransactionManager();
+		AnnotationTransactionAttributeSource tas = new AnnotationTransactionAttributeSource();
+		TransactionInterceptor ti = new TransactionInterceptor(ptm, tas);
+
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setInterfaces(new Class[] {ITestBean.class});
+		proxyFactory.addAdvice(ti);
+		proxyFactory.setTarget(tb);
+		ITestBean proxy = (ITestBean) proxyFactory.getProxy();
+		proxy.getAge();
+		assertEquals(1, ptm.commits);
+
+		ITestBean serializedProxy = (ITestBean) SerializationTestUtils.serializeAndDeserialize(proxy);
+		serializedProxy.getAge();
+		Advised advised = (Advised) serializedProxy;
+		TransactionInterceptor serializedTi = (TransactionInterceptor) advised.getAdvisors()[0].getAdvice();
+		CallCountingTransactionManager serializedPtm =
+				(CallCountingTransactionManager) serializedTi.getTransactionManager();
+		assertEquals(2, serializedPtm.commits);
+	}
+
 	public void testNullOrEmpty() throws Exception {
 		Method method = Empty.class.getMethod("getAge", (Class[]) null);
 		
@@ -129,7 +159,8 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 		
 		void setName(String name);
 	}
-	
+
+
 	public interface ITestBean2 {
 		
 		@Transactional
@@ -141,6 +172,7 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 		
 		void setName(String name);
 	}
+
 
 	public interface ITestBean3 {
 		
@@ -187,7 +219,7 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 	}
 	
 	
-	public static class TestBean1 implements ITestBean {
+	public static class TestBean1 implements ITestBean, Serializable {
 
 		private String name;
 

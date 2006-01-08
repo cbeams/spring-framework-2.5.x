@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.annotation;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,7 +49,7 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
  * @see org.springframework.metadata.commons.CommonsAttributes
  */
 public class AnnotationTransactionAttributeSource
-		extends AbstractFallbackTransactionAttributeSource {
+		extends AbstractFallbackTransactionAttributeSource implements Serializable {
 
 	/**
 	 * Returns all JDK 1.5+ annotations found for the given method.
