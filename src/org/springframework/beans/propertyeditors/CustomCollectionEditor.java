@@ -175,8 +175,8 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 
 
 	/**
-	 * This implementation returns null to indicate that there is no
-	 * appropriate text representation.
+	 * This implementation returns <code>null</code> to indicate that
+	 * there is no appropriate text representation.
 	 */
 	public String getAsText() {
 		return null;

@@ -35,6 +35,8 @@ import org.springframework.core.io.ResourceEditor;
  * @see java.net.URL
  * @see org.springframework.core.io.ResourceEditor
  * @see org.springframework.core.io.ResourceLoader
+ * @see FileEditor
+ * @see InputStreamEditor
  */
 public class URLEditor extends PropertyEditorSupport {
 

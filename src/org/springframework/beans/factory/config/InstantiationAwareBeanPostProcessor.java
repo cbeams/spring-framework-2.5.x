@@ -62,10 +62,10 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * but before Spring property population (from explicit properties or autowiring) occurs.
 	 * @param bean bean instance created, but whose properties have not yet been set
 	 * @param beanName the name of the bean
-	 * @return true if properties should be set on the bean; false if property population
-	 * should be skipped. Normal implementations should return true. Returning false will
-	 * also prevent any subsequent InstantiationAwareBeanPostProcessor instances
-	 * being invoked on this bean instance.
+	 * @return <code>true</code> if properties should be set on the bean; <code>false</code>
+	 * if property population should be skipped. Normal implementations should return <code>true</code>.
+	 * Returning <code>false</code> will also prevent any subsequent InstantiationAwareBeanPostProcessor
+	 * instances being invoked on this bean instance.
 	 * @throws BeansException in the case of errors
 	 */
 	boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException;

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
@@ -35,6 +36,10 @@ import org.springframework.core.io.ResourceEditor;
  * @author Juergen Hoeller
  * @since 1.0.1
  * @see java.io.InputStream
+ * @see org.springframework.core.io.ResourceEditor
+ * @see org.springframework.core.io.ResourceLoader
+ * @see URLEditor
+ * @see FileEditor
  */
 public class InputStreamEditor extends PropertyEditorSupport {
 
@@ -72,8 +77,8 @@ public class InputStreamEditor extends PropertyEditorSupport {
 	}
 
 	/**
-	 * This implementation returns null to indicate that there is no
-	 * appropriate text representation.
+	 * This implementation returns <code>null</code> to indicate that
+	 * there is no appropriate text representation.
 	 */
 	public String getAsText() {
 		return null;
