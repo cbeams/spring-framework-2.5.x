@@ -54,6 +54,7 @@ Package org.springframework.test
 Package org.springframework.transaction
 * fixed AbstractPlatformTransactionManager to serialize all relevant state
 * JtaTransactionManager only invokes rollback if transaction is still active (some JTA providers eagerly terminate)
+* marked AnnotationTransactionAttributeSource as Serializable
 
 Package org.springframework.ui
 * added "defaultEncoding" bean property to FreeMarkerConfigurationFactory(Bean), inherited by FreeMarkerConfigurer
@@ -72,6 +73,7 @@ Package org.springframework.web
 * added "currentFormObject" template method to AbstractFormController, for post-processing of a session form object
 * FixedLocaleResolver returns the JVM's default Locale if no explicit default Locale specified
 * turned AbstractCommandController's and AbstractFormController's "handleRequestInternal" methods non-final
+* refactored AbstractFormController's session form check into one single place, throwing SessionRequiredException
 * added protected accessors for UrlBasedViewResolver's bean properties, allowing subclasses to access the settings
 * added "argumentSeparator" property to MessageTag, allowing to specify a custom separator instead of the default comma
 * VelocityView converts Velocity's MethodInvocationException to a Spring NestedServletException with original root cause
