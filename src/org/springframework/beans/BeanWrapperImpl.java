@@ -433,7 +433,6 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	 * @param object object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
 	 * @return the nested BeanWrapper instance
-	 * @see #BeanWrapperImpl(Object, String, BeanWrapper)
 	 */
 	protected BeanWrapperImpl newNestedBeanWrapper(Object object, String nestedPath) {
 		return new BeanWrapperImpl(object, nestedPath, this);

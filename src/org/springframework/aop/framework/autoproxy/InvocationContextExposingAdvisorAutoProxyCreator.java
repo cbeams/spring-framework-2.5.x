@@ -22,9 +22,10 @@ import org.springframework.aop.aspectj.AspectJProxyUtils;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 
 /**
- * Extension of {@link DefaultAdvisorAutoProxyCreator} that adds an {@link ExposeInvocationInterceptor} and
- * a {@link ExposeJoinPointInterceptor} to the beginning of the advice chain. These additional advices are
- * needed when using AspectJ expression pointcuts and when using AspectJ-style advice.
+ * Extension of {@link DefaultAdvisorAutoProxyCreator} that adds an
+ * {@link ExposeInvocationInterceptor} to the beginning of the advice chain.
+ * These additional advices are needed when using AspectJ expression pointcuts
+ * and when using AspectJ-style advice.
  * 
  * @author Rob Harrop
  * @author Rod Johnson
@@ -35,4 +36,5 @@ public class InvocationContextExposingAdvisorAutoProxyCreator extends DefaultAdv
 	protected void extendCandidateAdvisors(List candidateAdvisors) {
 		AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(candidateAdvisors);
 	}
+
 }
