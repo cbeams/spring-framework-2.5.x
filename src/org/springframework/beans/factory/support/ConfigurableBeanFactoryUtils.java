@@ -16,10 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.core.io.Resource;
@@ -56,6 +58,7 @@ public abstract class ConfigurableBeanFactoryUtils {
 		ResourceEditor baseEditor = new ResourceEditor(resourceLoader);
 		beanFactory.registerCustomEditor(Resource.class, baseEditor);
 		beanFactory.registerCustomEditor(URL.class, new URLEditor(baseEditor));
+		beanFactory.registerCustomEditor(File.class, new FileEditor(baseEditor));
 		beanFactory.registerCustomEditor(InputStream.class, new InputStreamEditor(baseEditor));
 	}
 

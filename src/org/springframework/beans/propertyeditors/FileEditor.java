@@ -18,38 +18,69 @@ package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
 import java.io.File;
+import java.io.IOException;
 
-import org.springframework.util.StringUtils;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceEditor;
 
 /**
  * Editor for <code>java.io.File</code>, to directly populate a File property
- * instead of using a String file name property as bridge.
+ * from a Spring resource location.
  *
- * <p>Supports any pathname accepted by the <code>File(pathname)</code>
- * constructor.
+ * <p>Supports Spring-style URL notation: any fully qualified standard URL
+ * ("file:", "http:", etc) and Spring's special "classpath:" pseudo-URL.
+ *
+ * <p><b>NOTE:</b> The behavior of this editor has changed in Spring 2.0.
+ * Previously, it created a File instance directly from a filename.
+ * As of Spring 2.0, it takes a standard Spring resource location as input;
+ * this is consistent with URLEditor and InputStreamEditor now.
  *
  * @author Juergen Hoeller
  * @since 09.12.2003
- * @see java.io.File#File(String)
+ * @see java.io.File
+ * @see org.springframework.core.io.ResourceEditor
+ * @see org.springframework.core.io.ResourceLoader
+ * @see URLEditor
+ * @see InputStreamEditor
  */
 public class FileEditor extends PropertyEditorSupport {
 
+	private final ResourceEditor resourceEditor;
+
+
+	/**
+	 * Create a new FileEditor,
+	 * using the default ResourceEditor underneath.
+	 */
+	public FileEditor() {
+		this.resourceEditor = new ResourceEditor();
+	}
+
+	/**
+	 * Create a new FileEditor,
+	 * using the given ResourceEditor underneath.
+	 * @param resourceEditor the ResourceEditor to use
+	 */
+	public FileEditor(ResourceEditor resourceEditor) {
+		this.resourceEditor = resourceEditor;
+	}
+
+
 	public void setAsText(String text) throws IllegalArgumentException {
-		if (StringUtils.hasText(text)) {
-			setValue(new File(text));
+		this.resourceEditor.setAsText(text);
+		Resource resource = (Resource) this.resourceEditor.getValue();
+		try {
+			setValue(resource != null ? resource.getFile() : null);
 		}
-		else {
-			setValue(null);
+		catch (IOException ex) {
+			throw new IllegalArgumentException(
+					"Could not retrieve File for " + resource + ": " + ex.getMessage());
 		}
 	}
 
 	public String getAsText() {
-		if (getValue() != null) {
-			return ((File) getValue()).getAbsolutePath();
-		}
-		else {
-			return "";
-		}
+		File value = (File) getValue();
+		return (value != null ? value.getPath() : "");
 	}
 
 }

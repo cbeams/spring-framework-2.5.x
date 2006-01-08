@@ -449,7 +449,7 @@ public class CustomEditorTests extends TestCase {
 
 	public void testFileEditor() {
 		PropertyEditor fileEditor = new FileEditor();
-		fileEditor.setAsText("C:/test/myfile.txt");
+		fileEditor.setAsText("file:C:/test/myfile.txt");
 		assertEquals(new File("C:/test/myfile.txt"), fileEditor.getValue());
 		assertEquals((new File("C:/test/myfile.txt")).getAbsolutePath(), fileEditor.getAsText());
 	}
