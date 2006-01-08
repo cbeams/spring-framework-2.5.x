@@ -14,6 +14,8 @@ Package org.springframework.beans
 * refined BeanWrapperImpl to perform the accessible checking for read/write methods before every invocation
 * fixed PropertyAccessorUtils's "getLastNestedPropertySeparatorIndex" to correctly handle property paths without dot
 * added overloaded constructor to StringArrayPropertyEditor, allowing to specify a custom separator for String splitting
+* optimized AbstractBeanFactory to avoid internal NoSuchBeanDefinitionException throw+catch as far as possible
+* fixed AbstractBeanFactory to correctly delegate to parent BeanFactory from "isFactoryBean"
 * fixed AbstractBeanFactory to allow child bean definitions to refer to a parent via its alias name
 * DefaultListableBeanFactory is able to call non-public factory methods as well
 
