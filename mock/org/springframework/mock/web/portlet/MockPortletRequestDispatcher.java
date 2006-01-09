@@ -47,7 +47,7 @@ public class MockPortletRequestDispatcher implements PortletRequestDispatcher {
 	 * @param url the URL to dispatch to.
 	 */
 	public MockPortletRequestDispatcher(String url) {
-		Assert.notNull(url, "Url must not be null");
+		Assert.notNull(url, "URL must not be null");
 		this.url = url;
 	}
 

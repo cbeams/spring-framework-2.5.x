@@ -47,7 +47,7 @@ public class MockRequestDispatcher implements RequestDispatcher {
 	 * @param url the URL to dispatch to.
 	 */
 	public MockRequestDispatcher(String url) {
-		Assert.notNull(url, "Url must not be null");
+		Assert.notNull(url, "URL must not be null");
 		this.url = url;
 	}
 

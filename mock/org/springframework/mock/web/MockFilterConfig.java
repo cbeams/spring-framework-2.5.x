@@ -70,12 +70,12 @@ public class MockFilterConfig implements FilterConfig {
 	}
 
 	public void addInitParameter(String name, String value) {
-		Assert.notNull(name, "Attribute name must not be null");
+		Assert.notNull(name, "Parameter name must not be null");
 		this.initParameters.setProperty(name, value);
 	}
 
 	public String getInitParameter(String name) {
-		Assert.notNull(name, "Attribute name must not be null");
+		Assert.notNull(name, "Parameter name must not be null");
 		return this.initParameters.getProperty(name);
 	}
 
