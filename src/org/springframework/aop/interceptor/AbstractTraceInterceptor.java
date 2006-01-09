@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.aop.support.AopUtils;
+
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
 
 /**
  * Base <code>MethodInterceptor</code> implementation for tracing.
@@ -57,6 +58,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 */
 	private boolean hideProxyClassNames = false;
 
+
 	/**
 	 * Set whether to use a dynamic logger or a static logger.
 	 * Default is a static logger for this trace interceptor.
@@ -89,12 +91,13 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	}
 
 	/**
-	 * Set to <code>true</code> to have {@link #setUseDynamicLogger dynamic loggers} hide
-	 * proxy class names wherever possible. Default is <code>false</code>.
+	 * Set to "true" to have {@link #setUseDynamicLogger dynamic loggers} hide
+	 * proxy class names wherever possible. Default is "false".
 	 */
 	public void setHideProxyClassNames(boolean hideProxyClassNames) {
 		this.hideProxyClassNames = hideProxyClassNames;
 	}
+
 
 	/**
 	 * Determines whether or not logging is enabled for the particular <code>MethodInvocation</code>.
@@ -126,26 +129,29 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 		if (this.defaultLogger != null) {
 			return this.defaultLogger;
 		}
+
 		else {
 			Object target = invocation.getThis();
-			Class cls = target.getClass();
+			Class logCategoryClass = target.getClass();
 
 			if (this.hideProxyClassNames) {
-				if (AopUtils.isJdkDynamicProxy(target) && (target instanceof Advised)) {
-					Class targetClass = ((Advised)target).getTargetSource().getTargetClass();
-					if(targetClass != null) {
-						cls = targetClass;
+				if (AopUtils.isJdkDynamicProxy(target) && target instanceof Advised) {
+					Class targetClass = ((Advised) target).getTargetSource().getTargetClass();
+					if (targetClass != null) {
+						logCategoryClass = targetClass;
 					}
-				} else {
-					while(AopUtils.isCglibProxyClass(cls)) {
-						cls = cls.getSuperclass();
+				}
+				else {
+					while (AopUtils.isCglibProxyClass(logCategoryClass)) {
+						logCategoryClass = logCategoryClass.getSuperclass();
 					}
 				}
 			}
 
-			return LogFactory.getLog(cls);
+			return LogFactory.getLog(logCategoryClass);
 		}
 	}
+
 
 	/**
 	 * Subclasses must override this method to perform any tracing around the
