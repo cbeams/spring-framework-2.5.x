@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -75,14 +75,15 @@ public abstract class ClassUtils {
 	/**
 	 * Replacement for <code>Class.forName()</code> that also returns Class instances
 	 * for primitives (like "int") and array class names (like "String[]").
-	 * <p>Always uses the thread context class loader.
+	 * <p>Always uses the default class loader: that is, preferably the thread context
+	 * class loader, or the ClassLoader that loaded the ClassUtils class as fallback.
 	 * @param name the name of the Class
 	 * @return Class instance for the supplied name
 	 * @see java.lang.Class#forName(String, boolean, ClassLoader)
-	 * @see java.lang.Thread#getContextClassLoader()
+	 * @see #getDefaultClassLoader()
 	 */
 	public static Class forName(String name) throws ClassNotFoundException {
-		return forName(name, Thread.currentThread().getContextClassLoader());
+		return forName(name, getDefaultClassLoader());
 	}
 
 	/**
@@ -92,7 +93,6 @@ public abstract class ClassUtils {
 	 * @param classLoader the class loader to use
 	 * @return Class instance for the supplied name
 	 * @see java.lang.Class#forName(String, boolean, ClassLoader)
-	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	public static Class forName(String name, ClassLoader classLoader) throws ClassNotFoundException {
 		Class clazz = resolvePrimitiveClassName(name);
