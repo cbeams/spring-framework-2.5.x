@@ -3,18 +3,19 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 M2 (30.1.2006)
+Changes in version 2.0 M2 (16.1.2006)
 -------------------------------------
 
 Package org.springframework.aop
 * refined ThreadLocalTargetSource's synchronization to guarantee thread-safe destruction on shutdown
-* improved performance of introductions by faster determination of whether a method is on an introduced interface in IntroductionInfoSupport
+* improved performance of IntroductionInfoSupport by faster determination of whether method is on introduced interface
 * completed implementation of @AspectJ integration class MethodInvocationProceedingJoinPoint
 
 Package org.springframework.beans
 * fixed PropertyAccessorUtils's "getLastNestedPropertySeparatorIndex" to correctly handle property paths without dot
 * added overloaded constructor to StringArrayPropertyEditor, allowing to specify a custom separator for String splitting
-* added postProcessAfterInstantiation method to InstantiationAwareBeanPostProcessor
+* changed FileEditor's behavior to consider input text as standard Spring resource location (instead of plain filename)
+* added "postProcessAfterInstantiation" method to InstantiationAwareBeanPostProcessor
 
 Package org.springframework.core
 * added NestedIOException, deriving from java.io.IOException and adding NestedCheckedException-style root cause handling
@@ -32,8 +33,10 @@ Package org.springframework.jdbc
 Package org.springframework.orm
 * SqlMapClientTemplate always works with SqlMapSession and provided Connection to enable proper batching in all cases
 * added "configLocations" property to LocalSessionFactoryBean for Hibernate3, allowing to load multiple config files
+* LocalSessionFactoryBean supports cache regions specified through "entity/collectionCacheStrategies" on Hibernate 3.1
 * added optional SpringSessionContext for Hibernate 3.1, to plug Spring into "getCurrentSession()" without proxying
 * added "replicate" convenience methods to HibernateTemplate for both Hibernate2 and Hibernate3
+* added BlobStringType with configurable character encoding for both Hibernate2 and Hibernate3
 * updated Spring's JDO 2.0 support to JPOX JDO 2.0 API snapshot-9 (corresponding to JDO 2.0 final draft)
 * added full support for Java Persistence API 1.0 (JPA), in package "orm.jpa"
 
@@ -47,6 +50,7 @@ Package org.springframework.scheduling
 Package org.springframework.transaction
 * fixed AbstractPlatformTransactionManager to serialize all relevant state
 * fixed TransactionInterceptor to correctly serialize TransactionAspectSupport state
+* marked AnnotationTransactionAttributeSource as Serializable
 
 Package org.springframework.ui
 * added "defaultEncoding" bean property to FreeMarkerConfigurationFactory(Bean), inherited by FreeMarkerConfigurer
@@ -71,6 +75,7 @@ Package org.springframework.web
 * renamed FrameworkPortlet's RequestHandledEvent to PortletRequestHandledEvent, a subclass of RequestHandledEvent
 * PortletBean ignores init-params that do not match bean properties, analogous to HttpServletBean
 * turned AbstractCommandController's and AbstractFormController's "handleRequestInternal" methods non-final
+* refactored AbstractFormController's session form check into one single place, throwing SessionRequiredException
 * reworked MultiActionController's "bind" and "createBinder" to work on HttpServletRequest instead of ServletRequest
 * deprecated MultiActionController's "initBinder(ServletRequest...)" in favor of "initBinder(HttpServletRequest...)"
 * added protected accessors for UrlBasedViewResolver's bean properties, allowing subclasses to access the settings
@@ -86,7 +91,7 @@ Overall
 * removed support for iBATIS SQL Maps 1.3 (if you haven't done so already, upgrade to iBATIS SQL Maps 2.0/2.1!)
 * added explicit support for Hibernate 3.1 while remaining compatible with Hibernate 3.0 (as far as possible)
 * factored out "spring-jdo", "spring-hibernate2/3", "spring-toplink", "spring-ojb" jars (not in "spring.jar" anymore!)
-* introduced first AspectJ aspects to be distributed as part of Spring (for transaction management and DI of objects not instantiated by Spring container)
+* distributed first AspectJ aspects (for transaction management and DI of objects not instantiated by Spring container)
 
 Package org.springframework.aop
 * added support for AspectJ pointcut expressions, specified in AspectJ pointcut language
