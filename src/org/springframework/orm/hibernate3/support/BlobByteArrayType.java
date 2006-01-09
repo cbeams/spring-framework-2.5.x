@@ -90,12 +90,14 @@ public class BlobByteArrayType extends AbstractLobType  {
 	protected Object nullSafeGetInternal(
 			ResultSet rs, String[] names, Object owner, LobHandler lobHandler)
 			throws SQLException {
+
 		return lobHandler.getBlobAsBytes(rs, names[0]);
 	}
 
 	protected void nullSafeSetInternal(
 			PreparedStatement ps, int index, Object value, LobCreator lobCreator)
 			throws SQLException {
+
 		lobCreator.setBlobAsBytes(ps, index, (byte[]) value);
 	}
 
