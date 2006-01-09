@@ -449,9 +449,9 @@ public class CustomEditorTests extends TestCase {
 
 	public void testFileEditor() {
 		PropertyEditor fileEditor = new FileEditor();
-		fileEditor.setAsText("file:C:/test/myfile.txt");
-		assertEquals(new File("C:/test/myfile.txt"), fileEditor.getValue());
-		assertEquals((new File("C:/test/myfile.txt")).getAbsolutePath(), fileEditor.getAsText());
+		fileEditor.setAsText("file:myfile.txt");
+		assertEquals(new File("myfile.txt"), fileEditor.getValue());
+		assertEquals((new File("myfile.txt")).getPath(), fileEditor.getAsText());
 	}
 
 	public void testLocaleEditor() {
