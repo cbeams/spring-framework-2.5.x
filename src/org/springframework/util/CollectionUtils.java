@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -46,6 +47,42 @@ public abstract class CollectionUtils {
 	 */
 	public static boolean isEmpty(Map map) {
 		return (map == null || map.isEmpty());
+	}
+
+	/**
+	 * Check whether the given Iterator contains the given element.
+	 * @param iterator the Iterator to check
+	 * @param element the element to look for
+	 * @return <code>true</code> if found, <code>false</code> else
+	 */
+	public static boolean contains(Iterator iterator, Object element) {
+		if (iterator != null) {
+			while (iterator.hasNext()) {
+				Object candidate = iterator.next();
+				if (ObjectUtils.nullSafeEquals(candidate, element)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Check whether the given Enumeration contains the given element.
+	 * @param enumeration the Enumeration to check
+	 * @param element the element to look for
+	 * @return <code>true</code> if found, <code>false</code> else
+	 */
+	public static boolean contains(Enumeration enumeration, Object element) {
+		if (enumeration != null) {
+			while (enumeration.hasMoreElements()) {
+				Object candidate = enumeration.nextElement();
+				if (ObjectUtils.nullSafeEquals(candidate, element)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
