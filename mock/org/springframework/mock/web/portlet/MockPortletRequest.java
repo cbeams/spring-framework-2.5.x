@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 
 package org.springframework.mock.web.portlet;
 
-import java.lang.reflect.Array;
 import java.security.Principal;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -41,11 +39,13 @@ import javax.portlet.WindowState;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Mock implementation of the PortletRequest interface.
  *
  * @author John A. Lewis
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class MockPortletRequest implements PortletRequest {
@@ -62,7 +62,7 @@ public class MockPortletRequest implements PortletRequest {
 
 	private PortletPreferences portletPreferences = new MockPortletPreferences();
 
-	private final Hashtable properties = new Hashtable();
+	private final Map properties = CollectionFactory.createLinkedMapIfPossible(16);
 
 	private final Hashtable attributes = new Hashtable();
 
@@ -95,7 +95,6 @@ public class MockPortletRequest implements PortletRequest {
 
 	/**
 	 * Create a new MockPortletRequest.
-	 *
 	 * @param portalContext the PortalContext that the request runs in
 	 * @param portletContext the PortletContext that the request runs in
 	 */
@@ -107,17 +106,18 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	/**
-	 * Create a new MockPortletRequest.
-	 *
+	 * Create a new MockPortletRequest with a MockPortalContext.
 	 * @param portletContext the PortletContext that the request runs in
+	 * @see MockPortalContext
 	 */
 	public MockPortletRequest(PortletContext portletContext) {
 		this(new MockPortalContext(), portletContext);
 	}
 
 	/**
-	 * Create a new MockPortletRequest with a MockPortletContext.
-	 *
+	 * Create a new MockPortletRequest with a MockPortalContext
+	 * and a MockPortletContext.
+	 * @see MockPortalContext
 	 * @see MockPortletContext
 	 */
 	public MockPortletRequest() {
@@ -129,42 +129,44 @@ public class MockPortletRequest implements PortletRequest {
 	// PortletRequest methods
 	//---------------------------------------------------------------------
 
-	public boolean isWindowStateAllowed(WindowState state) {
-		if (state == null) {
-			return false;
-		}
-		Enumeration states = this.portalContext.getSupportedWindowStates();
-		while (states.hasMoreElements()) {
-			if (state.equals(states.nextElement())) {
-				return true;
-			}
-		}
-		return false;
+	public boolean isWindowStateAllowed(WindowState windowState) {
+		return CollectionUtils.contains(this.portalContext.getSupportedWindowStates(), windowState);
 	}
 
-	public boolean isPortletModeAllowed(PortletMode mode) {
-		if (mode == null) {
-			return false;
-		}
-		Enumeration modes = this.portalContext.getSupportedPortletModes();
-		while (modes.hasMoreElements()) {
-			if (mode.equals(modes.nextElement())) {
-				return true;
-			}
-		}
-		return false;
+	public boolean isPortletModeAllowed(PortletMode portletMode) {
+		return CollectionUtils.contains(this.portalContext.getSupportedPortletModes(), portletMode);
+	}
+
+	public void setPortletMode(PortletMode portletMode) {
+		this.portletMode = portletMode;
 	}
 
 	public PortletMode getPortletMode() {
 		return this.portletMode;
 	}
 
+	public void setWindowState(WindowState windowState) {
+		this.windowState = windowState;
+	}
+
 	public WindowState getWindowState() {
 		return this.windowState;
 	}
 
+	public void setPreferences(PortletPreferences preferences) {
+		this.portletPreferences = preferences;
+	}
+
 	public PortletPreferences getPreferences() {
 		return this.portletPreferences;
+	}
+
+	public void setSession(PortletSession session) {
+		this.session = session;
+		if (session instanceof MockPortletSession) {
+			MockPortletSession mockSession = ((MockPortletSession) session);
+			mockSession.access();
+		}
 	}
 
 	public PortletSession getPortletSession() {
@@ -183,58 +185,89 @@ public class MockPortletRequest implements PortletRequest {
 		return this.session;
 	}
 
-	public String getProperty(String name) {
-		Assert.notNull(name, "name must not be null");
-		Object value = this.properties.get(name);
-		if (value instanceof List) {
-			List list = (List) value;
-			if (list.size() < 1) {
-				return null;
-			}
-			Object element = list.get(0);
-			return (element != null ? element.toString() : null);
-		}
-		return (value != null ? value.toString() : null);
+	/**
+	 * Set a single value for the specified property.
+	 * <p>If there are already one or more values registered for the given
+	 * property key, they will be replaced.
+	 */
+	public void setProperty(String key, String value) {
+		Assert.notNull(key, "Property key must not be null");
+		List list = new LinkedList();
+		list.add(value);
+		this.properties.put(key, list);
 	}
 
-	public Enumeration getProperties(String name) {
-		Assert.notNull(name, "name must not be null");
-		Object value = this.properties.get(name);
-		if (value instanceof List) {
-			return Collections.enumeration((List) value);
-		}
-		else if (value != null) {
-			Vector vector = new Vector(1);
-			vector.add(value.toString());
-			return vector.elements();
+	/**
+	 * Add a single value for the specified property.
+	 * <p>If there are already one or more values registered for the given
+	 * property key, the given value will be added to the end of the list.
+	 */
+	public void addProperty(String key, String value) {
+		Assert.notNull(key, "Property key must not be null");
+		List oldList = (List) this.properties.get(key);
+		if (oldList != null) {
+			oldList.add(value);
 		}
 		else {
-			return Collections.enumeration(Collections.EMPTY_SET);
+			List list = new LinkedList();
+			list.add(value);
+			this.properties.put(key, list);
 		}
+	}
+
+	public String getProperty(String key) {
+		Assert.notNull(key, "Property key must not be null");
+		List list = (List) this.properties.get(key);
+		return (list != null && list.size() > 0 ? (String) list.get(0) : null);
+	}
+
+	public Enumeration getProperties(String key) {
+		Assert.notNull(key, "property key must not be null");
+		return Collections.enumeration((List) this.properties.get(key));
 	}
 
 	public Enumeration getPropertyNames() {
-		return this.properties.keys();
+		return Collections.enumeration(this.properties.keySet());
 	}
 
 	public PortalContext getPortalContext() {
 		return this.portalContext;
 	}
 
+	public void setAuthType(String authType) {
+		this.authType = authType;
+	}
+
 	public String getAuthType() {
 		return this.authType;
+	}
+
+	public void setContextPath(String contextPath) {
+		this.contextPath = contextPath;
 	}
 
 	public String getContextPath() {
 		return this.contextPath;
 	}
 
+	public void setRemoteUser(String remoteUser) {
+		this.remoteUser = remoteUser;
+	}
+
 	public String getRemoteUser() {
 		return this.remoteUser;
 	}
 
+	public void setUserPrincipal(Principal userPrincipal) {
+		this.userPrincipal = userPrincipal;
+	}
+
 	public Principal getUserPrincipal() {
 		return this.userPrincipal;
+	}
+
+	public void addUserRole(String role) {
+		this.userRoles.add(role);
 	}
 
 	public boolean isUserInRole(String role) {
@@ -247,6 +280,46 @@ public class MockPortletRequest implements PortletRequest {
 
 	public Enumeration getAttributeNames() {
 		return this.attributes.keys();
+	}
+
+	public void setParameters(Map parameters) {
+		Assert.notNull(parameters, "Parameters Map must not be null");
+		this.parameters.clear();
+		for (Iterator it = parameters.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			Assert.isTrue(entry.getKey() instanceof String, "Key must be of type String");
+			Assert.isTrue(entry.getValue() instanceof String[], "Value must be of type String[]");
+			this.parameters.put(entry.getKey(), entry.getValue());
+		}
+	}
+
+	public void setParameter(String key, String value) {
+		Assert.notNull(key, "Parameter key must be null");
+		Assert.notNull(value, "Parameter value must not be null");
+		this.parameters.put(key, new String[] {value});
+	}
+
+	public void setParameter(String key, String[] values) {
+		Assert.notNull(key, "Parameter key must be null");
+		Assert.notNull(values, "Parameter values must not be null");
+		this.parameters.put(key, values);
+	}
+
+	public void addParameter(String name, String value) {
+		addParameter(name, new String[] {value});
+	}
+
+	public void addParameter(String name, String[] values) {
+		String[] oldArr = (String[]) this.parameters.get(name);
+		if (oldArr != null) {
+			String[] newArr = new String[oldArr.length + values.length];
+			System.arraycopy(oldArr, 0, newArr, 0, oldArr.length);
+			System.arraycopy(values, 0, newArr, oldArr.length, values.length);
+			this.parameters.put(name, newArr);
+		}
+		else {
+			this.parameters.put(name, values);
+		}
 	}
 
 	public String getParameter(String name) {
@@ -264,6 +337,10 @@ public class MockPortletRequest implements PortletRequest {
 
 	public Map getParameterMap() {
 		return Collections.unmodifiableMap(this.parameters);
+	}
+
+	public void setSecure(boolean secure) {
+		this.secure = secure;
 	}
 
 	public boolean isSecure() {
@@ -288,8 +365,20 @@ public class MockPortletRequest implements PortletRequest {
 		return (session != null ? session.getId() : null);
 	}
 
+	public void setRequestedSessionIdValid(boolean requestedSessionIdValid) {
+		this.requestedSessionIdValid = requestedSessionIdValid;
+	}
+
 	public boolean isRequestedSessionIdValid() {
 		return this.requestedSessionIdValid;
+	}
+
+	public void addResponseContentType(String responseContentType) {
+		this.responseContentTypes.add(responseContentType);
+	}
+
+	public void addPreferredResponseContentType(String responseContentType) {
+		this.responseContentTypes.add(0, responseContentType);
 	}
 
 	public String getResponseContentType() {
@@ -300,192 +389,6 @@ public class MockPortletRequest implements PortletRequest {
 		return this.responseContentTypes.elements();
 	}
 
-	public Locale getLocale() {
-		return (Locale) this.locales.get(0);
-	}
-
-	public Enumeration getLocales() {
-		return this.locales.elements();
-	}
-
-	public String getScheme() {
-		return scheme;
-	}
-
-	public String getServerName() {
-		return serverName;
-	}
-
-	public int getServerPort() {
-		return serverPort;
-	}
-
-	
-	//---------------------------------------------------------------------
-	// MockPortletRequest methods
-	//---------------------------------------------------------------------
-
-	public void setSession(PortletSession session) {
-		this.session = session;
-		if (session instanceof MockPortletSession) {
-			MockPortletSession mockSession = ((MockPortletSession) session);
-			mockSession.access();
-		}
-	}
-
-	public void setPortletMode(PortletMode portletMode) {
-		this.portletMode = portletMode;
-	}
-
-	public void setWindowState(WindowState windowState) {
-		this.windowState = windowState;
-	}
-
-	public void setPreferences(PortletPreferences preferences) {
-		this.portletPreferences = preferences;
-	}
-
-	/**
-	 * Add a property entry for the given name.
-	 * <p>If there was no entry for that property name before,
-	 * the value will be used as-is. In case of an existing entry,
-	 * a List will be created, adding the given value (more
-	 * specifically, its toString representation) as further element.
-	 * <p>Multiple values can only be stored as list of Strings,
-	 * following the Servlet spec (see <code>getHeaders</code> accessor).
-	 * As alternative to repeated <code>addHeader</code> calls for
-	 * individual elements, you can use a single call with an entire
-	 * array or Collection of values as parameter.
-	 *
-	 * @see #getProperty
-	 * @see #getProperties
-	 * @see #getPropertyNames
-	 */
-	public void addProperty(String name, Object value) {
-		Assert.notNull(name, "name must not be null");
-		Assert.notNull(value, "value must not be null");
-		Object oldValue = this.properties.get(name);
-		if (oldValue instanceof List) {
-			List list = (List) oldValue;
-			addPropertyValue(list, value);
-		}
-		else if (oldValue != null) {
-			List list = new LinkedList();
-			list.add(oldValue);
-			addPropertyValue(list, value);
-			this.properties.put(name, list);
-		}
-		else if (value instanceof Collection || value.getClass().isArray()) {
-			List list = new LinkedList();
-			addPropertyValue(list, value);
-			this.properties.put(name, list);
-		}
-		else {
-			this.properties.put(name, value);
-		}
-	}
-
-	private void addPropertyValue(List list, Object value) {
-		if (value instanceof Collection) {
-			Collection valueColl = (Collection) value;
-			for (Iterator it = valueColl.iterator(); it.hasNext();) {
-				Object element = it.next();
-				Assert.notNull("Value collection must not contain null elements");
-				list.add(element.toString());
-			}
-		}
-		else if (value.getClass().isArray()) {
-			int length = Array.getLength(value);
-			for (int i = 0; i < length; i++) {
-				Object element = Array.get(value, i);
-				Assert.notNull("Value collection must not contain null elements");
-				list.add(element.toString());
-			}
-		}
-		else {
-			list.add(value);
-		}
-	}
-
-	public void setParameters(Map parameters) {
-		Assert.notNull(parameters);
-		for (Iterator it = parameters.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			Assert.notNull(entry.getKey());
-			Assert.notNull(entry.getValue());
-		}
-		this.parameters.clear();
-		for (Iterator it = parameters.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			this.parameters.put(entry.getKey(), entry.getValue());
-		}
-	}
-
-	public void setParameter(String key, String value) {
-		Assert.notNull(key);
-		Assert.notNull(value);
-		this.parameters.put(key, new String[]{value});
-	}
-
-	public void setParameter(String key, String[] values) {
-		Assert.notNull(key);
-		Assert.notNull(values);
-		this.parameters.put(key, values);
-	}
-
-	public void addParameter(String name, String value) {
-		addParameter(name, new String[]{value});
-	}
-
-	public void addParameter(String name, String[] values) {
-		String[] oldArr = (String[]) this.parameters.get(name);
-		if (oldArr != null) {
-			String[] newArr = new String[oldArr.length + values.length];
-			System.arraycopy(oldArr, 0, newArr, 0, oldArr.length);
-			System.arraycopy(values, 0, newArr, oldArr.length, values.length);
-			this.parameters.put(name, newArr);
-		}
-		else {
-			this.parameters.put(name, values);
-		}
-	}
-
-	public void setAuthType(String authType) {
-		this.authType = authType;
-	}
-
-	public void setContextPath(String contextPath) {
-		this.contextPath = contextPath;
-	}
-
-	public void setRemoteUser(String remoteUser) {
-		this.remoteUser = remoteUser;
-	}
-
-	public void setUserPrincipal(Principal userPrincipal) {
-		this.userPrincipal = userPrincipal;
-	}
-
-	public void addUserRole(String role) {
-		this.userRoles.add(role);
-	}
-
-	public void setSecure(boolean secure) {
-		this.secure = secure;
-	}
-
-	public void setRequestedSessionIdValid(boolean requestedSessionIdValid) {
-		this.requestedSessionIdValid = requestedSessionIdValid;
-	}
-
-	public void addResponseContentType(String responseContentType) {
-		this.responseContentTypes.add(responseContentType);
-	}
-
-	public void addPResponseContentType(String responseContentType) {
-		this.responseContentTypes.add(0, responseContentType);
-	}
-
 	public void addLocale(Locale locale) {
 		this.locales.add(locale);
 	}
@@ -494,16 +397,36 @@ public class MockPortletRequest implements PortletRequest {
 		this.locales.add(0, locale);
 	}
 
+	public Locale getLocale() {
+		return (Locale) this.locales.get(0);
+	}
+
+	public Enumeration getLocales() {
+		return this.locales.elements();
+	}
+
 	public void setScheme(String scheme) {
 		this.scheme = scheme;
+	}
+
+	public String getScheme() {
+		return scheme;
 	}
 
 	public void setServerName(String serverName) {
 		this.serverName = serverName;
 	}
 
+	public String getServerName() {
+		return serverName;
+	}
+
 	public void setServerPort(int serverPort) {
 		this.serverPort = serverPort;
+	}
+
+	public int getServerPort() {
+		return serverPort;
 	}
 
 }

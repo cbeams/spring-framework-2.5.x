@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,11 @@ public class MockExpressionEvaluator extends ExpressionEvaluator {
 
 	private final PageContext pageContext;
 
+
+	/**
+	 * Create a new MockExpressionEvaluator for the given PageContext.
+	 * @param pageContext the JSP PageContext to run in
+	 */
 	public MockExpressionEvaluator(PageContext pageContext) {
 		this.pageContext = pageContext;
 	}
@@ -51,6 +56,7 @@ public class MockExpressionEvaluator extends ExpressionEvaluator {
 	public Expression parseExpression(
 			final String expression, final Class expectedType, final FunctionMapper functionMapper)
 			throws ELException {
+
 		return new Expression() {
 			public Object evaluate(VariableResolver variableResolver) throws ELException {
 				return doEvaluate(expression, expectedType, functionMapper);
@@ -61,6 +67,7 @@ public class MockExpressionEvaluator extends ExpressionEvaluator {
 	public Object evaluate(
 			String expression, Class expectedType, VariableResolver variableResolver, FunctionMapper functionMapper)
 			throws ELException {
+
 		if (variableResolver != null) {
 			throw new IllegalArgumentException("Custom VariableResolver not supported");
 		}
@@ -70,6 +77,7 @@ public class MockExpressionEvaluator extends ExpressionEvaluator {
 	protected Object doEvaluate(
 			String expression, Class expectedType, FunctionMapper functionMapper)
 			throws ELException {
+
 		if (functionMapper != null) {
 			throw new IllegalArgumentException("Custom FunctionMapper not supported");
 		}

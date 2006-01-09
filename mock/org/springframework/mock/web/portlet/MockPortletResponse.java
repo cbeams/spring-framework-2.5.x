@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,95 +16,96 @@
 
 package org.springframework.mock.web.portlet;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Vector;
+import java.util.Map;
+import java.util.Set;
 
+import javax.portlet.PortalContext;
 import javax.portlet.PortletResponse;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 
 /**
  * Mock implementation of the PortletResponse interface.
  *
  * @author John A. Lewis
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class MockPortletResponse implements PortletResponse {
 
-	private final Hashtable properties = new Hashtable();
+	private final PortalContext portalContext;
 
-	
+	private final Map properties = CollectionFactory.createLinkedMapIfPossible(16);
+
+
+	/**
+	 * Create a new MockPortletResponse.
+	 * @param portalContext the PortalContext defining the supported
+	 * PortletModes and WindowStates
+	 */
+	public MockPortletResponse(PortalContext portalContext) {
+		Assert.notNull(portalContext, "PortalContext is required");
+		this.portalContext = portalContext;
+	}
+
+	/**
+	 * Create a new MockPortletResponse with a MockPortalContext.
+	 * @see MockPortalContext
+	 */
+	public MockPortletResponse() {
+		this.portalContext = new MockPortalContext();
+	}
+
+	/**
+	 * Return the PortalContext that this MockPortletResponse runs in,
+	 * defining the supported PortletModes and WindowStates.
+	 */
+	public PortalContext getPortalContext() {
+		return portalContext;
+	}
+
+
 	//---------------------------------------------------------------------
 	// PortletResponse methods
 	//---------------------------------------------------------------------
 
 	public void addProperty(String key, String value) {
-		Assert.notNull(key, "key must not be null");
-		Object oldValue = this.properties.get(key);
-		if (oldValue instanceof String) {
-			ArrayList list = new ArrayList();
-			list.add(oldValue);
-			list.add(value);
-			this.properties.put(key, list);
-		}
-		else if (oldValue instanceof List) {
-			((List) oldValue).add(value);
+		Assert.notNull(key, "Property key must not be null");
+		String[] oldArr = (String[]) this.properties.get(key);
+		if (oldArr != null) {
+			String[] newArr = new String[oldArr.length + 1];
+			System.arraycopy(oldArr, 0, newArr, 0, oldArr.length);
+			newArr[oldArr.length] = value;
+			this.properties.put(key, newArr);
 		}
 		else {
-			this.properties.put(key, value);
+			this.properties.put(key, new String[] {value});
 		}
 	}
 
 	public void setProperty(String key, String value) {
-		Assert.notNull(key, "key must not be null");
-		this.properties.put(key, value);
+		Assert.notNull(key, "Property key must not be null");
+		this.properties.put(key, new String[] {value});
+	}
+
+	public Set getPropertyNames() {
+		return this.properties.keySet();
+	}
+
+	public String getProperty(String key) {
+		Assert.notNull(key, "Property key must not be null");
+		String[] arr = (String[]) this.properties.get(key);
+		return (arr != null && arr.length > 0 ? arr[0] : null);
+	}
+
+	public String[] getProperties(String key) {
+		Assert.notNull(key, "Property key must not be null");
+		return (String[]) this.properties.get(key);
 	}
 
 	public String encodeURL(String path) {
 		return path;
-	}
-
-	
-	//---------------------------------------------------------------------
-	// MockPortletResponse methods
-	//---------------------------------------------------------------------
-
-	public String getProperty(String key) {
-		Assert.notNull(key, "key must not be null");
-		Object value = this.properties.get(key);
-		if (value instanceof List) {
-			List list = (List) value;
-			if (list.size() < 1) {
-				return null;
-			}
-			Object element = list.get(0);
-			return (element != null ? element.toString() : null);
-		}
-		return (value != null ? value.toString() : null);
-	}
-
-	public Enumeration getProperties(String key) {
-		Assert.notNull(key, "key must not be null");
-		Object value = this.properties.get(key);
-		if (value instanceof List) {
-			return Collections.enumeration((List) value);
-		}
-		else if (value != null) {
-			Vector vector = new Vector(1);
-			vector.add(value.toString());
-			return vector.elements();
-		}
-		else {
-			return Collections.enumeration(Collections.EMPTY_SET);
-		}
-	}
-
-	public Enumeration getPropertyNames() {
-		return this.properties.keys();
 	}
 
 }

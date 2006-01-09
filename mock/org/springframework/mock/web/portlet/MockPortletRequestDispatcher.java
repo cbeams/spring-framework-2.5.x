@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,13 @@ import javax.portlet.RenderResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.Assert;
+
 /**
  * Mock implementation of the PortletRequestDispatcher interface.
  *
  * @author John A. Lewis
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class MockPortletRequestDispatcher implements PortletRequestDispatcher {
@@ -39,16 +42,19 @@ public class MockPortletRequestDispatcher implements PortletRequestDispatcher {
 	private final String url;
 
 
+	/**
+	 * Create a new MockPortletRequestDispatcher for the given URL.
+	 * @param url the URL to dispatch to.
+	 */
 	public MockPortletRequestDispatcher(String url) {
+		Assert.notNull(url, "Url must not be null");
 		this.url = url;
 	}
 
 	
-	//---------------------------------------------------------------------
-	// PortletRequestDispatcher methods
-	//---------------------------------------------------------------------
-	
 	public void include(RenderRequest request, RenderResponse response) throws PortletException, IOException {
+		Assert.notNull(request, "Request must not be null");
+		Assert.notNull(response, "Response must not be null");
 		if (!(response instanceof MockRenderResponse)) {
 			throw new IllegalArgumentException("MockPortletRequestDispatcher requires MockRenderResponse");
 		}

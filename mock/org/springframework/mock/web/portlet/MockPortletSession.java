@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.portlet.PortletSession;
  * Mock implementation of the PortletSession interface.
  *
  * @author John A. Lewis
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class MockPortletSession implements PortletSession {
@@ -54,7 +55,6 @@ public class MockPortletSession implements PortletSession {
 
 	/**
 	 * Create a new MockPortletSession.
-	 *
 	 * @param portletContext the PortletContext that the session runs in
 	 */
 	public MockPortletSession(PortletContext portletContext) {
@@ -62,18 +62,13 @@ public class MockPortletSession implements PortletSession {
 	}
 
 	/**
-	 * Create a new MockHttpSession with a MockServletContext.
-	 *
+	 * Create a new MockPortletSession with a MockPortletContext.
 	 * @see MockPortletContext
 	 */
 	public MockPortletSession() {
 		this(new MockPortletContext());
 	}
 
-	
-	//---------------------------------------------------------------------
-	// PortletSession methods
-	//---------------------------------------------------------------------
 	
 	public Object getAttribute(String name) {
 		return this.portletAttributes.get(name);
@@ -111,6 +106,11 @@ public class MockPortletSession implements PortletSession {
 		return this.id;
 	}
 
+	public void access() {
+		this.lastAccessedTime = System.currentTimeMillis();
+		setNew(false);
+	}
+
 	public long getLastAccessedTime() {
 		return this.lastAccessedTime;
 	}
@@ -123,6 +123,14 @@ public class MockPortletSession implements PortletSession {
 		this.invalid = true;
 		this.portletAttributes.clear();
 		this.applicationAttributes.clear();
+	}
+
+	public boolean isInvalid() {
+		return invalid;
+	}
+
+	public void setNew(boolean value) {
+		this.isNew = value;
 	}
 
 	public boolean isNew() {
@@ -176,24 +184,6 @@ public class MockPortletSession implements PortletSession {
 
 	public PortletContext getPortletContext() {
 		return portletContext;
-	}
-
-	
-	//---------------------------------------------------------------------
-	// MockPortletSession methods
-	//---------------------------------------------------------------------
-	
-	public boolean isInvalid() {
-		return invalid;
-	}
-
-	public void setNew(boolean value) {
-		isNew = value;
-	}
-
-	public void access() {
-		this.lastAccessedTime = System.currentTimeMillis();
-		this.setNew(false);
 	}
 
 }

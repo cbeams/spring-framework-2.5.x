@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.springframework.mock.web.portlet;
 
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.ResourceBundle;
 
 import javax.portlet.PortletConfig;
@@ -31,17 +31,18 @@ import org.springframework.util.Assert;
  * Mock implementation of the PortletConfig interface.
  * 
  * @author John A. Lewis
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class MockPortletConfig implements PortletConfig {
 
 	private final PortletContext portletContext;
 
-	private final String name;
+	private final String portletName;
 	
 	private final HashMap resourceBundles = new HashMap();
 	
-	private final Hashtable initParameters = new Hashtable();
+	private final Properties initParameters = new Properties();
 
 
 	/**
@@ -55,53 +56,44 @@ public class MockPortletConfig implements PortletConfig {
 	/**
 	 * Create new MockPortletConfig.
 	 * @param portletContext the PortletContext that the portlet runs in
-	 * @param name the name of the portlet
+	 * @param portletName the name of the portlet
 	 */
-	public MockPortletConfig(PortletContext portletContext, String name) {
+	public MockPortletConfig(PortletContext portletContext, String portletName) {
 		this.portletContext = portletContext;
-		this.name = name;
+		this.portletName = portletName;
 	}
 
 	
-	//---------------------------------------------------------------------
-	// PortletConfig methods
-	//---------------------------------------------------------------------
-	
 	public String getPortletName() {
-		return name;
+		return portletName;
 	}
 	
 	public PortletContext getPortletContext() {
 		return portletContext;
 	}
 	
-    public ResourceBundle getResourceBundle(Locale locale) {
-		Assert.notNull(locale, "locale may not be null");
-        return (ResourceBundle)this.resourceBundles.get(locale);
-    }
-    
+	public void setResourceBundle(Locale locale, ResourceBundle resourceBundle) {
+		Assert.notNull(locale, "Locale must not be null");
+		this.resourceBundles.put(locale, resourceBundle);
+	}
+
+	public ResourceBundle getResourceBundle(Locale locale) {
+		Assert.notNull(locale, "Locale must not be null");
+		return (ResourceBundle) this.resourceBundles.get(locale);
+	}
+
+	public void addInitParameter(String name, String value) {
+		Assert.notNull(name, "Parameter name must not be null");
+		this.initParameters.setProperty(name, value);
+	}
+
 	public String getInitParameter(String name) {
-		Assert.notNull(name, "name may not be null");
-		return (String)this.initParameters.get(name);
+		Assert.notNull(name, "Parameter name must not be null");
+		return this.initParameters.getProperty(name);
 	}
 
 	public Enumeration getInitParameterNames() {
 		return this.initParameters.keys();
-	}
-
-	
-	//---------------------------------------------------------------------
-	// MockPortletConfig methods
-	//---------------------------------------------------------------------
-	
-	public void setResourceBundle(Locale locale, ResourceBundle resourceBundle) {
-		Assert.notNull(locale, "locale may not be null");
-	    this.resourceBundles.put(locale, resourceBundle);
-	}
-
-	public void addInitParameter(String name, String value) {
-		Assert.notNull(name, "name may not be null");
-	    this.initParameters.put(name, value);
 	}
 
 }

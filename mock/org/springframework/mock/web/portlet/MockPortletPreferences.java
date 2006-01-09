@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@ package org.springframework.mock.web.portlet;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.portlet.PortletPreferences;
 import javax.portlet.PreferencesValidator;
@@ -34,6 +35,7 @@ import org.springframework.util.Assert;
  * Mock implementation of the PortletPreferences interface.
  *
  * @author John A. Lewis
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class MockPortletPreferences implements PortletPreferences {
@@ -42,39 +44,42 @@ public class MockPortletPreferences implements PortletPreferences {
 
 	private final Map preferences = CollectionFactory.createLinkedMapIfPossible(16);
 
-	private final Map readOnly = new HashMap();
+	private final Set readOnly = new HashSet();
 
 
-	//---------------------------------------------------------------------
-	// PortletPreferences methods
-	//---------------------------------------------------------------------
+	public void setReadOnly(String key, boolean readOnly) {
+		Assert.notNull(key, "Key must not be null");
+		if (readOnly) {
+			this.readOnly.add(key);
+		}
+		else {
+			this.readOnly.remove(key);
+		}
+	}
 
 	public boolean isReadOnly(String key) {
-		Assert.notNull(key);
-		return this.readOnly.containsKey(key);
+		Assert.notNull(key, "Key must not be null");
+		return this.readOnly.contains(key);
 	}
 
 	public String getValue(String key, String def) {
-		Assert.notNull(key);
+		Assert.notNull(key, "Key must not be null");
 		String[] values = (String[]) this.preferences.get(key);
 		return (values != null && values.length > 0 ? values[0] : def);
 	}
 
 	public String[] getValues(String key, String[] def) {
-		Assert.notNull(key);
+		Assert.notNull(key, "Key must not be null");
 		String[] values = (String[]) this.preferences.get(key);
 		return (values != null && values.length > 0 ? values : def);
 	}
 
 	public void setValue(String key, String value) throws ReadOnlyException {
-		Assert.notNull(key);
-		if (isReadOnly(key))
-			throw new ReadOnlyException("preference '" + key + "' is read-only");
-		this.preferences.put(key, new String[]{value});
+		setValues(key, new String[] {value});
 	}
 
 	public void setValues(String key, String[] values) throws ReadOnlyException {
-		Assert.notNull(key);
+		Assert.notNull(key, "Key must not be null");
 		if (isReadOnly(key)) {
 			throw new ReadOnlyException("Preference '" + key + "' is read-only");
 		}
@@ -90,32 +95,20 @@ public class MockPortletPreferences implements PortletPreferences {
 	}
 
 	public void reset(String key) throws ReadOnlyException {
-		Assert.notNull(key);
+		Assert.notNull(key, "Key must not be null");
+		if (isReadOnly(key)) {
+			throw new ReadOnlyException("Preference '" + key + "' is read-only");
+		}
 		this.preferences.remove(key);
 	}
-
-	public void store() throws IOException, ValidatorException {
-		if (this.preferencesValidator != null) {
-			this.preferencesValidator.validate(this);
-		}
-	}
-
-
-	//---------------------------------------------------------------------
-	// MockPortletPreferences methods
-	//---------------------------------------------------------------------
 
 	public void setPreferencesValidator(PreferencesValidator preferencesValidator) {
 		this.preferencesValidator = preferencesValidator;
 	}
 
-	public void setReadOnly(String key, boolean readOnly) {
-		Assert.notNull(key);
-		if (readOnly) {
-			this.readOnly.put(key, null);
-		}
-		else {
-			this.readOnly.remove(key);
+	public void store() throws IOException, ValidatorException {
+		if (this.preferencesValidator != null) {
+			this.preferencesValidator.validate(this);
 		}
 	}
 

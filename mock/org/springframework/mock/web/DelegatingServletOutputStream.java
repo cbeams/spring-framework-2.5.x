@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ public class DelegatingServletOutputStream extends ServletOutputStream {
 
 	private final OutputStream targetStream;
 
+
 	/**
 	 * Create a new DelegatingServletOutputStream.
 	 * @param targetStream the target OutputStream
@@ -42,6 +43,11 @@ public class DelegatingServletOutputStream extends ServletOutputStream {
 	public DelegatingServletOutputStream(OutputStream targetStream) {
 		this.targetStream = targetStream;
 	}
+
+	public OutputStream getTargetStream() {
+		return targetStream;
+	}
+
 
 	public void write(int b) throws IOException {
 		this.targetStream.write(b);

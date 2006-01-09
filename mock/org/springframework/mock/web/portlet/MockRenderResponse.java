@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Locale;
 
+import javax.portlet.PortalContext;
 import javax.portlet.PortletURL;
 import javax.portlet.RenderResponse;
 
@@ -34,6 +35,7 @@ import org.springframework.web.util.WebUtils;
  * Mock implementation of the RenderResponse interface.
  *
  * @author John A. Lewis
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class MockRenderResponse extends MockPortletResponse implements RenderResponse {
@@ -58,7 +60,25 @@ public class MockRenderResponse extends MockPortletResponse implements RenderRes
 
 	private String includedUrl;
 
-	
+
+	/**
+	 * Create a new MockRenderResponse.
+	 * @param portalContext the PortalContext defining the supported
+	 * PortletModes and WindowStates
+	 */
+	public MockRenderResponse(PortalContext portalContext) {
+		super(portalContext);
+	}
+
+	/**
+	 * Create a new MockRenderResponse with a MockPortalContext.
+	 * @see MockPortalContext
+	 */
+	public MockRenderResponse() {
+		super();
+	}
+
+
 	//---------------------------------------------------------------------
 	// RenderResponse methods
 	//---------------------------------------------------------------------
@@ -68,12 +88,12 @@ public class MockRenderResponse extends MockPortletResponse implements RenderRes
 	}
 
 	public PortletURL createRenderURL() {
-		PortletURL url = new MockPortletURL("render");
+		PortletURL url = new MockPortletURL(getPortalContext(), MockPortletURL.URL_TYPE_RENDER);
 		return url;
 	}
 
 	public PortletURL createActionURL() {
-		PortletURL url = new MockPortletURL("action");
+		PortletURL url = new MockPortletURL(getPortalContext(), MockPortletURL.URL_TYPE_ACTION);
 		return url;
 	}
 
@@ -93,6 +113,10 @@ public class MockRenderResponse extends MockPortletResponse implements RenderRes
 		this.contentType = contentType;
 	}
 
+	public void setCharacterEncoding(String characterEncoding) {
+		this.characterEncoding = characterEncoding;
+	}
+
 	public String getCharacterEncoding() {
 		return this.characterEncoding;
 	}
@@ -105,6 +129,22 @@ public class MockRenderResponse extends MockPortletResponse implements RenderRes
 			this.writer = new PrintWriter(targetWriter);
 		}
 		return this.writer;
+	}
+
+	public byte[] getContentAsByteArray() {
+		flushBuffer();
+		return this.outputStream.toByteArray();
+	}
+
+	public String getContentAsString() throws UnsupportedEncodingException {
+		flushBuffer();
+		return (this.characterEncoding != null)
+				? this.outputStream.toString(this.characterEncoding)
+				: this.outputStream.toString();
+	}
+
+	public void setLocale(Locale locale) {
+		this.locale = locale;
 	}
 
 	public Locale getLocale() {
@@ -141,6 +181,10 @@ public class MockRenderResponse extends MockPortletResponse implements RenderRes
 		this.outputStream.reset();
 	}
 
+	public void setCommitted(boolean committed) {
+		this.committed = committed;
+	}
+
 	public boolean isCommitted() {
 		return this.committed;
 	}
@@ -158,32 +202,8 @@ public class MockRenderResponse extends MockPortletResponse implements RenderRes
 
 
 	//---------------------------------------------------------------------
-	// MockRenderReponse methods
+	// Methods for MockPortletRequestDispatcher
 	//---------------------------------------------------------------------
-
-	public void setCharacterEncoding(String characterEncoding) {
-		this.characterEncoding = characterEncoding;
-	}
-
-	public void setLocale(Locale locale) {
-		this.locale = locale;
-	}
-
-	public void setCommitted(boolean committed) {
-		this.committed = committed;
-	}
-
-	public byte[] getContentAsByteArray() {
-		flushBuffer();
-		return this.outputStream.toByteArray();
-	}
-
-	public String getContentAsString() throws UnsupportedEncodingException {
-		flushBuffer();
-		return (this.characterEncoding != null)
-				? this.outputStream.toString(this.characterEncoding)
-				: this.outputStream.toString();
-	}
 
 	public void setIncludedUrl(String includedUrl) {
 		this.includedUrl = includedUrl;

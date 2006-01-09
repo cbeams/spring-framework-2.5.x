@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 package org.springframework.mock.web;
 
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.Properties;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+
+import org.springframework.util.Assert;
 
 /**
  * Mock implementation of the ServletConfig interface.
@@ -36,9 +38,9 @@ public class MockServletConfig implements ServletConfig {
 
 	private final ServletContext servletContext;
 
-	private final String name;
+	private final String servletName;
 	
-	private final Hashtable initParameters = new Hashtable();
+	private final Properties initParameters = new Properties();
 
 
 	/**
@@ -52,32 +54,34 @@ public class MockServletConfig implements ServletConfig {
 	/**
 	 * Create new MockServletConfig.
 	 * @param servletContext the ServletContext that the servlet runs in
-	 * @param name the name of the servlet
+	 * @param servletName the name of the servlet
 	 */
-	public MockServletConfig(ServletContext servletContext, String name) {
+	public MockServletConfig(ServletContext servletContext, String servletName) {
 		this.servletContext = servletContext;
-		this.name = name;
+		this.servletName = servletName;
 	}
 
 
+	public String getServletName() {
+		return servletName;
+	}
+
+	public ServletContext getServletContext() {
+		return servletContext;
+	}
+
 	public void addInitParameter(String name, String value) {
-		this.initParameters.put(name, value);
+		Assert.notNull(name, "Parameter name must not be null");
+		this.initParameters.setProperty(name, value);
 	}
 
 	public String getInitParameter(String name) {
-		return (String) this.initParameters.get(name);
+		Assert.notNull(name, "Parameter name must not be null");
+		return this.initParameters.getProperty(name);
 	}
 
 	public Enumeration getInitParameterNames() {
 		return this.initParameters.keys();
 	}
 
-	public ServletContext getServletContext() {
-		return servletContext;
-	}
-	
-	public String getServletName() {
-		return name;
-	}
-	
 }

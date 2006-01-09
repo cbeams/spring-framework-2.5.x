@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -261,6 +261,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * parameter name, they will be replaced.
 	 */
 	public void setParameter(String name, String[] values) {
+		Assert.notNull(name, "Parameter name must not be null");
 		this.parameters.put(name, values);
 	}
 
@@ -279,6 +280,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * parameter name, the given values will be added to the end of the list.
 	 */
 	public void addParameter(String name, String[] values) {
+		Assert.notNull(name, "Parameter name must not be null");
 		String[] oldArr = (String[]) this.parameters.get(name);
 		if (oldArr != null) {
 			String[] newArr = new String[oldArr.length + values.length];
@@ -295,10 +297,12 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * Remove already registered values for the specified HTTP parameter, if any.
 	 */
 	public void removeParameter(String name) {
+		Assert.notNull(name, "Parameter name must not be null");
 		this.parameters.remove(name);
 	}
 
 	public String getParameter(String name) {
+		Assert.notNull(name, "Parameter name must not be null");
 		String[] arr = (String[]) this.parameters.get(name);
 		return (arr != null && arr.length > 0 ? arr[0] : null);
 	}
@@ -308,6 +312,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String[] getParameterValues(String name) {
+		Assert.notNull(name, "Parameter name must not be null");
 		return (String[]) this.parameters.get(name);
 	}
 
@@ -376,6 +381,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public void setAttribute(String name, Object value) {
+		Assert.notNull(name, "Attribute name must not be null");
 		if (value != null) {
 			this.attributes.put(name, value);
 		}
@@ -385,6 +391,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public void removeAttribute(String name) {
+		Assert.notNull(name, "Attribute name must not be null");
 		this.attributes.remove(name);
 	}
 
@@ -392,6 +399,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * Add a new preferred locale, before any existing locales.
 	 */
 	public void addPreferredLocale(Locale locale) {
+		Assert.notNull(locale, "Locale must not be null");
 		this.locales.add(0, locale);
 	}
 
@@ -490,8 +498,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * @see #getIntHeader
 	 */
 	public void addHeader(String name, Object value) {
-		Assert.notNull(name, "name must not be null");
-		Assert.notNull(value, "value must not be null");
+		Assert.notNull(name, "Header name must not be null");
+		Assert.notNull(value, "Header value must not be null");
 		Object oldValue = this.headers.get(name);
 		if (oldValue instanceof List) {
 			List list = (List) oldValue;
@@ -536,7 +544,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public long getDateHeader(String name) {
-		Assert.notNull(name, "name must not be null");
+		Assert.notNull(name, "Header name must not be null");
 		Object value = this.headers.get(name);
 		if (value instanceof Date) {
 			return ((Date) value).getTime();
@@ -554,7 +562,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getHeader(String name) {
-		Assert.notNull(name, "name must not be null");
+		Assert.notNull(name, "Header name must not be null");
 		Object value = this.headers.get(name);
 		if (value instanceof List) {
 			return StringUtils.collectionToCommaDelimitedString((List) value);
@@ -568,7 +576,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public Enumeration getHeaders(String name) {
-		Assert.notNull(name, "name must not be null");
+		Assert.notNull(name, "Header name must not be null");
 		Object value = this.headers.get(name);
 		if (value instanceof List) {
 			return Collections.enumeration((List) value);
@@ -588,7 +596,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public int getIntHeader(String name) {
-		Assert.notNull(name, "name must not be null");
+		Assert.notNull(name, "Header name must not be null");
 		Object value = this.headers.get(name);
 		if (value instanceof Number) {
 			return ((Number) value).intValue();

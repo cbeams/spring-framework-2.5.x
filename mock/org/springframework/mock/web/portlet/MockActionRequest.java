@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import javax.portlet.ActionRequest;
  * Mock implementation of the ActionRequest interface.
  *
  * @author John A. Lewis
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class MockActionRequest extends MockPortletRequest implements ActionRequest {
@@ -41,9 +42,9 @@ public class MockActionRequest extends MockPortletRequest implements ActionReque
 	private String contentType;
 
 	
-	//---------------------------------------------------------------------
-	// ActionRequest methods
-	//---------------------------------------------------------------------
+	public void setContent(byte[] content) {
+		this.content = content;
+	}
 
 	public InputStream getPortletInputStream() throws IOException {
 		if (this.content != null) {
@@ -74,25 +75,16 @@ public class MockActionRequest extends MockPortletRequest implements ActionReque
 		return characterEncoding;
 	}
 
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
 	public String getContentType() {
 		return contentType;
 	}
 
 	public int getContentLength() {
 		return (this.content != null ? content.length : -1);
-	}
-
-	
-	//---------------------------------------------------------------------
-	// MockActionRequest methods
-	//---------------------------------------------------------------------
-
-	public void setContent(byte[] content) {
-		this.content = content;
-	}
-
-	public void setContentType(String contentType) {
-		this.contentType = contentType;
 	}
 
 }

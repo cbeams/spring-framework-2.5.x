@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.Hashtable;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
+
+import org.springframework.util.Assert;
 
 /**
  * Mock implementation of the HttpSession interface.
@@ -108,6 +110,7 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	public Object getAttribute(String name) {
+		Assert.notNull(name, "Attribute name must not be null");
 		return this.attributes.get(name);
 	}
 
@@ -124,6 +127,7 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	public void setAttribute(String name, Object value) {
+		Assert.notNull(name, "Attribute name must not be null");
 		if (value != null) {
 			this.attributes.put(name, value);
 		}
@@ -137,6 +141,7 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	public void removeAttribute(String name) {
+		Assert.notNull(name, "Attribute name must not be null");
 		this.attributes.remove(name);
 	}
 
@@ -154,7 +159,7 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	public void setNew(boolean value) {
-		isNew = value;
+		this.isNew = value;
 	}
 
 	public boolean isNew() {

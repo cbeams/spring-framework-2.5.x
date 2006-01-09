@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,17 +36,20 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.Assert;
 import org.springframework.web.util.WebUtils;
 
 /**
  * Mock implementation of the PortletContext interface.
  *
  * @author John A. Lewis
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class MockPortletContext implements PortletContext {
 
 	private static final String TEMP_DIR_SYSTEM_PROPERTY = "java.io.tmpdir";
+
 
 	private final Log logger = LogFactory.getLog(getClass());
 
@@ -54,11 +57,13 @@ public class MockPortletContext implements PortletContext {
 	
 	private final ResourceLoader resourceLoader;
 
-	private final Properties initParameters = new Properties();
-
 	private final Hashtable attributes = new Hashtable();
 
-	
+	private final Properties initParameters = new Properties();
+
+	private String portletContextName = "MockPortletContext";
+
+
 	/**
 	 * Create a new MockPortletContext with no base path and a 
 	 * DefaultResourceLoader (i.e. the classpath root as WAR root).
@@ -102,10 +107,19 @@ public class MockPortletContext implements PortletContext {
 		}
 	}
 
-	
-	//---------------------------------------------------------------------
-	// PortletContext methods
-	//---------------------------------------------------------------------
+	/**
+	 * Build a full resource location for the given path,
+	 * prepending the resource base path of this MockPortletContext.
+	 * @param path the path as specified
+	 * @return the full resource path
+	 */
+	protected String getResourceLocation(String path) {
+		if (!path.startsWith("/")) {
+			path = "/" + path;
+		}
+		return this.resourceBasePath + path;
+	}
+
 	
 	public String getServerInfo() {
 		return "MockPortal/1.0";
@@ -195,17 +209,25 @@ public class MockPortletContext implements PortletContext {
 	}
 
 	public void setAttribute(String name, Object value) {
-		if (value != null)
+		if (value != null) {
 			this.attributes.put(name, value);
-		else
+		}
+		else {
 			this.attributes.remove(name);
+		}
 	}
 
 	public void removeAttribute(String name) {
 		this.attributes.remove(name);
 	}
 
+	public void addInitParameter(String name, String value) {
+		Assert.notNull(name, "Parameter name must not be null");
+		this.initParameters.setProperty(name, value);
+	}
+
 	public String getInitParameter(String name) {
+		Assert.notNull(name, "Parameter name must not be null");
 		return this.initParameters.getProperty(name);
 	}
 
@@ -221,30 +243,12 @@ public class MockPortletContext implements PortletContext {
 		logger.info(message, t);
 	}
 
-	public String getPortletContextName() {
-        return "MockPortletContext";
-    }
-
-	
-	//---------------------------------------------------------------------
-	// MockPortletContext methods
-	//---------------------------------------------------------------------
-	
-	public void addInitParameter(String name, String value) {
-		this.initParameters.put(name, value);
+	public void setPortletContextName(String portletContextName) {
+		this.portletContextName = portletContextName;
 	}
 
-	/**
-	 * Build a full resource location for the given path,
-	 * prepending the resource base path of this MockServletContext.
-	 * @param path the path as specified
-	 * @return the full resource path
-	 */
-	protected String getResourceLocation(String path) {
-		if (!path.startsWith("/")) {
-			path = "/" + path;
-		}
-		return this.resourceBasePath + path;
+	public String getPortletContextName() {
+		return portletContextName;
 	}
 
 }
