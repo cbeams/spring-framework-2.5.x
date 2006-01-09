@@ -30,9 +30,10 @@ import javax.servlet.ServletRequest;
  *
  * @author Jean-Pierre Pawlak
  * @since 08.05.2003
- * @see BindUtils#bind(ServletRequest, Object, String, BindInitializer)
- * @see BindUtils#bindAndValidate(ServletRequest, Object, String, org.springframework.validation.Validator, BindInitializer)
- * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder(javax.servlet.http.HttpServletRequest, ServletRequestDataBinder)
+ * @deprecated since Spring 1.2.7: prefer direct ServletRequestDataBinder usage,
+ * potentially in combination with a PropertyEditorRegistrar
+ * @see ServletRequestDataBinder
+ * @see org.springframework.beans.PropertyEditorRegistrar
  */
 public interface BindInitializer {
 
@@ -48,7 +49,6 @@ public interface BindInitializer {
 	 * @param binder new binder instance
 	 * @throws ServletException in case of invalid state or arguments
 	 * @see org.springframework.validation.DataBinder#registerCustomEditor
-	 * @see BindUtils#bind(ServletRequest,Object,String,BindInitializer)
 	 */
 	void initBinder(ServletRequest request, ServletRequestDataBinder binder) throws ServletException;
 
