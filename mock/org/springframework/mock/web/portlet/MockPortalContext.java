@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package org.springframework.mock.web.portlet;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
+import java.util.Vector;
 
 import javax.portlet.PortalContext;
 import javax.portlet.PortletMode;
@@ -29,31 +29,50 @@ import javax.portlet.WindowState;
  * Mock implementation of the PortalContext interface.
  *
  * @author John A. Lewis
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class MockPortalContext implements PortalContext {
 
 	private final Properties properties = new Properties();
 
-	private final ArrayList portletModes = new ArrayList();
+	private final Vector portletModes;
 
-	private final ArrayList windowStates = new ArrayList();
+	private final Vector windowStates;
 
 
+	/**
+	 * Create a new MockPortalContext
+	 * with default PortletModes (VIEW, EDIT, HELP)
+	 * and default WindowStates (NORMAL, MAXIMIZED, MINIMIZED).
+	 * @see javax.portlet.PortletMode
+	 * @see javax.portlet.WindowState
+	 */
 	public MockPortalContext() {
+		this.portletModes = new Vector(3);
 		this.portletModes.add(PortletMode.VIEW);
 		this.portletModes.add(PortletMode.EDIT);
 		this.portletModes.add(PortletMode.HELP);
+
+		this.windowStates = new Vector(3);
 		this.windowStates.add(WindowState.NORMAL);
 		this.windowStates.add(WindowState.MAXIMIZED);
 		this.windowStates.add(WindowState.MINIMIZED);
 	}
 
-    
-	//---------------------------------------------------------------------
-	// PortalContext methods
-	//---------------------------------------------------------------------
-	
+	/**
+	 * Create a new MockPortalContext with the given PortletModes and WindowStates.
+	 * @param supportedPortletModes the List of supported PortletMode instances
+	 * @param supportedWindowStates the List of supported WindowState instances
+	 * @see javax.portlet.PortletMode
+	 * @see javax.portlet.WindowState
+	 */
+	public MockPortalContext(List supportedPortletModes, List supportedWindowStates) {
+		this.portletModes = new Vector(supportedPortletModes);
+		this.windowStates = new Vector(supportedWindowStates);
+	}
+
+
 	public String getPortalInfo() {
 		return "MockPortal/1.0";
 	}
@@ -67,11 +86,11 @@ public class MockPortalContext implements PortalContext {
 	}
 
 	public Enumeration getSupportedPortletModes() {
-		return Collections.enumeration(this.portletModes);
+		return this.portletModes.elements();
 	}
 
 	public Enumeration getSupportedWindowStates() {
-		return Collections.enumeration(this.windowStates);
+		return this.windowStates.elements();
 	}
 
 }
