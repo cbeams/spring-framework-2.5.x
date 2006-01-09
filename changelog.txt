@@ -65,6 +65,7 @@ Package org.springframework.ui
 
 Package org.springframework.util
 * added "isNull()" methods to Assert class
+* ClassUtils's "forName(String)" method uses "getDefaultClassLoader()" instead of thread context ClassLoader only
 * fixed "StringUtils.delimitedListToStringArray" to properly handle an empty String as delimiter
 * added "setPathSeparator" method to AntPathMatcher, allowing to override the default path separator "/"
 * fixed AntPathMatcher to correctly treat "*" right after separator, i.e. to accept path "/test/" for pattern "/test/*"
@@ -74,6 +75,7 @@ Package org.springframework.util
 
 Package org.springframework.web
 * "contextConfigLocation" params in "web.xml" support "${...}" style placeholders for system properties
+* deprecated BindUtils and BindInitializer in package "web.bind" in favor of direct ServletRequestDataBinder usage
 * added "currentFormObject" template method to AbstractFormController, for post-processing of a session form object
 * FixedLocaleResolver returns the JVM's default Locale if no explicit default Locale specified
 * turned AbstractCommandController's and AbstractFormController's "handleRequestInternal" methods non-final
