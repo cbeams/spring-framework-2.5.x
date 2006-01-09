@@ -35,8 +35,8 @@ import org.springframework.jdbc.support.lob.LobHandler;
  *
  * <p>Can also be defined in generic Hibernate mappings, as DefaultLobCreator will
  * work with most JDBC-compliant database drivers. In this case, the field type
- * does not have to be BLOB: For databases like MySQL and MS SQL Server, any
- * large enough binary type will work.
+ * does not have to be CLOB: For databases like MySQL and MS SQL Server, any
+ * large enough character type will work.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -73,12 +73,14 @@ public class ClobStringType extends AbstractLobType {
 	protected Object nullSafeGetInternal(
 			ResultSet rs, String[] names, Object owner, LobHandler lobHandler)
 			throws SQLException {
+
 		return lobHandler.getClobAsString(rs, names[0]);
 	}
 
 	protected void nullSafeSetInternal(
 			PreparedStatement ps, int index, Object value, LobCreator lobCreator)
 			throws SQLException {
+
 		lobCreator.setClobAsString(ps, index, (String) value);
 	}
 
