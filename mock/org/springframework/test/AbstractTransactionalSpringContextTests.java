@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test;
 
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
@@ -36,6 +37,19 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * <p>If data should be left in the database, call the setComplete() method in each test.
  * The defaultRollback() property, which defaults to true, determines whether
  * transactions will complete by default.
+ * 
+ * <p>It is even possible to end the transaction early; for example, to verify lazy 
+ * loading behaviour of an O/R mapping tool. (This is a valuable away to avoid
+ * unexpected errors when testing a web UI, for example.) 
+ * Simply call the endTransaction() method.
+ * Execution will then occur without a transactional context. 
+ * <br>Spring 2.0 introduces the new startNewTransaction() method, which may
+ * be called after a call to endTransaction() if you wish to create a new transaction,
+ * quite independent of the old transaction. The new transaction's default fate will be to roll back,
+ * unless setComplete() is called again during the scope of the new transaction.
+ * Any number of transactions may be created and ended in this way.
+ * The final transaction will automatically be rolled back when the test case is
+ * torn down. 
  *
  * <p>Transactional behaviour requires a single bean in the context implementing the
  * PlatformTransactionManager interface. This will be set by the superclass's
@@ -68,6 +82,11 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * Should we commit this transaction?
 	 */
 	private boolean complete;
+	
+	/**
+	 * Number of transactions started
+	 */
+	private int transactionsStarted;
 
 
 	/**
@@ -116,12 +135,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 		onSetUpBeforeTransaction();
 
 		if (this.transactionManager != null) {
-			// start a transaction
-			this.transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
-				if (logger.isInfoEnabled()) {
-					logger.info("Began transaction: transaction manager [" + this.transactionManager + "]; defaultRollback "
-							+ this.defaultRollback);
-				}
+			startNewTransaction();
 		}
 		else {
 			logger.info("No transaction manager set: tests will NOT run within a transaction");
@@ -129,6 +143,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 		onSetUpInTransaction();
 	}
+
 
 	/**
 	 * Subclasses can override this method to perform any setup operations,
@@ -227,6 +242,26 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 			finally {
 				this.transactionStatus = null;
 			}
+		}
+	}
+	
+	/**
+	 * Start a new transaction. Only call this method if endTransaction() has been called.
+	 * setComplete() can be used again in the new transaction.
+	 * The fate of the new transaction, by default, will be the usual rollback.
+	 */
+	protected void startNewTransaction() throws TransactionException {
+		// start a transaction
+		if (this.transactionStatus != null) {
+			throw new IllegalStateException("Cannot start new transaction without ending existing transaction:" +
+					"Invoke endTransaction() before startNewTransaction()");
+		}
+		this.transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
+		++this.transactionsStarted;
+		this.complete = false;
+		if (logger.isInfoEnabled()) {
+			logger.info("Began transaction (" + transactionsStarted + "): transaction manager [" + this.transactionManager + "]; defaultRollback "
+					+ this.defaultRollback);
 		}
 	}
 
