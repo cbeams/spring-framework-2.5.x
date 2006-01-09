@@ -23,6 +23,8 @@ import javax.servlet.ServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.Assert;
+
 /**
  * Mock implementation of the RequestDispatcher interface.
  *
@@ -39,28 +41,39 @@ public class MockRequestDispatcher implements RequestDispatcher {
 
 	private final String url;
 
+
+	/**
+	 * Create a new MockRequestDispatcher for the given URL.
+	 * @param url the URL to dispatch to.
+	 */
 	public MockRequestDispatcher(String url) {
+		Assert.notNull(url, "URL must not be null");
 		this.url = url;
 	}
 
-	public void forward(ServletRequest servletRequest, ServletResponse servletResponse) {
-		if (servletResponse.isCommitted()) {
+
+	public void forward(ServletRequest request, ServletResponse response) {
+		Assert.notNull(request, "Request must not be null");
+		Assert.notNull(response, "Response must not be null");
+		if (response.isCommitted()) {
 			throw new IllegalStateException("Cannot perform forward - response is already committed");
 		}
-		if (!(servletResponse instanceof MockHttpServletResponse)) {
+		if (!(response instanceof MockHttpServletResponse)) {
 			throw new IllegalArgumentException("MockRequestDispatcher requires MockHttpServletResponse");
 		}
-		((MockHttpServletResponse) servletResponse).setForwardedUrl(this.url);
+		((MockHttpServletResponse) response).setForwardedUrl(this.url);
 		if (logger.isDebugEnabled()) {
 			logger.debug("MockRequestDispatcher: forwarding to URL [" + this.url + "]");
 		}
 	}
 
-	public void include(ServletRequest servletRequest, ServletResponse servletResponse) {
-		if (!(servletResponse instanceof MockHttpServletResponse)) {
+	public void include(ServletRequest request, ServletResponse response) {
+		Assert.notNull(request, "Request must not be null");
+		Assert.notNull(response, "Response must not be null");
+		if (!(response instanceof MockHttpServletResponse)) {
 			throw new IllegalArgumentException("MockRequestDispatcher requires MockHttpServletResponse");
 		}
-		((MockHttpServletResponse) servletResponse).setIncludedUrl(this.url);
+		((MockHttpServletResponse) response).setIncludedUrl(this.url);
 		if (logger.isDebugEnabled()) {
 			logger.debug("MockRequestDispatcher: including URL [" + this.url + "]");
 		}

@@ -35,6 +35,7 @@ public class DelegatingServletInputStream extends ServletInputStream {
 
 	private final InputStream sourceStream;
 
+
 	/**
 	 * Create a new DelegatingServletInputStream.
 	 * @param sourceStream the sourceStream InputStream
@@ -46,6 +47,7 @@ public class DelegatingServletInputStream extends ServletInputStream {
 	public InputStream getSourceStream() {
 		return sourceStream;
 	}
+
 
 	public int read() throws IOException {
 		return this.sourceStream.read();

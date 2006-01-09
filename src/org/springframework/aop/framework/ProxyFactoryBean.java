@@ -40,6 +40,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.core.OrderComparator;
+import org.springframework.util.ClassUtils;
 
 /**
  * FactoryBean implementation for use to source AOP proxies from a Spring BeanFactory.
@@ -118,6 +119,14 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 */
 	private String[] interceptorNames;
 	
+	/**
+	 * Name of the target or TargetSource bean. Null if the TargetSource is not specified in
+	 * the interceptorNames list.
+	 */
+	private String targetName;
+
+	private boolean autodetectInterfaces = false;
+
 	private boolean singleton = true;
 
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
@@ -132,12 +141,6 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * object is initialized.
 	 */
 	private BeanFactory beanFactory;
-
-	/**
-	 * Name of the target or TargetSource bean. Null if the TargetSource is not specified in
-	 * the interceptorNames list.
-	 */
-	private String targetName;
 
 	/** If this is a singleton, the cached singleton proxy instance */
 	private Object singletonInstance;
@@ -187,6 +190,17 @@ public class ProxyFactoryBean extends AdvisedSupport
 	}
 
 	/**
+	 * Set whether to autodetect proxy interfaces if none specified.
+	 * Will only kick in if "proxyTargetClass" is off (which is the default).
+	 * <p>Default is "false": If no proxy interfaces specified, a CGLIB
+	 * proxy for the full target class will be created. Specify "true" to
+	 * autodetect all interfaces implemented by the target class in this case.
+	 */
+	public void setAutodetectInterfaces(boolean autodetectInterfaces) {
+		this.autodetectInterfaces = autodetectInterfaces;
+	}
+
+	/**
 	 * Set the value of the singleton property. Governs whether this factory
 	 * should always return the same proxy instance (which implies the same target)
 	 * or whether it should return a new prototype instance, which implies that
@@ -214,8 +228,13 @@ public class ProxyFactoryBean extends AdvisedSupport
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
 		createAdvisorChain();
+
 		if (this.singleton) {
 			this.targetSource = freshTargetSource();
+			if (this.autodetectInterfaces && getProxiedInterfaces().length == 0 && !isProxyTargetClass()) {
+				// Rely on AOP infrastructure to tell us what interfaces to proxy.
+				setInterfaces(ClassUtils.getAllInterfacesForClass(this.targetSource.getTargetClass()));
+			}
 			// Eagerly initialize the shared singleton instance.
 			getSingletonInstance();
 			// We must listen to superclass advice change events to recache the singleton
@@ -223,6 +242,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 			addListener(this);
 		}
 	}
+
 
 	/**
 	 * Return a proxy. Invoked when clients obtain beans from this factory bean.
@@ -232,7 +252,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * @return a fresh AOP proxy reflecting the current state of this factory
 	 */
 	public Object getObject() throws BeansException {
-		return this.singleton ? getSingletonInstance() : newPrototypeInstance();
+		return (this.singleton ? getSingletonInstance() : newPrototypeInstance());
 	}
 
 	/**
@@ -271,9 +291,15 @@ public class ProxyFactoryBean extends AdvisedSupport
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating copy of prototype ProxyFactoryBean config: " + this);
 		}
+
 		AdvisedSupport copy = new AdvisedSupport();
 		// The copy needs a fresh advisor chain, and a fresh TargetSource.
-		copy.copyConfigurationFrom(this, freshTargetSource(), freshAdvisorChain());
+		TargetSource targetSource = freshTargetSource();
+		copy.copyConfigurationFrom(this, targetSource, freshAdvisorChain());
+		if (this.autodetectInterfaces && getProxiedInterfaces().length == 0 && !isProxyTargetClass()) {
+			// Rely on AOP infrastructure to tell us what interfaces to proxy.
+			copy.setInterfaces(ClassUtils.getAllInterfacesForClass(targetSource.getTargetClass()));
+		}
 		copy.setFrozen(this.freezeProxy);
 
 		if (logger.isDebugEnabled()) {
@@ -468,7 +494,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 	/**
 	 * Return a TargetSource to use when creating a proxy. If the target was not
 	 * specified at the end of the interceptorNames list, the TargetSource will be
-	 * this class' TargetSource member. Otherwise, we get the target bean and wrap
+	 * this class's TargetSource member. Otherwise, we get the target bean and wrap
 	 * it in a TargetSource if necessary.
 	 */
 	private TargetSource freshTargetSource() {
@@ -483,7 +509,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 				logger.debug("Refreshing target with name '" + this.targetName + "'");
 			}
 			Object target = this.beanFactory.getBean(this.targetName);
-			return (target instanceof TargetSource) ? (TargetSource) target : new SingletonTargetSource(target);
+			return (target instanceof TargetSource ? (TargetSource) target : new SingletonTargetSource(target));
 		}
 	}
 
@@ -536,7 +562,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 		
 		public PrototypePlaceholderAdvisor(String beanName) {
 			this.beanName = beanName;
-			this.message = "Placeholder for prototype Advisor/Advice with bean name ='" + beanName + "'";
+			this.message = "Placeholder for prototype Advisor/Advice with bean name '" + beanName + "'";
 		}
 		
 		public String getBeanName() {

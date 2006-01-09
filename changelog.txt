@@ -7,7 +7,9 @@ Changes in version 1.2.7 (16.1.2006)
 ------------------------------------
 
 Package org.springframework.aop
+* added "autodetectInterfaces" property to ProxyFactoryBean, for TransactionProxyFactoryBean-style interface detection
 * refined ThreadLocalTargetSource's synchronization to guarantee thread-safe destruction on shutdown
+* added "hideProxyClassNames" property to AbstractTraceInterceptor, to log with target class instead of proxy class
 
 Package org.springframework.beans
 * fixed BeanWrapperImpl to pass its "extractOldValueForEditor" setting on to nested BeanWrappers
@@ -31,6 +33,7 @@ Package org.springframework.jdbc
 * added "trackRowsAffected" property to BatchSqlUpdate, allowing to turn off the row counts list to save memory
 
 Package org.springframework.mock
+* made "servletContextName" configurable in MockServletContext
 * added "set/removeParameter" methods to MockHttpServletRequest, allowing to replace/remove existing parameters
 
 Package org.springframework.orm
@@ -40,6 +43,7 @@ Package org.springframework.orm
 * Hibernate LocalSessionFactoryBean exposes its DataSource on "SessionFactory.close()", for potential schema export
 * added "configLocations" property to LocalSessionFactoryBean for Hibernate3, allowing to load multiple config files
 * added "replicate" convenience methods to HibernateTemplate for both Hibernate2 and Hibernate3
+* added BlobStringType with configurable character encoding for both Hibernate2 and Hibernate3
 
 Package org.springframework.remoting
 * RmiServiceExporter performs explicit RMI unexport if binding to the registry failed, to avoid dangling exports

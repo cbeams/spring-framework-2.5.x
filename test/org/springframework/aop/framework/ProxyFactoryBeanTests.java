@@ -70,11 +70,26 @@ public class ProxyFactoryBeanTests extends TestCase {
 		this.factory = new XmlBeanFactory(new ClassPathResource("proxyFactoryTests.xml", getClass()), parent);
 	}
 
-	public void testIsDynamicProxy() {
+	public void testIsDynamicProxyWhenInterfaceSpecified() {
 		ITestBean test1 = (ITestBean) factory.getBean("test1");
 		assertTrue("test1 is a dynamic proxy", Proxy.isProxyClass(test1.getClass()));
 	}
 	
+	public void testIsDynamicProxyWhenInterfaceSpecifiedForPrototype() {
+		ITestBean test1 = (ITestBean) factory.getBean("test2");
+		assertTrue("test2 is a dynamic proxy", Proxy.isProxyClass(test1.getClass()));
+	}
+
+	public void testIsDynamicProxyWhenAutodetectingInterfaces() {
+		ITestBean test1 = (ITestBean) factory.getBean("test3");
+		assertTrue("test3 is a dynamic proxy", Proxy.isProxyClass(test1.getClass()));
+	}
+
+	public void testIsDynamicProxyWhenAutodetectingInterfacesForPrototype() {
+		ITestBean test1 = (ITestBean) factory.getBean("test4");
+		assertTrue("test4 is a dynamic proxy", Proxy.isProxyClass(test1.getClass()));
+	}
+
 	/**
 	 * Test that it's forbidden to specify TargetSource in both
 	 * interceptor chain and targetSource property.

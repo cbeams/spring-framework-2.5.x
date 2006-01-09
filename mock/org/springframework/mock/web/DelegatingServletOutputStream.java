@@ -35,6 +35,7 @@ public class DelegatingServletOutputStream extends ServletOutputStream {
 
 	private final OutputStream targetStream;
 
+
 	/**
 	 * Create a new DelegatingServletOutputStream.
 	 * @param targetStream the target OutputStream
@@ -42,6 +43,11 @@ public class DelegatingServletOutputStream extends ServletOutputStream {
 	public DelegatingServletOutputStream(OutputStream targetStream) {
 		this.targetStream = targetStream;
 	}
+
+	public OutputStream getTargetStream() {
+		return targetStream;
+	}
+
 
 	public void write(int b) throws IOException {
 		this.targetStream.write(b);

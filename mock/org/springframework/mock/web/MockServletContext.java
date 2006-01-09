@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.Assert;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -85,6 +86,8 @@ public class MockServletContext implements ServletContext {
 	private final Properties initParameters = new Properties();
 
 	private final Hashtable attributes = new Hashtable();
+
+	private String servletContextName = "MockServletContext";
 
 
 	/**
@@ -260,11 +263,13 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public String getInitParameter(String name) {
+		Assert.notNull(name, "Parameter name must not be null");
 		return this.initParameters.getProperty(name);
 	}
 
 	public void addInitParameter(String name, String value) {
-		this.initParameters.put(name, value);
+		Assert.notNull(name, "Parameter name must not be null");
+		this.initParameters.setProperty(name, value);
 	}
 
 	public Enumeration getInitParameterNames() {
@@ -272,6 +277,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public Object getAttribute(String name) {
+		Assert.notNull(name, "Attribute name must not be null");
 		return this.attributes.get(name);
 	}
 
@@ -280,6 +286,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public void setAttribute(String name, Object value) {
+		Assert.notNull(name, "Attribute name must not be null");
 		if (value != null) {
 			this.attributes.put(name, value);
 		}
@@ -289,11 +296,16 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public void removeAttribute(String name) {
+		Assert.notNull(name, "Attribute name must not be null");
 		this.attributes.remove(name);
 	}
 
+	public void setServletContextName(String servletContextName) {
+		this.servletContextName = servletContextName;
+	}
+
 	public String getServletContextName() {
-		return "MockServletContext";
+		return servletContextName;
 	}
 
 }

@@ -212,6 +212,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	//---------------------------------------------------------------------
 
 	public void addCookie(Cookie cookie) {
+		Assert.notNull(cookie, "Cookie must not be null");
 		this.cookies.add(cookie);
 	}
 
@@ -220,6 +221,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public Cookie getCookie(String name) {
+		Assert.notNull(name, "Cookie name must not be null");
 		for (Iterator it = this.cookies.iterator(); it.hasNext();) {
 			Cookie cookie = (Cookie) it.next();
 			if (name.equals(cookie.getName())) {
@@ -230,14 +232,21 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public boolean containsHeader(String name) {
+		Assert.notNull(name, "Header name must not be null");
 		return this.headers.containsKey(name);
 	}
 
+	public Set getHeaderNames() {
+		return this.headers.keySet();
+	}
+
 	public Object getHeader(String name) {
+		Assert.notNull(name, "Header name must not be null");
 		return this.headers.get(name);
 	}
 
 	public List getHeaders(String name) {
+		Assert.notNull(name, "Header name must not be null");
 		Object value = this.headers.get(name);
 		if (value instanceof List) {
 			return (List) value;
@@ -248,10 +257,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		else {
 			return Collections.EMPTY_LIST;
 		}
-	}
-
-	public Set getHeaderNames() {
-		return this.headers.keySet();
 	}
 
 	public String encodeURL(String url) {
@@ -291,6 +296,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		if (this.committed) {
 			throw new IllegalStateException("Cannot send redirect - response is already committed");
 		}
+		Assert.notNull(url, "Redirect URL must not be null");
 		this.redirectedUrl = url;
 		this.committed = true;
 	}
@@ -300,6 +306,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public void setDateHeader(String name, long value) {
+		Assert.notNull(name, "Header name must not be null");
 		this.headers.put(name, new Long(value));
 	}
 
@@ -308,6 +315,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public void setHeader(String name, String value) {
+		Assert.notNull(name, "Header name must not be null");
 		this.headers.put(name, value);
 	}
 
@@ -316,6 +324,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public void setIntHeader(String name, int value) {
+		Assert.notNull(name, "Header name must not be null");
 		this.headers.put(name, new Integer(value));
 	}
 
@@ -324,8 +333,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	private void doAddHeader(String name, Object value) {
-		Assert.notNull(name, "name must not be null");
-		Assert.notNull(value, "value must not be null");
+		Assert.notNull(name, "Header name must not be null");
+		Assert.notNull(value, "Header value must not be null");
 		Object oldValue = this.headers.get(name);
 		if (oldValue instanceof List) {
 			List list = (List) oldValue;
