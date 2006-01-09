@@ -32,8 +32,8 @@ import javax.transaction.Synchronization;
 import javax.transaction.TransactionManager;
 
 import junit.framework.TestCase;
-import org.easymock.ArgumentsMatcher;
 import org.easymock.MockControl;
+import org.easymock.internal.ArrayMatcher;
 import org.hibernate.SessionFactory;
 import org.hibernate.classic.Session;
 
@@ -238,6 +238,98 @@ public class LobTypeTests extends TestCase {
 		tmControl.verify();
 	}
 
+	public void testBlobStringType() throws Exception {
+		String content = "content";
+		byte[] contentBytes = content.getBytes();
+		lobHandler.getBlobAsBytes(rs, "column");
+		lobHandlerControl.setReturnValue(contentBytes);
+		lobCreator.setBlobAsBytes(ps, 1, contentBytes);
+		lobCreatorControl.setMatcher(new ArrayMatcher());
+
+		lobHandlerControl.replay();
+		lobCreatorControl.replay();
+
+		BlobStringType type = new BlobStringType(lobHandler, null);
+		assertEquals(1, type.sqlTypes().length);
+		assertEquals(Types.BLOB, type.sqlTypes()[0]);
+		assertEquals(String.class, type.returnedClass());
+		assertTrue(type.equals("content", "content"));
+		assertEquals("content", type.deepCopy("content"));
+		assertFalse(type.isMutable());
+
+		assertEquals(content, type.nullSafeGet(rs, new String[] {"column"}, null));
+		TransactionSynchronizationManager.initSynchronization();
+		try {
+			type.nullSafeSet(ps, content, 1);
+			List synchs = TransactionSynchronizationManager.getSynchronizations();
+			assertEquals(1, synchs.size());
+			((TransactionSynchronization) synchs.get(0)).beforeCompletion();
+			((TransactionSynchronization) synchs.get(0)).afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
+		}
+		finally {
+			TransactionSynchronizationManager.clearSynchronization();
+		}
+	}
+
+	public void testBlobStringTypeWithJtaSynchronization() throws Exception {
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		MockJtaTransaction transaction = new MockJtaTransaction();
+		tm.getStatus();
+		tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		tm.getTransaction();
+		tmControl.setReturnValue(transaction, 1);
+
+		String content = "content";
+		byte[] contentBytes = content.getBytes();
+		lobHandler.getBlobAsBytes(rs, "column");
+		lobHandlerControl.setReturnValue(contentBytes);
+		lobCreator.setBlobAsBytes(ps, 1, contentBytes);
+		lobCreatorControl.setMatcher(new ArrayMatcher());
+
+		lobHandlerControl.replay();
+		lobCreatorControl.replay();
+
+		BlobStringType type = new BlobStringType(lobHandler, tm);
+		assertEquals(content, type.nullSafeGet(rs, new String[] {"column"}, null));
+		tmControl.replay();
+		type.nullSafeSet(ps, content, 1);
+		Synchronization synch = transaction.getSynchronization();
+		assertNotNull(synch);
+		synch.beforeCompletion();
+		synch.afterCompletion(Status.STATUS_COMMITTED);
+		tmControl.verify();
+	}
+
+	public void testBlobStringTypeWithJtaSynchronizationAndRollback() throws Exception {
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		MockJtaTransaction transaction = new MockJtaTransaction();
+		tm.getStatus();
+		tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		tm.getTransaction();
+		tmControl.setReturnValue(transaction, 1);
+
+		String content = "content";
+		byte[] contentBytes = content.getBytes();
+		lobHandler.getBlobAsBytes(rs, "column");
+		lobHandlerControl.setReturnValue(contentBytes);
+		lobCreator.setBlobAsBytes(ps, 1, contentBytes);
+		lobCreatorControl.setMatcher(new ArrayMatcher());
+
+		lobHandlerControl.replay();
+		lobCreatorControl.replay();
+
+		BlobStringType type = new BlobStringType(lobHandler, tm);
+		assertEquals(content, type.nullSafeGet(rs, new String[] {"column"}, null));
+		tmControl.replay();
+		type.nullSafeSet(ps, content, 1);
+		Synchronization synch = transaction.getSynchronization();
+		assertNotNull(synch);
+		synch.afterCompletion(Status.STATUS_ROLLEDBACK);
+		tmControl.verify();
+	}
+
 	public void testBlobByteArrayType() throws Exception {
 		byte[] content = "content".getBytes();
 		lobHandler.getBlobAsBytes(rs, "column");
@@ -336,14 +428,7 @@ public class LobTypeTests extends TestCase {
 		lobHandler.getBlobAsBinaryStream(rs, "column");
 		lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()));
 		lobCreator.setBlobAsBytes(ps, 1, baos.toByteArray());
-		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
-			public boolean matches(Object[] o1, Object[] o2) {
-				return Arrays.equals((byte[]) o1[2], (byte[]) o2[2]);
-			}
-			public String toString(Object[] objects) {
-				return null;
-			}
-		});
+		lobCreatorControl.setMatcher(new ArrayMatcher());
 
 		lobHandlerControl.replay();
 		lobCreatorControl.replay();
@@ -407,14 +492,7 @@ public class LobTypeTests extends TestCase {
 		lobHandler.getBlobAsBinaryStream(rs, "column");
 		lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()));
 		lobCreator.setBlobAsBytes(ps, 1, baos.toByteArray());
-		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
-			public boolean matches(Object[] o1, Object[] o2) {
-				return Arrays.equals((byte[]) o1[2], (byte[]) o2[2]);
-			}
-			public String toString(Object[] objects) {
-				return null;
-			}
-		});
+		lobCreatorControl.setMatcher(new ArrayMatcher());
 
 		lobHandlerControl.replay();
 		lobCreatorControl.replay();
@@ -452,14 +530,7 @@ public class LobTypeTests extends TestCase {
 		lobHandler.getBlobAsBinaryStream(rs, "column");
 		lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()));
 		lobCreator.setBlobAsBytes(ps, 1, baos.toByteArray());
-		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
-			public boolean matches(Object[] o1, Object[] o2) {
-				return Arrays.equals((byte[]) o1[2], (byte[]) o2[2]);
-			}
-			public String toString(Object[] objects) {
-				return null;
-			}
-		});
+		lobCreatorControl.setMatcher(new ArrayMatcher());
 
 		lobHandlerControl.replay();
 		lobCreatorControl.replay();
