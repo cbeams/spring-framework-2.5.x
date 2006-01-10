@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import javax.servlet.ServletException;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
+import org.xml.sax.InputSource;
 
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.FatalBeanException;
@@ -42,6 +43,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.ResourceTestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanIsAbstractException;
@@ -61,7 +63,6 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
-import org.xml.sax.InputSource;
 
 /**
  * Miscellaneous tests for XML bean definitions.
@@ -341,6 +342,20 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue("Correct circular reference", jenny.getSpouse() == david);
 		assertTrue("Correct circular reference", david.getSpouse() == jenny);
 		assertTrue("Correct circular reference", ego.getSpouse() == ego);
+	}
+
+	public void testCircularReferencesWithNotAllowed() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		xbf.setAllowCircularReferences(false);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(false);
+		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
+		try {
+			xbf.getBean("jenny");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.contains(BeanCurrentlyInCreationException.class));
+		}
 	}
 
 	public void testFactoryReferenceCircle() {
