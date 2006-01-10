@@ -18,6 +18,8 @@ Package org.springframework.beans
 * added overloaded constructor to StringArrayPropertyEditor, allowing to specify a custom separator for String splitting
 * changed FileEditor's behavior to consider input text as standard Spring resource location (instead of plain filename)
 * added "postProcessAfterInstantiation" method to InstantiationAwareBeanPostProcessor
+* reworked AbstractBeanFactory's currently-in-creation check to log debug message when unfinished singleton is returned
+* added "allowCircularReferences" flag to AbstractAutowireCapableBeanFactory, to disallow circular references completely
 
 Package org.springframework.core
 * added NestedIOException, deriving from java.io.IOException and adding NestedCheckedException-style root cause handling
@@ -48,7 +50,9 @@ Package org.springframework.orm
 * added full support for Java Persistence API 1.0 (JPA), in package "orm.jpa"
 
 Package org.springframework.samples
+* updated "views.properties" files in all sample applications to use "(class)" and "(parent)"
 * renamed PetClinic's "Entity" base class to "BaseEntity", to avoid name collision with the JPA Entity annotation
+* marked JPetStore's OrderForm, AccountForm and UserSession as Serializable
 
 Package org.springframework.scheduling
 * removed special Quartz 1.3 check from SchedulerFactoryBean: requires Quartz 1.4 or higher now
