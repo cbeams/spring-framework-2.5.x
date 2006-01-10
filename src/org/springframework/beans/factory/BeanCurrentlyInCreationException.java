@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public class BeanCurrentlyInCreationException extends BeanCreationException {
 	 */
 	public BeanCurrentlyInCreationException(String beanName) {
 		super(beanName,
-				"Requested bean is currently in creation (circular reference when autowiring constructor?)");
+				"Requested bean is currently in creation: Is there an unresolvable circular reference?");
 	}
 
 	/**
