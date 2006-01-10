@@ -29,12 +29,42 @@ import org.springframework.web.servlet.support.JstlUtils;
  * and resource bundle for JSTL's formatting and message tags,
  * using Spring's locale and message source.
  *
- * <p>This is a separate class mainly to avoid JSTL dependencies
- * in InternalResourceView itself.
+ * <p>Typical usage with InternalResourceViewResolver would look as follows,
+ * from the perspective of the DispatcherServlet context definition:
+ *
+ * <pre>
+ * &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+ *   &lt;property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/&gt;
+ *   &lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
+ *   &lt;property name="suffix" value=".jsp"/&gt;
+ * &lt;/bean&gt;
+ *
+ * &lt;bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
+ *   &lt;property name="basename" value="messages"/&gt;
+ * &lt;/bean&gt;</pre>
+ *
+ * Every view name returned from a handler will be translated to a JSP
+ * resource (for example: "myView" -> "/WEB-INF/jsp/myView.jsp"), using
+ * this view class to enable explicit JSTL support.
+ *
+ * <p>The specified MessageSource loads messages from "messages.properties" etc
+ * files in the class path. This will automatically be exposed to views as
+ * JSTL localization context, which the JSTL fmt tags (message etc) will use.
+ * Consider using Spring's ReloadableResourceBundleMessageSource instead of
+ * the standard ResourceBundleMessageSource for more sophistication.
+ * Of course, any other Spring components can share the same MessageSource.
+ *
+ * <p>This is a separate class mainly to avoid JSTL dependencies in
+ * InternalResourceView itself. JSTL has not been part of standard
+ * J2EE up until J2EE 1.4, so we can't assume the JSTL API jar to be
+ * available on the class path.
  *
  * @author Juergen Hoeller
  * @since 27.02.2003
  * @see org.springframework.web.servlet.support.JstlUtils#exposeLocalizationContext
+ * @see InternalResourceViewResolver
+ * @see org.springframework.context.support.ResourceBundleMessageSource
+ * @see org.springframework.context.support.ReloadableResourceBundleMessageSource
  */
 public class JstlView extends InternalResourceView {
 
@@ -46,7 +76,6 @@ public class JstlView extends InternalResourceView {
 		this.jstlAwareMessageSource =
 				JstlUtils.getJstlAwareMessageSource(getServletContext(), getApplicationContext());
 	}
-
 
 	protected void exposeHelpers(HttpServletRequest request) throws Exception {
 		JstlUtils.exposeLocalizationContext(request, this.jstlAwareMessageSource);
