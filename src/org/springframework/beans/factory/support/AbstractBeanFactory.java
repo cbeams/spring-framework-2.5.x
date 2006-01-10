@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -88,13 +89,6 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
-	/**
-	 * Marker object to be temporarily registered in the singleton cache
-	 * while instantiating a bean, to be able to detect circular references.
-	 */
-	private static final Object CURRENTLY_IN_CREATION = new Object();
-
-
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -116,6 +110,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** Cache of singletons: bean name --> bean instance */
 	private final Map singletonCache = new HashMap();
 
+	/** Names of beans that are currently in creation */
+	private final Set currentlyInCreation = Collections.synchronizedSet(new HashSet());
+
 	/** Disposable bean instances: bean name --> disposable instance */
 	private final Map disposableBeans = new HashMap();
 
@@ -135,7 +132,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @see #getBean
 	 */
 	public AbstractBeanFactory(BeanFactory parentBeanFactory) {
-		this.parentBeanFactory = parentBeanFactory;
+		setParentBeanFactory(parentBeanFactory);
 	}
 
 
@@ -182,16 +179,27 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			sharedInstance = this.singletonCache.get(beanName);
 		}
 		if (sharedInstance != null) {
-			if (sharedInstance == CURRENTLY_IN_CREATION) {
-				throw new BeanCurrentlyInCreationException(beanName);
+			if (isSingletonCurrentlyInCreation(beanName)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Returning eagerly cached instance of singleton bean '" + beanName +
+							"' that is not fully initialized yet - a consequence of a circular reference");
+				}
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
+				}
 			}
 			bean = getObjectForSharedInstance(name, sharedInstance);
 		}
 
 		else {
+			// Fail if we're already creating this singleton instance:
+			// We're assumably within a circular reference.
+			if (isSingletonCurrentlyInCreation(beanName)) {
+				throw new BeanCurrentlyInCreationException(beanName);
+			}
+
 			// Check if bean definition exists in this factory.
 			RootBeanDefinition mergedBeanDefinition = null;
 			try {
@@ -199,13 +207,14 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				// Not found -> check parent.
-				if (this.parentBeanFactory instanceof AbstractBeanFactory) {
+				BeanFactory parentBeanFactory = getParentBeanFactory();
+				if (parentBeanFactory instanceof AbstractBeanFactory) {
 					// Delegation to parent with args only possible for AbstractBeanFactory.
-					return ((AbstractBeanFactory) this.parentBeanFactory).getBean(name, requiredType, args);
+					return ((AbstractBeanFactory) parentBeanFactory).getBean(name, requiredType, args);
 				}
-				else if (this.parentBeanFactory != null && args == null) {
+				else if (parentBeanFactory != null && args == null) {
 					// No args -> delegate to standard getBean method.
-					return this.parentBeanFactory.getBean(name, requiredType);
+					return parentBeanFactory.getBean(name, requiredType);
 				}
 				throw ex;
 			}
@@ -221,14 +230,20 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 						}
-						this.singletonCache.put(beanName, CURRENTLY_IN_CREATION);
+						this.currentlyInCreation.add(beanName);
 						try {
 							sharedInstance = createBean(beanName, mergedBeanDefinition, args);
-							this.singletonCache.put(beanName, sharedInstance);
+							addSingleton(beanName, sharedInstance);
 						}
 						catch (BeansException ex) {
-							this.singletonCache.remove(beanName);
+							// Explicitly remove instance from singleton cache:
+							// It might have been put there eagerly by the creation process,
+							// to allow for circular reference resolution.
+							removeSingleton(beanName);
 							throw ex;
+						}
+						finally {
+							this.currentlyInCreation.remove(beanName);
 						}
 					}
 				}
@@ -258,8 +273,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			return true;
 		}
 		// Not found -> check parent.
-		if (this.parentBeanFactory != null) {
-			return this.parentBeanFactory.containsBean(name);
+		BeanFactory parentBeanFactory = getParentBeanFactory();
+		if (parentBeanFactory != null) {
+			return parentBeanFactory.containsBean(name);
 		}
 		return false;
 	}
@@ -274,7 +290,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			synchronized (this.singletonCache) {
 				beanInstance = this.singletonCache.get(beanName);
 			}
-			if (beanInstance != null && beanInstance != CURRENTLY_IN_CREATION) {
+			if (beanInstance != null) {
 				beanClass = beanInstance.getClass();
 				singleton = true;
 			}
@@ -296,8 +312,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Not found -> check parent.
-			if (this.parentBeanFactory != null) {
-				return this.parentBeanFactory.isSingleton(name);
+			BeanFactory parentBeanFactory = getParentBeanFactory();
+			if (parentBeanFactory != null) {
+				return parentBeanFactory.isSingleton(name);
 			}
 			throw ex;
 		}
@@ -312,9 +329,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			Object beanInstance = null;
 			synchronized (this.singletonCache) {
 				beanInstance = this.singletonCache.get(beanName);
-			}
-			if (beanInstance == CURRENTLY_IN_CREATION) {
-				throw new BeanCurrentlyInCreationException(beanName);
 			}
 			if (beanInstance != null) {
 				beanClass = beanInstance.getClass();
@@ -346,8 +360,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Not found -> check parent.
-			if (this.parentBeanFactory != null) {
-				return this.parentBeanFactory.getType(name);
+			BeanFactory parentBeanFactory = getParentBeanFactory();
+			if (parentBeanFactory != null) {
+				return parentBeanFactory.getType(name);
 			}
 			throw ex;
 		}
@@ -380,8 +395,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		}
 		else {
 			// Not found -> check parent.
-			if (this.parentBeanFactory != null) {
-				return this.parentBeanFactory.getAliases(name);
+			BeanFactory parentBeanFactory = getParentBeanFactory();
+			if (parentBeanFactory != null) {
+				return parentBeanFactory.getAliases(name);
 			}
 			throw new NoSuchBeanDefinitionException(beanName, toString());
 		}
@@ -533,9 +549,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param beanName the name of the bean
 	 */ 
 	protected boolean isSingletonCurrentlyInCreation(String beanName) {
-		synchronized (this.singletonCache) {
-			return (CURRENTLY_IN_CREATION == this.singletonCache.get(beanName));
-		}
+		return this.currentlyInCreation.contains(beanName);
 	}
 
 	public boolean containsSingleton(String beanName) {
@@ -849,9 +863,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			synchronized (this.singletonCache) {
 				beanInstance = this.singletonCache.get(beanName);
 			}
-			if (beanInstance == CURRENTLY_IN_CREATION) {
-				throw new BeanCurrentlyInCreationException(beanName);
-			}
 			if (beanInstance != null) {
 				return (beanInstance instanceof FactoryBean);
 			}
@@ -862,8 +873,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Not found -> check parent.
-			if (this.parentBeanFactory != null) {
-				return this.parentBeanFactory.isSingleton(name);
+			BeanFactory parentBeanFactory = getParentBeanFactory();
+			if (parentBeanFactory != null) {
+				return parentBeanFactory.isSingleton(name);
 			}
 			throw ex;
 		}
