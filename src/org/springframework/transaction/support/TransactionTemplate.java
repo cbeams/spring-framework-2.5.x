@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.transaction.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 
@@ -55,7 +55,7 @@ import org.springframework.transaction.TransactionStatus;
  * @see org.springframework.transaction.PlatformTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
-public class TransactionTemplate extends DefaultTransactionDefinition implements InitializingBean{
+public class TransactionTemplate extends DefaultTransactionDefinition implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -76,6 +76,17 @@ public class TransactionTemplate extends DefaultTransactionDefinition implements
 	 * @param transactionManager transaction management strategy to be used
 	 */
 	public TransactionTemplate(PlatformTransactionManager transactionManager) {
+		this.transactionManager = transactionManager;
+	}
+	
+	/**
+	 * Create a new TransactionTemplate instance.
+	 * @param transactionManager transaction management strategy to be used
+	 * @param transactionDefinition transaction definition to copy from.
+	 * Properties can still be set to change values
+	 */
+	public TransactionTemplate(PlatformTransactionManager transactionManager, TransactionDefinition transactionDefinition) {
+		super(transactionDefinition);
 		this.transactionManager = transactionManager;
 	}
 
