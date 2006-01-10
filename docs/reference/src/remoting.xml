@@ -225,7 +225,7 @@ public class SimpleObject {
 			</para>
 			<para>
 				You're probably familiar with Spring's DispatcherServlet principles and if so,
-				you know that know you'll have to create an application context named
+				you know that now you'll have to create an application context named
 				<literal>remoting-servlet.xml</literal> (after the name of your servlet) in
 				the <literal>WEB-INF</literal> directory. The application context will be used
 				in the next section.
