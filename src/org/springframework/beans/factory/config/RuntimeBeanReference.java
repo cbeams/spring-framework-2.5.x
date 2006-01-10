@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ public class RuntimeBeanReference {
 
 	private final boolean toParent;
 
+
 	/**
 	 * Create a new RuntimeBeanReference to the given bean name,
 	 * without explicitly marking it as reference to a bean in
@@ -56,6 +57,7 @@ public class RuntimeBeanReference {
 		this.toParent = toParent;
 	}
 
+
 	/**
 	 * Return the target bean name.
 	 */
@@ -70,6 +72,7 @@ public class RuntimeBeanReference {
 	public boolean isToParent() {
 		return toParent;
 	}
+
 
 	public String toString() {
 	   return '<' + getBeanName() + '>';

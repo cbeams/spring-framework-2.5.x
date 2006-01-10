@@ -229,7 +229,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	/**
 	 * Initialize the default lazy-init, autowire and dependency check settings.
-	 *
 	 * @see #setDefaultLazyInit
 	 * @see #setDefaultAutowire
 	 * @see #setDefaultDependencyCheck
@@ -339,7 +338,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * convert custom elements into standard Spring bean definitions, for example.
 	 * Implementors have access to the parser's bean definition reader and the
 	 * underlying XML resource, through the corresponding accessors.
-	 *
 	 * @see #getBeanDefinitionReader()
 	 * @see #getResource()
 	 */
@@ -357,7 +355,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse the elements at the root level in the document:
 	 * "import", "alias", "bean".
-	 *
 	 * @param root the DOM root element of the document
 	 * @return the number of bean definitions found
 	 */
@@ -493,7 +490,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * convert custom elements into standard Spring bean definitions, for example.
 	 * Implementors have access to the parser's bean definition reader and the
 	 * underlying XML resource, through the corresponding accessors.
-	 *
 	 * @see #getBeanDefinitionReader()
 	 * @see #getResource()
 	 */
@@ -876,7 +872,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse a value, ref or collection sub-element of a property or
 	 * constructor-arg element.
-	 *
 	 * @param ele subelement of property element; we don't know which yet
 	 */
 	protected Object parsePropertySubElement(Element ele, String beanName) throws BeanDefinitionStoreException {
@@ -886,20 +881,21 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		else if (ele.getTagName().equals(REF_ELEMENT)) {
 			// A generic reference to any name of any bean.
 			String beanRef = ele.getAttribute(BEAN_REF_ATTRIBUTE);
+			boolean toParent = false;
 			if (!StringUtils.hasLength(beanRef)) {
 				// A reference to the id of another bean in the same XML file.
 				beanRef = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
 				if (!StringUtils.hasLength(beanRef)) {
 					// A reference to the id of another bean in a parent context.
 					beanRef = ele.getAttribute(PARENT_REF_ATTRIBUTE);
+					toParent = true;
 					if (!StringUtils.hasLength(beanRef)) {
 						throw new BeanDefinitionStoreException(
 								getResource(), beanName, "'bean', 'local' or 'parent' is required for a reference");
 					}
-					return new RuntimeBeanReference(beanRef, true);
 				}
 			}
-			return new RuntimeBeanReference(beanRef);
+			return new RuntimeBeanReference(beanRef, toParent);
 		}
 		else if (ele.getTagName().equals(IDREF_ELEMENT)) {
 			// A generic reference to any name of any bean.
@@ -1112,6 +1108,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		return props;
 	}
 
+	/**
+	 * Parse the merge attribute of a collection element, if any.
+	 */
 	protected boolean parseMergeAttribute(Element collectionElement) {
 		String value = collectionElement.getAttribute(MERGE_ATTRIBUTE);
 		if (DEFAULT_VALUE.equals(value)) {
