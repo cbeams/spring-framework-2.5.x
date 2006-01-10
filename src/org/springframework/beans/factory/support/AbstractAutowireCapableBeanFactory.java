@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +83,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	private InstantiationStrategy instantiationStrategy = new CglibSubclassingInstantiationStrategy();
 
+	/** Whether to automatically try to resolve circular references between beans */
+	private boolean allowCircularReferences = true;
+
 	/**
 	 * Dependency types to ignore on dependency check and autowire, as Set of
 	 * Class objects: for example, String. Default is none.
@@ -127,6 +130,28 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	public InstantiationStrategy getInstantiationStrategy() {
 		return instantiationStrategy;
+	}
+
+	/**
+	 * Set whether to allow circular references between beans - and automatically
+	 * try to resolve them.
+	 * <p>Note that circular reference resolution means that one of the involved beans
+	 * will receive a reference to another bean that is not fully initialized yet.
+	 * This can lead to subtle and not-so-subtle side effects on initialization;
+	 * it does work fine for many scenarios, though.
+	 * <p>Default is "true". Turn this off to throw an exception when encountering
+	 * a circular reference, disallowing them completely.
+	 */
+	public void setAllowCircularReferences(boolean allowCircularReferences) {
+		this.allowCircularReferences = allowCircularReferences;
+	}
+
+	/**
+	 * Return whether to allow circular references between beans - and automatically
+	 * try to resolve them.
+	 */
+	public boolean isAllowCircularReferences() {
+		return allowCircularReferences;
 	}
 
 	/**
@@ -350,7 +375,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 			// Eagerly cache singletons to be able to resolve circular references
 			// even when triggered by lifecycle interfaces like BeanFactoryAware.
-			if (isSingletonCurrentlyInCreation(beanName)) {
+			if (isAllowCircularReferences() && isSingletonCurrentlyInCreation(beanName)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Eagerly caching bean with name '" + beanName +
+							"' to allow for resolving potential circular references");
+				}
 				addSingleton(beanName, bean);
 			}
 
