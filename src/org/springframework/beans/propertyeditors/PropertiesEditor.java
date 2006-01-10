@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,13 @@ import java.util.Properties;
 
 /**
  * Editor for <code>java.util.Properties</code> objects.
- * Handles conversion from String to Properties object.
+ * Handles conversion from content String to Properties object.
  * Also handles Map to Properties conversion, for populating
  * a Properties object via XML "map" entries.
  *
- * <p>The required format is defined in <code>java.util.Properties</code>
- * documentation. Each property must be on a new line.
+ * <p>The required format is defined in the standard
+ * <code>java.util.Properties</code> documentation.
+ * Each property must be on a new line.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -42,10 +43,11 @@ public class PropertiesEditor extends PropertyEditorSupport {
 	 * Any of these characters, if they're first after whitespace or first
 	 * on a line, mean that the line is a comment and should be ignored.
 	 */
-	public final static String COMMENT_MARKERS = "#!";
+	private final static String COMMENT_MARKERS = "#!";
+
 
 	/**
-	 * Convert String into Properties.
+	 * Convert String into Properties, considering it as properties content.
 	 */
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (text == null) {
@@ -57,8 +59,9 @@ public class PropertiesEditor extends PropertyEditorSupport {
 			dropComments(props);
 		}
 		catch (IOException ex) {
-			// shouldn't happen
-			throw new IllegalArgumentException("Failed to parse [" + text + "] into Properties: " + ex.getMessage());
+			// Should never happen.
+			throw new IllegalArgumentException(
+					"Failed to parse [" + text + "] into Properties: " + ex.getMessage());
 		}
 		setValue(props);
 	}
@@ -86,7 +89,7 @@ public class PropertiesEditor extends PropertyEditorSupport {
 		Iterator keys = props.keySet().iterator();
 		while (keys.hasNext()) {
 			String key = (String) keys.next();
-			// A comment line starts with one of our comment markers
+			// A comment line starts with one of our comment markers.
 			if (key.length() > 0 && COMMENT_MARKERS.indexOf(key.charAt(0)) != -1) {
 				keys.remove();
 			}
