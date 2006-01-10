@@ -1,5 +1,7 @@
 package org.springframework.samples.jpetstore.web.spring;
 
+import java.io.Serializable;
+
 import org.springframework.beans.support.PagedListHolder;
 import org.springframework.samples.jpetstore.domain.Account;
 
@@ -7,7 +9,7 @@ import org.springframework.samples.jpetstore.domain.Account;
  * @author Juergen Hoeller
  * @since 30.11.2003
  */
-public class UserSession {
+public class UserSession implements Serializable {
 
 	private Account account;
 

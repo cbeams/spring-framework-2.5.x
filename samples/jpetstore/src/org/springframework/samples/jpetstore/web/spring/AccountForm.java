@@ -1,12 +1,14 @@
 package org.springframework.samples.jpetstore.web.spring;
 
+import java.io.Serializable;
+
 import org.springframework.samples.jpetstore.domain.Account;
 
 /**
  * @author Juergen Hoeller
  * @since 01.12.2003
  */
-public class AccountForm {
+public class AccountForm implements Serializable {
 
 	private Account account;
 

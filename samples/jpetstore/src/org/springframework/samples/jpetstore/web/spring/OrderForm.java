@@ -1,12 +1,14 @@
 package org.springframework.samples.jpetstore.web.spring;
 
+import java.io.Serializable;
+
 import org.springframework.samples.jpetstore.domain.Order;
 
 /**
  * @author Juergen Hoeller
  * @since 01.12.2003
  */
-public class OrderForm {
+public class OrderForm implements Serializable {
 
 	private final Order order = new Order();
 
