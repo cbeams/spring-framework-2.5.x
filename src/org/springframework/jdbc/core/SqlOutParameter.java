@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,17 +92,6 @@ public class SqlOutParameter extends ResultSetSupportingSqlParameter {
 	 */
 	public SqlOutParameter(String name, int sqlType, RowMapper rm) {
 		super(name, sqlType, rm);
-	}
-
-	/**
-	 * Create a new SqlOutParameter.
-	 * @param name name of the parameter, as used in input and output maps
-	 * @param sqlType SQL type of the parameter according to java.sql.Types
-	 * @param rm RowMapper to use for parsing the ResultSet
-	 * @param rowsExpected number of expected rows
-	 */
-	public SqlOutParameter(String name, int sqlType, RowMapper rm, int rowsExpected) {
-		super(name, sqlType, rm, rowsExpected);
 	}
 
 
