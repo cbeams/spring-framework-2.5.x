@@ -22,6 +22,7 @@ import java.util.ResourceBundle;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.util.Assert;
 
 /**
  * Helper class that allows for accessing a MessageSource as a ResourceBundle.
@@ -35,14 +36,22 @@ import org.springframework.context.NoSuchMessageException;
  */
 public class MessageSourceResourceBundle extends ResourceBundle {
 
-	private final MessageSource source;
+	private final MessageSource messageSource;
 
 	private final Locale locale;
 
+
+	/**
+	 * Create a new MessageSourceResourceBundle for the given MessageSource and Locale.
+	 * @param source the MessageSource to retrieve messages from
+	 * @param locale the Locale to retrieve messages for
+	 */
 	public MessageSourceResourceBundle(MessageSource source, Locale locale) {
-		this.source = source;
+		Assert.notNull(source, "MessageSource is required");
+		this.messageSource = source;
 		this.locale = locale;
 	}
+
 
 	/**
 	 * This implementation resolves the code in the MessageSource.
@@ -50,7 +59,7 @@ public class MessageSourceResourceBundle extends ResourceBundle {
 	 */
 	protected Object handleGetObject(String code) {
 		try {
-			return this.source.getMessage(code, null, this.locale);
+			return this.messageSource.getMessage(code, null, this.locale);
 		}
 		catch (NoSuchMessageException ex) {
 			return null;
@@ -58,7 +67,7 @@ public class MessageSourceResourceBundle extends ResourceBundle {
 	}
 
 	/**
-	 * This implementation returns null, as a MessageSource does
+	 * This implementation returns <code>null</code>, as a MessageSource does
 	 * not allow for enumerating the defined message codes.
 	 */
 	public Enumeration getKeys() {
