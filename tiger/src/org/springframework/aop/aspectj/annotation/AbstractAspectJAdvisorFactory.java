@@ -182,18 +182,26 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		}
 		
 		public String[] getParameterNames(Method m, Class clazz) {
+			if (m.getParameterTypes().length == 0) {
+				return new String[0];
+			}
+			
 			AspectJAnnotation annotation = findAspectJAnnotationOnMethod(m,clazz);
 			if (annotation == null) {
 				return null;
 			}
 			
 			StringTokenizer strTok = new StringTokenizer(annotation.getArgNames(),",");
-			String[] ret = new String[strTok.countTokens()];
-			for (int i = 0; i < ret.length; i++) {
-				ret[i] = strTok.nextToken();
+			if (strTok.countTokens() > 0) {
+				String[] ret = new String[strTok.countTokens()];
+				for (int i = 0; i < ret.length; i++) {
+					ret[i] = strTok.nextToken();
+				}
+				
+				return ret;
+			} else { 
+				return null; 				
 			}
-			
-			return ret;
 		}
 	};
 	
