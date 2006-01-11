@@ -486,7 +486,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 			return totalCalls;
 		}
 		
-		@Before("execution(* setAge(int))")		
+		@Before("execution(* setAge(int)) && args(newAge)")		
 		public void countSet(int newAge) throws Exception {
 			++totalCalls;
 		}
