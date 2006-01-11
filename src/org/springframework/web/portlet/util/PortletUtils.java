@@ -19,14 +19,18 @@ package org.springframework.web.portlet.util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.portlet.ActionRequest;
+import javax.portlet.ActionResponse;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 
+import org.springframework.util.Assert;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -47,6 +51,7 @@ public abstract class PortletUtils {
 	 * @return the File representing the temporary directory
 	 */
 	public static File getTempDir(PortletContext portletContext) {
+		Assert.notNull(portletContext, "PortletContext must not be null");
 		return (File) portletContext.getAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE);
 	}
 
@@ -64,6 +69,7 @@ public abstract class PortletUtils {
 	 * @see javax.portlet.PortletContext#getRealPath
 	 */
 	public static String getRealPath(PortletContext portletContext, String path) throws FileNotFoundException {
+		Assert.notNull(portletContext, "PortletContext must not be null");
 		// Interpret location as relative to the web application root directory.
 		if (!path.startsWith("/")) {
 			path = "/" + path;
@@ -76,6 +82,7 @@ public abstract class PortletUtils {
 		}
 		return realPath;
 	}
+
 
 	/**
 	 * Check the given request for a session attribute of the given name under the <code>PORTLET_SCOPE</code>.
@@ -99,6 +106,7 @@ public abstract class PortletUtils {
 	 * @return the value of the session attribute, or null if not found
 	 */
 	public static Object getSessionAttribute(PortletRequest request, String name, int scope) {
+		Assert.notNull(request, "Request must not be null");
 		PortletSession session = request.getPortletSession(false);
 		return (session != null ? session.getAttribute(name, scope) : null);
 	}
@@ -114,6 +122,7 @@ public abstract class PortletUtils {
 	 */
 	public static Object getRequiredSessionAttribute(PortletRequest request, String name)
 			throws IllegalStateException {
+
 		return getRequiredSessionAttribute(request, name, PortletSession.PORTLET_SCOPE);
 	}
 
@@ -128,7 +137,8 @@ public abstract class PortletUtils {
 	 * @throws IllegalStateException if the session attribute could not be found
 	 */
 	public static Object getRequiredSessionAttribute(PortletRequest request, String name, int scope)
-	    	throws IllegalStateException {
+			throws IllegalStateException {
+
 		Object attr = getSessionAttribute(request, name, scope);
 		if (attr == null)
 			throw new IllegalStateException("No session attribute '" + name + "' found");
@@ -144,7 +154,7 @@ public abstract class PortletUtils {
 	 * @param value the value of the session attribute
 	 */
 	public static void setSessionAttribute(PortletRequest request, String name, Object value) {
-	    setSessionAttribute(request, name, value, PortletSession.PORTLET_SCOPE);
+		setSessionAttribute(request, name, value, PortletSession.PORTLET_SCOPE);
 	}
 
 	/**
@@ -157,6 +167,7 @@ public abstract class PortletUtils {
 	 * @param scope session scope of this attribute
 	 */
 	public static void setSessionAttribute(PortletRequest request, String name, Object value, int scope) {
+		Assert.notNull(request, "Request must not be null");
 		if (value != null) {
 			request.getPortletSession().setAttribute(name, value, scope);
 		}
@@ -180,6 +191,7 @@ public abstract class PortletUtils {
 	 */
 	public static Object getOrCreateSessionAttribute(PortletSession session, String name, Class clazz)
 			throws IllegalArgumentException {
+
 		return getOrCreateSessionAttribute(session, name, clazz, PortletSession.PORTLET_SCOPE);
 	}
 
@@ -198,6 +210,7 @@ public abstract class PortletUtils {
 	public static Object getOrCreateSessionAttribute(PortletSession session, String name, Class clazz, int scope)
 			throws IllegalArgumentException {
 
+		Assert.notNull(session, "Session must not be null");
 		Object sessionObject = session.getAttribute(name, scope);
 		if (sessionObject == null) {
 			try {
@@ -219,6 +232,36 @@ public abstract class PortletUtils {
 	}
 
 	/**
+	 * Return the best available mutex for the given session:
+	 * that is, an object to synchronize on for the given session.
+	 * <p>Returns the session mutex attribute if available; usually,
+	 * this means that the HttpSessionMutexListener needs to be defined
+	 * in <code>web.xml</code>. Falls back to the PortletSession itself
+	 * if no mutex attribute found.
+	 * <p>The session mutex is guaranteed to be the same object during
+	 * the entire lifetime of the session, available under the key defined
+	 * by the <code>SESSION_MUTEX_ATTRIBUTE</code> constant. It serves as a
+	 * safe reference to synchronize on for locking on the current session.
+	 * <p>In many cases, the PortletSession reference itself is a safe mutex
+	 * as well, since it will always be the same object reference for the
+	 * same active logical session. However, this is not guaranteed across
+	 * different servlet containers; the only 100% safe way is a session mutex.
+	 * @param session the HttpSession to find a mutex for
+	 * @return the mutex object (never <code>null</code>)
+	 * @see org.springframework.web.util.WebUtils#SESSION_MUTEX_ATTRIBUTE
+	 * @see org.springframework.web.util.HttpSessionMutexListener
+	 */
+	public static Object getSessionMutex(PortletSession session) {
+		Assert.notNull(session, "Session must not be null");
+		Object mutex = session.getAttribute(WebUtils.SESSION_MUTEX_ATTRIBUTE);
+		if (mutex == null) {
+			mutex = session;
+		}
+		return mutex;
+	}
+
+
+	/**
 	 * Expose the given Map as request attributes, using the keys as attribute names
 	 * and the values as corresponding attribute values. Keys need to be Strings.
 	 * @param request current portlet request
@@ -228,6 +271,7 @@ public abstract class PortletUtils {
 	public static void exposeRequestAttributes(PortletRequest request, Map attributes)
 			throws IllegalArgumentException {
 
+		Assert.notNull(request, "Request must not be null");
 		Iterator it = attributes.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();
@@ -249,6 +293,7 @@ public abstract class PortletUtils {
 	 * @see org.springframework.web.util.WebUtils#SUBMIT_IMAGE_SUFFIXES
 	 */
 	public static boolean hasSubmitParameter(PortletRequest request, String name) {
+		Assert.notNull(request, "Request must not be null");
 		if (request.getParameter(name) != null) {
 			return true;
 		}
@@ -271,6 +316,7 @@ public abstract class PortletUtils {
 	 * @see org.springframework.web.util.WebUtils#SUBMIT_IMAGE_SUFFIXES
 	 */
 	public static String getSubmitParameter(PortletRequest request, String name) {
+		Assert.notNull(request, "Request must not be null");
 		if (request.getParameter(name) != null) {
 			return name;
 		}
@@ -300,6 +346,7 @@ public abstract class PortletUtils {
 	 * @see javax.portlet.PortletRequest#getParameterMap
 	 */
 	public static Map getParametersStartingWith(PortletRequest request, String prefix) {
+		Assert.notNull(request, "Request must not be null");
 		Enumeration paramNames = request.getParameterNames();
 		Map params = new TreeMap();
 		if (prefix == null) {
@@ -322,6 +369,45 @@ public abstract class PortletUtils {
 			}
 		}
 		return params;
+	}
+
+
+	/**
+	 * Pass all the action request parameters to the render phase by putting them into
+	 * the action response object. This may not be called when the action will call
+	 * {@link javax.portlet.ActionResponse#sendRedirect sendRedirect}.
+	 * @param request the current action request
+	 * @param response the current action response
+	 * @see javax.portlet.ActionResponse#setRenderParameter
+	 */
+	public static void passAllParametersToRenderPhase(ActionRequest request, ActionResponse response) {
+		try {
+			Enumeration en = request.getParameterNames();
+			while (en.hasMoreElements()) {
+				String param = (String) en.nextElement();
+				String values[] = request.getParameterValues(param);
+				response.setRenderParameter(param, values);
+			}
+		}
+		catch (IllegalStateException ex) {
+			// Ignore in case sendRedirect was already set.
+		}
+	}
+
+	/**
+	 * Clear all the render parameters from the ActionResponse.
+	 * This may not be called when the action will call
+	 * {@link ActionResponse#sendRedirect sendRedirect}.
+	 * @param response the current action response
+	 * @see ActionResponse#setRenderParameters
+	 */
+	public static void clearAllRenderParameters(ActionResponse response) {
+		try {
+			response.setRenderParameters(new HashMap());
+		}
+		catch (IllegalStateException ex) {
+			// Ignore in case sendRedirect was already set.
+		}
 	}
 
 }
