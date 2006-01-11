@@ -260,7 +260,7 @@ public class AspectJExpressionPointcutTests extends TestCase {
 		String expression = "execution(void org.springframework.beans.TestBean.setSomeNumber(Number) && args(Double)";
 
 		try {
-			getPointcut(expression);
+			getPointcut(expression).getClassFilter();  // call to getClassFilter forces resolution
 			fail("Invalid expression should throw IllegalArgumentException");
 		}
 		catch (IllegalArgumentException ex) {
@@ -301,7 +301,7 @@ public class AspectJExpressionPointcutTests extends TestCase {
 		String expression = "call(int org.springframework.beans.TestBean.getAge())";
 
 		try {
-			getPointcut(expression);
+			getPointcut(expression).getClassFilter(); // call to getClassFilter forces resolution...
 			fail("Should not support call pointcuts");
 		}
 		catch (UnsupportedPointcutPrimitiveException ex) {
