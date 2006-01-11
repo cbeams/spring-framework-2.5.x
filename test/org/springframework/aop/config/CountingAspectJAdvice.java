@@ -17,6 +17,7 @@
 package org.springframework.aop.config;
 
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.springframework.beans.ITestBean;
 
 /**
  * @author Rob Harrop
@@ -37,11 +38,23 @@ public class CountingAspectJAdvice {
 		this.afterCount++;
 	}
 
-	public void myAroundAdvice(ProceedingJoinPoint pjp, Object value) throws Throwable {
+	public void myAroundAdvice(ProceedingJoinPoint pjp) throws Throwable {
 		this.aroundCount++;
 		pjp.proceed();
 	}
+	
+	public void myAfterReturningAdvice(int age) {
+		this.afterCount++;
+	}
 
+	public void myAfterThrowingAdvice(RuntimeException ex) {
+		this.afterCount++;
+	}
+	
+	public void mySetAgeAdvice(int newAge, ITestBean bean) {
+		// no-op
+	}
+	
 	public int getBeforeCount() {
 		return this.beforeCount;
 	}
