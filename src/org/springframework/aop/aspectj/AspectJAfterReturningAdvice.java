@@ -18,8 +18,6 @@ package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
 
-import org.aspectj.weaver.tools.PointcutExpression;
-
 import org.springframework.aop.AfterReturningAdvice;
 
 /**
@@ -29,19 +27,36 @@ import org.springframework.aop.AfterReturningAdvice;
  * @since 2.0
  */
 public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implements AfterReturningAdvice {
-
+	
 	public AspectJAfterReturningAdvice(
 			Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
-		super(aspectJBeforeAdviceMethod, pointcut.getPointcutExpression(), aif);
+		super(aspectJBeforeAdviceMethod, pointcut, aif);
 	}
 
-	public AspectJAfterReturningAdvice(
-			Method aspectJBeforeAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif) {
-		super(aspectJBeforeAdviceMethod, pe, aif);
+	public void setReturningName(String name) {
+		setReturningNameNoCheck(name);
 	}
 	
 	public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
-		invokeAdviceMethod(args);
+		if (shouldInvokeOnReturnValueOf(returnValue)) {
+			invokeAdviceMethod(getJoinPointMatch(),returnValue,null);
+		}
+	}
+	
+	/**
+	 * Following AspectJ semantics, if a returning clause was specified, then the
+	 * advice is only invoked if the returned value is an instance of the given
+	 * returning type. Iff the returning type is object, the advice is *always* invoked.
+	 * @param returnValue
+	 * @return
+	 */
+	private boolean shouldInvokeOnReturnValueOf(Object returnValue) {
+		Class returningType = getDiscoveredReturningType();
+		if (returningType == Object.class) {
+			return true;
+		} else { 
+			return returningType.isAssignableFrom(returnValue.getClass());
+		}
 	}
 
 }

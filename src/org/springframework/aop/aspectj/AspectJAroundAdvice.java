@@ -21,7 +21,9 @@ import java.util.Map;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.weaver.tools.JoinPointMatch;
 import org.aspectj.weaver.tools.PointcutExpression;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -35,53 +37,25 @@ import org.springframework.core.ParameterNameDiscoverer;
  */
 public class AspectJAroundAdvice extends AbstractAspectJAdvice implements MethodInterceptor {
 	
-	// TODO pull up
-	private final String[] argNames;
-
 	public AspectJAroundAdvice(
 			Method aspectJAroundAdviceMethod, AspectJExpressionPointcut pointcut,
 			AspectInstanceFactory aif, ParameterNameDiscoverer parameterNameDiscoverer) {
 
-		super(aspectJAroundAdviceMethod, pointcut.getPointcutExpression(), aif);
-		this.argNames = parameterNameDiscoverer.getParameterNames(
-				this.aspectJAdviceMethod, this.aspectJAdviceMethod.getDeclaringClass());
-	}
-
-	public AspectJAroundAdvice(
-			Method aspectJAroundAdviceMethod, PointcutExpression pe,
-			AspectInstanceFactory aif, ParameterNameDiscoverer parameterNameDiscoverer) {
-
-		super(aspectJAroundAdviceMethod, pe, aif);
-		this.argNames = parameterNameDiscoverer.getParameterNames(
-				this.aspectJAdviceMethod, this.aspectJAdviceMethod.getDeclaringClass());
+		super(aspectJAroundAdviceMethod, pointcut, aif);
 	}
 
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		ReflectiveMethodInvocation invocation = (ReflectiveMethodInvocation) mi;
 		ProceedingJoinPoint pjp = lazyGetProceedingJoinPoint(invocation);
-		Object[] formals = argBinding(mi.getArguments());
-		if (formals == null) {
-			formals = new Object[0];
-		}
-		Object[] args = new Object[formals.length + 1];
-		args[0] = pjp;
-	
-		if (argNames == null) {
-			// basic mapping applies
-			System.arraycopy(formals, 0, args, 1, formals.length);				
-		} 
-		else {
-			// map based on bindings
-			Map bindingMap = invocation.getUserAttributes();
-			for (int i = 1; i < args.length; i++) {
-				// should be made more robust, works for now...
-				args[i] = bindingMap.get(argNames[i-1]);
-			}
-		}
-				
-		return invokeAdviceMethodWithGivenArgs(args);
+		JoinPointMatch jpm = getJoinPointMatch(invocation);
+		return invokeAdviceMethod(pjp,jpm,null,null);
 	}
 	
+	
+	protected JoinPointMatch getJoinPointMatch(ReflectiveMethodInvocation rmi) {
+		JoinPointMatch jpm = (JoinPointMatch) rmi.getUserAttributes().get(JOIN_POINT_MATCH_KEY);
+		return jpm;
+	}
 	
 	/**
 	 * Return the ProceedingJoinPoint for the current invocation,

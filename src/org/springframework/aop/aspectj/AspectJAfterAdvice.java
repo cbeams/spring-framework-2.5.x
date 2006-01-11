@@ -32,12 +32,7 @@ public class AspectJAfterAdvice extends AbstractAspectJAdvice implements MethodI
 
 	public AspectJAfterAdvice(
 			Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
-		super(aspectJBeforeAdviceMethod, pointcut.getPointcutExpression(), aif);
-	}
-
-	public AspectJAfterAdvice(
-			Method aspectJBeforeAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif) {
-		super(aspectJBeforeAdviceMethod, pe, aif);
+		super(aspectJBeforeAdviceMethod, pointcut, aif);
 	}
 	
 	public Object invoke(MethodInvocation mi) throws Throwable {
@@ -45,7 +40,7 @@ public class AspectJAfterAdvice extends AbstractAspectJAdvice implements MethodI
 			return mi.proceed();
 		}
 		finally {
-			invokeAdviceMethod(mi.getArguments());
+			invokeAdviceMethod(getJoinPointMatch(),null,null);
 		}
 	}
 

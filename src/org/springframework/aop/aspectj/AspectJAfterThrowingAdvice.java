@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.aspectj.weaver.tools.PointcutExpression;
 
 /**
  * Spring AOP advice wrapping an AspectJ after-throwing advice method.
@@ -31,13 +30,12 @@ import org.aspectj.weaver.tools.PointcutExpression;
 public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice implements MethodInterceptor {
 	
 	public AspectJAfterThrowingAdvice(
-			Method aspectJBeforeAdviceMethod, PointcutExpression pe, AspectInstanceFactory aif) {
-		super(aspectJBeforeAdviceMethod, pe, aif);
-	}
-
-	public AspectJAfterThrowingAdvice(
 			Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
-		super(aspectJBeforeAdviceMethod, pointcut.getPointcutExpression(), aif);
+		super(aspectJBeforeAdviceMethod, pointcut, aif);
+	}
+	
+	public void setThrowingName(String name) {
+		setThrowingNameNoCheck(name);
 	}
 	
 	public Object invoke(MethodInvocation mi) throws Throwable {
@@ -45,10 +43,21 @@ public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice implements
 			return mi.proceed();
 		}
 		catch (Throwable t) {
-			// TODO need to check arguments
-			invokeAdviceMethod(mi.getArguments());
+			if (shouldInvokeOnThrowing(t)) {
+				invokeAdviceMethod(getJoinPointMatch(),null,t);
+			}
 			throw t;
 		}
 	}
 
+	/**
+	 * In AspectJ semantics, after throwing advice that specifies a throwing clause
+	 * is only invoked if the thrown exception is a subtype of the given throwing type.
+	 * @param t
+	 * @return
+	 */
+	private boolean shouldInvokeOnThrowing(Throwable t) {
+		Class throwingType = getDiscoveredThrowingType();
+		return (throwingType.isAssignableFrom(t.getClass()));
+	}
 }

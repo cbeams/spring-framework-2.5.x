@@ -109,15 +109,27 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		return this;
 	}
 
+	public void setParameterNames(String[] names) {
+		this.pointcutParameterNames = names;
+	}
+	
+	public void setParameterTypes(Class[] types) {
+		this.pointcutParameterTypes = types;
+	}
+	
 	public void onSetExpression(String expression) {
-		PointcutParameter[] pointcutParameters = new PointcutParameter[this.pointcutParameterNames.length];
-		for (int i = 0; i < pointcutParameters.length; i++) {
-			pointcutParameters[i] = this.pointcutParser.createPointcutParameter(
-					this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
-		}
-		this.pointcutExpression =
-				this.pointcutParser.parsePointcutExpression(
-						replaceBooleanOperators(expression), pointcutDeclarationScope, pointcutParameters);
+		// doing this now is too early - we may need to discover and set pointcut
+		// parameters from the associated advice
+		// we now do it lazily in checkReadyToMatch instead...
+
+//		PointcutParameter[] pointcutParameters = new PointcutParameter[this.pointcutParameterNames.length];
+//		for (int i = 0; i < pointcutParameters.length; i++) {
+//			pointcutParameters[i] = this.pointcutParser.createPointcutParameter(
+//					this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
+//		}
+//		this.pointcutExpression =
+//				this.pointcutParser.parsePointcutExpression(
+//						replaceBooleanOperators(expression), pointcutDeclarationScope, pointcutParameters);
 	}
 	
 	/**
@@ -134,6 +146,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	}
 
 	public PointcutExpression getPointcutExpression() {
+		checkReadyToMatch();
 		return this.pointcutExpression;
 	}
 
@@ -142,8 +155,19 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	}
 
 	private void checkReadyToMatch() {
-		if (this.pointcutExpression == null) {
+		if (getExpression() == null) {
 			throw new IllegalStateException("Must set property [expression] before attempting to match.");
+		}
+		if (this.pointcutExpression == null) {
+			// we need to build it now...
+			PointcutParameter[] pointcutParameters = new PointcutParameter[this.pointcutParameterNames.length];
+			for (int i = 0; i < pointcutParameters.length; i++) {
+				pointcutParameters[i] = this.pointcutParser.createPointcutParameter(
+						this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
+			}
+			this.pointcutExpression =
+				this.pointcutParser.parsePointcutExpression(
+						replaceBooleanOperators(getExpression()), pointcutDeclarationScope, pointcutParameters);
 		}
 	}
 
@@ -183,22 +207,14 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 
 		JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(target, target, args);
 		if (joinPointMatch.matches() && invocation != null) {
-			bindParameters(invocation, joinPointMatch.getParameterBindings());
+			bindParameters(invocation, joinPointMatch);
 		}
 		return joinPointMatch.matches();
 	}
 
-	public JoinPointMatch matchesWithBinding(Method method, Object targetObject, Object[] args) {
-		ShadowMatch shadowMatch = this.pointcutExpression.matchesMethodExecution(method);
-		return (shadowMatch.matchesJoinPoint(targetObject, targetObject, args));
-	}
-
-	private void bindParameters(ReflectiveMethodInvocation invocation, PointcutParameter[] parameters) {
-		Map bindingsMap = invocation.getUserAttributes();
-		for (int i = 0; i < parameters.length; i++) {
-			PointcutParameter p = parameters[i];
-			bindingsMap.put(p.getName(), p.getBinding());
-		}
+	private void bindParameters(ReflectiveMethodInvocation invocation, JoinPointMatch jpm) {
+		Map userAttributes = invocation.getUserAttributes();
+		userAttributes.put(JoinPointMatch.class.getName(),jpm);
 	}
 
 	private ShadowMatch getShadowMatch(Method method) {
