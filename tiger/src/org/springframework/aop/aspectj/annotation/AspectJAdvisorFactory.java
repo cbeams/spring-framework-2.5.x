@@ -22,6 +22,7 @@ import java.util.List;
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Advisor;
+import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopConfigException;
 
 /**
@@ -55,6 +56,6 @@ public interface AspectJAdvisorFactory {
 	 */
 	Advisor getAdvisor(Method candidateAspectJAdviceMethod, MetadataAwareAspectInstanceFactory aif);
 	
-	Advice getAdvice(Method candidateAspectJAdviceMethod, MetadataAwareAspectInstanceFactory aif);
+	Advice getAdvice(Method candidateAspectJAdviceMethod, AspectJExpressionPointcut pointcut, MetadataAwareAspectInstanceFactory aif);
 
 }

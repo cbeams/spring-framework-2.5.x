@@ -71,7 +71,7 @@ class InstantiationModelAwarePointcutAdvisorImpl implements InstantiationModelAw
 		}
 		else {
 			// A singleton aspect.
-			this.instantiatedAdvice = instantiateAdvice();
+			this.instantiatedAdvice = instantiateAdvice(this.declaredPointcut);
 			this.pointcut = declaredPointcut;
 			this.lazy = false;
 		}
@@ -104,7 +104,7 @@ class InstantiationModelAwarePointcutAdvisorImpl implements InstantiationModelAw
 	 */
 	public synchronized Advice getAdvice() {
 		if (instantiatedAdvice == null) {
-			instantiatedAdvice = instantiateAdvice();
+			instantiatedAdvice = instantiateAdvice(this.declaredPointcut);
 		}
 		return instantiatedAdvice;
 	}
@@ -118,8 +118,8 @@ class InstantiationModelAwarePointcutAdvisorImpl implements InstantiationModelAw
 	}
 
 
-	private Advice instantiateAdvice() {
-		return this.atAspectJAdvisorFactory.getAdvice(method, aif);
+	private Advice instantiateAdvice(AspectJExpressionPointcut pcut) {
+		return this.atAspectJAdvisorFactory.getAdvice(method, pcut, aif);
 	}
 	
 	public MetadataAwareAspectInstanceFactory getAspectInstanceFactory() {
