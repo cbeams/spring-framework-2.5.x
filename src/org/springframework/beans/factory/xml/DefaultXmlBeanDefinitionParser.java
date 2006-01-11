@@ -434,7 +434,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			String uri = node.getNamespaceURI();
 			if (node.getNodeType() == Node.ELEMENT_NODE && !isDefaultNamespace(uri)) {
 				Element childElement = (Element) node;
-				// a node from a namespace outside of the standard - should map to a decorator
+				// A node from a namespace outside of the standard - should map to a decorator.
 				NamespaceHandler handler = getNamespaceHandlerResolver().resolve(uri);
 				BeanDefinitionDecorator decorator = handler.findDecoratorForElement(childElement);
 				int countBefore = getBeanDefinitionCount();
@@ -442,7 +442,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				registeredCount += (getBeanDefinitionCount() - countBefore);
 			}
 		}
-		// register the final decorated instance
+		// Register the final decorated instance.
 		BeanDefinitionReaderUtils.registerBeanDefinition(rootDefinition, this.beanDefinitionReader.getBeanFactory());
 		return registeredCount;
 	}
@@ -637,6 +637,10 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 			return bd;
 		}
+
+		catch (BeanDefinitionStoreException ex) {
+			throw ex;
+		}
 		catch (ClassNotFoundException ex) {
 			throw new BeanDefinitionStoreException(
 					getResource(), beanName, "Bean class [" + className + "] not found", ex);
@@ -644,6 +648,10 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		catch (NoClassDefFoundError err) {
 			throw new BeanDefinitionStoreException(
 					getResource(), beanName, "Class that bean class [" + className + "] depends on not found", err);
+		}
+		catch (Throwable ex) {
+			throw new BeanDefinitionStoreException(
+					getResource(), beanName, "Unexpected failure during bean definition parsing", ex);
 		}
 	}
 
@@ -851,10 +859,15 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				((hasRefAttribute || hasValueAttribute)) && subElement != null) {
 			throw new BeanDefinitionStoreException(
 					getResource(), beanName, elementName +
-					" is only allowed to contain either a 'ref' attribute OR a 'value' attribute OR a sub-element");
+					" is only allowed to contain either 'ref' attribute OR 'value' attribute OR sub-element");
 		}
 		if (hasRefAttribute) {
-			return new RuntimeBeanReference(ele.getAttribute(REF_ATTRIBUTE));
+			String refName = ele.getAttribute(REF_ATTRIBUTE);
+			if (!StringUtils.hasText(refName)) {
+				throw new BeanDefinitionStoreException(
+						getResource(), beanName, elementName + " contains empty 'ref' attribute");
+			}
+			return new RuntimeBeanReference(refName);
 		}
 		else if (hasValueAttribute) {
 			return ele.getAttribute(VALUE_ATTRIBUTE);
@@ -880,22 +893,26 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		}
 		else if (ele.getTagName().equals(REF_ELEMENT)) {
 			// A generic reference to any name of any bean.
-			String beanRef = ele.getAttribute(BEAN_REF_ATTRIBUTE);
+			String refName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
 			boolean toParent = false;
-			if (!StringUtils.hasLength(beanRef)) {
+			if (!StringUtils.hasLength(refName)) {
 				// A reference to the id of another bean in the same XML file.
-				beanRef = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
-				if (!StringUtils.hasLength(beanRef)) {
+				refName = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
+				if (!StringUtils.hasLength(refName)) {
 					// A reference to the id of another bean in a parent context.
-					beanRef = ele.getAttribute(PARENT_REF_ATTRIBUTE);
+					refName = ele.getAttribute(PARENT_REF_ATTRIBUTE);
 					toParent = true;
-					if (!StringUtils.hasLength(beanRef)) {
+					if (!StringUtils.hasLength(refName)) {
 						throw new BeanDefinitionStoreException(
-								getResource(), beanName, "'bean', 'local' or 'parent' is required for a reference");
+								getResource(), beanName, "'bean', 'local' or 'parent' is required for <ref> element");
 					}
 				}
 			}
-			return new RuntimeBeanReference(beanRef, toParent);
+			if (!StringUtils.hasText(refName)) {
+				throw new BeanDefinitionStoreException(
+						getResource(), beanName, "<ref> element contains empty target attribute");
+			}
+			return new RuntimeBeanReference(refName, toParent);
 		}
 		else if (ele.getTagName().equals(IDREF_ELEMENT)) {
 			// A generic reference to any name of any bean.
@@ -905,7 +922,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				beanRef = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
 				if (!StringUtils.hasLength(beanRef)) {
 					throw new BeanDefinitionStoreException(
-							getResource(), beanName, "Either 'bean' or 'local' is required for an idref");
+							getResource(), beanName, "Either 'bean' or 'local' is required for <idref> element");
 				}
 			}
 			return beanRef;
@@ -921,7 +938,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				}
 				catch (ClassNotFoundException ex) {
 					throw new BeanDefinitionStoreException(
-							getResource(), beanName, "Value type class [" + typeClassName + "] not found", ex);
+							getResource(), beanName, "Type class [" + typeClassName + "] not found for <value> element", ex);
 				}
 			}
 			return value;
@@ -1000,7 +1017,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 					if (candidateEle.getTagName().equals(KEY_ELEMENT)) {
 						if (keyEle != null) {
 							throw new BeanDefinitionStoreException(
-									getResource(), beanName, "<entry> is only allowed to contain one <key> sub-element");
+									getResource(), beanName, "<entry> element is only allowed to contain one <key> sub-element");
 						}
 						keyEle = candidateEle;
 					}
@@ -1008,7 +1025,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 						// Child element is what we're looking for.
 						if (valueEle != null) {
 							throw new BeanDefinitionStoreException(
-									getResource(), beanName, "<entry> must not contain more than one value sub-element");
+									getResource(), beanName, "<entry> element must not contain more than one value sub-element");
 						}
 						valueEle = candidateEle;
 					}
@@ -1022,21 +1039,26 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			if ((hasKeyAttribute && hasKeyRefAttribute) ||
 					((hasKeyAttribute || hasKeyRefAttribute)) && keyEle != null) {
 				throw new BeanDefinitionStoreException(
-						getResource(), beanName, "<entry> is only allowed to contain either " +
+						getResource(), beanName, "<entry> element is only allowed to contain either " +
 						"a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element");
 			}
 			if (hasKeyAttribute) {
 				key = entryEle.getAttribute(KEY_ATTRIBUTE);
 			}
 			else if (hasKeyRefAttribute) {
-				key = new RuntimeBeanReference(entryEle.getAttribute(KEY_REF_ATTRIBUTE));
+				String refName = entryEle.getAttribute(KEY_REF_ATTRIBUTE);
+				if (!StringUtils.hasText(refName)) {
+					throw new BeanDefinitionStoreException(
+							getResource(), beanName, "<entry> element contains empty 'key-ref' attribute");
+				}
+				key = new RuntimeBeanReference(refName);
 			}
 			else if (keyEle != null) {
 				key = parseKeyElement(keyEle, beanName);
 			}
 			else {
 				throw new BeanDefinitionStoreException(
-						getResource(), beanName, "<entry> must specify a key");
+						getResource(), beanName, "<entry> element must specify a key");
 			}
 
 			// Extract value from attribute or sub-element.
@@ -1046,21 +1068,26 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			if ((hasValueAttribute && hasValueRefAttribute) ||
 					((hasValueAttribute || hasValueRefAttribute)) && valueEle != null) {
 				throw new BeanDefinitionStoreException(
-						getResource(), beanName, "<entry> is only allowed to contain either " +
-						"a 'value' attribute OR a 'value-ref' attribute OR a value sub-element");
+						getResource(), beanName, "<entry> element is only allowed to contain either " +
+						"'value' attribute OR 'value-ref' attribute OR <value> sub-element");
 			}
 			if (hasValueAttribute) {
 				value = entryEle.getAttribute(VALUE_ATTRIBUTE);
 			}
 			else if (hasValueRefAttribute) {
-				value = new RuntimeBeanReference(entryEle.getAttribute(VALUE_REF_ATTRIBUTE));
+				String refName = entryEle.getAttribute(VALUE_REF_ATTRIBUTE);
+				if (!StringUtils.hasText(refName)) {
+					throw new BeanDefinitionStoreException(
+							getResource(), beanName, "<entry> element contains empty 'value-ref' attribute");
+				}
+				value = new RuntimeBeanReference(refName);
 			}
 			else if (valueEle != null) {
 				value = parsePropertySubElement(valueEle, beanName);
 			}
 			else {
 				throw new BeanDefinitionStoreException(
-						getResource(), beanName, "<entry> must specify a value");
+						getResource(), beanName, "<entry> element must specify a value");
 			}
 
 			// Add final key and value to the Map.
@@ -1082,7 +1109,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				// Child element is what we're looking for.
 				if (subElement != null) {
 					throw new BeanDefinitionStoreException(
-							getResource(), beanName, "<key> must not contain more than one value sub-element");
+							getResource(), beanName, "<key> element must not contain more than one value sub-element");
 				}
 				subElement = candidateEle;
 			}
