@@ -79,6 +79,11 @@
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>
+		<xsd:attribute name="returning" type="xsd:string"/>
+		<xsd:attribute name="throwing" type="xsd:string"/>
+		<!-- there is a case to make this next one an element with one sub-element for each
+		     argument name, but that is a lot more verbose that a comma-delimited list of arg names -->
+		<xsd:attribute name="arg-names" type="xsd:string"/>
 	</xsd:complexType>
 
 	<!-- TODO: need to constrain this -->

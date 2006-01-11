@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,7 @@ import org.springframework.util.xml.DomUtils;
  * </pre>
  *
  * @author Rob Harrop
+ * @author Adrian Colyer
  * @since 2.0
  */
 public class AopNamespaceHandler extends NamespaceHandlerSupport {
@@ -213,6 +214,12 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		private static final String AROUND = "around";
 		private static final String PROXY_TARGET_CLASS = "proxyTargetClass";
 		private static final String TRUE = "true";
+		private static final String RETURNING = "returning";
+		private static final String RETURNING_PROPERTY = "returningName";
+		private static final String THROWING = "throwing";
+		private static final String THROWING_PROPERTY = "throwingName";
+		private static final String ARG_NAMES = "arg-names";
+		private static final String ARG_NAMES_PROPERTY = "argumentNames"; 
 
 		private static final int METHOD_INDEX = 0;
 		private static final int POINTCUT_INDEX = 1;
@@ -324,6 +331,16 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 			// create the advice
 			String kind = adviceElement.getAttribute(KIND);
 			RootBeanDefinition adviceDefinition = new RootBeanDefinition(getAdviceClass(kind));
+			adviceDefinition.setPropertyValues(new MutablePropertyValues());
+			if (adviceElement.hasAttribute(RETURNING)) {
+				adviceDefinition.getPropertyValues().addPropertyValue(RETURNING_PROPERTY,adviceElement.getAttribute(RETURNING));
+			}
+			if (adviceElement.hasAttribute(THROWING)) {
+				adviceDefinition.getPropertyValues().addPropertyValue(THROWING_PROPERTY,adviceElement.getAttribute(THROWING));
+			}
+			if (adviceElement.hasAttribute(ARG_NAMES)) {
+				adviceDefinition.getPropertyValues().addPropertyValue(ARG_NAMES_PROPERTY,adviceElement.getAttribute(ARG_NAMES));
+			}
 
 			ConstructorArgumentValues cav = new ConstructorArgumentValues();
 			cav.addIndexedArgumentValue(METHOD_INDEX, methodDefinition);
