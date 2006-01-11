@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 
+import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.validation.BindException;
+import org.springframework.validation.BindingErrorProcessor;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
@@ -173,6 +175,10 @@ public abstract class BaseCommandController extends AbstractController {
 	
 	private MessageCodesResolver messageCodesResolver;
 
+	private BindingErrorProcessor bindingErrorProcessor;
+
+	private PropertyEditorRegistrar[] propertyEditorRegistrars;
+
 
 	/**
 	 * Set the name of the command in the model.
@@ -213,7 +219,7 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * @return the Validators for this controller.
+	 * Return the Validators for this controller.
 	 */
 	public final Validator[] getValidators() {
 		return validators;
@@ -267,6 +273,44 @@ public abstract class BaseCommandController extends AbstractController {
 	 */
 	public final MessageCodesResolver getMessageCodesResolver() {
 		return messageCodesResolver;
+	}
+
+	/**
+	 * Set the strategy to use for processing binding errors, that is,
+	 * required field errors and <code>PropertyAccessException</code>s.
+	 * <p>Default is <code>null</code>, i.e. using the default strategy of
+	 * the data binder.
+	 * @see #createBinder
+	 * @see org.springframework.validation.DataBinder#setBindingErrorProcessor
+	 */
+	public final void setBindingErrorProcessor(BindingErrorProcessor bindingErrorProcessor) {
+		this.bindingErrorProcessor = bindingErrorProcessor;
+	}
+
+	/**
+	 * Return the strategy to use for processing binding errors.
+	 */
+	public final BindingErrorProcessor getBindingErrorProcessor() {
+		return bindingErrorProcessor;
+	}
+
+	/**
+	 * Specify one or more PropertyEditorRegistrars to be applied
+	 * to every DataBinder that this controller uses.
+	 * <p>Allows for factoring out the registration of PropertyEditors
+	 * to separate objects, as alternative to <code>initBinder</code>.
+	 * @see #initBinder
+	 */
+	public final void setPropertyEditorRegistrars(PropertyEditorRegistrar[] propertyEditorRegistrars) {
+		this.propertyEditorRegistrars = propertyEditorRegistrars;
+	}
+
+	/**
+	 * Return the PropertyEditorRegistrars to be applied
+	 * to every DataBinder that this controller uses.
+	 */
+	public final PropertyEditorRegistrar[] getPropertyEditorRegistrars() {
+		return propertyEditorRegistrars;
 	}
 
 	protected void initApplicationContext() {
@@ -379,6 +423,14 @@ public abstract class BaseCommandController extends AbstractController {
 		PortletRequestDataBinder binder = new PortletRequestDataBinder(command, getCommandName());
 		if (this.messageCodesResolver != null) {
 			binder.setMessageCodesResolver(this.messageCodesResolver);
+		}
+		if (this.bindingErrorProcessor != null) {
+			binder.setBindingErrorProcessor(this.bindingErrorProcessor);
+		}
+		if (this.propertyEditorRegistrars != null) {
+			for (int i = 0; i < this.propertyEditorRegistrars.length; i++) {
+				this.propertyEditorRegistrars[i].registerCustomEditors(binder);
+			}
 		}
 		initBinder(request, binder);
 		return binder;
