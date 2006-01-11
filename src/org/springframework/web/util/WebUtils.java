@@ -29,6 +29,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -68,6 +69,9 @@ public abstract class WebUtils {
 	/** Default web app root key: "webapp.root" */
 	public static final String DEFAULT_WEB_APP_ROOT_KEY = "webapp.root";
 
+	/* Key for the mutex session attribute */
+	public static final String SESSION_MUTEX_ATTRIBUTE = WebUtils.class.getName() + ".MUTEX";
+
 	/** Name suffixes in case of image buttons */
 	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
 
@@ -87,6 +91,7 @@ public abstract class WebUtils {
 	 * @see Log4jWebConfigurer
 	 */
 	public static void setWebAppRootSystemProperty(ServletContext servletContext) throws IllegalStateException {
+		Assert.notNull(servletContext, "ServletContext must not be null");
 		String root = servletContext.getRealPath("/");
 		if (root == null) {
 			throw new IllegalStateException(
@@ -112,6 +117,7 @@ public abstract class WebUtils {
 	 * @see #setWebAppRootSystemProperty
 	 */
 	public static void removeWebAppRootSystemProperty(ServletContext servletContext) {
+		Assert.notNull(servletContext, "ServletContext must not be null");
 		String param = servletContext.getInitParameter(WEB_APP_ROOT_KEY_PARAM);
 		String key = (param != null ? param : DEFAULT_WEB_APP_ROOT_KEY);
 		System.getProperties().remove(key);
@@ -125,6 +131,7 @@ public abstract class WebUtils {
 	 * @return whether default HTML escaping is enabled (default is false)
 	 */
 	public static boolean isDefaultHtmlEscape(ServletContext servletContext) {
+		Assert.notNull(servletContext, "ServletContext must not be null");
 		String param = servletContext.getInitParameter(HTML_ESCAPE_CONTEXT_PARAM);
 		return Boolean.valueOf(param).booleanValue();
 	}
@@ -136,6 +143,7 @@ public abstract class WebUtils {
 	 * @return the File representing the temporary directory
 	 */
 	public static File getTempDir(ServletContext servletContext) {
+		Assert.notNull(servletContext, "ServletContext must not be null");
 		return (File) servletContext.getAttribute(TEMP_DIR_CONTEXT_ATTRIBUTE);
 	}
 
@@ -152,6 +160,7 @@ public abstract class WebUtils {
 	 * @see javax.servlet.ServletContext#getRealPath
 	 */
 	public static String getRealPath(ServletContext servletContext, String path) throws FileNotFoundException {
+		Assert.notNull(servletContext, "ServletContext must not be null");
 		// Interpret location as relative to the web application root directory.
 		if (!path.startsWith("/")) {
 			path = "/" + path;
@@ -172,6 +181,7 @@ public abstract class WebUtils {
 	 * @return the session id, or <code>null</code> if none
 	 */
 	public static String getSessionId(HttpServletRequest request) {
+		Assert.notNull(request, "Request must not be null");
 		HttpSession session = request.getSession(false);
 		return (session != null ? session.getId() : null);
 	}
@@ -185,6 +195,7 @@ public abstract class WebUtils {
 	 * @return the value of the session attribute, or <code>null</code> if not found
 	 */
 	public static Object getSessionAttribute(HttpServletRequest request, String name) {
+		Assert.notNull(request, "Request must not be null");
 		HttpSession session = request.getSession(false);
 		return (session != null ? session.getAttribute(name) : null);
 	}
@@ -216,6 +227,7 @@ public abstract class WebUtils {
 	 * @param name the name of the session attribute
 	 */
 	public static void setSessionAttribute(HttpServletRequest request, String name, Object value) {
+		Assert.notNull(request, "Request must not be null");
 		if (value != null) {
 			request.getSession().setAttribute(name, value);
 		}
@@ -240,6 +252,7 @@ public abstract class WebUtils {
 	public static Object getOrCreateSessionAttribute(HttpSession session, String name, Class clazz)
 			throws IllegalArgumentException {
 
+		Assert.notNull(session, "Session must not be null");
 		Object sessionObject = session.getAttribute(name);
 		if (sessionObject == null) {
 			try {
@@ -260,6 +273,35 @@ public abstract class WebUtils {
 		return sessionObject;
 	}
 
+	/**
+	 * Return the best available mutex for the given session:
+	 * that is, an object to synchronize on for the given session.
+	 * <p>Returns the session mutex attribute if available; usually,
+	 * this means that the HttpSessionMutexListener needs to be defined
+	 * in <code>web.xml</code>. Falls back to the HttpSession itself
+	 * if no mutex attribute found.
+	 * <p>The session mutex is guaranteed to be the same object during
+	 * the entire lifetime of the session, available under the key defined
+	 * by the <code>SESSION_MUTEX_ATTRIBUTE</code> constant. It serves as a
+	 * safe reference to synchronize on for locking on the current session.
+	 * <p>In many cases, the HttpSession reference itself is a safe mutex
+	 * as well, since it will always be the same object reference for the
+	 * same active logical session. However, this is not guaranteed across
+	 * different servlet containers; the only 100% safe way is a session mutex.
+	 * @param session the HttpSession to find a mutex for
+	 * @return the mutex object (never <code>null</code>)
+	 * @see #SESSION_MUTEX_ATTRIBUTE
+	 * @see HttpSessionMutexListener
+	 */
+	public static Object getSessionMutex(HttpSession session) {
+		Assert.notNull(session, "Session must not be null");
+		Object mutex = session.getAttribute(SESSION_MUTEX_ATTRIBUTE);
+		if (mutex == null) {
+			mutex = session;
+		}
+		return mutex;
+	}
+
 
 	/**
 	 * Expose the given Map as request attributes, using the keys as attribute names
@@ -271,6 +313,7 @@ public abstract class WebUtils {
 	public static void exposeRequestAttributes(ServletRequest request, Map attributes)
 			throws IllegalArgumentException {
 
+		Assert.notNull(request, "Request must not be null");
 		Iterator it = attributes.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();
@@ -289,6 +332,7 @@ public abstract class WebUtils {
 	 * @return the first cookie with the given name, or <code>null</code> if none is found
 	 */
 	public static Cookie getCookie(HttpServletRequest request, String name) {
+		Assert.notNull(request, "Request must not be null");
 		Cookie cookies[] = request.getCookies();
 		if (cookies != null) {
 			for (int i = 0; i < cookies.length; i++) {
@@ -310,6 +354,7 @@ public abstract class WebUtils {
 	 * @see #SUBMIT_IMAGE_SUFFIXES
 	 */
 	public static boolean hasSubmitParameter(ServletRequest request, String name) {
+		Assert.notNull(request, "Request must not be null");
 		if (request.getParameter(name) != null) {
 			return true;
 		}
@@ -339,6 +384,7 @@ public abstract class WebUtils {
 	 * @see javax.servlet.ServletRequest#getParameterMap
 	 */
 	public static Map getParametersStartingWith(ServletRequest request, String prefix) {
+		Assert.notNull(request, "Request must not be null");
 		Enumeration paramNames = request.getParameterNames();
 		Map params = new TreeMap();
 		if (prefix == null) {
