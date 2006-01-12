@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -537,12 +537,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #doClose()
 	 */
 	public void registerShutdownHook() {
-		this.shutdownHook = new Thread() {
-			public void run() {
-				doClose();
-			}
-		};
-		Runtime.getRuntime().addShutdownHook(this.shutdownHook);
+		if (this.shutdownHook == null) {
+			// No shutdown hook registered yet.
+			this.shutdownHook = new Thread() {
+				public void run() {
+					doClose();
+				}
+			};
+			Runtime.getRuntime().addShutdownHook(this.shutdownHook);
+		}
 	}
 
 	/**
@@ -569,7 +572,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void close() {
 		doClose();
 		// If we registered a JVM shutdown hook, we don't need it anymore now:
-		// We've already explicitly close the context.
+		// We've already explicitly closed the context.
 		if (this.shutdownHook != null) {
 			Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
 		}
