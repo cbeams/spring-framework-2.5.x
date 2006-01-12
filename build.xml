@@ -415,6 +415,18 @@
 			</fileset>
 		</delete>
 
+		<jar jarfile="${dist.dir}/extmodules/spring-portlet.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="META-INF/*.tld"/>
+				<include name="org/springframework/web/portlet/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
 		<jar jarfile="${dist.dir}/extmodules/spring-jdo.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/orm/jdo/**"/>
@@ -473,18 +485,6 @@
 		<jar jarfile="${dist.dir}/extmodules/spring-ojb.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/orm/ojb/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/extmodules/spring-portlet.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="META-INF/*.tld"/>
-				<include name="org/springframework/web/portlet/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
