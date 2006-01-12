@@ -51,12 +51,6 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 		return invokeAdviceMethod(pjp,jpm,null,null);
 	}
 	
-	
-	protected JoinPointMatch getJoinPointMatch(ReflectiveMethodInvocation rmi) {
-		JoinPointMatch jpm = (JoinPointMatch) rmi.getUserAttributes().get(JOIN_POINT_MATCH_KEY);
-		return jpm;
-	}
-	
 	/**
 	 * Return the ProceedingJoinPoint for the current invocation,
 	 * instantiating it lazily if it hasn't already been bound to the

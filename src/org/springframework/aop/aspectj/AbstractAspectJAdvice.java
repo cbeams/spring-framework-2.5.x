@@ -51,12 +51,6 @@ public abstract class AbstractAspectJAdvice implements InitializingBean {
 	protected final static String JOIN_POINT_KEY = JoinPoint.class.getName();
 	
 	/**
-	 * Key used in ReflectiveMethodInvocation userAtributes map for the current
-	 * joinpoint match object.
-	 */
-	protected final static String JOIN_POINT_MATCH_KEY = JoinPointMatch.class.getName();
-	
-	/**
 	 * Lazily instantiate joinpoint for the current invocation.
 	 * Requires MethodInvocation to be bound with ExposeInvocationInterceptor.
 	 * <br>Do not use if access is available to the current ReflectiveMethodInvocation
@@ -455,8 +449,18 @@ public abstract class AbstractAspectJAdvice implements InitializingBean {
 	// get the current join point match at the join point we are being dispatched on
 	protected JoinPointMatch getJoinPointMatch() {
 		ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) ExposeInvocationInterceptor.currentInvocation();
-		JoinPointMatch jpm = (JoinPointMatch) rmi.getUserAttributes().get(JOIN_POINT_MATCH_KEY);
-		return jpm;
+		return getJoinPointMatch(rmi);
+	}
+	
+	// note - can't use JoinPointMatch.getClass().getName() as the key, since
+	// Spring AOP does all the matching at a join point, and then all the invocations.
+	// Under this scenario, if we just use JoinPointMatch as the key, then
+	// 'last man wins' which is not what we want at all.
+	// Using the expression is guaranteed to be safe, since 2 identical expressions
+	// are guaranteed to bind in exactly the same way.
+	protected JoinPointMatch getJoinPointMatch(ReflectiveMethodInvocation rmi) {
+		JoinPointMatch jpm = (JoinPointMatch) rmi.getUserAttributes().get(this.pointcutExpression.getExpression());
+		return jpm;		
 	}
 	
 	private JoinPoint.StaticPart getJoinPointStaticPart() {
