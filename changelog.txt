@@ -20,13 +20,18 @@ Package org.springframework.beans
 * added "postProcessAfterInstantiation" method to InstantiationAwareBeanPostProcessor
 * reworked AbstractBeanFactory's currently-in-creation check to log debug message when unfinished singleton is returned
 * added "allowCircularReferences" flag to AbstractAutowireCapableBeanFactory, to disallow circular references completely
+* refined DefaultXmlBeanDefinitionParser to explicity check for empty ref name and throw meaningful exception
+* DefaultXmlBeanDefinitionParser wraps unexpected exceptions in BeanDefinitionStoreException with context info
+
+Package org.springframework.context
+* refined AbstractApplicationContext to never register more than one JVM shutdown hook
 
 Package org.springframework.core
 * added NestedIOException, deriving from java.io.IOException and adding NestedCheckedException-style root cause handling
 
 Package org.springframework.jdbc
 * DataSourceTransactionManager only attempts to release Connection if not pre-bound (to avoid inappropriate log message)
-* turned visibility of jdbc.core.StatementCreatorUtils to package-protected
+* turned visibility of "org.springframework.jdbc.core.StatementCreatorUtils" to package-protected
 * removed ResultReader interface (sub-interface of RowCallbackHandler): use RowMapper instead
 * reworked RowMapperResultReader adapter into RowMapperResultSetExtractor
 * reworked ResultSetSupportingSqlParameter to expose a RowMapper directly through a "getRowMapper()" method
@@ -47,7 +52,7 @@ Package org.springframework.orm
 * added "replicate" convenience methods to HibernateTemplate for both Hibernate2 and Hibernate3
 * added BlobStringType with configurable character encoding for both Hibernate2 and Hibernate3
 * updated Spring's JDO 2.0 support to JPOX JDO 2.0 API snapshot-9 (corresponding to JDO 2.0 final draft)
-* added full support for Java Persistence API 1.0 (JPA), in package "orm.jpa"
+* added full support for Java Persistence API 1.0 (JPA) Public Final Draft, in package "org.springframework.orm.jpa"
 
 Package org.springframework.samples
 * updated "views.properties" files in all sample applications to use "(class)" and "(parent)"
@@ -86,6 +91,12 @@ Package org.springframework.web
 * refactored RequestHandledEvent into RequestHandledEvent base class and ServletRequestHandledEvent subclass
 * renamed FrameworkPortlet's RequestHandledEvent to PortletRequestHandledEvent, a subclass of RequestHandledEvent
 * PortletBean ignores init-params that do not match bean properties, analogous to HttpServletBean
+* added HttpSessionMutexListener and "WebUtils.getSessionMutex", used by AbstractController's "synchronizeOnSession"
+* added "PortletUtils.getSessionMutex", used by the Portlet AbstractController's "synchronizeOnSession"
+* turned AbstractController's "passAllParametersToRenderPhase"/"clearAllRenderParameters" into PortletUtils methods
+* added "propertyEditorRegistrars" property to BaseCommandController, for applying PropertyEditorRegistrars
+* added "propertyEditorRegistrars" property to Portlet BaseCommandController, for applying PropertyEditorRegistrars
+* added "bindingErrorProcessor" property to Portlet BaseCommandController, for configurable BindingErrorProcessor
 * turned AbstractCommandController's and AbstractFormController's "handleRequestInternal" methods non-final
 * refactored AbstractFormController's session form check into one single place, throwing SessionRequiredException
 * reworked MultiActionController's "bind" and "createBinder" to work on HttpServletRequest instead of ServletRequest
@@ -93,6 +104,7 @@ Package org.springframework.web
 * added protected accessors for UrlBasedViewResolver's bean properties, allowing subclasses to access the settings
 * added "argumentSeparator" property to MessageTag, allowing to specify a custom separator instead of the default comma
 * added "useSingleModelNameAsRoot" property to AbstractXlstView, allowing to enforce the value of the "root" property
+* refined Struts DelegatingActionProxy and Delegating(Tiles)RequestProcessor to fall back to root WebApplicationContext
 
 
 Changes in version 2.0 M1 (22.12.2005)
@@ -210,6 +222,7 @@ Package org.springframework.util
 * changed ConcurrencyThrottleSupport's default "concurrencyLimit" to -1 (keeping ConcurrencyThrottleInterceptor at 1)
 
 Package org.springframework.web
+* use NestedServletException wherever a root cause gets wrapped by a ServletException (for nicer root cause handling)
 * WebApplicationContext interface does not extend ThemeSource anymore; implementing ThemeSource is now optional
 * introduced ServletConfigAware interface, for getting access to a Framework/DispatcherServlet's ServletConfig object
 * SimpleServletPostProcessor configures Servlets with DispatcherServlet's ServletConfig by default (can be turned off)
