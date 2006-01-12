@@ -22,7 +22,7 @@ import java.util.List;
  * Class to hold information for any parsed SQL statements.
  *
  * @author Thomas Risberg
- * @since 1.3
+ * @since 2.0
  */
 public class ParsedSql {
 	private List namedParameters;

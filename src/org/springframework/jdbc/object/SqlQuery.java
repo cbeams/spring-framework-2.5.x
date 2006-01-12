@@ -24,6 +24,8 @@ import javax.sql.DataSource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SqlNamedParameterHolder;
+import org.springframework.jdbc.support.NamedParameterUtils;
 
 /**
  * Reusable object to represent a SQL query. Like all RdbsOperation
@@ -114,6 +116,14 @@ public abstract class SqlQuery extends SqlOperation {
 		return getJdbcTemplate().query(newPreparedStatementCreator(parameters), rowMapper);
 	}
 
+	public List execute(final SqlNamedParameterHolder parameterMap, Map context) throws DataAccessException {
+		//ToDo: validateParameters(parameterMap);
+		Object[] parameters = NamedParameterUtils.convertArgMapToArray(getSql(), parameterMap.getValues());
+		RowMapper rowMapper = newRowMapper(parameters, context);
+		//ResultReader rr = newResultReader(getRowsExpected(), parameters, context);
+		return getJdbcTemplate().query(newPreparedStatementCreator(parameterMap), rowMapper);
+	}
+
 	/**
 	 * Convenient method to execute without context.
 	 * @param parameters parameters, as to JDO queries. Primitive parameters must
@@ -123,6 +133,11 @@ public abstract class SqlQuery extends SqlOperation {
 	public List execute(final Object[] parameters) throws DataAccessException {
 		return execute(parameters, null);
 	}
+
+	public List execute(final SqlNamedParameterHolder parameterMap) throws DataAccessException {
+		return execute(parameterMap, null);
+	}
+
 
 	/**
 	 * Convenient method to execute without parameters.

@@ -20,7 +20,8 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.PreparedStatementSetter;
-import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.core.SqlNamedParameterHolder;
+import org.springframework.jdbc.support.NamedParameterUtils;
 
 /**
  * RdbmsOperation using a JdbcTemplate and representing a SQL-based
@@ -49,7 +50,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	protected final void compileInternal() {
 		// validate parameter count
 		try {
-			int bindVarCount = JdbcUtils.countParameterPlaceholders(getSql(), '?', "'\"");
+			int bindVarCount = NamedParameterUtils.countParameterPlaceholders(getSql());
 			//int bindVarCount = JdbcUtils.countParameterPlaceholders(getSql());
 			if (bindVarCount != getDeclaredParameters().size()) {
 				throw new InvalidDataAccessApiUsageException(
@@ -88,8 +89,18 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * @param params parameter array. May be <code>null</code>.
 	 */
 	protected final PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
-		//preparedStatementFactory.setParsedSql(JdbcUtils.parseSqlStatement(getSql()));
+		preparedStatementFactory.setSqlToUse(NamedParameterUtils.parseSqlStatement(getSql()).getNewSql());
 		return this.preparedStatementFactory.newPreparedStatementCreator(params);
+	}
+
+	/**
+	 * Return a PreparedStatementCreator to perform an operation
+	 * with the given parameters.
+	 * @param paramMap parameter map. May be empty.
+	 */
+	protected final PreparedStatementCreator newPreparedStatementCreator(SqlNamedParameterHolder paramMap) {
+		preparedStatementFactory.setSqlToUse(NamedParameterUtils.substituteNamedParameters(getSql(), paramMap.getValues()));
+		return this.preparedStatementFactory.newPreparedStatementCreator(NamedParameterUtils.convertArgMapToArray(getSql(), paramMap.getValues()));
 	}
 
 	/**

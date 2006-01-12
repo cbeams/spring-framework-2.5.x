@@ -50,11 +50,12 @@ public class PreparedStatementCreatorFactory {
 	private boolean updatableResults = false;
 
 	private boolean returnGeneratedKeys = false;
-	
+
 	private String[] generatedKeysColumnNames = null;
 
 	private NativeJdbcExtractor nativeJdbcExtractor;
 
+	private String sqlToUse = null;
 
 	/**
 	 * Create a new factory. Will need to add parameters
@@ -137,7 +138,14 @@ public class PreparedStatementCreatorFactory {
 	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
 		this.nativeJdbcExtractor = nativeJdbcExtractor;
 	}
-	
+
+	/**
+	 * The SQL statement parsed with named parameters expanded.
+	 */
+	public void setSqlToUse(String sqlToUse) {
+		this.sqlToUse = sqlToUse;
+	}
+
 
 	/**
 	 * Return a new PreparedStatementCreator for the given parameters.
@@ -146,7 +154,7 @@ public class PreparedStatementCreatorFactory {
 	public PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
 		return new PreparedStatementCreatorImpl((params != null) ? Arrays.asList(params) : Collections.EMPTY_LIST);
 	}
-	
+
 	/**
 	 * Return a new PreparedStatementCreator for the given parameters.
 	 * @param params List of parameters. May be <code>null</code>.
@@ -179,7 +187,7 @@ public class PreparedStatementCreatorFactory {
 			implements PreparedStatementCreator, PreparedStatementSetter, SqlProvider, ParameterDisposer {
 
 		private final List parameters;
-		
+
 		/**
 		 * Create a new PreparedStatementCreatorImpl.
 		 * @param parameters list of parameter objects
@@ -191,16 +199,19 @@ public class PreparedStatementCreatorFactory {
 						"SQL [" + sql + "]: given " + this.parameters.size() +
 						" parameters but expected " + declaredParameters.size());
 		}
-		
+
 		public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 			PreparedStatement ps = null;
+			if (sqlToUse == null) {
+				sqlToUse = sql;
+			}
 			if (returnGeneratedKeys) {
 				try {
 					if (generatedKeysColumnNames == null) {
-						ps = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+						ps = con.prepareStatement(sqlToUse, PreparedStatement.RETURN_GENERATED_KEYS);
 					}
 					else {
-						ps = con.prepareStatement(sql, generatedKeysColumnNames);
+						ps = con.prepareStatement(sqlToUse, generatedKeysColumnNames);
 					}
 				}
 				catch (AbstractMethodError ex) {
@@ -210,10 +221,10 @@ public class PreparedStatementCreatorFactory {
 				}
 			}
 			else if (resultSetType == ResultSet.TYPE_FORWARD_ONLY && !updatableResults) {
-				ps = con.prepareStatement(sql);
+				ps = con.prepareStatement(sqlToUse);
 			}
 			else {
-				ps = con.prepareStatement(sql, resultSetType,
+				ps = con.prepareStatement(sqlToUse, resultSetType,
 					updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
 			}
 
@@ -229,14 +240,21 @@ public class PreparedStatementCreatorFactory {
 			}
 
 			// Set arguments: Does nothing if there are no parameters.
+			int sqlColIndx = 1;
 			for (int i = 0; i < this.parameters.size(); i++) {
 				SqlParameter declaredParameter = (SqlParameter) declaredParameters.get(i);
 				Object in = this.parameters.get(i);
-				int sqlColIndx = i + 1;
-				StatementCreatorUtils.setParameterValue(psToUse, sqlColIndx, declaredParameter, in);
+				if (in instanceof List) {
+					for (int j = 0; j < ((List)in).size(); j++) {
+						StatementCreatorUtils.setParameterValue(psToUse, sqlColIndx++, declaredParameter, ((List)in).get(j));
+					}
+				}
+				else {
+					StatementCreatorUtils.setParameterValue(psToUse, sqlColIndx++, declaredParameter, in);
+				}
 			}
 		}
-		
+
 		public String getSql() {
 			return sql;
 		}

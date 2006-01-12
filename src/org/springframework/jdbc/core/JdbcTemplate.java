@@ -42,6 +42,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.NamedParameterUtils;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
@@ -86,7 +87,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  * @see org.springframework.jdbc.datasource
  * @see org.springframework.jdbc.object
  */
-public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
+public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, JdbcConfigurations {
 
 	/** Custom NativeJdbcExtractor */
 	private NativeJdbcExtractor nativeJdbcExtractor;
@@ -319,7 +320,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (sql == null) {
 			throw new InvalidDataAccessApiUsageException("SQL must not be null");
 		}
-		if (JdbcUtils.countParameterPlaceholders(sql, '?', "'\"") > 0) {
+		if (NamedParameterUtils.countParameterPlaceholders(sql) > 0) {
 			throw new InvalidDataAccessApiUsageException(
 					"Cannot execute [" + sql + "] as a static query: it contains bind variables");
 		}

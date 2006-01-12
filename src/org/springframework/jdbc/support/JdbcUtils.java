@@ -275,6 +275,7 @@ public abstract class JdbcUtils {
 	 * @param str string to search in. Returns 0 if this is null.
 	 * @param placeholder the character to search for and count
 	 * @param delim the delimiter for character literals
+	 * @deprecated Use the countParameterPlaceholders(str) method in NamedParameterUtils instead.
 	 */
 	public static int countParameterPlaceholders(String str, char placeholder, char delim) {
 		return countParameterPlaceholders(str, placeholder, "" + delim);
@@ -295,6 +296,7 @@ public abstract class JdbcUtils {
 	 * @param str string to search in. Returns 0 if this is null
 	 * @param placeholder the character to search for and count.
 	 * @param delimiters the delimiters for character literals.
+	 * @deprecated Use the countParameterPlaceholders(str) method in NamedParameterUtils instead.
 	 */
 	public static int countParameterPlaceholders(String str, char placeholder, String delimiters) {
 		int count = 0;
