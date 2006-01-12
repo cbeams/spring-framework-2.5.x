@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public interface MethodMatcher {
 	 * statically. This method is
 	 * invoked only if the 2-arg matches method returns true for the given method
 	 * and target class, and if the isRuntime() method returns true.
-	 * Invoked immediately before potentially running of the advice, after any
+	 * Invoked immediately before potential running of the advice, after any
 	 * advice earlier in the advice chain has run.
 	 * @param method the candidate method
 	 * @param targetClass target class
