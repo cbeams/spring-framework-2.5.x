@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	
+	<aop:config>
+		<aop:aspect id="afterThrowingAdviceBindingTests" ref="testAspect">
+			<aop:advice 
+			    kind="afterThrowing"
+			    method="noArgs"
+			    pointcut="execution(* exceptional(..))"	
+			/>
+			<aop:advice
+			    kind="afterThrowing"
+				method="oneThrowable"
+				throwing="t"
+				pointcut="execution(* exceptional(..))"
+			/>
+			<aop:advice
+				kind="afterThrowing"
+				method="oneRuntimeException"
+				throwing="ex"
+				pointcut="execution(* exceptional(..))"
+			/>			
+			<aop:advice
+			    kind="afterThrowing"
+				method="noArgsOnThrowableMatch"
+				throwing="java.lang.Throwable"
+				pointcut="execution(* exceptional(..))"
+			/>
+			<aop:advice
+				kind="afterThrowing"
+				method="noArgsOnRuntimeExceptionMatch"
+				throwing="java.lang.RuntimeException"
+				pointcut="execution(* exceptional(..))"
+			/>			
+	</aop:aspect>		
+	</aop:config>
+	
+	<bean id="testAspect" class="org.springframework.aop.aspectj.AfterThrowingAdviceBindingTestAspect"/>
+	
+	<bean id="testBean" class="org.springframework.beans.TestBean"/>
+	
+</beans>
