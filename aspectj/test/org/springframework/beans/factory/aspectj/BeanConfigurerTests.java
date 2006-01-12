@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ package org.springframework.beans.factory.aspectj;
 
 import junit.framework.TestCase;
 
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.config.Autowire;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.annotation.Aspect;
 
 /**
  * @author Adrian Colyer
