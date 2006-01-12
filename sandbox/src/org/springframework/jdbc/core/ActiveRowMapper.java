@@ -29,16 +29,14 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 /**
- * RowMapper implementation that converts a single column into
- * a single result value per row. Expects to work on a ResultSet
- * that just contains a single column.
- *
- * <p>The type of the result value for each row can be specified.
- * The value for the single column will be extracted from the ResultSet
- * and converted into the specified target type.
+ * RowMapper implementation that converts a row into a new instance
+ * of the specified mapped class.  Column values are mapped based on matching
+ * the column name as obtained from result set metadata to public setters for
+ * the corresponding properties.  The names are matched either directly or by transforming
+ * a name separating the parts with underscores to the same name using "camel" case.
  *
  * @author Thomas Risberg
- * @since 1.3
+ * @since 2.0
  */
 public class ActiveRowMapper implements RowMapper {
 
@@ -88,9 +86,8 @@ public class ActiveRowMapper implements RowMapper {
 
 	/**
 	 * Extract the values for all columns in the current row.
-	 * <p>Delegates to <code>getColumnValue()</code> and also
-	 * <code>convertValueToRequiredType</code>, if necessary.
-	 * @see java.sql.ResultSetMetaData#getColumnCount()
+	 * <p>Utilizes public setters and result set metadata.
+	 * @see java.sql.ResultSetMetaData
 	 */
 
 	public Object mapRow(ResultSet rs, int rowNumber) throws SQLException {
@@ -106,8 +103,8 @@ public class ActiveRowMapper implements RowMapper {
 		}
 		ResultSetMetaData meta = rs.getMetaData();
 		int columns = meta.getColumnCount();
-		for (int x = 1; x <= columns; x++) {
-			String field = meta.getColumnName(x).toLowerCase();
+		for (int i = 1; i <= columns; i++) {
+			String field = meta.getColumnName(i).toLowerCase();
 			PersistentField fieldMeta = (PersistentField)mappedFields.get(field);
 			if (fieldMeta != null) {
 				Object value = null;
@@ -115,50 +112,50 @@ public class ActiveRowMapper implements RowMapper {
 				try {
 					if (fieldMeta.getJavaType().equals(String.class)) {
 						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {String.class});
-						value = rs.getString(x);
+						value = rs.getString(i);
 					}
 					else if (fieldMeta.getJavaType().equals(Byte.class)) {
 						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Byte.class});
-						value = new Byte(rs.getByte(x));
+						value = new Byte(rs.getByte(i));
 					}
 					else if (fieldMeta.getJavaType().equals(Short.class)) {
 						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Short.class});
-						value = new Short(rs.getShort(x));
+						value = new Short(rs.getShort(i));
 					}
 					else if (fieldMeta.getJavaType().equals(Integer.class)) {
 						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Integer.class});
-						value = new Integer(rs.getInt(x));
+						value = new Integer(rs.getInt(i));
 					}
 					else if (fieldMeta.getJavaType().equals(Long.class)) {
 						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Long.class});
-						value = new Long(rs.getLong(x));
+						value = new Long(rs.getLong(i));
 					}
 					else if (fieldMeta.getJavaType().equals(Float.class)) {
 						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Float.class});
-						value = new Float(rs.getFloat(x));
+						value = new Float(rs.getFloat(i));
 					}
 					else if (fieldMeta.getJavaType().equals(Double.class)) {
 						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Double.class});
-						value = new Double(rs.getDouble(x));
+						value = new Double(rs.getDouble(i));
 					}
 					else if (fieldMeta.getJavaType().equals(BigDecimal.class)) {
 						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {BigDecimal.class});
-						value = rs.getBigDecimal(x);
+						value = rs.getBigDecimal(i);
 					}
 					else if (fieldMeta.getJavaType().equals(Boolean.class)) {
 						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Boolean.class});
-						value = (rs.getBoolean(x)) ? Boolean.TRUE : Boolean.FALSE;
+						value = (rs.getBoolean(i)) ? Boolean.TRUE : Boolean.FALSE;
 					}
 					else if (fieldMeta.getJavaType().equals(Date.class)) {
 						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Date.class});
 						if (fieldMeta.getSqlType() == Types.DATE) {
-							value = rs.getDate(x);
+							value = rs.getDate(i);
 						}
 						else if (fieldMeta.getSqlType() == Types.TIME) {
-							value = rs.getTime(x);
+							value = rs.getTime(i);
 						}
 						else {
-							value = rs.getTimestamp(x);
+							value = rs.getTimestamp(i);
 						}
 					}
 					if (m != null) {
@@ -177,7 +174,8 @@ public class ActiveRowMapper implements RowMapper {
 	}
 
 	public static String underscoreName(String name) {
-		return name.substring(0,1).toLowerCase() + name.substring(1).replaceAll("([A-Z])", "_$1").toLowerCase();
+        // This is a 1.4 and later method - do we need to support 1.3?
+        return name.substring(0,1).toLowerCase() + name.substring(1).replaceAll("([A-Z])", "_$1").toLowerCase();
 	}
 
 	private String setterName(String columnName) {
