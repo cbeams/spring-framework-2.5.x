@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @see org.springframework.aop.framework.AopProxyUtils
  */
 public abstract class AopUtils {
@@ -282,7 +283,8 @@ public abstract class AopUtils {
 
 		// Use reflection to invoke the method.
 		try {
-		 return method.invoke(target, args);
+			method.setAccessible(true);
+			return method.invoke(target, args);
 		}
 		catch (InvocationTargetException ex) {
 			// Invoked method threw a checked exception.
@@ -291,10 +293,13 @@ public abstract class AopUtils {
 		}
 		catch (IllegalArgumentException ex) {
 			throw new AspectException("AOP configuration seems to be invalid: tried calling method [" +
-			    method + "] on target [" + target + "]", ex);
+					method + "] on target [" + target + "]", ex);
 		}
 		catch (IllegalAccessException ex) {
 			throw new AspectException("Couldn't access method: " + method, ex);
+		}
+		finally {
+			method.setAccessible(false);
 		}
 	}
 
