@@ -46,28 +46,59 @@ import java.util.ArrayList;
 import java.lang.reflect.Method;
 
 /**
+ * Abstract factory class for creating {@link Script} instances.
+ * <p/>Users can configure the factory to specify the location of the script resource
+ * and any additional configuration that may be required to create the scripted object
+ * such as the interfaces required for the scripted proxy.
+ * <p/>Users can then configure the scripted object itself with any configuration
+ * data or dependencies as required.
+ *
  * @author Rob Harrop
  * @author Rod Johnson
+ * @since 2.0M2
  */
 public abstract class AbstractScriptFactory implements BeanNameAware, BeanFactoryPostProcessor, BeanPostProcessor, ResourceLoaderAware {
 
+	/**
+	 * Prefix used to identify scripts that are defined 'inline' in a bean definition.
+	 */
 	private static final String INLINE_SCRIPT_PREFIX = "inline:";
 
+	/**
+	 * Name of the 'createObject' factory method used to construct scripted objects.
+	 */
+	private static final String CREATE_OBJECT_METHOD = "createObject";
+
+	/**
+	 * {@link Log} for this class.
+	 */
 	protected Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * Is refrehing for the scripted object enabled?
+	 */
 	private boolean enableRefresh = true;
 
+	/**
+	 * The name assigned to this instance when configured in the
+	 * Spring {@link org.springframework.beans.factory.BeanFactory}.
+	 */
 	private String ownBeanName;
 
+	/**
+	 * The {@link org.springframework.beans.factory.BeanFactory} that
+	 * this instance is running in.
+	 */
 	private ConfigurableListableBeanFactory beanFactory;
 
+	/**
+	 * {@link ResourceLoader} implementation used to resolve script resources.
+	 */
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	private Map beanScriptSources = new HashMap();
 
 	private Map beanInterfaces = new HashMap();
-
-	private static final String CREATE_OBJECT = "createObject";
 
 	public void setEnableRefresh(boolean enableRefresh) {
 		this.enableRefresh = enableRefresh;
@@ -101,7 +132,7 @@ public abstract class AbstractScriptFactory implements BeanNameAware, BeanFactor
 	private boolean isScriptDefinition(RootBeanDefinition rbd) {
 		int ctorArgCount = rbd.getConstructorArgumentValues().getArgumentCount();
 		return this.ownBeanName.equals(rbd.getFactoryBeanName()) &&
-				CREATE_OBJECT.equals(rbd.getFactoryMethodName()) &&
+				CREATE_OBJECT_METHOD.equals(rbd.getFactoryMethodName()) &&
 				(ctorArgCount == 1 || ctorArgCount == 2);
 	}
 

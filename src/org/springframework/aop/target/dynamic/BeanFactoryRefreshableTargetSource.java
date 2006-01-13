@@ -22,6 +22,8 @@ import org.springframework.beans.factory.support.ChildBeanDefinition;
 
 /**
  * @author Rob Harrop
+ * @author Rod Johnson
+ * @since 2.0M2
  */
 public class BeanFactoryRefreshableTargetSource extends AbstractRefreshableTargetSource {
    private String beanName;

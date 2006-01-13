@@ -34,17 +34,28 @@ import java.io.InputStream;
  */
 public abstract class AbstractScript implements Script {
 
-    protected Log logger = LogFactory.getLog(getClass());
+	/**
+	 * <code>Log</code> instance for this <code>Script</code>.
+	 */
+	protected Log logger = LogFactory.getLog(getClass());
 
 	/**
 	 * {@link ScriptSource} for this <code>Script</code> instance.
 	 */
 	private ScriptSource scriptSource;
 
+	/**
+	 * Create a new instance using the given <code>ScriptSource</code> to
+	 * locate the script code.
+	 */
 	protected AbstractScript(ScriptSource scriptSource) {
 		this.scriptSource = scriptSource;
 	}
 
+	/**
+	 * Handles opening/closing of the script {@link InputStream} and
+	 * delegates to the {@link #doCreateObject} template method.
+	 */
 	public final Object createObject() throws Exception {
 		InputStream is = null;
         try {
@@ -63,9 +74,17 @@ public abstract class AbstractScript implements Script {
         }
 	}
 
+	/**
+	 * Allows sub-classes to access the {@link ScriptSource} passed in during
+	 * construction.
+	 */
 	protected ScriptSource getScriptSource() {
 		return this.scriptSource;
 	}
 
+	/**
+	 * Sub-classes should implement this method and return an instance of
+	 * scripted object represented by the supplied {@link InputStream}.
+	 */
 	protected abstract Object doCreateObject(InputStream inputStream) throws Exception;
 }
