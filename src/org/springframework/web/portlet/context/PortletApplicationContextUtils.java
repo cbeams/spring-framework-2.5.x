@@ -19,6 +19,7 @@ package org.springframework.web.portlet.context;
 import javax.portlet.PortletContext;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -48,6 +49,7 @@ public abstract class PortletApplicationContextUtils {
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public static ApplicationContext getWebApplicationContext(PortletContext pc) {
+		Assert.notNull(pc, "PortletContext must not be null");
 		Object attr = pc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		if (attr == null) {
 			return null;

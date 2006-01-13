@@ -18,6 +18,7 @@ package org.springframework.web.context.support;
 
 import javax.servlet.ServletContext;
 
+import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -50,6 +51,7 @@ public abstract class WebApplicationContextUtils {
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public static WebApplicationContext getWebApplicationContext(ServletContext sc) {
+		Assert.notNull(sc, "ServletContext must not be null");
 		Object attr = sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		if (attr == null) {
 			return null;
