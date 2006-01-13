@@ -16,6 +16,9 @@
 
 package org.springframework.web.servlet;
 
+import org.springframework.util.ConventionUtils;
+import org.springframework.util.Assert;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -130,6 +133,14 @@ public class ModelAndView {
 		addObject(modelName, modelObject);
 	}
 
+	/**
+	 * Convenient constructor that accepts a single model object. Generates the
+	 * model parameter name automatically.
+	 * @see #addObject(Object)
+	 */
+	public ModelAndView(Object modelObject) {
+		addObject(modelObject);
+	}
 
 	/**
 	 * Set a View object for this ModelAndView. Will override any
@@ -201,6 +212,17 @@ public class ModelAndView {
 	}
 
 	/**
+	 * Add an object to the model. Generates the model parameter name using
+	 * {@link ConventionUtils#getVariableName(Object)}.
+	 * @param modelObject the object to add to the model. May not be <code>null</code>.
+	 */
+	public ModelAndView addObject(Object modelObject) {
+		Assert.notNull(modelObject, "'modelObject' should not be null.");
+		getModel().put(ConventionUtils.getVariableName(modelObject), modelObject);
+		return this;
+	}
+
+	/**
 	 * Add an object to the model.
 	 * @param modelName name of the object to add to the model
 	 * @param modelObject object to add to the model. May not be <code>null</code>.
@@ -208,6 +230,7 @@ public class ModelAndView {
 	 * return modelAndView.addObject("foo", bar);
 	 */
 	public ModelAndView addObject(String modelName, Object modelObject) {
+		Assert.notNull(modelObject, "'modelObject' should not be null.");
 		getModel().put(modelName, modelObject);
 		return this;
 	}

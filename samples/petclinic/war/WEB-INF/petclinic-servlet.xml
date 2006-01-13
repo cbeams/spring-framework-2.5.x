@@ -181,4 +181,7 @@
  		-->
 	<bean id="visitValidator" class="org.springframework.samples.petclinic.validation.VisitValidator"/>
 
+	<bean id="viewNameTranslator" class="org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator">
+		<property name="suffix" value="View"/>
+	</bean>
 </beans>

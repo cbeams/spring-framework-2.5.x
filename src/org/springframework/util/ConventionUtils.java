@@ -16,6 +16,9 @@
 
 package org.springframework.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -29,7 +32,7 @@ import java.util.Iterator;
 public abstract class ConventionUtils {
 
 	/**
-	 * Suffix added to names when a
+	 * Suffix added to names when using arrays.
 	 */
 	private static final String PLURAL_SUFFIX = "List";
 
@@ -40,7 +43,7 @@ public abstract class ConventionUtils {
 	 * <p/>
 	 * For arrays, we use the pluralized version of the array component type.
 	 * <p/>
-	 * For <code>Collection</code>s we attempt to 'peak ahead' in the <code>Collection</code> to determine the
+	 * For <code>Collection</code>s we attempt to 'peek ahead' in the <code>Collection</code> to determine the
 	 * component type and return the pluralized version of that component type.
 	 */
 	public static String getVariableName(Object value) {
@@ -58,6 +61,8 @@ public abstract class ConventionUtils {
 				valueClass = peekAhead(collection);
 				pluralize = true;
 			}
+
+			// TODO: what should we do with empty collections?
 		}
 
 		String name = StringUtils.uncapitalize(ClassUtils.getShortName(valueClass));
