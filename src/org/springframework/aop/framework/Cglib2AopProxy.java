@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -682,20 +682,28 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 		private final MethodProxy methodProxy;
 
+		private boolean protectedMethod;
+
 		public CglibMethodInvocation(Object proxy, Object target, Method method, Object[] arguments,
 				Class targetClass, List interceptorsAndDynamicMethodMatchers, MethodProxy methodProxy) {
 			super(proxy, target, method, arguments, targetClass, interceptorsAndDynamicMethodMatchers);
 			this.methodProxy = methodProxy;
+			this.protectedMethod = Modifier.isProtected(method.getModifiers());
 		}
 
 		/**
 		 * Gives a marginal performance improvement versus using reflection to
-		 * invoke the target.
+		 * invoke the target when invoking public methods.
 		 *
 		 * @see org.springframework.aop.framework.ReflectiveMethodInvocation#invokeJoinpoint
 		 */
 		protected Object invokeJoinpoint() throws Throwable {
-			return this.methodProxy.invoke(this.target, this.arguments);
+			if (this.protectedMethod) {
+				return super.invokeJoinpoint();
+			}
+			else {
+				return this.methodProxy.invoke(this.target, this.arguments);
+			}
 		}
 	}
 
@@ -750,10 +758,6 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		 * @see net.sf.cglib.proxy.CallbackFilter#accept(java.lang.reflect.Method)
 		 */
 		public int accept(Method method) {
-			// Don't modify protected methods.
-			if (Modifier.isProtected(method.getModifiers())) {
-				return NO_OVERRIDE;
-			}
 
 			if (method.getDeclaringClass() == Object.class && method.getName().equals("finalize")) {
 				logger.debug("Object.finalize () method found - using NO_OVERRIDE");
@@ -772,14 +776,6 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 				logger.debug("Found equals() method - using INVOKE_EQUALS");
 				return INVOKE_EQUALS;
 			}
-
-			// Could consider more aggressive optimization in which we have a
-			// distinct callback with the advice chain for each method, but it's
-			// probably not worth it.
-
-			// We can apply optimizations.
-			// The optimization means that we evaluate whether or not there's an
-			// advice chain once only, befre each invocation.
 
 			Class targetClass = this.advised.getTargetSource().getTargetClass();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.aop.support;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -47,6 +46,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @see org.springframework.aop.framework.AopProxyUtils
  */
 public abstract class AopUtils {
@@ -184,55 +184,6 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Return all interfaces that the given object implements as array,
-	 * including ones implemented by superclasses.
-	 * @param object the object to analyse for interfaces
-	 * @return all interfaces that the given object implements as array
-	 * @deprecated in favor of <code>ClassUtils.getAllInterfaces</code>
-	 * @see org.springframework.util.ClassUtils#getAllInterfaces(Object)
-	 */
-	public static Class[] getAllInterfaces(Object object) {
-		return getAllInterfacesForClass(object.getClass());
-	}
-
-	/**
-	 * Return all interfaces that the given class implements as array,
-	 * including ones implemented by superclasses.
-	 * @param clazz the class to analyse for interfaces
-	 * @return all interfaces that the given object implements as array
-	 * @deprecated in favor of <code>ClassUtils.getAllInterfacesForClass</code>
-	 * @see org.springframework.util.ClassUtils#getAllInterfacesForClass(Class)
-	 */
-	public static Class[] getAllInterfacesForClass(Class clazz) {
-		Set interfaces = ClassUtils.getAllInterfacesForClassAsSet(clazz);
-		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
-	}
-
-	/**
-	 * Return all interfaces that the given object implements as List,
-	 * including ones implemented by superclasses.
-	 * @param object the object to analyse for interfaces
-	 * @return all interfaces that the given object implements as List
-	 * @deprecated in favor of <code>ClassUtils.getAllInterfacesAsSet</code>
-	 * @see org.springframework.util.ClassUtils#getAllInterfacesAsSet(Object)
-	 */
-	public static List getAllInterfacesAsList(Object object) {
-		return getAllInterfacesForClassAsList(object.getClass());
-	}
-
-	/**
-	 * Return all interfaces that the given class implements as List,
-	 * including ones implemented by superclasses.
-	 * @param clazz the class to analyse for interfaces
-	 * @return all interfaces that the given object implements as List
-	 * @deprecated in favor of <code>ClassUtils.getAllInterfacesForClassAsSet</code>
-	 * @see org.springframework.util.ClassUtils#getAllInterfacesForClassAsSet(Class)
-	 */
-	public static List getAllInterfacesForClassAsList(Class clazz) {
-		return new ArrayList(ClassUtils.getAllInterfacesForClassAsSet(clazz));
-	}
-
-	/**
 	 * Can the given pointcut apply at all on the given class?
 	 * This is an important test as it can be used to optimize
 	 * out a pointcut for a class.
@@ -332,7 +283,8 @@ public abstract class AopUtils {
 
 		// Use reflection to invoke the method.
 		try {
-		 return method.invoke(target, args);
+			method.setAccessible(true);
+			return method.invoke(target, args);
 		}
 		catch (InvocationTargetException ex) {
 			// Invoked method threw a checked exception.
@@ -341,10 +293,13 @@ public abstract class AopUtils {
 		}
 		catch (IllegalArgumentException ex) {
 			throw new AspectException("AOP configuration seems to be invalid: tried calling method [" +
-			    method + "] on target [" + target + "]", ex);
+					method + "] on target [" + target + "]", ex);
 		}
 		catch (IllegalAccessException ex) {
 			throw new AspectException("Couldn't access method: " + method, ex);
+		}
+		finally {
+			method.setAccessible(false);
 		}
 	}
 
