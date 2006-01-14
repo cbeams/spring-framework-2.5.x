@@ -682,6 +682,14 @@ public class ProxyFactoryBeanTests extends TestCase {
         assertTrue("The proxy should be frozen", advised.isFrozen());
 	}
 
+	public void testDetectsInterfaces() throws Exception {
+		ProxyFactoryBean fb = new ProxyFactoryBean();
+		fb.setTarget(new TestBean());
+		fb.addAdvice(new DebugInterceptor());
+		fb.setBeanFactory(new DefaultListableBeanFactory());
+		ITestBean proxy = (ITestBean) fb.getObject();
+		assertTrue(AopUtils.isJdkDynamicProxy(proxy));
+	}
 	/**
 	 * Fires only on void methods. Saves list of methods intercepted.
 	 */

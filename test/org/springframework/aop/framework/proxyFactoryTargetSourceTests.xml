@@ -30,12 +30,14 @@
 
 	<bean id="directTarget"
 		class="org.springframework.aop.framework.ProxyFactoryBean"> 
-		<property name="interceptorNames"><value>countingBeforeAdvice,nopInterceptor,target</value></property>
+		<property name="interceptorNames" value="countingBeforeAdvice,nopInterceptor,target"/>
+		<property name="proxyTargetClass" value="true"/>
 	</bean>
 	
 	<bean id="viaTargetSource"
 		class="org.springframework.aop.framework.ProxyFactoryBean"> 
 		<property name="interceptorNames"><value>nopInterceptor,targetSource</value></property>
+		<property name="proxyTargetClass" value="true"/>		
 	</bean>
 	
 	<bean id ="unsupportedInterceptor"

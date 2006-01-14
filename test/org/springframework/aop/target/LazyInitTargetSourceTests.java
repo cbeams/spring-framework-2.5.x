@@ -19,6 +19,7 @@ package org.springframework.aop.target;
 import junit.framework.TestCase;
 
 import org.springframework.beans.TestBean;
+import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
@@ -31,7 +32,7 @@ public class LazyInitTargetSourceTests extends TestCase {
 	public void testLazyInitSingletonTargetSource() {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("lazyInitSingletonTests.xml", getClass()));
 		bf.preInstantiateSingletons();
-		TestBean tb = (TestBean) bf.getBean("proxy");
+		ITestBean tb = (ITestBean) bf.getBean("proxy");
 		assertFalse(bf.containsSingleton("target"));
 		assertEquals(10, tb.getAge());
 		assertTrue(bf.containsSingleton("target"));
@@ -40,7 +41,7 @@ public class LazyInitTargetSourceTests extends TestCase {
 	public void testCustomLazyInitSingletonTargetSource() {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("customLazyInitTarget.xml", getClass()));
 		bf.preInstantiateSingletons();
-		TestBean tb = (TestBean) bf.getBean("proxy");
+		ITestBean tb = (ITestBean) bf.getBean("proxy");
 		assertFalse(bf.containsSingleton("target"));
 		assertEquals("Rob Harrop", tb.getName());
 		assertTrue(bf.containsSingleton("target"));
@@ -50,7 +51,7 @@ public class LazyInitTargetSourceTests extends TestCase {
 	public static class CustomLazyInitTargetSource extends LazyInitTargetSource {
 
 		protected void postProcessTargetObject(Object targetObject) {
-			((TestBean)targetObject).setName("Rob Harrop");
+			((ITestBean)targetObject).setName("Rob Harrop");
 		}
 	}
 }

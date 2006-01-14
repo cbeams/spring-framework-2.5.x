@@ -125,7 +125,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 */
 	private String targetName;
 
-	private boolean autodetectInterfaces = false;
+	private boolean autodetectInterfaces = true;
 
 	private boolean singleton = true;
 

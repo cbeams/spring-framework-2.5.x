@@ -23,6 +23,7 @@ import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser;
@@ -75,7 +76,7 @@ public class CustomNamespaceHandlerTests extends TestCase {
 	}
 
 	public void testProxyingDecorator() throws Exception {
-		TestBean bean = (TestBean) this.beanFactory.getBean("debuggingTestBean");
+		ITestBean bean = (ITestBean) this.beanFactory.getBean("debuggingTestBean");
 		assetTestBean(bean);
 		assertTrue(AopUtils.isAopProxy(bean));
 		Advisor[] advisors = ((Advised) bean).getAdvisors();
@@ -84,7 +85,7 @@ public class CustomNamespaceHandlerTests extends TestCase {
 	}
 
 	public void testChainedDecorators() throws Exception {
-		TestBean bean = (TestBean) this.beanFactory.getBean("chainedTestBean");
+		ITestBean bean = (ITestBean) this.beanFactory.getBean("chainedTestBean");
 		assetTestBean(bean);
 		assertTrue(AopUtils.isAopProxy(bean));
 		Advisor[] advisors = ((Advised) bean).getAdvisors();
@@ -93,7 +94,7 @@ public class CustomNamespaceHandlerTests extends TestCase {
 		assertEquals("Incorrect advice class.", NopInterceptor.class, advisors[1].getAdvice().getClass());
 	}
 
-	private void assetTestBean(TestBean bean) {
+	private void assetTestBean(ITestBean bean) {
 		assertEquals("Invalid name", "Rob Harrop", bean.getName());
 		assertEquals("Invalid age", 23, bean.getAge());
 	}
