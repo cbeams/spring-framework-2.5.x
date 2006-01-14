@@ -107,7 +107,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Log logger = getLoggerForInvocation(invocation);
-		if (logger.isTraceEnabled()) {
+		if (isLogEnabled(logger)) {
 			return invokeUnderTrace(invocation, logger);
 		}
 		else {
@@ -152,6 +152,14 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 		}
 	}
 
+	/**
+	 * Is the {@link Log} instance enabled. Default implementation returns
+	 * <code>true</code> when <code>TRACE</code> level is enabled. Sub-classes
+	 * can override this to change the level under which 'tracing' occurs.
+	 */
+	protected boolean isLogEnabled(Log logger) {
+		return logger.isTraceEnabled();
+	}
 
 	/**
 	 * Subclasses must override this method to perform any tracing around the

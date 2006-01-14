@@ -258,28 +258,50 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * @see #setExitMessage
 	 * @see #setExceptionMessage
 	 */
-	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
+	protected final Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
 		String name = invocation.getMethod().getDeclaringClass().getName() + "." + invocation.getMethod().getName();
 		StopWatch stopWatch = new StopWatch(name);
 		Object returnValue = null;
 		boolean exitThroughException = false;
 		try {
 			stopWatch.start(name);
-			logger.trace(replacePlaceholders(this.enterMessage, invocation, null, null, -1));
+			writeToLog(logger, replacePlaceholders(this.enterMessage, invocation, null, null, -1));
 			returnValue = invocation.proceed();
 			return returnValue;
 		}
 		catch (Throwable ex) {
 			exitThroughException = true;
-			logger.trace(replacePlaceholders(this.exceptionMessage, invocation, null, ex, -1), ex);
+			writeToLog(logger, replacePlaceholders(this.exceptionMessage, invocation, null, ex, -1), ex);
 			throw ex;
 		}
 		finally {
 			stopWatch.stop();
 			if (!exitThroughException) {
-				logger.trace(
-						replacePlaceholders(this.exitMessage, invocation, returnValue, null, stopWatch.getTotalTimeMillis()));
+				writeToLog(logger, replacePlaceholders(this.exitMessage, invocation, returnValue, null, stopWatch.getTotalTimeMillis()));
 			}
+		}
+	}
+
+	/**
+	 * Writes the supplied message to the supplied <code>Log</code> instance.
+	 * @see #writeToLog(org.apache.commons.logging.Log, String, Throwable)
+	 */
+	protected void writeToLog(Log logger, String message) {
+		writeToLog(logger, message, null);
+	}
+
+	/**
+	 * Writes the supplied message and {@link Throwable} to the
+	 * supplied <code>Log</code> instance. By default messages are written
+	 * at <code>TRACE</code> level. Sub-classes can override this method
+	 * to control which level the message is written at.
+	 */
+	protected void writeToLog(Log logger, String message, Throwable t) {
+		if (t == null) {
+			logger.trace(message);
+		}
+		else {
+			logger.trace(message, t);
 		}
 	}
 
@@ -300,7 +322,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * @return the formatted output to write to the log
 	 */
 	protected String replacePlaceholders(String message, MethodInvocation methodInvocation,
-			Object returnValue, Throwable throwable, long invocationTime) {
+										 Object returnValue, Throwable throwable, long invocationTime) {
 
 		Matcher matcher = PATTERN.matcher(message);
 
