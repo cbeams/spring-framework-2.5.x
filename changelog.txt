@@ -9,6 +9,9 @@ Changes in version 2.0 M2 (17.1.2006)
 Package org.springframework.aop
 * added "autodetectInterfaces" property to ProxyFactoryBean, for TransactionProxyFactoryBean-style interface detection
 * improved performance of IntroductionInfoSupport by faster determination of whether method is on introduced interface
+* AspectJ binding from pointcut expressions to arbitrary advice method arguments now working
+* support for introductions using AspectJ @DeclareParents
+* support for new AspectJ 5 pertypewithin aspect instantiation model
 * completed implementation of @AspectJ integration class MethodInvocationProceedingJoinPoint
 * refined ThreadLocalTargetSource's synchronization to guarantee thread-safe destruction on shutdown
 * added "hideProxyClassNames" property to AbstractTraceInterceptor, to log with target class instead of proxy class
@@ -47,6 +50,7 @@ Package org.springframework.mock
 * made "servletContextName" and "portletContextName" configurable in MockServletContext respectively MockPortletContext
 * added alternative MockPortalContext constructor that accepts custom PortletMode and WindowState lists
 * reworked MockActionResponse and MockPortletURL to check against list of supported PortletModes/WindowStates
+* added startNewTransaction() method to AbstractTransactionalSpringContextTests
 
 Package org.springframework.orm
 * SqlMapClientTemplate always works with SqlMapSession and provided Connection to enable proper batching in all cases
