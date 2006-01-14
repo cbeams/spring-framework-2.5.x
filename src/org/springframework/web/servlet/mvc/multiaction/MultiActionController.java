@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import org.springframework.web.util.NestedServletException;
  * different types of request with methods of the form
  *
  * <pre>
- * ModelAndView actionName(HttpServletRequest request, HttpServletResponse response);</pre>
+ * (ModelAndView | Map | void) actionName(HttpServletRequest request, HttpServletResponse response);</pre>
  *
  * May take a third parameter HttpSession in which an existing session will be required,
  * or a third parameter of an arbitrary class that gets treated as command
@@ -57,6 +57,14 @@ import org.springframework.web.util.NestedServletException;
  * <p>These methods can throw any kind of exception, but should only let propagate
  * those that they consider fatal, or which their class or superclass is prepared to
  * catch by implementing an exception handler.
+ *
+ * <p>When returning just a {@link Map} instance view name translation will be used to generate
+ * the view name. The configured {@link org.springframework.web.servlet.RequestToViewNameTranslator}
+ * will be used to determine the view name.
+ *
+ * <p>When returning <code>void</code> a return value of <code>null</code> is assumed
+ * meaning that the handler method is responsible for writing the response directly to
+ * the supplied {@link HttpServletResponse}.
  *
  * <p>This model allows for rapid coding, but loses the advantage of compile-time
  * checking. It is similar to a Struts 1.1 DispatchAction, but more sophisticated.
@@ -99,6 +107,7 @@ import org.springframework.web.util.NestedServletException;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
+ * @author Rob Harrop
  * @see MethodNameResolver
  * @see InternalPathMethodNameResolver
  * @see PropertiesMethodNameResolver
@@ -213,72 +222,112 @@ public class MultiActionController extends AbstractController implements LastMod
 		this.delegate = delegate;
 		this.handlerMethodMap = new HashMap();
 		this.lastModifiedMethodMap = new HashMap();
-		
+
+		registerHandlerMethods(delegate);
+	}
+
+	/**
+	 * Registers all handlers methods on the delegate object.
+	 */
+	private void registerHandlerMethods(Object delegate) {
 		// Look at all methods in the subclass, trying to find
 		// methods that are validators according to our criteria
 		Method[] methods = delegate.getClass().getMethods();
 		for (int i = 0; i < methods.length; i++) {
 			// We're looking for methods with given parameters.
-			if (methods[i].getReturnType().equals(ModelAndView.class)) {
-				// We have a potential handler method, with the correct return type.
-				Class[] params = methods[i].getParameterTypes();
-				
-				// Check that the number and types of methods is correct.
-				// We don't care about the declared exceptions.
-				if (params.length >= 2 && params[0].equals(HttpServletRequest.class) &&
-						params[1].equals(HttpServletResponse.class)) {
-					// We're in business.
-					if (logger.isDebugEnabled()) {
-						logger.debug("Found action method [" + methods[i] + "]");
-					}
-					this.handlerMethodMap.put(methods[i].getName(), methods[i]);
-					
-					// Look for corresponding LastModified method.
-					try {
-						Method lastModifiedMethod = delegate.getClass().getMethod(
-								methods[i].getName() + LAST_MODIFIED_METHOD_SUFFIX,
-								new Class[] { HttpServletRequest.class } );
-						// put in cache, keyed by handler method name
-						this.lastModifiedMethodMap.put(methods[i].getName(), lastModifiedMethod);
-						if (logger.isDebugEnabled()) {
-							logger.debug("Found last modified method for action method [" + methods[i] + "]");
-						}
-					}
-					catch (NoSuchMethodException ex) {
-						// No last modified method. That's ok.
-					}
-				}
+			Method method = methods[i];
+			if (isHandlerMethod(method)) {
+				registerHandlerMethod(method);
+				registerLastModifiedMethodIfExists(delegate, method);
 			}
 		}
-		
+
 		// There must be SOME handler methods.
 		// WHAT IF SETTING DELEGATE LATER!?
 		if (this.handlerMethodMap.isEmpty()) {
 			throw new ApplicationContextException("No handler methods in class [" + getClass().getName() + "]");
 		}
-		
+
 		// Now look for exception handlers.
 		this.exceptionHandlerMap = new HashMap();
 		for (int i = 0; i < methods.length; i++) {
-			if (methods[i].getReturnType().equals(ModelAndView.class) &&
-					methods[i].getParameterTypes().length == 3) {
-				Class[] params = methods[i].getParameterTypes();
-				if (params[0].equals(HttpServletRequest.class) && 
-					params[1].equals(HttpServletResponse.class) &&
-					Throwable.class.isAssignableFrom(params[2])
-				) {
-					// Have an exception handler
-					this.exceptionHandlerMap.put(params[2], methods[i]);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Found exception handler method [" + methods[i] + "]");
-					}
-				}
+			Method method = methods[i];
+			if (isExceptionHandlerMethod(method)) {
+				// Have an exception handler
+				registerExceptionHandlerMethod(method);
 			}
 		}
 	}
-	
-	
-	//---------------------------------------------------------------------
+
+	/**
+	 * Is the supplied method a valid handler method?
+	 */
+	private boolean isHandlerMethod(Method method) {
+		Class returnType = method.getReturnType();
+
+		if (ModelAndView.class.equals(returnType) ||
+				Map.class.equals(returnType) ||
+				void.class.equals(returnType)) {
+			Class[] parameterTypes = method.getParameterTypes();
+
+			return (parameterTypes.length >= 2 &&
+					HttpServletRequest.class.equals(parameterTypes[0]) &&
+					HttpServletResponse.class.equals(parameterTypes[1]));
+		}
+		return false;
+	}
+
+	/**
+	 * Is the supplied method a valid exception handler method?
+	 */
+	private boolean isExceptionHandlerMethod(Method method) {
+		return (isHandlerMethod(method) &&
+				method.getParameterTypes().length == 3 &&
+				Throwable.class.isAssignableFrom(method.getParameterTypes()[2]));
+	}
+
+	/**
+	 * Registers the supplied method as a request handler.
+	 */
+	private void registerHandlerMethod(Method method) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Found action method [" + method + "]");
+		}
+		this.handlerMethodMap.put(method.getName(), method);
+	}
+
+	/**
+	 * Registers a LastModified handler method for the supplied handler method
+	 * if one exists.
+	 */
+	private void registerLastModifiedMethodIfExists(Object delegate, Method method) {
+		// Look for corresponding LastModified method.
+		try {
+			Method lastModifiedMethod = delegate.getClass().getMethod(
+					method.getName() + LAST_MODIFIED_METHOD_SUFFIX,
+					new Class[]{HttpServletRequest.class});
+			// put in cache, keyed by handler method name
+			this.lastModifiedMethodMap.put(method.getName(), lastModifiedMethod);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found last modified method for action method [" + method + "]");
+			}
+		}
+		catch (NoSuchMethodException ex) {
+			// No last modified method. That's ok.
+		}
+	}
+
+	/**
+	 * Registers the supplied method as an exception handler.
+	 */
+	private void registerExceptionHandlerMethod(Method method) {
+		this.exceptionHandlerMap.put(method.getParameterTypes()[2], method);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Found exception handler method [" + method + "]");
+		}
+	}
+
+//---------------------------------------------------------------------
 	// Implementation of LastModified
 	//---------------------------------------------------------------------
 
@@ -366,7 +415,8 @@ public class MultiActionController extends AbstractController implements LastMod
 				bind(request, command);
 			}
 			
-			return (ModelAndView) method.invoke(this.delegate, params.toArray(new Object[params.size()]));
+			Object returnValue = method.invoke(this.delegate, params.toArray(new Object[params.size()]));
+			return massageReturnValueIfNecessary(returnValue);
 		}
 		catch (InvocationTargetException ex) {
 			// The handler method threw an exception.
@@ -375,6 +425,22 @@ public class MultiActionController extends AbstractController implements LastMod
 		catch (Exception ex) {
 			// The binding process threw an exception.
 			return handleException(request, response, ex);
+		}
+	}
+
+	/**
+	 * Processes the return value of a handler method to ensure that it either returns
+	 * <code>null</code> or an instance of {@link ModelAndView}. When returning a
+	 * {@link Map} the {@link Map} instance is wrapped in a new {@link ModelAndView} instance.
+	 */
+	private ModelAndView massageReturnValueIfNecessary(Object returnValue) {
+		if(returnValue instanceof ModelAndView) {
+			return (ModelAndView) returnValue;
+		} else if(returnValue instanceof Map) {
+			return new ModelAndView().addAllObjects((Map)returnValue);
+		} else {
+			// either returned null or was 'void' return
+			return null; // the handle method already wrote the response
 		}
 	}
 
@@ -546,8 +612,8 @@ public class MultiActionController extends AbstractController implements LastMod
 			logger.debug("Invoking exception handler [" + handler + "] for exception [" + ex + "]");
 		}
 		try {
-			ModelAndView mv = (ModelAndView) handler.invoke(this.delegate, new Object[] {request, response, ex});
-			return mv;
+			Object returnValue =  handler.invoke(this.delegate, new Object[] {request, response, ex});
+			return massageReturnValueIfNecessary(returnValue);
 		}
 		catch (InvocationTargetException ex2) {
 			Throwable targetEx = ex2.getTargetException();
@@ -561,5 +627,5 @@ public class MultiActionController extends AbstractController implements LastMod
 			throw new NestedServletException("Unknown Throwable type encountered", targetEx);
 		}
 	}
-	
+
 }

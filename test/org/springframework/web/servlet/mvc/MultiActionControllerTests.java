@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -41,11 +42,13 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
 import org.springframework.web.servlet.mvc.multiaction.ParameterMethodNameResolver;
 import org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver;
 import org.springframework.web.servlet.support.SessionRequiredException;
+import org.springframework.context.ApplicationContextException;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
+ * @author Rob Harrop
  */
 public class MultiActionControllerTests extends TestCase {
 
@@ -160,7 +163,7 @@ public class MultiActionControllerTests extends TestCase {
 		request.addParameter("colin", "whatever");
 		request.addParameter("spring", "whatever");
 		assertEquals("spring", resolver.getHandlerMethodName(request));
-		
+
 		// validate image button handling
 		request = new MockHttpServletRequest();
 		request.addParameter("spring.x", "whatever");
@@ -430,6 +433,57 @@ public class MultiActionControllerTests extends TestCase {
 		testExceptionNoHandler(mc, new Exception());
 	}
 
+	public void testHandlerReturnsMap() throws Exception {
+		Map model = new HashMap();
+		model.put("message", "Hello World!");
+
+		MultiActionController mac = new ModelOnlyMultiActionController(model);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mav = mac.handleRequest(request, response);
+
+		assertNotNull("ModelAndView cannot be null", mav);
+		assertFalse("ModelAndView should not have a view", mav.hasView());
+		assertEquals(model, mav.getModel());
+	}
+
+	public void testExceptionHandlerReturnsMap() throws Exception {
+		Map model = new HashMap();
+
+		MultiActionController mac = new ModelOnlyMultiActionController(model);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mav = mac.handleRequest(request, response);
+
+		assertNotNull("ModelAndView cannot be null", mav);
+		assertFalse("ModelAndView should not have a view", mav.hasView());
+		assertTrue(model.containsKey("exception"));
+	}
+
+	public void testHandlerReturnsVoid() throws Exception {
+		MultiActionController mac = new VoidMultiActionController();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mav = mac.handleRequest(request, response);
+
+		assertNull("ModelAndView must be null", mav);
+	}
+
+	public void testExceptionHandlerReturnsVoid() throws Exception {
+
+		MultiActionController mac = new VoidMultiActionController();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mav = mac.handleRequest(request, response);
+
+		assertNull("ModelAndView cannot be null", mav);
+		assertEquals("exception", response.getContentAsString());
+	}
+
 
 	/** No error handlers */
 	public static class TestMaController extends MultiActionController {
@@ -569,4 +623,40 @@ public class MultiActionControllerTests extends TestCase {
 		}
 	}
 
+	public static class ModelOnlyMultiActionController extends MultiActionController {
+
+		private final Map model;
+
+		public ModelOnlyMultiActionController(Map model) throws ApplicationContextException {
+			this.model = model;
+		}
+
+		public Map welcome(HttpServletRequest request, HttpServletResponse response) {
+			return model;
+		}
+
+		public Map index(HttpServletRequest request, HttpServletResponse response) {
+			throw new IllegalStateException();
+		}
+
+		public Map handleIllegalStateException(HttpServletRequest request, HttpServletResponse response, IllegalStateException ex) {
+			model.put("exception", ex);
+			return model;
+		}
+	}
+
+	public static class VoidMultiActionController extends MultiActionController {
+
+		public void welcome(HttpServletRequest request, HttpServletResponse response) {
+
+		}
+
+		public void index(HttpServletRequest request, HttpServletResponse response) {
+			throw new IllegalStateException();
+		}
+
+		public void handleIllegalStateException(HttpServletRequest request, HttpServletResponse response, IllegalStateException ex) throws IOException {
+			response.getWriter().write("exception");
+		}
+	}
 }
