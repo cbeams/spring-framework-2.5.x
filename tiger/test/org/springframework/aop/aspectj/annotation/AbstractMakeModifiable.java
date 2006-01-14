@@ -68,15 +68,16 @@ public abstract class AbstractMakeModifiable {
 		
 		if (mixin.isModified()) {
 			// Already changed, don't need to change again
+			//System.out.println("changed");
 			return;
 		}
 		
 		// Find the current raw value, by invoking the corresponding setter
-		Method correspondingSetter =  getGetterFromSetter(((MethodSignature) jp.getSignature()).getMethod());
+		Method correspondingGetter =  getGetterFromSetter(((MethodSignature) jp.getSignature()).getMethod());
 		boolean modified = true;
-		if (correspondingSetter != null) {
+		if (correspondingGetter != null) {
 			try {
-				Object oldValue = correspondingSetter.invoke(jp.getTarget());
+				Object oldValue = correspondingGetter.invoke(jp.getTarget());
 				//System.out.println("Old value=" + oldValue + "; new=" + newValue);
 				modified = !ObjectUtils.nullSafeEquals(oldValue, newValue);
 			}
@@ -84,6 +85,9 @@ public abstract class AbstractMakeModifiable {
 				ex.printStackTrace();
 				// Don't sweat on exceptions; assume value was modified
 			}
+		}
+		else {
+			//System.out.println("cannot get getter for " + jp);
 		}
 		if (modified) {
 			mixin.markDirty();
@@ -93,8 +97,9 @@ public abstract class AbstractMakeModifiable {
 	private Method getGetterFromSetter(Method setter) {
 		String getterName = setter.getName().replaceFirst("set", "get");
 		try {
-			return setter.getDeclaringClass().getMethod(getterName, (Class) null);
-		} catch (NoSuchMethodException ex) {
+			return setter.getDeclaringClass().getMethod(getterName, (Class[]) null);
+		} 
+		catch (NoSuchMethodException ex) {
 			// must be write only
 			return null;
 		}
