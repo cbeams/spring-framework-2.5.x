@@ -22,13 +22,16 @@ import java.util.Arrays;
 import junit.framework.TestCase;
 
 import org.aopalliance.aop.AspectException;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.JoinPoint.StaticPart;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.springframework.aop.MethodBeforeAdvice;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
@@ -60,12 +63,44 @@ public class MethodInvocationProceedingJoinPointTests extends TestCase {
 	
 	public void testCanGetMethodSignatureFromJoinPoint() {
 		final Object raw = new TestBean();
+		// Will be set by advice during a method call
+		final int newAge = 23;
+		
 		ProxyFactory pf = new ProxyFactory(raw);
+		pf.setExposeProxy(true);
 		pf.addAdvisor(ExposeInvocationInterceptor.ADVISOR);
 		pf.addAdvice(new MethodBeforeAdvice() {
+			private int depth;
+			
 			public void before(Method method, Object[] args, Object target) throws Throwable {
+				JoinPoint jp = AbstractAspectJAdvice.currentJoinPoint();
+				assertTrue("Method named in toString", jp.toString().contains(method.getName()));
+				// Ensure that these don't cause problems
+				jp.toShortString();
+				jp.toLongString();
+				
 				assertSame(target, AbstractAspectJAdvice.currentJoinPoint().getTarget());
-				assertSame(target, AbstractAspectJAdvice.currentJoinPoint().getThis());
+				assertFalse(AopUtils.isAopProxy(AbstractAspectJAdvice.currentJoinPoint().getTarget()));
+				
+				ITestBean thisProxy = (ITestBean) AbstractAspectJAdvice.currentJoinPoint().getThis();
+				assertTrue(AopUtils.isAopProxy(AbstractAspectJAdvice.currentJoinPoint().getThis()));
+				
+				assertNotSame(target, thisProxy);
+				
+				// Check getting again doesn't cause a problem
+				assertSame(thisProxy, AbstractAspectJAdvice.currentJoinPoint().getThis());
+				
+				// Try reentrant call--will go through this advice.
+				// Be sure to increment depth to avoid infinite recursion
+				if (depth++ == 0) {
+					// Check that toString doesn't cause a problem
+					thisProxy.toString();
+					// Change age, so this will be returned by invocation
+					thisProxy.setAge(newAge);
+					assertEquals(newAge, thisProxy.getAge());
+				}
+				
+				assertSame(AopContext.currentProxy(), thisProxy);
 				assertSame(target, raw);
 				
 				assertSame(method.getName(), AbstractAspectJAdvice.currentJoinPoint().getSignature().getName());
@@ -91,7 +126,7 @@ public class MethodInvocationProceedingJoinPointTests extends TestCase {
 		});
 		ITestBean itb = (ITestBean) pf.getProxy();
 		// Any call will do
-		itb.getAge();
+		assertEquals("Advice reentrantly set age", newAge, itb.getAge());
 	}
 	
 	public void testCanGetSourceLocationFromJoinPoint() {

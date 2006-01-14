@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,11 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.DeclareParents;
-
-import org.springframework.aop.framework.AopContext;
 import org.springframework.aop.framework.DefaultLockable;
 import org.springframework.aop.framework.Lockable;
 
 /**
  * Demonstrates introductions, AspectJ annotation style.
- * <p>
- * <b>This is incomplete as of Spring AOP 2.0 M1. It is
- * possible that introductions may be considered out of scope
- * altogether for Spring 2.0.</b>
  * <p>
  * @author Rod Johnson
  * @since 2.0
@@ -42,15 +36,13 @@ public class MakeLockable {
 			defaultImpl=DefaultLockable.class)
 	public static Lockable mixin;
 	
+	// TODO still working on argument binding for mixin type
 	@Before("execution(* set*(*))")
-	//@Before(value="execution(* set*(*)) && this(mixin)", argNames="mixin")
-	public void checkNotLocked(JoinPoint jp) { 
-			//Lockable mixin) { // Bind to arg
-		
-		// TODO this is work in progress, an example only to indicate a possible Spring implementation strategy
-		// This is NOT the correct AspectJ syntax approach
-		Lockable mixin = (Lockable) AopContext.currentProxy(); 
-			//(Lockable) jp.getThis();
+	//@Before(value="execution(* set*(*)) && this(mixin)")
+	public void checkNotLocked(JoinPoint jp)//,
+//			Lockable mixin) { // Bind to arg
+	{
+		Lockable mixin = (Lockable) jp.getThis();
 		if (mixin.locked()) {
 			throw new IllegalStateException();
 		}

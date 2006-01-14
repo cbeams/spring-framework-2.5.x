@@ -25,10 +25,21 @@ import org.aspectj.lang.JoinPoint.StaticPart;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.aspectj.runtime.internal.AroundClosure;
+import org.springframework.aop.framework.ReflectiveMethodInvocation;
 
 /**
  * Implementation of AspectJ ProceedingJoinPoint interface
  * wrapping an AOP Alliance MethodInvocation.
+ * <p>
+ * <b>Note</b>: the getThis() method returns the current Spring AOP proxy.
+ * The getTarget() method returns the current Spring AOP target (which may be
+ * null if there is no target), and is a plain POJO without any advice.
+ * <b>If you want to call the object and have the advice take effect, use getThis().</b> 
+ * A common example is casting the object to an introduced interface in
+ * the implementation of an introduction.
+ * <br>
+ * Of course there is no such distinction between target and proxy
+ * in AspectJ.
  * 
  * @author Rod Johnson
  * @since 2.0
@@ -69,17 +80,28 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	}
 
 	public String toShortString() {
-		return "execution of " + methodInvocation.getMethod().getName();
+		return "execution(" + methodInvocation.getMethod().getName() + ")";
 	}
 
 	public String toLongString() {
-		return "execution of " + methodInvocation.getMethod().getName();
+		return getClass().getName() + ": execution: [" + methodInvocation + "]";
+	}
+	
+	
+	public String toString() {
+		return getClass().getName() + ": " + toShortString();
 	}
 
+	/**
+	 * Returns the Spring AOP proxy. Cannot be null.
+	 */
 	public Object getThis() {
-		return methodInvocation.getThis();
+		return ((ReflectiveMethodInvocation) methodInvocation).getProxy();
 	}
 
+	/**
+	 * Returns the Spring AOP target. May be null if there is no target.
+	 */
 	public Object getTarget() {
 		return methodInvocation.getThis();
 	}
