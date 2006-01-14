@@ -59,7 +59,7 @@ public interface TransactionStatus extends SavepointManager {
 	/**
 	 * Set the transaction rollback-only. This instructs the transaction manager
 	 * that the only possible outcome of the transaction may be a rollback,
-	 * proceeding with the normal applicaiton workflow though (i.e. no exception). 
+	 * proceeding with the normal application workflow though (i.e. no exception). 
 	 * <p>For transactions managed by TransactionTemplate or TransactionInterceptor.
 	 * An alternative way to trigger a rollback is throwing an application exception.
 	 * @see org.springframework.transaction.support.TransactionCallback#doInTransaction
