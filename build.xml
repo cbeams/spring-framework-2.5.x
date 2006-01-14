@@ -1588,8 +1588,9 @@
 		</delete>
 		<taskdef name="jrc" classname="net.sf.jasperreports.ant.JRAntCompileTask">
 			<classpath>
-				<fileset dir="./lib">
+				<fileset dir="${lib.dir}">
 					<include name="**/*.jar"/>
+					<exclude name="**/aspectjtools.jar"/>
 				</fileset>
 			</classpath>
 		</taskdef>
