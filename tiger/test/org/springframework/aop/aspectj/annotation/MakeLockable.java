@@ -38,8 +38,9 @@ import org.springframework.aop.framework.Lockable;
 @Aspect
 public class MakeLockable {
 	
-	@DeclareParents("org.springframework.aop.aspectj.annotation.*")
-	public static Lockable mixin = new DefaultLockable();
+	@DeclareParents(value = "org.springframework.aop.aspectj.annotation.*",
+			defaultImpl=DefaultLockable.class)
+	public static Lockable mixin;
 	
 	@Before("execution(* set*(*))")
 	//@Before(value="execution(* set*(*)) && this(mixin)", argNames="mixin")

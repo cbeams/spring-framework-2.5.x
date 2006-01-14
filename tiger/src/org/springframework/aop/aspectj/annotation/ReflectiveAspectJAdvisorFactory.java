@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.ClassFilters;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.TypePatternClassFilter;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -118,6 +117,12 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 			return null;
 		}
 		
+		if (declareParents.defaultImpl() == DeclareParents.class) {
+			// This is what comes back if it wasn't set. This seems bizarre...
+			// TODO this restriction possibly should be relaxed
+			throw new AspectException("defaultImpl must be set on DeclareParents");
+		}
+		
 		// Work out where it matches, with the ClassFilter
 		final Class[] interfaces = new Class[] { introductionField.getType() };
 		ClassFilter typePatternFilter = new TypePatternClassFilter(declareParents.value());
@@ -133,12 +138,9 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		};
 		final ClassFilter classFilter = ClassFilters.intersection(typePatternFilter, exclusion);
 
-		// Try to instantiate mixin instance and do delegation
-		Object meaninglessStaticDummyIntroductionInstanceUsedToDetermineConcreteClassWithNoArgConstructor;
+		// Try to instantiate a mixin instance and do delegation
 		try {
-			meaninglessStaticDummyIntroductionInstanceUsedToDetermineConcreteClassWithNoArgConstructor = introductionField.get(null);
-			Object newIntroductionInstanceToUse =
-					meaninglessStaticDummyIntroductionInstanceUsedToDetermineConcreteClassWithNoArgConstructor.getClass().newInstance();
+			Object newIntroductionInstanceToUse = declareParents.defaultImpl().newInstance();
 			return new DelegatingIntroductionAdvisor(interfaces, classFilter, newIntroductionInstanceToUse);
 		} 
 		catch (IllegalArgumentException ex) {
