@@ -39,7 +39,7 @@
   <sect1>
     <title>Using AspectJ to dependency inject objects using Spring</title>
 
-    <para>Spring 1.3 introduces an AspectJ aspect that can be used to
+    <para>Spring 2.0 introduces an AspectJ aspect that can be used to
     dependency inject objects not created by the Spring container. This can
     include objects instantiated by an O/R mapping framework, and objects
     simply constructed using the <literal>new</literal> operator. This is a

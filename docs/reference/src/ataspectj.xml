@@ -26,10 +26,11 @@
     supported, including advanced features such as argument binding, pointcut
     composition and references to named pointcuts.</para>
 
-    <para><remark>The functionality described in this chapter is only
-    available using AspectJ 5. Processing of the @AspectJ annotation-style
-    syntax is only available using Java 5 as well as AspectJ
-    5.</remark></para>
+    <para><remark>The annotation processing functionality described in this
+    chapter is only available using AspectJ 5. Processing of the @AspectJ
+    annotation-style syntax is only available using Java 5 as well as AspectJ
+    5. Externalization of pointcut expression strings into XML does not
+    require Java 5.</remark></para>
   </sect1>
 
   <sect1>
@@ -55,9 +56,19 @@
     <sect2>
       <title>Overview</title>
 
-      <para>AspectJ introduces a new annotation-style syntax, in addition to
+      <para>AspectJ 5 introduces a new annotation-style syntax, in addition to
       the traditional AspectJ syntax. With the annotation style syntax,
       aspects can be compiled by Javac.</para>
+
+      <para>This syntax places pointcut expression strings in
+      annotations.</para>
+
+      <para><remark>Spring also supports AspectJ semantics, with pointcut
+      expressions in Spring XML configuration files. This does not require
+      Java 5. It is discussed in the next section. All coverage of actual
+      advice, including argument binding, is equally relevant to this style of
+      use: the semantics, are identical--only the location of the pointcut
+      expression strings differs.</remark></para>
     </sect2>
 
     <sect2>
@@ -91,9 +102,26 @@
     </sect2>
 
     <sect2>
-      <title>Named pointcuts</title>
+      <title>Special types</title>
 
-      <para>TODO</para>
+      <para>AspectJ supports the binding of well-known types, such as the
+      current JoinPoint, and returned value and thrown throwable (if
+      applicable to the advice method).</para>
+
+      <para>TODO full list</para>
+
+      <para>Two special cases are the this and target values.</para>
+
+      <para>This, when bound or retrieved from JoinPoint.getThis(), returns
+      the current Spring AOP proxy. This allows invocation through the advice
+      chain, or casting to an introduced interface.</para>
+
+      <para>Target, when bound or retrieved, returns the current target. This
+      is a plain POJO, not advised.</para>
+    </sect2>
+
+    <sect2>
+      <title>Named pointcuts</title>
 
       <para>It is possible to reference named pointcuts in AspectJ aspects
       available on the class path, even if they were authored with traditional
@@ -120,15 +148,111 @@ public void doubleArg(ProceedingJoinPoint pjp, int x) throws Throwable {
     </sect2>
 
     <sect2>
-      <title>Binding models</title>
+      <title>Aspect instantiation models</title>
 
-      <para>TODO</para>
+      <para>Spring AOP "natively" supports two asoect instantiation
+      models:</para>
+
+      <para>Singleton</para>
+
+      <para>Per-instance</para>
+
+      <para>This correspond to the advisor or/and advice being a singleton or
+      non-singleton in Spring IoC configuration.</para>
+
+      <para>AspectJ supports a different, richer, set of instantiation models.
+      However, in AspectJ as in Spring, the singleton instantiation (which is
+      the default) is by far the most useful.</para>
+
+      <para>The full range of AspectJ instantiation models is:</para>
+
+      <para>singleton</para>
+
+      <para>perthis</para>
+
+      <para>pertarget</para>
+
+      <para>pertypewithin</para>
+
+      <para>percflow</para>
+
+      <para>percflowbelow</para>
+
+      <para>Spring can support the following aspect AspectJ instantiation
+      models, and will automatically respect such annotations:</para>
+
+      <para>singleton</para>
+
+      <para>perthis</para>
+
+      <para>pertarget</para>
+
+      <para>pertypewithin</para>
+
+      <para>If you use a binding type that is not supported, Spring will
+      through an exception. Thus you cannot get unexpected semantics.</para>
+
+      <para>TODO example of binding models</para>
     </sect2>
 
     <sect2>
       <title>Introductions</title>
 
-      <para>TODO</para>
+      <para>Spring supports AspectJ-style introductions. These are
+      significantly more elegant than the "native" Spring AOP equivalent,
+      using DelegatingIntroductionInterceptor.</para>
+
+      <para>For example, consider a simple interface expressing locking
+      status:</para>
+
+      <programlisting>public interface Lockable {
+
+    void lock();
+
+    void unlock();
+
+    boolean locked();
+}</programlisting>
+
+      <para>Imagine that we wish to introduce this interface to make a number
+      of objects Lockable. This means both making those objects implement the
+      Lockable interface, and also changing the behaviour of their setter
+      methods to throw an exception if they are locked.</para>
+
+      <para>This is achieved using the following @AspectJ aspect. We assume an
+      implementation of Lockable called DefaultLockable, although it is a
+      common idiom for the aspect itself to declare an implementation in an
+      inner class.</para>
+
+      <programlisting>@Aspect
+public class MakeLockable {
+
+   @DeclareParents(value = "org.springframework..*",
+      defaultImpl=DefaultLockable.class)
+   public static Lockable mixin;
+ 
+   @Before(value="execution(* set*(*)) &amp;&amp; this(mixin)", argNames="mixin")
+   public void checkNotLocked(Lockable mixin) {
+      if (mixin.locked()) {
+         throw new IllegalStateException();
+      }
+   }
+}</programlisting>
+
+      <para>The field annotated with the DeclareParents element specifies an
+      AspectJ type pattern to which the introduction will be apply. Note that
+      this variable must be static. The defaultImpl attribute of the
+      DeclareParents attribute is used to specify the class name to use to
+      make the introduction.</para>
+
+      <para>In this example, the before advice works in conjuction with the
+      Lockable mixin to change the behaviour of setter methods to throw an
+      exception if the object is locked. This is achieved through a pointcut
+      expression identifying setters, and also binding "this" to an argument
+      on the method advice, enabling the locking state to be tested.</para>
+
+      <para>The argNames attribute is required on the before advice, to ensure
+      correct argument binding (unless compiling with a debug flag).</para>
     </sect2>
 
     <sect2>
@@ -167,6 +291,160 @@ public void doubleArg(ProceedingJoinPoint pjp, int x) throws Throwable {
       themselves be subjected to auto proxying, to avoid circular
       dependencies.</para>
     </sect2>
+  </sect1>
+
+  <sect1>
+    <title>AspectJ advice with pointcut expressions in Spring XML</title>
+
+    <para>In this style of use, the semantics are identical to @AspectJ.
+    However, pointcut expression strings are expressed in Spring XMl, rather
+    than source-level annotations. This is usable without Java 5. It also
+    provides the ability to invoke arbitrary methods on POJOs, with no
+    requirements on the classes or methods to know anything about Spring or
+    AspectJ.</para>
+
+    <para>Advice methods follow AspectJ conventions.</para>
+
+    <para>Use looks as follows:</para>
+
+    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
+
+
+   &lt;aop:config&gt;
+    &lt;aop:aspect id="beforeAdviceBindingTests" ref="testAspect"&gt;
+      &lt;aop:advice 
+         kind="after"
+         method="oneIntArg"
+         pointcut="execution(* setAge(int)) and args(age)"
+      /&gt;
+      &lt;aop:advice
+         kind="after"
+         method="oneObjectArg"
+         pointcut="execution(* getAge()) and this(bean)"
+      /&gt;
+      &lt;aop:advice
+          kind="afterReturning"
+          method="oneObjectArg"
+          pointcut="execution(* getDoctor()) and target(bean)"
+      /&gt;
+     &lt;/aop:aspect&gt;
+   &lt;/aop:config&gt;
+
+   &lt;bean id="testAspect" class="org.springframework.aop.aspectj.AdviceBindingTestAspect"/&gt;
+
+   &lt;bean id="testBean" class="org.springframework.beans.TestBean"/&gt;
+
+&lt;/beans&gt;</programlisting>
+
+    <para>Notes:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Import of the Spring 2.0 AOP namespace in the beans
+        element</para>
+      </listitem>
+
+      <listitem>
+        <para>The use of one &lt;aop:config&gt; element to configure a set of
+        aspects that will automatically be applied using autoproxying</para>
+      </listitem>
+
+      <listitem>
+        <para>Use of one or more &lt;aop:aspect&gt; element to specify the
+        advice methods in a particular bean. The bean is identified using the
+        ref element. In the previous example, for example, we could also
+        dependency inject the "testAspect" bean.</para>
+      </listitem>
+
+      <listitem>
+        <para>The use of one or more &lt;aop:advice&gt; elements beneath each
+        &lt;aop:aspect&gt; element to identify the various advices that make
+        up an aspect. Note the specification of kind, indicating what kind of
+        advice this is. The other required attributes are "pointcut"--an
+        AspectJ 5 pointcut expression string--and "method". Method is the name
+        of a method. Note that overloaded methods will still work, based on
+        the argumnets bound in the pointcut expression.</para>
+      </listitem>
+
+      <listitem>
+        <para>Argument binding is handled through the pointcut
+        expression.</para>
+      </listitem>
+
+      <listitem>
+        <para>As with @AspectJ, it is possible for the method to take unbound
+        arguments of well-known types such as JoinPoint. However, there is no
+        requirement for the method to have any dependence on AspectJ.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>The valid advice kinds follow AspectJ rules, and are:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>before</para>
+      </listitem>
+
+      <listitem>
+        <para>after</para>
+      </listitem>
+
+      <listitem>
+        <para>afterReturning</para>
+      </listitem>
+
+      <listitem>
+        <para>afterThrowing</para>
+      </listitem>
+
+      <listitem>
+        <para>around</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Each of these advice kinds corresponds to an @AspectJ annotation,
+    which would include a pointcut expression.</para>
+
+    <para>The following is an example of a class that could be used with the
+    above XML:</para>
+
+    <programlisting>public class AdviceBindingTestAspect {
+
+  public void oneIntArg(int age) {
+     this.collaborator.oneIntArg(age);
+  }
+
+  public void needsJoinPointStaticPart(JoinPoint.StaticPart tjpsp) {
+     this.collaborator.needsJoinPointStaticPart(tjpsp.getSignature().getName());
+  }
+}
+</programlisting>
+
+    <para>The following shows an @AspectJ version, equivalent to the XML and
+    Java code. The semantics are identical, and both can be used with
+    Spring:</para>
+
+    <programlisting>@Aspect
+public class AdviceBindingTestAspect {
+
+  @Before("execution(* setAge(int)) and args(age)")
+  public void oneIntArg(int age) {
+    this.collaborator.oneIntArg(age);
+  }
+
+  @After("execution(* getAge())")
+  public void needsJoinPointStaticPart(JoinPoint.StaticPart tjpsp) {
+    this.collaborator.needsJoinPointStaticPart(tjpsp.getSignature().getName());
+  }
+}</programlisting>
+
+    <para>TODO show AspectJ style aspect also</para>
   </sect1>
 
   <sect1>
