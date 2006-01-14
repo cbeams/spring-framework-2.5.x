@@ -43,13 +43,12 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 	
 	/**
 	 * Create a new advisor for this DeclareParents field
-	 * @param introducedInterface interface to be introduced
 	 * @param introductionField static field defining the introduction 
 	 * @param typePattern type pattern the introduction is restricted to
 	 * @param defaultImpl default implementation class
 	 */
-	public DeclareParentsAdvisor(final Class introducedInterface, Field introductionField, String typePattern, Class defaultImpl) {
-		this.introducedInterface = introducedInterface;
+	public DeclareParentsAdvisor(Field introductionField, String typePattern, Class defaultImpl) {
+		this.introducedInterface = introductionField.getType();
 		ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
 		// Excludes methods implemented
 		ClassFilter exclusion = new ClassFilter() {

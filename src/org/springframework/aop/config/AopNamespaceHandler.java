@@ -16,11 +16,8 @@
 
 package org.springframework.aop.config;
 
+import java.lang.reflect.Field;
 import java.util.List;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import org.springframework.aop.aspectj.AspectJAfterAdvice;
 import org.springframework.aop.aspectj.AspectJAfterReturningAdvice;
@@ -28,9 +25,15 @@ import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
 import org.springframework.aop.aspectj.AspectJAroundAdvice;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
+import org.springframework.aop.aspectj.DeclareParentsAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.target.scope.ScopedProxyFactoryBean;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -46,6 +49,9 @@ import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * <code>NamespaceHandler</code> for the <code>aop</code> namespace.
@@ -77,6 +83,7 @@ import org.springframework.util.xml.DomUtils;
  *
  * @author Rob Harrop
  * @author Adrian Colyer
+ * @author Rod Johnson
  * @since 2.0
  */
 public class AopNamespaceHandler extends NamespaceHandlerSupport {
@@ -208,6 +215,10 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		private static final String REF = "ref";
 		private static final String KIND = "kind";
 		private static final String BEFORE = "before";
+		private static final String DECLARE_PARENTS = "declare-parents";
+		private static final String TYPE_PATTERN = "type-pattern";
+		private static final String DEFAULT_IMPL = "default-impl";
+		private static final String FIELD = "field";
 		private static final String AFTER = "after";
 		private static final String AFTER_RETURNING = "afterReturning";
 		private static final String AFTER_THROWING = "afterThrowing";
@@ -228,7 +239,6 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 		public void parse(Element element, BeanDefinitionRegistry registry) {
 			NodeList childNodes = element.getChildNodes();
-
 
 			NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
 
@@ -301,11 +311,84 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 				Element pointcutElement = (Element) pointcuts.get(i);
 				parsePointcut(pointcutElement, registry);
 			}
+			
+			List declareParents = DomUtils.getChildElementsByTagName(aspectElement, DECLARE_PARENTS, true);
+			for (int i = METHOD_INDEX; i < declareParents.size(); i++) {
+				Element declareParentsElement = (Element) declareParents.get(i);
+				parseDeclareParents(aspectName, declareParentsElement, registry);
+			}
 
 			List advice = DomUtils.getChildElementsByTagName(aspectElement, ADVICE, true);
 			for (int i = METHOD_INDEX; i < advice.size(); i++) {
 				Element adviceElement = (Element) advice.get(i);
 				parseAdvice(aspectName, adviceElement, registry);
+			}
+		}
+		
+		private void parseDeclareParents(String aspectName, Element declareParentsElement, BeanDefinitionRegistry registry) {
+			RootBeanDefinition fieldDefinition = new RootBeanDefinition(FieldLocatingFactoryBean.class);
+			ConstructorArgumentValues fav = new ConstructorArgumentValues();
+			// First one is the field on the other bean
+			fav.addIndexedArgumentValue(0, aspectName);
+			fav.addIndexedArgumentValue(1, declareParentsElement.getAttribute(FIELD));
+			fieldDefinition.setConstructorArgumentValues(fav);
+			
+			RootBeanDefinition advisorDefinition = new RootBeanDefinition(DeclareParentsAdvisor.class);
+			//new DeclareParentsAdvisor(Field introductionField, String typePattern, Class defaultImpl)
+			ConstructorArgumentValues cav = new ConstructorArgumentValues();
+			cav.addIndexedArgumentValue(0, fieldDefinition);
+			cav.addIndexedArgumentValue(1, declareParentsElement.getAttribute(TYPE_PATTERN));
+			// Will automatically be converted from a type
+			cav.addIndexedArgumentValue(2, declareParentsElement.getAttribute(DEFAULT_IMPL));
+
+			advisorDefinition.setConstructorArgumentValues(cav);
+			
+			// register the final advisor
+			String id = BeanDefinitionReaderUtils.generateBeanName(advisorDefinition, registry, false);
+			registry.registerBeanDefinition(id, advisorDefinition);
+		}
+		
+		/**
+		 * Used internally to return a reference to a field in the named bean
+		 */
+		public static class FieldLocatingFactoryBean implements FactoryBean, BeanFactoryAware {
+			private Field f;
+			private String beanName;
+			private String fieldName;
+
+			public FieldLocatingFactoryBean(String beanName, String fieldName) {
+				this.beanName = beanName;
+				this.fieldName = fieldName;
+			}
+			
+			public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+				Class beanClass = beanFactory.getType(beanName);
+				if (beanClass == null) {
+					throw new IllegalArgumentException("Can't determine type of bean with name '" + this.beanName + "'");
+				}
+				try {
+					// TODO valid assumption?
+					this.f = beanClass.getDeclaredField(fieldName);
+					if (!f.isAccessible()) {
+						f.setAccessible(true);
+					}
+				}
+				catch (NoSuchFieldException ex) {
+					// TODO refine
+					throw new FatalBeanException("Could not resolve field", ex);
+				}
+			}
+			
+			public Object getObject() throws Exception {
+				return f;
+			}
+			
+			public Class getObjectType() {
+				return Field.class;
+			}
+			
+			public boolean isSingleton() {
+				return true;
 			}
 		}
 
