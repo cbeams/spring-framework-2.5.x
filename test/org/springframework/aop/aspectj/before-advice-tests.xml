@@ -21,7 +21,7 @@
 			<aop:advice
 				kind="before"
 				method="oneIntAndOneObject"
-				pointcut="execution(* setAge(..)) and args(age) and this(bean)"
+				pointcut="execution(* setAge(..)) and args(age) and target(bean)"
 				arg-names="age,bean"
 			/>			
 			<aop:advice

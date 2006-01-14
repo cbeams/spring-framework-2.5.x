@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,20 +192,25 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		checkReadyToMatch();
 		ShadowMatch shadowMatch = getShadowMatch(method);
 
-		Object target;
+		// Bind Spring AOP proxy to AspectJ "this" and Spring AOP target to AspectJ target,
+		// consistent with return of MethodInvocationProceedingJoinPoint
 		ReflectiveMethodInvocation invocation;
+		Object targetObject;
+		Object thisObject;
 		try {
 			invocation = (ReflectiveMethodInvocation) ExposeInvocationInterceptor.currentInvocation();
-			target = invocation.getThis();
+			targetObject = invocation.getThis();
+			thisObject = invocation.getProxy();
 		}
 		catch (AspectException ex) {
 			// No current invocation
 			// TODO do we want to allow this?
-			target = null;
+			targetObject = null;
+			thisObject = null;
 			invocation = null;
 		}
 
-		JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(target, target, args);
+		JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(thisObject, targetObject, args);
 		if (joinPointMatch.matches() && invocation != null) {
 			bindParameters(invocation, joinPointMatch);
 		}

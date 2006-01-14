@@ -16,7 +16,7 @@
 			<aop:advice
 			    kind="around"
 				method="oneObjectArg"
-				pointcut="execution(* getAge()) and this(bean)"
+				pointcut="execution(* getAge()) and target(bean)"
 			/>
 			<aop:advice
 				kind="around"

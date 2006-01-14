@@ -19,6 +19,11 @@
 				pointcut="execution(* getAge()) and this(bean)"
 			/>
 			<aop:advice
+			    kind="afterReturning"
+				method="oneObjectArg"
+				pointcut="execution(* getDoctor()) and target(bean)"
+			/>
+			<aop:advice
 				kind="after"
 				method="oneIntAndOneObject"
 				pointcut="execution(* setAge(..)) and args(age) and this(bean)"
