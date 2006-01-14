@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.aopalliance.aop.Advice;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.annotation.After;
@@ -38,11 +37,8 @@ import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
 
-import org.springframework.aop.ClassFilter;
-import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopConfigException;
-import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.support.annotation.AnnotationUtils;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
@@ -137,45 +133,6 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	}
 
 
-	/**
-	 * Introduction advisor delegating to the given object.
-	 */
-	protected final class DelegatingIntroductionAdvisor implements IntroductionAdvisor {
-
-		private final Class[] interfaces;
-
-		private final ClassFilter filter;
-		
-		private final Advice advice;
-
-		public DelegatingIntroductionAdvisor(Class[] interfaces, ClassFilter filter, Object instance) {
-			this.interfaces = interfaces;
-			this.filter = filter;
-			this.advice = new DelegatingIntroductionInterceptor(instance);
-		}
-
-		public ClassFilter getClassFilter() {
-			return filter;
-		}
-
-		public void validateInterfaces() throws IllegalArgumentException {			
-			// Do nothing
-		}
-
-		public boolean isPerInstance() {
-			return true;
-		}
-
-		public Advice getAdvice() {
-			return advice;
-		}
-
-		public Class[] getInterfaces() {
-			return interfaces;
-		}
-	}
-
-	
 	protected static final ParameterNameDiscoverer ASPECTJ_ANNOTATION_PARAMETER_NAME_DISCOVERER = new ParameterNameDiscoverer() {
 		public String[] getParameterNames(Constructor ctor) {
 			throw new UnsupportedOperationException("Spring AOP cannot handle constructor advice");

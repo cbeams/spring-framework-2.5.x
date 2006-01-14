@@ -31,7 +31,6 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.aspectj.AbstractAspectJAdvice;
@@ -41,10 +40,9 @@ import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
 import org.springframework.aop.aspectj.AspectJAroundAdvice;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
+import org.springframework.aop.aspectj.DeclareParentsAdvisor;
 import org.springframework.aop.framework.AopConfigException;
-import org.springframework.aop.support.ClassFilters;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.aop.support.TypePatternClassFilter;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -57,8 +55,6 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  */
 public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFactory {
-	
-	private static final String THIS_JOIN_POINT = "thisJointPoint";
 	
 	/**
 	 * Create Spring Advisors for all At AspectJ methods on the given aspect instance.
@@ -123,36 +119,9 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 			throw new AspectException("defaultImpl must be set on DeclareParents");
 		}
 		
-		// Work out where it matches, with the ClassFilter
-		final Class[] interfaces = new Class[] { introductionField.getType() };
-		ClassFilter typePatternFilter = new TypePatternClassFilter(declareParents.value());
-		ClassFilter exclusion = new ClassFilter() {
-			public boolean matches(Class clazz) {
-				for (Class<?> introducedInterface : interfaces) {
-					if (introducedInterface.isAssignableFrom(clazz)) {
-						return false;
-					}
-				}
-				return true;
-			}
-		};
-		final ClassFilter classFilter = ClassFilters.intersection(typePatternFilter, exclusion);
-
-		// Try to instantiate a mixin instance and do delegation
-		try {
-			Object newIntroductionInstanceToUse = declareParents.defaultImpl().newInstance();
-			return new DelegatingIntroductionAdvisor(interfaces, classFilter, newIntroductionInstanceToUse);
-		} 
-		catch (IllegalArgumentException ex) {
-			throw new AspectException("Cannot evaluate static introduction field " + introductionField, ex);
-		} 
-		catch (IllegalAccessException ex) {
-			throw new AspectException("Cannot evaluate static introduction field " + introductionField, ex);
-		} 
-		catch (InstantiationException ex) {
-			throw new AspectException("Cannot instantiate class determined from static introduction field " + introductionField, ex);
-		}
+		return new DeclareParentsAdvisor(introductionField.getType(), introductionField, declareParents.value(), declareParents.defaultImpl());
 	}
+	
 	
 	public InstantiationModelAwarePointcutAdvisorImpl getAdvisor(
 			Method candidateAspectJAdviceMethod, MetadataAwareAspectInstanceFactory aif) {
