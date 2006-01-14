@@ -56,7 +56,7 @@ public abstract class AbstractMakeModifiable {
 	
 	@Before(value="execution(void set*(*)) && this(modifiable) && args(newValue)", 
 			argNames="modifiable,newValue")
-	public void checkNotLocked(JoinPoint jp, 
+	public void recordModificationIfSetterArgumentDiffersFromOldValue(JoinPoint jp, 
 		MutableModifable mixin, Object newValue) {
 		
 		/*
@@ -93,7 +93,7 @@ public abstract class AbstractMakeModifiable {
 	private Method getGetterFromSetter(Method setter) {
 		String getterName = setter.getName().replaceFirst("set", "get");
 		try {
-			return setter.getDeclaringClass().getMethod(getterName, null);
+			return setter.getDeclaringClass().getMethod(getterName, (Class) null);
 		} catch (NoSuchMethodException ex) {
 			// must be write only
 			return null;
