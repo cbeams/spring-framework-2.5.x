@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,12 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
-
+import org.springframework.aop.ClassFilter;
+import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopConfigException;
+import org.springframework.aop.support.TypePatternClassFilter;
 
 /**
  * Metadata for an AspectJ aspect class, with an
@@ -55,7 +57,7 @@ public class AspectMetadata {
 			throw new IllegalArgumentException(aspectClass + " is not an @AspectJ aspect");
 		}
 		validate();
-		
+
 		switch (ajType.getPerClause().getKind()) {
 			case SINGLETON :
 				this.perClausePointcut = Pointcut.TRUE;
@@ -66,6 +68,20 @@ public class AspectMetadata {
 				ajexp.setLocation("@Aspect annotation on " + aspectClass.getName());
 				ajexp.setExpression(findPerClause(aspectClass));
 				this.perClausePointcut = ajexp;
+				return;
+				
+			case PERTYPEWITHIN :
+				// Works with a type pattern
+				final ClassFilter typePatternClassFilter = new TypePatternClassFilter(findPerClause(aspectClass));
+				this.perClausePointcut = new Pointcut() {
+					public ClassFilter getClassFilter() {
+						return typePatternClassFilter;
+					}
+					
+					public MethodMatcher getMethodMatcher() {
+						return MethodMatcher.TRUE;
+					}
+				};
 				return;
 				
 			default :
@@ -83,6 +99,15 @@ public class AspectMetadata {
 	public boolean isPerThisOrPerTarget() {
 		PerClauseKind kind = getAjType().getPerClause().getKind();
 		return (kind == PerClauseKind.PERTARGET || kind == PerClauseKind.PERTHIS);
+	}
+	
+	public boolean isPerTypeWithin() {
+		PerClauseKind kind = getAjType().getPerClause().getKind();
+		return (kind == PerClauseKind.PERTYPEWITHIN);
+	}
+	
+	public boolean isLazilyInstantiated() {
+		return isPerThisOrPerTarget() || isPerTypeWithin();
 	}
 
 	/**

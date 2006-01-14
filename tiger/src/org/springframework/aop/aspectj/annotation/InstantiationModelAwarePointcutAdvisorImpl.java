@@ -58,8 +58,8 @@ class InstantiationModelAwarePointcutAdvisorImpl implements InstantiationModelAw
 		this.atAspectJAdvisorFactory = af;
 		this.aif = aif;
 		
-		if (aif.getAspectMetadata().isPerThisOrPerTarget()) {
-			// Static part of the pointcut is either pertarget or this
+		if (aif.getAspectMetadata().isLazilyInstantiated()) {
+			// Static part of the pointcut is a lazy type
 			final Pointcut preInstantiationORPointcut =
 					Pointcuts.union(aif.getAspectMetadata().getPerClausePointcut(), this.declaredPointcut);
 			
