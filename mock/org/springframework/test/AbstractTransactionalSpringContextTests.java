@@ -62,7 +62,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * using this mode, as it allows the potential to permanently modify data.
  * This mode is available only if dependency checking is turned off in
  * the AbstractDependencyInjectionSpringContextTests superclass. The non-transactional
- * capability is provided to enabled use of the same subclass in different environments.</i>
+ * capability is provided to enable use of the same subclass in different environments.</i>
  *
  * @author Rod Johnson
  * @since 1.1.1
