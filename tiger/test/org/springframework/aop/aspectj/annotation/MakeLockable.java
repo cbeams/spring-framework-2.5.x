@@ -31,7 +31,7 @@ import org.springframework.aop.framework.Lockable;
 @Aspect
 public class MakeLockable {
 	
-	@DeclareParents(value = "org.springframework.aop.aspectj.annotation.*",
+	@DeclareParents(value = "org.springframework..*",
 			defaultImpl=DefaultLockable.class)
 	public static Lockable mixin;
 	

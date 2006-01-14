@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj.annotation;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.RemoteException;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -39,6 +40,7 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.framework.autoproxy.metadata.Modifiable;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
@@ -264,6 +266,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 	@Aspect
 	public static class NamedPointcutAspectWithFQN {
 		
+		@SuppressWarnings("unused")
 		private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
 		
 		@Pointcut("execution(* getAge())")
@@ -444,6 +447,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals(2, AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable())), NotLockable.class).size());
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void testIntroductionOnTargetImplementingInterface() {
 		CannotBeUnlocked target = new CannotBeUnlocked();
 		Lockable proxy = (Lockable) createProxy(target,
@@ -468,15 +472,56 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void testIntroductionOnTargetExcludedByTypePattern() {
-		ITestBean target = new TestBean();
-		ITestBean proxy = (ITestBean) createProxy(target,
+		LinkedList target = new LinkedList();
+		List proxy = (List) createProxy(target,
 				AopUtils.findAdvisorsThatCanApply(
 						getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable())),
-						ITestBean.class
+						List.class
 				),
 				CannotBeUnlocked.class);
 		assertFalse("Type pattern must have excluded mixin", proxy instanceof Lockable);
+	}
+	
+	public void testIntroductionWithArgumentBinding() {
+		TestBean target = new TestBean();
+		
+		List<Advisor> advisors = getFixture().getAdvisors(
+				new SingletonMetadataAwareAspectInstanceFactory(new MakeITestBeanModifiable()));
+		advisors.addAll(getFixture().getAdvisors(
+				new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable())));
+		
+		Modifiable modifiable = (Modifiable) createProxy(target,
+				advisors,
+				ITestBean.class);
+		assertTrue(modifiable instanceof Modifiable);
+		Lockable lockable = (Lockable) modifiable;
+		assertFalse(lockable.locked());
+		
+		ITestBean itb = (ITestBean) modifiable;
+		assertFalse(modifiable.isModified());
+		int oldAge = itb.getAge();
+		itb.setAge(oldAge + 1);
+		assertTrue(modifiable.isModified());
+		modifiable.acceptChanges();
+		assertFalse(modifiable.isModified());
+		itb.setAge(itb.getAge());
+		assertFalse("Setting same value does not modify", modifiable.isModified());
+		itb.setName("And now for something completely different");
+		assertTrue(modifiable.isModified());
+		
+		lockable.lock();
+		assertTrue(lockable.locked());
+		try {
+			itb.setName("Else");
+			fail("Should be locked");
+		}
+		catch (IllegalStateException ex) {
+			// Ok
+		}
+		lockable.unlock();
+		itb.setName("Tony");
 	}
 	
 	
@@ -700,7 +745,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 	public void testDeclarePrecedenceNotSupported() {
 		TestBean target = new TestBean();
 		try {
-			ITestBean itb = (ITestBean) createProxy(target, 
+			createProxy(target, 
 				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(
 						new DeclarePrecedenceShouldSucceed())), 
 				ITestBean.class);
