@@ -1,4 +1,4 @@
-package org.springframework.beans.factory.script.groovy;
+package org.springframework.scripting.groovy;
 
 import org.springframework.scripting.Messenger
 

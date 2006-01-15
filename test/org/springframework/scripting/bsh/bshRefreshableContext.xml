@@ -3,16 +3,12 @@
 
 <beans>
 
-	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
+	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor">
+		<property name="refreshCheckDelay" value="1"/>
+	</bean>
 
 	<bean id="calculator" class="org.springframework.scripting.bsh.BshScriptFactory">
-		<constructor-arg>
-			<value>inline:
-int add(int x, int y) {
-  return x + y;
-}
-			</value>
- 		</constructor-arg>
+		<constructor-arg value="classpath:org/springframework/scripting/bsh/Calculator.bsh"/>
 		<constructor-arg value="org.springframework.scripting.Calculator"/>
 	</bean>
 

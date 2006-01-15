@@ -3,20 +3,12 @@
 
 <beans>
 
-	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
+	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor">
+		<property name="refreshCheckDelay" value="1"/>
+	</bean>
 
 	<bean id="calculator" class="org.springframework.scripting.groovy.GroovyScriptFactory">
-		<constructor-arg>
-			<value>inline:
-package org.springframework.scripting.groovy;
-import org.springframework.scripting.Calculator
-class GroovyCalculator implements Calculator {
-	int add(int x, int y) {
-	   return x + y;
-	}
-}
-			</value>
-		</constructor-arg>
+		<constructor-arg value="classpath:org/springframework/scripting/groovy/Calculator.groovy"/>
 	</bean>
 
 	<bean id="messenger" class="org.springframework.scripting.groovy.GroovyScriptFactory">

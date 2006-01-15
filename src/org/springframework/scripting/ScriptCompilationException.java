@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,23 +16,32 @@
 
 package org.springframework.scripting;
 
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.aop.target.dynamic.BeanFactoryRefreshableTargetSource;
+import org.springframework.core.NestedRuntimeException;
 
 /**
- * @author Rob Harrop
- * @author Rod Johnson
+ * Exception to be thrown on script compilation failure.
+ *
+ * @author Juergen Hoeller
+ * @since 2.0
  */
-public class RefreshableScriptTargetSource extends BeanFactoryRefreshableTargetSource {
+public class ScriptCompilationException extends NestedRuntimeException {
 
-	private ScriptSource scriptSource;
-
-	public RefreshableScriptTargetSource(BeanFactory factory, String beanName, ScriptSource scriptSource) {
-		super(factory, beanName, null);
-		this.scriptSource = scriptSource;
+	/**
+	 * Constructor for ScriptCompilationException.
+	 * @param msg the detail message
+	 */
+	public ScriptCompilationException(String msg) {
+		super(msg);
 	}
 
-	protected boolean requiresRefresh() {
-		return this.scriptSource.isModified();
+	/**
+	 * Constructor for ScriptCompilationException.
+	 * @param msg the detail message
+	 * @param ex root cause (usually from using an underlying
+	 * script compiler API)
+	 */
+	public ScriptCompilationException(String msg, Throwable ex) {
+		super(msg, ex);
 	}
+
 }

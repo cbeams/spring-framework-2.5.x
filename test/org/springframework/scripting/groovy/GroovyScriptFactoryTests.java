@@ -36,10 +36,19 @@ public class GroovyScriptFactoryTests extends TestCase {
 			return;
 		}
 
-		Calculator calc = getCalculator();
+		ApplicationContext ctx =
+				new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyContext.xml");
+		Calculator calc = (Calculator) ctx.getBean("calculator");
+		Messenger messenger = (Messenger) ctx.getBean("messenger");
 
 		assertFalse("Shouldn't get proxy when refresh is disabled", AopUtils.isAopProxy(calc));
+		assertFalse("Shouldn't get proxy when refresh is disabled", AopUtils.isAopProxy(messenger));
+
 		assertFalse("Scripted object should not be instance of Refreshable", calc instanceof Refreshable);
+		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
+
+		String desiredMessage = "Hello World!";
+		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
 	}
 
 	public void testNonStatic() throws Exception {
@@ -47,33 +56,21 @@ public class GroovyScriptFactoryTests extends TestCase {
 			return;
 		}
 
-		Messenger messenger = getMessenger();
+		ApplicationContext ctx =
+				new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyRefreshableContext.xml");
+		Messenger messenger = (Messenger) ctx.getBean("messenger");
 
 		assertTrue("Should be a proxy for refreshable scripts", AopUtils.isAopProxy(messenger));
 		assertTrue("Should be an instance of Refreshable", messenger instanceof Refreshable);
 
-		Refreshable refreshable = (Refreshable) messenger;
-
 		String desiredMessage = "Hello World!";
-		assertEquals("Message is incorrect.", desiredMessage, messenger.getMessage());
+		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
 
+		Refreshable refreshable = (Refreshable) messenger;
 		refreshable.refresh();
 
 		assertEquals("Message is incorrect after refresh.", desiredMessage, messenger.getMessage());
-
 		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
-	}
-
-	protected Calculator getCalculator() {
-		return (Calculator) getContext().getBean("calculator");
-	}
-
-	protected Messenger getMessenger() {
-		return (Messenger) getContext().getBean("messenger");
-	}
-
-	protected ApplicationContext getContext() {
-		return new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyContext.xml");
 	}
 
 }
