@@ -39,8 +39,10 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
@@ -315,7 +317,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 			List declareParents = DomUtils.getChildElementsByTagName(aspectElement, DECLARE_PARENTS, true);
 			for (int i = METHOD_INDEX; i < declareParents.size(); i++) {
 				Element declareParentsElement = (Element) declareParents.get(i);
-				parseDeclareParents(aspectName, declareParentsElement, registry);
+				parseDeclareParents(aspectName, declareParentsElement, new BeanDefinitionRegistryBuilder(registry));
 			}
 
 			List advice = DomUtils.getChildElementsByTagName(aspectElement, ADVICE, true);
@@ -325,27 +327,20 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 			}
 		}
 		
-		private void parseDeclareParents(String aspectName, Element declareParentsElement, BeanDefinitionRegistry registry) {
-			RootBeanDefinition fieldDefinition = new RootBeanDefinition(FieldLocatingFactoryBean.class);
-			ConstructorArgumentValues fav = new ConstructorArgumentValues();
-			// First one is the field on the other bean
-			fav.addIndexedArgumentValue(0, aspectName);
-			fav.addIndexedArgumentValue(1, declareParentsElement.getAttribute(FIELD));
-			fieldDefinition.setConstructorArgumentValues(fav);
+		private void parseDeclareParents(String aspectName, Element declareParentsElement, BeanDefinitionRegistryBuilder registryBuilder) {
+			BeanDefinitionBuilder fieldBuilder = BeanDefinitionBuilder.rootBeanDefinition(FieldLocatingFactoryBean.class).
+				addConstructorArg(aspectName).
+				addConstructorArg(declareParentsElement.getAttribute(FIELD));
+			registryBuilder.register(fieldBuilder);
 			
-			RootBeanDefinition advisorDefinition = new RootBeanDefinition(DeclareParentsAdvisor.class);
-			//new DeclareParentsAdvisor(Field introductionField, String typePattern, Class defaultImpl)
-			ConstructorArgumentValues cav = new ConstructorArgumentValues();
-			cav.addIndexedArgumentValue(0, fieldDefinition);
-			cav.addIndexedArgumentValue(1, declareParentsElement.getAttribute(TYPE_PATTERN));
-			// Will automatically be converted from a type
-			cav.addIndexedArgumentValue(2, declareParentsElement.getAttribute(DEFAULT_IMPL));
-
-			advisorDefinition.setConstructorArgumentValues(cav);
-			
-			// register the final advisor
-			String id = BeanDefinitionReaderUtils.generateBeanName(advisorDefinition, registry, false);
-			registry.registerBeanDefinition(id, advisorDefinition);
+			// new DeclareParentsAdvisor(Field introductionField, String typePattern, Class defaultImpl)
+			registryBuilder.register(
+					BeanDefinitionBuilder.rootBeanDefinition(DeclareParentsAdvisor.class).
+						addConstructorArg(fieldBuilder).
+						addConstructorArg(declareParentsElement.getAttribute(TYPE_PATTERN)).
+						// Will automatically be converted to a type
+						addConstructorArg(declareParentsElement.getAttribute(DEFAULT_IMPL))
+			);
 		}
 		
 		/**
