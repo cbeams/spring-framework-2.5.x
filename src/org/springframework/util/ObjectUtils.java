@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,6 +94,30 @@ public abstract class ObjectUtils {
 	}
 
 	/**
+	 * Append the given Object to the given array, returning a new array
+	 * consisting of the input array contents plus the given Object.
+	 * @param array the array to append to (can be <code>null</code>)
+	 * @param obj the Object to append
+	 * @return the new array (of the same component type; never <code>null</code>)
+	 */
+	public static Object[] addObjectToArray(Object[] array, Object obj) {
+		Class compType = Object.class;
+		if (array != null) {
+			compType = array.getClass().getComponentType();
+		}
+		else if (obj != null) {
+			compType = obj.getClass();
+		}
+		int newArrLength = (array != null ? array.length + 1 : 1);
+		Object[] newArr = (Object[]) Array.newInstance(compType, newArrLength);
+		if (array != null) {
+			System.arraycopy(array, 0, newArr, 0, array.length);
+		}
+		newArr[array.length] = obj;
+		return newArr;
+	}
+
+	/**
 	 * Convert a primitive array to an object array of primitive wrapper objects.
 	 * @param primitiveArray the primitive array
 	 * @return the object array
@@ -104,10 +128,9 @@ public abstract class ObjectUtils {
 			return new Object[0];
 		}
 		Class clazz = primitiveArray.getClass();
-		Assert.isTrue(clazz.isArray(),
-				"The specified parameter is not an array - it must be a primitive array");
-		Assert.isTrue(clazz.getComponentType().isPrimitive(),
-				"The specified parameter is not a primitive array");
+		if (!clazz.isArray() || !clazz.getComponentType().isPrimitive()) {
+			throw new IllegalArgumentException("The specified parameter is not a primitive array");
+		}
 		int length = Array.getLength(primitiveArray);
 		if (length == 0) {
 			return new Object[0];
