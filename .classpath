@@ -105,7 +105,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/aspectj/aspectjweaver.jar"/>
 	<classpathentry kind="lib" path="lib/jexcelapi/jxl.jar"/>
 	<classpathentry kind="lib" path="lib/commonj/commonj-twm.jar"/>
-	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-1.0.3.jar"/>
 	<classpathentry kind="src" path="samples/petclinic/test"/>
 	<classpathentry kind="lib" path="lib/jpa/persistence.jar"/>
 	<classpathentry kind="src" path="tiger/test"/>
@@ -117,5 +116,6 @@
 	<classpathentry kind="lib" path="lib/asm/asm-commons-2.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/asm/asm-2.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/asm/asm-util-2.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-1.1.1.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
