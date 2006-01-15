@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -463,9 +463,9 @@ public abstract class StringUtils {
 	 */
 	public static Locale parseLocaleString(String localeString) {
 		String[] parts = tokenizeToStringArray(localeString, "_ ", false, false);
-		String language = parts.length > 0 ? parts[0] : "";
-		String country = parts.length > 1 ? parts[1] : "";
-		String variant = parts.length > 2 ? parts[2] : "";
+		String language = (parts.length > 0 ? parts[0] : "");
+		String country = (parts.length > 1 ? parts[1] : "");
+		String variant = (parts.length > 2 ? parts[2] : "");
 		return (language.length() > 0 ? new Locale(language, country, variant) : null);
 	}
 
@@ -477,28 +477,31 @@ public abstract class StringUtils {
 	/**
 	 * Append the given String to the given String array, returning a new array
 	 * consisting of the input array contents plus the given String.
-	 * @param arr the array to append to
+	 * @param array the array to append to (can be <code>null</code>)
 	 * @param str the String to append
-	 * @return the new array
+	 * @return the new array (never <code>null</code>)
 	 */
-	public static String[] addStringToArray(String[] arr, String str) {
-		String[] newArr = new String[arr.length + 1];
-		System.arraycopy(arr, 0, newArr, 0, arr.length);
-		newArr[arr.length] = str;
+	public static String[] addStringToArray(String[] array, String str) {
+		if (ObjectUtils.isEmpty(array)) {
+			return new String[] {str};
+		}
+		String[] newArr = new String[array.length + 1];
+		System.arraycopy(array, 0, newArr, 0, array.length);
+		newArr[array.length] = str;
 		return newArr;
 	}
 
 	/**
 	 * Turn given source String array into sorted array.
-	 * @param source the source array
+	 * @param array the source array
 	 * @return the sorted array (never <code>null</code>)
 	 */
-	public static String[] sortStringArray(String[] source) {
-		if (source == null) {
+	public static String[] sortStringArray(String[] array) {
+		if (ObjectUtils.isEmpty(array)) {
 			return new String[0];
 		}
-		Arrays.sort(source);
-		return source;
+		Arrays.sort(array);
+		return array;
 	}
 
 	/**
@@ -528,8 +531,9 @@ public abstract class StringUtils {
 	 * or <code>null</code> if the delimiter wasn't found in the given input String
 	 */
 	public static String[] split(String toSplit, String delimiter) {
-		Assert.hasLength(toSplit, "Cannot split a null or empty string");
-		Assert.hasLength(delimiter, "Cannot use a null or empty delimiter to split a string");
+		if (!hasLength(toSplit) || !hasLength(delimiter)) {
+			return null;
+		}
 		int offset = toSplit.indexOf(delimiter);
 		if (offset < 0) {
 			return null;
