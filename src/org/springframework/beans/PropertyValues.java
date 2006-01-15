@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package org.springframework.beans;
 
 /**
- * Object containing 0 or more PropertyValue objects comprising one update.
+ * Holder containing 0 or more PropertyValue objects,
+ * typically comprising one update.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 13 May 2001
  * @see PropertyValue
  */
@@ -43,7 +45,12 @@ public interface PropertyValues {
 	 * @return whether there is a property value for this property
 	 */
 	boolean contains(String propertyName);
-	
+
+	/**
+	 * Does this holder not contain any PropertyValue objects at all?
+	 */
+	boolean isEmpty();
+
 	/**
 	 * Return the changes since the previous PropertyValues.
 	 * Subclasses should also override <code>equals</code>.

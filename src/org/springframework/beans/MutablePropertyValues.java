@@ -171,6 +171,14 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
+	 * Modify a PropertyValue object held in this object.
+	 * Indexed from 0.
+	 */
+	public void setPropertyValueAt(PropertyValue pv, int i) {
+		this.propertyValueList.set(i, pv);
+	}
+
+	/**
 	 * Merges the value of the supplied 'new' {@link PropertyValue} with that of
 	 * the current {@link PropertyValue} if merging is supported and enabled.
 	 * @see Mergable
@@ -203,12 +211,12 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
-	 * Modify a PropertyValue object held in this object.
-	 * Indexed from 0.
+	 * Clear this holder, removing all PropertyValues.
 	 */
-	public void setPropertyValueAt(PropertyValue pv, int i) {
-		this.propertyValueList.set(i, pv);
+	public void clear() {
+		this.propertyValueList.clear();
 	}
+	
 
 	public PropertyValue[] getPropertyValues() {
 		return (PropertyValue[])
@@ -227,6 +235,10 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	public boolean contains(String propertyName) {
 		return (getPropertyValue(propertyName) != null);
+	}
+
+	public boolean isEmpty() {
+		return this.propertyValueList.isEmpty();
 	}
 
 	public PropertyValues changesSince(PropertyValues old) {
