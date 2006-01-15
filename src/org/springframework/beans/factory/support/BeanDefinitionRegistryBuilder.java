@@ -23,13 +23,18 @@ package org.springframework.beans.factory.support;
  * 
  * @since 2.0
  * @author Rod Johnson
- * @see org.springframework.beans.factory.support.RootBeanDefinition
- * @see org.springframework.beans.factory.support.ChildBeanDefinition
+ * @see org.springframework.beans.factory.support.BeanDefinitionBuilder
+ * @see org.springframework.beans.factory.support.BeanDefinitionReaderUtils
  */
 public class BeanDefinitionRegistryBuilder {
 	
 	private final BeanDefinitionRegistry registry;
 	
+	/**
+	 * Construct a new BeanDefinitionBuilder that will register beans with this
+	 * registry
+	 * @param registry registry to register beans with
+	 */
 	public BeanDefinitionRegistryBuilder(BeanDefinitionRegistry registry) {
 		this.registry = registry;
 	}
@@ -47,8 +52,9 @@ public class BeanDefinitionRegistryBuilder {
 	}
 	
 	/**
-	 * Register an anonymous bean. A unique bean name will be generated, based on the owning
-	 * BeanDefinitionRegistry
+	 * Register a bean without specifying a name. A unique bean name will be generated, based on the owning
+	 * BeanDefinitionRegistry. The bean will still be a top level bean, not a nested
+	 * bean.
 	 * @param builder BeanDefinitionBuilder that is source of bean definition
 	*  @return the builder parameter, allowing further configuration
 	 */
