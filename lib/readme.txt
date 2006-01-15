@@ -25,6 +25,11 @@ distribution/website before using any of them in your own applications.
 - Apache Axis 1.3 (http://ws.apache.org/axis)
 - required for running JPetStore
 
+* bsh/bsh-2.0b4.jar
+- BeanShell 2.0 beta 4 (http://www.beanshell.org)
+- required for building the framework
+- required at runtime when using Spring's BeanShell support
+
 * c3p0/c3p0-0.9.0.2.jar
 - C3P0 0.9.0.2 connection pool (http://sourceforge.net/projects/c3p0)
 - required for building the framework
@@ -75,6 +80,11 @@ distribution/website before using any of them in your own applications.
 - FreeMarker 2.3.4 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
+
+* groovy/groovy-1.0-jsr-04.jar
+- Groovy 1.0 JSR-04 (http://groovy.codehaus.org)
+- required for building the framework
+- required at runtime when using Spring's Groovy support
 
 * hibernate/hibernate2.jar
 - Hibernate 2.1.8 (http://www.hibernate.org)
@@ -281,6 +291,11 @@ distribution/website before using any of them in your own applications.
 - Java Persistence API 1.0 M4 (http://glassfish.dev.java.net/javaee5/persistence)
 - required for building the framework
 - required at runtime when using Spring's JPA support
+
+* jruby/jruby.jar
+- JRuby 0.8.2 (http://jruby.sourceforge.net)
+- required for building the framework
+- required at runtime when using Spring's JRuby support
 
 * jsf/jsf-api.jar
 - JSF API 1.1 (http://java.sun.com/j2ee/javaserverfaces)

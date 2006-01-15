@@ -1275,6 +1275,7 @@
 				<exclude name="lib/aspectj/aspectjtools.jar"/>
 				<include name="lib/axis/**"/>
 				<include name="lib/aopalliance/**"/>
+				<include name="lib/bsh/**"/>
 				<include name="lib/c3p0/**"/>
 				<include name="lib/caucho/**"/>
 				<include name="lib/cglib/**"/>
@@ -1284,6 +1285,7 @@
 				<include name="lib/easymock/**"/>
 				<include name="lib/ehcache/**"/>
 				<include name="lib/freemarker/**"/>
+				<include name="lib/groovy/**"/>
 				<include name="lib/hibernate/**"/>
 				<include name="lib/hsqldb/**"/>
 				<include name="lib/ibatis/**"/>
@@ -1298,6 +1300,7 @@
 				<include name="lib/jmx/**"/>
 				<include name="lib/jotm/**"/>
 				<include name="lib/jpa/**"/>
+				<include name="lib/jruby/**"/>
 				<include name="lib/jsf/**"/>
 				<include name="lib/junit/**"/>
 				<include name="lib/log4j/**"/>
