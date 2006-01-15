@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,9 +268,9 @@ abstract class ConstructorResolver {
 		}
 		
 		if (factoryMethodToUse == null) {
-			throw new BeanDefinitionStoreException("No factory method: factory bean=" +
+			throw new BeanDefinitionStoreException("No factory method: factory bean '" +
 					mergedBeanDefinition.getFactoryBeanName() +
-					"; factory method=" + mergedBeanDefinition.getFactoryMethodName());
+					"'; factory method '" + mergedBeanDefinition.getFactoryMethodName() + "'");
 		}
 		if (!factoryMethodToUse.isAccessible()) {
 			factoryMethodToUse.setAccessible(true);
