@@ -40,11 +40,11 @@ public class AbstractRefreshableTargetSourceTests extends TestCase {
 	}
 
 	/**
-	 * Test what happens when checking for refresh and refresh occurs
+	 * Test what happens when checking for refresh and refresh occurs.
 	 */
 	public void testRefreshCheckWithRefresh() throws Exception {
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource(true);
-		ts.setRefreshCheckDelay(CountingRefreshableTargetSource.REFRESH_CHECK_ALWAYS);
+		ts.setRefreshCheckDelay(0);
 
 		Object a = ts.getTarget();
 		Thread.sleep(1000);
@@ -55,11 +55,11 @@ public class AbstractRefreshableTargetSourceTests extends TestCase {
 	}
 
 	/**
-	 * Test what happens when no refresh occurs
+	 * Test what happens when no refresh occurs.
 	 */
 	public void testWithNoRefreshCheck() throws Exception {
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource(true);
-		ts.setRefreshCheckDelay(CountingRefreshableTargetSource.REFRESH_CHECK_NEVER);
+		ts.setRefreshCheckDelay(-1);
 
 		Object a = ts.getTarget();
 		Object b = ts.getTarget();
@@ -101,6 +101,7 @@ public class AbstractRefreshableTargetSourceTests extends TestCase {
 		assertFalse("E and F should be different", e.equals(f));
 	}
 
+
 	private static class CountingRefreshableTargetSource extends AbstractRefreshableTargetSource {
 
 		private int callCount;
@@ -127,5 +128,5 @@ public class AbstractRefreshableTargetSourceTests extends TestCase {
 			return this.requiresRefresh;
 		}
 	}
-}
 
+}

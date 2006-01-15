@@ -17,49 +17,52 @@
 package org.springframework.aop.target.dynamic;
 
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.ChildBeanDefinition;
+import org.springframework.util.Assert;
 
 /**
+ * Refreshable TargetSource that fetches fresh target beans from a BeanFactory.
+ *
+ * <p>Can be subclassed to override <code>requiresRefresh()</code> to suppress
+ * unnecessary refreshes. By default, a refresh will be performed every time
+ * the "refreshCheckDelay" has elapsed.
+ *
  * @author Rob Harrop
  * @author Rod Johnson
- * @since 2.0M2
+ * @author Juergen Hoeller
+ * @since 2.0
+ * @see org.springframework.beans.factory.BeanFactory
+ * @see #requiresRefresh()
+ * @see #setRefreshCheckDelay
  */
 public class BeanFactoryRefreshableTargetSource extends AbstractRefreshableTargetSource {
-   private String beanName;
 
-	private DefaultListableBeanFactory childFactory;
+	private final BeanFactory beanFactory;
+
+	private final String beanName;
+
 
 	/**
-	 *
-	 * @param factory
-	 * @param beanName
-	 * @param childFactory optional, must be a child of factory.
-	 * Allows shared child factory.
+	 * Create a new BeanFactoryRefreshableTargetSource for the given
+	 * bean factory and bean name.
+	 * <p>Note that the passed-in BeanFactory should have an appropriate
+	 * bean definition set up for the given bean name.
+	 * @param beanFactory the BeanFactory to fetch beans from
+	 * @param beanName the name of the target bean
 	 */
-	public BeanFactoryRefreshableTargetSource(BeanFactory factory, String beanName, DefaultListableBeanFactory childFactory) {
-		//super(initialTarget);
+	public BeanFactoryRefreshableTargetSource(BeanFactory beanFactory, String beanName) {
+		Assert.notNull(beanFactory, "BeanFactory is required");
+		Assert.notNull(beanName, "Bean name is required");
+		this.beanFactory = beanFactory;
 		this.beanName = beanName;
-		this.childFactory = (childFactory == null) ?
-			new DefaultListableBeanFactory(factory) :
-			childFactory;
-
-		// The child bean definition is a prototype, so whenever
-		// we call getBean() on it we'll get a fresh object,
-		// configured the same way.
-		// Apart from that, the child bean definition will be
-		// the same as the parent: all properties are inherited
-		ChildBeanDefinition definition = createChildBeanDefinition(beanName);
-		definition.setSingleton(false);
-		this.childFactory.registerBeanDefinition(beanName, definition);
 	}
 
 
+	/**
+	 * Fetch a new target bean instance from the bean factory.
+	 * @see org.springframework.beans.factory.BeanFactory#getBean
+	 */
 	protected Object freshTarget() {
-		return this.childFactory.getBean(this.beanName);
+		return this.beanFactory.getBean(this.beanName);
 	}
 
-	protected ChildBeanDefinition createChildBeanDefinition(String beanName) {
-		return new ChildBeanDefinition(beanName, null);
-	}
 }

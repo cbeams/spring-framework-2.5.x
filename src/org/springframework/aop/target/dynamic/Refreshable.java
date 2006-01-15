@@ -12,26 +12,33 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.target.dynamic;
 
-import org.springframework.beans.BeansException;
-
 /**
- * Interface to be implemented by dynamic objects,
- * which support reloading and optionally polling for
- * updates.
+ * Interface to be implemented by dynamic target objects,
+ * which support reloading and optionally polling for updates.
  *
  * @author Rod Johnson
  * @author Rob Harrop
- * @since 2.0M2
+ * @since 2.0
  */
 public interface Refreshable {
-	
-	long getRefreshCount();
-	
-	void refresh() throws BeansException;
 
+	/**
+	 * Refresh the underlying target object.
+	 */
+	void refresh();
+
+	/**
+	 * Return the number of actual refreshs since startup.
+	 */
+	long getRefreshCount();
+
+	/**
+	 * Return the last time an actual refresh happened (as timestamp).
+	 */
 	long getLastRefreshTime();
+
 }

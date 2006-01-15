@@ -18,32 +18,80 @@ package org.springframework.aop.target.dynamic;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.TargetSource;
 
 /**
+ * Abstract TargetSource implementation that wraps a refreshable target object.
+ * Subclasses can determine whether a refresh is required, and need to provide
+ * fresh target objects.
+ *
+ * <p>Implements the Refreshable interface for explicit control.
  *
  * @author Rod Johnson
  * @author Rob Harrop
- * @since 2.0M2
+ * @author Juergen Hoeller
+ * @since 2.0
  */
 public abstract class AbstractRefreshableTargetSource implements TargetSource, Refreshable {
 
-	public static final int REFRESH_CHECK_NEVER = -1;
-
-	public static final int REFRESH_CHECK_ALWAYS = 0;
-
+	/** Logger available to subclasses */
 	protected Log logger = LogFactory.getLog(getClass());
 
 	protected Object targetObject;
 
-	private long lastRefreshCheck = System.currentTimeMillis();
+	private long refreshCheckDelay = -1;
 
-	private long refreshCheckDelay = REFRESH_CHECK_NEVER;
+	private long lastRefreshCheck = -1;
 
-	private long lastRefreshTime;
+	private long lastRefreshTime = -1;
 
-	private long refreshCount;
+	private long refreshCount = 0;
 
+
+	/**
+	 * Set the delay between refresh checks, in milliseconds.
+	 * Default is -1, indicating no refresh checks at all.
+	 * <p>Note that an actual refresh will only happen when
+	 * <code>requiresRefresh()</code> returns <code>true</code>.
+	 * @see #requiresRefresh()
+	 */
+	public void setRefreshCheckDelay(long refreshCheckDelay) {
+		this.refreshCheckDelay = refreshCheckDelay;
+	}
+
+
+	public Class getTargetClass() {
+		if (this.targetObject == null) {
+			refresh();
+		}
+		return this.targetObject.getClass();
+	}
+
+	public boolean isStatic() {
+		return false;
+	}
+
+	public final synchronized Object getTarget() {
+		if (this.targetObject == null || (refreshCheckDelayElapsed() && requiresRefresh())) {
+			refresh();
+		}
+		return this.targetObject;
+	}
+
+	public void releaseTarget(Object object) {
+	}
+
+
+	public final synchronized void refresh() {
+		logger.debug("Attempting to refresh target");
+
+		this.targetObject = freshTarget();
+		this.refreshCount++;
+		this.lastRefreshTime = System.currentTimeMillis();
+
+		logger.debug("Target refreshed successfully");
+	}
 
 	public long getRefreshCount() {
 		return this.refreshCount;
@@ -53,58 +101,42 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 		return this.lastRefreshTime;
 	}
 
-	public void setRefreshCheckDelay(long refreshCheckDelay) {
-		this.refreshCheckDelay = refreshCheckDelay;
-	}
-
-	public Class getTargetClass() {
-		return (this.targetObject == null) ? null : this.targetObject.getClass();
-	}
-
-	public boolean isStatic() {
-		return false;
-	}
-
-	public final synchronized Object getTarget() throws Exception {
-		if ((this.targetObject == null) || (refreshCheckDelayElapsed() && requiresRefresh())) {
-			refresh();
-		}
-
-		return this.targetObject;
-	}
-
-	public void releaseTarget(Object object) throws Exception {
-	}
-
-	public final synchronized void refresh() {
-		logger.debug("Attempting to refresh target.");
-
-		this.refreshCount++;
-		this.lastRefreshTime = System.currentTimeMillis();
-		this.targetObject = freshTarget();
-
-		logger.debug("Target refreshed successfully.");
-	}
 
 	private boolean refreshCheckDelayElapsed() {
-		if (this.refreshCheckDelay == REFRESH_CHECK_NEVER) {
+		if (this.refreshCheckDelay < 0) {
 			return false;
 		}
+
 		long currentTimeMillis = System.currentTimeMillis();
-		boolean elapsed = (currentTimeMillis - this.lastRefreshCheck) > this.refreshCheckDelay;
 
-		if (elapsed) {
-			// going to perform a refresh check - update the time
-			logger.debug("Refresh check delay elapsed - will check if refresh is necessary.");
+		if (this.lastRefreshCheck < 0 || currentTimeMillis - this.lastRefreshCheck > this.refreshCheckDelay) {
+			// Going to perform a refresh check - update the time.
 			this.lastRefreshCheck = currentTimeMillis;
+			logger.debug("Refresh check delay elapsed - checking whether refresh is required");
+			return true;
 		}
-		return elapsed;
-	}
 
-	protected boolean requiresRefresh() {
 		return false;
 	}
 
+
+	/**
+	 * Determine whether a refresh is required.
+	 * Invoked for each refresh check, after the refresh check delay has elapsed.
+	 * <p>Default implementation always returns <code>true</code>, trigger
+	 * a refresh every time the delay has elapsed. To be overridden by subclasses
+	 * with an appropriate check of the underlying target resource.
+	 */
+	protected boolean requiresRefresh() {
+		return true;
+	}
+
+	/**
+	 * Obtain a fresh target object.
+	 * Only invoked if a refresh check has found that a refresh is required
+	 * (that is, <code>requiresRefresh</code> has returned <code>true</code>).
+	 * @see #requiresRefresh()
+	 */
 	protected abstract Object freshTarget();
 
 }
