@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,25 @@ public class ObjectUtilsTests extends TestCase {
 		for (int i = 0; i < wrapper.length; i++) {
 			assertEquals(a[i], wrapper[i].intValue());
 		}
+	}
+	
+	public void testAddObjectToArrayWhenEmpty() {
+		String[] array = new String[0];
+		String newElement = "foo";
+		Object[] newArray = ObjectUtils.addObjectToArray(array, newElement);
+		assertEquals(1, newArray.length);
+		assertEquals(newElement, newArray[0]);
+	}
+	
+	public void testAddObjectToArrayWhenContainingOneElement() {
+		String[] array = new String[1];
+		String existingElement = "foo";
+		array[0] = existingElement;
+		String newElement = "bar";
+		Object[] newArray = ObjectUtils.addObjectToArray(array, newElement);
+		assertEquals(2, newArray.length);
+		assertEquals(existingElement, newArray[0]);
+		assertEquals(newElement, newArray[1]);
 	}
 
 }
