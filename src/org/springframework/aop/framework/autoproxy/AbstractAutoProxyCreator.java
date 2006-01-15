@@ -284,9 +284,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	}
 
 	/**
-	 * Create a target source for bean instances. Uses any
-	 * TargetSourceCreators if set. Returns null if no Custom TargetSource
-	 * should be used.
+	 * Create a target source for bean instances. Uses any TargetSourceCreators if set.
+	 * Returns <code>null</code> if no custom TargetSource should be used.
 	 * <p>This implementation uses the "customTargetSourceCreators" property.
 	 * Subclasses can override this method to use a different mechanism.
 	 * @param beanClass the class of the bean to create a TargetSource for

@@ -46,7 +46,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 
 	/**
 	 * Create a new ChildBeanDefinition for the given parent, to be
-	 * configured through its bean properties and cofiguration methods.
+	 * configured through its bean properties and configuration methods.
 	 * @param parentName the name of the parent bean
 	 * @see #setBeanClass
 	 * @see #setBeanClassName

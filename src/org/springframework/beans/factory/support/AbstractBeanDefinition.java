@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -419,8 +419,8 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 * Specify constructor argument values for this bean.
 	 */
 	public void setConstructorArgumentValues(ConstructorArgumentValues constructorArgumentValues) {
-		this.constructorArgumentValues = (constructorArgumentValues != null) ?
-		    constructorArgumentValues : new ConstructorArgumentValues();
+		this.constructorArgumentValues =
+				(constructorArgumentValues != null ? constructorArgumentValues : new ConstructorArgumentValues());
 	}
 
 	/**
@@ -441,7 +441,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 * Specify property values for this bean, if any.
 	 */
 	public void setPropertyValues(MutablePropertyValues propertyValues) {
-		this.propertyValues = (propertyValues != null) ? propertyValues : new MutablePropertyValues();
+		this.propertyValues = (propertyValues != null ? propertyValues : new MutablePropertyValues());
 	}
 
 	/**
@@ -503,7 +503,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Set the name of the initializer method. The default is null
+	 * Set the name of the initializer method. The default is <code>null</code>
 	 * in which case there is no initializer method.
 	 */
 	public void setInitMethodName(String initMethodName) {
@@ -535,7 +535,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Set the name of the destroy method. The default is null
+	 * Set the name of the destroy method. The default is <code>null</code>
 	 * in which case there is no destroy method.
 	 */
 	public void setDestroyMethodName(String destroyMethodName) {

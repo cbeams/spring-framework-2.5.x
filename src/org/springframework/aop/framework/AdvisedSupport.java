@@ -37,6 +37,7 @@ import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -194,6 +195,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Set the interfaces to be proxied.
 	 */
 	public void setInterfaces(Class[] interfaces) {
+		Assert.notNull(interfaces, "Interfaces must not be null");
 		this.interfaces.clear();
 		for (int i = 0; i < interfaces.length; i++) {
 			addInterface(interfaces[i]);
@@ -205,6 +207,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param newInterface additional interface to proxy
 	 */
 	public void addInterface(Class newInterface) {
+		Assert.notNull(newInterface, "Interface must not be null");
 		if (!newInterface.isInterface()) {
 			throw new IllegalArgumentException("[" + newInterface.getName() + "] is not an interface");
 		}
