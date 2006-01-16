@@ -21,34 +21,6 @@
 	<!-- ========================= MAPPING DEFINITIONS ========================= -->
 
 	<!--
-	  - This bean provides explicit View mappings in a resource bundle instead of the
-	  - default InternalResourceViewResolver. It fetches the view mappings from
-	  - localized "views_xx" classpath files, i.e. "/WEB-INF/classes/views.properties"
-	  - or "/WEB-INF/classes/views_de.properties".
-	  -
-	  - Symbolic view names returned by Controllers will be resolved by this bean
-	  - using the respective properties file, which defines arbitrary mappings between
-	  - view names and resources.
-	  -->
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
-		<property name="basename" value="views"/>
-	</bean>
-
-	<!--
-	  - This bean resolves specific types of exception to corresponding error views.
-		- The default behaviour of DispatcherServlet is to propagate all exceptions to the
-		- servlet container: This will happen here with all other types of exception.
-		-->
-	<bean id="exceptionResolver" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
-		<property name="exceptionMappings">
-			<props>
-				<prop key="org.springframework.dao.DataAccessException">dataAccessFailure</prop>
-				<prop key="org.springframework.transaction.TransactionException">dataAccessFailure</prop>
-			</props>
-		</property>
-	</bean>
-
-	<!--
 	 - This bean is an explicit URL mapper that is used by the "petclinic" DispatcherServlet
 	 - It is used instead of the default BeanNameUrlHandlerMapping.
 	 -->
@@ -66,6 +38,44 @@
 				<prop key="/addVisit.htm">addVisitForm</prop>
 			</props>
 		</property>
+	</bean>
+
+	<!--
+	  - This bean resolves specific types of exception to corresponding error views.
+		- The default behaviour of DispatcherServlet is to propagate all exceptions to the
+		- servlet container: This will happen here with all other types of exception.
+		-->
+	<bean id="exceptionResolver" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop key="org.springframework.dao.DataAccessException">dataAccessFailure</prop>
+				<prop key="org.springframework.transaction.TransactionException">dataAccessFailure</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!--
+		- This bean resolves default view names for controllers that do not explicitly
+		- specify a view name in their return ModelAndView (see ClinicController).
+		- This translator takes the request URL and extracts a view name from it: e.g.
+		- "/welcome.html" -> "welcome", plus configured "View" suffix -> "welcomeView".
+		-->
+	<bean id="viewNameTranslator" class="org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator">
+		<property name="suffix" value="View"/>
+	</bean>
+
+	<!--
+	  - This bean provides explicit View mappings in a resource bundle instead of the
+	  - default InternalResourceViewResolver. It fetches the view mappings from
+	  - localized "views_xx" classpath files, i.e. "/WEB-INF/classes/views.properties"
+	  - or "/WEB-INF/classes/views_de.properties".
+	  -
+	  - Symbolic view names returned by Controllers will be resolved by this bean
+	  - using the respective properties file, which defines arbitrary mappings between
+	  - view names and resources.
+	  -->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
+		<property name="basename" value="views"/>
 	</bean>
 
 
@@ -181,7 +191,4 @@
  		-->
 	<bean id="visitValidator" class="org.springframework.samples.petclinic.validation.VisitValidator"/>
 
-	<bean id="viewNameTranslator" class="org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator">
-		<property name="suffix" value="View"/>
-	</bean>
 </beans>
