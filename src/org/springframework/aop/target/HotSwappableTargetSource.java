@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 	/** Target cached and invoked using reflection */
 	private Object target;
 
+
 	/**
 	 * Create a new HotSwappableTargetSource with the given initial target object.
 	 * @param initialTarget the initial target object
@@ -47,44 +48,44 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 		this.target = initialTarget;
 	}
 
+
 	public Class getTargetClass() {
 		return this.target.getClass();
 	}
 
+	/**
+	 * Not static.
+	 */
 	public final boolean isStatic() {
 		return false;
 	}
 
-	/**
-	 * Synchronization around something that takes so little time is fine.
-	 */
 	public synchronized Object getTarget() {
+		// Synchronization around something that takes so little time is fine.
 		return this.target;
 	}
 
-	public void releaseTarget(Object o) {
-		// No implementation needed
+	/**
+	 * No need to release target.
+	 */
+	public void releaseTarget(Object target) {
 	}
+
 
 	/**
 	 * Swap the target, returning the old target.
-	 * @param newTarget new target
-	 * @return the old target
+	 * @param newTarget the new target object
+	 * @return the old target object
 	 * @throws IllegalArgumentException if the new target is invalid
 	 */
 	public synchronized Object swap(Object newTarget) throws IllegalArgumentException {
-		if (newTarget == null) {
-			throw new IllegalArgumentException("Cannot swap to null");
-		}
+		Assert.notNull(newTarget, "New target must not be null");
 		// TODO type checks
 		Object old = this.target;
 		this.target = newTarget;
 		return old;
 	}
 
-	public String toString() {
-		return "HotSwappableTargetSource for target: " + this.target;
-	}
 
 	/**
 	 * Two HotSwappableTargetSources are equal if the targets are equal.
@@ -99,6 +100,10 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 
 	public int hashCode() {
 		return this.target.hashCode();
+	}
+
+	public String toString() {
+		return "HotSwappableTargetSource for target: " + this.target;
 	}
 
 }

@@ -68,6 +68,9 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 		return this.targetObject.getClass();
 	}
 
+	/**
+	 * Not static.
+	 */
 	public boolean isStatic() {
 		return false;
 	}
@@ -79,6 +82,9 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 		return this.targetObject;
 	}
 
+	/**
+	 * No need to release target.
+	 */
 	public void releaseTarget(Object object) {
 	}
 
