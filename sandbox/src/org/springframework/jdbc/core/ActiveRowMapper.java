@@ -107,60 +107,51 @@ public class ActiveRowMapper implements RowMapper {
 			String field = meta.getColumnName(i).toLowerCase();
 			PersistentField fieldMeta = (PersistentField)mappedFields.get(field);
 			if (fieldMeta != null) {
-				Object value = null;
-				Method m = null;
 				try {
-					if (fieldMeta.getJavaType().equals(String.class)) {
-						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {String.class});
-						value = rs.getString(i);
-					}
-					else if (fieldMeta.getJavaType().equals(Byte.class)) {
-						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Byte.class});
-						value = new Byte(rs.getByte(i));
-					}
-					else if (fieldMeta.getJavaType().equals(Short.class)) {
-						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Short.class});
-						value = new Short(rs.getShort(i));
-					}
-					else if (fieldMeta.getJavaType().equals(Integer.class)) {
-						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Integer.class});
-						value = new Integer(rs.getInt(i));
-					}
-					else if (fieldMeta.getJavaType().equals(Long.class)) {
-						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Long.class});
-						value = new Long(rs.getLong(i));
-					}
-					else if (fieldMeta.getJavaType().equals(Float.class)) {
-						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Float.class});
-						value = new Float(rs.getFloat(i));
-					}
-					else if (fieldMeta.getJavaType().equals(Double.class)) {
-						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Double.class});
-						value = new Double(rs.getDouble(i));
-					}
-					else if (fieldMeta.getJavaType().equals(BigDecimal.class)) {
-						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {BigDecimal.class});
-						value = rs.getBigDecimal(i);
-					}
-					else if (fieldMeta.getJavaType().equals(Boolean.class)) {
-						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Boolean.class});
-						value = (rs.getBoolean(i)) ? Boolean.TRUE : Boolean.FALSE;
-					}
-					else if (fieldMeta.getJavaType().equals(Date.class)) {
-						m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[] {Date.class});
-						if (fieldMeta.getSqlType() == Types.DATE) {
-							value = rs.getDate(i);
-						}
-						else if (fieldMeta.getSqlType() == Types.TIME) {
-							value = rs.getTime(i);
-						}
-						else {
-							value = rs.getTimestamp(i);
-						}
-					}
-					if (m != null) {
-						m.invoke(result , new Object[] {value});
-					}
+                    Object value = null;
+                    Class fieldType = fieldMeta.getJavaType();
+                    Method m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[]{fieldType});
+                    if (fieldType.equals(String.class)) {
+                        value = rs.getString(field);
+                    }
+                    else if (fieldType.equals(byte.class) || fieldType.equals(Byte.class)) {
+                        value = new Byte(rs.getByte(field));
+                    }
+                    else if (fieldType.equals(short.class) || fieldType.equals(Short.class)) {
+                        value = new Short(rs.getShort(field));
+                    }
+                    else if (fieldType.equals(int.class) || fieldType.equals(Integer.class)) {
+                        value = new Integer(rs.getInt(field));
+                    }
+                    else if (fieldType.equals(long.class) || fieldType.equals(Long.class)) {
+                        value = new Long(rs.getLong(field));
+                    }
+                    else if (fieldType.equals(float.class) || fieldType.equals(Float.class)) {
+                        value = new Float(rs.getFloat(field));
+                    }
+                    else if (fieldType.equals(double.class) || fieldType.equals(Double.class)) {
+                        value = new Double(rs.getDouble(field));
+                    }
+                    else if (fieldType.equals(BigDecimal.class)) {
+                        value = rs.getBigDecimal(field);
+                    }
+                    else if (fieldType.equals(boolean.class) || fieldType.equals(Boolean.class)) {
+                        value = (rs.getBoolean(field)) ? Boolean.TRUE : Boolean.FALSE;
+                    }
+                    else if (fieldType.equals(Date.class)) {
+                        if (fieldMeta.getSqlType() == Types.DATE) {
+                            value = rs.getDate(field);
+                        }
+                        else if (fieldMeta.getSqlType() == Types.TIME) {
+                            value = rs.getTime(field);
+                        }
+                        else {
+                            value = rs.getTimestamp(field);
+                        }
+                    }
+                    if (m != null) {
+                        m.invoke(result, new Object[]{value});
+                    }
 				} catch (NoSuchMethodException e) {
 					throw new DataAccessResourceFailureException(new StringBuffer().append("Failed to map field ").append(fieldMeta.getFieldName()).append(".").toString(), e);
 				} catch (IllegalAccessException e) {
