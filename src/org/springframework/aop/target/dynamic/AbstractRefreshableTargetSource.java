@@ -76,7 +76,7 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 	}
 
 	public final synchronized Object getTarget() {
-		if (this.targetObject == null || (refreshCheckDelayElapsed() && requiresRefresh())) {
+		if ((refreshCheckDelayElapsed() && requiresRefresh()) || this.targetObject == null) {
 			refresh();
 		}
 		return this.targetObject;
