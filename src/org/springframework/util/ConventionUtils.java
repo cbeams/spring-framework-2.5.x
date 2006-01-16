@@ -57,12 +57,13 @@ public abstract class ConventionUtils {
 		else if (value instanceof Collection) {
 			Collection collection = (Collection) value;
 
-			if (!collection.isEmpty()) {
-				valueClass = peekAhead(collection);
-				pluralize = true;
+			if (collection.isEmpty()) {
+				throw new IllegalArgumentException("Cannot generate variable name for an empty Collection");
 			}
+			
+			valueClass = peekAhead(collection);
+			pluralize = true;
 
-			// TODO: what should we do with empty collections?
 		}
 
 		String name = StringUtils.uncapitalize(ClassUtils.getShortName(valueClass));

@@ -26,11 +26,15 @@ import org.springframework.samples.petclinic.Owner;
 import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
+import org.springframework.ui.ModelMap;
+
+import java.util.Map;
 
 /**
  * <code>MultiActionController</code> that handles all non-form URL's.
  *
  * @author Ken Krebs
+ * @author Rob Harrop
  */
 public class ClinicController extends MultiActionController implements InitializingBean {
 
@@ -64,8 +68,8 @@ public class ClinicController extends MultiActionController implements Initializ
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render the response
 	 */
-	public ModelAndView vetsHandler(HttpServletRequest request, HttpServletResponse response) throws ServletException {
-		return new ModelAndView().addObject("vets", this.clinic.getVets());
+	public Map vetsHandler(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		return new ModelMap(this.clinic.getVets());
 	}
 
 	/**

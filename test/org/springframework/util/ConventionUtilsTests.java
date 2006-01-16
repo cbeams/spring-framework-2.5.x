@@ -50,7 +50,12 @@ public class ConventionUtilsTests extends TestCase {
 		assertEquals("Incorrect plural Set form", "testBeanList", ConventionUtils.getVariableName(set));
 
 		List emptyList = new ArrayList();
-		assertEquals("List without items should just return class name", "arrayList", ConventionUtils.getVariableName(emptyList));
+		try {
+			ConventionUtils.getVariableName(emptyList);
+			fail("Should not be able to generate name for empty collection");
+		} catch(IllegalArgumentException ex) {
+			// success;
+		}
 	}
 
 }

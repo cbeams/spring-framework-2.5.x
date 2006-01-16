@@ -16,11 +16,12 @@
 
 package org.springframework.web.servlet;
 
-import org.springframework.util.ConventionUtils;
 import org.springframework.util.Assert;
+import org.springframework.ui.ModelMap;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Collection;
 
 /**
  * Holder for both Model and View in the web MVC framework.
@@ -48,7 +49,7 @@ public class ModelAndView {
 	private Object view;
 
 	/** Model */
-	private Map model;
+	private ModelMap model;
 
 	/**
 	 * Indicates whether or not this instance has been cleared with a call to {@link #clear()}.
@@ -87,6 +88,9 @@ public class ModelAndView {
 
 	/**
 	 * Creates new ModelAndView given a View object and a model.
+	 * <emphasis>Note: the supplied model data is copied into the internal
+	 * storage of this class. You should not consider to modify the supplied
+	 * Map after supplying it to this class</emphasis>
 	 * @param view View object to render
 	 * @param model Map of model names (Strings) to model objects
 	 * (Objects). Model entries may not be <code>null</code>, but the model Map
@@ -94,10 +98,12 @@ public class ModelAndView {
 	 */
 	public ModelAndView(View view, Map model) {
 		this.view = view;
-		this.model = model;
+		if (model != null) {
+			getModelMap().addAllObjects(model);
+		}
 	}
 
-	/** 
+	/**
 	 * Creates new ModelAndView given a view name and a model.
 	 * @param viewName name of the View to render, to be resolved
 	 * by the DispatcherServlet
@@ -107,7 +113,9 @@ public class ModelAndView {
 	 */
 	public ModelAndView(String viewName, Map model) {
 		this.view = viewName;
-		this.model = model;
+		if (model != null) {
+			getModelMap().addAllObjects(model);
+		}
 	}
 
 	/**
@@ -201,24 +209,30 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Return the model map. Never returns <code>null</code>.
-	 * To be called by application code for modifying the model.
+	 * Returns the internal <code>ModelMap</code> instance. Will not be null.
 	 */
-	public Map getModel() {
+	protected ModelMap getModelMap() {
 		if (this.model == null) {
-			this.model = new HashMap(1);
+			this.model = new ModelMap();
 		}
 		return this.model;
 	}
 
 	/**
-	 * Add an object to the model. Generates the model parameter name using
-	 * {@link ConventionUtils#getVariableName(Object)}.
+	 * Return the model map. Never returns <code>null</code>.
+	 * To be called by application code for modifying the model.
+	 */
+	public Map getModel() {
+		return getModelMap();
+	}
+
+	/**
+	 * Add an object to the model using parameter name generation.
 	 * @param modelObject the object to add to the model. May not be <code>null</code>.
+	 * @see ModelMap#addObject(Object)
 	 */
 	public ModelAndView addObject(Object modelObject) {
-		Assert.notNull(modelObject, "'modelObject' should not be null.");
-		getModel().put(ConventionUtils.getVariableName(modelObject), modelObject);
+		getModelMap().addObject(modelObject);
 		return this;
 	}
 
@@ -230,8 +244,7 @@ public class ModelAndView {
 	 * return modelAndView.addObject("foo", bar);
 	 */
 	public ModelAndView addObject(String modelName, Object modelObject) {
-		Assert.notNull(modelObject, "'modelObject' should not be null.");
-		getModel().put(modelName, modelObject);
+		getModelMap().addObject(modelName, modelObject);
 		return this;
 	}
 
@@ -242,7 +255,7 @@ public class ModelAndView {
 	 * return modelAndView.addAllObjects(myModelMap);
 	 */
 	public ModelAndView addAllObjects(Map modelMap) {
-		getModel().putAll(modelMap);
+		getModelMap().addAllObjects(modelMap);
 		return this;
 	}
 
@@ -293,5 +306,4 @@ public class ModelAndView {
 		buf.append("; model is ").append(this.model);
 		return buf.toString();
 	}
-
 }
