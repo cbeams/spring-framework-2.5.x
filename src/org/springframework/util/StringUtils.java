@@ -48,13 +48,15 @@ import java.util.TreeSet;
  */
 public abstract class StringUtils {
 
-	private static final String FOLDER_SEPARATOR = "/";  // folder separator
+	private static final String FOLDER_SEPARATOR = "/";
 
-	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";	// Windows folder separator
+	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";
 
-	private static final String TOP_PATH = "..";  // top folder
+	private static final String TOP_PATH = "..";
 
-	private static final String CURRENT_PATH = ".";  // current folder
+	private static final String CURRENT_PATH = ".";
+
+	private static final char EXTENSION_SEPARATOR = '.';
 
 
 	//---------------------------------------------------------------------
@@ -368,12 +370,44 @@ public abstract class StringUtils {
 	/**
 	 * Extract the filename from the given path,
 	 * e.g. "mypath/myfile.txt" -> "myfile.txt".
-	 * @param path the file path
-	 * @return the extracted filename
+	 * @param path the file path (may be <code>null</code>)
+	 * @return the extracted filename, or <code>null</code> if none
 	 */
 	public static String getFilename(String path) {
+		if (path == null) {
+			return null;
+		}
 		int separatorIndex = path.lastIndexOf(FOLDER_SEPARATOR);
 		return (separatorIndex != -1 ? path.substring(separatorIndex + 1) : path);
+	}
+
+	/**
+	 * Extract the filename extension from the given path,
+	 * e.g. "mypath/myfile.txt" -> "txt".
+	 * @param path the file path (may be <code>null</code>)
+	 * @return the extracted filename extension, or <code>null</code> if none
+	 */
+	public static String getFilenameExtension(String path) {
+		if (path == null) {
+			return null;
+		}
+		int sepIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
+		return (sepIndex != -1 ? path.substring(sepIndex + 1) : null);
+	}
+
+	/**
+	 * Strip the filename extension from the given path,
+	 * e.g. "mypath/myfile.txt" -> "mypath/myfile".
+	 * @param path the file path (may be <code>null</code>)
+	 * @return the path with stripped filename extension,
+	 * or <code>null</code> if none
+	 */
+	public static String stripFilenameExtension(String path) {
+		if (path == null) {
+			return null;
+		}
+		int sepIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
+		return (sepIndex != -1 ? path.substring(0, sepIndex) : path);
 	}
 
 	/**

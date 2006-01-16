@@ -175,14 +175,47 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("unqualified", StringUtils.unqualify(qualified));
 	}
 
+	public void testCapitalize() {
+		String capitalized = "i am not capitalized";
+		assertEquals("I am not capitalized", StringUtils.capitalize(capitalized));
+	}
+
 	public void testUncapitalize() {
 		String capitalized = "I am capitalized";
 		assertEquals("i am capitalized", StringUtils.uncapitalize(capitalized));
 	}
 
-	public void testCapitalize() {
-		String capitalized = "i am not capitalized";
-		assertEquals("I am not capitalized", StringUtils.capitalize(capitalized));
+	public void testGetFilename() {
+		assertEquals(null, StringUtils.getFilename(null));
+		assertEquals("", StringUtils.getFilename(""));
+		assertEquals("myfile", StringUtils.getFilename("myfile"));
+		assertEquals("myfile", StringUtils.getFilename("mypath/myfile"));
+		assertEquals("myfile.", StringUtils.getFilename("myfile."));
+		assertEquals("myfile.", StringUtils.getFilename("mypath/myfile."));
+		assertEquals("myfile.txt", StringUtils.getFilename("myfile.txt"));
+		assertEquals("myfile.txt", StringUtils.getFilename("mypath/myfile.txt"));
+	}
+
+	public void testGetFilenameExtension() {
+		assertEquals(null, StringUtils.getFilenameExtension(null));
+		assertEquals(null, StringUtils.getFilenameExtension(""));
+		assertEquals(null, StringUtils.getFilenameExtension("myfile"));
+		assertEquals(null, StringUtils.getFilenameExtension("myPath/myfile"));
+		assertEquals("", StringUtils.getFilenameExtension("myfile."));
+		assertEquals("", StringUtils.getFilenameExtension("myPath/myfile."));
+		assertEquals("txt", StringUtils.getFilenameExtension("myfile.txt"));
+		assertEquals("txt", StringUtils.getFilenameExtension("mypath/myfile.txt"));
+	}
+
+	public void stripFilenameExtension() {
+		assertEquals(null, StringUtils.stripFilenameExtension(null));
+		assertEquals("", StringUtils.stripFilenameExtension(""));
+		assertEquals("myfile", StringUtils.stripFilenameExtension("myfile"));
+		assertEquals("mypath/myfile", StringUtils.stripFilenameExtension("mypath/myfile"));
+		assertEquals("myfile", StringUtils.stripFilenameExtension("myfile."));
+		assertEquals("mypath/myfile", StringUtils.stripFilenameExtension("mypath/myfile."));
+		assertEquals("myfile", StringUtils.stripFilenameExtension("myfile.txt"));
+		assertEquals("mypath/myfile", StringUtils.stripFilenameExtension("mypath/myfile.txt"));
 	}
 
 	public void testPathEquals() {
