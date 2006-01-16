@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.aspectj;
+package org.springframework.beans.factory.annotation;
 
-import org.springframework.beans.factory.config.Autowire;
+import org.springframework.beans.factory.wiring.BeanWiringInfo;
+import org.springframework.beans.factory.wiring.BeanWiringInfoResolver;
 import org.springframework.util.Assert;
 
 /**
@@ -27,7 +28,8 @@ import org.springframework.util.Assert;
  *
  * @author Rod Johnson
  * @since 2.0
- * @see ClassNameBeanWiringInfoResolver
+ * @see Configurable
+ * @see org.springframework.beans.factory.wiring.ClassNameBeanWiringInfoResolver
  */
 public class AnnotationBeanWiringInfoResolver implements BeanWiringInfoResolver {
 

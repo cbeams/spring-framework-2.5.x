@@ -19,6 +19,10 @@ package org.springframework.aop.config;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import org.springframework.aop.aspectj.AspectJAfterAdvice;
 import org.springframework.aop.aspectj.AspectJAfterReturningAdvice;
 import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
@@ -51,9 +55,6 @@ import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * <code>NamespaceHandler</code> for the <code>aop</code> namespace.
@@ -167,7 +168,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 	private static class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 
 		private static final String BEAN_CONFIGURER =
-				"org.springframework.beans.factory.aspectj.AnnotationBeanConfigurer";
+				"org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect";
 
 		private boolean registered;
 

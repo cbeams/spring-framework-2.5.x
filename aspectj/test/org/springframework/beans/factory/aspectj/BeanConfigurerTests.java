@@ -17,12 +17,13 @@
 package org.springframework.beans.factory.aspectj;
 
 import junit.framework.TestCase;
-
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
-import org.springframework.beans.factory.config.Autowire;
+import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -193,7 +194,7 @@ public class BeanConfigurerTests extends TestCase {
 
 
 	@Aspect
-	private static class WireArbitraryExistingPojo extends AbstractBeanConfigurer {
+	private static class WireArbitraryExistingPojo extends AbstractBeanConfigurerAspect {
 
 		@Pointcut("initialization(ArbitraryExistingPojo.new(..)) && this(beanInstance)")
 		protected void beanCreation(Object beanInstance){
@@ -203,7 +204,7 @@ public class BeanConfigurerTests extends TestCase {
 
 
 	@Aspect
-	private static class AspectThatWillNotBeUsed extends AbstractBeanConfigurer {
+	private static class AspectThatWillNotBeUsed extends AbstractBeanConfigurerAspect {
 
 		@Pointcut("initialization(ClassThatWillNotActuallyBeWired.new(..)) && this(beanInstance)")
 		protected void beanCreation(Object beanInstance){

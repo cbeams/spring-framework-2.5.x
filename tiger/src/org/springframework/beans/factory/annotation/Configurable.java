@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.aspectj;
+package org.springframework.beans.factory.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -23,12 +23,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.beans.factory.config.Autowire;
-
-
 /**
- * Annotation that marks a class as eligible for Spring-driven
- * configuration by an AspectJ BeanConfigurer.
+ * Annotation that marks a class as eligible for Spring-driven configuration.
+ *
+ * <p>Typically used with the AspectJ AnnotationBeanConfigurer.
  *
  * @author Rod Johnson
  * @author Rob Harrop

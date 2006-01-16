@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.aspectj;
+package org.springframework.beans.factory.wiring;
 
 /**
  * Strategy interface to be implemented by objects than can resolve bean name
  * information, given a newly instantiated bean object. Invocations to the
- * <code>resolve(Object)<</code> method on this interface will be driven by
+ * <code>resolve(Object)</code> method on this interface will be driven by
  * the AspectJ pointcut in the relevant concrete aspect.
  *
  * <p>Metadata resolution strategy can be pluggable. A good default is

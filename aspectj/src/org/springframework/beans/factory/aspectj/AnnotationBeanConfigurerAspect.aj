@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
  
 package org.springframework.beans.factory.aspectj;
 
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver;
+
 /**
  * Concrete aspect that uses the Configurable annotation to identify
  * which classes need autowiring. The bean name to look up will be
@@ -24,12 +27,12 @@ package org.springframework.beans.factory.aspectj;
  *
  * @author Rod Johnson
  * @since 2.0
- * @see Configurable
- * @see AnnotationBeanWiringInfoResolver
+ * @see org.springframework.beans.factory.annotation.Configurable
+ * @see org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver
  */
-public aspect AnnotationBeanConfigurer extends AbstractBeanConfigurer {
+public aspect AnnotationBeanConfigurerAspect extends AbstractBeanConfigurerAspect {
 	
-	public AnnotationBeanConfigurer() {
+	public AnnotationBeanConfigurerAspect() {
 		setBeanWiringInfoResolver(new AnnotationBeanWiringInfoResolver());
 	}
 

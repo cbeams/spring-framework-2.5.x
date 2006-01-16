@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.config;
+package org.springframework.beans.factory.annotation;
 
-
-import org.springframework.beans.factory.aspectj.Configurable;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 /**
  * Enumeration determining autowiring status: that is, whether a bean should
  * have its dependencies automatically injected by the Spring container using
  * setter injection. This is a core concept in Spring DI.
- * <p>
- * Available for use in annotation-based configurations, such as for the AspectJ
+ *
+ * <p>Available for use in annotation-based configurations, such as for the AspectJ
  * AnnotationBeanConfigurer aspect.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0
- * @see Configurable
+ * @see org.springframework.beans.factory.annotation.Configurable
  * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
  */
 public enum Autowire {
