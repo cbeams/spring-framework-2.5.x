@@ -16,16 +16,13 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
+import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.w3c.dom.Element;
 
-import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-import org.springframework.beans.factory.config.PropertiesFactoryBean;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
-import org.springframework.beans.factory.support.RootBeanDefinition;
-
 /**
+ * {@link NamespaceHandler} for the <code>util</code> namespace.
+ *
  * @author Rob Harrop
  * @since 2.0
  */

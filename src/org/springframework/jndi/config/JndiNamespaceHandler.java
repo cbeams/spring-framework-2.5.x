@@ -46,12 +46,12 @@ public class JndiNamespaceHandler extends NamespaceHandlerSupport {
 			return JndiObjectFactoryBean.class;
 		}
 
-		protected void postProcess(BeanDefinitionBuilder definition, Element element) {
+		protected void postProcess(BeanDefinitionBuilder definitionBuilder, Element element) {
 			NodeList childNodes = element.getChildNodes();
 			for (int i = 0; i < childNodes.getLength(); i++) {
 				Node node = childNodes.item(i);
 				if (ENVIRONMENT.equals(node.getLocalName())) {
-					definition.addPropertyValue(JNDI_ENVIRONMENT, DomUtils.getTextValue((Element) node));
+					definitionBuilder.addPropertyValue(JNDI_ENVIRONMENT, DomUtils.getTextValue((Element) node));
 				}
 			}
 		}
