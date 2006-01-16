@@ -16,86 +16,62 @@
 
 package org.springframework.web.servlet.view;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.util.UrlPathHelper;
-import org.springframework.util.StringUtils;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Default implementation of the {@link RequestToViewNameTranslator} interface that
  * simply transforms the URI of the incoming request into the view name.
- * <p/>
- * The default transformation simply strips the leading slash and file extension of
+ *
+ * <p>The default transformation simply strips the leading slash and file extension of
  * the URI and returns the result as the view name with the configured
  * {@link #setPrefix prefix} and {@link #setSuffix suffix} added as appropriate.
- * <p/>
- * Stripping of the leading slash and file extension can be disabled using the
- * {@link #setStripLeadingSlashes} and {@link #setStripExtensions} properties
+ *
+ * <p>Stripping of the leading slash and file extension can be disabled using the
+ * {@link #setStripLeadingSlash} and {@link #setStripExtension} properties
  * respectively.
  *
  * @author Rob Harrop
- * @since 2.0M2
+ * @since 2.0
  */
 public class DefaultRequestToViewNameTranslator implements RequestToViewNameTranslator {
 
-	/**
-	 * The <code>/</code> character.
-	 */
 	private static final String SLASH = "/";
 
-	/**
-	 * The <code>.</code> character.
-	 */
-	private static final String DOT = ".";
 
-	/**
-	 * {@link UrlPathHelper} implementation used to split up the incoming request URI.
-	 */
-	private UrlPathHelper pathHelper = new UrlPathHelper();
-
-	/**
-	 * The separator to use in place of slashes when generating the view name.
-	 */
-	private String separator =SLASH;
-
-	/**
-	 * The prefix to add to any generated view names.
-	 */
 	private String prefix = "";
 
-	/**
-	 * The suffix to add to any generated view names.
-	 */
 	private String suffix = "";
 
-	/**
-	 * Should file extensions be stripped from the URL?
-	 */
-	private boolean stripExtensions = true;
+	private String separator = "/";
+
+	private boolean stripLeadingSlash = true;
+
+	private boolean stripExtension = true;
+
+	private UrlPathHelper urlPathHelper = new UrlPathHelper();
+
 
 	/**
-	 * Should leading slashes be stripped from the URL?
-	 */
-	private boolean stripLeadingSlashes = true;
-
-	/**
-	 * Sets the prefix to prepend to generated view names.
+	 * Set the prefix to prepend to generated view names.
 	 */
 	public void setPrefix(String prefix) {
 		this.prefix = (prefix == null ? "" : prefix);
 	}
 
 	/**
-	 * Sets the suffix to append to generated view names.
+	 * Set the suffix to append to generated view names.
 	 */
 	public void setSuffix(String suffix) {
 		this.suffix = (suffix == null ? "" : suffix);
 	}
 
 	/**
-	 * Sets the value that will replace '<code>/</code>' as the separator
-	 * in the view name. The default behaviour simply leaves '<code>/</code>'
+	 * Set the value that will replace '<code>/</code>' as the separator
+	 * in the view name. The default behavior simply leaves '<code>/</code>'
 	 * as the separator.
 	 */
 	public void setSeparator(String separator) {
@@ -103,52 +79,91 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	}
 
 	/**
-	 * Sets whether or not file extensions should be stripped from the URI when
-	 * generating the view name. Default is <code>true</code>.
+	 * Set whether or not leadng slashes should be stripped from the URI when
+	 * generating the view name. Default is "true".
 	 */
-	public void setStripExtensions(boolean stripExtensions) {
-		this.stripExtensions = stripExtensions;
+	public void setStripLeadingSlash(boolean stripLeadingSlash) {
+		this.stripLeadingSlash = stripLeadingSlash;
 	}
 
 	/**
-	 * Sets whether or not leadng slashes should be stripped from the URI when
-	 * generating the view name. Default is <code>true</code>.
+	 * Set whether or not file extensions should be stripped from the URI when
+	 * generating the view name. Default is "true".
 	 */
-	public void setStripLeadingSlashes(boolean stripLeadingSlashes) {
-		this.stripLeadingSlashes = stripLeadingSlashes;
+	public void setStripExtension(boolean stripExtension) {
+		this.stripExtension = stripExtension;
 	}
 
 	/**
-	 * Sets the {@link UrlPathHelper} to use when manipulating the request URI
+	 * Set if URL lookup should always use the full path within the current servlet
+	 * context. Else, the path within the current servlet mapping is used
+	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
+	 * Default is "false".
+	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
 	 */
-	public void setPathHelper(UrlPathHelper pathHelper) {
-		this.pathHelper = pathHelper;
+	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
+		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
 	}
 
 	/**
+	 * Set if context path and request URI should be URL-decoded.
+	 * Both are returned <i>undecoded</i> by the Servlet API,
+	 * in contrast to the servlet path.
+	 * <p>Uses either the request encoding or the default encoding according
+	 * to the Servlet spec (ISO-8859-1).
+	 * <p>Note: Setting this to "true" requires JDK 1.4 if the encoding differs
+	 * from the VM's platform default encoding, as JDK 1.3's URLDecoder class
+	 * does not offer a way to specify the encoding.
+	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
+	 */
+	public void setUrlDecode(boolean urlDecode) {
+		this.urlPathHelper.setUrlDecode(urlDecode);
+	}
+
+	/**
+	 * Set the UrlPathHelper to use for resolution of lookup paths.
+	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
+	 * or to share common UrlPathHelper settings across multiple web components.
+	 */
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		this.urlPathHelper = urlPathHelper;
+	}
+
+
+	/**
+
 	 * Translates the request URI of the incoming {@link HttpServletRequest} to the
 	 * view name based on the configured parameters.
 	 */
-	public final String translate(HttpServletRequest request) {
-		String pathInMapping = this.pathHelper.getPathWithinApplication(request);
-		return this.prefix + transformPath(pathInMapping) + this.suffix;
+	public final String getViewName(HttpServletRequest request) {
+		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
+		return this.prefix + transformPath(lookupPath) + this.suffix;
 	}
 
 	/**
-	 * Transforms the request URI (in the context of the webapp) stripping
+	 * Transform the request URI (in the context of the webapp) stripping
 	 * slashes and extensions, and replacing the separator as required.
+	 * @param lookupPath the lookup path for the current request,
+	 * as determined by the UrlPathHelper
+	 * @return the transformed path, with slashes and extensions stripped
+	 * if desired
 	 */
-	protected String transformPath(String pathInApplication) {
-		String path = pathInApplication;
+	protected String transformPath(String lookupPath) {
+		String path = lookupPath;
 
-		if(this.stripLeadingSlashes && path.startsWith(SLASH)) {
+		if (this.stripLeadingSlash && path.startsWith(SLASH)) {
 			path = path.substring(1);
 		}
 
-		if(this.stripExtensions && path.indexOf(DOT) > -1) {
-			path = path.substring(0, path.lastIndexOf(DOT));
+		if (this.stripExtension) {
+			path = StringUtils.stripFilenameExtension(path);
 		}
 
-		return !SLASH.equals(this.separator) ? path : StringUtils.replace(path, SLASH, this.separator);
+		if (!SLASH.equals(this.separator)) {
+			path = StringUtils.replace(path, SLASH, this.separator);
+		}
+
+		return path;
 	}
+
 }

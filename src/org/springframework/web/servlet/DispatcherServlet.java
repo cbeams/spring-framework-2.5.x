@@ -179,16 +179,16 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String HANDLER_EXCEPTION_RESOLVER_BEAN_NAME = "handlerExceptionResolver";
 
 	/**
+	 * Well-known name for the RequestToViewNameTranslator object in the bean factory for this namespace.
+	 */
+	public static final String REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME = "viewNameTranslator";
+
+	/**
 	 * Well-known name for the ViewResolver object in the bean factory for this namespace.
 	 * Only used when "detectAllViewResolvers" is turned off.
 	 * @see #setDetectAllViewResolvers
 	 */
 	public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
-
-	/**
-	 * Well-known name for the RequestToViewNameTranslator object in the bean factory for this namespace.
-	 */
-	public static final String REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME = "viewNameTranslator";
 
 	/**
 	 * Request attribute to hold the currently chosen HandlerExecutionChain.
@@ -280,9 +280,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** ThemeResolver used by this servlet */
 	private ThemeResolver themeResolver;
 
-	/** RequestToViewNameTranslator used by this servlet */
-	private RequestToViewNameTranslator viewNameTranslator;
-
 	/** List of HandlerMappings used by this servlet */
 	private List handlerMappings;
 
@@ -291,6 +288,9 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/** List of HandlerExceptionResolvers used by this servlet */
 	private List handlerExceptionResolvers;
+
+	/** RequestToViewNameTranslator used by this servlet */
+	private RequestToViewNameTranslator viewNameTranslator;
 
 	/** List of ViewResolvers used by this servlet */
 	private List viewResolvers;
@@ -371,8 +371,8 @@ public class DispatcherServlet extends FrameworkServlet {
 		initHandlerMappings();
 		initHandlerAdapters();
 		initHandlerExceptionResolvers();
-		initViewResolvers();
 		initRequestToViewNameTranslator();
+		initViewResolvers();
 	}
 
 	/**
@@ -544,6 +544,30 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
+	 * Initialize the RequestToViewNameTranslator used by this servlet instance. If no
+	 * implementation is configured then we default to DefaultRequestToViewNameTranslator.
+	 */
+	private void initRequestToViewNameTranslator() {
+		try {
+			this.viewNameTranslator = (RequestToViewNameTranslator) getWebApplicationContext().getBean(
+					REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME);
+			if (logger.isInfoEnabled()) {
+				logger.info("Using RequestToViewNameTranslator [" + this.viewNameTranslator + "]");
+			}
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// We need to use the default.
+			this.viewNameTranslator =
+					(RequestToViewNameTranslator) getDefaultStrategy(RequestToViewNameTranslator.class);
+			if (logger.isInfoEnabled()) {
+				logger.info("Unable to locate RequestToViewNameTranslator with name '" +
+						REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME +
+						"': using default [" + this.viewNameTranslator + "]");
+			}
+		}
+	}
+
+	/**
 	 * Initialize the ViewResolvers used by this class.
 	 * If no ViewResolver beans are defined in the BeanFactory
 	 * for this namespace, we default to InternalResourceViewResolver.
@@ -576,30 +600,6 @@ public class DispatcherServlet extends FrameworkServlet {
 			this.viewResolvers = getDefaultStrategies(ViewResolver.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("No ViewResolvers found in servlet '" + getServletName() + "': using default");
-			}
-		}
-	}
-
-	/**
-	 * Initialize the RequestToViewNameTranslator used by this servlet instance. If no
-	 * implementation is configured then we default to DefaultRequestToViewNameTranslator.
-	 */
-	private void initRequestToViewNameTranslator() {
-		try {
-			this.viewNameTranslator = (RequestToViewNameTranslator) getWebApplicationContext().getBean(
-					REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME);
-			if (logger.isInfoEnabled()) {
-				logger.info("Using RequestToViewNameTranslator [" + this.viewNameTranslator + "]");
-			}
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// We need to use the default.
-			this.viewNameTranslator =
-					(RequestToViewNameTranslator) getDefaultStrategy(RequestToViewNameTranslator.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("Unable to locate RequestToViewNameTranslator with name '" +
-						REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME +
-						"': using default [" + this.viewNameTranslator + "]");
 			}
 		}
 	}
@@ -1016,9 +1016,9 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		View view = null;
 
-		// do we need view name translation
+		// Do we need view name translation?
 		if (!mv.hasView()) {
-			translateRequestIntoViewName(request, mv);
+			mv.setViewName(getDefaultViewName(request));
 		}
 
 		if (mv.isReference()) {
@@ -1046,19 +1046,18 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Translates the supplied {@link HttpServletRequest} into a view name and sets it on the supplied
-	 * {@link ModelAndView}.
+	 * Translate the supplied request into a default view name.
+	 * @param request current HTTP servlet request
+	 * @return the view name
+	 * @throws Exception if view name translation failed
 	 */
-	protected void translateRequestIntoViewName(HttpServletRequest request, ModelAndView mv) throws ServletException {
-		String viewName = this.viewNameTranslator.translate(request);
-
+	protected String getDefaultViewName(HttpServletRequest request) throws Exception {
+		String viewName = this.viewNameTranslator.getViewName(request);
 		if (viewName == null) {
-			throw new ServletException("Could not translate request [" +
-					request + "] into view name using [" +
-					this.viewNameTranslator.getClass().getName() + "].");
+			throw new ServletException("Could not translate request [" + request +
+					"] into view name using [" + this.viewNameTranslator.getClass().getName() + "]");
 		}
-
-		mv.setViewName(viewName);
+		return viewName;
 	}
 
 	/**
