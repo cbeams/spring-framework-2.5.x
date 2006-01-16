@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -511,7 +511,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public boolean contains(final Object entity) throws DataAccessException {
 		Boolean result = (Boolean) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) {
-				return new Boolean(session.contains(entity));
+				return (session.contains(entity) ? Boolean.TRUE : Boolean.FALSE);
 			}
 		}, true);
 		return result.booleanValue();

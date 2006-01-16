@@ -549,7 +549,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 				return Boolean.FALSE;
 			}
 
-			return new Boolean(AopProxyUtils.equalsInProxy(this.advised, otherAdvised));
+			return (AopProxyUtils.equalsInProxy(this.advised, otherAdvised) ? Boolean.TRUE : Boolean.FALSE);
 		}
 	}
 

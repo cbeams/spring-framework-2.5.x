@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ public class SingleColumnRowMapper implements RowMapper {
 				return rs.getString(index);
 			}
 			else if (Boolean.class.equals(requiredType)) {
-				return new Boolean(rs.getBoolean(index));
+				return (rs.getBoolean(index) ? Boolean.TRUE : Boolean.FALSE);
 			}
 			else if (Byte.class.equals(requiredType)) {
 				return new Byte(rs.getByte(index));
