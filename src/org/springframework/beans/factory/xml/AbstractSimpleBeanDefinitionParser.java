@@ -18,20 +18,20 @@ package org.springframework.beans.factory.xml;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.MutablePropertyValues;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Attr;
 
 /**
- * @author robh
+ * @author Rob Harrop
+ * @since 2.0
  */
 public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-    protected final BeanDefinition doParse(Element element) {
-        RootBeanDefinition definition = new RootBeanDefinition(getBeanClass(element));
+    protected final void doParse(Element element, BeanDefinitionBuilder builder) {
 
-        MutablePropertyValues mpvs = new MutablePropertyValues();
         NamedNodeMap attributes = element.getAttributes();
         for(int x = 0; x < attributes.getLength(); x++) {
             Attr attribute = (Attr) attributes.item(x);
@@ -41,16 +41,12 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
                 continue;
             }
 
-            mpvs.addPropertyValue(attribute.getLocalName(), attribute.getValue());
+            builder.addPropertyValue(attribute.getLocalName(), attribute.getValue());
         }
-        definition.setPropertyValues(mpvs);
-		postProcess(definition, element);
-		return definition;
+		postProcess(builder, element);
     }
 
-    protected abstract Class getBeanClass(Element element);
 
-	protected void postProcess(RootBeanDefinition beanDefinition, Element element) {
-
+	protected void postProcess(BeanDefinitionBuilder beanDefinition, Element element) {
 	}
 }

@@ -17,27 +17,16 @@
 package org.springframework.transaction.config;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor;
-import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
-import org.springframework.transaction.interceptor.NameMatchTransactionAttributeSource;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.xml.DomUtils;
 import org.springframework.aop.config.NamespaceHandlerUtils;
 import org.w3c.dom.Element;
-
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * @author Rob Harrop
@@ -45,18 +34,18 @@ import java.util.HashMap;
  */
 public class TxNamespaceHandler extends NamespaceHandlerSupport {
 
-	private static final String TRANSACTION_MANAGER = "transactionManager";
+	public static final String TRANSACTION_MANAGER = "transactionManager";
 
-	private static final String TRANSACTION_ATTRIBUTE_SOURCE = "transactionAttributeSource";
+	public static final String TRANSACTION_ATTRIBUTE_SOURCE = "transactionAttributeSource";
 
-	private static final String ANNOTATION_SOURCE_CLASS_NAME = "org.springframework.transaction.annotation.AnnotationTransactionAttributeSource";
+	public static final String ANNOTATION_SOURCE_CLASS_NAME = "org.springframework.transaction.annotation.AnnotationTransactionAttributeSource";
 
 	public TxNamespaceHandler() {
 		registerBeanDefinitionParser("advice", new TxAdviceBeanDefinitionParser());
 		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenBeanDefinitionParser());
 	}
 
-	private static Class getAnnotationSourceClass() {
+	public static Class getAnnotationSourceClass() {
 		try {
 			return ClassUtils.forName(ANNOTATION_SOURCE_CLASS_NAME);
 		}
@@ -92,72 +81,4 @@ public class TxNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 
-	private static class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
-
-		private static final String ATTRIBUTES = "attributes";
-
-		public static final String TIMEOUT = "timeout";
-
-		public static final String READ_ONLY = "read-only";
-
-		public static final String NAME_MAP = "nameMap";
-
-		public static final String PROPAGATION = "propagation";
-
-		public static final String ISOLATION = "isolation";
-
-		protected BeanDefinition doParse(Element element) {
-			RootBeanDefinition definition = new RootBeanDefinition(TransactionInterceptor.class);
-
-			MutablePropertyValues mpvs = new MutablePropertyValues();
-			definition.setPropertyValues(mpvs);
-
-			// set the transaction manager property
-			mpvs.addPropertyValue(TRANSACTION_MANAGER, new RuntimeBeanReference(element.getAttribute(TRANSACTION_MANAGER)));
-
-			List txAttributes = DomUtils.getChildElementsByTagName(element, ATTRIBUTES, true);
-
-			if (txAttributes.size() > 1) {
-				throw new IllegalStateException("Element 'attributes' is allowed at most once inside element 'advice'");
-			}
-			else if (txAttributes.size() == 1) {
-				// using Attributes source
-				parseAttributes((Element) txAttributes.get(0), mpvs);
-			}
-			else {
-				// assume annotations source
-				// TODO: fix this to use direct class reference when building all on 1.5
-				Class beanClass = getAnnotationSourceClass();
-
-				mpvs.addPropertyValue(TRANSACTION_ATTRIBUTE_SOURCE, new RootBeanDefinition(beanClass));
-			}
-			return definition;
-		}
-
-		private void parseAttributes(Element attributesElement, MutablePropertyValues mpvs) {
-			List methods = DomUtils.getChildElementsByTagName(attributesElement, "method", true);
-
-			Map transactionAttributeMap = new HashMap(methods.size());
-
-			for (int i = 0; i < methods.size(); i++) {
-				Element methodElement = (Element) methods.get(i);
-
-				String name = methodElement.getAttribute("name");
-
-				RuleBasedTransactionAttribute attribute = new RuleBasedTransactionAttribute();
-				attribute.setPropagationBehaviorName(TransactionDefinition.PROPAGATION_CONSTANT_PREFIX + methodElement.getAttribute(PROPAGATION));
-				attribute.setIsolationLevelName(TransactionDefinition.ISOLATION_CONSTANT_PREFIX + methodElement.getAttribute(ISOLATION));
-				attribute.setTimeout(Integer.parseInt(methodElement.getAttribute(TIMEOUT)));
-				attribute.setReadOnly(Boolean.valueOf(methodElement.getAttribute(READ_ONLY)).booleanValue());
-
-				transactionAttributeMap.put(name, attribute);
-			}
-
-			RootBeanDefinition attributeSourceDefinition = new RootBeanDefinition(NameMatchTransactionAttributeSource.class);
-			attributeSourceDefinition.setPropertyValues(new MutablePropertyValues());
-			attributeSourceDefinition.getPropertyValues().addPropertyValue(NAME_MAP, transactionAttributeMap);
-
-			mpvs.addPropertyValue(TRANSACTION_ATTRIBUTE_SOURCE, attributeSourceDefinition);
-		}
-	}
 }

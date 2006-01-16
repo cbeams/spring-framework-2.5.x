@@ -38,7 +38,16 @@ public class BeanDefinitionRegistryBuilder {
 	public BeanDefinitionRegistryBuilder(BeanDefinitionRegistry registry) {
 		this.registry = registry;
 	}
-	
+
+	/**
+	 * Gets the underlying {@link BeanDefinitionRegistry}. Useful for direct access or
+	 * querying.
+	 * @return
+	 */
+	public BeanDefinitionRegistry getRegistry() {
+		return this.registry;
+	}
+
 	/**
 	 * Registered a named bean
 	 * @param name bean name
