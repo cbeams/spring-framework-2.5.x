@@ -201,7 +201,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			catch (BeanCreationException ex) {
 				if (ex.contains(BeanCurrentlyInCreationException.class)) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Ignoring match to currently created bean '" + beanName + "'", ex);
+						logger.debug("Ignoring match to currently created bean '" + beanName + "':" + ex.getMessage());
 					}
 					// Ignore: indicates a circular reference when autowiring constructors.
 					// We want to find matches other than the currently created bean itself.
@@ -212,23 +212,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		return result;
-	}
-
-	/**
-	 * Determine whether the bean definition with the given name matches
-	 * the given type.
-	 * @param beanName the name of the bean to check
-	 * @param type class or interface to match, or <code>null</code> for all bean names
-	 * @return whether the type matches
-	 * @see RootBeanDefinition#hasBeanClass
-	 * @see RootBeanDefinition#getBeanClass
-	 */
-	private boolean isBeanDefinitionTypeMatch(String beanName, Class type) {
-		if (type == null) {
-			return true;
-		}
-		RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
-		return (rbd.hasBeanClass() && type.isAssignableFrom(rbd.getBeanClass()));
 	}
 
 	/**
