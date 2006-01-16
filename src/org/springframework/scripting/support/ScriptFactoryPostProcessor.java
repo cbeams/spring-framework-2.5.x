@@ -16,12 +16,16 @@
 
 package org.springframework.scripting.support;
 
+import net.sf.cglib.asm.Type;
+import net.sf.cglib.core.Signature;
+import net.sf.cglib.proxy.InterfaceMaker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -35,8 +39,10 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * BeanPostProcessor that handles ScriptFactory definitions,
@@ -146,7 +152,7 @@ public class ScriptFactoryPostProcessor
 
 			if (scriptFactory.requiresConfigInterface() && !bd.getPropertyValues().isEmpty()) {
 				PropertyValue[] pvs = bd.getPropertyValues().getPropertyValues();
-				Class configInterface = ScriptUtils.createConfigInterface(pvs, interfaces);
+				Class configInterface = createConfigInterface(pvs, interfaces);
 				interfaces = (Class[]) ObjectUtils.addObjectToArray(interfaces, configInterface);
 			}
 
@@ -211,6 +217,30 @@ public class ScriptFactoryPostProcessor
 		else {
 			return new ResourceScriptSource(resourceLoader.getResource(scriptSourceLocator));
 		}
+	}
+
+	/**
+	 * Create a config interface for the given bean property values.
+	 * <p>This implementation creates the interface via CGLIB's InterfaceMaker,
+	 * determining the property types from the given interfaces (as far as possible).
+	 * @param pvs the bean property values to create a config interface for
+	 * @param interfaces the interfaces to check against (might define
+	 * getters corresponding to the setters we're supposed to generate)
+	 * @return the config interface
+	 * @see net.sf.cglib.proxy.InterfaceMaker
+	 * @see org.springframework.beans.BeanUtils#findPropertyType
+	 */
+	protected Class createConfigInterface(PropertyValue[] pvs, Class[] interfaces) {
+		Assert.notEmpty(pvs, "Property values must not be empty");
+		InterfaceMaker maker = new InterfaceMaker();
+		for (int i = 0; i < pvs.length; i++) {
+			String propertyName = pvs[i].getName();
+			Class propertyType = BeanUtils.findPropertyType(propertyName, interfaces);
+			String setterName = "set" + StringUtils.capitalize(propertyName);
+			Signature signature = new Signature(setterName, Type.VOID_TYPE, new Type[] {Type.getType(propertyType)});
+			maker.add(signature, new Type[0]);
+		}
+		return maker.create();
 	}
 
 	/**
