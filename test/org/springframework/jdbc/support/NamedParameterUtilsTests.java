@@ -32,15 +32,21 @@ public class NamedParameterUtilsTests extends TestCase {
 		assertTrue(NamedParameterUtils.countParameterPlaceholders("?") == 1);
 		assertTrue(NamedParameterUtils.countParameterPlaceholders("The \"big\" ? 'bad wolf'") == 1);
 		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big ?? bad wolf") == 2);
+		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big ? ? bad ? wolf") == 3);
 		assertTrue(NamedParameterUtils.countParameterPlaceholders("The \"big?\" 'ba''ad?' ? wolf") == 1);
 		assertTrue(NamedParameterUtils.countParameterPlaceholders(":parameter") == 1);
 		assertTrue(NamedParameterUtils.countParameterPlaceholders("The \"big\" :parameter 'bad wolf'") == 1);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big :parameter :parameter bad wolf") == 2);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The \"big:\" 'ba''ad?' :parameter wolf") == 1);
+		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big :parameter :parameter bad wolf") == 1);
+		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big :parameter :newpar :parameter bad wolf") == 2);
+		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big :parameter, :newpar, :parameter bad wolf") == 2);
+		assertTrue(NamedParameterUtils.countParameterPlaceholders("The \"big:\" 'ba''ad:p' :parameter wolf") == 1);
 		assertTrue(NamedParameterUtils.countParameterPlaceholders("&parameter") == 1);
 		assertTrue(NamedParameterUtils.countParameterPlaceholders("The \"big\" &parameter 'bad wolf'") == 1);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big &parameter &parameter bad wolf") == 2);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The \"big &x  \" 'ba''ad?' &parameter wolf") == 1);
+		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big &parameter &parameter bad wolf") == 1);
+		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big &parameter &newparameter &parameter bad wolf") == 2);
+		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big &parameter, &newparameter, &parameter bad wolf") == 2);
+		assertTrue(NamedParameterUtils.countParameterPlaceholders("The \"big &x  \" 'ba''ad&p' &parameter wolf") == 1);
+		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big :parameter, &newparameter, &parameter bad wolf") == 2);
 	}
 
 }
