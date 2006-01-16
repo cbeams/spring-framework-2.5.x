@@ -129,7 +129,8 @@ public class BeanDefinitionBuilder  {
 	}
 
 	/**
-	 * Constructor args are indexed. All additions are at the present point
+	 * Add an indexed constructor arg value. The current index is tracked internally and all
+	 * additions are at the present point.
 	 */
 	public BeanDefinitionBuilder addConstructorArg(Object value) {
 		if(this.beanDefinition.getConstructorArgumentValues() == null) {
@@ -140,69 +141,108 @@ public class BeanDefinitionBuilder  {
 		return this;
 	}
 
+	/**
+	 * Add a reference to a named bean as a constructor arg.
+	 * @see #addConstructorArg(Object)
+	 */
 	public BeanDefinitionBuilder addConstructorArgReference(String beanName) {
 		return addConstructorArg(new RuntimeBeanReference(beanName));
 	}
 
+	/**
+	 * Add a reference to the bean identified by the supplied <code>BeanDefinitionBuilder</code>
+	 * as a constructor arg.
+	 * @see #addConstructorArg(Object)
+	 */
 	public BeanDefinitionBuilder addConstructorArgReference(BeanDefinitionBuilder target) {
 		return addConstructorArgReference(getTargetBeanName(target));
 	}
 
-
+	/**
+	 * Sets the name of the factory method to use for this definition.
+	 */
 	public BeanDefinitionBuilder setFactoryMethod(String factoryMethod) {
 		this.beanDefinition.setFactoryMethodName(factoryMethod);
 		return this;
 	}
 
+	/**
+	 * Sets the name of the factory bean to use for this definition.
+	 */
 	public BeanDefinitionBuilder setFactoryBean(String factoryBean, String factoryMethod) {
 		this.beanDefinition.setFactoryBeanName(factoryBean);
 		this.beanDefinition.setFactoryMethodName(factoryMethod);
 		return this;
 	}
 
-
+	/**
+	 * Sets whether or not this definition describes a singleton bean.
+	 */
 	public BeanDefinitionBuilder setSingleton(boolean singleton) {
 		this.beanDefinition.setSingleton(singleton);
 		return this;
 	}
 
+	/**
+	 * Sets whether or not this definition is abstract.
+	 */
 	public BeanDefinitionBuilder setAbstract(boolean flag) {
 		this.beanDefinition.setAbstract(flag);
 		return this;
 	}
 
+	/**
+	 * Set whether beans for this definition should be lazily initialized or not.
+	 */
 	public BeanDefinitionBuilder setLazyInit(boolean lazy) {
 		this.beanDefinition.setLazyInit(lazy);
 		return this;
 	}
 
+	/**
+	 * Set the autowire mode for this definition.
+	 */
 	public BeanDefinitionBuilder setAutowireMode(int autowireMode) {
 		beanDefinition.setAutowireMode(autowireMode);
 		return this;
 	}
-	
+
+	/**
+	 * Set the depency check mode for this definition.
+	 */
 	public BeanDefinitionBuilder setDependencyCheck(int dependencyCheck) {
 		beanDefinition.setDependencyCheck(dependencyCheck);
 		return this;
 	}
-	
+
+	/**
+	 * Set the destroy method for this definition.
+	 */
 	public BeanDefinitionBuilder setDestroyMethodName(String methodName) {
 		beanDefinition.setDestroyMethodName(methodName);
 		return this;
 	}
-	
+
+	/**
+	 * Sets the init method for this definition.
+	 */
 	public BeanDefinitionBuilder setInitMethodName(String methodName) {
 		beanDefinition.setInitMethodName(methodName);
 		return this;
 	}
-	
-	
+
+	/**
+	 * Sets the description associated with this definition.
+	 */
 	public BeanDefinitionBuilder setResourceDescription(String resourceDescription) {
 		beanDefinition.setResourceDescription(resourceDescription);
 		return this;
 	}
-	
-	
+
+	/**
+	 * Append the specified bean name to the list of beans that this definition
+	 * depends on.
+	 */
 	public BeanDefinitionBuilder addDependsOn(String beanName) {
 		if (beanDefinition.getDependsOn() == null) {
 			beanDefinition.setDependsOn(new String[] { beanName });
