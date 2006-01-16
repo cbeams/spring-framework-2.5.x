@@ -90,21 +90,21 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~1820 KB)
+* "spring" (~1815 KB)
 - Convenient jar file that combines all standard modules (see "module jars" below)
 - Note: Does NOT include extension modules! (see "extension module jars" below)
 
 MODULE JARS (dist/modules):
 
-* "spring-core" (~135 KB)
+* "spring-core" (~140 KB)
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~265 KB)
+* "spring-beans" (~270 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
-* "spring-aop" (~230 KB)
+* "spring-aop" (~250 KB)
 - Contents: AOP framework, source-level metadata support, AOP Alliance interfaces
 - Dependencies: spring-core, (spring-beans, CGLIB, Commons Attributes)
 
@@ -116,7 +116,7 @@ MODULE JARS (dist/modules):
 - Contents: DAO support, transaction infrastructure
 - Dependencies: spring-core, (spring-beans, spring-aop, spring-context, JTA)
 
-* "spring-jdbc" (~210 KB)
+* "spring-jdbc" (~225 KB)
 - Contents: JDBC support, iBATIS SQL Maps support
 - Dependencies: spring-dao, spring-beans, (iBATIS SQL Maps)
 
@@ -128,7 +128,7 @@ MODULE JARS (dist/modules):
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
 - Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts, JSF)
 
-* "spring-webmvc" (~210 KB)
+* "spring-webmvc" (~215 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI, Velocity, FreeMarker, JasperReports)
 
@@ -172,7 +172,7 @@ EXTENSION MODULE JARS (dist/extmodules):
 
 ASPECTS JAR (dist/aspects)
 
-* "spring-aspects" (~15 KB)
+* "spring-aspects" (~10 KB)
 - Contents: AspectJ aspects, for explicitly linking aspects into an IDE (Eclipse AJDT)
 - Not needed for deployment, since its classes are also in "spring" and "spring-aop"
 

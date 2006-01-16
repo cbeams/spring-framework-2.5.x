@@ -248,10 +248,11 @@
 				<include name="org/springframework/**"/>
 				<exclude name="org/springframework/web/portlet/**"/>
 				<exclude name="org/springframework/orm/jdo/**"/>
-				<exclude name="org/springframework/orm/ojb/**"/>
+				<exclude name="org/springframework/orm/jpa/**"/>
 				<exclude name="org/springframework/orm/hibernate/**"/>
 				<exclude name="org/springframework/orm/hibernate3/**"/>
 				<exclude name="org/springframework/orm/toplink/**"/>
+				<exclude name="org/springframework/orm/ojb/**"/>
 			</fileset>
 			<zipfileset src="lib/aopalliance/aopalliance.jar"/>
 			<manifest>
