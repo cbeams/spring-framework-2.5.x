@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 M2 (17.1.2006)
+Changes in version 2.0 M2 (21.1.2006)
 -------------------------------------
 
 Package org.springframework.aop
@@ -11,14 +11,14 @@ Package org.springframework.aop
 * allowed AopUtils's "invokeJoinpointUsingReflection" to invoke protected methods
 * added "autodetectInterfaces" property to ProxyFactoryBean, for TransactionProxyFactoryBean-style interface detection
 * improved performance of IntroductionInfoSupport by faster determination of whether method is on introduced interface
-* AspectJ binding from pointcut expressions to arbitrary advice method arguments now working
-* support for introductions using AspectJ @DeclareParents
-* support for new AspectJ 5 pertypewithin aspect instantiation model
-* completed implementation of @AspectJ integration class MethodInvocationProceedingJoinPoint
 * refined ThreadLocalTargetSource's synchronization to guarantee thread-safe destruction on shutdown
 * added "hideProxyClassNames" property to AbstractTraceInterceptor, to log with target class instead of proxy class
 * added "target.dynamic" package to support dynamic refresh of object instances
 * added BeanFactoryRefreshableTargetSource to allow object instances to be refreshed with new instances from BeanFactory
+* AspectJ binding from pointcut expressions to arbitrary advice method arguments now working
+* support for introductions using AspectJ @DeclareParents
+* support for new AspectJ 5 "pertypewithin" aspect instantiation model
+* completed implementation of @AspectJ integration class MethodInvocationProceedingJoinPoint
 
 Package org.springframework.beans
 * fixed PropertyAccessorUtils's "getLastNestedPropertySeparatorIndex" to correctly handle property paths without dot
@@ -29,8 +29,11 @@ Package org.springframework.beans
 * added "postProcessAfterInstantiation" method to InstantiationAwareBeanPostProcessor
 * reworked AbstractBeanFactory's currently-in-creation check to log debug message when unfinished singleton is returned
 * added "allowCircularReferences" flag to AbstractAutowireCapableBeanFactory, to disallow circular references completely
+* DefaultListableBeanFactory's "getBeansOfType" logs BeanCurrentlyInCreationException message instead of stacktrace
 * refined DefaultXmlBeanDefinitionParser to explicity check for empty ref name and throw meaningful exception
 * DefaultXmlBeanDefinitionParser wraps unexpected exceptions in BeanDefinitionStoreException with context info
+* moved general bean wiring support from "beans.factory.aspectj" to "beans.factory.wiring"/"beans.factory.annotation"
+* renamed AspectJ AnnotationBeanConfigurer to AnnotationBeanConfigurerAspect
 
 Package org.springframework.context
 * refined AbstractApplicationContext to never register more than one JVM shutdown hook
@@ -47,6 +50,9 @@ Package org.springframework.jdbc
 * reworked SqlQuery and subclasses to work with a RowMapper instead of a ResultReader -> "newRowMapper" template method
 * fixed BatchSqlUpdate's constructor that takes a "batchSize" argument to correctly interpret it as batch size
 * added "trackRowsAffected" property to BatchSqlUpdate, allowing to turn off the row counts list to save memory
+
+Package org.springframework.jmx
+* fixed "persistPeriod" default to be -1 even in ManagedResource attribute (not just in ManagedResource annotation)
 
 Package org.springframework.mock
 * made "servletContextName" and "portletContextName" configurable in MockServletContext respectively MockPortletContext
@@ -77,6 +83,7 @@ Package org.springframework.scripting
 * added support for BeanShell, Groovy and JRuby scripted objects
 
 Package org.springframework.test
+* fixed AbstractDependencyInjectionSpringContextTests's "populateProtectedVariables" to avoid incorrect warnings
 * added "startNewTransaction()" method to AbstractTransactionalSpringContextTests
 
 Package org.springframework.transaction
