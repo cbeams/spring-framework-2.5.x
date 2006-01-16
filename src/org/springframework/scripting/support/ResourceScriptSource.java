@@ -37,7 +37,8 @@ import org.springframework.util.FileCopyUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
- * @see org.springframework.core.io.Resource
+ * @see org.springframework.core.io.Resource#getInputStream()
+ * @see org.springframework.core.io.Resource#getFile()
  * @see org.springframework.core.io.ResourceLoader
  */
 public class ResourceScriptSource implements ScriptSource {
@@ -45,7 +46,7 @@ public class ResourceScriptSource implements ScriptSource {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private Resource resource;
+	private final Resource resource;
 
 	private long lastModified = -1;
 
@@ -62,7 +63,7 @@ public class ResourceScriptSource implements ScriptSource {
 	/**
 	 * Return the Resource to load the script from.
 	 */
-	public Resource getResource() {
+	public final Resource getResource() {
 		return resource;
 	}
 
