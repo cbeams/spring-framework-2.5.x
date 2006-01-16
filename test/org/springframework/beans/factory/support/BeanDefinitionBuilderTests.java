@@ -35,7 +35,7 @@ public class BeanDefinitionBuilderTests extends TestCase {
 	public void testSimpleProperty() {
 		String[] dependsOn = new String[] { "A", "B", "C" };
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(TestBean.class);
-		bdb.singleton(false).addPropertyReferenceToNamedBean("age", "15");
+		bdb.setSingleton(false).addPropertyReference("age", "15");
 		for (int i = 0; i < dependsOn.length; i++) {
 			bdb.addDependsOn(dependsOn[i]);
 		}

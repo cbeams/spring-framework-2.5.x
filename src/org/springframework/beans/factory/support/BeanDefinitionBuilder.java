@@ -23,14 +23,15 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Programmatic means of constructor BeanDefinitions using the builder
- * pattern. Intended primarily for use when implementing Spring 2.0
- * NamespaceHandlers.
+ * Programmatic means of constructing {@link org.springframework.beans.factory.config.BeanDefinition BeanDefinitions}
+ * using the builder pattern. Intended primarily for use when implementing Spring 2.0
+ * {@link org.springframework.beans.factory.xml.NamespaceHandler NamespaceHandlers}.
  * <p>
- * Note that BeanDefinitionBuilder objects support references. A property
- * or constructor argument that is passed another BeanDefinitionBuilder object
- * <i>that has already been registered with a BeanDefinitionRegistryBuilder</i>
+ * Note that <code>BeanDefinitionBuilder</code> objects support references. A property
+ * or constructor argument that is passed another <code>BeanDefinitionBuilder</code> object
+ * <emphasis>that has already been registered with a <code>BeanDefinitionRegistryBuilder</code></emphasis>
  * will result in a reference to the bean with that name.
+ *
  * @author Rod Johnson
  * @author Rob Harrop
  * @since 2.0
@@ -38,28 +39,33 @@ import org.springframework.util.ObjectUtils;
 public class BeanDefinitionBuilder  {
 
 	/**
-	 * BeanDefinition we are creating
+	 * The <code>BeanDefinition</code> instance we are creating.
 	 */
 	private AbstractBeanDefinition beanDefinition;
 	
 	/**
-	 * OIur current position with respect to constructor args
+	 * Our current position with respect to constructor args.
 	 */
 	private int constructorArgIndex;
-	
+
+	/**
+	 * The bean name assigned to the current <code>BeanDefinition</code> if any.
+	 */
 	private String assignedBeanName;
 
-
+	/**
+	 * Create a new <code>BeanDefinitionBuilder</code> used to construct a {@link RootBeanDefinition}.
+	 * @param beanClass the <code>Class</code> of the bean the definition is being created for.
+	 */
 	public static BeanDefinitionBuilder rootBeanDefinition(Class beanClass) {
 		return rootBeanDefinition(beanClass, null);
 	}
-	
-//	public static BeanDefinitionBuilder rootBeanDefinition(String className) {
-//		return rootBeanDefinition(className, null);
-//	}
-	
-	//public static BeanDefinitionBuilder rootBeanDefinition(String className, String factoryMethod) {
-		
+
+	/**
+	 * Create a new <code>BeanDefinitionBuilder</code> used to construct a {@link RootBeanDefinition}.
+	 * @param beanClass the <code>Class</code> of the bean the definition is being created for.
+	 * @param factoryMethod the name of the method to use to construct the bean instance.
+	 */
 	public static BeanDefinitionBuilder rootBeanDefinition(Class beanClass, String factoryMethod) {
 		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
 		builder.beanDefinition = new RootBeanDefinition();
@@ -67,112 +73,65 @@ public class BeanDefinitionBuilder  {
 		builder.beanDefinition.setFactoryMethodName(factoryMethod);
 		return builder;
 	}
-	
+
+	/**
+	 * Create a new <code>BeanDefinitionBuilder</code> used to construct a {@link ChildBeanDefinition}.
+	 * @param parentBeanName the name of the parent bean.
+	 */
 	public static BeanDefinitionBuilder childBeanDefinition(String parentBeanName) {
 		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
 		builder.beanDefinition = new ChildBeanDefinition(parentBeanName);
 		return builder;
 	}
 
-	
 	/**
-	 * Protect from public use
-	 *
+	 * Protect from public use.
 	 */
 	protected BeanDefinitionBuilder() {
 	}
 
 	/**
-	 * Return the created bean definition
+	 * Validate and return the created {@link org.springframework.beans.factory.config.BeanDefinition}.
 	 */
 	public AbstractBeanDefinition getBeanDefinition() {
-		beanDefinition.validate();
-		return beanDefinition;
-	}
-	
-
-	public BeanDefinitionBuilder factoryMethod(String factoryMethod) {
-		beanDefinition.setFactoryMethodName(factoryMethod);
-		return this;
-	}
-
-	public BeanDefinitionBuilder factoryBean(String factoryBean, String factoryMethod) {
-		beanDefinition.setFactoryBeanName(factoryBean);
-		beanDefinition.setFactoryMethodName(factoryMethod);
-		return this;
-	}
-
-	
-	public BeanDefinitionBuilder singleton(boolean singleton) {
-		beanDefinition.setSingleton(singleton);
-		return this;
-	}
-	
-	public BeanDefinitionBuilder setAbstract(boolean flag) {
-		beanDefinition.setAbstract(flag);
-		return this;
-	}
-	
-	public BeanDefinitionBuilder lazyInit(boolean lazy) {
-		beanDefinition.setLazyInit(lazy);
-		return this;
+		this.beanDefinition.validate();
+		return this.beanDefinition;
 	}
 
 	/**
-	 * Add a property value
-	 * @param name property name
-	 * @param value property value. May be a simple type, or may be a
-	 * BeanDefinitionBuilder object, in which case if the name has been assigned,
-	 * a runtime bean reference is created. If you want to make a reference
-	 * to a named bean, use addPropertyValueToNamedBean
-	 * @return this object
+	 * Adds the supplied property value under the given name.
 	 */
 	public BeanDefinitionBuilder addPropertyValue(String name, Object value) {
-		value = resolveReferenceValue(value);
 		if(this.beanDefinition.getPropertyValues() == null) {
 			this.beanDefinition.setPropertyValues(new MutablePropertyValues());
 		}
 		this.beanDefinition.getPropertyValues().addPropertyValue(new PropertyValue(name, value));
 		return this;
 	}
-	
-	public BeanDefinitionBuilder addPropertyReferenceToNamedBean(String name, String bean) {
+
+	/**
+	 * Adds a reference to the specified bean name under the property specified.
+	 * @param name the name of the property to add the reference to.
+	 * @param bean the name of the bean being referenced.
+	 */
+	public BeanDefinitionBuilder addPropertyReference(String name, String bean) {
 		return this.addPropertyValue(name, new RuntimeBeanReference(bean));
 	}
-	
-	protected Object resolveReferenceValue(Object value) {
-		if (value instanceof BeanDefinitionBuilder) {
-			BeanDefinitionBuilder target = (BeanDefinitionBuilder) value;
-			if (target.assignedBeanName == null) {
-				throw new IllegalStateException("Cannot support references: not yet assigned an identity");
-			}
-			return new RuntimeBeanReference(target.assignedBeanName);
-		}
-		else {
-			return value;
-		}
-	}
-	
+
 	/**
-	 * Called by BeanDefinitionRegistryBuilder to let this object know the name of the
-	 * bean definition. Allows reference setting
-	 * @param name bean name that has been assigned for this object
+	 * Adds a reference to the bean identified by the supplied <code>BeanDefinitionBuilder</code> to the
+	 * specified property.
+	 * @param name the name of tye 
+	 * @param target
 	 */
-	protected void assignBeanName(String name) {
-		if (this.assignedBeanName != null) {
-			throw new IllegalStateException("Cannot assign bean name: bean name of '" + assignedBeanName + "' already assigned");
-		}
-		this.assignedBeanName = name;
+	public BeanDefinitionBuilder addPropertyReference(String name, BeanDefinitionBuilder target) {
+		return addPropertyReference(name, getTargetBeanName(target));
 	}
 
 	/**
 	 * Constructor args are indexed. All additions are at the present point
-	 * @param name
-	 * @param value
-	 * @return
 	 */
 	public BeanDefinitionBuilder addConstructorArg(Object value) {
-		value = resolveReferenceValue(value);
 		if(this.beanDefinition.getConstructorArgumentValues() == null) {
 			this.beanDefinition.setConstructorArgumentValues(new ConstructorArgumentValues());
 		}
@@ -180,36 +139,65 @@ public class BeanDefinitionBuilder  {
 		this.beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(constructorArgIndex++, value);
 		return this;
 	}
-	
-	public BeanDefinitionBuilder addConstructorReferenceToNamedBean(String beanName) {
+
+	public BeanDefinitionBuilder addConstructorArgReference(String beanName) {
 		return addConstructorArg(new RuntimeBeanReference(beanName));
 	}
 
+	public BeanDefinitionBuilder addConstructorArgReference(BeanDefinitionBuilder target) {
+		return addConstructorArgReference(getTargetBeanName(target));
+	}
+
+
+	public BeanDefinitionBuilder setFactoryMethod(String factoryMethod) {
+		this.beanDefinition.setFactoryMethodName(factoryMethod);
+		return this;
+	}
+
+	public BeanDefinitionBuilder setFactoryBean(String factoryBean, String factoryMethod) {
+		this.beanDefinition.setFactoryBeanName(factoryBean);
+		this.beanDefinition.setFactoryMethodName(factoryMethod);
+		return this;
+	}
+
+
+	public BeanDefinitionBuilder setSingleton(boolean singleton) {
+		this.beanDefinition.setSingleton(singleton);
+		return this;
+	}
+
+	public BeanDefinitionBuilder setAbstract(boolean flag) {
+		this.beanDefinition.setAbstract(flag);
+		return this;
+	}
+
+	public BeanDefinitionBuilder setLazyInit(boolean lazy) {
+		this.beanDefinition.setLazyInit(lazy);
+		return this;
+	}
 
 	public BeanDefinitionBuilder setAutowireMode(int autowireMode) {
-		// TODO validate, or in AstractBeanDefinition
 		beanDefinition.setAutowireMode(autowireMode);
 		return this;
 	}
 	
 	public BeanDefinitionBuilder setDependencyCheck(int dependencyCheck) {
-		// TODO validate, or in AstractBeanDefinition
 		beanDefinition.setDependencyCheck(dependencyCheck);
 		return this;
 	}
 	
-	public BeanDefinitionBuilder destroyMethodName(String methodName) {
+	public BeanDefinitionBuilder setDestroyMethodName(String methodName) {
 		beanDefinition.setDestroyMethodName(methodName);
 		return this;
 	}
 	
-	public BeanDefinitionBuilder initMethodName(String methodName) {
+	public BeanDefinitionBuilder setInitMethodName(String methodName) {
 		beanDefinition.setInitMethodName(methodName);
 		return this;
 	}
 	
 	
-	public BeanDefinitionBuilder resourceDescription(String resourceDescription) {
+	public BeanDefinitionBuilder setResourceDescription(String resourceDescription) {
 		beanDefinition.setResourceDescription(resourceDescription);
 		return this;
 	}
@@ -226,4 +214,29 @@ public class BeanDefinitionBuilder  {
 		return this;
 	}
 
+
+	/**
+	 * Called by BeanDefinitionRegistryBuilder to let this object know the name of the
+	 * bean definition. Allows reference setting
+	 * @param name bean name that has been assigned for this object
+	 */
+	protected void assignBeanName(String name) {
+		if (this.assignedBeanName != null) {
+			throw new IllegalStateException("Cannot assign bean name: bean name of '" + assignedBeanName + "' already assigned");
+		}
+		this.assignedBeanName = name;
+	}
+
+	/**
+	 * Returns the bean name assigned to the supplied <code>BeanDefinitionBuilder</code>.
+	 * @throws IllegalArgumentException if the <code>BeanDefinitionBuilder</code> has no assigned bean name.
+	 */
+	private String getTargetBeanName(BeanDefinitionBuilder target) throws IllegalArgumentException {
+		String assignedBeanName = target.assignedBeanName;
+		if(assignedBeanName == null) {
+			throw new IllegalArgumentException("Cannot add a reference to the bean identified by the " +
+					"supplied BeanDefinitonBuilder. No bean name has been assigned.");
+		}
+		return assignedBeanName;
+	}
 }
