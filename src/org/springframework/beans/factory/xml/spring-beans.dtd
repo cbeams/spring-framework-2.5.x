@@ -154,6 +154,9 @@
 	rather just serving as parent for concrete child bean definitions.
 	Default is "false". Specify "true" to tell the bean factory to not try to
 	instantiate that particular bean in any case.
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 <!ATTLIST bean abstract (true | false) "false">
 
@@ -165,6 +168,9 @@
 
 	Singletons are most commonly used, and are ideal for multi-threaded
 	service objects.
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 <!ATTLIST bean singleton (true | false) "true">
 
@@ -172,6 +178,10 @@
 	If this bean should be lazily initialized.
 	If false, it will get instantiated on startup by bean factories
 	that perform eager initialization of singletons.
+
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 <!ATTLIST bean lazy-init (true | false | default) "default">
 
@@ -212,8 +222,11 @@
 	behaviour for bigger applications.
 
 	Note that explicit dependencies, i.e. "property" and "constructor-arg" elements,
-	always override autowiring. Autowire behaviour can be combined with dependency
+	always override autowiring. Autowire behavior can be combined with dependency
 	checking, which will be performed after all autowiring has been completed.
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 <!ATTLIST bean autowire (no | byName | byType | constructor | autodetect | default) "default">
 
@@ -225,6 +238,9 @@
 	"simple" type dependency checking includes primitives and String
 	"object" includes collaborators (other beans in the factory)
 	"all" includes both types of dependency checking
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 <!ATTLIST bean dependency-check (none | objects | simple | all | default) "default">
 
@@ -235,6 +251,9 @@
 	Note that dependencies are normally expressed through bean properties or
 	constructor arguments. This property should just be necessary for other kinds
 	of dependencies like statics (*ugh*) or database preparation on startup.
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 <!ATTLIST bean depends-on CDATA #IMPLIED>
 

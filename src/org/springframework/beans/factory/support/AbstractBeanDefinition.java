@@ -180,16 +180,17 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Override settings in this bean definition from the given bean definition.
+	 * Override settings in this bean definition (assumably a copied parent
+	 * from a parent-child inheritance relationship) from the given bean
+	 * definition (assumably the child).
 	 * <p><ul>
 	 * <li>Will override beanClass if specified in the given bean definition.
-	 * <li>Will always take abstract, singleton, lazyInit from the given bean definition.
-	 * <li>Will add constructorArgumentValues, propertyValues, methodOverrides to
-	 * existing ones.
-	 * <li>Will override initMethodName, destroyMethodName, staticFactoryMethodName
-	 * if specified.
-	 * <li>Will always take dependsOn, autowireMode, dependencyCheck from the
-	 * given bean definition.
+	 * <li>Will always take abstract, singleton, lazyInit, autowireMode,
+	 * dependencyCheck, dependsOn from the given bean definition.
+	 * <li>Will add constructorArgumentValues, propertyValues, methodOverrides
+	 * from the given bean definition to existing ones.
+	 * <li>Will override factoryBeanName, factoryMethodName, initMethodName,
+	 * destroyMethodName if specified in the given bean definition.
 	 * </ul>
 	 */
 	public void overrideFrom(AbstractBeanDefinition other) {
