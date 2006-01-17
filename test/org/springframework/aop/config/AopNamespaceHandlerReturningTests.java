@@ -18,11 +18,8 @@ package org.springframework.aop.config;
 
 import junit.framework.TestCase;
 
-import org.springframework.aop.Advisor;
-import org.springframework.aop.framework.Advised;
-import org.springframework.aop.framework.CountingBeforeAdvice;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.PropertyAccessException;
 import org.springframework.beans.PropertyAccessExceptionsException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
@@ -53,13 +50,16 @@ public class AopNamespaceHandlerReturningTests extends TestCase {
 			fail("Expected BeanCreationException");
 		} catch (BeanCreationException beanEx) {
 			Throwable cause = beanEx.getCause();
-			assertTrue("Expected PropertyAccessExceptionsException, got: " + cause.getClass(),cause instanceof PropertyAccessExceptionsException);
+			assertTrue("Expected PropertyAccessExceptionsException, got: " + cause.getClass(),
+					cause instanceof PropertyAccessExceptionsException);
 			PropertyAccessExceptionsException ex = (PropertyAccessExceptionsException) cause;
-			cause = ex.getPropertyAccessException("returningName");
-			// we get back a MethodInvocationException, which nests what we really want to test...
-			cause = cause.getCause();
-			assertTrue("Expected UnsupportedOperationException, got: " + cause.getClass(),cause instanceof UnsupportedOperationException);
-			assertEquals("Only afterReturning advice can be used to bind a return value",cause.getMessage());
+			PropertyAccessException nestedEx = ex.getPropertyAccessException("returningName");
+			// We get back a MethodInvocationException, which nests what we really want to test...
+			cause = nestedEx.getCause();
+			assertTrue("Expected UnsupportedOperationException, got: " + cause.getClass(),
+					cause instanceof UnsupportedOperationException);
+			assertEquals("Only afterReturning advice can be used to bind a return value",
+					cause.getMessage());
 		}
 	}
 

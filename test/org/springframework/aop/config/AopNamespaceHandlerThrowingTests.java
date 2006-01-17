@@ -18,11 +18,8 @@ package org.springframework.aop.config;
 
 import junit.framework.TestCase;
 
-import org.springframework.aop.Advisor;
-import org.springframework.aop.framework.Advised;
-import org.springframework.aop.framework.CountingBeforeAdvice;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.PropertyAccessException;
 import org.springframework.beans.PropertyAccessExceptionsException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
@@ -51,15 +48,19 @@ public class AopNamespaceHandlerThrowingTests extends TestCase {
 		try {
 			this.context = new ClassPathXmlApplicationContext(getErrorConfigLocation());
 			fail("Expected BeanCreationException");
-		} catch (BeanCreationException beanEx) {
+		}
+		catch (BeanCreationException beanEx) {
 			Throwable cause = beanEx.getCause();
-			assertTrue("Expected PropertyAccessExceptionsException, got: " + cause.getClass(),cause instanceof PropertyAccessExceptionsException);
+			assertTrue("Expected PropertyAccessExceptionsException, got: " + cause.getClass(),
+					cause instanceof PropertyAccessExceptionsException);
 			PropertyAccessExceptionsException ex = (PropertyAccessExceptionsException) cause;
-			cause = ex.getPropertyAccessException("throwingName");
-			// we get back a MethodInvocationException, which nests what we really want to test...
-			cause = cause.getCause();
-			assertTrue("Expected UnsupportedOperationException, got: " + cause.getClass(),cause instanceof UnsupportedOperationException);
-			assertEquals("Only afterThrowing advice can be used to bind a thrown exception",cause.getMessage());
+			PropertyAccessException nestedEx = ex.getPropertyAccessException("throwingName");
+			// We get back a MethodInvocationException, which nests what we really want to test...
+			cause = nestedEx.getCause();
+			assertTrue("Expected UnsupportedOperationException, got: " + cause.getClass(),
+					cause instanceof UnsupportedOperationException);
+			assertEquals("Only afterThrowing advice can be used to bind a thrown exception",
+					cause.getMessage());
 		}
 	}
 

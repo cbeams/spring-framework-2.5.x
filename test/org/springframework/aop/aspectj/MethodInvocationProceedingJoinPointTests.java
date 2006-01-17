@@ -20,13 +20,13 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.aop.AspectException;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.JoinPoint.StaticPart;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
+
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.aop.framework.ProxyFactory;
@@ -36,8 +36,6 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
 /**
- * 
- * 
  * @author Rod Johnson
  * @since 2.0
  */
@@ -74,7 +72,7 @@ public class MethodInvocationProceedingJoinPointTests extends TestCase {
 			
 			public void before(Method method, Object[] args, Object target) throws Throwable {
 				JoinPoint jp = AbstractAspectJAdvice.currentJoinPoint();
-				assertTrue("Method named in toString", jp.toString().contains(method.getName()));
+				assertTrue("Method named in toString", jp.toString().indexOf(method.getName()) != -1);
 				// Ensure that these don't cause problems
 				jp.toShortString();
 				jp.toLongString();
