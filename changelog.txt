@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.7 (16.1.2006)
+Changes in version 1.2.7 (21.1.2006)
 ------------------------------------
 
 Package org.springframework.aop
@@ -16,10 +16,18 @@ Package org.springframework.beans
 * refined BeanWrapperImpl to perform the accessible checking for read/write methods before every invocation
 * fixed PropertyAccessorUtils's "getLastNestedPropertySeparatorIndex" to correctly handle property paths without dot
 * added overloaded constructor to StringArrayPropertyEditor, allowing to specify a custom separator for String splitting
-* optimized AbstractBeanFactory to avoid internal NoSuchBeanDefinitionException throw+catch as far as possible
-* fixed AbstractBeanFactory to correctly delegate to parent BeanFactory from "isFactoryBean"
 * fixed AbstractBeanFactory to allow child bean definitions to refer to a parent via its alias name
-* DefaultListableBeanFactory is able to call non-public factory methods as well
+* fixed AbstractBeanFactory to correctly delegate to parent BeanFactory from "isFactoryBean"
+* optimized AbstractBeanFactory to avoid internal NoSuchBeanDefinitionException throw+catch as far as possible
+* reworked AbstractBeanFactory's currently-in-creation check to log debug message when unfinished singleton is returned
+* added "allowCircularReferences" flag to AbstractAutowireCapableBeanFactory, to disallow circular references completely
+* DefaultListableBeanFactory's "getBeansOfType" logs BeanCurrentlyInCreationException message instead of stacktrace
+* added "default-init-method" and "default-destroy-method" attributes to the XML bean definition format
+* refined DefaultXmlBeanDefinitionParser to explicity check for empty ref name and throw meaningful exception
+* DefaultXmlBeanDefinitionParser wraps unexpected exceptions in BeanDefinitionStoreException with context info
+
+Package org.springframework.core
+* refined Jdk13ControlFlow to be compatible with GNU ClassPath (whose stacktrace has a whitespace after the method name)
 
 Package org.springframework.jdbc
 * added further error codes for Oracle and MySQL to default "sql-error-codes.xml" file
@@ -32,28 +40,38 @@ Package org.springframework.jdbc
 * fixed BatchSqlUpdate's constructor that takes a "batchSize" argument to correctly interpret it as batch size
 * added "trackRowsAffected" property to BatchSqlUpdate, allowing to turn off the row counts list to save memory
 
+Package org.springframework.jmx
+* fixed MBeanExporter to work correctly with an "excludedBeans" list that it not sorted by bean name ascending
+* fixed "persistPeriod" default to be -1 even in ManagedResource attribute (not just in ManagedResource annotation)
+
 Package org.springframework.mock
 * made "servletContextName" configurable in MockServletContext
 * added "set/removeParameter" methods to MockHttpServletRequest, allowing to replace/remove existing parameters
 
 Package org.springframework.orm
 * SqlMapClientTemplate always works with SqlMapSession and provided Connection to enable proper batching in all cases
-* updated Spring's JDO support to be compatible with JPOX JDO 2.0 API snapshot-9 (corresponding to JDO 2.0 final draft)
-* JdoTransactionManager does explicit "isActive()" check before attempting a rollback, to avoid illegal state exception
 * Hibernate LocalSessionFactoryBean exposes its DataSource on "SessionFactory.close()", for potential schema export
 * added "configLocations" property to LocalSessionFactoryBean for Hibernate3, allowing to load multiple config files
 * added "replicate" convenience methods to HibernateTemplate for both Hibernate2 and Hibernate3
 * added BlobStringType with configurable character encoding for both Hibernate2 and Hibernate3
+* updated Spring's JDO support to be compatible with JPOX JDO 2.0 API snapshot-9 (corresponding to JDO 2.0 final draft)
+* JdoTransactionManager does explicit "isActive()" check before attempting a rollback, to avoid illegal state exception
 
 Package org.springframework.remoting
 * RmiServiceExporter performs explicit RMI unexport if binding to the registry failed, to avoid dangling exports
 * JaxRpcPortClientInterceptor/ProxyFactoryBean apply given JaxRpcServicePostProcessors to existing JAX-RPC Service too
+
+Package org.springframework.samples
+* updated "views.properties" files in all sample applications to use "(class)" and "(parent)"
+* marked JPetStore's OrderForm, AccountForm and UserSession as Serializable
 
 Package org.springframework.scheduling
 * added support for Quartz 1.5's merged JobDataMap to QuartzJobBean, falling back to plain JobDataMap on Quartz 1.4
 
 Package org.springframework.test
 * added overloaded constructors that take a JUnit TestCase name to all of the provided TestCase subclasses
+* fixed AbstractDependencyInjectionSpringContextTests's "populateProtectedVariables" to avoid incorrect warnings
+* added "startNewTransaction()" method to AbstractTransactionalSpringContextTests
 
 Package org.springframework.transaction
 * fixed AbstractPlatformTransactionManager to serialize all relevant state
@@ -74,16 +92,21 @@ Package org.springframework.util
 * fixed ConcurrencyThrottleSupport to serialize all relevant state
 
 Package org.springframework.web
+* use NestedServletException wherever a root cause gets wrapped by a ServletException (for nicer root cause handling)
 * "contextConfigLocation" params in "web.xml" support "${...}" style placeholders for system properties
 * deprecated BindUtils and BindInitializer in package "web.bind" in favor of direct ServletRequestDataBinder usage
 * added "currentFormObject" template method to AbstractFormController, for post-processing of a session form object
 * FixedLocaleResolver returns the JVM's default Locale if no explicit default Locale specified
+* added HttpSessionMutexListener and "WebUtils.getSessionMutex", used by AbstractController's "synchronizeOnSession"
+* added "FacesContextUtils.getSessionMutex", to make HttpSessionMutexListener's session mutex available to JSF code
+* added "propertyEditorRegistrars" property to BaseCommandController, for applying PropertyEditorRegistrars
 * turned AbstractCommandController's and AbstractFormController's "handleRequestInternal" methods non-final
 * refactored AbstractFormController's session form check into one single place, throwing SessionRequiredException
 * added protected accessors for UrlBasedViewResolver's bean properties, allowing subclasses to access the settings
 * added "argumentSeparator" property to MessageTag, allowing to specify a custom separator instead of the default comma
 * VelocityView converts Velocity's MethodInvocationException to a Spring NestedServletException with original root cause
 * added "useSingleModelNameAsRoot" property to AbstractXlstView, allowing to enforce the value of the "root" property
+* refined Struts DelegatingActionProxy and Delegating(Tiles)RequestProcessor to fall back to root WebApplicationContext
 
 
 Changes in version 1.2.6 (14.11.2005)

@@ -136,7 +136,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: Hibernate 2.1 support, Hibernate 3.x support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, Hibernate2, Hibernate3)
 
-* "spring" (~1865 KB)
+* "spring" (~1875 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
