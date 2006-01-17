@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	/**
 	 * A list of bean names that should be excluded from autodetection.
 	 */
-	private String[] excludedBeans = new String[0];
+	private Set excludedBeans;
 
 	/**
 	 * Stores the <code>MBeanInfoAssembler</code> to use for this exporter.
@@ -222,7 +222,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * Set the list of names for beans that should be excluded from autodetection.
 	 */
 	public void setExcludedBeans(String[] excludedBeans) {
-		this.excludedBeans = (excludedBeans != null ? excludedBeans : new String[0]);
+		this.excludedBeans = (excludedBeans != null ? new HashSet(Arrays.asList(excludedBeans)) : null);
 	}
 
 	/**
@@ -723,7 +723,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * Indicates whether or not a particular bean name is present in the excluded beans list.
 	 */
 	private boolean isExcluded(String beanName) {
-		return (Arrays.binarySearch(this.excludedBeans, beanName) > -1);
+		return (this.excludedBeans != null && this.excludedBeans.contains(beanName));
 	}
 
 	/**

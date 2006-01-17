@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,25 @@ import org.springframework.web.util.UrlPathHelper;
  * a forward. This can be enforced by calling <code>response.flushBuffer()</code>
  * (which will commit the response) before rendering the view.
  *
+ * <p>Typical usage with InternalResourceViewResolver would look as follows,
+ * from the perspective of the DispatcherServlet context definition:
+ *
+ * <pre>
+ * &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+ *   &lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
+ *   &lt;property name="suffix" value=".jsp"/&gt;
+ * &lt;/bean&gt;</pre>
+ *
+ * Every view name returned from a handler will be translated to a JSP
+ * resource (for example: "myView" -> "/WEB-INF/jsp/myView.jsp"), using
+ * this view class by default.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see javax.servlet.RequestDispatcher#forward
  * @see javax.servlet.RequestDispatcher#include
  * @see javax.servlet.ServletResponse#flushBuffer
+ * @see InternalResourceViewResolver
  */
 public class InternalResourceView extends AbstractUrlBasedView {
 

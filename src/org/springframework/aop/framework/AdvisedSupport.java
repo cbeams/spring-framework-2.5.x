@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -194,6 +195,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Set the interfaces to be proxied.
 	 */
 	public void setInterfaces(Class[] interfaces) {
+		Assert.notNull(interfaces, "Interfaces must not be null");
 		this.interfaces.clear();
 		for (int i = 0; i < interfaces.length; i++) {
 			addInterface(interfaces[i]);
@@ -205,6 +207,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param newInterface additional interface to proxy
 	 */
 	public void addInterface(Class newInterface) {
+		Assert.notNull(newInterface, "Interface must not be null");
 		if (!newInterface.isInterface()) {
 			throw new IllegalArgumentException("[" + newInterface.getName() + "] is not an interface");
 		}

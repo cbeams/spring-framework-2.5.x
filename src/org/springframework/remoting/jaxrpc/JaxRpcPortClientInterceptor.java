@@ -1,6 +1,6 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -419,7 +419,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			stub._setProperty(Stub.ENDPOINT_ADDRESS_PROPERTY, this.endpointAddress);
 		}
 		if (this.maintainSession) {
-			stub._setProperty(Stub.SESSION_MAINTAIN_PROPERTY, new Boolean(this.maintainSession));
+			stub._setProperty(Stub.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 		}
 		if (this.customProperties != null) {
 			Enumeration en = this.customProperties.propertyNames();
@@ -575,7 +575,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			call.setTargetEndpointAddress(this.endpointAddress);
 		}
 		if (this.maintainSession) {
-			call.setProperty(Call.SESSION_MAINTAIN_PROPERTY, new Boolean(this.maintainSession));
+			call.setProperty(Call.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 		}
 		if (this.customProperties != null) {
 			Enumeration en = this.customProperties.propertyNames();

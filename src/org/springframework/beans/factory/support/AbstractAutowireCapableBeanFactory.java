@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ import org.springframework.beans.factory.config.InstantiationAwareBeanPostProces
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 13.02.2004
  * @see AutowireCapableBeanFactory
  * @see AbstractBeanFactory#createBean
@@ -83,6 +84,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     implements AutowireCapableBeanFactory {
 
 	private InstantiationStrategy instantiationStrategy = new CglibSubclassingInstantiationStrategy();
+
+	/** Whether to automatically try to resolve circular references between beans */
+	private boolean allowCircularReferences = true;
 
 	/**
 	 * Dependency types to ignore on dependency check and autowire, as Set of
@@ -128,6 +132,28 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	public InstantiationStrategy getInstantiationStrategy() {
 		return instantiationStrategy;
+	}
+
+	/**
+	 * Set whether to allow circular references between beans - and automatically
+	 * try to resolve them.
+	 * <p>Note that circular reference resolution means that one of the involved beans
+	 * will receive a reference to another bean that is not fully initialized yet.
+	 * This can lead to subtle and not-so-subtle side effects on initialization;
+	 * it does work fine for many scenarios, though.
+	 * <p>Default is "true". Turn this off to throw an exception when encountering
+	 * a circular reference, disallowing them completely.
+	 */
+	public void setAllowCircularReferences(boolean allowCircularReferences) {
+		this.allowCircularReferences = allowCircularReferences;
+	}
+
+	/**
+	 * Return whether to allow circular references between beans - and automatically
+	 * try to resolve them.
+	 */
+	public boolean isAllowCircularReferences() {
+		return allowCircularReferences;
 	}
 
 	/**
@@ -208,12 +234,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Apply InstantiationAwareBeanPostProcessors to the given existing bean instance,
-	 * invoking their <code>postProcessBeforeInstantiation</code> methods.
-	 * The returned bean instance may be a wrapper around the original.
+	 * Apply InstantiationAwareBeanPostProcessors to the specified bean definition
+	 * (by class and name), invoking their <code>postProcessBeforeInstantiation</code> methods.
+     * <p>Any returned object will be used as the bean instead of actually instantiating the target
+	 * bean. A <code>null</code> return value from the post-processor will result in the target bean being
+	 * instantiated.
 	 * @param beanClass the class of the bean to be instantiated
 	 * @param beanName the name of the bean
-	 * @return the bean object to use instead of a default instance of the target bean
+	 * @return the bean object to use instead of a default instance of the target bean, or <code>null</code>
 	 * @throws BeansException if any post-processing failed
 	 * @see InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation
 	 */
@@ -336,7 +364,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 			// Eagerly cache singletons to be able to resolve circular references
 			// even when triggered by lifecycle interfaces like BeanFactoryAware.
-			if (isSingletonCurrentlyInCreation(beanName)) {
+			if (isAllowCircularReferences() && isSingletonCurrentlyInCreation(beanName)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Eagerly caching bean with name '" + beanName +
+							"' to allow for resolving potential circular references");
+				}
 				addSingleton(beanName, bean);
 			}
 
@@ -1040,14 +1072,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * and a chance to know about its owning bean factory (this object).
 	 * This means checking whether the bean implements InitializingBean or defines
 	 * a custom init method, and invoking the necessary callback(s) if it does.
-	 * <p>To be called by createBean implementations of concrete subclasses.
 	 * @param beanName the bean has in the factory. Used for debug output.
 	 * @param bean new bean instance we may need to initialize
 	 * @param mergedBeanDefinition the bean definition that the bean was created with
-	 * (can also be <code>null</code>, if initializing )
+	 * (can also be <code>null</code>, if given an existing bean instance)
 	 * @throws Throwable if thrown by init methods or by the invocation process
 	 * @see #invokeCustomInitMethod
-	 * @see #createBean
 	 */
 	protected void invokeInitMethods(String beanName, Object bean, RootBeanDefinition mergedBeanDefinition)
 			throws Throwable {
@@ -1060,7 +1090,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		if (mergedBeanDefinition != null && mergedBeanDefinition.getInitMethodName() != null) {
-			invokeCustomInitMethod(beanName, bean, mergedBeanDefinition.getInitMethodName());
+			invokeCustomInitMethod(
+					beanName, bean, mergedBeanDefinition.getInitMethodName(), mergedBeanDefinition.isEnforceInitMethod());
 		}
 	}
 
@@ -1072,10 +1103,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param beanName the bean has in the factory. Used for debug output.
 	 * @param bean new bean instance we may need to initialize
 	 * @param initMethodName the name of the custom init method
+	 * @param enforceInitMethod indicates whether the defined init method needs to exist
 	 * @see #invokeInitMethods
 	 */
-	protected void invokeCustomInitMethod(String beanName, Object bean, String initMethodName)
-			throws Throwable {
+	protected void invokeCustomInitMethod(
+			String beanName, Object bean, String initMethodName, boolean enforceInitMethod) throws Throwable {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Invoking custom init method '" + initMethodName +
@@ -1083,8 +1115,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		Method initMethod = BeanUtils.findMethod(bean.getClass(), initMethodName, null);
 		if (initMethod == null) {
-			throw new NoSuchMethodException("Couldn't find an init method named '" + initMethodName +
-					"' on bean with name '" + beanName + "'");
+			if (enforceInitMethod) {
+				throw new NoSuchMethodException("Couldn't find an init method named '" + initMethodName +
+						"' on bean with name '" + beanName + "'");
+			}
+			else {
+				// Ignore non-existent default lifecycle methods.
+				return;
+			}
 		}
 		if (!Modifier.isPublic(initMethod.getModifiers())) {
 			initMethod.setAccessible(true);

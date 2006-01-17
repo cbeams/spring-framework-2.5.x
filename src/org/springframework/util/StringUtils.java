@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,13 +48,15 @@ import java.util.TreeSet;
  */
 public abstract class StringUtils {
 
-	private static final String FOLDER_SEPARATOR = "/";  // folder separator
+	private static final String FOLDER_SEPARATOR = "/";
 
-	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";	// Windows folder separator
+	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";
 
-	private static final String TOP_PATH = "..";  // top folder
+	private static final String TOP_PATH = "..";
 
-	private static final String CURRENT_PATH = ".";  // current folder
+	private static final String CURRENT_PATH = ".";
+
+	private static final char EXTENSION_SEPARATOR = '.';
 
 
 	//---------------------------------------------------------------------
@@ -368,12 +370,44 @@ public abstract class StringUtils {
 	/**
 	 * Extract the filename from the given path,
 	 * e.g. "mypath/myfile.txt" -> "myfile.txt".
-	 * @param path the file path
-	 * @return the extracted filename
+	 * @param path the file path (may be <code>null</code>)
+	 * @return the extracted filename, or <code>null</code> if none
 	 */
 	public static String getFilename(String path) {
+		if (path == null) {
+			return null;
+		}
 		int separatorIndex = path.lastIndexOf(FOLDER_SEPARATOR);
 		return (separatorIndex != -1 ? path.substring(separatorIndex + 1) : path);
+	}
+
+	/**
+	 * Extract the filename extension from the given path,
+	 * e.g. "mypath/myfile.txt" -> "txt".
+	 * @param path the file path (may be <code>null</code>)
+	 * @return the extracted filename extension, or <code>null</code> if none
+	 */
+	public static String getFilenameExtension(String path) {
+		if (path == null) {
+			return null;
+		}
+		int sepIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
+		return (sepIndex != -1 ? path.substring(sepIndex + 1) : null);
+	}
+
+	/**
+	 * Strip the filename extension from the given path,
+	 * e.g. "mypath/myfile.txt" -> "mypath/myfile".
+	 * @param path the file path (may be <code>null</code>)
+	 * @return the path with stripped filename extension,
+	 * or <code>null</code> if none
+	 */
+	public static String stripFilenameExtension(String path) {
+		if (path == null) {
+			return null;
+		}
+		int sepIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
+		return (sepIndex != -1 ? path.substring(0, sepIndex) : path);
 	}
 
 	/**
@@ -463,9 +497,9 @@ public abstract class StringUtils {
 	 */
 	public static Locale parseLocaleString(String localeString) {
 		String[] parts = tokenizeToStringArray(localeString, "_ ", false, false);
-		String language = parts.length > 0 ? parts[0] : "";
-		String country = parts.length > 1 ? parts[1] : "";
-		String variant = parts.length > 2 ? parts[2] : "";
+		String language = (parts.length > 0 ? parts[0] : "");
+		String country = (parts.length > 1 ? parts[1] : "");
+		String variant = (parts.length > 2 ? parts[2] : "");
 		return (language.length() > 0 ? new Locale(language, country, variant) : null);
 	}
 
@@ -477,28 +511,31 @@ public abstract class StringUtils {
 	/**
 	 * Append the given String to the given String array, returning a new array
 	 * consisting of the input array contents plus the given String.
-	 * @param arr the array to append to
+	 * @param array the array to append to (can be <code>null</code>)
 	 * @param str the String to append
-	 * @return the new array
+	 * @return the new array (never <code>null</code>)
 	 */
-	public static String[] addStringToArray(String[] arr, String str) {
-		String[] newArr = new String[arr.length + 1];
-		System.arraycopy(arr, 0, newArr, 0, arr.length);
-		newArr[arr.length] = str;
+	public static String[] addStringToArray(String[] array, String str) {
+		if (ObjectUtils.isEmpty(array)) {
+			return new String[] {str};
+		}
+		String[] newArr = new String[array.length + 1];
+		System.arraycopy(array, 0, newArr, 0, array.length);
+		newArr[array.length] = str;
 		return newArr;
 	}
 
 	/**
 	 * Turn given source String array into sorted array.
-	 * @param source the source array
+	 * @param array the source array
 	 * @return the sorted array (never <code>null</code>)
 	 */
-	public static String[] sortStringArray(String[] source) {
-		if (source == null) {
+	public static String[] sortStringArray(String[] array) {
+		if (ObjectUtils.isEmpty(array)) {
 			return new String[0];
 		}
-		Arrays.sort(source);
-		return source;
+		Arrays.sort(array);
+		return array;
 	}
 
 	/**
@@ -528,8 +565,9 @@ public abstract class StringUtils {
 	 * or <code>null</code> if the delimiter wasn't found in the given input String
 	 */
 	public static String[] split(String toSplit, String delimiter) {
-		Assert.hasLength(toSplit, "Cannot split a null or empty string");
-		Assert.hasLength(delimiter, "Cannot use a null or empty delimiter to split a string");
+		if (!hasLength(toSplit) || !hasLength(delimiter)) {
+			return null;
+		}
 		int offset = toSplit.indexOf(delimiter);
 		if (offset < 0) {
 			return null;

@@ -1,6 +1,6 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@ public abstract class AbstractControlFlowTests extends TestCase {
 	public void testUnderClassAndMethod() {
 		new One().test();
 		new Two().testing();
+		new Three().test();
 	}
 	
 	/*
@@ -44,6 +45,7 @@ public abstract class AbstractControlFlowTests extends TestCase {
 
 	
 	public class One {
+
 		public void test() {
 			ControlFlow cflow = createControlFlow();
 			assertTrue(cflow.under(One.class));
@@ -54,8 +56,10 @@ public abstract class AbstractControlFlowTests extends TestCase {
 		}
 
 	}
-	
+
+
 	public class Two {
+
 		public void testing() {
 			ControlFlow cflow = createControlFlow();
 			assertTrue(cflow.under(Two.class));
@@ -65,4 +69,22 @@ public abstract class AbstractControlFlowTests extends TestCase {
 			assertTrue(cflow.under(Two.class, "testing"));
 		}
 	}
+
+
+	public class Three {
+
+		public void test() {
+			testing();
+		}
+
+		private void testing() {
+			ControlFlow cflow = createControlFlow();
+			assertTrue(cflow.under(Three.class));
+			assertTrue(cflow.under(AbstractControlFlowTests.class));
+			assertFalse(cflow.under(One.class));
+			assertTrue(cflow.under(Three.class, "test"));
+			assertTrue(cflow.under(Three.class, "testing"));
+		}
+	}
+
 }

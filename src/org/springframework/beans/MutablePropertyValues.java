@@ -1,6 +1,6 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.StringUtils;
@@ -29,13 +30,16 @@ import org.springframework.util.StringUtils;
  * to support deep copy and construction from a Map.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 13 May 2001
  */
 public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	/** List of PropertyValue objects */
-	private final ArrayList propertyValueList;
-	
+	private final List propertyValueList;
+
+
 	/**
 	 * Creates a new empty MutablePropertyValues object.
 	 * Property values can be added with the addPropertyValue methods.
@@ -91,7 +95,8 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 			this.propertyValueList = new ArrayList(0);
 		}
 	}
-	
+
+
 	/**
 	 * Copy all given PropertyValues into this object. Guarantees PropertyValue
 	 * references are independent, although it can't deep copy objects currently
@@ -131,6 +136,19 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
+	 * Overloaded version of addPropertyValue that takes
+	 * a property name and a property value.
+	 * @param propertyName name of the property
+	 * @param propertyValue value of the property
+	 * @return this object to allow creating objects, adding multiple
+	 * PropertyValues in a single statement
+	 * @see #addPropertyValue(PropertyValue)
+	 */
+	public MutablePropertyValues addPropertyValue(String propertyName, Object propertyValue) {
+		return addPropertyValue(new PropertyValue(propertyName, propertyValue));
+	}
+
+	/**
 	 * Add a PropertyValue object, replacing any existing one
 	 * for the corresponding property.
 	 * @param pv PropertyValue object to add
@@ -150,22 +168,11 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
-	 * Overloaded version of addPropertyValue that takes
-	 * a property name and a property value.
-	 * @param propertyName name of the property
-	 * @param propertyValue value of the property
-	 * @see #addPropertyValue(PropertyValue)
+	 * Modify a PropertyValue object held in this object.
+	 * Indexed from 0.
 	 */
-	public void addPropertyValue(String propertyName, Object propertyValue) {
-		addPropertyValue(new PropertyValue(propertyName, propertyValue));
-	}
-
-	/**
-	 * Remove the given PropertyValue, if contained.
-	 * @param pv the PropertyValue to remove
-	 */
-	public void removePropertyValue(PropertyValue pv) {
-		this.propertyValueList.remove(pv);
+	public void setPropertyValueAt(PropertyValue pv, int i) {
+		this.propertyValueList.set(i, pv);
 	}
 
 	/**
@@ -178,12 +185,20 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
-	 * Modify a PropertyValue object held in this object.
-	 * Indexed from 0.
+	 * Remove the given PropertyValue, if contained.
+	 * @param pv the PropertyValue to remove
 	 */
-	public void setPropertyValueAt(PropertyValue pv, int i) {
-		this.propertyValueList.set(i, pv);
+	public void removePropertyValue(PropertyValue pv) {
+		this.propertyValueList.remove(pv);
 	}
+
+	/**
+	 * Clear this holder, removing all PropertyValues.
+	 */
+	public void clear() {
+		this.propertyValueList.clear();
+	}
+
 
 	public PropertyValue[] getPropertyValues() {
 		return (PropertyValue[])
@@ -202,6 +217,10 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	public boolean contains(String propertyName) {
 		return (getPropertyValue(propertyName) != null);
+	}
+
+	public boolean isEmpty() {
+		return this.propertyValueList.isEmpty();
 	}
 
 	public PropertyValues changesSince(PropertyValues old) {
@@ -225,6 +244,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		}
 		return changes;
 	}
+
 
 	public String toString() {
 		PropertyValue[] pvs = getPropertyValues();

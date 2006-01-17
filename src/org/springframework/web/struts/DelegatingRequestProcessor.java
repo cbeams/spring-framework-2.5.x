@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,19 +111,20 @@ public class DelegatingRequestProcessor extends RequestProcessor {
 	}
 
 	/**
-	 * Fetch ContextLoaderPlugIn's WebApplicationContext from the
-	 * ServletContext, containing the Struts Action beans to delegate to.
+	 * Fetch ContextLoaderPlugIn's WebApplicationContext from the ServletContext,
+	 * falling back to the root WebApplicationContext. This context is supposed
+	 * to contain the Struts Action beans to delegate to.
 	 * @param actionServlet the associated ActionServlet
 	 * @param moduleConfig the associated ModuleConfig
 	 * @return the WebApplicationContext
 	 * @throws IllegalStateException if no WebApplicationContext could be found
-	 * @see DelegatingActionUtils#getRequiredWebApplicationContext
+	 * @see DelegatingActionUtils#findRequiredWebApplicationContext
 	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
 	 */
 	protected WebApplicationContext initWebApplicationContext(
 			ActionServlet actionServlet, ModuleConfig moduleConfig) throws IllegalStateException {
 
-		return DelegatingActionUtils.getRequiredWebApplicationContext(actionServlet, moduleConfig);
+		return DelegatingActionUtils.findRequiredWebApplicationContext(actionServlet, moduleConfig);
 	}
 
 	/**
@@ -138,7 +139,8 @@ public class DelegatingRequestProcessor extends RequestProcessor {
 	 * @see #getDelegateAction
 	 */
 	protected Action processActionCreate(
-			HttpServletRequest request, HttpServletResponse response, ActionMapping mapping) throws IOException {
+			HttpServletRequest request, HttpServletResponse response, ActionMapping mapping)
+			throws IOException {
 		try {
 			return getDelegateAction(mapping);
 		}

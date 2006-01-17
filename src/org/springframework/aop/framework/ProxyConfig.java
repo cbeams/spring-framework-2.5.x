@@ -1,6 +1,6 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,22 +90,21 @@ public class ProxyConfig implements Serializable {
 	/**
 	 * Set whether proxies should perform aggressive optimizations.
 	 * The exact meaning of "aggressive optimizations" will differ
-	 * between proxies, but there is usually some tradeoff. 
+	 * between proxies, but there is usually some tradeoff.
+	 * Default is "false".
 	 * <p>For example, optimization will usually mean that advice changes won't
 	 * take effect after a proxy has been created. For this reason, optimization
-	 * is disabled by default. An optimize value of true may be ignored
-	 * if other settings preclude optimization: for example, if exposeProxy
-	 * is set to true and that's not compatible with the optimization.
+	 * is disabled by default. An optimize value of "true" may be ignored
+	 * if other settings preclude optimization: for example, if "exposeProxy"
+	 * is set to "true" and that's not compatible with the optimization.
 	 * <p>For example, CGLIB-enhanced proxies may optimize out.
 	 * overriding methods with no advice chain. This can produce 2.5x
 	 * performance improvement for methods with no advice.
-	 * <p><b>Warning:</b> Setting this to true can produce large performance
-	 * gains when using CGLIB (also set proxyTargetClass to true), so it's
+	 * <p><b>Warning:</b> Setting this to "true" can produce large performance
+	 * gains when using CGLIB (also set "proxyTargetClass" to "true"), so it's
 	 * a good setting for performance-critical proxies. However, enabling this
 	 * will mean that advice cannot be changed after a proxy has been obtained
 	 * from this factory.
-	 * @param optimize whether to enable aggressive optimizations.
-	 * Default is "false".
 	 */
 	public void setOptimize(boolean optimize) {
 		this.optimize = optimize;
@@ -188,6 +187,7 @@ public class ProxyConfig implements Serializable {
 	public boolean isOpaque() {
 		return opaque;
 	}
+
 
 	/**
 	 * Copy configuration from the other config object.

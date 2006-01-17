@@ -1,6 +1,6 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,9 @@ public abstract class ControlFlowFactory {
 			this.stack = new Throwable().getStackTrace();
 		}
 
+		/**
+		 * Searches for class name match in a StackTraceElement.
+		 */
 		public boolean under(Class clazz) {
 			String className = clazz.getName();
 			for (int i = 0; i < stack.length; i++) {
@@ -65,7 +68,8 @@ public abstract class ControlFlowFactory {
 		}
 
 		/**
-		 * Matches whole method name.
+		 * Searches for class name match plus method name match
+		 * in a StackTraceElement.
 		 */
 		public boolean under(Class clazz, String methodName) {
 			String className = clazz.getName();
@@ -113,21 +117,51 @@ public abstract class ControlFlowFactory {
 
 		private final String stackTrace;
 
+		private final int stackTraceLength;
+
 		public Jdk13ControlFlow() {
 			StringWriter sw = new StringWriter();
 			new Throwable().printStackTrace(new PrintWriter(sw));
 			this.stackTrace = sw.toString();
+			this.stackTraceLength = this.stackTrace.length();
 		}
 
+		/**
+		 * Searches for class name match in the stringified stacktrace.
+		 */
 		public boolean under(Class clazz) {
 			return this.stackTrace.indexOf(clazz.getName()) != -1;
 		}
 
 		/**
-		 * Matches whole method name.
+		 * Searches for class name + "." + method name match in the stringified
+		 * stacktrace. Checks the character right after the method name for '('
+		 * or whitespace, to only match the exact method name (and not a method
+		 * with a longer name that happens to start with the same characters).
+		 * <p>The whitespace check has been introduced for compatibility with
+		 * GNU ClassPath, as of Spring 1.2.7. Sun JDKs (and JDKs with licensed
+		 * Sun core libraries) always append '(' right after the method name.
 		 */
 		public boolean under(Class clazz, String methodName) {
-			return this.stackTrace.indexOf(clazz.getName() + "." + methodName + "(") != -1;
+			String searchPattern = clazz.getName() + "." + methodName;
+			int patternLength = searchPattern.length();
+			int index = 0;
+			do {
+				index = this.stackTrace.indexOf(searchPattern, index);
+				if (index != -1) {
+					int endIndex = index + patternLength;
+					if (endIndex == this.stackTraceLength) {
+						return true;
+					}
+					char afterPattern = this.stackTrace.charAt(endIndex);
+					if (afterPattern == '(' || Character.isWhitespace(afterPattern)) {
+						return true;
+					}
+					index = endIndex;
+				}
+			}
+			while (index != -1);
+			return false;
 		}
 
 		/**

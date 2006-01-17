@@ -1,6 +1,6 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingErrorProcessor;
 import org.springframework.validation.MessageCodesResolver;
@@ -147,6 +148,8 @@ public abstract class BaseCommandController extends AbstractController {
 
 	private BindingErrorProcessor bindingErrorProcessor;
 
+	private PropertyEditorRegistrar[] propertyEditorRegistrars;
+
 
 	/**
 	 * Set the name of the command in the model.
@@ -208,7 +211,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Return the primary Validator for this controller.
 	 */
 	public final Validator getValidator() {
-		return (validators != null && validators.length > 0 ? validators[0] : null);
+		return (this.validators != null && this.validators.length > 0 ? this.validators[0] : null);
 	}
 
 	/**
@@ -261,6 +264,25 @@ public abstract class BaseCommandController extends AbstractController {
 	 */
 	public final BindingErrorProcessor getBindingErrorProcessor() {
 		return bindingErrorProcessor;
+	}
+
+	/**
+	 * Specify one or more PropertyEditorRegistrars to be applied
+	 * to every DataBinder that this controller uses.
+	 * <p>Allows for factoring out the registration of PropertyEditors
+	 * to separate objects, as alternative to <code>initBinder</code>.
+	 * @see #initBinder
+	 */
+	public final void setPropertyEditorRegistrars(PropertyEditorRegistrar[] propertyEditorRegistrars) {
+		this.propertyEditorRegistrars = propertyEditorRegistrars;
+	}
+
+	/**
+	 * Return the PropertyEditorRegistrars to be applied
+	 * to every DataBinder that this controller uses.
+	 */
+	public final PropertyEditorRegistrar[] getPropertyEditorRegistrars() {
+		return propertyEditorRegistrars;
 	}
 
 
@@ -318,7 +340,7 @@ public abstract class BaseCommandController extends AbstractController {
 	protected final boolean checkCommand(Object command) {
 		return (this.commandClass == null || this.commandClass.isInstance(command));
 	}
-	
+
 
 	/**
 	 * Bind the parameters of the given request to the given command object.
@@ -362,8 +384,9 @@ public abstract class BaseCommandController extends AbstractController {
 	 * <p>Called by <code>bindAndValidate</code>. Can be overridden to plug in
 	 * custom ServletRequestDataBinder subclasses.
 	 * <p>Default implementation creates a standard ServletRequestDataBinder,
-	 * sets the specified MessageCodesResolver (if any), and invokes initBinder.
-	 * Note that <code>initBinder</code> will not be invoked if you override this method!
+	 * sets the specified MessageCodesResolver and BindingErrorProcessor (if any),
+	 * and invokes <code>initBinder</code>. Note that <code>initBinder</code>
+	 * will not be invoked if you override this method!
 	 * @param request current HTTP request
 	 * @param command the command to bind onto
 	 * @return the new binder instance
@@ -382,6 +405,11 @@ public abstract class BaseCommandController extends AbstractController {
 		}
 		if (this.bindingErrorProcessor != null) {
 			binder.setBindingErrorProcessor(this.bindingErrorProcessor);
+		}
+		if (this.propertyEditorRegistrars != null) {
+			for (int i = 0; i < this.propertyEditorRegistrars.length; i++) {
+				this.propertyEditorRegistrars[i].registerCustomEditors(binder);
+			}
 		}
 		initBinder(request, binder);
 		return binder;

@@ -1,6 +1,6 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,6 +78,7 @@ public class ConstructorArgumentValues {
 	 * Add argument value for the given index in the constructor argument list.
 	 * @param index the index in the constructor argument list
 	 * @param value the argument value
+	 * @param type the type of the constructor argument
 	 */
 	public void addIndexedArgumentValue(int index, Object value, String type) {
 		this.indexedArgumentValues.put(new Integer(index), new ValueHolder(value, type));
@@ -214,10 +215,11 @@ public class ConstructorArgumentValues {
 	}
 
 	/**
-	 * Return the number of arguments held in this instance.
+	 * Return the number of argument values held in this instance,
+	 * counting both indexed and generic argument values.
 	 */
 	public int getArgumentCount() {
-		return this.indexedArgumentValues.size() + this.genericArgumentValues.size();
+		return (this.indexedArgumentValues.size() + this.genericArgumentValues.size());
 	}
 
 	/**
@@ -225,7 +227,15 @@ public class ConstructorArgumentValues {
 	 * neither indexed ones nor generic ones.
 	 */
 	public boolean isEmpty() {
-		return this.indexedArgumentValues.isEmpty() && this.genericArgumentValues.isEmpty();
+		return (this.indexedArgumentValues.isEmpty() && this.genericArgumentValues.isEmpty());
+	}
+
+	/**
+	 * Clear this holder, removing all argument values.
+	 */
+	public void clear() {
+		this.indexedArgumentValues.clear();
+		this.genericArgumentValues.clear();
 	}
 
 

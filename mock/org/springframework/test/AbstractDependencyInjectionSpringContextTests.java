@@ -1,6 +1,6 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -235,7 +235,6 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 			}
 
 			for (int i = 0; i < fields.length; i++) {
-				// TODO go up tree but not to this class
 				Field field = fields[i];
 				field.setAccessible(true);
 				if (logger.isDebugEnabled()) {
@@ -258,18 +257,18 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 			}
 			clazz = clazz.getSuperclass();
 		}
-		while (clazz != AbstractSpringContextTests.class);
+		while (!clazz.equals(AbstractDependencyInjectionSpringContextTests.class));
 
 		this.managedVariableNames = (String[]) managedVarNames.toArray(new String[managedVarNames.size()]);
 	}
 
 	protected void populateProtectedVariables() throws IllegalAccessException {
 		for (int i = 0; i < this.managedVariableNames.length; i++) {
+			String varName = this.managedVariableNames[i];
 			Object bean = null;
 			try {
-				Field field = findField(getClass(), this.managedVariableNames[i]);
-				// TODO what if not found?
-				bean = this.applicationContext.getBean(this.managedVariableNames[i], field.getType());
+				Field field = findField(getClass(), varName);
+				bean = this.applicationContext.getBean(varName, field.getType());
 				field.setAccessible(true);
 				field.set(this, bean);
 				if (logger.isDebugEnabled()) {
@@ -277,10 +276,14 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 				}
 			}
 			catch (NoSuchFieldException ex) {
-				logger.warn("No field with name '" + this.managedVariableNames[i] + "'");
+				if (logger.isWarnEnabled()) {
+					logger.warn("No field with name '" + varName + "'");
+				}
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				logger.warn("No bean with name '" + this.managedVariableNames[i] + "'");
+				if (logger.isWarnEnabled()) {
+					logger.warn("No bean with name '" + varName + "'");
+				}
 			}
 		}
 	}

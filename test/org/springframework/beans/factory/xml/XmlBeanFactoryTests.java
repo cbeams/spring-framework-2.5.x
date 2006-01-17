@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
 
 import javax.mail.Session;
 import javax.servlet.ServletException;
@@ -44,14 +43,15 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.ResourceTestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.DummyFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MethodReplacer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -343,6 +343,20 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue("Correct circular reference", ego.getSpouse() == ego);
 	}
 
+	public void testCircularReferencesWithNotAllowed() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		xbf.setAllowCircularReferences(false);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(false);
+		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
+		try {
+			xbf.getBean("jenny");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.contains(BeanCurrentlyInCreationException.class));
+		}
+	}
+
 	public void testFactoryReferenceCircle() {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("factoryCircle.xml", getClass()));
 		TestBean tb = (TestBean) xbf.getBean("singletonFactory");
@@ -358,6 +372,17 @@ public class XmlBeanFactoryTests extends TestCase {
 		// properly create the remaining two instances
 		xbf.getBean("proxy2");
 		assertEquals(7, xbf.getSingletonCount());
+	}
+
+	public void testNoSuchFactoryBeanMethod() {
+		try {
+			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("no-such-factory-method.xml", getClass()));
+			assertNotNull(xbf.getBean("defaultTestBean"));
+			fail("Should not get invalid bean");
+		}
+		catch (BeanCreationException ex) {
+			// Ok
+		}
 	}
 
 	public void testInitMethodIsInvoked() throws Exception {

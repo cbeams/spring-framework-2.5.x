@@ -1,6 +1,6 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
  */
@@ -106,25 +107,29 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	private boolean lazyInit = false;
 
+	private int autowireMode = AUTOWIRE_NO;
+
+	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
+
+	private String[] dependsOn;
+
 	private ConstructorArgumentValues constructorArgumentValues;
 
 	private MutablePropertyValues propertyValues;
 
 	private MethodOverrides methodOverrides = new MethodOverrides();
 
-	private int autowireMode = AUTOWIRE_NO;
+	private String factoryBeanName;
 
-	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
+	private String factoryMethodName;
 
 	private String initMethodName;
 
 	private String destroyMethodName;
 
-	private String factoryMethodName;
-	
-	private String factoryBeanName;
+	private boolean enforceInitMethod = true;
 
-	private String[] dependsOn;
+	private boolean enforceDestroyMethod = true;
 
 	private String resourceDescription;
 
@@ -156,34 +161,36 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		setAbstract(original.isAbstract());
 		setSingleton(original.isSingleton());
 		setLazyInit(original.isLazyInit());
+		setAutowireMode(original.getAutowireMode());
+		setDependencyCheck(original.getDependencyCheck());
+		setDependsOn(original.getDependsOn());
 
 		setConstructorArgumentValues(new ConstructorArgumentValues(original.getConstructorArgumentValues()));
 		setPropertyValues(new MutablePropertyValues(original.getPropertyValues()));
 		setMethodOverrides(new MethodOverrides(original.getMethodOverrides()));
 
-		setAutowireMode(original.getAutowireMode());
-		setDependencyCheck(original.getDependencyCheck());
-
-		setInitMethodName(original.getInitMethodName());
-		setDestroyMethodName(original.getDestroyMethodName());
-		setFactoryMethodName(original.getFactoryMethodName());
 		setFactoryBeanName(original.getFactoryBeanName());
+		setFactoryMethodName(original.getFactoryMethodName());
+		setInitMethodName(original.getInitMethodName());
+		setEnforceInitMethod(original.isEnforceInitMethod());
+		setDestroyMethodName(original.getDestroyMethodName());
+		setEnforceDestroyMethod(original.isEnforceDestroyMethod());
 
-		setDependsOn(original.getDependsOn());
 		setResourceDescription(original.getResourceDescription());
 	}
 
 	/**
-	 * Override settings in this bean definition from the given bean definition.
+	 * Override settings in this bean definition (assumably a copied parent
+	 * from a parent-child inheritance relationship) from the given bean
+	 * definition (assumably the child).
 	 * <p><ul>
 	 * <li>Will override beanClass if specified in the given bean definition.
-	 * <li>Will always take abstract, singleton, lazyInit from the given bean definition.
-	 * <li>Will add constructorArgumentValues, propertyValues, methodOverrides to
-	 * existing ones.
-	 * <li>Will override initMethodName, destroyMethodName, staticFactoryMethodName
-	 * if specified.
-	 * <li>Will always take dependsOn, autowireMode, dependencyCheck from the
-	 * given bean definition.
+	 * <li>Will always take abstract, singleton, lazyInit, autowireMode,
+	 * dependencyCheck, dependsOn from the given bean definition.
+	 * <li>Will add constructorArgumentValues, propertyValues, methodOverrides
+	 * from the given bean definition to existing ones.
+	 * <li>Will override factoryBeanName, factoryMethodName, initMethodName,
+	 * destroyMethodName if specified in the given bean definition.
 	 * </ul>
 	 */
 	public void overrideFrom(AbstractBeanDefinition other) {
@@ -194,27 +201,28 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		setAbstract(other.isAbstract());
 		setSingleton(other.isSingleton());
 		setLazyInit(other.isLazyInit());
+		setAutowireMode(other.getAutowireMode());
+		setDependencyCheck(other.getDependencyCheck());
+		setDependsOn(other.getDependsOn());
 
 		getConstructorArgumentValues().addArgumentValues(other.getConstructorArgumentValues());
 		getPropertyValues().addPropertyValues(other.getPropertyValues());
 		getMethodOverrides().addOverrides(other.getMethodOverrides());
 
-		if (other.getInitMethodName() != null) {
-			setInitMethodName(other.getInitMethodName());
-		}
-		if (other.getDestroyMethodName() != null) {
-			setDestroyMethodName(other.getDestroyMethodName());
+		if (other.getFactoryBeanName() != null) {
+			setFactoryBeanName(other.getFactoryBeanName());
 		}
 		if (other.getFactoryMethodName() != null) {
 			setFactoryMethodName(other.getFactoryMethodName());
 		}
-		if (other.getFactoryBeanName() != null) {
-			setFactoryBeanName(other.getFactoryBeanName());
+		if (other.getInitMethodName() != null) {
+			setInitMethodName(other.getInitMethodName());
+			setEnforceInitMethod(other.isEnforceInitMethod());
 		}
-
-		setDependsOn(other.getDependsOn());
-		setAutowireMode(other.getAutowireMode());
-		setDependencyCheck(other.getDependencyCheck());
+		if (other.getDestroyMethodName() != null) {
+			setDestroyMethodName(other.getDestroyMethodName());
+			setEnforceDestroyMethod(other.isEnforceDestroyMethod());
+		}
 
 		setResourceDescription(other.getResourceDescription());
 	}
@@ -264,6 +272,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 			return (String) this.beanClass;
 		}
 	}
+
 
 	/**
 	 * Set if this bean is "abstract", i.e. not meant to be instantiated itself but
@@ -318,58 +327,6 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 */
 	public boolean isLazyInit() {
 		return lazyInit;
-	}
-
-	/**
-	 * Specify constructor argument values for this bean.
-	 */
-	public void setConstructorArgumentValues(ConstructorArgumentValues constructorArgumentValues) {
-		this.constructorArgumentValues = (constructorArgumentValues != null) ?
-		    constructorArgumentValues : new ConstructorArgumentValues();
-	}
-
-	/**
-	 * Return constructor argument values for this bean, if any.
-	 */
-	public ConstructorArgumentValues getConstructorArgumentValues() {
-		return constructorArgumentValues;
-	}
-
-	/**
-	 * Return if there are constructor argument values defined for this bean.
-	 */
-	public boolean hasConstructorArgumentValues() {
-		return (constructorArgumentValues != null && !constructorArgumentValues.isEmpty());
-	}
-
-	/**
-	 * Specify property values for this bean, if any.
-	 */
-	public void setPropertyValues(MutablePropertyValues propertyValues) {
-		this.propertyValues = (propertyValues != null) ? propertyValues : new MutablePropertyValues();
-	}
-
-	/**
-	 * Return property values for this bean, if any.
-	 */
-	public MutablePropertyValues getPropertyValues() {
-		return propertyValues;
-	}
-
-	/**
-	 * Specify method overrides for the bean, if any.
-	 */
-	public void setMethodOverrides(MethodOverrides methodOverrides) {
-		this.methodOverrides = (methodOverrides != null) ? methodOverrides : new MethodOverrides();
-	}
-
-	/**
-	 * Return information about methods to be overridden by the IoC
-	 * container. This will be empty if there are no method overrides.
-	 * Never returns null.
-	 */
-	public MethodOverrides getMethodOverrides() {
-		return this.methodOverrides;
 	}
 
 	/**
@@ -441,69 +398,6 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Set the name of the initializer method. The default is null
-	 * in which case there is no initializer method.
-	 */
-	public void setInitMethodName(String initMethodName) {
-		this.initMethodName = initMethodName;
-	}
-
-	/**
-	 * Return the name of the initializer method.
-	 */
-	public String getInitMethodName() {
-		return this.initMethodName;
-	}
-
-	/**
-	 * Set the name of the destroy method. The default is null
-	 * in which case there is no destroy method.
-	 */
-	public void setDestroyMethodName(String destroyMethodName) {
-		this.destroyMethodName = destroyMethodName;
-	}
-
-	/**
-	 * Return the name of the destroy method.
-	 */
-	public String getDestroyMethodName() {
-		return this.destroyMethodName;
-	}
-
-	/**
-	 * Specify a factory method, if any. This method will be invoked with
-	 * constructor arguments, or with no arguments if none are specified.
-	 * The static method will be invoked on the specifed beanClass.
-	 * @param factoryMethodName static factory method name, or <code>null</code> if
-	 * normal constructor creation should be used
-	 * @see #getBeanClass
-	 */
-	public void setFactoryMethodName(String factoryMethodName) {
-		this.factoryMethodName = factoryMethodName;
-	}
-
-	/**
-	 * Return a factory method, if any.
-	 */
-	public String getFactoryMethodName() {
-		return this.factoryMethodName;
-	}
-
-	/**
-	 * Specify the factory bean to use, if any.
-	 */
-	public void setFactoryBeanName(String factoryBeanName) {
-		this.factoryBeanName = factoryBeanName;
-	}
-
-	/**
-	 * Returns the factory bean name, if any.
-	 */
-	public String getFactoryBeanName() {
-		return factoryBeanName;
-	}
-
-	/**
 	 * Set the names of the beans that this bean depends on being initialized.
 	 * The bean factory will guarantee that these beans get initialized before.
 	 * <p>Note that dependencies are normally expressed through bean properties or
@@ -520,6 +414,159 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	public String[] getDependsOn() {
 		return dependsOn;
 	}
+
+
+	/**
+	 * Specify constructor argument values for this bean.
+	 */
+	public void setConstructorArgumentValues(ConstructorArgumentValues constructorArgumentValues) {
+		this.constructorArgumentValues =
+				(constructorArgumentValues != null ? constructorArgumentValues : new ConstructorArgumentValues());
+	}
+
+	/**
+	 * Return constructor argument values for this bean, if any.
+	 */
+	public ConstructorArgumentValues getConstructorArgumentValues() {
+		return constructorArgumentValues;
+	}
+
+	/**
+	 * Return if there are constructor argument values defined for this bean.
+	 */
+	public boolean hasConstructorArgumentValues() {
+		return (constructorArgumentValues != null && !constructorArgumentValues.isEmpty());
+	}
+
+	/**
+	 * Specify property values for this bean, if any.
+	 */
+	public void setPropertyValues(MutablePropertyValues propertyValues) {
+		this.propertyValues = (propertyValues != null ? propertyValues : new MutablePropertyValues());
+	}
+
+	/**
+	 * Return property values for this bean, if any.
+	 */
+	public MutablePropertyValues getPropertyValues() {
+		return propertyValues;
+	}
+
+	/**
+	 * Specify method overrides for the bean, if any.
+	 */
+	public void setMethodOverrides(MethodOverrides methodOverrides) {
+		this.methodOverrides = (methodOverrides != null) ? methodOverrides : new MethodOverrides();
+	}
+
+	/**
+	 * Return information about methods to be overridden by the IoC
+	 * container. This will be empty if there are no method overrides.
+	 * Never returns null.
+	 */
+	public MethodOverrides getMethodOverrides() {
+		return this.methodOverrides;
+	}
+
+
+	/**
+	 * Specify the factory bean to use, if any.
+	 */
+	public void setFactoryBeanName(String factoryBeanName) {
+		this.factoryBeanName = factoryBeanName;
+	}
+
+	/**
+	 * Returns the factory bean name, if any.
+	 */
+	public String getFactoryBeanName() {
+		return factoryBeanName;
+	}
+
+	/**
+	 * Specify a factory method, if any. This method will be invoked with
+	 * constructor arguments, or with no arguments if none are specified.
+	 * The static method will be invoked on the specifed factory bean,
+	 * if any, or on the local bean class else.
+	 * @param factoryMethodName static factory method name, or <code>null</code> if
+	 * normal constructor creation should be used
+	 * @see #getBeanClass
+	 */
+	public void setFactoryMethodName(String factoryMethodName) {
+		this.factoryMethodName = factoryMethodName;
+	}
+
+	/**
+	 * Return a factory method, if any.
+	 */
+	public String getFactoryMethodName() {
+		return this.factoryMethodName;
+	}
+
+	/**
+	 * Set the name of the initializer method. The default is <code>null</code>
+	 * in which case there is no initializer method.
+	 */
+	public void setInitMethodName(String initMethodName) {
+		this.initMethodName = initMethodName;
+	}
+
+	/**
+	 * Return the name of the initializer method.
+	 */
+	public String getInitMethodName() {
+		return this.initMethodName;
+	}
+
+	/**
+	 * Specifies whether or not the configured init method is the default.
+	 * Default value is <code>false</code>.
+	 * @see #setInitMethodName
+	 */
+	public void setEnforceInitMethod(boolean enforceInitMethod) {
+		this.enforceInitMethod = enforceInitMethod;
+	}
+
+	/**
+	 * Indicates whether the configured init method is the default.
+	 * @see #getInitMethodName()
+	 */
+	public boolean isEnforceInitMethod() {
+		return this.enforceInitMethod;
+	}
+
+	/**
+	 * Set the name of the destroy method. The default is <code>null</code>
+	 * in which case there is no destroy method.
+	 */
+	public void setDestroyMethodName(String destroyMethodName) {
+		this.destroyMethodName = destroyMethodName;
+	}
+
+	/**
+	 * Return the name of the destroy method.
+	 */
+	public String getDestroyMethodName() {
+		return this.destroyMethodName;
+	}
+
+	/**
+	 * Specifies whether or not the configured destroy method is the default.
+	 * Default value is <code>false</code>.
+	 * @see #setDestroyMethodName
+	 */
+	public void setEnforceDestroyMethod(boolean enforceDestroyMethod) {
+		this.enforceDestroyMethod = enforceDestroyMethod;
+	}
+
+	/**
+	 * Indicates whether the configured destroy method is the default.
+	 * @see #getDestroyMethodName
+	 */
+	public boolean isEnforceDestroyMethod() {
+		return this.enforceDestroyMethod;
+	}
+
 
 	/**
 	 * Set a description of the resource that this bean definition
@@ -582,6 +629,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		}
 	}
 
+
 	public String toString() {
 		StringBuffer sb = new StringBuffer("class [");
 		sb.append(getBeanClassName()).append("]");
@@ -590,12 +638,12 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		sb.append("; lazyInit=").append(this.lazyInit);
 		sb.append("; autowire=").append(this.autowireMode);
 		sb.append("; dependencyCheck=").append(this.dependencyCheck);
+		sb.append("; factoryBeanName=").append(this.factoryBeanName);
+		sb.append("; factoryMethodName=").append(this.factoryMethodName);
 		sb.append("; initMethodName=").append(this.initMethodName);
 		sb.append("; destroyMethodName=").append(this.destroyMethodName);
-		sb.append("; factoryMethodName=").append(this.factoryMethodName);
-		sb.append("; factoryBeanName=").append(this.factoryBeanName);
-		if (getResourceDescription() != null) {
-			sb.append("; defined in ").append(getResourceDescription());
+		if (this.resourceDescription != null) {
+			sb.append("; defined in ").append(this.resourceDescription);
 		}
 		return sb.toString();
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,12 +88,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Set if it should be allowed to override bean definitions by registering a
-	 * different definition with the same name, automatically replacing the former.
+	 * Set whether it should be allowed to override bean definitions by registering
+	 * a different definition with the same name, automatically replacing the former.
 	 * If not, an exception will be thrown. Default is "true".
 	 */
 	public void setAllowBeanDefinitionOverriding(boolean allowBeanDefinitionOverriding) {
 		this.allowBeanDefinitionOverriding = allowBeanDefinitionOverriding;
+	}
+
+	/**
+	 * Return whether it should be allowed to override bean definitions by registering
+	 * a different definition with the same name, automatically replacing the former.
+	 */
+	public boolean isAllowBeanDefinitionOverriding() {
+		return allowBeanDefinitionOverriding;
 	}
 
 
@@ -205,7 +213,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			catch (BeanCreationException ex) {
 				if (ex.contains(BeanCurrentlyInCreationException.class)) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Ignoring match to currently created bean '" + beanName + "'", ex);
+						logger.debug("Ignoring match to currently created bean '" + beanName + "':" + ex.getMessage());
 					}
 					// Ignore: indicates a circular reference when autowiring constructors.
 					// We want to find matches other than the currently created bean itself.
@@ -314,7 +322,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		Object oldBeanDefinition = this.beanDefinitionMap.get(beanName);
 		if (oldBeanDefinition != null) {
-			if (!this.allowBeanDefinitionOverriding) {
+			if (!isAllowBeanDefinitionOverriding()) {
 				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
 						"Cannot register bean definition [" + beanDefinition + "] for bean '" + beanName +
 						"': there's already [" + oldBeanDefinition + "] bound");
