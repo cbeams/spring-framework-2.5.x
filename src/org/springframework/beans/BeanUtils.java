@@ -79,7 +79,7 @@ public abstract class BeanUtils {
 	 * Determine if the given target type is assignable from the given value
 	 * type, assuming setting by reflection. Considers primitive wrapper
 	 * classes as assignable to the corresponding primitive types.
-	 * <p>For example used in BeanWrapperImpl's custom editor matrching.
+	 * <p>For example used in BeanWrapperImpl's custom editor matching.
 	 * @param targetType the target type
 	 * @param valueType the value type that should be assigned to the target type
 	 * @return if the target type is assignable from the value type
