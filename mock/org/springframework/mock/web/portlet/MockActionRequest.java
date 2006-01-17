@@ -52,7 +52,7 @@ public class MockActionRequest extends MockPortletRequest implements ActionReque
 		}
 		else {
 			return null;
-    }
+        }
 	}
 
 	public void setCharacterEncoding(String characterEncoding) {
