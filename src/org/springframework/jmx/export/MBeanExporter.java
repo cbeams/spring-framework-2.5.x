@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.jmx.export;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
@@ -122,7 +124,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	/**
 	 * A list of bean names that should be excluded from autodetection.
 	 */
-	private String[] excludedBeans = new String[0];
+	private Set excludedBeans;
 
 	/**
 	 * The <code>MBeanExporterListeners</code> registered with this exporter.
@@ -240,7 +242,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * Set the list of names for beans that should be excluded from autodetection.
 	 */
 	public void setExcludedBeans(String[] excludedBeans) {
-		this.excludedBeans = (excludedBeans != null ? excludedBeans : new String[0]);
+		this.excludedBeans = (excludedBeans != null ? new HashSet(Arrays.asList(excludedBeans)) : null);
 	}
 
 	/**
@@ -745,7 +747,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * Indicates whether or not a particular bean name is present in the excluded beans list.
 	 */
 	private boolean isExcluded(String beanName) {
-		return (Arrays.binarySearch(this.excludedBeans, beanName) > -1);
+		return (this.excludedBeans != null && this.excludedBeans.contains(beanName));
 	}
 
 
