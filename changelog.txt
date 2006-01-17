@@ -39,6 +39,7 @@ Package org.springframework.context
 * refined AbstractApplicationContext to never register more than one JVM shutdown hook
 
 Package org.springframework.core
+* refined Jdk13ControlFlow to be compatible with GNU ClassPath (whose stacktrace has a whitespace after the method name)
 * added NestedIOException, deriving from java.io.IOException and adding NestedCheckedException-style root cause handling
 
 Package org.springframework.jdbc
@@ -52,6 +53,7 @@ Package org.springframework.jdbc
 * added "trackRowsAffected" property to BatchSqlUpdate, allowing to turn off the row counts list to save memory
 
 Package org.springframework.jmx
+* fixed MBeanExporter to work correctly with an "excludedBeans" list that it not sorted by bean name ascending
 * fixed "persistPeriod" default to be -1 even in ManagedResource attribute (not just in ManagedResource annotation)
 
 Package org.springframework.mock
