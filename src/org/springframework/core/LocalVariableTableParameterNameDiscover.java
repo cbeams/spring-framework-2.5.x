@@ -51,22 +51,25 @@ public class LocalVariableTableParameterNameDiscover implements
 		ParameterNameDiscoveringVisitor visitor = null;
 		try {
 			visitor = visitMethod(m);
-		} catch (IOException ex) {
+			if (visitor.foundTargetMember()) {
+				return visitor.getParameterNames();
+			} 
+			else {
+				return null;
+			}
+		} 
+		catch (IOException ex) {
 			// we couldn't load the class file, which is not
 			// fatal as it simply means this method of discovering
 			// parameter names won't work.
-			if (logger.isWarnEnabled()) {
-				logger.warn("IOException whilst attempting to read .class file for class " +
+			if (logger.isInfoEnabled()) {
+				logger.info("IOException whilst attempting to read .class file for class " +
 						m.getDeclaringClass().getName() + 
 						" - unable to determine parameter names for method " +
 						m.getName(),ex);
 			}
 		}
-		if (visitor.foundTargetMember()) {
-			return visitor.getParameterNames();
-		} else {
-			return null;
-		}
+		return null;
 	}
 
 	/* (non-Javadoc)
@@ -76,21 +79,24 @@ public class LocalVariableTableParameterNameDiscover implements
 		ParameterNameDiscoveringVisitor visitor = null;
 		try {
 			visitor = visitConstructor(ctor);
-		} catch (IOException ex) {
+			if (visitor.foundTargetMember()) {
+				return visitor.getParameterNames();
+			} 
+			else {
+				return null;
+			}
+		} 
+		catch (IOException ex) {
 			// we couldn't load the class file, which is not
 			// fatal as it simply means this method of discovering
 			// parameter names won't work.
-			if (logger.isWarnEnabled()) {
-				logger.warn("IOException whilst attempting to read .class file for class " +
+			if (logger.isInfoEnabled()) {
+				logger.info("IOException whilst attempting to read .class file for class " +
 						ctor.getDeclaringClass().getName() + 
 						" - unable to determine parameter names for constructor",ex);
 			}
 		}
-		if (visitor.foundTargetMember()) {
-			return visitor.getParameterNames();
-		} else {
-			return null;
-		}
+		return null;
 	}
 
 	/**
@@ -146,7 +152,8 @@ public class LocalVariableTableParameterNameDiscover implements
 				desc.equals(this.descriptorToMatch)) {
 				this.foundTargetMember = true;
 				return new LocalVariableTableVisitor(this,this.numParamsExpected);	
-			} else {
+			} 
+			else {
 				// not interested in this method...
 				return null;
 			}
