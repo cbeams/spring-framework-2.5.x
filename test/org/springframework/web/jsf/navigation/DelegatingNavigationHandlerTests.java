@@ -47,7 +47,7 @@ public class DelegatingNavigationHandlerTests extends TestCase {
 			}
 		};
 
-		delNavHandler.handleNavigation(facesContext, "action", "myViewId");
+		delNavHandler.handleNavigation(facesContext, "fromAction", "myViewId");
 		assertEquals(jsfHandler.lastFromAction, "fromAction");
 		assertEquals(jsfHandler.lastOutcome, "myViewId");
 	}
