@@ -51,7 +51,15 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 	 * Singleton advisor for this class. Use in preference to INSTANCE when using
 	 * Spring AOP, as it prevents the need to create a new Advisor to wrap the instance.
 	 */
-	public static final Advisor ADVISOR = new DefaultPointcutAdvisor(INSTANCE);
+	public static final Advisor ADVISOR = new DefaultPointcutAdvisor(INSTANCE) {
+		public int getOrder() {
+			return Integer.MIN_VALUE;
+		}
+		
+		public String toString() {
+			return "ExposeInvocationInterceptor.ADVISOR";
+		}
+	};
 
 	private static ThreadLocal invocation = new ThreadLocal();
 	
@@ -65,10 +73,12 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 	 */
 	public static MethodInvocation currentInvocation() throws AspectException {
 		MethodInvocation mi = (MethodInvocation) invocation.get();
+		String mesg = "No MethodInvocation found: check that an AOP invocation is in progress, " +
+					"and that the ExposeInvocationInterceptor is in the interceptor chain";
 		if (mi == null)
 			throw new AspectException(
-					"No MethodInvocation found: check that an AOP invocation is in progress, " +
-					"and that the ExposeInvocationInterceptor is in the interceptor chain");
+					mesg, 
+					new Throwable(mesg));
 		return mi;
 	}
 	

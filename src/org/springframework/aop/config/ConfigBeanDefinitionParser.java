@@ -93,6 +93,9 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private static final int PARAMETER_NAME_DISCOVERER = 3;
 
 	public void parse(Element element, BeanDefinitionRegistry registry) {
+		
+		ParseContext parseContext = new ParseContext();
+		
 		NodeList childNodes = element.getChildNodes();
 
 		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
@@ -110,12 +113,22 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 					parsePointcut((Element) node, registry);
 				}
 				else if (ADVISOR.equals(localName)) {
-					parseAdvisor((Element) node, registry);
+					parseAdvisor((Element) node, registry, parseContext);
 				}
 				else if (ASPECT.equals(localName)) {
-					parseAspect((Element) node, registry);
+					parseAspect((Element) node, registry, parseContext);
 				}
 			}
+		}
+	}
+	
+	/**
+	 * Used to hold position info in current AopConfig element, for advice ordering
+	 */
+	private class ParseContext {
+		private int advisorOrderValue;
+		public int nextAdvisorOrderValue() {
+			return advisorOrderValue++;
 		}
 	}
 
@@ -139,10 +152,11 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * {@link org.springframework.aop.Advisor} and any resultant {@link org.springframework.aop.Pointcut}
 	 * with the supplied {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}.
 	 */
-	private void parseAdvisor(Element element, BeanDefinitionRegistry registry) {
+	private void parseAdvisor(Element element, BeanDefinitionRegistry registry, ParseContext parseContext) {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(DefaultPointcutAdvisor.class);
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();
+		mpvs.addPropertyValue("order", "" + parseContext.nextAdvisorOrderValue());
 		beanDefinition.setPropertyValues(mpvs);
 
 		mpvs.addPropertyValue(ADVICE, new RuntimeBeanReference(element.getAttribute(ADVICE_REF)));
@@ -158,7 +172,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		registry.registerBeanDefinition(id, beanDefinition);
 	}
 
-	private void parseAspect(Element aspectElement, BeanDefinitionRegistry registry) {
+	private void parseAspect(Element aspectElement, BeanDefinitionRegistry registry, ParseContext parseContext) {
 		String aspectName = aspectElement.getAttribute(REF);
 
 		List pointcuts = DomUtils.getChildElementsByTagName(aspectElement, POINTCUT, true);
@@ -170,17 +184,18 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		List declareParents = DomUtils.getChildElementsByTagName(aspectElement, DECLARE_PARENTS, true);
 		for (int i = METHOD_INDEX; i < declareParents.size(); i++) {
 			Element declareParentsElement = (Element) declareParents.get(i);
-			parseDeclareParents(aspectName, declareParentsElement, new BeanDefinitionRegistryBuilder(registry));
+			parseDeclareParents(aspectName, declareParentsElement, new BeanDefinitionRegistryBuilder(registry), parseContext);
 		}
 
 		List advice = DomUtils.getChildElementsByTagName(aspectElement, ADVICE, true);
 		for (int i = METHOD_INDEX; i < advice.size(); i++) {
 			Element adviceElement = (Element) advice.get(i);
-			parseAdvice(aspectName, adviceElement, registry);
+			parseAdvice(aspectName, adviceElement, registry, parseContext);
 		}
 	}
 
-	private void parseDeclareParents(String aspectName, Element declareParentsElement, BeanDefinitionRegistryBuilder registryBuilder) {
+	private void parseDeclareParents(String aspectName, Element declareParentsElement, 
+			BeanDefinitionRegistryBuilder registryBuilder, ParseContext parseContext) {
 		BeanDefinitionBuilder fieldBuilder = BeanDefinitionBuilder.rootBeanDefinition(FieldLocatingFactoryBean.class).
 				addConstructorArg(aspectName).
 				addConstructorArg(declareParentsElement.getAttribute(FIELD));
@@ -243,7 +258,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	private void parseAdvice(String aspectName, Element adviceElement, BeanDefinitionRegistry registry) {
+	private void parseAdvice(String aspectName, Element adviceElement, 
+			BeanDefinitionRegistry registry, ParseContext parseContext) {
 
 		// create the properties for the advisor
 		MutablePropertyValues advisorProperties = new MutablePropertyValues();
@@ -287,6 +303,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 		// configure the advisor
 		RootBeanDefinition advisorDefinition = new RootBeanDefinition(DefaultPointcutAdvisor.class);
+		advisorProperties.addPropertyValue("order", "" + parseContext.nextAdvisorOrderValue());
 		advisorDefinition.setPropertyValues(advisorProperties);
 		advisorDefinition.getPropertyValues().addPropertyValue(ADVICE, adviceDefinition);
 
