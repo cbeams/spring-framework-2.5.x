@@ -19,6 +19,8 @@ package org.springframework.web.jsf.navigation;
 import javax.faces.application.NavigationHandler;
 import javax.faces.context.FacesContext;
 
+import org.springframework.web.jsf.navigation.DelegatingNavigationHandler.NavigationHandlerContext;
+
 /**
  * <code>NavigationHandler</code> which is meant to chain to any JSF-managed
  * NavigationHandler, which will have been loaded in a ThreadLocal by
@@ -27,6 +29,7 @@ import javax.faces.context.FacesContext;
  * chain of Spring-managed NavigationHandlers.
  * 
  * @author Colin Sampaleanu
+ * @since 1.2.7
  * @see org.springframework.webflow.jsf.util.navigation.DelegatingNavigationHandler
  */
 public class JsfChainingNavigationHandler extends NavigationHandler {
