@@ -25,17 +25,20 @@ import org.springframework.web.util.UrlPathHelper;
 /**
  * Default implementation of the {@link RequestToViewNameTranslator} interface that
  * simply transforms the URI of the incoming request into the view name.
+ * Can be explicitly defined as "viewNameTranslator" bean in a DispatcherServlet
+ * context; else, a plain default instance will be used.
  *
- * <p>The default transformation simply strips the leading slash and file extension of
- * the URI and returns the result as the view name with the configured
- * {@link #setPrefix prefix} and {@link #setSuffix suffix} added as appropriate.
+ * <p>The default transformation simply strips the leading slash and file extension
+ * of the URI and returns the result as the view name with the configured "prefix"
+ * and "suffix" added as appropriate.
  *
  * <p>Stripping of the leading slash and file extension can be disabled using the
- * {@link #setStripLeadingSlash} and {@link #setStripExtension} properties
- * respectively.
+ * "stripLeadingSlash" and "stripExtension" properties, respectively.
  *
  * @author Rob Harrop
  * @since 2.0
+ * @see org.springframework.web.servlet.RequestToViewNameTranslator
+ * @see org.springframework.web.servlet.ViewResolver
  */
 public class DefaultRequestToViewNameTranslator implements RequestToViewNameTranslator {
 
@@ -131,9 +134,10 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 
 
 	/**
-
 	 * Translates the request URI of the incoming {@link HttpServletRequest} to the
 	 * view name based on the configured parameters.
+	 * @see org.springframework.web.util.UrlPathHelper#getLookupPathForRequest
+	 * @see #transformPath
 	 */
 	public final String getViewName(HttpServletRequest request) {
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
