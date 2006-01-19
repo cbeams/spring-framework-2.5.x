@@ -5,8 +5,10 @@
 
 	<bean id="lifecycleAware" class="org.springframework.beans.factory.xml.DefaultLifecycleMethodsTests$LifecycleAwareBean"/>
 
-	<bean id="lifecycleMethodsDisabled" class="org.springframework.beans.factory.xml.DefaultLifecycleMethodsTests$LifecycleAwareBean" init-method="" destroy-method=""/>
+	<bean id="lifecycleMethodsDisabled" class="org.springframework.beans.factory.xml.DefaultLifecycleMethodsTests$LifecycleAwareBean"
+			init-method="" destroy-method=""/>
 
-	<bean id="overrideLifecycleMethods" class="org.springframework.beans.factory.xml.DefaultLifecycleMethodsTests$LifecycleAwareBean" init-method="customInit" destroy-method="customDestroy"/>
+	<bean id="overrideLifecycleMethods" class="org.springframework.beans.factory.xml.DefaultLifecycleMethodsTests$LifecycleAwareBean"
+			init-method="customInit" destroy-method="customDestroy"/>
 
 </beans>
