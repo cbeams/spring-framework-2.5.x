@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.util;
+package org.springframework.core;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,33 +28,34 @@ import org.springframework.beans.TestBean;
 /**
  * @author Rob Harrop
  */
-public class ConventionUtilsTests extends TestCase {
+public class ConventionsTests extends TestCase {
 
 	public void testSimpleObject() {
 		TestBean testBean = new TestBean();
-		assertEquals("Incorrect singular variable name", "testBean", ConventionUtils.getVariableName(testBean));
+		assertEquals("Incorrect singular variable name", "testBean", Conventions.getVariableName(testBean));
 	}
 
 	public void testArray() {
 		TestBean[] testBeans = new TestBean[0];
-		assertEquals("Incorrect plural array form", "testBeanList", ConventionUtils.getVariableName(testBeans));
+		assertEquals("Incorrect plural array form", "testBeanList", Conventions.getVariableName(testBeans));
 	}
 
 	public void testCollections() {
 		List list = new ArrayList();
 		list.add(new TestBean());
-		assertEquals("Incorrect plural List form", "testBeanList", ConventionUtils.getVariableName(list));
+		assertEquals("Incorrect plural List form", "testBeanList", Conventions.getVariableName(list));
 
 		Set set = new HashSet();
 		set.add(new TestBean());
-		assertEquals("Incorrect plural Set form", "testBeanList", ConventionUtils.getVariableName(set));
+		assertEquals("Incorrect plural Set form", "testBeanList", Conventions.getVariableName(set));
 
 		List emptyList = new ArrayList();
 		try {
-			ConventionUtils.getVariableName(emptyList);
+			Conventions.getVariableName(emptyList);
 			fail("Should not be able to generate name for empty collection");
-		} catch(IllegalArgumentException ex) {
-			// success;
+		}
+		catch(IllegalArgumentException ex) {
+			// success
 		}
 	}
 

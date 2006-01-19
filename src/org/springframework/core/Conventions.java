@@ -14,37 +14,38 @@
  * limitations under the License.
  */
 
-package org.springframework.util;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+package org.springframework.core;
 
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
+
 /**
  * Provides methods to support various naming and other conventions used
- * throughout the framework.
+ * throughout the framework. Mainly for internal use within the framework.
  *
  * @author Rob Harrop
- * @since 2.0M2
+ * @since 2.0
  */
-public abstract class ConventionUtils {
+public abstract class Conventions {
 
 	/**
 	 * Suffix added to names when using arrays.
 	 */
 	private static final String PLURAL_SUFFIX = "List";
 
+
 	/**
-	 * Retrieves the conventional variable name for the supplied <code>Object</code> based on its concrete type.
-	 * The convention used is to return the uncapitalized short name of the <code>Class</code>. So,
-	 * <code>com.myapp.Product</code> becomes <code>product</code>.
-	 * <p/>
-	 * For arrays, we use the pluralized version of the array component type.
-	 * <p/>
-	 * For <code>Collection</code>s we attempt to 'peek ahead' in the <code>Collection</code> to determine the
-	 * component type and return the pluralized version of that component type.
+	 * Determine the conventional variable name for the supplied
+	 * code>Object</code> based on its concrete type. The convention
+	 * used is to return the uncapitalized short name of the <code>Class</code>.
+	 * So, <code>com.myapp.Product</code> becomes <code>product</code>.
+	 * <p>For arrays, we use the pluralized version of the array component type.
+	 * For <code>Collection</code>s we attempt to 'peek ahead' in the
+	 * <code>Collection</code> to determine the component type and
+	 * return the pluralized version of that component type.
 	 */
 	public static String getVariableName(Object value) {
 		Class valueClass = value.getClass();
@@ -56,14 +57,11 @@ public abstract class ConventionUtils {
 		}
 		else if (value instanceof Collection) {
 			Collection collection = (Collection) value;
-
 			if (collection.isEmpty()) {
 				throw new IllegalArgumentException("Cannot generate variable name for an empty Collection");
 			}
-			
 			valueClass = peekAhead(collection);
 			pluralize = true;
-
 		}
 
 		String name = StringUtils.uncapitalize(ClassUtils.getShortName(valueClass));
@@ -78,17 +76,18 @@ public abstract class ConventionUtils {
 	}
 
 	/**
-	 * Retreives the <code>Class</code> of an element in the <code>Collection</code>. The exact element
-	 * for which the <code>Class</code> is retreived will depend on the concrete <code>Collection</code>
-	 * implementation.
+	 * Retrieve the <code>Class</code> of an element in the <code>Collection</code>.
+	 * The exact element for which the <code>Class</code> is retreived will depend
+	 * on the concrete <code>Collection</code> implementation.
 	 */
 	private static Class peekAhead(Collection collection) {
-		Iterator itr = collection.iterator();
-		if (itr.hasNext()) {
-			return itr.next().getClass();
+		Iterator it = collection.iterator();
+		if (it.hasNext()) {
+			return it.next().getClass();
 		}
 		else {
-			throw new IllegalStateException("Unable to peek ahead in non-empty collection - hasNext() returns false.");
+			throw new IllegalStateException(
+					"Unable to peek ahead in non-empty collection - no element found");
 		}
 	}
 

@@ -16,21 +16,26 @@
 
 package org.springframework.ui;
 
-import org.springframework.util.Assert;
-import org.springframework.util.ConventionUtils;
-
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Iterator;
+import java.util.Map;
+
+import org.springframework.core.Conventions;
+import org.springframework.util.Assert;
 
 /**
  * Implementation of {@link java.util.Map} for use when building model data for use
- * with UI tools. Supports chained calls and model parameter name generation.
+ * with UI tools. Supports chained calls and generation of model attribute names.
+ *
+ * <p>This class serves as generic model holder for both Servlet and Portlet MVC,
+ * but is tied to neither of those.
  *
  * @author Rob Harrop
- * @see ConventionUtils#getVariableName(Object)
  * @since 2.0
+ * @see Conventions#getVariableName
+ * @see org.springframework.web.servlet.ModelAndView
+ * @see org.springframework.web.portlet.ModelAndView
  */
 public class ModelMap extends HashMap {
 
@@ -41,8 +46,17 @@ public class ModelMap extends HashMap {
 	}
 
 	/**
+	 * Construct a new <code>ModelMap</code> containing the supplied model object
+	 * under the supplied name.
+	 * @see #addObject(String, Object)
+	 */
+	public ModelMap(String modelName, Object modelObject) {
+		addObject(modelName, modelObject);
+	}
+
+	/**
 	 * Construct a new <code>ModelMap</code> containing the supplied model object.
-	 * Uses parameter name generation to generate the key for the supplied model
+	 * Uses attribute name generation to generate the key for the supplied model
 	 * object.
 	 * @see #addObject(Object)
 	 */
@@ -50,48 +64,38 @@ public class ModelMap extends HashMap {
 		addObject(modelObject);
 	}
 
-	/**
-	 * Construct a new <code>ModelMap</code> containing the supplied model object under
-	 * the supplied name.
-	 * @see #addObject(String, Object)
-	 */
-	public ModelMap(String name, Object modelObject) {
-		addObject(name, modelObject);
-	}
 
 	/**
-	 * Adds the supplied <code>Object</code> to this <code>Map</code> used a
-	 * {@link ConventionUtils#getVariableName generated name}.
-	 * <p/><emphasis>Note: Empty {@link Collection Collections} are not added to
-	 * the model when using this method because we cannot correctly determine
-	 * the true convention name. View code should check for <code>null</code> rather than
-	 * for empty collections as is already done by JSTL tags</emphasis>.
-	 * @param modelObject the model parameter <code>Object</code>. Cannot be <code>null</code>.
+	 * Add the supplied <code>Object</code> under the supplied name.
+	 * @param modelName the name of the model attribute (never <code>null</code>)
+	 * @param modelObject the model attribute object (never <code>null</code>)
 	 */
-	public ModelMap addObject(Object modelObject) {
-		Assert.notNull(modelObject, "'modelObject' should not be null.");
-
-		if (modelObject instanceof Collection && ((Collection) modelObject).isEmpty()) {
-			return this;
-		}
-
-		return addObject(ConventionUtils.getVariableName(modelObject), modelObject);
-	}
-
-	/**
-	 * Adds the supplied <code>Object</code> under the supplied name.
-	 * @param name the name of the model parameter. Cannot be <code>null</code>.
-	 * @param modelObject the model parameter object. Cannot be <code>null</code>.
-	 */
-	public ModelMap addObject(String name, Object modelObject) {
-		Assert.notNull(name, "'name' should not be null.");
-		Assert.notNull(modelObject, "'modelObject' should not be null.");
-		this.put(name, modelObject);
+	public ModelMap addObject(String modelName, Object modelObject) {
+		Assert.notNull(modelName, "Model name should not be null");
+		Assert.notNull(modelObject, "Model object should not be null");
+		this.put(modelName, modelObject);
 		return this;
 	}
 
 	/**
-	 * Copies all objects in the supplied <code>Map</code> into this <code>Map</code>.
+	 * Add the supplied <code>Object</code> to this <code>Map</code> used a
+	 * {@link org.springframework.core.Conventions#getVariableName generated name}.
+	 * <p/><emphasis>Note: Empty {@link Collection Collections} are not added to
+	 * the model when using this method because we cannot correctly determine
+	 * the true convention name. View code should check for <code>null</code> rather than
+	 * for empty collections as is already done by JSTL tags</emphasis>.
+	 * @param modelObject the model attribute object (never <code>null</code>)
+	 */
+	public ModelMap addObject(Object modelObject) {
+		Assert.notNull(modelObject, "Model object should not be null");
+		if (modelObject instanceof Collection && ((Collection) modelObject).isEmpty()) {
+			return this;
+		}
+		return addObject(Conventions.getVariableName(modelObject), modelObject);
+	}
+
+	/**
+	 * Copy all objects in the supplied <code>Map</code> into this <code>Map</code>.
 	 */
 	public ModelMap addAllObjects(Map objects) {
 		if (objects != null) {
@@ -101,16 +105,17 @@ public class ModelMap extends HashMap {
 	}
 
 	/**
-	 * Copies all objects in the supplied <code>Colletion</code> into this <code>Map</code>
-	 * using parameter name generation for each element.
+	 * Copy all objects in the supplied <code>Collection</code> into this <code>Map</code>,
+	 * using attribute name generation for each element.
 	 * @see #addObject(Object)
 	 */
 	public ModelMap addAllObjects(Collection objects) {
 		if (objects != null) {
-			for (Iterator iterator = objects.iterator(); iterator.hasNext();) {
-				addObject(iterator.next());
+			for (Iterator it = objects.iterator(); it.hasNext();) {
+				addObject(it.next());
 			}
 		}
 		return this;
 	}
+
 }
