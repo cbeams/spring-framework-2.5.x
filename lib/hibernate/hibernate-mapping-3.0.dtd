@@ -982,7 +982,7 @@ finder methods for named queries -->
 
 <!ELEMENT return-scalar EMPTY>
 	<!ATTLIST return-scalar column CDATA #REQUIRED>
-	<!ATTLIST return-scalar type CDATA #REQUIRED>
+	<!ATTLIST return-scalar type CDATA #IMPLIED>
 
 <!ELEMENT synchronize EMPTY>
 	<!ATTLIST synchronize table CDATA #REQUIRED>

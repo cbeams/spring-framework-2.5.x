@@ -61,8 +61,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's CosMultipartResolver or CosMailSender
 
-* dom4j/dom4j-1.6, dom4j/jaxen-1.1-beta-4.jar
-- DOM4J 1.6 XML parser (http://www.dom4j.org)
+* dom4j/dom4j-1.6.1, dom4j/jaxen-1.1-beta-7.jar
+- DOM4J 1.6.1 XML parser (http://www.dom4j.org)
 - required for running PetClinic (by Hibernate)
 - required for building and running Tiles Example
 
@@ -92,7 +92,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's Hibernate 2.1 support
 
 * hibernate/hibernate3.jar
-- Hibernate 3.1 (http://www.hibernate.org)
+- Hibernate 3.1.1 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate 3.x support
 
