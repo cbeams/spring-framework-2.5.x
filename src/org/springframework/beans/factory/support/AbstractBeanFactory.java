@@ -54,6 +54,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.core.CollectionFactory;
+import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 
 /**
@@ -201,24 +202,23 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 
 			// Check if bean definition exists in this factory.
-			RootBeanDefinition mergedBeanDefinition = null;
-			try {
-				mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
-			}
-			catch (NoSuchBeanDefinitionException ex) {
+			if (getParentBeanFactory() != null && !containsBeanDefinition(beanName)) {
 				// Not found -> check parent.
-				BeanFactory parentBeanFactory = getParentBeanFactory();
-				if (parentBeanFactory instanceof AbstractBeanFactory) {
+				if (getParentBeanFactory() instanceof AbstractBeanFactory) {
 					// Delegation to parent with args only possible for AbstractBeanFactory.
-					return ((AbstractBeanFactory) parentBeanFactory).getBean(name, requiredType, args);
+					return ((AbstractBeanFactory) getParentBeanFactory()).getBean(name, requiredType, args);
 				}
-				else if (parentBeanFactory != null && args == null) {
+				else if (args == null) {
 					// No args -> delegate to standard getBean method.
-					return parentBeanFactory.getBean(name, requiredType);
+					return getParentBeanFactory().getBean(name, requiredType);
 				}
-				throw ex;
+				else {
+					throw new NoSuchBeanDefinitionException(beanName,
+							"Cannot delegate to parent BeanFactory because it does not supported passed-in arguments");
+				}
 			}
 
+			RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
 			checkMergedBeanDefinition(mergedBeanDefinition, beanName, requiredType, args);
 
 			// Create bean instance.
@@ -282,42 +282,41 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
-		try {
-			Class beanClass = null;
-			boolean singleton = true;
+		Class beanClass = null;
+		boolean singleton = true;
 
-			Object beanInstance = null;
-			synchronized (this.singletonCache) {
-				beanInstance = this.singletonCache.get(beanName);
-			}
-			if (beanInstance != null) {
-				beanClass = beanInstance.getClass();
-				singleton = true;
-			}
-			else {
-				RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
-				if (bd.hasBeanClass()) {
-					beanClass = bd.getBeanClass();
-				}
-				singleton = bd.isSingleton();
+		Object beanInstance = null;
+		synchronized (this.singletonCache) {
+			beanInstance = this.singletonCache.get(beanName);
+		}
+
+		if (beanInstance != null) {
+			beanClass = beanInstance.getClass();
+			singleton = true;
+		}
+
+		else {
+			// No singleton instance found -> check bean definition.
+			if (getParentBeanFactory() != null && !containsBeanDefinition(beanName)) {
+				// No bean definition found in this factory -> delegate to parent.
+				return getParentBeanFactory().isSingleton(name);
 			}
 
-			// In case of FactoryBean, return singleton status of created object if not a dereference.
-			if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass) &&
-					!isFactoryDereference(name)) {
-				FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
-				return factoryBean.isSingleton();
+			RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+			if (bd.hasBeanClass()) {
+				beanClass = bd.getBeanClass();
 			}
-			return singleton;
+			singleton = bd.isSingleton();
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Not found -> check parent.
-			BeanFactory parentBeanFactory = getParentBeanFactory();
-			if (parentBeanFactory != null) {
-				return parentBeanFactory.isSingleton(name);
-			}
-			throw ex;
+
+		// In case of FactoryBean, return singleton status of created object if not a dereference.
+		if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass) &&
+				!isFactoryDereference(name)) {
+			FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
+			return factoryBean.isSingleton();
 		}
+
+		return singleton;
 	}
 
 	public Class getType(String name) throws NoSuchBeanDefinitionException {
@@ -335,7 +334,12 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 
 			else {
-				// OK, let's assume it's a bean definition.
+				// No singleton instance found -> check bean definition.
+				if (getParentBeanFactory() != null && !containsBeanDefinition(beanName)) {
+					// No bean definition found in this factory -> delegate to parent.
+					return getParentBeanFactory().getType(name);
+				}
+
 				RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
 
 				// Delegate to getTypeForFactoryMethod in case of factory method.
@@ -358,14 +362,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 			return beanClass;
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Not found -> check parent.
-			BeanFactory parentBeanFactory = getParentBeanFactory();
-			if (parentBeanFactory != null) {
-				return parentBeanFactory.getType(name);
-			}
-			throw ex;
-		}
+
 		catch (BeanCreationException ex) {
 			if (ex.contains(BeanCurrentlyInCreationException.class) ||
 					ex.contains(FactoryBeanNotInitializedException.class)) {
@@ -628,12 +625,11 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param targetType the target type
 	 * @return the converted value, matching the target type
 	 * @throws org.springframework.beans.TypeMismatchException if type conversion failed
-	 * @see #doTypeConversionIfNecessary(Object, Class, org.springframework.beans.BeanWrapperImpl)
 	 */
 	protected Object doTypeConversionIfNecessary(Object value, Class targetType) throws TypeMismatchException {
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		initBeanWrapper(bw);
-		return doTypeConversionIfNecessary(value, targetType, bw);
+		return doTypeConversionIfNecessary(bw, value, targetType);
 	}
 
 	/**
@@ -646,18 +642,35 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @throws org.springframework.beans.TypeMismatchException if type conversion failed
 	 * @see org.springframework.beans.BeanWrapperImpl#doTypeConversionIfNecessary(Object, Class)
 	 */
-	protected Object doTypeConversionIfNecessary(Object value, Class targetType, BeanWrapperImpl bw)
+	protected Object doTypeConversionIfNecessary(BeanWrapperImpl bw, Object value, Class targetType)
+			throws TypeMismatchException {
+
+		return doTypeConversionIfNecessary(bw, value, targetType, null);
+	}
+
+	/**
+	 * Convert the given value into the specified target type,
+	 * using the specified BeanWrapper.
+	 * @param value the original value
+	 * @param targetType the target type
+	 * @param bw the BeanWrapper to work on
+	 * @return the converted value, matching the target type
+	 * @throws org.springframework.beans.TypeMismatchException if type conversion failed
+	 * @see org.springframework.beans.BeanWrapperImpl#doTypeConversionIfNecessary(Object, Class)
+	 */
+	protected Object doTypeConversionIfNecessary(
+			BeanWrapperImpl bw, Object value, Class targetType, MethodParameter methodParam)
 			throws TypeMismatchException {
 
 		// Synchronize if custom editors are registered.
 		// Necessary because PropertyEditors are not thread-safe.
 		if (!getCustomEditors().isEmpty()) {
 			synchronized (getCustomEditors()) {
-				return bw.doTypeConversionIfNecessary(value, targetType);
+				return bw.doTypeConversionIfNecessary(value, targetType, methodParam);
 			}
 		}
 		else {
-			return bw.doTypeConversionIfNecessary(value, targetType);
+			return bw.doTypeConversionIfNecessary(value, targetType, methodParam);
 		}
 	}
 
@@ -665,36 +678,38 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/**
 	 * Return a RootBeanDefinition for the given bean name,
 	 * merging a child bean definition with its parent if necessary.
-	 * @param beanName the name of the bean definition
+	 * @param name the name of the bean to retrieve the merged definition for
 	 * @return a (potentially merged) RootBeanDefinition for the given bean
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @throws BeansException in case of errors
 	 */
-	public RootBeanDefinition getMergedBeanDefinition(String beanName) throws BeansException {
-		return getMergedBeanDefinition(beanName, false);
+	public RootBeanDefinition getMergedBeanDefinition(String name) throws BeansException {
+		return getMergedBeanDefinition(name, false);
 	}
 
 	/**
 	 * Return a RootBeanDefinition, even by traversing parent if the parameter is a
 	 * child definition. Can ask the parent bean factory if not found in this instance.
-	 * @param beanName the name of the bean definition
+	 * @param name the name of the bean to retrieve the merged definition for
 	 * @param includingAncestors whether to ask the parent bean factory if not found
 	 * in this instance
 	 * @return a (potentially merged) RootBeanDefinition for the given bean
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
-	protected RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors)
+	protected RootBeanDefinition getMergedBeanDefinition(String name, boolean includingAncestors)
 	    throws BeansException {
-		try {
-			return getMergedBeanDefinition(beanName, getBeanDefinition(transformedBeanName(beanName)));
+
+		String beanName = transformedBeanName(name);
+
+		// Efficiently check whether bean definition exists in this factory.
+		if (includingAncestors && !containsBeanDefinition(beanName) &&
+				getParentBeanFactory() instanceof AbstractBeanFactory) {
+			return ((AbstractBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName, true);
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			if (includingAncestors && getParentBeanFactory() instanceof AbstractBeanFactory) {
-				return ((AbstractBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName, true);
-			}
-			throw ex;
-		}
+
+		// Resolve merged bean definition locally.
+		return getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
 	}
 
 	/**
@@ -858,26 +873,25 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	public boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
-		try {
-			Object beanInstance = null;
-			synchronized (this.singletonCache) {
-				beanInstance = this.singletonCache.get(beanName);
-			}
-			if (beanInstance != null) {
-				return (beanInstance instanceof FactoryBean);
-			}
-			else {
-				RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
-				return (bd.hasBeanClass() && FactoryBean.class.equals(bd.getBeanClass()));
-			}
+		Object beanInstance = null;
+
+		synchronized (this.singletonCache) {
+			beanInstance = this.singletonCache.get(beanName);
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Not found -> check parent.
-			BeanFactory parentBeanFactory = getParentBeanFactory();
-			if (parentBeanFactory != null) {
-				return parentBeanFactory.isSingleton(name);
+
+		if (beanInstance != null) {
+			return (beanInstance instanceof FactoryBean);
+		}
+
+		else {
+			// No singleton instance found -> check bean definition.
+			if (!containsBeanDefinition(beanName) && getParentBeanFactory() instanceof AbstractBeanFactory) {
+				// No bean definition found in this factory -> delegate to parent.
+				return ((AbstractBeanFactory) getParentBeanFactory()).isFactoryBean(name);
 			}
-			throw ex;
+
+			RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+			return (bd.hasBeanClass() && FactoryBean.class.equals(bd.getBeanClass()));
 		}
 	}
 
