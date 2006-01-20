@@ -50,7 +50,8 @@ public class JsfChainingNavigationHandler extends NavigationHandler {
 			String outcome) {
 		NavigationHandler threadBoundHandler = NavigationHandlerContext
 				.getNavigationHandler();
-		if (threadBoundHandler != null)
+		if (threadBoundHandler != null) {
 			threadBoundHandler.handleNavigation(facesContext, fromAction, outcome);
+		}
 	}
 }
