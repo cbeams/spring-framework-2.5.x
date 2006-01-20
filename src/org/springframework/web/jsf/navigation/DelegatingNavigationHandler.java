@@ -46,7 +46,7 @@ import org.springframework.web.jsf.FacesContextUtils;
  * </pre>
  * 
  * The ApplicationConext will be searched for the NavigationHandler under the
- * bean name {@link #NAVIGATION_HANDLER_BEAN}. If this is just a single bean
+ * bean name {@link #NAVIGATION_HANDLER_BEAN_NAME}. If this is just a single bean
  * with no nested handlers, then delegation will terminate at that handler.
  * 
  * <pre>
@@ -88,17 +88,17 @@ import org.springframework.web.jsf.FacesContextUtils;
  */
 public class DelegatingNavigationHandler extends NavigationHandler {
 
-	public final static String NAVIGATION_HANDLER_BEAN = "jsfNavigationHandler";
+	public final static String NAVIGATION_HANDLER_BEAN_NAME = "jsfNavigationHandler";
 
-	protected String navigationHandlerBean = NAVIGATION_HANDLER_BEAN;
+	protected String navigationHandlerBeanName = NAVIGATION_HANDLER_BEAN_NAME;
 
 	/**
-	 * Last (JSF-managed) navigation handler in the chain.
+	 * The first (JSF-managed) navigation handler in the chain.
 	 */
 	private NavigationHandler first;
 
 	/**
-	 * Last (JSF-managed) navigation handler in the chain.
+	 * The last (JSF-managed) navigation handler in the chain.
 	 */
 	private NavigationHandler last;
 
@@ -144,7 +144,7 @@ public class DelegatingNavigationHandler extends NavigationHandler {
 	 * Extension point for subclasses. This method returns a
 	 * <code>NavigationHandler</code>s for this class to process, from the
 	 * Spring application context. By default, it looks for a bean with the name
-	 * {@link #NAVIGATION_HANDLER_BEAN}, and does so in a lazy fashion, only
+	 * {@link #NAVIGATION_HANDLER_BEAN_NAME}, and does so in a lazy fashion, only
 	 * once.
 	 * 
 	 * @param facesContext Current FacesContext
@@ -156,7 +156,7 @@ public class DelegatingNavigationHandler extends NavigationHandler {
 			return first;
 		}
 		ApplicationContext appContext = getApplicationContext(facesContext);
-		first = (NavigationHandler)appContext.getBean(navigationHandlerBean, NavigationHandler.class);
+		first = (NavigationHandler)appContext.getBean(navigationHandlerBeanName, NavigationHandler.class);
 		return first;
 	}
 

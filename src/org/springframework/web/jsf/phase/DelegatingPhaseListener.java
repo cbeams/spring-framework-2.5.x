@@ -86,6 +86,53 @@ public class DelegatingPhaseListener implements PhaseListener {
 	}
 
 	/**
+	 * Implementation of standard PhaseListener interface method. It is supposed
+	 * to return the identifier of the request processing phase during which
+	 * this listener is interested in processing PhaseEvent events.
+	 * <p>
+	 * The behavior in the default implementation is as follows:
+	 * <p>
+	 * If the beforePhase or afterPhase methods have not been called yet, then
+	 * this method returns PhaseId.ANY_PHASE, as it does not actually have
+	 * knowledge yet of the PhaseListener(s) being delegated to.
+	 * <p>
+	 * If the beforePhase or afterPhase methods have been called, then in the
+	 * default implementation the PhaseListener(s) being delegated to will have
+	 * been retrieved and cached. If there is only one PhaseListener, then the
+	 * result of its getPhaseId() will be returned. If there are multiple
+	 * PhaseListeners in the list, then PhaseId.ANY_PHASE is returned since each
+	 * phase listener may be interested in different phases.
+	 * <p>
+	 * When overriding the getDelegates method, make sure to override this
+	 * method as appropriate, to match the semantics of any changes to that
+	 * method.
+	 */
+	public PhaseId getPhaseId() {
+		if (delegates == null || delegates.size() > 1) {
+			return PhaseId.ANY_PHASE;
+		}
+		return ((PhaseListener)delegates.get(0)).getPhaseId();
+	}
+
+	public void afterPhase(PhaseEvent event) {
+		List listeners = getDelegates(event.getFacesContext());
+		Iterator it = listeners.iterator();
+		while (it.hasNext()) {
+			PhaseListener listener = (PhaseListener)it.next();
+			listener.afterPhase(event);
+		}
+	}
+
+	public void beforePhase(PhaseEvent event) {
+		List listeners = getDelegates(event.getFacesContext());
+		Iterator it = listeners.iterator();
+		while (it.hasNext()) {
+			PhaseListener listener = (PhaseListener)it.next();
+			listener.beforePhase(event);
+		}
+	}
+
+	/**
 	 * Extension point for subclasses. This method returns a List of
 	 * PhaseListeners that is to be delegated to in sequence.
 	 * <p>
@@ -138,52 +185,5 @@ public class DelegatingPhaseListener implements PhaseListener {
 	 */
 	protected WebApplicationContext getApplicationContext(final FacesContext facesContext) throws BeansException {
 		return FacesContextUtils.getWebApplicationContext(facesContext);
-	}
-
-	public void afterPhase(PhaseEvent event) {
-		List listeners = getDelegates(event.getFacesContext());
-		Iterator it = listeners.iterator();
-		while (it.hasNext()) {
-			PhaseListener listener = (PhaseListener)it.next();
-			listener.afterPhase(event);
-		}
-	}
-
-	public void beforePhase(PhaseEvent event) {
-		List listeners = getDelegates(event.getFacesContext());
-		Iterator it = listeners.iterator();
-		while (it.hasNext()) {
-			PhaseListener listener = (PhaseListener)it.next();
-			listener.beforePhase(event);
-		}
-	}
-
-	/**
-	 * Implementation of standard PhaseListener interface method. It is supposed
-	 * to return the identifier of the request processing phase during which
-	 * this listener is interested in processing PhaseEvent events.
-	 * <p>
-	 * The behavior in the default implementation is as follows:
-	 * <p>
-	 * If the beforePhase or afterPhase methods have not been called yet, then
-	 * this method returns PhaseId.ANY_PHASE, as it does not actually have
-	 * knowledge yet of the PhaseListener(s) being delegated to.
-	 * <p>
-	 * If the beforePhase or afterPhase methods have been called, then in the
-	 * default implementation the PhaseListener(s) being delegated to will have
-	 * been retrieved and cached. If there is only one PhaseListener, then the
-	 * result of its getPhaseId() will be returned. If there are multiple
-	 * PhaseListeners in the list, then PhaseId.ANY_PHASE is returned since each
-	 * phase listener may be interested in different phases.
-	 * <p>
-	 * When overriding the getDelegates method, make sure to override this
-	 * method as appropriate, to match the semantics of any changes to that
-	 * method.
-	 */
-	public PhaseId getPhaseId() {
-		if (delegates == null || delegates.size() > 1) {
-			return PhaseId.ANY_PHASE;
-		}
-		return ((PhaseListener)delegates.get(0)).getPhaseId();
 	}
 }
