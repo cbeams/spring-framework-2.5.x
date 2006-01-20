@@ -32,17 +32,10 @@ public class TypeMismatchException extends PropertyAccessException {
 	public static final String ERROR_CODE = "typeMismatch";
 
 
+	private Object value;
+
 	private Class requiredType;
 
-
-	/**
-	 * Create a new TypeMismatchException.
-	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
-	 * @param requiredType the required target type
-	 */
-	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, Class requiredType) {
-		this(propertyChangeEvent, requiredType, null);
-	}
 
 	/**
 	 * Create a new TypeMismatchException.
@@ -59,12 +52,35 @@ public class TypeMismatchException extends PropertyAccessException {
 				(propertyChangeEvent.getPropertyName() != null ?
 				" for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
 				ex);
+		this.value = propertyChangeEvent.getNewValue();
+		this.requiredType = requiredType;
+	}
+
+	/**
+	 * Create a new TypeMismatchException without PropertyChangeEvent.
+	 * @param value the offending value that couldn't be converted (may be <code>null</code>)
+	 * @param requiredType the required target type (or <code>null</code> if not known)
+	 * @param ex the root cause
+	 */
+	public TypeMismatchException(Object value, Class requiredType, Throwable ex) {
+		super("Failed to convert value of type [" +
+				(value != null ? value.getClass().getName() : null) + "]" +
+				(requiredType != null ? " to required type [" + requiredType.getName() + "]" : ""),
+				ex);
+		this.value = value;
 		this.requiredType = requiredType;
 	}
 
 
 	/**
-	 * Return the required target type.
+	 * Return the offending value (may be <code>null</code>)
+	 */
+	public Object getValue() {
+		return value;
+	}
+
+	/**
+	 * Return the required target type, if any.
 	 */
 	public Class getRequiredType() {
 		return requiredType;

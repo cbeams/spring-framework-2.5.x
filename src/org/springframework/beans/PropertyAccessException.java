@@ -25,21 +25,12 @@ import org.springframework.core.ErrorCoded;
  * such as type mismatch or invocation target exception.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public abstract class PropertyAccessException extends BeansException implements ErrorCoded {
 
 	private PropertyChangeEvent propertyChangeEvent;
 	
-
-	/**
-	 * Create a new PropertyAccessException.
-	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
-	 * @param msg the detail message
-	 */
-	public PropertyAccessException(PropertyChangeEvent propertyChangeEvent, String msg) {
-		super(msg);
-		this.propertyChangeEvent = propertyChangeEvent;
-	}
 
 	/**
 	 * Create a new PropertyAccessException.
@@ -52,9 +43,19 @@ public abstract class PropertyAccessException extends BeansException implements 
 		this.propertyChangeEvent = propertyChangeEvent;
 	}
 
+	/**
+	 * Create a new PropertyAccessException without PropertyChangeEvent.
+	 * @param msg the detail message
+	 * @param ex the root cause
+	 */
+	public PropertyAccessException(String msg, Throwable ex) {
+		super(msg, ex);
+	}
+
 
 	/**
 	 * Return the PropertyChangeEvent that resulted in the problem.
+	 * Only available if an actual bean property was affected.
 	 */
 	public PropertyChangeEvent getPropertyChangeEvent() {
 		return propertyChangeEvent;

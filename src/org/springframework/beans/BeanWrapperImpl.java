@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,11 @@ package org.springframework.beans;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyDescriptor;
-import java.beans.PropertyEditor;
-import java.beans.PropertyEditorManager;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +32,9 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.GenericsHelper;
+import org.springframework.core.JdkVersion;
+import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -81,6 +80,8 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	private static final Log logger = LogFactory.getLog(BeanWrapperImpl.class);
 
 
+	private final PropertyTypeConverter propertyTypeConverter;
+
 	/** The wrapped object */
 	private Object object;
 
@@ -118,6 +119,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	 * @see #setWrappedInstance
 	 */
 	public BeanWrapperImpl(boolean registerDefaultEditors) {
+		this.propertyTypeConverter = new PropertyTypeConverter(this);
 		if (registerDefaultEditors) {
 			registerDefaultEditors();
 		}
@@ -160,7 +162,8 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	 * @param nestedPath the nested path of the object
 	 * @param superBw the containing BeanWrapper (must not be <code>null</code>)
 	 */
-	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapper superBw) {
+	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl superBw) {
+		this.propertyTypeConverter = new PropertyTypeConverter(this);
 		setWrappedInstance(object, nestedPath, superBw.getWrappedInstance());
 		setExtractOldValueForEditor(superBw.isExtractOldValueForEditor());
 	}
@@ -187,9 +190,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	 * @param rootObject the root object at the top of the path
 	 */
 	public void setWrappedInstance(Object object, String nestedPath, Object rootObject) {
-		if (object == null) {
-			throw new IllegalArgumentException("Cannot set BeanWrapperImpl target to a null object");
-		}
+		Assert.notNull(object, "Bean object must not be null");
 		this.object = object;
 		this.nestedPath = (nestedPath != null ? nestedPath : "");
 		this.rootObject = (!"".equals(this.nestedPath) ? rootObject : object);
@@ -254,9 +255,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	}
 
 	public PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
-		if (propertyName == null) {
-			throw new IllegalArgumentException("Can't find property descriptor for <code>null</code> property");
-		}
+		Assert.notNull(propertyName, "Property name must not be null");
 		PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
 		if (pd != null) {
 			return pd;
@@ -278,11 +277,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	}
 
 	public boolean isReadableProperty(String propertyName) {
-		// This is a programming error, although asking for a property
-		// that doesn't exist is not.
-		if (propertyName == null) {
-			throw new IllegalArgumentException("Can't find readability status for <code>null</code> property");
-		}
+		Assert.notNull(propertyName, "Property name must not be null");
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
 			if (pd != null) {
@@ -291,23 +286,19 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 				}
 			}
 			else {
-				// maybe an indexed/mapped property
+				// Maybe an indexed/mapped property...
 				getPropertyValue(propertyName);
 				return true;
 			}
 		}
 		catch (InvalidPropertyException ex) {
-			// cannot be evaluated, so can't be readable
+			// Cannot be evaluated, so can't be readable.
 		}
 		return false;
 	}
 
 	public boolean isWritableProperty(String propertyName) {
-		// This is a programming error, although asking for a property
-		// that doesn't exist is not.
-		if (propertyName == null) {
-			throw new IllegalArgumentException("Can't find writability status for <code>null</code> property");
-		}
+		Assert.notNull(propertyName, "Property name must not be null");
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
 			if (pd != null) {
@@ -316,13 +307,13 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 				}
 			}
 			else {
-				// maybe an indexed/mapped property
+				// Maybe an indexed/mapped property...
 				getPropertyValue(propertyName);
 				return true;
 			}
 		}
 		catch (InvalidPropertyException ex) {
-			// cannot be evaluated, so can't be writable
+			// Cannot be evaluated, so can't be writable.
 		}
 		return false;
 	}
@@ -588,7 +579,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 		String propertyName = tokens.canonicalName;
 
 		if (tokens.keys != null) {
-			// apply indexes and map keys: fetch value for all keys but the last one
+			// Apply indexes and map keys: fetch value for all keys but the last one.
 			PropertyTokenHolder getterTokens = new PropertyTokenHolder();
 			getterTokens.canonicalName = tokens.canonicalName;
 			getterTokens.actualName = tokens.actualName;
@@ -603,7 +594,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 						"Cannot access indexed value in property referenced " +
 						"in indexed property path '" + propertyName + "'", ex);
 			}
-			// set value for last key
+			// Set value for last key.
 			String key = tokens.keys[tokens.keys.length - 1];
 			if (propValue == null) {
 				throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
@@ -618,8 +609,8 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 					if (this.extractOldValueForEditor) {
 						oldValue = Array.get(propValue, arrayIndex);
 					}
-					Object convertedValue =
-							doTypeConversionIfNecessary(propertyName, propertyName, oldValue, newValue, requiredType);
+					Object convertedValue = this.propertyTypeConverter.doTypeConversionIfNecessary(
+							propertyName, oldValue, newValue, requiredType);
 					Array.set(propValue, Integer.parseInt(key), convertedValue);
 				}
 				catch (IllegalArgumentException ex) {
@@ -633,41 +624,66 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 				}
 			}
 			else if (propValue instanceof List) {
+				PropertyDescriptor pd = getPropertyDescriptorInternal(tokens.actualName);
+				Class requiredType = null;
+				if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
+					requiredType = GenericsHelper.getCollectionReturnType(pd.getReadMethod());
+				}
 				List list = (List) propValue;
 				int index = Integer.parseInt(key);
 				Object oldValue = null;
 				if (this.extractOldValueForEditor && index < list.size()) {
 					oldValue = list.get(index);
 				}
-				Object convertedValue =
-						doTypeConversionIfNecessary(propertyName, propertyName, oldValue, newValue, null);
-				if (index < list.size()) {
-					list.set(index, convertedValue);
-				}
-				else if (index >= list.size()) {
-					for (int i = list.size(); i < index; i++) {
-						try {
-							list.add(null);
-						}
-						catch (NullPointerException ex) {
-							throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
-									"Cannot set element with index " + index + " in List of size " +
-									list.size() + ", accessed using property path '" + propertyName +
-									"': List does not support filling up gaps with null elements");
-						}
+				try {
+					Object convertedValue = this.propertyTypeConverter.doTypeConversionIfNecessary(
+							propertyName, oldValue, newValue, requiredType);
+					if (index < list.size()) {
+						list.set(index, convertedValue);
 					}
-					list.add(convertedValue);
+					else if (index >= list.size()) {
+						for (int i = list.size(); i < index; i++) {
+							try {
+								list.add(null);
+							}
+							catch (NullPointerException ex) {
+								throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
+										"Cannot set element with index " + index + " in List of size " +
+										list.size() + ", accessed using property path '" + propertyName +
+										"': List does not support filling up gaps with null elements");
+							}
+						}
+						list.add(convertedValue);
+					}
+				}
+				catch (IllegalArgumentException ex) {
+					PropertyChangeEvent pce =
+							new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
+					throw new TypeMismatchException(pce, requiredType, ex);
 				}
 			}
 			else if (propValue instanceof Map) {
+				PropertyDescriptor pd = getPropertyDescriptorInternal(tokens.actualName);
+				Class mapKeyType = null;
+				Class mapValueType = null;
+				if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
+					mapKeyType = GenericsHelper.getMapKeyReturnType(pd.getReadMethod());
+					mapValueType = GenericsHelper.getMapValueReturnType(pd.getReadMethod());
+				}
 				Map map = (Map) propValue;
 				Object oldValue = null;
 				if (this.extractOldValueForEditor) {
 					oldValue = map.get(key);
 				}
-				Object convertedValue =
-						doTypeConversionIfNecessary(propertyName, propertyName, oldValue, newValue, null);
-				map.put(key, convertedValue);
+				// IMPORTANT: Do not pass full property name in here - property editors
+				// must not kick in for map keys but rather only for map values.
+				Object convertedMapKey = this.propertyTypeConverter.doTypeConversionIfNecessary(
+						null, null, key, mapKeyType);
+				// Pass full property name and old value in here, since we want full
+				// conversion ability for map values.
+				Object convertedMapValue = this.propertyTypeConverter.doTypeConversionIfNecessary(
+						propertyName, oldValue, newValue, mapValueType);
+				map.put(convertedMapKey, convertedMapValue);
 			}
 			else {
 				throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
@@ -704,8 +720,9 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 			}
 
 			try {
-				Object convertedValue =
-						doTypeConversionIfNecessary(propertyName, propertyName, oldValue, newValue, pd.getPropertyType());
+				Object convertedValue = this.propertyTypeConverter.doTypeConversionIfNecessary(
+						propertyName, oldValue, newValue, pd.getPropertyType(),
+						new MethodParameter(writeMethod, 0));
 
 				if (pd.getPropertyType().isPrimitive() && (convertedValue == null || "".equals(convertedValue))) {
 					throw new IllegalArgumentException("Invalid value [" + newValue + "] for property '" +
@@ -797,10 +814,22 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 		}
 	}
 
-	private PropertyChangeEvent createPropertyChangeEvent(String propertyName, Object oldValue, Object newValue) {
-		return new PropertyChangeEvent((this.rootObject != null ? this.rootObject : "constructor"),
-				(propertyName != null ? this.nestedPath + propertyName : null),
-				oldValue, newValue);
+
+	/**
+	 * Convert the value to the required type (if necessary from a String).
+	 * <p>Conversions from String to any type use the <code>setAsText</code> method
+	 * of the PropertyEditor class. Note that a PropertyEditor must be registered
+	 * for the given class for this to work; this is a standard JavaBeans API.
+	 * A number of PropertyEditors are automatically registered by BeanWrapperImpl.
+	 * @param value the value to convert
+	 * @param requiredType the type we must convert to
+	 * @return the new value, possibly the result of type conversion
+	 * @throws TypeMismatchException if type conversion failed
+	 * @see java.beans.PropertyEditor#setAsText(String)
+	 * @see java.beans.PropertyEditor#getValue()
+	 */
+	public Object doTypeConversionIfNecessary(Object value, Class requiredType) throws TypeMismatchException {
+		return doTypeConversionIfNecessary(value, requiredType, null);
 	}
 
 	/**
@@ -809,169 +838,23 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	 * of the PropertyEditor class. Note that a PropertyEditor must be registered
 	 * for the given class for this to work; this is a standard JavaBeans API.
 	 * A number of PropertyEditors are automatically registered by BeanWrapperImpl.
-	 * @param newValue proposed change value
+	 * @param value the value to convert
 	 * @param requiredType the type we must convert to
+	 * @param methodParam the method parameter that is the target of the conversion
+	 * (may be <code>null</code>)
 	 * @return the new value, possibly the result of type conversion
 	 * @throws TypeMismatchException if type conversion failed
 	 * @see java.beans.PropertyEditor#setAsText(String)
 	 * @see java.beans.PropertyEditor#getValue()
 	 */
-	public Object doTypeConversionIfNecessary(Object newValue, Class requiredType) throws TypeMismatchException {
-		return doTypeConversionIfNecessary(null, null, null, newValue, requiredType);
-	}
-
-	/**
-	 * Convert the value to the required type (if necessary from a String),
-	 * for the specified property.
-	 * @param propertyName name of the property
-	 * @param oldValue previous value, if available (may be <code>null</code>)
-	 * @param newValue proposed change value
-	 * @param requiredType the type we must convert to
-	 * (or <code>null</code> if not known, for example in case of a collection element)
-	 * @return the new value, possibly the result of type conversion
-	 * @throws TypeMismatchException if type conversion failed
-	 */
-	protected Object doTypeConversionIfNecessary(String propertyName, String fullPropertyName,
-			Object oldValue, Object newValue, Class requiredType) throws TypeMismatchException {
-
-		Object convertedValue = newValue;
-		if (convertedValue != null) {
-
-			// Custom editor for this type?
-			PropertyEditor pe = findCustomEditor(requiredType, fullPropertyName);
-
-			// Value not of required type?
-			if (pe != null ||
-					(requiredType != null &&
-					(requiredType.isArray() || !requiredType.isAssignableFrom(convertedValue.getClass())))) {
-
-				if (requiredType != null) {
-					if (pe == null) {
-						// No custom editor -> check BeanWrapperImpl's default editors.
-						pe = (PropertyEditor) getDefaultEditor(requiredType);
-						if (pe == null) {
-							// No BeanWrapper default editor -> check standard JavaBean editors.
-							pe = PropertyEditorManager.findEditor(requiredType);
-						}
-					}
-				}
-
-				if (pe != null && !(convertedValue instanceof String)) {
-					// Not a String -> use PropertyEditor's setValue.
-					// With standard PropertyEditors, this will return the very same object;
-					// we just want to allow special PropertyEditors to override setValue
-					// for type conversion from non-String values to the required type.
-					try {
-						pe.setValue(convertedValue);
-						Object newConvertedValue = pe.getValue();
-						if (newConvertedValue != convertedValue) {
-							convertedValue = newConvertedValue;
-							// Reset PropertyEditor: It already did a proper conversion.
-							// Don't use it again for a setAsText call.
-							pe = null;
-						}
-					}
-					catch (IllegalArgumentException ex) {
-						throw new TypeMismatchException(
-								createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType, ex);
-					}
-				}
-
-				if (requiredType != null && !requiredType.isArray() && convertedValue instanceof String[]) {
-					// Convert String array to a comma-separated String.
-					// Only applies if no PropertyEditor converted the String array before.
-					// The CSV String will be passed into a PropertyEditor's setAsText method, if any.
-					if (logger.isDebugEnabled()) {
-						logger.debug("Converting String array to comma-delimited String [" + convertedValue + "]");
-					}
-					convertedValue = StringUtils.arrayToCommaDelimitedString((String[]) convertedValue);
-				}
-
-				if (pe != null && convertedValue instanceof String) {
-					// Use PropertyEditor's setAsText in case of a String value.
-					if (logger.isDebugEnabled()) {
-						logger.debug("Converting String to [" + requiredType + "] using property editor [" + pe + "]");
-					}
-					try {
-						pe.setValue(oldValue);
-						pe.setAsText((String) convertedValue);
-						convertedValue = pe.getValue();
-					}
-					catch (IllegalArgumentException ex) {
-						throw new TypeMismatchException(
-								createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType, ex);
-					}
-				}
-
-				if (requiredType != null) {
-					// Array required -> apply appropriate conversion of elements.
-					if (requiredType.isArray()) {
-						Class componentType = requiredType.getComponentType();
-						if (convertedValue instanceof Collection) {
-							// Convert Collection elements to array elements.
-							Collection coll = (Collection) convertedValue;
-							Object result = Array.newInstance(componentType, coll.size());
-							int i = 0;
-							for (Iterator it = coll.iterator(); it.hasNext(); i++) {
-								Object value = doTypeConversionIfNecessary(
-										propertyName, propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
-										null, it.next(), componentType);
-								Array.set(result, i, value);
-							}
-							return result;
-						}
-						else if (convertedValue != null && convertedValue.getClass().isArray()) {
-							// Convert Collection elements to array elements.
-							int arrayLength = Array.getLength(convertedValue);
-							Object result = Array.newInstance(componentType, arrayLength);
-							for (int i = 0; i < arrayLength; i++) {
-								Object value = doTypeConversionIfNecessary(
-										propertyName, propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
-										null, Array.get(convertedValue, i), componentType);
-								Array.set(result, i, value);
-							}
-							return result;
-						}
-						else {
-							// A plain value: convert it to an array with a single component.
-							Object result = Array.newInstance(componentType, 1);
-							Object value = doTypeConversionIfNecessary(
-									propertyName, propertyName + PROPERTY_KEY_PREFIX + 0 + PROPERTY_KEY_SUFFIX,
-									null, convertedValue, componentType);
-							Array.set(result, 0, value);
-							return result;
-						}
-					}
-
-					// If the resulting value definitely doesn't match the required type,
-					// try field lookup as fallback. If no matching field found,
-					// throw explicit TypeMismatchException with full context information.
-					if (convertedValue != null && !requiredType.isPrimitive() &&
-							!requiredType.isAssignableFrom(convertedValue.getClass())) {
-
-						// In case of String value, try to find matching field (for JDK 1.5
-						// enum or custom enum with values defined as static fields).
-						if (convertedValue instanceof String) {
-							try {
-								Field enumField = requiredType.getField((String) convertedValue);
-								return enumField.get(null);
-							}
-							catch (Exception ex) {
-								if (logger.isDebugEnabled()) {
-									logger.debug("Field [" + convertedValue + "] isn't an enum value", ex);
-								}
-							}
-						}
-
-						// Definitely doesn't match: throw TypeMismatchException.
-						throw new TypeMismatchException(
-								createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType);
-					}
-				}
-			}
+	public Object doTypeConversionIfNecessary(
+			Object value, Class requiredType, MethodParameter methodParam) throws TypeMismatchException {
+		try {
+			return this.propertyTypeConverter.doTypeConversionIfNecessary(null, null, value, requiredType, methodParam);
 		}
-
-		return convertedValue;
+		catch (IllegalArgumentException ex) {
+			throw new TypeMismatchException(value, requiredType, ex);
+		}
 	}
 
 
