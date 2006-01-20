@@ -118,6 +118,29 @@ public class DelegatingNavigationHandler extends NavigationHandler {
 	}
 
 	/**
+	 * Handle the navigation request implied by the specified parameters. We
+	 * first ensure that the original JSF NavigationHandler (if any) is placed
+	 * in a ThreadLocal, to (optionally) be called at the end of the chain, and
+	 * then delegate to the NavigationHandler out of the application context.
+	 * 
+	 * @param facesContext <code>FacesContext</code> for the current request
+	 * @param fromAction The action binding expression that was evaluated to
+	 * retrieve the specified outcome (if any)
+	 * @param outcome The logical outcome returned by the specified action
+	 */
+	public void handleNavigation(FacesContext facesContext, String fromAction, String outcome) {
+		NavigationHandler handler = getNavigationHandler(facesContext);
+		NavigationHandler originalThreadBoundHandler = NavigationHandlerContext.getNavigationHandler();
+		try {
+			NavigationHandlerContext.setNavigationHandler(last);
+			handler.handleNavigation(facesContext, fromAction, outcome);
+		}
+		finally {
+			NavigationHandlerContext.setNavigationHandler(originalThreadBoundHandler);
+		}
+	}
+
+	/**
 	 * Extension point for subclasses. This method returns a
 	 * <code>NavigationHandler</code>s for this class to process, from the
 	 * Spring application context. By default, it looks for a bean with the name
@@ -147,29 +170,6 @@ public class DelegatingNavigationHandler extends NavigationHandler {
 	 */
 	protected WebApplicationContext getApplicationContext(final FacesContext facesContext) throws BeansException {
 		return FacesContextUtils.getWebApplicationContext(facesContext);
-	}
-
-	/**
-	 * Handle the navigation request implied by the specified parameters. We
-	 * first ensure that the original JSF NavigationHandler (if any) is placed
-	 * in a ThreadLocal, to (optionally) be called at the end of the chain, and
-	 * then delegate to the NavigationHandler out of the application context.
-	 * 
-	 * @param facesContext <code>FacesContext</code> for the current request
-	 * @param fromAction The action binding expression that was evaluated to
-	 * retrieve the specified outcome (if any)
-	 * @param outcome The logical outcome returned by the specified action
-	 */
-	public void handleNavigation(FacesContext facesContext, String fromAction, String outcome) {
-		NavigationHandler handler = getNavigationHandler(facesContext);
-		NavigationHandler originalThreadBoundHandler = NavigationHandlerContext.getNavigationHandler();
-		try {
-			NavigationHandlerContext.setNavigationHandler(last);
-			handler.handleNavigation(facesContext, fromAction, outcome);
-		}
-		finally {
-			NavigationHandlerContext.setNavigationHandler(originalThreadBoundHandler);
-		}
 	}
 
 	static abstract class NavigationHandlerContext {

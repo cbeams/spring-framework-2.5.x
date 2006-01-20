@@ -35,17 +35,16 @@ import org.springframework.web.jsf.FacesContextUtils;
  * PhaseListener implementation that delegates to one or more Spring-managed
  * PhaseListeners coming from a Spring ApplicationContext.
  * <p>
- * <p>
  * Configure this listener in your <code>faces-config.xml</code> file as
  * follows:
- * 
  * <pre>
  * &lt;application&gt;
  *     ...
  *     &lt;phase-listenerr&gt;org.springframework.web.jsf.phase.DelegatingPhaseListener&lt;/phase-listener&gt;
+ *     ...
  * &lt;/application&gt;
  * </pre>
- * 
+ * <p>
  * On the first invocation by JSF to the beforePhase() or afterPhase() methods,
  * the ApplicationContext will be queried for a bean with the name
  * {@link #PHASE_LISTENER_BEAN}. This bean must be a PhaseListener, or a
