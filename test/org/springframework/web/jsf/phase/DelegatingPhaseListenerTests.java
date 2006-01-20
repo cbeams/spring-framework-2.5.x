@@ -69,7 +69,7 @@ public class DelegatingPhaseListenerTests extends TestCase {
 	public void testGetSingleDelegate() {
 
 		TestListener target = new TestListener();
-		appContext.getBean(DelegatingPhaseListener.PHASE_LISTENER_BEAN);
+		appContext.getBean(DelegatingPhaseListener.PHASE_LISTENER_BEAN_NAME);
 		acControl.setReturnValue(target);
 		acControl.replay();
 
@@ -90,7 +90,7 @@ public class DelegatingPhaseListenerTests extends TestCase {
 		delegates.add(new TestListener());
 		delegates.add(new TestListener());
 
-		appContext.getBean(DelegatingPhaseListener.PHASE_LISTENER_BEAN);
+		appContext.getBean(DelegatingPhaseListener.PHASE_LISTENER_BEAN_NAME);
 		acControl.setReturnValue(delegates);
 		acControl.replay();
 
@@ -101,7 +101,7 @@ public class DelegatingPhaseListenerTests extends TestCase {
 	public void testBeforeAndAfterPhase() {
 
 		TestListener target = new TestListener();
-		appContext.getBean(DelegatingPhaseListener.PHASE_LISTENER_BEAN);
+		appContext.getBean(DelegatingPhaseListener.PHASE_LISTENER_BEAN_NAME);
 		acControl.setReturnValue(target);
 		acControl.replay();
 
