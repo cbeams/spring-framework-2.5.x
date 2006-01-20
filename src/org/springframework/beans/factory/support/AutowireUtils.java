@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,20 +73,20 @@ abstract class AutowireUtils {
 	 * Therefore, with an arg of type Integer, a constructor (Integer) would be preferred to a
 	 * constructor (Number) which would in turn be preferred to a constructor (Object).
 	 * All argument weights get accumulated.
-	 * @param argTypes the argument types to match
+	 * @param paramTypes the parameter types to match
 	 * @param args the arguments to match
 	 * @return the accumulated weight for all arguments
 	 */
-	public static int getTypeDifferenceWeight(Class[] argTypes, Object[] args) {
+	public static int getTypeDifferenceWeight(Class[] paramTypes, Object[] args) {
 		int result = 0;
-		for (int i = 0; i < argTypes.length; i++) {
-			if (!BeanUtils.isAssignable(argTypes[i], args[i])) {
+		for (int i = 0; i < paramTypes.length; i++) {
+			if (!BeanUtils.isAssignable(paramTypes[i], args[i])) {
 				return Integer.MAX_VALUE;
 			}
 			if (args[i] != null) {
 				Class superClass = args[i].getClass().getSuperclass();
 				while (superClass != null) {
-					if (BeanUtils.isAssignable(argTypes[i], superClass)) {
+					if (BeanUtils.isAssignable(paramTypes[i], superClass)) {
 						result++;
 						superClass = superClass.getSuperclass();
 					}
