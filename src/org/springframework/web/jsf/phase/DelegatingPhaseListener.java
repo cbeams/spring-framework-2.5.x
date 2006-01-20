@@ -47,7 +47,7 @@ import org.springframework.web.jsf.FacesContextUtils;
  * <p>
  * On the first invocation by JSF to the beforePhase() or afterPhase() methods,
  * the ApplicationContext will be queried for a bean with the name
- * {@link #PHASE_LISTENER_BEAN}. This bean must be a PhaseListener, or a
+ * {@link #PHASE_LISTENER_BEAN_NAME}. This bean must be a PhaseListener, or a
  * java.util.List of PhaseListeners. The method invocation, along with
  * subsequent invocations of the same methods will then be delegated to the
  * listener or listeners that were obtained from the context. Note that the
@@ -70,9 +70,9 @@ public class DelegatingPhaseListener implements PhaseListener {
 	 * The default bean name used to look up in the ApplicationContext the
 	 * PhaseListener or List of PhaseListeners to be delegated to.
 	 */
-	public final static String PHASE_LISTENER_BEAN = "jsfPhaseListener";
+	public final static String PHASE_LISTENER_BEAN_NAME = "jsfPhaseListener";
 
-	protected String phaseListenerBean = PHASE_LISTENER_BEAN;
+	protected String phaseListenerBeanName = PHASE_LISTENER_BEAN_NAME;
 
 	/**
 	 * A list of PhaseListenrs we are delegating to
@@ -137,7 +137,7 @@ public class DelegatingPhaseListener implements PhaseListener {
 	 * PhaseListeners that is to be delegated to in sequence.
 	 * <p>
 	 * The default implementation of this method looks for a bean in the Spring
-	 * application context with the name {@link #PHASE_LISTENER_BEAN}, doing so
+	 * application context with the name {@link #PHASE_LISTENER_BEAN_NAME}, doing so
 	 * in a lazy fashion, then caching the info. This bean must be a
 	 * PhaseListener, or a List of PhaseListeners.
 	 * 
@@ -147,13 +147,13 @@ public class DelegatingPhaseListener implements PhaseListener {
 	protected List getDelegates(final FacesContext facesContext) throws BeansException {
 		if (delegates == null) {
 			ApplicationContext appContext = getApplicationContext(facesContext);
-			Object bean = appContext.getBean(phaseListenerBean);
+			Object bean = appContext.getBean(phaseListenerBeanName);
 			if (bean instanceof PhaseListener) {
 				delegates = new ArrayList(1);
 				delegates.add(bean);
 			}
 			else {
-				String errMsg = "Bean with id '" + phaseListenerBean
+				String errMsg = "Bean with id '" + phaseListenerBeanName
 						+ "' must be of type PhaseListener or List (containing one or more PhaseListeners only";
 				if (!(bean instanceof List)) {
 					throw new FatalBeanException(errMsg);
