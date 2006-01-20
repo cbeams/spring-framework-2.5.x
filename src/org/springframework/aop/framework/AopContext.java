@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,9 @@ import org.aopalliance.aop.AspectException;
 public abstract class AopContext {
 	
 	/**
-	 * AOP proxy associated with this thread. Will be <code>null</code> unless the
+	 * Threadlocal holder for AOP proxy associated with this thread. 
+	 * Will be <code>null</code> unless the
 	 * exposeInvocation property on the controlling proxy has been set to true.
-	 * The default value for this property is false, for performance reasons.
 	 */
 	private static ThreadLocal currentProxy = new ThreadLocal();
 
@@ -63,7 +63,8 @@ public abstract class AopContext {
 	 */
 	public static Object currentProxy() throws AspectException {
 		if (currentProxy.get() == null) {
-			throw new AspectException("Cannot find proxy: set 'exposeProxy' property on Advised to make it available");
+			String mesg = "Cannot find proxy: set 'exposeProxy' property on Advised to true to make it available";
+			throw new AspectException(mesg, new Throwable(mesg));
 		}
 		return currentProxy.get();
 	}
