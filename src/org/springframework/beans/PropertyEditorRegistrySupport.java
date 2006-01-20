@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.beans.propertyeditors.LocaleEditor;
 import org.springframework.beans.propertyeditors.PropertiesEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
 
@@ -66,6 +67,8 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	private Map defaultEditors;
 
 	private Map customEditors;
+
+	private Map customEditorCache;
 
 
 	//---------------------------------------------------------------------
@@ -197,13 +200,14 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 			throw new IllegalArgumentException("Either requiredType or propertyPath is required");
 		}
 		if (this.customEditors == null) {
-			this.customEditors = new HashMap();
+			this.customEditors = CollectionFactory.createLinkedMapIfPossible(16);
 		}
 		if (propertyPath != null) {
 			this.customEditors.put(propertyPath, new CustomEditorHolder(propertyEditor, requiredType));
 		}
 		else {
 			this.customEditors.put(requiredType, propertyEditor);
+			this.customEditorCache = null;
 		}
 	}
 
@@ -265,19 +269,33 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @see java.beans.PropertyEditor#getAsText
 	 */
 	private PropertyEditor getCustomEditor(Class requiredType) {
-		if (requiredType != null) {
-			PropertyEditor editor = (PropertyEditor) this.customEditors.get(requiredType);
+		if (requiredType == null) {
+			return null;
+		}
+		// Check directly registered editor for type.
+		PropertyEditor editor = (PropertyEditor) this.customEditors.get(requiredType);
+		if (editor == null) {
+			// Check cached editor for type, registered for superclass or interface.
+			if (this.customEditorCache != null) {
+				editor = (PropertyEditor) this.customEditorCache.get(requiredType);
+			}
 			if (editor == null) {
-				for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
+				// Find editor for superclass or interface.
+				for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext() && editor == null;) {
 					Object key = it.next();
 					if (key instanceof Class && ((Class) key).isAssignableFrom(requiredType)) {
 						editor = (PropertyEditor) this.customEditors.get(key);
+						// Cache editor for search type, to avoid the overhead
+						// of repeated assignable-from checks.
+						if (this.customEditorCache == null) {
+							this.customEditorCache = new HashMap();
+						}
+						this.customEditorCache.put(requiredType, editor);
 					}
 				}
 			}
-			return editor;
 		}
-		return null;
+		return editor;
 	}
 
 	/**
