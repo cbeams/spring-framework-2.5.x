@@ -27,7 +27,7 @@ package org.springframework.beans;
  * @see org.springframework.beans.factory.support.ManagedMap
  * @see org.springframework.beans.factory.support.ManagedProperties
  */
-public interface Mergable {
+public interface Mergeable {
 
 	/**
 	 * Is merging enabled for this particular instance?

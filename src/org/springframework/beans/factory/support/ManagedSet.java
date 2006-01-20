@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.Mergable;
+import org.springframework.beans.Mergeable;
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 
@@ -36,7 +36,7 @@ import java.util.Set;
  * @see org.springframework.core.CollectionFactory#createLinkedSetIfPossible
  * @since 21.01.2004
  */
-public class ManagedSet implements Set, Mergable {
+public class ManagedSet implements Set, Mergeable {
 
 	private Set targetSet;
 

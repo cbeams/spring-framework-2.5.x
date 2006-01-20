@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.Mergable;
+import org.springframework.beans.Mergeable;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ import java.util.List;
  * @author Rob Harrop
  * @since 27.05.2003
  */
-public class ManagedList extends ArrayList implements Mergable {
+public class ManagedList extends ArrayList implements Mergeable {
 
 	private boolean mergeEnabled;
 
