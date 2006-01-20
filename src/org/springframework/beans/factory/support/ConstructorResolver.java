@@ -269,9 +269,10 @@ abstract class ConstructorResolver {
 		}
 		
 		if (factoryMethodToUse == null) {
-			throw new BeanDefinitionStoreException("No factory method: factory bean '" +
-					mergedBeanDefinition.getFactoryBeanName() +
-					"'; factory method '" + mergedBeanDefinition.getFactoryMethodName() + "'");
+			throw new BeanDefinitionStoreException("No matching factory method found: " +
+					(mergedBeanDefinition.getFactoryBeanName() != null ?
+					 "factory bean '" + mergedBeanDefinition.getFactoryBeanName() + "'; " : "") +
+					"factory method '" + mergedBeanDefinition.getFactoryMethodName() + "'");
 		}
 		if (!factoryMethodToUse.isAccessible()) {
 			factoryMethodToUse.setAccessible(true);

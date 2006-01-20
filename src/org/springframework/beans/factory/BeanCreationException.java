@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,9 @@ public class BeanCreationException extends FatalBeanException {
 	 * @param ex the root cause
 	 */
 	public BeanCreationException(String resourceDescription, String beanName, String msg, Throwable ex) {
-		super("Error creating bean with name '" + beanName + "' defined in " + resourceDescription + ": " + msg, ex);
+		super("Error creating bean with name '" + beanName + "'" +
+				(resourceDescription != null ? " defined in " + resourceDescription : "") +
+				": " + msg, ex);
 		this.resourceDescription = resourceDescription;
 		this.beanName = beanName;
 	}
