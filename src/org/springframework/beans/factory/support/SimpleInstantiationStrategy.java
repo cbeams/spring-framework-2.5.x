@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
  * Simple object instantiation strategy for use in a BeanFactory.
  *
  * <p>Does not support Method Injection, although it provides hooks for subclasses
- * to override to add Method Injection  support, for example by overriding methods.
+ * to override to add Method Injection support, for example by overriding methods.
  * 
  * @author Rod Johnson
  * @since 1.1
