@@ -835,6 +835,28 @@ public class ExampleBean {
         <literal>exampleBean.setEmail(null)</literal>.</para>
       </sect3>
 
+      <sect3 id="beans-inner-beans">
+        <title>Inner bean definitions via nested bean elements</title>
+
+        <para>A <literal>bean</literal> element inside the
+        <literal>property</literal> element is used to define a bean value
+        inline, instead of referring to a bean defined elsewhere in the
+        BeanFactory. The inline bean definition does not need to have any id
+        defined. <programlisting>&lt;bean id="outer" class="..."&gt;
+  &lt;!-- Instead of using a reference to target, just use an inner bean --&gt;
+  &lt;property name="target"&gt;
+    &lt;bean class="com.mycompany.PersonImpl"&gt;
+      &lt;property name="name"&gt;&lt;value&gt;Tony&lt;/value&gt;&lt;/property&gt;
+      &lt;property name="age"&gt;&lt;value&gt;51&lt;/value&gt;&lt;/property&gt;
+    &lt;/bean&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+        <para>Note that the <literal>singleton</literal> flag and any
+        <literal>id</literal> attribute are effectively ignored. Inner beans
+        are anonymous prototypes.</para>
+      </sect3>
+
       <sect3 id="beans-collection-elements">
         <title>The collection elements</title>
 
@@ -844,11 +866,12 @@ public class ExampleBean {
         <literal>Set</literal>, <literal>Map</literal>, and
         <literal>Properties</literal>, respectively, to be defined and
         set.<programlisting>&lt;bean id="moreComplexObject" class="example.ComplexObject"&gt;
-  &lt;!-- results in a setPeople(java.util.Properties) call --&gt;
-  &lt;property name="people"&gt;
+  &lt;!-- results in a setAdminEmails(java.util.Properties) call --&gt;
+  &lt;property name="adminEmails"&gt;
     &lt;props&gt;
-      &lt;prop key="HarryPotter"&gt;The magic property&lt;/prop&gt;
-      &lt;prop key="JerrySeinfeld"&gt;The funny property&lt;/prop&gt;
+      &lt;prop key="administrator"&gt;administrator@somecompany.org&lt;/prop&gt;
+      &lt;prop key="support"&gt;support@somecompany.org&lt;/prop&gt;
+      &lt;prop key="development"&gt;development@somecompany.org&lt;/prop&gt;
     &lt;/props&gt;
   &lt;/property&gt;
   &lt;!-- results in a setSomeList(java.util.List) call --&gt;
@@ -883,28 +906,81 @@ public class ExampleBean {
         <para><emphasis>Note that the value of a map key or value, or a set
         value, can also again be any of the
         elements:</emphasis><programlisting>(bean | ref | idref | list | set | map | props | value | null)</programlisting></para>
-      </sect3>
 
-      <sect3 id="beans-inner-beans">
-        <title>Inner bean definitions via nested bean elements</title>
-
-        <para>A <literal>bean</literal> element inside the
-        <literal>property</literal> element is used to define a bean value
-        inline, instead of referring to a bean defined elsewhere in the
-        BeanFactory. The inline bean definition does not need to have any id
-        defined. <programlisting>&lt;bean id="outer" class="..."&gt;
-  &lt;!-- Instead of using a reference to target, just use an inner bean --&gt;
-  &lt;property name="target"&gt;
-    &lt;bean class="com.mycompany.PersonImpl"&gt;
-      &lt;property name="name"&gt;&lt;value&gt;Tony&lt;/value&gt;&lt;/property&gt;
-      &lt;property name="age"&gt;&lt;value&gt;51&lt;/value&gt;&lt;/property&gt;
-    &lt;/bean&gt;
-  &lt;/property&gt;
-&lt;/bean&gt;</programlisting></para>
-
-        <para>Note that the <literal>singleton</literal> flag and any
-        <literal>id</literal> attribute are effectively ignored. Inner beans
-        are anonymous prototypes.</para>
+        <para>
+			As of Spring 2.0, the container also supports the <emphasis>merging</emphasis> of collections. This allows
+			an application developer to define a parent-style <literal>list</literal>, <literal>map</literal>,
+			<literal>set</literal> or <literal>props</literal> element, and have child-style
+			<literal>list</literal>, <literal>map</literal>, <literal>set</literal> or <literal>props</literal> elements
+			inherit and override values from the parent collection; i.e. the child collection's values will be the
+			result obtained from the merging of the elements of the parent and child collections, with the child's
+			collection elements overriding values specified in the parent collection.
+        </para>
+        <para>
+			<emphasis>Please note that this section on merging makes use of the parent-child
+			bean mechanism. This concept has not yet been introduced, so readers unfamiliar with the
+			concept of parent and child bean definitions may wish to read the corresponding section
+			before continuing (see <xref linkend="beans-child-bean-definitions"/>).</emphasis>
+        </para>
+        <para>
+			An example would perhaps serve best to illustrate this feature...
+        </para><programlisting><![CDATA[<beans>
+  <bean id="parent" abstract="true" class="example.ComplexObject">
+    <property name="adminEmails">
+      <props>
+        <prop key="administrator">administrator@somecompany.com</prop>
+        <prop key="support">support@somecompany.com</prop>
+      </props>
+    </property>
+  </bean>
+  <bean id="child" parent="parent">
+    <!-- the merge is specified on the *child* collection definition -->
+    <property name="adminEmails" merge="true">
+      <props>
+        <prop key="sales">sales@somecompany.com</prop>
+        <prop key="support">support@somecompany.co.uk</prop>
+      </props>
+    </property>
+  </bean>
+<beans>]]></programlisting>
+		<para>
+			Notice the use of the <literal>merge=true</literal> attribute on the definition
+			of the <literal>adminEmails</literal> property of the <literal>child</literal> bean definition.
+			When the <literal>child</literal> bean is actually resolved and instantiated by the
+			container, the resulting instance will have an <literal>adminEmails</literal>
+			<classname>Properties</classname> collection that contains the result of the merging of the
+			child's <literal>adminEmails</literal> collection with the parent's <literal>adminEmails</literal>
+			collection; to wit...
+		</para>
+		<programlisting><![CDATA[administrator=administrator@somecompany.com
+sales=sales@somecompany.com
+support=support@somecompany.co.uk]]></programlisting>
+		<para>
+			Notice how the child <classname>Properties</classname> collection's value set will have inherited
+			all the property elements from the parent <literal><![CDATA[<props/>]]></literal>. Notice also
+			how the child's value for the <literal>support</literal> value overrides the attendant
+			value in the parent collection.
+		</para>
+		<para>
+			This merging behaviour applies similarly to the <literal>list</literal>, <literal>map</literal>,
+			and <literal>set</literal> collection types. In the specific case of the <literal>list</literal>
+			element, the semantics associated with the <classname>List</classname> collection type, i.e.
+			the notion of an <literal>ordered</literal> collection of values, is maintained... the 
+			parent's values will precede all of the child list's values. In the case of the <literal>map</literal>,
+			<literal>set</literal>, and <literal>props</literal> collection types, there is no notion of ordering
+			and hence no ordering semantics are in effect for the collection types that underly the associated
+			<classname>Map</classname>, <classname>Set</classname> and <classname>Properties</classname>
+			implementation types used internally by the container.
+		</para>
+		<para>
+			Finally, some minor notes about the merging support are in order; one cannot merge different
+			collection types (e.g. a <literal>map</literal> and a <literal>list</literal>), and if one does
+			attempt to do so an appropriate <classname>Exception</classname> will be thrown; and in case it
+			is not immediately obvious, the <literal>merge</literal> attribute must be specified on the
+			lower level, inherited, child definition... specifying the <literal>merge</literal> attribute on
+			a parent collection definition is redundant and will not result in the desired merging; and
+			(lastly), please note that this merging feature is only available in Spring 2.0 (and later versions).
+		</para>
       </sect3>
 
       <sect3 id="beans-idref-element">
