@@ -40,11 +40,12 @@ import org.springframework.beans.factory.InitializingBean;
  * either works with a passed-in Registry reference or falls back to the
  * registry as specified by its local properties and defaults.
  *
- * <p>Also useful to enforce creation of a local RMI registry at a given port, for
- * example for a JMX connector. If used in conjunction with ConnectorServerFactoryBean,
- * it is recommended to mark the connector definition (ConnectorServerFactoryBean)
- * as "depends-on" the registry definition (RmiRegistryFactoryBean), to guarantee
- * starting up the registry first.
+ * <p>Also useful to enforce creation of a local RMI registry at a given port,
+ * for example for a JMX connector. If used in conjunction with
+ * ConnectorServerFactoryBean, it is recommended that one mark the connector
+ * definition (ConnectorServerFactoryBean) as "depends-on" the registry
+ * definition (RmiRegistryFactoryBean), to guarantee starting up the registry
+ * first.
  *
  * <p>Note: The implementation of this class mirrors the corresponding logic
  * in RmiServiceExporter, and also offers the same customization hooks.
