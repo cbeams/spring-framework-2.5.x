@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2005 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -68,30 +68,7 @@ public class TigerAspectJExpressionPointcutTests extends TestCase {
 		public void setPhoneNumbers(List<String> numbers) {
 		}
 	}
-	
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
-	public @interface EmptySpringAnnotation {
-		
-	}
-	
-	@Transactional
-	public static class HasTransactionalAnnotation {
-		
-		public void foo() {
-		}
-		public Object bar(String foo) {
-			throw new UnsupportedOperationException();
-		}
-	}
-	
-	@EmptySpringAnnotation
-	public static class SpringAnnotated {
-		public void foo() {
-		}
-	}
-	
-	
+
 	public void testMatchGenericArgument() {
 		String expression = "execution(* set*(java.util.List<org.springframework.beans.TestBean>) )";
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
@@ -197,16 +174,7 @@ public class TigerAspectJExpressionPointcutTests extends TestCase {
 		assertTrue(anySpringMethodAnnotation.matches(AnnotationTransactionAttributeSourceTests.TestBean3.class.getMethod("getAge", (Class[]) null), TestBean3.class));
 		assertFalse(anySpringMethodAnnotation.matches(AnnotationTransactionAttributeSourceTests.TestBean3.class.getMethod("setName", String.class), TestBean3.class));
 	}
-	
-	public static class ProcessesSpringAnnotatedParameters {
-		public void takesAnnotatedParameters(TestBean tb, SpringAnnotated sa) {
-		}
-		
-		public void takesNoAnnotatedParameters(TestBean tb, TestBean3 tb3) {
-		}
-	}
 
-	
 	public void testAnnotationOnMethodArgumentsWithFQN() throws SecurityException, NoSuchMethodException {
 		String expression = "@args(*, org.springframework.aop.aspectj.TigerAspectJExpressionPointcutTests.EmptySpringAnnotation))";
 		AspectJExpressionPointcut takesSpringAnnotatedArgument2 = new AspectJExpressionPointcut();
@@ -253,6 +221,41 @@ public class TigerAspectJExpressionPointcutTests extends TestCase {
 		assertFalse(takesSpringAnnotatedArgument2.matches(
 				ProcessesSpringAnnotatedParameters.class.getMethod("takesNoAnnotatedParameters", TestBean.class, TestBean3.class),
 				ProcessesSpringAnnotatedParameters.class));
+	}
+
+
+	public static class ProcessesSpringAnnotatedParameters {
+
+		public void takesAnnotatedParameters(TestBean tb, SpringAnnotated sa) {
+		}
+
+		public void takesNoAnnotatedParameters(TestBean tb, TestBean3 tb3) {
+		}
+	}
+
+
+	@Transactional
+	public static class HasTransactionalAnnotation {
+
+		public void foo() {
+		}
+		public Object bar(String foo) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public @interface EmptySpringAnnotation {
+
+	}
+
+
+	@EmptySpringAnnotation
+	public static class SpringAnnotated {
+		public void foo() {
+		}
 	}
 
 }
