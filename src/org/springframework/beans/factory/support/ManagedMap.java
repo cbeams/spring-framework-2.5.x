@@ -16,24 +16,25 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.beans.Mergable;
+import org.springframework.core.CollectionFactory;
+import org.springframework.util.Assert;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.Mergable;
-import org.springframework.core.CollectionFactory;
-
 /**
  * Tag collection class used to hold managed Map values,
  * which may include runtime bean references.
- *
+ * <p/>
  * <p>Wraps a target Map, which will be a linked map if possible
  * (that is, if running on JDK 1.4 or if Commons Collections 3.x is available).
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @since 27.05.2003
  * @see org.springframework.core.CollectionFactory#createLinkedMapIfPossible
+ * @since 27.05.2003
  */
 public class ManagedMap implements Map, Mergable {
 
@@ -63,14 +64,19 @@ public class ManagedMap implements Map, Mergable {
 		return mergeEnabled;
 	}
 
-	public void merge(Object parent) {
+	public synchronized Object merge(Object parent) {
+		if (!this.mergeEnabled) {
+			throw new IllegalStateException("Cannot merge when the mergeEnabled property is false.");
+		}
+		Assert.notNull(parent);
 		if (parent instanceof Map) {
-			Map parentMap = (Map)parent;
+			Map parentMap = (Map) parent;
 			Map temp = CollectionFactory.createLinkedMapIfPossible(parentMap.size() + this.size());
 			temp.putAll(parentMap);
 			temp.putAll(this);
-			this.targetMap = temp;
+			return temp;
 		}
+		throw new IllegalArgumentException("Cannot merge object with object of type [" + parent.getClass() + "]");
 	}
 
 

@@ -161,7 +161,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		for (int i = 0; i < this.propertyValueList.size(); i++) {
 			PropertyValue currentPv = (PropertyValue) this.propertyValueList.get(i);
 			if (currentPv.getName().equals(pv.getName())) {
-				mergeIfRequired(pv, currentPv);
+				pv = mergeIfRequired(pv, currentPv);
 				setPropertyValueAt(pv, i);
 				return this;
 			}
@@ -183,15 +183,17 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * the current {@link PropertyValue} if merging is supported and enabled.
 	 * @see Mergable
 	 */
-	private void mergeIfRequired(PropertyValue newPv, PropertyValue currentPv) {
+	private PropertyValue mergeIfRequired(PropertyValue newPv, PropertyValue currentPv) {
 		Object value = newPv.getValue();
 		if (value instanceof Mergable) {
 			Mergable mergable = (Mergable) value;
 			if (mergable.isMergeEnabled()) {
-				mergable.merge(currentPv.getValue());
-			}
+				Object merged = mergable.merge(currentPv.getValue());
+                return new PropertyValue(newPv.getName(), merged);
+            }
 		}
-	}
+        return newPv;
+    }
 
 	/**
 	 * Overloaded version of removePropertyValue that takes a property name.

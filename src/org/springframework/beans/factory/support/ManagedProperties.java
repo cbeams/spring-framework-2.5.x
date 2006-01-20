@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import java.util.Properties;
 
 import org.springframework.beans.Mergable;
+import org.springframework.util.Assert;
 
 /**
  * Represents a Spring-managed {@link Properties} instance that supports
@@ -41,15 +42,18 @@ public class ManagedProperties extends Properties implements Mergable {
 	}
 
 
-	public void merge(Object parent) {
-		if (parent instanceof Properties) {
-			Properties parentProperties = (Properties) parent;
-			Properties temp = new Properties();
-			temp.putAll(parentProperties);
-			temp.putAll(this);
-			this.clear();
-			this.putAll(temp);
+	public synchronized Object merge(Object parent) {
+		if (!this.mergeEnabled) {
+			throw new IllegalStateException("Cannot merge when the mergeEnabled property is false.");
 		}
+		Assert.notNull(parent);
+		if (parent instanceof Properties) {
+			Properties temp = new Properties();
+			temp.putAll((Properties) parent);
+			temp.putAll(this);
+			return temp;
+		}
+		throw new IllegalArgumentException("Cannot merge object with object of type [" + parent.getClass() + "]");
 	}
 
 }

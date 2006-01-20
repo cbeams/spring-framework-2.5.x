@@ -16,10 +16,11 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.beans.Mergable;
+import org.springframework.util.Assert;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.beans.Mergable;
 
 /**
  * Tag subclass used to hold managed List elements, which may
@@ -51,13 +52,17 @@ public class ManagedList extends ArrayList implements Mergable {
 	}
 
 
-	public synchronized void merge(Object parent) {
+	public synchronized Object merge(Object parent) {
+		if (!this.mergeEnabled) {
+			throw new IllegalStateException("Cannot merge when the mergeEnabled property is false.");
+		}
+		Assert.notNull(parent);
 		if (parent instanceof List) {
 			List temp = new ArrayList((List) parent);
 			temp.addAll(this);
-			this.clear();
-			this.addAll(temp);
+			return temp;
 		}
+		throw new IllegalArgumentException("Cannot merge object with object of type [" + parent.getClass() + "]");
 	}
 
 }

@@ -16,24 +16,25 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.beans.Mergable;
+import org.springframework.core.CollectionFactory;
+import org.springframework.util.Assert;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.springframework.beans.Mergable;
-import org.springframework.core.CollectionFactory;
-
 /**
  * Tag collection class used to hold managed Set values,
  * which may include runtime bean references.
- *
+ * <p/>
  * <p>Wraps a target Set, which will be a linked set if possible
  * (that is, if running on JDK 1.4 or if Commons Collections 3.x is available).
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @since 21.01.2004
  * @see org.springframework.core.CollectionFactory#createLinkedSetIfPossible
+ * @since 21.01.2004
  */
 public class ManagedSet implements Set, Mergable {
 
@@ -63,14 +64,19 @@ public class ManagedSet implements Set, Mergable {
 		return mergeEnabled;
 	}
 
-	public void merge(Object other) {
-		if (other instanceof Set) {
-			Set otherSet = (Set) other;
+	public synchronized Object merge(Object parent) {
+		if (!this.mergeEnabled) {
+			throw new IllegalStateException("Cannot merge when the mergeEnabled property is false.");
+		}
+		Assert.notNull(parent);
+		if (parent instanceof Set) {
+			Set otherSet = (Set) parent;
 			Set temp = CollectionFactory.createLinkedSetIfPossible(otherSet.size() + this.size());
 			temp.addAll(otherSet);
 			temp.addAll(this);
-			this.targetSet = temp;
+			return temp;
 		}
+		throw new IllegalArgumentException("Cannot merge object with object of type [" + parent.getClass() + "]");
 	}
 
 
