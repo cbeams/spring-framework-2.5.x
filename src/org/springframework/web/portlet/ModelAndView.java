@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,8 +16,9 @@
 
 package org.springframework.web.portlet;
 
-import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.ui.ModelMap;
 
 /**
  * Holder for both Model and View in the web MVC framework.
@@ -25,10 +26,11 @@ import java.util.Map;
  * both to make it possible for a controller to return both model
  * and view in a single return value.
  *
- * <p>Class to represent a model and view returned by a handler used
- * by a DispatcherServlet. The view is specified through a String
- * view name which will need to be resolved by a ViewResolver object.
- * The model is a Map, allowing the use of multiple data objects keyed by name.
+ * <p>Represents a model and view returned by a handler, to be resolved
+ * by a DispatcherPortlet. The view can take the form of a String
+ * view name which will need to be resolved by a ViewResolver object;
+ * alternatively a view object can be specified directly. The model
+ * is a Map, allowing the use of multiple objects keyed by name.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -42,8 +44,13 @@ public class ModelAndView {
 	/** View instance or view name String */
 	private Object view;
 
-	/** Model */
-	private Map model;
+	/** Model Map */
+	private ModelMap model;
+
+	/**
+	 * Indicates whether or not this instance has been cleared with a call to {@link #clear()}.
+	 */
+	private boolean cleared;
 
 
 	/**
@@ -58,6 +65,17 @@ public class ModelAndView {
 	/**
 	 * Convenient constructor when there is no model data to expose.
 	 * Can also be used in conjunction with <code>addObject</code>.
+	 * @param viewName name of the View to render, to be resolved
+	 * by the DispatcherPortlet's ViewResolver
+	 * @see #addObject
+	 */
+	public ModelAndView(String viewName) {
+		this.view = viewName;
+	}
+
+	/**
+	 * Convenient constructor when there is no model data to expose.
+	 * Can also be used in conjunction with <code>addObject</code>.
 	 * @param view View object to render (usually a Servlet MVC View object)
 	 * @see #addObject
 	 */
@@ -66,39 +84,44 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Convenient constructor when there is no model data to expose.
-	 * Can also be used in conjunction with <code>addObject</code>.
+	 * Create a new ModelAndView given a view name and a model.
 	 * @param viewName name of the View to render, to be resolved
-	 * by the DispatcherServlet
-	 * @see #addObject
-	 */
-	public ModelAndView(String viewName) {
-		this.view = viewName;
-	}
-
-	/**
-	 * Creates new ModelAndView given a View object and a model.
-	 * @param view View object to render (usually a Servlet MVC View object)
+	 * by the DispatcherPortlet's ViewResolver
 	 * @param model Map of model names (Strings) to model objects
-	 * (Objects). Model entries may not be <code>null</code>, but the model Map
-	 * may be <code>null</code> if there is no model data.
-	 */
-	public ModelAndView(Object view, Map model) {
-		this.view = view;
-		this.model = model;
-	}
-
-	/**
-	 * Creates new ModelAndView given a view name and a model.
-	 * @param viewName name of the View to render, to be resolved
-	 * by the DispatcherServlet
-	 * @param model Map of model names (Strings) to model objects
-	 * (Objects). Model entries may not be <code>null</code>, but the model Map
-	 * may be <code>null</code> if there is no model data.
+	 * (Objects). Model entries may not be <code>null</code>, but the
+	 * model Map may be <code>null</code> if there is no model data.
 	 */
 	public ModelAndView(String viewName, Map model) {
 		this.view = viewName;
-		this.model = model;
+		if (model != null) {
+			getModelMap().addAllObjects(model);
+		}
+	}
+
+	/**
+	 * Create a new ModelAndView given a View object and a model.
+	 * @param view View object to render (usually a Servlet MVC View object)
+	 * @param model Map of model names (Strings) to model objects
+	 * (Objects). Model entries may not be <code>null</code>, but the
+	 * model Map may be <code>null</code> if there is no model data.
+	 */
+	public ModelAndView(Object view, Map model) {
+		this.view = view;
+		if (model != null) {
+			getModelMap().addAllObjects(model);
+		}
+	}
+
+	/**
+	 * Convenient constructor to take a single model object.
+	 * @param viewName name of the View to render, to be resolved
+	 * by the DispatcherPortlet's ViewResolver
+	 * @param modelName name of the single entry in the model
+	 * @param modelObject the single model object
+	 */
+	public ModelAndView(String viewName, String modelName, Object modelObject) {
+		this.view = viewName;
+		addObject(modelName, modelObject);
 	}
 
 	/**
@@ -112,18 +135,23 @@ public class ModelAndView {
 		addObject(modelName, modelObject);
 	}
 
+
 	/**
-	 * Convenient constructor to take a single model object.
-	 * @param viewName name of the View to render, to be resolved
-	 * by the DispatcherServlet
-	 * @param modelName name of the single entry in the model
-	 * @param modelObject the single model object
+	 * Set a view name for this ModelAndView, to be resolved by the
+	 * DispatcherPortlet via a ViewResolver. Will override any
+	 * pre-existing view name or View.
 	 */
-	public ModelAndView(String viewName, String modelName, Object modelObject) {
+	public void setViewName(String viewName) {
 		this.view = viewName;
-		addObject(modelName, modelObject);
 	}
 
+	/**
+	 * Return the view name to be resolved by the DispatcherPortlet
+	 * via a ViewResolver, or <code>null</code> if we are using a view object.
+	 */
+	public String getViewName() {
+		return (this.view instanceof String ? (String) this.view : null);
+	}
 
 	/**
 	 * Set a View object for this ModelAndView. Will override any
@@ -138,33 +166,24 @@ public class ModelAndView {
 
 	/**
 	 * Return the View object, or <code>null</code> if we are using a view name
-	 * to be resolved by the DispatcherServlet via a ViewResolver.
+	 * to be resolved by the DispatcherPortlet via a ViewResolver.
 	 */
 	public Object getView() {
 		return (!(this.view instanceof String) ? this.view : null);
 	}
 
 	/**
-	 * Set a view name for this ModelAndView, to be resolved by the
-	 * DispatcherServlet via a ViewResolver. Will override any
-	 * pre-existing view name or View.
+	 * Indicate whether or not this <code>ModelAndView</code> has a view, either
+	 * as a view name or as a direct view instance.
 	 */
-	public void setViewName(String viewName) {
-		this.view = viewName;
+	public boolean hasView() {
+		return (this.view != null);
 	}
 
 	/**
-	 * Return the view name to be resolved by the DispatcherServlet
-	 * via a ViewResolver, or <code>null</code> if we are using a View object.
-	 */
-	public String getViewName() {
-		return (this.view instanceof String ? (String) this.view : null);
-	}
-
-	/**
-	 * Return whether we use a view reference, i.e. true if the
-	 * view has been specified via a name to be resolved by the
-	 * DispatcherServlet via a ViewResolver.
+	 * Return whether we use a view reference, i.e. <code>true</code>
+	 * if the view has been specified via a name to be resolved by the
+	 * DispatcherPortlet via a ViewResolver.
 	 */
 	public boolean isReference() {
 		return (this.view instanceof String);
@@ -172,9 +191,19 @@ public class ModelAndView {
 
 	/**
 	 * Return the model map. May return null.
-	 * Called by DispatcherServlet for evaluation of the model.
+	 * Called by DispatcherPortlet for evaluation of the model.
 	 */
 	protected Map getModelInternal() {
+		return this.model;
+	}
+
+	/**
+	 * Returns the internal <code>ModelMap</code> instance. Will not be null.
+	 */
+	protected ModelMap getModelMap() {
+		if (this.model == null) {
+			this.model = new ModelMap();
+		}
 		return this.model;
 	}
 
@@ -183,34 +212,43 @@ public class ModelAndView {
 	 * To be called by application code for modifying the model.
 	 */
 	public Map getModel() {
-		if (this.model == null) {
-			this.model = new HashMap(1);
-		}
-		return this.model;
+		return getModelMap();
+	}
+
+
+	/**
+	 * Add an object to the model using parameter name generation.
+	 * @param modelObject the object to add to the model (never <code>null</code>)
+	 * @see ModelMap#addObject(Object)
+	 */
+	public ModelAndView addObject(Object modelObject) {
+		getModelMap().addObject(modelObject);
+		return this;
 	}
 
 	/**
 	 * Add an object to the model.
 	 * @param modelName name of the object to add to the model
-	 * @param modelObject object to add to the model. May not be <code>null</code>.
+	 * @param modelObject object to add to the model (never <code>null</code>)
 	 * @return this ModelAndView, convenient to allow usages like
 	 * return modelAndView.addObject("foo", bar);
 	 */
 	public ModelAndView addObject(String modelName, Object modelObject) {
-		getModel().put(modelName, modelObject);
+		getModelMap().addObject(modelName, modelObject);
 		return this;
 	}
 
 	/**
 	 * Add all entries contained in the provided map to the model.
-	 * @param modelMap a map of modelName->modelObject pairs
+	 * @param modelMap a map of modelName -> modelObject pairs
 	 * @return this ModelAndView, convenient to allow usages like
 	 * return modelAndView.addAllObjects(myModelMap);
 	 */
 	public ModelAndView addAllObjects(Map modelMap) {
-		getModel().putAll(modelMap);
+		getModelMap().addAllObjects(modelMap);
 		return this;
 	}
+
 
 	/**
 	 * Clear the state of this ModelAndView object.
@@ -218,20 +256,31 @@ public class ModelAndView {
 	 * <p>Can be used to suppress rendering of a given ModelAndView object
 	 * in the <code>postHandle</code> method of a HandlerInterceptor.
 	 * @see #isEmpty()
-	 * @see org.springframework.web.portlet.HandlerInterceptor#postHandle
+	 * @see HandlerInterceptor#postHandle
 	 */
 	public void clear() {
 		this.view = null;
 		this.model = null;
+		this.cleared = true;
 	}
 
 	/**
-	 * Return whether this ModelAndView object is empty,
+	 * Return whether this ModelAndView object is empty
 	 * i.e. whether it does not hold any view and does not contain a model.
-	 * @see #clear()
 	 */
 	public boolean isEmpty() {
 		return (this.view == null && this.model == null);
+	}
+
+	/**
+	 * Return whether this ModelAndView object is empty as a result of a call to {@link #clear}
+	 * i.e. whether it does not hold any view and does not contain a model.
+	 * Returns <code>false</code> if any additional state was added to the instance
+	 * <strong>after</strong> the call to {@link #clear}.
+	 * @see #clear()
+	 */
+	public boolean wasCleared() {
+		return (this.cleared && isEmpty());
 	}
 
 
