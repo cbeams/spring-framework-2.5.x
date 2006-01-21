@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,10 @@
 
 package org.springframework.jdbc.core;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
@@ -219,6 +216,8 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getInt(1);
 		ctrlResultSet.setReturnValue(11);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(false);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
@@ -347,6 +346,8 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getInt(1);
 		ctrlResultSet.setReturnValue(22);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(false);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
@@ -389,6 +390,8 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getDouble(1);
 		ctrlResultSet.setReturnValue(22.0d);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(false);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
@@ -431,6 +434,8 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getDouble(1);
 		ctrlResultSet.setReturnValue(87.0d);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(false);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
