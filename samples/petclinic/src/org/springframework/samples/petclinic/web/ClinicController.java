@@ -96,7 +96,7 @@ public class ClinicController extends MultiActionController implements Initializ
 		if (owner == null) {
 			return new ModelAndView("findOwnersRedirect");
 		}
-		return new ModelAndView(owner);
+		return new ModelAndView().addObject(owner);
 	}
 
 }
