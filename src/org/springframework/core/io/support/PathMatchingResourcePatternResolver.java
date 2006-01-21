@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	/** URL protocol for an entry from a zip file: "zip" */
 	private static final String URL_PROTOCOL_ZIP = "zip";
+
+	/** URL protocol for an entry from a WebSphere jar file: "wsjar" */
+	private static final String URL_PROTOCOL_WSJAR = "wsjar";
 
 	/** Separator between JAR URL and file path within the JAR */
 	private static final String JAR_URL_SEPARATOR = "!/";
@@ -298,13 +301,18 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	/**
 	 * Return whether the given resource handle indicates a jar resource
 	 * that the <code>doFindPathMatchingJarResources</code> method can handle.
+	 * <p>The default implementation checks against the URL protocols
+	 * "jar", "zip" and "wsjar" (the latter are used by BEA WebLogic Server
+	 * and IBM WebSphere, respectively, but can be treated like jar files).
 	 * @param resource the resource handle to check
 	 * (usually the root directory to start path matching from)
 	 * @see #doFindPathMatchingJarResources
 	 */
 	protected boolean isJarResource(Resource resource) throws IOException {
 		String protocol = resource.getURL().getProtocol();
-		return (URL_PROTOCOL_JAR.equals(protocol) || URL_PROTOCOL_ZIP.equals(protocol));
+		return (URL_PROTOCOL_JAR.equals(protocol) ||
+				URL_PROTOCOL_ZIP.equals(protocol) ||
+				URL_PROTOCOL_WSJAR.equals(protocol));
 	}
 
 	/**
