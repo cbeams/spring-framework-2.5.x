@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 M2 (21.1.2006)
+Changes in version 2.0 M2 (25.1.2006)
 -------------------------------------
 
 Package org.springframework.aop
@@ -23,10 +23,16 @@ Package org.springframework.aop
 Package org.springframework.beans
 * fixed PropertyAccessorUtils's "getLastNestedPropertySeparatorIndex" to correctly handle property paths without dot
 * added overloaded constructor to StringArrayPropertyEditor, allowing to specify a custom separator for String splitting
+* BeanWrapperImpl keeps registered editors in a linked Map: the first registered editor that matches will be used
+* BeanWrapperImpl caches registered editors that match superclass or interface, to avoid repeated assignable-from checks
+* added support for bean properties with generic Collections/Maps, auto-converting to their element/key/value type
+* added support for constructor arguments with generic Collections/Maps, auto-converting to their element/key/value type
 * added "merge" attribute to "list"/"set/"map"/"props", for merging of collection values across parent/child definitions
 * added "default-merge" attribute to "beans" element to allow control of collection merging at the file level
 * changed FileEditor's behavior to consider input text as standard Spring resource location (instead of plain filename)
 * added "postProcessAfterInstantiation" method to InstantiationAwareBeanPostProcessor
+* fixed AbstractBeanFactory to correctly delegate to parent BeanFactory from "isFactoryBean"
+* optimized AbstractBeanFactory to avoid internal NoSuchBeanDefinitionException throw+catch as far as possible
 * reworked AbstractBeanFactory's currently-in-creation check to log debug message when unfinished singleton is returned
 * added "allowCircularReferences" flag to AbstractAutowireCapableBeanFactory, to disallow circular references completely
 * DefaultListableBeanFactory's "getBeansOfType" logs BeanCurrentlyInCreationException message instead of stacktrace
@@ -41,9 +47,11 @@ Package org.springframework.context
 Package org.springframework.core
 * refined Jdk13ControlFlow to be compatible with GNU ClassPath (whose stacktrace has a whitespace after the method name)
 * added NestedIOException, deriving from java.io.IOException and adding NestedCheckedException-style root cause handling
+* refined AbstractResource to work around "FilterInputStream.close()" NPE, simply catching Throwable and ignoring it
 
 Package org.springframework.jdbc
 * DataSourceTransactionManager only attempts to release Connection if not pre-bound (to avoid inappropriate log message)
+* fixed SingleColumnRowMapper to explicitly check "ResultSet.wasNull()" after "getInt"/"getLong"/"getFloat" etc
 * turned visibility of "org.springframework.jdbc.core.StatementCreatorUtils" to package-protected
 * removed ResultReader interface (sub-interface of RowCallbackHandler): use RowMapper instead
 * reworked RowMapperResultReader adapter into RowMapperResultSetExtractor
@@ -58,6 +66,7 @@ Package org.springframework.jmx
 
 Package org.springframework.mock
 * made "servletContextName" and "portletContextName" configurable in MockServletContext respectively MockPortletContext
+* added "set/removeParameter" methods to MockHttpServletRequest, allowing to replace/remove existing parameters
 * added alternative MockPortalContext constructor that accepts custom PortletMode and WindowState lists
 * reworked MockActionResponse and MockPortletURL to check against list of supported PortletModes/WindowStates
 
@@ -94,6 +103,7 @@ Package org.springframework.transaction
 * marked AnnotationTransactionAttributeSource as Serializable
 
 Package org.springframework.ui
+* added ModelMap, providing "addObject" methods that auto-generate model attribute names according to conventions
 * added "defaultEncoding" bean property to FreeMarkerConfigurationFactory(Bean), inherited by FreeMarkerConfigurer
 * added overloaded methods to JasperReportsUtils to allow exporter parameter to be specified for specific formats
 
@@ -117,6 +127,7 @@ Package org.springframework.web
 * refactored RequestHandledEvent into RequestHandledEvent base class and ServletRequestHandledEvent subclass
 * renamed FrameworkPortlet's RequestHandledEvent to PortletRequestHandledEvent, a subclass of RequestHandledEvent
 * PortletBean ignores init-params that do not match bean properties, analogous to HttpServletBean
+* reworked Servlet ModelAndView and Portlet ModelAndView to fully support ModelMap's conventional attribute names
 * added HttpSessionMutexListener and "WebUtils.getSessionMutex", used by AbstractController's "synchronizeOnSession"
 * added "PortletUtils.getSessionMutex", used by the Portlet AbstractController's "synchronizeOnSession"
 * added "FacesContextUtils.getSessionMutex", to make HttpSessionMutexListener's session mutex available to JSF code
