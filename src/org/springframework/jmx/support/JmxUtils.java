@@ -17,8 +17,8 @@
 package org.springframework.jmx.support;
 
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.management.ManagementFactory;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -51,10 +51,6 @@ import org.springframework.util.StringUtils;
 public abstract class JmxUtils {
 
 	private static final Log logger = LogFactory.getLog(JmxUtils.class);
-
-	private static final String MANAGEMENT_FACTORY_CLASS = "java.lang.management.ManagementFactory";
-
-	private static final String GET_PLATFORM_MBEAN_SERVER_METHOD = "getPlatformMBeanServer";
 
 	/**
 	 * Suffix used to identify an MBean interface
@@ -107,19 +103,7 @@ public abstract class JmxUtils {
 		}
 		else if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
 			// Attempt to load the PlatformMBeanServer.
-			try {
-				Class managementFactoryClass = ClassUtils.forName(MANAGEMENT_FACTORY_CLASS);
-				Method getPlatformMBeanServer = managementFactoryClass.getMethod(GET_PLATFORM_MBEAN_SERVER_METHOD, null);
-				server = (MBeanServer) getPlatformMBeanServer.invoke(null, null);
-			}
-			catch (InvocationTargetException ex) {
-				throw new MBeanServerNotFoundException(
-						"ManagementFactory.getPlatformMBeanServer() threw exception", ex.getTargetException());
-			}
-			catch (Exception ex) {
-				throw new MBeanServerNotFoundException(
-						"Could not invoke ManagementFactory.getPlatformMBeanServer()", ex);
-			}
+			server = ManagementFactory.getPlatformMBeanServer();
 		}
 
 		if (server == null) {
