@@ -51,8 +51,8 @@ knowledge about it immediately.
 
 2. RELEASE INFO
 
-The Spring Framework requires J2SE 1.3 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). J2SE 1.4 is
-required for building the framework; for the full build including Tiger support, J2SE 5.0 is required.
+The Spring Framework requires J2SE 1.3 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). JDK 1.5 is
+required for building the framework; for the full build including all aspects, AspectJ is required as well.
 J2EE 1.2 (Servlet 2.2, JSP 1.1) is sufficient when not using Spring's JSP tag libraries or the EJB support.
 
 Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1, JMX 1.0/1.2, JCA 1.0,
@@ -90,7 +90,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~1815 KB)
+* "spring" (~1830 KB)
 - Convenient jar file that combines all standard modules (see "module jars" below)
 - Note: Does NOT include extension modules! (see "extension module jars" below)
 
@@ -124,7 +124,7 @@ MODULE JARS (dist/modules):
 - Contents: JMX support, JCA support, scheduling support, mail support, caching support
 - Dependencies: spring-beans, (spring-context, spring-dao, spring-jdbc, JMX, Quartz, JavaMail, EHCache)
 
-* "spring-web" (~150 KB)
+* "spring-web" (~155 KB)
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
 - Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts, JSF)
 
