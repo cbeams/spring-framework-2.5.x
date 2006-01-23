@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,7 +54,7 @@ public class UrlResource extends AbstractResource {
 	 * @param url a URL
 	 */
 	public UrlResource(URL url) {
-		Assert.notNull(url, "url is required");
+		Assert.notNull(url, "URL must not be null");
 		this.url = url;
 		this.cleanedUrl = getCleanedUrl(this.url, url.toString());
 	}
@@ -64,7 +64,7 @@ public class UrlResource extends AbstractResource {
 	 * @param path a URL path
 	 */
 	public UrlResource(String path) throws MalformedURLException {
-		Assert.notNull(path, "path is required");
+		Assert.notNull(path, "Path must not be null");
 		this.url = new URL(path);
 		this.cleanedUrl = getCleanedUrl(this.url, path);
 	}

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,7 +46,7 @@ public class FileSystemResource extends AbstractResource {
 	 * @param file a File handle
 	 */
 	public FileSystemResource(File file) {
-		Assert.notNull(file, "file is required");
+		Assert.notNull(file, "File must not be null");
 		this.file = file;
 		this.path = StringUtils.cleanPath(file.getPath());
 	}
@@ -56,7 +56,7 @@ public class FileSystemResource extends AbstractResource {
 	 * @param path a file path
 	 */
 	public FileSystemResource(String path) {
-		Assert.notNull(path, "path is required");
+		Assert.notNull(path, "Path must not be null");
 		this.file = new File(path);
 		this.path = StringUtils.cleanPath(path);
 	}
