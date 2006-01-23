@@ -35,11 +35,11 @@ public class MakeLockable {
 			defaultImpl=DefaultLockable.class)
 	public static Lockable mixin;
 	
-	@Before(value="execution(* set*(*)) && this(mixin)", argNames="mixin")
+	@Before(value="execution(void set*(*)) && this(mixin)", argNames="mixin")
 	public void checkNotLocked(
 		Lockable mixin)  // Bind to arg
 	{
-		// Will also work
+		// Can also obtain the mixin (this) this way
 		//Lockable mixin = (Lockable) jp.getThis();
 		if (mixin.locked()) {
 			throw new IllegalStateException();
