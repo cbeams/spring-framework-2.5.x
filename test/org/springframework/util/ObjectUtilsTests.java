@@ -101,4 +101,8 @@ public class ObjectUtilsTests extends TestCase {
 		assertEquals(newElement, newArray[1]);
 	}
 
+	public void testNullSafeEqualsWithArrays() throws Exception {
+		assertTrue(ObjectUtils.nullSafeEquals(new String[]{"a", "b", "c"}, new String[]{"a", "b", "c"}));
+		assertTrue(ObjectUtils.nullSafeEquals(new int[]{1, 2, 3}, new int[]{1, 2, 3}));
+	}
 }
