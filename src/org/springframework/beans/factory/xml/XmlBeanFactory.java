@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,6 +36,10 @@ import org.springframework.core.io.Resource;
  * It supports singletons, prototypes, and references to either of these kinds of bean.
  * See "spring-beans.dtd" for details on options and configuration style.
  *
+ * <p><b>For advanced needs, consider using a DefaultListableBeanFactory with
+ * an XmlBeanDefinitionReader.</b> The latter allows for reading from multiple XML
+ * resources and is highly configurable in its actual XML parsing behavior.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
@@ -45,6 +49,7 @@ import org.springframework.core.io.Resource;
 public class XmlBeanFactory extends DefaultListableBeanFactory {
 
 	private final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this);
+
 
 	/**
 	 * Create a new XmlBeanFactory with the given resource,
