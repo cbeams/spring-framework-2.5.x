@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.core.ControlFlow;
 import org.springframework.core.ControlFlowFactory;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Pointcut and method matcher for use in simple <b>cflow</b>-style pointcut.
@@ -31,14 +32,15 @@ import org.springframework.core.ControlFlowFactory;
  * normal pointcuts, but they are useful in some cases.
  *
  * @author Rod Johnson
+ * @author Rob Harrop
  * @see org.springframework.core.ControlFlow
  */
 public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher, Serializable {
-	
+
 	private Class clazz;
-	
+
 	private String methodName;
-	
+
 	private int evaluations;
 
 
@@ -49,7 +51,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	public ControlFlowPointcut(Class clazz) {
 		this(clazz, null);
 	}
-	
+
 	/**
 	 * Construct a new pointcut that matches all calls below the
 	 * given method in the given class. If the method name is null,
@@ -69,7 +71,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	public boolean matches(Class clazz) {
 		return true;
 	}
-		
+
 	/**
 	 * Subclasses can override this if it's possible to filter out
 	 * some candidate classes.
@@ -104,4 +106,28 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 		return this;
 	}
 
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof ControlFlowPointcut)) {
+			return false;
+		}
+
+		ControlFlowPointcut that = (ControlFlowPointcut) obj;
+		return (this.clazz.equals(that.clazz))
+						&& ObjectUtils.nullSafeEquals(that.methodName, this.methodName);
+	}
+
+	public int hashCode() {
+		int code = 17;
+		code = 37 * code + this.clazz.hashCode();
+
+		if (this.methodName != null) {
+			code = 37 * code + this.methodName.hashCode();
+		}
+
+		return code;
+	}
 }

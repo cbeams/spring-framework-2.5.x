@@ -89,7 +89,15 @@ public class ControlFlowPointcutTests extends TestCase {
 		// We saved most evaluations
 		assertEquals(1, cflow.getEvaluations());
 	}
-	
+
+	public void testEqualsAndHashCode() throws Exception {
+		assertEquals(new ControlFlowPointcut(One.class), new ControlFlowPointcut(One.class));
+		assertEquals(new ControlFlowPointcut(One.class, "getAge"), new ControlFlowPointcut(One.class, "getAge"));
+		assertFalse(new ControlFlowPointcut(One.class, "getAge").equals(new ControlFlowPointcut(One.class)));
+		assertEquals(new ControlFlowPointcut(One.class).hashCode(), new ControlFlowPointcut(One.class).hashCode());
+		assertEquals(new ControlFlowPointcut(One.class, "getAge").hashCode(), new ControlFlowPointcut(One.class, "getAge").hashCode());
+		assertFalse(new ControlFlowPointcut(One.class, "getAge").hashCode() == new ControlFlowPointcut(One.class).hashCode());
+	}
 	
 	public class One {
 		int getAge(ITestBean proxied) {

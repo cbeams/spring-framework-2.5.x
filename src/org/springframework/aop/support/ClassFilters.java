@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,16 @@
 package org.springframework.aop.support;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import org.springframework.aop.ClassFilter;
+import org.springframework.util.Assert;
 
 /**
  * Static methods useful for composing ClassFilters.
  *
  * @author Rod Johnson
+ * @author Rob Harrop
  * @since 11.11.2003
  */
 public abstract class ClassFilters {
@@ -31,17 +34,18 @@ public abstract class ClassFilters {
 	public static ClassFilter union(ClassFilter a, ClassFilter b) {
 		return new UnionClassFilter(new ClassFilter[] { a, b } );
 	}
-	
+
 	public static ClassFilter intersection(ClassFilter a, ClassFilter b) {
 		return new IntersectionClassFilter(new ClassFilter[] { a, b } );
 	}
-	
-	
+
+
 	private static class UnionClassFilter implements ClassFilter, Serializable {
-		
+
 		private ClassFilter[] filters;
-		
+
 		public UnionClassFilter(ClassFilter[] filters) {
+			Assert.notNull(filters, "'filters' cannot be null.");
 			this.filters = filters;
 		}
 
@@ -53,13 +57,30 @@ public abstract class ClassFilters {
 			}
 			return false;
 		}
+
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+
+			if (!(obj instanceof UnionClassFilter)) {
+				return false;
+			}
+
+			return Arrays.equals(this.filters, ((UnionClassFilter) obj).filters);
+		}
+
+		public int hashCode() {
+			return Arrays.hashCode(this.filters);
+		}
 	}
-	
+
 	private static class IntersectionClassFilter implements ClassFilter, Serializable {
-		
+
 		private ClassFilter[] filters;
-		
+
 		public IntersectionClassFilter(ClassFilter[] filters) {
+			Assert.notNull(filters, "'filters' cannot be null.");
 			this.filters = filters;
 		}
 
@@ -70,6 +91,22 @@ public abstract class ClassFilters {
 				}
 			}
 			return true;
+		}
+
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+
+			if (!(obj instanceof IntersectionClassFilter)) {
+				return false;
+			}
+
+			return Arrays.equals(this.filters, ((IntersectionClassFilter) obj).filters);
+		}
+
+		public int hashCode() {
+			return Arrays.hashCode(this.filters);
 		}
 	}
 

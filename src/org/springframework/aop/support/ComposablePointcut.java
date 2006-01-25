@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.Serializable;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Convenient class for building up pointcuts. All methods return
@@ -34,12 +35,13 @@ import org.springframework.aop.Pointcut;
  * method for this.
  *
  * @author Rod Johnson
+ * @author Rob Harrop
  * @since 11.11.2003
  */
 public class ComposablePointcut implements Pointcut, Serializable {
-	
+
 	private ClassFilter classFilter;
-	
+
 	private MethodMatcher methodMatcher;
 
 
@@ -47,7 +49,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 		this.classFilter =  ClassFilter.TRUE;
 		this.methodMatcher = MethodMatcher.TRUE;
 	}
-	
+
 	public ComposablePointcut(ClassFilter classFilter, MethodMatcher methodMatcher) {
 		this.classFilter = classFilter;
 		this.methodMatcher = methodMatcher;
@@ -58,7 +60,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 		this.classFilter = ClassFilters.union(this.classFilter, filter);
 		return this;
 	}
-	
+
 	public ComposablePointcut intersection(ClassFilter filter) {
 		this.classFilter = ClassFilters.intersection(this.classFilter, filter);
 		return this;
@@ -73,7 +75,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 		this.methodMatcher = MethodMatchers.intersection(this.methodMatcher, mm);
 		return this;
 	}
-	
+
 	public ComposablePointcut intersection(Pointcut other) {
 		this.classFilter = ClassFilters.intersection(this.classFilter, other.getClassFilter());
 		this.methodMatcher = MethodMatchers.intersection(this.methodMatcher, other.getMethodMatcher());
@@ -89,4 +91,32 @@ public class ComposablePointcut implements Pointcut, Serializable {
 		return this.methodMatcher;
 	}
 
+	public int hashCode() {
+		int code = 17;
+
+		if(this.classFilter != null) {
+			code = 37 * code + this.classFilter.hashCode();
+		}
+
+		if(this.methodMatcher != null) {
+			code = 37 * code + this.methodMatcher.hashCode();
+		}
+
+		return code;
+	}
+
+	public boolean equals(Object obj) {
+		if(this == obj) {
+			return true;
+		}
+
+		if(!(obj instanceof ComposablePointcut)) {
+			return false;
+		}
+
+		ComposablePointcut that = (ComposablePointcut) obj;
+		boolean cf = ObjectUtils.nullSafeEquals(that.classFilter, this.classFilter);
+		boolean mm = ObjectUtils.nullSafeEquals(that.methodMatcher, this.methodMatcher);
+		return cf && mm;
+	}
 }

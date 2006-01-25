@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.aop.support;
 
+import org.springframework.util.ObjectUtils;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
@@ -27,6 +29,7 @@ import java.util.List;
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Rob Harrop
  * @since 11.02.2004
  * @see #isMatch
  */
@@ -98,4 +101,21 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 				(mappedName.startsWith("*") && methodName.endsWith(mappedName.substring(1, mappedName.length())));
 	}
 
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+
+		if (!(other instanceof NameMatchMethodPointcut)) {
+			return false;
+		}
+
+		NameMatchMethodPointcut that = (NameMatchMethodPointcut) other;
+
+		return ObjectUtils.nullSafeEquals(this.mappedNames, that.mappedNames);
+	}
+
+	public int hashCode() {
+		return (this.mappedNames != null ? this.mappedNames.hashCode() : 0);
+	}
 }
