@@ -108,7 +108,18 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 			}
 			return retVal;
 		}
-		
+
+		return doProceed(mi);
+	}
+
+	/**
+	 * Proceed with the supplied {@link org.aopalliance.intercept.MethodInterceptor}.
+	 * Subclasses can override this method to intercept method invocations on the
+	 * target object which is useful when an introduction needs to monitor the object
+	 * that it is introduced into. This method is <strong>never</strong> called for
+	 * {@link MethodInvocation MethodInvocations} on the introduced interfaces.
+	 */
+	protected Object doProceed(MethodInvocation mi) throws Throwable {
 		// If we get here, just pass the invocation on.
 		return mi.proceed();
 	}
