@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -94,12 +94,7 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 	 */
 	public SqlLobValue(byte[] bytes, LobHandler lobHandler) {
 		this.content = bytes;
-		if (bytes != null) {
-			this.length = bytes.length;
-		}
-		else {
-			this.length = 0;
-		}
+		this.length = (bytes != null ? bytes.length : 0);
 		this.lobCreator = lobHandler.getLobCreator();
 	}
 
@@ -120,12 +115,7 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 	 */
 	public SqlLobValue(String content, LobHandler lobHandler) {
 		this.content = content;
-		if (content != null) {
-			this.length = content.length();
-		}
-		else {
-			this.length = 0;
-		}
+		this.length = (content != null ? content.length() : 0);
 		this.lobCreator = lobHandler.getLobCreator();
 	}
 
@@ -192,8 +182,8 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 				this.lobCreator.setBlobAsBinaryStream(ps, paramIndex, (InputStream) this.content, this.length);
 			}
 			else {
-				throw new IllegalArgumentException("Content type [" + this.content.getClass().getName() +
-																					 "] not supported for BLOB columns");
+				throw new IllegalArgumentException(
+						"Content type [" + this.content.getClass().getName() + "] not supported for BLOB columns");
 			}
 		}
 		else if (sqlType == Types.CLOB) {
@@ -207,8 +197,8 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 				this.lobCreator.setClobAsCharacterStream(ps, paramIndex, (Reader) this.content, this.length);
 			}
 			else {
-				throw new IllegalArgumentException("Content type [" + this.content.getClass().getName() +
-																					 "] not supported for CLOB columns");
+				throw new IllegalArgumentException(
+						"Content type [" + this.content.getClass().getName() + "] not supported for CLOB columns");
 			}
 		}
 		else {
