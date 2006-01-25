@@ -85,7 +85,7 @@ public abstract class RequestContextAwareTag extends TagSupport implements TryCa
 	 * Return the current RequestContext.
 	 */
 	protected final RequestContext getRequestContext() {
-		return requestContext;
+		return this.requestContext;
 	}
 
 	/**
