@@ -60,7 +60,7 @@ import org.springframework.web.util.NestedServletException;
  *
  * <p>Properties:
  * <ul>
- * <li>stylesheetLocation: a javax.swing.Spring <code>Resource</code> pointing to the
+ * <li>stylesheetLocation: {@link Resource} pointing to the
  * XSLT stylesheet
  * <li>root: name of the root element, defaults to "DocRoot"
  * <li>uriResolver: URIResolver used in the transform
