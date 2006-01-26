@@ -825,7 +825,6 @@
 			<classpath refid="all-libs"/>
 
 			<formatter type="plain" usefile="false"/>
-			<formatter type="xml"/>
 
 			<batchtest fork="yes" todir="${target.junit.reports.dir}">
 				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
@@ -856,7 +855,6 @@
 			<classpath refid="all-libs"/>
 
 			<formatter type="plain" usefile="false"/>
-			<formatter type="xml"/>
 
 			<batchtest fork="yes" todir="${target.junit.reports.dir}">
 				<fileset dir="${target.tigertestclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
@@ -886,7 +884,7 @@
 		<mkdir dir="${target.junit.reports.dir}"/>
 		<mkdir dir="${target.junit.summary.dir}"/>
 
-		<junit printsummary="yes" haltonfailure="no" haltonerror="no">
+		<junit forkmode="perBatch" printsummary="yes" haltonfailure="no" haltonerror="no">
 
 			<jvmarg line="-Djava.awt.headless=true"/>
 
