@@ -25,6 +25,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -46,6 +49,7 @@ import org.springframework.util.Assert;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @see #getModel
  * @see DataBinder#getErrors
  */
@@ -72,6 +76,7 @@ public class BindException extends Exception implements Errors {
 
 	private final Stack nestedPathStack = new Stack();
 
+	private Set disallowedFields = new HashSet();
 
 	/**
 	 * Create a new BindException instance.
@@ -362,6 +367,19 @@ public class BindException extends Exception implements Errors {
 		return getBeanWrapper().findCustomEditor(type, fixedField);
 	}
 
+	/**
+	 * Marks the specified field as disallowed.
+	 */
+	public void disallowField(String fieldName) {
+		 this.disallowedFields.add(fieldName);
+	}
+
+	/**
+	 * Returns the list of fields that were disallowed during the bind process.
+	 */
+	public String[] getDisallowedFields() {
+		return (String[]) this.disallowedFields.toArray(new String[this.disallowedFields.size()]);
+	}
 
 	/**
 	 * Return a model Map for the obtained state, exposing an Errors

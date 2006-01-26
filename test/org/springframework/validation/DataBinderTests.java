@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.util.StringUtils;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  */
 public class DataBinderTests extends TestCase {
 
@@ -952,6 +953,25 @@ public class DataBinderTests extends TestCase {
 		assertEquals("myName", ex2.getFieldValue("name"));
 	}
 
+	public void testTrackDisallowedFields() throws Exception {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+		binder.setAllowedFields(new String[]{"name", "age"});
+
+		String name = "Rob Harrop";
+		String beanName = "foobar";
+
+		MutablePropertyValues mpvs = new MutablePropertyValues();
+		mpvs.addPropertyValue("name", name);
+		mpvs.addPropertyValue("beanName", beanName);
+
+		binder.bind(mpvs);
+
+		assertEquals(name, testBean.getName());
+		String[] disallowedFields = binder.getErrors().getDisallowedFields();
+		assertEquals(1, disallowedFields.length);
+		assertEquals("beanName", disallowedFields[0]);
+	}
 
 	private static class TestBeanValidator implements Validator {
 
