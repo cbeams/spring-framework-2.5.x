@@ -20,6 +20,8 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.Assert;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Convenient superclass for configurers that can perform Dependency Injection on
@@ -37,10 +39,11 @@ import org.springframework.util.Assert;
  */
 public abstract class BeanConfigurerSupport implements BeanFactoryAware {
 
+	protected Log logger = LogFactory.getLog(getClass());
+
 	private BeanWiringInfoResolver beanWiringInfoResolver = new ClassNameBeanWiringInfoResolver();
 
 	private AutowireCapableBeanFactory beanFactory;
-
 
 	/**
 	 * Set the BeanWiringInfoResolver to use. Default behavior will be to look
@@ -60,7 +63,7 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware {
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof AutowireCapableBeanFactory)) {
 			throw new IllegalArgumentException(
- 				"Bean configurer aspect needs to run in a ConfigurableListableBeanFactory, not in [" + beanFactory + "]");
+				 "Bean configurer aspect needs to run in a ConfigurableListableBeanFactory, not in [" + beanFactory + "]");
 		}
 		this.beanFactory = (AutowireCapableBeanFactory) beanFactory;
 	}
@@ -81,10 +84,12 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware {
 		}
 
 		if (this.beanFactory == null) {
-			throw new IllegalStateException(
-					"BeanFactory has not be set on [" + getClass().getName() + "]: " +
+			if(logger.isWarnEnabled()) {
+				logger.warn("BeanFactory has not be set on [" + getClass().getName() + "]: " +
 					"Make sure this configurer runs in a Spring container. " +
 					"For example, add it to a Spring application context as XML bean definition.");
+			}
+			return;
 		}
 
 		if (bwi.indicatesAutowiring()) {
