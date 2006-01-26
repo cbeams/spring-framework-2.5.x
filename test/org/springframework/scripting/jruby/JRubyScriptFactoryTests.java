@@ -23,6 +23,7 @@ import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.JdkVersion;
+import org.springframework.core.NestedRuntimeException;
 import org.springframework.scripting.Calculator;
 import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
@@ -74,12 +75,11 @@ public class JRubyScriptFactoryTests extends TestCase {
 
 	public void testScriptCompilationException() throws Exception {
 		try {
-			ApplicationContext ctx = new ClassPathXmlApplicationContext("org/springframework/scripting/jruby/jrubyBrokenContext.xml");
-			Object bean = ctx.getBean("broken");
+			new ClassPathXmlApplicationContext("org/springframework/scripting/jruby/jrubyBrokenContext.xml");
 			fail("Should throw exception for broken script file");
 		}
-		catch (Exception e) {
-			assertTrue(e.getCause().getCause() instanceof ScriptCompilationException);
+		catch (NestedRuntimeException e) {
+			assertTrue(e.contains(ScriptCompilationException.class));
 		}
 	}
 
