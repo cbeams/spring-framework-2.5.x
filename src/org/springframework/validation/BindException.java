@@ -371,7 +371,7 @@ public class BindException extends Exception implements Errors {
 	 * Marks the specified field as disallowed.
 	 */
 	public void disallowField(String fieldName) {
-		 this.disallowedFields.add(fieldName);
+		this.disallowedFields.add(fieldName);
 	}
 
 	/**
