@@ -938,8 +938,11 @@
 		<copy todir="${target.clover.dir}" preservelastmodified="true">
 			<fileset dir="${src.dir}">
 				<include name="**/*.properties"/>
+				<include name="**/*.handlers"/>
+				<include name="**/*.schemas"/>
 				<include name="**/*.xml"/>
 				<include name="**/*.dtd"/>
+				<include name="**/*.xsd"/>
 				<include name="**/*.vm"/>
 				<include name="**/*.ftl"/>
 				<include name="**/*.types"/>
@@ -965,8 +968,11 @@
 		<copy todir="${target.clover.dir}" preservelastmodified="true">
 			<fileset dir="${tiger.src.dir}">
 				<include name="**/*.properties"/>
+				<include name="**/*.handlers"/>
+				<include name="**/*.schemas"/>
 				<include name="**/*.xml"/>
 				<include name="**/*.dtd"/>
+				<include name="**/*.xsd"/>
 				<include name="**/*.vm"/>
 				<include name="**/*.ftl"/>
 				<include name="**/*.types"/>
@@ -982,7 +988,7 @@
 
 		<mkdir dir="${reports.dir}"/>
 
-		<junit printsummary="yes" haltonfailure="yes" haltonerror="yes">
+		<junit forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
 			<jvmarg line="-Djava.awt.headless=true"/>
 
