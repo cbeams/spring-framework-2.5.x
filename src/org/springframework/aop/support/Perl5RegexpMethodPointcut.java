@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.apache.oro.text.regex.Perl5Matcher;
  * JdkRegexpMethodPointcut.
  *
  * @author Rod Johnson
+ * @author Rob Harrop
  * @since 1.1
  * @see JdkRegexpMethodPointcut
  */
@@ -51,36 +52,69 @@ public class Perl5RegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	 * the initPatternRepresentation() method. 
 	 */
 	private transient Pattern[] compiledPatterns = new Pattern[0];
-	
+
+	private transient Pattern[] compiledExclusionPatterns = new Pattern[0];
+
 	/** ORO pattern matcher to use */
 	private transient PatternMatcher matcher;
 
 
 	/**
-	 * Initialize ORO fields from patterns String[].
+	 * Initializes the {@link Pattern ORO representation} of the supplied exclusion patterns.
 	 */
 	protected void initPatternRepresentation(String[] patterns) throws IllegalArgumentException {
-		this.compiledPatterns = new Pattern[patterns.length];
+		this.compiledPatterns = compilePatterns(patterns);
+		this.matcher = new Perl5Matcher();
+	}
+
+	/**
+	 * Returns <code>true</code> if the {@link Pattern} at index <code>patternIndex</code>
+	 * matches the supplied candidate <code>String</code>.
+	 */
+	protected boolean matches(String pattern, int patternIndex) {
+		boolean matched = this.matcher.matches(pattern, this.compiledPatterns[patternIndex]);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Candidate is [" + pattern + "]; pattern is [" +
+							this.compiledPatterns[patternIndex].getPattern() + "]; matched=" + matched);
+		}
+		return matched;
+	}
+
+	/**
+	 * Initializes the {@link Pattern ORO representation} of the supplied exclusion patterns.
+	 */
+	protected void initExcludedPatternRepresentation(String[] excludedPatterns) throws IllegalArgumentException {
+		this.compiledExclusionPatterns = compilePatterns(excludedPatterns);
+	}
+
+	/**
+	 * Returns <code>true</code> if the exclusion {@link Pattern} at index <code>patternIndex</code>
+	 * matches the supplied candidate <code>String</code>.
+	 */
+	protected boolean matchesExclusion(String pattern, int patternIndex) {
+		boolean matched = this.matcher.matches(pattern, this.compiledExclusionPatterns[patternIndex]);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Candidate is [" + pattern + "]; pattern is [" +
+							this.compiledExclusionPatterns[patternIndex].getPattern() + "]; matched=" + matched);
+		}
+		return matched;
+	}
+
+	/**
+	 * Compiles the supplied pattern sources into a {@link Pattern} array.
+	 */
+	private Pattern[] compilePatterns(String[] source) {
 		Perl5Compiler compiler = new Perl5Compiler();
-		for (int i = 0; i < patterns.length; i++) {
+		Pattern[] destination = new Pattern[source.length];
+		for (int i = 0; i < source.length; i++) {
 			// compile the pattern to be thread-safe
 			try {
-				this.compiledPatterns[i] = compiler.compile(patterns[i], Perl5Compiler.READ_ONLY_MASK);
+				destination[i] = compiler.compile(source[i], Perl5Compiler.READ_ONLY_MASK);
 			}
 			catch (MalformedPatternException ex) {
 				throw new IllegalArgumentException(ex.getMessage());
 			}
 		}
-		this.matcher = new Perl5Matcher();
+		return destination;
 	}
-
-	protected boolean matches(String pattern, int patternIndex) {
-		boolean matched = this.matcher.matches(pattern, this.compiledPatterns[patternIndex]);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Candidate is [" + pattern + "]; pattern is [" +
-					this.compiledPatterns[patternIndex].getPattern() + "]; matched=" + matched);
-		}
-		return matched;
-	}
-
 }

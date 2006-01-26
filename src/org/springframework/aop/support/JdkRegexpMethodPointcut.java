@@ -37,26 +37,33 @@ import java.util.regex.PatternSyntaxException;
  * consider Perl5RegexpMethodPointcut.
  *
  * @author Dmitriy Kopylenko
+ * @author Rob Harrop
  * @since 1.1
  * @see Perl5RegexpMethodPointcut
  */
 public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	
 	/** 
-	 * Java 1.4 compiled form of this pattern. 
+	 * Java 1.4 compiled form of the patterns.
 	 */
 	private transient Pattern[] compiledPatterns = new Pattern[0];
 
+	/** 
+	 * Java 1.4 compiled form of the exclusion patterns.
+	 */
+	private transient Pattern[] compiledExclusionPatterns = new Pattern[0];
+
 	/**
-	 * Initialize Java 1.4 Patterns field from patterns String[].
+	 * Initialize Java 1.4 {@link Pattern Patterns} from the supplied <code>String[]</code>.
 	 */
 	protected void initPatternRepresentation(String[] patterns) throws PatternSyntaxException {
-		this.compiledPatterns = new Pattern[patterns.length];
-		for (int i = 0; i < patterns.length; i++) {
-			this.compiledPatterns[i] = Pattern.compile(patterns[i]);
-		} 
+		this.compiledPatterns = compilePatterns(patterns);
 	}
 
+	/**
+	 * Returns <code>true</code> if the {@link Pattern} at index <code>patternIndex</code>
+	 * matches the supplied candidate <code>String</code>.
+	 */
 	protected boolean matches(String pattern, int patternIndex) {
 		Matcher matcher = this.compiledPatterns[patternIndex].matcher(pattern);
 		boolean matched = matcher.matches();
@@ -67,4 +74,36 @@ public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 		return matched;
 	}
 
+	/**
+	 * Initialize Java 1.4 exclusion {@link Pattern Patterns} from the supplied <code>String[]</code>.
+	 */
+	protected void initExcludedPatternRepresentation(String[] excludedPatterns) throws IllegalArgumentException {
+		this.compiledExclusionPatterns = compilePatterns(excludedPatterns);
+	}
+
+	/**
+	 * Returns <code>true</code> if the exclusion {@link Pattern} at index <code>patternIndex</code>
+	 * matches the supplied candidate <code>String</code>.
+	 */
+	protected boolean matchesExclusion(String candidate, int patternIndex) {
+		Matcher matcher = this.compiledExclusionPatterns[patternIndex].matcher(candidate);
+		boolean matched = matcher.matches();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Candidate is [" + candidate + "]; candidate is [" +
+					this.compiledExclusionPatterns[patternIndex].pattern() + "]; matched=" + matched);
+		}
+		return matched;
+	}
+
+	/**
+	 * Compiles the supplied <code>String[]</code> into an array of
+	 * {@link Pattern} objects and returns that array.
+	 */
+	private Pattern[] compilePatterns(String[] source) {
+		Pattern[] destination = new Pattern[source.length];
+		for (int i = 0; i < source.length; i++) {
+			destination[i] = Pattern.compile(source[i]);
+		}
+		return destination;
+	}
 }

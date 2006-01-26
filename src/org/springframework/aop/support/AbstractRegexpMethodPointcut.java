@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.ClassFilter;
+import org.springframework.util.Assert;
 
 /**
  * Abstract base regular expression pointcut bean. JavaBean properties are:
@@ -34,15 +35,15 @@ import org.springframework.aop.ClassFilter;
  * <li>patterns: alternative property taking a String array of patterns. The result will
  * be the union of these patterns.
  * </ul>
- * 
+ *
  * <p>Note: the regular expressions must be a match. For example,
  * <code>.*get.*</code> will match com.mycom.Foo.getBar().
  * <code>get.*</code> will not.
- * 
+ *
  * <p>This base class is serializable. Subclasses should declare all fields transient
  * - the initPatternRepresentation method in this class will be invoked again on the
  * client side on deserialization.
- * 
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 1.1
@@ -51,17 +52,19 @@ import org.springframework.aop.ClassFilter;
  */
 public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPointcut
 		implements ClassFilter, Serializable {
-	
+
 	/** Transient as it's reinitialized on deserialization */
 	protected transient Log logger = LogFactory.getLog(getClass());
-	
+
 	/** Regular expressions to match */
 	private String[] patterns = new String[0];
 
+	/** Regaular expressions <strong>not</strong> to match */
+	private String[] excludedPatterns = new String[0];
 
 	/**
 	 * Convenience method when we have only a single pattern.
-	 * Use either this method or setPatterns, not both.
+	 * Use either this method or {@link #setPatterns}, not both.
 	 * @see #setPatterns
 	 */
 	public void setPattern(String pattern) {
@@ -75,6 +78,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * @param patterns regular expressions describing methods to match
 	 */
 	public void setPatterns(String[] patterns) {
+		Assert.notEmpty(patterns, "'patterns' cannot be null or empty.");
 		this.patterns = patterns;
 		initPatternRepresentation(patterns);
 	}
@@ -83,9 +87,36 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * Return the regular expressions for method matching.
 	 */
 	public String[] getPatterns() {
-		return patterns;
+		return this.patterns;
 	}
 
+	/**
+	 * Convenience method when we have only a single exclusion pattern.
+	 * Use either this method or {@link #setExcludedPatterns}, not both.
+	 * @see #setExcludedPatterns
+	 */
+	public void setExcludedPattern(String excludedPattern) {
+		setExcludedPatterns(new String[]{excludedPattern});
+	}
+
+	/**
+	 * Set the regular expressions defining methods to match for exclusion.
+	 * Matching will be the union of all these; if any match,
+	 * the pointcut matches.
+	 * @param excludedPatterns regular expressions describing methods to match for exclusion
+	 */
+	public void setExcludedPatterns(String[] excludedPatterns) {
+		Assert.notEmpty(excludedPatterns, "'excludedPatterns' cannot be null or empty.");
+		this.excludedPatterns = excludedPatterns;
+		initExcludedPatternRepresentation(excludedPatterns);
+	}
+
+	/**
+	 * Returns the regular expressions for exclusion matching.
+	 */
+	public String[] getExcludedPatterns() {
+		return this.excludedPatterns;
+	}
 
 	/**
 	 * Subclasses must implement this to initialize regexp pointcuts.
@@ -97,14 +128,23 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 */
 	protected abstract void initPatternRepresentation(String[] patterns) throws IllegalArgumentException;
 
+	protected abstract void initExcludedPatternRepresentation(String[] excludedPatterns) throws IllegalArgumentException;
+
 	/**
 	 * Does the pattern at the given index match this string?
-	 * @param pattern string pattern to match
+	 * @param pattern <code>String</code> pattern to match
 	 * @param patternIndex index of pattern from 0
-	 * @return whether there's a match
+	 * @return <code>true</code> if there is a match, else <code>false</code>.
 	 */
 	protected abstract boolean matches(String pattern, int patternIndex);
 
+	/**
+	 * Does the exclusion pattern at the given index match this string?
+	 * @param pattern <code>String</code> pattern to match.
+	 * @param patternIndex index of pattern starting from 0.
+	 * @return <code>true</code> if there is a match, else <code>false</code>.
+	 */
+	protected abstract boolean matchesExclusion(String pattern, int patternIndex);
 
 	/**
 	 * Try to match the regular expression against the fully qualified name
@@ -120,6 +160,12 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 		for (int i = 0; i < this.patterns.length; i++) {
 			boolean matched = matches(patt, i);
 			if (matched) {
+				for (int j = 0; j < this.excludedPatterns.length; j++) {
+					boolean excluded = matchesExclusion(patt, j);
+					if(excluded) {
+						return false;
+					}
+				}
 				return true;
 			}
 		}
@@ -130,16 +176,16 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 		// TODO do with regexp
 		return true;
 	}
-	
+
 	public final ClassFilter getClassFilter() {
 		return this;
 	}
 
-	
+
 	//---------------------------------------------------------------------
 	// Serialization support
 	//---------------------------------------------------------------------
-	
+
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
 		// Rely on default serialization; just initialize state after deserialization.
 		ois.defaultReadObject();
@@ -149,6 +195,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 
 		// Ask subclass to reinitialize.
 		initPatternRepresentation(this.patterns);
+		initExcludedPatternRepresentation(this.excludedPatterns);
 	}
-	
+
 }
