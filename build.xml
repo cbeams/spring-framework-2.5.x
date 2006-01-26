@@ -891,6 +891,7 @@
 			<jvmarg line="-Djava.awt.headless=true"/>
 
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+			<classpath location="${target.tigertestclasses.dir}"/>
 			<classpath location="${target.testclasses.dir}"/>
 			<classpath location="${target.mockclasses.dir}"/>
 			<classpath location="${target.classes.dir}"/>
