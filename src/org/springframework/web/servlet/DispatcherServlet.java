@@ -989,9 +989,8 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		if (exMv != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("HandlerExceptionResolver returned ModelAndView [" + exMv + "] for exception");
+				logger.debug("Handler execution resulted in exception - forwarding to resolved error view: " + exMv, ex);
 			}
-			logger.warn("Handler execution resulted in exception - forwarding to resolved error view", ex);
 			return exMv;
 		}
 		else {
