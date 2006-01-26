@@ -25,6 +25,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.JdkVersion;
 import org.springframework.scripting.Calculator;
 import org.springframework.scripting.Messenger;
+import org.springframework.scripting.ScriptCompilationException;
+import org.springframework.beans.BeansException;
 
 /**
  * @author Rob Harrop
@@ -68,6 +70,17 @@ public class JRubyScriptFactoryTests extends TestCase {
 
 		assertEquals("Message is incorrect after refresh.", desiredMessage, messenger.getMessage());
 		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
+	}
+
+	public void testScriptCompilationException() throws Exception {
+		try {
+			ApplicationContext ctx = new ClassPathXmlApplicationContext("org/springframework/scripting/jruby/jrubyBrokenContext.xml");
+			Object bean = ctx.getBean("broken");
+			fail("Should throw exception for broken script file");
+		}
+		catch (Exception e) {
+			assertTrue(e.getCause().getCause() instanceof ScriptCompilationException);
+		}
 	}
 
 }

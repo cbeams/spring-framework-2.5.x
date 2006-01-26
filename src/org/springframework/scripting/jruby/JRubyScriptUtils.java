@@ -21,11 +21,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import org.jruby.Ruby;
+import org.jruby.RubyNil;
 import org.jruby.exceptions.JumpException;
 import org.jruby.javasupport.JavaUtil;
 import org.jruby.runtime.builtin.IRubyObject;
 
 import org.springframework.util.ClassUtils;
+import org.springframework.scripting.ScriptCompilationException;
 
 /**
  * Utility methods for handling JRuby-scripted objects.
@@ -47,6 +49,9 @@ public abstract class JRubyScriptUtils {
 	public static Object createJRubyObject(String scriptSource, Class[] interfaces) throws JumpException {
 		Ruby ruby = Ruby.getDefaultInstance();
 		IRubyObject rubyObject = ruby.evalScript(scriptSource);
+		if(rubyObject instanceof RubyNil) {
+			throw new ScriptCompilationException("Compilation of JRuby script returned '" + rubyObject + "'");
+		}
 		return Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(),
 				interfaces, new RubyObjectInvocationHandler(rubyObject, ruby));
 	}
