@@ -25,7 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -76,7 +75,7 @@ public class BindException extends Exception implements Errors {
 
 	private final Stack nestedPathStack = new Stack();
 
-	private Set disallowedFields = new HashSet();
+	private Set suppressedFields = new HashSet();
 
 	/**
 	 * Create a new BindException instance.
@@ -370,15 +369,15 @@ public class BindException extends Exception implements Errors {
 	/**
 	 * Marks the specified field as disallowed.
 	 */
-	public void disallowField(String fieldName) {
-		this.disallowedFields.add(fieldName);
+	public void recordSuppressedField(String fieldName) {
+		this.suppressedFields.add(fieldName);
 	}
 
 	/**
 	 * Returns the list of fields that were disallowed during the bind process.
 	 */
-	public String[] getDisallowedFields() {
-		return (String[]) this.disallowedFields.toArray(new String[this.disallowedFields.size()]);
+	public String[] getSuppressedFields() {
+		return (String[]) this.suppressedFields.toArray(new String[this.suppressedFields.size()]);
 	}
 
 	/**

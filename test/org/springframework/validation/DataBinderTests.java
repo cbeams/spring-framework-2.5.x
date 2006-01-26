@@ -968,7 +968,7 @@ public class DataBinderTests extends TestCase {
 		binder.bind(mpvs);
 
 		assertEquals(name, testBean.getName());
-		String[] disallowedFields = binder.getErrors().getDisallowedFields();
+		String[] disallowedFields = binder.getErrors().getSuppressedFields();
 		assertEquals(1, disallowedFields.length);
 		assertEquals("beanName", disallowedFields[0]);
 	}

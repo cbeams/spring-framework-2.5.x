@@ -20,7 +20,6 @@ import java.beans.PropertyEditor;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -341,7 +340,7 @@ public class DataBinder implements PropertyEditorRegistry {
 			String field = pvArray[i].getName();
 			if (!((allowedFieldsList != null && allowedFieldsList.contains(field)) || isAllowed(field))) {
 				mpvs.removePropertyValue(pvArray[i]);
-				this.errors.disallowField(pvArray[i].getName());
+				this.errors.recordSuppressedField(pvArray[i].getName());
 				if (logger.isDebugEnabled()) {
 					logger.debug("Field [" + pvArray[i] + "] has been removed from PropertyValues " +
 							"and will not be bound, because it has not been found in the list of allowed fields " +
