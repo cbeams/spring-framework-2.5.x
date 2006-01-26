@@ -31,7 +31,7 @@ public final class XmlBeanDefinitionReaderTests extends TestCase {
     private MockControl mock;
     private BeanDefinitionRegistry registry;
 
-    public void setup() {
+    public void setUp() {
         this.mock = MockControl.createControl(BeanDefinitionRegistry.class);
         this.registry = (BeanDefinitionRegistry) mock.getMock();
     }
