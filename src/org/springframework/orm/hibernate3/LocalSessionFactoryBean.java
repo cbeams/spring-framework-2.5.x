@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate3;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -25,6 +26,7 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
@@ -47,6 +49,7 @@ import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.FilterDefinition;
 import org.hibernate.engine.SessionFactoryImplementor;
+import org.hibernate.event.EventListeners;
 import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
 
 import org.springframework.beans.BeanUtils;
@@ -59,6 +62,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.lob.LobHandler;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -576,6 +580,9 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	/**
 	 * Specify the Hibernate event listeners to register, with listener types
 	 * as keys and listener objects as values.
+	 * <p>Instead of a single listener object, you can also pass in a list
+	 * or set of listeners objects as value. However, this is only supported
+	 * on Hibernate 3.1.
 	 * <p>See the Hibernate documentation for further details on listener types
 	 * and associated listener interfaces.
 	 * @param eventListeners Map with listener type Strings as keys and
@@ -764,9 +771,20 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 				// Register specified Hibernate event listeners.
 				for (Iterator it = this.eventListeners.entrySet().iterator(); it.hasNext();) {
 					Map.Entry entry = (Map.Entry) it.next();
+					Assert.isTrue(entry.getKey() instanceof String, "Event listener key needs to be of type String");
 					String listenerType = (String) entry.getKey();
 					Object listenerObject = entry.getValue();
-					config.setListener(listenerType, listenerObject);
+					if (listenerObject instanceof Collection) {
+						Collection listeners = (Collection) listenerObject;
+						EventListeners listenerRegistry = config.getEventListeners();
+						Object[] listenerArray =
+								(Object[]) Array.newInstance(listenerRegistry.getListenerClassFor(listenerType), listeners.size());
+						listenerArray = listeners.toArray(listenerArray);
+						config.setListeners(listenerType, listenerArray);
+					}
+					else {
+						config.setListener(listenerType, listenerObject);
+					}
 				}
 			}
 
@@ -809,7 +827,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			updateDatabaseSchema();
 		}
 	}
-	
+
 
 	private String[] parseCacheStrategy(Properties strategies, String key) {
 		String strategy = null;

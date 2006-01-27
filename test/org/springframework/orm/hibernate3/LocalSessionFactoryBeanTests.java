@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -43,6 +44,8 @@ import org.hibernate.cfg.Mappings;
 import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.connection.UserSuppliedConnectionProvider;
 import org.hibernate.engine.FilterDefinition;
+import org.hibernate.event.MergeEvent;
+import org.hibernate.event.MergeEventListener;
 import org.hibernate.mapping.TypeDef;
 
 import org.springframework.beans.factory.xml.XmlBeanFactory;
@@ -437,6 +440,33 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals(listeners, registeredListeners);
 	}
 
+	public void testLocalSessionFactoryBeanWithEventListenerSet() throws Exception {
+		final Map registeredListeners = new HashMap();
+		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
+			protected Configuration newConfiguration() {
+				return new Configuration() {
+					public void setListeners(String type, Object[] listeners) {
+						assertTrue(listeners instanceof MergeEventListener[]);
+						registeredListeners.put(type, new HashSet(Arrays.asList(listeners)));
+					}
+				};
+			}
+			protected SessionFactory newSessionFactory(Configuration config) {
+				return null;
+			}
+		};
+		sfb.setMappingResources(new String[0]);
+		sfb.setDataSource(new DriverManagerDataSource());
+		Map listeners = new HashMap();
+		Set mergeSet = new HashSet();
+		mergeSet.add(new DummyMergeEventListener());
+		mergeSet.add(new DummyMergeEventListener());
+		listeners.put("merge", mergeSet);
+		sfb.setEventListeners(listeners);
+		sfb.afterPropertiesSet();
+		assertEquals(listeners, registeredListeners);
+	}
+
 	public void testLocalSessionFactoryBeanWithFilterDefinitions() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("filterDefinitions.xml", getClass()));
 		FilterTestLocalSessionFactoryBean sf = (FilterTestLocalSessionFactoryBean) xbf.getBean("&sessionFactory");
@@ -496,6 +526,16 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		protected SessionFactory newSessionFactory(Configuration config) {
 			this.mappings = config.createMappings();
 			return null;
+		}
+	}
+
+
+	public static class DummyMergeEventListener implements MergeEventListener {
+
+		public void onMerge(MergeEvent event) throws HibernateException {
+		}
+
+		public void onMerge(MergeEvent event, Map copiedAlready) throws HibernateException {
 		}
 	}
 
