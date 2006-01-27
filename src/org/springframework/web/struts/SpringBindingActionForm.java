@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,7 +167,7 @@ public class SpringBindingActionForm extends ActionForm {
 			ObjectError objectError = (ObjectError) it.next();
 			String effectiveMessageKey = findEffectiveMessageKey(objectError);
 			if (effectiveMessageKey == null && !defaultActionMessageAvailable) {
-				// Need to specify default code despite it not beign resolvable:
+				// Need to specify default code despite it not being resolvable:
 				// Struts 1.1 ActionMessage doesn't support default messages.
 				effectiveMessageKey = objectError.getCode();
 			}
