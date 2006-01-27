@@ -19,14 +19,12 @@ package org.springframework.aop.config;
 import junit.framework.TestCase;
 
 import org.springframework.beans.ITestBean;
-import org.springframework.beans.PropertyAccessException;
-import org.springframework.beans.PropertyAccessExceptionsException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
- * @author Rob Harrop
+ * @author Adrian Colyer
  */
 public class AopNamespaceHandlerReturningTests extends TestCase {
 
@@ -48,18 +46,9 @@ public class AopNamespaceHandlerReturningTests extends TestCase {
 		try {
 			this.context = new ClassPathXmlApplicationContext(getErrorConfigLocation());
 			fail("Expected BeanCreationException");
-		} catch (BeanCreationException beanEx) {
-			Throwable cause = beanEx.getCause();
-			assertTrue("Expected PropertyAccessExceptionsException, got: " + cause.getClass(),
-					cause instanceof PropertyAccessExceptionsException);
-			PropertyAccessExceptionsException ex = (PropertyAccessExceptionsException) cause;
-			PropertyAccessException nestedEx = ex.getPropertyAccessException("returningName");
-			// We get back a MethodInvocationException, which nests what we really want to test...
-			cause = nestedEx.getCause();
-			assertTrue("Expected UnsupportedOperationException, got: " + cause.getClass(),
-					cause instanceof UnsupportedOperationException);
-			assertEquals("Only afterReturning advice can be used to bind a return value",
-					cause.getMessage());
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.contains(UnsupportedOperationException.class));
 		}
 	}
 

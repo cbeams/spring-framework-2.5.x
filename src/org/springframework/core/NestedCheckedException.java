@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -137,21 +137,16 @@ public abstract class NestedCheckedException extends Exception {
 		if (exClass == null) {
 			return false;
 		}
-		Throwable ex = this;
-		while (ex != null) {
-			if (exClass.isInstance(ex)) {
-				return true;
-			}
-			if (ex instanceof NestedCheckedException) {
-				// Cast is necessary on JDK 1.3, where Throwable does not
-				// provide a "getCause" method itself.
-				ex = ((NestedCheckedException) ex).getCause();
-			}
-			else {
-				ex = null;
-			}
+		if (exClass.isInstance(this)) {
+			return true;
 		}
-		return false;
+		Throwable cause = getCause();
+		if (cause instanceof NestedCheckedException) {
+			return ((NestedCheckedException) cause).contains(exClass);
+		}
+		else {
+			return (cause != null && exClass.isInstance(cause));
+		}
 	}
 
 }

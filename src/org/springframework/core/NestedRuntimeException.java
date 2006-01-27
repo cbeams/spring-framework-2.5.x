@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,21 +137,16 @@ public abstract class NestedRuntimeException extends RuntimeException {
 		if (exClass == null) {
 			return false;
 		}
-		Throwable ex = this;
-		while (ex != null) {
-			if (exClass.isInstance(ex)) {
-				return true;
-			}
-			if (ex instanceof NestedRuntimeException) {
-				// Cast is necessary on JDK 1.3, where Throwable does not
-				// provide a "getCause" method itself.
-				ex = ((NestedRuntimeException) ex).getCause();
-			}
-			else {
-				ex = null;
-			}
+		if (exClass.isInstance(this)) {
+			return true;
 		}
-		return false;
+		Throwable cause = getCause();
+		if (cause instanceof NestedRuntimeException) {
+			return ((NestedRuntimeException) cause).contains(exClass);
+		}
+		else {
+			return (cause != null && exClass.isInstance(cause));
+		}
 	}
 
 }
