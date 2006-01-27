@@ -34,11 +34,15 @@ import java.util.Arrays;
 public abstract class ObjectUtils {
 
 	/**
-	 * Determine if the given objects are equal, returning true if both are null
-	 * or false if only one is null.
+	 * Determine if the given objects are equal, returning <code>true</code>
+	 * if both are <code>null</code> or <code>false</code> if only one is
+	 * <code>null</code>.
+	 * <p>Compares arrays with <code>Arrays.equals</code>, performing an equality
+	 * check based on the array elements rather than the array reference.
 	 * @param o1 first Object to compare
 	 * @param o2 second Object to compare
 	 * @return whether the given objects are equal
+	 * @see java.util.Arrays#equals
 	 */
 	public static boolean nullSafeEquals(Object o1, Object o2) {
 		if (o1 == o2) {
@@ -47,7 +51,6 @@ public abstract class ObjectUtils {
 		if (o1 == null || o2 == null) {
 			return false;
 		}
-
 		if (o1.equals(o2)) {
 			return true;
 		}
