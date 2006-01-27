@@ -78,7 +78,6 @@ public class XmlBeanFactoryTests extends TestCase {
 		reader.setValidating(false);
 		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
 
-		assertTrue("7 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 7);
 		TestBean emma = (TestBean) xbf.getBean("emma");
 		TestBean georgia = (TestBean) xbf.getBean("georgia");
 		ITestBean emmasJenks = emma.getSpouse();
@@ -98,7 +97,6 @@ public class XmlBeanFactoryTests extends TestCase {
 		Resource resource = new ClassPathResource("reftypes.xml", getClass());
 		reader.loadBeanDefinitions(new EncodedResource(resource, "ISO-8859-1"));
 
-		assertTrue("7 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 7);
 		TestBean jen = (TestBean) xbf.getBean("jenny");
 		TestBean dave = (TestBean) xbf.getBean("david");
 		TestBean jenks = (TestBean) xbf.getBean("jenks");
@@ -112,7 +110,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 
-        reader.setValidating(false);
+		reader.setValidating(false);
 		InputStream inputStream = getClass().getResourceAsStream("reftypes.xml");
 		try {
 			reader.loadBeanDefinitions(new InputSource(inputStream));
@@ -152,11 +150,45 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals("inner4", inner4.getName());
 		assertEquals(9, inner4.getAge());
 
+		TestBean hasInnerBeansForConstructor = (TestBean) xbf.getBean("hasInnerBeansForConstructor");
+		TestBean innerForConstructor = (TestBean) hasInnerBeansForConstructor.getSpouse();
+		assertNotNull(innerForConstructor);
+		assertEquals("innerBean", innerForConstructor.getBeanName());
+		assertEquals("inner1", innerForConstructor.getName());
+		assertEquals(6, innerForConstructor.getAge());
+
 		xbf.destroySingletons();
 		assertTrue(inner1.wasDestroyed());
 		assertTrue(inner2.wasDestroyed());
 		assertTrue(innerFactory.getName() == null);
 		assertTrue(inner5.wasDestroyed());
+	}
+
+	public void testFailsOnInnerBean() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(false);
+		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
+
+		try {
+			xbf.getBean("failsOnInnerBean");
+		}
+		catch (BeanCreationException ex) {
+			// Check whether message contains outer bean name.
+			ex.printStackTrace();
+			assertTrue(ex.getMessage().contains("failsOnInnerBean"));
+			assertTrue(ex.getMessage().contains("someMap"));
+		}
+
+		try {
+			xbf.getBean("failsOnInnerBeanForConstructor");
+		}
+		catch (BeanCreationException ex) {
+			// Check whether message contains outer bean name.
+			ex.printStackTrace();
+			assertTrue(ex.getMessage().contains("failsOnInnerBeanForConstructor"));
+			assertTrue(ex.getMessage().contains("constructor argument"));
+		}
 	}
 
 	public void testSingletonInheritanceFromParentFactorySingleton() throws Exception {
@@ -1267,8 +1299,8 @@ public class XmlBeanFactoryTests extends TestCase {
 		tbArg.setName("arg1");
 		TestBean tbArg2 = new TestBean();
 		tbArg2.setName("arg2");
-		FactoryMethods fm1 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", new Object[]{tbArg});
-		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", new Object[]{tbArg2});
+		FactoryMethods fm1 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", new Object[] {tbArg});
+		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", new Object[] {tbArg2});
 
 		assertEquals(0, fm1.getNum());
 		assertEquals("default", fm1.getName());

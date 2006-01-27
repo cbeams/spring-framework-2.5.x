@@ -889,7 +889,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 */
 	protected Object parsePropertySubElement(Element ele, String beanName) throws BeanDefinitionStoreException {
 		if (ele.getTagName().equals(BEAN_ELEMENT)) {
-			return parseBeanDefinitionElement(ele, true);
+			try {
+				return parseBeanDefinitionElement(ele, true);
+			}
+			catch (BeanDefinitionStoreException ex) {
+				throw new BeanDefinitionStoreException(
+						getResource(), beanName, "Could not parse inner bean definition", ex);
+			}
 		}
 		else if (ele.getTagName().equals(REF_ELEMENT)) {
 			// A generic reference to any name of any bean.
