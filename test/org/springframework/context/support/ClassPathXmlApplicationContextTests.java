@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.util.FileCopyUtils;
  */
 public class ClassPathXmlApplicationContextTests extends TestCase {
 
-	public void testMultipleConfigLocations() throws Exception {
+	public void testMultipleConfigLocations() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				new String[] {
 					"/org/springframework/context/support/contextB.xml",
@@ -55,7 +55,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		assertTrue(ctx.containsBean("logicTwo"));
 	}
 
-	public void testConfigLocationPattern() throws Exception {
+	public void testConfigLocationPattern() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"/org/springframework/context/support/context*.xml");
 		assertTrue(ctx.containsBean("service"));
@@ -143,7 +143,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		assertEquals("contexttest", writer.toString());
 	}
 
-	public void testGenericApplicationContextWithXmlBeanDefinitions() throws Exception {
+	public void testGenericApplicationContextWithXmlBeanDefinitions() {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(ctx);
 		reader.loadBeanDefinitions(new ClassPathResource("contextB.xml", getClass()));
