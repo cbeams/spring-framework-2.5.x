@@ -18,6 +18,7 @@ package org.springframework.beans.factory.xml;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 
 /**
@@ -28,32 +29,34 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  */
 public final class XmlBeanDefinitionReaderTests extends TestCase {
 
-    private MockControl mock;
-    private BeanDefinitionRegistry registry;
+	private MockControl mock;
+	private BeanDefinitionRegistry registry;
 
-    public void setUp() {
-        this.mock = MockControl.createControl(BeanDefinitionRegistry.class);
-        this.registry = (BeanDefinitionRegistry) mock.getMock();
-    }
+	public void setUp() {
+		this.mock = MockControl.createControl(BeanDefinitionRegistry.class);
+		this.registry = (BeanDefinitionRegistry) mock.getMock();
+	}
 
-    public void testSetParserClassSunnyDay() throws Exception {
-        new XmlBeanDefinitionReader(this.registry).setParserClass(DefaultXmlBeanDefinitionParser.class);
-    }
+	public void testSetParserClassSunnyDay() throws Exception {
+		new XmlBeanDefinitionReader(this.registry).setParserClass(DefaultXmlBeanDefinitionParser.class);
+	}
 
-    public void testSetParserClassToNull() throws Exception {
-        try {
-            new XmlBeanDefinitionReader(this.registry).setParserClass(null);
-            fail("An IllegalArgumentException must have been thrown (null parserClass).");
-        } catch (final IllegalArgumentException expected) {
-        }
-    }
+	public void testSetParserClassToNull() throws Exception {
+		try {
+			new XmlBeanDefinitionReader(this.registry).setParserClass(null);
+			fail("An IllegalArgumentException must have been thrown (null parserClass).");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
 
-    public void testSetParserClassToUnsupportedParserType() throws Exception {
-        try {
-            new XmlBeanDefinitionReader(this.registry).setParserClass(String.class);
-            fail("An IllegalArgumentException must have been thrown (usupported parserClass).");
-        } catch (final IllegalArgumentException expected) {
-        }
-    }
+	public void testSetParserClassToUnsupportedParserType() throws Exception {
+		try {
+			new XmlBeanDefinitionReader(this.registry).setParserClass(String.class);
+			fail("An IllegalArgumentException must have been thrown (usupported parserClass).");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
 
 }
