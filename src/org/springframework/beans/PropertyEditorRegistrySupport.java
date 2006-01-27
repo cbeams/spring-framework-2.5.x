@@ -373,11 +373,11 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 				String prefix = propertyPath.substring(0, startIndex);
 				String key = propertyPath.substring(startIndex, endIndex + 1);
 				String suffix = propertyPath.substring(endIndex + 1, propertyPath.length());
-				// strip the first key
+				// Strip the first key.
 				strippedPaths.add(nestedPath + prefix + suffix);
-				// search for further keys to strip, with the first key stripped
+				// Search for further keys to strip, with the first key stripped.
 				addStrippedPropertyPaths(strippedPaths, nestedPath + prefix, suffix);
-				// search for further keys to strip, with the first key not stripped
+				// Search for further keys to strip, with the first key not stripped.
 				addStrippedPropertyPaths(strippedPaths, nestedPath + prefix + key, suffix);
 			}
 		}
