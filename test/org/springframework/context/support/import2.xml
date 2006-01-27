@@ -3,8 +3,7 @@
 
 <beans>
 
-	<bean name="assemblerTwo" class="org.springframework.context.support.Assembler">
-		<property name="service"><ref bean="service"/></property>
+	<bean name="assemblerTwo" parent="assemblerOne">
 		<property name="logic"><ref bean="logicTwo"/></property>
 	</bean>
 
