@@ -40,7 +40,6 @@ public class AopNamespaceHandlerScopeTests extends TestCase {
 	}
 
 	public void testRequestScoping() throws Exception {
-
 		MockHttpServletRequest oldRequest = new MockHttpServletRequest();
 		MockHttpServletRequest newRequest = new MockHttpServletRequest();
 
@@ -89,4 +88,5 @@ public class AopNamespaceHandlerScopeTests extends TestCase {
 	private ITestBean getTestBean(String name) {
 		return (ITestBean) this.context.getBean(name);
 	}
+
 }

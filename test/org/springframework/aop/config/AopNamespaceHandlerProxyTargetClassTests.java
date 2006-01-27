@@ -19,7 +19,6 @@ package org.springframework.aop.config;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 
-
 /**
  * @author Rob Harrop
  */
@@ -33,4 +32,5 @@ public class AopNamespaceHandlerProxyTargetClassTests extends AopNamespaceHandle
 	protected String getConfigLocation() {
 		return "org/springframework/aop/config/aopNamespaceHandlerProxyTargetClassTests.xml";
 	}
+
 }
