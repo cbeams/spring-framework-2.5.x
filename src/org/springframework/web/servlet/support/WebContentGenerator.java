@@ -28,7 +28,8 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
 /**
  * Convenient superclass for any kind of web content generator,
  * like AbstractController and WebContentInterceptor. Can also be
- * used for custom handlers that have their own HandlerAdapter.
+ * used for custom handlers that have their own
+ * {@link org.springframework.web.servlet.HandlerAdapter}.
  *
  * <p>Supports HTTP cache control options. The usage of corresponding
  * HTTP headers can be determined via the "useExpiresHeader" and
@@ -56,7 +57,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	public static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
 
-	/** Set of supported methods. GET and POST by default. */
+	/** Set of supported methods. HEAD, GET and POST by default. */
 	private Set	supportedMethods = new HashSet();
 
 	private boolean requireSession = false;
@@ -243,8 +244,9 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	/**
 	 * Set HTTP headers to allow caching for the given number of seconds.
-	 * Tells the browser to revalidate the resource if mustRevalidate is true.
-	 * @param response current HTTP response
+	 * Tells the browser to revalidate the resource if mustRevalidate is
+	 * <code>true</code>.
+	 * @param response the current HTTP response
 	 * @param seconds number of seconds into the future that the response
 	 * should be cacheable for
 	 * @param mustRevalidate whether the client should revalidate the resource
@@ -280,12 +282,14 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
-	 * Apply the given cache seconds and generate respective HTTP headers,
-	 * i.e. allow caching for the given number of seconds in case of a positive
-	 * value, prevent caching if given a 0 value, do nothing else.
-	 * @param response current HTTP response
-	 * @param seconds positive number of seconds into the future that the
-	 * response should be cacheable for, 0 to prevent caching
+	 * Apply the given cache seconds and generate respective HTTP headers.
+	 * <p>That is, allow caching for the given number of seconds in the
+	 * case of a positive value, prevent caching if given a 0 value, else
+	 * do nothing (i.e. leave caching to the client).
+	 * @param response the current HTTP response
+	 * @param seconds the (positive) number of seconds into the future that
+	 * the response should be cacheable for; 0 to prevent caching; and
+	 * a negative value to leave caching to the client.
 	 * @param mustRevalidate whether the client should revalidate the resource
 	 * (typically only necessary for controllers with last-modified support)
 	 */
