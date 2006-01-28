@@ -23,7 +23,7 @@ SQLException), simplifies error handling, and greatly reduces the amount of code
 You'll never need to write another finally block to use JDBC again. The JDBC-oriented exceptions comply to
 Spring's generic DAO exception hierarchy.
 
-* Integration with Hibernate, JDO, TopLink, Apache OJB, and iBATIS SQL Maps: in terms of resource holders,
+* Integration with JDO, JPA, Hibernate, TopLink, Apache OJB, and iBATIS SQL Maps: in terms of resource holders,
 DAO implementation support, and transaction strategies. First-class Hibernate and JDO support with many
 IoC convenience features, addressing many typical Hibernate/JDO integration issues. All of these comply
 to Spring's generic transaction and DAO exception hierarchies.
@@ -90,7 +90,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~1830 KB)
+* "spring" (~1835 KB)
 - Convenient jar file that combines all standard modules (see "module jars" below)
 - Note: Does NOT include extension modules! (see "extension module jars" below)
 
@@ -100,11 +100,11 @@ MODULE JARS (dist/modules):
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~270 KB)
+* "spring-beans" (~275 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
-* "spring-aop" (~250 KB)
+* "spring-aop" (~255 KB)
 - Contents: AOP framework, source-level metadata support, AOP Alliance interfaces
 - Dependencies: spring-core, (spring-beans, CGLIB, Commons Attributes)
 
