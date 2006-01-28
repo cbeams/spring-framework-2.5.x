@@ -44,7 +44,7 @@ import org.springframework.core.Constants;
  * unregistered by overriding the {@link #onRegister(ObjectName)} and
  * {@link #onUnregister(ObjectName)} methods respectively.
  *
- * <p>By default, the registration process wil fail if attempting to
+ * <p>By default, the registration process will fail if attempting to
  * register an MBean using a {@link javax.management.ObjectName} that is
  * already used.
  *
@@ -153,7 +153,7 @@ public class MBeanRegistrationSupport {
 	 * Actually register the MBean with the server. The behavior when encountering
 	 * an existing MBean can be configured using the {@link #setRegistrationBehavior(int)}
 	 * and {@link #setRegistrationBehaviorName(String)} methods.
-	 * @throws JMException if the export failed
+	 * @throws JMException if the registration failed
 	 */
 	protected void doRegister(Object mbean, ObjectName objectName) throws JMException {
 		try {

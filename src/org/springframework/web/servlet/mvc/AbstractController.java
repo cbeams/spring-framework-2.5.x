@@ -69,8 +69,8 @@ import org.springframework.web.util.WebUtils;
  *      <td>requireSession</td>
  *      <td>false</td>
  *      <td>whether a session should be required for requests to be able to
- *          be handled by this controller. This ensures, derived controller
- *          can - without fear of Nullpointers - call request.getSession() to
+ *          be handled by this controller. This ensures that derived controller
+ *          can - without fear of null pointers - call request.getSession() to
  *          retrieve a session. If no session can be found while processing
  *          the request, a ServletException will be thrown</td>
  *  </tr>

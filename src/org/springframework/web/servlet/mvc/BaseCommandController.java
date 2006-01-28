@@ -270,7 +270,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Specify one or more PropertyEditorRegistrars to be applied
 	 * to every DataBinder that this controller uses.
 	 * <p>Allows for factoring out the registration of PropertyEditors
-	 * to separate objects, as alternative to <code>initBinder</code>.
+	 * to separate objects, as an alternative to <code>initBinder</code>.
 	 * @see #initBinder
 	 */
 	public final void setPropertyEditorRegistrars(PropertyEditorRegistrar[] propertyEditorRegistrars) {
