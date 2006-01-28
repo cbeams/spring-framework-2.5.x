@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 M2 (25.1.2006)
+Changes in version 2.0 M2 (31.1.2006)
 -------------------------------------
 
 Overall
@@ -41,17 +41,21 @@ Package org.springframework.beans
 * DefaultListableBeanFactory's "getBeansOfType" logs BeanCurrentlyInCreationException message instead of stacktrace
 * refined DefaultXmlBeanDefinitionParser to explicity check for empty ref name and throw meaningful exception
 * DefaultXmlBeanDefinitionParser wraps unexpected exceptions in BeanDefinitionStoreException with context info
+* inner bean parsing/instantiation exceptions get wrapped in outer exceptions with appropriate context information
 * moved general bean wiring support from "beans.factory.aspectj" to "beans.factory.wiring"/"beans.factory.annotation"
 * renamed AspectJ AnnotationBeanConfigurer to AnnotationBeanConfigurerAspect
+* deprecated BeanFactoryBootstrap in favor of using a BeanFactoryLocator or a custom bootstrap class
 
 Package org.springframework.context
 * refined AbstractApplicationContext to never register more than one JVM shutdown hook
+* deprecated ContextListener, since it doesn't serve any purpose
 
 Package org.springframework.core
 * refined Jdk13ControlFlow to be compatible with GNU ClassPath (whose stacktrace has a whitespace after the method name)
 * added NestedIOException, deriving from java.io.IOException and adding NestedCheckedException-style root cause handling
 * refined AbstractResource to work around "FilterInputStream.close()" NPE, simply catching Throwable and ignoring it
 * PathMatchingResourcePatternResolver considers URL protocol "wsjar" as jar file (to load from WebSphere-managed jars)
+* ResourceArrayPropertyEditor can translate a set/list of patterns into a Resource array (rather than just one pattern)
 
 Package org.springframework.jdbc
 * DataSourceTransactionManager only attempts to release Connection if not pre-bound (to avoid inappropriate log message)
@@ -64,6 +68,7 @@ Package org.springframework.jdbc
 * reworked SqlQuery and subclasses to work with a RowMapper instead of a ResultReader -> "newRowMapper" template method
 * fixed BatchSqlUpdate's constructor that takes a "batchSize" argument to correctly interpret it as batch size
 * added "trackRowsAffected" property to BatchSqlUpdate, allowing to turn off the row counts list to save memory
+* refined JdbcBeanDefinitionReader to offer constructors with BeanDefinitionRegistry and PropertiesBeanDefinitionReader
 
 Package org.springframework.jmx
 * fixed MBeanExporter to work correctly with an "excludedBeans" list that it not sorted by bean name ascending
@@ -78,7 +83,8 @@ Package org.springframework.mock
 Package org.springframework.orm
 * SqlMapClientTemplate always works with SqlMapSession and provided Connection to enable proper batching in all cases
 * added "configLocations" property to LocalSessionFactoryBean for Hibernate3, allowing to load multiple config files
-* LocalSessionFactoryBean supports cache regions specified through "entity/collectionCacheStrategies" on Hibernate 3.1
+* LocalSessionFactoryBean supports cache regions specified through "entity/collectionCacheStrategies" (on Hibernate 3.1)
+* LocalSessionFactoryBean supports multiple event listeners per type through "eventListeners" (on Hibernate 3.1)
 * added optional SpringSessionContext for Hibernate 3.1, to plug Spring into "getCurrentSession()" without proxying
 * added "replicate" convenience methods to HibernateTemplate for both Hibernate2 and Hibernate3
 * added BlobStringType with configurable character encoding for both Hibernate2 and Hibernate3
@@ -119,6 +125,9 @@ Package org.springframework.util
 * refined StopWatch to not add new lines for "shortSummary()" but rather only for "prettyPrint()"
 * fixed ConcurrencyThrottleSupport to serialize all relevant state
 
+Package org.springframework.validation
+* DataBinder registers suppressed fields in BindException, which offers a "getSuppressedFields()" accessor now
+
 Package org.springframework.web
 * "contextConfigLocation" params in "web.xml" support "${...}" style placeholders for system properties
 * deprecated BindUtils and BindInitializer in package "web.bind" in favor of direct ServletRequestDataBinder usage
@@ -133,6 +142,7 @@ Package org.springframework.web
 * refactored RequestHandledEvent into RequestHandledEvent base class and ServletRequestHandledEvent subclass
 * renamed FrameworkPortlet's RequestHandledEvent to PortletRequestHandledEvent, a subclass of RequestHandledEvent
 * PortletBean ignores init-params that do not match bean properties, analogous to HttpServletBean
+* DispatcherServlet does not log handler exceptions at warn level anymore but rather only at debug level
 * reworked Servlet ModelAndView and Portlet ModelAndView to fully support ModelMap's conventional attribute names
 * added HttpSessionMutexListener and "WebUtils.getSessionMutex", used by AbstractController's "synchronizeOnSession"
 * added "PortletUtils.getSessionMutex", used by the Portlet AbstractController's "synchronizeOnSession"
