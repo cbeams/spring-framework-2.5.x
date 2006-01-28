@@ -92,12 +92,12 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's Hibernate 2.1 support
 
 * hibernate/hibernate3.jar
-- Hibernate 3.1.1 (http://www.hibernate.org)
+- Hibernate 3.1.2 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate 3.x support
 
 * hibernate/hibernate-annotation.jar
-- Hibernate Annotations 3.1 beta 6 (http://www.hibernate.org)
+- Hibernate Annotations 3.1 beta 8 (http://www.hibernate.org)
 - required for building the "tiger" part of the framework
 - required at runtime when using Spring's Hibernate Annotations support
 
@@ -253,7 +253,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's JasperReports support
 
 * jdo/jdo2.jar
-- JDO API 2.0 beta (http://www.jpox.org, "snapshot-9")
+- JDO API 2.0 beta (http://www.jpox.org, corresponding to JPOX 1.1.0-beta-6)
 - required for building the framework
 - required at runtime when using Spring's JDO support
 
@@ -311,8 +311,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's Log4jConfigurer
 
-* ojb/db-ojb-1.0.3.jar
-- Apache ObJectRelationalBridge 1.0.3 (http://db.apache.org/ojb)
+* ojb/db-ojb-1.0.4.jar
+- Apache ObJectRelationalBridge 1.0.4 (http://db.apache.org/ojb)
 - required for building the framework
 - required at runtime when using Spring's OJB support
 
