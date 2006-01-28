@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ import oracle.toplink.sessionbroker.SessionBroker;
 import oracle.toplink.sessions.Project;
 import oracle.toplink.sessions.Session;
 
+/**
+ * @author <a href="mailto:james.x.clark@oracle.com">James Clark</a>
+ */
 public class SessionBrokerFactoryTests extends TestCase {
 
 	/*
