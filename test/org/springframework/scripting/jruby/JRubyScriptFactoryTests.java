@@ -27,7 +27,6 @@ import org.springframework.core.NestedRuntimeException;
 import org.springframework.scripting.Calculator;
 import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
-import org.springframework.beans.BeansException;
 
 /**
  * @author Rob Harrop
@@ -74,6 +73,10 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testScriptCompilationException() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		try {
 			new ClassPathXmlApplicationContext("org/springframework/scripting/jruby/jrubyBrokenContext.xml");
 			fail("Should throw exception for broken script file");
