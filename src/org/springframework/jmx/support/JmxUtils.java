@@ -82,7 +82,8 @@ public abstract class JmxUtils {
 	 * <code>MBeanServer</code> can be found. Logs a warning if more than one
 	 * <code>MBeanServer</code> found, returning the first one from the list.
 	 * @param agentId the agent identifier of the MBeanServer to retrieve.
-	 * If this parameter is null, all registered MBeanServers are considered.
+	 * If this parameter is <code>null</code>, all registered MBeanServers are
+	 * considered.
 	 * @return the <code>MBeanServer</code> if found
 	 * @throws org.springframework.jmx.MBeanServerNotFoundException
 	 * if no <code>MBeanServer</code> could be found
