@@ -19,12 +19,17 @@ package org.springframework.aop.target;
 import org.springframework.beans.BeansException;
 
 /**
- * TargetSource that lazily accesses a singleton from a BeanFactory.
+ * {@link org.springframework.aop.TargetSource} that lazily accesses
+ * a singleton bean from a {@link org.springframework.beans.factory.BeanFactory}.
  *
  * <p>Useful when a proxy reference is needed on initialization but
  * the actual target object should not be initialized until first use.
- * The target bean must me marked as "lazy-init" too, else it would get
- * instantiated by the BeanFactory on startup. For example:
+ * When the target bean is defined in an
+ * {@link org.springframework.context.ApplicationContext} (or a
+ * <code>BeanFactory</code> that is eagerly pre-instantiating singleton beans)
+ * it must be marked as "lazy-init" too, else it will be instantiated by said
+ * <code>ApplicationContext</code> (or <code>BeanFactory</code>) on startup.
+ * <p>For example:
  *
  * <pre>
  * &lt;bean id="serviceTarget" class="example.MyService" lazy-init="true"&gt;
@@ -65,6 +70,7 @@ public class LazyInitTargetSource extends AbstractBeanFactoryBasedTargetSource {
 	/**
 	 * Sub-classes may override this method to perform additional processing on
 	 * the target object when it is first loaded.
+	 * @param targetObject the target object that has just been instantiated (and configured)
 	 */
 	protected void postProcessTargetObject(Object targetObject) {
 	}
