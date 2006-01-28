@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ import java.beans.PropertyEditor;
 import java.util.Collections;
 import java.util.EmptyStackException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.Set;
-import java.util.HashSet;
+import java.util.Stack;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -367,14 +367,20 @@ public class BindException extends Exception implements Errors {
 	}
 
 	/**
-	 * Marks the specified field as disallowed.
+	 * Mark the specified disallowed field as suppressed.
+	 * <p>The data binder invokes this for each field value that was
+	 * detected to target a disallowed field.
+	 * @see DataBinder#setAllowedFields
 	 */
 	public void recordSuppressedField(String fieldName) {
 		this.suppressedFields.add(fieldName);
 	}
 
 	/**
-	 * Returns the list of fields that were disallowed during the bind process.
+	 * Return the list of fields that were suppressed during the bind process.
+	 * <p>Can be used to determine whether any field values were targetting
+	 * disallowed fields.
+	 * @see DataBinder#setAllowedFields
 	 */
 	public String[] getSuppressedFields() {
 		return (String[]) this.suppressedFields.toArray(new String[this.suppressedFields.size()]);
