@@ -32,8 +32,8 @@ import org.springframework.beans.factory.InitializingBean;
  * Convenient FactoryBean for defining Hibernate FilterDefinitions.
  * Exposes a corresponding Hibernate FilterDefinition object.
  *
- * <p>Typically defined as inner bean within a LocalSessionFactoryBean
- * definition, as list element for the "filterDefinitions" bean property.
+ * <p>Typically defined as an inner bean within a LocalSessionFactoryBean
+ * definition, as the list element for the "filterDefinitions" bean property.
  * For example:
  *
  * <pre>
