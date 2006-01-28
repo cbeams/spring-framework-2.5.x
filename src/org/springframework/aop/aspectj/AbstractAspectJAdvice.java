@@ -24,7 +24,6 @@ import java.util.Map;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.weaver.tools.JoinPointMatch;
-import org.aspectj.weaver.tools.PointcutExpression;
 import org.aspectj.weaver.tools.PointcutParameter;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
@@ -113,6 +112,9 @@ public abstract class AbstractAspectJAdvice implements InitializingBean {
 			Method aspectJAdviceMethod, AspectJExpressionPointcut pointcutExpression, AspectInstanceFactory aif) {
 
 		this.aspectJAdviceMethod = aspectJAdviceMethod;
+		if (!aspectJAdviceMethod.isAccessible()) {
+			aspectJAdviceMethod.setAccessible(true);
+		}
 		this.numAdviceInvocationArguments = this.aspectJAdviceMethod.getParameterTypes().length;
 		this.pointcutExpression = pointcutExpression;
 		this.aif = aif;
