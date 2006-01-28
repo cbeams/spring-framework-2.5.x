@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -293,9 +293,9 @@ public abstract class JdbcUtils {
 	 * <p>The grammar of the string passed in should obey the rules of the JDBC spec
 	 * which is close to no rules at all: one placeholder per parameter, and it should
 	 * be valid SQL for the target database.
-	 * @param str string to search in. Returns 0 if this is null
-	 * @param placeholder the character to search for and count.
-	 * @param delimiters the delimiters for character literals.
+	 * @param str string to search in
+	 * @param placeholder the character to search for and count
+	 * @param delimiters the delimiters for character literals
 	 * @deprecated Use the countParameterPlaceholders(str) method in NamedParameterUtils instead.
 	 */
 	public static int countParameterPlaceholders(String str, char placeholder, String delimiters) {
