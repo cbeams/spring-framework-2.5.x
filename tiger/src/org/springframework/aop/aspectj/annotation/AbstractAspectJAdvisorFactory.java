@@ -220,7 +220,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 		AjType<?> ajType = AjTypeSystem.getAjType(aspectClass);
 		if (!ajType.isAspect()) {
-			throw new IllegalStateException("Cannot validate " + aspectClass.getName() + ": not an aspect");
+			throw new NotAnAtAspectException(aspectClass);
 		}
 		if (ajType.getPerClause().getKind() == PerClauseKind.PERCFLOW) {
 			throw new AopConfigException(aspectClass.getName() + " uses percflow instantiation model: " +

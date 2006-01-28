@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import org.springframework.aop.aspectj.annotation.AspectMetadata;
-import org.springframework.aop.aspectj.annotation.MetadataAwareAspectInstanceFactory;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
- * AspectInstanceFactory backed by Spring IoC prototype.
+ * AspectInstanceFactory backed by Spring IoC prototype, and enforcing
+ * prototype semantics.
  * Note that this may instantiate multiple times, which probably won't give
  * the semantics you expect. Use a LazySingletonMetadataAwareAspectInstanceFactoryDecorator
  * to wrap this to ensure only one new aspect comes back.
@@ -30,44 +29,14 @@ import org.springframework.beans.factory.BeanFactory;
  * @since 2.0
  * @see org.springframework.aop.aspectj.annotation.LazySingletonMetadataAwareAspectInstanceFactoryDecorator
  */
-public class PrototypeAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
-
-	private final BeanFactory beanFactory;
-
-	private final String name;
-
-	private final AspectMetadata am;
-
-	private int instantiations;
-
-
+public class PrototypeAspectInstanceFactory extends BeanFactoryAspectInstanceFactory {
+	
 	public PrototypeAspectInstanceFactory(BeanFactory beanFactory, String name) {
-		this.beanFactory = beanFactory;
+		super(beanFactory, name);
 		if (beanFactory.isSingleton(name)) {
 			throw new IllegalArgumentException(
 					"Cannot use PrototypeAspectInstanceFactory with bean named '" + name + "': not a prototype");
 		}
-		this.name = name;
-		am = new AspectMetadata(beanFactory.getType(name));
-	}
-	
-	public synchronized Object getAspectInstance() {
-		++instantiations;
-		return this.beanFactory.getBean(name);
-	}
-	
-	public AspectMetadata getAspectMetadata() {
-		return this.am;
-	}
-	
-	public int getInstantiationCount() {
-		return instantiations;
-	}
-	
-	@Override
-	public String toString() {
-		return "PrototypeAspectInstanceFactory: bean name='" + name + "'; " +
-			"instantiations=" + instantiations;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,30 @@ import org.springframework.aop.framework.AopConfigException;
  */
 public interface AspectJAdvisorFactory {
 	
+	/**
+	 * Return whether or not the given class is an aspect,
+	 * as reported by AspectJ's AJTypeSystem. Will simply return false
+	 * if the supposed aspect is invalid (such as an extension of
+	 * a concrete aspect class). Will return true for some aspects
+	 * that Spring AOP cannot process, such as those with unsupported
+	 * instantiation models. Use the validate() method to handle
+	 * these cases if necessary
+	 * @param clazz supposed annotation-style AspectJ class
+	 * @return whether or not this class is recognized by AspectJ as
+	 * an aspect class
+	 */
 	boolean isAspect(Class<?> clazz);
 	
 	/**
-	 * Is it a valid aspect class?
-	 * @param aspectClass
-	 * @throws AopConfigException
+	 * Is the given class a valid aspect class?
+	 * @param aspectClass supposed AspectJ annotation-style class
+	 * to validate
+	 * @throws AopConfigException if the class is an invalid aspect
+	 * (which can never be legal)
+	 * @throws NotAnAtAspectException if the class is not an aspect at all
+	 * (which may or may be legal, depending on the context)
 	 */
-	void validate(Class<?> aspectClass) throws AopConfigException;
+	void validate(Class<?> aspectClass) throws AopConfigException, NotAnAtAspectException;
 
 	/**
 	 * Create Spring Advisors for all At AspectJ methods on the given aspect instance.

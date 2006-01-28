@@ -35,6 +35,14 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 public enum Autowire {
 	
 	/**
+	 * Constant that indicates that autowiring information was not specified.
+	 * In some cases it may be necessary to specify autowiring status,
+	 * but merely confirm that this should be inherited from an enclosing
+	 * container definition scope.
+	 */
+	INHERITED(-1),
+	
+	/**
 	 * Constant that indicates no autowiring at all.
 	 */
 	NO(AutowireCapableBeanFactory.AUTOWIRE_NO),
@@ -56,5 +64,13 @@ public enum Autowire {
 	Autowire(int value) { this.value = value; }
 	
 	public int value() { return value; }
+	
+	/**
+	 * Return whether this is a specified autowiring value
+	 * @return was autowiring specified
+	 */
+	public boolean isAutowire() {
+		return this == BY_NAME || this == BY_TYPE;
+	}
 
 }
