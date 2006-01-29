@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,16 +190,17 @@ public abstract class CommonsFileUploadSupport {
 	 */
 	protected FileUpload prepareFileUpload(String encoding) {
 		FileUpload fileUpload = getFileUpload();
+		FileUpload actualFileUpload = fileUpload;
 
 		// Use new temporary FileUpload instance if the request specifies
 		// its own encoding that does not match the default encoding.
 		if (encoding != null && !encoding.equals(fileUpload.getHeaderEncoding())) {
-			fileUpload = newFileUpload(getFileItemFactory());
-			fileUpload.setSizeMax(getFileUpload().getSizeMax());
-			fileUpload.setHeaderEncoding(encoding);
+			actualFileUpload = newFileUpload(getFileItemFactory());
+			actualFileUpload.setSizeMax(fileUpload.getSizeMax());
+			actualFileUpload.setHeaderEncoding(encoding);
 		}
 
-		return fileUpload;
+		return actualFileUpload;
 	}
 
 	/**
