@@ -10,6 +10,7 @@ Overall
 * all of Spring must be built on JDK 1.5 now; the test suite is still able to run on JDK 1.4 and 1.3
 
 Package org.springframework.aop
+* added equals/hashCode implementations to all pointcuts and advisors
 * removed restriction on proxying protected methods from Cglib2AopProxy
 * allowed AopUtils's "invokeJoinpointUsingReflection" to invoke protected methods
 * added "autodetectInterfaces" property to ProxyFactoryBean, for TransactionProxyFactoryBean-style interface detection
@@ -88,7 +89,7 @@ Package org.springframework.orm
 * added optional SpringSessionContext for Hibernate 3.1, to plug Spring into "getCurrentSession()" without proxying
 * added "replicate" convenience methods to HibernateTemplate for both Hibernate2 and Hibernate3
 * added BlobStringType with configurable character encoding for both Hibernate2 and Hibernate3
-* updated Spring's JDO 2.0 support to JPOX JDO 2.0 API snapshot-9 (corresponding to JDO 2.0 final draft)
+* updated Spring's JDO 2.0 support to JDO API 2.0 beta (as provided by Apache, corresponding to JPOX 1.1.0-beta-6)
 * added full support for Java Persistence API 1.0 (JPA) Public Final Draft, in package "org.springframework.orm.jpa"
 
 Package org.springframework.samples
@@ -161,6 +162,7 @@ Package org.springframework.web
 * added RequestToViewNameTranslator strategy to allow DispatcherServlet to auto-generate view names where necessary
 * added DefaultRequestToViewNameTranslator to provide intuitive defaults for automatic view name generation
 * refined Struts DelegatingActionProxy and Delegating(Tiles)RequestProcessor to fall back to root WebApplicationContext
+* added DelegatingNavigationHandlerProxy and DelegatingPhaseListenerAdapter to JSF support (used by Spring Web Flow)
 
 
 Changes in version 2.0 M1 (22.12.2005)
