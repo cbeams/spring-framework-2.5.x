@@ -122,7 +122,7 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 	 * Can be overridden in subclasses.
 	 * <p>The default implementation checks the request encoding,
 	 * falling back to the default encoding specified for this resolver.
-	 * @param request current HTTP request
+	 * @param request current portlet request
 	 * @return the encoding for the request (never <code>null</code>)
 	 * @see javax.portlet.ActionRequest#getCharacterEncoding
 	 * @see #setDefaultEncoding

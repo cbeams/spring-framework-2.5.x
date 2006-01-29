@@ -88,9 +88,9 @@ public abstract class CommonsFileUploadSupport {
 	}
 
 	/**
-	 * Return the underlying <code>org.apache.commons.fileupload.servlet.ServletFileUpload</code>
+	 * Return the underlying <code>org.apache.commons.fileupload.FileUpload</code>
 	 * instance. There is hardly any need to access this.
-	 * @return the underlying ServletFileUpload instance
+	 * @return the underlying FileUpload instance
 	 */
 	public FileUpload getFileUpload() {
 		return fileUpload;
@@ -195,7 +195,7 @@ public abstract class CommonsFileUploadSupport {
 		// its own encoding that does not match the default encoding.
 		if (encoding != null && !encoding.equals(fileUpload.getHeaderEncoding())) {
 			fileUpload = newFileUpload(getFileItemFactory());
-			fileUpload.setSizeMax(fileUpload.getSizeMax());
+			fileUpload.setSizeMax(getFileUpload().getSizeMax());
 			fileUpload.setHeaderEncoding(encoding);
 		}
 

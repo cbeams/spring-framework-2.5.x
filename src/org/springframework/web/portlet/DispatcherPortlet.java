@@ -314,8 +314,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	}
 
 	/**
-	 * Initialize the MultipartResolver used by this class.
-	 * If no bean is defined with the given name in the BeanFactory
+	 * Initialize the PortletMultipartResolver used by this class.
+	 * If no valid bean is defined with the given name in the BeanFactory
 	 * for this namespace, no multipart handling is provided.
 	 */
 	private void initMultipartResolver() throws BeansException {
@@ -330,10 +330,18 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			// Default is no multipart resolver.
 			this.multipartResolver = null;
 			if (logger.isInfoEnabled()) {
-				logger.info("Unable to locate MultipartResolver with name '"	+ MULTIPART_RESOLVER_BEAN_NAME +
+				logger.info("Unable to locate PortletMultipartResolver with name '"	+ MULTIPART_RESOLVER_BEAN_NAME +
 						"': no multipart request handling provided");
 			}
 		}
+        catch (ClassCastException ex) {
+            // The bean is not a PortletMultipartResolver so ignore it
+            this.multipartResolver = null;
+            if (logger.isInfoEnabled()) {
+                logger.info("The bean with name '" + MULTIPART_RESOLVER_BEAN_NAME +
+                        "' is not a PortletMultipartResolver: no multipart request handling provided");
+            }
+        }
 	}
 
 	/**
