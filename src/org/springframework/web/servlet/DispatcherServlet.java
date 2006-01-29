@@ -94,7 +94,7 @@ import org.springframework.web.util.UrlPathHelper;
  * <li>If a {@link View} or view name is not supplied by the user, then the configured
  * RequestToViewNameTranslator will translate the current {@link HttpServletRequest}
  * into a view name. The default implementation is
- * {@link org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator}
+ * {@link org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator}.
  *
  * <li>Its strategy for resolving multipart requests is determined by a MultipartResolver
  * implementation. Implementations for Jakarta Commons FileUpload and Jason Hunter's COS
@@ -382,8 +382,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initMultipartResolver() throws BeansException {
 		try {
-			this.multipartResolver =
-					(MultipartResolver) getWebApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME);
+			this.multipartResolver = (MultipartResolver)
+					getWebApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME, MultipartResolver.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("Using MultipartResolver [" + this.multipartResolver + "]");
 			}
@@ -405,7 +405,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initLocaleResolver() throws BeansException {
 		try {
-			this.localeResolver = (LocaleResolver) getWebApplicationContext().getBean(LOCALE_RESOLVER_BEAN_NAME);
+			this.localeResolver = (LocaleResolver)
+					getWebApplicationContext().getBean(LOCALE_RESOLVER_BEAN_NAME, LocaleResolver.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("Using LocaleResolver [" + this.localeResolver + "]");
 			}
@@ -427,7 +428,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initThemeResolver() throws BeansException {
 		try {
-			this.themeResolver = (ThemeResolver) getWebApplicationContext().getBean(THEME_RESOLVER_BEAN_NAME);
+			this.themeResolver = (ThemeResolver)
+					getWebApplicationContext().getBean(THEME_RESOLVER_BEAN_NAME, ThemeResolver.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("Using ThemeResolver [" + this.themeResolver + "]");
 			}
@@ -461,7 +463,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		else {
 			try {
-				Object hm = getWebApplicationContext().getBean(HANDLER_MAPPING_BEAN_NAME);
+				Object hm = getWebApplicationContext().getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
 				this.handlerMappings = Collections.singletonList(hm);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -498,7 +500,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		else {
 			try {
-				Object ha = getWebApplicationContext().getBean(HANDLER_ADAPTER_BEAN_NAME);
+				Object ha = getWebApplicationContext().getBean(HANDLER_ADAPTER_BEAN_NAME, HandlerAdapter.class);
 				this.handlerAdapters = Collections.singletonList(ha);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -533,7 +535,8 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		else {
 			try {
-				Object her = getWebApplicationContext().getBean(HANDLER_EXCEPTION_RESOLVER_BEAN_NAME);
+				Object her = getWebApplicationContext().getBean(
+						HANDLER_EXCEPTION_RESOLVER_BEAN_NAME, HandlerExceptionResolver.class);
 				this.handlerExceptionResolvers = Collections.singletonList(her);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -550,7 +553,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void initRequestToViewNameTranslator() {
 		try {
 			this.viewNameTranslator = (RequestToViewNameTranslator) getWebApplicationContext().getBean(
-					REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME);
+					REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME, RequestToViewNameTranslator.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("Using RequestToViewNameTranslator [" + this.viewNameTranslator + "]");
 			}
@@ -586,7 +589,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		else {
 			try {
-				Object vr = getWebApplicationContext().getBean(VIEW_RESOLVER_BEAN_NAME);
+				Object vr = getWebApplicationContext().getBean(VIEW_RESOLVER_BEAN_NAME, ViewResolver.class);
 				this.viewResolvers = Collections.singletonList(vr);
 			}
 			catch (NoSuchBeanDefinitionException ex) {

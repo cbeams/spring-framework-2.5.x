@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,8 +90,8 @@ import org.springframework.web.servlet.ViewResolver;
  * Additional ViewResolver objects can be added through the application context.
  * ViewResolvers can be given any bean name (tested by type).
  *
- * <li>Its strategy for resolving multipart requests is determined by a 
- * PortletMultipartResolver implementation. An implementation for Jakarta Commons 
+ * <li>Its strategy for resolving multipart requests is determined by a
+ * PortletMultipartResolver implementation. An implementation for Jakarta Commons
  * FileUpload is included. The MultipartResolver bean name is "portletMultipartResolver";
  * default is none.
  * </ul>
@@ -325,9 +325,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 */
 	private void initMultipartResolver() throws BeansException {
 		try {
-			this.multipartResolver =
-					(PortletMultipartResolver) getPortletApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME, 
-                            PortletMultipartResolver.class);
+			this.multipartResolver = (PortletMultipartResolver)
+					getPortletApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME, PortletMultipartResolver.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("Using MultipartResolver [" + this.multipartResolver + "]");
 			}
@@ -361,7 +360,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		}
 		else {
 			try {
-				Object hm = getPortletApplicationContext().getBean(HANDLER_MAPPING_BEAN_NAME);
+				Object hm = getPortletApplicationContext().getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
 				this.handlerMappings = Collections.singletonList(hm);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -398,7 +397,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		}
 		else {
 			try {
-				Object ha = getPortletApplicationContext().getBean(HANDLER_ADAPTER_BEAN_NAME);
+				Object ha = getPortletApplicationContext().getBean(HANDLER_ADAPTER_BEAN_NAME, HandlerAdapter.class);
 				this.handlerAdapters = Collections.singletonList(ha);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -433,7 +432,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		}
 		else {
 			try {
-				Object her = getPortletApplicationContext().getBean(HANDLER_EXCEPTION_RESOLVER_BEAN_NAME);
+				Object her = getPortletApplicationContext().getBean(
+						HANDLER_EXCEPTION_RESOLVER_BEAN_NAME, HandlerExceptionResolver.class);
 				this.handlerExceptionResolvers = Collections.singletonList(her);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -462,7 +462,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		}
 		else {
 			try {
-				Object vr = getPortletApplicationContext().getBean(VIEW_RESOLVER_BEAN_NAME);
+				Object vr = getPortletApplicationContext().getBean(VIEW_RESOLVER_BEAN_NAME, ViewResolver.class);
 				this.viewResolvers = Collections.singletonList(vr);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
