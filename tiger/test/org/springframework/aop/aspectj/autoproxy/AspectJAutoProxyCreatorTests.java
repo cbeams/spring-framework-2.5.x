@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,10 +18,9 @@ package org.springframework.aop.aspectj.autoproxy;
 
 import junit.framework.TestCase;
 
-import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.PerTargetAspect;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.TwoAdviceAspect;
-import org.springframework.aop.framework.Advised;
+import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.PropertyValue;
@@ -36,7 +35,6 @@ import org.springframework.context.support.GenericApplicationContext;
  * Advisors to demonstrate that existing autoproxying contract is honoured.
  * 
  * @author Rod Johnson
- *
  */
 public class AspectJAutoProxyCreatorTests extends TestCase {
 	
@@ -47,7 +45,6 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		ITestBean adrian = (ITestBean) bf.getBean("adrian");
 		
 		assertTrue(AopUtils.isAopProxy(adrian));
-		Advised advised = (Advised) adrian;
 		assertEquals(68, adrian.getAge());
 	}
 	
@@ -193,4 +190,5 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		adrian1.setAge(0);
 		assertEquals(start++, adrian1.getAge());
 	}
+
 }
