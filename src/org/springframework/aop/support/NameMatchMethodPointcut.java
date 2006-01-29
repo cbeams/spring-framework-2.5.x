@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,12 +16,12 @@
 
 package org.springframework.aop.support;
 
-import org.springframework.util.ObjectUtils;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.springframework.util.ObjectUtils;
 
 /**
  * Pointcut bean for simple method name matches, as alternative to regexp patterns.
@@ -105,17 +105,12 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 		if (this == other) {
 			return true;
 		}
-
-		if (!(other instanceof NameMatchMethodPointcut)) {
-			return false;
-		}
-
-		NameMatchMethodPointcut that = (NameMatchMethodPointcut) other;
-
-		return ObjectUtils.nullSafeEquals(this.mappedNames, that.mappedNames);
+		return (other instanceof NameMatchMethodPointcut &&
+				ObjectUtils.nullSafeEquals(this.mappedNames, ((NameMatchMethodPointcut) other).mappedNames));
 	}
 
 	public int hashCode() {
 		return (this.mappedNames != null ? this.mappedNames.hashCode() : 0);
 	}
+
 }

@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,6 +24,7 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.core.ControlFlow;
 import org.springframework.core.ControlFlowFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -60,6 +61,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	 * @param methodName the name of the method
 	 */
 	public ControlFlowPointcut(Class clazz, String methodName) {
+		Assert.notNull(clazz, "Class must not be null");
 		this.clazz = clazz;
 		this.methodName = methodName;
 	}
@@ -106,28 +108,24 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 		return this;
 	}
 
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-
-		if (!(obj instanceof ControlFlowPointcut)) {
+		if (!(other instanceof ControlFlowPointcut)) {
 			return false;
 		}
-
-		ControlFlowPointcut that = (ControlFlowPointcut) obj;
-		return (this.clazz.equals(that.clazz))
-						&& ObjectUtils.nullSafeEquals(that.methodName, this.methodName);
+		ControlFlowPointcut that = (ControlFlowPointcut) other;
+		return (this.clazz.equals(that.clazz)) && ObjectUtils.nullSafeEquals(that.methodName, this.methodName);
 	}
 
 	public int hashCode() {
 		int code = 17;
 		code = 37 * code + this.clazz.hashCode();
-
 		if (this.methodName != null) {
 			code = 37 * code + this.methodName.hashCode();
 		}
-
 		return code;
 	}
+
 }

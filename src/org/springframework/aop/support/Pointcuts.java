@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,29 +31,6 @@ import org.springframework.aop.Pointcut;
  * @author Rod Johnson
  */
 public abstract class Pointcuts {
-	
-	private static class SetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
-		public static SetterPointcut INSTANCE = new SetterPointcut();
-		public boolean matches(Method method, Class targetClass) {
-			return method.getName().startsWith("set") &&
-				method.getParameterTypes().length == 1 &&
-				method.getReturnType() == Void.TYPE;
-		}
-		private Object readResolve() {
-			return INSTANCE;
-		}
-	}
-	
-	private static class GetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
-		public static GetterPointcut INSTANCE = new GetterPointcut();
-		public boolean matches(Method method, Class targetClass) {
-			return method.getName().startsWith("get") &&
-				method.getParameterTypes().length == 0;
-		}
-		private Object readResolve() {
-			return INSTANCE;
-		}
-	}
 	
 	/**
 	 * Pointcut matching all setters, in any class
@@ -107,9 +84,35 @@ public abstract class Pointcuts {
 		return false;
 	}
 
-	public static boolean equals(Pointcut a, Pointcut b) {
-		return a.getClassFilter() == b.getClassFilter() &&
-				a.getMethodMatcher() == b.getMethodMatcher();
+
+	private static class SetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
+
+		public static SetterPointcut INSTANCE = new SetterPointcut();
+
+		public boolean matches(Method method, Class targetClass) {
+			return method.getName().startsWith("set") &&
+				method.getParameterTypes().length == 1 &&
+				method.getReturnType() == Void.TYPE;
+		}
+
+		private Object readResolve() {
+			return INSTANCE;
+		}
+	}
+
+
+	private static class GetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
+
+		public static GetterPointcut INSTANCE = new GetterPointcut();
+
+		public boolean matches(Method method, Class targetClass) {
+			return method.getName().startsWith("get") &&
+				method.getParameterTypes().length == 0;
+		}
+
+		private Object readResolve() {
+			return INSTANCE;
+		}
 	}
 
 }

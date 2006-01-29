@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -48,8 +48,8 @@ public abstract class MethodMatchers {
 		private MethodMatcher b;
 
 		private UnionMethodMatcher(MethodMatcher a, MethodMatcher b) {
-			Assert.notNull(a, "'a' cannot be null.");
-			Assert.notNull(b, "'b' cannot be null.");
+			Assert.notNull(a, "First MethodMatcher must not be null");
+			Assert.notNull(b, "Second MethodMatcher must not be null");
 			this.a = a;
 			this.b = b;
 		}
@@ -94,39 +94,39 @@ public abstract class MethodMatchers {
 		private MethodMatcher b;
 
 		private IntersectionMethodMatcher(MethodMatcher a, MethodMatcher b) {
-			Assert.notNull(a, "'a' cannot be null.");
-			Assert.notNull(b, "'b' cannot be null.");
+			Assert.notNull(a, "First MethodMatcher must not be null");
+			Assert.notNull(b, "Second MethodMatcher must not be null");
 			this.a = a;
 			this.b = b;
 		}
 
 		public boolean matches(Method method, Class targetClass) {
-			return a.matches(method, targetClass) && b.matches(method, targetClass);
+			return this.a.matches(method, targetClass) && this.b.matches(method, targetClass);
 		}
 
 		public boolean isRuntime() {
-			return a.isRuntime() || b.isRuntime();
+			return this.a.isRuntime() || this.b.isRuntime();
 		}
 
 		public boolean matches(Method method, Class targetClass, Object[] args) {
 			// Because a dynamic intersection may be composed of a static and dynamic part,
 			// we must avoid calling the 3-arg matches method on a dynamic matcher, as
 			// it will probably be an unsupported operation.
-			boolean aMatches = a.isRuntime() ? a.matches(method, targetClass, args) : a.matches(method, targetClass);
-			boolean bMatches = b.isRuntime() ? b.matches(method, targetClass, args) : b.matches(method, targetClass);
+			boolean aMatches = this.a.isRuntime() ?
+					this.a.matches(method, targetClass, args) : this.a.matches(method, targetClass);
+			boolean bMatches = this.b.isRuntime() ?
+					this.b.matches(method, targetClass, args) : this.b.matches(method, targetClass);
 			return aMatches && bMatches;
 		}
 
-		public boolean equals(Object obj) {
-			if (this == obj) {
+		public boolean equals(Object other) {
+			if (this == other) {
 				return true;
 			}
-
-			if (!(obj instanceof IntersectionMethodMatcher)) {
+			if (!(other instanceof IntersectionMethodMatcher)) {
 				return false;
 			}
-
-			IntersectionMethodMatcher that = (IntersectionMethodMatcher) obj;
+			IntersectionMethodMatcher that = (IntersectionMethodMatcher) other;
 			return (this.a.equals(that.a) && this.b.equals(that.b));
 		}
 

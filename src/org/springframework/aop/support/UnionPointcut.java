@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,9 +25,8 @@ import org.springframework.aop.Pointcut;
 import org.springframework.util.Assert;
 
 /**
- * Pointcut unions are tricky, because we can't just
- * OR the MethodMatchers: we need to check that each MethodMatcher's
- * ClassFilter was happy as well.
+ * Pointcut unions are tricky, because we can't just 'OR' the MethodMatchers:
+ * We need to check that each MethodMatcher's ClassFilter was happy as well.
  *
  * @author Rod Johnson
  * @author Rob Harrop
@@ -42,8 +41,8 @@ class UnionPointcut implements Pointcut, Serializable {
 
 
 	public UnionPointcut(Pointcut a, Pointcut b) {
-		Assert.notNull(a, "'a' cannot be null.");
-		Assert.notNull(b, "'b' cannot be null.");
+		Assert.notNull(a, "First Pointcut must not be null");
+		Assert.notNull(b, "Second Pointcut must not be null");
 		this.a = a;
 		this.b = b;
 		this.methodMatcher = new PointcutUnionMethodMatcher();
@@ -58,17 +57,15 @@ class UnionPointcut implements Pointcut, Serializable {
 		return this.methodMatcher;
 	}
 
-	public boolean equals(Object obj) {
-		if (this == obj) {
+
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-
-		if (!(obj instanceof UnionPointcut)) {
+		if (!(other instanceof UnionPointcut)) {
 			return false;
 		}
-
-		UnionPointcut that = (UnionPointcut) obj;
-
+		UnionPointcut that = (UnionPointcut) other;
 		return (this.a.equals(that.a) && this.b.equals(that.b));
 	}
 
@@ -78,6 +75,7 @@ class UnionPointcut implements Pointcut, Serializable {
 		code = 37 * code + this.b.hashCode();
 		return code;
 	}
+
 
 	private class PointcutUnionMethodMatcher implements MethodMatcher, Serializable {
 
