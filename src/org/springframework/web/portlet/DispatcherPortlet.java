@@ -89,6 +89,11 @@ import org.springframework.web.servlet.ViewResolver;
  * resolving symbolic view names into View objects. Default is InternalResourceViewResolver.
  * Additional ViewResolver objects can be added through the application context.
  * ViewResolvers can be given any bean name (tested by type).
+ *
+ * <li>Its strategy for resolving multipart requests is determined by a 
+ * PortletMultipartResolver implementation. An implementation for Jakarta Commons 
+ * FileUpload is included. The MultipartResolver bean name is "portletMultipartResolver";
+ * default is none.
  * </ul>
  *
  * <p><b>A web application can use any number of DispatcherPortlets.</b> Each portlet
@@ -115,9 +120,9 @@ import org.springframework.web.servlet.ViewResolver;
 public class DispatcherPortlet extends FrameworkPortlet {
 
 	/**
-	 * Well-known name for the MultipartResolver object in the bean factory for this namespace.
+	 * Well-known name for the PortletMultipartResolver object in the bean factory for this namespace.
 	 */
-	public static final String MULTIPART_RESOLVER_BEAN_NAME = "multipartResolver";
+	public static final String MULTIPART_RESOLVER_BEAN_NAME = "portletMultipartResolver";
 
 	/**
 	 * Well-known name for the HandlerMapping object in the bean factory for this namespace.
@@ -321,7 +326,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	private void initMultipartResolver() throws BeansException {
 		try {
 			this.multipartResolver =
-					(PortletMultipartResolver) getPortletApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME);
+					(PortletMultipartResolver) getPortletApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME, 
+                            PortletMultipartResolver.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("Using MultipartResolver [" + this.multipartResolver + "]");
 			}
@@ -334,14 +340,6 @@ public class DispatcherPortlet extends FrameworkPortlet {
 						"': no multipart request handling provided");
 			}
 		}
-        catch (ClassCastException ex) {
-            // The bean is not a PortletMultipartResolver so ignore it
-            this.multipartResolver = null;
-            if (logger.isInfoEnabled()) {
-                logger.info("The bean with name '" + MULTIPART_RESOLVER_BEAN_NAME +
-                        "' is not a PortletMultipartResolver: no multipart request handling provided");
-            }
-        }
 	}
 
 	/**
