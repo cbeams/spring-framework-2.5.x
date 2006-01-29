@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.config;
+package org.springframework.aop.aspectj.autoproxy;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.config.NamespaceHandlerUtils;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.core.JdkVersion;
 
 /**
  * @author Rob Harrop
  */
-public class NamespaceHandlerUtilsTests extends TestCase {
+public class AspectJNamespaceHandlerTests extends TestCase {
 
 	public void testRegisterAutoProxyCreator() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
-			return;
-		}
-
 		BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
 
 		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
@@ -43,10 +39,6 @@ public class NamespaceHandlerUtilsTests extends TestCase {
 	}
 
 	public void testRegisterAspectJAutoProxyCreator() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
-			return;
-		}
-
 		BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
 
 		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(registry);
@@ -60,18 +52,11 @@ public class NamespaceHandlerUtilsTests extends TestCase {
 	}
 
 	public void testRegisterAspectJAutoProxyCreatorWithExistingAutoProxyCreator() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
-			return;
-		}
-
 		BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
-
 		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
-
 		assertEquals(1, registry.getBeanDefinitionCount());
 
 		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(registry);
-
 		assertEquals("Incorrect definition count", 1, registry.getBeanDefinitionCount());
 
 		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
@@ -79,18 +64,11 @@ public class NamespaceHandlerUtilsTests extends TestCase {
 	}
 
 	public void testRegisterAutoProxyCreatorWhenAspectJAutoProxyCreatorAlreadyExists() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
-			return;
-		}
-
 		BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
-
 		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(registry);
-
 		assertEquals(1, registry.getBeanDefinitionCount());
 
 		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
-
 		assertEquals("Incorrect definition count", 1, registry.getBeanDefinitionCount());
 
 		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
