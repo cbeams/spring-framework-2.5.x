@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,8 @@ package org.springframework.core;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import org.springframework.util.Assert;
+
 /**
  * Static factory to conceal automatic choice of Java 1.4 or 1.3 ControlFlow
  * implementation class.
@@ -27,6 +29,7 @@ import java.io.StringWriter;
  * but we don't want to impose a runtime dependency on JDK 1.4.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 02.02.2004
  */
 public abstract class ControlFlowFactory {
@@ -58,6 +61,7 @@ public abstract class ControlFlowFactory {
 		 * Searches for class name match in a StackTraceElement.
 		 */
 		public boolean under(Class clazz) {
+			Assert.notNull(clazz, "Class must not be null");
 			String className = clazz.getName();
 			for (int i = 0; i < stack.length; i++) {
 				if (this.stack[i].getClassName().equals(className)) {
@@ -72,6 +76,8 @@ public abstract class ControlFlowFactory {
 		 * in a StackTraceElement.
 		 */
 		public boolean under(Class clazz, String methodName) {
+			Assert.notNull(clazz, "Class must not be null");
+			Assert.notNull(methodName, "Method name must not be null");
 			String className = clazz.getName();
 			for (int i = 0; i < this.stack.length; i++) {
 				if (this.stack[i].getClassName().equals(className) &&
@@ -87,6 +93,9 @@ public abstract class ControlFlowFactory {
 		 * Caller must understand stack trace format, so there's less abstraction.
 		 */
 		public boolean underToken(String token) {
+			if (token == null) {
+				return false;
+			}
 			StringWriter sw = new StringWriter();
 			new Throwable().printStackTrace(new PrintWriter(sw));
 			String stackTrace = sw.toString();
@@ -130,6 +139,7 @@ public abstract class ControlFlowFactory {
 		 * Searches for class name match in the stringified stacktrace.
 		 */
 		public boolean under(Class clazz) {
+			Assert.notNull(clazz, "Class must not be null");
 			return this.stackTrace.indexOf(clazz.getName()) != -1;
 		}
 
@@ -143,6 +153,8 @@ public abstract class ControlFlowFactory {
 		 * Sun core libraries) always append '(' right after the method name.
 		 */
 		public boolean under(Class clazz, String methodName) {
+			Assert.notNull(clazz, "Class must not be null");
+			Assert.notNull(methodName, "Method name must not be null");
 			String searchPattern = clazz.getName() + "." + methodName;
 			int patternLength = searchPattern.length();
 			int index = 0;
@@ -169,7 +181,7 @@ public abstract class ControlFlowFactory {
 		 * Caller must understand stack trace format, so there's less abstraction.
 		 */
 		public boolean underToken(String token) {
-			return this.stackTrace.indexOf(token) != -1;
+			return (token != null && this.stackTrace.indexOf(token) != -1);
 		}
 	}
 
