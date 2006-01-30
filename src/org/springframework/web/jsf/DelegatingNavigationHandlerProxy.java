@@ -33,7 +33,7 @@ import org.springframework.web.context.WebApplicationContext;
  * &lt;application&gt;
  *   ...
  *   &lt;navigation-handler&gt;
- * 	   org.springframework.jsf.navigation.DelegatingNavigationHandlerProxy
+ * 	   org.springframework.web.jsf.DelegatingNavigationHandlerProxy
  *   &lt;/navigation-handler&gt;
  *   ...
  * &lt;/application&gt;</pre>
@@ -44,7 +44,7 @@ import org.springframework.web.context.WebApplicationContext;
  * power can be applied to such a bean, in particular all flavors of dependency injection.
  *
  * <pre>
- * &lt;bean name=&quot;jsfNavigationHandler&quot; class=";mypackage.MyNavigationHandler"/&gt;
+ * &lt;bean name="jsfNavigationHandler" class="mypackage.MyNavigationHandler"&gt;
  *   &lt;property name="myProperty" ref="myOtherBean"/&gt;
  * &lt;/bean&gt;</pre>
  *
