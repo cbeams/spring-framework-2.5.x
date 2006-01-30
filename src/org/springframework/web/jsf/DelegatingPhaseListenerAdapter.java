@@ -24,6 +24,7 @@ import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
 
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -38,7 +39,7 @@ import org.springframework.web.context.WebApplicationContext;
  * &lt;application&gt;
  *   ...
  *   &lt;phase-listener&gt;
- *     org.springframework.web.jsf.phase.DelegatingPhaseListenerAdapter
+ *     org.springframework.web.jsf.DelegatingPhaseListenerAdapter
  *   &lt;/phase-listener&gt;
  *   ...
  * &lt;/application&gt;</pre>
@@ -95,7 +96,7 @@ public class DelegatingPhaseListenerAdapter implements PhaseListener {
 	 */
 	protected Collection getDelegates(FacesContext facesContext) {
 		ListableBeanFactory bf = getBeanFactory(facesContext);
-		return bf.getBeansOfType(PhaseListener.class).values();
+		return BeanFactoryUtils.beansOfTypeIncludingAncestors(bf, PhaseListener.class).values();
 	}
 
 	/**
