@@ -26,14 +26,15 @@ import org.hibernate.engine.SessionFactoryImplementor;
  * that delegates to Spring's SessionFactoryUtils for providing a
  * Spring-managed current Session.
  *
- * <p>Used by Spring's LocalSessionFactoryBean if told to not expose
- * a transaction-aware SessionFactory proxy. LocalSessionFactoryBean's
- * default is still SessionFactory proxying, though, mainly to remain
- * compatible with Hibernate 3.0 as well).
+ * <p>Used by Spring's LocalSessionFactoryBean if told to not expose a
+ * transaction-aware SessionFactory proxy. LocalSessionFactoryBean's default
+ * is still SessionFactory proxying, though, mainly to remain compatible with
+ * Hibernate 3.0 as well. Turn the "exposeTransactionAwareSessionFactory" flag
+ * to "false" to expose the raw Hibernate 3.1 CurrentSessionContext mechanism.
  *
- * <p>Can be specified in custom SessionFactory setup through the
- * "hibernate.current_session_context_class" property, with the
- * fully qualified name of this class as value.
+ * <p>This CurrentSessionContext implementation can be specified in custom
+ * SessionFactory setup through the "hibernate.current_session_context_class"
+ * property, with the fully qualified name of this class as value.
  *
  * @author Juergen Hoeller
  * @since 2.0
