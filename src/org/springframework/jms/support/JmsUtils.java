@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,7 +160,7 @@ public abstract class JmsUtils {
 			// All other exceptions in our Jms runtime exception hierarchy have the
 			// same unqualified names as their javax.jms counterparts, so just
 			// construct the converted exception dynamically based on name.
-			String shortName = ClassUtils.getShortName(ex.getClass().getName());
+			String shortName = ClassUtils.getShortName(ex.getClass());
 
 			// All JmsException subclasses reside in the same package.
 			String longName = JmsException.class.getPackage().getName() + "." + shortName;
