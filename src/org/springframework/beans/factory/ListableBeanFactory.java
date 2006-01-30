@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,9 +36,11 @@ import org.springframework.beans.BeansException;
  * <p>The methods in this interface will just respect bean definitions of this factory.
  * They will ignore any singleton beans that have been registered by other means like
  * ConfigurableBeanFactory's <code>registerSingleton</code> method, with the exception
- * of <code>getBeansOfType</code> which will match such manually registered singletons
- * too. Of course, BeanFactory's methods do allow access to such special beans too.
- * In typical scenarios, all beans will be defined by bean definitions anyway.
+ * of <code>getBeanNamesOfType</code> and <code>getBeansOfType</code> which will check
+ * such manually registered singletons too. Of course, BeanFactory's <code>getBean</code>
+ * does allow transparent access to such special beans as well. However, in typical
+ * scenarios, all beans will be defined by external bean definitions anyway, so most
+ * applications don't need to worry about this differentation.
  *
  * <p>With the exception of <code>getBeanDefinitionCount</code> and
  * <code>containsBeanDefinition</code>, the methods in this interface are
@@ -105,6 +107,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * <p>This version of getBeanNamesForType matches all kinds of beans, be it
 	 * singletons, prototypes, or FactoryBeans. In most implementations, the
 	 * result will be the same as for <code>getBeanNamesOfType(type, true, true)</code>.
+	 * <p>Bean names returned by this method should always return bean names <i>in the
+	 * order of definition</i> in the backend configuration, as far as possible.
 	 * @param type the class or interface to match, or <code>null</code> for all bean names
 	 * @return the names of beans (or objects created by FactoryBeans) matching
 	 * the given object type (including subclasses), or an empty array if none
@@ -117,7 +121,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Return the names of beans matching the given type (including subclasses),
 	 * judging from either bean definitions or the value of <code>getObjectType</code>
 	 * in the case of FactoryBeans.
-	 * <p>Does consider objects created by FactoryBeans if the "includeFactoryBeans"
+	 * <p>Does consnsatisider objects created by FactoryBeans if the "includeFactoryBeans"
 	 * flag is set, which means that FactoryBeans will get initialized. If the
 	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
 	 * will be matched against the type. If "includeFactoryBeans" is not set,
@@ -128,6 +132,8 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * to include beans in ancestor factories too.
 	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
 	 * by other means than bean definitions.
+	 * <p>Bean names returned by this method should always return bean names <i>in the
+	 * order of definition</i> in the backend configuration, as far as possible.
 	 * @param type the class or interface to match, or <code>null</code> for all bean names
 	 * @param includePrototypes whether to include prototype beans too
 	 * or just singletons (also applies to FactoryBeans)
@@ -158,6 +164,10 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * <p>This version of getBeansOfType matches all kinds of beans, be it
 	 * singletons, prototypes, or FactoryBeans. In most implementations, the
 	 * result will be the same as for <code>getBeansOfType(type, true, true)</code>.
+	 * <p>The Map returned by this method should always return bean names and
+	 * corresponding bean instances <i>in the order of definition</i> in the
+	 * backend configuration, as far as possible. This will usually mean that
+	 * either JDK 1.4 or Commons Collections needs to be available.
 	 * @param type the class or interface to match, or <code>null</code> for all concrete beans
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values
@@ -183,6 +193,10 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * to include beans in ancestor factories too.
 	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
 	 * by other means than bean definitions.
+	 * <p>The Map returned by this method should always return bean names and
+	 * corresponding bean instances <i>in the order of definition</i> in the
+	 * backend configuration, as far as possible. This will usually mean that
+	 * either JDK 1.4 or Commons Collections needs to be available.
 	 * @param type the class or interface to match, or <code>null</code> for all concrete beans
 	 * @param includePrototypes whether to include prototype beans too
 	 * or just singletons (also applies to FactoryBeans)

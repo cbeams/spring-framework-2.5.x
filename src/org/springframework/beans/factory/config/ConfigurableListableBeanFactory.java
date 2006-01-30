@@ -48,7 +48,7 @@ public interface ConfigurableListableBeanFactory
 	 * <p>This will typically be used by application contexts to register
 	 * dependencies that are resolved in other ways, like BeanFactory through
 	 * BeanFactoryAware or ApplicationContext through ApplicationContextAware.
-	 * <p>By default, only the BeanFactory interface is ignored.
+	 * <p>By default, only the BeanFactoryAware interface is ignored.
 	 * For further types to ignore, invoke this method for each type.
 	 * @see org.springframework.beans.factory.BeanFactoryAware
 	 * @see org.springframework.context.ApplicationContextAware
@@ -71,7 +71,10 @@ public interface ConfigurableListableBeanFactory
 	/**
 	 * Ensure that all non-lazy-init singletons are instantiated, also considering
 	 * FactoryBeans. Typically invoked at the end of factory setup, if desired.
-	 * @throws BeansException if one of the singleton beans could not be created
+	 * @throws BeansException if one of the singleton beans could not be created.
+	 * Note: This may have left the factory with some beans already initialized!
+	 * Call <code>destroySingletons()</code> for full cleanup in this case.
+	 * @see #destroySingletons()
 	 */
 	void preInstantiateSingletons() throws BeansException;
 
