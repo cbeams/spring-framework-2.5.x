@@ -416,6 +416,9 @@ public class CustomEditorTests extends TestCase {
 
 		bw.setPropertyValue("myChar", "c");
 		assertEquals('c', cb.getMyChar());
+
+		bw.setPropertyValue("myChar", "\u0041");
+		assertEquals('A', cb.getMyChar());
 	}
 
 	public void testCharacterEditorWithAllowEmpty() {
@@ -428,6 +431,9 @@ public class CustomEditorTests extends TestCase {
 
 		bw.setPropertyValue("myCharacter", "c");
 		assertEquals(new Character('c'), cb.getMyCharacter());
+
+		bw.setPropertyValue("myCharacter", "\u0041");
+		assertEquals(new Character('A'), cb.getMyCharacter());
 
 		bw.setPropertyValue("myCharacter", "");
 		assertNull(cb.getMyCharacter());
