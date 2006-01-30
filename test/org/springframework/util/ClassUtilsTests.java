@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2006 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.springframework.util;
 
 import java.io.Serializable;
@@ -16,8 +32,6 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
 /**
- * Tests the various functionality of the ClassUtils class.
- *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  */
@@ -58,17 +72,42 @@ public class ClassUtilsTests extends TestCase {
 		assertEquals(double[].class, ClassUtils.forName("double[]"));
 	}
 
+	public void testGetQualifiedName() {
+		String className = ClassUtils.getQualifiedName(getClass());
+		assertEquals("Class name did not match", "org.springframework.util.ClassUtilsTests", className);
+	}
+
+	public void testGetQualifiedNameForObjectArrayClass() {
+		String className = ClassUtils.getQualifiedName(Object[].class);
+		assertEquals("Class name did not match", "java.lang.Object[]", className);
+	}
+
+	public void testGetQualifiedNameForPrimitiveArrayClass() {
+		String className = ClassUtils.getQualifiedName(byte[].class);
+		assertEquals("Class name did not match", "byte[]", className);
+	}
+
 	public void testGetShortName() {
 		String className = ClassUtils.getShortName(getClass());
 		assertEquals("Class name did not match", "ClassUtilsTests", className);
 	}
 
-	public void testGetInnerClassShortName() {
+	public void testGetShortNameForObjectArrayClass() {
+		String className = ClassUtils.getShortName(Object[].class);
+		assertEquals("Class name did not match", "Object[]", className);
+	}
+
+	public void testGetShortNameForPrimitiveArrayClass() {
+		String className = ClassUtils.getShortName(byte[].class);
+		assertEquals("Class name did not match", "byte[]", className);
+	}
+
+	public void testGetShortNameForInnerClass() {
 		String className = ClassUtils.getShortName(InnerClass.class);
 		assertEquals("Class name did not match", "ClassUtilsTests.InnerClass", className);
 	}
 
-	public void testGetCglibClassShortName() {
+	public void testGetShortNameForCglibClass() {
 		TestBean tb = new TestBean();
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTarget(tb);

@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -130,6 +130,34 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Get the class name without the qualified package name.
+	 * @param className the className to get the short name for
+	 * @return the class name of the class without the package name
+	 * @throws IllegalArgumentException if the className is empty
+	 */
+	public static String getShortName(String className) {
+		Assert.hasLength(className, "Class name must not be empty");
+		int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR_CHAR);
+		int nameEndIndex = className.indexOf(CGLIB_CLASS_SEPARATOR_CHAR);
+		if (nameEndIndex == -1) {
+			nameEndIndex = className.length();
+		}
+		String shortName = className.substring(lastDotIndex + 1, nameEndIndex);
+		shortName = shortName.replace(INNER_CLASS_SEPARATOR_CHAR, PACKAGE_SEPARATOR_CHAR);
+		return shortName;
+	}
+
+	/**
+	 * Get the class name without the qualified package name.
+	 * @param clazz the class to get the short name for
+	 * @return the class name of the class without the package name
+	 * @throws IllegalArgumentException if the class is null
+	 */
+	public static String getShortName(Class clazz) {
+		return getShortName(getQualifiedName(clazz));
+	}
+
+	/**
 	 * Return the short string name of a Java class in decapitalized
 	 * JavaBeans property format.
 	 * @param clazz the class
@@ -141,32 +169,21 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Get the class name without the qualified package name.
-	 * @param clazz the class to get the short name for
-	 * @return the class name of the class without the package name
-	 * @throws IllegalArgumentException if the class is null
+	 * Return the qualified name of the given class: usually simply
+	 * the class name, but component type class name + "[]" for arrays.
+	 * @param clazz the class
+	 * @return the qualified name of the class
 	 */
-	public static String getShortName(Class clazz) {
-		return getShortName(clazz.getName());
+	public static String getQualifiedName(Class clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		if (clazz.isArray()) {
+			return clazz.getComponentType().getName() + ARRAY_SUFFIX;
+		}
+		else {
+			return clazz.getName();
+		}
 	}
 
-	/**
-	 * Get the class name without the qualified package name.
-	 * @param className the className to get the short name for
-	 * @return the class name of the class without the package name
-	 * @throws IllegalArgumentException if the className is empty
-	 */
-	public static String getShortName(String className) {
-		Assert.hasLength(className, "class name must not be empty");
-		int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR_CHAR);
-		int nameEndIndex = className.indexOf(CGLIB_CLASS_SEPARATOR_CHAR);
-		if (nameEndIndex == -1) {
-			nameEndIndex = className.length();
-		}
-		String shortName = className.substring(lastDotIndex + 1, nameEndIndex);
-		shortName = shortName.replace(INNER_CLASS_SEPARATOR_CHAR, PACKAGE_SEPARATOR_CHAR);
-		return shortName;
-	}
 
 	/**
 	 * Return the qualified name of the given method, consisting of
@@ -187,6 +204,8 @@ public abstract class ClassUtils {
 	 * @param paramTypes the parameter types of the method
 	 */
 	public static boolean hasMethod(Class clazz, String methodName, Class[] paramTypes) {
+		Assert.notNull(clazz, "Class must not be null");
+		Assert.notNull(methodName, "Method name must not be null");
 		try {
 			clazz.getMethod(methodName, paramTypes);
 			return true;
@@ -204,6 +223,8 @@ public abstract class ClassUtils {
 	 * @return the number of methods with the given name
 	 */
 	public static int getMethodCountForName(Class clazz, String methodName) {
+		Assert.notNull(clazz, "Class must not be null");
+		Assert.notNull(methodName, "Method name must not be null");
 		int count = 0;
 		do {
 			for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
@@ -226,10 +247,12 @@ public abstract class ClassUtils {
 	 * @return whether there is at least one method with the given name
 	 */
 	public static boolean hasAtLeastOneMethodWithName(Class clazz, String methodName) {
+		Assert.notNull(clazz, "Class must not be null");
+		Assert.notNull(methodName, "Method name must not be null");
 		do {
 			for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
 				Method method = clazz.getDeclaredMethods()[i];
-				if (methodName.equals(method.getName())) {
+				if (method.getName().equals(methodName)) {
 					return true;
 				}
 			}
@@ -248,6 +271,8 @@ public abstract class ClassUtils {
 	 * @throws IllegalArgumentException if the method name is blank or the clazz is null
 	 */
 	public static Method getStaticMethod(Class clazz, String methodName, Class[] args) {
+		Assert.notNull(clazz, "Class must not be null");
+		Assert.notNull(methodName, "Method name must not be null");
 		try {
 			Method method = clazz.getDeclaredMethod(methodName, args);
 			if ((method.getModifiers() & Modifier.STATIC) != 0) {
@@ -258,15 +283,16 @@ public abstract class ClassUtils {
 		return null;
 	}
 
+
 	/**
-	 * Return a path suitable for use with ClassLoader.getResource (also
-	 * suitable for use with Class.getResource by prepending a slash ('/') to
-	 * the return value. Built by taking the package of the specified class
-	 * file, converting all dots ('.') to slashes ('/'), adding a trailing slash
+	 * Return a path suitable for use with <code>ClassLoader.getResource</code>
+	 * (also suitable for use with <code>Class.getResource</code> by prepending a
+	 * slash ('/') to the return value. Built by taking the package of the specified
+	 * class file, converting all dots ('.') to slashes ('/'), adding a trailing slash
 	 * if necesssary, and concatenating the specified resource name to this.
 	 * <br/>As such, this function may be used to build a path suitable for
 	 * loading a resource file that is in the same package as a class file,
-	 * although {link org.springframework.core.io.ClassPathResource} is usually
+	 * although {@link org.springframework.core.io.ClassPathResource} is usually
 	 * even more convenient.
 	 * @param clazz the Class whose package will be used as the base
 	 * @param resourceName the resource name to append. A leading slash is optional.
@@ -275,6 +301,7 @@ public abstract class ClassUtils {
 	 * @see java.lang.Class#getResource
 	 */
 	public static String addResourcePathToPackagePath(Class clazz, String resourceName) {
+		Assert.notNull(resourceName, "Resource name must not be null");
 		if (!resourceName.startsWith("/")) {
 			return classPackageAsResourcePath(clazz) + "/" + resourceName;
 		}

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,8 @@
 package org.springframework.beans;
 
 import java.beans.PropertyChangeEvent;
+
+import org.springframework.util.ClassUtils;
 
 /**
  * Exception thrown on a type mismatch when trying to set a bean property.
@@ -47,10 +49,11 @@ public class TypeMismatchException extends PropertyAccessException {
 		super(propertyChangeEvent,
 				"Failed to convert property value of type [" +
 				(propertyChangeEvent.getNewValue() != null ?
-				propertyChangeEvent.getNewValue().getClass().getName() : null) + "]" +
-				(requiredType != null ? " to required type [" + requiredType.getName() + "]" : "")+
+				 ClassUtils.getQualifiedName(propertyChangeEvent.getNewValue().getClass()) : null) + "]" +
+				(requiredType != null ?
+				 " to required type [" + ClassUtils.getQualifiedName(requiredType) + "]" : "") +
 				(propertyChangeEvent.getPropertyName() != null ?
-				" for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
+				 " for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
 				ex);
 		this.value = propertyChangeEvent.getNewValue();
 		this.requiredType = requiredType;
@@ -64,8 +67,10 @@ public class TypeMismatchException extends PropertyAccessException {
 	 */
 	public TypeMismatchException(Object value, Class requiredType, Throwable ex) {
 		super("Failed to convert value of type [" +
-				(value != null ? value.getClass().getName() : null) + "]" +
-				(requiredType != null ? " to required type [" + requiredType.getName() + "]" : ""),
+				(value != null ?
+				 ClassUtils.getQualifiedName(value.getClass()) : null) + "]" +
+				(requiredType != null ?
+				 " to required type [" + ClassUtils.getQualifiedName(requiredType) + "]" : ""),
 				ex);
 		this.value = value;
 		this.requiredType = requiredType;
