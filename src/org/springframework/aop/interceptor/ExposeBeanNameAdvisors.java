@@ -19,19 +19,28 @@ package org.springframework.aop.interceptor;
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
+import org.springframework.beans.factory.NamedBean;
 
 /**
- * Advisor that may be used when autoproxying beans
+ * Convenient methods for creating advisors 
+ * that may be used when autoproxying beans
  * created with the Spring IoC container, binding the bean name
  * to the current invocation. May support a bean()
  * pointcut designator with AspectJ.
+ * <br>
+ * Typically used in Spring autoproxying, where the bean name is
+ * known at proxy creation time.
  * 
  * @author Rod Johnson
  * @since 2.0
+ * @see org.springframework.beans.factory.NamedBean
  */
-public class ExposeBeanNameAdvisor extends DefaultPointcutAdvisor {
+public abstract class ExposeBeanNameAdvisors extends DefaultPointcutAdvisor {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -39,7 +48,7 @@ public class ExposeBeanNameAdvisor extends DefaultPointcutAdvisor {
 	 * Binding for the bean name of the bean which is currently being invoked
 	 * in the ReflectiveMethodInvocation userAttributes Map
 	 */
-	private static final String BEAN_NAME_ATTRIBUTE = ExposeBeanNameAdvisor.class.getName() + ".beanName";
+	private static final String BEAN_NAME_ATTRIBUTE = ExposeBeanNameAdvisors.class.getName() + ".beanName";
 
 	
 	/**
@@ -74,24 +83,59 @@ public class ExposeBeanNameAdvisor extends DefaultPointcutAdvisor {
 	}
 	
 	
-	private final String beanName;
-	
 	/**
-	 * Create a new advisor that will expose the given bean name
+	 * Create a new advisor that will expose the given bean name,
+	 * with no introduction
 	 * @param beanName bean name to expose
 	 */
-	public ExposeBeanNameAdvisor(String beanName) {
-		this.beanName = beanName;
-		setAdvice(new ExposeBeanNameInterceptor());
+	public static Advisor createAdvisorWithoutIntroduction(String beanName) {
+		return new DefaultPointcutAdvisor(new ExposeBeanNameInterceptor(beanName));
 	}
 	
-	private class ExposeBeanNameInterceptor implements MethodInterceptor {
+	
+	/**
+	 * Create a new advisor that will expose the given bean name,
+	 * introducing the NamedBean interface to make the bean name accessible
+	 * without forcing the target object to be aware of this Spring IoC
+	 * concept
+	 * @param beanName bean name to expose
+	 */
+	public static Advisor createAdvisorIntroducingNamedBean(String beanName) {
+		return new DefaultIntroductionAdvisor(new ExposeBeanNameIntroduction(beanName));
+	}
+	
+	
+	private static class ExposeBeanNameInterceptor implements MethodInterceptor {
+		
+		private final String beanName;
+		
+		public ExposeBeanNameInterceptor(String beanName) {
+			this.beanName = beanName;
+		}
 		
 		public Object invoke(MethodInvocation mi) throws Throwable {
 			ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) mi;
 			rmi.getUserAttributes().put(BEAN_NAME_ATTRIBUTE, beanName);
 			return mi.proceed();
-			
+		}
+	}
+	
+	private static class ExposeBeanNameIntroduction extends DelegatingIntroductionInterceptor implements NamedBean {
+		
+		private final String beanName; 
+		
+		public ExposeBeanNameIntroduction(String beanName) {
+			this.beanName = beanName;
+		}
+		
+		public Object invoke(MethodInvocation mi) throws Throwable {
+			ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) mi;
+			rmi.getUserAttributes().put(BEAN_NAME_ATTRIBUTE, beanName);
+			return super.invoke(mi);
+		}
+		
+		public String getBeanName() {
+			return beanName;
 		}
 	}
 
