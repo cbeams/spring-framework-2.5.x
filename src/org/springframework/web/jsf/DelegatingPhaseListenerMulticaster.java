@@ -32,28 +32,28 @@ import org.springframework.web.context.WebApplicationContext;
  * JSF PhaseListener implementation that delegates to one or more Spring-managed
  * PhaseListener beans coming from the Spring root WebApplicationContext.
  *
- * <p>Configure this listener adapter in your <code>faces-config.xml</code> file
+ * <p>Configure this listener multicaster in your <code>faces-config.xml</code> file
  * as follows:
  *
  * <pre>
  * &lt;application&gt;
  *   ...
  *   &lt;phase-listener&gt;
- *     org.springframework.web.jsf.DelegatingPhaseListenerAdapter
+ *     org.springframework.web.jsf.DelegatingPhaseListenerMulticaster
  *   &lt;/phase-listener&gt;
  *   ...
  * &lt;/application&gt;</pre>
  *
- * The adapter will delegate all <code>beforePhase</code> and <code>afterPhase</code>
+ * The multicaster will delegate all <code>beforePhase</code> and <code>afterPhase</code>
  * events to all target PhaseListener beans. By default, those will simply be obtained
  * by type: All beans in the Spring root WebApplicationContext that implement the
  * PhaseListener interface will be fetched and invoked.
  *
- * <p>Note this adapter's <code>getPhaseId()</code> method will always return
+ * <p>Note this multicaster's <code>getPhaseId()</code> method will always return
  * <code>ANY_PHASE</code>. The phase id exposed by the target listener beans
  * will be ignored; all events will be propagated to all listeners.
  *
- * <p>This adapter may be subclassed to change the strategy used to obtain
+ * <p>This multicaster may be subclassed to change the strategy used to obtain
  * the listener beans, or to change the strategy used to access the ApplicationContext
  * (normally obtained via {@link FacesContextUtils#getWebApplicationContext(FacesContext)}).
  *
@@ -61,7 +61,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Colin Sampaleanu
  * @since 1.2.7
  */
-public class DelegatingPhaseListenerAdapter implements PhaseListener {
+public class DelegatingPhaseListenerMulticaster implements PhaseListener {
 
 	public PhaseId getPhaseId() {
 		return PhaseId.ANY_PHASE;
@@ -96,7 +96,7 @@ public class DelegatingPhaseListenerAdapter implements PhaseListener {
 	 */
 	protected Collection getDelegates(FacesContext facesContext) {
 		ListableBeanFactory bf = getBeanFactory(facesContext);
-		return BeanFactoryUtils.beansOfTypeIncludingAncestors(bf, PhaseListener.class).values();
+		return BeanFactoryUtils.beansOfTypeIncludingAncestors(bf, PhaseListener.class, true, false).values();
 	}
 
 	/**

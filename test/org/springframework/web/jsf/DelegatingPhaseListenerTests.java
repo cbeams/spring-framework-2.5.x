@@ -34,13 +34,13 @@ public class DelegatingPhaseListenerTests extends TestCase {
 
 	private MockFacesContext facesContext;
 	private StaticListableBeanFactory beanFactory;
-	private DelegatingPhaseListenerAdapter delPhaseListener;
+	private DelegatingPhaseListenerMulticaster delPhaseListener;
 
 	protected void setUp() {
 		facesContext = new MockFacesContext();
 		beanFactory = new StaticListableBeanFactory();
 
-		delPhaseListener = new DelegatingPhaseListenerAdapter() {
+		delPhaseListener = new DelegatingPhaseListenerMulticaster() {
 			protected ListableBeanFactory getBeanFactory(FacesContext facesContext) {
 				return beanFactory;
 			}
