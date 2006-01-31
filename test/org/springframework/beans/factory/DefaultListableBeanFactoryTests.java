@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,7 +38,11 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.support.*;
+import org.springframework.beans.factory.support.AbstractBeanFactory;
+import org.springframework.beans.factory.support.ChildBeanDefinition;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
 import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
@@ -47,33 +51,36 @@ import org.springframework.beans.propertyeditors.CustomNumberEditor;
  * Tests properties population and autowire behavior.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class DefaultListableBeanFactoryTests extends TestCase {
     
    public void testCanReferenceParentBeanFromChildViaAlias() throws Exception {
+		final String PARENTS_ALIAS = "alias";
+		final String EXPECTED_NAME = "Juergen";
+		final int EXPECTED_AGE = 41;
 
-        final String PARENTS_ALIAS = "alias";
-        final String EXPECTED_NAME = "Juergen";
-        final int EXPECTED_AGE = 41;
+		RootBeanDefinition parentDefinition = new RootBeanDefinition(TestBean.class);
+		parentDefinition.setAbstract(true);
+		parentDefinition.getPropertyValues().addPropertyValue("name", EXPECTED_NAME);
+		parentDefinition.getPropertyValues().addPropertyValue("age", new Integer(EXPECTED_AGE));
 
-        RootBeanDefinition parentDefinition = new RootBeanDefinition(TestBean.class);
-        parentDefinition.setAbstract(true);
-        parentDefinition.getPropertyValues().addPropertyValue("name", EXPECTED_NAME);
-        parentDefinition.getPropertyValues().addPropertyValue("age", new Integer(EXPECTED_AGE));
+		ChildBeanDefinition childDefinition = new ChildBeanDefinition(PARENTS_ALIAS);
 
-        ChildBeanDefinition childDefinition = new ChildBeanDefinition(PARENTS_ALIAS);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition("parent", parentDefinition);
+		factory.registerBeanDefinition("child", childDefinition);
+		factory.registerAlias("parent", PARENTS_ALIAS);
 
-        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-        factory.registerBeanDefinition("parent", parentDefinition);
-        factory.registerBeanDefinition("child", childDefinition);
-        factory.registerAlias("parent", PARENTS_ALIAS);
+		TestBean child = (TestBean) factory.getBean("child");
+		assertEquals(EXPECTED_NAME, child.getName());
+		assertEquals(EXPECTED_AGE, child.getAge());
 
-        TestBean child = (TestBean) factory.getBean("child");
-        assertEquals(EXPECTED_NAME, child.getName());
-        assertEquals(EXPECTED_AGE, child.getAge());
-    } 
+		assertEquals("Use cached merged bean definition",
+				factory.getMergedBeanDefinition("child"), factory.getMergedBeanDefinition("child"));
+	}
 
-    public void testUnreferencedSingletonWasInstantiated() {
+	public void testUnreferencedSingletonWasInstantiated() {
 		KnowsIfInstantiated.clearInstantiationRecord();
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		Properties p = new Properties();
@@ -808,7 +815,6 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 	}
 	
 	/**
-	 * 
 	 * @param singleton whether the bean created from the factory method on
 	 * the bean instance should be a singleton or prototype. This flag is
 	 * used to allow checking of the new ability in 1.2.4 to determine the type
@@ -888,6 +894,57 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			assertNotSame(tb2, second);
 		}
 		assertEquals(expectedNameFromArgs, tb2.getName());
+	}
+
+	public void testFieldSettingWithInstantiationAwarePostProcessorNoShortCircuit() {
+		testFieldSettingWithInstantiationAwarePostProcessor(false);
+	}
+
+	public void testFieldSettingWithInstantiationAwarePostProcessorWithShortCircuit() {
+		testFieldSettingWithInstantiationAwarePostProcessor(true);
+	}
+
+	private void testFieldSettingWithInstantiationAwarePostProcessor(final boolean skipPropertyPopulation) {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, null);
+		int ageSetByPropertyValue = 27;
+		bd.getPropertyValues().addPropertyValue(new PropertyValue("age", new Integer(ageSetByPropertyValue)));
+		lbf.registerBeanDefinition("test", bd);
+		final String nameSetOnField = "nameSetOnField";
+		lbf.addBeanPostProcessor(new InstantiationAwareBeanPostProcessor() {
+			public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+				return bean;
+			}
+			public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+				return bean;
+			}
+			public Object postProcessBeforeInstantiation(Class beanClass, String beanName) throws BeansException {
+				return null;
+			}
+			public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
+				TestBean tb = (TestBean) bean;
+				try {
+					Field f = TestBean.class.getDeclaredField("name");
+					f.setAccessible(true);
+					f.set(tb, nameSetOnField);
+					return !skipPropertyPopulation;
+				}
+				catch (Exception ex) {
+					fail("Unexpected exception: " + ex);
+					// Keep compiler happy about return
+					throw new IllegalStateException();
+				}
+			}
+		});
+		lbf.preInstantiateSingletons();
+		TestBean tb = (TestBean) lbf.getBean("test");
+		assertEquals("Name was set on field by IAPP", nameSetOnField, tb.getName());
+		if (!skipPropertyPopulation) {
+			assertEquals("Property value still set", ageSetByPropertyValue, tb.getAge());
+		}
+		else {
+			assertEquals("Property value was NOT set and still has default value", 0, tb.getAge());
+		}
 	}
 
 
@@ -987,57 +1044,6 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 		public Object createGeneric() {
 			return create();
-		}
-	}
-	
-	public void testFieldSettingWithInstantiationAwarePostProcessorNoShortCircuit() {
-		testFieldSettingWithInstantiationAwarePostProcessor(false);
-	}
-	
-	public void testFieldSettingWithInstantiationAwarePostProcessorWithShortCircuit() {
-		testFieldSettingWithInstantiationAwarePostProcessor(true);
-	}
-	
-	private void testFieldSettingWithInstantiationAwarePostProcessor(final boolean skipPropertyPopulation) {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, null);
-		int ageSetByPropertyValue = 27;
-		bd.getPropertyValues().addPropertyValue(new PropertyValue("age", new Integer(ageSetByPropertyValue)));
-		lbf.registerBeanDefinition("test", bd);
-		final String nameSetOnField = "nameSetOnField";
-		lbf.addBeanPostProcessor(new InstantiationAwareBeanPostProcessor() {
-			public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-				return bean;
-			}
-			public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-				return bean;
-			}
-			public Object postProcessBeforeInstantiation(Class beanClass, String beanName) throws BeansException {
-				return null;
-			}
-			public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
-				TestBean tb = (TestBean) bean;
-				try {
-					Field f = TestBean.class.getDeclaredField("name");
-					f.setAccessible(true);
-					f.set(tb, nameSetOnField);
-					return !skipPropertyPopulation;
-				}
-				catch (Exception ex) {
-					fail("Unexpected exception: " + ex);
-					// Keep compiler happy about return
-					throw new IllegalStateException();
-				}
-			}
-		});
-		lbf.preInstantiateSingletons();
-		TestBean tb = (TestBean) lbf.getBean("test");
-		assertEquals("Name was set on field by IAPP", nameSetOnField, tb.getName());
-		if (!skipPropertyPopulation) {
-			assertEquals("Property value still set", ageSetByPropertyValue, tb.getAge());
-		}
-		else {
-			assertEquals("Property value was NOT set and still has default value", 0, tb.getAge());
 		}
 	}
 
