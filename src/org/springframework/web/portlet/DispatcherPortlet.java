@@ -910,6 +910,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 						"View object [" + viewObject + "] is not an instance of [org.springframework.web.servlet.View] - " +
 						"DispatcherPortlet does not support any other view types");
 			}
+			view = (View) viewObject;
 		}
 
 		if (view == null) {
