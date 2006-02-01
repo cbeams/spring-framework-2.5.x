@@ -29,6 +29,10 @@ To run PetClinic with TopLink, download TopLink 10.1.3 or higher from the Oracle
 website (http://www.oracle.com/technology/products/ias/toplink), install it and
 copy toplink.jar and xmlparserv2.jar into Spring's "lib/toplink" directory.
 
+* NOTE: The sample currently only works against TopLink 10.1.3 developer previews.
+* The reason for this is an incompatibility in TopLink 10.1.3 final's HSQLDB
+* platform adapter. This will be resolved until Spring 2.0 RC1.
+
 All data access strategies can work with JTA for transaction management,
 by activating the JtaTransactionManager and a JndiObjectFactoryBean that
 refers to a transactional container DataSource. The default for Hibernate
