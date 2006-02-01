@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,9 +39,9 @@ import org.aspectj.lang.reflect.PerClauseKind;
 
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopConfigException;
-import org.springframework.beans.support.annotation.AnnotationUtils;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
+import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * Abstract base class for factories that can create Spring AOP Advisors
@@ -184,7 +184,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		return null;
 	}
 	
-	private static <A extends Annotation> AspectJAnnotation<A> findAnnotation(Class<A> toLookFor,Method method, Class clazz) {
+	private static <A extends Annotation> AspectJAnnotation<A> findAnnotation(Class<A> toLookFor, Method method, Class clazz) {
 		A result = AnnotationUtils.findMethodAnnotation(toLookFor,method,clazz);
 		if (result != null) {
 			return new AspectJAnnotation<A>(result);

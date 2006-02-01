@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.support.annotation.AnnotationUtils;
+import org.springframework.beans.annotation.AnnotationBeanUtils;
 import org.springframework.jmx.export.metadata.InvalidMetadataException;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.export.metadata.ManagedAttribute;
@@ -54,7 +54,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 			return null;
 		}
 		ManagedResource managedResource = new ManagedResource();
-		AnnotationUtils.copyPropertiesToBean(ann, managedResource);
+		AnnotationBeanUtils.copyPropertiesToBean(ann, managedResource);
 		return managedResource;
 	}
 
@@ -64,7 +64,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 			return null;
 		}
 		ManagedAttribute managedAttribute = new ManagedAttribute();
-		AnnotationUtils.copyPropertiesToBean(ann, managedAttribute, "defaultValue");
+		AnnotationBeanUtils.copyPropertiesToBean(ann, managedAttribute, "defaultValue");
 		if (ann.defaultValue().length() > 0) {
 			managedAttribute.setDefaultValue(ann.defaultValue());
 		}
@@ -84,7 +84,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 		}
 
 		ManagedOperation op = new ManagedOperation();
-		AnnotationUtils.copyPropertiesToBean(ann, op);
+		AnnotationBeanUtils.copyPropertiesToBean(ann, op);
 		return op;
 	}
 
@@ -102,7 +102,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 			for (int i = 0; i < paramData.length; i++) {
 				Annotation annotation = paramData[i];
 				ManagedOperationParameter managedOperationParameter = new ManagedOperationParameter();
-				AnnotationUtils.copyPropertiesToBean(annotation, managedOperationParameter);
+				AnnotationBeanUtils.copyPropertiesToBean(annotation, managedOperationParameter);
 				result[i] = managedOperationParameter;
 			}
 		}
@@ -120,7 +120,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 			Annotation notification = notifications[i];
 
 			ManagedNotification managedNotification = new ManagedNotification();
-			AnnotationUtils.copyPropertiesToBean(notification, managedNotification);
+			AnnotationBeanUtils.copyPropertiesToBean(notification, managedNotification);
 			result[i] = managedNotification;
 		}
 		return result;
