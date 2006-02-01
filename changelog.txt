@@ -1,10 +1,10 @@
-SPRING FRAMEWORK CHANGELOG
+nSPRING FRAMEWORK CHANGELOG
 ==========================
 http://www.springframework.org
 
 
-Changes in version 2.0 M2 (31.1.2006)
--------------------------------------
+Changes in version 2.0 M2 (1.2.2006)
+------------------------------------
 
 Overall
 * all of Spring must be built on JDK 1.5 now; the test suite is still able to run on JDK 1.4 and 1.3
@@ -13,7 +13,8 @@ Package org.springframework.aop
 * added equals/hashCode implementations to all pointcuts and advisors
 * removed restriction on proxying protected methods from Cglib2AopProxy
 * allowed AopUtils's "invokeJoinpointUsingReflection" to invoke protected methods
-* added "autodetectInterfaces" property to ProxyFactoryBean, for TransactionProxyFactoryBean-style interface detection
+* added "autodetectInterfaces" to ProxyFactoryBean, for TransactionProxyFactoryBean style behavior (is the default now!)
+* refined ProxyFactoryBean to lazily initialize a singleton proxy, to let "getObjectType()" expose the type beforehand
 * improved performance of IntroductionInfoSupport by faster determination of whether method is on introduced interface
 * refined ThreadLocalTargetSource's synchronization to guarantee thread-safe destruction on shutdown
 * added "hideProxyClassNames" property to AbstractTraceInterceptor, to log with target class instead of proxy class
@@ -37,6 +38,7 @@ Package org.springframework.beans
 * added "postProcessAfterInstantiation" method to InstantiationAwareBeanPostProcessor
 * fixed AbstractBeanFactory to correctly delegate to parent BeanFactory from "isFactoryBean"
 * optimized AbstractBeanFactory to avoid internal NoSuchBeanDefinitionException throw+catch as far as possible
+* AbstractBeanFactory caches merged bean definitions, for efficient prototype child creation and CGLIB class reuse
 * reworked AbstractBeanFactory's currently-in-creation check to log debug message when unfinished singleton is returned
 * added "allowCircularReferences" flag to AbstractAutowireCapableBeanFactory, to disallow circular references completely
 * DefaultListableBeanFactory's "getBeansOfType" logs BeanCurrentlyInCreationException message instead of stacktrace
@@ -52,11 +54,13 @@ Package org.springframework.context
 * deprecated ContextListener, since it doesn't serve any purpose
 
 Package org.springframework.core
+* JdkVersion explicitly detects JDK 1.6 and 1.7 as well (does not mis-detect 1.6 as 1.3 anymore)
 * refined Jdk13ControlFlow to be compatible with GNU ClassPath (whose stacktrace has a whitespace after the method name)
 * added NestedIOException, deriving from java.io.IOException and adding NestedCheckedException-style root cause handling
 * refined AbstractResource to work around "FilterInputStream.close()" NPE, simply catching Throwable and ignoring it
 * PathMatchingResourcePatternResolver considers URL protocol "wsjar" as jar file (to load from WebSphere-managed jars)
 * ResourceArrayPropertyEditor can translate a set/list of patterns into a Resource array (rather than just one pattern)
+* split previous AnnotationUtils helper into core.annotation.AnnotationUtils and beans.annotation.AnnotationBeanUtils
 
 Package org.springframework.jdbc
 * DataSourceTransactionManager only attempts to release Connection if not pre-bound (to avoid inappropriate log message)
@@ -144,6 +148,7 @@ Package org.springframework.web
 * renamed FrameworkPortlet's RequestHandledEvent to PortletRequestHandledEvent, a subclass of RequestHandledEvent
 * PortletBean ignores init-params that do not match bean properties, analogous to HttpServletBean
 * DispatcherServlet does not log handler exceptions at warn level anymore but rather only at debug level
+* fixed DispatcherPortlet to properly support an exposed View object in a given ModelAndView
 * reworked Servlet ModelAndView and Portlet ModelAndView to fully support ModelMap's conventional attribute names
 * added HttpSessionMutexListener and "WebUtils.getSessionMutex", used by AbstractController's "synchronizeOnSession"
 * added "PortletUtils.getSessionMutex", used by the Portlet AbstractController's "synchronizeOnSession"
@@ -156,13 +161,14 @@ Package org.springframework.web
 * refactored AbstractFormController's session form check into one single place, throwing SessionRequiredException
 * reworked MultiActionController's "bind" and "createBinder" to work on HttpServletRequest instead of ServletRequest
 * deprecated MultiActionController's "initBinder(ServletRequest...)" in favor of "initBinder(HttpServletRequest...)"
+* refined ParameterMethodNameResolver to treat an empty method name as no name at all, letting the default kick in
 * added protected accessors for UrlBasedViewResolver's bean properties, allowing subclasses to access the settings
 * added "argumentSeparator" property to MessageTag, allowing to specify a custom separator instead of the default comma
 * added "useSingleModelNameAsRoot" property to AbstractXlstView, allowing to enforce the value of the "root" property
 * added RequestToViewNameTranslator strategy to allow DispatcherServlet to auto-generate view names where necessary
 * added DefaultRequestToViewNameTranslator to provide intuitive defaults for automatic view name generation
 * refined Struts DelegatingActionProxy and Delegating(Tiles)RequestProcessor to fall back to root WebApplicationContext
-* added DelegatingNavigationHandlerProxy and DelegatingPhaseListenerAdapter to JSF support (used by Spring Web Flow)
+* added DelegatingNavigationHandlerProxy and DelegatingPhaseListenerMulticaster to JSF support (used by Spring Web Flow)
 
 
 Changes in version 2.0 M1 (22.12.2005)
