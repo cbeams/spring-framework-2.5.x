@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,7 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.weaver.tools.JoinPointMatch;
 import org.aspectj.weaver.tools.PointcutParameter;
+
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
@@ -48,17 +49,19 @@ public abstract class AbstractAspectJAdvice implements InitializingBean {
 	 * joinpoint.
 	 */
 	protected final static String JOIN_POINT_KEY = JoinPoint.class.getName();
-	
+
+
 	/**
 	 * Lazily instantiate joinpoint for the current invocation.
 	 * Requires MethodInvocation to be bound with ExposeInvocationInterceptor.
-	 * <br>Do not use if access is available to the current ReflectiveMethodInvocation
+	 * <p>Do not use if access is available to the current ReflectiveMethodInvocation
 	 * (in an around advice).
 	 * @return current AspectJ joinpoint, or through an exception if we're not in a
 	 * Spring AOP invocation.
 	 */
 	public static JoinPoint currentJoinPoint() {
-		ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) ExposeInvocationInterceptor.currentInvocation();
+		ReflectiveMethodInvocation rmi =
+				(ReflectiveMethodInvocation) ExposeInvocationInterceptor.currentInvocation();
 		JoinPoint jp = (JoinPoint) rmi.getUserAttributes().get(JOIN_POINT_KEY);
 		if (jp == null) {
 			jp = new MethodInvocationProceedingJoinPoint(rmi);
@@ -66,12 +69,14 @@ public abstract class AbstractAspectJAdvice implements InitializingBean {
 		}
 		return jp;
 	}
-	
+
+
 	protected final Method aspectJAdviceMethod;
 	
 	private final AspectJExpressionPointcut pointcutExpression;
 	
 	private final AspectInstanceFactory aif;
+
 
 	/**
 	 * This will be non-null if the creator of this advice object knows the argument names
@@ -106,8 +111,9 @@ public abstract class AbstractAspectJAdvice implements InitializingBean {
 	 */
 	private int joinPointStaticPartArgumentIndex = -1;
 	
-	private final Map/*<adviceArgumentName,argumentIndex>*/ argumentBindings = new HashMap(); 
-	
+	private final Map/*<adviceArgumentName,argumentIndex>*/ argumentBindings = new HashMap();
+
+
 	protected AbstractAspectJAdvice(
 			Method aspectJAdviceMethod, AspectJExpressionPointcut pointcutExpression, AspectInstanceFactory aif) {
 
@@ -471,17 +477,19 @@ public abstract class AbstractAspectJAdvice implements InitializingBean {
 	
 	/**
 	 * Invoke the advice method.
-	 * @param jpMatch, the JoinPointMatch that matched this execution join point
+	 * @param jpMatch the JoinPointMatch that matched this execution join point
 	 * @param returnValue the return value from the method execution (may be null)
 	 * @param t the exception thrown by the method execution (may be null)
 	 */
 	protected Object invokeAdviceMethod(JoinPointMatch jpMatch, Object returnValue, Throwable t) throws Throwable {
-		return invokeAdviceMethodWithGivenArgs(argBinding(getJoinPoint(),jpMatch,returnValue,t));
+		return invokeAdviceMethodWithGivenArgs(argBinding(getJoinPoint(), jpMatch, returnValue, t));
 	}
 
 	// as above, but in this case we are given the join point
-	protected Object invokeAdviceMethod(JoinPoint jp, JoinPointMatch jpMatch, Object returnValue, Throwable t) throws Throwable {
-		return invokeAdviceMethodWithGivenArgs(argBinding(jp,jpMatch,returnValue,t));
+	protected Object invokeAdviceMethod(JoinPoint jp, JoinPointMatch jpMatch, Object returnValue, Throwable t)
+			throws Throwable {
+
+		return invokeAdviceMethodWithGivenArgs(argBinding(jp, jpMatch, returnValue, t));
 	}
 
 	protected Object invokeAdviceMethodWithGivenArgs(Object[] args) throws Throwable {
