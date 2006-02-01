@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -162,7 +162,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 			assertEquals("getName", ex.getMessage());
 		}
 		FactoryBean pfb = (ProxyFactoryBean) bf.getBean("&noTarget");
-		assertTrue(ITestBean.class.isAssignableFrom(pfb.getObjectType()));
+		assertTrue("Has correct object type", ITestBean.class.isAssignableFrom(pfb.getObjectType()));
 	}
 	
 	/**
@@ -192,15 +192,15 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertEquals(di.getCount(), 3);
 	}
 	
-	
 	public void testPrototypeInstancesAreNotEqual() {
+		assertTrue("Has correct object type", ITestBean.class.isAssignableFrom(factory.getType("prototype")));
 		ITestBean test2 = (ITestBean) factory.getBean("prototype");
 		ITestBean test2_1 = (ITestBean) factory.getBean("prototype");
 		assertTrue("Prototype instances !=", test2 != test2_1);
 		assertTrue("Prototype instances equal", test2.equals(test2_1));
+		assertTrue("Has correct object type", ITestBean.class.isAssignableFrom(factory.getType("prototype")));
 	}
-	
-	
+
 	/**
 	 * Uses its own bean factory XML for clarity
 	 * @param beanName name of the ProxyFactoryBean definition that should
@@ -258,8 +258,14 @@ public class ProxyFactoryBeanTests extends TestCase {
 
 	public void testCanGetFactoryReferenceAndManipulate() {
 		ProxyFactoryBean config = (ProxyFactoryBean) factory.getBean("&test1");
+		assertTrue("Has correct object type", ITestBean.class.isAssignableFrom(config.getObjectType()));
+		assertTrue("Has correct object type", ITestBean.class.isAssignableFrom(factory.getType("test1")));
+		// Trigger lazy initialization.
+		config.getObject();
 		assertEquals("Have one advisors", 1, config.getAdvisors().length);
-		
+		assertTrue("Has correct object type", ITestBean.class.isAssignableFrom(config.getObjectType()));
+		assertTrue("Has correct object type", ITestBean.class.isAssignableFrom(factory.getType("test1")));
+
 		ITestBean tb = (ITestBean) factory.getBean("test1");
 		// no exception 
 		tb.hashCode();
@@ -555,6 +561,8 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertTrue(agi.globalsAdded() == -1);
 		
 		ProxyFactoryBean pfb = (ProxyFactoryBean) factory.getBean("&validGlobals");
+		// Trigger lazy initialization.
+		pfb.getObject();
 		// 2 globals + 2 explicit
 		assertEquals("Have 2 globals and 2 explicit advisors", 3, pfb.getAdvisors().length);
 		
