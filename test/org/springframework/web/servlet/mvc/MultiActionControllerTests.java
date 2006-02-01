@@ -16,11 +16,11 @@
 
 package org.springframework.web.servlet.mvc;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -31,6 +31,7 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.TestBean;
+import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
@@ -42,7 +43,6 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
 import org.springframework.web.servlet.mvc.multiaction.ParameterMethodNameResolver;
 import org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver;
 import org.springframework.web.servlet.support.SessionRequiredException;
-import org.springframework.context.ApplicationContextException;
 
 /**
  * @author Rod Johnson
@@ -75,6 +75,7 @@ public class MultiActionControllerTests extends TestCase {
 
 	private void doTestCustomizedInternalPathMethodNameResolver(
 			String in, String prefix, String suffix, String expected) throws Exception {
+
 		MultiActionController rc = new MultiActionController();
 		InternalPathMethodNameResolver resolver = new InternalPathMethodNameResolver();
 		if (prefix != null) {
@@ -91,13 +92,35 @@ public class MultiActionControllerTests extends TestCase {
 
 	public void testParameterMethodNameResolver() throws NoSuchRequestHandlingMethodException {
 		ParameterMethodNameResolver mnr = new ParameterMethodNameResolver();
+
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.html");
 		request.addParameter("action", "bar");
 		assertEquals("bar", mnr.getHandlerMethodName(request));
+
 		request = new MockHttpServletRequest("GET", "/foo.html");
 		try {
 			mnr.getHandlerMethodName(request);
-			// should have thrown NoSuchRequestHandlingMethodException
+			fail("Should have thrown NoSuchRequestHandlingMethodException");
+		}
+		catch (NoSuchRequestHandlingMethodException ex) {
+			// expected
+		}
+
+		request = new MockHttpServletRequest("GET", "/foo.html");
+		request.addParameter("action", "");
+		try {
+			mnr.getHandlerMethodName(request);
+			fail("Should have thrown NoSuchRequestHandlingMethodException");
+		}
+		catch (NoSuchRequestHandlingMethodException ex) {
+			// expected
+		}
+
+		request = new MockHttpServletRequest("GET", "/foo.html");
+		request.addParameter("action", "     ");
+		try {
+			mnr.getHandlerMethodName(request);
+			fail("Should have thrown NoSuchRequestHandlingMethodException");
 		}
 		catch (NoSuchRequestHandlingMethodException ex) {
 			// expected
@@ -121,17 +144,8 @@ public class MultiActionControllerTests extends TestCase {
 		logicalMappings.setProperty("nina", "colin");
 		resolver.setLogicalMappings(logicalMappings);
 
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addParameter("nomatch", "whatever");
-		try {
-			resolver.getHandlerMethodName(request);
-		}
-		catch (NoSuchRequestHandlingMethodException ex) {
-			//expected
-		}
-
 		// verify default handler
-		request = new MockHttpServletRequest();
+		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("this will not match anything", "whatever");
 		assertEquals("default", resolver.getHandlerMethodName(request));
 

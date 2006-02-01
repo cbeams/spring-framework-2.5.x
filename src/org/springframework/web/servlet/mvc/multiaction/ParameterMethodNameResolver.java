@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -108,6 +110,9 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 	 * @see #setMethodParamNames
 	 */
 	public void setParamName(String paramName) {
+		if (paramName != null) {
+			Assert.hasText(paramName, "paramName must not be empty");
+		}
 		this.paramName = paramName;
 	}
 
@@ -145,6 +150,9 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 	 * used when no parameter was found in the request
 	 */
 	public void setDefaultMethodName(String defaultMethodName) {
+		if (defaultMethodName != null) {
+			Assert.hasText(defaultMethodName, "defaultMethodName must not be empty");
+		}
 		this.defaultMethodName = defaultMethodName;
 	}
 
@@ -179,24 +187,34 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 			}
 		}
 
-		if (methodName != null) {
+		if (methodName != null && this.logicalMappings != null) {
 			// Resolve logical name into real method name, if appropriate.
-			if (this.logicalMappings != null) {
-				methodName = this.logicalMappings.getProperty(methodName, methodName);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Resolved method name '" + methodName + "' to handler method '" + methodName + "'");
-				}
+			String originalName = methodName;
+			methodName = this.logicalMappings.getProperty(methodName, methodName);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Resolved method name '" + originalName + "' to handler method '" + methodName + "'");
 			}
 		}
-		else {
-			// No specific method resolved: use default method.
-			methodName = this.defaultMethodName;
-			logger.debug("Falling back to default handler method '" + this.defaultMethodName + "'");
+
+		if (methodName != null && !StringUtils.hasText(methodName)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Method name '" + methodName + "' is empty: treating it as no method name found");
+			}
+			methodName = null;
 		}
 
-		// If resolution failed completely, throw an exception.
 		if (methodName == null) {
-			throw new NoSuchRequestHandlingMethodException(request);
+			if (this.defaultMethodName != null) {
+				// No specific method resolved: use default method.
+				methodName = this.defaultMethodName;
+				if (logger.isDebugEnabled()) {
+					logger.debug("Falling back to default handler method '" + this.defaultMethodName + "'");
+				}
+			}
+			else {
+				// If resolution failed completely, throw an exception.
+				throw new NoSuchRequestHandlingMethodException(request);
+			}
 		}
 
 		return methodName;
