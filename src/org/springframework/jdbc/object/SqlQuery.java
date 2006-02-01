@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,8 +24,6 @@ import javax.sql.DataSource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.SqlNamedParameterHolder;
-import org.springframework.jdbc.support.NamedParameterUtils;
 
 /**
  * Reusable object to represent a SQL query. Like all RdbsOperation
@@ -116,14 +114,6 @@ public abstract class SqlQuery extends SqlOperation {
 		return getJdbcTemplate().query(newPreparedStatementCreator(parameters), rowMapper);
 	}
 
-	public List execute(final SqlNamedParameterHolder parameterMap, Map context) throws DataAccessException {
-		//ToDo: validateParameters(parameterMap);
-		Object[] parameters = NamedParameterUtils.convertArgMapToArray(getSql(), parameterMap.getValues());
-		RowMapper rowMapper = newRowMapper(parameters, context);
-		//ResultReader rr = newResultReader(getRowsExpected(), parameters, context);
-		return getJdbcTemplate().query(newPreparedStatementCreator(parameterMap), rowMapper);
-	}
-
 	/**
 	 * Convenient method to execute without context.
 	 * @param parameters parameters, as to JDO queries. Primitive parameters must
@@ -133,11 +123,6 @@ public abstract class SqlQuery extends SqlOperation {
 	public List execute(final Object[] parameters) throws DataAccessException {
 		return execute(parameters, null);
 	}
-
-	public List execute(final SqlNamedParameterHolder parameterMap) throws DataAccessException {
-		return execute(parameterMap, null);
-	}
-
 
 	/**
 	 * Convenient method to execute without parameters.

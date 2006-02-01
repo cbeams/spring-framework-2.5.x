@@ -1,26 +1,43 @@
-package org.springframework.jdbc.support;
+/*
+ * Copyright 2002-2006 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.core.SqlTypeValue;
-import org.springframework.jdbc.support.ParsedSql;
+package org.springframework.jdbc.support;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.LinkedList;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.SqlTypeValue;
 
 /**
- * Created by IntelliJ IDEA.
- * User: trisberg
- * Date: Nov 20, 2005
- * Time: 9:25:45 AM
- * To change this template use File | Settings | File Templates.
+ * Helper methods for handling parameter parsing, in particular for named parameters.
+ *
+ * @author Thomas Risberg
+ * @since 2.0
  */
 public class NamedParameterUtils {
-	private static final Log logger = LogFactory.getLog(NamedParameterUtils.class);
+
 	private static final int MAX_SELECT_LIST_ENTRIES = 100;
+
+	private static final Log logger = LogFactory.getLog(NamedParameterUtils.class);
+
 
 	/**
 	 * Count the occurrences of the character <code>placeholder</code> in an SQL string
@@ -83,8 +100,7 @@ public class NamedParameterUtils {
 	 * @param sql the SQL statement.
 	 */
 	public static ParsedSql parseSqlStatement(String sql) {
-
-		ArrayList namedParameters = new ArrayList();
+		List namedParameters = new ArrayList();
 		ParsedSql parsedSql = new ParsedSql(sql);
 
 		byte[] statement = (sql == null) ? new byte[0] : sql.getBytes();
@@ -177,8 +193,7 @@ public class NamedParameterUtils {
 				else {
 					if (statement[i] == ':' || statement[i] == '&') {
 						int j = i + 1;
-						while (j < statement.length &&
-								parameterNameIsContinued(statement, j)) {
+						while (j < statement.length && parameterNameIsContinued(statement, j)) {
 							j++;
 						}
 						if (j - i > 1) {
@@ -186,8 +201,8 @@ public class NamedParameterUtils {
 							if (argMap != null) {
 								Object o = argMap.get(parameter);
 								if (o instanceof List) {
-									if (((List)o).size() > MAX_SELECT_LIST_ENTRIES) {
-										logger.warn("The number of entries in a select list should not exceed " + MAX_SELECT_LIST_ENTRIES + ".");
+									if (((List) o).size() > MAX_SELECT_LIST_ENTRIES) {
+										logger.warn("The number of entries in a select list should not exceed " + MAX_SELECT_LIST_ENTRIES);
 									}
 									for (int k = 0; k < ((List)o).size(); k++) {
 										if (k > 0)
@@ -252,26 +267,24 @@ public class NamedParameterUtils {
 		Object[] args = new Object[parsedSql.getNamedParameterCount()];
 		if (parsedSql.getNamedParameterCount() != parsedSql.getParameterCount()) {
 			throw new InvalidDataAccessApiUsageException("You must supply named parameter placeholders for all " +
-					"parameters when using a Map for the parameter values.");
+					"parameters when using a Map for the parameter values");
 		}
 		if (parsedSql.getNamedParameterCount() != parameters.size()) {
 			if (parsedSql.getNamedParameterCount() > parameters.size()) {
-			throw new InvalidDataAccessApiUsageException("Wrong number of parameters/values supplied.  You have " +
+			throw new InvalidDataAccessApiUsageException("Wrong number of parameters/values supplied. You have " +
 					parsedSql.getNamedParameterCount() + " named parameter(s) and supplied " + parameters.size() +
-					" parameter value(s).");
+					" parameter value(s)");
 			}
 			else {
-				logger.warn("You have additional entries in the parameter map supplied.  There are " +
+				logger.warn("You have additional entries in the parameter map supplied. There are " +
 					parsedSql.getNamedParameterCount() + " named parameter(s) and " + parameters.size() +
-					" parameter value(s).");
-				logger.warn("!!!! " + parameters);
+					" parameter value(s)");
 			}
 		}
 		for (int i = 0; i < parsedSql.getNamedParameters().size(); i++) {
 			if (!parameters.containsKey(parsedSql.getNamedParameters().get(i))) {
 				throw new InvalidDataAccessApiUsageException("No entry supplied for the '" +
-						parsedSql.getNamedParameters().get(i) + "' parameter.");
-
+						parsedSql.getNamedParameters().get(i) + "' parameter");
 			}
 			args[i] = parameters.get(parsedSql.getNamedParameters().get(i));
 		}
@@ -292,12 +305,12 @@ public class NamedParameterUtils {
 			if (parsedSql.getNamedParameterCount() < typeMap.size()) {
 				logger.warn("You have additional entries in the type map supplied.  There are " +
 					parsedSql.getNamedParameterCount() + " named parameter(s) and " + typeMap.size() +
-					" type value(s).");
+					" type value(s)");
 			}
 		}
 		for (int i = 0; i < parsedSql.getNamedParameters().size(); i++) {
 			if (typeMap.containsKey(parsedSql.getNamedParameters().get(i))) {
-				types[i] = ((Integer)typeMap.get(parsedSql.getNamedParameters().get(i))).intValue();
+				types[i] = ((Integer) typeMap.get(parsedSql.getNamedParameters().get(i))).intValue();
 			}
 			else {
 				types[i] = SqlTypeValue.TYPE_UNKNOWN;
@@ -305,4 +318,5 @@ public class NamedParameterUtils {
 		}
 		return types;
 	}
+
 }

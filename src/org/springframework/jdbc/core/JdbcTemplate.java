@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  * @see org.springframework.jdbc.datasource
  * @see org.springframework.jdbc.object
  */
-public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, JdbcConfigurations {
+public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/** Custom NativeJdbcExtractor */
 	private NativeJdbcExtractor nativeJdbcExtractor;

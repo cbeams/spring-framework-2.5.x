@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,25 +26,27 @@ import java.util.HashMap;
  * @since 2.0
  */
 public class SqlNamedParameterTypes {
-    Map parameterTypes = new HashMap();
 
-    public SqlNamedParameterTypes() {
-    }
+	private Map parameterTypes = new HashMap();
 
-    public SqlNamedParameterTypes(Map sqlTypes) {
-        this.parameterTypes.putAll(sqlTypes);
-    }
+	public SqlNamedParameterTypes() {
+	}
 
-    public SqlNamedParameterTypes(String parameterName, int sqlType) {
-        this.parameterTypes.put(parameterName, new Integer(sqlType));
-    }
+	public SqlNamedParameterTypes(Map sqlTypes) {
+		this.parameterTypes.putAll(sqlTypes);
+	}
 
-    public SqlNamedParameterTypes addType(String parameterName, int sqlType) {
-        parameterTypes.put(parameterName, new Integer(sqlType));
-        return this;
-    }
+	public SqlNamedParameterTypes(String parameterName, int sqlType) {
+		this.parameterTypes.put(parameterName, new Integer(sqlType));
+	}
 
-    public Map getTypes() {
-        return parameterTypes;
-    }
+	public SqlNamedParameterTypes addType(String parameterName, int sqlType) {
+		parameterTypes.put(parameterName, new Integer(sqlType));
+		return this;
+	}
+
+	public Map getTypes() {
+		return parameterTypes;
+	}
+
 }

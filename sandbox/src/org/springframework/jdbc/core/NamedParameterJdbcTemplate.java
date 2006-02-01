@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,30 @@
 
 package org.springframework.jdbc.core;
 
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.support.DataAccessUtils;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.NamedParameterUtils;
-import org.springframework.jdbc.support.ParsedSql;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-
-import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.NamedParameterUtils;
+import org.springframework.jdbc.support.ParsedSql;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+
 /**
- * This class provides basic set of JDBC operations allowing
- * the use of named parameters rather than the traditional '?' placeholders.
- * It delegates to the JdbcTemlate once the substitution from named parameters to
- * JDBC style '?' placeholders is done at execution time.  It also allows for expanding
- * a List of values to the appropriate number of placeholders.
+ * This class provides basic set of JDBC operations allowing the use of
+ * named parameters rather than the traditional '?' placeholders.
  *
- * The underlying JdbcTemplate is exposed to allow for convenient access to the traditional
- * JdbcTemplate methods.
+ * <p>It delegates to the JdbcTemplate once the substitution from named parameters
+ * to JDBC style '?' placeholders is done at execution time. It also allows for
+ * expanding a List of values to the appropriate number of placeholders.
+ *
+ * <p>The underlying JdbcTemplate is exposed to allow for convenient access
+ * to the traditional JdbcTemplate methods.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -46,17 +47,11 @@ import java.util.Map;
  * @see NamedParameterJdbcOperations
  * @see JdbcTemplate
  */
-public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations, JdbcConfigurations {
+public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations {
 
 	/** The JdbcTemplate we are wrapping */
-	private JdbcTemplate classicJdbcTemplate;
+	private final JdbcOperations classicJdbcTemplate;
 
-	/**
-	 * Create a new NamedParameterJdbcTemplate.  DataSource must be
-	 * supplied using the setter method.
-	 */
-	public NamedParameterJdbcTemplate() {
-	}
 
 	/**
 	 * Create a new NamedParameterJdbcTemplate for the given DataSource.
@@ -68,33 +63,11 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations,
 	}
 
 	/**
-	 * Create a new NamedParameterJdbcTemplate for the given DataSource.
-	 * Note: Depending on the "lazyInit" flag, initialization of the exception translator
-	 * will be triggered.
-	 * <p>Creates a classic Spring JdbcTemplate and wraps it.
-	 * @param dataSource JDBC DataSource to obtain connections from
-	 * @param lazyInit whether to lazily initialize the SQLExceptionTranslator
-	 */
-	public NamedParameterJdbcTemplate(DataSource dataSource, boolean lazyInit) {
-		this.classicJdbcTemplate = new JdbcTemplate(dataSource, lazyInit);
-	}
-
-	/**
 	 * Create a new SimpleJdbcTemplate for the given classic Spring JdbcTemplate.
 	 * @param classicJdbcTemplate the classic Spring JdbcTemplate to wrap
 	 */
-	public NamedParameterJdbcTemplate(JdbcTemplate classicJdbcTemplate) {
+	public NamedParameterJdbcTemplate(JdbcOperations classicJdbcTemplate) {
 		this.classicJdbcTemplate = classicJdbcTemplate;
-	}
-
-
-	/**
-	 * Create a new NamedParameterJdbcTemplate for the given DataSource.
-	 * <p>Creates a classic Spring JdbcTemplate.
-	 * @param dataSource the JDBC DataSource to access
-	 */
-	public void setDataSource(DataSource dataSource) {
-		this.classicJdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	/**
@@ -105,37 +78,6 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations,
 		return this.classicJdbcTemplate;
 	}
 
-	public void setNativeJdbcExtractor(NativeJdbcExtractor extractor) {
-		this.classicJdbcTemplate.setNativeJdbcExtractor(extractor);
-	}
-
-	public NativeJdbcExtractor getNativeJdbcExtractor() {
-		return this.classicJdbcTemplate.getNativeJdbcExtractor();
-	}
-
-	public void setIgnoreWarnings(boolean ignoreWarnings) {
-		this.classicJdbcTemplate.setIgnoreWarnings(ignoreWarnings);
-	}
-
-	public boolean isIgnoreWarnings() {
-		return this.classicJdbcTemplate.isIgnoreWarnings();
-	}
-
-	public void setFetchSize(int fetchSize) {
-		this.classicJdbcTemplate.setFetchSize(fetchSize);
-	}
-
-	public int getFetchSize() {
-		return this.classicJdbcTemplate.getFetchSize();
-	}
-
-	public void setMaxRows(int maxRows) {
-		this.classicJdbcTemplate.setMaxRows(maxRows);
-	}
-
-	public int getMaxRows() {
-		return this.classicJdbcTemplate.getMaxRows();
-	}
 
 	public void query(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes, RowCallbackHandler rch)
 			throws DataAccessException {
@@ -266,7 +208,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations,
 		PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, types);
 		pscf.setReturnGeneratedKeys(true);
 		if (keyColumnNames != null) {
-				pscf.setGeneratedKeysColumnNames(keyColumnNames);
+			pscf.setGeneratedKeysColumnNames(keyColumnNames);
 		}
 		return getJdbcOperations().update(pscf.newPreparedStatementCreator(values), keyHolder);
 	}

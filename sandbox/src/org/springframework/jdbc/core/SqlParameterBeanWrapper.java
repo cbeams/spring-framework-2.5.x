@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,11 @@
 
 package org.springframework.jdbc.core;
 
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.jdbc.core.SqlNamedParameterHolder;
-import org.springframework.jdbc.core.SqlNamedParameterTypes;
-
 import java.beans.PropertyDescriptor;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.beans.BeanWrapperImpl;
 
 /**
  * SQL values wrapper to hold the column values for a row or parameter
@@ -33,33 +31,36 @@ import java.util.Map;
  * @since 2.0
  */
 public class SqlParameterBeanWrapper extends BeanWrapperImpl implements SqlNamedParameterHolder {
-    private Map sqlTypes = new HashMap();
 
-    public SqlParameterBeanWrapper() {
+	private Map sqlTypes = new HashMap();
+
+
+	public SqlParameterBeanWrapper() {
 	}
 
 	public SqlParameterBeanWrapper(Object object) {
 		super(object);
 	}
 
+
 	public void setTypes(Map sqlTypes) {
 		this.sqlTypes.putAll(sqlTypes);
 	}
 
-    public Object getValue(String columnName) {
-        return this.getPropertyValue(columnName);
-    }
+	public Object getValue(String columnName) {
+		return this.getPropertyValue(columnName);
+	}
 
-    public int getType(String columnName) {
-        if (sqlTypes.containsKey(columnName)) {
-            return ((Integer)sqlTypes.get(columnName)).intValue();
-        }
-        return 0;
-    }
+	public int getType(String columnName) {
+		if (sqlTypes.containsKey(columnName)) {
+			return ((Integer) sqlTypes.get(columnName)).intValue();
+		}
+		return 0;
+	}
 
-    public void setValues(Map valueMap) {
-        this.setPropertyValues(valueMap);
-    }
+	public void setValues(Map valueMap) {
+		this.setPropertyValues(valueMap);
+	}
 
 	public Map getValues() {
 		PropertyDescriptor[] propDescriptors = this.getPropertyDescriptors();
@@ -67,22 +68,23 @@ public class SqlParameterBeanWrapper extends BeanWrapperImpl implements SqlNamed
 		for (int i = 0; i < propDescriptors.length; i++) {
 			String propName = propDescriptors[i].getName();
 			Object propValue = this.getPropertyValue(propName);
-			if (!"class".equals(propName))
+			if (!"class".equals(propName)) {
 				values.put(propName, propValue);
+			}
 		}
 		return values;
 	}
 
-    public void setSqlTypes(SqlNamedParameterTypes sqlTypesHolder) {
-        this.sqlTypes.putAll(sqlTypesHolder.getTypes());
-    }
+	public void setSqlTypes(SqlNamedParameterTypes sqlTypesHolder) {
+		this.sqlTypes.putAll(sqlTypesHolder.getTypes());
+	}
 
-    public void setSqlTypes(Map sqlTypes) {
-        this.sqlTypes.putAll(sqlTypes);
-    }
+	public void setSqlTypes(Map sqlTypes) {
+		this.sqlTypes.putAll(sqlTypes);
+	}
 
-    public Map getTypes() {
-        return this.sqlTypes;
-    }
+	public Map getTypes() {
+		return this.sqlTypes;
+	}
 
 }
