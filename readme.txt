@@ -90,7 +90,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~1835 KB)
+* "spring" (~1830 KB)
 - Convenient jar file that combines all standard modules (see "module jars" below)
 - Note: Does NOT include extension modules! (see "extension module jars" below)
 
@@ -116,7 +116,7 @@ MODULE JARS (dist/modules):
 - Contents: DAO support, transaction infrastructure
 - Dependencies: spring-core, (spring-beans, spring-aop, spring-context, JTA)
 
-* "spring-jdbc" (~225 KB)
+* "spring-jdbc" (~215 KB)
 - Contents: JDBC support, iBATIS SQL Maps support
 - Dependencies: spring-dao, spring-beans, (iBATIS SQL Maps)
 
