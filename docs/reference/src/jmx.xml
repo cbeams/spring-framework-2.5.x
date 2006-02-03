@@ -1241,9 +1241,23 @@ public class AnnotationTestBean implements IJmxTestBean {
         </para>
 	</section>
 	<section id="jmx-resources">
-		<title>Further Resources - JMX</title>
+		<title>Further Resources</title>
         <para>
-            This section contains resources about JMX...
+            This section contains links to further resources about JMX.
         </para>
+		<itemizedlist>
+			<listitem>
+				<para>The <ulink url="http://java.sun.com/products/JavaManagement/">JMX homepage</ulink> at Sun</para>
+			</listitem>
+			<listitem>
+				<para>The <ulink url="http://jcp.org/aboutJava/communityprocess/final/jsr003/index3.html">JMX specification</ulink> (JSR-000003)</para>
+			</listitem>
+			<listitem>
+				<para>The <ulink url="http://jcp.org/aboutJava/communityprocess/final/jsr160/index.html">JMX Remote API specification</ulink> (JSR-000160)</para>
+			</listitem>
+			<listitem>
+				<para>The <ulink url="http://mx4j.sourceforge.net/">MX4J homepage</ulink> (an Open Source implementation of various JMX specs)</para>
+			</listitem>
+		</itemizedlist>
 	</section>
 </chapter>
