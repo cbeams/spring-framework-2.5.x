@@ -1,3 +1,9 @@
+BODY {
+   text-align: justify;
+   margin-right: 2em;
+   margin-left: 2em;
+}
+
 A {
     color: #003399;
 }
@@ -15,7 +21,6 @@ P, DL, DT, DD, BLOCKQUOTE {
     margin-bottom: 3px;
     margin-top: 3px;
     padding-top: 0px;
-    /*border: 1px solid black;*/
 }
 
 OL, UL, P {
@@ -41,7 +46,6 @@ P.pubdate {
 td {
     font-size: 80%;
 }
-
 
 TD, TH, SPAN {
     color: #000000;
@@ -147,12 +151,6 @@ HR  {
     margin:0;
 }
 
-/*(.itemizedlist, UL { 
-    padding-top: 0; 
-    padding-bottom:0; 
-    margin:0; 
-}*/
-
 .term { 
     font-weight:bold;
 }
@@ -165,4 +163,3 @@ HR  {
 .legalnotice {
     font-size: 70%;
 }
-    
