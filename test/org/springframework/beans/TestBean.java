@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.22 2006-01-05 18:42:00 robharrop Exp $
+ *	$Id: TestBean.java,v 1.23 2006-02-03 19:57:31 robharrop Exp $
  */
 
 /*
@@ -47,13 +47,19 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private String beanName;
 
+	private String country;
+
 	private BeanFactory beanFactory;
 
 	private boolean postProcessed;
 
 	private String name;
 
+	private String sex;
+
 	private int age;
+
+	private boolean jedi;
 
 	private ITestBean spouse;
 
@@ -134,12 +140,28 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.name = name;
 	}
 
+	public String getSex() {
+		return sex;
+	}
+
+	public void setSex(String sex) {
+		this.sex = sex;
+	}
+
 	public int getAge() {
 		return age;
 	}
 
 	public void setAge(int age) {
 		this.age = age;
+	}
+
+	public boolean isJedi() {
+		return jedi;
+	}
+
+	public void setJedi(boolean jedi) {
+		this.jedi = jedi;
 	}
 
 	public ITestBean getSpouse() {
@@ -162,6 +184,14 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 			throw new NumberFormatException("Number format exception: contains a ,");
 		}
 		this.touchy = touchy;
+	}
+
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
 	}
 
 	public String[] getStringArray() {
