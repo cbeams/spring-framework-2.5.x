@@ -87,6 +87,14 @@ public abstract class ObjectUtils {
 	}
 
 	/**
+	 * Returns the value of <code>obj.toString()</code> is <code>obj</code> is
+	 * not <code>null</code> otherwise returns an empty <code>String</code>.
+	 */
+	public static String nullSafeToString(Object obj) {
+		return (obj != null ? obj.toString() : "");
+	}
+
+	/**
 	 * Return a hex string form of an object's identity hash code.
 	 * @param obj the object
 	 * @return the object's identity code in hex
