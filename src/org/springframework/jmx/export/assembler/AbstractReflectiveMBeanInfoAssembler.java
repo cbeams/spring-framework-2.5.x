@@ -39,7 +39,7 @@ import org.springframework.jmx.support.JmxUtils;
  * the MBean class.
  *
  * <p>The logic for creating MBean metadata from the reflective metadata is contained
- * in this class, but this class makes no desicions as to which methods and
+ * in this class, but this class makes no decisions as to which methods and
  * properties are to be exposed. Instead it gives subclasses a chance to 'vote'
  * on each property or method through the <code>includeXXX</code> methods.
  *

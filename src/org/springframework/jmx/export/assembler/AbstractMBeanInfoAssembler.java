@@ -34,7 +34,7 @@ import org.springframework.jmx.support.JmxUtils;
  * that encapsulates the creation of a <code>ModelMBeanInfo</code> instance
  * but delegates the creation of metadata to subclasses.
  *
- * <p>This class offers to flavors of Class extraction from a managed bean
+ * <p>This class offers two flavors of Class extraction from a managed bean
  * instance: <code>getTargetClass</code>, extracting the target class behind
  * any kind of AOP proxy, and <code>getClassToExpose</code>, returning the
  * class or interface that will be searched for annotations and exposed
