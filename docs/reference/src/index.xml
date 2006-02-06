@@ -1,6 +1,5 @@
-<?xml version='1.0' encoding="iso-8859-1"?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
-                      "../lib/docbook-dtd/docbookx.dtd"
+<?xml version='1.0' encoding="iso-8859-1" ?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "../lib/docbook-dtd/docbookx.dtd"
 [
 <!ENTITY overview			SYSTEM "overview.xml">
 <!ENTITY background			SYSTEM "background.xml">
@@ -28,118 +27,94 @@
 <!ENTITY testing			SYSTEM "testing.xml">
 <!ENTITY dtd				SYSTEM "dtd.xml">
 ]>
-
-
 <book>
-
     <bookinfo>
-        <title>Spring - Java/J2EE Application Framework</title>
-        <subtitle>
+		<title>Spring - Java/J2EE Application Framework</title>
+		<subtitle>
           Reference Documentation
         </subtitle>
-        <releaseinfo>Version 2.0 M2</releaseinfo>
-        <pubdate>(Work in progress)</pubdate>
-        
-        <authorgroup>
-					<author>
-						<firstname>Rod</firstname>
-						<surname>Johnson</surname>
-					</author>
-					<author>
-						<firstname>Juergen</firstname>
-						<surname>Hoeller</surname>
-					</author>
-					<author>
-						<firstname>Alef</firstname>
-						<surname>Arendsen</surname>
-					</author>
-					<author>
-						<firstname>Colin</firstname>
-						<surname>Sampaleanu</surname>
-					</author>
-					<author>
-						<firstname>Rob</firstname>
-						<surname>Harrop</surname>
-					</author>
-					<author>
-						<firstname>Thomas</firstname>
-						<surname>Risberg</surname>
-					</author>
-					<author>
-						<firstname>Darren</firstname>
-						<surname>Davison</surname>
-					</author>
-					<author>
-						<firstname>Dmitriy</firstname>
-						<surname>Kopylenko</surname>
-€					</author>
-					<author>
-						<firstname>Mark</firstname>
-						<surname>Pollack</surname>
-					</author>
-					<author>
-						<firstname>Thierry</firstname>
-						<surname>Templier</surname>
-					</author>
-					<author>
-						<firstname>Erwin</firstname>
-						<surname>Vervaet</surname>
-					</author>
-        </authorgroup>
-
-        <legalnotice>Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.</legalnotice>
-    </bookinfo>
-
-    <toc/>
-
-	    &overview;
-
-	    &background;
-
-	    &beans;
-	    
-	    &resources;
-	    
-	    &validation;
-	    
-	    &aop;
-	
-		&ataspectj;
-		
-		&aspectj;
-	    
-	    &transaction;
-	    
-	    &metadata;
-	    
-	    &dao;
-
-	    &jdbc;
-
-	    &orm;
-
-	    &mvc;
-	    
-	    &views;
-		
-	    &webintegration;
-
-			&remoting;
-
-	    &ejb;
-
-			&jms;
-
-			&jmx;
-
-			&cci;
-
-	    &mail;
-	    
-	    &scheduling;
-
-	    &testing;
-	
-	    &dtd;
-	
+		<releaseinfo>Version 2.0 M2</releaseinfo>
+		<pubdate>(Work in progress)</pubdate>
+		<authorgroup>
+			<author>
+				<firstname>Rod</firstname>
+				<surname>Johnson</surname>
+			</author>
+			<author>
+				<firstname>Juergen</firstname>
+				<surname>Hoeller</surname>
+			</author>
+			<author>
+				<firstname>Alef</firstname>
+				<surname>Arendsen</surname>
+			</author>
+			<author>
+				<firstname>Colin</firstname>
+				<surname>Sampaleanu</surname>
+			</author>
+			<author>
+				<firstname>Rob</firstname>
+				<surname>Harrop</surname>
+			</author>
+			<author>
+				<firstname>Thomas</firstname>
+				<surname>Risberg</surname>
+			</author>
+			<author>
+				<firstname>Darren</firstname>
+				<surname>Davison</surname>
+			</author>
+			<author>
+				<firstname>Dmitriy</firstname>
+				<surname>Kopylenko</surname>
+			</author>
+			<author>
+				<firstname>Mark</firstname>
+				<surname>Pollack</surname>
+			</author>
+			<author>
+				<firstname>Thierry</firstname>
+				<surname>Templier</surname>
+			</author>
+			<author>
+				<firstname>Erwin</firstname>
+				<surname>Vervaet</surname>
+			</author>
+			<author>
+				<firstname>Rick</firstname>
+				<surname>Evans</surname>
+			</author>
+		</authorgroup>
+		<legalnotice>
+			Copies of this document may be made for your own use and for distribution to others, provided that
+			you do not charge any fee for such copies and further provided that each copy contains this
+			Copyright Notice, whether distributed in print or electronically.
+		</legalnotice>
+	</bookinfo>
+    <toc />
+	&overview;
+	&background;
+	&beans;
+	&resources;
+	&validation;
+	&aop;
+	&ataspectj;
+	&aspectj;
+	&transaction;
+	&metadata;
+	&dao;
+	&jdbc;
+	&orm;
+	&mvc;
+	&views;
+	&webintegration;
+	&remoting;
+	&ejb;
+	&jms;
+	&jmx;
+	&cci;
+	&mail;
+	&scheduling;
+	&testing;
+	&dtd;
 </book>
