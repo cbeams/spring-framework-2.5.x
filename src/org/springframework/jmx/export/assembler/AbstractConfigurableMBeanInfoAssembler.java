@@ -60,7 +60,7 @@ public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractRef
 			if (!(entry.getKey() instanceof String)) {
 				throw new IllegalArgumentException("Property [notificationInfoMappings] only accepts Strings for Map keys");
 			}
-			this.notificationInfoMappings.put(entry.getKey(), extractNotificationMetdata(entry.getValue()));
+			this.notificationInfoMappings.put(entry.getKey(), extractNotificationMetadata(entry.getValue()));
 		}
 	}
 
@@ -79,7 +79,7 @@ public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractRef
 		return (result == null) ? new ModelMBeanNotificationInfo[0] : result;
 	}
 
-	private ModelMBeanNotificationInfo[] extractNotificationMetdata(Object mapValue) {
+	private ModelMBeanNotificationInfo[] extractNotificationMetadata(Object mapValue) {
 		if (mapValue instanceof ManagedNotification) {
 			ManagedNotification mn = (ManagedNotification) mapValue;
 			return new ModelMBeanNotificationInfo[] {JmxMetadataUtils.convertToModelMBeanNotificationInfo(mn)};
