@@ -279,8 +279,8 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	/**
 	 * Sets the {@link NotificationListener NotificationListeners} to register with the
 	 * {@link javax.management.MBeanServer}. The key of each entry in the <code>Map</code> is
-	 * the {@link javax.management.ObjectName} of MBean the listener should be registered for.
-	 * Specifying a asterisk (<code>*</code>) will cause the listener to be associated with all
+	 * the {@link javax.management.ObjectName} of the MBean the listener should be registered for.
+	 * Specifying an asterisk (<code>*</code>) will cause the listener to be associated with all
 	 * MBeans registered by this class at startup time.
 	 * <p>The value of each entry is the {@link javax.management.NotificationListener} to register.
 	 * For more advanced options such as registering
@@ -288,6 +288,8 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * handback objects see {@link #setNotificationListeners(NotificationListenerBean[])}.
 	 * @throws MalformedObjectNameException if one of the supplied
 	 * {@link ObjectName ObjectName} instances is malformed
+	 * @throws IllegalArgumentException if any of the values in the supplied listeners map
+	 * is not a {@link NotificationListener} or is <code>null</code>.
 	 */
 	public void setNotificationListenerMappings(Map listeners) throws MalformedObjectNameException {
 		List notificationListeners = new ArrayList();
