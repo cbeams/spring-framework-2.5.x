@@ -308,12 +308,6 @@ public class JmxTestBean implements IJmxTestBean {
 
 </beans>]]></programlisting>
 		</section>
-		<section id="jmx-exporting-classloader">
-			<title>Being specific about the ClassLoader</title>
-			<para>
-				[TODO]...
-			</para>
-		</section>
 	</section>
 	<section id="jmx-interface">
 		<title>Controlling the management interface of your beans</title>
@@ -1129,10 +1123,6 @@ public class AnnotationTestBean implements IJmxTestBean {
   </property>
 </bean>]]></programlisting>
 			<para>
-				For more information on these properties consult the Javadoc. For information of meaning of
-				the various environment variables, consult the Javadoc for... [TODO]
-			</para>
-			<para>
 				Note that when using a RMI-based connector you need the lookup service (tnameserv or
 				rmiregistry) to be started in order for the name registration to complete. If you are using
 				Spring to export remote services for you via RMI, then Spring will already have constructed
@@ -1515,6 +1505,9 @@ public class JmxTestBean implements IJmxTestBean, NotificationPublisherAware {
 			</listitem>
 			<listitem>
 				<para>The <ulink url="http://mx4j.sourceforge.net/">MX4J homepage</ulink> (an Open Source implementation of various JMX specs)</para>
+			</listitem>
+			<listitem>
+				<para><ulink url="http://java.sun.com/developer/technicalArticles/J2SE/jmx.html">Getting Started with JMX</ulink> - an introductory article from Sun.</para>
 			</listitem>
 		</itemizedlist>
 	</section>
