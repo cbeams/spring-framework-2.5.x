@@ -436,7 +436,8 @@ public class AspectJAdviceParameterNameDiscoverer implements
 	private String maybeExtractVariableName(String candidateToken) {
 		if (candidateToken == null) { return null; }
 		
-		if (Character.isJavaIdentifierStart(candidateToken.charAt(0))) {
+		if (Character.isJavaIdentifierStart(candidateToken.charAt(0)) &&
+			Character.isLowerCase(candidateToken.charAt(0))) {
 			char[] tokenChars = candidateToken.toCharArray();
 			for (int i = 0; i < tokenChars.length; i++) {
 				if (!Character.isJavaIdentifierPart(tokenChars[i])) {
