@@ -140,5 +140,13 @@ public class AfterReturningAdviceBindingTests extends
 		testBeanProxy.returnsThis();
 		mockControl.verify();
 	}
+	
+	public void testReturningPrimitive() {
+		mockCollaborator.oneInt(20);
+		mockControl.replay();
+		testBeanProxy.setAge(20);
+		testBeanProxy.haveBirthday();
+		mockControl.verify();
+	}
 
 }

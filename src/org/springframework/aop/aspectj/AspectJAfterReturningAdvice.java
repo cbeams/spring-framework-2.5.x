@@ -52,7 +52,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 	 */
 	private boolean shouldInvokeOnReturnValueOf(Object returnValue) {
 		Class returningType = getDiscoveredReturningType();
-		if (returningType == Object.class) {
+		if (returningType == Object.class || returningType.isPrimitive()) {
 			return true;
 		} else { 
 			return returningType.isAssignableFrom(returnValue.getClass());

@@ -72,6 +72,12 @@
 				returning="java.lang.String"
 				pointcut="execution(* getSpouse())"
 			/>
+			<aop:advice
+				kind="afterReturning"
+				method="oneInt"
+				returning="result"
+				pointcut="execution(* haveBirthday())"
+			/>
 		</aop:aspect>		
 	</aop:config>
 	

@@ -26,6 +26,7 @@ public class AfterReturningAdviceBindingTestAspect extends
 		void oneTestBeanArg(TestBean b);
 		void objectMatchNoArgs();
 		void stringMatchNoArgs();
+		void oneInt(int result);
 	}
 	
 	private AfterReturningAdviceBindingCollaborator getCollaborator() {
@@ -46,6 +47,10 @@ public class AfterReturningAdviceBindingTestAspect extends
 	
 	public void stringMatchNoArgs() {
 		getCollaborator().stringMatchNoArgs();
+	}
+	
+	public void oneInt(int result) {
+		getCollaborator().oneInt(result);
 	}
 		
 }
