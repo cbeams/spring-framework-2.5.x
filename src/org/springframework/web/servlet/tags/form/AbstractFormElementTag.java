@@ -16,30 +16,16 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.web.servlet.tags.HtmlEscapingAwareTag;
-import org.springframework.web.util.ExpressionEvaluationUtils;
-
 import javax.servlet.jsp.JspException;
 
 /**
  * @author Rob Harrop
  * @since 2.0
  */
-public abstract class AbstractFormElementTag extends HtmlEscapingAwareTag {
+public abstract class AbstractFormElementTag extends AbstractFormTag {
 
 	protected final int doStartTagInternal() throws Exception {
 		return writeTagContent(createTagWriter());
-	}
-
-	protected TagWriter createTagWriter() {
-		return new TagWriter(this.pageContext.getOut());
-	}
-
-	protected Object evaluate(String attributeName, String value) throws JspException {
-		if (value == null) {
-			return null;
-		}
-		return ExpressionEvaluationUtils.evaluate(attributeName, value, this.pageContext);
 	}
 
 	protected abstract int writeTagContent(TagWriter tagWriter) throws JspException;

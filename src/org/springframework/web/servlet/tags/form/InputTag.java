@@ -33,6 +33,12 @@ public class InputTag extends AbstractHtmlInputElementTag {
 
 	private String onselect;
 
+	public static final String MAXLENGTH_ATTRIBUTE = "maxlength";
+
+	public static final String ALT_ATTRIBUTE = "alt";
+
+	public static final String ONSELECT_ATTRIBUTE = "onselect";
+
 	public void setMaxlength(String maxlength) {
 		this.maxlength = maxlength;
 	}
@@ -56,9 +62,9 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(getValue()));
 
 		// custom optional attributes
-		tagWriter.writeOptionalAttributeValue("maxlength", ObjectUtils.nullSafeToString(evaluate("maxlength", this.maxlength)));
-		tagWriter.writeOptionalAttributeValue("alt", ObjectUtils.nullSafeToString(evaluate("alt", this.alt)));
-		tagWriter.writeOptionalAttributeValue("onselect", ObjectUtils.nullSafeToString(evaluate("onselect", this.onselect)));
+		writeOptionalAttribute(tagWriter, MAXLENGTH_ATTRIBUTE, this.maxlength);
+		writeOptionalAttribute(tagWriter, ALT_ATTRIBUTE, this.maxlength);
+		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, this.maxlength);
 		tagWriter.endTag();
 		return EVAL_PAGE;
 	}

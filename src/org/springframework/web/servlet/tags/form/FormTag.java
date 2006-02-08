@@ -18,8 +18,6 @@ package org.springframework.web.servlet.tags.form;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.servlet.tags.HtmlEscapingAwareTag;
-import org.springframework.web.util.ExpressionEvaluationUtils;
 
 import javax.servlet.jsp.JspException;
 
@@ -28,11 +26,13 @@ import javax.servlet.jsp.JspException;
  * @author Rob Harrop
  * @since 2.0
  */
-public class FormTag extends HtmlEscapingAwareTag {
+public class FormTag extends AbstractFormTag {
 
-	public static final String COMMAND_NAME_VARIABLE_NAME = "commandName";
+	public static final String COMMAND_NAME_VARIABLE_NAME = "org.springframework.web.servlet.tags.form.FormTag.commandName";
 
 	private static final String DEFAULT_METHOD = "POST";
+
+	public static final String DEFAULT_COMMAND_NAME = "command";
 
 	public static final String ONSUBMIT_ATTRIBUTE = "onsubmit";
 
@@ -44,9 +44,11 @@ public class FormTag extends HtmlEscapingAwareTag {
 
 	public static final String ENCTYPE_ATTRIBUTE = "enctype";
 
+	public static final String COMMAND_NAME_ATTRIBUTE = "commandName";
+
 	private TagWriter tagWriter;
 
-	private String commandName;
+	private String commandName = DEFAULT_COMMAND_NAME;
 
 	private String action;
 
@@ -64,6 +66,7 @@ public class FormTag extends HtmlEscapingAwareTag {
 	}
 
 	public void setAction(String action) {
+		Assert.hasText(action, "'action' cannot be null or zero length.");
 		this.action = action;
 	}
 
@@ -73,14 +76,17 @@ public class FormTag extends HtmlEscapingAwareTag {
 	}
 
 	public void setEnctype(String enctype) {
+		Assert.hasText(enctype, "'enctype' cannot be null or zero length.");
 		this.enctype = enctype;
 	}
 
 	public void setOnsubmit(String onsubmit) {
+		Assert.hasText(onsubmit, "'onsubmit' cannot be null or zero length.");
 		this.onsubmit = onsubmit;
 	}
 
 	public void setOnreset(String onreset) {
+		Assert.hasText(onreset, "'onreset' cannot be null or zero length.");
 		this.onreset = onreset;
 	}
 
@@ -89,34 +95,27 @@ public class FormTag extends HtmlEscapingAwareTag {
 		// write the tag
 		this.tagWriter = createTagWriter();
 		this.tagWriter.startTag("form");
-		
+
 		this.tagWriter.writeAttribute(METHOD_ATTRIBUTE,
 						ObjectUtils.nullSafeToString(evaluate(METHOD_ATTRIBUTE, this.method)));
-		this.tagWriter.writeOptionalAttributeValue(ACTION_ATTRIBUTE,
-						ObjectUtils.nullSafeToString(evaluate(ACTION_ATTRIBUTE, this.action)));
-		this.tagWriter.writeOptionalAttributeValue(ENCTYPE_ATTRIBUTE,
-						ObjectUtils.nullSafeToString(evaluate(ENCTYPE_ATTRIBUTE, this.enctype)));
-		tagWriter.writeOptionalAttributeValue(ONSUBMIT_ATTRIBUTE,
-						ObjectUtils.nullSafeToString(evaluate(ONSUBMIT_ATTRIBUTE, this.onsubmit)));
-		tagWriter.writeOptionalAttributeValue(ONRESET_ATTRIBUTE,
-						ObjectUtils.nullSafeToString(evaluate(ONRESET_ATTRIBUTE, this.onreset)));
+		writeOptionalAttribute(tagWriter, ACTION_ATTRIBUTE, this.action);
+		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, this.enctype);
+		writeOptionalAttribute(tagWriter, ONSUBMIT_ATTRIBUTE, this.onsubmit);
+		writeOptionalAttribute(tagWriter, ONRESET_ATTRIBUTE, this.onreset);
 
 		this.tagWriter.forceBlock();
 
 		// expose the command name for nested tags
-		this.pageContext.setAttribute(COMMAND_NAME_VARIABLE_NAME, this.commandName);
+		this.pageContext.setAttribute(COMMAND_NAME_VARIABLE_NAME, resolveCommandName());
 		return EVAL_BODY_INCLUDE;
 	}
 
-	protected TagWriter createTagWriter() {
-		return new TagWriter(this.pageContext.getOut());
-	}
-
-	protected Object evaluate(String attributeName, String value) throws JspException {
-		if (value == null) {
-			return null;
+	private String resolveCommandName() throws JspException {
+		Object resolvedCommmandName = evaluate(COMMAND_NAME_ATTRIBUTE, this.commandName);
+		if (resolvedCommmandName == null) {
+			throw new IllegalArgumentException("'commandName' cannot be null.");
 		}
-		return ExpressionEvaluationUtils.evaluate(attributeName, value, this.pageContext);
+		return (String) resolvedCommmandName;
 	}
 
 	public int doEndTag() throws JspException {

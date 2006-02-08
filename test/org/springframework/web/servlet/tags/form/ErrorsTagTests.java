@@ -48,13 +48,11 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
-	public void testFoo() throws Exception {
-	  //
-	}
-	
-	/*public void testWithErrors() throws Exception {
+	public void testWithErrors() throws Exception {
 		// construct an errors instance of the tag
-		Errors errors = new BindException(new TestBean(), COMMAND_NAME);
+		TestBean target = new TestBean();
+		target.setName("Rob Harrop");
+		Errors errors = new BindException(target, COMMAND_NAME);
 		errors.rejectValue("name", "some.code", "Default Message");
 		errors.rejectValue("name", "too.short", "Too Short");
 
@@ -81,7 +79,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 
 		String output = getWriter().toString();
 		assertEquals(0, output.length());
-	}*/
+	}
 
 	private void assertSpanTagOpened(String output) {
 		assertTrue(output.startsWith("<span "));

@@ -97,7 +97,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	private void renderFromMap(Map map, TagWriter tagWriter) throws JspException {
 		for (Iterator iterator = map.entrySet().iterator(); iterator.hasNext();) {
 			Map.Entry entry = (Map.Entry) iterator.next();
-			renderOption(tagWriter, entry.getKey().toString(), entry.getValue().toString());
+			renderOption(tagWriter, entry, entry.getKey().toString(), entry.getValue().toString());
 		}
 	}
 
@@ -111,20 +111,20 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 
 
 		for (Iterator iterator = itemList.iterator(); iterator.hasNext();) {
-			Object o = iterator.next();
-			BeanWrapper wrapper = new BeanWrapperImpl(o);
+			Object item = iterator.next();
+			BeanWrapper wrapper = new BeanWrapperImpl(item);
 
 			Object key = wrapper.getPropertyValue(keyProperty).toString();
-			String value = (valueProperty == null ? o.toString() : wrapper.getPropertyValue(valueProperty).toString());
+			String value = (valueProperty == null ? item.toString() : ObjectUtils.nullSafeToString(wrapper.getPropertyValue(valueProperty)));
 
-			renderOption(tagWriter, key, value);
+			renderOption(tagWriter, item, key, value);
 		}
 	}
 
-	private void renderOption(TagWriter tagWriter, Object key, String value) throws JspException {
+	private void renderOption(TagWriter tagWriter, Object item, Object key, String value) throws JspException {
 		tagWriter.startTag("option");
 		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(key));
-		if (getValue().equals(key)) {
+		if (isActiveValue(key) || isActiveValue(item)) {
 			tagWriter.writeAttribute("selected", "true");
 		}
 		tagWriter.appendValue(value);

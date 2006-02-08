@@ -25,12 +25,11 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 		tagWriter.writeAttribute("type", "checkbox");
 
 		Object boundValue = getValue();
-		// todo: something about nulls here
 
 		if (boundValue instanceof Boolean) {
 			renderFromBoolean((Boolean) boundValue, tagWriter);
 		}
-		else {
+		else if(boundValue != null) {
 
 			if (this.value == null) {
 				throw new IllegalArgumentException("Attribute 'value' is required when binding to non-Boolean values.");
@@ -38,7 +37,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 
 			Object resolvedValue = evaluate("value", this.value);
 
-			if (boundValue != null && boundValue.getClass().isArray()) {
+			if (boundValue.getClass().isArray()) {
 				renderFromCollection(resolvedValue, toList(boundValue), tagWriter);
 			}
 			else if (boundValue instanceof Collection) {

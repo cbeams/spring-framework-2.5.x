@@ -26,35 +26,61 @@ import javax.servlet.jsp.JspException;
  */
 public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag {
 
-	protected String onfocus;
+    protected String onfocus;
 
-	protected String onblur;
+    protected String onblur;
 
-	protected String onchange;
+    protected String onchange;
 
-	protected String accesskey;
+    protected String accesskey;
 
-	public void setOnfocus(String onfocus) {
-		this.onfocus = onfocus;
-	}
+    public static final String ONFOCUS_ATTRIBUTE = "onfocus";
 
-	public void setOnblur(String onblur) {
-		this.onblur = onblur;
-	}
+    public static final String ONBLUR_ATTRIBUTE = "onblur";
 
-	public void setOnchange(String onchange) {
-		this.onchange = onchange;
-	}
+    public static final String ONCHANGE_ATTRIBUTE = "onchange";
 
-	public void setAccesskey(String accesskey) {
-		this.accesskey = accesskey;
-	}
+    public static final String ACCESSKEY_ATTRIBUTE = "accesskey";
 
-	protected void writeDefaultAttributes(TagWriter tagWriter) throws JspException {
-		super.writeDefaultAttributes(tagWriter);
-		tagWriter.writeOptionalAttributeValue("onfocus", ObjectUtils.nullSafeToString(evaluate("onfocus", this.onfocus)));
-		tagWriter.writeOptionalAttributeValue("onblur", ObjectUtils.nullSafeToString(evaluate("onblur", this.onblur)));
-		tagWriter.writeOptionalAttributeValue("onchange", ObjectUtils.nullSafeToString(evaluate("onchange", this.onchange)));
-		tagWriter.writeOptionalAttributeValue("accesskey", ObjectUtils.nullSafeToString(evaluate("accesskey", this.accesskey)));
-	}
+    public void setOnfocus(String onfocus) {
+        this.onfocus = onfocus;
+    }
+
+    public void setOnblur(String onblur) {
+        this.onblur = onblur;
+    }
+
+    public void setOnchange(String onchange) {
+        this.onchange = onchange;
+    }
+
+    public void setAccesskey(String accesskey) {
+        this.accesskey = accesskey;
+    }
+
+    protected void writeDefaultAttributes(TagWriter tagWriter) throws JspException {
+        super.writeDefaultAttributes(tagWriter);
+        writeOptionalAttribute(tagWriter, ONFOCUS_ATTRIBUTE, this.onfocus);
+        writeOptionalAttribute(tagWriter, ONBLUR_ATTRIBUTE, this.onblur);
+        writeOptionalAttribute(tagWriter, ONCHANGE_ATTRIBUTE, this.onchange);
+        writeOptionalAttribute(tagWriter, ACCESSKEY_ATTRIBUTE, this.accesskey);
+    }
+
+    /**
+     * Checks to see whether or not the value of this tag is the active value, or the
+     * value to which this tag is bound.
+     * <p/>Performs a two stage comparison, first comparing objects using
+     * {@link org.springframework.util.ObjectUtils#nullSafeEquals} and then finally comparing the <code>String</code>
+     * values. This helps when object types might be statically incompatible but logically
+     * equal in certain cases (i.e. <code>String</code> and <code>Character</code>).
+     */
+    protected boolean isActiveValue(Object resolvedValue) throws JspException {
+        Object boundValue = getValue();
+        boolean equal = ObjectUtils.nullSafeEquals(resolvedValue, boundValue);
+
+        if (!equal && (resolvedValue != null && boundValue != null)) {
+            equal = resolvedValue.toString().equals(boundValue.toString());
+        }
+        return equal;
+    }
 }

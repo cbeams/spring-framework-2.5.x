@@ -36,6 +36,8 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 
 	public static final String DIR_ATTRIBUTE = "dir";
 
+	public static final String TABINDEX_ATTRIBUTE = "tabindex";
+
 	public static final String ONCLICK_ATTRIBUTE = "onclick";
 
 	public static final String ONDBLCLICK_ATTRIBUTE = "ondblclick";
@@ -65,6 +67,8 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	private String title;
 
 	private String dir;
+
+	private String tabindex;
 
 	private String onclick;
 
@@ -104,6 +108,10 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 
 	public void setDir(String dir) {
 		this.dir = dir;
+	}
+
+	public void setTabindex(String tabindex) {
+		this.tabindex = tabindex;
 	}
 
 	public void setOnclick(String onclick) {
@@ -154,19 +162,21 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 		super.writeDefaultAttributes(tagWriter);
 		tagWriter.writeOptionalAttributeValue(CLASS_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate("cssClass", this.cssClass)));
 		tagWriter.writeOptionalAttributeValue(STYLE_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate("cssStyle", this.cssStyle)));
-		tagWriter.writeOptionalAttributeValue(LANG_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate(LANG_ATTRIBUTE, this.lang)));
-		tagWriter.writeOptionalAttributeValue(TITLE_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate(TITLE_ATTRIBUTE, this.title)));
-		tagWriter.writeOptionalAttributeValue(DIR_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate(DIR_ATTRIBUTE, this.dir)));
-		tagWriter.writeOptionalAttributeValue(ONCLICK_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate(ONCLICK_ATTRIBUTE, this.onclick)));
-		tagWriter.writeOptionalAttributeValue(ONDBLCLICK_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate(ONDBLCLICK_ATTRIBUTE, this.ondblclick)));
-		tagWriter.writeOptionalAttributeValue(ONMOUSEDOWN_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate(ONMOUSEDOWN_ATTRIBUTE, this.onmousedown)));
-		tagWriter.writeOptionalAttributeValue(ONMOUSEUP_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate(ONMOUSEUP_ATTRIBUTE, this.onmouseup)));
-		tagWriter.writeOptionalAttributeValue(ONMOUSEOVER_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate(ONMOUSEOVER_ATTRIBUTE, this.onmouseover)));
-		tagWriter.writeOptionalAttributeValue(ONMOUSEMOVE_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate(ONMOUSEMOVE_ATTRIBUTE, this.onmousemove)));
-		tagWriter.writeOptionalAttributeValue(ONMOUSEOUT_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate(ONMOUSEOUT_ATTRIBUTE, this.onmouseout)));
-		tagWriter.writeOptionalAttributeValue(ONKEYPRESS_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate(ONKEYPRESS_ATTRIBUTE, this.onkeypress)));
-		tagWriter.writeOptionalAttributeValue(ONKEYUP_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate(ONKEYUP_ATTRIBUTE, this.onkeyup)));
-		tagWriter.writeOptionalAttributeValue(ONKEYDOWN_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate(ONKEYDOWN_ATTRIBUTE, this.onkeydown)));
+		writeOptionalAttribute(tagWriter, LANG_ATTRIBUTE, this.lang);
+		writeOptionalAttribute(tagWriter, TITLE_ATTRIBUTE, this.title);
+		writeOptionalAttribute(tagWriter, DIR_ATTRIBUTE, this.dir);
+		writeOptionalAttribute(tagWriter, TABINDEX_ATTRIBUTE, this.tabindex);
+		writeOptionalAttribute(tagWriter, ONCLICK_ATTRIBUTE, this.onclick);
+		writeOptionalAttribute(tagWriter, ONDBLCLICK_ATTRIBUTE, this.ondblclick);
+		writeOptionalAttribute(tagWriter, ONMOUSEDOWN_ATTRIBUTE, this.onmousedown);
+		writeOptionalAttribute(tagWriter, ONMOUSEUP_ATTRIBUTE, this.onmouseup);
+		writeOptionalAttribute(tagWriter, ONMOUSEOVER_ATTRIBUTE, this.onmouseover);
+		writeOptionalAttribute(tagWriter, ONMOUSEMOVE_ATTRIBUTE, this.onmousemove);
+		writeOptionalAttribute(tagWriter, ONMOUSEOUT_ATTRIBUTE, this.onmouseout);
+		writeOptionalAttribute(tagWriter, ONKEYPRESS_ATTRIBUTE, this.onkeypress);
+		writeOptionalAttribute(tagWriter, ONKEYUP_ATTRIBUTE, this.onkeyup);
+		writeOptionalAttribute(tagWriter, ONKEYDOWN_ATTRIBUTE, this.onkeydown);
 	}
+
 
 }

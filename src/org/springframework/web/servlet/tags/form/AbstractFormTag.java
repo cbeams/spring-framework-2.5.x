@@ -17,6 +17,8 @@
 package org.springframework.web.servlet.tags.form;
 
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.servlet.tags.HtmlEscapingAwareTag;
+import org.springframework.web.util.ExpressionEvaluationUtils;
 
 import javax.servlet.jsp.JspException;
 
@@ -24,28 +26,20 @@ import javax.servlet.jsp.JspException;
  * @author Rob Harrop
  * @since 2.0
  */
-public class RadioButtonTag extends AbstractHtmlInputElementTag {
+public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 
-    private String value;
+	protected Object evaluate(String attributeName, String value) throws JspException {
+		if (value == null) {
+			return null;
+		}
+		return ExpressionEvaluationUtils.evaluate(attributeName, value, this.pageContext);
+	}
 
-    public void setValue(String value) {
-        this.value = value;
-    }
+	protected final void writeOptionalAttribute(TagWriter tagWriter, String attributeName, String value) throws JspException {
+		tagWriter.writeOptionalAttributeValue(attributeName, ObjectUtils.nullSafeToString(evaluate(attributeName, value)));
+	}
 
-    protected int writeTagContent(TagWriter tagWriter) throws JspException {
-        tagWriter.startTag("input");
-        writeDefaultAttributes(tagWriter);
-        tagWriter.writeAttribute("type", "radio");
-
-        Object resolvedValue = evaluate("value", this.value);
-        tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(resolvedValue));
-
-        if (isActiveValue(resolvedValue)) {
-            tagWriter.writeAttribute("checked", "true");
-        }
-
-        tagWriter.endTag();
-        return EVAL_PAGE;
-    }
-
+	protected TagWriter createTagWriter() {
+		return new TagWriter(this.pageContext.getOut());
+	}
 }

@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.tags.form;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 
@@ -51,8 +50,12 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormElemen
 	}
 
 	protected void writeDefaultAttributes(TagWriter tagWriter) throws JspException {
-		tagWriter.writeOptionalAttributeValue(ID_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate(ID_ATTRIBUTE, this.id)));
-		tagWriter.writeAttribute("name", getPath());
+		writeOptionalAttribute(tagWriter, ID_ATTRIBUTE, this.id);
+		tagWriter.writeAttribute("name", getName());
+	}
+
+	protected String getName() throws JspException {
+		return getPath();
 	}
 
 	protected final Object getValue() throws JspException {

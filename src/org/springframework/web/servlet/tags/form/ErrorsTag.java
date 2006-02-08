@@ -24,7 +24,7 @@ import javax.servlet.jsp.JspException;
  * @author Rob Harrop
  * @since 2.0
  */
-public class ErrorsTag extends AbstractDataBoundFormElementTag {
+public class ErrorsTag extends AbstractHtmlElementTag {
 
 	public static final String SPAN_TAG = "span";
 
@@ -52,7 +52,7 @@ public class ErrorsTag extends AbstractDataBoundFormElementTag {
 		return EVAL_PAGE;
 	}
 
-	protected String getPath() throws JspException {
-		return super.getPath() + ".errors";
+	protected String getName() throws JspException {
+		return getPath() + ".errors";
 	}
 }

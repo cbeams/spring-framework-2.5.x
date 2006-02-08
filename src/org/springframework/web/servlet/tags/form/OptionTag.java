@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 import javax.servlet.jsp.JspException;
@@ -41,6 +42,7 @@ public class OptionTag extends AbstractFormElementTag {
 	 * May be a runtime expression.
 	 */
 	public void setValue(String value) {
+		Assert.notNull(value, "'value' cannot be null.");
 		this.value = value;
 	}
 
@@ -49,6 +51,7 @@ public class OptionTag extends AbstractFormElementTag {
 	 * May be a runtime expression.
 	 */
 	public void setLabel(String label) {
+		Assert.notNull(label, "'label' cannot be null.");
 		this.label = label;
 	}
 
@@ -73,7 +76,14 @@ public class OptionTag extends AbstractFormElementTag {
 		Object selectedValue = getSelectedValue();
 
 		Object resolvedValue = evaluate("value", this.value);
-		String resolvedLabel = ObjectUtils.nullSafeToString(evaluate("label", this.label));
+		String resolvedLabel;
+
+		if (this.label == null) {
+			resolvedLabel = ObjectUtils.nullSafeToString(resolvedValue);
+		}
+		else {
+			resolvedLabel = ObjectUtils.nullSafeToString(evaluate("label", this.label));
+		}
 
 		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(resolvedValue));
 		if (selectedValue.equals(resolvedValue)) {

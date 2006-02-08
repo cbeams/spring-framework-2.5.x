@@ -22,12 +22,40 @@ import javax.servlet.jsp.JspException;
 
 /**
  * @author Rob Harrop
+ * @since 2.0
  */
 public class TextareaTag extends AbstractHtmlInputElementTag {
 
-  protected int writeTagContent(TagWriter tagWriter) throws JspException {
+	public static final String ROWS_ATTRIBUTE = "rows";
+
+	public static final String COLS_ATTRIBUTE = "cols";
+
+	public static final String ONSELECT_ATTRIBUTE = "onselect";
+
+	private String rows;
+
+	private String cols;
+
+	private String onselect;
+
+	public void setRows(String rows) {
+		this.rows = rows;
+	}
+
+	public void setCols(String cols) {
+		this.cols = cols;
+	}
+
+	public void setOnselect(String onselect) {
+		this.onselect = onselect;
+	}
+
+	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("textarea");
 		writeDefaultAttributes(tagWriter);
+		writeOptionalAttribute(tagWriter, ROWS_ATTRIBUTE, this.rows);
+		writeOptionalAttribute(tagWriter, COLS_ATTRIBUTE, this.cols);
+		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, this.onselect);
 		tagWriter.appendValue(ObjectUtils.nullSafeToString(getValue()));
 		tagWriter.endTag();
 		return EVAL_PAGE;

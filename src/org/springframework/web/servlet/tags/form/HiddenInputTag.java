@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import org.springframework.util.ObjectUtils;
+
 import javax.servlet.jsp.JspException;
 
 /**
@@ -27,6 +29,8 @@ public class HiddenInputTag extends AbstractDataBoundFormElementTag {
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("input");
 		writeDefaultAttributes(tagWriter);
+		tagWriter.writeAttribute("type", "hidden");
+		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(getValue()));
 		tagWriter.endTag();
 		return EVAL_PAGE;
 	}
