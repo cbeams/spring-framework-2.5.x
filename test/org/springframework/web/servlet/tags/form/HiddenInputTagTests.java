@@ -16,16 +16,44 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import junit.framework.TestCase;
+import org.springframework.beans.TestBean;
+
+import javax.servlet.jsp.tagext.Tag;
 
 /**
  * @author Rob Harrop
  * @since 2.0
  */
-public class HiddenInputTagTests extends TestCase {
+public class HiddenInputTagTests extends AbstractFormTagTests {
 
-	public void testToDo() throws Exception {
-		//
+	private HiddenInputTag tag;
+
+	protected void onSetUp() {
+		this.tag = new HiddenInputTag() {
+			protected TagWriter createTagWriter() {
+				return new TagWriter(getWriter());
+			}
+		};
+		this.tag.setPageContext(getPageContext());
 	}
 
+	public void testRender() throws Exception {
+		this.tag.setPath("name");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		assertTrue(output.startsWith("<input "));
+		assertTrue(output.endsWith("/>"));
+
+		assertContainsAttribute(output, "type", "hidden");
+		assertContainsAttribute(output, "value", "Sally Greenwood");
+	}
+
+	protected TestBean createTestBean() {
+		TestBean bean = new TestBean();
+		bean.setName("Sally Greenwood");
+		return bean;
+	}
 }

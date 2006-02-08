@@ -69,6 +69,8 @@ public class InputTagTests extends AbstractFormTagTests {
 		String cssClass = "textfield";
 		String cssStyle = "width:10px";
 		String lang = "en";
+		String dir = "ltr";
+		String tabindex = "2";
 		String onclick = "doClick()";
 		String ondblclick = "doDblclick()";
 		String onkeydown = "doKeydown()";
@@ -79,8 +81,13 @@ public class InputTagTests extends AbstractFormTagTests {
 		String onmouseout = "doMouseOut()";
 		String onmouseover = "doMouseOver()";
 		String onmouseup = "doMouseUp()";
-		String onreset = "doOnReset()";
-		String onsubmit = "doOnSubmit()";
+		String onfocus = "doFocus()";
+		String onblur = "doBlur()";
+		String onchange = "doChange()";
+		String accesskey = "a";
+		String maxlength = "12";
+		String alt = "Some text";
+		String onselect = "doSelect()";
 
 		this.tag.setId(id);
 		this.tag.setPath("name");
@@ -88,6 +95,8 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setCssStyle(cssStyle);
 		this.tag.setTitle(title);
 		this.tag.setLang(lang);
+		this.tag.setDir(dir);
+		this.tag.setTabindex(tabindex);
 		this.tag.setOnclick(onclick);
 		this.tag.setOndblclick(ondblclick);
 		this.tag.setOnkeydown(onkeydown);
@@ -98,6 +107,13 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setOnmouseout(onmouseout);
 		this.tag.setOnmouseover(onmouseover);
 		this.tag.setOnmouseup(onmouseup);
+		this.tag.setOnfocus(onfocus);
+		this.tag.setOnblur(onblur);
+		this.tag.setOnchange(onchange);
+		this.tag.setAccesskey(accesskey);
+		this.tag.setMaxlength(maxlength);
+		this.tag.setAlt(alt);
+		this.tag.setOnselect(onselect);
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 		String output = getWriter().toString();
@@ -113,6 +129,8 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "style", cssStyle);
 		assertContainsAttribute(output, "title", title);
 		assertContainsAttribute(output, "lang", lang);
+		assertContainsAttribute(output, "dir", dir);
+		assertContainsAttribute(output, "tabindex", tabindex);
 		assertContainsAttribute(output, "onclick", onclick);
 		assertContainsAttribute(output, "ondblclick", ondblclick);
 		assertContainsAttribute(output, "onkeydown", onkeydown);
@@ -123,6 +141,13 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "onmouseout", onmouseout);
 		assertContainsAttribute(output, "onmouseover", onmouseover);
 		assertContainsAttribute(output, "onmouseup", onmouseup);
+		assertContainsAttribute(output, "onfocus", onfocus);
+		assertContainsAttribute(output, "onblur", onblur);
+		assertContainsAttribute(output, "onchange", onchange);
+		assertContainsAttribute(output, "accesskey", accesskey);
+		assertContainsAttribute(output, "maxlength", maxlength);
+		assertContainsAttribute(output, "alt", alt);
+		assertContainsAttribute(output, "onselect", onselect);
 	}
 
 	private void assertTagClosed(String output) {

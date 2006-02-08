@@ -21,11 +21,25 @@ import org.springframework.util.ObjectUtils;
 import javax.servlet.jsp.JspException;
 
 /**
+ * Data-binding aware JSP tag for rendering a hidden HTML '<code>input</code>' field
+ * containing the databound value.
+ * <p/>
+ * Example (binding to 'name' property of form backing object):
+ * <pre class="code>
+ * &lt;form:hidden path=&quot;name&quot;/&gt;
+ * </pre>
+ * 
  * @author Rob Harrop
  * @since 2.0
  */
 public class HiddenInputTag extends AbstractDataBoundFormElementTag {
 
+	/**
+	 * Writes the HTML '<code>input</code>' tag to the supplied {@link TagWriter} including the
+	 * databound value.
+	 * @see #writeDefaultAttributes(TagWriter)
+	 * @see #getValue()
+	 */
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("input");
 		writeDefaultAttributes(tagWriter);

@@ -56,13 +56,6 @@ public class OptionTag extends AbstractFormElementTag {
 	}
 
 	/**
-	 * Returns <code>option</code>.
-	 */
-	protected String getTagName() {
-		return "option";
-	}
-
-	/**
 	 * Renders an HTML <code>&lt;option&gt;</code> using configured
 	 * {@link #setValue value} and {@link #setLabel label} values.
 	 * <p/>

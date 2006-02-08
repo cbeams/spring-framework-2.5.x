@@ -131,10 +131,6 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 		tagWriter.endTag();
 	}
 
-	protected String getTagName() {
-		return "select";
-	}
-
 	public int doEndTag() throws JspException {
 		if (this.tagWriter != null) {
 			this.tagWriter.endTag();

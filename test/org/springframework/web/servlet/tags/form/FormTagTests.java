@@ -19,6 +19,7 @@ package org.springframework.web.servlet.tags.form;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.jsp.tagext.Tag;
+import javax.servlet.jsp.JspException;
 
 /**
  * @author Rob Harrop
@@ -42,11 +43,15 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		String commandName = "myCommand";
 		String enctype = "my/enctype";
 		String method = "POST";
+		String onsubmit = "onsubmit";
+		String onreset = "onreset";
 
 		this.tag.setAction(action);
 		this.tag.setCommandName(commandName);
 		this.tag.setEnctype(enctype);
 		this.tag.setMethod(method);
+		this.tag.setOnsubmit(onsubmit);
+		this.tag.setOnreset(onreset);
 
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, result);
@@ -65,10 +70,20 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(output, "action", action);
 		assertContainsAttribute(output, "enctype", enctype);
 		assertContainsAttribute(output, "method", method);
-
-
+		assertContainsAttribute(output, "onsubmit", onsubmit);
+		assertContainsAttribute(output, "onreset", onreset);
 	}
 
+	public void testWithNullResolvedCommand() throws Exception {
+		this.tag.setCommandName("${null}");
+		try {
+			this.tag.doStartTag();
+			fail("Should not be able to have a command name that resolves to null");
+		}
+		catch (IllegalArgumentException e) {
+			// success
+		}
+	}
 	private void assertFormTagOpened(String output) {
 		assertTrue(output.startsWith("<form "));
 	}

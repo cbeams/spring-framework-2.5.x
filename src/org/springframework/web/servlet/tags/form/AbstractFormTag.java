@@ -23,11 +23,22 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
 import javax.servlet.jsp.JspException;
 
 /**
+ * Base class for all databinding-aware JSP form tags. Provides utility methods for
+ * null-safe EL evaluation and for accessing and working with a {@link TagWriter}.
+ * <p/>
+ * Sub-classes (or test classes) can override the {@link #createTagWriter()} method to
+ * redirect output to a {@link java.io.Writer} other than the {@link javax.servlet.jsp.JspWriter}
+ * associated with the current {@link javax.servlet.jsp.PageContext}.
  * @author Rob Harrop
  * @since 2.0
  */
 public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 
+	/**
+	 * Evaluates the supplied value for the supplied attribute name. If the supplied value
+	 * is <code>null</code> then <code>null</code> is returned, otherwise evaluation is
+	 * handled using {@link ExpressionEvaluationUtils#evaluate(String, String, javax.servlet.jsp.PageContext)}.
+	 */
 	protected Object evaluate(String attributeName, String value) throws JspException {
 		if (value == null) {
 			return null;
@@ -35,10 +46,24 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 		return ExpressionEvaluationUtils.evaluate(attributeName, value, this.pageContext);
 	}
 
+	/**
+	 * Optionally writes the supplied value under the supplied attribute name into the supplied
+	 * {@link TagWriter}. In this case, the supplied value is {@link #evaluate evaluated} first
+	 * and then the {@link ObjectUtils#nullSafeToString String representation} is written as the
+	 * attribute value. If the resultant <code>String</code> representation is <code>null</code>
+	 * or empty, no attribute is written.
+	 * @see TagWriter#writeOptionalAttributeValue(String, String)
+	 */
 	protected final void writeOptionalAttribute(TagWriter tagWriter, String attributeName, String value) throws JspException {
 		tagWriter.writeOptionalAttributeValue(attributeName, ObjectUtils.nullSafeToString(evaluate(attributeName, value)));
 	}
 
+	/**
+	 * Creates the {@link TagWriter} which all output will be written to. By default,
+	 * the {@link TagWriter} writes its output to the {@link javax.servlet.jsp.JspWriter}
+	 * for the current {@link javax.servlet.jsp.PageContext}. Subclasses may choose to
+	 * change the {@link java.io.Writer} to which output is actually written.
+	 */
 	protected TagWriter createTagWriter() {
 		return new TagWriter(this.pageContext.getOut());
 	}

@@ -65,6 +65,20 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, "Foo");
 	}
 
+	public void testWithNoLabel() throws Exception {
+	  getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, "foo");
+		this.tag.setValue("bar");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		assertOptionTagOpened(output);
+		assertOptionTagClosed(output);
+		assertContainsAttribute(output, "value", "bar");
+		assertBlockTagContains(output, "bar");
+	}
+
 	public void testWithoutContext() throws Exception {
 		this.tag.setValue("foo");
 		this.tag.setLabel("Foo");

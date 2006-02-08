@@ -63,8 +63,8 @@ public class InputTag extends AbstractHtmlInputElementTag {
 
 		// custom optional attributes
 		writeOptionalAttribute(tagWriter, MAXLENGTH_ATTRIBUTE, this.maxlength);
-		writeOptionalAttribute(tagWriter, ALT_ATTRIBUTE, this.maxlength);
-		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, this.maxlength);
+		writeOptionalAttribute(tagWriter, ALT_ATTRIBUTE, this.alt);
+		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, this.onselect);
 		tagWriter.endTag();
 		return EVAL_PAGE;
 	}

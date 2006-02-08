@@ -1,6 +1,23 @@
+/*
+ * Copyright 2002-2006 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.web.servlet.tags.form;
 
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.Assert;
 
 import javax.servlet.jsp.JspException;
 import java.util.ArrayList;
@@ -10,12 +27,18 @@ import java.util.List;
 
 /**
  * @author Rob Harrop
+ * @since 2.0
  */
 public class CheckboxTag extends AbstractHtmlInputElementTag {
 
 	private String value;
 
+	/**
+	 * Sets the value that is sent to the server when the render checkbox is selected.
+	 * Can be a runtime expression.
+	 */
 	public void setValue(String value) {
+		Assert.notNull(value, "'value' cannot be null.");
 		this.value = value;
 	}
 
@@ -29,7 +52,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 		if (boundValue instanceof Boolean) {
 			renderFromBoolean((Boolean) boundValue, tagWriter);
 		}
-		else if(boundValue != null) {
+		else {
 
 			if (this.value == null) {
 				throw new IllegalArgumentException("Attribute 'value' is required when binding to non-Boolean values.");
@@ -37,7 +60,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 
 			Object resolvedValue = evaluate("value", this.value);
 
-			if (boundValue.getClass().isArray()) {
+			if (boundValue != null && boundValue.getClass().isArray()) {
 				renderFromCollection(resolvedValue, toList(boundValue), tagWriter);
 			}
 			else if (boundValue instanceof Collection) {

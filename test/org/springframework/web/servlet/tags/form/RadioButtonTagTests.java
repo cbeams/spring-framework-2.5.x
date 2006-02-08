@@ -36,10 +36,6 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
-	public void testFoo() throws Exception {
-		String o = null;
-		System.out.println(o instanceof String);
-	}
 	public void testWithCheckedValue() throws Exception {
 		this.tag.setPath("sex");
 		this.tag.setValue("M");

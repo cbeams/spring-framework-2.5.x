@@ -52,10 +52,13 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItems("${countries}");
 		this.tag.setItemKey("isoCode");
 		this.tag.setItemValue("name");
+		this.tag.setSize("5");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		validateOutput(getWriter().toString());
+		String output = getWriter().toString();
+		validateOutput(output);
+		assertContainsAttribute(output, "size", "5");
 	}
 
 	public void testWithListAndNoLabel() throws Exception {

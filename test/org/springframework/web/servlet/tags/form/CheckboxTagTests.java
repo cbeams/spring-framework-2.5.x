@@ -22,7 +22,10 @@ import org.dom4j.io.SAXReader;
 import org.springframework.beans.TestBean;
 
 import javax.servlet.jsp.tagext.Tag;
+import javax.servlet.jsp.JspException;
 import java.io.StringReader;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * @author Rob Harrop
@@ -169,11 +172,46 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("abc", checkboxElement.attribute("value").getValue());
 	}
 
+	public void testWithCollection() throws Exception {
+		this.tag.setPath("someList");
+		this.tag.setValue("foo");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
+		assertEquals("someList", checkboxElement.attribute("name").getValue());
+		assertEquals("true", checkboxElement.attribute("checked").getValue());
+		assertEquals("foo", checkboxElement.attribute("value").getValue());
+	}
+
+	public void testWithNullValue() throws Exception {
+		try {
+			this.tag.setPath("name");
+			this.tag.doStartTag();
+			fail("Should not be able to render with a null value when binding to a non-boolean.");
+		}
+		catch (IllegalArgumentException e) {
+			// success
+		}
+	}
 	protected TestBean createTestBean() {
 		this.bean = new TestBean();
 		this.bean.setName("Rob Harrop");
 		this.bean.setJedi(true);
 		this.bean.setStringArray(new String[]{"foo", "bar"});
+		List list = new ArrayList();
+		list.add("foo");
+		list.add("bar");
+		this.bean.setSomeList(list);
 		return this.bean;
 	}
 }
