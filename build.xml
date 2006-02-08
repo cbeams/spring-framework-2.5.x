@@ -166,6 +166,10 @@
 			<fileset dir="${src.dir}/org/springframework/web/servlet/tags">
 				<include name="*.tld"/>
 			</fileset>
+
+			<fileset dir="${src.dir}/org/springframework/web/servlet/tags/form">
+				<include name="*.tld"/>
+			</fileset>
 		</copy>
 
 	</target>
