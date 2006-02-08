@@ -21,7 +21,7 @@ package org.springframework.dao;
  * one row (or element) but zero rows (or elements) were actually returned.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see IncorrectResultSizeDataAccessException
  */
 public class EmptyResultDataAccessException extends IncorrectResultSizeDataAccessException {
