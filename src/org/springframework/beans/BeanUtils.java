@@ -253,16 +253,34 @@ public abstract class BeanUtils {
 	public static Method findMethodWithMinimalParameters(Class clazz, String methodName) {
 		Method[] methods = clazz.getMethods();
 		Method targetMethod = null;
+		int numMethodsFoundWithCurrentMinimumArgs = 0;
 		for (int i = 0; i < methods.length; i++) {
 			if (methods[i].getName().equals(methodName)) {
+				int numParams = methods[i].getParameterTypes().length;
 				if (targetMethod == null ||
-						methods[i].getParameterTypes().length < targetMethod.getParameterTypes().length) {
+						numParams < targetMethod.getParameterTypes().length) {
 					targetMethod = methods[i];
+					numMethodsFoundWithCurrentMinimumArgs = 1;
+				}
+				else {
+					if (targetMethod.getParameterTypes().length == numParams) {
+						// additional candidate with same length
+						numMethodsFoundWithCurrentMinimumArgs++;
+					}
 				}
 			}
 		}
 		if (targetMethod != null) {
-			return targetMethod;
+			if (numMethodsFoundWithCurrentMinimumArgs == 1) {
+				return targetMethod;
+			}
+			else {
+				String msg = "Cannot resolve method '" + methodName + 
+				             "' to a unique method. Attempted to resolve to overloaded method with " +
+				             "the least number of parameters, but there were " + 
+				             numMethodsFoundWithCurrentMinimumArgs + " candidates";
+				throw new IllegalArgumentException(msg);
+			}
 		}
 		else {
 			return findDeclaredMethodWithMinimalParameters(clazz, methodName);
@@ -282,16 +300,34 @@ public abstract class BeanUtils {
 	public static Method findDeclaredMethodWithMinimalParameters(Class clazz, String methodName) {
 		Method[] methods = clazz.getDeclaredMethods();
 		Method targetMethod = null;
+		int numMethodsFoundWithCurrentMinimumArgs = 0;
 		for (int i = 0; i < methods.length; i++) {
 			if (methods[i].getName().equals(methodName)) {
+				int numParams = methods[i].getParameterTypes().length;
 				if (targetMethod == null ||
 						methods[i].getParameterTypes().length < targetMethod.getParameterTypes().length) {
 					targetMethod = methods[i];
+					numMethodsFoundWithCurrentMinimumArgs = 1;
+				}
+				else {
+					if (targetMethod.getParameterTypes().length == numParams) {
+						// additional candidate with same length
+						numMethodsFoundWithCurrentMinimumArgs++;
+					}
 				}
 			}
 		}
 		if (targetMethod != null) {
-			return targetMethod;
+			if (numMethodsFoundWithCurrentMinimumArgs == 1) {
+				return targetMethod;
+			}
+			else {
+				String msg = "Cannot resolve method '" + methodName + 
+				             "' to a unique method. Attempted to resolve to overloaded method with " +
+				             "the least number of parameters, but there were " + 
+				             numMethodsFoundWithCurrentMinimumArgs + " candidates";
+				throw new IllegalArgumentException(msg);
+			}
 		}
 		else {
 			if (clazz.getSuperclass() != null) {
