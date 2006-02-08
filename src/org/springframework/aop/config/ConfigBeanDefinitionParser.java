@@ -110,7 +110,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				String localName = node.getLocalName();
 				if (POINTCUT.equals(localName)) {
-					parsePointcut((Element) node, registry);
+					parsePointcut((Element) node, registry, true);
 				}
 				else if (ADVISOR.equals(localName)) {
 					parseAdvisor((Element) node, registry, parseContext);
@@ -136,8 +136,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * Parses the supplied <code>&lt;pointcut&gt;</code> and registers the resulting
 	 * {@link org.springframework.aop.Pointcut} with the {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}.
 	 */
-	private void parsePointcut(Element pointcutElement, BeanDefinitionRegistry registry) {
-		BeanDefinition pointcutDefinition = createPointcutDefinition(pointcutElement.getAttribute(EXPRESSION));
+	private void parsePointcut(Element pointcutElement, BeanDefinitionRegistry registry, boolean asPrototype) {
+		BeanDefinition pointcutDefinition = createPointcutDefinition(pointcutElement.getAttribute(EXPRESSION),asPrototype);
 		String id = pointcutElement.getAttribute(ID);
 
 		if (!StringUtils.hasText(id)) {
@@ -178,7 +178,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		List pointcuts = DomUtils.getChildElementsByTagName(aspectElement, POINTCUT, true);
 		for (int i = 0; i < pointcuts.size(); i++) {
 			Element pointcutElement = (Element) pointcuts.get(i);
-			parsePointcut(pointcutElement, registry);
+			parsePointcut(pointcutElement, registry,true);
 		}
 
 		List declareParents = DomUtils.getChildElementsByTagName(aspectElement, DECLARE_PARENTS, true);
@@ -358,7 +358,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		else if (element.hasAttribute(POINTCUT)) {
 			// create a pointcut for the anonymous pc and register it
-			BeanDefinition pointcutDefinition = createPointcutDefinition(element.getAttribute(POINTCUT));
+			BeanDefinition pointcutDefinition = createPointcutDefinition(element.getAttribute(POINTCUT),false);
 			String pointcutName =
 					BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) pointcutDefinition, registry, false);
 			registry.registerBeanDefinition(pointcutName, pointcutDefinition);
@@ -375,9 +375,12 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	protected BeanDefinition createPointcutDefinition(String expression) {
+	protected BeanDefinition createPointcutDefinition(String expression, boolean asPrototype) {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition();
 		beanDefinition.setBeanClass(AspectJExpressionPointcut.class);
+		if (asPrototype) {
+			beanDefinition.setSingleton(false);
+		}
 		beanDefinition.setPropertyValues(new MutablePropertyValues());
 		beanDefinition.getPropertyValues().addPropertyValue(EXPRESSION, expression);
 		return beanDefinition;
