@@ -51,7 +51,7 @@ Package org.springframework.beans
 
 Package org.springframework.context
 * refined AbstractApplicationContext to never register more than one JVM shutdown hook
-* deprecated ContextListener, since it doesn't serve any purpose
+* deprecated ConsoleListener, since it doesn't serve any purpose
 
 Package org.springframework.core
 * JdkVersion explicitly detects JDK 1.6 and 1.7 as well (does not mis-detect 1.6 as 1.3 anymore)
