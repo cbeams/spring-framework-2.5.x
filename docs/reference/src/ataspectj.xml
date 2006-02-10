@@ -13,7 +13,7 @@
     language.</para>
 
     <para>As of the AspectJ 5, the AspectJ weaver has been split from the
-    <code>ajc</code> compiler, making it available to back a generic Spring
+    <literal>ajc</literal> compiler, making it available to back a generic Spring
     AOP pointcut implementation. This
     implementation--AspectJExpressionPointcut--is added to Spring in Spring
     2.0. This enables Spring AOP to work with AspectJ pointcut
@@ -275,7 +275,7 @@ public class MakeLockable {
       application context to which it applies.</para>
 
       <para>Usage is very simple. Just add the following definition to your
-      application context:<code></code><programlisting>&lt;bean 
+      application context:<programlisting>&lt;bean 
   class="org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator" /&gt;</programlisting></para>
 
       <para>No configuration is usually required. See the documentation on
