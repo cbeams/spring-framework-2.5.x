@@ -25,12 +25,17 @@ import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.Assert;
 
 /**
- * ScriptFactory implementation for a Groovy script.
+ * {@link org.springframework.scripting.ScriptFactory} implementation
+ * for a Groovy script.
  *
- * <p>Typically used in combination with ScriptFactoryPostProcessor;
- * see the latter's javadoc for a configuration example.
+ * <p>Typically used in combination with a
+ * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor};
+ * see the latter's
+ * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor Javadoc}
+ * for a configuration example.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -49,8 +54,10 @@ public class GroovyScriptFactory implements ScriptFactory {
 	 * a Groovy script defines its Java interfaces itself.
 	 * @param scriptSourceLocator a locator that points to the source of the script.
 	 * Interpreted by the post-processor that actually creates the script.
+	 * @throws IllegalArgumentException if the supplied argument is <code>null></code> or consists wholly of whitespace
 	 */
 	public GroovyScriptFactory(String scriptSourceLocator) {
+		Assert.hasText(scriptSourceLocator);
 		this.scriptSourceLocator = scriptSourceLocator;
 	}
 
@@ -62,6 +69,7 @@ public class GroovyScriptFactory implements ScriptFactory {
 	/**
 	 * Groovy scripts determine their interfaces themselves,
 	 * hence we don't need to explicitly expose interfaces here.
+	 * @return <code>null</code> always
 	 */
 	public Class[] getScriptInterfaces() {
 		return null;
@@ -70,13 +78,14 @@ public class GroovyScriptFactory implements ScriptFactory {
 	/**
 	 * Groovy scripts do not need a config interface,
 	 * since they expose their setters as public methods.
+	 * @return <code>false</code> always
 	 */
 	public boolean requiresConfigInterface() {
 		return false;
 	}
 
 	/**
-	 * Load and parse the Groovy script via the GroovyClassLoader.
+	 * Loads and parses the Groovy script via the GroovyClassLoader.
 	 * @see groovy.lang.GroovyClassLoader
 	 */
 	public Object getScriptedObject(ScriptSource actualScriptSource, Class[] actualInterfaces)
