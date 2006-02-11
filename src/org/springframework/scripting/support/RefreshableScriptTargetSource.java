@@ -19,6 +19,7 @@ package org.springframework.scripting.support;
 import org.springframework.aop.target.dynamic.BeanFactoryRefreshableTargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.scripting.ScriptSource;
+import org.springframework.util.Assert;
 
 /**
  * Subclass of BeanFactoryRefreshableTargetSource that determines whether a
@@ -42,6 +43,7 @@ public class RefreshableScriptTargetSource extends BeanFactoryRefreshableTargetS
 	 */
 	public RefreshableScriptTargetSource(BeanFactory beanFactory, String beanName, ScriptSource scriptSource) {
 		super(beanFactory, beanName);
+		Assert.notNull(scriptSource, "ScriptSource must not be null");
 		this.scriptSource = scriptSource;
 	}
 
