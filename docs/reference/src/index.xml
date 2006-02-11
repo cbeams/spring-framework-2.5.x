@@ -25,16 +25,14 @@
 <!ENTITY mail				SYSTEM "mail.xml">
 <!ENTITY scheduling			SYSTEM "scheduling.xml">
 <!ENTITY testing			SYSTEM "testing.xml">
+<!ENTITY scripting			SYSTEM "scripting.xml">
 <!ENTITY dtd				SYSTEM "dtd.xml">
 ]>
 <book>
     <bookinfo>
 		<title>Spring - Java/J2EE Application Framework</title>
-		<subtitle>
-          Reference Documentation
-        </subtitle>
+		<subtitle>Reference Documentation</subtitle>
 		<releaseinfo>Version 2.0 M2</releaseinfo>
-		<pubdate>(Work in progress)</pubdate>
 		<authorgroup>
 			<author>
 				<firstname>Rod</firstname>
@@ -91,17 +89,18 @@
 			Copyright Notice, whether distributed in print or electronically.
 		</legalnotice>
 	</bookinfo>
-    <toc />
+    <toc/>
 	&overview;
 	&background;
 	&beans;
 	&resources;
 	&validation;
+	&metadata;
 	&aop;
 	&ataspectj;
 	&aspectj;
 	&transaction;
-	&metadata;
+	&testing;
 	&dao;
 	&jdbc;
 	&orm;
@@ -115,6 +114,6 @@
 	&cci;
 	&mail;
 	&scheduling;
-	&testing;
+	&scripting;
 	&dtd;
 </book>
