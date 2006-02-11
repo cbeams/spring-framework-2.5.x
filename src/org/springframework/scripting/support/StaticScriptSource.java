@@ -20,7 +20,8 @@ import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 
 /**
- * Static implementation of the ScriptSource interface,
+ * Static implementation of the
+ * {@link org.springframework.scripting.ScriptSource} interface,
  * encapsulating a given String that contains the script
  * source text.
  *
@@ -38,16 +39,20 @@ public class StaticScriptSource implements ScriptSource {
 	/**
 	 * Create a new StaticScriptSource for the given script.
 	 * @param script the script String
+	 * @throws IllegalArgumentException if the supplied <code>script</code> is <code>null</code>
 	 */
 	public StaticScriptSource(String script) {
 		setScript(script);
 	}
 
+
 	/**
 	 * Set a fresh script String, overriding the previous script.
+	 * @param script the script String
+	 * @throws IllegalArgumentException if the supplied <code>script</code> is <code>null</code>
 	 */
 	public void setScript(String script) {
-		Assert.notNull(script, "Script must not be null");
+		Assert.hasText(script, "Script must not be null");
 		this.modified = !script.equals(this.script);
 		this.script = script;
 	}
