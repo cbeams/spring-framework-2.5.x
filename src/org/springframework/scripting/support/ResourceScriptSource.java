@@ -30,9 +30,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 
 /**
- * ScriptSource implementation based on Spring's Resource abstraction.
- * Loads the script text from the underlying Resource's InputStream
- * and tracks the file timestamp of the Resource (if possible).
+ * ScriptSource implementation based on Spring's
+ * {@link org.springframework.core.io.Resource} abstraction.
+ * Loads the script text from the underlying
+ * {@link org.springframework.core.io.Resource Resource's}
+ * {@link org.springframework.core.io.Resource#getInputStream() InputStream}
+ * and tracks the file timestamp of the {@link org.springframework.core.io.Resource}
+ * (if possible).
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -53,7 +57,8 @@ public class ResourceScriptSource implements ScriptSource {
 
 	/**
 	 * Create a new ResourceScriptSource for the given resource.
-	 * @param resource the Resource to load the script from
+	 * @param resource the {@link org.springframework.core.io.Resource} to load the script from
+	 * @throws IllegalArgumentException if the supplied {@link org.springframework.core.io.Resource} is <code>null</code>
 	 */
 	public ResourceScriptSource(Resource resource) {
 		Assert.notNull(resource, "Resource must not be null");
@@ -61,7 +66,8 @@ public class ResourceScriptSource implements ScriptSource {
 	}
 
 	/**
-	 * Return the Resource to load the script from.
+	 * Return the {@link org.springframework.core.io.Resource} to load the
+	 * script from.
 	 */
 	public final Resource getResource() {
 		return resource;
