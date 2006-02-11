@@ -17,7 +17,6 @@
 package org.springframework.scripting.jruby;
 
 import junit.framework.TestCase;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.context.ApplicationContext;
@@ -29,9 +28,19 @@ import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
 
 /**
+ * Unit tests for the JRubyScriptFactory class.
+ *
  * @author Rob Harrop
+ * @author Rick Evans
  */
 public class JRubyScriptFactoryTests extends TestCase {
+
+	private static final String RUBY_SCRIPT_SOURCE_LOCATOR =
+			"inline:require 'java'\n" +
+					"class RubyBar\n" +
+					"end\n" +
+					"RubyBar.new";
+
 
 	public void testStatic() throws Exception {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
@@ -83,6 +92,65 @@ public class JRubyScriptFactoryTests extends TestCase {
 		}
 		catch (NestedRuntimeException e) {
 			assertTrue(e.contains(ScriptCompilationException.class));
+		}
+	}
+
+	public void testWhereJRubyScriptDoesNotReturnNewObject() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		try {
+			new ClassPathXmlApplicationContext("org/springframework/scripting/jruby/jrubyDoesNotReturnObjectContext.xml");
+			fail("Must throw exception for script file that does not have 'xxx.new' as last statement");
+		}
+		catch (NestedRuntimeException expected) {
+			assertTrue(expected.contains(ScriptCompilationException.class));
+		}
+	}
+
+	public void testCtorWithNullScriptSourceLocator() throws Exception {
+		try {
+			new JRubyScriptFactory(null, new Class[]{Messenger.class});
+			fail("Must have thrown exception by this point.");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
+
+	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
+		try {
+			new JRubyScriptFactory("", new Class[]{Messenger.class});
+			fail("Must have thrown exception by this point.");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
+
+	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
+		try {
+			new JRubyScriptFactory("\n   ", new Class[]{Messenger.class});
+			fail("Must have thrown exception by this point.");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
+
+	public void testCtorWithNullScriptInterfacesArray() throws Exception {
+		try {
+			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, null);
+			fail("Must have thrown exception by this point.");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
+
+	public void testCtorWithEmptyScriptInterfacesArray() throws Exception {
+		try {
+			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, new Class[]{});
+			fail("Must have thrown exception by this point.");
+		}
+		catch (IllegalArgumentException expected) {
 		}
 	}
 
