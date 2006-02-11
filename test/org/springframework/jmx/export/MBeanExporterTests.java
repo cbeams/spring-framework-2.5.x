@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -34,6 +34,8 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.Attribute;
+import javax.management.NotificationListener;
+import javax.management.Notification;
 import javax.management.modelmbean.ModelMBeanInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,11 +43,63 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Integration tests for the MBeanExporter class.
+ * 
  * @author Rob Harrop
+ * @author Rick Evans
  */
 public class MBeanExporterTests extends AbstractMBeanServerTests {
 
 	private static final String OBJECT_NAME = "spring:test=jmxMBeanAdaptor";
+
+
+	public void testRegisterNonNotificationListenerType() throws Exception {
+		Map listeners = new HashMap();
+		// put a non-NotificationListener instance in as a value...
+		listeners.put("*", this);
+		MBeanExporter exporter = new MBeanExporter();
+		try {
+			exporter.setNotificationListenerMappings(listeners);
+			fail("Must have thrown an IllegalArgumentException when registering a non-NotificationListener instance as a NotificationListener.");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
+
+	public void testRegisterNullNotificationListenerType() throws Exception {
+		Map listeners = new HashMap();
+		// put null in as a value...
+		listeners.put("*", null);
+		MBeanExporter exporter = new MBeanExporter();
+		try {
+			exporter.setNotificationListenerMappings(listeners);
+			fail("Must have thrown an IllegalArgumentException when registering a null instance as a NotificationListener.");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
+
+	public void testRegisterNotificationListenerForNonExistentMBean() throws Exception {
+		Map listeners = new HashMap();
+		NotificationListener dummyListener = new NotificationListener() {
+			public void handleNotification(Notification notification, Object handback) {
+				throw new UnsupportedOperationException();
+			}
+		};
+		// the MBean with the supplied object name does not exist...
+		listeners.put("spring:type=Test", dummyListener);
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setBeans(getBeanMap());
+		exporter.setServer(server);
+		exporter.setNotificationListenerMappings(listeners);
+		try {
+			exporter.afterPropertiesSet();
+			fail("Must have thrown an MBeanExportException when registering a NotificationListener on a non-existent MBean.");
+		}
+		catch (MBeanExportException expected) {
+			assertTrue(expected.contains(InstanceNotFoundException.class));
+		}
+	}
 
 	public void testWithSuppliedMBeanServer() throws Exception {
 		MBeanExporter adaptor = new MBeanExporter();
@@ -142,7 +196,6 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		assertListener(listener2);
 	}
 
-
 	public void testExportJdkProxy() throws Exception {
 		JmxTestBean bean = new JmxTestBean();
 		bean.setName("Rob Harrop");
@@ -189,7 +242,6 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 
 	public void testRegisterIgnoreExisting() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance(OBJECT_NAME);
-
 
 		Person preRegistered = new Person();
 		preRegistered.setName("Rob Harrop");
@@ -272,8 +324,6 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		server.setAttribute(objectName, new Attribute("Name", otherName));
 		assertEquals("Incorrect updated name.", otherName, bean.getName());
-
-
 	}
 
 
@@ -291,6 +341,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		return map;
 	}
 
+
 	private static class InvokeDetectAssembler implements MBeanInfoAssembler {
 
 		private boolean invoked = false;
@@ -300,7 +351,6 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 			return null;
 		}
 	}
-
 
 	private static class MockMBeanExporterListener implements MBeanExporterListener {
 
@@ -355,4 +405,5 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 			this.name = name;
 		}
 	}
+
 }
