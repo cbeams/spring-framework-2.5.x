@@ -32,7 +32,7 @@ public interface Refreshable {
 	void refresh();
 
 	/**
-	 * Return the number of actual refreshs since startup.
+	 * Return the number of actual refreshes since startup.
 	 */
 	long getRefreshCount();
 
