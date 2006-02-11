@@ -111,6 +111,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
 		try {
 			new GroovyScriptFactory(null);
+			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
 		}
@@ -119,6 +120,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
 		try {
 			new GroovyScriptFactory("");
+			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
 		}
@@ -127,6 +129,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
 		try {
 			new GroovyScriptFactory("\n   ");
+			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
 		}
