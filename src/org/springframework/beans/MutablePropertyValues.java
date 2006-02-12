@@ -136,19 +136,6 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
-	 * Overloaded version of addPropertyValue that takes
-	 * a property name and a property value.
-	 * @param propertyName name of the property
-	 * @param propertyValue value of the property
-	 * @return this object to allow creating objects, adding multiple
-	 * PropertyValues in a single statement
-	 * @see #addPropertyValue(PropertyValue)
-	 */
-	public MutablePropertyValues addPropertyValue(String propertyName, Object propertyValue) {
-		return addPropertyValue(new PropertyValue(propertyName, propertyValue));
-	}
-
-	/**
 	 * Add a PropertyValue object, replacing any existing one
 	 * for the corresponding property.
 	 * @param pv PropertyValue object to add
@@ -166,6 +153,17 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		}
 		this.propertyValueList.add(pv);
 		return this;
+	}
+
+	/**
+	 * Overloaded version of <code>addPropertyValue</code> that takes
+	 * a property name and a property value.
+	 * @param propertyName name of the property
+	 * @param propertyValue value of the property
+	 * @see #addPropertyValue(PropertyValue)
+	 */
+	public void addPropertyValue(String propertyName, Object propertyValue) {
+		addPropertyValue(new PropertyValue(propertyName, propertyValue));
 	}
 
 	/**
@@ -194,7 +192,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
-	 * Overloaded version of removePropertyValue that takes a property name.
+	 * Overloaded version of <code>removePropertyValue</code> that takes a property name.
 	 * @param propertyName name of the property
 	 * @see #removePropertyValue(PropertyValue)
 	 */
