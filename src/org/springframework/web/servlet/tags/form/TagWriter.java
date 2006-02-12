@@ -16,12 +16,13 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.StringUtils;
-
-import javax.servlet.jsp.JspException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Stack;
+
+import javax.servlet.jsp.JspException;
+
+import org.springframework.util.StringUtils;
 
 /**
  * @author Rob Harrop
@@ -29,13 +30,15 @@ import java.util.Stack;
  */
 class TagWriter {
 
-	private SafeWriter writer;
+	private final SafeWriter writer;
 
 	private Stack tagState = new Stack();
+
 
 	public TagWriter(Writer writer) {
 		this.writer = new SafeWriter(writer);
 	}
+
 
 	public void startTag(String tagName) throws JspException {
 		if (inTag()) {
@@ -120,32 +123,34 @@ class TagWriter {
 		return (TagStateEntry) this.tagState.peek();
 	}
 
+
 	private static class TagStateEntry {
 
 		private String tagName;
 
 		private boolean blockTag;
 
-		public String getTagName() {
-			return tagName;
-		}
-
 		public void setTagName(String tagName) {
 			this.tagName = tagName;
 		}
 
-		public boolean isBlockTag() {
-			return blockTag;
+		public String getTagName() {
+			return tagName;
 		}
 
 		public void setBlockTag(boolean blockTag) {
 			this.blockTag = blockTag;
 		}
+
+		public boolean isBlockTag() {
+			return blockTag;
+		}
 	}
+
 
 	private static class SafeWriter {
 
-		private Writer writer;
+		private final Writer writer;
 
 		public SafeWriter(Writer writer) {
 			this.writer = writer;
@@ -153,12 +158,13 @@ class TagWriter {
 
 		public SafeWriter append(String value) throws JspException {
 			try {
-				this.writer.append(value);
+				this.writer.write(String.valueOf(value));
 				return this;
 			}
-			catch (IOException e) {
-				throw new JspException("Unable to write to JspWriter.", e);
+			catch (IOException ex) {
+				throw new JspException("Unable to write to JspWriter", ex);
 			}
 		}
 	}
+
 }

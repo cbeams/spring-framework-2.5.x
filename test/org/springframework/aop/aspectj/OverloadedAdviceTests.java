@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,8 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
- * Tests for overloaded advice
+ * Tests for overloaded advice.
+ *
  * @author Adrian Colyer
  */
 public class OverloadedAdviceTests  extends TestCase {
@@ -33,9 +34,10 @@ public class OverloadedAdviceTests  extends TestCase {
 					new String[] {"org/springframework/aop/aspectj/overloaded-advice-tests.xml"});
 		}
 		catch (BeanCreationException ex) {
-			Throwable cause = ex.getCause();
-			assertTrue("should be IllegalArgumentException",cause instanceof IllegalArgumentException);
-			assertTrue("invalidAbsoluteTypeName should be detected by AJ",cause.getMessage().indexOf("invalidAbsoluteTypeName") != -1);
+			Throwable cause = ex.getRootCause();
+			assertTrue("Should be IllegalArgumentException", cause instanceof IllegalArgumentException);
+			assertTrue("invalidAbsoluteTypeName should be detected by AJ",
+					cause.getMessage().indexOf("invalidAbsoluteTypeName") != -1);
 		}
 	}
 	
@@ -45,21 +47,10 @@ public class OverloadedAdviceTests  extends TestCase {
 					new String[] {"org/springframework/aop/aspectj/ambiguous-advice-tests.xml"});
 		}
 		catch (BeanCreationException ex) {
-			Throwable cause = getRootCause(ex);
-			System.out.println(cause);
-			assertTrue("should be IllegalArgumentException",cause instanceof IllegalArgumentException);
-			assertTrue("Cannot resolve method 'myBeforeAdvice' to a unique method.",cause.getMessage().indexOf("Cannot resolve method 'myBeforeAdvice' to a unique method.") != -1);
-		}
-	}
-	
-	private Throwable getRootCause(Throwable t) {
-		Throwable ret = t;
-		Throwable cause = t.getCause();
-		if ((cause != null) && (cause != ret)) {
-			return getRootCause(cause);
-		}
-		else {
-			return ret;
+			Throwable cause = ex.getRootCause();
+			assertTrue("Should be IllegalArgumentException", cause instanceof IllegalArgumentException);
+			assertTrue("Cannot resolve method 'myBeforeAdvice' to a unique method",
+					cause.getMessage().indexOf("Cannot resolve method 'myBeforeAdvice' to a unique method") != -1);
 		}
 	}
 

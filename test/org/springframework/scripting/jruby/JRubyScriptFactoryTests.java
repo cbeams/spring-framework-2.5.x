@@ -110,8 +110,12 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		try {
-			new JRubyScriptFactory(null, new Class[]{Messenger.class});
+			new JRubyScriptFactory(null, new Class[] {Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -119,8 +123,12 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		try {
-			new JRubyScriptFactory("", new Class[]{Messenger.class});
+			new JRubyScriptFactory("", new Class[] {Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -128,8 +136,12 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		try {
-			new JRubyScriptFactory("\n   ", new Class[]{Messenger.class});
+			new JRubyScriptFactory("\n   ", new Class[] {Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -137,6 +149,10 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithNullScriptInterfacesArray() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		try {
 			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, null);
 			fail("Must have thrown exception by this point.");
@@ -146,8 +162,12 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithEmptyScriptInterfacesArray() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		try {
-			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, new Class[]{});
+			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, new Class[] {});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {

@@ -16,8 +16,11 @@
 
 package org.springframework.scripting.groovy;
 
+import java.io.FileNotFoundException;
+
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.beans.factory.BeanCreationException;
@@ -27,8 +30,6 @@ import org.springframework.core.JdkVersion;
 import org.springframework.scripting.Calculator;
 import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptSource;
-
-import java.io.FileNotFoundException;
 
 /**
  * Unit tests for the GroovyScriptFactory class.
@@ -109,6 +110,10 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		try {
 			new GroovyScriptFactory(null);
 			fail("Must have thrown exception by this point.");
@@ -118,6 +123,10 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		try {
 			new GroovyScriptFactory("");
 			fail("Must have thrown exception by this point.");
@@ -127,6 +136,10 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		try {
 			new GroovyScriptFactory("\n   ");
 			fail("Must have thrown exception by this point.");
@@ -150,6 +163,10 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testGetScriptedObjectDoesNotChokeOnNullInterfacesBeingPassedIn() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		MockControl mock = MockControl.createControl(ScriptSource.class);
 		ScriptSource scriptSource = (ScriptSource) mock.getMock();
 		scriptSource.getScriptAsString();
@@ -163,6 +180,10 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testGetScriptedObjectDoesChokeOnNullScriptSourceBeingPassedIn() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		GroovyScriptFactory factory = new GroovyScriptFactory("a script source locator (doesn't matter here)");
 		try {
 			factory.getScriptedObject(null, null);
