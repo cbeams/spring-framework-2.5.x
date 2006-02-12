@@ -1,6 +1,20 @@
-nSPRING FRAMEWORK CHANGELOG
+SPRING FRAMEWORK CHANGELOG
 ==========================
 http://www.springframework.org
+
+
+Changes in version 2.0 M3 (27.2.2006)
+-------------------------------------
+
+Package org.springframework.core
+* added "getRootCause()" method to NestedRuntime/CheckedException, for retrieving the innermost exception
+
+Package org.springframework.validation
+* introduced BindingResult interface, as extension of the Errors interface
+* reworked BindException to implement the BindingResult interface, wrapping an existing BindingResult
+* added BeanBindingResult and MapBindingResult implementations, based on a refactoring of BindException
+* adapted BindingErrorProcessor interface to operate on a BeanBindingResult instead of a BindException
+* added "BindingResult getBindingResult()" method to DataBinder, deprecating the "BindException getErrors()" method 
 
 
 Changes in version 2.0 M2 (1.2.2006)
