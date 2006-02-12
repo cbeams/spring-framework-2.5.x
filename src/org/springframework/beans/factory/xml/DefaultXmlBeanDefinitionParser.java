@@ -366,7 +366,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			if (node instanceof Element) {
 				Element ele = (Element) node;
 				String namespaceUri = ele.getNamespaceURI();
-
 				if (isDefaultNamespace(namespaceUri)) {
 					beanDefinitionCount += parseDefaultElement(ele);
 				}
@@ -379,7 +378,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	}
 
 	private boolean isDefaultNamespace(String namespaceUri) {
-		return namespaceUri == null || BEANS_NAMESPACE_URI.equals(namespaceUri);
+		return (!StringUtils.hasLength(namespaceUri) || BEANS_NAMESPACE_URI.equals(namespaceUri));
 	}
 
 	private int parseDefaultElement(Element ele) {
