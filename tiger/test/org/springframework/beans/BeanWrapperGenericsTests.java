@@ -23,9 +23,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collection;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 
@@ -84,7 +86,7 @@ public class BeanWrapperGenericsTests extends TestCase {
 		assertEquals(new Integer(5), gb.getShortMap().get(new Short("4")));
 	}
 
-	public void testGenericMapWithKeyTypeOnly() {
+	public void testGenericMapWithKeyType() {
 		GenericBean gb = new GenericBean();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		Map input = new HashMap();
@@ -95,12 +97,39 @@ public class BeanWrapperGenericsTests extends TestCase {
 		assertEquals("7", gb.getLongMap().get(new Long("6")));
 	}
 
-	public void testGenericMapElementWithKeyTypeOnly() {
+	public void testGenericMapElementWithKeyType() {
 		GenericBean gb = new GenericBean();
 		gb.setLongMap(new HashMap<Long,Integer>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("longMap[4]", "5");
 		assertEquals("5", gb.getLongMap().get(new Long("4")));
+	}
+
+	public void testGenericMapWithCollectionValue() {
+		GenericBean gb = new GenericBean();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
+		Map input = new HashMap();
+		HashSet value1 = new HashSet();
+		value1.add(new Integer(1));
+		input.put("1", value1);
+		ArrayList value2 = new ArrayList();
+		value2.add(Boolean.TRUE);
+		input.put("2", value2);
+		bw.setPropertyValue("collectionMap", input);
+		assertTrue(gb.getCollectionMap().get(new Integer(1)) instanceof HashSet);
+		assertTrue(gb.getCollectionMap().get(new Integer(2)) instanceof ArrayList);
+	}
+
+	public void testGenericMapElementWithCollectionValue() {
+		GenericBean gb = new GenericBean();
+		gb.setCollectionMap(new HashMap<Number,Collection<? extends Object>>());
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
+		HashSet value1 = new HashSet();
+		value1.add(new Integer(1));
+		bw.setPropertyValue("collectionMap[1]", value1);
+		assertTrue(gb.getCollectionMap().get(new Integer(1)) instanceof HashSet);
 	}
 
 }

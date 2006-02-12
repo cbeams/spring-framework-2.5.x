@@ -27,6 +27,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.springframework.beans.GenericBean;
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.core.io.UrlResource;
 
 /**
@@ -200,6 +201,28 @@ public class BeanFactoryGenericsTests extends TestCase {
 		assertEquals("7", gb.getLongMap().get(new Long("6")));
 	}
 
+	public void testGenericMapWithCollectionValueConstructor() throws MalformedURLException {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
+		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
+
+		Map input = new HashMap();
+		HashSet value1 = new HashSet();
+		value1.add(new Integer(1));
+		input.put("1", value1);
+		ArrayList value2 = new ArrayList();
+		value2.add(Boolean.TRUE);
+		input.put("2", value2);
+		rbd.getConstructorArgumentValues().addGenericArgumentValue(Boolean.TRUE);
+		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
+
+		bf.registerBeanDefinition("genericBean", rbd);
+		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+
+		assertTrue(gb.getCollectionMap().get(new Integer(1)) instanceof HashSet);
+		assertTrue(gb.getCollectionMap().get(new Integer(2)) instanceof ArrayList);
+	}
+
 
 	public void testGenericSetFactoryMethod() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
@@ -321,6 +344,29 @@ public class BeanFactoryGenericsTests extends TestCase {
 
 		assertEquals("5", gb.getLongMap().get(new Long("4")));
 		assertEquals("7", gb.getLongMap().get(new Long("6")));
+	}
+
+	public void testGenericMapWithCollectionValueFactoryMethod() throws MalformedURLException {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
+		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
+		rbd.setFactoryMethodName("createInstance");
+
+		Map input = new HashMap();
+		HashSet value1 = new HashSet();
+		value1.add(new Integer(1));
+		input.put("1", value1);
+		ArrayList value2 = new ArrayList();
+		value2.add(Boolean.TRUE);
+		input.put("2", value2);
+		rbd.getConstructorArgumentValues().addGenericArgumentValue(Boolean.TRUE);
+		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
+
+		bf.registerBeanDefinition("genericBean", rbd);
+		GenericBean gb = (GenericBean) bf.getBean("genericBean");
+
+		assertTrue(gb.getCollectionMap().get(new Integer(1)) instanceof HashSet);
+		assertTrue(gb.getCollectionMap().get(new Integer(2)) instanceof ArrayList);
 	}
 
 }

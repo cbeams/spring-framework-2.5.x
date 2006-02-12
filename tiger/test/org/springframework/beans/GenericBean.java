@@ -16,6 +16,7 @@
 
 package org.springframework.beans;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +38,8 @@ public class GenericBean {
 	private Map<Short, Integer> shortMap;
 
 	private Map<Long, ?> longMap;
+
+	private Map<Number, Collection<? extends Object>> collectionMap;
 
 
 	public GenericBean() {
@@ -69,6 +72,10 @@ public class GenericBean {
 
 	public GenericBean(Map<Long, ?> longMap) {
 		this.longMap = longMap;
+	}
+
+	public GenericBean(boolean someFlag, Map<Number, Collection<? extends Object>> collectionMap) {
+		this.collectionMap = collectionMap;
 	}
 
 
@@ -104,6 +111,14 @@ public class GenericBean {
 		this.longMap = longMap;
 	}
 
+	public Map<Number, Collection<? extends Object>> getCollectionMap() {
+		return collectionMap;
+	}
+
+	public void setCollectionMap(Map<Number, Collection<? extends Object>> collectionMap) {
+		this.collectionMap = collectionMap;
+	}
+
 
 	public static GenericBean createInstance(Set<Integer> integerSet) {
 		return new GenericBean(integerSet);
@@ -127,6 +142,10 @@ public class GenericBean {
 
 	public static GenericBean createInstance(Map<Long, ?> longMap) {
 		return new GenericBean(longMap);
+	}
+
+	public static GenericBean createInstance(boolean someFlag, Map<Number, Collection<? extends Object>> collectionMap) {
+		return new GenericBean(someFlag, collectionMap);
 	}
 
 }

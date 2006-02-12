@@ -209,8 +209,7 @@ class PropertyTypeConverter {
 			int i = 0;
 			for (Iterator it = coll.iterator(); it.hasNext(); i++) {
 				Object value = doTypeConversionIfNecessary(
-						propertyName + PropertyAccessor.PROPERTY_KEY_PREFIX + i + PropertyAccessor.PROPERTY_KEY_SUFFIX,
-						null, it.next(), componentType);
+						buildIndexedPropertyName(propertyName, i), null, it.next(), componentType);
 				Array.set(result, i, value);
 			}
 			return result;
@@ -221,8 +220,7 @@ class PropertyTypeConverter {
 			Object result = Array.newInstance(componentType, arrayLength);
 			for (int i = 0; i < arrayLength; i++) {
 				Object value = doTypeConversionIfNecessary(
-						propertyName + PropertyAccessor.PROPERTY_KEY_PREFIX + i + PropertyAccessor.PROPERTY_KEY_SUFFIX,
-						null, Array.get(input, i), componentType);
+						buildIndexedPropertyName(propertyName, i), null, Array.get(input, i), componentType);
 				Array.set(result, i, value);
 			}
 			return result;
@@ -231,8 +229,7 @@ class PropertyTypeConverter {
 			// A plain value: convert it to an array with a single component.
 			Object result = Array.newInstance(componentType, 1);
 			Object value = doTypeConversionIfNecessary(
-					propertyName + PropertyAccessor.PROPERTY_KEY_PREFIX + 0 + PropertyAccessor.PROPERTY_KEY_SUFFIX,
-					null, input, componentType);
+					buildIndexedPropertyName(propertyName, 0), null, input, componentType);
 			Array.set(result, 0, value);
 			return result;
 		}
@@ -250,8 +247,7 @@ class PropertyTypeConverter {
 			int i = 0;
 			for (Iterator it = original.iterator(); it.hasNext(); i++) {
 				Object convertedElement = doTypeConversionIfNecessary(
-						propertyName + PropertyAccessor.PROPERTY_KEY_PREFIX + i + PropertyAccessor.PROPERTY_KEY_SUFFIX,
-						null, it.next(), elementType);
+						buildIndexedPropertyName(propertyName, i), null, it.next(), elementType);
 				convertedCopy.add(convertedElement);
 			}
 			return convertedCopy;
@@ -272,16 +268,26 @@ class PropertyTypeConverter {
 				Map.Entry entry = (Map.Entry) it.next();
 				Object key = entry.getKey();
 				Object convertedMapKey = doTypeConversionIfNecessary(
-						propertyName + PropertyAccessor.PROPERTY_KEY_PREFIX + key + PropertyAccessor.PROPERTY_KEY_SUFFIX,
-						null, entry.getKey(), mapKeyType);
+						buildKeyedPropertyName(propertyName, key), null, entry.getKey(), mapKeyType);
 				Object convertedMapValue = doTypeConversionIfNecessary(
-						propertyName + PropertyAccessor.PROPERTY_KEY_PREFIX + key + PropertyAccessor.PROPERTY_KEY_SUFFIX,
-						null, entry.getValue(), mapValueType);
+						buildKeyedPropertyName(propertyName, key), null, entry.getValue(), mapValueType);
 				convertedCopy.put(convertedMapKey, convertedMapValue);
 			}
 			return convertedCopy;
 		}
 		return original;
+	}
+
+	private String buildIndexedPropertyName(String propertyName, int index) {
+		return (propertyName != null ?
+				propertyName + PropertyAccessor.PROPERTY_KEY_PREFIX + index + PropertyAccessor.PROPERTY_KEY_SUFFIX :
+				null);
+	}
+
+	private String buildKeyedPropertyName(String propertyName, Object key) {
+		return (propertyName != null ?
+				propertyName + PropertyAccessor.PROPERTY_KEY_PREFIX + key + PropertyAccessor.PROPERTY_KEY_SUFFIX :
+				null);
 	}
 
 }
