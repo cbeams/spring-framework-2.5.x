@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.validation.BindException;
 import org.springframework.validation.DataBinder;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.support.BindStatus;
 
@@ -43,8 +44,8 @@ public class BindTagTests extends AbstractTagTests {
 
 	public void testBindTagWithoutErrors() throws JspException {
 		PageContext pc = createPageContext();
-		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		Errors errors = new ServletRequestDataBinder(new TestBean(), "tb").getBindingResult();
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
 		tag.setPath("tb");
@@ -64,9 +65,9 @@ public class BindTagTests extends AbstractTagTests {
 
 	public void testBindTagWithGlobalErrors() throws JspException {
 		PageContext pc = createPageContext();
-		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
+		Errors errors = new ServletRequestDataBinder(new TestBean(), "tb").getBindingResult();
 		errors.reject("code1", "message1");
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
@@ -103,9 +104,9 @@ public class BindTagTests extends AbstractTagTests {
 
 	public void testBindTagWithGlobalErrorsAndNoDefaultMessage() throws JspException {
 		PageContext pc = createPageContext();
-		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
+		Errors errors = new ServletRequestDataBinder(new TestBean(), "tb").getBindingResult();
 		errors.reject("code1");
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
@@ -136,9 +137,9 @@ public class BindTagTests extends AbstractTagTests {
 
 	public void testBindTagWithGlobalErrorsAndDefaultMessageOnly() throws JspException {
 		PageContext pc = createPageContext();
-		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
+		Errors errors = new ServletRequestDataBinder(new TestBean(), "tb").getBindingResult();
 		errors.reject(null, "message1");
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
@@ -172,9 +173,9 @@ public class BindTagTests extends AbstractTagTests {
 	public void testBindStatusGetErrorMessagesAsString() throws JspException {
 		// one error (should not include delimiter)
 		PageContext pc = createPageContext();
-		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
+		Errors errors = new ServletRequestDataBinder(new TestBean(), "tb").getBindingResult();
 		errors.reject("code1", null, "message1");
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
 		tag.setPath("tb");
@@ -185,10 +186,10 @@ public class BindTagTests extends AbstractTagTests {
 
 		// two errors
 		pc = createPageContext();
-		errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
+		errors = new ServletRequestDataBinder(new TestBean(), "tb").getBindingResult();
 		errors.reject("code1", null, "message1");
 		errors.reject("code1", null, "message2");
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 		tag = new BindTag();
 		tag.setPageContext(pc);
 		tag.setPath("tb");
@@ -199,8 +200,8 @@ public class BindTagTests extends AbstractTagTests {
 
 		// no errors
 		pc = createPageContext();
-		errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		errors = new ServletRequestDataBinder(new TestBean(), "tb").getBindingResult();
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 		tag = new BindTag();
 		tag.setPageContext(pc);
 		tag.setPath("tb");
@@ -213,11 +214,11 @@ public class BindTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		tb.setName("name1");
-		BindException errors = new ServletRequestDataBinder(tb, "tb").getErrors();
+		Errors errors = new ServletRequestDataBinder(tb, "tb").getBindingResult();
 		errors.rejectValue("name", "code1", "message & 1");
 		errors.rejectValue("name", "code2", "message2");
 		errors.rejectValue("age", "code2", "message2");
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
@@ -283,11 +284,11 @@ public class BindTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		tb.setName("name1");
-		BindException errors = new ServletRequestDataBinder(tb, "tb").getErrors();
+		Errors errors = new ServletRequestDataBinder(tb, "tb").getBindingResult();
 		errors.rejectValue("name", "code1");
 		errors.rejectValue("name", "code2");
 		errors.rejectValue("age", "code2");
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
@@ -339,11 +340,11 @@ public class BindTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		tb.setName("name1");
-		BindException errors = new ServletRequestDataBinder(tb, "tb").getErrors();
+		Errors errors = new ServletRequestDataBinder(tb, "tb").getBindingResult();
 		errors.rejectValue("name", null, "message & 1");
 		errors.rejectValue("name", null, "message2");
 		errors.rejectValue("age", null, "message2");
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
@@ -401,9 +402,9 @@ public class BindTagTests extends AbstractTagTests {
 		TestBean spouse = new TestBean();
 		spouse.setName("name2");
 		tb.setSpouse(spouse);
-		BindException errors = new ServletRequestDataBinder(tb, "tb").getErrors();
+		Errors errors = new ServletRequestDataBinder(tb, "tb").getBindingResult();
 		errors.rejectValue("spouse.name", "code1", "message1");
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
 		pc.setAttribute("myattr", "tb.spouse.name");
@@ -426,10 +427,10 @@ public class BindTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		tb.setName("name1");
-		BindException errors = new BindException(tb, "tb");
+		Errors errors = new BindException(tb, "tb");
 		errors.rejectValue("name", "code1", null, "message & 1");
 		errors.rejectValue("name", "code2", null, "message2");
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 
 		// test global property (should be null)
 		BindTag tag = new BindTag();
@@ -449,10 +450,10 @@ public class BindTagTests extends AbstractTagTests {
 	public void testBindTagWithIndexedProperties() throws JspException {
 		PageContext pc = createPageContext();
 		IndexedTestBean tb = new IndexedTestBean();
-		BindException errors = new ServletRequestDataBinder(tb, "tb").getErrors();
+		Errors errors = new ServletRequestDataBinder(tb, "tb").getBindingResult();
 		errors.rejectValue("array[0]", "code1", "message1");
 		errors.rejectValue("array[0]", "code2", "message2");
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
@@ -475,10 +476,10 @@ public class BindTagTests extends AbstractTagTests {
 	public void testBindTagWithMappedProperties() throws JspException {
 		PageContext pc = createPageContext();
 		IndexedTestBean tb = new IndexedTestBean();
-		BindException errors = new ServletRequestDataBinder(tb, "tb").getErrors();
+		Errors errors = new ServletRequestDataBinder(tb, "tb").getBindingResult();
 		errors.rejectValue("map[key1]", "code1", "message1");
 		errors.rejectValue("map[key1]", "code2", "message2");
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
@@ -507,10 +508,10 @@ public class BindTagTests extends AbstractTagTests {
 				return "something";
 			}
 		});
-		BindException errors = binder.getErrors();
+		Errors errors = binder.getBindingResult();
 		errors.rejectValue("array[0]", "code1", "message1");
 		errors.rejectValue("array[0]", "code2", "message2");
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
@@ -608,8 +609,8 @@ public class BindTagTests extends AbstractTagTests {
 
 	public void testBindErrorsTagWithoutErrors() throws JspException {
 		PageContext pc = createPageContext();
-		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		Errors errors = new ServletRequestDataBinder(new TestBean(), "tb").getBindingResult();
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 		BindErrorsTag tag = new BindErrorsTag();
 		tag.setPageContext(pc);
 		tag.setName("tb");
@@ -619,9 +620,9 @@ public class BindTagTests extends AbstractTagTests {
 
 	public void testBindErrorsTagWithErrors() throws JspException {
 		PageContext pc = createPageContext();
-		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
+		Errors errors = new ServletRequestDataBinder(new TestBean(), "tb").getBindingResult();
 		errors.reject("test", null, "test");
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 		BindErrorsTag tag = new BindErrorsTag();
 		tag.setPageContext(pc);
 		tag.setName("tb");
@@ -713,8 +714,8 @@ public class BindTagTests extends AbstractTagTests {
 
 	public void testNestedPathWithBindTag() throws JspException {
 		PageContext pc = createPageContext();
-		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+		Errors errors = new ServletRequestDataBinder(new TestBean(), "tb").getBindingResult();
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", errors);
 
 		NestedPathTag nestedPathTag = new NestedPathTag();
 		nestedPathTag.setPath("tb");
@@ -754,8 +755,8 @@ public class BindTagTests extends AbstractTagTests {
 
 	public void testNestedPathWithBindTagWithIgnoreNestedPath() throws JspException {
 		PageContext pc = createPageContext();
-		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb2").getErrors();
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb2", errors);
+		Errors errors = new ServletRequestDataBinder(new TestBean(), "tb2").getBindingResult();
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb2", errors);
 
 		NestedPathTag tag = new NestedPathTag();
 		tag.setPath("tb");
@@ -781,7 +782,7 @@ public class BindTagTests extends AbstractTagTests {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
 		CustomDateEditor l = new CustomDateEditor(df, true);
 		binder.registerCustomEditor(Date.class, l);
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", binder.getBindingResult());
 
 		// execute the bind tag using the date property
 		BindTag bind = new BindTag();
@@ -827,7 +828,7 @@ public class BindTagTests extends AbstractTagTests {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
 		CustomDateEditor l = new CustomDateEditor(df, true);
 		binder.registerCustomEditor(Date.class, l);
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", binder.getBindingResult());
 
 		// try another time, this time using Strings
 		BindTag bind = new BindTag();
@@ -856,7 +857,7 @@ public class BindTagTests extends AbstractTagTests {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
 		CustomDateEditor l = new CustomDateEditor(df, true);
 		binder.registerCustomEditor(Date.class, l);
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", binder.getBindingResult());
 
 		// now try to execute the tag outside a bindtag
 		TransformTag transform = new TransformTag();
@@ -896,7 +897,7 @@ public class BindTagTests extends AbstractTagTests {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
 		CustomDateEditor l = new CustomDateEditor(df, true);
 		binder.registerCustomEditor(Date.class, l);
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", binder.getBindingResult());
 
 		// try with non-existing value
 		BindTag bind = new BindTag();
@@ -922,7 +923,7 @@ public class BindTagTests extends AbstractTagTests {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
 		CustomDateEditor l = new CustomDateEditor(df, true);
 		binder.registerCustomEditor(Date.class, l);
-		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
+		pc.getRequest().setAttribute(BindException.MODEL_KEY_PREFIX + "tb", binder.getBindingResult());
 
 		// execute the bind tag using the date property
 		BindTag bind = new BindTag();

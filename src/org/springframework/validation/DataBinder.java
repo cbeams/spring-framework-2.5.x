@@ -81,7 +81,7 @@ import org.springframework.util.StringUtils;
  * @see #setMessageCodesResolver
  * @see #setBindingErrorProcessor
  * @see #bind
- * @see #getErrors
+ * @see #getBindingResult
  * @see DefaultMessageCodesResolver
  * @see DefaultBindingErrorProcessor
  * @see org.springframework.context.MessageSource
@@ -98,7 +98,9 @@ public class DataBinder implements PropertyEditorRegistry {
 	 */
 	protected static final Log logger = LogFactory.getLog(DataBinder.class);
 
-	private final BindException errors;
+	private final BeanBindingResult bindingResult;
+
+	private BindException bindException;
 
 	private boolean ignoreUnknownFields = true;
 
@@ -124,7 +126,7 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @param objectName name of the target object
 	 */
 	public DataBinder(Object target, String objectName) {
-		this.errors = createErrors(target, objectName);
+		this.bindingResult = createBindingResult(target, objectName);
 		setExtractOldValueForEditor(true);
 	}
 
@@ -138,22 +140,22 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @return the Errors instance
 	 * @see #close
 	 */
-	protected BindException createErrors(Object target, String objectName) {
-		return new BindException(target, objectName);
+	protected BeanBindingResult createBindingResult(Object target, String objectName) {
+		return new BeanBindingResult(target, objectName);
 	}
 
 	/**
 	 * Return the wrapped target object.
 	 */
 	public Object getTarget() {
-		return this.errors.getTarget();
+		return this.bindingResult.getTarget();
 	}
 
 	/**
 	 * Return the name of the bound object.
 	 */
 	public String getObjectName() {
-		return this.errors.getObjectName();
+		return this.bindingResult.getObjectName();
 	}
 
 	/**
@@ -161,16 +163,30 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @return the Errors instance, to be treated as Errors or as BindException
 	 * @see Errors
 	 */
-	public BindException getErrors() {
-		return errors;
+	public BindingResult getBindingResult() {
+		return bindingResult;
 	}
+
+	/**
+	 * Return the Errors instance for this data binder.
+	 * @return the Errors instance, to be treated as Errors or as BindException
+	 * @deprecated in favor of <code>getBindingResult()</code>
+	 * @see #getBindingResult()
+	 */
+	public BindException getErrors() {
+		if (this.bindException == null) {
+			this.bindException = new BindException(this.bindingResult);
+		}
+		return this.bindException;
+	}
+
 
 	/**
 	 * Return the underlying BeanWrapper of the Errors object.
 	 * To be used by binder subclasses that need bean property checks.
 	 */
 	protected BeanWrapper getBeanWrapper() {
-		return this.errors.getBeanWrapper();
+		return this.bindingResult.getBeanWrapper();
 	}
 
 	/**
@@ -248,11 +264,11 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * Turn this to "false" to avoid side effects caused by getters.
 	 */
 	public void setExtractOldValueForEditor(boolean extractOldValueForEditor) {
-		this.errors.getBeanWrapper().setExtractOldValueForEditor(extractOldValueForEditor);
+		this.bindingResult.getBeanWrapper().setExtractOldValueForEditor(extractOldValueForEditor);
 	}
 
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
-		this.errors.getBeanWrapper().registerCustomEditor(requiredType, propertyEditor);
+		this.bindingResult.getBeanWrapper().registerCustomEditor(requiredType, propertyEditor);
 	}
 
 	public void registerCustomEditor(Class requiredType, String field, PropertyEditor propertyEditor) {
@@ -267,11 +283,11 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * Set the strategy to use for resolving errors into message codes.
 	 * Applies the given strategy to the underlying errors holder.
 	 * <p>Default is a DefaultMessageCodesResolver.
-	 * @see BindException#setMessageCodesResolver
+	 * @see BeanBindingResult#setMessageCodesResolver
 	 * @see DefaultMessageCodesResolver
 	 */
 	public void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
-		this.errors.setMessageCodesResolver(messageCodesResolver);
+		this.bindingResult.setMessageCodesResolver(messageCodesResolver);
 	}
 
 	/**
@@ -340,7 +356,7 @@ public class DataBinder implements PropertyEditorRegistry {
 			String field = pvArray[i].getName();
 			if (!((allowedFieldsList != null && allowedFieldsList.contains(field)) || isAllowed(field))) {
 				mpvs.removePropertyValue(pvArray[i]);
-				this.errors.recordSuppressedField(pvArray[i].getName());
+				this.bindingResult.recordSuppressedField(pvArray[i].getName());
 				if (logger.isDebugEnabled()) {
 					logger.debug("Field [" + pvArray[i] + "] has been removed from PropertyValues " +
 							"and will not be bound, because it has not been found in the list of allowed fields " +
@@ -393,7 +409,7 @@ public class DataBinder implements PropertyEditorRegistry {
 						(pv.getValue() instanceof String && !StringUtils.hasText((String) pv.getValue()))) {
 					// Use bind error processor to create FieldError.
 					String field = requiredFields[i];
-					getBindingErrorProcessor().processMissingFieldError(field, getErrors());
+					getBindingErrorProcessor().processMissingFieldError(field, this.bindingResult);
 					// Remove property from property values to bind:
 					// It has already caused a field error with a rejected value.
 					mpvs.removePropertyValue(field);
@@ -423,7 +439,7 @@ public class DataBinder implements PropertyEditorRegistry {
 			// Use bind error processor to create FieldErrors.
 			PropertyAccessException[] exs = ex.getPropertyAccessExceptions();
 			for (int i = 0; i < exs.length; i++) {
-				getBindingErrorProcessor().processPropertyAccessException(exs[i], getErrors());
+				getBindingErrorProcessor().processPropertyAccessException(exs[i], this.bindingResult);
 			}
 		}
 	}
@@ -433,13 +449,13 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * a BindException if it encountered any errors.
 	 * @return the model Map, containing target object and Errors instance
 	 * @throws BindException if there were any errors in the bind operation
-	 * @see BindException#getModel
+	 * @see BindingResult#getModel()
 	 */
 	public Map close() throws BindException {
-		if (getErrors().hasErrors()) {
-			throw getErrors();
+		if (getBindingResult().hasErrors()) {
+			throw new BindException(getBindingResult());
 		}
-		return getErrors().getModel();
+		return getBindingResult().getModel();
 	}
 
 }

@@ -71,7 +71,7 @@ import org.springframework.validation.ObjectError;
  *   MyPojoBean bean = ...;
  *   ServletRequestDataBinder binder = new ServletRequestDataBinder(bean, "myPojo");
  *   binder.bind(request);
- *   form.expose(binder.getErrors(), request);
+ *   form.expose(binder.getBindingResult(), request);
  *   return actionMapping.findForward("success");
  * }</pre>
  *
@@ -128,10 +128,8 @@ public class SpringBindingActionForm extends ActionForm {
 	 * to the view, accessible through Struts standard tags.
 	 * @param errors the Spring Errors object to wrap, usually taken from
 	 * a DataBinder that has been used for populating a POJO form object
-	 * @see org.springframework.validation.DataBinder#getErrors()
-	 * Populate the SpringBindingActionForm with Locale and MessageResources,
-	 * retrieved from request/session attributes
 	 * @param request the HttpServletRequest to retrieve the attributes from
+	 * @see org.springframework.validation.DataBinder#getBindingResult()
 	 */
 	public void expose(Errors errors, HttpServletRequest request) {
 		this.errors = errors;

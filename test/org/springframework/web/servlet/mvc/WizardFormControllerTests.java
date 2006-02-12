@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -366,7 +366,7 @@ public class WizardFormControllerTests extends TestCase {
 		assertTrue("Has model", tb != null);
 		assertTrue("Name is " + name, ObjectUtils.nullSafeEquals(name, tb.getName()));
 		assertTrue("Age is " + age, tb.getAge() == age);
-		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + "tb");
+		Errors errors = (Errors) mv.getModel().get(BindException.MODEL_KEY_PREFIX + "tb");
 		if (params != null && params.containsKey("formChange")) {
 			assertNotNull(errors);
 			assertFalse(errors.hasErrors());

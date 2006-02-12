@@ -34,8 +34,8 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
  * @since 1.2
  * @see #MISSING_FIELD_ERROR_CODE
  * @see DataBinder#setBindingErrorProcessor
- * @see BindException#addError
- * @see BindException#resolveMessageCodes
+ * @see BeanBindingResult#addError
+ * @see BeanBindingResult#resolveMessageCodes
  * @see org.springframework.beans.PropertyAccessException#getErrorCode
  * @see org.springframework.beans.TypeMismatchException#ERROR_CODE
  * @see org.springframework.beans.MethodInvocationException#ERROR_CODE
@@ -49,23 +49,24 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 	 */
 	public static final String MISSING_FIELD_ERROR_CODE = "required";
 
-	public void processMissingFieldError(String missingField, BindException errors) {
+
+	public void processMissingFieldError(String missingField, BeanBindingResult bindingResult) {
 		// Create field error with code "required".
-		String[] codes = errors.resolveMessageCodes(MISSING_FIELD_ERROR_CODE, missingField);
-		Object[] arguments = getArgumentsForBindError(errors.getObjectName(), missingField);
-		errors.addError(new FieldError(
-				errors.getObjectName(), missingField, "", true,
+		String[] codes = bindingResult.resolveMessageCodes(MISSING_FIELD_ERROR_CODE, missingField);
+		Object[] arguments = getArgumentsForBindError(bindingResult.getObjectName(), missingField);
+		bindingResult.addError(new FieldError(
+				bindingResult.getObjectName(), missingField, "", true,
 				codes, arguments, "Field '" + missingField + "' is required"));
 	}
 
-	public void processPropertyAccessException(PropertyAccessException ex, BindException errors) {
+	public void processPropertyAccessException(PropertyAccessException ex, BeanBindingResult bindingResult) {
 		// Create field error with the exceptions's code, e.g. "typeMismatch".
 		String field = ex.getPropertyChangeEvent().getPropertyName();
 		Object value = ex.getPropertyChangeEvent().getNewValue();
-		String[] codes = errors.resolveMessageCodes(ex.getErrorCode(), field);
-		Object[] arguments = getArgumentsForBindError(errors.getObjectName(), field);
-		errors.addError(new FieldError(
-				errors.getObjectName(), field, value, true,
+		String[] codes = bindingResult.resolveMessageCodes(ex.getErrorCode(), field);
+		Object[] arguments = getArgumentsForBindError(bindingResult.getObjectName(), field);
+		bindingResult.addError(new FieldError(
+				bindingResult.getObjectName(), field, value, true,
 				codes, arguments, ex.getLocalizedMessage()));
 	}
 

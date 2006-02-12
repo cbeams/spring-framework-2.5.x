@@ -74,6 +74,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 
 	public static final String CODE_SEPARATOR = ".";
 
+
 	public String[] resolveMessageCodes(String errorCode, String objectName) {
 		return new String[] {errorCode + CODE_SEPARATOR + objectName, errorCode};
 	}

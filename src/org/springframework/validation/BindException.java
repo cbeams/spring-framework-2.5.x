@@ -16,402 +16,191 @@
 
 package org.springframework.validation;
 
-import java.beans.PropertyEditor;
-import java.util.Collections;
-import java.util.EmptyStackException;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
 
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of the Errors interface, supporting
- * registration and evaluation of binding errors.
- * Slightly unusual, as it <i>is</i> an exception.
+ * Exception to be thrown when abinding errors are considered fatal.
+ * Implements the BindingResult interface (and hence its super-interface Errors)
+ * to allow for direct analysis of binding errors.
  *
- * <p>This is mainly a framework-internal class. Normally, application
- * code will work with the Errors interface, or a DataBinder that in
- * turn exposes a BindException via <code>getErrors()</code>.
- *
- * <p>Supports exporting a model, suitable for example for web MVC.
- * Thus, it is sometimes used as parameter type instead of the Errors interface
- * itself - if extracting the model makes sense in the particular context.
+ * <p>As of Spring 2.0, this is a special-purpose class. Normally, application
+ * code will work with the BindingResult interface, or a DataBinder that
+ * in turn exposes a BindingResult via <code>getBindingResult()</code>.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @see #getModel
- * @see DataBinder#getErrors
+ * @see BindingResult
+ * @see DataBinder#getBindingResult()
+ * @see DataBinder#close()
  */
-public class BindException extends Exception implements Errors {
+public class BindException extends Exception implements BindingResult {
 
 	/**
-	 * Prefix for the name of the Errors instance in a model,
+	 * Prefix for the name of the BindException instance in a model,
 	 * followed by the object name.
+	 * @deprecated in favor of <code>BindingResult.MODEL_KEY_PREFIX</code>
+	 * @see BindingResult#MODEL_KEY_PREFIX
 	 */
 	public static final String ERROR_KEY_PREFIX = BindException.class.getName() + ".";
 
 
-	private final List errors = new LinkedList();
+	private final BindingResult bindingResult;
 
-	private final Object target;
-
-	private final String objectName;
-
-	private transient BeanWrapper beanWrapper;
-
-	private MessageCodesResolver messageCodesResolver = new DefaultMessageCodesResolver();
-
-	private String nestedPath = "";
-
-	private final Stack nestedPathStack = new Stack();
-
-	private Set suppressedFields = new HashSet();
 
 	/**
-	 * Create a new BindException instance.
-	 * @param target target object to bind onto
+	 * Create a new BindException instance for a BindingResult.
+	 * @param bindingResult the BindingResult instance to wrap
+	 */
+	public BindException(BindingResult bindingResult) {
+		Assert.notNull(bindingResult, "BindingResult must not be null");
+		this.bindingResult = bindingResult;
+	}
+
+	/**
+	 * Create a new BindException instance for a target bean.
+	 * @param target target bean to bind onto
 	 * @param objectName the name of the target object
-	 * @see DefaultMessageCodesResolver
+	 * @see BeanBindingResult
 	 */
 	public BindException(Object target, String objectName) {
 		Assert.notNull(target, "Target object must not be null");
-		this.target = target;
-		this.objectName = objectName;
+		this.bindingResult = new BeanBindingResult(target, objectName);
 	}
+
+	/**
+	 * Return the BindingResult that this BindException wraps.
+	 * Will typically be a BeanBindingResult.
+	 * @see BeanBindingResult
+	 */
+	public final BindingResult getBindingResult() {
+		return bindingResult;
+	}
+
 
 	/**
 	 * Return the wrapped target object.
 	 */
 	public Object getTarget() {
-		return target;
+		return this.bindingResult.getTarget();
 	}
 
 	public String getObjectName() {
-		return objectName;
-	}
-
-	/**
-	 * Return the BeanWrapper that this instance uses.
-	 * Creates a new one if none existed before.
-	 */
-	protected BeanWrapper getBeanWrapper() {
-		if (this.beanWrapper == null) {
-			this.beanWrapper = new BeanWrapperImpl(this.target);
-		}
-		return this.beanWrapper;
-	}
-
-	/**
-	 * Set the strategy to use for resolving errors into message codes.
-	 * Default is DefaultMessageCodesResolver.
-	 * @see DefaultMessageCodesResolver
-	 */
-	public void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
-		this.messageCodesResolver = messageCodesResolver;
-	}
-
-	/**
-	 * Return the strategy to use for resolving errors into message codes.
-	 */
-	public MessageCodesResolver getMessageCodesResolver() {
-		return messageCodesResolver;
+		return this.bindingResult.getObjectName();
 	}
 
 
 	public void setNestedPath(String nestedPath) {
-		doSetNestedPath(nestedPath);
-		this.nestedPathStack.clear();
+		this.bindingResult.setNestedPath(nestedPath);
 	}
 
 	public String getNestedPath() {
-		return nestedPath;
+		return this.bindingResult.getNestedPath();
 	}
 
 	public void pushNestedPath(String subPath) {
-		this.nestedPathStack.push(getNestedPath());
-		doSetNestedPath(getNestedPath() + subPath);
+		this.bindingResult.pushNestedPath(subPath);
 	}
 
-	public void popNestedPath() throws IllegalArgumentException {
-		try {
-			String formerNestedPath = (String) this.nestedPathStack.pop();
-			doSetNestedPath(formerNestedPath);
-		}
-		catch (EmptyStackException ex) {
-			throw new IllegalStateException("Cannot pop nested path: no nested path on stack");
-		}
-	}
-
-	/**
-	 * Actually set the nested path.
-	 * Delegated to by setNestedPath and pushNestedPath.
-	 */
-	protected void doSetNestedPath(String nestedPath) {
-		if (nestedPath == null) {
-			nestedPath = "";
-		}
-		nestedPath = BeanUtils.canonicalName(nestedPath);
-		if (nestedPath.length() > 0 && !nestedPath.endsWith(NESTED_PATH_SEPARATOR)) {
-			nestedPath += NESTED_PATH_SEPARATOR;
-		}
-		this.nestedPath = nestedPath;
-	}
-
-	/**
-	 * Transform the given field into its full path,
-	 * regarding the nested path of this instance.
-	 */
-	protected String fixedField(String field) {
-		return getNestedPath() + BeanUtils.canonicalName(field);
+	public void popNestedPath() throws IllegalStateException {
+		this.bindingResult.popNestedPath();
 	}
 
 
 	public void reject(String errorCode) {
-		reject(errorCode, null, null);
+		this.bindingResult.reject(errorCode);
 	}
 
 	public void reject(String errorCode, String defaultMessage) {
-		reject(errorCode, null, defaultMessage);
+		this.bindingResult.reject(errorCode, defaultMessage);
 	}
 
 	public void reject(String errorCode, Object[] errorArgs, String defaultMessage) {
-		addError(new ObjectError(getObjectName(), resolveMessageCodes(errorCode), errorArgs, defaultMessage));
+		this.bindingResult.reject(errorCode, errorArgs, defaultMessage);
 	}
 
 	public void rejectValue(String field, String errorCode) {
-		rejectValue(field, errorCode, null, null);
+		this.bindingResult.rejectValue(field, errorCode);
 	}
 
 	public void rejectValue(String field, String errorCode, String defaultMessage) {
-		rejectValue(field, errorCode, null, defaultMessage);
+		this.bindingResult.rejectValue(field, errorCode, defaultMessage);
 	}
 
 	public void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage) {
-		String fixedField = fixedField(field);
-		Object newVal = getBeanWrapper().getPropertyValue(fixedField);
-		FieldError fe = new FieldError(
-				getObjectName(), fixedField, newVal, false,
-				resolveMessageCodes(errorCode, field), errorArgs, defaultMessage);
-		addError(fe);
-	}
-
-	/**
-	 * Resolve the given error code into message codes.
-	 * Calls the MessageCodesResolver with appropriate parameters.
-	 * @param errorCode the error code to resolve into message codes
-	 * @return the resolved message codes
-	 * @see #setMessageCodesResolver
-	 */
-	public String[] resolveMessageCodes(String errorCode) {
-		return getMessageCodesResolver().resolveMessageCodes(errorCode, getObjectName());
-	}
-
-	/**
-	 * Resolve the given error code into message codes for the given field.
-	 * Calls the MessageCodesResolver with appropriate parameters.
-	 * @param errorCode the error code to resolve into message codes
-	 * @param field the field to resolve message codes for
-	 * @return the resolved message codes
-	 * @see #setMessageCodesResolver
-	 */
-	public String[] resolveMessageCodes(String errorCode, String field) {
-		String fixedField = fixedField(field);
-		Class fieldType = getBeanWrapper().getPropertyType(fixedField);
-		return getMessageCodesResolver().resolveMessageCodes(errorCode, getObjectName(), fixedField, fieldType);
-	}
-
-	/**
-	 * Add an ObjectError or FieldError to the errors list.
-	 * <p>Intended to be used by subclasses like DataBinder,
-	 * or by cooperating strategies like a BindingErrorProcessor.
-	 * @see ObjectError
-	 * @see FieldError
-	 * @see DataBinder
-	 * @see BindingErrorProcessor
-	 */
-	public void addError(ObjectError error) {
-		this.errors.add(error);
+		this.bindingResult.rejectValue(field, errorCode, errorArgs, defaultMessage);
 	}
 
 	public void addAllErrors(Errors errors) {
-		this.errors.addAll(errors.getAllErrors());
+		this.bindingResult.addAllErrors(errors);
 	}
 
 
 	public boolean hasErrors() {
-		return !this.errors.isEmpty();
+		return this.bindingResult.hasErrors();
 	}
 
 	public int getErrorCount() {
-		return this.errors.size();
+		return this.bindingResult.getErrorCount();
 	}
 
 	public List getAllErrors() {
-		return Collections.unmodifiableList(this.errors);
+		return this.bindingResult.getAllErrors();
 	}
 
 	public boolean hasGlobalErrors() {
-		return (getGlobalErrorCount() > 0);
+		return this.bindingResult.hasGlobalErrors();
 	}
 
 	public int getGlobalErrorCount() {
-		return getGlobalErrors().size();
+		return this.bindingResult.getGlobalErrorCount();
 	}
 
 	public List getGlobalErrors() {
-		List result = new LinkedList();
-		for (Iterator it = this.errors.iterator(); it.hasNext();) {
-			Object error = it.next();
-			if (!(error instanceof FieldError)) {
-				result.add(error);
-			}
-		}
-		return Collections.unmodifiableList(result);
+		return this.bindingResult.getGlobalErrors();
 	}
 
 	public ObjectError getGlobalError() {
-		for (Iterator it = this.errors.iterator(); it.hasNext();) {
-			ObjectError objectError = (ObjectError) it.next();
-			if (!(objectError instanceof FieldError)) {
-				return objectError;
-			}
-		}
-		return null;
+		return this.bindingResult.getGlobalError();
 	}
 
 	public boolean hasFieldErrors(String field) {
-		return (getFieldErrorCount(field) > 0);
+		return this.bindingResult.hasFieldErrors(field);
 	}
 
 	public int getFieldErrorCount(String field) {
-		return getFieldErrors(field).size();
+		return this.bindingResult.getFieldErrorCount(field);
 	}
 
 	public List getFieldErrors(String field) {
-		List result = new LinkedList();
-		String fixedField = fixedField(field);
-		for (Iterator it = this.errors.iterator(); it.hasNext();) {
-			Object error = it.next();
-			if (error instanceof FieldError && isMatchingFieldError(fixedField, ((FieldError) error))) {
-				result.add(error);
-			}
-		}
-		return Collections.unmodifiableList(result);
+		return this.bindingResult.getFieldErrors(field);
 	}
 
 	public FieldError getFieldError(String field) {
-		String fixedField = fixedField(field);
-		for (Iterator it = this.errors.iterator(); it.hasNext();) {
-			Object error = it.next();
-			if (error instanceof FieldError) {
-				FieldError fe = (FieldError) error;
-				if (isMatchingFieldError(fixedField, fe)) {
-					return fe;
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Check whether the given FieldError matches the given field.
-	 * @param field the field that we are looking up FieldErrors for
-	 * @param fieldError the candidate FieldError
-	 * @return whether the FieldError matches the given field
-	 */
-	protected boolean isMatchingFieldError(String field, FieldError fieldError) {
-		return (field.equals(fieldError.getField()) ||
-				(field.endsWith("*") && fieldError.getField().startsWith(field.substring(0, field.length() - 1))));
+		return this.bindingResult.getFieldError(field);
 	}
 
 	public Object getFieldValue(String field) {
-		FieldError fe = getFieldError(field);
-		String fixedField = fixedField(field);
-		// Use rejected value in case of error, current bean property value else.
-		Object value = (fe != null) ? fe.getRejectedValue() : getBeanWrapper().getPropertyValue(fixedField);
-		// Apply custom editor, but not on binding failures like type mismatches.
-		if (fe == null || !fe.isBindingFailure()) {
-			PropertyEditor customEditor = getCustomEditor(fixedField);
-			if (customEditor != null) {
-				customEditor.setValue(value);
-				String textValue = customEditor.getAsText();
-				// If the PropertyEditor returned null, there is no appropriate
-				// text representation for this value: only use it if non-null.
-				if (textValue != null) {
-					value = textValue;
-				}
-			}
-		}
-		return value;
+		return this.bindingResult.getFieldValue(field);
 	}
 
-	/**
-	 * Retrieve the custom PropertyEditor for the given field, if any.
-	 * @param field the field name
-	 * @return the custom PropertyEditor, or <code>null</code>
-	 */
-	public PropertyEditor getCustomEditor(String field) {
-		String fixedField = fixedField(field);
-		Class type = getBeanWrapper().getPropertyType(fixedField);
-		return getBeanWrapper().findCustomEditor(type, fixedField);
-	}
 
-	/**
-	 * Mark the specified disallowed field as suppressed.
-	 * <p>The data binder invokes this for each field value that was
-	 * detected to target a disallowed field.
-	 * @see DataBinder#setAllowedFields
-	 */
 	public void recordSuppressedField(String fieldName) {
-		this.suppressedFields.add(fieldName);
+		this.bindingResult.recordSuppressedField(fieldName);
 	}
 
-	/**
-	 * Return the list of fields that were suppressed during the bind process.
-	 * <p>Can be used to determine whether any field values were targetting
-	 * disallowed fields.
-	 * @see DataBinder#setAllowedFields
-	 */
 	public String[] getSuppressedFields() {
-		return (String[]) this.suppressedFields.toArray(new String[this.suppressedFields.size()]);
+		return this.bindingResult.getSuppressedFields();
 	}
 
-	/**
-	 * Return a model Map for the obtained state, exposing an Errors
-	 * instance as '{@link #ERROR_KEY_PREFIX ERROR_KEY_PREFIX} + objectName'
-	 * and the object itself.
-	 * <p>Note that the Map is constructed every time you're calling this method.
-	 * Adding things to the map and then re-calling this method will not work.
-	 * <p>The attributes in the model Map returned by this method are usually
-	 * included in the ModelAndView for a form view that uses Spring's bind tag,
-	 * which needs access to the Errors instance. Spring's SimpleFormController
-	 * will do this for you when rendering its form or success view. When
-	 * building the ModelAndView yourself, you need to include the attributes
-	 * from the model Map returned by this method yourself.
-	 * @see #getObjectName
-	 * @see #ERROR_KEY_PREFIX
-	 * @see org.springframework.web.servlet.ModelAndView
-	 * @see org.springframework.web.servlet.tags.BindTag
-	 * @see org.springframework.web.servlet.mvc.SimpleFormController
-	 */
 	public Map getModel() {
-		Map model = new HashMap();
-		// Errors instance, even if no errors.
-		model.put(ERROR_KEY_PREFIX + getObjectName(), this);
-		// Mapping from name to target object.
-		model.put(getObjectName(), getTarget());
-		return model;
+		return this.bindingResult.getModel();
 	}
+
 
 	/**
 	 * Returns diagnostic information about the errors held in this object.
@@ -419,7 +208,7 @@ public class BindException extends Exception implements Errors {
 	public String getMessage() {
 		StringBuffer sb = new StringBuffer("BindException: ");
 		sb.append(getErrorCount()).append(" errors");
-		Iterator it = this.errors.iterator();
+		Iterator it = this.bindingResult.getAllErrors().iterator();
 		while (it.hasNext()) {
 			sb.append("; ").append(it.next());
 		}

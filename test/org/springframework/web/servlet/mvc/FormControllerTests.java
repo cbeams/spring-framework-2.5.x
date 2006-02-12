@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ public class FormControllerTests extends TestCase {
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name", mv.getViewName().equals(formView));
-		assertTrue("has errors", mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getCommandName()) != null);
+		assertTrue("has errors", mv.getModel().get(BindException.MODEL_KEY_PREFIX + mc.getCommandName()) != null);
 		
 		assertTrue("refDataCount == 1", mc.refDataCount == 1);
 		
@@ -161,7 +161,7 @@ public class FormControllerTests extends TestCase {
 
 		assertEquals("returned correct view name", successView, mv.getViewName());
 		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
-		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + TestController.BEAN_NAME);
+		Errors errors = (Errors) mv.getModel().get(BindException.MODEL_KEY_PREFIX + TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
 		assertTrue("errors is non null", errors != null);
 		assertTrue("bean name bound ok", person.getName().equals(name));
@@ -188,7 +188,7 @@ public class FormControllerTests extends TestCase {
 
 		assertEquals("returned correct view name", formView, mv.getViewName());
 		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
-		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + TestController.BEAN_NAME);
+		Errors errors = (Errors) mv.getModel().get(BindException.MODEL_KEY_PREFIX + TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
 		assertTrue("errors is non null", errors != null);
 		assertTrue("bean name bound ok", person.getName().equals(name));
@@ -262,7 +262,7 @@ public class FormControllerTests extends TestCase {
 		assertTrue("model is non null", person != null);
 		assertTrue("bean name bound ok", person.getName().equals(name));
 		assertTrue("bean age is default", person.getAge() == TestController.DEFAULT_AGE);
-		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getCommandName());
+		Errors errors = (Errors) mv.getModel().get(BindException.MODEL_KEY_PREFIX + mc.getCommandName());
 		assertTrue("errors returned in model", errors != null);
 		assertTrue("One error", errors.getErrorCount() == 1);
 		FieldError fe = errors.getFieldError("age");
@@ -297,7 +297,7 @@ public class FormControllerTests extends TestCase {
 		// yes, but it was rejected after binding by the validator
 		assertTrue("bean name bound ok", person.getName().equals(name));
 		assertTrue("bean age is default", person.getAge() == TestController.DEFAULT_AGE);
-		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getCommandName());
+		Errors errors = (Errors) mv.getModel().get(BindException.MODEL_KEY_PREFIX + mc.getCommandName());
 		assertTrue("errors returned in model", errors != null);
 		assertTrue("3 errors", errors.getErrorCount() == 3);
 		FieldError fe = errors.getFieldError("age");
@@ -415,7 +415,7 @@ public class FormControllerTests extends TestCase {
 		assertTrue("model is non null", bean != null);
 		assertEquals("name3", bean.getArray()[0].getName());
 		assertEquals("name1", ((TestBean) bean.getList().get(0)).getName());
-		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getCommandName());
+		Errors errors = (Errors) mv.getModel().get(BindException.MODEL_KEY_PREFIX + mc.getCommandName());
 		assertTrue("errors returned in model", errors != null);
 		assertTrue("2 errors", errors.getErrorCount() == 2);
 		FieldError fe1 = errors.getFieldError("array[1].age");
@@ -463,7 +463,7 @@ public class FormControllerTests extends TestCase {
 		assertTrue("bean name bound ok", person.getName().equals("Rod"));
 		assertTrue("bean age is 99", person.getAge() == 99);
 		assertEquals("Command property myFloat not updated in onFormChange", myFloat, person.getMyFloat());
-		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getCommandName());
+		Errors errors = (Errors) mv.getModel().get(BindException.MODEL_KEY_PREFIX + mc.getCommandName());
 		assertTrue("errors returned in model", errors != null);
 		assertTrue("No errors", errors.getErrorCount() == 0);
 	}

@@ -38,12 +38,14 @@ public interface BindingErrorProcessor {
 	 * Apply the missing field error to the given BindException.
 	 * <p>Usually, a field error is created for a missing required field.
 	 * @param missingField the field that was missing during binding
-	 * @param errors the errors object to add the error(s) to. You can add more than
-	 * just one error or maybe even ignore it.
-	 * @see BindException#addError
-	 * @see BindException#resolveMessageCodes
+	 * @param bindingResult the errors object to add the error(s) to.
+	 * You can add more than just one error or maybe even ignore it.
+	 * The <code>BeanBindingResult</code> object features convenience utils such as
+	 * a <code>MessageCodesResolver</code> to resolve an error code into message codes.
+	 * @see BeanBindingResult#addError
+	 * @see BeanBindingResult#resolveMessageCodes
 	 */
-	void processMissingFieldError(String missingField, BindException errors);
+	void processMissingFieldError(String missingField, BeanBindingResult bindingResult);
 
 	/**
 	 * Translate the given <code>PropertyAccessException</code> to an appropriate
@@ -52,17 +54,17 @@ public interface BindingErrorProcessor {
 	 * <code>ObjectError</code>. Usually, field errors are created, but in certain
 	 * situations one might want to create a global <code>ObjectError</code> instead.
 	 * @param ex the <code>PropertyAccessException</code> to translate
-	 * @param errors the errors object to add the error(s) to. You can add more than
-	 * just one error or maybe even ignore it. The <code>BindException</code> object
-	 * features convenience utils such as a <code>MessageCodesResolver</code> to
-	 * resolve an error code into message codes.
+	 * @param bindingResult the errors object to add the error(s) to.
+	 * You can add more than just one error or maybe even ignore it.
+	 * The <code>BeanBindingResult</code> object features convenience utils such as
+	 * a <code>MessageCodesResolver</code> to resolve an error code into message codes.
 	 * @see Errors
 	 * @see FieldError
 	 * @see ObjectError
 	 * @see MessageCodesResolver
-	 * @see BindException#addError
-	 * @see BindException#resolveMessageCodes
+	 * @see BeanBindingResult#addError
+	 * @see BeanBindingResult#resolveMessageCodes
 	 */
-	void processPropertyAccessException(PropertyAccessException ex, BindException errors);
+	void processPropertyAccessException(PropertyAccessException ex, BeanBindingResult bindingResult);
 
 }

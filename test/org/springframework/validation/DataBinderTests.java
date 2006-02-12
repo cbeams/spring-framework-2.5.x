@@ -65,7 +65,7 @@ public class DataBinderTests extends TestCase {
 		assertTrue("changed name correctly", rod.getName().equals("Rod"));
 		assertTrue("changed age correctly", rod.getAge() == 32);
 
-		Map m = binder.getErrors().getModel();
+		Map m = binder.getBindingResult().getModel();
 		assertTrue("There is one element in map", m.size() == 2);
 		TestBean tb = (TestBean) m.get("person");
 		assertTrue("Same object", tb.equals(rod));
@@ -106,26 +106,26 @@ public class DataBinderTests extends TestCase {
 			assertTrue("changed name correctly", rod.getName().equals("Rod"));
 			//assertTrue("changed age correctly", rod.getAge() == 32);
 
-			Map m = binder.getErrors().getModel();
+			Map map = binder.getBindingResult().getModel();
 			//assertTrue("There are 3 element in map", m.size() == 1);
-			TestBean tb = (TestBean) m.get("person");
+			TestBean tb = (TestBean) map.get("person");
 			assertTrue("Same object", tb.equals(rod));
 
-			BindException be = (BindException) m.get(BindException.ERROR_KEY_PREFIX + "person");
-			assertTrue("Added itself to map", ex == be);
-			assertTrue(be.hasErrors());
-			assertTrue("Correct number of errors", be.getErrorCount() == 2);
+			BindingResult br = (BindingResult) map.get(BindingResult.MODEL_KEY_PREFIX + "person");
+			assertTrue("Added itself to map", br == binder.getBindingResult());
+			assertTrue(br.hasErrors());
+			assertTrue("Correct number of errors", br.getErrorCount() == 2);
 
-			assertTrue("Has age errors", be.hasFieldErrors("age"));
-			assertTrue("Correct number of age errors", be.getFieldErrorCount("age") == 1);
-			assertEquals("32x", binder.getErrors().getFieldValue("age"));
-			assertEquals("32x", binder.getErrors().getFieldError("age").getRejectedValue());
+			assertTrue("Has age errors", br.hasFieldErrors("age"));
+			assertTrue("Correct number of age errors", br.getFieldErrorCount("age") == 1);
+			assertEquals("32x", binder.getBindingResult().getFieldValue("age"));
+			assertEquals("32x", binder.getBindingResult().getFieldError("age").getRejectedValue());
 			assertEquals(0, tb.getAge());
 
-			assertTrue("Has touchy errors", be.hasFieldErrors("touchy"));
-			assertTrue("Correct number of touchy errors", be.getFieldErrorCount("touchy") == 1);
-			assertEquals("m.y", binder.getErrors().getFieldValue("touchy"));
-			assertEquals("m.y", binder.getErrors().getFieldError("touchy").getRejectedValue());
+			assertTrue("Has touchy errors", br.hasFieldErrors("touchy"));
+			assertTrue("Correct number of touchy errors", br.getFieldErrorCount("touchy") == 1);
+			assertEquals("m.y", binder.getBindingResult().getFieldValue("touchy"));
+			assertEquals("m.y", binder.getBindingResult().getFieldError("touchy").getRejectedValue());
 			assertNull(tb.getTouchy());
 		}
 	}
@@ -164,30 +164,30 @@ public class DataBinderTests extends TestCase {
 			assertTrue("changed name correctly", rod.getName().equals("Rod"));
 			//assertTrue("changed age correctly", rod.getAge() == 32);
 
-			Map m = binder.getErrors().getModel();
+			Map model = binder.getBindingResult().getModel();
 			//assertTrue("There are 3 element in map", m.size() == 1);
-			TestBean tb = (TestBean) m.get("person");
+			TestBean tb = (TestBean) model.get("person");
 			assertTrue("Same object", tb.equals(rod));
 
-			BindException be = (BindException) m.get(BindException.ERROR_KEY_PREFIX + "person");
-			assertTrue("Added itself to map", ex == be);
-			assertTrue(be.hasErrors());
-			assertTrue("Correct number of errors", be.getErrorCount() == 2);
+			BindingResult br = (BindingResult) model.get(BindingResult.MODEL_KEY_PREFIX + "person");
+			assertTrue("Added itself to map", br == binder.getBindingResult());
+			assertTrue(br.hasErrors());
+			assertTrue("Correct number of errors", br.getErrorCount() == 2);
 
-			assertTrue("Has age errors", be.hasFieldErrors("age"));
-			assertTrue("Correct number of age errors", be.getFieldErrorCount("age") == 1);
-			assertEquals("32x", binder.getErrors().getFieldValue("age"));
-			assertEquals("32x", binder.getErrors().getFieldError("age").getRejectedValue());
+			assertTrue("Has age errors", br.hasFieldErrors("age"));
+			assertTrue("Correct number of age errors", br.getFieldErrorCount("age") == 1);
+			assertEquals("32x", binder.getBindingResult().getFieldValue("age"));
+			assertEquals("32x", binder.getBindingResult().getFieldError("age").getRejectedValue());
 			assertEquals(0, tb.getAge());
 
-			assertTrue("Has touchy errors", be.hasFieldErrors("touchy"));
-			assertTrue("Correct number of touchy errors", be.getFieldErrorCount("touchy") == 1);
-			assertEquals("m.y", binder.getErrors().getFieldValue("touchy"));
-			assertEquals("m.y", binder.getErrors().getFieldError("touchy").getRejectedValue());
+			assertTrue("Has touchy errors", br.hasFieldErrors("touchy"));
+			assertTrue("Correct number of touchy errors", br.getFieldErrorCount("touchy") == 1);
+			assertEquals("m.y", binder.getBindingResult().getFieldValue("touchy"));
+			assertEquals("m.y", binder.getBindingResult().getFieldError("touchy").getRejectedValue());
 			assertNull(tb.getTouchy());
 
-			assertTrue("Does not have spouse errors", !be.hasFieldErrors("spouse"));
-			assertEquals("Kerry", binder.getErrors().getFieldValue("spouse"));
+			assertTrue("Does not have spouse errors", !br.hasFieldErrors("spouse"));
+			assertEquals("Kerry", binder.getBindingResult().getFieldValue("spouse"));
 			assertNotNull(tb.getSpouse());
 		}
 	}
@@ -216,7 +216,7 @@ public class DataBinderTests extends TestCase {
 		assertTrue("changed name correctly", rod.getName().equals("Rod"));
 		assertTrue("did not change age", rod.getAge() == 0);
 
-		Map m = binder.getErrors().getModel();
+		Map m = binder.getBindingResult().getModel();
 		assertTrue("There is one element in map", m.size() == 2);
 		TestBean tb = (TestBean) m.get("target");
 		assertTrue("Same object", tb.equals(rod));
@@ -238,7 +238,7 @@ public class DataBinderTests extends TestCase {
 		assertTrue("changed touchy correctly", "Rod".equals(rod.getTouchy()));
 		assertTrue("did not change age", rod.getAge() == 0);
 
-		Map m = binder.getErrors().getModel();
+		Map m = binder.getBindingResult().getModel();
 		assertTrue("There is one element in map", m.size() == 2);
 		TestBean tb = (TestBean) m.get("person");
 		assertTrue("Same object", tb.equals(rod));
@@ -262,19 +262,19 @@ public class DataBinderTests extends TestCase {
 
 		binder.bind(pvs);
 
-		BindException ex = binder.getErrors();
-		assertEquals("Wrong number of errors", 5, ex.getErrorCount());
+		BindingResult br = binder.getBindingResult();
+		assertEquals("Wrong number of errors", 5, br.getErrorCount());
 
-		assertEquals("required", ex.getFieldError("touchy").getCode());
-		assertEquals("", ex.getFieldValue("touchy"));
-		assertEquals("required", ex.getFieldError("name").getCode());
-		assertEquals("", ex.getFieldValue("name"));
-		assertEquals("required", ex.getFieldError("age").getCode());
-		assertEquals("", ex.getFieldValue("age"));
-		assertEquals("required", ex.getFieldError("date").getCode());
-		assertEquals("", ex.getFieldValue("date"));
-		assertEquals("required", ex.getFieldError("spouse.name").getCode());
-		assertEquals("", ex.getFieldValue("spouse.name"));
+		assertEquals("required", br.getFieldError("touchy").getCode());
+		assertEquals("", br.getFieldValue("touchy"));
+		assertEquals("required", br.getFieldError("name").getCode());
+		assertEquals("", br.getFieldValue("name"));
+		assertEquals("required", br.getFieldError("age").getCode());
+		assertEquals("", br.getFieldValue("age"));
+		assertEquals("required", br.getFieldError("date").getCode());
+		assertEquals("", br.getFieldValue("date"));
+		assertEquals("required", br.getFieldError("spouse.name").getCode());
+		assertEquals("", br.getFieldValue("spouse.name"));
 	}
 
 	public void testBindingWithNestedObjectCreation() throws Exception {
@@ -316,21 +316,21 @@ public class DataBinderTests extends TestCase {
 		pvs.addPropertyValue(new PropertyValue("spouse.name", "sue"));
 		binder.bind(pvs);
 
-		binder.getErrors().rejectValue("name", "someCode", "someMessage");
-		binder.getErrors().rejectValue("touchy", "someCode", "someMessage");
-		binder.getErrors().rejectValue("spouse.name", "someCode", "someMessage");
+		binder.getBindingResult().rejectValue("name", "someCode", "someMessage");
+		binder.getBindingResult().rejectValue("touchy", "someCode", "someMessage");
+		binder.getBindingResult().rejectValue("spouse.name", "someCode", "someMessage");
 
-		assertEquals("", binder.getErrors().getNestedPath());
-		assertEquals("value", binder.getErrors().getFieldValue("name"));
-		assertEquals("prefixvalue", binder.getErrors().getFieldError("name").getRejectedValue());
+		assertEquals("", binder.getBindingResult().getNestedPath());
+		assertEquals("value", binder.getBindingResult().getFieldValue("name"));
+		assertEquals("prefixvalue", binder.getBindingResult().getFieldError("name").getRejectedValue());
 		assertEquals("prefixvalue", tb.getName());
-		assertEquals("value", binder.getErrors().getFieldValue("touchy"));
-		assertEquals("value", binder.getErrors().getFieldError("touchy").getRejectedValue());
+		assertEquals("value", binder.getBindingResult().getFieldValue("touchy"));
+		assertEquals("value", binder.getBindingResult().getFieldError("touchy").getRejectedValue());
 		assertEquals("value", tb.getTouchy());
 
-		assertTrue(binder.getErrors().hasFieldErrors("spouse.*"));
-		assertEquals(1, binder.getErrors().getFieldErrorCount("spouse.*"));
-		assertEquals("spouse.name", binder.getErrors().getFieldError("spouse.*").getField());
+		assertTrue(binder.getBindingResult().hasFieldErrors("spouse.*"));
+		assertEquals(1, binder.getBindingResult().getFieldErrorCount("spouse.*"));
+		assertEquals("spouse.name", binder.getBindingResult().getFieldError("spouse.*").getField());
 	}
 
 	public void testCustomEditorForPrimitiveProperty() {
@@ -350,7 +350,7 @@ public class DataBinderTests extends TestCase {
 		pvs.addPropertyValue(new PropertyValue("age", ""));
 		binder.bind(pvs);
 
-		assertEquals("argh", binder.getErrors().getFieldValue("age"));
+		assertEquals("argh", binder.getBindingResult().getFieldValue("age"));
 		assertEquals(99, tb.getAge());
 	}
 
@@ -372,14 +372,14 @@ public class DataBinderTests extends TestCase {
 		pvs.addPropertyValue(new PropertyValue("touchy", "value"));
 		binder.bind(pvs);
 
-		binder.getErrors().rejectValue("name", "someCode", "someMessage");
-		binder.getErrors().rejectValue("touchy", "someCode", "someMessage");
+		binder.getBindingResult().rejectValue("name", "someCode", "someMessage");
+		binder.getBindingResult().rejectValue("touchy", "someCode", "someMessage");
 
-		assertEquals("value", binder.getErrors().getFieldValue("name"));
-		assertEquals("prefixvalue", binder.getErrors().getFieldError("name").getRejectedValue());
+		assertEquals("value", binder.getBindingResult().getFieldValue("name"));
+		assertEquals("prefixvalue", binder.getBindingResult().getFieldError("name").getRejectedValue());
 		assertEquals("prefixvalue", tb.getName());
-		assertEquals("value", binder.getErrors().getFieldValue("touchy"));
-		assertEquals("prefixvalue", binder.getErrors().getFieldError("touchy").getRejectedValue());
+		assertEquals("value", binder.getBindingResult().getFieldValue("touchy"));
+		assertEquals("prefixvalue", binder.getBindingResult().getFieldError("touchy").getRejectedValue());
 		assertEquals("prefixvalue", tb.getTouchy());
 	}
 
@@ -423,7 +423,7 @@ public class DataBinderTests extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("spouse.age", "argh");
 		db.bind(pvs);
-		Errors errors = db.getErrors();
+		Errors errors = db.getBindingResult();
 		Validator testValidator = new TestBeanValidator();
 		testValidator.validate(tb, errors);
 
@@ -472,7 +472,7 @@ public class DataBinderTests extends TestCase {
 	public void testValidatorWithErrors() {
 		TestBean tb = new TestBean();
 		tb.setSpouse(new TestBean());
-		Errors errors = new BindException(tb, "tb");
+		Errors errors = new BeanBindingResult(tb, "tb");
 		Validator testValidator = new TestBeanValidator();
 		testValidator.validate(tb, errors);
 		errors.setNestedPath("spouse.");
@@ -526,7 +526,7 @@ public class DataBinderTests extends TestCase {
 		pvs.addPropertyValue("set", new String[] {"10", "20", "30"});
 		binder.bind(pvs);
 
-		assertEquals(tb.getSet(), binder.getErrors().getFieldValue("set"));
+		assertEquals(tb.getSet(), binder.getBindingResult().getFieldValue("set"));
 		assertTrue(tb.getSet() instanceof TreeSet);
 		assertEquals(3, tb.getSet().size());
 		assertTrue(tb.getSet().contains(new Integer(10)));
@@ -545,7 +545,7 @@ public class DataBinderTests extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("array[0]", "a");
 		binder.bind(pvs);
-		Errors errors = binder.getErrors();
+		Errors errors = binder.getBindingResult();
 		errors.rejectValue("array[0].name", "NOT_ROD", "are you sure you're not Rod?");
 		errors.rejectValue("map[key1].name", "NOT_ROD", "are you sure you're not Rod?");
 
@@ -584,7 +584,7 @@ public class DataBinderTests extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("array[0].nestedIndexedBean.list[0].name", "a");
 		binder.bind(pvs);
-		Errors errors = binder.getErrors();
+		Errors errors = binder.getBindingResult();
 		errors.rejectValue("array[0].nestedIndexedBean.list[0].name", "NOT_ROD", "are you sure you're not Rod?");
 
 		assertEquals(1, errors.getFieldErrorCount("array[0].nestedIndexedBean.list[0].name"));
@@ -626,8 +626,8 @@ public class DataBinderTests extends TestCase {
 		binder.bind(pvs);
 		assertEquals("listtest1", ((TestBean) tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
 		assertEquals("listtest2", ((TestBean) tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
-		assertEquals("test1", binder.getErrors().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
-		assertEquals("test2", binder.getErrors().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
+		assertEquals("test1", binder.getBindingResult().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
+		assertEquals("test2", binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
 
 	public void testSpecificEditorForNestedIndexedField() {
@@ -649,8 +649,8 @@ public class DataBinderTests extends TestCase {
 		binder.bind(pvs);
 		assertEquals("listtest1", ((TestBean) tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
 		assertEquals("test2", ((TestBean) tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
-		assertEquals("test1", binder.getErrors().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
-		assertEquals("test2", binder.getErrors().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
+		assertEquals("test1", binder.getBindingResult().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
+		assertEquals("test2", binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
 
 	public void testInnerSpecificEditorForNestedIndexedField() {
@@ -672,8 +672,8 @@ public class DataBinderTests extends TestCase {
 		binder.bind(pvs);
 		assertEquals("listtest1", ((TestBean) tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
 		assertEquals("test2", ((TestBean) tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
-		assertEquals("test1", binder.getErrors().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
-		assertEquals("test2", binder.getErrors().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
+		assertEquals("test1", binder.getBindingResult().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
+		assertEquals("test2", binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
 
 	public void testDirectBindingToIndexedField() {
@@ -692,7 +692,7 @@ public class DataBinderTests extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("array[0]", "a");
 		binder.bind(pvs);
-		Errors errors = binder.getErrors();
+		Errors errors = binder.getBindingResult();
 		errors.rejectValue("array[0]", "NOT_ROD", "are you sure you're not Rod?");
 		errors.rejectValue("map[key1]", "NOT_ROD", "are you sure you're not Rod?");
 		errors.rejectValue("map[key0]", "NOT_NULL", "should not be null");
@@ -739,7 +739,7 @@ public class DataBinderTests extends TestCase {
 				return ((TestBean) getValue()).getName();
 			}
 		});
-		Errors errors = binder.getErrors();
+		Errors errors = binder.getBindingResult();
 		errors.rejectValue("map[key0]", "NOT_NULL", "should not be null");
 
 		assertEquals(1, errors.getFieldErrorCount("map[key0]"));
@@ -767,7 +767,7 @@ public class DataBinderTests extends TestCase {
 				return ((TestBean) getValue()).getName();
 			}
 		});
-		Errors errors = binder.getErrors();
+		Errors errors = binder.getBindingResult();
 		errors.rejectValue("map[key0]", "NOT_NULL", "should not be null");
 
 		assertEquals(1, errors.getFieldErrorCount("map[key0]"));
@@ -798,7 +798,7 @@ public class DataBinderTests extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("array[0]", "a");
 		binder.bind(pvs);
-		Errors errors = binder.getErrors();
+		Errors errors = binder.getBindingResult();
 		errors.rejectValue("array[0]", "NOT_ROD", "are you sure you're not Rod?");
 
 		assertEquals("arraya", errors.getFieldValue("array[0]"));
@@ -824,7 +824,7 @@ public class DataBinderTests extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("stringArray", "a1-b2");
 		binder.bind(pvs);
-		assertTrue(!binder.getErrors().hasErrors());
+		assertTrue(!binder.getBindingResult().hasErrors());
 		assertEquals(2, tb.getStringArray().length);
 		assertEquals("a1", tb.getStringArray()[0]);
 		assertEquals("b2", tb.getStringArray()[1]);
@@ -841,7 +841,7 @@ public class DataBinderTests extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("stringArray", new String[] {"a1", "b2"});
 		binder.bind(pvs);
-		assertTrue(!binder.getErrors().hasErrors());
+		assertTrue(!binder.getBindingResult().hasErrors());
 		assertEquals(2, tb.getStringArray().length);
 		assertEquals("Xa1", tb.getStringArray()[0]);
 		assertEquals("Xb2", tb.getStringArray()[1]);
@@ -853,7 +853,7 @@ public class DataBinderTests extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("age", "32x"));
 		binder.bind(pvs);
-		Errors errors = binder.getErrors();
+		Errors errors = binder.getBindingResult();
 		FieldError ageError = errors.getFieldError("age");
 		assertEquals("typeMismatch", ageError.getCode());
 
@@ -879,9 +879,9 @@ public class DataBinderTests extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("age", "32x"));
 		binder.bind(pvs);
-		Errors errors = binder.getErrors();
+		Errors errors = binder.getBindingResult();
 
-		BindException errors2 = new BindException(rod, "person");
+		BeanBindingResult errors2 = new BeanBindingResult(rod, "person");
 		errors.rejectValue("name", "badName");
 		errors.addAllErrors(errors2);
 
@@ -900,12 +900,12 @@ public class DataBinderTests extends TestCase {
 		pvs.addPropertyValue("list[0]", tb1);
 		pvs.addPropertyValue("list[1]", tb2);
 		binder.bind(pvs);
-		assertEquals(tb1.getName(), binder.getErrors().getFieldValue("list[0].name"));
-		assertEquals(tb2.getName(), binder.getErrors().getFieldValue("list[1].name"));
+		assertEquals(tb1.getName(), binder.getBindingResult().getFieldValue("list[0].name"));
+		assertEquals(tb2.getName(), binder.getBindingResult().getFieldValue("list[1].name"));
 		tb.getList().set(0, tb2);
 		tb.getList().set(1, tb1);
-		assertEquals(tb2.getName(), binder.getErrors().getFieldValue("list[0].name"));
-		assertEquals(tb1.getName(), binder.getErrors().getFieldValue("list[1].name"));
+		assertEquals(tb2.getName(), binder.getBindingResult().getFieldValue("list[0].name"));
+		assertEquals(tb1.getName(), binder.getBindingResult().getFieldValue("list[1].name"));
 	}
 
 	public void testRejectWithoutDefaultMessage() throws Exception {
@@ -913,7 +913,7 @@ public class DataBinderTests extends TestCase {
 		tb.setName("myName");
 		tb.setAge(99);
 
-		BindException ex = new BindException(tb, "tb");
+		BeanBindingResult ex = new BeanBindingResult(tb, "tb");
 		ex.reject("invalid");
 		ex.rejectValue("age", "invalidField");
 
@@ -968,7 +968,7 @@ public class DataBinderTests extends TestCase {
 		binder.bind(mpvs);
 
 		assertEquals(name, testBean.getName());
-		String[] disallowedFields = binder.getErrors().getSuppressedFields();
+		String[] disallowedFields = binder.getBindingResult().getSuppressedFields();
 		assertEquals(1, disallowedFields.length);
 		assertEquals("beanName", disallowedFields[0]);
 	}

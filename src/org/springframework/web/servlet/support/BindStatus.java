@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BeanBindingResult;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
@@ -56,9 +57,9 @@ public class BindStatus {
 
 	private final Errors errors;
 
-	private PropertyEditor editor;
-
 	private Object value;
+
+	private PropertyEditor editor;
 
 	private List objectErrors;
 
@@ -111,12 +112,11 @@ public class BindStatus {
 				}
 				else {
 					this.objectErrors = this.errors.getFieldErrors(this.expression);
-					if (this.errors instanceof BindException) {
-						this.editor = ((BindException) this.errors).getCustomEditor(this.expression);
-					}
 					this.value = this.errors.getFieldValue(this.expression);
+					this.editor = getCustomEditor(this.errors, this.expression);
 				}
 			}
+
 			else {
 				this.objectErrors = this.errors.getGlobalErrors();
 			}
@@ -147,6 +147,22 @@ public class BindStatus {
 		if (htmlEscape && this.value instanceof String) {
 			this.value = HtmlUtils.htmlEscape((String) this.value);
 		}
+	}
+
+	/**
+	 * Find a custom editor for the given field, if any.
+	 * @see org.springframework.validation.BeanBindingResult#getCustomEditor(String)
+	 */
+	private PropertyEditor getCustomEditor(Errors errors, String field) {
+		Errors bindingResult = errors;
+		// Unwrap BindException for backwards compatibility.
+		if (errors instanceof BindException) {
+			bindingResult = ((BindException) errors).getBindingResult();
+		}
+		if (bindingResult instanceof BeanBindingResult) {
+			return ((BeanBindingResult) bindingResult).getCustomEditor(field);
+		}
+		return null;
 	}
 
 	/**

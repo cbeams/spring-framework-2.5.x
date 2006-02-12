@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,6 +31,7 @@ import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.ResourceBundleThemeSource;
 import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.EscapedErrors;
 import org.springframework.web.context.WebApplicationContext;
@@ -614,7 +615,11 @@ public class RequestContext {
 		Errors errors = (Errors) this.errorsMap.get(name);
 		boolean put = false;
 		if (errors == null) {
-			errors = (Errors) getModelObject(BindException.ERROR_KEY_PREFIX + name);
+			errors = (Errors) getModelObject(BindingResult.MODEL_KEY_PREFIX + name);
+			// Check old BindException prefix for backwards compatibility.
+			if (errors == null) {
+				errors = (Errors) getModelObject(BindException.ERROR_KEY_PREFIX + name);
+			}
 			if (errors == null) {
 				return null;
 			}

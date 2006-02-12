@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,7 @@ package org.springframework.web.portlet.bind;
 import javax.portlet.PortletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.portlet.multipart.MultipartActionRequest;
 
@@ -116,9 +117,10 @@ public class PortletRequestDataBinder extends WebDataBinder {
 	 * @throws PortletRequestBindingException subclass of PortletException on any binding problem
 	 */
 	public void closeNoCatch() throws PortletRequestBindingException {
-		if (getErrors().hasErrors()) {
+		if (getBindingResult().hasErrors()) {
 			throw new PortletRequestBindingException(
-					"Errors binding onto object '" + getErrors().getObjectName() + "'", getErrors());
+					"Errors binding onto object '" + getBindingResult().getObjectName() + "'",
+					new BindException(getBindingResult()));
 		}
 	}
 
