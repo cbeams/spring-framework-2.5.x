@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,8 +31,8 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.DefaultPropertiesPersister;
@@ -95,29 +95,35 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public static final String SEPARATOR = ".";
 
 	/**
-	 * Special string added to distinguish owner.(class)=com.myapp.MyClass
+	 * Special key to distinguish owner.(class)=com.myapp.MyClass
 	 */
 	public static final String CLASS_KEY = "(class)";
 
 	/**
-	 * Special string added to distinguish owner.(parent)=parentBeanName
+	 * Special key to distinguish owner.class=com.myapp.MyClass
+	 * Deprecated in favor of .(class)=
+	 */
+	private static final String DEPRECATED_CLASS_KEY = "class";
+
+	/**
+	 * Special key to distinguish owner.(parent)=parentBeanName
 	 */
 	public static final String PARENT_KEY = "(parent)";
 
 	/**
-	 * Special string added to distinguish owner.(abstract)=true
+	 * Special key to distinguish owner.(abstract)=true
 	 * Default is "false".
 	 */
 	public static final String ABSTRACT_KEY = "(abstract)";
 
 	/**
-	 * Special string added to distinguish owner.(singleton)=true
+	 * Special key to distinguish owner.(singleton)=true
 	 * Default is "true".
 	 */
 	public static final String SINGLETON_KEY = "(singleton)";
 
 	/**
-	 * Special string added to distinguish owner.(lazy-init)=true
+	 * Special key to distinguish owner.(lazy-init)=true
 	 * Default is "false".
 	 */
 	public static final String LAZY_INIT_KEY = "(lazy-init)";
@@ -136,9 +142,10 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public static final String REF_PREFIX = "*";
 
 	/**
-	 * Prefix used to denote a constructor arg definition
+	 * Prefix used to denote a constructor argument definition.
 	 */
 	public static final String CONSTRUCTOR_ARG_PREFIX = "$";
+
 
 	private String defaultParentBean;
 
@@ -409,7 +416,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 			String key = StringUtils.trimWhitespace((String) entry.getKey());
 			if (key.startsWith(prefix + SEPARATOR)) {
 				String property = key.substring(prefix.length() + SEPARATOR.length());
-				if (CLASS_KEY.equals(property)) {
+				if (isClassKey(property)) {
 					className = StringUtils.trimWhitespace((String) entry.getValue());
 				}
 				else if (PARENT_KEY.equals(property)) {
@@ -482,6 +489,23 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 			throw new BeanDefinitionStoreException(resourceDescription, beanName,
 					"Class that bean class [" + className + "] depends on not found", err);
 		}
+	}
+
+	/**
+	 * Indicates whether the supplied property matches the class property of
+	 * the bean definition.
+	 */
+	private boolean isClassKey(String property) {
+		if (CLASS_KEY.equals(property)) {
+			return true;
+		}
+		else if (DEPRECATED_CLASS_KEY.equals(property)) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Use of 'class' property in [" + getClass().getName() + "] is deprecated in favor of '(class)'");
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/**
