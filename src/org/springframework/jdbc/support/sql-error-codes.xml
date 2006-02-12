@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <!--
 	- Default SQL error codes for well-known databases.
-	- Can be overridden by definitions in a sql-error-codes.xml file
+	- Can be overridden by definitions in a "sql-error-codes.xml" file
 	- in the root of the class path.
 	-
 	- If the Database Product Name contains characters that are invalid
@@ -48,6 +48,9 @@
 		<property name="dataIntegrityViolationCodes">
 			<value>2627,8114,8115</value>
 		</property>
+		<property name="deadlockLoserCodes">
+			<value>1205</value>
+		</property>
 	</bean>
 
 	<bean id="MySQL" class="org.springframework.jdbc.support.SQLErrorCodes">
@@ -56,6 +59,9 @@
 		</property>
 		<property name="dataIntegrityViolationCodes">
 			<value>1062</value>
+		</property>
+		<property name="dataAccessResourceFailureCodes">
+			<value>1</value>
 		</property>
 		<property name="cannotAcquireLockCodes">
 			<value>1205</value>
@@ -80,6 +86,9 @@
 		</property>
 		<property name="cannotAcquireLockCodes">
 			<value>54</value>
+		</property>
+		<property name="deadlockLoserCodes">
+			<value>60</value>
 		</property>
 	</bean>
 
