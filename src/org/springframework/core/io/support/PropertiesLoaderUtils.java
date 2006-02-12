@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core.io.support;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -97,7 +98,9 @@ public abstract class PropertiesLoaderUtils {
 			URL url = (URL) urls.nextElement();
 			InputStream is = null;
 			try {
-				is = url.openStream();
+				URLConnection con = url.openConnection();
+				con.setUseCaches(false);
+				is = con.getInputStream();
 				properties.load(is);
 			}
 			finally {
