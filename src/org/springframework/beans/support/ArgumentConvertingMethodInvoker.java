@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 				// Check if the inspected method has the correct number of parameters.
 				Class[] paramTypes = candidates[i].getParameterTypes();
 				if (paramTypes.length == argCount) {
-					Object[] argumentsToUse = arguments;
+					Object[] argumentsToUse = new Object[argCount];
 					int numberOfCorrectArguments = 0;
 					for (int j = 0; j < argCount; j++) {
 						// Verify that the supplied argument is assignable to the method parameter.
