@@ -42,8 +42,17 @@ public class TypeMismatchException extends PropertyAccessException {
 	/**
 	 * Create a new TypeMismatchException.
 	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
+	 * @param requiredType the required target type
+	 */
+	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, Class requiredType) {
+		this(propertyChangeEvent, requiredType, null);
+	}
+
+	/**
+	 * Create a new TypeMismatchException.
+	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
 	 * @param requiredType the required target type (or <code>null</code> if not known)
-	 * @param ex the root cause
+	 * @param ex the root cause (may be <code>null</code>)
 	 */
 	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, Class requiredType, Throwable ex) {
 		super(propertyChangeEvent,
@@ -63,7 +72,16 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * Create a new TypeMismatchException without PropertyChangeEvent.
 	 * @param value the offending value that couldn't be converted (may be <code>null</code>)
 	 * @param requiredType the required target type (or <code>null</code> if not known)
-	 * @param ex the root cause
+	 */
+	public TypeMismatchException(Object value, Class requiredType) {
+		this(value, requiredType, null);
+	}
+
+	/**
+	 * Create a new TypeMismatchException without PropertyChangeEvent.
+	 * @param value the offending value that couldn't be converted (may be <code>null</code>)
+	 * @param requiredType the required target type (or <code>null</code> if not known)
+	 * @param ex the root cause (may be <code>null</code>)
 	 */
 	public TypeMismatchException(Object value, Class requiredType, Throwable ex) {
 		super("Failed to convert value of type [" +
