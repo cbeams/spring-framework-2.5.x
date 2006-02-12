@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -60,14 +60,14 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	private String exceptionAttribute = DEFAULT_EXCEPTION_ATTRIBUTE;
 
 	private boolean renderWhenMinimized = false;
-	
+
 
 	public void setOrder(int order) {
-	  this.order = order;
+		this.order = order;
 	}
 
 	public int getOrder() {
-	  return order;
+		return order;
 	}
 
 	/**
@@ -128,27 +128,26 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 
 	/**
 	 * Set if the resolver should render a view when the portlet is in
-	 * a minimized window.  The default is false.
-	 * @see javax.portlet.RenderRequest#getWindowState
+	 * a minimized window. The default is "false".
+	 * @see javax.portlet.RenderRequest#getWindowState()
 	 * @see javax.portlet.WindowState#MINIMIZED
 	 */
-    public void setRenderWhenMinimized(boolean renderWhenMinimized) {
-        this.renderWhenMinimized = renderWhenMinimized;
-    }
+	public void setRenderWhenMinimized(boolean renderWhenMinimized) {
+		this.renderWhenMinimized = renderWhenMinimized;
+	}
 
-    
-	public ModelAndView resolveException(
-	    RenderRequest request, RenderResponse response, Object handler, Exception ex) {
 
+	public ModelAndView resolveException(RenderRequest request, RenderResponse response, Object handler, Exception ex) {
 		// Check whether we're supposed to apply to the given handler.
-		if (this.mappedHandlers != null && !this.mappedHandlers.contains(handler))
+		if (this.mappedHandlers != null && !this.mappedHandlers.contains(handler)) {
 			return null;
+		}
 
-	    // if the portlet is minimized and we don't want to render then return null
-	    if (WindowState.MINIMIZED.equals(request.getWindowState()) &&
-	            ! renderWhenMinimized)
-	        return null;
-	    
+		// If the portlet is minimized and we don't want to render then return null.
+		if (WindowState.MINIMIZED.equals(request.getWindowState()) && !this.renderWhenMinimized) {
+			return null;
+		}
+
 		String viewName = null;
 
 		// Check for specific exception mappings.
@@ -165,13 +164,16 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 		}
 
 		// Return default error view else, if defined.
-		if (viewName == null && this.defaultErrorView != null)
+		if (viewName == null && this.defaultErrorView != null) {
 			viewName = this.defaultErrorView;
+		}
 
-		if (viewName != null)
-			return getModelAndView(viewName, request, response, handler, ex);
-		else
+		if (viewName != null) {
+			return getModelAndView(viewName, ex);
+		}
+		else {
 			return null;
+		}
 	}
 
 	/**
@@ -197,25 +199,21 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 		return getDepth(exceptionMapping, exceptionClass.getSuperclass(), depth + 1);
 	}
 
-    /**
-     * Return a ModelAndView for the given view name and exception. Default
-     * implementation adds the specified exception attribute. Can be overridden
-     * in subclasses.
-     * @param viewName the name of the error view
-     * @param request the render request
-     * @param response the render response
-     * @param handler the handler executed when the exception was thrown
-     * @param ex the exception that got thrown during handler execution
-     * @return the ModelAndView instance
-     * @see #setExceptionAttribute
-     */
-    protected ModelAndView getModelAndView(String viewName, RenderRequest request,
-            RenderResponse response, Object handler, Exception ex) {
-        ModelAndView mv = new ModelAndView(viewName);
-        if (this.exceptionAttribute != null) {
-            mv.addObject(this.exceptionAttribute, ex);
-        }
-        return mv;
-    }
+	/**
+	 * Return a ModelAndView for the given view name and exception.
+	 * Default implementation adds the specified exception attribute.
+	 * Can be overridden in subclasses.
+	 * @param viewName the name of the error view
+	 * @param ex the exception that got thrown during handler execution
+	 * @return the ModelAndView instance
+	 * @see #setExceptionAttribute
+	 */
+	protected ModelAndView getModelAndView(String viewName, Exception ex) {
+		ModelAndView mv = new ModelAndView(viewName);
+		if (this.exceptionAttribute != null) {
+			mv.addObject(this.exceptionAttribute, ex);
+		}
+		return mv;
+	}
 
 }
