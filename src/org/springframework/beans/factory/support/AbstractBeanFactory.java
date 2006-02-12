@@ -254,7 +254,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 			else {
 				// It's a prototype -> create a new instance.
-				bean = createBean(name, mergedBeanDefinition, args);
+				bean = createBean(beanName, mergedBeanDefinition, args);
 			}
 		}
 
