@@ -252,16 +252,6 @@ public class MultiActionControllerTests extends TestCase {
 		assertTrue("No method invoked", mc.getInvokedMethods() == 0);
 	}
 
-	public static class TestDelegate {
-
-		boolean invoked;
-
-		public ModelAndView test(HttpServletRequest request, HttpServletResponse response) {
-			invoked = true;
-			return new ModelAndView("test");
-		}
-	}
-
 	public void testInvokesCorrectMethodOnDelegate() throws Exception {
 		MultiActionController mac = new MultiActionController();
 		TestDelegate d = new TestDelegate();
@@ -413,7 +403,8 @@ public class MultiActionControllerTests extends TestCase {
 	public void testHandlerCaughtException() throws Exception {
 		TestMaController mc = new TestExceptionHandler();
 		ModelAndView mv = testHandlerCaughtException(mc, new Exception());
-		assertTrue("mv name is handle(Exception)", mv.getViewName().equals("handle(Exception)"));
+		assertNotNull("ModelAndView must not be null", mv);
+		assertTrue("mv name is handle(Exception)", "handle(Exception)".equals(mv.getViewName()));
 		assertTrue("Invoked correct method", mc.wasInvoked("handle(Exception)"));
 
 		// WILL GET RUNTIME EXCEPTIONS TOO
@@ -487,7 +478,6 @@ public class MultiActionControllerTests extends TestCase {
 	}
 
 	public void testExceptionHandlerReturnsVoid() throws Exception {
-
 		MultiActionController mac = new VoidMultiActionController();
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
@@ -570,6 +560,17 @@ public class MultiActionControllerTests extends TestCase {
 	}
 
 
+	public static class TestDelegate {
+
+		boolean invoked;
+
+		public ModelAndView test(HttpServletRequest request, HttpServletResponse response) {
+			invoked = true;
+			return new ModelAndView("test");
+		}
+	}
+
+
 	public static class TestExceptionHandler extends TestMaController {
 
 		public ModelAndView handleAnyException(HttpServletRequest request, HttpServletResponse response, Exception ex) {
@@ -637,6 +638,7 @@ public class MultiActionControllerTests extends TestCase {
 		}
 	}
 
+
 	public static class ModelOnlyMultiActionController extends MultiActionController {
 
 		private final Map model;
@@ -659,10 +661,10 @@ public class MultiActionControllerTests extends TestCase {
 		}
 	}
 
+
 	public static class VoidMultiActionController extends MultiActionController {
 
 		public void welcome(HttpServletRequest request, HttpServletResponse response) {
-
 		}
 
 		public void index(HttpServletRequest request, HttpServletResponse response) {
@@ -673,4 +675,5 @@ public class MultiActionControllerTests extends TestCase {
 			response.getWriter().write("exception");
 		}
 	}
+
 }
