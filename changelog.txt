@@ -6,8 +6,21 @@ http://www.springframework.org
 Changes in version 2.0 M3 (27.2.2006)
 -------------------------------------
 
+Package org.springframework.beans
+* changed MutablePropertyValues's "addPropertyValue" signature back to void, to remain binary compatible with Spring 1.2
+* fixed PropertyTypeConverter to never build "null[...]" property paths that lead to exceptions in "findCustomEditor"
+* fixed ArgumentConvertingMethodInvoker to perform conversion attempts on a copy of the argument array (not the source)
+* fixed AbstractBeanFactory to use canonical bean name (id) for prototype creation, exposing it to BeanPostProcessors
+* re-added support for deprecated "class" property to PropertiesBeanDefinitionReader, alongside "(class)"
+* DefaultXmlBeanDefinitionParser considers "" as default namespace as well, for compatibility with the Oracle XML parser
+
 Package org.springframework.core
 * added "getRootCause()" method to NestedRuntime/CheckedException, for retrieving the innermost exception
+* refined PropertiesLoaderUtils to use a URLConnection with "setUseCaches(false)", to avoid jar file locking on Windows
+
+Package org.springframework.jdbc
+* refined default SQL error codes for MS SQL, MySQL, and Oracle
+* fixed DataSourceUtils to correctly close and reset a Connection in afterCompletion, even if called by different thread
 
 Package org.springframework.validation
 * introduced BindingResult interface, as extension of the Errors interface
@@ -15,6 +28,9 @@ Package org.springframework.validation
 * added BeanBindingResult and MapBindingResult implementations, based on a refactoring of BindException
 * adapted BindingErrorProcessor interface to operate on a BeanBindingResult instead of a BindException
 * added "BindingResult getBindingResult()" method to DataBinder, deprecating the "BindException getErrors()" method 
+
+Package org.springframework.web
+* MultiActionController does not consider "handleRequest" itself as handler method (to avoid potential stack overflow)
 
 
 Changes in version 2.0 M2 (1.2.2006)
