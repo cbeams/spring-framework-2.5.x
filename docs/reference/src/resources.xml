@@ -127,9 +127,7 @@
 			that come supplied straight out of the box in Spring:
 		</para>
 		<section>
-			<title>
-				<classname>UrlResource</classname>
-			</title>
+			<title><classname>UrlResource</classname></title>
 			<para>
 				The <classname>UrlResource</classname> wraps a
 				<classname>java.net.URL</classname>, and may be used to access any object
@@ -156,9 +154,7 @@
 			</para>
 		</section>
 		<section>
-			<title>
-				<classname>ClassPathResource</classname>
-			</title>
+			<title><classname>ClassPathResource</classname></title>
 			<para>
 				This class represents a resource which should be obtained from the
 				classpath. This uses either the thread context class loader, a given
@@ -184,9 +180,7 @@
 			</para>
 		</section>
 		<section>
-			<title>
-				<classname>FileSystemResource</classname>
-			</title>
+			<title><classname>FileSystemResource</classname></title>
 			<para>
 				This is a <interfacename>Resource</interfacename> implementation for
 				<classname>java.io.File</classname> handles. It obviously supports
@@ -195,9 +189,7 @@
 			</para>
 		</section>
 		<section>
-			<title>
-				<classname>ServletContextResource</classname>
-			</title>
+			<title><classname>ServletContextResource</classname></title>
 			<para>
 				This is a <interfacename>Resource</interfacename> implementation for
 				<interfacename>ServletContext</interfacename> resources, interpreting
@@ -213,9 +205,7 @@
 			</para>
 		</section>
 		<section>
-			<title>
-				<classname>InputStreamResource</classname>
-			</title>
+			<title><classname>InputStreamResource</classname></title>
 			<para>
 				A <interfacename>Resource</interfacename> implementation for a given
 				<interfacename>InputStream</interfacename>. This should only be used if
@@ -233,9 +223,7 @@
 			</para>
 		</section>
 		<section>
-			<title>
-				<classname>ByteArrayResource</classname>
-			</title>
+			<title><classname>ByteArrayResource</classname></title>
 			<para>
 				This is a <interfacename>Resource</interfacename> implementation for a given
 				byte array. It creates a <classname>ByteArrayInputStream</classname> for the
