@@ -16,6 +16,13 @@
 
 package org.springframework.beans.factory.aspectj;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
 import junit.framework.TestCase;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -93,9 +100,23 @@ public class BeanConfigurerTests extends TestCase {
 		}
 	}
 
-
+	public void testInjectionOnDeserialization() throws Exception {
+		ShouldBeConfiguredBySpring domainObject = new ShouldBeConfiguredBySpring();
+		domainObject.setName("Anonymous");
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(baos);
+		oos.writeObject(domainObject);
+		oos.close();
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		ObjectInputStream ois = new ObjectInputStream(bais);
+		ShouldBeConfiguredBySpring deserializedDomainObject = 
+			(ShouldBeConfiguredBySpring) ois.readObject();
+		assertEquals("Dependency injected on deserialization","Rod",deserializedDomainObject.getName());
+	}
+	
+	
 	@Configurable("beanOne")
-	private static class ShouldBeConfiguredBySpring {
+	private static class ShouldBeConfiguredBySpring implements Serializable {
 
 		private String name;
 
@@ -105,6 +126,10 @@ public class BeanConfigurerTests extends TestCase {
 
 		public String getName() {
 			return this.name;
+		}
+		
+		private void readObject(java.io.ObjectInputStream in) throws IOException,ClassNotFoundException {
+			in.defaultReadObject();
 		}
 	}
 
@@ -211,6 +236,14 @@ public class BeanConfigurerTests extends TestCase {
 		}
 	}
 
+	@Aspect
+	private static class DIOnDeserialization extends AbstractBeanConfigurerAspect {
+		
+		@Pointcut("execution(void java.io.Serializable+.readObject(java.io.ObjectInputStream)) && this(beanInstance) && @this(org.springframework.beans.factory.annotation.Configurable)")
+		protected void beanCreation(Object beanInstance) {	
+		}
+		
+	}
 
 	private static class ClassThatWillNotActuallyBeWired {
 
