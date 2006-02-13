@@ -1707,6 +1707,119 @@ public class AnotherExampleBean implements DisposableBean {
         couples the code to Spring, and does not follow the Inversion of
         Control style, where collaborators are provided to beans as
         properties.</para>
+        <para>
+            An alternative option that is equivalent in effect to the
+            <interfacename>BeanFactoryAware</interfacename>-based approach is to use the
+            <classname>org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean</classname>.
+            (It should be noted that this approach still does not reduce the coupling to Spring,
+            but it does not violate the central principal of IoC as much as the
+            <interfacename>BeanFactoryAware</interfacename>-based approach.)
+        </para>
+        <para>
+            The <classname>ObjectFactoryCreatingFactoryBean</classname> is a
+            <link linkend="beans-factory-lifecycle-factorybean"><interfacename>FactoryBean</interfacename></link>
+            implementation that returns a reference to an object (factory) that can in turn be used to
+            effect a bean lookup. The
+            <classname>ObjectFactoryCreatingFactoryBean</classname> class does itself
+            implement the <interfacename>BeanFactoryAware</interfacename> interface... what client
+            beans are actually injected with is an instance of the
+            <interfacename>ObjectFactory</interfacename> interface. This is a Spring-specific
+            interface (and hence there is still no total decoupling from Spring), but clients
+            can then use the <interfacename>ObjectFactory</interfacename>'s
+            <literal>getObject()</literal> method to effect the bean lookup (under the hood the
+            <interfacename>ObjectFactory</interfacename> implementation instance that is returned
+            simply delegates down to a <interfacename>BeanFactory</interfacename> to actually
+            lookup a bean by name). All that you as an application developer need do is supply
+            the <classname>ObjectFactoryCreatingFactoryBean</classname> with the name of the
+            bean that is to be looked up. Let's look at an example:
+        </para><programlisting><![CDATA[package x.y;
+
+public class NewsFeed {
+    
+    private String news;
+
+    public void setNews(String news) {
+        this.news = news;
+    }
+
+    public String getNews() {
+        return this.toString() + ": '" + news + "'";
+    }
+}]]></programlisting>
+		<programlisting><![CDATA[package x.y;
+
+import org.springframework.beans.factory.ObjectFactory;
+
+public class NewsFeedManager {
+
+    private ObjectFactory factory;
+
+    public void setFactory(ObjectFactory factory) {
+        this.factory = factory;
+    }
+
+    public void printNews() {
+        // here is where the lookup is performed; note that there is no
+        // need to hardcode the name of the bean that is being looked up...
+        NewsFeed news = (NewsFeed) factory.getObject();
+        System.out.println(news.getNews());
+    }
+}]]></programlisting>
+        <para>
+            Find below the the XML configuration to wire together the above classes
+            using the <classname>ObjectFactoryCreatingFactoryBean</classname> approach.
+        </para>
+        <programlisting><![CDATA[<beans>
+    <bean id="newsFeedManager" class="x.y.NewsFeedManager">
+        <property name="factory">
+            <bean class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
+                <property name="targetBeanName">
+                    <idref local="newsFeed"/>
+                </property>
+            </bean>
+        </property>
+    </bean>
+    <bean id="newsFeed" class="x.y.NewsFeed" singleton="false">
+        <property name="news" value="... that's fit to print!"/>
+    </bean>
+</beans>]]></programlisting>
+        <para>
+            And here is a small driver program to test the fact that new (prototype)
+            instances of the <literal>newsFeed</literal> bean are actually being returned for
+            each call to the injected <interfacename>ObjectFactory</interfacename> inside the
+            <classname>NewsFeedManager</classname>'s <literal>printNews()</literal> method.
+        </para>
+        <programlisting><![CDATA[import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import x.y.NewsFeedManager;
+
+public class Main {
+
+    public static void main(String[] args) throws Exception {
+
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
+        NewsFeedManager manager = (NewsFeedManager) ctx.getBean("newsFeedManager");
+        manager.printNews();
+        manager.printNews();
+    }
+}]]></programlisting>
+        <para>
+            The output from running the above program will look like so (results will of course vary
+            on your machine).
+        </para>
+        <programlisting><![CDATA[x.y.NewsFeed@1292d26: '... that's fit to print!'
+x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
+        <para>
+            The interested reader may also find the <classname>ServiceLocatorFactoryBean</classname>
+            (in the <literal>org.springframework.beans.factory.config</literal> package) to be
+            of use... the approach is similar to that of the
+            <classname>ObjectFactoryCreatingFactoryBean</classname>, but it allows one
+            to specify one's own lookup interface as opposed to having to use a Spring-specific
+            lookup interface such as the <interfacename>ObjectFactory</interfacename>.
+            Consult the (copious) Javadocs for the <classname>ServiceLocatorFactoryBean</classname>
+            for a full treatment of this alternative approach (that <emphasis>does</emphasis>
+            reduce the coupling to Spring).
+        </para>
       </sect3>
 
       <sect3 id="beans-factory-aware-beannameaware">
