@@ -509,9 +509,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 public class AnnotationTestBean implements IJmxTestBean {
 
   private String name;
-
   private int age;
-
 
   @ManagedAttribute(description="The Age Attribute", currencyTimeLimit=15)
   public int getAge() {
@@ -535,7 +533,10 @@ public class AnnotationTestBean implements IJmxTestBean {
     return name;
   }
 
-  @ManagedOperation(description="Add Two Numbers Together")
+  @ManagedOperation(description="Add two numbers")
+  @ManagedOperationParameters({
+    @ManagedOperationParameter(name = "x", description = "The first number"),
+    @ManagedOperationParameter(name = "y", description = "The second number")})
   public int add(int x, int y) {
     return x + y;
   }
@@ -550,6 +551,36 @@ public class AnnotationTestBean implements IJmxTestBean {
 				are converted into the classes used by Commons Attributes. However, this is only a one-off cost
 				and JDK 5.0 annotations give you the added (and valuable) benefit of compile-time checking.
 			</para>
+			<para>
+	            The attendant XML configuration for the above annotated class can be found below.
+			</para>
+			<programlisting><![CDATA[<beans>
+    <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+        <property name="assembler" ref="assembler"/>
+        <property name="namingStrategy" ref="namingStrategy"/>
+        <property name="autodetect" value="true"/>
+    </bean>
+
+    <bean id="jmxAttributeSource"
+          class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+
+    <!-- will create management interface using annotation metadata -->
+    <bean id="assembler"
+          class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+        <property name="attributeSource" ref="jmxAttributeSource"/>
+    </bean>
+
+    <!-- will pick up ObjectName from annotation -->
+    <bean id="namingStrategy"
+          class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+        <property name="attributeSource" ref="jmxAttributeSource"/>
+    </bean>
+
+    <bean id="testBean" class="org.springframework.jmx.AnnotationTestBean">
+        <property name="name" value="TEST"/>
+        <property name="age" value="100"/>
+    </bean>
+</beans>]]></programlisting>
 		</section>
 		<section id="jmx-interface-metadata-types">
 			<title>Source-Level Metadata Types</title>
