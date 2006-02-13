@@ -553,6 +553,11 @@ RubyMessenger.new</value>
 				and Smalltalk, making them available to Java developers using a Java-like syntax.
 				</emphasis>
 			</quote>
+			<note>
+				<para>
+		            Please note that Groovy itself requires JDK 1.4+.
+				</para>
+			</note>
 			<para>
 				The core class in Spring's Groovy support is the
 				<classname>GroovyScriptFactory</classname> (this class is a Groovy-specific
