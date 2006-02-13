@@ -116,7 +116,7 @@ public class JndiTemplate {
 	 */
 	public Object lookup(final String name) throws NamingException {
 		if (logger.isInfoEnabled()) {
-			logger.debug("Looking up JNDI object with name [" + name + "]");
+			logger.info("Looking up JNDI object with name [" + name + "]");
 		}
 		return execute(new JndiCallback() {
 			public Object doInContext(Context ctx) throws NamingException {
