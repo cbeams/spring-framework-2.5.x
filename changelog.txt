@@ -30,7 +30,9 @@ Package org.springframework.validation
 * added "BindingResult getBindingResult()" method to DataBinder, deprecating the "BindException getErrors()" method 
 
 Package org.springframework.web
+* fixed DispatcherServlet to keep and restore previous thread-bound LocaleContext and RequestAttributes
 * MultiActionController does not consider "handleRequest" itself as handler method (to avoid potential stack overflow)
+* added full JSP 1.2 form tag library in package "web.servlet.tags", complementing the existing base tag library
 
 
 Changes in version 2.0 M2 (1.2.2006)
