@@ -34,6 +34,17 @@
 				method="needsJoinPointStaticPart"
 				pointcut="execution(* getAge())"
 			/>
+		</aop:aspect>
+		
+		<!-- variation with external pointcut reference -->
+		<aop:aspect ref="authenticationLogger">
+			<aop:pointcut id="authenticationMethodWithString" 
+  			      expression="execution(boolean *..SecurityManager.authenticate(..)) and args(username,java.lang.String)"/>
+
+			<aop:advice pointcut-ref="authenticationMethodWithString"
+				        method="logAuthenticationAttempt(java.lang.String)"
+					    kind="before"
+			/>
 		</aop:aspect>		
 	</aop:config>
 	
@@ -41,4 +52,5 @@
 	
 	<bean id="testBean" class="org.springframework.beans.TestBean"/>
 	
+	<bean id="authenticationLogger" class="org.springframework.aop.aspectj.AuthenticationLogger"/>
 </beans>

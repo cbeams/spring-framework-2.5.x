@@ -129,6 +129,10 @@ public abstract class AbstractAspectJAdvice implements InitializingBean {
 	public Method getAspectJAdviceMethod() {
 		return this.aspectJAdviceMethod;
 	}
+
+	public AspectJExpressionPointcut getPointcut() {
+		return this.pointcutExpression;
+	}
 	
 	/**
 	 * Set by creator of this advice object if the argument names are known.

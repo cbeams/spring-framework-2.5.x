@@ -22,8 +22,8 @@ import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
 import org.springframework.aop.aspectj.AspectJAroundAdvice;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
+import org.springframework.aop.aspectj.AspectJPointcutAdvisor;
 import org.springframework.aop.aspectj.DeclareParentsAdvisor;
-import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
@@ -153,7 +153,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * with the supplied {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}.
 	 */
 	private void parseAdvisor(Element element, BeanDefinitionRegistry registry, ParseContext parseContext) {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(DefaultPointcutAdvisor.class);
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(AspectJPointcutAdvisor.class);
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();
 		mpvs.addPropertyValue("order", "" + parseContext.nextAdvisorOrderValue());
@@ -302,7 +302,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		adviceDefinition.setConstructorArgumentValues(cav);
 
 		// configure the advisor
-		RootBeanDefinition advisorDefinition = new RootBeanDefinition(DefaultPointcutAdvisor.class);
+		RootBeanDefinition advisorDefinition = new RootBeanDefinition(AspectJPointcutAdvisor.class);
 		advisorProperties.addPropertyValue("order", "" + parseContext.nextAdvisorOrderValue());
 		advisorDefinition.setPropertyValues(advisorProperties);
 		advisorDefinition.getPropertyValues().addPropertyValue(ADVICE, adviceDefinition);

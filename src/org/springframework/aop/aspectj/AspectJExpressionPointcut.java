@@ -240,4 +240,28 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		}
 	}
 
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("AspectJExpressionPointcut: ");
+		if (this.pointcutParameterNames != null && this.pointcutParameterTypes != null) {
+			sb.append("(");
+			for (int i = 0; i < this.pointcutParameterTypes.length; i++) {
+				sb.append(this.pointcutParameterTypes[i].getName());
+				sb.append(" ");
+				sb.append(this.pointcutParameterNames[i]);
+				if ((i+1) < this.pointcutParameterTypes.length) {
+					sb.append(", ");
+				}
+			}
+			sb.append(")");
+		}
+		sb.append(" ");
+		if (getExpression() != null) {
+			sb.append(getExpression());
+		} 
+		else {
+			sb.append("<pointcut expression not set>");
+		}
+		return sb.toString();
+	}
 }
