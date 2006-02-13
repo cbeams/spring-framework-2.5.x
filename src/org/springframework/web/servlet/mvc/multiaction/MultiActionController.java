@@ -32,7 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationContextException;
+import org.springframework.util.Assert;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -143,34 +143,33 @@ public class MultiActionController extends AbstractController implements LastMod
 	private Object delegate;
 
 	/** Methods, keyed by name */
-	private Map handlerMethodMap;
+	private Map handlerMethodMap = new HashMap();
 	
 	/** LastModified methods, keyed by handler method name (without LAST_MODIFIED_SUFFIX) */
-	private Map lastModifiedMethodMap;
+	private Map lastModifiedMethodMap = new HashMap();
 	
 	/** Methods, keyed by exception class */
-	private Map exceptionHandlerMap;
+	private Map exceptionHandlerMap = new HashMap();
 
 
 	/**
 	 * Constructor for MultiActionController that looks for handler methods
-	 * in the present subclass.Caches methods for quick invocation later.
+	 * in the present subclass. Caches methods for quick invocation later.
 	 * This class's use of reflection will impose little overhead at runtime.
-	 * @throws ApplicationContextException if the class doesn't contain any
-	 * action handler methods (and so could never handle any requests).
 	 */
-	public MultiActionController() throws ApplicationContextException {
-		setDelegate(this);
+	public MultiActionController() {
+		this.delegate = this;
+		registerHandlerMethods(this.delegate);
+		// We'll accept no handler methods found here - a delegate might be set later on.
 	}
 	
 	/**
 	 * Constructor for MultiActionController that looks for handler methods in delegate,
-	 * rather than a subclass of this class. Caches methods.
-	 * @param delegate handler class. This doesn't need to implement any particular
+	 * rather than a subclass of this class. Caches methods for quick invocation later.
+	 * @param delegate handler object. This doesn't need to implement any particular
 	 * interface, as everything is done using reflection.
-	 * @throws ApplicationContextException if the class doesn't contain any handler methods
 	 */
-	public MultiActionController(Object delegate) throws ApplicationContextException {
+	public MultiActionController(Object delegate) {
 		setDelegate(delegate);
 	}
 	
@@ -205,31 +204,31 @@ public class MultiActionController extends AbstractController implements LastMod
 		return validators;
 	}
 
-
 	/**
 	 * Set the delegate used by this class. The default is <code>this</code>,
 	 * assuming that handler methods have been added by a subclass.
-	 * This method is rarely invoked once the class is configured.
-	 * @param delegate class containing methods, which may be the present
-	 * class, the handler methods being in a subclass
-	 * @throws ApplicationContextException if there aren't any valid request
-	 * handling methods in the subclass.
+	 * <p>This method does not get invoked once the class is configured.
+	 * @param delegate an object containing handler methods
 	 */
-	public final void setDelegate(Object delegate) throws ApplicationContextException {
-		if (delegate == null) {
-			throw new IllegalArgumentException("delegate cannot be <code>null</code> in MultiActionController");
-		}
+	public final void setDelegate(Object delegate) {
+		Assert.notNull(delegate, "Delegate must not be null");
 		this.delegate = delegate;
-		this.handlerMethodMap = new HashMap();
-		this.lastModifiedMethodMap = new HashMap();
-
-		registerHandlerMethods(delegate);
+		registerHandlerMethods(this.delegate);
+		// There must be SOME handler methods.
+		if (this.handlerMethodMap.isEmpty()) {
+			throw new IllegalStateException("No handler methods in class [" + this.delegate.getClass() + "]");
+		}
 	}
+
 
 	/**
 	 * Registers all handlers methods on the delegate object.
 	 */
 	private void registerHandlerMethods(Object delegate) {
+		this.handlerMethodMap.clear();
+		this.lastModifiedMethodMap.clear();
+		this.exceptionHandlerMap.clear();
+
 		// Look at all methods in the subclass, trying to find
 		// methods that are validators according to our criteria
 		Method[] methods = delegate.getClass().getMethods();
@@ -242,14 +241,7 @@ public class MultiActionController extends AbstractController implements LastMod
 			}
 		}
 
-		// There must be SOME handler methods.
-		// WHAT IF SETTING DELEGATE LATER!?
-		if (this.handlerMethodMap.isEmpty()) {
-			throw new ApplicationContextException("No handler methods in class [" + getClass().getName() + "]");
-		}
-
 		// Now look for exception handlers.
-		this.exceptionHandlerMap = new HashMap();
 		for (int i = 0; i < methods.length; i++) {
 			Method method = methods[i];
 			if (isExceptionHandlerMethod(method)) {
@@ -261,18 +253,17 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	/**
 	 * Is the supplied method a valid handler method?
+	 * <p>Does not consider <code>Controller.handleRequest</code> itself
+	 * as handler method (to avoid potential stack overflow).
 	 */
 	private boolean isHandlerMethod(Method method) {
 		Class returnType = method.getReturnType();
-
-		if (ModelAndView.class.equals(returnType) ||
-				Map.class.equals(returnType) ||
-				void.class.equals(returnType)) {
+		if (ModelAndView.class.equals(returnType) || Map.class.equals(returnType) || void.class.equals(returnType)) {
 			Class[] parameterTypes = method.getParameterTypes();
-
 			return (parameterTypes.length >= 2 &&
 					HttpServletRequest.class.equals(parameterTypes[0]) &&
-					HttpServletResponse.class.equals(parameterTypes[1]));
+					HttpServletResponse.class.equals(parameterTypes[1]) &&
+					!("handleRequest".equals(method.getName()) && parameterTypes.length == 2));
 		}
 		return false;
 	}
@@ -305,8 +296,8 @@ public class MultiActionController extends AbstractController implements LastMod
 		try {
 			Method lastModifiedMethod = delegate.getClass().getMethod(
 					method.getName() + LAST_MODIFIED_METHOD_SUFFIX,
-					new Class[]{HttpServletRequest.class});
-			// put in cache, keyed by handler method name
+					new Class[] {HttpServletRequest.class});
+			// Put in cache, keyed by handler method name.
 			this.lastModifiedMethodMap.put(method.getName(), lastModifiedMethod);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found last modified method for action method [" + method + "]");
@@ -327,7 +318,8 @@ public class MultiActionController extends AbstractController implements LastMod
 		}
 	}
 
-//---------------------------------------------------------------------
+
+	//---------------------------------------------------------------------
 	// Implementation of LastModified
 	//---------------------------------------------------------------------
 
@@ -336,7 +328,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * Return -1, indicating that content must be updated, if there's no such handler.
 	 * @see org.springframework.web.servlet.mvc.LastModified#getLastModified(HttpServletRequest)
 	 */
-	public final long getLastModified(HttpServletRequest request) {
+	public long getLastModified(HttpServletRequest request) {
 		try {
 			String handlerMethodName = this.methodNameResolver.getHandlerMethodName(request);
 			Method lastModifiedMethod = (Method) this.lastModifiedMethodMap.get(handlerMethodName);
@@ -349,7 +341,7 @@ public class MultiActionController extends AbstractController implements LastMod
 				catch (Exception ex) {
 					// We encountered an error invoking the last-modified method.
 					// We can't do anything useful except log this, as we can't throw an exception.
-					logger.error("Failed to invoke lastModified method", ex);
+					logger.error("Failed to invoke last-modified method", ex);
 				}
 			}	// if we had a lastModified method for this request
 		}
@@ -364,7 +356,7 @@ public class MultiActionController extends AbstractController implements LastMod
 
 
 	//---------------------------------------------------------------------
-	// Implementation of Controller
+	// Implementation of AbstractController
 	//---------------------------------------------------------------------
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
@@ -430,17 +422,20 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	/**
 	 * Processes the return value of a handler method to ensure that it either returns
-	 * <code>null</code> or an instance of {@link ModelAndView}. When returning a
-	 * {@link Map} the {@link Map} instance is wrapped in a new {@link ModelAndView} instance.
+	 * <code>null</code> or an instance of {@link ModelAndView}. When returning a {@link Map},
+	 * the {@link Map} instance is wrapped in a new {@link ModelAndView} instance.
 	 */
 	private ModelAndView massageReturnValueIfNecessary(Object returnValue) {
-		if(returnValue instanceof ModelAndView) {
+		if (returnValue instanceof ModelAndView) {
 			return (ModelAndView) returnValue;
-		} else if(returnValue instanceof Map) {
-			return new ModelAndView().addAllObjects((Map)returnValue);
-		} else {
-			// either returned null or was 'void' return
-			return null; // the handle method already wrote the response
+		}
+		else if (returnValue instanceof Map) {
+			return new ModelAndView().addAllObjects((Map) returnValue);
+		}
+		else {
+			// Either returned null or was 'void' return.
+			// We'll assume that the handle method already wrote the response.
+			return null;
 		}
 	}
 
