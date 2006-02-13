@@ -59,9 +59,7 @@
             Groovy bean is going to be implementing; note that this interface is defined
             in plain Java... dependant objects that are injected with a reference to the
             <interfacename>Messenger</interfacename> won't know that the underlying
-            implementation is a Groovy bean. Also note that there is no requirement for
-            scripted beans to implement an interface... it just happens to be the case
-            in this example.
+            implementation is a Groovy bean.
         </para>
         <programlisting><![CDATA[package org.springframework.scripting;
 
@@ -88,10 +86,10 @@ public class DefaultBookingService implements BookingService {
     }
 }]]></programlisting>
         <para>
-            Here is the implementation of the <interfacename>Messenger</interfacename>
+            Here is an implementation of the <interfacename>Messenger</interfacename>
             interface in Groovy.
         </para>
-        <programlisting><![CDATA[// from the file 'Messenger.groovy'
+        <programlisting><lineannotation>// from the file 'Messenger.groovy'</lineannotation><![CDATA[
 package org.springframework.scripting.groovy;
 
 // import the Messenger interface (written in Java) that is to be implemented
@@ -105,13 +103,11 @@ class GroovyMessenger implements Messenger {
         <para>
             And here (finally!) are the bean definitions that will effect the injection
             of the Groovy-scripted <interfacename>Messenger</interfacename> implementation
-            into an instance of the <classname>BookingService</classname> class.
+            into an instance of the <classname>DefaultBookingService</classname> class.
         </para>
-        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
-<beans>
+        <programlisting><![CDATA[<beans>
 
-    <!-- this is the workhorse that effects the scripting support (explained in detail later) -->
+    <!-- this is the workhorse bean that effects the scripting support (explained in detail later) -->
     <bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
 
     <!-- and this is the bean definition for the Groovy-based Messenger implementation -->
@@ -136,117 +132,336 @@ class GroovyMessenger implements Messenger {
         </para>
         <para>
             Keep reading for the details explaining just why that
-            <classname>ScriptFactoryPostProcessor</classname> bean had to be defined (and
-            what exactly it is doing).
+            <classname>ScriptFactoryPostProcessor</classname> bean had to be defined
+            (and exactly what it is doing).
         </para>
 	</section>
 	<section id="scripting-beans">
 		<title>Defining scripted beans</title>
 		<para>
-            This section describes exactly how one defines Spring managed beans in any of
-            the supported scripting languages.
+            This section describes exactly how one defines Spring managed beans in
+            any of the supported scripting languages.
         </para>
 		<para>
-            Please note that this section does not attempt to explain the syntax and idioms of
-            the supported scripting languages. The assumption is that if you want to use Groovy
-            (for example) to write certain (or all) of the classes in your application, then
-            you already know Groovy. If you need further details about the scripting languages
-            themselves, please do consult the section entitled
-            <xref linkend="scripting-resources" /> at the end of this chapter.
+            Please note that this chapter does not attempt to explain the syntax and
+            idioms of the supported scripting languages. For example, if you want to
+            use Groovy to write certain of the classes in your application, then the
+            assumption is that you already know Groovy. If you need further details
+            about the scripting languages themselves, please do consult the section
+            entitled <xref linkend="scripting-resources" /> at the end of this chapter.
         </para>
 		<section id="scripting-beans-concepts">
 			<title>Common concepts</title>
 			<para>
-				The steps involved in using beans that are backed by scripts are as follows:
+				The steps involved in using script-backed beans are as follows:
 			</para>
-			<itemizedlist>
+			<orderedlist numeration="arabic">
 				<listitem>
 					<para>
-						Define a
+						Write the test for the script (naturally)
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis>Then</emphasis> write the script itself :)
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Define an
 						<classname>org.springframework.scripting.support.ScriptFactoryPostProcessor</classname>
-						bean in your configuration.
+						bean in your Spring configuration.
 					</para>
 				</listitem>
 				<listitem>
 					<para>
-						Then, for every scripted bean, define an appropriate
+						Then define your script-backed beans using an appropriate
 						<interfacename>org.springframework.scripting.ScriptFactory</interfacename>
-						implementation.
+						implementation. This is an interative step... you will need
+						at least one bean defintion per script (although the same script
+						can of course be referenced by multiple bean definitions).
 					</para>
 				</listitem>
-			</itemizedlist>
+			</orderedlist>
 			<para>
-			    With regard to the first step, a
-			    <classname>ScriptFactoryPostProcessor</classname> is an implementation
-			    of the <interfacename>BeanPostProcessor</interfacename> interface; it
-			    contains all of the logic necessary to instantiate and configure
-			    scripted beans.
+	            The first two steps (testing and writing your scripts) are beyond the 
+	            scope of this chapter. Grab a old of the language specification and /
+	            or reference manual for your chosen scripting language and crack on with
+	            developing your scripts. You <emphasis>will</emphasis> first want to read
+	            the rest of this chapter though, as Spring's scripting support does make
+	            some (small) assumptions about the contents of your script files.
 			</para>
-			<para>
-			    You only need to define one <classname>ScriptFactoryPostProcessor</classname>
-			    bean, and you don't need to give it an <literal>id</literal> or
-			    <literal>name</literal>; it is enough that it is simply defined. In a
-			    typical scenario, the <classname>ScriptFactoryPostProcessor</classname>
-			    class has no dependencies or configuration that needs to be set by an
-			    application developer... simply define the bean and you're done.
-			</para>
-			<para>
-		        However, the <classname>ScriptFactoryPostProcessor</classname> class does have
-		        some additional configuration properties that come into play if you want to
-		        have <emphasis>refreshable</emphasis> beans. That is, beans that are reloaded
-		        and reconfigured whenever the underlying script resource is modified. See the
-		        section entitled <xref linkend="scripting-refreshable-beans"/> for a full
-		        treatment of this topic.
-			</para>
-			<para>
-		        The second step involves defining scripted bean definitions, one for each
-		        bean that you want to configure (this is no different to normal Java bean
-		        configuration). However, instead of specifying the fully qualified classname
-		        of the class that is to be instantiated and configured by the container,
-		        one specifies instead the fully qualified classname of the
-		        script-language-specific <interfacename>ScriptFactory</interfacename>
-		        implementation class that will create an object from an arbitrary script.
-		    </para>
-			<para>
-		        A <interfacename>ScriptFactory</interfacename> defines a factory-style
-		        interface for creating
-				Java objects from an arbitrary script resource. In the case of Groovy, the
-				particular <interfacename>ScriptFactory</interfacename> required is the
-				<classname>org.springframework.scripting.groovy.GroovyScriptFactory</classname>
-				class. (See the language specific sections below for the details of what
-				particular <interfacename>ScriptFactory</interfacename> implementation
-				class is required for each language.)
-			</para>
-			<para>
-				There is one <emphasis>very</emphasis> important thing to be aware of
-				with regard to Spring's scripting support. Namely, it is not (currently)
-				possible to supply constructor arguments to scripted beans (and hence
-				constructor-injection is not available for scripted beans). Constructor
-				arguments defined on an <literal>xxxScriptFactory</literal>
-				are instead passed to the actual <literal>xxxScriptFactory</literal>
-				instance itself... and conversely, any and all property values are
-				<emphasis>passed straight through</emphasis> to the scripted bean
-				once it has been instantiated. In all of the
-				<interfacename>ScriptFactory</interfacename> implementations that
-				Spring provides, one of the constructor arguments is
-				always a path to the script file (see also the section entitled
-				<xref linkend="scripting-beans-concepts-inline"/>).
-			</para>
-			<para>
-	            Finally, if it is not immediately obvious, all of the usual Spring
-	            container lifecycles apply to scripted beans. That is, the beans themselves
-	            can be defined as singletons and prototypes, and the classes of such
-	            beans can implement lifecycle callback interfaces such as Spring's
-	            <interfacename>InitializingBean</interfacename> and
-	            <interfacename>DisposableBean</interfacename>. 
-			</para>
+			<section>
+				<title>The <classname>ScriptFactoryPostProcessor</classname></title>
+				<para>
+					With regard to the third step, a
+					<classname>ScriptFactoryPostProcessor</classname> is an
+					implementation of the <interfacename>BeanPostProcessor</interfacename>
+					interface; it contains all of the logic necessary to instantiate and
+					configure scripted beans.
+				</para>
+				<para>
+					You only need to define one <classname>ScriptFactoryPostProcessor</classname>
+					bean, and you don't need to give it an <literal>id</literal> or
+					<literal>name</literal>; it is enough that it is simply defined.
+					In a typical scenario, the <classname>ScriptFactoryPostProcessor</classname>
+					class has no dependencies or configuration that needs to be set
+					by an application developer... simply define the bean and you're done.
+				</para>
+				<para>
+					However, the <classname>ScriptFactoryPostProcessor</classname> class
+					does have some additional configuration properties that come into play
+					if you want to have <emphasis>refreshable</emphasis> beans, i.e. beans
+					that are reloaded and reconfigured whenever the underlying script
+					resource is modified. See the section entitled
+					<xref linkend="scripting-refreshable-beans"/> for a full treatment of
+					this topic.
+				</para>
+			</section>
+		    <section>
+				<title>The <interfacename>ScriptFactory</interfacename></title>
+				<para>
+					The final step involves defining scripted bean definitions, one for each
+					bean that you want to configure (this is no different to normal Java bean
+					configuration). However, instead of specifying the fully qualified classname
+					of the class that is to be instantiated and configured by the container,
+					one specifies instead the fully qualified classname of the
+					script-language-specific <interfacename>ScriptFactory</interfacename>
+					implementation class that will create an object from a script.
+				</para>
+				<para>
+					A <interfacename>ScriptFactory</interfacename> defines a factory-style
+					interface for creating
+					Java objects from an arbitrary script resource. In the case of Groovy,
+					the	particular <interfacename>ScriptFactory</interfacename> that is
+					required is the
+					<classname>org.springframework.scripting.groovy.GroovyScriptFactory</classname>
+					class. (See the language specific sections below for the details of what
+					particular <interfacename>ScriptFactory</interfacename> implementation
+					class is required for each supported language.)
+				</para>
+			</section>
+		    <section>
+				<title>Understanding Constructor Injection in the context of scripted beans</title>
+				<para>
+					There is one <emphasis>very</emphasis> important thing to be aware of
+					with regard to Spring's scripting support. Namely, it is not (currently)
+					possible to supply constructor arguments to scripted beans (and hence
+					constructor-injection is not available for scripted beans). Constructor
+					arguments defined on an <literal>xxxScriptFactory</literal>
+					are instead passed to the actual <literal>xxxScriptFactory</literal>
+					instance itself; conversely, any and all property values are
+					<emphasis>passed straight through</emphasis> to the scripted bean
+					once it has been instantiated (and hence setter-injection cannot be used
+					to configure <literal>xxxScriptFactory</literal> instances).
+				</para>
+				<para>
+		            In the interests of making this special handling of constructors and
+		            properties 100% clear, the following mixture of code and configuration
+		            will <emphasis>not</emphasis> work.
+				</para>
+				<para>
+					Here is an implementation of the <interfacename>Messenger</interfacename>
+					interface in Groovy.
+				</para>
+				<programlisting><lineannotation>// from the file 'Messenger.groovy'</lineannotation><![CDATA[
+package org.springframework.scripting.groovy;
+
+import org.springframework.scripting.Messenger
+
+// define the implementation in Groovy
+class GroovyMessenger implements Messenger {
+
+    GroovyMessenger() {}
+
+    // this will *not* work
+    GroovyMessenger(String message) {
+        this.message = message;
+    }
+
+    @Property String message;
+
+    @Property String anotherMessage
+}]]></programlisting>
+				<programlisting><![CDATA[
+    <bean id="badMessenger"
+          class="org.springframework.scripting.groovy.GroovyScriptFactory">
+        <constructor-arg value="classpath:Messenger.groovy"/>
+        <!--
+            this next constructor argument value will (fail to) be injected into the ScriptFactory
+        -->
+        <constructor-arg value="This will *not* work"/>
+        <!--
+            only property values are injected into the scripted object created by a ScriptFactory
+        -->
+        <property name="anotherMessage" value="Passed straight through to the scripted object"/>
+    </bean>]]></programlisting>
+				<para>
+					In practice this restriction is not as onerous as it first appears.
+				</para>
+			</section>
 			<section id="scripting-refreshable-beans">
 				<title>Refreshable beans</title>
 				<para>
-		            [TODO]
+		            One of the (if not <emphasis>the</emphasis>) most compelling value adds
+		            of the scripting support in Spring is the
+		            <firstterm>'refreshable bean'</firstterm> feature.
+				</para>
+				<para>
+		            A refreshable bean is a bean that is backed up by a script in one of the
+		            supported scripting languages; with a little (tiny) amount of configuration,
+		            a script-backed bean can monitor changes in its underlying script resource,
+		            and simply reload itself when script is changed (perhaps a developer edits
+		            and saves changes to the file on the filesystem).
+				</para>
+				<para>
+		            This allows a developer to deploy any number of script files
+		            as part of an application, configure the Spring container to create beans
+		            backed by said scripts (using the mechanisms described in this chapter),
+		            and then later, as requirements change or some other external factor comes
+		            into play, simply edit a script and have any change she or she might make
+		            reflected in the bean that is backed by the changed script. There is 
+		            no need to shut down a running application (or redeploy in the case of
+		            a web application)... the script-backed bean (or beans) so changed
+		            will simply pick up the new state and logic from the changed script
+		            (or scripts); this is obviously great for scenarios such as rapid
+		            prototyping.
+				</para>
+				<note>
+					<para>
+			            This feature is <emphasis>off</emphasis> by default.
+					</para>
+				</note>
+				<para>
+		            Let's first look at an example to see just how easy it is to start using
+		            refreshable beans. To <emphasis>turn on</emphasis> the refreshable beans
+		            feature, one simply has to specify exactly <emphasis>one</emphasis>
+		            additional property on the definition of one's
+		            <classname>ScriptFactoryPostProcessor</classname>. So if we stick with
+		            <link linkend="scripting-a-first-example">the example</link> from earlier
+		            in this chapter, here's what we would change in the Spring XML configuration
+		            to effect refreshable beans:
+				</para>
+				<programlisting><![CDATA[<beans>
+
+    <bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor">
+     ]]><lineannotation>   &lt;!-- 'turns on' the 'refreshable beans' feature (explained in more detail below) --&gt;</lineannotation><![CDATA[
+        <property name="refreshCheckDelay" value="10"/>
+    </bean>
+    ]]><lineannotation>
+    &lt;!--
+        this bean is now 'refreshable' due to the added property
+        on the ScriptFactoryPostProcessor bean defined above
+    --&gt;</lineannotation><![CDATA[
+    <bean id="messenger"
+          class="org.springframework.scripting.groovy.GroovyScriptFactory">
+        <constructor-arg value="classpath:Messenger.groovy"/>
+        <property name="message" value="I Can Do The Frug"/>
+    </bean>
+
+    <bean id="bookingService" class="x.y.DefaultBookingService">
+        <property name="messenger" ref="messenger"/>
+    </bean>
+
+</beans>]]></programlisting>
+				<para>
+		            Yes, that really is all one has to do. The <literal>refreshCheckDelay</literal>
+		            property defined on the <classname>ScriptFactoryPostProcessor</classname> class
+		            is the number of milliseconds between refresh checks.
+		            Remember that <interfacename>BeanPostProcessor</interfacename>
+		            implementation instances (such as the <classname>ScriptFactoryPostProcessor</classname>)
+		            apply to <emphasis>all</emphasis> script-backed beans in the scope of the surrounding
+		            application context. This means that switching on the refreshable bean behavior by
+		            assigning a positive value to the <literal>refreshCheckDelay</literal>
+		            property of a <classname>ScriptFactoryPostProcessor</classname> bean makes
+		            <emphasis>all</emphasis> script-backed beans exhibit the refreshable behavior
+		            (assigning a negative value to the <literal>refreshCheckDelay</literal>
+		            property turns off the refresh behavior).
+		        </para>
+		        <para>
+					If we then run the following application we can exercise the refreshable feature;
+					please do excuse the <emphasis>'jumping-through-hoops-to-pause-the-execution'</emphasis>
+		            shenanigans in this next slice of code... the
+		            <literal>System.in.read()</literal> call is only there so that the
+		            execution of the program pauses while I (the author) go off and edit
+		            the underlying script file so that the script-backed bean will refresh
+		            its state when the program resumes executing.
+				</para>
+				<programlisting><![CDATA[import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.scripting.Messenger;
+
+public final class Boot {
+
+    public static void main(final String[] args) throws Exception {
+
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
+        Messenger messenger = (Messenger) ctx.getBean("messenger");
+        System.out.println(messenger.getMessage());
+        // pause execution while I go off and make changes to the script...
+        System.in.read();
+        System.out.println(messenger.getMessage());
+    }
+}]]></programlisting>
+				<para>
+		            Let's assume then (for the purposes of this example, that all
+		            calls to the <literal>getMessage()</literal> method of
+		            <interfacename>Messenger</interfacename> implementations have to be
+		            changed such that they .
+		            Find below the changes that I (the author) am going to make to the
+		            <filename>Messenger.groovy</filename> script when the execution of
+		            the program is paused.
+				</para>
+				<programlisting><![CDATA[package org.springframework.scripting
+
+class GroovyMessenger implements Messenger {
+
+    private String message = "Bingo"
+
+    public String getMessage() {
+     ]]><lineannotation>   // change the implementation to surround the message in quotes</lineannotation><![CDATA[
+        return "'" + this.message + "'"
+    }
+
+    public void setMessage(String message) {
+        this.message = message
+    }
+}]]></programlisting>
+				<para>
+		            When the program is executed, the output before the inut pause will be
+		            <computeroutput>I Can Do The Frug</computeroutput>; after the change
+		            to the script is made and saved, and the program resumes execution,
+		            the result of calling the <literal>getMessage()</literal> method on the
+		            script-backed <interfacename>Messenger</interfacename> implementation
+		            will be <computeroutput>'I Can Do The Frug'</computeroutput> (notice
+		            the inclusion of the additional quotes).
+				</para>
+				<para>
+		            It is important to understand that changes to a script will
+		            <emphasis>not</emphasis> trigger a refresh if said changes occur
+		            within the window of the <literal>refreshDelay</literal> value passed
+		            as a property value on the <classname>ScriptFactoryPostProcessor</classname>.
+		            It is equally important to understand that changes to the script are
+		            <emphasis>not</emphasis> actually 'picked up' until a method is called
+		            on the script-backed bean. It is only when a method is called on a
+		            script-backed bean that it checks to see if its underlying script
+		            source has changed. Any exceptions relating to refreshing the script
+		            (such as encountering a compilation error, or finding that the script
+		            file has been deleted) will result in a <emphasis>fatal</emphasis>
+		            exception being propagated to the calling code.
+				</para>
+				<para>
+		            The refreshable bean behavior described above does
+					<emphasis>not</emphasis> apply to scripts defined using the
+					<literal>inline:</literal> notation (see the section entitled
+					<xref linkend="scripting-beans-inline"/>). Additionally, it
+					<emphasis>only</emphasis> applies to beans where changes to the
+					underlying script can actually be monitored; for example, by
+					a file system watcher that checks the last modified date on
+					a script file that exists on the filesystem.
 				</para>
 			</section>
-			<section id="scripting-beans-concepts-inline">
+			<section id="scripting-beans-inline">
 				<title>Inline scripts</title>
 				<para>
 					The scripting support can also cater for scripts that are embedded
@@ -294,7 +509,7 @@ class GroovyMessenger implements Messenger {
 			            the <literal>inline:</literal> notation. If you do, the text will
 			            <emphasis>not</emphasis> be recognized as an inline script source, and
 			            normal <interfacename>Resource</interfacename> loading rules will apply:
-			            this will lead to a nasty exception the root cause of which will not
+			            this will lead to a nasty exception the root cause of which may not
 			            be immediately obvious.
 					</para>
 				</note>
@@ -339,20 +554,25 @@ RubyMessenger.new</value>
 				</emphasis>
 			</quote>
 			<para>
-				The core class in Spring's Groovy support is the Groovy-specific implementation
-				of the <interfacename>ScriptFactory</interfacename> interface: the
-				<classname>GroovyScriptFactory</classname>. The
-				<classname>GroovyScriptFactory</classname> has one constructor that takes a
-				single argument that is a path to the script resource containing the
+				The core class in Spring's Groovy support is the
+				<classname>GroovyScriptFactory</classname> (this class is a Groovy-specific
+				implementation of the <interfacename>ScriptFactory</interfacename> interface).
+				The	<classname>GroovyScriptFactory</classname> has one constructor that takes
+				a single argument that is a path to the script resource containing the
 				Groovy script. Any of the usual <interfacename>Resource</interfacename>
 				<footnote id="scripting-resources-footnote">
 					<para>
-			            See the section entitled <xref linkend="resources"/> for a full
-			            treatment of Spring's low level resource handling abstraction.
-					</para>
+						<!--
+							Rick : PDF stylesheet currently chokes on xref in footnote (bug?),
+							hence no helpful clickable cross reference here
+						-->
+						See the chapter entitled <literal>'Resources'</literal> for a full
+						treatment of Spring's low level resource handling abstraction.
+			        </para>
 				</footnote>
 				path strings can be used here, in addition to the scripting-specific
-				<literal>inline:</literal> notation for inline scripts.
+				<literal>inline:</literal> notation for
+				<link linkend="scripting-beans-inline">inline scripts</link>.
 			</para>
 			<para>
 	            Any properties that are defined on the bean definition will be set on the
@@ -364,28 +584,83 @@ RubyMessenger.new</value>
 			<para>
 	            It is important that you <emphasis>do not</emphasis> define more than one
 	            class per Groovy script. While this is perfectly legal in Groovy, it is
-	            (arguably) a bad practice: one should (in the opinion of this author)
-	            respect the standard Java conventions of one (public) class per source file.
-	            If you do define more than one class per Groovy script (again, it must be
-	            pointed out that this is not encouraged), then do make sure that the class
-	            you are going to expose via the <classname>GroovyScriptFactory</classname>
-	            is defined <emphasis>first</emphasis> in said script (otherwise a nasty and
-	            probably not very helpful exception will be thrown when the Spring IoC container
-	            starts either trying to inject dependencies into the scripted object or
-	            tries to inject the scripted object into other collaborators as a dependency
-	            itself).
+	            (arguably) a bad practice: in the interests of a consistent approach, one
+	            should (in the opinion of this author) respect the standard Java conventions
+	            of one (public) class per source file. If you do define more than one class
+	            per Groovy script (again, it must be pointed out that this is not encouraged),
+	            then do make sure that the class you are going to expose via the
+	            <classname>GroovyScriptFactory</classname> is defined
+	            <emphasis>first</emphasis> in said script (otherwise a nasty and probably not
+	            very helpful exception will be thrown when the Spring IoC container starts
+	            either trying to inject dependencies into the scripted object or tries to
+	            inject the scripted object into other collaborators as a dependency itself).
 			</para>
 			<para>
-	            That is pretty much it so far as Groovy-based beans go; there is not a whole
-	            lot more that can be added. It really is a case of defining one
-	            <classname>GroovyScriptFactory</classname> for each Groovy-based bean that
-	            you want to configure. The underlying Groovy implementation takes care of
-	            all the hard details such as parsing and compiling the script and
-	            instantiating an instance of the Groovy-based class. Groove on!
+	            If you have read this chapter straight from the top, you will already have
+	            <link linkend="scripting-a-first-example">seen an example</link> of a
+	            Groovy-scripted bean. Let's look at another example (again using an example
+	            from the Spring test suite).
+			</para>
+        <programlisting><![CDATA[package org.springframework.scripting;
+
+public interface Calculator {
+
+    int add(int x, int y);
+}]]></programlisting>
+        <para>
+            Here is an implementation of the <interfacename>Calculator</interfacename>
+            interface in Groovy.
+        </para>
+        <programlisting><lineannotation>// from the file 'calculator.groovy'</lineannotation><![CDATA[
+package org.springframework.scripting.groovy
+
+class GroovyCalculator implements Calculator {
+
+    int add(int x, int y) {
+        x + y
+    }
+}]]></programlisting>
+        <para>
+            And here is the attendant Spring configuration (XML).
+        </para>
+        <programlisting><lineannotation>&lt;-- from the file 'beans.xml' --&gt;</lineannotation><![CDATA[
+<beans>
+    <bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
+    <bean id="calculator"
+          class="org.springframework.scripting.groovy.GroovyScriptFactory">
+        <constructor-arg value="classpath:calculator.groovy"/>
+    </bean>
+</beans>]]></programlisting>
+			<para>
+				Lastly, here is a small application to exercise the above configuration.
+			</para>
+			<programlisting><![CDATA[package org.springframework.scripting;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class Main {
+
+    public static void Main(String[] args) {
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
+        Calculator calc = (Calculator) ctx.getBean("calculator");
+        System.out.println(calc.add(2, 8));
+    }
+}]]></programlisting>
+			<para>
+	            The resulting output from running the above program will be
+	            (unsurprisingly) <computeroutput>10</computeroutput>.
+	            (Exciting example huh? Remember that the intent is to convey the
+	            concept... consult the scripting showcase project for more realistic
+	            example; or indeed the section entitled <xref linkend="scripting-scenarios"/>
+	            later in this chapter).
 			</para>
 			<para>
-				See the section entitled <xref linkend="scripting-scenarios" /> for
-				some scenarios where one might want to use Groovy-based beans.
+	            That is pretty much it so far as Groovy-based beans go. It really is
+	            a case of defining one <classname>GroovyScriptFactory</classname> for
+	            each Groovy-based bean that you want to configure. The underlying
+	            Groovy code takes care of all the hard details such as parsing and
+	            compiling the script. Groove on!
 			</para>
 		</section>
 		<section id="scripting-beans-bsh">
@@ -401,8 +676,71 @@ RubyMessenger.new</value>
 				like those in Perl and JavaScript.</emphasis>
 			</quote>
 			<para>
-	            [TODO]
+				The core class in Spring's BeanShell support is the
+				<classname>BshScriptFactory</classname> (this class is a BeanShell-specific
+				implementation of the <interfacename>ScriptFactory</interfacename> interface).
+				The	<classname>BshScriptFactory</classname> has one constructor that takes as
+				its arguments a path to the script resource containing the
+				BeanShell script, and a <classname>Class[]</classname> array containing the
+				interfaces that the bean is to implement. Any of the usual
+				<interfacename>Resource</interfacename>
+				<footnoteref linkend="scripting-resources-footnote"/> path strings can be
+				used here, in addition to the scripting-specific <literal>inline:</literal>
+				notation for <link linkend="scripting-beans-inline">inline scripts</link>.
 			</para>
+			<para>
+	            Any properties that are defined on the bean definition will be set on the
+	            object that is returned by the <classname>BshScriptFactory</classname>.
+	            You will also need to have the <filename>bsh.jar</filename> file (and all
+	            of its dependencies) on your classpath if you want to use BeanShell and Spring
+	            in this fashion.
+			</para>
+			<para>
+	            The implementation of the BeanShell scripting support in Spring is
+	            interesting. What happens is this... Spring creates a JDK dynamic proxy
+	            implementing all of the interfaces that are passed as the
+	            <literal>'scriptInterfaces'</literal> argument of the
+	            <classname>BshScriptFactory</classname> constructor (this is why
+	            you <emphasis>must</emphasis> supply at least one interface to the
+	            <classname>BshScriptFactory</classname> constructor and (accordingly) program
+	            to interfaces when using BeanShell-backed beans). This means that every
+	            method call on a BeanShell-backed object is going through the JDK
+	            dynamic proxy invocation mechanism.
+			</para>
+			<para>
+	            Let's look at a fully working example of using a BeanShell-based bean
+	            that implements the <interfacename>Messenger</interfacename> interface
+	            that was defined earlier in this chapter (repeated below for your
+	            convenience).
+			</para>
+        <programlisting><![CDATA[package org.springframework.scripting;
+
+public interface Messenger {
+
+    String getMessage();
+}]]></programlisting>
+			<para>
+	            Here is the BeanShell 'implementation' (the term is used loosely
+	            here) of the above interface.
+			</para>
+	        <programlisting><![CDATA[String message;
+
+String getMessage() {
+    return message;
+}
+
+void setMessage(String aMessage) {
+    message = aMessage;
+}]]></programlisting>
+			<para>
+	            And here is the Spring XML that defines an 'instance' of the above 'class'
+	            (again, the term is used very loosely here).
+			</para>
+			<programlisting><![CDATA[    <bean id="messageService" class="org.springframework.scripting.bsh.BshScriptFactory">
+        <constructor-arg value="classpath:scripts/BshMessenger.bsh"/>
+        <constructor-arg value="org.springframework.scripting.Messenger"/>
+        <property name="message" value="Hello World!"/>
+    </bean>]]></programlisting>
 			<para>
 				See the section entitled <xref linkend="scripting-scenarios" /> for some
 				scenarios where one might want to use BeanShell-based beans.
@@ -429,6 +767,21 @@ RubyMessenger.new</value>
 				<footnoteref linkend="scripting-resources-footnote"/> path strings can be
 				used here, in addition to the scripting-specific <literal>inline:</literal>
 				notation for inline scripts.
+			</para>
+			<para>
+				<emphasis>(With apologies to the reader if this text looks familiar - this
+				next paragraph is copied almost word for word from the previous BeanShell section.)
+				</emphasis>
+	            The implementation of the JRuby scripting support in Spring is
+	            interesting. What happens is this... Spring creates a JDK dynamic proxy
+	            implementing all of the interfaces that are passed as the
+	            <literal>'scriptInterfaces'</literal> argument of the
+	            <classname>JRubyScriptFactory</classname> constructor (this is why
+	            you <emphasis>must</emphasis> supply at least one interface to the
+	            <classname>JRubyScriptFactory</classname> constructor and (accordingly) program
+	            to interfaces when using JRuby-backed beans). This means that every
+	            method call on a JRuby-backed object is going through the JDK
+	            dynamic proxy invocation mechanism.
 			</para>
 			<para>
 	            Any properties that are defined on the bean definition will be set on the
@@ -463,7 +816,7 @@ class RubyMessenger < Messenger
   @@message
  end
 end
-RubyMessenger.new]]></programlisting>
+RubyMessenger.new]]><lineannotation> # IMPORTANT (see below)</lineannotation></programlisting>
 			<para>
 	            And here is the Spring XML that defines an instance of the
 	            <classname>RubyMessenger</classname> JRuby bean.
@@ -481,36 +834,38 @@ RubyMessenger.new]]></programlisting>
 				can achieve this by simply instantiating a new instance of your JRuby class
 				on the last line of the script like so:
 	        </para>
-	        <programlisting><![CDATA[require 'java'
+	        <programlisting>require 'java'
 
 include_class 'org.springframework.scripting.Messenger'
 
 # class definition same as above...
 
-# this last line is required! if omitted, bad things will happen
-RubyMessenger.new]]></programlisting>
+<lineannotation># this last line is required! if omitted, an Exception *will* be thrown</lineannotation>
+RubyMessenger.new</programlisting>
 	        <para>
 				If you forget to do this, an opaque <classname>ScriptCompilationException</classname>
-				will be thrown immediately after the JRuby script is executed by the JRuby interpeter.
-				The key text that identifies this as the root cause of an exception can be found
-				immediately below (so if your Spring container throws an exception at startup and the
-				following text is there, you can pretty much identify the cause immediately):
+				will be thrown immediately after the script is executed by the JRuby
+				interpreter. The key text that identifies this as the root cause of an
+				exception can be found immediately below (so if your Spring container
+				throws an exception when creating your scripted bean and the following
+				text is there in the corresponding stacktrace, you can identify the cause
+				immediately):
 			</para>
 			<programlisting><![CDATA[org.springframework.scripting.ScriptCompilationException: Compilation of JRuby script returned '']]></programlisting>
 			<para>
-	            To rectify this, simply instantiate a new instance of whatever class you want
-	            to expose as a JRuby-scripted bean (as shown above). Please also note that you
-	            can actually define as many classes and objects as you want in your JRuby script...
-	            what is important is that the script as a whole must return an object (for Spring
-	            to configure), and the easiest way to do that in JRuby is to simply instantiate
-	            a new instance of your JRuby class on the last line of the script.
+	            To rectify this, simply instantiate a new instance of whatever class
+	            you want to expose as a JRuby-scripted bean (as shown above). Please
+	            also note that you can actually define as many classes and objects
+	            as you want in your JRuby script... what is important is that the
+	            script as a whole must return an object (for Spring to configure), and
+	            the easiest way to do that in JRuby is to simply instantiate a new instance
+	            of your JRuby class on the last line of the script.
 			</para>
 			<para>
 	            And that is it... it's really just a case of defining one
 	            <classname>JRubyScriptFactory</classname> for each JRuby-based bean that
-	            you want to configure. The underlying JRuby implementation takes care of
-	            all the hard details such as parsing and compiling the script and
-	            instantiating an instance of the JRuby-based class.
+	            you want to configure. The underlying JRuby interpreter takes care of
+	            all the hard details associated with interpreting and executing the script.
 			</para>
 			<para>
 				See the section entitled <xref linkend="scripting-scenarios" /> for some
@@ -537,6 +892,12 @@ RubyMessenger.new]]></programlisting>
             language would be beneficial are, of course, many and varied. This section
             describes some use cases for the scripting support in Spring.
         </para>
+        <para>
+            Please also note that the Spring distribution ships with a showcase project
+            for Spring's scripting support in the relevant section of the Spring distribution.
+            (A showcase project is a small project that is limited in scope to covering
+            one particular aspect of the Spring Framework.)
+        </para>
 		<section id="scripting-scenarios-controllers">
 			<title>Scripted Spring MVC Controllers</title>
 			<para>
@@ -550,6 +911,12 @@ RubyMessenger.new]]></programlisting>
 			</para>
 		</section>
 	</section>
+    <section id="scripting-with-aop">
+        <title>Scripted beans and AOP</title>
+		<para>
+			[TODO]
+		</para>
+    </section>
 	<section id="scripting-resources">
 		<title>Further Resources</title>
 		<para>
