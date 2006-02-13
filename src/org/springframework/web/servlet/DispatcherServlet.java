@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.scope.RequestAttributes;
 import org.springframework.web.context.scope.RequestContextHolder;
 import org.springframework.web.context.scope.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartException;
@@ -749,7 +750,9 @@ public class DispatcherServlet extends FrameworkServlet {
 		HandlerExecutionChain mappedHandler = null;
 		int interceptorIndex = -1;
 
+
 		// Expose current LocaleResolver and request as LocaleContext.
+		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
 		LocaleContextHolder.setLocaleContext(new LocaleContext() {
 			public Locale getLocale() {
 				return localeResolver.resolveLocale(request);
@@ -757,6 +760,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		});
 
 		// Expose current RequestAttributes to current thread.
+		RequestAttributes previousRequestAttributes = RequestContextHolder.getRequestAttributes();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
 		if (logger.isDebugEnabled()) {
@@ -842,10 +846,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 
 			// Reset thread-bound RequestAttributes.
-			RequestContextHolder.setRequestAttributes(null);
+			RequestContextHolder.setRequestAttributes(previousRequestAttributes);
 
 			// Reset thread-bound LocaleContext.
-			LocaleContextHolder.setLocaleContext(null);
+			LocaleContextHolder.setLocaleContext(previousLocaleContext);
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cleared thread-bound request context: " + request);
