@@ -17,11 +17,18 @@
 package org.springframework.web.servlet.tags.form;
 
 /**
+ * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
+ * element with a '<code>type</code>' of '<code>password</code>'.
+ *
  * @author Rob Harrop
  * @since 2.0
  */
 public class PasswordInputTag extends InputTag {
 
+	/**
+	 * Returns '<code>password</code>' causing the rendered HTML '<code>input</code>'
+	 * element to have a '<code>type</code>' of '<code>password</code>'.
+	 */
 	protected String getType() {
 		return "password";
 	}

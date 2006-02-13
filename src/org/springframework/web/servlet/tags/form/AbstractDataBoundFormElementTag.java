@@ -18,50 +18,102 @@ package org.springframework.web.servlet.tags.form;
 
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.support.BindStatus;
-import org.springframework.web.util.ExpressionEvaluationUtils;
 
 import javax.servlet.jsp.JspException;
 
 /**
+ * Base tag for all data-binding aware JSP form tags. Provides the common
+ * {@link #setPath path} and {@link #setId id} properties. Provides sub-classes
+ * with utility methods for accessing the {@link BindStatus} of their bound value
+ * and also for {@link #writeOptionalAttribute interacting} with the {@link TagWriter}.
+ *
  * @author Rob Harrop
+ * @since 2.0
  */
-public abstract class AbstractDataBoundFormElementTag extends AbstractFormElementTag {
+public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 
+	/**
+	 * The '<code>id</code>' attribute of the rendered HTML tag.
+	 */
 	public static final String ID_ATTRIBUTE = "id";
 
+	/**
+	 * The {@link BindStatus} of this tag.
+	 */
 	private BindStatus bindStatus;
 
+	/**
+	 * The value of the '<code>id</code>' attribute.
+	 */
 	private String id;
 
+	/**
+	 * The property path from the {@link FormTag#setCommandName command object}.
+	 */
 	private String path;
 
+	/**
+	 * Sets the property path from the {@link FormTag#setCommandName command object}.
+	 * May be a runtime expression. Required.
+	 */
 	public void setPath(String path) {
 		Assert.hasText(path, "'path' cannot be null or zero length.");
 		this.path = path;
 	}
 
+	/**
+	 * Sets the value of the '<code>id</code>' attribute.
+	 * May be a runtime expression.
+	 */
 	public void setId(String id) {
 		Assert.notNull(id, "'id' cannot be null.");
 		this.id = id;
 	}
 
-	protected String getPath() throws JspException {
-		return (String) ExpressionEvaluationUtils.evaluate("path", this.path, this.pageContext);
+	/**
+	 * Gets the {@link #evaluate resolved} property path from the
+	 * {@link FormTag#setCommandName command object}.
+	 */
+	protected final String getPath() throws JspException {
+		return (String) evaluate("path", this.path);
 	}
 
+	/**
+	 * Writes the default set of attributes to the supplied {@link TagWriter}.
+	 * Further abstract sub-classes should override this method to add in
+	 * any additional default attributes but <strong>must</strong> remember
+	 * to call the <code>super</code> method.
+	 * <p/>Concrete sub-classes should call this method when/if they want
+	 * to render default attributes.
+	 */
 	protected void writeDefaultAttributes(TagWriter tagWriter) throws JspException {
 		writeOptionalAttribute(tagWriter, ID_ATTRIBUTE, this.id);
 		tagWriter.writeAttribute("name", getName());
 	}
 
+	/**
+	 * Gets the value for the HTML '<code>name</code>' attribute. The default
+	 * implementation simply delegates to {@link #getPath} to use the property
+	 * path as the name. For the most part this is desirable as it links with
+	 * the server-side expectation for databinding. However, some subclasses
+	 * may wish to change the value of the '<code>name</code>' attribute without
+	 * changing the bind path.
+	 */
 	protected String getName() throws JspException {
 		return getPath();
 	}
 
+	/**
+	 * Gets the bound value.
+	 * @see #getBindStatus()
+	 */
 	protected final Object getValue() throws JspException {
 		return getBindStatus().getValue();
 	}
 
+	/**
+	 * Gets the {@link BindStatus} for this tag.
+	 */
 	protected BindStatus getBindStatus() throws JspException {
 		if (this.bindStatus == null) {
 			String resolvedPropertyPath = getPath();

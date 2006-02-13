@@ -23,12 +23,16 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
 import javax.servlet.jsp.JspException;
 
 /**
- * Base class for all databinding-aware JSP form tags. Provides utility methods for
+ * Base class for all JSP form tags. Provides utility methods for
  * null-safe EL evaluation and for accessing and working with a {@link TagWriter}.
+ * <p/>
+ * Sub-classes should implement the {@link #writeTagContent(TagWriter)} to perform
+ * actual tag rendering.
  * <p/>
  * Sub-classes (or test classes) can override the {@link #createTagWriter()} method to
  * redirect output to a {@link java.io.Writer} other than the {@link javax.servlet.jsp.JspWriter}
  * associated with the current {@link javax.servlet.jsp.PageContext}.
+ * 
  * @author Rob Harrop
  * @since 2.0
  */
@@ -67,4 +71,19 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	protected TagWriter createTagWriter() {
 		return new TagWriter(this.pageContext.getOut());
 	}
+
+	/**
+	 * Provides a simple template method that calls {@link #createTagWriter()} and passes
+	 * the created {@link TagWriter} to the {@link #writeTagContent(TagWriter)} method.
+	 * @return the value returned by {@link #writeTagContent(TagWriter)}
+	 */
+	protected final int doStartTagInternal() throws Exception {
+		return writeTagContent(createTagWriter());
+	}
+
+	/**
+	 * Subclasses should implement this method to perform tag content rendering.
+	 * @return valid tag render instruction as per {@link javax.servlet.jsp.tagext.Tag#doStartTag()}.
+	 */
+	protected abstract int writeTagContent(TagWriter tagWriter) throws JspException;
 }

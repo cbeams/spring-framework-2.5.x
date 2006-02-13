@@ -21,31 +21,52 @@ import org.springframework.util.ObjectUtils;
 import javax.servlet.jsp.JspException;
 
 /**
+ * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
+ * element with a '<code>type</code>' of '<code>radio</code>'.
+ * <p/>
+ * Rendered elements are marked as 'checked' if the configured
+ * {@link #setValue(String) value} matches the {@link #getValue bound value}.
+ * <p/>
+ * A typical usage pattern will involved multiple tag instances bound
+ * to the same property but with different values.
+ * 
  * @author Rob Harrop
  * @since 2.0
  */
 public class RadioButtonTag extends AbstractHtmlInputElementTag {
 
-    private String value;
+	/**
+	 * The value of the '<code>value</code>' attribute.
+	 */
+	private String value;
 
-    public void setValue(String value) {
-        this.value = value;
-    }
+	/**
+	 * Sets the value of the '<code>value</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setValue(String value) {
+		this.value = value;
+	}
 
-    protected int writeTagContent(TagWriter tagWriter) throws JspException {
-        tagWriter.startTag("input");
-        writeDefaultAttributes(tagWriter);
-        tagWriter.writeAttribute("type", "radio");
+	/**
+	 * Renders the '<code>input(radio)</code>' element with the configured
+	 * {@link #setValue(String) value}. Marks the element as checked if the
+	 * value matches the {@link #getValue bound value}.
+	 */
+	protected int writeTagContent(TagWriter tagWriter) throws JspException {
+		tagWriter.startTag("input");
+		writeDefaultAttributes(tagWriter);
+		tagWriter.writeAttribute("type", "radio");
 
-        Object resolvedValue = evaluate("value", this.value);
-        tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(resolvedValue));
+		Object resolvedValue = evaluate("value", this.value);
+		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(resolvedValue));
 
-        if (isActiveValue(resolvedValue)) {
-            tagWriter.writeAttribute("checked", "true");
-        }
+		if (isActiveValue(resolvedValue)) {
+			tagWriter.writeAttribute("checked", "true");
+		}
 
-        tagWriter.endTag();
-        return EVAL_PAGE;
-    }
+		tagWriter.endTag();
+		return EVAL_PAGE;
+	}
 
 }

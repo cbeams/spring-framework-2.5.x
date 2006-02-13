@@ -635,13 +635,13 @@
 		</attribute>
 
 		<attribute>
-			<name>itemKey</name>
+			<name>itemValue</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 
 		<attribute>
-			<name>itemValue</name>
+			<name>itemLabel</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>

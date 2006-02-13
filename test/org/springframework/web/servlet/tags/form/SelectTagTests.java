@@ -50,8 +50,8 @@ public class SelectTagTests extends AbstractFormTagTests {
 	public void testWithList() throws Exception {
 		this.tag.setPath("country");
 		this.tag.setItems("${countries}");
-		this.tag.setItemKey("isoCode");
-		this.tag.setItemValue("name");
+		this.tag.setItemValue("isoCode");
+		this.tag.setItemLabel("name");
 		this.tag.setSize("5");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
@@ -64,7 +64,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	public void testWithListAndNoLabel() throws Exception {
 		this.tag.setPath("country");
 		this.tag.setItems("${countries}");
-		this.tag.setItemKey("isoCode");
+		this.tag.setItemValue("isoCode");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
@@ -95,7 +95,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	public void testWithInvalidList() throws Exception {
 		this.tag.setPath("country");
 		this.tag.setItems("${other}");
-		this.tag.setItemKey("isoCode");
+		this.tag.setItemValue("isoCode");
 		try {
 			this.tag.doStartTag();
 			fail("Should not be able to use a non-Collection typed value as the value of 'items'.");

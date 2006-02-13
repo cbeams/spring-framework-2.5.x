@@ -16,32 +16,54 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import javax.servlet.jsp.JspException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 /**
+ * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
+ * element with a '<code>type</code>' of '<code>checkbox</code>'.
+ * <p/>
+ * May be used in one of three different approaches depending on the
+ * type of the {@link #getValue bound value}.
+ * <h3>Approach One</h3>
+ * When the bound value is of type {@link Boolean} then the '<code>input(checkbox)</code>'
+ * is marked as 'checked' if the bound value is <code>true</code>. The '<code>value</code>'
+ * attribute corresponds to the resolved value of the {@link #setValue(String) value} property.
+ * <h3>Approach Two</h3>
+ * When the bound value is of type {@link Collection} then the '<code>input(checkbox)</code>'
+ * is marked as 'checked' if the configured {@link #setValue(String) value} is present in
+ * the bound {@link Collection}.
+ * <h3>Approach Three</h3>
+ * For any other bound value type, the '<code>input(checkbox)</code>' is marked as 'checked'
+ * if the the configured {@link #setValue(String) value} is equal to the bound value.
+ * 
  * @author Rob Harrop
  * @since 2.0
  */
 public class CheckboxTag extends AbstractHtmlInputElementTag {
 
+	/**
+	 * The value of the '<code>value</code>' attribute.
+	 */
 	private String value;
 
 	/**
-	 * Sets the value that is sent to the server when the render checkbox is selected.
-	 * Can be a runtime expression.
+	 * Sets the value of the '<code>value</code>' attribute.
+	 * May be a runtime expression.
 	 */
 	public void setValue(String value) {
 		Assert.notNull(value, "'value' cannot be null.");
 		this.value = value;
 	}
 
+	/**
+	 * Writes the '<code>input(checkbox)</code>' to the supplied {@link TagWriter}
+	 * marking it as 'checked' if appropriate.
+	 */
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("input");
 		writeDefaultAttributes(tagWriter);
@@ -61,13 +83,13 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 			Object resolvedValue = evaluate("value", this.value);
 
 			if (boundValue != null && boundValue.getClass().isArray()) {
-				renderFromCollection(resolvedValue, toList(boundValue), tagWriter);
+				renderFromCollection(resolvedValue, CollectionUtils.toList(boundValue), tagWriter);
 			}
 			else if (boundValue instanceof Collection) {
 				renderFromCollection(resolvedValue, (Collection) boundValue, tagWriter);
 			}
 			else {
-				renderSingleValue(resolvedValue, boundValue, tagWriter);
+				renderSingleValue(resolvedValue, tagWriter);
 			}
 		}
 
@@ -83,14 +105,24 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 		return EVAL_PAGE;
 	}
 
-	private void renderSingleValue(Object resolvedValue, Object boundValue, TagWriter tagWriter) throws JspException {
+	/**
+	 * Renders the '<code>input(checkbox)</code>' with the supplied value, marking the
+	 * '<code>input</code>' element as 'checked' if the supplied value matches the
+	 * bound value.
+	 */
+	private void renderSingleValue(Object resolvedValue, TagWriter tagWriter) throws JspException {
 		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(resolvedValue));
 
-		if (boundValue != null && resolvedValue.equals(boundValue)) {
+		if (isActiveValue(resolvedValue)) {
 			tagWriter.writeAttribute("checked", "true");
 		}
 	}
 
+	/**
+	 * Renders the '<code>input(checkbox)</code>' with the supplied value, marking the
+	 * '<code>input</code>' element as 'checked' if the supplied value is present
+	 * in the bound {@link Collection} value.
+	 */
 	private void renderFromCollection(Object resolvedValue, Collection boundValue, TagWriter tagWriter) throws JspException {
 		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(resolvedValue));
 
@@ -99,18 +131,15 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 		}
 	}
 
-	private void renderFromBoolean(Boolean b, TagWriter tagWriter) throws JspException {
+	/**
+	 * Renders the '<code>input(checkbox)</code>' with the supplied value, marking the
+	 * '<code>input</code>' element as 'checked' if the supplied {@link Boolean} is
+	 * <code>true</code>.
+	 */
+	private void renderFromBoolean(Boolean boundValue, TagWriter tagWriter) throws JspException {
 		tagWriter.writeAttribute("value", "true");
-		if (b.booleanValue()) {
+		if (boundValue.booleanValue()) {
 			tagWriter.writeAttribute("checked", "true");
 		}
-	}
-
-	private List toList(Object boundValue) {
-		List values = new ArrayList();
-		boolean primitive = boundValue.getClass().getComponentType().isPrimitive();
-		Object[] array = (primitive ? ObjectUtils.toObjectArray(boundValue) : (Object[]) boundValue);
-		values.addAll(Arrays.asList(array));
-		return values;
 	}
 }

@@ -22,39 +22,82 @@ import javax.servlet.jsp.JspException;
 
 
 /**
+ * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
+ * element with a '<code>type</code>' of '<code>text</code>'.
+ * 
  * @author Rob Harrop
  * @since 2.0
  */
 public class InputTag extends AbstractHtmlInputElementTag {
 
-	private String maxlength;
-
-	private String alt;
-
-	private String onselect;
-
+	/**
+	 * The name of the '<code>maxlength</code>' attribute.
+	 */
 	public static final String MAXLENGTH_ATTRIBUTE = "maxlength";
 
+	/**
+	 * The name of the '<code>alt</code>' attribute.
+	 */
 	public static final String ALT_ATTRIBUTE = "alt";
 
+	/**
+	 * The name of the '<code>onselect</code>' attribute.
+	 */
 	public static final String ONSELECT_ATTRIBUTE = "onselect";
 
+	/**
+	 * The value of the '<code>maxlength</code>' attribute.
+	 */
+	private String maxlength;
+
+	/**
+	 * The value of the '<code>alt</code>' attribute.
+	 */
+	private String alt;
+
+	/**
+	 * The value of the '<code>onselect</code>' attribute.
+	 */
+	private String onselect;
+
+	/**
+	 * Sets the value of the '<code>maxlength</code>' attribute.
+	 * May be a runtime expression.
+	 */
 	public void setMaxlength(String maxlength) {
 		this.maxlength = maxlength;
 	}
 
+	/**
+	 * Sets the value of the '<code>alt</code>' attribute.
+	 * May be a runtime expression.
+	 */
 	public void setAlt(String alt) {
 		this.alt = alt;
 	}
 
+	/**
+	 * Sets the value of the '<code>onselect</code>' attribute.
+	 * May be a runtime expression.
+	 */
 	public void setOnselect(String onselect) {
 		this.onselect = onselect;
 	}
 
+	/**
+	 * Gets the value of the '<code>type</code>' attribute. Subclasses
+	 * can override this to change the type of '<code>input</code>' element
+	 * rendered. Default value is '<code>text</code>'.
+	 */
 	protected String getType() {
 		return "text";
 	}
 
+	/**
+	 * Writes the '<code>input</code>' tag to the supplied {@link TagWriter}.
+	 * Uses the value returned by {@link #getType()} to determine which
+	 * type of '<code>input</code>' element to render.
+	 */
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("input");
 		writeDefaultAttributes(tagWriter);

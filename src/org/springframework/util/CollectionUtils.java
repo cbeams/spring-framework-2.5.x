@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.List;
+import java.util.Arrays;
 
 /**
  * Miscellaneous collection utility methods.
@@ -152,4 +154,19 @@ public abstract class CollectionUtils {
 		return null;
 	}
 
+	/**
+	 * Converts the supplied array into a {@link List}. Primitive arrays are correctly
+	 * converted into {@link List Lists} of the appropriate wrapper type.
+	 */
+	public static List toList(Object source) {
+		Assert.notNull(source, "'source' cannot be null.");
+
+		if (!source.getClass().isArray()) {
+			throw new IllegalArgumentException("'source' is not an array");
+		}
+
+		boolean primitive = source.getClass().getComponentType().isPrimitive();
+		Object[] array = (primitive ? ObjectUtils.toObjectArray(source) : (Object[]) source);
+		return Arrays.asList(array);
+	}
 }

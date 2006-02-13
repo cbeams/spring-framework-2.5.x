@@ -21,31 +21,63 @@ import org.springframework.util.ObjectUtils;
 import javax.servlet.jsp.JspException;
 
 /**
+ * Databinding-aware JSP tag for rendering an HTML '<code>textarea</code>'.
+ *
  * @author Rob Harrop
  * @since 2.0
  */
 public class TextareaTag extends AbstractHtmlInputElementTag {
 
+	/**
+	 * The name of the '<code>rows</code>' attribute.
+	 */
 	public static final String ROWS_ATTRIBUTE = "rows";
 
+	/**
+	 * The name of the '<code>cols</code>' attribute.
+	 */
 	public static final String COLS_ATTRIBUTE = "cols";
 
+	/**
+	 * The name of the '<code>onselect</code>' attribute.
+	 */
 	public static final String ONSELECT_ATTRIBUTE = "onselect";
 
+	/**
+	 * The value of the '<code>rows</code>' attribute.
+	 */
 	private String rows;
 
+	/**
+	 * The value of the '<code>cols</code>' attribute.
+	 */
 	private String cols;
 
+	/**
+	 * The value of the '<code>onselect</code>' attribute.
+	 */
 	private String onselect;
 
+	/**
+	 * Sets the value of the '<code>rows</code>' attribute.
+	 * May be a runtime expression.
+	 */
 	public void setRows(String rows) {
 		this.rows = rows;
 	}
 
+	/**
+	 * Sets the value of the '<code>cols</code>' attribute.
+	 * May be a runtime expression.
+	 */
 	public void setCols(String cols) {
 		this.cols = cols;
 	}
 
+	/**
+	 * Sets the value of the '<code>onselect</code>' attribute.
+	 * May be a runtime expression.
+	 */
 	public void setOnselect(String onselect) {
 		this.onselect = onselect;
 	}
