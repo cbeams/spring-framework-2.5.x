@@ -17,7 +17,6 @@
 package org.springframework.scripting.bsh;
 
 import junit.framework.TestCase;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.context.ApplicationContext;
@@ -26,9 +25,15 @@ import org.springframework.scripting.Calculator;
 import org.springframework.scripting.Messenger;
 
 /**
+ * Unit and integration tests for the BshScriptFactory class.
+ *
  * @author Rob Harrop
+ * @author Rick Evans
  */
 public class BshScriptFactoryTests extends TestCase {
+
+	private static final String BSH_SCRIPT_SOURCE_LOCATOR = "inline:String bingo;";
+
 
 	public void testStatic() throws Exception {
 		ApplicationContext ctx =
@@ -60,6 +65,51 @@ public class BshScriptFactoryTests extends TestCase {
 		assertEquals("Message is incorrect after refresh", desiredMessage, messenger.getMessage());
 
 		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
+	}
+
+	public void testCtorWithNullScriptSourceLocator() throws Exception {
+		try {
+			new BshScriptFactory(null, new Class[]{Messenger.class});
+			fail("Must have thrown exception by this point.");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
+
+	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
+		try {
+			new BshScriptFactory("", new Class[]{Messenger.class});
+			fail("Must have thrown exception by this point.");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
+
+	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
+		try {
+			new BshScriptFactory("\n   ", new Class[]{Messenger.class});
+			fail("Must have thrown exception by this point.");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
+
+	public void testCtorWithNullScriptInterfacesArray() throws Exception {
+		try {
+			new BshScriptFactory(BSH_SCRIPT_SOURCE_LOCATOR, null);
+			fail("Must have thrown exception by this point.");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
+
+	public void testCtorWithEmptyScriptInterfacesArray() throws Exception {
+		try {
+			new BshScriptFactory(BSH_SCRIPT_SOURCE_LOCATOR, new Class[]{});
+			fail("Must have thrown exception by this point.");
+		}
+		catch (IllegalArgumentException expected) {
+		}
 	}
 
 }
