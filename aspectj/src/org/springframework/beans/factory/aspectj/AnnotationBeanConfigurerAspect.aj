@@ -37,7 +37,7 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractBeanConfigurerAspec
 	}
 
 	/**
-	 * The creation of a new bean (an object with the @SpringConfigured annotation)
+	 * The creation of a new bean (an object with the @Configurable annotation)
 	 */
 	protected pointcut beanCreation(Object beanInstance) :
 		initialization((@Configurable *).new(..)) && this(beanInstance);
