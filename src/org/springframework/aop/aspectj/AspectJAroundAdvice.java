@@ -17,14 +17,11 @@
 package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
-import java.util.Map;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.weaver.tools.JoinPointMatch;
-import org.aspectj.weaver.tools.PointcutExpression;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.core.ParameterNameDiscoverer;
 

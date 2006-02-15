@@ -27,6 +27,8 @@ package org.springframework.core;
  */
 public interface Ordered {
 
+  public static final int LOWEST_PRECEDENCE = Integer.MAX_VALUE;
+	
   /**
    * Return the order value of this object,
    * higher value meaning greater in terms of sorting.

@@ -86,6 +86,9 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private static final String THROWING_PROPERTY = "throwingName";
 	private static final String ARG_NAMES = "arg-names";
 	private static final String ARG_NAMES_PROPERTY = "argumentNames";
+	private static final String ASPECT_NAME_PROPERTY = "aspectName";
+	private static final String ASPECT_BEAN_PROPERTY = "aspectBean";
+	private static final String ORDER_PROPERTY = "order";
 
 	private static final int METHOD_INDEX = 0;
 	private static final int POINTCUT_INDEX = 1;
@@ -156,7 +159,9 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(AspectJPointcutAdvisor.class);
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("order", "" + parseContext.nextAdvisorOrderValue());
+		if (element.hasAttribute(ORDER_PROPERTY)) {
+			mpvs.addPropertyValue(ORDER_PROPERTY,element.getAttribute(ORDER_PROPERTY));
+		}
 		beanDefinition.setPropertyValues(mpvs);
 
 		mpvs.addPropertyValue(ADVICE, new RuntimeBeanReference(element.getAttribute(ADVICE_REF)));
@@ -190,7 +195,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		List advice = DomUtils.getChildElementsByTagName(aspectElement, ADVICE, true);
 		for (int i = METHOD_INDEX; i < advice.size(); i++) {
 			Element adviceElement = (Element) advice.get(i);
-			parseAdvice(aspectName, adviceElement, registry, parseContext);
+			parseAdvice(aspectName, i, adviceElement, registry, parseContext);
 		}
 	}
 
@@ -258,7 +263,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	private void parseAdvice(String aspectName, Element adviceElement, 
+	private void parseAdvice(String aspectName, int order, Element adviceElement, 
 			BeanDefinitionRegistry registry, ParseContext parseContext) {
 
 		// create the properties for the advisor
@@ -282,6 +287,9 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		String kind = adviceElement.getAttribute(KIND);
 		RootBeanDefinition adviceDefinition = new RootBeanDefinition(getAdviceClass(kind));
 		adviceDefinition.setPropertyValues(new MutablePropertyValues());
+		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_NAME_PROPERTY,aspectName);		
+		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_BEAN_PROPERTY, new RuntimeBeanReference(aspectName));		
+		adviceDefinition.getPropertyValues().addPropertyValue(ORDER_PROPERTY,order);		
 		if (adviceElement.hasAttribute(RETURNING)) {
 			adviceDefinition.getPropertyValues().addPropertyValue(RETURNING_PROPERTY, adviceElement.getAttribute(RETURNING));
 		}
@@ -303,7 +311,6 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 		// configure the advisor
 		RootBeanDefinition advisorDefinition = new RootBeanDefinition(AspectJPointcutAdvisor.class);
-		advisorProperties.addPropertyValue("order", "" + parseContext.nextAdvisorOrderValue());
 		advisorDefinition.setPropertyValues(advisorProperties);
 		advisorDefinition.getPropertyValues().addPropertyValue(ADVICE, adviceDefinition);
 

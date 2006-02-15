@@ -103,6 +103,7 @@
 		<xsd:attribute name="advice-ref" type="xsd:string" use="required"/>
 		<xsd:attribute name="pointcut" type="xsd:string"/>
 		<xsd:attribute name="pointcut-ref" type="xsd:string"/>
+		<xsd:attribute name="order" type="xsd:int"/>
 	</xsd:complexType>
 
 </xsd:schema>

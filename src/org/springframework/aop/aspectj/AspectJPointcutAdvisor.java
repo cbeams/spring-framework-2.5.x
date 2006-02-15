@@ -76,7 +76,9 @@ public class AspectJPointcutAdvisor extends DefaultPointcutAdvisor {
 		super.setAdvice(advice);
 		
 		if (advice instanceof AbstractAspectJAdvice) {
-			ensureAdviceAndPointcutReferToSamePointcutInstance((AbstractAspectJAdvice)advice);		
+			AbstractAspectJAdvice ajAdvice = (AbstractAspectJAdvice) advice;
+			ensureAdviceAndPointcutReferToSamePointcutInstance(ajAdvice);	
+			setOrder(ajAdvice.getAspectOrder());
 		}
 		
 	}

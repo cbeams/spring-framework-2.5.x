@@ -18,9 +18,6 @@ package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
 
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.weaver.tools.PointcutExpression;
-
 import org.springframework.aop.MethodBeforeAdvice;
 
 /**

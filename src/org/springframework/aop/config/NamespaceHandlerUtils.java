@@ -16,11 +16,11 @@
 
 package org.springframework.aop.config;
 
-import org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvisorAutoProxyCreator;
+import org.springframework.aop.aspectj.autoproxy.AspectJInvocationContextExposingAdvisorAutoProxyCreator;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -47,12 +47,12 @@ public abstract class NamespaceHandlerUtils {
 			// already have the apc
 			return;
 		}
-		RootBeanDefinition definition = new RootBeanDefinition(InvocationContextExposingAdvisorAutoProxyCreator.class);
+		RootBeanDefinition definition = new RootBeanDefinition(AspectJInvocationContextExposingAdvisorAutoProxyCreator.class);
 		registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, definition);
 	}
 
 	public static void registerAspectJAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
-		Class baseApcClass = InvocationContextExposingAdvisorAutoProxyCreator.class;
+		Class baseApcClass = AspectJInvocationContextExposingAdvisorAutoProxyCreator.class;
 		Class ajApcClass = getAspectJAutoProxyCreatorClassIfPossible();
 
 		if (ajApcClass == null) {
