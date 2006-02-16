@@ -16,21 +16,31 @@
 
 package org.springframework.transaction;
 
+import java.lang.reflect.Method;
+
 import junit.framework.TestCase;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.transaction.interceptor.TransactionAttribute;
+import org.springframework.transaction.interceptor.TransactionAttributeSource;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.springframework.beans.ITestBean;
 import org.springframework.aop.support.AopUtils;
 
 /**
  * @author Rob Harrop
+ * @author Adrian Colyer
  */
 public class TransactionNamespaceHandlerTests extends TestCase {
 
 	private ApplicationContext context;
+	private Method getAgeMethod;
+	private Method setAgeMethod;
 
-	public void setUp() {
+	public void setUp() throws Exception {
 		this.context = new ClassPathXmlApplicationContext("org/springframework/transaction/transactionNamespaceHandlerTests.xml");
+		getAgeMethod = ITestBean.class.getMethod("getAge",new Class[0]);
+		setAgeMethod = ITestBean.class.getMethod("setAge",new Class[] {int.class});
 	}
 
 	public void testIsProxy() throws Exception {
@@ -62,6 +72,16 @@ public class TransactionNamespaceHandlerTests extends TestCase {
 			assertEquals("Should have 1 rolled back transaction", 1, ptm.rollbacks);
 
 		}
+	}
+	
+	public void testRollbackRules() {
+		TransactionInterceptor txInterceptor = (TransactionInterceptor) context.getBean("txRollbackAdvice");
+		TransactionAttributeSource txAttrSource = txInterceptor.getTransactionAttributeSource();
+		TransactionAttribute txAttr = txAttrSource.getTransactionAttribute(getAgeMethod,ITestBean.class);
+		assertTrue("should be configured to rollback on Exception",txAttr.rollbackOn(new Exception()));
+		
+		txAttr = txAttrSource.getTransactionAttribute(setAgeMethod, ITestBean.class);
+		assertFalse("should not rollback on RuntimeException",txAttr.rollbackOn(new RuntimeException()));
 	}
 
 	private ITestBean getTestBean() {

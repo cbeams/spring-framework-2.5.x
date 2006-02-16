@@ -53,6 +53,8 @@
 					</xsd:attribute>
 					<xsd:attribute name="timeout" type="xsd:integer" default="-1"/>
 					<xsd:attribute name="read-only" type="xsd:boolean" default="false"/>
+					<xsd:attribute name="rollback-for" type="xsd:string"/>
+					<xsd:attribute name="no-rollback-for" type="xsd:string"/>
 				</xsd:complexType>
 			</xsd:element>
 		</xsd:sequence>
