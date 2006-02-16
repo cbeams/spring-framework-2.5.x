@@ -73,8 +73,8 @@ public class PluggableSchemaResolver implements EntityResolver {
 	 * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)
 	 */
 	public PluggableSchemaResolver(ClassLoader classLoader, String schemaMappingsLocation) {
-		Assert.notNull(classLoader, "classLoader cannot be null");
-		Assert.hasText(schemaMappingsLocation, "schemaMappingsLocation cannot be null or empty");
+		Assert.notNull(classLoader, "'classLoader' cannot be null");
+		Assert.hasText(schemaMappingsLocation, "'schemaMappingsLocation' cannot be null or empty");
 		try {
 			this.schemaMappings =
 					PropertiesLoaderUtils.loadAllProperties(schemaMappingsLocation, classLoader);

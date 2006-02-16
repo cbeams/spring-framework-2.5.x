@@ -20,7 +20,7 @@ import org.w3c.dom.Document;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
-import org.springframework.core.io.Resource;
+import org.springframework.beans.factory.support.ReaderContext;
 
 /**
  * Strategy interface for parsing XML bean definitions.
@@ -32,6 +32,7 @@ import org.springframework.core.io.Resource;
  * settings that are defined for all bean definitions in the document.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 18.12.2003
  * @see XmlBeanDefinitionReader#setParserClass
  */
@@ -40,16 +41,12 @@ public interface XmlBeanDefinitionParser {
 	/**
 	 * Parse bean definitions from the given DOM document,
 	 * and register them with the given bean factory.
-	 * @param reader the bean definition reader, containing the bean factory
-	 * to work on and the bean class loader to use. Can also be used to load
-	 * further bean definition files referenced by the given document.
 	 * @param doc the DOM document
-	 * @param resource descriptor of the original XML resource
-	 * (useful for displaying parse errors)
+	 * @param readerContext the current context of the reader. Includes the resource being parsed.
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of parsing errors
 	 */
-	int registerBeanDefinitions(BeanDefinitionReader reader, Document doc, Resource resource)
+	int registerBeanDefinitions(Document doc, ReaderContext readerContext)
 			throws BeanDefinitionStoreException;
 
 }

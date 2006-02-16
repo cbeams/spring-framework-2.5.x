@@ -77,7 +77,6 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	/**
 	 * Create a new <code>DefaultNamespaceHandlerResolver</code> using the
 	 * default mapping file location.
-	 *
 	 * @see #SPRING_HANDLER_MAPPINGS_LOCATION
 	 */
 	public DefaultNamespaceHandlerResolver(ClassLoader classLoader) {
@@ -114,7 +113,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 				Class handlerClass = ClassUtils.forName(className);
 				if (!NamespaceHandler.class.isAssignableFrom(handlerClass)) {
 					throw new IllegalArgumentException("Class [" + className +
-							"] does not implements the NamespaceHandler interface");
+							"] does not implement the NamespaceHandler interface");
 				}
 				this.handlerMappings.put(namespaceUri, BeanUtils.instantiateClass(handlerClass));
 			}
