@@ -19,7 +19,6 @@ package org.springframework.beans.factory.support;
 /**
  * Represents a problem with a bean definition configuration. May be a
  * potential fatal problem (an error) or simply just a warning.
- *
  * @author Rob Harrop
  * @since 2.0
  */
@@ -30,25 +29,21 @@ public class Problem {
 	 */
 	private String message;
 
-	private String bean;
+	private ParseState parseState;
 
 	private Throwable rootCause;
 
 	private Location location;
 
-	public Problem(String message, String bean, Throwable rootCause, Location location) {
+	public Problem(String message, ParseState parseState, Throwable rootCause, Location location) {
 		this.message = message;
-		this.bean = bean;
+		this.parseState = parseState;
 		this.rootCause = rootCause;
 		this.location = location;
 	}
 
-	public String getBean() {
-		return bean;
-	}
-
-	public void setBean(String bean) {
-		this.bean = bean;
+	public ParseState getParseState() {
+		return this.parseState;
 	}
 
 	public String getMessage() {
@@ -82,7 +77,7 @@ public class Problem {
 	public String toString() {
 		return new StringBuffer()
 						.append('[')
-						.append((this.bean != null ? this.bean : "<unknown>"))
+						.append(this.parseState)
 						.append("] ")
 						.append(this.message)
 						.append(" @ <")

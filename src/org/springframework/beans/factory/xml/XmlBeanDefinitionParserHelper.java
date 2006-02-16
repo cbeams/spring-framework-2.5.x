@@ -16,38 +16,39 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.beans.factory.support.ManagedProperties;
-import org.springframework.beans.factory.support.ReaderContext;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.MethodOverrides;
-import org.springframework.beans.factory.support.LookupOverride;
-import org.springframework.beans.factory.support.ReplaceOverride;
-import org.springframework.beans.factory.support.ManagedList;
-import org.springframework.beans.factory.support.ManagedSet;
-import org.springframework.beans.factory.support.ManagedMap;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.util.xml.DomUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
+import org.springframework.beans.factory.support.LookupOverride;
+import org.springframework.beans.factory.support.ManagedList;
+import org.springframework.beans.factory.support.ManagedMap;
+import org.springframework.beans.factory.support.ManagedProperties;
+import org.springframework.beans.factory.support.ManagedSet;
+import org.springframework.beans.factory.support.MethodOverrides;
+import org.springframework.beans.factory.support.ParseState;
+import org.springframework.beans.factory.support.ReaderContext;
+import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.NodeList;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Set;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * Stateful helper class used to parse XML bean definitions. Intended for use
@@ -68,64 +69,119 @@ public class XmlBeanDefinitionParserHelper {
 	 * Anything else represents false. Case seNsItive.
 	 */
 	private static final String TRUE_VALUE = "true";
+
 	private static final String DEFAULT_VALUE = "default";
+
 	private static final String DESCRIPTION_ELEMENT = "description";
+
 	private static final String AUTOWIRE_BY_NAME_VALUE = "byName";
+
 	private static final String AUTOWIRE_BY_TYPE_VALUE = "byType";
+
 	private static final String AUTOWIRE_CONSTRUCTOR_VALUE = "constructor";
+
 	private static final String AUTOWIRE_AUTODETECT_VALUE = "autodetect";
+
 	private static final String DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE = "all";
+
 	private static final String DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE = "simple";
+
 	private static final String DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE = "objects";
+
 	private static final String NAME_ATTRIBUTE = "name";
+
 	private static final String BEAN_ELEMENT = "bean";
+
 	private static final String ID_ATTRIBUTE = "id";
+
 	private static final String PARENT_ATTRIBUTE = "parent";
+
 	private static final String CLASS_ATTRIBUTE = "class";
+
 	private static final String ABSTRACT_ATTRIBUTE = "abstract";
+
 	private static final String SINGLETON_ATTRIBUTE = "singleton";
+
 	private static final String LAZY_INIT_ATTRIBUTE = "lazy-init";
+
 	private static final String AUTOWIRE_ATTRIBUTE = "autowire";
+
 	private static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependency-check";
+
 	private static final String DEPENDS_ON_ATTRIBUTE = "depends-on";
+
 	private static final String INIT_METHOD_ATTRIBUTE = "init-method";
+
 	private static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
+
 	private static final String FACTORY_METHOD_ATTRIBUTE = "factory-method";
+
 	private static final String FACTORY_BEAN_ATTRIBUTE = "factory-bean";
+
 	private static final String CONSTRUCTOR_ARG_ELEMENT = "constructor-arg";
+
 	private static final String INDEX_ATTRIBUTE = "index";
+
 	private static final String TYPE_ATTRIBUTE = "type";
+
 	private static final String PROPERTY_ELEMENT = "property";
+
 	private static final String REF_ATTRIBUTE = "ref";
+
 	private static final String VALUE_ATTRIBUTE = "value";
+
 	private static final String LOOKUP_METHOD_ELEMENT = "lookup-method";
+
 	private static final String REPLACED_METHOD_ELEMENT = "replaced-method";
+
 	private static final String REPLACER_ATTRIBUTE = "replacer";
+
 	private static final String ARG_TYPE_ELEMENT = "arg-type";
+
 	private static final String ARG_TYPE_MATCH_ATTRIBUTE = "match";
+
 	private static final String REF_ELEMENT = "ref";
+
 	private static final String IDREF_ELEMENT = "idref";
+
 	private static final String BEAN_REF_ATTRIBUTE = "bean";
+
 	private static final String LOCAL_REF_ATTRIBUTE = "local";
+
 	private static final String PARENT_REF_ATTRIBUTE = "parent";
+
 	private static final String VALUE_ELEMENT = "value";
+
 	private static final String NULL_ELEMENT = "null";
+
 	private static final String LIST_ELEMENT = "list";
+
 	private static final String SET_ELEMENT = "set";
+
 	private static final String MAP_ELEMENT = "map";
+
 	private static final String ENTRY_ELEMENT = "entry";
+
 	private static final String KEY_ELEMENT = "key";
+
 	private static final String KEY_ATTRIBUTE = "key";
+
 	private static final String KEY_REF_ATTRIBUTE = "key-ref";
+
 	private static final String VALUE_REF_ATTRIBUTE = "value-ref";
+
 	private static final String PROPS_ELEMENT = "props";
+
 	private static final String PROP_ELEMENT = "prop";
+
 	private static final String MERGE_ATTRIBUTE = "merge";
 
 	/**
 	 * {@link Log} instance for this class.
 	 */
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	private ParseState parseState = new ParseState();
 
 	/**
 	 * The {@link ReaderContext} used for error reporting.
@@ -302,11 +358,12 @@ public class XmlBeanDefinitionParserHelper {
 		}
 
 		try {
-			ConstructorArgumentValues cargs = parseConstructorArgElements(ele, beanName);
-			MutablePropertyValues pvs = parsePropertyElements(ele, beanName);
+			this.parseState.bean(beanName);
+			ConstructorArgumentValues cargs = parseConstructorArgElements(ele);
+			MutablePropertyValues pvs = parsePropertyElements(ele);
 
 			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
-					className, parent, cargs, pvs, getReaderContext().getReader().getBeanClassLoader());
+							className, parent, cargs, pvs, getReaderContext().getReader().getBeanClassLoader());
 
 			if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 				String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
@@ -358,8 +415,8 @@ public class XmlBeanDefinitionParserHelper {
 				}
 			}
 
-			parseLookupOverrideSubElements(ele, beanName, bd.getMethodOverrides());
-			parseReplacedMethodSubElements(ele, beanName, bd.getMethodOverrides());
+			parseLookupOverrideSubElements(ele, bd.getMethodOverrides());
+			parseReplacedMethodSubElements(ele, bd.getMethodOverrides());
 
 			bd.setResourceDescription(getReaderContext().getResource().getDescription());
 
@@ -381,13 +438,16 @@ public class XmlBeanDefinitionParserHelper {
 			return bd;
 		}
 		catch (ClassNotFoundException ex) {
-			getReaderContext().error("Bean class [" + className + "] not found", ele, beanName, ex);
+			error("Bean class [" + className + "] not found", ele,ex);
 		}
 		catch (NoClassDefFoundError err) {
-			getReaderContext().error("Class that bean class [" + className + "] depends on not found", ele, beanName, err);
+			error("Class that bean class [" + className + "] depends on not found", ele, err);
 		}
 		catch (Throwable ex) {
-			getReaderContext().error("Unexpected failure during bean definition parsing", ele, beanName, ex);
+			error("Unexpected failure during bean definition parsing", ele, ex);
+		}
+		finally {
+			this.parseState.pop();
 		}
 
 		return null;
@@ -429,14 +489,14 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse constructor-arg sub-elements of the given bean element.
 	 */
-	protected ConstructorArgumentValues parseConstructorArgElements(Element beanEle, String beanName) {
+	protected ConstructorArgumentValues parseConstructorArgElements(Element beanEle) {
 
 		NodeList nl = beanEle.getChildNodes();
 		ConstructorArgumentValues cargs = new ConstructorArgumentValues();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element && CONSTRUCTOR_ARG_ELEMENT.equals(node.getNodeName())) {
-				parseConstructorArgElement((Element) node, beanName, cargs);
+				parseConstructorArgElement((Element) node, cargs);
 			}
 		}
 		return cargs;
@@ -445,14 +505,14 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse property sub-elements of the given bean element.
 	 */
-	protected MutablePropertyValues parsePropertyElements(Element beanEle, String beanName) {
+	protected MutablePropertyValues parsePropertyElements(Element beanEle) {
 
 		NodeList nl = beanEle.getChildNodes();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element && PROPERTY_ELEMENT.equals(node.getNodeName())) {
-				parsePropertyElement((Element) node, beanName, pvs);
+				parsePropertyElement((Element) node, pvs);
 			}
 		}
 		return pvs;
@@ -461,7 +521,7 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse lookup-override sub-elements of the given bean element.
 	 */
-	protected void parseLookupOverrideSubElements(Element beanEle, String beanName, MethodOverrides overrides) {
+	protected void parseLookupOverrideSubElements(Element beanEle, MethodOverrides overrides) {
 
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -478,7 +538,7 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse replaced-method sub-elements of the given bean element.
 	 */
-	protected void parseReplacedMethodSubElements(Element beanEle, String beanName, MethodOverrides overrides) {
+	protected void parseReplacedMethodSubElements(Element beanEle, MethodOverrides overrides) {
 
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -502,34 +562,48 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse a constructor-arg element.
 	 */
-	protected void parseConstructorArgElement(Element ele, String beanName, ConstructorArgumentValues cargs) {
+	protected void parseConstructorArgElement(Element ele, ConstructorArgumentValues cargs) {
 
-		Object val = parsePropertyValue(ele, beanName, null);
 		String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
 		String typeAttr = ele.getAttribute(TYPE_ATTRIBUTE);
 		if (StringUtils.hasLength(indexAttr)) {
 			try {
 				int index = Integer.parseInt(indexAttr);
 				if (index < 0) {
-					getReaderContext().error("'index' cannot be lower than 0", beanName);
+					error("'index' cannot be lower than 0", ele);
 				}
-				if (StringUtils.hasLength(typeAttr)) {
-					cargs.addIndexedArgumentValue(index, val, typeAttr);
+
+				try {
+					this.parseState.constructor(index);
+					Object val = parsePropertyValue(ele, null);
+					if (StringUtils.hasLength(typeAttr)) {
+						cargs.addIndexedArgumentValue(index, val, typeAttr);
+					}
+					else {
+						cargs.addIndexedArgumentValue(index, val);
+					}
 				}
-				else {
-					cargs.addIndexedArgumentValue(index, val);
+				finally {
+					this.parseState.pop();
 				}
 			}
 			catch (NumberFormatException ex) {
-				getReaderContext().error("Attribute 'index' of tag 'constructor-arg' must be an integer", beanName);
+				error("Attribute 'index' of tag 'constructor-arg' must be an integer", ele);
 			}
 		}
 		else {
-			if (StringUtils.hasLength(typeAttr)) {
-				cargs.addGenericArgumentValue(val, typeAttr);
+			try {
+				this.parseState.constructor();
+				Object val = parsePropertyValue(ele, null);
+				if (StringUtils.hasLength(typeAttr)) {
+					cargs.addGenericArgumentValue(val, typeAttr);
+				}
+				else {
+					cargs.addGenericArgumentValue(val);
+				}
 			}
-			else {
-				cargs.addGenericArgumentValue(val);
+			finally {
+				this.parseState.pop();
 			}
 		}
 	}
@@ -537,17 +611,25 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse a property element.
 	 */
-	protected void parsePropertyElement(Element ele, String beanName, MutablePropertyValues pvs) {
+	protected void parsePropertyElement(Element ele, MutablePropertyValues pvs) {
 
-		String propertyName = ele.getAttribute(NAME_ATTRIBUTE);
-		if (!StringUtils.hasLength(propertyName)) {
-			getReaderContext().error("Tag 'property' must have a 'name' attribute", beanName);
+		try {
+			String propertyName = ele.getAttribute(NAME_ATTRIBUTE);
+			if (!StringUtils.hasLength(propertyName)) {
+				error("Tag 'property' must have a 'name' attribute", ele);
+				return;
+			}
+			if (pvs.contains(propertyName)) {
+				error("Multiple 'property' definitions for property '" + propertyName + "'", ele);
+				return;
+			}
+			this.parseState.property(propertyName);
+			Object val = parsePropertyValue(ele, propertyName);
+			pvs.addPropertyValue(propertyName, val);
 		}
-		if (pvs.contains(propertyName)) {
-			getReaderContext().error("Multiple 'property' definitions for property '" + propertyName + "'", beanName);
+		finally {
+			this.parseState.pop();
 		}
-		Object val = parsePropertyValue(ele, beanName, propertyName);
-		pvs.addPropertyValue(propertyName, val);
 	}
 
 
@@ -555,11 +637,11 @@ public class XmlBeanDefinitionParserHelper {
 	 * Get the value of a property element. May be a list etc.
 	 * Also used for constructor arguments, "propertyName" being null in this case.
 	 */
-	protected Object parsePropertyValue(Element ele, String beanName, String propertyName) {
+	protected Object parsePropertyValue(Element ele, String propertyName) {
 
 		String elementName = (propertyName != null) ?
-				"<property> element for property '" + propertyName + "'" :
-				"<constructor-arg> element";
+						"<property> element for property '" + propertyName + "'" :
+						"<constructor-arg> element";
 
 		// Should only have one child element: ref, value, list, etc.
 		NodeList nl = ele.getChildNodes();
@@ -573,7 +655,7 @@ public class XmlBeanDefinitionParserHelper {
 				else {
 					// Child element is what we're looking for.
 					if (subElement != null) {
-						getReaderContext().error(elementName + " must not contain more than one sub-element", beanName);
+						error(elementName + " must not contain more than one sub-element", ele);
 					}
 					subElement = candidateEle;
 				}
@@ -583,14 +665,14 @@ public class XmlBeanDefinitionParserHelper {
 		boolean hasRefAttribute = ele.hasAttribute(REF_ATTRIBUTE);
 		boolean hasValueAttribute = ele.hasAttribute(VALUE_ATTRIBUTE);
 		if ((hasRefAttribute && hasValueAttribute) ||
-				((hasRefAttribute || hasValueAttribute)) && subElement != null) {
-			getReaderContext().error(elementName +
-					" is only allowed to contain either 'ref' attribute OR 'value' attribute OR sub-element", beanName);
+						((hasRefAttribute || hasValueAttribute)) && subElement != null) {
+			error(elementName +
+							" is only allowed to contain either 'ref' attribute OR 'value' attribute OR sub-element", ele);
 		}
 		if (hasRefAttribute) {
 			String refName = ele.getAttribute(REF_ATTRIBUTE);
 			if (!StringUtils.hasText(refName)) {
-				getReaderContext().error(elementName + " contains empty 'ref' attribute", beanName);
+				error(elementName + " contains empty 'ref' attribute", ele);
 			}
 			return new RuntimeBeanReference(refName);
 		}
@@ -600,10 +682,10 @@ public class XmlBeanDefinitionParserHelper {
 
 		if (subElement == null) {
 			// Neither child element nor "ref" or "value" attribute found.
-			getReaderContext().error(elementName + " must specify a ref or value", beanName);
+			error(elementName + " must specify a ref or value", ele);
 		}
 
-		return parsePropertySubElement(subElement, beanName);
+		return parsePropertySubElement(subElement);
 	}
 
 	/**
@@ -611,9 +693,9 @@ public class XmlBeanDefinitionParserHelper {
 	 * constructor-arg element.
 	 * @param ele subelement of property element; we don't know which yet
 	 */
-	protected Object parsePropertySubElement(Element ele, String beanName) {
+	protected Object parsePropertySubElement(Element ele) {
 		if (ele.getTagName().equals(BEAN_ELEMENT)) {
-				return parseBeanDefinitionElement(ele, true);
+			return parseBeanDefinitionElement(ele, true);
 		}
 		else if (ele.getTagName().equals(REF_ELEMENT)) {
 			// A generic reference to any name of any bean.
@@ -627,12 +709,12 @@ public class XmlBeanDefinitionParserHelper {
 					refName = ele.getAttribute(PARENT_REF_ATTRIBUTE);
 					toParent = true;
 					if (!StringUtils.hasLength(refName)) {
-						getReaderContext().error("'bean', 'local' or 'parent' is required for <ref> element", beanName);
+						error("'bean', 'local' or 'parent' is required for <ref> element", ele);
 					}
 				}
 			}
 			if (!StringUtils.hasText(refName)) {
-				getReaderContext().error("<ref> element contains empty target attribute", beanName);
+				error("<ref> element contains empty target attribute", ele);
 			}
 			return new RuntimeBeanReference(refName, toParent);
 		}
@@ -643,7 +725,7 @@ public class XmlBeanDefinitionParserHelper {
 				// A reference to the id of another bean in the same XML file.
 				beanRef = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
 				if (!StringUtils.hasLength(beanRef)) {
-					getReaderContext().error("Either 'bean' or 'local' is required for <idref> element", beanName);
+					error("Either 'bean' or 'local' is required for <idref> element", ele);
 				}
 			}
 			return beanRef;
@@ -658,7 +740,7 @@ public class XmlBeanDefinitionParserHelper {
 					return new TypedStringValue(value, typeClass);
 				}
 				catch (ClassNotFoundException ex) {
-					getReaderContext().error("Type class [" + typeClassName + "] not found for <value> element", ele, beanName, ex);
+					error("Type class [" + typeClassName + "] not found for <value> element", ele, ex);
 				}
 			}
 			return value;
@@ -668,32 +750,32 @@ public class XmlBeanDefinitionParserHelper {
 			return null;
 		}
 		else if (ele.getTagName().equals(LIST_ELEMENT)) {
-			return parseListElement(ele, beanName);
+			return parseListElement(ele);
 		}
 		else if (ele.getTagName().equals(SET_ELEMENT)) {
-			return parseSetElement(ele, beanName);
+			return parseSetElement(ele);
 		}
 		else if (ele.getTagName().equals(MAP_ELEMENT)) {
-			return parseMapElement(ele, beanName);
+			return parseMapElement(ele);
 		}
 		else if (ele.getTagName().equals(PROPS_ELEMENT)) {
-			return parsePropsElement(ele, beanName);
+			return parsePropsElement(ele);
 		}
-		getReaderContext().error("Unknown property sub-element: [" + ele.getTagName() + "]", beanName);
+		error("Unknown property sub-element: [" + ele.getTagName() + "]", ele);
 		return null;
 	}
 
 	/**
 	 * Parse a list element.
 	 */
-	protected List parseListElement(Element collectionEle, String beanName) {
+	protected List parseListElement(Element collectionEle) {
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedList list = new ManagedList(nl.getLength());
 		list.setMergeEnabled(parseMergeAttribute(collectionEle));
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
 				Element ele = (Element) nl.item(i);
-				list.add(parsePropertySubElement(ele, beanName));
+				list.add(parsePropertySubElement(ele));
 			}
 		}
 		return list;
@@ -702,14 +784,14 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse a set element.
 	 */
-	protected Set parseSetElement(Element collectionEle, String beanName) {
+	protected Set parseSetElement(Element collectionEle) {
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedSet set = new ManagedSet(nl.getLength());
 		set.setMergeEnabled(parseMergeAttribute(collectionEle));
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
 				Element ele = (Element) nl.item(i);
-				set.add(parsePropertySubElement(ele, beanName));
+				set.add(parsePropertySubElement(ele));
 			}
 		}
 		return set;
@@ -718,7 +800,7 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse a map element.
 	 */
-	protected Map parseMapElement(Element mapEle, String beanName) {
+	protected Map parseMapElement(Element mapEle) {
 		List entryEles = DomUtils.getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
 		ManagedMap map = new ManagedMap(entryEles.size());
 		map.setMergeEnabled(parseMergeAttribute(mapEle));
@@ -736,14 +818,14 @@ public class XmlBeanDefinitionParserHelper {
 					Element candidateEle = (Element) entrySubNodes.item(j);
 					if (candidateEle.getTagName().equals(KEY_ELEMENT)) {
 						if (keyEle != null) {
-							getReaderContext().error("<entry> element is only allowed to contain one <key> sub-element", beanName);
+							error("<entry> element is only allowed to contain one <key> sub-element", entryEle);
 						}
 						keyEle = candidateEle;
 					}
 					else {
 						// Child element is what we're looking for.
 						if (valueEle != null) {
-							getReaderContext().error("<entry> element must not contain more than one value sub-element", beanName);
+							error("<entry> element must not contain more than one value sub-element", entryEle);
 						}
 						valueEle = candidateEle;
 					}
@@ -755,9 +837,9 @@ public class XmlBeanDefinitionParserHelper {
 			boolean hasKeyAttribute = entryEle.hasAttribute(KEY_ATTRIBUTE);
 			boolean hasKeyRefAttribute = entryEle.hasAttribute(KEY_REF_ATTRIBUTE);
 			if ((hasKeyAttribute && hasKeyRefAttribute) ||
-					((hasKeyAttribute || hasKeyRefAttribute)) && keyEle != null) {
-				getReaderContext().error("<entry> element is only allowed to contain either " +
-						"a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element", beanName);
+							((hasKeyAttribute || hasKeyRefAttribute)) && keyEle != null) {
+				error("<entry> element is only allowed to contain either " +
+								"a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element", entryEle);
 			}
 			if (hasKeyAttribute) {
 				key = entryEle.getAttribute(KEY_ATTRIBUTE);
@@ -765,15 +847,15 @@ public class XmlBeanDefinitionParserHelper {
 			else if (hasKeyRefAttribute) {
 				String refName = entryEle.getAttribute(KEY_REF_ATTRIBUTE);
 				if (!StringUtils.hasText(refName)) {
-					getReaderContext().error("<entry> element contains empty 'key-ref' attribute", beanName);
+					error("<entry> element contains empty 'key-ref' attribute", entryEle);
 				}
 				key = new RuntimeBeanReference(refName);
 			}
 			else if (keyEle != null) {
-				key = parseKeyElement(keyEle, beanName);
+				key = parseKeyElement(keyEle);
 			}
 			else {
-				getReaderContext().error("<entry> element must specify a key", beanName);
+				error("<entry> element must specify a key", entryEle);
 			}
 
 			// Extract value from attribute or sub-element.
@@ -781,9 +863,9 @@ public class XmlBeanDefinitionParserHelper {
 			boolean hasValueAttribute = entryEle.hasAttribute(VALUE_ATTRIBUTE);
 			boolean hasValueRefAttribute = entryEle.hasAttribute(VALUE_REF_ATTRIBUTE);
 			if ((hasValueAttribute && hasValueRefAttribute) ||
-					((hasValueAttribute || hasValueRefAttribute)) && valueEle != null) {
-				getReaderContext().error("<entry> element is only allowed to contain either " +
-						"'value' attribute OR 'value-ref' attribute OR <value> sub-element", beanName);
+							((hasValueAttribute || hasValueRefAttribute)) && valueEle != null) {
+				error("<entry> element is only allowed to contain either " +
+								"'value' attribute OR 'value-ref' attribute OR <value> sub-element", entryEle);
 			}
 			if (hasValueAttribute) {
 				value = entryEle.getAttribute(VALUE_ATTRIBUTE);
@@ -791,15 +873,15 @@ public class XmlBeanDefinitionParserHelper {
 			else if (hasValueRefAttribute) {
 				String refName = entryEle.getAttribute(VALUE_REF_ATTRIBUTE);
 				if (!StringUtils.hasText(refName)) {
-					getReaderContext().error("<entry> element contains empty 'value-ref' attribute", beanName);
+					error("<entry> element contains empty 'value-ref' attribute", entryEle);
 				}
 				value = new RuntimeBeanReference(refName);
 			}
 			else if (valueEle != null) {
-				value = parsePropertySubElement(valueEle, beanName);
+				value = parsePropertySubElement(valueEle);
 			}
 			else {
-				getReaderContext().error("<entry> element must specify a value", beanName);
+				error("<entry> element must specify a value", entryEle);
 			}
 
 			// Add final key and value to the Map.
@@ -812,7 +894,7 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse a key sub-element of a map element.
 	 */
-	protected Object parseKeyElement(Element keyEle, String beanName) {
+	protected Object parseKeyElement(Element keyEle) {
 		NodeList nl = keyEle.getChildNodes();
 		Element subElement = null;
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -821,17 +903,18 @@ public class XmlBeanDefinitionParserHelper {
 				// Child element is what we're looking for.
 
 				if (subElement != null) {
-					getReaderContext().error("<key> element must not contain more than one value sub-element", beanName);
+					error("<key> element must not contain more than one value sub-element", keyEle);
 				}
 				subElement = candidateEle;
 			}
 		}
-		return parsePropertySubElement(subElement, beanName);
+		return parsePropertySubElement(subElement);
 	}
+
 	/**
 	 * Parse a props element.
 	 */
-	protected Properties parsePropsElement(Element propsEle, String beanName) {
+	protected Properties parsePropsElement(Element propsEle) {
 		ManagedProperties props = new ManagedProperties();
 		props.setMergeEnabled(parseMergeAttribute(propsEle));
 		List propEles = DomUtils.getChildElementsByTagName(propsEle, PROP_ELEMENT);
@@ -855,5 +938,13 @@ public class XmlBeanDefinitionParserHelper {
 			value = getDefaultMerge();
 		}
 		return TRUE_VALUE.equals(value);
+	}
+
+	private void error(String message, Object source) {
+		getReaderContext().error(message, source, this.parseState.snapshot());
+	}
+
+	private void error(String message, Object source, Throwable cause) {
+		getReaderContext().error(message, source, this.parseState.snapshot(), cause);
 	}
 }

@@ -52,26 +52,26 @@ public class ReaderContext {
 		error(message, source, null, null);
 	}
 
-	public void error(String message, Object source, String bean) {
-		error(message, source, bean, null);
+	public void error(String message, Object source, ParseState parseState) {
+		error(message, source, parseState, null);
 	}
 
-	public void error(String message, Object source, String bean, Throwable cause) {
+	public void error(String message, Object source, ParseState parseState, Throwable cause) {
 		Location location = new Location(getResource(), source);
-		this.problemReporter.error(new Problem(message, bean, cause, location));
+		this.problemReporter.error(new Problem(message, parseState, cause, location));
 	}
 
 	public void warning(String message, Object source) {
-		warning(message, null, null, source);
+		warning(message, source, null, null);
 	}
 
-	public void warning(String message, String bean, Object source) {
-		warning(message, bean, null, source);
+	public void warning(String message, Object source, ParseState parseState) {
+		warning(message, source, parseState, null);
 	}
 
-	public void warning(String message, String bean, Throwable cause, Object source) {
+	public void warning(String message, Object source, ParseState parseState, Throwable cause) {
 		Location location = new Location(getResource(), source);
-		this.problemReporter.warning(new Problem(message, bean, cause, location));
+		this.problemReporter.warning(new Problem(message, parseState, cause, location));
 	}
 
 }
