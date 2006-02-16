@@ -290,7 +290,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		adviceDefinition.setPropertyValues(new MutablePropertyValues());
 		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_NAME_PROPERTY,aspectName);		
 		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_BEAN_PROPERTY, new RuntimeBeanReference(aspectName));		
-		adviceDefinition.getPropertyValues().addPropertyValue(DECLARATION_ORDER_PROPERTY,order);		
+		adviceDefinition.getPropertyValues().addPropertyValue(DECLARATION_ORDER_PROPERTY,new Integer(order));		
 		if (adviceElement.hasAttribute(RETURNING)) {
 			adviceDefinition.getPropertyValues().addPropertyValue(RETURNING_PROPERTY, adviceElement.getAttribute(RETURNING));
 		}
