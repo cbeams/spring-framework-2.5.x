@@ -17,11 +17,17 @@
 package org.springframework.beans.factory.support;
 
 /**
+ * Represents a problem with a bean definition configuration. May be a
+ * potential fatal problem (an error) or simply just a warning.
+ *
  * @author Rob Harrop
  * @since 2.0
  */
 public class Problem {
 
+	/**
+	 * The message
+	 */
 	private String message;
 
 	private String bean;
@@ -74,7 +80,10 @@ public class Problem {
 	}
 
 	public String toString() {
-		return new StringBuilder()
+		return new StringBuffer()
+						.append('[')
+						.append((this.bean != null ? this.bean : "<unknown>"))
+						.append("] ")
 						.append(this.message)
 						.append(" @ <")
 						.append(getResourceDescription())
