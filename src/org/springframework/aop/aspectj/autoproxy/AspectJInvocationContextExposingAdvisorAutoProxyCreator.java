@@ -42,8 +42,9 @@ import org.springframework.core.Ordered;
  */
 public class AspectJInvocationContextExposingAdvisorAutoProxyCreator extends
 		InvocationContextExposingAdvisorAutoProxyCreator {
-
 	
+	private static final long serialVersionUID = 7343914060829875857L;
+
 	/**
 	 * <p>
 	 * Keep the special ExposeInvocationInterceptor at position 0 if

@@ -218,7 +218,7 @@ public class AspectJPrecedenceAwareOrderComparatorTests extends TestCase {
 	}
 
 	private Advisor createAspectJAdvice(int advisorOrder, int adviceDeclarationOrder, String aspectName, AbstractAspectJAdvice advice) {
-		advice.setOrder(adviceDeclarationOrder);
+		advice.setDeclarationOrder(adviceDeclarationOrder);
 		advice.setAspectName(aspectName);
 		AspectJPointcutAdvisor advisor = new AspectJPointcutAdvisor();
 		advisor.setPointcut(this.anyOldPointcut);

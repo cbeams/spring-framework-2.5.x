@@ -62,6 +62,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	 */
 	public List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory maaif) {
 		final Class<?> aspectClass = maaif.getAspectMetadata().getAspectClass();
+		final String aspectName = maaif.getAspectMetadata().getAspectName();
 		validate(aspectClass);
 		
 		// We need to wrap the MetadataAwareAspectInstanceFactory with a decorator
@@ -75,7 +76,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 			public void doWith(Method m) throws IllegalArgumentException, IllegalAccessException {
 				// Exclude pointcuts
 				if (m.getAnnotation(Pointcut.class) == null) {
-					PointcutAdvisor pa = getAdvisor(m, lazySingletonAspectInstanceFactory);
+					PointcutAdvisor pa = getAdvisor(m, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);
 					if (pa != null) {
 						advisors.add(pa);
 					}
@@ -124,7 +125,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	
 	
 	public InstantiationModelAwarePointcutAdvisorImpl getAdvisor(
-			Method candidateAspectJAdviceMethod, MetadataAwareAspectInstanceFactory aif) {
+			Method candidateAspectJAdviceMethod, MetadataAwareAspectInstanceFactory aif,
+			int declarationOrderInAspect, String aspectName) {
 		validate(aif.getAspectMetadata().getAspectClass());
 		
 		AspectJExpressionPointcut ajexp =
@@ -132,14 +134,19 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		if (ajexp == null) {
 			return null;
 		}
-		return new InstantiationModelAwarePointcutAdvisorImpl(this, ajexp, aif, candidateAspectJAdviceMethod);
+		return new InstantiationModelAwarePointcutAdvisorImpl(this, ajexp, aif, candidateAspectJAdviceMethod, declarationOrderInAspect, aspectName);
 	}
 	
 	/**
 	 * @return <code>null</code> if the method is not an AspectJ advice method or if it is a pointcut
 	 * that will be used by other advice but will not create a Springt advice in its own right
 	 */
-	public Advice getAdvice(Method candidateAspectJAdviceMethod, AspectJExpressionPointcut ajexp, MetadataAwareAspectInstanceFactory aif) {
+	public Advice getAdvice(
+			Method candidateAspectJAdviceMethod, 
+			AspectJExpressionPointcut ajexp, 
+			MetadataAwareAspectInstanceFactory aif,
+			int declarationOrderInAspect,
+			String aspectName) {
 		Class<?> candidateAspectClass = aif.getAspectMetadata().getAspectClass();
 		
 		validate(aif.getAspectMetadata().getAspectClass());
@@ -195,6 +202,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		}
 
 		// now to configure the advice...
+		springAdvice.setAspectName(aspectName);
+		springAdvice.setDeclarationOrder(declarationOrderInAspect);
 		String[] argNames = getArgNames(candidateAspectJAdviceMethod,candidateAspectClass);
 		if (argNames != null) {
 			springAdvice.setArgNamesFromStringArray(argNames);
@@ -246,6 +255,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	 * The advice has no effect.
 	 */
 	protected static class SyntheticInstantiationAdvisor extends DefaultPointcutAdvisor {
+
+		private static final long serialVersionUID = -7789221134469113954L;
 
 		public SyntheticInstantiationAdvisor(final MetadataAwareAspectInstanceFactory aif) {
 			super(aif.getAspectMetadata().getPerClausePointcut(), new MethodBeforeAdvice() {

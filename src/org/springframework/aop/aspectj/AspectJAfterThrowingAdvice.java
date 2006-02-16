@@ -34,6 +34,14 @@ public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice implements
 		super(aspectJBeforeAdviceMethod, pointcut, aif);
 	}
 	
+	public boolean isBeforeAdvice() {
+		return false;
+	}
+	
+	public boolean isAfterAdvice() {
+		return true;
+	}
+
 	public void setThrowingName(String name) {
 		setThrowingNameNoCheck(name);
 	}

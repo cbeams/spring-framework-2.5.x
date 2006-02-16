@@ -64,7 +64,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name, Class type) {
 		this.beanFactory = beanFactory;
 		this.name = name;
-		am = new AspectMetadata(type);
+		am = new AspectMetadata(type,name);
 	}
 	
 	public synchronized Object getAspectInstance() {

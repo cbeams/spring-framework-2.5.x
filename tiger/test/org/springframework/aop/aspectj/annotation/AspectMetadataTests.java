@@ -34,7 +34,7 @@ public class AspectMetadataTests extends TestCase {
 
 	public void testNotAnAspect() {
 		try {
-			new AspectMetadata(String.class);
+			new AspectMetadata(String.class,"someBean");
 			fail();
 		}
 		catch (IllegalArgumentException ex) {
@@ -43,21 +43,21 @@ public class AspectMetadataTests extends TestCase {
 	}
 	
 	public void testSingletonAspect() {
-		AspectMetadata am = new AspectMetadata(ExceptionAspect.class);
+		AspectMetadata am = new AspectMetadata(ExceptionAspect.class,"someBean");
 		assertFalse(am.isPerThisOrPerTarget());
 		assertSame(Pointcut.TRUE, am.getPerClausePointcut());
 		assertEquals(PerClauseKind.SINGLETON, am.getAjType().getPerClause().getKind());
 	}
 	
 	public void testPerTargetAspect() {
-		AspectMetadata am = new AspectMetadata(PerTargetAspect.class);
+		AspectMetadata am = new AspectMetadata(PerTargetAspect.class,"someBean");
 		assertTrue(am.isPerThisOrPerTarget());
 		assertNotSame(Pointcut.TRUE, am.getPerClausePointcut());
 		assertEquals(PerClauseKind.PERTARGET, am.getAjType().getPerClause().getKind());
 	}
 	
 	public void testPerThisAspect() {
-		AspectMetadata am = new AspectMetadata(PerThisAspect.class);
+		AspectMetadata am = new AspectMetadata(PerThisAspect.class,"someBean");
 		assertTrue(am.isPerThisOrPerTarget());
 		assertNotSame(Pointcut.TRUE, am.getPerClausePointcut());
 		assertEquals(PerClauseKind.PERTHIS, am.getAjType().getPerClause().getKind());

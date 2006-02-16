@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
  * @author Adrian Colyer
  * @since 2.0
  */
-public abstract class AbstractAspectJAdvice implements InitializingBean, Ordered {
+public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJPrecedenceInformation{
 	
 	/**
 	 * Key used in ReflectiveMethodInvocation userAtributes map for the current
@@ -98,7 +98,7 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, Ordered
 	/**
 	 * the order of declaration of this advice within the aspect
 	 */
-	private int order;
+	private int declarationOrder;
 	
 	/**
 	 * This will be non-null if the creator of this advice object knows the argument names
@@ -168,19 +168,26 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, Ordered
 		this.aspectBean = bean;
 	}
 	
-	public int getAspectOrder() {
+	/**
+	 * Gets the precedence (order) associated with the aspect declaring this
+	 * advice
+	 */
+	public int getOrder() {
 		if (this.aspectBean != null && (this.aspectBean instanceof Ordered)) {
 			return ((Ordered)this.aspectBean).getOrder();
 		}
 		return Ordered.LOWEST_PRECEDENCE;
 	}
 	
-	public void setOrder(int order) {
-		this.order = order;
+	/**
+	 * Sets the <b>declaration order</b> of this advice within the aspect
+	 */
+	public void setDeclarationOrder(int order) {
+		this.declarationOrder = order;
 	}
 	
-	public int getOrder() {
-		return this.order;
+	public int getDeclarationOrder() {
+		return this.declarationOrder;
 	}
 	
 	/**
@@ -523,11 +530,7 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, Ordered
 		JoinPointMatch jpm = (JoinPointMatch) rmi.getUserAttributes().get(this.pointcutExpression.getExpression());
 		return jpm;		
 	}
-	
-	private JoinPoint.StaticPart getJoinPointStaticPart() {
-		return getJoinPoint().getStaticPart();
-	}
-	
+
 	/**
 	 * Invoke the advice method.
 	 * @param jpMatch the JoinPointMatch that matched this execution join point

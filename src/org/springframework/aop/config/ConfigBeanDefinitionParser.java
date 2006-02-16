@@ -88,6 +88,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private static final String ARG_NAMES_PROPERTY = "argumentNames";
 	private static final String ASPECT_NAME_PROPERTY = "aspectName";
 	private static final String ASPECT_BEAN_PROPERTY = "aspectBean";
+	private static final String DECLARATION_ORDER_PROPERTY = "declarationOrder";
 	private static final String ORDER_PROPERTY = "order";
 
 	private static final int METHOD_INDEX = 0;
@@ -289,7 +290,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		adviceDefinition.setPropertyValues(new MutablePropertyValues());
 		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_NAME_PROPERTY,aspectName);		
 		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_BEAN_PROPERTY, new RuntimeBeanReference(aspectName));		
-		adviceDefinition.getPropertyValues().addPropertyValue(ORDER_PROPERTY,order);		
+		adviceDefinition.getPropertyValues().addPropertyValue(DECLARATION_ORDER_PROPERTY,order);		
 		if (adviceElement.hasAttribute(RETURNING)) {
 			adviceDefinition.getPropertyValues().addPropertyValue(RETURNING_PROPERTY, adviceElement.getAttribute(RETURNING));
 		}

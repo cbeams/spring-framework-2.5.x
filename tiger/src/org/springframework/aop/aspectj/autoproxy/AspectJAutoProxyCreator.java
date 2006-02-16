@@ -23,15 +23,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.reflect.PerClauseKind;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.aspectj.InstantiationModelAwarePointcutAdvisor;
 import org.springframework.aop.aspectj.annotation.AspectJAdvisorFactory;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory;
 import org.springframework.aop.aspectj.annotation.SingletonMetadataAwareAspectInstanceFactory;
-import org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvisorAutoProxyCreator;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.core.Ordered;
 
 /**
  * {@link org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvisorAutoProxyCreator} subclass that processes all
@@ -48,10 +52,12 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * @see org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator
  * @see org.springframework.aop.aspectj.annotation.AspectJAdvisorFactory
  */
-public class AspectJAutoProxyCreator extends InvocationContextExposingAdvisorAutoProxyCreator {
-	
-	private static final Log staticLogger = LogFactory.getLog(AspectJAutoProxyCreator.class);
+public class AspectJAutoProxyCreator extends AspectJInvocationContextExposingAdvisorAutoProxyCreator {
 
+	private static final long serialVersionUID = -3347584141231774337L;
+	private static final Log staticLogger = LogFactory.getLog(AspectJAutoProxyCreator.class);
+	private static final String ORDER_PROPERTY = "order"; 
+	
 	/**
 	 * Look for AspectJ annotated aspect classes in the current bean factory,
 	 * and return to a list of Spring AOP advisors representing them.
@@ -73,7 +79,7 @@ public class AspectJAutoProxyCreator extends InvocationContextExposingAdvisorAut
 		for (String beanName : beanDefinitionNames) {
 			// We must be careful not to instantiate beans eagerly as in this
 			// case they would be cached by the Spring container but would not
-			// have bean weaved
+			// have been weaved
 			Class<?> beanType = beanFactory.getType(beanName);
 			if (beanType == null) {
 				continue;
@@ -81,12 +87,13 @@ public class AspectJAutoProxyCreator extends InvocationContextExposingAdvisorAut
 
 			if (aspectJAdvisorFactory.isAspect(beanType)) {
 				//logger.debug("Found aspect bean '" + beanName + "'");
-				AspectMetadata amd = new AspectMetadata(beanType);
+				AspectMetadata amd = new AspectMetadata(beanType,beanName);
 				if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
 					// Default singleton binding
 					Object beanInstance = beanFactory.getBean(beanName);
 					List<Advisor> classAdvisors =
-							aspectJAdvisorFactory.getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(beanInstance));
+							aspectJAdvisorFactory.getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(beanInstance,beanName));
+					setAdvisorOrderIfNecessary(classAdvisors,beanInstance);
 					staticLogger.debug("Found " + classAdvisors.size() + " AspectJ advice methods");
 					advisors.addAll(classAdvisors);
 				}
@@ -99,6 +106,7 @@ public class AspectJAutoProxyCreator extends InvocationContextExposingAdvisorAut
 					
 					List<Advisor> classAdvisors =
 							aspectJAdvisorFactory.getAdvisors(new PrototypeAspectInstanceFactory(beanFactory, beanName));
+					setAdvisorOrderIfNecessary(classAdvisors,beanFactory,beanName);
 					staticLogger.debug("Found " + classAdvisors.size() + " AspectJ advice methods in bean with name '" + beanName + "'");
 					advisors.addAll(classAdvisors);
 				}
@@ -107,9 +115,47 @@ public class AspectJAutoProxyCreator extends InvocationContextExposingAdvisorAut
 		return advisors;
 	}
 
+	// TODO: consider creating intermediate OrderedPointcutAdvisor interface between
+	// PointcutAdvisor and InstantiationModelAwarePointcutAdvisor
+	private static void setAdvisorOrderIfNecessary(List<Advisor> advisors, Object beanInstance) {
+		if (beanInstance instanceof Ordered) {
+			int order = ((Ordered)beanInstance).getOrder();
+			for (Advisor advisor : advisors) {
+				if (advisor instanceof InstantiationModelAwarePointcutAdvisor) {
+					((InstantiationModelAwarePointcutAdvisor)advisor).setOrder(order);
+				}
+			}
+		}
+	}
+	
+	// we can't instantiate a bean instance, so we look for a prototype order property value
+	// and use that instead...
+	private static void setAdvisorOrderIfNecessary(List<Advisor> advisors, BeanFactory beanFactory, String beanName) {
+		if (beanFactory instanceof ConfigurableListableBeanFactory) {
+			BeanDefinition beanDef = ((ConfigurableListableBeanFactory)beanFactory).getBeanDefinition(beanName);
+			MutablePropertyValues mpvs = beanDef.getPropertyValues();
+			if (mpvs.contains(ORDER_PROPERTY)) {
+				int order = Integer.parseInt((String)mpvs.getPropertyValue(ORDER_PROPERTY).getValue());
+				for (Advisor advisor : advisors) {
+					if (advisor instanceof InstantiationModelAwarePointcutAdvisor) {
+						((InstantiationModelAwarePointcutAdvisor)advisor).setOrder(order);
+					}
+				}
+			}
+		}
+	}
 
 	private AspectJAdvisorFactory aspectJAdvisorFactory = new ReflectiveAspectJAdvisorFactory();
 
+	public AspectJAutoProxyCreator() {
+		super();
+		// we need to always use class proxying for @AspectJ aspects, as there is no
+		// guarantee that all of the advice methods are contained in any interface
+		// that the aspect may implement (typically, an @AspectJ aspect won't implement
+		// any interfaces anyway, so this is not a big loss).
+		setProxyTargetClass(true);
+	}
+	
 	public void setAspectJAdvisorFactory(AspectJAdvisorFactory aspectJAdvisorFactory) {
 		this.aspectJAdvisorFactory = aspectJAdvisorFactory;
 	}

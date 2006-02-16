@@ -191,7 +191,7 @@ public class AspectJExpressionPointcutTests extends TestCase {
 	public void testFriendlyErrorOnNoLocation3ArgMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
 		try {
-			pc.matches(getAge, ITestBean.class, null);
+			pc.matches(getAge, ITestBean.class, (Object[]) null);
 			fail();
 		}
 		catch (IllegalStateException ex) {

@@ -38,4 +38,12 @@ public class AspectJMethodBeforeAdvice extends AbstractAspectJAdvice implements 
 		invokeAdviceMethod(getJoinPointMatch(),null,null);
 	}
 
+	public boolean isBeforeAdvice() {
+		return true;
+	}
+	
+	public boolean isAfterAdvice() {
+		return false;
+	}
+
 }

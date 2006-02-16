@@ -17,13 +17,10 @@
  */
 package org.springframework.aop.aspectj.autoproxy;
 
-import org.aopalliance.aop.Advice;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.aspectj.AbstractAspectJAdvice;
 import org.springframework.aop.aspectj.AspectJAopUtils;
-import org.springframework.aop.aspectj.AspectJPointcutAdvisor;
+import org.springframework.aop.aspectj.AspectJPrecedenceInformation;
 import org.springframework.core.OrderComparator;
-import org.springframework.core.Ordered;
 
 /**
  * <p>
@@ -84,27 +81,6 @@ class AspectJPrecedenceAwareOrderComparator extends OrderComparator {
 		return ret;
 	}
 
-	/**
-	 * @param advisor1
-	 * @return
-	 */
-	private String getName(Advisor advisor) {
-		StringBuffer sb = new StringBuffer();
-		Advice advice = advisor.getAdvice();
-		sb.append(advice.getClass().getSimpleName());
-		sb.append(":");
-		if (advisor instanceof Ordered) {
-			sb.append("order " + ((Ordered)advisor).getOrder() + ", ");
-		}
-		if (advice instanceof AbstractAspectJAdvice) {
-			AbstractAspectJAdvice ajAdvice = (AbstractAspectJAdvice) advice;
-			sb.append(ajAdvice.getAspectName());
-			sb.append(", declaration order= ");
-			sb.append(ajAdvice.getOrder());
-		}
-		return sb.toString();
-	}
-
 	private boolean isAdvisor(Object obj) {
 		return ((obj != null) && (obj instanceof Advisor));
 	}
@@ -113,19 +89,16 @@ class AspectJPrecedenceAwareOrderComparator extends OrderComparator {
 		int advisorPrecedence = super.compare(advisor1,advisor2);
 		
 		if (haveSamePrecedence(advisorPrecedence) && declaredInSameAspect(advisor1,advisor2)) {
-			advisorPrecedence = comparePrecedenceWithinAspect((AspectJPointcutAdvisor)advisor1,(AspectJPointcutAdvisor)advisor2);
+			advisorPrecedence = comparePrecedenceWithinAspect(advisor1,advisor2);
 		}
 		
 		return advisorPrecedence;
 	}
 	
 	
-	private int comparePrecedenceWithinAspect(AspectJPointcutAdvisor advisor1, AspectJPointcutAdvisor advisor2) {
-		AbstractAspectJAdvice advice1 = (AbstractAspectJAdvice) advisor1.getAdvice();
-		AbstractAspectJAdvice advice2 = (AbstractAspectJAdvice) advisor2.getAdvice();
-
+	private int comparePrecedenceWithinAspect(Advisor advisor1, Advisor advisor2) {
 		boolean oneOrOtherIsAfterAdvice = (AspectJAopUtils.isAfterAdvice(advisor1) || AspectJAopUtils.isAfterAdvice(advisor2));
-		int adviceDeclarationOrderDelta = advice1.getOrder() - advice2.getOrder();
+		int adviceDeclarationOrderDelta = getAspectDeclarationOrder(advisor1) - getAspectDeclarationOrder(advisor2);
 		
 		if (oneOrOtherIsAfterAdvice) {
 			// the advice declared last has higher precedence
@@ -158,18 +131,39 @@ class AspectJPrecedenceAwareOrderComparator extends OrderComparator {
 	}
 
 	private boolean declaredInSameAspect(Advisor advisor1, Advisor advisor2) {
-		if (! ((advisor1.getAdvice() instanceof AbstractAspectJAdvice) &&
-			   (advisor2.getAdvice() instanceof AbstractAspectJAdvice))) {
+		if (! (hasAspectName(advisor1) && hasAspectName(advisor2))) {
 			return false;
 		}
 		else {
-			AbstractAspectJAdvice advice1 = (AbstractAspectJAdvice) advisor1.getAdvice();
-			AbstractAspectJAdvice advice2 = (AbstractAspectJAdvice) advisor2.getAdvice();
-			
-			return advice1.getAspectName().equals(advice2.getAspectName());
+			return getAspectName(advisor1).equals(getAspectName(advisor2));
 		}
 	}
 
+	private boolean hasAspectName(Advisor anAdvisor) {
+		if (anAdvisor instanceof AspectJPrecedenceInformation) {
+			return true;
+		}
+		else {
+			return (anAdvisor.getAdvice() instanceof AspectJPrecedenceInformation);
+		}
+	}
+	
+	// pre-condition is that hasAspectName returned true
+	private String getAspectName(Advisor anAdvisor) {
+		return AspectJAopUtils.getAspectJPrecedenceInformationFor(anAdvisor).getAspectName();
+	}
+
+	private int getAspectDeclarationOrder(Advisor anAdvisor) {
+		AspectJPrecedenceInformation precedenceInfo = 
+			AspectJAopUtils.getAspectJPrecedenceInformationFor(anAdvisor);
+		if (precedenceInfo != null) {
+			return precedenceInfo.getDeclarationOrder();
+		}
+		else {
+			return 0;
+		}
+	}
+	
 	private boolean haveSamePrecedence(int advisorPrecedence) {
 		return advisorPrecedence == SAME_PRECEDENCE;
 	}

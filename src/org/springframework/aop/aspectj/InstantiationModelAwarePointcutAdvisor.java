@@ -33,4 +33,5 @@ public interface InstantiationModelAwarePointcutAdvisor extends PointcutAdvisor 
 	
 	boolean isAdviceInstantiated();
 
+	void setOrder(int order);
 }

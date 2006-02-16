@@ -22,9 +22,12 @@ import org.aopalliance.aop.Advice;
 import org.aspectj.lang.reflect.PerClauseKind;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
+import org.springframework.aop.aspectj.AspectJPrecedenceInformation;
 import org.springframework.aop.aspectj.InstantiationModelAwarePointcutAdvisor;
+import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactory.AspectJAnnotation;
 import org.springframework.aop.support.DynamicMethodMatcherPointcut;
 import org.springframework.aop.support.Pointcuts;
+import org.springframework.core.Ordered;
 
 /**
  * Internal implementation of AspectJPointcutAdvisor
@@ -33,7 +36,7 @@ import org.springframework.aop.support.Pointcuts;
  * @author Rod Johnson
  * @since 2.0
  */
-class InstantiationModelAwarePointcutAdvisorImpl implements InstantiationModelAwarePointcutAdvisor {
+class InstantiationModelAwarePointcutAdvisorImpl implements InstantiationModelAwarePointcutAdvisor,Ordered, AspectJPrecedenceInformation {
 
 	private final AspectJExpressionPointcut declaredPointcut;
 	
@@ -49,14 +52,29 @@ class InstantiationModelAwarePointcutAdvisorImpl implements InstantiationModelAw
 	
 	private Advice instantiatedAdvice;
 
+	private int declarationOrder;
+	
+	private String aspectName;
+	
+	private int aspectOrder = Ordered.LOWEST_PRECEDENCE;
+	
+	private Boolean isBeforeAdvice = null;
+	private Boolean isAfterAdvice = null;
 
 	public InstantiationModelAwarePointcutAdvisorImpl(
-			AspectJAdvisorFactory af, AspectJExpressionPointcut ajexp, MetadataAwareAspectInstanceFactory aif, Method method) {
+			AspectJAdvisorFactory af, 
+			AspectJExpressionPointcut ajexp, 
+			MetadataAwareAspectInstanceFactory aif, 
+			Method method,
+			int declarationOrderInAspect,
+			String aspectName) {
 
 		this.declaredPointcut = ajexp;
 		this.method = method;
 		this.atAspectJAdvisorFactory = af;
 		this.aif = aif;
+		this.declarationOrder = declarationOrderInAspect;
+		this.aspectName = aspectName;
 		
 		if (aif.getAspectMetadata().isLazilyInstantiated()) {
 			// Static part of the pointcut is a lazy type
@@ -119,7 +137,7 @@ class InstantiationModelAwarePointcutAdvisorImpl implements InstantiationModelAw
 
 
 	private Advice instantiateAdvice(AspectJExpressionPointcut pcut) {
-		return this.atAspectJAdvisorFactory.getAdvice(method, pcut, aif);
+		return this.atAspectJAdvisorFactory.getAdvice(method, pcut, aif, declarationOrder, aspectName);
 	}
 	
 	public MetadataAwareAspectInstanceFactory getAspectInstanceFactory() {
@@ -174,4 +192,65 @@ class InstantiationModelAwarePointcutAdvisorImpl implements InstantiationModelAw
 		}
 	}
 
+	public void setOrder(int order) {
+		this.aspectOrder = order;
+	}
+	
+	public int getOrder() {
+		return this.aspectOrder;
+	}
+
+	public String getAspectName() {
+		return this.aspectName;
+	}
+
+	public int getDeclarationOrder() {
+		return this.declarationOrder;
+	}
+
+	public boolean isBeforeAdvice() {
+		if (isBeforeAdvice == null) {
+			determineAdviceType();
+		}
+		return isBeforeAdvice;
+	}
+
+	public boolean isAfterAdvice() {
+		if (isAfterAdvice == null) {
+			determineAdviceType();
+		}
+		return isAfterAdvice;
+	}
+
+	/** !! duplicates some logic from getAdvice, but importantly does not force 
+	 *     creation of the advice.
+	 *
+	 */
+	private void determineAdviceType() {
+		Class<?> candidateAspectClass = aif.getAspectMetadata().getAspectClass();
+		AspectJAnnotation<?> aspectJAnnotation =
+			AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(this.method, candidateAspectClass);
+		if (aspectJAnnotation == null) {
+			isBeforeAdvice = false;
+			isAfterAdvice = false;
+		}
+		else {
+			switch (aspectJAnnotation.getAnnotationType()) {
+				case AtAfter:
+				case AtAfterReturning:
+				case AtAfterThrowing:
+					isAfterAdvice = true;
+					isBeforeAdvice = false;
+					break;
+				case AtAround:
+				case AtPointcut:
+					isAfterAdvice = false;
+					isBeforeAdvice = false;
+					break;
+				case AtBefore:
+					isAfterAdvice = false;
+					isBeforeAdvice = true;
+			}
+		}
+	}
 }

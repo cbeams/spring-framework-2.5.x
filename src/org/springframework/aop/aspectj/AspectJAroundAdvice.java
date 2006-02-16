@@ -40,6 +40,15 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 
 		super(aspectJAroundAdviceMethod, pointcut, aif);
 	}
+	
+	public boolean isBeforeAdvice() {
+		return false;
+	}
+	
+	public boolean isAfterAdvice() {
+		return false;
+	}
+
 
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		ReflectiveMethodInvocation invocation = (ReflectiveMethodInvocation) mi;

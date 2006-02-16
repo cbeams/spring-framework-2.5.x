@@ -17,9 +17,7 @@ package org.springframework.aop.aspectj;
 
 import org.easymock.MockControl;
 import org.springframework.aop.aspectj.AfterThrowingAdviceBindingTestAspect.AfterThrowingAdviceBindingCollaborator;
-import org.springframework.aop.framework.Advised;
 import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**

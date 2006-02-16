@@ -33,6 +33,14 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 		super(aspectJBeforeAdviceMethod, pointcut, aif);
 	}
 
+	public boolean isBeforeAdvice() {
+		return false;
+	}
+	
+	public boolean isAfterAdvice() {
+		return true;
+	}
+
 	public void setReturningName(String name) {
 		setReturningNameNoCheck(name);
 	}

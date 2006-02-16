@@ -70,8 +70,17 @@ public interface AspectJAdvisorFactory {
 	/**
 	 * @return <code>null</code> if the method is not an AspectJ advice method
 	 */
-	Advisor getAdvisor(Method candidateAspectJAdviceMethod, MetadataAwareAspectInstanceFactory aif);
+	Advisor getAdvisor(
+			Method candidateAspectJAdviceMethod, 
+			MetadataAwareAspectInstanceFactory aif,
+			int declarationOrderInAspect,
+			String aspectName);
 	
-	Advice getAdvice(Method candidateAspectJAdviceMethod, AspectJExpressionPointcut pointcut, MetadataAwareAspectInstanceFactory aif);
+	Advice getAdvice(
+			Method candidateAspectJAdviceMethod, 
+			AspectJExpressionPointcut pointcut, 
+			MetadataAwareAspectInstanceFactory aif,
+			int declarationOrderInAspect,
+			String aspectName);
 
 }

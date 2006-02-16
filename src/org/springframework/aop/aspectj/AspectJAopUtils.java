@@ -40,23 +40,54 @@ public abstract class AspectJAopUtils {
 	 * smell to it...
 	 */
 	public static boolean isAfterAdvice(Advisor anAdvisor) {
-		Advice advice = anAdvisor.getAdvice();
-		if ((advice instanceof AfterReturningAdvice) ||
-		    (advice instanceof ThrowsAdvice) ||
-		    (advice instanceof AfterReturningAdviceInterceptor) ||
-		    (advice instanceof AspectJAfterAdvice) ||
-		    (advice instanceof AspectJAfterReturningAdvice) ||
-		    (advice instanceof AspectJAfterThrowingAdvice) ||
-		    (advice instanceof ThrowsAdviceInterceptor)) {
-			return true;
+		AspectJPrecedenceInformation precedenceInfo =  
+			getAspectJPrecedenceInformationFor(anAdvisor);
+		if (precedenceInfo != null) {
+			return precedenceInfo.isAfterAdvice();
 		}
 		else {
-			return false;
+			// unpleasant instanceof test... 
+			Advice advice = anAdvisor.getAdvice();
+			if ((advice instanceof AfterReturningAdvice) ||
+			    (advice instanceof ThrowsAdvice) ||
+			    (advice instanceof AfterReturningAdviceInterceptor) ||
+			    (advice instanceof AspectJAfterAdvice) ||
+			    (advice instanceof AspectJAfterReturningAdvice) ||
+			    (advice instanceof AspectJAfterThrowingAdvice) ||
+			    (advice instanceof ThrowsAdviceInterceptor)) {
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 	}
 	
 	public static boolean isBeforeAdvice(Advisor anAdvisor) {
-		return (anAdvisor.getAdvice() instanceof BeforeAdvice);
+		AspectJPrecedenceInformation precedenceInfo =  
+			getAspectJPrecedenceInformationFor(anAdvisor);
+		if (precedenceInfo != null) {
+			return precedenceInfo.isBeforeAdvice();
+		}
+		else {
+			return (anAdvisor.getAdvice() instanceof BeforeAdvice);
+		}
 	}
 	
+	/**
+	 * Returns the AspectJPrecedenceInformation provided by this advisor or its advice.
+	 * If neither the advisor nor the advice have precedence information, will return null.
+	 * @param anAdvisor
+	 * @return
+	 */
+	public static AspectJPrecedenceInformation getAspectJPrecedenceInformationFor(Advisor anAdvisor) {
+		AspectJPrecedenceInformation ret = null;
+		if (anAdvisor instanceof AspectJPrecedenceInformation) {
+			ret = (AspectJPrecedenceInformation) anAdvisor;
+		}
+		else if (anAdvisor.getAdvice() instanceof AspectJPrecedenceInformation) {
+			ret = (AspectJPrecedenceInformation) anAdvisor.getAdvice();
+		}
+		return ret;
+	}
 }

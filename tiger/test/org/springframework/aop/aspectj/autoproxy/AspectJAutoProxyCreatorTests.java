@@ -124,7 +124,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals("Setter does not initiate advice", explicitlySetAge, adrian1.getAge());
 		// Fire aspect
 		
-		AspectMetadata am = new AspectMetadata(PerTargetAspect.class);
+		AspectMetadata am = new AspectMetadata(PerTargetAspect.class,"someBean");
 		assertTrue(am.getPerClausePointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
 		
 		adrian1.getSpouse();

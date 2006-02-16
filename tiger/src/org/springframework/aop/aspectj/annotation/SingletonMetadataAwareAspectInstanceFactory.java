@@ -30,9 +30,9 @@ public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspect
 	private final AspectMetadata metadata;
 
 
-	public SingletonMetadataAwareAspectInstanceFactory(Object aspectInstance) {
+	public SingletonMetadataAwareAspectInstanceFactory(Object aspectInstance, String beanName) {
 		super(aspectInstance);
-		this.metadata = new AspectMetadata(aspectInstance.getClass());
+		this.metadata = new AspectMetadata(aspectInstance.getClass(),beanName);
 	}
 	
 	public AspectMetadata getAspectMetadata() {

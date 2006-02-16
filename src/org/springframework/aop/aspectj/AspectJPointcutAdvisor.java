@@ -31,6 +31,8 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
  */
 public class AspectJPointcutAdvisor extends DefaultPointcutAdvisor {
 
+	private static final long serialVersionUID = -7817774360632388588L;
+
 	public AspectJPointcutAdvisor() {
 		super();
 	}
@@ -78,7 +80,7 @@ public class AspectJPointcutAdvisor extends DefaultPointcutAdvisor {
 		if (advice instanceof AbstractAspectJAdvice) {
 			AbstractAspectJAdvice ajAdvice = (AbstractAspectJAdvice) advice;
 			ensureAdviceAndPointcutReferToSamePointcutInstance(ajAdvice);	
-			setOrder(ajAdvice.getAspectOrder());
+			setOrder(ajAdvice.getOrder());
 		}
 		
 	}

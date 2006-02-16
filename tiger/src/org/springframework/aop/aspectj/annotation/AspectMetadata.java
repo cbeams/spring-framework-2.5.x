@@ -49,8 +49,15 @@ public class AspectMetadata {
 	 */
 	private final Pointcut perClausePointcut;
 
+	/**
+	 * The name of this aspect as defined to Spring (the bean name) - 
+	 * allows us to determine if two pieces of advice come from the 
+	 * same aspect and hence their relative precedence.
+	 */
+	private String aspectName;
 
-	public AspectMetadata(Class<?> aspectClass) {
+	public AspectMetadata(Class<?> aspectClass, String aspectName) {
+		this.aspectName = aspectName;
 		this.ajType = AjTypeSystem.getAjType(aspectClass);
 		
 		if (!ajType.isAspect()) {
@@ -134,6 +141,10 @@ public class AspectMetadata {
 	
 	public Class<?> getAspectClass() {
 		return this.ajType.getJavaClass();
+	}
+	
+	public String getAspectName() {
+		return this.aspectName;
 	}
 	
 	/**
