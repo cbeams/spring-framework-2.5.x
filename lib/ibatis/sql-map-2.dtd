@@ -147,7 +147,7 @@ parameterMap CDATA #IMPLIED
 parameterClass CDATA #IMPLIED
 >
 
-<!ELEMENT selectKey (#PCDATA) >
+<!ELEMENT selectKey (#PCDATA | include)*>
 <!ATTLIST selectKey
 resultClass CDATA #IMPLIED
 keyProperty CDATA #IMPLIED
