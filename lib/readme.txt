@@ -91,9 +91,9 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's iBATIS SQL Maps 1.3 support
 
 * ibatis/ibatis-sqlmap-2.jar, ibatis/ibatis-common-2.jar
-- iBATIS SQL Maps 2.1.5 (http://www.ibatis.com)
+- iBATIS SQL Maps 2.1.7 (http://www.ibatis.com)
 - required for building the framework
-- required at runtime when using Spring's iBATIS SQL Maps 2.0 support
+- required at runtime when using Spring's iBATIS SQL Maps 2.x support
 
 * itext/itext-1.3.jar
 - iText PDF 1.3 (http://www.lowagie.com/itext)
@@ -282,8 +282,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's Log4jConfigurer
 
-* ojb/db-ojb-1.0.3.jar
-- Apache ObJectRelationalBridge 1.0.3 (http://db.apache.org/ojb)
+* ojb/db-ojb-1.0.4.jar
+- Apache ObJectRelationalBridge 1.0.4 (http://db.apache.org/ojb)
 - required for building the framework
 - required at runtime when using Spring's OJB support
 
