@@ -45,7 +45,7 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
  * 	<li><code>AdminController</code> -> <code>/welcome/*</code></li>
  * 	<li><code>CatalogController</code> -> <code>/catalog/*</code></li>
  * </ul>
- * For {@link MultiActionController} it is often useful to this this mapping strategy in
+ * For {@link MultiActionController} it is often useful to use this mapping strategy in
  * conjunction with the {@link org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver}.
  *
  * @author Rob Harrop
@@ -107,4 +107,5 @@ public class ControllerClassNameHandlerMapping extends AbstractUrlHandlerMapping
 		}
 		return pathMapping.toString();
 	}
+
 }
