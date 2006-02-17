@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,13 @@ import java.util.Set;
 import org.springframework.core.ReflectiveVisitorHelper;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Converts objects to string form, generally for debugging purposes, using
  * Spring's <code>toString</code> styling conventions.
- * <p>
- * Underneath the hood, uses the reflective visitor pattern to nicely encapsulate styling
- * algorithms for each type of styled object.
+ *
+ * <p>Underneath the hood, uses the reflective visitor pattern to nicely encapsulate
+ * styling algorithms for each type of styled object.
  *
  * @author Keith Donald
  * @since 1.2.2
@@ -41,20 +40,16 @@ import org.springframework.util.StringUtils;
 public class DefaultValueStyler implements ValueStyler {
 
 	private static final String EMPTY = "[empty]";
-
 	private static final String NULL = "[null]";
-
 	private static final String COLLECTION = "collection";
-
 	private static final String SET = "set";
-
 	private static final String LIST = "list";
-
 	private static final String MAP = "map";
-
 	private static final String ARRAY = "array";
 
+
 	private ReflectiveVisitorHelper reflectiveVisitorHelper = new ReflectiveVisitorHelper();
+
 
 	public String style(Object value) {
 		return (String) reflectiveVisitorHelper.invokeVisit(this, value);
@@ -140,7 +135,7 @@ public class DefaultValueStyler implements ValueStyler {
 
 	private String styleArray(Object[] array) {
 		StringBuffer buffer = new StringBuffer(array.length * 8 + 16);
-		buffer.append(ARRAY + "<" + StringUtils.delete(ClassUtils.getShortName(array.getClass()), ";") + ">[");
+		buffer.append(ARRAY + "<" + ClassUtils.getShortName(array.getClass().getComponentType()) + ">[");
 		for (int i = 0; i < array.length - 1; i++) {
 			buffer.append(style(array[i]));
 			buffer.append(',').append(' ');
