@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,9 +246,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 
-	/** Perform cleanup of request attributes after include request? */
-	private boolean cleanupAfterInclude = true;
-
 	/** Detect all HandlerMappings or just expect "handlerMapping" bean? */
 	private boolean detectAllHandlerMappings = true;
 
@@ -260,6 +257,10 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/** Detect all ViewResolvers or just expect "viewResolver" bean? */
 	private boolean detectAllViewResolvers = true;
+
+	/** Perform cleanup of request attributes after include request? */
+	private boolean cleanupAfterInclude = true;
+
 
 	/** MultipartResolver used by this servlet */
 	private MultipartResolver multipartResolver;
@@ -282,23 +283,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** List of ViewResolvers used by this servlet */
 	private List viewResolvers;
 
-
-	/**
-	 * Set whether to perform cleanup of request attributes after an include request,
-	 * i.e. whether to reset the original state of all request attributes after the
-	 * DispatcherServlet has processed within an include request. Else, just the
-	 * DispatcherServlet's own request attributes will be reset, but not model
-	 * attributes for JSPs or special attributes set by views (for example, JSTL's).
-	 * <p>Default is "true", which is strongly recommended. Views should not rely on
-	 * request attributes having been set by (dynamic) includes. This allows JSP views
-	 * rendered by an included controller to use any model attributes, even with the
-	 * same names as in the main JSP, without causing side effects. Only turn this
-	 * off for special needs, for example to deliberately allow main JSPs to access
-	 * attributes from JSP views rendered by an included controller.
-	 */
-	public void setCleanupAfterInclude(boolean cleanupAfterInclude) {
-		this.cleanupAfterInclude = cleanupAfterInclude;
-	}
 
 	/**
 	 * Set whether to detect all HandlerMapping beans in this servlet's context.
@@ -344,6 +328,23 @@ public class DispatcherServlet extends FrameworkServlet {
 		this.detectAllViewResolvers = detectAllViewResolvers;
 	}
 
+	/**
+	 * Set whether to perform cleanup of request attributes after an include request,
+	 * i.e. whether to reset the original state of all request attributes after the
+	 * DispatcherServlet has processed within an include request. Else, just the
+	 * DispatcherServlet's own request attributes will be reset, but not model
+	 * attributes for JSPs or special attributes set by views (for example, JSTL's).
+	 * <p>Default is "true", which is strongly recommended. Views should not rely on
+	 * request attributes having been set by (dynamic) includes. This allows JSP views
+	 * rendered by an included controller to use any model attributes, even with the
+	 * same names as in the main JSP, without causing side effects. Only turn this
+	 * off for special needs, for example to deliberately allow main JSPs to access
+	 * attributes from JSP views rendered by an included controller.
+	 */
+	public void setCleanupAfterInclude(boolean cleanupAfterInclude) {
+		this.cleanupAfterInclude = cleanupAfterInclude;
+	}
+
 
 	/**
 	 * Overridden method, invoked after any bean properties have been set and the
@@ -368,8 +369,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initMultipartResolver() throws BeansException {
 		try {
-			this.multipartResolver =
-					(MultipartResolver) getWebApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME);
+			this.multipartResolver = (MultipartResolver)
+					getWebApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME, MultipartResolver.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("Using MultipartResolver [" + this.multipartResolver + "]");
 			}
@@ -391,7 +392,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initLocaleResolver() throws BeansException {
 		try {
-			this.localeResolver = (LocaleResolver) getWebApplicationContext().getBean(LOCALE_RESOLVER_BEAN_NAME);
+			this.localeResolver = (LocaleResolver)
+					getWebApplicationContext().getBean(LOCALE_RESOLVER_BEAN_NAME, LocaleResolver.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("Using LocaleResolver [" + this.localeResolver + "]");
 			}
@@ -413,7 +415,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initThemeResolver() throws BeansException {
 		try {
-			this.themeResolver = (ThemeResolver) getWebApplicationContext().getBean(THEME_RESOLVER_BEAN_NAME);
+			this.themeResolver = (ThemeResolver)
+					getWebApplicationContext().getBean(THEME_RESOLVER_BEAN_NAME, ThemeResolver.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("Using ThemeResolver [" + this.themeResolver + "]");
 			}
@@ -447,7 +450,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		else {
 			try {
-				Object hm = getWebApplicationContext().getBean(HANDLER_MAPPING_BEAN_NAME);
+				Object hm = getWebApplicationContext().getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
 				this.handlerMappings = Collections.singletonList(hm);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -484,7 +487,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		else {
 			try {
-				Object ha = getWebApplicationContext().getBean(HANDLER_ADAPTER_BEAN_NAME);
+				Object ha = getWebApplicationContext().getBean(HANDLER_ADAPTER_BEAN_NAME, HandlerAdapter.class);
 				this.handlerAdapters = Collections.singletonList(ha);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -519,7 +522,8 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		else {
 			try {
-				Object her = getWebApplicationContext().getBean(HANDLER_EXCEPTION_RESOLVER_BEAN_NAME);
+				Object her = getWebApplicationContext().getBean(
+						HANDLER_EXCEPTION_RESOLVER_BEAN_NAME, HandlerExceptionResolver.class);
 				this.handlerExceptionResolvers = Collections.singletonList(her);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -548,7 +552,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		else {
 			try {
-				Object vr = getWebApplicationContext().getBean(VIEW_RESOLVER_BEAN_NAME);
+				Object vr = getWebApplicationContext().getBean(VIEW_RESOLVER_BEAN_NAME, ViewResolver.class);
 				this.viewResolvers = Collections.singletonList(vr);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -683,6 +687,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		int interceptorIndex = -1;
 
 		// Expose current LocaleResolver and request as LocaleContext.
+		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
 		LocaleContextHolder.setLocaleContext(new LocaleContext() {
 			public Locale getLocale() {
 				return localeResolver.resolveLocale(request);
@@ -767,7 +772,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
 			}
 			// Reset thread-bound LocaleContext.
-			LocaleContextHolder.setLocaleContext(null);
+			LocaleContextHolder.setLocaleContext(previousLocaleContext);
 		}
 	}
 
@@ -911,9 +916,8 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		if (exMv != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("HandlerExceptionResolver returned ModelAndView [" + exMv + "] for exception");
+				logger.debug("Handler execution resulted in exception - forwarding to resolved error view: " + exMv, ex);
 			}
-			logger.warn("Handler execution resulted in exception - forwarding to resolved error view", ex);
 			return exMv;
 		}
 		else {
