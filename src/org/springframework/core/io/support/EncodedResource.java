@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class EncodedResource {
 	 * @param encoding the encoding to use for reading from the resource
 	 */
 	public EncodedResource(Resource resource, String encoding) {
-		Assert.notNull("Resource is required");
+		Assert.notNull(resource, "Resource must not be null");
 		this.resource = resource;
 		this.encoding = encoding;
 	}
