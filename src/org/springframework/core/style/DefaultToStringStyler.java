@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.style;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -33,13 +34,23 @@ public class DefaultToStringStyler implements ToStringStyler {
 
 	private final ValueStyler valueStyler;
 
+
+	/**
+	 * Create a new DefaultToStringStyler.
+	 * @param valueStyler the ValueStyler to use
+	 */
 	public DefaultToStringStyler(ValueStyler valueStyler) {
+		Assert.notNull(valueStyler, "ValueStyler must not be null");
 		this.valueStyler = valueStyler;
 	}
 
+	/**
+	 * Return the ValueStyler used by this ToStringStyler.
+	 */
 	protected final ValueStyler getValueStyler() {
 		return valueStyler;
 	}
+
 
 	public void styleStart(StringBuffer buffer, Object obj) {
 		if (!obj.getClass().isArray()) {
