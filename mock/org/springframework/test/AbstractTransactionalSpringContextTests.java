@@ -4,9 +4,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -66,6 +66,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * capability is provided to enable use of the same subclass in different environments.</i>
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 1.1.1
  */
 public abstract class AbstractTransactionalSpringContextTests extends AbstractDependencyInjectionSpringContextTests {
@@ -106,7 +107,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 	/**
 	 * Subclasses can set this value in their constructor to change
-	 * default, which is always to roll the transaction back
+	 * default, which is always to roll the transaction back.
 	 */
 	public void setDefaultRollback(boolean defaultRollback) {
 		this.defaultRollback = defaultRollback;
@@ -258,9 +259,11 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 			throw new IllegalStateException("Cannot start new transaction without ending existing transaction:" +
 					"Invoke endTransaction() before startNewTransaction()");
 		}
+
 		this.transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
 		++this.transactionsStarted;
-		this.complete = false;
+		this.complete = !this.defaultRollback;
+
 		if (logger.isInfoEnabled()) {
 			logger.info("Began transaction (" + this.transactionsStarted + "): transaction manager [" +
 					this.transactionManager + "]; default rollback = " + this.defaultRollback);
