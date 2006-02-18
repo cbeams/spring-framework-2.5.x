@@ -411,6 +411,11 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		return parentBeanFactory;
 	}
 
+	public boolean containsLocalBean(String name) {
+		String beanName = transformedBeanName(name);
+		return (containsSingleton(beanName) || containsBeanDefinition(beanName));
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of ConfigurableBeanFactory interface

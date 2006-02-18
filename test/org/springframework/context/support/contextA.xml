@@ -6,7 +6,7 @@
 	<import resource="import1.xml"/>
 	<import resource="classpath:org/springframework/context/*/import2.xml"/>
 
-	<bean id="messageSource" class="org.springframework.context.support.StaticMessageSource"/>
+	<bean id="ms" name="messageSource" class="org.springframework.context.support.StaticMessageSource"/>
 
 	<bean class="org.springframework.context.support.FactoryBeanAndApplicationListener"/>
 

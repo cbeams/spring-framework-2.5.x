@@ -114,16 +114,19 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	 * (see <code>registerSingleton</code>). Can also be used to check whether a
 	 * singleton defined by a bean definition has already been created.
 	 * <p>To check whether a bean factory contains a bean definition with a given name,
-	 * use ListableBeanFactory's <code>containsBeanDefinition</code>. Calling both
-	 * <code>containsBeanDefinition</code> and <code>containsSingleton</code> answers
-	 * whether a specific bean factory contains an own bean with the given name.
+	 * use ListableBeanFactory's <code>containsBeanDefinition</code>. Analogous to the
+	 * present method, this checks whether the factory contains a registered bean definition.
+	 * Note that both of those methods check for the actual given bean name, ignoring aliases.
 	 * <p>Use BeanFactory's <code>containsBean</code> for general checks whether the
 	 * factory knows about a bean with a given name (whether manually registed singleton
-	 * instance or created by bean definition), also checking ancestor factories.
+	 * instance or created by bean definition), also checking ancestor factories. To check
+	 * the local factory only, use HierarchicalBeanFactory's <code>containsLocalBean</code>.
+	 * Both of those methods translate aliases back to the respective canonical bean name.
 	 * @param beanName the name of the bean to look for
 	 * @return if this bean factory contains a singleton instance with the given name
 	 * @see #registerSingleton
 	 * @see org.springframework.beans.factory.BeanFactory#containsBean
+	 * @see org.springframework.beans.factory.HierarchicalBeanFactory#containsLocalBean
 	 * @see org.springframework.beans.factory.ListableBeanFactory#containsBeanDefinition
 	 */
 	boolean containsSingleton(String beanName);

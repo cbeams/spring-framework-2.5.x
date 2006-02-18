@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -466,17 +466,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Return whether the local bean factory of this context contains a bean
-	 * of the given name, ignoring beans defined in ancestor contexts.
-	 * <p>Needs to check both bean definitions and manually registered singletons.
-	 * We cannot use <code>containsBean</code> here, as we do not want a bean
-	 * from an ancestor bean factory.
-	 */
-	protected final boolean containsLocalBean(String beanName) {
-		return (containsBeanDefinition(beanName) || getBeanFactory().containsSingleton(beanName));
-	}
-
-	/**
 	 * Template method which can be overridden to add context-specific refresh work.
 	 * Called on initialization of special beans, before instantiation of singletons.
 	 * @throws BeansException in case of errors during refresh
@@ -621,6 +610,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	public BeanFactory getParentBeanFactory() {
 		return getParent();
+	}
+
+	public boolean containsLocalBean(String name) {
+		return getBeanFactory().containsLocalBean(name);
 	}
 
 	/**

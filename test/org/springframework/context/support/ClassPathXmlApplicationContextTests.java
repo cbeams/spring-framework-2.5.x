@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import junit.framework.TestCase;
 
@@ -44,7 +45,7 @@ import org.springframework.util.FileCopyUtils;
  */
 public class ClassPathXmlApplicationContextTests extends TestCase {
 
-	public void testMultipleConfigLocations() throws Exception {
+	public void testMultipleConfigLocations() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				new String[] {
 					"/org/springframework/context/support/contextB.xml",
@@ -55,7 +56,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		assertTrue(ctx.containsBean("logicTwo"));
 	}
 
-	public void testConfigLocationPattern() throws Exception {
+	public void testConfigLocationPattern() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"/org/springframework/context/support/context*.xml");
 		assertTrue(ctx.containsBean("service"));
@@ -98,7 +99,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		    new FileSystemResource(new ClassPathResource("/org/springframework/context/support/contextC.xml").getFile())));
 	}
 
-	public void testChildWithProxy() throws Exception {
+	public void testChildWithProxy() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"/org/springframework/context/support/context*.xml");
 		ClassPathXmlApplicationContext child = new ClassPathXmlApplicationContext(
@@ -143,7 +144,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		assertEquals("contexttest", writer.toString());
 	}
 
-	public void testGenericApplicationContextWithXmlBeanDefinitions() throws Exception {
+	public void testGenericApplicationContextWithXmlBeanDefinitions() {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(ctx);
 		reader.loadBeanDefinitions(new ClassPathResource("contextB.xml", getClass()));
@@ -153,6 +154,14 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		assertTrue(ctx.containsBean("service"));
 		assertTrue(ctx.containsBean("logicOne"));
 		assertTrue(ctx.containsBean("logicTwo"));
+	}
+
+	public void testMessageSourceFoundEvenForAlias() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				"/org/springframework/context/support/context*.xml");
+		StaticMessageSource ms = (StaticMessageSource) ctx.getBean("messageSource");
+		ms.addMessage("code1", Locale.UK, "message1");
+		assertEquals("message1", ctx.getMessage("code1", null, Locale.UK));
 	}
 
 }
