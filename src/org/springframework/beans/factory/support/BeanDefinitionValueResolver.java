@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,7 @@ public class BeanDefinitionValueResolver {
 	 */
 	public BeanDefinitionValueResolver(
 			AbstractBeanFactory beanFactory, String beanName, BeanDefinition beanDefinition) {
+
 		this.beanName = beanName;
 		this.beanDefinition = beanDefinition;
 		this.beanFactory = beanFactory;
@@ -93,12 +94,12 @@ public class BeanDefinitionValueResolver {
 		if (value instanceof BeanDefinitionHolder) {
 			// Resolve BeanDefinitionHolder: contains BeanDefinition with name and aliases.
 			BeanDefinitionHolder bdHolder = (BeanDefinitionHolder) value;
-			return resolveInnerBeanDefinition(bdHolder.getBeanName(), bdHolder.getBeanDefinition());
+			return resolveInnerBeanDefinition(argName, bdHolder.getBeanName(), bdHolder.getBeanDefinition());
 		}
 		else if (value instanceof BeanDefinition) {
 			// Resolve plain BeanDefinition, without contained name: use dummy name.
 			BeanDefinition bd = (BeanDefinition) value;
-			return resolveInnerBeanDefinition("(inner bean)", bd);
+			return resolveInnerBeanDefinition(argName, "(inner bean)", bd);
 		}
 		else if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
@@ -139,16 +140,25 @@ public class BeanDefinitionValueResolver {
 	/**
 	 * Resolve an inner bean definition.
 	 */
-	private Object resolveInnerBeanDefinition(String innerBeanName, BeanDefinition innerBd) throws BeansException {
+	private Object resolveInnerBeanDefinition(
+			String argName, String innerBeanName, BeanDefinition innerBd) throws BeansException {
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Resolving inner bean definition '" + innerBeanName + "' of bean '" + this.beanName + "'");
 		}
-		RootBeanDefinition mergedInnerBd = this.beanFactory.getMergedBeanDefinition(innerBeanName, innerBd);
-		Object innerBean = this.beanFactory.createBean(innerBeanName, mergedInnerBd, null);
-		if (mergedInnerBd.isSingleton()) {
-			this.beanFactory.registerDependentBean(innerBeanName, this.beanName);
+		try {
+			RootBeanDefinition mergedInnerBd = this.beanFactory.getMergedBeanDefinition(innerBeanName, innerBd);
+			Object innerBean = this.beanFactory.createBean(innerBeanName, mergedInnerBd, null);
+			if (mergedInnerBd.isSingleton()) {
+				this.beanFactory.registerDependentBean(innerBeanName, this.beanName);
+			}
+			return this.beanFactory.getObjectForSharedInstance(innerBeanName, innerBean);
 		}
-		return this.beanFactory.getObjectForSharedInstance(innerBeanName, innerBean);
+		catch (BeansException ex) {
+			throw new BeanCreationException(
+					this.beanDefinition.getResourceDescription(), this.beanName,
+					"Cannot create inner bean '" + innerBeanName + "' while setting " + argName, ex);
+		}
 	}
 
 	/**
@@ -179,8 +189,7 @@ public class BeanDefinitionValueResolver {
 		catch (BeansException ex) {
 			throw new BeanCreationException(
 					this.beanDefinition.getResourceDescription(), this.beanName,
-					"Can't resolve reference to bean '" + ref.getBeanName() +
-					"' while setting property '" + argName + "'", ex);
+					"Cannot resolve reference to bean '" + ref.getBeanName() + "' while setting " + argName, ex);
 		}
 	}
 
@@ -192,7 +201,7 @@ public class BeanDefinitionValueResolver {
 		for (int i = 0; i < ml.size(); i++) {
 			resolved.add(
 			    resolveValueIfNecessary(
-							argName + BeanWrapper.PROPERTY_KEY_PREFIX + i + BeanWrapper.PROPERTY_KEY_SUFFIX,
+							argName + " with key " + BeanWrapper.PROPERTY_KEY_PREFIX + i + BeanWrapper.PROPERTY_KEY_SUFFIX,
 							ml.get(i)));
 		}
 		return resolved;
@@ -207,7 +216,7 @@ public class BeanDefinitionValueResolver {
 		for (Iterator it = ms.iterator(); it.hasNext();) {
 			resolved.add(
 			    resolveValueIfNecessary(
-							argName + BeanWrapper.PROPERTY_KEY_PREFIX + i + BeanWrapper.PROPERTY_KEY_SUFFIX,
+							argName + " with key " + BeanWrapper.PROPERTY_KEY_PREFIX + i + BeanWrapper.PROPERTY_KEY_SUFFIX,
 							it.next()));
 			i++;
 		}
@@ -222,11 +231,11 @@ public class BeanDefinitionValueResolver {
 		Iterator it = mm.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();
-			resolved.put(
-					resolveValueIfNecessary(argName, entry.getKey()),
-			    resolveValueIfNecessary(
-							argName + BeanWrapper.PROPERTY_KEY_PREFIX + entry.getKey() + BeanWrapper.PROPERTY_KEY_SUFFIX,
-							entry.getValue()));
+			Object resolvedKey = resolveValueIfNecessary(argName, entry.getKey());
+			Object resolvedValue = resolveValueIfNecessary(
+					argName + " with key " + BeanWrapper.PROPERTY_KEY_PREFIX + entry.getKey() + BeanWrapper.PROPERTY_KEY_SUFFIX,
+					entry.getValue());
+			resolved.put(resolvedKey, resolvedValue);
 		}
 		return resolved;
 	}

@@ -1042,7 +1042,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		PropertyValue[] pvArray = pvs.getPropertyValues();
 		for (int i = 0; i < pvArray.length; i++) {
 			PropertyValue pv = pvArray[i];
-			Object resolvedValue = valueResolver.resolveValueIfNecessary(pv.getName(), pv.getValue());
+			Object resolvedValue =
+					valueResolver.resolveValueIfNecessary("bean property '" + pv.getName() + "'", pv.getValue());
 			deepCopy.addPropertyValue(pvArray[i].getName(), resolvedValue);
 		}
 
