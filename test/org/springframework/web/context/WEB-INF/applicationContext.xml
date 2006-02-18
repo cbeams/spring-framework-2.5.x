@@ -63,8 +63,11 @@
 	</bean>
 
 	<bean id="myPlaceholder" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="location">
-			<value>classpath:/org/springframework/web/context/WEB-INF/myplaceholder.properties</value>
+		<property name="locations">
+			<list>
+				<value>classpath:/org/springframework/web/context/WEB-INF/myplace*.properties</value>
+				<value>classpath:/org/springframework/web/context/WEB-INF/myover*.properties</value>
+			</list>
 		</property>
 	</bean>
 
