@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -107,7 +107,7 @@ public interface BeanFactory {
 	/**
 	 * Used to dereference a FactoryBean and distinguish it from beans
 	 * <i>created</i> by the FactoryBean. For example, if the bean named
-	 * <code>myEjb</code> is a FactoryBean, getting <code>&myEjb</code> will
+	 * <code>myBean</code> is a FactoryBean, getting <code>&myBean</code> will
 	 * return the factory, not the instance returned by the factory.
 	 */
 	String FACTORY_BEAN_PREFIX = "&";
@@ -117,10 +117,8 @@ public interface BeanFactory {
 	 * Return an instance, which may be shared or independent, of the given bean name.
 	 * This method allows a Spring bean factory to be used as a replacement for
 	 * the Singleton or Prototype design pattern.
-	 * <p>Callers may retain references to returned objects
-	 * in the case of Singleton beans. 
-	 * <p>This method delegates to the parent factory if the 
-	 * bean cannot be found in this factory instance.
+	 * <p>Translates aliases back to the corresponding canonical bean name.
+	 * Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the name of the bean to return
 	 * @return the instance of the bean
 	 * @throws NoSuchBeanDefinitionException if there is no bean definition
@@ -131,10 +129,10 @@ public interface BeanFactory {
 
 	/**
 	 * Return an instance (possibly shared or independent) of the given bean name.
-	 * <p>Behaves the same as getBean(String), but provides a measure of type safety by
-	 * throwing a Spring BeansException if the bean is not of the required type.
+	 * <p>Behaves the same as <code>getBean(String)</code>, but provides a measure of
+	 * type safety by throwing a Spring BeansException if the bean is not of the required type.
 	 * This means that ClassCastException can't be thrown on casting the result correctly,
-	 * as can happen with getBean(String). 
+	 * as can happen with <code>getBean(String)</code>.
 	 * @param name the name of the bean to return
 	 * @param requiredType type the bean must match. Can be an interface or superclass
 	 * of the actual class, or <code>null</code> for any match. For example, if the value is
@@ -148,15 +146,17 @@ public interface BeanFactory {
 
 	/**
 	 * Does this bean factory contain a bean definition with the given name?
-	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * <p>Translates aliases back to the corresponding canonical bean name.
+	 * Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the name of the bean to query
 	 * @return whether a bean with the given name is defined
 	 */
 	boolean containsBean(String name);
 
 	/**
-	 * Is this bean a singleton? That is, will getBean() always return the same object?
-	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * Is this bean a singleton? That is, will <code>getBean</code> always return the same object?
+	 * <p>Translates aliases back to the corresponding canonical bean name.
+	 * Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the name of the bean to query
 	 * @return is this bean a singleton
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
@@ -165,8 +165,10 @@ public interface BeanFactory {
 
 	/**
 	 * Determine the type of the bean with the given name.
-	 * More specifically, checks the type of object that getBean would return.
+	 * More specifically, checks the type of object that <code>getBean</code> would return.
 	 * For a FactoryBean, returns the type of object that the FactoryBean creates.
+	 * <p>Translates aliases back to the corresponding canonical bean name.
+	 * Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the name of the bean to query
 	 * @return the type of the bean, or <code>null</code> if not determinable
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
