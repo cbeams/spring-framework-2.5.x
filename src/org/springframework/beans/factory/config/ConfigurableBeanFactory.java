@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,8 +24,8 @@ import org.springframework.beans.factory.HierarchicalBeanFactory;
 
 /**
  * Configuration interface to be implemented by most bean factories.
- * Provides facilities to configure a bean factory, in addition to the bean
- * factory client methods in the BeanFactory interface.
+ * Provides facilities for configuring a bean factory, in addition to the
+ * client view in the BeanFactory and HierarchicalBeanFactory interfaces.
  *
  * <p>This subinterface of BeanFactory is not meant to be used in normal
  * application code: Stick to BeanFactory or ListableBeanFactory for typical
@@ -35,6 +35,7 @@ import org.springframework.beans.factory.HierarchicalBeanFactory;
  * @author Juergen Hoeller
  * @since 03.11.2003
  * @see org.springframework.beans.factory.BeanFactory
+ * @see org.springframework.beans.factory.HierarchicalBeanFactory
  * @see org.springframework.beans.factory.ListableBeanFactory
  * @see ConfigurableListableBeanFactory
  */
@@ -121,7 +122,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	 * factory knows about a bean with a given name (whether manually registed singleton
 	 * instance or created by bean definition), also checking ancestor factories. To check
 	 * the local factory only, use HierarchicalBeanFactory's <code>containsLocalBean</code>.
-	 * Both of those methods translate aliases back to the respective canonical bean name.
+	 * Both of those methods translate aliases back to the corresponding canonical bean name.
 	 * @param beanName the name of the bean to look for
 	 * @return if this bean factory contains a singleton instance with the given name
 	 * @see #registerSingleton
