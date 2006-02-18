@@ -35,7 +35,7 @@ import org.springframework.aop.support.AopUtils;
  * the <code>Log</code> for the target class being intercepted.
  *
  * <p>Subclasses must implement the <code>invokeUnderTrace</code> method, which
- * is invoked by this class ONLY when a particularinvocation SHOULD be traced.
+ * is invoked by this class ONLY when a particular invocation SHOULD be traced.
  * Subclasses should write to the <code>Log</code> instance provided.
  *
  * @author Rob Harrop
