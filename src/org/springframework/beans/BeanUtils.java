@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,11 +51,11 @@ public abstract class BeanUtils {
 		primitiveWrapperTypeMap.put(Boolean.class, boolean.class);
 		primitiveWrapperTypeMap.put(Byte.class, byte.class);
 		primitiveWrapperTypeMap.put(Character.class, char.class);
-		primitiveWrapperTypeMap.put(Short.class, short.class);
+		primitiveWrapperTypeMap.put(Double.class, double.class);
+		primitiveWrapperTypeMap.put(Float.class, float.class);
 		primitiveWrapperTypeMap.put(Integer.class, int.class);
 		primitiveWrapperTypeMap.put(Long.class, long.class);
-		primitiveWrapperTypeMap.put(Float.class, float.class);
-		primitiveWrapperTypeMap.put(Double.class, double.class);
+		primitiveWrapperTypeMap.put(Short.class, short.class);
 	}
 
 
@@ -77,7 +77,7 @@ public abstract class BeanUtils {
 	 * Determine if the given target type is assignable from the given value
 	 * type, assuming setting by reflection. Considers primitive wrapper
 	 * classes as assignable to the corresponding primitive types.
-	 * <p>For example used in BeanWrapperImpl's custom editor matrching.
+	 * <p>For example used in BeanWrapperImpl's custom editor matching.
 	 * @param targetType the target type
 	 * @param valueType the value type that should be assigned to the target type
 	 * @return if the target type is assignable from the value type
@@ -476,8 +476,16 @@ public abstract class BeanUtils {
 				PropertyDescriptor sourcePd = getPropertyDescriptor(source.getClass(), targetPd.getName());
 				if (sourcePd != null && sourcePd.getReadMethod() != null) {
 					try {
-						Object value = sourcePd.getReadMethod().invoke(source, new Object[0]);
-						targetPd.getWriteMethod().invoke(target, new Object[] {value});
+						Method readMethod = sourcePd.getReadMethod();
+						if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+							readMethod.setAccessible(true);
+						}
+						Object value = readMethod.invoke(source, new Object[0]);
+						Method writeMethod = targetPd.getWriteMethod();
+						if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
+							writeMethod.setAccessible(true);
+						}
+						writeMethod.invoke(target, new Object[] {value});
 					}
 					catch (Exception ex) {
 						throw new FatalBeanException("Could not copy properties from source to target", ex);
