@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -393,7 +393,6 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #resume
 	 */
 	private SuspendedResourcesHolder suspend(Object transaction) throws TransactionException {
-		Object holder = doSuspend(transaction);
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			List suspendedSynchronizations = TransactionSynchronizationManager.getSynchronizations();
 			for (Iterator it = suspendedSynchronizations.iterator(); it.hasNext();) {
@@ -405,9 +404,13 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			boolean readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
 			TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
 			TransactionSynchronizationManager.setActualTransactionActive(false);
+			Object holder = doSuspend(transaction);
 			return new SuspendedResourcesHolder(holder, suspendedSynchronizations, name, readOnly);
 		}
-		return new SuspendedResourcesHolder(holder, null, null, false);
+		else {
+			Object holder = doSuspend(transaction);
+			return new SuspendedResourcesHolder(holder, null, null, false);
+		}
 	}
 
 	/**
@@ -420,6 +423,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #suspend
 	 */
 	private void resume(Object transaction, SuspendedResourcesHolder resourcesHolder) throws TransactionException {
+		doResume(transaction, resourcesHolder.getSuspendedResources());
 		if (resourcesHolder.getSuspendedSynchronizations() != null) {
 			TransactionSynchronizationManager.setActualTransactionActive(true);
 			TransactionSynchronizationManager.setCurrentTransactionReadOnly(resourcesHolder.isReadOnly());
@@ -431,7 +435,6 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				TransactionSynchronizationManager.registerSynchronization(synchronization);
 			}
 		}
-		doResume(transaction, resourcesHolder.getSuspendedResources());
 	}
 
 
