@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,57 +130,75 @@ public class SingleColumnRowMapper implements RowMapper {
 	 */
 	protected Object getColumnValue(ResultSet rs, int index, Class requiredType) throws SQLException {
 		if (requiredType != null) {
+			Object value = null;
+			boolean wasNullCheck = false;
+
 			// Explicitly extract typed value, as far as possible.
 			if (String.class.equals(requiredType)) {
-				return rs.getString(index);
+				value = rs.getString(index);
 			}
 			else if (Boolean.class.equals(requiredType)) {
-				return new Boolean(rs.getBoolean(index));
+				value = (rs.getBoolean(index) ? Boolean.TRUE : Boolean.FALSE);
+				wasNullCheck = true;
 			}
 			else if (Byte.class.equals(requiredType)) {
-				return new Byte(rs.getByte(index));
+				value = new Byte(rs.getByte(index));
+				wasNullCheck = true;
 			}
 			else if (Short.class.equals(requiredType)) {
-				return new Short(rs.getShort(index));
+				value = new Short(rs.getShort(index));
+				wasNullCheck = true;
 			}
 			else if (Integer.class.equals(requiredType)) {
-				return new Integer(rs.getInt(index));
+				value = new Integer(rs.getInt(index));
+				wasNullCheck = true;
 			}
 			else if (Long.class.equals(requiredType)) {
-				return new Long(rs.getLong(index));
+				value = new Long(rs.getLong(index));
+				wasNullCheck = true;
 			}
 			else if (Float.class.equals(requiredType)) {
-				return new Float(rs.getFloat(index));
+				value = new Float(rs.getFloat(index));
+				wasNullCheck = true;
 			}
 			else if (Double.class.equals(requiredType) || Number.class.equals(requiredType)) {
-				return new Double(rs.getDouble(index));
+				value = new Double(rs.getDouble(index));
+				wasNullCheck = true;
 			}
 			else if (byte[].class.equals(requiredType)) {
-				return rs.getBytes(index);
+				value = rs.getBytes(index);
 			}
 			else if (java.sql.Date.class.equals(requiredType)) {
-				return rs.getDate(index);
+				value = rs.getDate(index);
 			}
 			else if (java.sql.Time.class.equals(requiredType)) {
-				return rs.getTime(index);
+				value = rs.getTime(index);
 			}
 			else if (java.sql.Timestamp.class.equals(requiredType) || java.util.Date.class.equals(requiredType)) {
-				return rs.getTimestamp(index);
+				value = rs.getTimestamp(index);
 			}
 			else if (BigDecimal.class.equals(requiredType)) {
-				return rs.getBigDecimal(index);
+				value = rs.getBigDecimal(index);
 			}
 			else if (Blob.class.equals(requiredType)) {
-				return rs.getBlob(index);
+				value = rs.getBlob(index);
 			}
 			else if (Clob.class.equals(requiredType)) {
-				return rs.getClob(index);
+				value = rs.getClob(index);
 			}
 			else {
 				// Some unknown type desired -> rely on getObject.
-				return rs.getObject(index);
+				value = rs.getObject(index);
 			}
+
+			// Perform was-null check if demanded (for results that the
+			// JDBC driver returns as primitives).
+			if (wasNullCheck && value != null && rs.wasNull()) {
+				value = null;
+			}
+			return value;
 		}
+
 		else {
 			// No required type specified -> perform default extraction.
 			return getColumnValue(rs, index);

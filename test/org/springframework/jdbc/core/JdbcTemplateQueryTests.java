@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,6 +194,8 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getInt(1);
 		ctrlResultSet.setReturnValue(11);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(false);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
@@ -401,6 +403,8 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getInt(1);
 		ctrlResultSet.setReturnValue(22);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(false);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
@@ -422,6 +426,41 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		assertEquals(new Integer(22), template.queryForObject(sql, Integer.class));
 	}
 
+	public void testQueryForObjectWithIntegerAndNull() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
+
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt(1);
+		ctrlResultSet.setReturnValue(0);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		mockStatement.executeQuery(sql);
+		ctrlStatement.setReturnValue(mockResultSet);
+		mockStatement.getWarnings();
+		ctrlStatement.setReturnValue(null);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable();
+
+		mockConnection.createStatement();
+		ctrlConnection.setReturnValue(mockStatement);
+
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		assertNull(template.queryForObject(sql, Integer.class));
+	}
+
 	public void testQueryForInt() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 
@@ -434,6 +473,8 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getInt(1);
 		ctrlResultSet.setReturnValue(22);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(false);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
@@ -468,6 +509,8 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getLong(1);
 		ctrlResultSet.setReturnValue(87);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(false);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
@@ -617,6 +660,8 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getInt(1);
 		ctrlResultSet.setReturnValue(11);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(false);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
@@ -730,6 +775,8 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getInt(1);
 		ctrlResultSet.setReturnValue(22);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(false);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
@@ -767,6 +814,8 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getInt(1);
 		ctrlResultSet.setReturnValue(22);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(false);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
@@ -803,6 +852,8 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getLong(1);
 		ctrlResultSet.setReturnValue(87);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(false);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
