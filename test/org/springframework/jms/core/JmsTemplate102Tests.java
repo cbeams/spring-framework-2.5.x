@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,19 @@ import javax.naming.NamingException;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.jms.InvalidClientIDException;
+import org.springframework.jms.InvalidDestinationException;
+import org.springframework.jms.InvalidSelectorException;
+import org.springframework.jms.JmsException;
+import org.springframework.jms.JmsSecurityException;
+import org.springframework.jms.MessageEOFException;
+import org.springframework.jms.MessageFormatException;
+import org.springframework.jms.MessageNotReadableException;
+import org.springframework.jms.MessageNotWriteableException;
+import org.springframework.jms.ResourceAllocationException;
+import org.springframework.jms.TransactionInProgressException;
+import org.springframework.jms.TransactionRolledBackException;
+import org.springframework.jms.UncategorizedJmsException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.JndiDestinationResolver;
 import org.springframework.jndi.JndiTemplate;
@@ -156,7 +169,7 @@ public class JmsTemplate102Tests extends TestCase {
 		JmsTemplate102 template = new JmsTemplate102();
 		JndiDestinationResolver destMan = new JndiDestinationResolver();
 		destMan.setJndiTemplate(new JndiTemplate() {
-			protected Context createInitialContext() throws NamingException {
+			protected Context createInitialContext() {
 				return mockJndiContext;
 			}
 		});
@@ -705,7 +718,6 @@ public class JmsTemplate102Tests extends TestCase {
 
 		MockControl queueSenderControl = MockControl.createControl(QueueSender.class);
 		QueueSender mockQueueSender = (QueueSender) queueSenderControl.getMock();
-
 		MockControl messageControl = MockControl.createControl(TextMessage.class);
 		TextMessage mockMessage = (TextMessage) messageControl.getMock();
 
@@ -1049,6 +1061,105 @@ public class JmsTemplate102Tests extends TestCase {
 		else {
 			assertEquals("Messages should refer to the same object", message, mockMessage);
 		}
+	}
+
+	public void testIllegalStateException() throws Exception {
+		doTestJmsException(new javax.jms.IllegalStateException(""), org.springframework.jms.IllegalStateException.class);
+	}
+
+	public void testInvalidClientIDException() throws Exception {
+		doTestJmsException(new javax.jms.InvalidClientIDException(""), InvalidClientIDException.class);
+	}
+
+	public void testInvalidDestinationException() throws Exception {
+		doTestJmsException(new javax.jms.InvalidDestinationException(""), InvalidDestinationException.class);
+	}
+
+	public void testInvalidSelectorException() throws Exception {
+		doTestJmsException(new javax.jms.InvalidSelectorException(""), InvalidSelectorException.class);
+	}
+
+	public void testJmsSecurityException() throws Exception {
+		doTestJmsException(new javax.jms.JMSSecurityException(""), JmsSecurityException.class);
+	}
+
+	public void testMessageEOFException() throws Exception {
+		doTestJmsException(new javax.jms.MessageEOFException(""), MessageEOFException.class);
+	}
+
+	public void testMessageFormatException() throws Exception {
+		doTestJmsException(new javax.jms.MessageFormatException(""), MessageFormatException.class);
+	}
+
+	public void testMessageNotReadableException() throws Exception {
+		doTestJmsException(new javax.jms.MessageNotReadableException(""), MessageNotReadableException.class);
+	}
+
+	public void testMessageNotWriteableException() throws Exception {
+		doTestJmsException(new javax.jms.MessageNotWriteableException(""), MessageNotWriteableException.class);
+	}
+
+	public void testResourceAllocationException() throws Exception {
+		doTestJmsException(new javax.jms.ResourceAllocationException(""), ResourceAllocationException.class);
+	}
+
+	public void testTransactionInProgressException() throws Exception {
+		doTestJmsException(new javax.jms.TransactionInProgressException(""), TransactionInProgressException.class);
+	}
+
+	public void testTransactionRolledBackException() throws Exception {
+		doTestJmsException(new javax.jms.TransactionRolledBackException(""), TransactionRolledBackException.class);
+	}
+
+	public void testUncategorizedJmsException() throws Exception {
+		doTestJmsException(new javax.jms.JMSException(""), UncategorizedJmsException.class);
+	}
+
+	protected void doTestJmsException(JMSException original, Class thrownExceptionClass) throws Exception {
+		JmsTemplate template = createTemplate();
+		template.setConnectionFactory(mockQueueConnectionFactory);
+		template.setMessageConverter(new SimpleMessageConverter());
+		String s = "Hello world";
+
+		MockControl queueSenderControl = MockControl.createControl(QueueSender.class);
+		QueueSender mockQueueSender = (QueueSender) queueSenderControl.getMock();
+		MockControl messageControl = MockControl.createControl(TextMessage.class);
+		TextMessage mockMessage = (TextMessage) messageControl.getMock();
+
+		queueSessionControl.reset();
+		mockQueueSession.createSender(mockQueue);
+		queueSessionControl.setReturnValue(mockQueueSender);
+		mockQueueSession.createTextMessage("Hello world");
+		queueSessionControl.setReturnValue(mockMessage);
+
+		mockQueueSender.send(mockMessage);
+		queueSenderControl.setThrowable(original, 1);
+		mockQueueSender.close();
+		queueSenderControl.setVoidCallable(1);
+
+		mockQueueSession.close();
+		queueSessionControl.setVoidCallable(1);
+		mockQueueConnection.close();
+		queueConnectionControl.setVoidCallable(1);
+
+		queueSenderControl.replay();
+		queueSessionControl.replay();
+		queueConnectionControl.replay();
+
+		try {
+			template.convertAndSend(mockQueue, s);
+			fail("Should have thrown JmsException");
+		}
+		catch (JmsException wrappedEx) {
+			// expected
+			assertEquals(thrownExceptionClass, wrappedEx.getClass());
+			assertEquals(original, wrappedEx.getCause());
+		}
+
+		queueSenderControl.verify();
+		queueSessionControl.verify();
+		queueConnectionControl.verify();
+		queueConnectionFactoryControl.verify();
 	}
 
 }
