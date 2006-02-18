@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,7 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
 public class ResultSetWrappingRowSetTests extends TestCase {
 
 	private MockControl rsetControl;
-
 	private ResultSet rset;
-
 	private ResultSetWrappingSqlRowSet rowset;
 
 	public void setUp() throws Exception {
@@ -46,19 +44,18 @@ public class ResultSetWrappingRowSetTests extends TestCase {
 		rset = (ResultSet) rsetControl.getMock();
 		rset.getMetaData();
 		rsetControl.setReturnValue(null);
-
 	}
 
 	public void testGetBigDecimalInt() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getBigDecimal", new Class[] {int.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getBigDecimal", new Class[] {int.class});
-		doTest(rset, rowset, new Integer(1), new BigDecimal(1));
+		doTest(rset, rowset, new Integer(1), BigDecimal.valueOf(1));
 	}
 
 	public void testGetBigDecimalString() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getBigDecimal", new Class[] {String.class});
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getBigDecimal", new Class[] {String.class});
-		doTest(rset, rowset, "test", new BigDecimal(1));
+		doTest(rset, rowset, "test", BigDecimal.valueOf(1));
 	}
 
 	public void testGetStringInt() throws Exception {
@@ -120,7 +117,6 @@ public class ResultSetWrappingRowSetTests extends TestCase {
 		Method rowset = ResultSetWrappingSqlRowSet.class.getDeclaredMethod("getObject", new Class[] {String.class});
 		doTest(rset, rowset, "test", new Object());
 	}
-
 
 	public void testGetIntInt() throws Exception {
 		Method rset = ResultSet.class.getDeclaredMethod("getInt", new Class[] {int.class});
