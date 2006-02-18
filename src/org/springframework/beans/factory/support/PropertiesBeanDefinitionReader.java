@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,6 +36,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
+import org.springframework.util.StringUtils;
 
 /**
  * Bean definition reader for a simple properties format.
@@ -90,18 +91,18 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public static final String SEPARATOR = ".";
 
 	/**
-	 * Special string added to distinguish owner.(class)=com.myapp.MyClass
+	 * Special key to distinguish owner.(class)=com.myapp.MyClass
 	 */
 	public static final String CLASS_KEY = "(class)";
 
 	/**
-	 * Prefix for the class property of a root bean definition.
-	 * Deprecated in favor of {@link #CLASS_KEY}
+	 * Special key to distinguish owner.class=com.myapp.MyClass
+	 * Deprecated in favor of .(class)=
 	 */
 	private static final String DEPRECATED_CLASS_KEY = "class";
 
 	/**
-	 * Special string added to distinguish owner.(parent)=parentBeanName
+	 * Special key to distinguish owner.(parent)=parentBeanName
 	 */
 	public static final String PARENT_KEY = "(parent)";
 
@@ -112,19 +113,19 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	private static final String DEPRECATED_PARENT_KEY = "parent";
 
 	/**
-	 * Special string added to distinguish owner.(abstract)=true
+	 * Special key to distinguish owner.(abstract)=true
 	 * Default is "false".
 	 */
 	public static final String ABSTRACT_KEY = "(abstract)";
 
 	/**
-	 * Special string added to distinguish owner.(singleton)=true
+	 * Special key to distinguish owner.(singleton)=true
 	 * Default is "true".
 	 */
 	public static final String SINGLETON_KEY = "(singleton)";
 
 	/**
-	 * Special string added to distinguish owner.(lazy-init)=true
+	 * Special key to distinguish owner.(lazy-init)=true
 	 * Default is "false".
 	 */
 	public static final String LAZY_INIT_KEY = "(lazy-init)";
@@ -283,7 +284,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @throws BeansException in case of loading or parsing errors
 	 */
 	public int registerBeanDefinitions(ResourceBundle rb, String prefix) throws BeanDefinitionStoreException {
-		// Simply create a map and call overloaded method
+		// Simply create a map and call overloaded method.
 		Map map = new HashMap();
 		Enumeration keys = rb.getKeys();
 		while (keys.hasMoreElements()) {
@@ -408,58 +409,41 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
-			String key = (String) entry.getKey();
+			String key = StringUtils.trimWhitespace((String) entry.getKey());
 			if (key.startsWith(prefix + SEPARATOR)) {
 				String property = key.substring(prefix.length() + SEPARATOR.length());
 				if (isClassKey(property)) {
-					className = (String) entry.getValue();
+					className = StringUtils.trimWhitespace((String) entry.getValue());
 				}
 				else if (isParentKey(property)) {
-					parent = (String) entry.getValue();
+					parent = StringUtils.trimWhitespace((String) entry.getValue());
 				}
 				else if (ABSTRACT_KEY.equals(property)) {
-					String val = (String) entry.getValue();
+					String val = StringUtils.trimWhitespace((String) entry.getValue());
 					isAbstract = TRUE_VALUE.equals(val);
 				}
 				else if (SINGLETON_KEY.equals(property)) {
-					String val = (String) entry.getValue();
+					String val = StringUtils.trimWhitespace((String) entry.getValue());
 					singleton = (val == null) || TRUE_VALUE.equals(val);
 				}
 				else if (LAZY_INIT_KEY.equals(property)) {
-					String val = (String) entry.getValue();
+					String val = StringUtils.trimWhitespace((String) entry.getValue());
 					lazyInit = TRUE_VALUE.equals(val);
 				}
 				else if (property.endsWith(REF_SUFFIX)) {
 					// This isn't a real property, but a reference to another prototype
 					// Extract property name: property is of form dog(ref)
 					property = property.substring(0, property.length() - REF_SUFFIX.length());
-					String ref = (String) entry.getValue();
+					String ref = StringUtils.trimWhitespace((String) entry.getValue());
 
 					// It doesn't matter if the referenced bean hasn't yet been registered:
-					// this will ensure that the reference is resolved at rungime
-					// Default is not to use singleton
+					// this will ensure that the reference is resolved at runtime.
 					Object val = new RuntimeBeanReference(ref);
 					pvs.addPropertyValue(new PropertyValue(property, val));
 				}
 				else{
-					// normal bean property
-					Object val = entry.getValue();
-					if (val instanceof String) {
-						String strVal = (String) val;
-						// if it starts with a reference prefix...
-						if (strVal.startsWith(REF_PREFIX)) {
-							// expand reference
-							String targetName = strVal.substring(1);
-							if (targetName.startsWith(REF_PREFIX)) {
-								// escaped prefix -> use plain value
-								val = targetName;
-							}
-							else {
-								val = new RuntimeBeanReference(targetName);
-							}
-						}
-					}
-					pvs.addPropertyValue(new PropertyValue(property, val));
+					// It's a normal bean property.
+					pvs.addPropertyValue(new PropertyValue(property, readValue(entry)));
 				}
 			}
 		}
@@ -494,7 +478,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	}
 
 	/**
-	 * Indicates that whether the supplied property matches the class property of
+	 * Indicates whether the supplied property matches the class property of
 	 * the bean definition.
 	 */
 	private boolean isClassKey(String property) {
@@ -503,7 +487,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		}
 		else if (DEPRECATED_CLASS_KEY.equals(property)) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Use of 'class' property in " + getClass().getName() + " is deprecated in favor of '(class)'.");
+				logger.warn("Use of 'class' property in [" + getClass().getName() + "] is deprecated in favor of '(class)'");
 			}
 			return true;
 		}
@@ -511,7 +495,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	}
 
 	/**
-	 * Indicates that whether the supplied property matches the parent property of
+	 * Indicates whether the supplied property matches the parent property of
 	 * the bean definition.
 	 */
 	private boolean isParentKey(String property) {
@@ -520,11 +504,35 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		}
 		else if (DEPRECATED_PARENT_KEY.equals(property)) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Use of 'parent' property in " + getClass().getName() + " is deprecated in favor of '(parent)'.");
+				logger.warn("Use of 'parent' property in [" + getClass().getName() + "] is deprecated in favor of '(parent)'.");
 			}
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Reads the value of the entry. Correctly interprets bean references for
+	 * values that are prefixed with an asterisk.
+	 */
+	private Object readValue(Map.Entry entry) {
+		Object val = entry.getValue();
+		if (val instanceof String) {
+			String strVal = (String) val;
+			// If it starts with a reference prefix...
+			if (strVal.startsWith(REF_PREFIX)) {
+				// Expand the reference.
+				String targetName = strVal.substring(1);
+				if (targetName.startsWith(REF_PREFIX)) {
+					// Escaped prefix -> use plain value.
+					val = targetName;
+				}
+				else {
+					val = new RuntimeBeanReference(targetName);
+				}
+			}
+		}
+		return val;
 	}
 
 }
