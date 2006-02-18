@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,9 +187,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	 * @param rootObject the root object at the top of the path
 	 */
 	public void setWrappedInstance(Object object, String nestedPath, Object rootObject) {
-		if (object == null) {
-			throw new IllegalArgumentException("Cannot set BeanWrapperImpl target to a null object");
-		}
+		Assert.notNull(object, "Bean object must not be null");
 		this.object = object;
 		this.nestedPath = (nestedPath != null ? nestedPath : "");
 		this.rootObject = (!"".equals(this.nestedPath) ? rootObject : object);
@@ -254,9 +252,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	}
 
 	public PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
-		if (propertyName == null) {
-			throw new IllegalArgumentException("Can't find property descriptor for <code>null</code> property");
-		}
+		Assert.notNull(propertyName, "Property name must not be null");
 		PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
 		if (pd != null) {
 			return pd;
@@ -278,11 +274,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	}
 
 	public boolean isReadableProperty(String propertyName) {
-		// This is a programming error, although asking for a property
-		// that doesn't exist is not.
-		if (propertyName == null) {
-			throw new IllegalArgumentException("Can't find readability status for <code>null</code> property");
-		}
+		Assert.notNull(propertyName, "Property name must not be null");
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
 			if (pd != null) {
@@ -291,23 +283,19 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 				}
 			}
 			else {
-				// maybe an indexed/mapped property
+				// Maybe an indexed/mapped property...
 				getPropertyValue(propertyName);
 				return true;
 			}
 		}
 		catch (InvalidPropertyException ex) {
-			// cannot be evaluated, so can't be readable
+			// Cannot be evaluated, so can't be readable.
 		}
 		return false;
 	}
 
 	public boolean isWritableProperty(String propertyName) {
-		// This is a programming error, although asking for a property
-		// that doesn't exist is not.
-		if (propertyName == null) {
-			throw new IllegalArgumentException("Can't find writability status for <code>null</code> property");
-		}
+		Assert.notNull(propertyName, "Property name must not be null");
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
 			if (pd != null) {
@@ -316,13 +304,13 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 				}
 			}
 			else {
-				// maybe an indexed/mapped property
+				// Maybe an indexed/mapped property...
 				getPropertyValue(propertyName);
 				return true;
 			}
 		}
 		catch (InvalidPropertyException ex) {
-			// cannot be evaluated, so can't be writable
+			// Cannot be evaluated, so can't be writable.
 		}
 		return false;
 	}
@@ -433,7 +421,6 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	 * @param object object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
 	 * @return the nested BeanWrapper instance
-	 * @see #BeanWrapperImpl(Object, String, BeanWrapper)
 	 */
 	protected BeanWrapperImpl newNestedBeanWrapper(Object object, String nestedPath) {
 		return new BeanWrapperImpl(object, nestedPath, this);
@@ -589,7 +576,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 		String propertyName = tokens.canonicalName;
 
 		if (tokens.keys != null) {
-			// apply indexes and map keys: fetch value for all keys but the last one
+			// Apply indexes and map keys: fetch value for all keys but the last one.
 			PropertyTokenHolder getterTokens = new PropertyTokenHolder();
 			getterTokens.canonicalName = tokens.canonicalName;
 			getterTokens.actualName = tokens.actualName;
@@ -604,7 +591,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 						"Cannot access indexed value in property referenced " +
 						"in indexed property path '" + propertyName + "'", ex);
 			}
-			// set value for last key
+			// Set value for last key.
 			String key = tokens.keys[tokens.keys.length - 1];
 			if (propValue == null) {
 				throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
