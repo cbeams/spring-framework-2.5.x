@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.7 (21.1.2006)
+Changes in version 1.2.7 (20.2.2006)
 ------------------------------------
 
 Package org.springframework.aop
@@ -12,31 +12,48 @@ Package org.springframework.aop
 * added "hideProxyClassNames" property to AbstractTraceInterceptor, to log with target class instead of proxy class
 
 Package org.springframework.beans
+* BeanWrapperImpl keeps registered editors in a linked Map: the first registered editor that matches will be used
+* BeanWrapperImpl caches registered editors that match superclass or interface, to avoid repeated assignable-from checks
 * fixed BeanWrapperImpl to pass its "extractOldValueForEditor" setting on to nested BeanWrappers
 * refined BeanWrapperImpl to perform the accessible checking for read/write methods before every invocation
 * fixed PropertyAccessorUtils's "getLastNestedPropertySeparatorIndex" to correctly handle property paths without dot
 * added overloaded constructor to StringArrayPropertyEditor, allowing to specify a custom separator for String splitting
+* fixed ArgumentConvertingMethodInvoker to perform conversion attempts on a copy of the argument array (not the source)
+* added "containsLocalBean" method to HierarchicalBeanFactory interface, refactored from AbstractApplicationContext
 * fixed AbstractBeanFactory to allow child bean definitions to refer to a parent via its alias name
 * fixed AbstractBeanFactory to correctly delegate to parent BeanFactory from "isFactoryBean"
 * optimized AbstractBeanFactory to avoid internal NoSuchBeanDefinitionException throw+catch as far as possible
 * reworked AbstractBeanFactory's currently-in-creation check to log debug message when unfinished singleton is returned
+* AbstractBeanFactory caches merged bean definitions, for efficient prototype child creation and CGLIB class reuse
+* fixed AbstractBeanFactory to use canonical bean name (id) for prototype creation, exposing it to BeanPostProcessors
 * added "allowCircularReferences" flag to AbstractAutowireCapableBeanFactory, to disallow circular references completely
 * DefaultListableBeanFactory's "getBeansOfType" logs BeanCurrentlyInCreationException message instead of stacktrace
+* PropertiesBeanDefinitionReader trims String values for special keys such as "(class)", "(parent)", etc
 * added "default-init-method" and "default-destroy-method" attributes to the XML bean definition format
 * refined DefaultXmlBeanDefinitionParser to explicity check for empty ref name and throw meaningful exception
 * DefaultXmlBeanDefinitionParser wraps unexpected exceptions in BeanDefinitionStoreException with context info
+* inner bean parsing/instantiation exceptions get wrapped in outer exceptions with appropriate context information
 
 Package org.springframework.core
 * refined Jdk13ControlFlow to be compatible with GNU ClassPath (whose stacktrace has a whitespace after the method name)
+* added workaround for "FilterInputStream.close()" NPE to AbstractResource, simply catching Throwable and ignoring it
+* PathMatchingResourcePatternResolver considers URL protocol "wsjar" as jar file (to load from WebSphere-managed jars)
+* ResourceArrayPropertyEditor can translate a set/list of patterns into a Resource array (rather than just one pattern)
+
+Package org.springframework.context
+* AbstractApplicationContext discovers its context MessageSource as "messageSource" bean even through an alias
 
 Package org.springframework.jdbc
-* added further error codes for Oracle and MySQL to default "sql-error-codes.xml" file
+* refined default SQL error codes for MS SQL, MySQL, and Oracle
 * OracleLobHandler lazily initializes Oracle driver classes, always loading via the actual Connection's class loader
 * fixed DataSourceUtils to correctly re-suspend a Connection even if the Connection hasn't been used since resume
+* refined DataSourceUtils to expect an "afterCompletion" callback from a different thread (in case of JTA transaction)
 * DataSourceTransactionManager only attempts to release Connection if not pre-bound (to avoid inappropriate log message)
+* TransactionAwareDataSourceProxy works correctly in combination with JdbcTemplate and transaction suspend/resume now
 * fixed JdbcTemplate to extract the JDBC Connection for CallableStatementCreators if a NativeJdbcExtractor has been set
 * factored out protected "getColumnMapRowMapper" and "getSingleColumnRowMapper" hooks within JdbcTemplate
 * SingleColumnRowMapper explicitly calls "ResultSet.getBigDecimal()" if the required type is BigDecimal
+* fixed SingleColumnRowMapper to explicitly check "ResultSet.wasNull()" after "getInt"/"getLong"/"getFloat" etc
 * fixed BatchSqlUpdate's constructor that takes a "batchSize" argument to correctly interpret it as batch size
 * added "trackRowsAffected" property to BatchSqlUpdate, allowing to turn off the row counts list to save memory
 
@@ -75,6 +92,7 @@ Package org.springframework.test
 
 Package org.springframework.transaction
 * fixed AbstractPlatformTransactionManager to serialize all relevant state
+* refined AbstractPlatformTransactionManager to suspend synchronizations before the actual transaction (not after)
 * JtaTransactionManager only invokes rollback if transaction is still active (some JTA providers eagerly terminate)
 * marked AnnotationTransactionAttributeSource as Serializable
 
@@ -95,6 +113,7 @@ Package org.springframework.web
 * use NestedServletException wherever a root cause gets wrapped by a ServletException (for nicer root cause handling)
 * "contextConfigLocation" params in "web.xml" support "${...}" style placeholders for system properties
 * deprecated BindUtils and BindInitializer in package "web.bind" in favor of direct ServletRequestDataBinder usage
+* fixed DispatcherServlet to keep and restore previous thread-bound LocaleContext
 * added "currentFormObject" template method to AbstractFormController, for post-processing of a session form object
 * FixedLocaleResolver returns the JVM's default Locale if no explicit default Locale specified
 * added HttpSessionMutexListener and "WebUtils.getSessionMutex", used by AbstractController's "synchronizeOnSession"
