@@ -107,6 +107,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** Map from alias to canonical bean name */
 	private final Map aliasMap = new HashMap();
 
+	/** Map from ChildBeanDefinition to merged RootBeanDefinition */
+	private final Map mergedBeanDefinitions = new HashMap();
+
 	/** Cache of singletons: bean name --> bean instance */
 	private final Map singletonCache = new HashMap();
 
@@ -250,7 +253,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 			else {
 				// It's a prototype -> create a new instance.
-				bean = createBean(name, mergedBeanDefinition, args);
+				bean = createBean(beanName, mergedBeanDefinition, args);
 			}
 		}
 
@@ -707,44 +710,52 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		}
 
 		else if (bd instanceof ChildBeanDefinition) {
-			// Child bean definition: needs to be merged with parent.
-			ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
-			RootBeanDefinition pbd = null;
-			try {
-				if (!beanName.equals(cbd.getParentName())) {
-					pbd = getMergedBeanDefinition(cbd.getParentName(), true);
-				}
-				else {
-					if (getParentBeanFactory() instanceof AbstractBeanFactory) {
-						AbstractBeanFactory parentFactory = (AbstractBeanFactory) getParentBeanFactory();
-						pbd = parentFactory.getMergedBeanDefinition(cbd.getParentName(), true);
+			synchronized (this.mergedBeanDefinitions) {
+				RootBeanDefinition rbd = (RootBeanDefinition) this.mergedBeanDefinitions.get(bd);
+
+				if (rbd == null) {
+					// Child bean definition: needs to be merged with parent.
+					ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
+					RootBeanDefinition pbd = null;
+					try {
+						if (!beanName.equals(cbd.getParentName())) {
+							pbd = getMergedBeanDefinition(cbd.getParentName(), true);
+						}
+						else {
+							if (getParentBeanFactory() instanceof AbstractBeanFactory) {
+								AbstractBeanFactory parentFactory = (AbstractBeanFactory) getParentBeanFactory();
+								pbd = parentFactory.getMergedBeanDefinition(cbd.getParentName(), true);
+							}
+							else {
+								throw new NoSuchBeanDefinitionException(cbd.getParentName(),
+										"Parent name '" + cbd.getParentName() + "' is equal to bean name '" + beanName +
+										"': cannot be resolved without an AbstractBeanFactory parent");
+							}
+						}
 					}
-					else {
-						throw new NoSuchBeanDefinitionException(cbd.getParentName(),
-								"Parent name '" + cbd.getParentName() + "' is equal to bean name '" + beanName +
-								"': cannot be resolved without an AbstractBeanFactory parent");
+					catch (NoSuchBeanDefinitionException ex) {
+						throw new BeanDefinitionStoreException(cbd.getResourceDescription(), beanName,
+								"Could not resolve parent bean definition '" + cbd.getParentName() + "'", ex);
 					}
+
+					// Deep copy with overridden values.
+					rbd = new RootBeanDefinition(pbd);
+					rbd.overrideFrom(cbd);
+
+					// Validate merged definition: mainly to prepare method overrides.
+					try {
+						rbd.validate();
+					}
+					catch (BeanDefinitionValidationException ex) {
+						throw new BeanDefinitionStoreException(rbd.getResourceDescription(), beanName,
+								"Validation of bean definition failed", ex);
+					}
+
+					this.mergedBeanDefinitions.put(bd, rbd);
 				}
-			}
-			catch (NoSuchBeanDefinitionException ex) {
-				throw new BeanDefinitionStoreException(cbd.getResourceDescription(), beanName,
-						"Could not resolve parent bean definition '" + cbd.getParentName() + "'", ex);
-			}
 
-			// Deep copy with overridden values.
-			RootBeanDefinition rbd = new RootBeanDefinition(pbd);
-			rbd.overrideFrom(cbd);
-
-			// Validate merged definition: mainly to prepare method overrides.
-			try {
-				rbd.validate();
+				return rbd;
 			}
-			catch (BeanDefinitionValidationException ex) {
-				throw new BeanDefinitionStoreException(rbd.getResourceDescription(), beanName,
-						"Validation of bean definition failed", ex);
-			}
-
-			return rbd;
 		}
 
 		else {
