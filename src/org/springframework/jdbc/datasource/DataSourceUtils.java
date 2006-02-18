@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -98,7 +98,7 @@ public abstract class DataSourceUtils {
 		Assert.notNull(dataSource, "No DataSource specified");
 
 		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
-		if (conHolder != null) {
+		if (conHolder != null && (conHolder.hasConnection() || conHolder.isSynchronizedWithTransaction())) {
 			conHolder.requested();
 			if (!conHolder.hasConnection()) {
 				logger.debug("Fetching resumed JDBC Connection from DataSource");
@@ -106,6 +106,7 @@ public abstract class DataSourceUtils {
 			}
 			return conHolder.getConnection();
 		}
+		// Else we either got no holder or an empty thread-bound holder here.
 
 		logger.debug("Fetching JDBC Connection from DataSource");
 		Connection con = dataSource.getConnection();
@@ -114,12 +115,20 @@ public abstract class DataSourceUtils {
 			logger.debug("Registering transaction synchronization for JDBC Connection");
 			// Use same Connection for further JDBC actions within the transaction.
 			// Thread-bound object will get removed by synchronization at transaction completion.
-			conHolder = new ConnectionHolder(con);
-			conHolder.setSynchronizedWithTransaction(true);
-			conHolder.requested();
+			ConnectionHolder holderToUse = conHolder;
+			if (holderToUse == null) {
+				holderToUse = new ConnectionHolder(con);
+			}
+			else {
+				holderToUse.setConnection(con);
+			}
+			holderToUse.requested();
 			TransactionSynchronizationManager.registerSynchronization(
-					new ConnectionSynchronization(conHolder, dataSource));
-			TransactionSynchronizationManager.bindResource(dataSource, conHolder);
+					new ConnectionSynchronization(holderToUse, dataSource));
+			holderToUse.setSynchronizedWithTransaction(true);
+			if (holderToUse != conHolder) {
+				TransactionSynchronizationManager.bindResource(dataSource, holderToUse);
+			}
 		}
 
 		return con;
@@ -263,7 +272,7 @@ public abstract class DataSourceUtils {
 
 		if (dataSource != null) {
 			ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
-			if (conHolder != null && connectionEquals(conHolder.getConnection(), con)) {
+			if (conHolder != null && conHolder.hasConnection() && connectionEquals(conHolder.getConnection(), con)) {
 				// It's the transactional Connection: Don't close it.
 				conHolder.released();
 				return;
@@ -372,12 +381,19 @@ public abstract class DataSourceUtils {
 			// If we haven't closed the Connection in beforeCompletion,
 			// close it now. The holder might have been used for other
 			// cleanup in the meantime, for example by a Hibernate Session.
-			if (TransactionSynchronizationManager.hasResource(this.dataSource)) {
-				TransactionSynchronizationManager.unbindResource(this.dataSource);
+			if (this.holderActive) {
+				// The thread-bound ConnectionHolder might not be available anymore,
+				// since afterCompletion might get called from a different thread.
+				if (TransactionSynchronizationManager.hasResource(this.dataSource)) {
+					TransactionSynchronizationManager.unbindResource(this.dataSource);
+				}
 				this.holderActive = false;
 				if (this.connectionHolder.hasConnection()) {
 					releaseConnection(this.connectionHolder.getConnection(), this.dataSource);
+					// Reset the ConnectionHolder - it might remain bound to the thread.
+					this.connectionHolder.setConnection(null);
 				}
+				this.connectionHolder.reset();
 			}
 		}
 	}
