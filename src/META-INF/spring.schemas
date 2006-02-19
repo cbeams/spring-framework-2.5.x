@@ -3,3 +3,4 @@ http\://www.springframework.org/schema/util/spring-util.xsd=org/springframework/
 http\://www.springframework.org/schema/aop/spring-aop.xsd=org/springframework/aop/config/spring-aop.xsd
 http\://www.springframework.org/schema/jndi/spring-jndi.xsd=org/springframework/jndi/config/spring-jndi.xsd
 http\://www.springframework.org/schema/tx/spring-tx.xsd=org/springframework/transaction/config/spring-tx.xsd
+http\://www.springframework.org/schema/mvc/spring-mvc.xsd=org/springframework/web/servlet/config/spring-mvc.xsd

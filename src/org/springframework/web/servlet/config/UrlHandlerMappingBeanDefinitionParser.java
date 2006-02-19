@@ -16,12 +16,8 @@
 
 package org.springframework.web.servlet.config;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
-import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -44,22 +40,28 @@ import org.w3c.dom.NodeList;
  * @author Alef Arendsen
  * @since 2.0
  */
-public class UrlHandlerMappingBeanDefinitionParser implements
-		BeanDefinitionParser {
+public class UrlHandlerMappingBeanDefinitionParser extends MvcBeanDefinitionParserSupport 
+	implements BeanDefinitionParser {
 	
 	//---------------------------------------------------------------------
 	// Static section
 	//---------------------------------------------------------------------
 	
-	private static final String URLMAPPING = "urlmapping";
-	
-	private static final String ALWAYS_USE_FULL_PATH = "alwaysUseFullPath";
-	private static final String URL_DECODE = "urlDecode";
-	private static final String LAZY_INIT_HANDLERS = "lazyInitHandlers";
-	private static final String ORDER = "order";
-	private static final String DEFAULT_HANDLER = "defaultHandler";
+	private static final String URLMAPPING = "url-mapping";
+	private static final String ALWAYS_USE_FULL_PATH = "always-use-full-path";
+	private static final String ALWAYS_USE_FULL_PATH_PROPERTY = "alwaysUseFullPath";
+	private static final String URL_DECODE = "url-decode";
+	private static final String URL_DECODE_PROPERTY = "urlDecode";
+	private static final String LAZY_INIT_HANDLERS = "lazy-init-handlers";
+	private static final String LAZY_INIT_HANLDERS_PROPERTY = "lazyInitHandlers";
+	private static final String DEFAULT_HANDLER = "default-handler";
+
+	private static final String HANDLER = "handler";	
+	private static final String PATH = "path";
+	private static final String CONTROLLER_REF = "controller-ref";
 
 	private static final String INTERCEPTOR = "interceptor";
+	private static final String INTERCEPTOR_REF = "interceptor-ref";
 
 	//---------------------------------------------------------------------
 	// Instance section
@@ -74,6 +76,23 @@ public class UrlHandlerMappingBeanDefinitionParser implements
 		Assert.notNull(element);
 		Assert.notNull(registry);
 		
+		NodeList handlerMappingChildren = element.getChildNodes();		
+		
+		int handlerCount = 0;
+		for (int i = 0; i < handlerMappingChildren.getLength(); i++) {
+			Node handlerMapping = handlerMappingChildren.item(i);
+		
+			if (URLMAPPING.equals(handlerMapping.getLocalName()) && handlerMapping.getNodeType() == Node.ELEMENT_NODE) {
+				Element el = (Element)handlerMapping;
+				RootBeanDefinition handlerMappingDefinition = parseHandlerMappingDefinition(el, registry);
+				handlerMappingDefinition.getPropertyValues().addPropertyValue("order", new Integer(handlerCount++));
+				registry.registerBeanDefinition(BeanDefinitionReaderUtils.generateBeanName(
+						handlerMappingDefinition, registry, false), handlerMappingDefinition);				
+			}
+		}		
+	}
+	
+	private RootBeanDefinition parseHandlerMappingDefinition(Element element, BeanDefinitionRegistry registry) {
 		Properties mappings = new Properties();
 		ManagedList interceptors = new ManagedList();
 		
@@ -83,48 +102,39 @@ public class UrlHandlerMappingBeanDefinitionParser implements
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node childElement = childNodes.item(i);
 			// just to be sure that it's really a urlmapping
-			if (URLMAPPING.equals(childElement.getLocalName()) && childElement.getNodeType() == Node.ELEMENT_NODE) {
+			if (HANDLER.equals(childElement.getLocalName()) && childElement.getNodeType() == Node.ELEMENT_NODE) {
 				// parse handler mapping mapping paths to urls
 				Element el = (Element)childElement;
-				String path = el.getAttribute("path");
-				String ref = el.getAttribute("ref");
+				String path = el.getAttribute(PATH);
+				String ref = el.getAttribute(CONTROLLER_REF);
 				
 				mappings.put(path, ref);
 			} else if (INTERCEPTOR.equals(childElement.getLocalName()) && childElement.getNodeType() == Node.ELEMENT_NODE) {
 				// parse interceptor
 				Element el = (Element)childElement;
-				String ref = el.getAttribute("ref");
+				String ref = el.getAttribute(INTERCEPTOR_REF);
 				interceptors.add(new RuntimeBeanReference(ref));
 			}
 		}	
 		
 		// create root bean definition
-		RootBeanDefinition definition = new RootBeanDefinition();
+		RootBeanDefinition definition = new RootBeanDefinition();	
 		definition.setBeanClass(SimpleUrlHandlerMapping.class);
 		definition.getPropertyValues().addPropertyValue("mappings", mappings);
 		
 		definition.getPropertyValues().addPropertyValue("interceptors", interceptors);
 		
 		// parse attributes
-		setPropertyIfAvailable(element, ALWAYS_USE_FULL_PATH, definition);
-		setPropertyIfAvailable(element, URL_DECODE, definition);
-		setPropertyIfAvailable(element, LAZY_INIT_HANDLERS, definition);
-		setPropertyIfAvailable(element, ORDER, definition);
+		setPropertyIfAvailable(element, ALWAYS_USE_FULL_PATH, ALWAYS_USE_FULL_PATH_PROPERTY, definition);
+		setPropertyIfAvailable(element, URL_DECODE, URL_DECODE_PROPERTY, definition);
+		setPropertyIfAvailable(element, LAZY_INIT_HANDLERS, LAZY_INIT_HANLDERS_PROPERTY, definition);
 		
 		String defaultHandler = element.getAttribute(DEFAULT_HANDLER);
 		if (StringUtils.hasText(defaultHandler)) {
 			definition.getPropertyValues().addPropertyValue("defaultHandler", defaultHandler);
 		}
-		
-		registry.registerBeanDefinition(
-				BeanDefinitionReaderUtils.generateBeanName(definition, registry, false), definition);
-	}
-	
-	private void setPropertyIfAvailable(Element el, String property, RootBeanDefinition definition) {
-		String propertyValue = el.getAttribute(property);
-		if (StringUtils.hasText(propertyValue)) {
-			definition.getPropertyValues().addPropertyValue(property, propertyValue);
-		}
+
+		return definition;
 	}
 
 }
