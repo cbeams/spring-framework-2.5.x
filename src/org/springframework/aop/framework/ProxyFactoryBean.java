@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -252,7 +252,16 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * @return a fresh AOP proxy reflecting the current state of this factory
 	 */
 	public Object getObject() throws BeansException {
-		return (this.singleton ? getSingletonInstance() : newPrototypeInstance());
+		if (isSingleton()) {
+			return getSingletonInstance();
+		}
+		else {
+			if (this.targetName == null) {
+				logger.warn("Using non-singleton proxies with singleton targets is often undesirable." +
+								"Enable prototype proxies by setting the 'targetName' property.");
+			}
+			return newPrototypeInstance();
+		}
 	}
 
 	/**
@@ -558,6 +567,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 	private static class PrototypePlaceholderAdvisor implements Advisor {
 
 		private final String beanName;
+
 		private final String message;
 		
 		public PrototypePlaceholderAdvisor(String beanName) {
