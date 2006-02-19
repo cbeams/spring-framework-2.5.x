@@ -33,11 +33,23 @@ public class MockServletContextTests extends TestCase {
 		assertTrue(paths.contains("/web/MockServletContextTests.class"));
 	}
 
-	public void testListDirectories() {
+	public void testListSubdirectories() {
 		MockServletContext sc = new MockServletContext("org/springframework/mock");
 		Set paths = sc.getResourcePaths("/");
 		assertNotNull(paths);
 		assertTrue(paths.contains("/web/"));
+	}
+
+	public void testListNonDirectory() {
+		MockServletContext sc = new MockServletContext("org/springframework/mock");
+		Set paths = sc.getResourcePaths("/web/MockServletContextTests.class");
+		assertNull(paths);
+	}
+
+	public void testListInvalidPath() {
+		MockServletContext sc = new MockServletContext("org/springframework/mock");
+		Set paths = sc.getResourcePaths("/web/invalid");
+		assertNull(paths);
 	}
 
 }

@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Set;
@@ -34,10 +33,12 @@ import javax.servlet.ServletContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -169,7 +170,10 @@ public class MockServletContext implements ServletContext {
 		try {
 			File file = resource.getFile();
 			String[] fileList = file.list();
-			Set resourcePaths = new HashSet(fileList.length);
+			if (ObjectUtils.isEmpty(fileList)) {
+				return null;
+			}
+			Set resourcePaths = CollectionFactory.createLinkedSetIfPossible(fileList.length);
 			for (int i = 0; i < fileList.length; i++) {
 				String resultPath = actualPath + fileList[i];
 				if (resource.createRelative(fileList[i]).getFile().isDirectory()) {
