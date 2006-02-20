@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -531,6 +531,24 @@ public class DataBinderTests extends TestCase {
 		assertTrue(tb.getSet().contains(new Integer(10)));
 		assertTrue(tb.getSet().contains(new Integer(20)));
 		assertTrue(tb.getSet().contains(new Integer(30)));
+
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("set", null);
+		binder.bind(pvs);
+
+		assertNull(tb.getSet());
+	}
+
+	public void testBindingNullToEmptyCollection() {
+		IndexedTestBean tb = new IndexedTestBean();
+		DataBinder binder = new DataBinder(tb, "tb");
+		binder.registerCustomEditor(Set.class, new CustomCollectionEditor(TreeSet.class, true));
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("set", null);
+		binder.bind(pvs);
+
+		assertTrue(tb.getSet() instanceof TreeSet);
+		assertTrue(tb.getSet().isEmpty());
 	}
 
 	public void testBindingToIndexedField() {
