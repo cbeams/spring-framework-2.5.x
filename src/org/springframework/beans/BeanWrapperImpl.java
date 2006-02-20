@@ -820,138 +820,136 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 			Object oldValue, Object newValue, Class requiredType) throws TypeMismatchException {
 
 		Object convertedValue = newValue;
-		if (convertedValue != null) {
 
-			// Custom editor for this type?
-			PropertyEditor pe = findCustomEditor(requiredType, fullPropertyName);
+		// Custom editor for this type?
+		PropertyEditor pe = findCustomEditor(requiredType, fullPropertyName);
 
-			// Value not of required type?
-			if (pe != null ||
-					(requiredType != null &&
-					(requiredType.isArray() || !requiredType.isAssignableFrom(convertedValue.getClass())))) {
+		// Value not of required type?
+		if (pe != null ||
+				(requiredType != null &&
+				(requiredType.isArray() || !requiredType.isInstance(convertedValue)))) {
 
-				if (requiredType != null) {
+			if (requiredType != null) {
+				if (pe == null) {
+					// No custom editor -> check BeanWrapperImpl's default editors.
+					pe = (PropertyEditor) getDefaultEditor(requiredType);
 					if (pe == null) {
-						// No custom editor -> check BeanWrapperImpl's default editors.
-						pe = (PropertyEditor) getDefaultEditor(requiredType);
-						if (pe == null) {
-							// No BeanWrapper default editor -> check standard JavaBean editors.
-							pe = PropertyEditorManager.findEditor(requiredType);
-						}
+						// No BeanWrapper default editor -> check standard JavaBean editors.
+						pe = PropertyEditorManager.findEditor(requiredType);
 					}
 				}
+			}
 
-				if (pe != null && !(convertedValue instanceof String)) {
-					// Not a String -> use PropertyEditor's setValue.
-					// With standard PropertyEditors, this will return the very same object;
-					// we just want to allow special PropertyEditors to override setValue
-					// for type conversion from non-String values to the required type.
-					try {
-						pe.setValue(convertedValue);
-						Object newConvertedValue = pe.getValue();
-						if (newConvertedValue != convertedValue) {
-							convertedValue = newConvertedValue;
-							// Reset PropertyEditor: It already did a proper conversion.
-							// Don't use it again for a setAsText call.
-							pe = null;
-						}
-					}
-					catch (IllegalArgumentException ex) {
-						throw new TypeMismatchException(
-								createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType, ex);
+			if (pe != null && !(convertedValue instanceof String)) {
+				// Not a String -> use PropertyEditor's setValue.
+				// With standard PropertyEditors, this will return the very same object;
+				// we just want to allow special PropertyEditors to override setValue
+				// for type conversion from non-String values to the required type.
+				try {
+					pe.setValue(convertedValue);
+					Object newConvertedValue = pe.getValue();
+					if (newConvertedValue != convertedValue) {
+						convertedValue = newConvertedValue;
+						// Reset PropertyEditor: It already did a proper conversion.
+						// Don't use it again for a setAsText call.
+						pe = null;
 					}
 				}
-
-				if (requiredType != null && !requiredType.isArray() && convertedValue instanceof String[]) {
-					// Convert String array to a comma-separated String.
-					// Only applies if no PropertyEditor converted the String array before.
-					// The CSV String will be passed into a PropertyEditor's setAsText method, if any.
-					if (logger.isDebugEnabled()) {
-						logger.debug("Converting String array to comma-delimited String [" + convertedValue + "]");
-					}
-					convertedValue = StringUtils.arrayToCommaDelimitedString((String[]) convertedValue);
+				catch (IllegalArgumentException ex) {
+					throw new TypeMismatchException(
+							createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType, ex);
 				}
+			}
 
-				if (pe != null && convertedValue instanceof String) {
-					// Use PropertyEditor's setAsText in case of a String value.
-					if (logger.isDebugEnabled()) {
-						logger.debug("Converting String to [" + requiredType + "] using property editor [" + pe + "]");
-					}
-					try {
-						pe.setValue(oldValue);
-						pe.setAsText((String) convertedValue);
-						convertedValue = pe.getValue();
-					}
-					catch (IllegalArgumentException ex) {
-						throw new TypeMismatchException(
-								createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType, ex);
-					}
+			if (requiredType != null && !requiredType.isArray() && convertedValue instanceof String[]) {
+				// Convert String array to a comma-separated String.
+				// Only applies if no PropertyEditor converted the String array before.
+				// The CSV String will be passed into a PropertyEditor's setAsText method, if any.
+				if (logger.isDebugEnabled()) {
+					logger.debug("Converting String array to comma-delimited String [" + convertedValue + "]");
 				}
+				convertedValue = StringUtils.arrayToCommaDelimitedString((String[]) convertedValue);
+			}
 
-				if (requiredType != null) {
-					// Array required -> apply appropriate conversion of elements.
-					if (requiredType.isArray()) {
-						Class componentType = requiredType.getComponentType();
-						if (convertedValue instanceof Collection) {
-							// Convert Collection elements to array elements.
-							Collection coll = (Collection) convertedValue;
-							Object result = Array.newInstance(componentType, coll.size());
-							int i = 0;
-							for (Iterator it = coll.iterator(); it.hasNext(); i++) {
-								Object value = doTypeConversionIfNecessary(
-										propertyName, propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
-										null, it.next(), componentType);
-								Array.set(result, i, value);
-							}
-							return result;
-						}
-						else if (convertedValue != null && convertedValue.getClass().isArray()) {
-							// Convert Collection elements to array elements.
-							int arrayLength = Array.getLength(convertedValue);
-							Object result = Array.newInstance(componentType, arrayLength);
-							for (int i = 0; i < arrayLength; i++) {
-								Object value = doTypeConversionIfNecessary(
-										propertyName, propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
-										null, Array.get(convertedValue, i), componentType);
-								Array.set(result, i, value);
-							}
-							return result;
-						}
-						else {
-							// A plain value: convert it to an array with a single component.
-							Object result = Array.newInstance(componentType, 1);
+			if (pe != null && convertedValue instanceof String) {
+				// Use PropertyEditor's setAsText in case of a String value.
+				if (logger.isDebugEnabled()) {
+					logger.debug("Converting String to [" + requiredType + "] using property editor [" + pe + "]");
+				}
+				try {
+					pe.setValue(oldValue);
+					pe.setAsText((String) convertedValue);
+					convertedValue = pe.getValue();
+				}
+				catch (IllegalArgumentException ex) {
+					throw new TypeMismatchException(
+							createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType, ex);
+				}
+			}
+
+			if (requiredType != null) {
+				// Array required -> apply appropriate conversion of elements.
+				if (requiredType.isArray()) {
+					Class componentType = requiredType.getComponentType();
+					if (convertedValue instanceof Collection) {
+						// Convert Collection elements to array elements.
+						Collection coll = (Collection) convertedValue;
+						Object result = Array.newInstance(componentType, coll.size());
+						int i = 0;
+						for (Iterator it = coll.iterator(); it.hasNext(); i++) {
 							Object value = doTypeConversionIfNecessary(
-									propertyName, propertyName + PROPERTY_KEY_PREFIX + 0 + PROPERTY_KEY_SUFFIX,
-									null, convertedValue, componentType);
-							Array.set(result, 0, value);
-							return result;
+									propertyName, propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
+									null, it.next(), componentType);
+							Array.set(result, i, value);
+						}
+						return result;
+					}
+					else if (convertedValue != null && convertedValue.getClass().isArray()) {
+						// Convert Collection elements to array elements.
+						int arrayLength = Array.getLength(convertedValue);
+						Object result = Array.newInstance(componentType, arrayLength);
+						for (int i = 0; i < arrayLength; i++) {
+							Object value = doTypeConversionIfNecessary(
+									propertyName, propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
+									null, Array.get(convertedValue, i), componentType);
+							Array.set(result, i, value);
+						}
+						return result;
+					}
+					else {
+						// A plain value: convert it to an array with a single component.
+						Object result = Array.newInstance(componentType, 1);
+						Object value = doTypeConversionIfNecessary(
+								propertyName, propertyName + PROPERTY_KEY_PREFIX + 0 + PROPERTY_KEY_SUFFIX,
+								null, convertedValue, componentType);
+						Array.set(result, 0, value);
+						return result;
+					}
+				}
+
+				// If the resulting value definitely doesn't match the required type,
+				// try field lookup as fallback. If no matching field found,
+				// throw explicit TypeMismatchException with full context information.
+				if (convertedValue != null && !requiredType.isPrimitive() &&
+						!requiredType.isInstance(convertedValue)) {
+
+					// In case of String value, try to find matching field (for JDK 1.5
+					// enum or custom enum with values defined as static fields).
+					if (convertedValue instanceof String) {
+						try {
+							Field enumField = requiredType.getField((String) convertedValue);
+							return enumField.get(null);
+						}
+						catch (Exception ex) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Field [" + convertedValue + "] isn't an enum value", ex);
+							}
 						}
 					}
 
-					// If the resulting value definitely doesn't match the required type,
-					// try field lookup as fallback. If no matching field found,
-					// throw explicit TypeMismatchException with full context information.
-					if (convertedValue != null && !requiredType.isPrimitive() &&
-							!requiredType.isAssignableFrom(convertedValue.getClass())) {
-
-						// In case of String value, try to find matching field (for JDK 1.5
-						// enum or custom enum with values defined as static fields).
-						if (convertedValue instanceof String) {
-							try {
-								Field enumField = requiredType.getField((String) convertedValue);
-								return enumField.get(null);
-							}
-							catch (Exception ex) {
-								if (logger.isDebugEnabled()) {
-									logger.debug("Field [" + convertedValue + "] isn't an enum value", ex);
-								}
-							}
-						}
-
-						// Definitely doesn't match: throw TypeMismatchException.
-						throw new TypeMismatchException(
-								createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType);
-					}
+					// Definitely doesn't match: throw TypeMismatchException.
+					throw new TypeMismatchException(
+							createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType);
 				}
 			}
 		}

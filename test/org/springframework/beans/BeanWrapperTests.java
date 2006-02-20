@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -441,12 +441,16 @@ public class BeanWrapperTests extends TestCase {
 					setValue(StringUtils.arrayToDelimitedString(((String[]) value), "-"));
 				}
 				else {
-					super.setValue(value);
+					super.setValue(value != null ? value : "");
 				}
 			}
 		});
+		bw.setPropertyValue("name", new String[] {});
+		assertEquals("", tb.getName());
 		bw.setPropertyValue("name", new String[] {"a1", "b2"});
 		assertEquals("a1-b2", tb.getName());
+		bw.setPropertyValue("name", null);
+		assertEquals("", tb.getName());
 	}
 
 	public void testIntArrayProperty() {
