@@ -23,6 +23,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.JdkVersion;
 import org.springframework.scripting.Messenger;
@@ -55,6 +56,16 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 			"}";
 	private static final String EXPECTED_CHANGED_MESSAGE_TEXT = "'" + MESSAGE_TEXT + "'";
 	private static final int DEFAULT_SECONDS_TO_PAUSE = 1;
+	private static final String DELEGATING_SCRIPT = "inline:package org.springframework.scripting;\n" +
+			"class DelegatingMessenger implements Messenger {\n" +
+			"  private Messenger wrappedMessenger;\n" +
+			"  public String getMessage() {\n" +
+			"    return this.wrappedMessenger.getMessage()\n" +
+			"  }\n" +
+			"  public void setMessenger(Messenger wrappedMessenger) {\n" +
+			"    this.wrappedMessenger = wrappedMessenger\n" +
+			"  }\n" +
+			"}";
 
 
 	public void testDoesNothingWhenPostProcessingNonScriptFactoryTypeBeforeInstantiation() throws Exception {
@@ -79,7 +90,7 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 			return;
 		}
 
-		BeanDefinition processorBeanDefinition = createRefreshingScriptFactoryPostProcessor(true);
+		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(true);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
 
 		GenericApplicationContext ctx = new GenericApplicationContext();
@@ -104,7 +115,7 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 			return;
 		}
 
-		BeanDefinition processorBeanDefinition = createRefreshingScriptFactoryPostProcessor(false);
+		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(false);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
 
 		GenericApplicationContext ctx = new GenericApplicationContext();
@@ -129,9 +140,9 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 			return;
 		}
 
-		BeanDefinition processorBeanDefinition = createRefreshingScriptFactoryPostProcessor(true);
+		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(true);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
-		BeanDefinitionBuilder collaboratorBuilder = BeanDefinitionBuilder.rootBeanDefinition(MessengerService.class);
+		BeanDefinitionBuilder collaboratorBuilder = BeanDefinitionBuilder.rootBeanDefinition(DefaultMessengerService.class);
 		collaboratorBuilder.addPropertyReference(MESSENGER_BEAN_NAME, MESSENGER_BEAN_NAME);
 
 		GenericApplicationContext ctx = new GenericApplicationContext();
@@ -151,8 +162,38 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 		// the updated script surrounds the message in quotes before returning...
 		assertEquals(EXPECTED_CHANGED_MESSAGE_TEXT, refreshedMessenger.getMessage());
 		// ok, is this change reflected in the reference that the collaborator has?
-		MessengerService collaborator = (MessengerService) ctx.getBean(collaboratorBeanName);
+		DefaultMessengerService collaborator = (DefaultMessengerService) ctx.getBean(collaboratorBeanName);
 		assertEquals(EXPECTED_CHANGED_MESSAGE_TEXT, collaborator.getMessage());
+	}
+
+	public void testReferencesAcrossAContainerHierarchy() throws Exception {
+		// Groovy requires JDK 1.4
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		GenericApplicationContext businessContext = new GenericApplicationContext();
+		businessContext.registerBeanDefinition("messenger", BeanDefinitionBuilder.rootBeanDefinition(StubMessenger.class).getBeanDefinition());
+		businessContext.refresh();
+
+		BeanDefinitionBuilder scriptedBeanBuilder = BeanDefinitionBuilder.rootBeanDefinition(GroovyScriptFactory.class);
+		scriptedBeanBuilder.addConstructorArg(DELEGATING_SCRIPT);
+		scriptedBeanBuilder.addPropertyReference("messenger", "messenger");
+
+		GenericApplicationContext presentationCtx = new GenericApplicationContext(businessContext);
+		presentationCtx.registerBeanDefinition("needsMessenger", scriptedBeanBuilder.getBeanDefinition());
+		presentationCtx.registerBeanDefinition("scriptProcessor", createScriptFactoryPostProcessor(true));
+		presentationCtx.refresh();
+	}
+
+	public void testScriptHavingAReferenceToAnotherBean() throws Exception {
+		// Groovy requires JDK 1.4
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		// just tests that the (singleton) script-backed bean is able to be instantiated with references to its collaborators
+		new ClassPathXmlApplicationContext("org/springframework/scripting/support/groovyReferences.xml");
 	}
 
 	public void testForRefreshedScriptHavingErrorPickedUpOnFirstCall() throws Exception {
@@ -161,9 +202,9 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 			return;
 		}
 
-		BeanDefinition processorBeanDefinition = createRefreshingScriptFactoryPostProcessor(true);
+		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(true);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
-		BeanDefinitionBuilder collaboratorBuilder = BeanDefinitionBuilder.rootBeanDefinition(MessengerService.class);
+		BeanDefinitionBuilder collaboratorBuilder = BeanDefinitionBuilder.rootBeanDefinition(DefaultMessengerService.class);
 		collaboratorBuilder.addPropertyReference(MESSENGER_BEAN_NAME, MESSENGER_BEAN_NAME);
 
 		GenericApplicationContext ctx = new GenericApplicationContext();
@@ -190,7 +231,31 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 		}
 	}
 
-	// Rick TODO: this is very brittle (depends on hidden implementation details of the ScriptFactoryPostProcessor class).
+	public void testPrototypeScriptedBean() throws Exception {
+		// Groovy requires JDK 1.4
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		GenericApplicationContext ctx = new GenericApplicationContext();
+		ctx.registerBeanDefinition("messenger", BeanDefinitionBuilder.rootBeanDefinition(StubMessenger.class).getBeanDefinition());
+
+		BeanDefinitionBuilder scriptedBeanBuilder = BeanDefinitionBuilder.rootBeanDefinition(GroovyScriptFactory.class);
+		scriptedBeanBuilder.setSingleton(false);
+		scriptedBeanBuilder.addConstructorArg(DELEGATING_SCRIPT);
+		scriptedBeanBuilder.addPropertyReference("messenger", "messenger");
+
+		final String BEAN_WITH_DEPENDENCY_NAME = "needsMessenger";
+		ctx.registerBeanDefinition(BEAN_WITH_DEPENDENCY_NAME, scriptedBeanBuilder.getBeanDefinition());
+		ctx.registerBeanDefinition("scriptProcessor", createScriptFactoryPostProcessor(true));
+		ctx.refresh();
+		
+		Messenger messenger1 = (Messenger) ctx.getBean(BEAN_WITH_DEPENDENCY_NAME);
+		Messenger messenger2 = (Messenger) ctx.getBean(BEAN_WITH_DEPENDENCY_NAME);
+		assertNotSame(messenger1, messenger2);
+	}
+
+	// This is very brittle (depends on private implementation details of the ScriptFactoryPostProcessor class).
 	private static StaticScriptSource getScriptSource(GenericApplicationContext ctx) throws Exception {
 		ScriptFactoryPostProcessor processor = (ScriptFactoryPostProcessor) ctx.getBean(PROCESSOR_BEAN_NAME);
 		final Field factoryField = processor.getClass().getDeclaredField("scriptBeanFactory");
@@ -200,7 +265,7 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 		return (StaticScriptSource) bd.getConstructorArgumentValues().getIndexedArgumentValue(0, StaticScriptSource.class).getValue();
 	}
 
-	private static BeanDefinition createRefreshingScriptFactoryPostProcessor(boolean isRefreshable) {
+	private static BeanDefinition createScriptFactoryPostProcessor(boolean isRefreshable) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ScriptFactoryPostProcessor.class);
 		if (isRefreshable) {
 			builder.addPropertyValue("refreshCheckDelay", new Long(1));
@@ -232,8 +297,7 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 		}
 	}
 
-
-	public static final class MessengerService {
+	public static final class DefaultMessengerService {
 
 		private Messenger messenger;
 

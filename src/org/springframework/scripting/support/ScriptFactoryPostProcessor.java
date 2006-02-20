@@ -137,6 +137,8 @@ public class ScriptFactoryPostProcessor
 					"ScriptFactoryPostProcessor must run in AbstractBeanFactory, not in " + beanFactory);
 		}
 		this.beanFactory = (AbstractBeanFactory) beanFactory;
+		// Required so that references (up container hierarchies) are correctly resolved
+		this.scriptBeanFactory.setParentBeanFactory(this.beanFactory);
 	}
 
 	public void setResourceLoader(ResourceLoader resourceLoader) {
