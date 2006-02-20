@@ -38,7 +38,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport.Tran
  * the PlatformTransactionManager helper, rather than indirectly
  * testing the helper implementation.
  *
- * <ü>This is a superclass to allow testing both the AOP Alliance MethodInterceptor
+ * This is a superclass to allow testing both the AOP Alliance MethodInterceptor
  * and the AspectJ aspect.
  *
  * @author Rod Johnson
