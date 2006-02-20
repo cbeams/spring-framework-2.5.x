@@ -11,9 +11,6 @@
             This support allows one to write any number of classes in a supported scripting
             language, and have the Spring container transparently instantiate, configure
             and dependency inject such scripted objects.
-            The benefits afforded by this support are of course dependent upon your
-            particular application development scenarios, but the scenario that springs
-            most readily to mind is that of rapid prototyping. 
         </para>
 		<para>
             The scripting languages currently supported are:
@@ -49,29 +46,29 @@
 			in detail. Before diving into all of the gory ins and outs of said support,
 			let's look at a quick example of a scripted bean.
 		</para>
-        <para>
+		<para>
             The script language for this first bean is Groovy (the basis for this example
             was taken from the Spring test suite, so if you want to see equivalent examples
             in any of the other supported languages, direct yourself to the source code).
         </para>
-        <para>
+		<para>
             Let's look at the <interfacename>Messenger</interfacename> interface that the
             Groovy bean is going to be implementing; note that this interface is defined
-            in plain Java... dependant objects that are injected with a reference to the
+            in plain Java... dependent objects that are injected with a reference to the
             <interfacename>Messenger</interfacename> won't know that the underlying
-            implementation is a Groovy bean.
+            implementation is a Groovy script.
         </para>
-        <programlisting><![CDATA[package org.springframework.scripting;
+		<programlisting><![CDATA[package org.springframework.scripting;
 
 public interface Messenger {
 
     String getMessage();
 }]]></programlisting>
-        <para>
-            And here is the definition of a class that has a dependency on said
+		<para>
+            Here is the definition of a class that has a dependency on said
             <interfacename>Messenger</interfacename> interface.
         </para>
-        <programlisting><![CDATA[package org.springframework.scripting;
+		<programlisting><![CDATA[package org.springframework.scripting;
 
 public class DefaultBookingService implements BookingService {
 
@@ -85,11 +82,11 @@ public class DefaultBookingService implements BookingService {
         // use the injected Messenger object...
     }
 }]]></programlisting>
-        <para>
+		<para>
             Here is an implementation of the <interfacename>Messenger</interfacename>
             interface in Groovy.
         </para>
-        <programlisting><lineannotation>// from the file 'Messenger.groovy'</lineannotation><![CDATA[
+		<programlisting><lineannotation>// from the file 'Messenger.groovy'</lineannotation><![CDATA[
 package org.springframework.scripting.groovy;
 
 // import the Messenger interface (written in Java) that is to be implemented
@@ -98,31 +95,30 @@ import org.springframework.scripting.Messenger
 // define the implementation in Groovy
 class GroovyMessenger implements Messenger {
 
-	@Property String message;
+    @Property String message;
 }]]></programlisting>
-        <para>
-            And here (finally!) are the bean definitions that will effect the injection
-            of the Groovy-scripted <interfacename>Messenger</interfacename> implementation
-            into an instance of the <classname>DefaultBookingService</classname> class.
+		<para>
+            Finally, here are the bean definitions that will effect the injection of the
+            Groovy-scripted <interfacename>Messenger</interfacename> implementation into
+            an instance of the <classname>DefaultBookingService</classname> class.
         </para>
-        <programlisting><![CDATA[<beans>
+		<programlisting><![CDATA[<beans>
 
     <!-- this is the workhorse bean that effects the scripting support (explained in detail later) -->
-    <bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
+    <bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor" />
 
     <!-- and this is the bean definition for the Groovy-based Messenger implementation -->
-    <bean id="messenger"
-          class="org.springframework.scripting.groovy.GroovyScriptFactory">
-        <constructor-arg value="classpath:Messenger.groovy"/>
-        <property name="message" value="I Can Do The Frug"/>
+    <bean id="messenger" class="org.springframework.scripting.groovy.GroovyScriptFactory">
+        <constructor-arg value="classpath:Messenger.groovy" />
+        <property name="message" value="I Can Do The Frug" />
     </bean>
 
     <bean id="bookingService" class="x.y.DefaultBookingService">
-        <property name="messenger" ref="messenger"/>
+        <property name="messenger" ref="messenger" />
     </bean>
 
 </beans>]]></programlisting>
-        <para>
+		<para>
             The <literal>bookingService</literal> bean (a
             <classname>DefaultBookingService</classname>) can now use it's private
             <literal>messenger</literal> member variable as normal... because the
@@ -130,7 +126,7 @@ class GroovyMessenger implements Messenger {
             into it <emphasis>is</emphasis> a Messenger instance. There is nothing
             special going on here, this is just plain Java and plain Groovy.
         </para>
-        <para>
+		<para>
             Keep reading for the details explaining just why that
             <classname>ScriptFactoryPostProcessor</classname> bean had to be defined
             (and exactly what it is doing).
@@ -214,11 +210,11 @@ class GroovyMessenger implements Messenger {
 					if you want to have <emphasis>refreshable</emphasis> beans, i.e. beans
 					that are reloaded and reconfigured whenever the underlying script
 					resource is modified. See the section entitled
-					<xref linkend="scripting-refreshable-beans"/> for a full treatment of
+					<xref linkend="scripting-refreshable-beans" /> for a full treatment of
 					this topic.
 				</para>
 			</section>
-		    <section>
+			<section>
 				<title>The <interfacename>ScriptFactory</interfacename></title>
 				<para>
 					The final step involves defining scripted bean definitions, one for each
@@ -241,7 +237,7 @@ class GroovyMessenger implements Messenger {
 					class is required for each supported language.)
 				</para>
 			</section>
-		    <section>
+			<section>
 				<title>Understanding Constructor Injection in the context of scripted beans</title>
 				<para>
 					There is one <emphasis>very</emphasis> important thing to be aware of
@@ -286,15 +282,11 @@ class GroovyMessenger implements Messenger {
 				<programlisting><![CDATA[
     <bean id="badMessenger"
           class="org.springframework.scripting.groovy.GroovyScriptFactory">
-        <constructor-arg value="classpath:Messenger.groovy"/>
-        <!--
-            this next constructor argument value will (fail to) be injected into the ScriptFactory
-        -->
-        <constructor-arg value="This will *not* work"/>
-        <!--
-            only property values are injected into the scripted object created by a ScriptFactory
-        -->
-        <property name="anotherMessage" value="Passed straight through to the scripted object"/>
+        <constructor-arg value="classpath:Messenger.groovy" />]]>
+        <lineannotation>&lt;!-- this constructor argument will not be injected into the ScriptFactory --&gt;</lineannotation><![CDATA[
+        <constructor-arg value="This will *not* work" />]]>
+        <lineannotation>&lt;!-- only property values are injected into the scripted object --&gt;</lineannotation><![CDATA[
+        <property name="anotherMessage" value="Passed straight through to the scripted object" />
     </bean>]]></programlisting>
 				<para>
 					In practice this restriction is not as onerous as it first appears.
@@ -355,12 +347,12 @@ class GroovyMessenger implements Messenger {
     --&gt;</lineannotation><![CDATA[
     <bean id="messenger"
           class="org.springframework.scripting.groovy.GroovyScriptFactory">
-        <constructor-arg value="classpath:Messenger.groovy"/>
-        <property name="message" value="I Can Do The Frug"/>
+        <constructor-arg value="classpath:Messenger.groovy" />
+        <property name="message" value="I Can Do The Frug" />
     </bean>
 
     <bean id="bookingService" class="x.y.DefaultBookingService">
-        <property name="messenger" ref="messenger"/>
+        <property name="messenger" ref="messenger" />
     </bean>
 
 </beans>]]></programlisting>
@@ -378,7 +370,7 @@ class GroovyMessenger implements Messenger {
 		            (assigning a negative value to the <literal>refreshCheckDelay</literal>
 		            property turns off the refresh behavior).
 		        </para>
-		        <para>
+				<para>
 					If we then run the following application we can exercise the refreshable feature;
 					please do excuse the <emphasis>'jumping-through-hoops-to-pause-the-execution'</emphasis>
 		            shenanigans in this next slice of code... the
@@ -397,8 +389,8 @@ public final class Boot {
 
         ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
         Messenger messenger = (Messenger) ctx.getBean("messenger");
-        System.out.println(messenger.getMessage());
-        // pause execution while I go off and make changes to the script...
+        System.out.println(messenger.getMessage());]]>
+        <lineannotation>// pause execution while I go off and make changes to the script...</lineannotation><![CDATA[
         System.in.read();
         System.out.println(messenger.getMessage());
     }
@@ -428,7 +420,7 @@ class GroovyMessenger implements Messenger {
     }
 }]]></programlisting>
 				<para>
-		            When the program is executed, the output before the inut pause will be
+		            When the program is executed, the output before the input pause will be
 		            <computeroutput>I Can Do The Frug</computeroutput>; after the change
 		            to the script is made and saved, and the program resumes execution,
 		            the result of calling the <literal>getMessage()</literal> method on the
@@ -454,7 +446,7 @@ class GroovyMessenger implements Messenger {
 		            The refreshable bean behavior described above does
 					<emphasis>not</emphasis> apply to scripts defined using the
 					<literal>inline:</literal> notation (see the section entitled
-					<xref linkend="scripting-beans-inline"/>). Additionally, it
+					<xref linkend="scripting-beans-inline" />). Additionally, it
 					<emphasis>only</emphasis> applies to beans where changes to the
 					underlying script can actually be monitored; for example, by
 					a file system watcher that checks the last modified date on
@@ -496,7 +488,7 @@ class GroovyMessenger implements Messenger {
 					<interfacename>Validator</interfacename> implementation to a Spring MVC
 					<interfacename>Controller</interfacename>... this is a moments work
 					using an inline script. (See the section entitled
-					<xref linkend="scripting-scenarios-validators"/>  for just such	an example.)
+					<xref linkend="scripting-scenarios-validators" />  for just such an example.)
 				</para>
 				<para>
 		            Also don't forget that in the case of more complex classes than the one
@@ -537,8 +529,8 @@ class RubyMessenger &lt; Messenger
 end
 RubyMessenger.new</value>
         </constructor-arg>
-        <constructor-arg value="org.springframework.scripting.Messenger"/>
-        <property name="message" value="Hello World!"/>
+        <constructor-arg value="org.springframework.scripting.Messenger" />
+        <property name="message" value="Hello World!" />
     </bean>]]></programlisting>
 			</section>
 		</section>
@@ -606,17 +598,17 @@ RubyMessenger.new</value>
 	            Groovy-scripted bean. Let's look at another example (again using an example
 	            from the Spring test suite).
 			</para>
-        <programlisting><![CDATA[package org.springframework.scripting;
+			<programlisting><![CDATA[package org.springframework.scripting;
 
 public interface Calculator {
 
     int add(int x, int y);
 }]]></programlisting>
-        <para>
+			<para>
             Here is an implementation of the <interfacename>Calculator</interfacename>
             interface in Groovy.
         </para>
-        <programlisting><lineannotation>// from the file 'calculator.groovy'</lineannotation><![CDATA[
+			<programlisting><lineannotation>// from the file 'calculator.groovy'</lineannotation><![CDATA[
 package org.springframework.scripting.groovy
 
 class GroovyCalculator implements Calculator {
@@ -625,15 +617,14 @@ class GroovyCalculator implements Calculator {
         x + y
     }
 }]]></programlisting>
-        <para>
+			<para>
             And here is the attendant Spring configuration (XML).
         </para>
-        <programlisting><lineannotation>&lt;-- from the file 'beans.xml' --&gt;</lineannotation><![CDATA[
+			<programlisting><lineannotation>&lt;-- from the file 'beans.xml' --&gt;</lineannotation><![CDATA[
 <beans>
-    <bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
-    <bean id="calculator"
-          class="org.springframework.scripting.groovy.GroovyScriptFactory">
-        <constructor-arg value="classpath:calculator.groovy"/>
+    <bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor" />
+    <bean id="calculator" class="org.springframework.scripting.groovy.GroovyScriptFactory">
+        <constructor-arg value="classpath:calculator.groovy" />
     </bean>
 </beans>]]></programlisting>
 			<para>
@@ -657,7 +648,7 @@ public class Main {
 	            (unsurprisingly) <computeroutput>10</computeroutput>.
 	            (Exciting example huh? Remember that the intent is to convey the
 	            concept... consult the scripting showcase project for more realistic
-	            example; or indeed the section entitled <xref linkend="scripting-scenarios"/>
+	            example; or indeed the section entitled <xref linkend="scripting-scenarios" />
 	            later in this chapter).
 			</para>
 			<para>
@@ -689,7 +680,7 @@ public class Main {
 				BeanShell script, and a <classname>Class[]</classname> array containing the
 				interfaces that the bean is to implement. Any of the usual
 				<interfacename>Resource</interfacename>
-				<footnoteref linkend="scripting-resources-footnote"/> path strings can be
+				<footnoteref linkend="scripting-resources-footnote" /> path strings can be
 				used here, in addition to the scripting-specific <literal>inline:</literal>
 				notation for <link linkend="scripting-beans-inline">inline scripts</link>.
 			</para>
@@ -718,7 +709,7 @@ public class Main {
 	            that was defined earlier in this chapter (repeated below for your
 	            convenience).
 			</para>
-        <programlisting><![CDATA[package org.springframework.scripting;
+			<programlisting><![CDATA[package org.springframework.scripting;
 
 public interface Messenger {
 
@@ -728,7 +719,7 @@ public interface Messenger {
 	            Here is the BeanShell 'implementation' (the term is used loosely
 	            here) of the above interface.
 			</para>
-	        <programlisting><![CDATA[String message;
+			<programlisting><![CDATA[String message;
 
 String getMessage() {
     return message;
@@ -742,9 +733,9 @@ void setMessage(String aMessage) {
 	            (again, the term is used very loosely here).
 			</para>
 			<programlisting><![CDATA[    <bean id="messageService" class="org.springframework.scripting.bsh.BshScriptFactory">
-        <constructor-arg value="classpath:scripts/BshMessenger.bsh"/>
-        <constructor-arg value="org.springframework.scripting.Messenger"/>
-        <property name="message" value="Hello World!"/>
+        <constructor-arg value="classpath:scripts/BshMessenger.bsh" />
+        <constructor-arg value="org.springframework.scripting.Messenger" />
+        <property name="message" value="Hello World!" />
     </bean>]]></programlisting>
 			<para>
 				See the section entitled <xref linkend="scripting-scenarios" /> for some
@@ -769,7 +760,7 @@ void setMessage(String aMessage) {
 				JRuby script, and a <classname>Class[]</classname> array containing the
 				interfaces that the bean is to implement. Any of the usual
 				<interfacename>Resource</interfacename>
-				<footnoteref linkend="scripting-resources-footnote"/> path strings can be
+				<footnoteref linkend="scripting-resources-footnote" /> path strings can be
 				used here, in addition to the scripting-specific <literal>inline:</literal>
 				notation for inline scripts.
 			</para>
@@ -801,13 +792,13 @@ void setMessage(String aMessage) {
 	            interface that was defined earlier in this chapter (for your convenience it
 	            is repeated below).
 			</para>
-        <programlisting><![CDATA[package org.springframework.scripting;
+			<programlisting><![CDATA[package org.springframework.scripting;
 
 public interface Messenger {
 
     String getMessage();
 }]]></programlisting>
-	        <programlisting><![CDATA[require 'java'
+			<programlisting><![CDATA[require 'java'
 
 include_class 'org.springframework.scripting.Messenger'
 
@@ -827,9 +818,9 @@ RubyMessenger.new]]><lineannotation> # IMPORTANT (see below)</lineannotation></p
 	            <classname>RubyMessenger</classname> JRuby bean.
 			</para>
 			<programlisting><![CDATA[    <bean id="messageService" class="org.springframework.scripting.jruby.JRubyScriptFactory">
-        <constructor-arg value="classpath:scripts/RubyMessenger.rb"/>
-        <constructor-arg value="org.springframework.scripting.Messenger"/>
-        <property name="message" value="Hello World!"/>
+        <constructor-arg value="classpath:scripts/RubyMessenger.rb" />
+        <constructor-arg value="org.springframework.scripting.Messenger" />
+        <property name="message" value="Hello World!" />
     </bean>]]></programlisting>
 			<para>
 				Take especial notice of the last line of that JRuby script. When using JRuby
@@ -839,7 +830,7 @@ RubyMessenger.new]]><lineannotation> # IMPORTANT (see below)</lineannotation></p
 				can achieve this by simply instantiating a new instance of your JRuby class
 				on the last line of the script like so:
 	        </para>
-	        <programlisting>require 'java'
+			<programlisting>require 'java'
 
 include_class 'org.springframework.scripting.Messenger'
 
@@ -847,7 +838,7 @@ include_class 'org.springframework.scripting.Messenger'
 
 <lineannotation># this last line is required! if omitted, an Exception *will* be thrown</lineannotation>
 RubyMessenger.new</programlisting>
-	        <para>
+			<para>
 				If you forget to do this, an opaque <classname>ScriptCompilationException</classname>
 				will be thrown immediately after the script is executed by the JRuby
 				interpreter. The key text that identifies this as the root cause of an
@@ -878,50 +869,95 @@ RubyMessenger.new</programlisting>
 			</para>
 		</section>
 	</section>
-	<section id="scripting-extending">
-		<title>Adding support for other scripting languages</title>
-		<para>
-            Although Spring supports (arguably) the most popular Java scripting languages
-            straight out of the box, you may wish to add support for another scripting
-            language. This section describes the classes and work that would be
-            involved in adding support for your favourite scripting language to Spring.
-        </para>
-        <para>
-            [TODO]
-        </para>
-	</section>
 	<section id="scripting-scenarios">
 		<title>Scenarios</title>
 		<para>
             The possible scenarios where defining Spring managed beans in a scripting
             language would be beneficial are, of course, many and varied. This section
-            describes some use cases for the scripting support in Spring.
+            describes two possible use cases for the scripting support in Spring.
         </para>
-        <para>
+		<para>
             Please also note that the Spring distribution ships with a showcase project
-            for Spring's scripting support in the relevant section of the Spring distribution.
+            for this scripting support in the relevant section of the Spring distribution.
             (A showcase project is a small project that is limited in scope to covering
             one particular aspect of the Spring Framework.)
         </para>
 		<section id="scripting-scenarios-controllers">
 			<title>Scripted Spring MVC Controllers</title>
 			<para>
-				[TODO]
+				One group of classes that may benefit from using script-backed beans is
+				that of Spring MVC controllers. In pure Spring MVC applications, the
+				navigational flow through a web application is to a large extent
+				determined by code encapsulated within one's SpringMVC controllers.
+				As the navigational flow and other presentation layer logic of a web
+				application needs to be updated to respond to support issues or changing
+				business requirements, it may well be easier to effect any such required
+				changes	by editing one or more scripts and seeing those changes being
+				immediately reflected in the state of a running application.
 			</para>
+			<para>
+				Remember that in the lightweight architectural model espoused by projects
+				such as Spring, one is typically aiming to have a really
+				<emphasis>thin</emphasis> presentation layer, with all the meaty business
+				logic of an application being contained in the domain and service layer classes.
+	            Developing one's Spring MVC controllers as script-backed beans allows one to
+	            change one's presentation layer logic by simply editing and saving (hopefully
+	            simple) script text files; any changes to such scripts will (depending on
+	            one's configuration) automatically be reflected in the beans that are backed
+	            by said scripts.
+			</para>
+			<note>
+				<para>
+		            Please note that in order to effect this automatic 'pickup' of any changes
+		            to script-backed beans, one will have had to enable the 'refreshable beans'
+		            feature. See the section entitled <xref linkend="scripting-refreshable-beans"/>
+		            for a full and detailed treatment of this feature.
+				</para>
+			</note>
+			<para>
+	            Find below an example of an
+	            <interfacename>org.springframework.web.servlet.mvc.Controller</interfacename>
+	            implemented using the Groovy scripting language. (This example is taken in
+	            part from the 'mvc' portion of the scripting support showcase project that
+	            is supplied with the Spring distribution.
+			</para>
+			<programlisting><![CDATA[TODO]]></programlisting>
 		</section>
 		<section id="scripting-scenarios-validators">
 			<title>Scripted Validators</title>
 			<para>
-				[TODO]
+				Another area of one's application development with Spring that may benefit
+				from the flexibility afforded by script-backed beans is that of
+				validation. It may be easier to express complex validation logic using a
+				loosely typed scripting language that may also have support for inline
+				regular expressions and other convenient features related to string 
+				manipulation, iteration, and the like.
 			</para>
+			<para>
+	            Again, developing one's validators as script-backed beans allows one to change
+	            validation logic by simply editing and saving a simple text file; any such
+	            changes will (depending on one's configuration) automatically be reflected
+	            in the execution of a running application and would not require the restart
+	            of an application.
+			</para>
+			<para>
+	            Find below an example of a Spring
+	            <interfacename>org.springframework.validation.Validator</interfacename>
+	            implemented using the Groovy scripting language. (See the section entitled
+	            <xref linkend="validator"/> for a discussion of the
+	            <interfacename>Validator</interfacename> interface.)
+			</para>
+			<programlisting><![CDATA[TODO]]></programlisting>
+			<note>
+				<para>
+		            Please note that in order to effect this automatic 'pickup' of any changes
+		            to script-backed beans, one will have had to enable the 'refreshable beans'
+		            feature. See the section entitled <xref linkend="scripting-refreshable-beans"/>
+		            for a full and detailed treatment of this feature.
+				</para>
+			</note>
 		</section>
 	</section>
-    <section id="scripting-with-aop">
-        <title>Scripted beans and AOP</title>
-		<para>
-			[TODO]
-		</para>
-    </section>
 	<section id="scripting-resources">
 		<title>Further Resources</title>
 		<para>
