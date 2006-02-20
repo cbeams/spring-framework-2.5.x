@@ -6,7 +6,8 @@
 
 	<bean id="welcome" class="org.springframework.web.servlet.mvc.mapping.WelcomeController"/>
 	<bean id="admin" class="org.springframework.web.servlet.mvc.mapping.AdminController"/>
-
+	<bean id="buy" class="org.springframework.web.servlet.mvc.mapping.BuyForm"/>
+	
 	<bean id="mapping" class="org.springframework.web.servlet.mvc.mapping.ControllerClassNameHandlerMapping"/>
 
 </beans>

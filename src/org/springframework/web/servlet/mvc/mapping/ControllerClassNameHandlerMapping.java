@@ -99,9 +99,10 @@ public class ControllerClassNameHandlerMapping extends AbstractUrlHandlerMapping
 	protected String generatePathMapping(Class controllerClass) {
 		StringBuffer pathMapping = new StringBuffer("/");
 		String className = ClassUtils.getShortName(controllerClass.getName());
-		if (className.endsWith(CONTROLLER_SUFFIX)) {
-			pathMapping.append(className.substring(0, className.indexOf(CONTROLLER_SUFFIX)).toLowerCase());
-		}
+		String path = className.endsWith(CONTROLLER_SUFFIX) ? className.substring(0, className.indexOf(CONTROLLER_SUFFIX)) : className;
+
+		pathMapping.append(path.toLowerCase());
+
 		if (MultiActionController.class.isAssignableFrom(controllerClass)) {
 			pathMapping.append("/*");
 		}

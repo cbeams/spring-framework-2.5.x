@@ -71,4 +71,12 @@ public class ControllerClassNameHandlerMappingTests extends TestCase {
 
 		assertEquals("Incorrect controller.", this.wac.getBean("admin"), chain.getHandler());
 	}
+
+	public void testWithOutControllerSuffix() throws Exception {
+	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/buyform");
+		HandlerExecutionChain chain = this.hm.getHandler(request);
+
+		assertEquals("Incorrect controller.", this.wac.getBean("buy"), chain.getHandler());
+
+	}
 }
