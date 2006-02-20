@@ -42,7 +42,7 @@ public aspect AnnotationTransactionAspect extends AbstractTransactionAspect {
 	 * Transactional annotation.
 	 */
 	private pointcut executionOfAnyPublicMethodInAtTransactionalType() :
-		execution(public * (@Transactional *+).*(..));
+		execution(public * ((@Transactional *)+).*(..));
 	
 	/**
 	 * Matches the execution of any public method with the 

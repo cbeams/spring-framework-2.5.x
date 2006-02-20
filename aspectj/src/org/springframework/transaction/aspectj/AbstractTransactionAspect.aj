@@ -18,6 +18,7 @@ package org.springframework.transaction.aspectj;
 
 import java.lang.reflect.Method;
 
+import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
@@ -55,7 +56,7 @@ public abstract aspect AbstractTransactionAspect extends TransactionAspectSuppor
 		setTransactionAttributeSource(tas);
 	}
 	
-	
+	@SuppressAjWarnings("adviceDidNotMatch")
 	before(Object txObject) : transactionalMethodExecution(txObject) {
 		MethodSignature methodSignature = (MethodSignature) thisJoinPoint.getSignature();
 		Method method = methodSignature.getMethod();
@@ -66,14 +67,17 @@ public abstract aspect AbstractTransactionAspect extends TransactionAspectSuppor
 		}
 	}
 	
+	@SuppressAjWarnings("adviceDidNotMatch")
 	after(Object txObject) throwing(Throwable t) : transactionalMethodExecution(txObject) {
 		doCloseTransactionAfterThrowing(TransactionAspectSupport.currentTransactionInfo(), t);
 	}
 	
+	@SuppressAjWarnings("adviceDidNotMatch")
 	after(Object txObject) returning() : transactionalMethodExecution(txObject) {
 		doCommitTransactionAfterReturning(TransactionAspectSupport.currentTransactionInfo());
 	}
 	
+	@SuppressAjWarnings("adviceDidNotMatch")
 	after(Object txObject) : transactionalMethodExecution(txObject) {
 		doFinally(TransactionAspectSupport.currentTransactionInfo());
 	}

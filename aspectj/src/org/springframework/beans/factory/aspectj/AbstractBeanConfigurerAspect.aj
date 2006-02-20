@@ -16,11 +16,8 @@
  
 package org.springframework.beans.factory.aspectj;
 
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
-import org.springframework.beans.factory.wiring.BeanWiringInfo;
 
 /**
  * Abstract superaspect for AspectJ aspects that can perform Dependency Injection on
@@ -42,6 +39,7 @@ public abstract aspect AbstractBeanConfigurerAspect extends BeanConfigurerSuppor
 	/**
 	 * All beans should be configured after construction.
 	 */
+	@SuppressAjWarnings("adviceDidNotMatch")
 	after(Object beanInstance) returning : beanCreation(beanInstance) {
 		configureBean(beanInstance);
 	}
