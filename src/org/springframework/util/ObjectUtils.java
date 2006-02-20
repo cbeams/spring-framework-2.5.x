@@ -165,7 +165,7 @@ public abstract class ObjectUtils {
 		if (array != null) {
 			System.arraycopy(array, 0, newArr, 0, array.length);
 		}
-		newArr[array.length] = obj;
+		newArr[newArr.length - 1] = obj;
 		return newArr;
 	}
 

@@ -25,10 +25,13 @@ import junit.framework.TestCase;
 import org.springframework.beans.FatalBeanException;
 
 /**
+ * Unit tests for the ObjectUtils class.
+ * 
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rick Evans
  */
-public class ObjectUtilsTests extends TestCase {
+public final class ObjectUtilsTests extends TestCase {
 
 	public void testIsCheckedException() {
 		assertTrue(ObjectUtils.isCheckedException(new Exception()));
@@ -81,6 +84,44 @@ public class ObjectUtilsTests extends TestCase {
 			assertEquals(a[i], wrapper[i].intValue());
 		}
 	}
+
+	public void testToObjectArrayWithNull() {
+		Object[] objects = ObjectUtils.toObjectArray(null);
+		assertNotNull(objects);
+		assertEquals(0, objects.length);
+	}
+
+	public void testToObjectArrayWithEmptyPrimitiveArray() {
+		Object[] objects = ObjectUtils.toObjectArray(new byte[] {});
+		assertNotNull(objects);
+		assertEquals(0, objects.length);
+	}
+
+	public void testToObjectArrayWithNonArrayType() {
+		try {
+			ObjectUtils.toObjectArray("Not an []");
+			fail("Must have thrown an IllegalArgumentException by this point.");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
+
+	public void testToObjectArrayWithNonPrimitiveArray() {
+		try {
+			ObjectUtils.toObjectArray(new String[] {"Bingo"});
+			fail("Must have thrown an IllegalArgumentException by this point.");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
+
+	public void testAddObjectToArraySunnyDay() {
+		String[] array = new String[] {"foo", "bar"};
+		String newElement = "baz";
+		Object[] newArray = ObjectUtils.addObjectToArray(array, newElement);
+		assertEquals(3, newArray.length);
+		assertEquals(newElement, newArray[2]);
+	}
 	
 	public void testAddObjectToArrayWhenEmpty() {
 		String[] array = new String[0];
@@ -90,10 +131,9 @@ public class ObjectUtilsTests extends TestCase {
 		assertEquals(newElement, newArray[0]);
 	}
 	
-	public void testAddObjectToArrayWhenContainingOneElement() {
-		String[] array = new String[1];
+	public void testAddObjectToSingleNonNullElementArray() {
 		String existingElement = "foo";
-		array[0] = existingElement;
+		String[] array = new String[] {existingElement};
 		String newElement = "bar";
 		Object[] newArray = ObjectUtils.addObjectToArray(array, newElement);
 		assertEquals(2, newArray.length);
@@ -101,8 +141,31 @@ public class ObjectUtilsTests extends TestCase {
 		assertEquals(newElement, newArray[1]);
 	}
 
+	public void testAddObjectToSingleNullElementArray() {
+		String[] array = new String[] {null};
+		String newElement = "bar";
+		Object[] newArray = ObjectUtils.addObjectToArray(array, newElement);
+		assertEquals(2, newArray.length);
+		assertEquals(null, newArray[0]);
+		assertEquals(newElement, newArray[1]);
+	}
+
+	public void testAddObjectToNullArray() throws Exception {
+		String newElement = "foo";
+		Object[] newArray = ObjectUtils.addObjectToArray(null, newElement);
+		assertEquals(1, newArray.length);
+		assertEquals(newElement, newArray[0]);
+	}
+
+	public void testAddNullObjectToNullArray() throws Exception {
+		Object[] newArray = ObjectUtils.addObjectToArray(null, null);
+		assertEquals(1, newArray.length);
+		assertEquals(null, newArray[0]);
+	}
+
 	public void testNullSafeEqualsWithArrays() throws Exception {
 		assertTrue(ObjectUtils.nullSafeEquals(new String[]{"a", "b", "c"}, new String[]{"a", "b", "c"}));
 		assertTrue(ObjectUtils.nullSafeEquals(new int[]{1, 2, 3}, new int[]{1, 2, 3}));
 	}
+
 }
