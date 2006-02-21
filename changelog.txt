@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.7 (20.2.2006)
+Changes in version 1.2.7 (22.2.2006)
 ------------------------------------
 
 Package org.springframework.aop
@@ -16,6 +16,8 @@ Package org.springframework.beans
 * BeanWrapperImpl caches registered editors that match superclass or interface, to avoid repeated assignable-from checks
 * fixed BeanWrapperImpl to pass its "extractOldValueForEditor" setting on to nested BeanWrappers
 * refined BeanWrapperImpl to perform the accessible checking for read/write methods before every invocation
+* BeanWrapperImpl passes a null value to a PropertyEditor's "setValue" method, allowing for conversion of null values
+* added "nullAsEmptyCollection" flag to CustomCollectionEditor, allowing to convert a null value to an empty Collection
 * fixed PropertyAccessorUtils's "getLastNestedPropertySeparatorIndex" to correctly handle property paths without dot
 * added overloaded constructor to StringArrayPropertyEditor, allowing to specify a custom separator for String splitting
 * fixed ArgumentConvertingMethodInvoker to perform conversion attempts on a copy of the argument array (not the source)
@@ -26,6 +28,7 @@ Package org.springframework.beans
 * reworked AbstractBeanFactory's currently-in-creation check to log debug message when unfinished singleton is returned
 * AbstractBeanFactory caches merged bean definitions, for efficient prototype child creation and CGLIB class reuse
 * fixed AbstractBeanFactory to use canonical bean name (id) for prototype creation, exposing it to BeanPostProcessors
+* fixed AbstractBeanFactory to destroy a failed bean completely, including dependent beans (in case of eager references)
 * added "allowCircularReferences" flag to AbstractAutowireCapableBeanFactory, to disallow circular references completely
 * DefaultListableBeanFactory's "getBeansOfType" logs BeanCurrentlyInCreationException message instead of stacktrace
 * PropertiesBeanDefinitionReader trims String values for special keys such as "(class)", "(parent)", etc
@@ -58,16 +61,20 @@ Package org.springframework.jdbc
 * added "trackRowsAffected" property to BatchSqlUpdate, allowing to turn off the row counts list to save memory
 
 Package org.springframework.jmx
+* fixed MBeanServerConnectionFactoryBean to avoid potential initialization of unused JMX Connector on shutdown
 * fixed MBeanExporter to work correctly with an "excludedBeans" list that it not sorted by bean name ascending
 * fixed "persistPeriod" default to be -1 even in ManagedResource attribute (not just in ManagedResource annotation)
 
 Package org.springframework.mock
 * made "servletContextName" configurable in MockServletContext
+* MockServletContext's "getResourcePaths" correctly resolves directories as paths that end with a slash
 * added "set/removeParameter" methods to MockHttpServletRequest, allowing to replace/remove existing parameters
+* MockHttpServletResponse detects charset specification in "setContentType" and sets character encoding accordingly
 
 Package org.springframework.orm
 * SqlMapClientTemplate always works with SqlMapSession and provided Connection to enable proper batching in all cases
 * Hibernate LocalSessionFactoryBean exposes its DataSource on "SessionFactory.close()", for potential schema export
+* Hibernate LocalSessionFactoryBean offers protected "executeSchemaStatement" method for overriding the failure handling
 * added "configLocations" property to LocalSessionFactoryBean for Hibernate3, allowing to load multiple config files
 * added "replicate" convenience methods to HibernateTemplate for both Hibernate2 and Hibernate3
 * added BlobStringType with configurable character encoding for both Hibernate2 and Hibernate3
@@ -126,6 +133,7 @@ Package org.springframework.web
 * VelocityView converts Velocity's MethodInvocationException to a Spring NestedServletException with original root cause
 * added "useSingleModelNameAsRoot" property to AbstractXlstView, allowing to enforce the value of the "root" property
 * refined Struts DelegatingActionProxy and Delegating(Tiles)RequestProcessor to fall back to root WebApplicationContext
+* added DelegatingNavigationHandlerProxy and DelegatingPhaseListenerAdapter to JSF support (used by Spring Web Flow)
 
 
 Changes in version 1.2.6 (14.11.2005)
