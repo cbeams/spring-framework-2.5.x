@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +51,8 @@ import org.hibernate.persister.entity.EntityPersister;
  * Hibernate 3.0. Consider copying this implementation and adapting it to the changed
  * API if you want to run it against Hibernate 3.1.
  *
- * <p>Spring 1.3 is likely to update its default implementation of this class to
- * Hibernate 3.1, even if the remainder of Spring 1.3's Hibernate3 support will stay
+ * <p>Spring 2.0 is likely to update its default implementation of this class to
+ * Hibernate 3.1, even if the remainder of Spring 2.0's Hibernate3 support will stay
  * compatible with Hibernate 3.0.
  *
  * @author Juergen Hoeller
