@@ -108,7 +108,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @return the names of beans matching the given object type 
 	 * (including subclasses), or an empty array if none
 	 * @deprecated in favor of getBeanNamesForType.
-	 * This method will be removed as of Spring 1.3.
+	 * This method will be removed as of Spring 2.0.
 	 * @see #getBeanNamesForType
 	 * @see BeanFactoryUtils#beanNamesIncludingAncestors(ListableBeanFactory, Class)
 	 */
