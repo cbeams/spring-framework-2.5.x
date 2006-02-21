@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.2.7 (January 2006)
---------------------------------------------------
+THE SPRING FRAMEWORK, release 1.2.7 (February 2006)
+---------------------------------------------------
 http://www.springframework.org
 
 
@@ -100,7 +100,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: AOP framework, source-level metadata support, AOP Alliance interfaces
 - Dependencies: spring-core, (spring-beans, CGLIB, Commons Attributes)
 
-* "spring-context" (~110 KB)
+* "spring-context" (~105 KB)
 - Contents: application context, validation, JNDI, UI context support
 - Dependencies: spring-beans, (spring-aop, Velocity, FreeMarker, JasperReports)
 
@@ -116,7 +116,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: JMX support, JCA support, scheduling support, mail support, caching support
 - Dependencies: spring-beans, (spring-dao, spring-context, spring-jdbc, JMX, Quartz, JavaMail, EHCache)
 
-* "spring-web" (~135 KB)
+* "spring-web" (~140 KB)
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
 - Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts, JSF)
 
@@ -136,7 +136,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: Hibernate 2.1 support, Hibernate 3.x support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, Hibernate2, Hibernate3)
 
-* "spring" (~1875 KB)
+* "spring" (~1880 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
