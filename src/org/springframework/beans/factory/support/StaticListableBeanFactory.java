@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -152,8 +152,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	}
 
 	public String[] getBeanDefinitionNames() {
-		Set keySet = this.beans.keySet();
-		return (String[]) keySet.toArray(new String[keySet.size()]);
+		return StringUtils.toStringArray(this.beans.keySet());
 	}
 
 	public String[] getBeanDefinitionNames(Class type) {
@@ -167,7 +166,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 				matches.add(name);
 			}
 		}
-		return (String[]) matches.toArray(new String[matches.size()]);
+		return StringUtils.toStringArray(matches);
 	}
 
 	public String[] getBeanNamesForType(Class type) {
@@ -196,7 +195,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 				}
 			}
 		}
-		return (String[]) matches.toArray(new String[matches.size()]);
+		return StringUtils.toStringArray(matches);
 	}
 
 	public Map getBeansOfType(Class type) throws BeansException {

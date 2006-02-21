@@ -118,7 +118,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	public String[] getBeanDefinitionNames() {
-		return (String[]) this.beanDefinitionNames.toArray(new String[this.beanDefinitionNames.size()]);
+		return StringUtils.toStringArray(this.beanDefinitionNames);
 	}
 
 	public String[] getBeanDefinitionNames(Class type) {
@@ -130,7 +130,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				matches.add(beanName);
 			}
 		}
-		return (String[]) matches.toArray(new String[matches.size()]);
+		return StringUtils.toStringArray(matches);
 	}
 
 	public String[] getBeanNamesForType(Class type) {
@@ -193,7 +193,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 
-		return (String[]) result.toArray(new String[result.size()]);
+		return StringUtils.toStringArray(result);
 	}
 
 	public Map getBeansOfType(Class type) throws BeansException {
@@ -287,7 +287,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		catch (BeansException ex) {
-			// destroy already created singletons to avoid dangling resources
+			// Destroy already created singletons to avoid dangling resources.
 			try {
 				destroySingletons();
 			}
