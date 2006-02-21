@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class LocalizedResourceHelper {
 	 * @param resourceLoader the ResourceLoader to use
 	 */
 	public LocalizedResourceHelper(ResourceLoader resourceLoader) {
-		Assert.notNull(resourceLoader, "ResourceLoader is required");
+		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
 	}
 
@@ -87,8 +87,8 @@ public class LocalizedResourceHelper {
 	 * @see java.util.ResourceBundle
 	 */
 	public Resource findLocalizedResource(String name, String extension, Locale locale) {
-		Assert.notNull(name, "name is required");
-		Assert.notNull(extension, "extension is required");
+		Assert.notNull(name, "Name must not be null");
+		Assert.notNull(extension, "Extension must not be null");
 
 		Resource resource = null;
 
