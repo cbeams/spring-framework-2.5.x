@@ -440,7 +440,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 		}
 
-		String[] aliasesArray = (String[]) aliases.toArray(new String[aliases.size()]);
+		String[] aliasesArray = StringUtils.toStringArray(aliases);
 		return new BeanDefinitionHolder(beanDefinition, beanName, aliasesArray);
 	}
 

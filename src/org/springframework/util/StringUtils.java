@@ -539,6 +539,20 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Copy the given Collection into a String array.
+	 * The Collection must contain String elements only.
+	 * @param collection the Collection to copy
+	 * @return the String array (<code>null</code> if the Collection
+	 * was <code>null</code> as well)
+	 */
+	public static String[] toStringArray(Collection collection) {
+		if (collection == null) {
+			return null;
+		}
+		return (String[]) collection.toArray(new String[collection.size()]);
+	}
+
+	/**
 	 * Remove duplicate Strings from the given array.
 	 * Also sorts the array, as it uses a TreeSet.
 	 * @param array the String array
@@ -552,7 +566,7 @@ public abstract class StringUtils {
 		for (int i = 0; i < array.length; i++) {
 			set.add(array[i]);
 		}
-		return (String[]) set.toArray(new String[set.size()]);
+		return toStringArray(set);
 	}
 
 	/**
@@ -679,7 +693,7 @@ public abstract class StringUtils {
 				tokens.add(token);
 			}
 		}
-		return (String[]) tokens.toArray(new String[tokens.size()]);
+		return toStringArray(tokens);
 	}
 
 	/**
@@ -719,7 +733,7 @@ public abstract class StringUtils {
 				result.add(str.substring(pos));
 			}
 		}
-		return (String[]) result.toArray(new String[result.size()]);
+		return toStringArray(result);
 	}
 
 	/**
