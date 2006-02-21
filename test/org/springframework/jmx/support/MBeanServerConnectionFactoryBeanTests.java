@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,15 +16,16 @@
 
 package org.springframework.jmx.support;
 
-import org.springframework.core.JdkVersion;
-import org.springframework.jmx.AbstractJmxTests;
-import org.springframework.aop.support.AopUtils;
+import java.net.MalformedURLException;
 
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
-import java.net.MalformedURLException;
+
+import org.springframework.aop.support.AopUtils;
+import org.springframework.core.JdkVersion;
+import org.springframework.jmx.AbstractJmxTests;
 
 /**
  * @author Rob Harrop
@@ -97,17 +98,33 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractJmxTests {
 		assertTrue(AopUtils.isAopProxy(connection));
 
 		JMXConnectorServer connector = null;
-
 		try {
 			connector = getConnectorServer();
 			connector.start();
-
 			assertEquals("Incorrect MBean count", server.getMBeanCount(), connection.getMBeanCount());
-		} finally {
-			if(connector != null) {
+		}
+		finally {
+			bean.destroy();
+			if (connector != null) {
 				connector.stop();
 			}
 		}
+	}
+
+	public void testWithLazyConnectionAndNoAccess() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			// to avoid NoClassDefFoundError for JSSE
+			return;
+		}
+
+		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
+		bean.setServiceUrl(SERVICE_URL);
+		bean.setConnectOnStartup(false);
+		bean.afterPropertiesSet();
+
+		MBeanServerConnection connection = (MBeanServerConnection) bean.getObject();
+		assertTrue(AopUtils.isAopProxy(connection));
+		bean.destroy();
 	}
 
 }
