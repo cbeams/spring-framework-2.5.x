@@ -121,7 +121,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Return the names of beans matching the given type (including subclasses),
 	 * judging from either bean definitions or the value of <code>getObjectType</code>
 	 * in the case of FactoryBeans.
-	 * <p>Does consnsatisider objects created by FactoryBeans if the "includeFactoryBeans"
+	 * <p>Does consider objects created by FactoryBeans if the "includeFactoryBeans"
 	 * flag is set, which means that FactoryBeans will get initialized. If the
 	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
 	 * will be matched against the type. If "includeFactoryBeans" is not set,
