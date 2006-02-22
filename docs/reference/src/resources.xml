@@ -73,7 +73,7 @@
 					stream. If <literal>true</literal>, the <classname>InputStream</classname>
 					cannot be read multiple times, and must be read once only and then closed
 					to avoid resource leaks. Will be <literal>false</literal> for all usual
-					resource implementations, with the  exception of
+					resource implementations, with the exception of
 					<classname>InputStreamResource</classname>.
 				</para>
 			</listitem>
@@ -424,7 +424,7 @@
 		<para>
 			Note that the resource path has no prefix, so
 			because the application context itself is going to be used as the
-			<interfacename>ResourceLoader</interfacename>, the resource itself with
+			<interfacename>ResourceLoader</interfacename>, the resource itself will
 			be loaded via a <classname>ClassPathResource</classname>,
 			<literal>FileSystemResource</literal>,
 			<classname>ServletContextResource</classname>, etc. as appropriate depending
@@ -433,7 +433,7 @@
 		<para>
 			If there is a need to force a specific <interfacename>Resource</interfacename>
 			type to be used, then a prefix may be used. The following two examples
-			show how to force a <classname>ClassPathResurce</classname> and a
+			show how to force a <classname>ClassPathResource</classname> and a
 			<classname>UrlResource</classname> (the latter being used to access a
 			filesystem file).
 		</para>
