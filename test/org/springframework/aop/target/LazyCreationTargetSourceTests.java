@@ -29,10 +29,9 @@ public class LazyCreationTargetSourceTests extends TestCase {
 
 	public void testCreateLazy() {
 		TargetSource targetSource = new AbstractLazyCreationTargetSource() {
-			protected Object createObject() throws Exception {
+			protected Object createObject() {
 				return new InitCountingBean();
 			}
-
 			public Class getTargetClass() {
 				return InitCountingBean.class;
 			}

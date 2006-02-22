@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.apache.commons.logging.Log;
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
- * @since 1.0.2
+ * @since 1.2
  * @see CustomizableTraceInterceptor
  */
 public class SimpleTraceInterceptor extends AbstractTraceInterceptor {
@@ -50,6 +50,7 @@ public class SimpleTraceInterceptor extends AbstractTraceInterceptor {
 	public SimpleTraceInterceptor(boolean useDynamicLogger) {
 		setUseDynamicLogger(useDynamicLogger);
 	}
+
 
 	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
 		String invocationDescription = getInvocationDescription(invocation);
