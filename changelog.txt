@@ -3,13 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.7 (22.2.2006)
+Changes in version 1.2.7 (24.2.2006)
 ------------------------------------
 
 Package org.springframework.aop
 * added "autodetectInterfaces" property to ProxyFactoryBean, for TransactionProxyFactoryBean-style interface detection
+* AbstractBeanFactoryBasedTargetSource offers explicit "setTargetClass" method, else determines target class on demand
 * refined ThreadLocalTargetSource's synchronization to guarantee thread-safe destruction on shutdown
+* deprecated AbstractLazyInitTargetSource in favor of AbstractLazyCreationTargetSource
 * added "hideProxyClassNames" property to AbstractTraceInterceptor, to log with target class instead of proxy class
+* deprecated AbstractPerformanceMonitorInterceptor in favor of AbstractMonitoringInterceptor
+* fixed DebugInterceptor to properly synchronize access to its count field in a multithreading environment
 
 Package org.springframework.beans
 * BeanWrapperImpl keeps registered editors in a linked Map: the first registered editor that matches will be used
@@ -115,6 +119,7 @@ Package org.springframework.util
 * WeakReferenceMonitor uses a daemon thread, to avoid a hanging thread even if weak references have not been released
 * refined StopWatch to not add new lines for "shortSummary()" but rather only for "prettyPrint()"
 * fixed ConcurrencyThrottleSupport to serialize all relevant state
+* fixed ResponseTimeMonitorImpl to properly synchronize access to its instance variables in a multithreading environment
 
 Package org.springframework.web
 * use NestedServletException wherever a root cause gets wrapped by a ServletException (for nicer root cause handling)
@@ -125,6 +130,7 @@ Package org.springframework.web
 * FixedLocaleResolver returns the JVM's default Locale if no explicit default Locale specified
 * added HttpSessionMutexListener and "WebUtils.getSessionMutex", used by AbstractController's "synchronizeOnSession"
 * added "FacesContextUtils.getSessionMutex", to make HttpSessionMutexListener's session mutex available to JSF code
+* added overloaded "getModelAndView" method with HttpServletRequest argument to SimpleMappingExceptionResolver
 * added "propertyEditorRegistrars" property to BaseCommandController, for applying PropertyEditorRegistrars
 * turned AbstractCommandController's and AbstractFormController's "handleRequestInternal" methods non-final
 * refactored AbstractFormController's session form check into one single place, throwing SessionRequiredException
