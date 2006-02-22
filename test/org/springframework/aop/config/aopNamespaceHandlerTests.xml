@@ -12,9 +12,9 @@
 
 		<aop:aspect id="countAgeCalls" ref="countingAdvice">
 			<aop:pointcut id="setCalls" expression="execution(* *..ITestBean.set*(..))"/>
-			<aop:advice pointcut="execution(* *..ITestBean.set*(..))" method="myBeforeAdvice" kind="before"/>
-			<aop:advice pointcut-ref="setCalls" method="myAfterAdvice" kind="after"/>
-			<aop:advice pointcut-ref="setCalls" method="myAroundAdvice" kind="around"/>
+			<aop:before pointcut="execution(* *..ITestBean.set*(..))" method="myBeforeAdvice"/>
+			<aop:after pointcut-ref="setCalls" method="myAfterAdvice"/>
+			<aop:around pointcut-ref="setCalls" method="myAroundAdvice"/>
 		</aop:aspect>
 
 	</aop:config>

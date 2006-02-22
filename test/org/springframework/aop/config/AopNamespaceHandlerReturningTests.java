@@ -19,9 +19,10 @@ package org.springframework.aop.config;
 import junit.framework.TestCase;
 
 import org.springframework.beans.ITestBean;
-import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.xml.sax.SAXParseException;
 
 /**
  * @author Adrian Colyer
@@ -45,10 +46,10 @@ public class AopNamespaceHandlerReturningTests extends TestCase {
 	public void testParseReturningOnOtherAdviceType() {
 		try {
 			this.context = new ClassPathXmlApplicationContext(getErrorConfigLocation());
-			fail("Expected BeanCreationException");
+			fail("Expected BeanDefinitionStoreException");
 		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.contains(UnsupportedOperationException.class));
+		catch (BeanDefinitionStoreException ex) {
+			assertTrue(ex.contains(SAXParseException.class));
 		}
 	}
 

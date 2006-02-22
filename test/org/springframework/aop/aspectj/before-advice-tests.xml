@@ -8,29 +8,24 @@
 	
 	<aop:config>
 		<aop:aspect id="beforeAdviceBindingTests" ref="testAspect">
-			<aop:advice 
-			    kind="before"
+			<aop:before
 			    method="oneIntArg"
 			    pointcut="execution(* setAge(int)) and args(age)"	
 			/>
-			<aop:advice
-			    kind="before"
+			<aop:before
 				method="oneObjectArg"
 				pointcut="execution(* getAge()) and this(bean)"
 			/>
-			<aop:advice
-				kind="before"
+			<aop:before
 				method="oneIntAndOneObject"
 				pointcut="execution(* setAge(..)) and args(age) and target(bean)"
 				arg-names="age,bean"
 			/>			
-			<aop:advice
-				kind="before"
+			<aop:before
 				method="needsJoinPoint"
 				pointcut="execution(* getAge())"
 			/>
-			<aop:advice
-				kind="before"
+			<aop:before
 				method="needsJoinPointStaticPart"
 				pointcut="execution(* getAge())"
 			/>
@@ -41,9 +36,8 @@
 			<aop:pointcut id="authenticationMethodWithString" 
   			      expression="execution(boolean *..SecurityManager.authenticate(..)) and args(username,java.lang.String)"/>
 
-			<aop:advice pointcut-ref="authenticationMethodWithString"
+			<aop:before pointcut-ref="authenticationMethodWithString"
 				        method="logAuthenticationAttempt(java.lang.String)"
-					    kind="before"
 			/>
 		</aop:aspect>		
 	</aop:config>

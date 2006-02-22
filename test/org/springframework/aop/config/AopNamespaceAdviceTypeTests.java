@@ -19,6 +19,7 @@ package org.springframework.aop.config;
 import junit.framework.TestCase;
 
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -27,23 +28,23 @@ import org.xml.sax.SAXParseException;
 /**
  * @author Adrian Colyer
  */
-public class AopNamespaceHandlerThrowingTests extends TestCase {
+public class AopNamespaceAdviceTypeTests extends TestCase {
 
 	private ApplicationContext context;
 
 	protected String getOKConfigLocation() {
-		return "org/springframework/aop/config/aopNamespaceHandlerThrowingOKTests.xml";
+		return "org/springframework/aop/config/aopNamespaceHandlerAdviceTypeOKTests.xml";
 	}
 
 	protected String getErrorConfigLocation() {
-		return "org/springframework/aop/config/aopNamespaceHandlerThrowingErrorTests.xml";
+		return "org/springframework/aop/config/aopNamespaceHandlerAdviceTypeErrorTests.xml";
 	}
 
-	public void testThrowingOnThrowingAdvice() {
+	public void testParsingOfAdviceTypes() {
 		this.context = new ClassPathXmlApplicationContext(getOKConfigLocation());
 	}
 	
-	public void testParseThrowingOnOtherAdviceType() {
+	public void testParsingOfAdviceTypesWithError() {
 		try {
 			this.context = new ClassPathXmlApplicationContext(getErrorConfigLocation());
 			fail("Expected BeanDefinitionStoreException");

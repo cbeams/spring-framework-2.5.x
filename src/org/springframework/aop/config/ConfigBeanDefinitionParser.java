@@ -16,6 +16,11 @@
 
 package org.springframework.aop.config;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.aspectj.AspectJAfterAdvice;
 import org.springframework.aop.aspectj.AspectJAfterReturningAdvice;
 import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
@@ -47,9 +52,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.lang.reflect.Field;
-import java.util.List;
-
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} for the <code>&lt;aop:config&gt;</code> tag.
  *
@@ -77,6 +79,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private static final String AFTER = "after";
 	private static final String AFTER_RETURNING = "afterReturning";
 	private static final String AFTER_THROWING = "afterThrowing";
+	private static final String AFTER_RETURNING_ELEMENT = "after-returning";
+	private static final String AFTER_THROWING_ELEMENT = "after-throwing";
 	private static final String AROUND = "around";
 	private static final String PROXY_TARGET_CLASS = "proxyTargetClass";
 	private static final String TRUE = "true";
@@ -95,6 +99,16 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private static final int POINTCUT_INDEX = 1;
 	private static final int ASPECT_INSTANCE_FACTORY_INDEX = 2;
 	private static final int PARAMETER_NAME_DISCOVERER = 3;
+
+	private static final String ADVICE_DEPRECATION_MESSAGE =
+		"The element <aop:advice> is deprecated in Spring 2.0 M3 in favour of " +
+		"the advice type specific forms <aop:before>, <aop:after-returning>, " +
+		"<aop:after-throwing>, <aop:after>, and <aop:around>. Please update " +
+		"your configuration files before the next milestone build, when support " +
+		"for <aop:advice> will be removed.";
+
+	private final Log logger = LogFactory.getLog(getClass());
+
 
 	public void parse(Element element, BeanDefinitionRegistry registry) {
 		
@@ -193,10 +207,35 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			parseDeclareParents(aspectName, declareParentsElement, new BeanDefinitionRegistryBuilder(registry), parseContext);
 		}
 
-		List advice = DomUtils.getChildElementsByTagName(aspectElement, ADVICE, true);
-		for (int i = METHOD_INDEX; i < advice.size(); i++) {
-			Element adviceElement = (Element) advice.get(i);
-			parseAdvice(aspectName, i, adviceElement, registry, parseContext);
+		// we have to parse "advice" and all the advice kinds in one loop, to get the
+		// ordering semantics right
+		NodeList nodeList = aspectElement.getChildNodes();
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Node node = nodeList.item(i);
+			if (isAdviceNode(node)) {
+				parseAdvice(aspectName, i, (Element) node, registry, parseContext);
+			}
+		}
+		
+//		List advice = DomUtils.getChildElementsByTagName(aspectElement, ADVICE, true);
+//		for (int i = METHOD_INDEX; i < advice.size(); i++) {
+//			Element adviceElement = (Element) advice.get(i);
+//			parseAdvice(aspectName, i, adviceElement, registry, parseContext);
+//		}		
+	}
+	
+	private boolean isAdviceNode(Node aNode) {
+		if (! (aNode instanceof Element)) {
+			return false;
+		}
+		else {
+			String name = aNode.getLocalName();
+			return (ADVICE.equals(name) ||
+					BEFORE.equals(name) ||
+					AFTER.equals(name) ||
+					AFTER_RETURNING_ELEMENT.equals(name) ||
+					AFTER_THROWING_ELEMENT.equals(name) ||
+					AROUND.equals(name));
 		}
 	}
 
@@ -264,6 +303,10 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
+	/** 
+	 * This could be an "advice" element, or one of "before", "after", "..." 
+	 * 
+	 */
 	private void parseAdvice(String aspectName, int order, Element adviceElement, 
 			BeanDefinitionRegistry registry, ParseContext parseContext) {
 
@@ -285,8 +328,18 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		instanceFactoryDefinition.getPropertyValues().addPropertyValue("aspectBeanName", aspectName);
 
 		// create the advice
-		String kind = adviceElement.getAttribute(KIND);
-		RootBeanDefinition adviceDefinition = new RootBeanDefinition(getAdviceClass(kind));
+		RootBeanDefinition adviceDefinition = null; 
+		boolean isAroundAdvice = false;
+		if (adviceElement.hasAttribute(KIND)) {
+			logger.warn(ADVICE_DEPRECATION_MESSAGE);
+			String kind = adviceElement.getAttribute(KIND);
+			adviceDefinition = new RootBeanDefinition(getAdviceClass(kind));
+			isAroundAdvice = AROUND.equals(kind);
+		} 
+		else {
+			adviceDefinition = new RootBeanDefinition(getAdviceClass(adviceElement));
+			isAroundAdvice = AROUND.equals(adviceElement.getLocalName());
+		}
 		adviceDefinition.setPropertyValues(new MutablePropertyValues());
 		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_NAME_PROPERTY,aspectName);		
 		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_BEAN_PROPERTY, new RuntimeBeanReference(aspectName));		
@@ -306,7 +359,9 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		cav.addIndexedArgumentValue(POINTCUT_INDEX, new RuntimeBeanReference(pointcutBeanName));
 		cav.addIndexedArgumentValue(ASPECT_INSTANCE_FACTORY_INDEX, instanceFactoryDefinition);
 
-		extendAdviceConstructorArgs(cav, kind);
+		if (isAroundAdvice) {
+			extendAdviceConstructorArgs(cav);
+		}
 
 		adviceDefinition.setConstructorArgumentValues(cav);
 
@@ -320,11 +375,9 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		registry.registerBeanDefinition(id, advisorDefinition);
 	}
 
-	private void extendAdviceConstructorArgs(ConstructorArgumentValues cav, String kind) {
-		if (AROUND.equals(kind)) {
-			RootBeanDefinition discovererDefinition = new RootBeanDefinition(PrioritizedParameterNameDiscoverer.class);
-			cav.addIndexedArgumentValue(PARAMETER_NAME_DISCOVERER, discovererDefinition);
-		}
+	private void extendAdviceConstructorArgs(ConstructorArgumentValues cav) {
+		RootBeanDefinition discovererDefinition = new RootBeanDefinition(PrioritizedParameterNameDiscoverer.class);
+		cav.addIndexedArgumentValue(PARAMETER_NAME_DISCOVERER, discovererDefinition);
 	}
 
 	private Class getAdviceClass(String kind) {
@@ -347,6 +400,28 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		else {
 			throw new IllegalArgumentException("Unknown advice kind [" + kind + "].");
 		}
+	}
+	
+	private Class getAdviceClass(Element adviceElement) {
+		String elementName = adviceElement.getLocalName();
+		if (BEFORE.equals(elementName)) {
+			return AspectJMethodBeforeAdvice.class;
+		}
+		else if (AFTER.equals(elementName)) {
+			return AspectJAfterAdvice.class;
+		}
+		else if (AFTER_RETURNING_ELEMENT.equals(elementName)) {
+			return AspectJAfterReturningAdvice.class;
+		}
+		else if (AFTER_THROWING_ELEMENT.equals(elementName)) {
+			return AspectJAfterThrowingAdvice.class;
+		}
+		else if (AROUND.equals(elementName)) {
+			return AspectJAroundAdvice.class;
+		}
+		else {
+			throw new IllegalArgumentException("Unknown advice kind [" + elementName + "].");
+		}		
 	}
 
 	/**

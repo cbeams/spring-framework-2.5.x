@@ -7,35 +7,29 @@
 
 	
 	<aop:config>
-		<aop:aspect id="beforeAdviceBindingTests" ref="testAspect">
-			<aop:advice 
-			    kind="after"
+		<aop:aspect id="afterAdviceBindingTests" ref="testAspect">
+			<aop:after
 			    method="oneIntArg"
 			    pointcut="execution(* setAge(int)) and args(age)"	
 			/>
-			<aop:advice
-			    kind="after"
+			<aop:after
 				method="oneObjectArg"
 				pointcut="execution(* getAge()) and this(bean)"
 			/>
-			<aop:advice
-			    kind="afterReturning"
+			<aop:after
 				method="oneObjectArg"
 				pointcut="execution(* getDoctor()) and target(bean)"
 			/>
-			<aop:advice
-				kind="after"
+			<aop:after
 				method="oneIntAndOneObject"
 				pointcut="execution(* setAge(..)) and args(age) and this(bean)"
 				arg-names="age,bean"
 			/>			
-			<aop:advice
-				kind="after"
+			<aop:after
 				method="needsJoinPoint"
 				pointcut="execution(* getAge())"
 			/>
-			<aop:advice
-				kind="after"
+			<aop:after
 				method="needsJoinPointStaticPart"
 				pointcut="execution(* getAge())"
 			/>

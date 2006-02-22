@@ -13,8 +13,7 @@
 			    type-pattern="org.springframework.beans..*"	
 				default-impl="org.springframework.aop.framework.DefaultLockable"
 			/>
-			<aop:advice
-			    kind="before"
+			<aop:before
 				method="checkNotLocked"
 				pointcut="execution(* set*(*)) and this(mixin)"
 				arg-names="mixin"

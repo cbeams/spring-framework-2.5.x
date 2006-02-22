@@ -8,72 +8,60 @@
 	
 	<aop:config>
 		<aop:aspect id="afterReturningAdviceBindingTests" ref="testAspect">
-			<aop:advice 
-			    kind="afterReturning"
+			<aop:after-returning
 			    method="oneIntArg"
 			    pointcut="execution(* setAge(int)) and args(age)"	
 			/>
-			<aop:advice
-			    kind="afterReturning"
+			<aop:after-returning
 				method="oneObjectArg"
 				pointcut="execution(* getAge()) and this(bean)"
 			/>
-			<aop:advice
-				kind="afterReturning"
+			<aop:after-returning
 				method="oneIntAndOneObject"
 				pointcut="execution(* setAge(..)) and args(age) and this(bean)"
 				arg-names="age,bean"
 			/>			
-			<aop:advice
-				kind="afterReturning"
+			<aop:after-returning
 				method="needsJoinPoint"
 				pointcut="execution(* getAge())"
 			/>
-			<aop:advice
-				kind="afterReturning"
+			<aop:after-returning
 				method="needsJoinPointStaticPart"
 				pointcut="execution(* getAge())"
 			/>
 			
 			<!-- additional tests using the returning attribute -->
-			<aop:advice
-				kind="afterReturning"
+			<aop:after-returning
 				method="oneString"
 				returning="name"
 				pointcut="execution(* getName())"
 			/>
-			<aop:advice
-				kind="afterReturning"
+			<aop:after-returning
 				method="oneObjectArg"
 				returning="bean"
 				pointcut="execution(* returnsThis())"
 			/>
-			<aop:advice
-				kind="afterReturning"
+			<aop:after-returning
 				method="oneTestBeanArg"
 				returning="bean"
 				pointcut="execution(* returnsThis())"
 			/>
-			<aop:advice
-				kind="afterReturning"
+			<aop:after-returning
 				method="oneString"
 				returning="name"
 				pointcut="execution(* getSpouse())"
 			/>
-			<aop:advice
-				kind="afterReturning"
+			<aop:after-returning
 				method="objectMatchNoArgs"
 				returning="java.lang.Object"
 				pointcut="execution(* returnsThis())"
 			/>
-			<aop:advice
-				kind="afterReturning"
+			<aop:after-returning
 				method="stringMatchNoArgs"
 				returning="java.lang.String"
 				pointcut="execution(* getSpouse())"
 			/>
-			<aop:advice
-				kind="afterReturning"
+			<aop:after-returning
 				method="oneInt"
 				returning="result"
 				pointcut="execution(* haveBirthday())"

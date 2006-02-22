@@ -8,31 +8,26 @@
 	
 	<aop:config>
 		<aop:aspect id="afterThrowingAdviceBindingTests" ref="testAspect">
-			<aop:advice 
-			    kind="afterThrowing"
+			<aop:after-throwing
 			    method="noArgs"
 			    pointcut="execution(* exceptional(..))"	
 			/>
-			<aop:advice
-			    kind="afterThrowing"
+			<aop:after-throwing
 				method="oneThrowable"
 				throwing="t"
 				pointcut="execution(* exceptional(..))"
 			/>
-			<aop:advice
-				kind="afterThrowing"
+			<aop:after-throwing
 				method="oneRuntimeException"
 				throwing="ex"
 				pointcut="execution(* exceptional(..))"
 			/>			
-			<aop:advice
-			    kind="afterThrowing"
+			<aop:after-throwing
 				method="noArgsOnThrowableMatch"
 				throwing="java.lang.Throwable"
 				pointcut="execution(* exceptional(..))"
 			/>
-			<aop:advice
-				kind="afterThrowing"
+			<aop:after-throwing
 				method="noArgsOnRuntimeExceptionMatch"
 				throwing="java.lang.RuntimeException"
 				pointcut="execution(* exceptional(..))"

@@ -18,66 +18,54 @@
 			order="90"/>		
 		
 		<aop:aspect ref="lowPrecedenceAspect">
-			<aop:advice
-				kind="before"
+			<aop:before
 				method="beforeAdviceOne"
 				pointcut="execution(* getAge())"/>		
 									
-			<aop:advice
-				kind="before"
+			<aop:before
 				method="beforeAdviceTwo"
 				pointcut="execution(* getAge())"/>				
 			
-			<aop:advice
-				kind="around"
+			<aop:around
 				method="aroundAdviceOne"
 				pointcut="execution(* getAge())"/>				
 			
-			<aop:advice
-				kind="around"
+			<aop:around
 				method="aroundAdviceTwo"
 				pointcut="execution(* getAge())"/>				
 			
-			<aop:advice
-				kind="afterReturning"
+			<aop:after-returning
 				method="afterAdviceOne"
 				pointcut="execution(* getAge())"/>				
 			
-			<aop:advice
-				kind="afterReturning"
+			<aop:after-returning
 				method="afterAdviceTwo"
 				pointcut="execution(* getAge())"/>				
 						
 		</aop:aspect>
 		
 		<aop:aspect ref="highPrecedenceAspect">
-			<aop:advice
-				kind="before"
+			<aop:before
 				method="beforeAdviceOne"
 				pointcut="execution(* getAge())"/>				
 			
-			<aop:advice
-				kind="before"
+			<aop:before
 				method="beforeAdviceTwo"
 				pointcut="execution(* getAge())"/>				
 			
-			<aop:advice
-				kind="around"
+			<aop:around
 				method="aroundAdviceOne"
 				pointcut="execution(* getAge())"/>				
 			
-			<aop:advice
-				kind="around"
+			<aop:around
 				method="aroundAdviceTwo"
 				pointcut="execution(* getAge())"/>				
 			
-			<aop:advice
-				kind="afterReturning"
+			<aop:after-returning
 				method="afterAdviceOne"
 				pointcut="execution(* getAge())"/>				
 			
-			<aop:advice
-				kind="afterReturning"
+			<aop:after-returning
 				method="afterAdviceTwo"
 				pointcut="execution(* getAge())"/>				
 									

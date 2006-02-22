@@ -46,7 +46,16 @@
 		<xsd:sequence>
 			<xsd:element name="pointcut" type="pointcutType" minOccurs="0" maxOccurs="1"/>
 			<xsd:element name="declare-parents" type="declareParentsType" minOccurs="0" maxOccurs="unbounded"/>
-			<xsd:element name="advice" type="adviceType" minOccurs="1" maxOccurs="unbounded"/>
+			<xsd:choice minOccurs="1" maxOccurs="unbounded">
+				<!-- this first element kept for backwards compat, use of the specific
+				     forms is encouraged -->
+				<xsd:element name="advice" type="adviceType"/>
+				<xsd:element name="before" type="basicAdviceType"/>
+				<xsd:element name="after" type="basicAdviceType"/>
+				<xsd:element name="after-returning" type="afterReturningAdviceType"/>
+				<xsd:element name="after-throwing" type="afterThrowingAdviceType"/>
+				<xsd:element name="around" type="basicAdviceType"/>			
+			</xsd:choice>
 		</xsd:sequence>
 		<xsd:attribute name="id" type="xsd:ID"/>
 		<xsd:attribute name="ref" type="xsd:string"/>
@@ -97,6 +106,35 @@
 		<xsd:attribute name="arg-names" type="xsd:string"/>
 	</xsd:complexType>
 
+	<xsd:complexType name="basicAdviceType">
+		<xsd:attribute name="pointcut" type="xsd:string"/>
+		<xsd:attribute name="pointcut-ref" type="xsd:string"/>
+		<xsd:attribute name="method" type="xsd:string" use="required"/>
+		<!-- there is a case to make this next one an element with one sub-element for each
+			argument name, but that is a lot more verbose that a comma-delimited list of arg names -->
+		<xsd:attribute name="arg-names" type="xsd:string"/>
+	</xsd:complexType>
+	
+	<xsd:complexType name="afterReturningAdviceType">
+		<xsd:attribute name="pointcut" type="xsd:string"/>
+		<xsd:attribute name="pointcut-ref" type="xsd:string"/>
+		<xsd:attribute name="method" type="xsd:string" use="required"/>
+		<xsd:attribute name="returning" type="xsd:string"/>
+		<!-- there is a case to make this next one an element with one sub-element for each
+			argument name, but that is a lot more verbose that a comma-delimited list of arg names -->
+		<xsd:attribute name="arg-names" type="xsd:string"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="afterThrowingAdviceType">
+		<xsd:attribute name="pointcut" type="xsd:string"/>
+		<xsd:attribute name="pointcut-ref" type="xsd:string"/>
+		<xsd:attribute name="method" type="xsd:string" use="required"/>
+		<xsd:attribute name="throwing" type="xsd:string"/>
+		<!-- there is a case to make this next one an element with one sub-element for each
+			argument name, but that is a lot more verbose that a comma-delimited list of arg names -->
+		<xsd:attribute name="arg-names" type="xsd:string"/>
+	</xsd:complexType>
+	
 	<!-- TODO: need to constrain this -->
 	<xsd:complexType name="advisorType">
 		<xsd:attribute name="id" type="xsd:string"/>

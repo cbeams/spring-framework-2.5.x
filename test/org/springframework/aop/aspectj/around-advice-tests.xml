@@ -8,24 +8,20 @@
 	
 	<aop:config>
 		<aop:aspect id="beforeAdviceBindingTests" ref="testAspect">
-			<aop:advice 
-			    kind="around"
+			<aop:around
 			    method="oneIntArg"
 			    pointcut="execution(* setAge(int)) and args(age)"	
 			/>
-			<aop:advice
-			    kind="around"
+			<aop:around
 				method="oneObjectArg"
 				pointcut="execution(* getAge()) and target(bean)"
 			/>
-			<aop:advice
-				kind="around"
+			<aop:around
 				method="oneIntAndOneObject"
 				pointcut="execution(* setAge(..)) and args(age) and this(bean)"
 				arg-names="thisJoinPoint,age,bean"
 			/>			
-			<aop:advice
-				kind="around"
+			<aop:around
 				method="justJoinPoint"
 				pointcut="execution(* getAge())"
 			/>

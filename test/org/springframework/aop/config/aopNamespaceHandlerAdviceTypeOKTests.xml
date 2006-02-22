@@ -7,11 +7,13 @@
 
 	<aop:config>
 		<aop:aspect id="countAgeCalls" ref="countingAdvice">
-			<aop:after pointcut="execution(int getAge(..))" 
-				        method="myAfterAdvice" 
-				        returning="age"/>
+			<aop:pointcut id="pc" expression="execution(* getAge())"/>
+			<aop:before pointcut-ref="pc" method="myBeforeAdvice" />
+			<aop:after pointcut-ref="pc" method="myAfterAdvice" />
+			<aop:after-returning pointcut-ref="pc" method="myAfterReturningAdvice" returning="age"/>
+			<aop:after-throwing pointcut-ref="pc" method="myAfterThrowingAdvice" throwing="ex"/>
+			<aop:around pointcut-ref="pc" method="myAroundAdvice"/>
 		</aop:aspect>
-
 	</aop:config>
 
 	<bean id="getNameCounter" class="org.springframework.aop.framework.CountingBeforeAdvice"/>

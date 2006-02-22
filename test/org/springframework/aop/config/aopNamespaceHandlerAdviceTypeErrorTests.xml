@@ -7,9 +7,10 @@
 
 	<aop:config>
 		<aop:aspect id="countAgeCalls" ref="countingAdvice">
-			<aop:after pointcut="execution(int getAge(..))" 
-				        method="myAfterAdvice" 
-				        returning="age"/>
+			<aop:aspect id="countAgeCalls" ref="countingAdvice">
+				<aop:pointcut id="pc" expression="execution(* getAge())"/>
+				<aop:before pointcut-ref="pc" method="myBeforeAdvice" returning="age" />
+			</aop:aspect>
 		</aop:aspect>
 
 	</aop:config>

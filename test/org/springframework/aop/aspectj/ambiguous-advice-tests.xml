@@ -9,7 +9,7 @@
 	<aop:config>
 		<aop:aspect id="ambiguousAdviceTest" ref="testAspect">
 			<aop:pointcut id="setter" expression="execution(* setName(..)) and args(name)"/>
-			<aop:advice pointcut-ref="setter" kind="before" method="myBeforeAdvice"/>
+			<aop:before pointcut-ref="setter" method="myBeforeAdvice"/>
 		</aop:aspect>		
 	</aop:config>
 	
