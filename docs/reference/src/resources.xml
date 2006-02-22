@@ -305,7 +305,7 @@ public interface InputStreamSource {
   &lt;property name="template" value="some/resource/path/myTemplate.txt"/&gt;
 &lt;/bean&gt;</programlisting>Note that the resource path has no prefix, so
     because the application context itself is going to be used as the
-    <literal>ResourceLoader</literal>, the resource itself with be loaded via
+    <literal>ResourceLoader</literal>, the resource itself will be loaded via
     a <literal>ClassPathResource</literal>,
     <literal>FileSystemResource</literal>,
     <literal>ServletContextResource</literal>, etc., as appropriate depending
