@@ -28,7 +28,7 @@ import javax.management.remote.JMXServiceURL;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.target.AbstractLazyInitTargetSource;
+import org.springframework.aop.target.AbstractLazyCreationTargetSource;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -161,7 +161,7 @@ public class MBeanServerConnectionFactoryBean implements FactoryBean, Initializi
 	 * @see MBeanServerConnectionFactoryBean#setServiceUrl(String)
 	 * @see MBeanServerConnectionFactoryBean#setEnvironment(java.util.Properties)
 	 */
-	private class JMXConnectorLazyInitTargetSource extends AbstractLazyInitTargetSource {
+	private class JMXConnectorLazyInitTargetSource extends AbstractLazyCreationTargetSource {
 
 		protected Object createObject() throws Exception {
 			return JMXConnectorFactory.connect(serviceUrl, environment);
@@ -176,7 +176,7 @@ public class MBeanServerConnectionFactoryBean implements FactoryBean, Initializi
 	/**
 	 * Lazily creates an <code>MBeanServerConnection</code>.
 	 */
-	private class MBeanServerConnectionLazyInitTargetSource extends AbstractLazyInitTargetSource {
+	private class MBeanServerConnectionLazyInitTargetSource extends AbstractLazyCreationTargetSource {
 
 		protected Object createObject() throws Exception {
 			return connector.getMBeanServerConnection();
