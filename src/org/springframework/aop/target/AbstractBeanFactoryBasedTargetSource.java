@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.io.Serializable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -55,15 +56,14 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	/** Name of the target bean we will create on each invocation */
 	private String targetBeanName;
 
+	/** Class of the target */
+	private Class targetClass;
+
 	/**
 	 * BeanFactory that owns this TargetSource. We need to hold onto this
 	 * reference so that we can create new prototype instances as necessary.
 	 */
 	private BeanFactory beanFactory;
-
-	/** Class of the target */
-	private Class targetClass;
-	
 
 
 	/**
@@ -86,6 +86,16 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	}
 
 	/**
+	 * Specify the target class explicitly, to avoid any kind of access to the
+	 * target bean (for example, to avoid initialization of a FactoryBean instance).
+	 * <p>Default is to detect the type automatically, through a <code>getType</code>
+	 * call on the BeanFactory (or even a full <code>getBean</code> call as fallback).
+	 */
+	public void setTargetClass(Class targetClass) {
+		this.targetClass = targetClass;
+	}
+
+	/**
 	 * Set the owning BeanFactory. We need to save a reference so that we can
 	 * use the <code>getBean</code> method on every invocation.
 	 */
@@ -93,17 +103,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 		if (this.targetBeanName == null) {
 			throw new IllegalStateException("targetBeanName is required");
 		}
-
 		this.beanFactory = beanFactory;
-
-		// Determine type of the target bean.
-		this.targetClass = this.beanFactory.getType(this.targetBeanName);
-		if (this.targetClass == null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Getting bean with name '" + this.targetBeanName + "' to determine type");
-			}
-			this.targetClass = this.beanFactory.getBean(this.targetBeanName).getClass();
-		}
 	}
 
 	/**
@@ -114,7 +114,17 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	}
 
 
-	public Class getTargetClass() {
+	public synchronized Class getTargetClass() {
+		if (this.targetClass == null && this.beanFactory != null) {
+			// Determine type of the target bean.
+			this.targetClass = this.beanFactory.getType(this.targetBeanName);
+			if (this.targetClass == null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Getting bean with name '" + this.targetBeanName + "' to determine type");
+				}
+				this.targetClass = this.beanFactory.getBean(this.targetBeanName).getClass();
+			}
+		}
 		return this.targetClass;
 	}
 
@@ -133,9 +143,9 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	 * @param other object to copy configuration from
 	 */
 	protected void copyFrom(AbstractBeanFactoryBasedTargetSource other) {
-		this.beanFactory = other.beanFactory;
-		this.targetClass = other.targetClass;
 		this.targetBeanName = other.targetBeanName;
+		this.targetClass = other.targetClass;
+		this.beanFactory = other.beanFactory;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.beans.BeansException;
  * &lt;bean id="service" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
  *   &lt;property name="targetSource"&gt;
  *     &lt;bean class="org.springframework.aop.target.LazyInitTargetSource"&gt;
- *       &lt;property name="targetBeanName"&gt;&lt;idref local="serviceTarget"/&gt;&lt;/property&gt;
+ *       &lt;property name="targetBeanName" ref="serviceTarget"/&gt;
  *     &lt;/bean&gt;
  *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
@@ -42,17 +42,24 @@ import org.springframework.beans.BeansException;
  * The "serviceTarget" bean will not get initialized until a method on the
  * "service" proxy gets invoked.
  *
- * <p>Sub-classes can extend this class and override the {@link #postProcessTargetObject(Object)} to
- * perform some additional processing with the target object when it is first loaded.
+ * <p><b>NOTE:</b> Consider specifying "targetClass" if you'd like to avoid any
+ * kind of access to the target bean (for example, to avoid initialization of a
+ * FactoryBean instance). Default is to detect the type automatically, through a
+ * <code>getType</code> call on the BeanFactory, which will trigger FactoryBeans.
+ *
+ * <p>Subclasses can extend this class and override the {@link #postProcessTargetObject(Object)}
+ * to perform some additional processing with the target object when it is first loaded.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 1.1.4
- * @see #postProcessTargetObject(Object)
+ * @see #setTargetClass
+ * @see #postProcessTargetObject
  */
 public class LazyInitTargetSource extends AbstractBeanFactoryBasedTargetSource {
 
 	private Object target;
+
 
 	public synchronized Object getTarget() throws BeansException {
 		if (this.target == null) {
