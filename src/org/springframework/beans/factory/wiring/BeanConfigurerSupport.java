@@ -25,12 +25,13 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Convenient superclass for configurers that can perform Dependency Injection on
- * objects, however they may be created. Typically subclassed by AspectJ aspects.
+ * objects (however they may be created). Typically subclassed by AspectJ aspects.
 
- * <p>Subaspects may also need a metadata resolution strategy, in the
- * BeanWiringInfoResolver interface. The default implementation looks for a bean
- * with the same name as the fully-qualified class name. This is the default name
- * of the bean in a Spring XML file if the id attribute is not used.
+ * <p>Subclasses may also need a metadata resolution strategy, in the
+ * {@link BeanWiringInfoResolver} interface. The default implementation looks
+ * for a bean with the same name as the fully-qualified class name. (This is
+ * the default name of the bean in a Spring XML file if the id attribute is
+ * not used.)
 
  * @author Rob Harrop
  * @author Rod Johnson
@@ -48,7 +49,7 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware {
 	/**
 	 * Set the BeanWiringInfoResolver to use. Default behavior will be to look
 	 * for a bean with the same name as the class.
-	 * <p>As alternative, consider using annotation-driven bean wiring.
+	 * <p>As an alternative, consider using annotation-driven bean wiring.
 	 * @see ClassNameBeanWiringInfoResolver
 	 * @see org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver
 	 */
@@ -63,7 +64,7 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware {
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof AutowireCapableBeanFactory)) {
 			throw new IllegalArgumentException(
-				 "Bean configurer aspect needs to run in a ConfigurableListableBeanFactory, not in [" + beanFactory + "]");
+				 "Bean configurer aspect needs to run in an AutowireCapableBeanFactory, not in [" + beanFactory + "]");
 		}
 		this.beanFactory = (AutowireCapableBeanFactory) beanFactory;
 	}
@@ -74,7 +75,7 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware {
 	 * Subclasses can override this to provide custom configuration logic.
 	 * <p>Typically called by an aspect, for all bean instances matched
 	 * by a pointcut.
-	 * @param beanInstance the bean instance to configure
+	 * @param beanInstance the bean instance to configure (must <b>not</b> be <code>null</code>
 	 */
 	protected void configureBean(Object beanInstance) {
 		BeanWiringInfo bwi = this.beanWiringInfoResolver.resolveWiringInfo(beanInstance);
@@ -87,7 +88,7 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware {
 			if(logger.isWarnEnabled()) {
 				logger.warn("BeanFactory has not be set on [" + getClass().getName() + "]: " +
 					"Make sure this configurer runs in a Spring container. " +
-					"For example, add it to a Spring application context as XML bean definition.");
+					"For example, add it to a Spring application context as an XML bean definition.");
 			}
 			return;
 		}
