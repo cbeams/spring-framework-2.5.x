@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -250,7 +250,7 @@ public class SimpleFormController extends AbstractFormController {
 		}
 		else if (isFormChangeRequest(request)) {
 			logger.debug("Detected form change request -> routing request to onFormChange");
-			onFormChange(request, response, command);
+			onFormChange(request, response, command, errors);
 			return showForm(request, response, errors);
 		}
 		else {
@@ -290,12 +290,33 @@ public class SimpleFormController extends AbstractFormController {
 	 * {@link #isFormChangeRequest(javax.servlet.http.HttpServletRequest)}
 	 * returns <code>true</code>. Allows subclasses to implement custom logic
 	 * to modify the command object to directly modify data in the form.
+	 * <p>Default implementation delegates to
+	 * <code>onFormChange(request, response, command)</code>.
+	 * @param request current servlet request
+	 * @param response current servlet response
+	 * @param command form object with request parameters bound onto it
+	 * @param errors validation errors holder, allowing for additional
+	 * custom validation
+	 * @throws Exception in case of errors
+	 * @see #isFormChangeRequest(HttpServletRequest)
+	 * @see #onFormChange(HttpServletRequest, HttpServletResponse, Object)
+	 */
+	protected void onFormChange(
+			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
+			throws Exception {
+
+		onFormChange(request, response, command);
+	}
+
+	/**
+	 * Simpler <code>onFormChange</code> variant, called by the full version
+	 * <code>onFormChange(request, response, command, errors)</code>.
 	 * <p>Default implementation is empty.
 	 * @param request current servlet request
 	 * @param response current servlet response
 	 * @param command form object with request parameters bound onto it
 	 * @throws Exception in case of errors
-	 * @see #isFormChangeRequest(javax.servlet.http.HttpServletRequest)
+	 * @see #onFormChange(HttpServletRequest, HttpServletResponse, Object, BindException)
 	 */
 	protected void onFormChange(HttpServletRequest request, HttpServletResponse response, Object command)
 			throws Exception {
