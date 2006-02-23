@@ -189,17 +189,23 @@
 
     <para>In the example above, all requests ending with
     <literal>.form</literal> will be handled by the DispatcherServlet. The
-    DispatcherServlet now needs to be configured. As illustrated in <xref
-    linkend="context-introduction" />, ApplicationContexts in Spring can be
-    scoped. In the web MVC framework, each DispatcherServlet has its own
-    <literal>WebApplicationContext</literal>, which contains the
-    DispatcherServlet configuration beans. The default BeanFactory used by the
-    DispatcherServlet is the <literal>XmlBeanFactory</literal> and the
-    DispatcherServlet will on initialization <emphasis>look for a file named
-    <literal>[servlet-name]-servlet.xml</literal></emphasis> in the
-    <literal>WEB-INF</literal> directory of your web application. The default
-    values used by the DispatcherServlet can be modified by using the servlet
-    initialization parameters (see below for more information).</para>
+    DispatcherServlet now needs to be configured.</para>
+
+    <para>As illustrated in <xref linkend="context-introduction" />,
+    ApplicationContexts in Spring can be scoped. In the web MVC framework,
+		each DispatcherServlet has its own <literal>WebApplicationContext</literal>,
+    which inherits all the beans already defined in in the Root WebApplicationContext.
+		These inherited beans defined can be overridden in the servlet-specific scope,
+    and new scope-specific beans can be defined local to a given servlet instance.</para>
+
+    <para>The framework will, on initialization of a DispatcherServlet,
+    <emphasis>look for a file named <literal>[servlet-name]-servlet.xml</literal></emphasis>
+    in the <literal>WEB-INF</literal> directory of your web application and
+    create the beans defined there (overriding the definitions of any beans
+    defined with the same name in the global scope).</para>
+
+    <para>The config location used by the DispatcherServlet can be modified
+    through a servlet initialization parameter (see below for details).</para>
 
     <para>The <literal>WebApplicationContext</literal> is just an ordinary
     ApplicationContext that has some extra features necessary for web
