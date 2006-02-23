@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,7 +34,7 @@ import org.springframework.web.portlet.bind.PortletRequestDataBinder;
 import org.springframework.web.portlet.handler.SessionRequiredException;
 
 /**
- * <p>Form controller that autopopulates a form bean from the request.
+ * <p>Form controller that auto-populates a form bean from the request.
  * This, either using a new bean instance per request, or using the same bean
  * when the <code>sessionForm</code> property has been set to
  * <code>true</code>.</p>
@@ -430,7 +430,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 		if (!isRedirectAction()) {
 			setFormSubmit(response);
 		}
-		BindException errors = bindAndValidate(request, command).getErrors();
+		PortletRequestDataBinder binder = bindAndValidate(request, command);
+		BindException errors = new BindException(binder.getBindingResult());
 		processFormSubmission(request, response, command, errors);
 		setRenderCommandAndErrors(request, command, errors);
 	}
@@ -606,22 +607,26 @@ public abstract class AbstractFormController extends BaseCommandController {
 	protected final BindException getErrorsForNewForm(RenderRequest request) throws Exception {
 		// Create form-backing object for new form
 		Object command = formBackingObject(request);
-		if (command == null)
+		if (command == null) {
 			throw new PortletException("Form object returned by formBackingObject() must not be null");
-		if (!checkCommand(command))
+		}
+		if (!checkCommand(command)) {
 			throw new PortletException("Form object returned by formBackingObject() must match commandClass");
-		
+		}
+
 		// Bind without validation, to allow for prepopulating a form, and for
 		// convenient error evaluation in views (on both first attempt and resubmit).
 		PortletRequestDataBinder binder = createBinder(request, command);
+		BindException errors = new BindException(binder.getBindingResult());
+
 		if (isBindOnNewForm()) {
 			if (logger.isDebugEnabled()) logger.debug("Binding to new form");
 			binder.bind(request);
-			onBindOnNewForm(request, command, binder.getErrors());
+			onBindOnNewForm(request, command, errors);
 		}
 		
 		// Return BindException object that resulted from binding.
-		return binder.getErrors();
+		return errors;
 	}
 
 	/**
@@ -634,7 +639,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * custom registration of binding errors
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #onBindOnNewForm(RenderRequest, Object)
-	 * @see #setBindOnNewForm(boolean)
+	 * @see #setBindOnNewForm
 	 */
 	protected void onBindOnNewForm(RenderRequest request, Object command, BindException errors)
 			throws Exception {
@@ -941,7 +946,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 		if (!checkCommand(command)) {
 			throw new PortletException("Form object returned by formBackingObject() must match commandClass");
 		}
-		BindException errors = bindAndValidate(request, command).getErrors();
+		PortletRequestDataBinder binder = bindAndValidate(request, command);
+		BindException errors = new BindException(binder.getBindingResult());
 		processFormSubmission(request, response, command, errors);
 		setRenderCommandAndErrors(request, command, errors);
 	}

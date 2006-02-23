@@ -30,7 +30,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.SessionRequiredException;
 
 /**
- * <p>Form controller that autopopulates a form bean from the request.
+ * <p>Form controller that auto-populates a form bean from the request.
  * This, either using a new bean instance per request, or using the same bean
  * when the <code>sessionForm</code> property has been set to <code>true</code>.</p>
  *
@@ -246,7 +246,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 			try {
 				Object command = getCommand(request);
 				ServletRequestDataBinder binder = bindAndValidate(request, command);
-				return processFormSubmission(request, response, command, binder.getErrors());
+				BindException errors = new BindException(binder.getBindingResult());
+				return processFormSubmission(request, response, command, errors);
 			}
 			catch (SessionRequiredException ex) {
 				// Cannot submit a session form if no form object is in the session.
@@ -349,14 +350,15 @@ public abstract class AbstractFormController extends BaseCommandController {
 		// Bind without validation, to allow for prepopulating a form, and for
 		// convenient error evaluation in views (on both first attempt and resubmit).
 		ServletRequestDataBinder binder = createBinder(request, command);
+		BindException errors = new BindException(binder.getBindingResult());
 		if (isBindOnNewForm()) {
 			logger.debug("Binding to new form");
 			binder.bind(request);
-			onBindOnNewForm(request, command, binder.getErrors());
+			onBindOnNewForm(request, command, errors);
 		}
 
 		// Return BindException object that resulted from binding.
-		return binder.getErrors();
+		return errors;
 	}
 
 	/**
@@ -646,7 +648,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 		Object command = formBackingObject(request);
 		ServletRequestDataBinder binder = bindAndValidate(request, command);
-		return processFormSubmission(request, response, command, binder.getErrors());
+		BindException errors = new BindException(binder.getBindingResult());
+		return processFormSubmission(request, response, command, errors);
 	}
 
 }
