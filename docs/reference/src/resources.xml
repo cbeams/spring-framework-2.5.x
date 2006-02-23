@@ -313,7 +313,7 @@ public interface InputStreamSource {
 
     <para>If there is a need to force a specifc <literal>Resource</literal>
     type to be used, then a prefix may be used. The following two examples
-    show how to force a <literal>ClassPathResurce</literal> and a
+    show how to force a <literal>ClassPathResource</literal> and a
     <literal>UrlResource</literal> (the latter being used to access a
     filesystem file).</para>
 
