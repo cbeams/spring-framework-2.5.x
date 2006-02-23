@@ -32,7 +32,8 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class ByteArrayMultipartFileEditor extends ByteArrayPropertyEditor {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	/** Static to avoid creating a new logger every time */
+	private static final Log logger = LogFactory.getLog(ByteArrayMultipartFileEditor.class);
 
 
 	public void setValue(Object value) {
@@ -42,7 +43,7 @@ public class ByteArrayMultipartFileEditor extends ByteArrayPropertyEditor {
 				super.setValue(multipartFile.getBytes());
 			}
 			catch (IOException ex) {
-				logger.error("Cannot read contents of multipart file", ex);
+				logger.warn("Cannot read contents of multipart file", ex);
 				throw new IllegalArgumentException("Cannot read contents of multipart file: " + ex.getMessage());
 			}
 		}

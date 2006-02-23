@@ -323,7 +323,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	}
 
 	/**
-	 * Set Hibernate properties, like "hibernate.dialect".
+	 * Set Hibernate properties, such as "hibernate.dialect".
 	 * <p>Can be used to override values in a Hibernate XML config file,
 	 * or to specify all necessary properties locally.
 	 * <p>Note: Do not specify a transaction provider here when using
@@ -502,16 +502,16 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	/**
 	 * Specify the cache strategies for entities (persistent classes or named entities).
-	 * This configuration setting corresponds to the &lt;class-cache> entry
+	 * This configuration setting corresponds to the &lt;class-cache&gt; entry
 	 * in the "hibernate.cfg.xml" configuration format.
 	 * <p>For example:
 	 * <pre>
-	 * &lt;property name="entityCacheStrategies">
-	 *   &lt;props>
-	 *     &lt;prop key="com.mycompany.Customer">read-write</prop>
-	 *     &lt;prop key="com.mycompany.Product">read-only</prop>
-	 *   &lt;/props>
-	 * &lt;/property></pre>
+	 * &lt;property name="entityCacheStrategies"&gt;
+	 *   &lt;props&gt;
+	 *     &lt;prop key="com.mycompany.Customer"&gt;read-write&lt;/prop&gt;
+	 *     &lt;prop key="com.mycompany.Product"&gt;read-only,myRegion&lt;/prop&gt;
+	 *   &lt;/props&gt;
+	 * &lt;/property&gt;</pre>
 	 * @param entityCacheStrategies properties that define entity cache strategies,
 	 * with class names as keys and cache concurrency strategies as values
 	 * @see org.hibernate.cfg.Configuration#setCacheConcurrencyStrategy(String, String)
@@ -522,15 +522,16 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	/**
 	 * Specify the cache strategies for persistent collections (with specific roles).
-	 * This configuration setting corresponds to the &lt;collection-cache> entry
+	 * This configuration setting corresponds to the &lt;collection-cache&gt; entry
 	 * in the "hibernate.cfg.xml" configuration format.
 	 * <p>For example:
 	 * <pre>
-	 * &lt;property name="collectionCacheStrategies">
-	 *   &lt;props>
-	 *     &lt;prop key="com.mycompany.Order.items">read-only</prop>
-	 *   &lt;/props>
-	 * &lt;/property></pre>
+	 * &lt;property name="collectionCacheStrategies"&gt;
+	 *   &lt;props&gt;
+	 *     &lt;prop key="com.mycompany.Order.items">read-write&lt;/prop&gt;
+	 *     &lt;prop key="com.mycompany.Product.categories"&gt;read-only,myRegion&lt;/prop&gt;
+	 *   &lt;/props&gt;
+	 * &lt;/property&gt;</pre>
 	 * @param collectionCacheStrategies properties that define collection cache strategies,
 	 * with collection roles as keys and cache concurrency strategies as values
 	 * @see org.hibernate.cfg.Configuration#setCollectionCacheConcurrencyStrategy(String, String)

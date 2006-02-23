@@ -51,6 +51,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 public abstract class AbstractBeanFactoryBasedTargetSource
 		implements TargetSource, BeanFactoryAware, Serializable {
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Name of the target bean we will create on each invocation */

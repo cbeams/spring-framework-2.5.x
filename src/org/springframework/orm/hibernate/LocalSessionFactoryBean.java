@@ -237,7 +237,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	}
 
 	/**
-	 * Set Hibernate properties, like "hibernate.dialect".
+	 * Set Hibernate properties, such as "hibernate.dialect".
 	 * <p>Can be used to override values in a Hibernate XML config file,
 	 * or to specify all necessary properties locally.
 	 * <p>Note: Do not specify a transaction provider here when using

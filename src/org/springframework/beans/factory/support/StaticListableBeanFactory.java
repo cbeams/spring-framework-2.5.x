@@ -54,6 +54,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	/** Map from bean name to bean instance */
 	private final Map beans = new HashMap();
 
+
 	/**
 	 * Add a new singleton bean.
 	 * Will overwrite any existing instance for the given name.

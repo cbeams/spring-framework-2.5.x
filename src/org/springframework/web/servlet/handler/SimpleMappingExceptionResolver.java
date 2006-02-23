@@ -226,10 +226,9 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	/**
 	 * Return a ModelAndView for the given request, view name and exception.
 	 * Default implementation delegates to <code>getModelAndView(viewName, ex)</code>.
-	 * @param request current HTTP request (useful for obtaining metadata)
 	 * @param viewName the name of the error view
 	 * @param ex the exception that got thrown during handler execution
-	 * @param request current HTTP request
+	 * @param request current HTTP request (useful for obtaining metadata)
 	 * @return the ModelAndView instance
 	 * @see #getModelAndView(String, Exception)
 	 */

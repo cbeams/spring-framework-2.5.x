@@ -126,10 +126,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 
-	//---------------------------------------------------------------------
-	// Instance data
-	//---------------------------------------------------------------------
-
 	/** Logger used by this class. Available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -155,10 +151,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private ApplicationEventMulticaster applicationEventMulticaster;
 
 
-	//---------------------------------------------------------------------
-	// Constructors
-	//---------------------------------------------------------------------
-
 	/**
 	 * Create a new AbstractApplicationContext with no parent.
 	 */
@@ -177,7 +169,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	//---------------------------------------------------------------------
-	// Implementation of ApplicationContext
+	// Implementation of ApplicationContext interface
 	//---------------------------------------------------------------------
 
 	/**
@@ -243,7 +235,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	//---------------------------------------------------------------------
-	// Implementation of ConfigurableApplicationContext
+	// Implementation of ConfigurableApplicationContext interface
 	//---------------------------------------------------------------------
 
 	public void setParent(ApplicationContext parent) {
@@ -261,6 +253,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public List getBeanFactoryPostProcessors() {
 		return beanFactoryPostProcessors;
 	}
+
 
 	public void refresh() throws BeansException, IllegalStateException {
 		this.startupTime = System.currentTimeMillis();
@@ -537,7 +530,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	//---------------------------------------------------------------------
-	// Implementation of BeanFactory
+	// Implementation of BeanFactory interface
 	//---------------------------------------------------------------------
 
 	public Object getBean(String name) throws BeansException {
@@ -566,7 +559,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	//---------------------------------------------------------------------
-	// Implementation of ListableBeanFactory
+	// Implementation of ListableBeanFactory interface
 	//---------------------------------------------------------------------
 
 	public boolean containsBeanDefinition(String name) {
@@ -605,7 +598,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	//---------------------------------------------------------------------
-	// Implementation of HierarchicalBeanFactory
+	// Implementation of HierarchicalBeanFactory interface
 	//---------------------------------------------------------------------
 
 	public BeanFactory getParentBeanFactory() {
@@ -628,7 +621,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	//---------------------------------------------------------------------
-	// Implementation of MessageSource
+	// Implementation of MessageSource interface
 	//---------------------------------------------------------------------
 
 	public String getMessage(String code, Object args[], String defaultMessage, Locale locale) {
@@ -667,7 +660,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	//---------------------------------------------------------------------
-	// Implementation of ResourcePatternResolver
+	// Implementation of ResourcePatternResolver interface
 	//---------------------------------------------------------------------
 
 	public Resource[] getResources(String locationPattern) throws IOException {
