@@ -532,6 +532,24 @@ public class DataBinderTests extends TestCase {
 		assertTrue(tb.getSet().contains(new Integer(10)));
 		assertTrue(tb.getSet().contains(new Integer(20)));
 		assertTrue(tb.getSet().contains(new Integer(30)));
+
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("set", null);
+		binder.bind(pvs);
+
+		assertNull(tb.getSet());
+	}
+
+	public void testBindingNullToEmptyCollection() {
+		IndexedTestBean tb = new IndexedTestBean();
+		DataBinder binder = new DataBinder(tb, "tb");
+		binder.registerCustomEditor(Set.class, new CustomCollectionEditor(TreeSet.class, true));
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("set", null);
+		binder.bind(pvs);
+
+		assertTrue(tb.getSet() instanceof TreeSet);
+		assertTrue(tb.getSet().isEmpty());
 	}
 
 	public void testBindingToIndexedField() {
@@ -972,6 +990,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals(1, disallowedFields.length);
 		assertEquals("beanName", disallowedFields[0]);
 	}
+
 
 	private static class TestBeanValidator implements Validator {
 

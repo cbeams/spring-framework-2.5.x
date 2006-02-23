@@ -118,7 +118,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	public String[] getBeanDefinitionNames() {
-		return (String[]) this.beanDefinitionNames.toArray(new String[this.beanDefinitionNames.size()]);
+		return StringUtils.toStringArray(this.beanDefinitionNames);
 	}
 
 	public String[] getBeanNamesForType(Class type) {
@@ -181,7 +181,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 
-		return (String[]) result.toArray(new String[result.size()]);
+		return StringUtils.toStringArray(result);
 	}
 
 	public Map getBeansOfType(Class type) throws BeansException {

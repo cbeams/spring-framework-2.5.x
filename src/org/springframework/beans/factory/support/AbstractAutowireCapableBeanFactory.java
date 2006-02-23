@@ -43,6 +43,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Abstract BeanFactory superclass that implements default bean creation,
@@ -679,7 +680,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				result.add(pds[i].getName());
 			}
 		}
-		return (String[]) result.toArray(new String[result.size()]);
+		return StringUtils.toStringArray(result);
 	}
 
 	/**

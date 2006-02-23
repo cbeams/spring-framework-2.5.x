@@ -90,10 +90,6 @@ class PropertyTypeConverter {
 			String propertyName, Object oldValue, Object newValue, Class requiredType, MethodParameter methodParam)
 			throws IllegalArgumentException {
 
-		if (newValue == null) {
-			return null;
-		}
-
 		Object convertedValue = newValue;
 
 		// Custom editor for this type?
@@ -101,7 +97,7 @@ class PropertyTypeConverter {
 
 		// Value not of required type?
 		if (pe != null ||
-				(requiredType != null && !requiredType.isAssignableFrom(convertedValue.getClass()))) {
+				(requiredType != null && !requiredType.isInstance(convertedValue))) {
 
 			if (requiredType != null) {
 				if (pe == null) {
@@ -135,8 +131,7 @@ class PropertyTypeConverter {
 			// If the resulting value definitely doesn't match the required type,
 			// try field lookup as fallback. If no matching field found,
 			// throw explicit TypeMismatchException with full context information.
-			if (convertedValue != null && !requiredType.isPrimitive() &&
-					!requiredType.isAssignableFrom(convertedValue.getClass())) {
+			if (convertedValue != null && !requiredType.isPrimitive() && !requiredType.isInstance(convertedValue)) {
 
 				// In case of String value, try to find matching field (for JDK 1.5
 				// enum or custom enum with values defined as static fields).

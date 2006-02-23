@@ -382,8 +382,8 @@ public abstract class DataSourceUtils {
 					releaseConnection(this.connectionHolder.getConnection(), this.dataSource);
 					// Reset the ConnectionHolder - it might remain bound to the thread.
 					this.connectionHolder.setConnection(null);
-					this.connectionHolder.setSynchronizedWithTransaction(false);
 				}
+				this.connectionHolder.reset();
 			}
 		}
 	}

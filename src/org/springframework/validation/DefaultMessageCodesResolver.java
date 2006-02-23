@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the MessageCodesResolver interface.
@@ -106,7 +108,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 			codeList.add(errorCode + CODE_SEPARATOR + fieldType.getName());
 		}
 		codeList.add(errorCode);
-		return (String[]) codeList.toArray(new String[codeList.size()]);
+		return StringUtils.toStringArray(codeList);
 	}
 
 	/**

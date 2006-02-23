@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,11 +23,12 @@ import java.util.List;
 /**
  * Simple stop watch, allowing for timing of a number of tasks,
  * exposing total running time and running time for each named task.
- * Conceals use of System.currentTimeMillis(), improving the readability
- * of application code and reducing the likelihood of calculation errors.
  *
- * <p>Note that this object is not designed to be threadsafe, and does not
- * use synchronization or threading. Therefore it is safe to invoke it from EJBs.
+ * <p>Conceals use of <code>System.currentTimeMillis()</code>, improving the
+ * readability of application code and reducing the likelihood of calculation errors.
+ *
+ * <p>Note that this object is not designed to be thread-safe and does not
+ * use synchronization.
  *
  * <p>This class is normally used to verify performance during proof-of-concepts
  * and in development, rather than as part of production applications.
@@ -177,7 +178,7 @@ public class StopWatch {
 		if (!this.keepTaskList) {
 			throw new UnsupportedOperationException("Task info is not being kept!");
 		}
-		return (TaskInfo[]) taskList.toArray(new TaskInfo[0]);
+		return (TaskInfo[]) this.taskList.toArray(new TaskInfo[this.taskList.size()]);
 	}
 
 
@@ -220,7 +221,7 @@ public class StopWatch {
 
 	/**
 	 * Return an informative string describing all tasks performed
-	 * For custom reporting, call getTaskInfo() and use the task info directly.
+	 * For custom reporting, call <code>getTaskInfo()</code> and use the task info directly.
 	 */
 	public String toString() {
 		StringBuffer sb = new StringBuffer(shortSummary());

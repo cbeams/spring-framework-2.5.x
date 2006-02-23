@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,35 +22,26 @@ import java.util.Date;
  * Implementation of ResponseTimeMonitor for use via delegation by
  * objects that implement this interface.
  *
- * <p>Uses no synchronization, so is suitable for use in a web application.
- *
  * @author Rod Johnson
  * @since November 21, 2000
  */
 public class ResponseTimeMonitorImpl implements ResponseTimeMonitor {
 
-	/** The number of operations recorded by this object */
-	private int accessCount;
-
 	/** The system time at which this object was initialized */
-	private long initedMillis;
+	private final long initedMillis = System.currentTimeMillis();
+
+	/** The number of operations recorded by this object */
+	private volatile int accessCount;
 
 	/** The sum of the response times for all operations */
-	private int totalResponseTimeMillis = 0;
+	private volatile int totalResponseTimeMillis = 0;
 
 	/** The best response time this object has recorded */
-	private int bestResponseTimeMillis = Integer.MAX_VALUE;
+	private volatile int bestResponseTimeMillis = Integer.MAX_VALUE;
 
 	/** The worst response time this object has recorded */
-	private int worstResponseTimeMillis = Integer.MIN_VALUE;
+	private volatile int worstResponseTimeMillis = Integer.MIN_VALUE;
 
-
-	/**
-	 * Create a new ResponseTimeMonitorImpl.
-	 */
-	public ResponseTimeMonitorImpl() {
-		this.initedMillis = System.currentTimeMillis();
-	}
 
 	/**
 	 * Return the date when this object was loaded.
@@ -98,12 +89,13 @@ public class ResponseTimeMonitorImpl implements ResponseTimeMonitor {
 		return worstResponseTimeMillis;
 	}
 
+
 	/**
 	 * Utility method to record this response time, updating
 	 * the best and worst response times if necessary.
 	 * @param responseTimeMillis the response time of this request
 	 */
-	public void recordResponseTime(long responseTimeMillis) {
+	public synchronized void recordResponseTime(long responseTimeMillis) {
 		++this.accessCount;
 		int iResponseTime = (int) responseTimeMillis;
 		this.totalResponseTimeMillis += iResponseTime;
@@ -119,7 +111,7 @@ public class ResponseTimeMonitorImpl implements ResponseTimeMonitor {
 	 * Return a human-readable string showing the performance
 	 * data recorded by this object.
 	 */
-	public String toString() {
+	public synchronized String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("hits=[").append(getAccessCount()).append("]; ");
 		sb.append("average=[").append(getAverageResponseTimeMillis()).append("ms]; ");

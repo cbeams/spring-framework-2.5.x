@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,22 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 
 	private final Class collectionType;
 
+	private final boolean nullAsEmptyCollection;
+
+
+	/**
+	 * Create a new CustomCollectionEditor for the given target type,
+	 * keeping an incoming <code>null</code> as-is.
+	 * @param collectionType the target type, which needs to be a
+	 * sub-interface of Collection or a concrete Collection class
+	 * @see java.util.Collection
+	 * @see java.util.ArrayList
+	 * @see java.util.TreeSet
+	 * @see org.springframework.core.CollectionFactory#createLinkedSetIfPossible
+	 */
+	public CustomCollectionEditor(Class collectionType) {
+		this(collectionType, false);
+	}
 
 	/**
 	 * Create a new CustomCollectionEditor for the given target type.
@@ -58,12 +74,14 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	 * TreeSet for SortedSet, and LinkedHashSet or HashSet for Set.
 	 * @param collectionType the target type, which needs to be a
 	 * sub-interface of Collection or a concrete Collection class
+	 * @param nullAsEmptyCollection whether to convert an incoming <code>null</code>
+	 * value to an empty Collection (of the appropriate type)
 	 * @see java.util.Collection
 	 * @see java.util.ArrayList
 	 * @see java.util.TreeSet
 	 * @see org.springframework.core.CollectionFactory#createLinkedSetIfPossible
 	 */
-	public CustomCollectionEditor(Class collectionType) {
+	public CustomCollectionEditor(Class collectionType, boolean nullAsEmptyCollection) {
 		if (collectionType == null) {
 			throw new IllegalArgumentException("Collection type is required");
 		}
@@ -72,6 +90,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 					"Collection type [" + collectionType.getName() + "] does not implement [java.util.Collection]");
 		}
 		this.collectionType = collectionType;
+		this.nullAsEmptyCollection = nullAsEmptyCollection;
 	}
 
 
@@ -86,7 +105,10 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	 * Convert the given value to a Collection of the target type.
 	 */
 	public void setValue(Object value) {
-		if (this.collectionType.isInstance(value) && !alwaysCreateNewCollection()) {
+		if (value == null && this.nullAsEmptyCollection) {
+			super.setValue(createCollection(this.collectionType, 0));
+		}
+		else if (value == null || (this.collectionType.isInstance(value) && !alwaysCreateNewCollection())) {
 			// Use the source value as-is, as it matches the target type.
 			super.setValue(value);
 		}
@@ -99,7 +121,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 			}
 			super.setValue(target);
 		}
-		else if (value != null && value.getClass().isArray()) {
+		else if (value.getClass().isArray()) {
 			// Convert array elements to Collection elements.
 			int length = Array.getLength(value);
 			Collection target = createCollection(this.collectionType, length);

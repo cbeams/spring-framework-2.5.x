@@ -56,6 +56,7 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Abstract superclass for BeanFactory implementations, implementing the
@@ -118,7 +119,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	private final Set currentlyInCreation = Collections.synchronizedSet(new HashSet());
 
 	/** Disposable bean instances: bean name --> disposable instance */
-	private final Map disposableBeans = new HashMap();
+	private final Map disposableBeans = CollectionFactory.createLinkedMapIfPossible(16);
 
 	/** Map between dependent bean names: bean name --> dependent bean name */
 	private final Map dependentBeanMap = new HashMap();
@@ -170,8 +171,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param requiredType the required type of the bean to retrieve
 	 * @param args arguments to use if creating a prototype using explicit arguments to a
 	 * static factory method. It is invalid to use a non-null args value in any other case.
-	 * TODO: We could consider supporting this for constructor args also, but it's really a
-	 * corner case required for AspectJ integration.
 	 */
 	public Object getBean(String name, Class requiredType, Object[] args) throws BeansException {
 		String beanName = transformedBeanName(name);
@@ -239,10 +238,10 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 							addSingleton(beanName, sharedInstance);
 						}
 						catch (BeansException ex) {
-							// Explicitly remove instance from singleton cache:
-							// It might have been put there eagerly by the creation process,
-							// to allow for circular reference resolution.
-							removeSingleton(beanName);
+							// Explicitly remove instance from singleton cache: It might have been put there
+							// eagerly by the creation process, to allow for circular reference resolution.
+							// Also remove any beans that received a temporary reference to the bean.
+							destroyDisposableBean(beanName);
 							throw ex;
 						}
 						finally {
@@ -391,7 +390,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 					}
 				}
 			}
-			return (String[]) aliases.toArray(new String[aliases.size()]);
+			return StringUtils.toStringArray(aliases);
 		}
 		else {
 			// Not found -> check parent.
@@ -410,6 +409,11 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 	public BeanFactory getParentBeanFactory() {
 		return parentBeanFactory;
+	}
+
+	public boolean containsLocalBean(String name) {
+		String beanName = transformedBeanName(name);
+		return (containsSingleton(beanName) || containsBeanDefinition(beanName));
 	}
 
 
@@ -519,9 +523,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		synchronized (this.singletonCache) {
 			this.singletonCache.remove(beanName);
 		}
-		synchronized (this.disposableBeans) {
-			this.disposableBeans.remove(beanName);
-		}
 	}
 
 	/**
@@ -540,7 +541,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	public String[] getSingletonNames() {
 		synchronized (this.singletonCache) {
-			return (String[]) this.singletonCache.keySet().toArray(new String[this.singletonCache.size()]);
+			return StringUtils.toStringArray(this.singletonCache.keySet());
 		}
 	}
 
@@ -563,18 +564,14 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		if (logger.isInfoEnabled()) {
 			logger.info("Destroying singletons in factory {" + this + "}");
 		}
-		try {
-			synchronized (this.singletonCache) {
-				this.singletonCache.clear();
-			}
-			synchronized (this.disposableBeans) {
-				for (Iterator it = new HashSet(this.disposableBeans.keySet()).iterator(); it.hasNext();) {
-					destroyDisposableBean((String) it.next());
-				}
+		synchronized (this.disposableBeans) {
+			String[] disposableBeanName = StringUtils.toStringArray(this.disposableBeans.keySet());
+			for (int i = 0; i < disposableBeanName.length; i++) {
+				destroyDisposableBean(disposableBeanName[i]);
 			}
 		}
-		catch (Throwable ex) {
-			logger.error("Unexpected failure during bean destruction", ex);
+		synchronized (this.singletonCache) {
+			this.singletonCache.clear();
 		}
 	}
 
@@ -1022,6 +1019,10 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @see #destroyBean
 	 */
 	private void destroyDisposableBean(String beanName) {
+		// Remove a registered singleton of the given name, if any.
+		removeSingleton(beanName);
+
+		// Destroy the corresponding DisposableBean instance.
 		Object disposableBean = null;
 		synchronized (this.disposableBeans) {
 			disposableBean = this.disposableBeans.remove(beanName);

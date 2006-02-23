@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,24 +34,25 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  *
  * <p>This class is typically very fast, compared to traditional setup/teardown scripts.
  *
- * <p>If data should be left in the database, call the setComplete() method in each test.
- * The defaultRollback() property, which defaults to true, determines whether
- * transactions will complete by default.
- * 
- * <p>It is even possible to end the transaction early; for example, to verify lazy 
- * loading behaviour of an O/R mapping tool. (This is a valuable away to avoid
- * unexpected errors when testing a web UI, for example.) 
- * Simply call the endTransaction() method.
- * Execution will then occur without a transactional context. 
- * <br>Spring 2.0 introduces the new startNewTransaction() method, which may
- * be called after a call to endTransaction() if you wish to create a new transaction,
- * quite independent of the old transaction. The new transaction's default fate will be to roll back,
- * unless setComplete() is called again during the scope of the new transaction.
- * Any number of transactions may be created and ended in this way.
- * The final transaction will automatically be rolled back when the test case is
- * torn down. 
+ * <p>If data should be left in the database, call the <code>setComplete()</code>
+ * method in each test. The "defaultRollback" property, which defaults to "true",
+ * determines whether transactions will complete by default.
  *
- * <p>Transactional behaviour requires a single bean in the context implementing the
+ * <p>It is even possible to end the transaction early; for example, to verify lazy
+ * loading behavior of an O/R mapping tool. (This is a valuable away to avoid
+ * unexpected errors when testing a web UI, for example.)  Simply call the
+ * <code>endTransaction()</code> method. Execution will then occur without a
+ * transactional context.
+ *
+ * <p>The <code>startNewTransaction()</code> method may be called after a call to
+ * <code>endTransaction()</code> if you wish to create a new transaction, quite
+ * independent of the old transaction. The new transaction's default fate will be to
+ * roll back, unless <code>setComplete()</code> is called again during the scope of the
+ * new transaction. Any number of transactions may be created and ended in this way.
+ * The final transaction will automatically be rolled back when the test case is
+ * torn down.
+ *
+ * <p>Transactional behavior requires a single bean in the context implementing the
  * PlatformTransactionManager interface. This will be set by the superclass's
  * Dependency Injection mechanism. If using the superclass's Field Injection mechanism,
  * the implementation should be named "transactionManager". This mechanism allows the
@@ -65,6 +66,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * capability is provided to enable use of the same subclass in different environments.</i>
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 1.1.1
  */
 public abstract class AbstractTransactionalSpringContextTests extends AbstractDependencyInjectionSpringContextTests {
@@ -82,7 +84,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * Should we commit this transaction?
 	 */
 	private boolean complete;
-	
+
 	/**
 	 * Number of transactions started
 	 */
@@ -105,7 +107,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 	/**
 	 * Subclasses can set this value in their constructor to change
-	 * default, which is always to roll the transaction back
+	 * default, which is always to roll the transaction back.
 	 */
 	public void setDefaultRollback(boolean defaultRollback) {
 		this.defaultRollback = defaultRollback;
@@ -244,24 +246,27 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 			}
 		}
 	}
-	
+
 	/**
-	 * Start a new transaction. Only call this method if endTransaction() has been called.
-	 * setComplete() can be used again in the new transaction.
+	 * Start a new transaction. Only call this method if <code>endTransaction()</code>
+	 * has been called. <code>setComplete()</code> can be used again in the new transaction.
 	 * The fate of the new transaction, by default, will be the usual rollback.
+	 * @see #endTransaction()
+	 * @see #setComplete()
 	 */
 	protected void startNewTransaction() throws TransactionException {
-		// start a transaction
 		if (this.transactionStatus != null) {
 			throw new IllegalStateException("Cannot start new transaction without ending existing transaction:" +
 					"Invoke endTransaction() before startNewTransaction()");
 		}
+
 		this.transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
 		++this.transactionsStarted;
-		this.complete = false;
+		this.complete = !this.defaultRollback;
+
 		if (logger.isInfoEnabled()) {
-			logger.info("Began transaction (" + transactionsStarted + "): transaction manager [" + this.transactionManager + "]; defaultRollback "
-					+ this.defaultRollback);
+			logger.info("Began transaction (" + this.transactionsStarted + "): transaction manager [" +
+					this.transactionManager + "]; default rollback = " + this.defaultRollback);
 		}
 	}
 

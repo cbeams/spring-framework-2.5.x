@@ -18,6 +18,7 @@ package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.sql.DataSource;
 import javax.transaction.Status;
@@ -31,7 +32,9 @@ import org.easymock.MockControl;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.jta.JtaTransactionManager;
+import org.springframework.transaction.jta.JtaTransactionObject;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -302,6 +305,91 @@ public class DataSourceJtaTransactionTests extends TestCase {
 		conControl.verify();
 		utControl.verify();
 		tmControl.verify();
+	}
+
+	public void testJtaTransactionWithConnectionHolderStillBound() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+
+		JtaTransactionManager ptm = new JtaTransactionManager(ut) {
+			protected void doRegisterAfterCompletionWithJtaTransaction(
+					JtaTransactionObject txObject, final List synchronizations) {
+				Thread async = new Thread() {
+					public void run() {
+						invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_COMMITTED);
+					}
+				};
+				async.start();
+				try {
+					async.join();
+				}
+				catch (InterruptedException ex) {
+					ex.printStackTrace();
+				}
+			}
+		};
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		for (int i = 0; i < 3; i++) {
+			utControl.reset();
+			ut.getStatus();
+			utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+			utControl.replay();
+
+			dsControl.reset();
+			conControl.reset();
+			ds.getConnection();
+			dsControl.setReturnValue(con, 1);
+			con.close();
+			conControl.setVoidCallable(1);
+			dsControl.replay();
+			conControl.replay();
+
+			final boolean releaseCon = (i != 1);
+
+			tt.execute(new TransactionCallbackWithoutResult() {
+				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+					assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
+					assertTrue("Is existing transaction", !status.isNewTransaction());
+
+					Connection c = DataSourceUtils.getConnection(ds);
+					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+					DataSourceUtils.releaseConnection(c, ds);
+
+					c = DataSourceUtils.getConnection(ds);
+					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+					if (releaseCon) {
+						DataSourceUtils.releaseConnection(c, ds);
+					}
+				}
+			});
+
+			if (!releaseCon) {
+				assertTrue("Still has connection holder", TransactionSynchronizationManager.hasResource(ds));
+			}
+			else {
+				assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+			}
+			assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+			conControl.verify();
+			dsControl.verify();
+			utControl.verify();
+		}
+	}
+
+	protected void tearDown() {
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 	}
 
 }

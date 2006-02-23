@@ -152,15 +152,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 
 		// Check for specific exception mappings.
 		if (this.exceptionMappings != null) {
-			int deepest = Integer.MAX_VALUE;
-			for (Enumeration names = this.exceptionMappings.propertyNames(); names.hasMoreElements();) {
-				String exceptionMapping = (String) names.nextElement();
-				int depth = getDepth(exceptionMapping, ex);
-				if (depth >= 0 && depth < deepest) {
-					deepest = depth;
-					viewName = this.exceptionMappings.getProperty(exceptionMapping);
-				}
-			}
+			viewName = findMatchingViewName(this.exceptionMappings, ex);
 		}
 
 		// Return default error view else, if defined.
@@ -169,11 +161,32 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 		}
 
 		if (viewName != null) {
-			return getModelAndView(viewName, ex);
+			return getModelAndView(viewName, ex, request);
 		}
 		else {
 			return null;
 		}
+	}
+
+
+	/**
+	 * Find a matching view name in the given exception mappings
+	 * @param exceptionMappings mappings between exception class names and error view names
+	 * @param ex the exception that got thrown during handler execution
+	 * @return the view name, or <code>null</code> if none found
+	 * @see #setExceptionMappings
+	 */
+	protected String findMatchingViewName(Properties exceptionMappings, Exception ex) {
+		int deepest = Integer.MAX_VALUE;
+		for (Enumeration names = this.exceptionMappings.propertyNames(); names.hasMoreElements();) {
+			String exceptionMapping = (String) names.nextElement();
+			int depth = getDepth(exceptionMapping, ex);
+			if (depth >= 0 && depth < deepest) {
+				deepest = depth;
+				return this.exceptionMappings.getProperty(exceptionMapping);
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -183,7 +196,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 * <p>Follows the same algorithm as RollbackRuleAttribute.
 	 * @see org.springframework.transaction.interceptor.RollbackRuleAttribute
 	 */
-	public int getDepth(String exceptionMapping, Exception ex) {
+	protected int getDepth(String exceptionMapping, Exception ex) {
 		return getDepth(exceptionMapping, ex.getClass(), 0);
 	}
 
@@ -197,6 +210,20 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 			return -1;
 		}
 		return getDepth(exceptionMapping, exceptionClass.getSuperclass(), depth + 1);
+	}
+
+
+	/**
+	 * Return a ModelAndView for the given request, view name and exception.
+	 * Default implementation delegates to <code>getModelAndView(viewName, ex)</code>.
+	 * @param viewName the name of the error view
+	 * @param ex the exception that got thrown during handler execution
+	 * @param request current portlet request (useful for obtaining metadata)
+	 * @return the ModelAndView instance
+	 * @see #getModelAndView(String, Exception)
+	 */
+	protected ModelAndView getModelAndView(String viewName, Exception ex, RenderRequest request) {
+		return getModelAndView(viewName, ex);
 	}
 
 	/**

@@ -34,12 +34,12 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.util.StringUtils;
 
 /**
- * Static bean factory that allows to register existing singleton instances
+ * Static factory that allows to register existing singleton instances
  * programmatically. Does not have support for prototype beans and aliases.
  *
  * <p>Serves as example for a simple implementation of the ListableBeanFactory
  * interface, managing existing bean instances rather than creating new ones
- * based on bean definitions. Useful for simple tests.
+ * based on bean definitions.
  *
  * <p>For a full-fledged bean factory based on bean definitions, have a look
  * at DefaultListableBeanFactory.
@@ -153,8 +153,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	}
 
 	public String[] getBeanDefinitionNames() {
-		Set keySet = this.beans.keySet();
-		return (String[]) keySet.toArray(new String[keySet.size()]);
+		return StringUtils.toStringArray(this.beans.keySet());
 	}
 
 	public String[] getBeanNamesForType(Class type) {
@@ -183,7 +182,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 				}
 			}
 		}
-		return (String[]) matches.toArray(new String[matches.size()]);
+		return StringUtils.toStringArray(matches);
 	}
 
 	public Map getBeansOfType(Class type) throws BeansException {

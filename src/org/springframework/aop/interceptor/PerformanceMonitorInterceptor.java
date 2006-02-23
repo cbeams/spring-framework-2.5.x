@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,16 +24,16 @@ import org.springframework.util.StopWatch;
 /**
  * Simple AOP Alliance <code>MethodInterceptor</code> for performance monitoring.
  * This interceptor has no effect on the intercepted method call.
- * <p/>
+ *
  * <p>Uses a <code>StopWatch</code> for the actual performance measuring.
- * 
+ *
  * @author Rod Johnson
  * @author Dmitriy Kopylenko
  * @author Rob Harrop
  * @see org.springframework.util.StopWatch
  * @see JamonPerformanceMonitorInterceptor
  */
-public class PerformanceMonitorInterceptor extends AbstractPerformanceMonitorInterceptor {
+public class PerformanceMonitorInterceptor extends AbstractMonitoringInterceptor {
 
 	/**
 	 * Create a new PerformanceMonitorInterceptor with a static logger.
@@ -42,14 +42,15 @@ public class PerformanceMonitorInterceptor extends AbstractPerformanceMonitorInt
 	}
 
 	/**
-		 * Create a new PerformanceMonitorInterceptor with a dynamic or static logger,
-		 * according to the given flag.
-		 * @param useDynamicLogger whether to use a dynamic logger or a static logger
-		 * @see #setUseDynamicLogger
-		 */
+	 * Create a new PerformanceMonitorInterceptor with a dynamic or static logger,
+	 * according to the given flag.
+	 * @param useDynamicLogger whether to use a dynamic logger or a static logger
+	 * @see #setUseDynamicLogger
+	 */
 	public PerformanceMonitorInterceptor(boolean useDynamicLogger) {
 		setUseDynamicLogger(useDynamicLogger);
 	}
+
 
 	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
 		String name = createInvocationTraceName(invocation);

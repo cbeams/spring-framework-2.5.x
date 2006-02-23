@@ -829,20 +829,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	}
 
 
-	private String[] parseCacheStrategy(Properties strategies, String key) {
-		String strategy = null;
-		String region = null;
-		String attribute = strategies.getProperty(key);
-		String[] tokens = StringUtils.commaDelimitedListToStringArray(attribute);
-		if (tokens.length > 0) {
-			strategy = tokens[0];
-		}
-		if (tokens.length > 1) {
-			region = tokens[1];
-		}
-		return new String[] {strategy, region};
-	}
-
 	/**
 	 * Subclasses can override this method to perform custom initialization
 	 * of the Configuration instance used for SessionFactory creation.
@@ -997,7 +983,13 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	/**
 	 * Execute the given schema script on the given JDBC Connection.
-	 * Will log unsuccessful statements and continue to execute.
+	 * <p>Note that the default implementation will log unsuccessful statements
+	 * and continue to execute. Override the <code>executeSchemaStatement</code>
+	 * method to treat failures differently.
+	 * @param con the JDBC Connection to execute the script on
+	 * @param sql the SQL statements to execute
+	 * @throws SQLException if thrown by JDBC methods
+	 * @see #executeSchemaStatement
 	 * @param con the JDBC Connection to execute the script on
 	 * @param sql the SQL statements to execute
 	 * @throws SQLException if thrown by JDBC methods
@@ -1012,13 +1004,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 				Statement stmt = con.createStatement();
 				try {
 					for (int i = 0; i < sql.length; i++) {
-						logger.debug("Executing schema statement: " + sql[i]);
-						try {
-							stmt.executeUpdate(sql[i]);
-						}
-						catch (SQLException ex) {
-							logger.warn("Unsuccessful schema statement: " + sql[i], ex);
-						}
+						executeSchemaStatement(stmt, sql[i]);
 					}
 				}
 				finally {
@@ -1029,6 +1015,28 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 				if (!oldAutoCommit) {
 					con.setAutoCommit(false);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Execute the given schema SQL on the given JDBC Statement.
+	 * <p>Note that the default implementation will log unsuccessful statements
+	 * and continue to execute. Override this method to treat failures differently.
+	 * @param stmt the JDBC Statement to execute the SQL on
+	 * @param sql the SQL statement to execute
+	 * @throws SQLException if thrown by JDBC methods (and considered fatal)
+	 */
+	protected void executeSchemaStatement(Statement stmt, String sql) throws SQLException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Executing schema statement: " + sql);
+		}
+		try {
+			stmt.executeUpdate(sql);
+		}
+		catch (SQLException ex) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Unsuccessful schema statement: " + sql, ex);
 			}
 		}
 	}

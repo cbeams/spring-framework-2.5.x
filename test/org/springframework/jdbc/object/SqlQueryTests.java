@@ -274,7 +274,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		for (int i = 0; i < results.length; i++) {
 			// BREAKS ON ' in name
 			int dbCount = helper.queryForInt(
-					"SELECT COUNT(FORENAME) FROM CUSTMR WHERE FORENAME='" + results[i] + "'", (Object[])null);
+					"SELECT COUNT(FORENAME) FROM CUSTMR WHERE FORENAME='" + results[i] + "'", (Object[]) null);
 			assertTrue("found in db", dbCount == 1);
 		}
 

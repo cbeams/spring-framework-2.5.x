@@ -464,7 +464,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 					PROPERTY_KEY_PREFIX +
 					StringUtils.collectionToDelimitedString(keys, PROPERTY_KEY_SUFFIX + PROPERTY_KEY_PREFIX) +
 					PROPERTY_KEY_SUFFIX;
-			tokens.keys = (String[]) keys.toArray(new String[keys.size()]);
+			tokens.keys = StringUtils.toStringArray(keys);
 		}
 		return tokens;
 	}
@@ -764,7 +764,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 			}
 		}
 	}
-	
+
 	public void setPropertyValue(PropertyValue pv) throws BeansException {
 		setPropertyValue(pv.getName(), pv.getValue());
 	}

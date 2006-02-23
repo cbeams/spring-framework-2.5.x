@@ -1,17 +1,17 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.util;
@@ -20,6 +20,7 @@ import java.beans.Introspector;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -151,7 +152,6 @@ public abstract class ClassUtils {
 	 * Get the class name without the qualified package name.
 	 * @param clazz the class to get the short name for
 	 * @return the class name of the class without the package name
-	 * @throws IllegalArgumentException if the class is null
 	 */
 	public static String getShortName(Class clazz) {
 		return getShortName(getQualifiedName(clazz));
@@ -342,6 +342,7 @@ public abstract class ClassUtils {
 	/**
 	 * Return all interfaces that the given class implements as array,
 	 * including ones implemented by superclasses.
+	 * <p>If the class itself is an interface, it gets returned as sole interface.
 	 * @param clazz the class to analyse for interfaces
 	 * @return all interfaces that the given object implements as array
 	 */
@@ -363,10 +364,14 @@ public abstract class ClassUtils {
 	/**
 	 * Return all interfaces that the given class implements as Set,
 	 * including ones implemented by superclasses.
+	 * <p>If the class itself is an interface, it gets returned as sole interface.
 	 * @param clazz the class to analyse for interfaces
 	 * @return all interfaces that the given object implements as Set
 	 */
 	public static Set getAllInterfacesForClassAsSet(Class clazz) {
+		if (clazz.isInterface()) {
+			return Collections.singleton(clazz);
+		}
 		Set interfaces = new HashSet();
 		while (clazz != null) {
 			for (int i = 0; i < clazz.getInterfaces().length; i++) {

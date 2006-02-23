@@ -28,6 +28,8 @@ import java.util.Set;
 import java.util.Stack;
 import java.io.Serializable;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Abstract implementation of the BindingResult interface and its
  * superinterface Errors. Encapsulates common management of
@@ -352,7 +354,7 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	 * @see DataBinder#setAllowedFields
 	 */
 	public String[] getSuppressedFields() {
-		return (String[]) this.suppressedFields.toArray(new String[this.suppressedFields.size()]);
+		return StringUtils.toStringArray(this.suppressedFields);
 	}
 
 
