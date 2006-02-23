@@ -30,8 +30,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's BeanShell support
 
-* c3p0/c3p0-0.9.0.2.jar
-- C3P0 0.9.0.2 connection pool (http://sourceforge.net/projects/c3p0)
+* c3p0/c3p0-0.9.0.4.jar
+- C3P0 0.9.0.4 connection pool (http://sourceforge.net/projects/c3p0)
 - required for building the framework
 - required at runtime when using Spring's C3P0NativeJdbcExtractor
 - required for running Image Database
@@ -108,7 +108,7 @@ distribution/website before using any of them in your own applications.
 * ibatis/ibatis-sqlmap-2.jar, ibatis/ibatis-common-2.jar
 - iBATIS SQL Maps 2.1.7 (http://www.ibatis.com)
 - required for building the framework
-- required at runtime when using Spring's iBATIS SQL Maps 2.0 support
+- required at runtime when using Spring's iBATIS SQL Maps 2.x support
 
 * itext/itext-1.3.jar
 - iText PDF 1.3 (http://www.lowagie.com/itext)
