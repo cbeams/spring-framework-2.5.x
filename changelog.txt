@@ -3,16 +3,29 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 M3 (27.2.2006)
--------------------------------------
+Changes in version 2.0 M3 (6.3.2006)
+------------------------------------
+
+Package org.springframework.aop
+* AbstractBeanFactoryBasedTargetSource offers explicit "setTargetClass" method, else determines target class on demand
+* renamed AbstractLazyInitTargetSource to AbstractLazyCreationTargetSource
+* renamed AbstractPerformanceMonitorInterceptor to AbstractMonitoringInterceptor
+* fixed DebugInterceptor to properly synchronize access to its count field in a multithreading environment
 
 Package org.springframework.beans
+* BeanWrapperImpl passes a null value to a PropertyEditor's "setValue" method, allowing for conversion of null values
 * changed MutablePropertyValues's "addPropertyValue" signature back to void, to remain binary compatible with Spring 1.2
 * fixed PropertyTypeConverter to never build "null[...]" property paths that lead to exceptions in "findCustomEditor"
 * fixed ArgumentConvertingMethodInvoker to perform conversion attempts on a copy of the argument array (not the source)
+* added "nullAsEmptyCollection" flag to CustomCollectionEditor, allowing to convert a null value to an empty Collection
+* added "containsLocalBean" method to HierarchicalBeanFactory interface, refactored from AbstractApplicationContext
 * fixed AbstractBeanFactory to use canonical bean name (id) for prototype creation, exposing it to BeanPostProcessors
+* fixed AbstractBeanFactory to destroy a failed bean completely, including dependent beans (in case of eager references)
 * re-added support for deprecated "class" property to PropertiesBeanDefinitionReader, alongside "(class)"
 * DefaultXmlBeanDefinitionParser considers "" as default namespace as well, for compatibility with the Oracle XML parser
+
+Package org.springframework.context
+* AbstractApplicationContext discovers its context MessageSource as "messageSource" bean even through an alias
 
 Package org.springframework.core
 * added "getRootCause()" method to NestedRuntime/CheckedException, for retrieving the innermost exception
@@ -20,7 +33,21 @@ Package org.springframework.core
 
 Package org.springframework.jdbc
 * refined default SQL error codes for MS SQL, MySQL, and Oracle
-* fixed DataSourceUtils to correctly close and reset a Connection in afterCompletion, even if called by different thread
+* refined DataSourceUtils to expect an "afterCompletion" callback from a different thread (in case of JTA transaction)
+
+Package org.springframework.jmx
+* fixed MBeanServerConnectionFactoryBean to avoid potential initialization of unused JMX Connector on shutdown
+
+Package org.springframework.mock
+* MockServletContext's "getResourcePaths" correctly resolves directories as paths that end with a slash
+* MockHttpServletResponse detects charset specification in "setContentType" and sets character encoding accordingly
+* fixed AbstractTransactionalSpringContextTests's "startNewTransaction" to initialize "complete" to "!defaultRollback"
+
+Package org.springframework.orm
+* Hibernate LocalSessionFactoryBean offers protected "executeSchemaStatement" method for overriding the failure handling
+
+Package org.springframework.util
+* fixed ResponseTimeMonitorImpl to properly synchronize access to its instance variables in a multithreading environment
 
 Package org.springframework.validation
 * introduced BindingResult interface, as extension of the Errors interface
@@ -31,9 +58,11 @@ Package org.springframework.validation
 
 Package org.springframework.web
 * fixed DispatcherServlet to keep and restore previous thread-bound LocaleContext and RequestAttributes
+* added overloaded "getModelAndView" method with HttpServletRequest argument to SimpleMappingExceptionResolver
 * MultiActionController does not consider "handleRequest" itself as handler method (to avoid potential stack overflow)
 * added full JSP 1.2 form tag library in package "web.servlet.tags", complementing the existing base tag library
 * added schema support for configuring a SimpleUrlHandlerMapping using spring-web.xsd
+* added protected "callNextHandlerInChain" method to DecoratingNavigationHandler, to be called by subclasses
 
 
 Changes in version 2.0 M2 (1.2.2006)
