@@ -89,10 +89,10 @@ public class DefaultBookingService implements BookingService {
 		<programlisting><lineannotation>// from the file 'Messenger.groovy'</lineannotation><![CDATA[
 package org.springframework.scripting.groovy;
 
-// import the Messenger interface (written in Java) that is to be implemented
+]]><lineannotation>// import the Messenger interface (written in Java) that is to be implemented</lineannotation><![CDATA[
 import org.springframework.scripting.Messenger
 
-// define the implementation in Groovy
+]]><lineannotation>// define the implementation in Groovy</lineannotation><![CDATA[
 class GroovyMessenger implements Messenger {
 
     @Property String message;
@@ -104,7 +104,7 @@ class GroovyMessenger implements Messenger {
         </para>
 		<programlisting><![CDATA[<beans>
 
-    <!-- this is the workhorse bean that effects the scripting support (explained in detail later) -->
+    <!-- this is the workhorse bean that effects the scripting support (detailed later) -->
     <bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor" />
 
     <!-- and this is the bean definition for the Groovy-based Messenger implementation -->
@@ -174,14 +174,14 @@ class GroovyMessenger implements Messenger {
 						Then define your script-backed beans using an appropriate
 						<interfacename>org.springframework.scripting.ScriptFactory</interfacename>
 						implementation. This is an interative step... you will need
-						at least one bean defintion per script (although the same script
+						at least one bean definition per script (although the same script
 						can of course be referenced by multiple bean definitions).
 					</para>
 				</listitem>
 			</orderedlist>
 			<para>
 	            The first two steps (testing and writing your scripts) are beyond the 
-	            scope of this chapter. Grab a old of the language specification and /
+	            scope of this chapter. Grab a hold of the language specification and /
 	            or reference manual for your chosen scripting language and crack on with
 	            developing your scripts. You <emphasis>will</emphasis> first want to read
 	            the rest of this chapter though, as Spring's scripting support does make
@@ -265,12 +265,11 @@ package org.springframework.scripting.groovy;
 
 import org.springframework.scripting.Messenger
 
-// define the implementation in Groovy
 class GroovyMessenger implements Messenger {
 
     GroovyMessenger() {}
 
-    // this will *not* work
+    ]]><lineannotation>// this constructor is *not* available for Constructor Injection...</lineannotation><![CDATA[
     GroovyMessenger(String message) {
         this.message = message;
     }
@@ -283,7 +282,7 @@ class GroovyMessenger implements Messenger {
     <bean id="badMessenger"
           class="org.springframework.scripting.groovy.GroovyScriptFactory">
         <constructor-arg value="classpath:Messenger.groovy" />]]>
-        <lineannotation>&lt;!-- this constructor argument will not be injected into the ScriptFactory --&gt;</lineannotation><![CDATA[
+        <lineannotation>&lt;!-- this next constructor argument will *not* be injected into the GroovyMessenger --&gt;</lineannotation><![CDATA[
         <constructor-arg value="This will *not* work" />]]>
         <lineannotation>&lt;!-- only property values are injected into the scripted object --&gt;</lineannotation><![CDATA[
         <property name="anotherMessage" value="Passed straight through to the scripted object" />
@@ -357,9 +356,10 @@ class GroovyMessenger implements Messenger {
 
 </beans>]]></programlisting>
 				<para>
-		            Yes, that really is all one has to do. The <literal>refreshCheckDelay</literal>
+		            That really is all one has to do. The <literal>refreshCheckDelay</literal>
 		            property defined on the <classname>ScriptFactoryPostProcessor</classname> class
-		            is the number of milliseconds between refresh checks.
+		            is the number of milliseconds after which any changes to the underlying script
+		            source will incur a refresh.
 		            Remember that <interfacename>BeanPostProcessor</interfacename>
 		            implementation instances (such as the <classname>ScriptFactoryPostProcessor</classname>)
 		            apply to <emphasis>all</emphasis> script-backed beans in the scope of the surrounding
@@ -853,9 +853,7 @@ RubyMessenger.new</programlisting>
 	            you want to expose as a JRuby-scripted bean (as shown above). Please
 	            also note that you can actually define as many classes and objects
 	            as you want in your JRuby script... what is important is that the
-	            script as a whole must return an object (for Spring to configure), and
-	            the easiest way to do that in JRuby is to simply instantiate a new instance
-	            of your JRuby class on the last line of the script.
+	            script as a whole must return an object (for Spring to configure).
 			</para>
 			<para>
 	            And that is it... it's really just a case of defining one
@@ -888,7 +886,7 @@ RubyMessenger.new</programlisting>
 				One group of classes that may benefit from using script-backed beans is
 				that of Spring MVC controllers. In pure Spring MVC applications, the
 				navigational flow through a web application is to a large extent
-				determined by code encapsulated within one's SpringMVC controllers.
+				determined by code encapsulated within one's Spring MVC controllers.
 				As the navigational flow and other presentation layer logic of a web
 				application needs to be updated to respond to support issues or changing
 				business requirements, it may well be easier to effect any such required
@@ -911,7 +909,7 @@ RubyMessenger.new</programlisting>
 		            Please note that in order to effect this automatic 'pickup' of any changes
 		            to script-backed beans, one will have had to enable the 'refreshable beans'
 		            feature. See the section entitled <xref linkend="scripting-refreshable-beans"/>
-		            for a full and detailed treatment of this feature.
+		            for a full treatment of this feature.
 				</para>
 			</note>
 			<para>
@@ -928,10 +926,9 @@ RubyMessenger.new</programlisting>
 			<para>
 				Another area of one's application development with Spring that may benefit
 				from the flexibility afforded by script-backed beans is that of
-				validation. It may be easier to express complex validation logic using a
-				loosely typed scripting language that may also have support for inline
-				regular expressions and other convenient features related to string 
-				manipulation, iteration, and the like.
+				validation. It <emphasis>may</emphasis> be easier to express complex validation
+				logic using a loosely typed scripting language (that may also have support
+				for inline regular expressions) as opposed to regular Java.
 			</para>
 			<para>
 	            Again, developing one's validators as script-backed beans allows one to change
