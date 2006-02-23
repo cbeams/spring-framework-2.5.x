@@ -20,8 +20,9 @@ import junit.framework.TestCase;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
-public class PerformanceInterceptorTests extends TestCase {
+public class PerformanceMonitorInterceptorTests extends TestCase {
 
 	public void testSuffixAndPrefixAssignment() {
 		PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor();
