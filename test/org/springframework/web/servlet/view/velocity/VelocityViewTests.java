@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -389,6 +389,57 @@ public class VelocityViewTests extends TestCase {
 		assertEquals("Correct view class", VelocityToolboxView.class, view.getClass());
 		assertEquals("Correct URL", "prefix_test_suffix", ((VelocityView) view).getUrl());
 		assertEquals("Correct toolbox", toolbox, ((VelocityToolboxView) view).getToolboxConfigLocation());
+	}
+
+	public void testVelocityViewResolverWithToolboxSubclass() throws Exception {
+		final Template expectedTemplate = new Template();
+		VelocityConfig vc = new VelocityConfig() {
+			public VelocityEngine getVelocityEngine() {
+				return new TestVelocityEngine("prefix_test_suffix", expectedTemplate);
+			}
+		};
+
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.getBeanFactory().registerSingleton("configurer",vc);
+
+		String toolbox = "org/springframework/web/servlet/view/velocity/toolbox.xml";
+
+		VelocityViewResolver vr = new VelocityViewResolver();
+		vr.setViewClass(VelocityLayoutView.class);
+		vr.setPrefix("prefix_");
+		vr.setSuffix("_suffix");
+		vr.setToolboxConfigLocation(toolbox);
+		vr.setApplicationContext(wac);
+
+		View view = vr.resolveViewName("test", Locale.CANADA);
+		assertEquals("Correct view class", VelocityLayoutView.class, view.getClass());
+		assertEquals("Correct URL", "prefix_test_suffix", ((VelocityView) view).getUrl());
+		assertEquals("Correct toolbox", toolbox, ((VelocityToolboxView) view).getToolboxConfigLocation());
+	}
+
+	public void testVelocityLayoutViewResolver() throws Exception {
+		final Template expectedTemplate = new Template();
+		VelocityConfig vc = new VelocityConfig() {
+			public VelocityEngine getVelocityEngine() {
+				return new TestVelocityEngine("prefix_test_suffix", expectedTemplate);
+			}
+		};
+
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.getBeanFactory().registerSingleton("configurer",vc);
+
+		VelocityLayoutViewResolver vr = new VelocityLayoutViewResolver();
+		vr.setPrefix("prefix_");
+		vr.setSuffix("_suffix");
+		vr.setLayoutUrl("myLayoutUrl");
+		vr.setLayoutKey("myLayoutKey");
+		vr.setScreenContentKey("myScreenContentKey");
+		vr.setApplicationContext(wac);
+
+		View view = vr.resolveViewName("test", Locale.CANADA);
+		assertEquals("Correct view class", VelocityLayoutView.class, view.getClass());
+		assertEquals("Correct URL", "prefix_test_suffix", ((VelocityView) view).getUrl());
+		// TODO: Need to test actual VelocityLayoutView properties and their functionality!
 	}
 
 }
