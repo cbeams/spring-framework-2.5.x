@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,11 +54,12 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 
 
 	/**
-	 * Sets default viewClass to VelocityView.
+	 * Sets default viewClass to <code>requiredViewClass</code>.
 	 * @see #setViewClass
+	 * @see #requiredViewClass
 	 */
 	public VelocityViewResolver() {
-		setViewClass(VelocityView.class);
+		setViewClass(requiredViewClass());
 	}
 
 	/**
@@ -74,6 +75,7 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 	 * Velocity context of this view, or <code>null</code> if not needed.
 	 * VelocityFormatter is part of the standard Velocity distribution.
 	 * @see org.apache.velocity.app.tools.VelocityFormatter
+	 * @see VelocityView#setVelocityFormatterAttribute
 	 */
 	public void setVelocityFormatterAttribute(String velocityFormatterAttribute) {
 		this.velocityFormatterAttribute = velocityFormatterAttribute;
@@ -83,6 +85,7 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 	 * Set the name of the DateTool helper object to expose in the Velocity context
 	 * of this view, or <code>null</code> if not needed. DateTool is part of Velocity Tools 1.0.
 	 * @see org.apache.velocity.tools.generic.DateTool
+	 * @see VelocityView#setDateToolAttribute
 	 */
 	public void setDateToolAttribute(String dateToolAttribute) {
 		this.dateToolAttribute = dateToolAttribute;
@@ -92,6 +95,7 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 	 * Set the name of the NumberTool helper object to expose in the Velocity context
 	 * of this view, or <code>null</code> if not needed. NumberTool is part of Velocity Tools 1.1.
 	 * @see org.apache.velocity.tools.generic.NumberTool
+	 * @see VelocityView#setNumberToolAttribute
 	 */
 	public void setNumberToolAttribute(String numberToolAttribute) {
 		this.numberToolAttribute = numberToolAttribute;
@@ -105,15 +109,32 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 	 * <p>The specfied location string needs to refer to a ServletContext
 	 * resource, as expected by ServletToolboxManager which is part of
 	 * the view package of Velocity Tools.
-	 * <p><b>Note:</b> Specifying a Toolbox config location will lead to
+	 * <p><b>Note:</b> Specifying a toolbox config location will lead to
 	 * VelocityToolboxView instances being created.
 	 * @see org.apache.velocity.tools.view.servlet.ServletToolboxManager#getInstance
+	 * @see VelocityToolboxView#setToolboxConfigLocation
 	 */
 	public void setToolboxConfigLocation(String toolboxConfigLocation) {
-		if (!VelocityToolboxView.class.isAssignableFrom(getViewClass())) {
-			setViewClass(VelocityToolboxView.class);
-		}
 		this.toolboxConfigLocation = toolboxConfigLocation;
+	}
+
+
+	protected void initApplicationContext() {
+		super.initApplicationContext();
+
+		if (this.toolboxConfigLocation != null) {
+			if (VelocityView.class.equals(getViewClass())) {
+				logger.info("Using VelocityToolboxView instead of default VelocityView " +
+						"due to specified toolboxConfigLocation");
+				setViewClass(VelocityToolboxView.class);
+			}
+			else if (!VelocityToolboxView.class.isAssignableFrom(getViewClass())) {
+				throw new IllegalArgumentException(
+						"Given view class [" + getViewClass().getName() +
+						"] is not of type [" + VelocityToolboxView.class.getName() +
+						"], which it needs to be in case of a specified toolboxConfigLocation");
+			}
+		}
 	}
 
 
