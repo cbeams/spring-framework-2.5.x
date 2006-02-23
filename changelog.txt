@@ -10,6 +10,7 @@ Package org.springframework.aop
 * AbstractBeanFactoryBasedTargetSource offers explicit "setTargetClass" method, else determines target class on demand
 * renamed AbstractLazyInitTargetSource to AbstractLazyCreationTargetSource
 * renamed AbstractPerformanceMonitorInterceptor to AbstractMonitoringInterceptor
+* refined DebugInterceptor to keep its count in a field of type long instead of int, with "long getCount()" accessor
 * fixed DebugInterceptor to properly synchronize access to its count field in a multithreading environment
 
 Package org.springframework.beans
@@ -21,6 +22,7 @@ Package org.springframework.beans
 * added "containsLocalBean" method to HierarchicalBeanFactory interface, refactored from AbstractApplicationContext
 * fixed AbstractBeanFactory to use canonical bean name (id) for prototype creation, exposing it to BeanPostProcessors
 * fixed AbstractBeanFactory to destroy a failed bean completely, including dependent beans (in case of eager references)
+* fixed AbstractBeanFactory's definition caching to allow for proper placeholder substitution even with parent/child
 * re-added support for deprecated "class" property to PropertiesBeanDefinitionReader, alongside "(class)"
 * DefaultXmlBeanDefinitionParser considers "" as default namespace as well, for compatibility with the Oracle XML parser
 
@@ -45,6 +47,7 @@ Package org.springframework.mock
 
 Package org.springframework.orm
 * Hibernate LocalSessionFactoryBean offers protected "executeSchemaStatement" method for overriding the failure handling
+* fixed JpaTemplate's "findByNamedQuery" to correctly apply parameter indexes starting from 1
 
 Package org.springframework.util
 * fixed ResponseTimeMonitorImpl to properly synchronize access to its instance variables in a multithreading environment
@@ -59,9 +62,12 @@ Package org.springframework.validation
 Package org.springframework.web
 * fixed DispatcherServlet to keep and restore previous thread-bound LocaleContext and RequestAttributes
 * added overloaded "getModelAndView" method with HttpServletRequest argument to SimpleMappingExceptionResolver
-* MultiActionController does not consider "handleRequest" itself as handler method (to avoid potential stack overflow)
-* added full JSP 1.2 form tag library in package "web.servlet.tags", complementing the existing base tag library
 * added schema support for configuring a SimpleUrlHandlerMapping using spring-web.xsd
+* upgraded VelocityToolboxView to use Velocity Tools 1.2+ API and avoid using deprecated earlier API
+* added VelocityLayoutViewResolver, a convenience subclass of VelocityViewResolver with support for VelocityLayoutView
+* MultiActionController does not consider "handleRequest" itself as handler method (to avoid potential stack overflow)
+* added overloaded "onFormChange" method with BindException argument to SimpleFormController
+* added full JSP 1.2 form tag library in package "web.servlet.tags", complementing the existing base tag library
 * added protected "callNextHandlerInChain" method to DecoratingNavigationHandler, to be called by subclasses
 
 
