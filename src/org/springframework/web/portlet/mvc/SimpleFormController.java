@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -257,6 +257,7 @@ public class SimpleFormController extends AbstractFormController {
 		return null;
 	}
 
+
 	/**
 	 * This implementation calls <code>showForm</code> in case of errors,
 	 * and delegates to <code>onSubmitRender<code>'s full version else.
@@ -314,7 +315,7 @@ public class SimpleFormController extends AbstractFormController {
 				setFormSubmit(response);
 			}
 			passRenderParameters(request, response);
-			onFormChange(request, response, command);
+			onFormChange(request, response, command, errors);
 		}
 		else {
 			logger.debug("No errors - processing submit");
@@ -353,16 +354,37 @@ public class SimpleFormController extends AbstractFormController {
 	 * {@link #isFormChangeRequest(PortletRequest)}
 	 * returns <code>true</code>. Allows subclasses to implement custom logic
 	 * to modify the command object to directly modify data in the form.
+	 * <p>Default implementation delegates to
+	 * <code>onFormChange(request, response, command)</code>.
+	 * @param request current action request
+	 * @param response current action response
+	 * @param command form object with request parameters bound onto it
+	 * @param errors validation errors holder, allowing for additional
+	 * custom validation
+	 * @throws Exception in case of errors
+	 * @see #isFormChangeRequest(PortletRequest)
+	 * @see #onFormChange(ActionRequest, ActionResponse, Object)
+	 */
+	protected void onFormChange(ActionRequest request, ActionResponse response, Object command, BindException errors)
+			throws Exception {
+
+		onFormChange(request, response, command);
+	}
+
+	/**
+	 * Simpler <code>onFormChange</code> variant, called by the full version
+	 * <code>onFormChange(request, response, command, errors)</code>.
 	 * <p>Default implementation is empty.
 	 * @param request current action request
 	 * @param response current action response
 	 * @param command form object with request parameters bound onto it
 	 * @throws Exception in case of errors
-	 * @see #isFormChangeRequest(PortletRequest)
+	 * @see #onFormChange(ActionRequest, ActionResponse, Object, BindException)
 	 */
 	protected void onFormChange(ActionRequest request, ActionResponse response, Object command)
 			throws Exception {
 	}
+
 
 	/**
 	 * Submit render phase callback with all parameters. Called in case of submit without errors
