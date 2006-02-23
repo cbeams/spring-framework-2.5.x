@@ -115,6 +115,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** Cache of singletons: bean name --> bean instance */
 	private final Map singletonCache = new HashMap();
 
+	/** Names of beans that have already been created at least once */
+	private final Set alreadyCreated = Collections.synchronizedSet(new HashSet());
+
 	/** Names of beans that are currently in creation */
 	private final Set currentlyInCreation = Collections.synchronizedSet(new HashSet());
 
@@ -220,6 +223,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				}
 			}
 
+			this.alreadyCreated.add(beanName);
 			RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
 			checkMergedBeanDefinition(mergedBeanDefinition, beanName, requiredType, args);
 
@@ -770,7 +774,11 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 								"Validation of bean definition failed", ex);
 					}
 
-					this.mergedBeanDefinitions.put(bd, rbd);
+					// Only cache the merged bean definition if we're already about to create an
+					// instance of the bean, or at least have already created an instance before.
+					if (this.alreadyCreated.contains(beanName)) {
+						this.mergedBeanDefinitions.put(bd, rbd);
+					}
 				}
 
 				return rbd;
@@ -824,6 +832,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 		}
 	}
+
 
 	/**
 	 * Get the object for the given shared bean, either the bean

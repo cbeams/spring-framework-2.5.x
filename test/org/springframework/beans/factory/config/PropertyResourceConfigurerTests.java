@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -188,19 +188,42 @@ public class PropertyResourceConfigurerTests extends TestCase {
 	}
 
 	public void testPropertyPlaceholderConfigurer() {
+		doTestPropertyPlaceholderConfigurer(false);
+	}
+
+	public void testPropertyPlaceholderConfigurerWithParentChildSeparation() {
+		doTestPropertyPlaceholderConfigurer(true);
+	}
+
+	private void doTestPropertyPlaceholderConfigurer(boolean parentChildSeparation) {
 		StaticApplicationContext ac = new StaticApplicationContext();
 
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "${age}");
-		pvs.addPropertyValue("name", "name${var}${var}${");
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
-		ac.registerSingleton("tb1", TestBean.class, pvs);
+		if (parentChildSeparation) {
+			MutablePropertyValues pvs1 = new MutablePropertyValues();
+			pvs1.addPropertyValue("age", "${age}");
+			MutablePropertyValues pvs2 = new MutablePropertyValues();
+			pvs2.addPropertyValue("name", "name${var}${var}${");
+			pvs2.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+
+			RootBeanDefinition parent = new RootBeanDefinition(TestBean.class, pvs1);
+			ChildBeanDefinition bd = new ChildBeanDefinition("parent", pvs2);
+			ac.getDefaultListableBeanFactory().registerBeanDefinition("parent", parent);
+			ac.getDefaultListableBeanFactory().registerBeanDefinition("tb1", bd);
+		}
+		else {
+			MutablePropertyValues pvs = new MutablePropertyValues();
+			pvs.addPropertyValue("age", "${age}");
+			pvs.addPropertyValue("name", "name${var}${var}${");
+			pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+			RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, pvs);
+			ac.getDefaultListableBeanFactory().registerBeanDefinition("tb1", bd);
+		}
 
 		ConstructorArgumentValues cas = new ConstructorArgumentValues();
 		cas.addIndexedArgumentValue(1, "${age}");
 		cas.addGenericArgumentValue("${var}name${age}");
 
-		pvs = new MutablePropertyValues();
+		MutablePropertyValues pvs = new MutablePropertyValues();
 		List friends = new ManagedList();
 		friends.add("na${age}me");
 		friends.add(new RuntimeBeanReference("${ref}"));
