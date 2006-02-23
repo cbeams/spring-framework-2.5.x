@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.SessionRequiredException;
 
 /**
- * <p>Form controller that autopopulates a form bean from the request.
+ * <p>Form controller that auto-populates a form bean from the request.
  * This, either using a new bean instance per request, or using the same bean
  * when the <code>sessionForm</code> property has been set to <code>true</code>.</p>
  *
