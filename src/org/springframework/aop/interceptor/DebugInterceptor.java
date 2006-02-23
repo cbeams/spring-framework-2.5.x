@@ -34,7 +34,7 @@ import org.aopalliance.intercept.MethodInvocation;
  */
 public class DebugInterceptor extends SimpleTraceInterceptor {
 
-	private volatile int count;
+	private volatile long count;
 
 
 	/**
@@ -69,7 +69,7 @@ public class DebugInterceptor extends SimpleTraceInterceptor {
 	/**
 	 * Return the number of times this interceptor has been invoked.
 	 */
-	public int getCount() {
+	public long getCount() {
 		return this.count;
 	}
 
