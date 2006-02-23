@@ -20,8 +20,8 @@ distribution/website before using any of them in your own applications.
 - Apache Axis 1.3 (http://ws.apache.org/axis)
 - required for running JPetStore
 
-* c3p0/c3p0-0.9.0.2.jar
-- C3P0 0.9.0.2 connection pool (http://sourceforge.net/projects/c3p0)
+* c3p0/c3p0-0.9.0.4.jar
+- C3P0 0.9.0.4 connection pool (http://sourceforge.net/projects/c3p0)
 - required for building the framework
 - required at runtime when using Spring's C3P0NativeJdbcExtractor
 - required for running Image Database
