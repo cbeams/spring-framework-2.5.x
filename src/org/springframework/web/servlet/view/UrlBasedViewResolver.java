@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -305,9 +305,9 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 
 	/**
 	 * Overridden to implement check for "redirect:" prefix.
-	 * <p>Not possible in loadView, as overridden loadView versions in
-	 * subclasses might rely on the superclass always creating instances
-	 * of the required view class.
+	 * <p>Not possible in <code>loadView</code>, since overridden
+	 * <code>loadView</code> versions in subclasses might rely on the
+	 * superclass always creating instances of the required view class.
 	 * @see #loadView
 	 * @see #requiredViewClass
 	 */
