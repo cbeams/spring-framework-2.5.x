@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.0 M3 (February 2006)
-----------------------------------------------------
+THE SPRING FRAMEWORK, release 2.0 M3 (March 2006)
+-------------------------------------------------
 http://www.springframework.org
 
 
@@ -90,25 +90,25 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~1830 KB)
+* "spring" (~1895 KB)
 - Convenient jar file that combines all standard modules (see "module jars" below)
 - Note: Does NOT include extension modules! (see "extension module jars" below)
 
 MODULE JARS (dist/modules):
 
-* "spring-core" (~140 KB)
+* "spring-core" (~145 KB)
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~275 KB)
+* "spring-beans" (~285 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
-* "spring-aop" (~255 KB)
+* "spring-aop" (~270 KB)
 - Contents: AOP framework, source-level metadata support, AOP Alliance interfaces
 - Dependencies: spring-core, (spring-beans, CGLIB, Commons Attributes)
 
-* "spring-context" (~130 KB)
+* "spring-context" (~135 KB)
 - Contents: application context, validation, JNDI, UI context support, scripting
 - Dependencies: spring-beans, (Velocity, FreeMarker, JasperReports)
 
@@ -128,7 +128,7 @@ MODULE JARS (dist/modules):
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
 - Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts, JSF)
 
-* "spring-webmvc" (~215 KB)
+* "spring-webmvc" (~250 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI, Velocity, FreeMarker, JasperReports)
 
@@ -138,7 +138,7 @@ MODULE JARS (dist/modules):
 
 EXTENSION MODULE JARS (dist/extmodules):
 
-* "spring-portlet" (~105 KB)
+* "spring-portlet" (~110 KB)
 - Contents: framework portlets, portlet MVC
 - Dependencies: spring-web, spring-webmvc, (Portlet)
 
@@ -166,7 +166,7 @@ EXTENSION MODULE JARS (dist/extmodules):
 - Contents: OJB 1.0 support
 - Dependencies: spring-dao, spring-jdbc, OJB
 
-* "spring-mock" (~70 KB)
+* "spring-mock" (~75 KB)
 - Contents: JNDI mocks, Servlet API mocks, Portlet API mocks, JUnit support
 - Dependencies: spring-core
 
