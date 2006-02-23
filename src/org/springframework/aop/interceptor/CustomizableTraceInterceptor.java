@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -296,12 +296,12 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * at <code>TRACE</code> level. Sub-classes can override this method
 	 * to control which level the message is written at.
 	 */
-	protected void writeToLog(Log logger, String message, Throwable t) {
-		if (t == null) {
-			logger.trace(message);
+	protected void writeToLog(Log logger, String message, Throwable ex) {
+		if (ex != null) {
+			logger.trace(message, ex);
 		}
 		else {
-			logger.trace(message, t);
+			logger.trace(message);
 		}
 	}
 
@@ -322,7 +322,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * @return the formatted output to write to the log
 	 */
 	protected String replacePlaceholders(String message, MethodInvocation methodInvocation,
-										 Object returnValue, Throwable throwable, long invocationTime) {
+			Object returnValue, Throwable throwable, long invocationTime) {
 
 		Matcher matcher = PATTERN.matcher(message);
 
