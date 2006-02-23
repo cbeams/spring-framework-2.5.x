@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.aop.support.AopUtils;
  * the <code>Log</code> for the target class being intercepted.
  *
  * <p>Subclasses must implement the <code>invokeUnderTrace</code> method, which
- * is invoked by this class ONLY when a particularinvocation SHOULD be traced.
+ * is invoked by this class ONLY when a particular invocation SHOULD be traced.
  * Subclasses should write to the <code>Log</code> instance provided.
  *
  * @author Rob Harrop
@@ -107,7 +107,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Log logger = getLoggerForInvocation(invocation);
-		if (logger.isTraceEnabled()) {
+		if (isLogEnabled(logger)) {
 			return invokeUnderTrace(invocation, logger);
 		}
 		else {
@@ -152,6 +152,14 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 		}
 	}
 
+	/**
+	 * Is the {@link Log} instance enabled. Default implementation returns
+	 * <code>true</code> when <code>TRACE</code> level is enabled. Sub-classes
+	 * can override this to change the level under which 'tracing' occurs.
+	 */
+	protected boolean isLogEnabled(Log logger) {
+		return logger.isTraceEnabled();
+	}
 
 	/**
 	 * Subclasses must override this method to perform any tracing around the
