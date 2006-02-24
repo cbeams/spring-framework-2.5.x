@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.7 (24.2.2006)
+Changes in version 1.2.7 (26.2.2006)
 ------------------------------------
 
 Package org.springframework.aop
@@ -30,7 +30,6 @@ Package org.springframework.beans
 * fixed AbstractBeanFactory to correctly delegate to parent BeanFactory from "isFactoryBean"
 * optimized AbstractBeanFactory to avoid internal NoSuchBeanDefinitionException throw+catch as far as possible
 * reworked AbstractBeanFactory's currently-in-creation check to log debug message when unfinished singleton is returned
-* AbstractBeanFactory caches merged bean definitions, for efficient prototype child creation and CGLIB class reuse
 * fixed AbstractBeanFactory to use canonical bean name (id) for prototype creation, exposing it to BeanPostProcessors
 * fixed AbstractBeanFactory to destroy a failed bean completely, including dependent beans (in case of eager references)
 * added "allowCircularReferences" flag to AbstractAutowireCapableBeanFactory, to disallow circular references completely
@@ -134,9 +133,11 @@ Package org.springframework.web
 * added "propertyEditorRegistrars" property to BaseCommandController, for applying PropertyEditorRegistrars
 * turned AbstractCommandController's and AbstractFormController's "handleRequestInternal" methods non-final
 * refactored AbstractFormController's session form check into one single place, throwing SessionRequiredException
+* added overloaded "onFormChange" method with BindException argument to SimpleFormController
 * added protected accessors for UrlBasedViewResolver's bean properties, allowing subclasses to access the settings
 * added "argumentSeparator" property to MessageTag, allowing to specify a custom separator instead of the default comma
 * VelocityView converts Velocity's MethodInvocationException to a Spring NestedServletException with original root cause
+* added VelocityLayoutViewResolver, a convenience subclass of VelocityViewResolver with support for VelocityLayoutView
 * added "useSingleModelNameAsRoot" property to AbstractXlstView, allowing to enforce the value of the "root" property
 * refined Struts DelegatingActionProxy and Delegating(Tiles)RequestProcessor to fall back to root WebApplicationContext
 * added DelegatingNavigationHandlerProxy and DelegatingPhaseListenerAdapter to JSF support (used by Spring Web Flow)
