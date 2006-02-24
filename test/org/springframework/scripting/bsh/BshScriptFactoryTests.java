@@ -17,12 +17,17 @@
 package org.springframework.scripting.bsh;
 
 import junit.framework.TestCase;
+import org.easymock.MockControl;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.NestedRuntimeException;
 import org.springframework.scripting.Calculator;
 import org.springframework.scripting.Messenger;
+import org.springframework.scripting.ScriptCompilationException;
+import org.springframework.scripting.ScriptSource;
+import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 
 /**
  * Unit and integration tests for the BshScriptFactory class.
@@ -65,6 +70,36 @@ public class BshScriptFactoryTests extends TestCase {
 		assertEquals("Message is incorrect after refresh", desiredMessage, messenger.getMessage());
 
 		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
+	}
+
+	public void testScriptCompilationException() throws Exception {
+		try {
+			new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshBrokenContext.xml");
+			fail("Must throw exception for broken script file");
+		}
+		catch (NestedRuntimeException e) {
+			assertTrue(e.contains(ScriptCompilationException.class));
+		}
+	}
+
+	public void testScriptThatCompilesButIsJustPlainBad() throws Exception {
+		MockControl mock = MockControl.createControl(ScriptSource.class);
+		ScriptSource script = (ScriptSource) mock.getMock();
+		script.getScriptAsString();
+		final String badScript = "String getMessage() { throw new IllegalArgumentException(); }";
+		mock.setReturnValue(badScript);
+		mock.replay();
+		BshScriptFactory factory = new BshScriptFactory(
+				ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript,
+				new Class[]{Messenger.class});
+		try {
+			Messenger messenger = (Messenger) factory.getScriptedObject(script, new Class[]{Messenger.class});
+			messenger.getMessage();
+			fail("Must have thrown a BshScriptUtils.BshExecutionException.");
+		}
+		catch (BshScriptUtils.BshExecutionException expected) {
+		}
+		mock.verify();
 	}
 
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
