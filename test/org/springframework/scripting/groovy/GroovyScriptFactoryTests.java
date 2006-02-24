@@ -16,20 +16,22 @@
 
 package org.springframework.scripting.groovy;
 
-import java.io.FileNotFoundException;
-
 import junit.framework.TestCase;
 import org.easymock.MockControl;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.JdkVersion;
+import org.springframework.core.NestedRuntimeException;
 import org.springframework.scripting.Calculator;
 import org.springframework.scripting.Messenger;
+import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptSource;
+import org.springframework.scripting.support.ScriptFactoryPostProcessor;
+
+import java.io.FileNotFoundException;
 
 /**
  * Unit tests for the GroovyScriptFactory class.
@@ -79,6 +81,64 @@ public class GroovyScriptFactoryTests extends TestCase {
 
 		assertEquals("Message is incorrect after refresh.", desiredMessage, messenger.getMessage());
 		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
+	}
+
+	public void testScriptCompilationException() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		try {
+			new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyBrokenContext.xml");
+			fail("Should throw exception for broken script file");
+		}
+		catch (NestedRuntimeException e) {
+			assertTrue(e.contains(ScriptCompilationException.class));
+		}
+	}
+
+	public void testScriptedClassThatDoesNotHaveANoArgCtor() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		MockControl mock = MockControl.createControl(ScriptSource.class);
+		ScriptSource script = (ScriptSource) mock.getMock();
+		script.getScriptAsString();
+		final String badScript = "class Foo { public Foo(String foo) {}}";
+		mock.setReturnValue(badScript);
+		mock.replay();
+		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript);
+		try {
+			factory.getScriptedObject(script, new Class []{});
+			fail("Must have thrown a ScriptCompilationException (no public no-arg ctor in scripted class).");
+		}
+		catch (ScriptCompilationException expected) {
+			assertTrue(expected.contains(InstantiationException.class));
+		}
+		mock.verify();
+	}
+
+	public void testScriptedClassThatHasNoPublicNoArgCtor() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		MockControl mock = MockControl.createControl(ScriptSource.class);
+		ScriptSource script = (ScriptSource) mock.getMock();
+		script.getScriptAsString();
+		final String badScript = "class Foo { protected Foo() {}}";
+		mock.setReturnValue(badScript);
+		mock.replay();
+		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript);
+		try {
+			factory.getScriptedObject(script, new Class []{});
+			fail("Must have thrown a ScriptCompilationException (no oublic no-arg ctor in scripted class).");
+		}
+		catch (ScriptCompilationException expected) {
+			assertTrue(expected.contains(IllegalAccessException.class));
+		}
+		mock.verify();
 	}
 
 	public void testWithTwoClassesDefinedInTheOneGroovyFile_CorrectClassFirst() throws Exception {
