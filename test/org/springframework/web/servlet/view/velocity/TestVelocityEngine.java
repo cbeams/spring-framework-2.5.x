@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.web.servlet.view.velocity;
 
-import junit.framework.Assert;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 
@@ -26,17 +28,27 @@ import org.apache.velocity.app.VelocityEngine;
  */
 public class TestVelocityEngine extends VelocityEngine {
 
-	private Template t;
-	private String expectedName;
+	private final Map templates = new HashMap();
 
-	public TestVelocityEngine(String expectedName, Template t) {
-		this.t = t;
-		this.expectedName = expectedName;
+
+	public TestVelocityEngine() {
 	}
 
+	public TestVelocityEngine(String expectedName, Template template) {
+		addTemplate(expectedName, template);
+	}
+
+	public void addTemplate(String expectedName, Template template) {
+		this.templates.put(expectedName, template);
+	}
+
+
 	public Template getTemplate(String name) {
-		Assert.assertEquals(name, this.expectedName);
-		return t;
+		Template template = (Template) this.templates.get(name);
+		if (template == null) {
+			throw new IllegalStateException("No template registered for name [" + name + "]");
+		}
+		return template;
 	}
 
 }
