@@ -24,12 +24,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet 2.3 Filter that allows to specify a character encoding for requests.
+ * Servlet 2.3 Filter that allows one to specify a character encoding for requests.
  * This is useful because current browsers typically do not set a character
  * encoding even if specified in the HTML page or form.
  *
- * <p>Can either just apply this filter's encoding if the request does not
- * already specify an encoding, or apply this filter's encoding in any case.
+ * <p>One can either just apply this filter's encoding if the request does not
+ * already specify an encoding, or force the application of this filter's
+ * encoding in any case.
  *
  * @author Juergen Hoeller
  * @since 15.03.2004
