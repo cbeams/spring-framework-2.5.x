@@ -18,7 +18,7 @@
             to pick and choose the architecture, technology, or methodology that is most
             relevant to a developer and his or her development team is arguably most evident
             in the web area, where Spring provides its own web framework
-            (<link linked="mvc">SpringMVC</link>), while at the same time providing integration
+            (<link linkend="mvc">SpringMVC</link>), while at the same time providing integration
             with a number of popular third party web frameworks. This allows one to continue
             to leverage any and all of the skills one may have acquired in a
             particular web framework such as Struts, while at the same time being able to
@@ -448,7 +448,7 @@
 			</emphasis>
 		</quote>
 		<para>
-			While Spring has its own <link linked="mvc">powerful web layer</link>, there
+			While Spring has its own <link linkend="mvc">powerful web layer</link>, there
 			are a number of unique advantages to building a J2EE application using a
 			combination of Tapestry for the web	user interface and the Spring container
 			for the lower layers. This section of the web integration chapter attempts
