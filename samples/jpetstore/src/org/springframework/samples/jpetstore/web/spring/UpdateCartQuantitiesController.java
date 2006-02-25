@@ -30,10 +30,11 @@ public class UpdateCartQuantitiesController implements Controller {
 					cartItems.remove();
 				}
 			}
-			catch (NumberFormatException e) {
-				//ignore on purpose
+			catch (NumberFormatException ex) {
+				// ignore on purpose
 			}
 		}
+		request.getSession().setAttribute("sessionCart", cart);
 		return new ModelAndView("Cart", "cart", cart);
 	}
 
