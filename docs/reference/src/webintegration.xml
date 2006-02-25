@@ -437,135 +437,63 @@
 	<section id="view-tapestry">
 		<title>Tapestry</title>
 		<para>
-			Tapestry is a powerful, component-oriented web application framework
-			from Apache's Jakarta project (<ulink url="http://jakarta.apache.org/tapestry"/>).
-			While Spring has its own powerful web ui layer, there are a number of unique
-			advantages to building a J2EE application using a combination of Tapestry for
-			the web	ui, and the Spring container for the lower layers. This document
-			attempts to detail a few best practices for combining these two frameworks.
-			(It is expected that you are relatively familiar with both Tapestry and Spring
-			Framework basics, so they will not be explained here; general introductory
-			documentation for both Tapestry and Spring Framework is available on
-			their respective web sites.)
+			From the <ulink url="http://jakarta.apache.org/tapestry/">Tapestry homepage</ulink>...
 		</para>
-		<section id="view-tapestry-architecture">
-			<title>Architectural Overview</title>
+		<quote>
+			<emphasis>
+				Tapestry is an open-source framework for creating dynamic, robust, highly
+				scalable web applications in Java. Tapestry complements and builds upon
+				the standard Java Servlet API, and so it works in any servlet container or
+				application server.
+			</emphasis>
+		</quote>
+		<para>
+			While Spring has its own <link linked="mvc">powerful web layer</link>, there
+			are a number of unique advantages to building a J2EE application using a
+			combination of Tapestry for the web	user interface and the Spring container
+			for the lower layers. This section of the web integration chapter attempts
+			to detail a few best practices for combining these two frameworks.
+		</para>
+		<para>
+			A <emphasis>typical</emphasis> layered J2EE application built with Tapestry
+			and Spring will consist of a top user interface (UI) layer built with Tapestry,
+			and a number of lower layers, all wired together by one or more Spring containers.
+			Tapestry's own
+			<ulink url="http://jakarta.apache.org/tapestry/UsersGuide/hivemind.html">reference documentation</ulink> 
+			contains the following snippet of best practice advice. (Text that I the author
+			have added is contained within <literal>[]</literal> brackets.)
+		</para>
+		<quote>
+			<emphasis>
+				A very succesful design pattern in Tapestry is to keep pages and components
+				very simple, and <emphasis role="bold">delegate</emphasis> as much logic as
+				possible out to HiveMind [or Spring, or whatever] services. Listener methods
+				should ideally do little more than marshall together the correct information
+				and pass it over to a service.
+			</emphasis>
+		</quote>
+        <para>
+            The key question then is... how does one supply Tapestry pages with collaborating
+            services? The answer, ideally, is that one would want to dependency inject those
+            services directly into one's Tapestry pages. In Tapestry, one can effect this
+            dependency injection by a
+            <ulink url="http://jakarta.apache.org/tapestry/UsersGuide/injection.html">variety of means</ulink>...
+            this section is only going to enumerate the dependency injection means afforded
+            by Spring. The real beauty of the rest of this Spring-Tapestry integration is that
+            the elegant and flexible design of Tapestry itself makes doing this dependency
+            injection of Spring-managed beans a cinch. (Another nice thing is that this
+            Spring-Tapestry itegration code was written - and continues to be maintained - by
+            the Tapestry creator
+            <ulink url="http://howardlewisship.com/blog/">Howard M. Lewis Ship</ulink>, so hats
+            off to him for what is really some silky smooth integration).
+        </para>
+		<section id="view-tapestry-di">
+			<title>Injecting Spring-managed beans</title>
 			<para>
-				A typical layered J2EE application built with Tapestry and Spring
-				will consist of a top UI layer built with Tapestry, and a number of
-				lower layers, all wired together by one or more Spring containers.
+				Assume we have the following simple Spring container definition (in the
+				ubiquitous XML format):
 			</para>
-			<itemizedlist>
-				<listitem>
-					<para>
-						<emphasis>User Interface Layer:</emphasis>
-					</para>
-					<para>- concerned with the user interface</para>
-					<para>- contains some application logic</para>
-					<para>- provided by Tapestry</para>
-					<para>
-						- aside from providing UI via Tapestry, code in this layer
-						does its work via objects which implement interfaces from the
-						Service Layer. The actual objects which implement these service
-						layer interfaces are obtained from a Spring container.
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						<emphasis>Service Layer:</emphasis>
-					</para>
-					<para>- application specific 'service' code</para>
-					<para>
-						- works with domain objects, and uses the Mapper API to get
-						those domain objects into and out of some sort of repository
-						(database).
-					</para>
-					<para>- hosted in one or more Spring contexts</para>
-					<para>
-						- code in this layer manipulates objects in the domain model,
-						in an application specific fashion. It does its work via other code
-						in this layer, and via the Mapper API. An object in this layer is
-						given the specific mapper implementations it needs to work with, via
-						a Spring container.
-					</para>
-					<para>
-						- since code in this layer is hosted in a Spring container, it
-						may be transactionally wrapped by a Spring container, as opposed to
-						managing its own transactions.
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						<emphasis>Domain Model:</emphasis>
-					</para>
-					<para>
-						- domain specific object hierarchy, which deals with data and
-						logic specific to this domain.
-					</para>
-					<para>
-						- although the domain object hierarchy is built with the idea
-						that it is persisted somehow and makes some general concessions to
-						this (for example, bidirectional relationships), it generally has no
-						knowledge of other layers. As such, it may be tested in isolation,
-						and used with different mapping implementations for production vs.
-						testing.
-					</para>
-					<para>
-						- these objects may be standalone, or used in conjunction with
-						a Spring container to take advantage of some of the benefits of the
-						container, e.g. isolation, IoC, different strategy implementations, etc.
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						<emphasis>Data Source Layer:</emphasis>
-					</para>
-					<para>
-						- Mapper (also called Data Access Object): an API used to
-						persist the domain model to a repository of some sort (generally a
-						relational database, but it could be the filesystem, memory, etc.)
-					</para>
-					<para>
-						- Mapper API implementations: one or more specific
-						implementations of the Mapper API, for example, a Hibernate-specific
-						mapper, a JDO-specific mapper, JDBC-specific mapper, etc.
-					</para>
-					<para>
-						- mapper implementations live in one or more Spring containers. A
-						service layer object is given the mapper objects it needs to work with
-						via the container(s).
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						<emphasis>Database, filesystem, or other repositories:</emphasis>
-					</para>
-					<para>
-						- objects in the domain model are stored into one or more
-						repositories via one or more mapper implementations.
-					</para>
-					<para>
-						- a repository may be very simple (e.g. filesystem), or may
-						have its own representation of the data from the domain model (i.e.
-						a schema in a database). It does not know about other layers however.
-					</para>
-				</listitem>
-			</itemizedlist>
-		</section>
-		<section id="view-tapestry-implementation">
-			<title>Implementation</title>
-			<para>
-				The only real question (which needs to be addressed by this
-				document), is how Tapestry pages get access to service implementations,
-				which are simply beans defined in one or more Spring containers.
-			</para>
-			<section id="view-tapestry-context">
-				<title>Sample application context</title>
-				<para>
-					Assume we have the following simple Spring container definition (in the
-					ubiquitous XML format):
-				</para>
-				<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+			<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
         "http://www.springframework.org/dtd/spring-beans.dtd">
  
@@ -574,21 +502,15 @@
     <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="java:DefaultDS"/>
     </bean>
- 
-    <!-- define a Hibernate Session factory via a Spring LocalSessionFactoryBean -->
+
     <bean id="hibSessionFactory" 
           class="org.springframework.orm.hibernate.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
     </bean>
- 
-    <!--
-     - Defines a transaction manager for usage in business or data access objects.
-     - No special treatment by the container, just a bean instance available as reference
-     - for business objects that want to handle transactions, e.g. via TransactionTemplate.
-     -->
+
     <bean id="transactionManager" 
           class="org.springframework.transaction.jta.JtaTransactionManager"/>
- 
+
     <bean id="mapper" 
           class="com.whatever.dataaccess.mapper.hibernate.MapperImpl">
         <property name="sessionFactory" ref="hibSessionFactory"/>
@@ -629,49 +551,55 @@
     </bean>  
  
  </beans>]]></programlisting>
-				<para>
-					Inside the Tapestry application, we need to
-					load this application context, and allow Tapestry pages to get the
-					authenticationService and userService beans, which implement the
-					AuthenticationService and UserService interfaces, respectively.
-				</para>
-			</section>
-			<section id="view-tapestry-appctx">
-				<title>Obtaining beans in Tapestry pages</title>
-				<para>
-					At this point, the application context is available to a web
-					application by calling Spring's static utility function
-					<literal>WebApplicationContextUtils.getApplicationContext(servletContext)</literal>,
-					where servletContext is the standard <interface>ServletContext</interface>
-					from the J2EE Servlet specification. As such, one simple mechanism for
-					a page to get an instance of the UserService, for example, would be
-					with code such as:
-				</para>
-				<programlisting><![CDATA[WebApplicationContext appContext = WebApplicationContextUtils.getApplicationContext(
-        getRequestCycle().getRequestContext().getServlet().getServletContext());
+			<para>
+	            Inside the Tapestry application, the above bean definitions need to
+	            be <link linkend="webintegration-common">loaded into a Spring container</link>,
+	            and any relevant Tapestry pages need to be supplied (injected) with the
+	            <literal>authenticationService</literal> and
+	            <literal>userService</literal> beans, which implement the
+				<interfacename>AuthenticationService</interfacename> and
+				<interfacename>UserService</interfacename> interfaces, respectively.
+			</para>
+			<para>
+				At this point, the application context is available to a web
+				application by calling Spring's static utility function
+				<literal>WebApplicationContextUtils.getApplicationContext(servletContext)</literal>,
+				where servletContext is the standard <interface>ServletContext</interface>
+				from the J2EE Servlet specification. As such, one simple mechanism for
+				a page to get an instance of the <interfacename>UserService</interfacename>,
+				for example, would be with code such as:
+			</para>
+			<programlisting><![CDATA[WebApplicationContext appContext = WebApplicationContextUtils.getApplicationContext(
+    getRequestCycle().getRequestContext().getServlet().getServletContext());
 UserService userService = (UserService) appContext.getBean("userService");
 ]]><lineannotation>... some code which uses UserService</lineannotation></programlisting>
+			<para>
+				This mechanism does work... having said that, it can be made a
+				lot less verbose by encapsulating most of the functionality in a
+				method in the base class for the page or component.	However, in
+				some respects it goes against the Inversion of Control approach
+				which Spring encourages, which is being used in other layers
+				of this application, in that ideally you would like the page to
+				not have to ask the context for a specific bean by name, and in
+				fact, the page would ideally not know about the context at all.
+			</para>
+			<para>
+				Luckily, there is a mechanism to allow this. We rely upon the
+				fact that Tapestry already has a mechanism to declaratively add
+				properties to a page, and it is in fact the preferred approach to
+				manage all properties on a page in this declarative fashion, so that
+				Tapestry can properly manage their lifecycle as part of the page and
+				component lifecycle.
+			</para>
+			<note>
 				<para>
-					This mechanism does
-					work. It can be made a lot less verbose by encapsulating most of the
-					functionality in a method in the base class for the page or component.
-					However, in some respects it goes against the Inversion of Control
-					approach which Spring encourages, which is being used in other layers
-					of this app, in that ideally you would like the page to not have to
-					ask the context for a specific bean by name, and in fact, the page
-					would ideally not know about the context at all.
+			        This next section is applicable to versions of Tapestry &lt; 4.0.
+			        if you are using Tapestry version 4.0+, please consult the section
+			        entitled <xref linkend="view-tapestry-40-style-di"/>.
 				</para>
-				<para>
-					Luckily, there is a mechanism to allow this. We rely upon the
-					fact that Tapestry already has a mechanism to declaratively add
-					properties to a page, and it is in fact the preferred approach to
-					manage all properties on a page in this declarative fashion, so that
-					Tapestry can properly manage their lifecycle as part of the page and
-					component lifecycle.
-				</para>
-			</section>
-			<section id="view-tapestry-exposeappctx">
-				<title>Exposing the application context to Tapestry</title>
+			</note>
+			<section id="view-tapestry-pre40-style-di">
+				<title>Dependency Injecting Spring Beans into Tapestry pages</title>
 				<para>
 					First we need to make the <interface>ApplicationContext</interface>
 					available to the Tapestry page or Component without having to have the
@@ -793,20 +721,17 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
 				<title>Adding abstract accessors</title>
 				<para>
 					Now in the Java class definition for the page or component
-					itself, all we need to do is add an abstract getter method for the
-					properties we have defined, to access them. When the page or component
-					is actually loaded by Tapestry, it performs runtime code
-					instrumentation on the classfile to add the properties which have been
-					defined, and hook up the abstract getter methods to the newly created
-					fields. For example:
+					itself, all we need to do is add an abstract getter method
+					for the properties we have defined (in order to be able to
+					access said properties).
 				</para>
 				<programlisting><![CDATA[// our UserService implementation; will come from page definition
 public abstract UserService getUserService();
 // our AuthenticationService implementation; will come from page definition
 public abstract AuthenticationService getAuthenticationService();]]></programlisting>
 				<para>
-					For completeness, the entire Java class, for a login page in this
-					example, might look like this:
+					For the sake of completeness, the entire Java class, for a
+					login page in this example, might look like this:
 				</para>
 				<programlisting><![CDATA[package com.whatever.web.xportal.pages;
  
@@ -821,10 +746,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
     /** the key under which the authenticated user object is stored in the visit as */
     public static final String USER_KEY = "user";
    
-    /**
-     * The name of a cookie to store on the user's machine that will identify
-     * them next time they log in.
-     **/
+    /** The name of the cookie that identifies a user **/
     private static final String COOKIE_NAME = Login.class.getName() + ".username";  
     private final static int ONE_WEEK = 7 * 24 * 60 * 60;
  
@@ -853,7 +775,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
  
     /**
      *  Attempts to login. 
-     *
+     * <p>
      *  If the user name is not known, or the password is invalid, then an error
      *  message is displayed.
      **/
@@ -872,7 +794,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
         if (delegate.getHasErrors()) {
             return;
         }
- 
+
         try {
             User user = getAuthenticationService().login(getUsername(), getPassword());
            loginUser(user, cycle);
@@ -894,11 +816,11 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
         String username = user.getUsername();
  
         // Get the visit object; this will likely force the
-        // creation of the visit object and an HttpSession.
+        // creation of the visit object and an HttpSession
         Map visit = (Map) getVisit();
         visit.put(USER_KEY, user);
  
-        // After logging in, go to the MyLibrary page, unless otherwise specified.
+        // After logging in, go to the MyLibrary page, unless otherwise specified
         ICallback callback = getCallback();
  
         if (callback == null) {
@@ -907,10 +829,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
         else {
             callback.performCallback(cycle);
         }
- 
-        // I've found that failing to set a maximum age and a path means that
-        // the browser (IE 5.0 anyway) quietly drops the cookie.
- 
+
         IEngine engine = getEngine();
         Cookie cookie = new Cookie(COOKIE_NAME, username);
         cookie.setPath(engine.getServletPath());
@@ -928,20 +847,90 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
     }
 }]]></programlisting>
 			</section>
-		</section>
-		<section id="view-tapestry-summary">
-			<title>Summary</title>
+			<section id="view-tapestry-40-style-di">
+				<title>Dependency Injecting Spring Beans into Tapestry pages - Tapestry 4.0+ style</title>
+				<para>
+					Effecting the dependency injection of Spring-managed beans into Tapestry
+					pages in Tapestry version 4.0+ is <emphasis>so</emphasis> much simpler.
+					All that is needed is a single
+					<ulink url="http://howardlewisship.com/tapestry-javaforge/tapestry-spring/">add-on library</ulink>,
+					and some (small) amount of (essentially boilerplate) configuration.
+					Simply package and deploy this library with the (any of the) other
+					libraries required by your web application (typially in
+					<literal>WEB-INF/lib</literal>).
+				</para>
+				<para>
+					You will then need to create and expose the Spring container using the
+					<link linkend="webintegration-common">method detailed previously</link>.
+					You can then inject Spring-managed beans into Tapestry very easily; if
+					we are using Java5, consider the <classname>Login</classname> page from above:
+					we simply need to annotate the appropriate getter methods
+					in order to dependency inject the Spring-managed <literal>userService</literal>
+					and <literal>authenticationService</literal> objects (lots of the class
+					definition has been elided for clarity)...
+				</para>
+				<programlisting><![CDATA[package com.whatever.web.xportal.pages;
+
+public abstract class Login extends BasePage implements ErrorProperty, PageRenderListener {
+    
+    @InjectObject("spring:userService")
+    public abstract UserService getUserService();
+    
+    @InjectObject("spring:authenticationService")
+    public abstract AuthenticationService getAuthenticationService();
+
+}]]></programlisting>
 			<para>
-				In this example, we've managed to allow service beans defined in
-				the Spring <interface>ApplicationContext</interface> to be provided to the
-				page in a declarative fashion. The page class does not know where the
-				service implementations are coming from, and in fact it is easy to slip
-				in another implementation, for example, during testing. This inversion
-				of control is one of the prime goals and benefits of the Spring
-				Framework, and we have managed to extend it all the way up the J2EE
-				stack in this Tapestry application.
+				We are almost done... all that remains is the HiveMind configuration that exposes the
+				Spring container stored in the <interfacename>ServletContext</interfacename> as a
+				HiveMind service; to wit...
 			</para>
+			<programlisting><![CDATA[<?xml version="1.0"?>
+<module id="com.javaforge.tapestry.spring" version="0.1.1">
+
+    <service-point id="SpringApplicationInitializer"
+        interface="org.apache.tapestry.services.ApplicationInitializer"
+        visibility="private">
+        <invoke-factory>
+            <construct class="SpringApplicationInitializer">
+                <set-object property="beanFactoryHolder"
+                    value="service:hivemind.lib.DefaultSpringBeanFactoryHolder" />
+            </construct>
+        </invoke-factory>
+    </service-point>
+
+    <!-- Hook the Spring setup into the overall application initialization. -->
+    <contribution
+        configuration-id="tapestry.init.ApplicationInitializers">
+        <command id="spring-context"
+            object="service:SpringApplicationInitializer" />
+    </contribution>
+
+</module>]]></programlisting>
+				<para>
+					If you are using Java5 (and thus have access to annotations), then
+					that really is it.
+				</para>
+				<para>
+		            If you are not using Java5, then one obviously doesn't annotate one's
+		            Tapestry page classes with annotations; instead, one simply uses
+		            good old fashioned XML to declare the dependency injection; to wit,
+		            inside the <literal>.page</literal> or <literal>.jwc</literal> file
+		            for the <classname>Login</classname> page (or component)...
+				</para>
+				<programlisting><![CDATA[<inject property="userService" object="spring:userService"/>
+<inject property="authenticationService" object="spring:authenticationService"/>]]></programlisting>
+			</section>
 		</section>
+		<para>
+			In this example, we've managed to allow service beans defined in
+			a Spring container to be provided to the Tapestry page in a declarative
+			fashion. The page class does not know where the service implementations
+			are coming from, and in fact it is easy to slip in another implementation,
+			for example, during testing. This inversion	of control is one of the
+			prime goals and benefits of the Spring Framework, and we have managed
+			to extend it all the way up the J2EE stack in this Tapestry application.
+		</para>
 	</section>
 	<section id="webwork">
 		<title>WebWork</title>
