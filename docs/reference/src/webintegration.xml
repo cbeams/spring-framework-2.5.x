@@ -3,22 +3,84 @@
 	<title>Integrating with other web frameworks</title>
 	<section id="intro">
 		<title>Introduction</title>
+        <para>
+            This chapter details Spring's integration with third party web frameworks
+            such as <ulink url="http://struts.apache.org/">Struts</ulink>,
+            <ulink url="http://java.sun.com/javaee/javaserverfaces/">JSF</ulink>,
+            <ulink url="http://jakarta.apache.org/tapestry/">Tapestry</ulink>, and
+            <ulink url="http://www.opensymphony.com/webwork/">WebWork</ulink>.
+        </para>
+        <para>
+            One of the core value propositions of the Spring Framework is that of
+            enabling <emphasis>choice</emphasis>. In a general sense, Spring does not
+            force one to use or buy into any particular architecture, technology, or
+            methodology (although it certainly recommends some over others). This freedom
+            to pick and choose the architecture, technology, or methodology that is most
+            relevant to a developer and his or her development team is arguably most evident
+            in the web area, where Spring provides its own web framework
+            (<link linked="mvc">SpringMVC</link>), while at the same time providing integration
+            with a number of popular third party web frameworks. This allows one to continue
+            to leverage any and all of the skills one may have acquired in a
+            particular web framework such as Struts, while at the same time being able to
+            enjoy the benefits afforded by Spring in other areas such as data access,
+            declarative transaction management, and flexible configuration and application
+            assembly.
+        </para>
+        <para>
+            Having dispensed withe the woolly sales patter (c.f. the previous paragraph),
+            the remainder of this chapter will concentrate upon the meaty details of
+            integrating your favourite web framework with Spring. One thing that is often
+            commented upon by developers coming to Java from other languages is the seeming
+            super-abundance of web frameworks available in Java... there are indeed a great
+            number of web frameworks in the Java space; in fact there are far too many to
+            cover with any semblance of detail in a single chapter. This chapter thus picks
+            four of the more popular web frameworks in Java, starting with the Spring
+            configuration that is common to all of the supported web frameworks, and then
+            detailing the specific integration options for each supported web framework.
+        </para>
 		<para>
-			Spring can be easily integrated into any Java-based web framework. All you need to do
-			is to declare the
+			<emphasis>
+				Please note that this chapter does not attempt to explain how to use any
+				of the supported web frameworks. For example, if you want to use Struts for
+				the presentation layer of your web application, the assumption is that you
+				are already familiar with Struts. If you need further details about any of
+				the supported web frameworks themselves, please do consult the section
+				entitled <xref linkend="webintegration-resources" /> at the end of this chapter.
+            </emphasis>
+        </para>
+    </section>
+    <section id="webintegration-common">
+		<title>Common configuration</title>
+        <para>
+            Before diving into the integration specifics of each supported web framework, let
+            us first take a look at the Spring configuration that <emphasis>not</emphasis>
+            specific to any one web framework. (This section is equally applicable to Spring's
+            own web framework, SpringMVC.)
+        </para>
+        <para>
+            One of the concepts (for want of a better word) espoused by (Spring's) lightweight
+            application model is that of a layered architecture. Remember that in a 'classic'
+            layered architecture, the web layer is but one of many layers... it serves as one
+            of the entry points into a server side application, and it delegates to service
+            objects (facades) defined in a service layer to satisfy business specific (and
+            presentation-technology agnostic) use cases. In Spring, these service objects,
+            any other business-specific objects, data access objects, etc. exist in a
+            distinct 'business context', which contains <emphasis>no</emphasis> web or
+            presentation layer objects (presentation objects such as Spring MVC controllers
+            are typically configured in a distinct 'presentation context'). This section
+            details how one configures a Spring container (a
+            <classname>WebApplicationContext</classname>) that contains all of the
+            'business beans' in one's application.
+        </para>
+		<para>
+			Onto specifics... all that one need do is to declare a
 			<ulink url="http://www.springframework.org/docs/api/org/springframework/web/context/ContextLoaderListener.html"><classname>ContextLoaderListener</classname></ulink>
-			in your <literal>web.xml</literal> file and use an <literal>contextConfigLocation</literal>
-			&lt;context-param&gt; to set which context files to load.
+			in the standard J2EE servlet <literal>web.xml</literal> file of one's web application,
+			and add a <literal>contextConfigLocation</literal> &lt;context-param/&gt; section
+			(in the same file) that defines which set of Spring XML cpnfiguration files to load.
 		</para>
 		<para>
-			Find below the &lt;context-param&gt; configuration:
-		</para>
-		<programlisting><![CDATA[<context-param>
-    <param-name>contextConfigLocation</param-name>
-    <param-value>/WEB-INF/applicationContext*.xml</param-value>
-</context-param>]]></programlisting>
-		<para>
-			Find below the &lt;listener&gt; configuration:
+			Find below the &lt;listener/&gt; configuration:
 		</para>
 		<programlisting><![CDATA[<listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
@@ -32,16 +94,26 @@
 			</para>
 		</note>
 		<para>
+			Find below the &lt;context-param/&gt; configuration:
+		</para>
+		<programlisting><![CDATA[<context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>/WEB-INF/applicationContext*.xml</param-value>
+</context-param>]]></programlisting>
+		<para>
 			If you don't specify the <literal>contextConfigLocation</literal> 
 			context parameter, the <classname>ContextLoaderListener</classname> will look 
 			for a file called <literal>/WEB-INF/applicationContext.xml</literal> to load. 
 			Once the context files are loaded, Spring creates a
 			<ulink url="http://www.springframework.org/docs/api/org/springframework/web/context/WebApplicationContext.html"><classname>WebApplicationContext</classname></ulink>
-			object based on the bean definitions and puts it into the <interface>ServletContext</interface>.
+			object based on the bean definitions and stores it in the
+			<interface>ServletContext</interface> of one's web application.
 		</para>
 		<para>
-			All Java web frameworks are built on top of the Servlet API, so you can use the following
-			code to get the <interface>ApplicationContext</interface> that Spring created.
+			All Java web frameworks are built on top of the Servlet API, and so one can
+			use the following code snippet to get access to this 'business context'
+			<interface>ApplicationContext</interface> created by the
+			<classname>ContextLoaderListener</classname>.
 		</para>
 		<programlisting><![CDATA[WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);]]></programlisting>
 		<para>
@@ -60,73 +132,54 @@
 			by name, then cast them to one of their implemented interfaces.
 		</para>
 		<para>
-			Fortunately, most of the frameworks in this section have simpler 
-			ways of looking up beans. Not only do they make it easy to get beans from 
-			a Spring container, but they also allow you to use dependency 
-			injection on their controllers. Each framework section has more detail on 
-			its specific integration strategies.
+			Fortunately, most of the frameworks in this section have simpler ways of looking up
+			beans. Not only do they make it easy to get beans from a Spring container, but they
+			also allow you to use dependency injection on their controllers. Each web framework
+			section has more detail on its specific integration strategies.
 		</para>
 	</section>	
 	<section id="jsf">
 		<title>JavaServer Faces</title>
 		<para>
-			JavaServer Faces (JSF) is a component-based, event-driven web framework. 
-			According to Sun Microsystem's
-			<ulink url="http://java.sun.com/j2ee/javaserverfaces/overview.html">JSF Overview</ulink>,
-			JSF technology includes:
+			JavaServer Faces (JSF) is an increasingly popular component-based, event-driven
+			web framework. The key class in Spring's JSF integration is the
+			<classname>DelegatingVariableResolver</classname> class.
 		</para>
-   		<itemizedlist>
-   			<listitem>
-   				<para>
-   					A set of APIs for representing UI components and managing 
-					their state, handling events and input validation, defining page 
-					navigation, and supporting internationalization and accessibility.
-   				</para>
-   			</listitem>
-   			<listitem>
-   				<para>
-   					A JavaServer Pages (JSP) custom tag library for expressing a 
-					JavaServer Faces interface within a JSP page.
-				</para>
-   			</listitem>
-   		</itemizedlist>
 		<section id="jsf-delegatingvariableresolver">
 			<title>DelegatingVariableResolver</title>
 			<para>
-				The easiest way to integrate your Spring middle-tier with your JSF 
+				The easiest way to integrate one's Spring middle-tier with one's JSF 
 				web layer is to use the 
 				<ulink url="http://www.springframework.org/docs/api/org/springframework/web/jsf/DelegatingVariableResolver.html">
 				<classname>DelegatingVariableResolver</classname></ulink> class. To configure 
-				this variable resolver in your application, you'll need to edit your 
-				<emphasis>faces-context.xml</emphasis>. After the opening <literal>
-				&lt;faces-config&gt;</literal> element, add an <literal>&lt;application&gt;</literal> 
-				element and a <literal>&lt;variable-resolver&gt;</literal> element within it.  
+				this variable resolver in one's application, one will need to edit one's 
+				<emphasis>faces-context.xml</emphasis> file. After the opening
+				<literal>&lt;faces-config/&gt;</literal> element, add an <literal>&lt;application/&gt;</literal> 
+				element and a <literal>&lt;variable-resolver/&gt;</literal> element within it.  
 				The value of the variable resolver should reference Spring's 
-				<classname>DelegatingVariableResolver</classname>:
+				<classname>DelegatingVariableResolver</classname>; to wit...
 			</para>
 			<programlisting><![CDATA[<faces-config>
   <application>
-	  <variable-resolver>org.springframework.web.jsf.DelegatingVariableResolver</variable-resolver>
-	  <locale-config>
-	    <default-locale>en</default-locale>
-	    <supported-locale>en</supported-locale>
-	    <supported-locale>es</supported-locale>
-	  </locale-config>
-	  <message-bundle>messages</message-bundle>
-	</application>
+    <variable-resolver>org.springframework.web.jsf.DelegatingVariableResolver</variable-resolver>
+      <locale-config>
+        <default-locale>en</default-locale>
+        <supported-locale>en</supported-locale>
+        <supported-locale>es</supported-locale>
+      </locale-config>
+      <message-bundle>messages</message-bundle>
+    </application>
 </faces-config>]]></programlisting>
 			<para>
-				By specifying Spring's variable resolver, you can configure Spring 
-				beans as managed properties of your managed beans. The 
-				<classname>DelegatingVariableResolver</classname> will first delegate value
+				The <classname>DelegatingVariableResolver</classname> will first delegate value
 				lookups to the default resolver of the underlying JSF implementation, and
-				then to Spring's root <classname>WebApplicationContext</classname>. This
-				allows you to easily inject dependencies into your JSF-managed beans.
+				then to Spring's 'business context' <classname>WebApplicationContext</classname>.
+				This allows one to easily inject dependencies into one's JSF-managed beans.
 			</para>
 			<para>
-				Managed beans are defined in your <literal>faces-config.xml</literal> 
-				file. Below is an example where #{userManager} is a bean that's retrieved 
-				from Spring's <interface>BeanFactory</interface>.
+				Managed beans are defined in one's <literal>faces-config.xml</literal> 
+				file. Find below an example where <literal>#{userManager}</literal> is a bean
+				that is retrieved from the Spring 'business context'.
 			</para>
 			<programlisting><![CDATA[<managed-bean>
   <managed-bean-name>userList</managed-bean-name>
@@ -137,26 +190,26 @@
     <value>#{userManager}</value>
   </managed-property>
 </managed-bean>]]></programlisting>
-			<para>
-				The <classname>DelegatingVariableResolver</classname> is the recommended 
-				strategy for integrating JSF and Spring. If you're looking for more robust 
-				integration features, you might take a look at the 
-				<ulink url="http://jsf-spring.sourceforge.net/">JSF-Spring</ulink> project.
-			</para>
 		</section>
 		<section id="jsf-facescontextutils">
 			<title>FacesContextUtils</title>
 			<para>
 				A custom <interfacename>VariableResolver</interfacename> works well when mapping
-				your properties to beans in <emphasis>faces-config.xml</emphasis>, but at times
-				you may need to grab a bean explicitly.  The
+				one's properties to beans in <emphasis>faces-config.xml</emphasis>, but at times
+				one may need to grab a bean explicitly.  The
 				<ulink url="http://www.springframework.org/docs/api/org/springframework/web/jsf/FacesContextUtils.html">
-				<classname>FacesContextUtils</classname></ulink> class makes this easy. It's
+				<classname>FacesContextUtils</classname></ulink> class makes this easy. It is
 				similar to <classname>WebApplicationContextUtils</classname>, except that it
 				takes a <classname>FacesContext</classname> parameter rather than a
 				<interface>ServletContext</interface> parameter.
 			</para>
 			<programlisting><![CDATA[ApplicationContext ctx = FacesContextUtils.getWebApplicationContext(FacesContext.getCurrentInstance());]]></programlisting>
+			<para>
+				The <classname>DelegatingVariableResolver</classname> is the recommended 
+				strategy for integrating JSF and Spring. If one is looking for more robust 
+				integration features, one might want take a look at the 
+				<ulink url="http://jsf-spring.sourceforge.net/">JSF-Spring</ulink> project.
+			</para>
 		</section>
 	</section>
 	<section id="struts">
@@ -169,8 +222,8 @@
 			Software Foundation. At the time, it greatly simplified the JSP/Servlet 
 			programming paradigm and won over many developers who were using 
 			proprietary frameworks. It simplified the programming model, it was open 
-			source, and it had a large community, which allowed the project to grow 
-			and become popular among Java web developers.
+			source (and thus free as in beer), and it had a large community, which allowed
+			the project to grow and become popular among Java web developers.
 		</para>
 		<para>
 			To integrate your Struts application with Spring, you have two options:
@@ -280,7 +333,7 @@
 					will work:
 				</para>
 				<programlisting><![CDATA[<action path="/user" type="com.whatever.struts.UserAction"/>		
-	<action path="/user"/>]]></programlisting>
+<action path="/user"/>]]></programlisting>
 				<para>
 					If you're using Struts' <emphasis>modules</emphasis> feature, 
 					your bean names must contain the module prefix. For example, an action 
@@ -950,6 +1003,9 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
         </para>
 		<itemizedlist>
 			<listitem>
+				<para>The <ulink url="http://struts.apache.org/">Struts</ulink> homepage</para>
+			</listitem>
+			<listitem>
 				<para>The <ulink url="http://java.sun.com/javaee/javaserverfaces/">JSF</ulink> homepage</para>
 			</listitem>
 			<listitem>
@@ -957,6 +1013,14 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
 			</listitem>
 			<listitem>
 				<para>The <ulink url="http://www.opensymphony.com/webwork/">WebWork</ulink> homepage</para>
+			</listitem>
+		</itemizedlist>
+        <para>
+            Find below some further web framework-related resources that you may find personally enriching.
+        </para>
+		<itemizedlist>
+			<listitem>
+				<para>The <ulink url="http://wiki.apache.org/struts/StrutsTi">StrutsTI</ulink> project wiki</para>
 			</listitem>
 		</itemizedlist>
 	</section>
