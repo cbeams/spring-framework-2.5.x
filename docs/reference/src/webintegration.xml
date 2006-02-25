@@ -946,54 +946,54 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
 	<section id="webwork">
 		<title>WebWork</title>
 		<para>
-			<ulink url="http://www.opensymphony.com/webwork">WebWork</ulink>
-			is a web framework designed with simplicity in mind. It's built on top of 
-			<ulink url="http://www.opensymphony.com/xwork">XWork</ulink>, which is a 
-			generic command framework. XWork also has an IoC container, but it isn't 
-			as full-featured as Spring and won't be covered in this section. WebWork 
-			controllers are called Actions, mainly because they must implement the 
-			<ulink url="http://www.opensymphony.com/xwork/api/com/opensymphony/xwork/Action.html">
-			<literal>Action</literal></ulink> interface. The 
-			<ulink url="http://www.opensymphony.com/xwork/api/com/opensymphony/xwork/ActionSupport.html">
-			<classname>ActionSupport</classname></ulink> class implements this interface, 
-			and it is most common parent class for WebWork actions.
+			From the <ulink url="http://www.opensymphony.com/webwork/">WebWork homepage</ulink>...
 		</para>
-		<para>
-			WebWork maintains its own Spring integration project, located on 
-			java.net in the <ulink url="https://xwork-optional.dev.java.net/">
-			xwork-optional</ulink> project. Currently, three options are available for 
-			integrating WebWork with Spring:
-		</para>
-		<itemizedlist>
-			<listitem>
-				<para>
-					<classname>SpringObjectFactory</classname>: 
-					override XWork's default 
-					<ulink url="http://www.opensymphony.com/xwork/api/com/opensymphony/xwork/ObjectFactory.html">
-					<classname>ObjectFactory</classname></ulink> so XWork will look for 
-					Spring beans in the root <classname>WebApplicationContext</classname>.
-				</para>
-			</listitem>
-			<listitem>
-				<para>
-					<classname>ActionAutowiringInterceptor:</classname> 
-					use an interceptor to  automatically wire an Action's dependencies 
-					as they're created.
-				</para>
-			</listitem>
-			<listitem>
-				<para>
-					<classname>SpringExternalReferenceResolver:</classname> 
-					look up Spring beans based on the name defined in an &lt;external-ref&gt; 
-					element of an &lt;action&gt; element.
-				</para>
-			</listitem>
-		</itemizedlist>
-		<para>
-			All of these strategies are explained in further detail in
-			<ulink url="http://wiki.opensymphony.com/display/WW/Other+Spring+Integration">
-			WebWork's reference documentation</ulink>.
-		</para>
+		<quote>
+			<emphasis>
+				WebWork is a Java web-application development framework. It is built
+				specifically with developer productivity and code simplicity in mind,
+				providing robust support for building reusable UI templates, such as form
+				controls, UI themes, internationalization, dynamic form parameter mapping
+				to JavaBeans, robust client and server side validation, and much more.
+			</emphasis>
+		</quote>
+        <para>
+            WebWork is (in the opinion of this author) a very clean, elegant web framework.
+            Its architecture and key concepts are not only very easy to understand, it has
+            a rich tag library, nicely decoupled validation, and it is (again, in the opinion
+            of this author) quite easy to be productive in next to no time at all (the
+            documentation and tutorials are pretty good too).
+        </para>
+        <para>
+            One of the key enablers in WebWork's technology stack is
+            <ulink url="http://www.opensymphony.com/webwork/wikidocs/IoC%20Overview.html">an IoC container</ulink>
+            to manage Webwork Actions, handle the "wiring" of business objects, etc.
+            Previous to WebWork version 2.2, WebWork used it's own proprietary IoC container
+            (and provided integration points so that one could integrate an IoC container
+            such as Springs into the mix). However, as of WebWork version 2.2, the default
+            IoC container that is used within WebWork <emphasis>is</emphasis> Spring. This
+            is obviously great news if one is a Spring developer, because it means that one
+            is immediately familiar with the basics of IoC configuration, idioms and suchlike
+            within WebWork.
+        </para>
+        <para>
+            Now in the interests of adhering to the DRY (Dont Repeat Yourself) principle, it
+            would be foolish to writeup the Spring-WebWork integration in light of the fact that
+            the WebWork team have already written such a writeup. Please do consult the
+            <ulink url="http://www.opensymphony.com/webwork/wikidocs/Spring.html">Spring-WebWork integration page</ulink>
+             on the
+            <ulink url="http://wiki.opensymphony.com/display/WW/WebWork">WebWork wiki</ulink>
+             for the full lowdown.
+        </para>
+        <para>
+            Note that the Spring-WebWork integration code was developed (and continues
+            to be maintained and improved) by the WebWork developers themselves, so in the
+            first instance please do refer to the WebWork site and forums if you are having
+            issues with said integration. Having said that, do feel free to post comments and
+            queries regarding the Spring-WebWork integration on the
+            <ulink url="http://forum.springframework.org/forumdisplay.php?f=25">Spring support forums</ulink>
+            too.
+        </para>
 	</section>
 	<section id="webintegration-resources">
 		<title>Further Resources</title>
