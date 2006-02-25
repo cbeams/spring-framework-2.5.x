@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.7 (26.2.2006)
+Changes in version 1.2.7 (27.2.2006)
 ------------------------------------
 
 Package org.springframework.aop
@@ -103,6 +103,7 @@ Package org.springframework.test
 Package org.springframework.transaction
 * fixed AbstractPlatformTransactionManager to serialize all relevant state
 * refined AbstractPlatformTransactionManager to suspend synchronizations before the actual transaction (not after)
+* JtaTransactionManager autodetects JNDI location "java:pm/TransactionManager" on Borland and Sun application servers
 * JtaTransactionManager only invokes rollback if transaction is still active (some JTA providers eagerly terminate)
 * marked AnnotationTransactionAttributeSource as Serializable
 
