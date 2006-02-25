@@ -197,6 +197,20 @@
     which inherits all the beans already defined in in the Root WebApplicationContext.
 		These inherited beans defined can be overridden in the servlet-specific scope,
     and new scope-specific beans can be defined local to a given servlet instance.</para>
+		<para>
+			<mediaobject>
+				<imageobject role="fo">
+					<!-- TODO: replace with SVG version -->
+					<imagedata fileref="images/mvc-contexts.gif" format="GIF" align="center" />
+				</imageobject>
+				<imageobject role="html">
+					<imagedata fileref="images/mvc-contexts.gif" format="GIF" align="center" />
+				</imageobject>
+				<caption>
+					<para>Context hierarchy in Spring MVC</para>
+				</caption>
+			</mediaobject>
+		</para>
 
     <para>The framework will, on initialization of a DispatcherServlet,
     <emphasis>look for a file named <literal>[servlet-name]-servlet.xml</literal></emphasis>
