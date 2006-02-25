@@ -11,7 +11,7 @@
 
 &lt;!--
 	Spring XML Beans DTD
-	Authors: Rod Johnson, Juergen Hoeller, Alef Arendsen, Colin Sampaleanu
+	Authors: Rod Johnson, Juergen Hoeller, Alef Arendsen, Colin Sampaleanu, Rob Harrop
 
 	This defines a simple and consistent way of creating a namespace
 	of JavaBeans objects, managed by a Spring BeanFactory, read by
@@ -63,8 +63,11 @@
 	the "bean" level. See those attribute definitions for details.
 -->
 &lt;!ATTLIST beans default-lazy-init (true | false) "false">
-&lt;!ATTLIST beans default-dependency-check (none | objects | simple | all) "none">
 &lt;!ATTLIST beans default-autowire (no | byName | byType | constructor | autodetect) "no">
+&lt;!ATTLIST beans default-dependency-check (none | objects | simple | all) "none">
+&lt;!ATTLIST beans default-init-method CDATA #IMPLIED>
+&lt;!ATTLIST beans default-destroy-method CDATA #IMPLIED>
+&lt;!ATTLIST beans default-merge (true | false) "false">
 
 &lt;!--
 	Element containing informative text describing the purpose of the enclosing
@@ -126,7 +129,8 @@
 
 &lt;!--
 	Optional. Can be used to create one or more aliases illegal in an id.
-	Multiple aliases can be separated by any number of spaces or commas.
+	Multiple aliases can be separated by any number of spaces, commas, or
+	semi-colons (or indeed any mixture of the three).
 -->
 &lt;!ATTLIST bean name CDATA #IMPLIED>
 
@@ -157,8 +161,11 @@
 &lt;!--
 	Is this bean "abstract", i.e. not meant to be instantiated itself but
 	rather just serving as parent for concrete child bean definitions.
-	Default is false. Specify true to tell the bean factory to not try to
+	Default is "false". Specify "true" to tell the bean factory to not try to
 	instantiate that particular bean in any case.
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 &lt;!ATTLIST bean abstract (true | false) "false">
 
@@ -170,6 +177,9 @@
 
 	Singletons are most commonly used, and are ideal for multi-threaded
 	service objects.
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 &lt;!ATTLIST bean singleton (true | false) "true">
 
@@ -177,6 +187,10 @@
 	If this bean should be lazily initialized.
 	If false, it will get instantiated on startup by bean factories
 	that perform eager initialization of singletons.
+
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 &lt;!ATTLIST bean lazy-init (true | false | default) "default">
 
@@ -217,8 +231,11 @@
 	behaviour for bigger applications.
 
 	Note that explicit dependencies, i.e. "property" and "constructor-arg" elements,
-	always override autowiring. Autowire behaviour can be combined with dependency
+	always override autowiring. Autowire behavior can be combined with dependency
 	checking, which will be performed after all autowiring has been completed.
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 &lt;!ATTLIST bean autowire (no | byName | byType | constructor | autodetect | default) "default">
 
@@ -230,6 +247,9 @@
 	"simple" type dependency checking includes primitives and String
 	"object" includes collaborators (other beans in the factory)
 	"all" includes both types of dependency checking
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 &lt;!ATTLIST bean dependency-check (none | objects | simple | all | default) "default">
 
@@ -240,6 +260,9 @@
 	Note that dependencies are normally expressed through bean properties or
 	constructor arguments. This property should just be necessary for other kinds
 	of dependencies like statics (*ugh*) or database preparation on startup.
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 &lt;!ATTLIST bean depends-on CDATA #IMPLIED>
 
@@ -518,6 +541,9 @@
 	(bean | ref | idref | value | null | list | set | map | props)*
 )>
 
+&lt;!-- Enable/disable merging for collections when using parent/child beans -->
+&lt;!ATTLIST list merge (true | false | default) "default">
+
 &lt;!--
 	A set can contain multiple inner bean, ref, collection, or value elements.
 	Java sets are untyped, pending generics support in Java 1.5,
@@ -527,6 +553,9 @@
 	(bean | ref | idref | value | null | list | set | map | props)*
 )>
 
+&lt;!-- Enable/disable merging for collections when using parent/child beans -->
+&lt;!ATTLIST set merge (true | false | default) "default">
+
 
 &lt;!--
 	A Spring map is a mapping from a string key to object.
@@ -535,6 +564,9 @@
 &lt;!ELEMENT map (
 	(entry)*
 )>
+
+&lt;!-- Enable/disable merging for collections when using parent/child beans -->
+&lt;!ATTLIST map merge (true | false | default) "default">
 
 &lt;!--
 	A map entry can be an inner bean, ref, value, or collection.
@@ -582,6 +614,9 @@
 	(prop)*
 )>
 
+&lt;!-- Enable/disable merging for collections when using parent/child beans -->
+&lt;!ATTLIST props merge (true | false | default) "default">
+
 &lt;!--
 	Element content is the string value of the property.
 	Note that whitespace is trimmed off to avoid unwanted whitespace
@@ -592,6 +627,5 @@
 &lt;!--
 	Each property element must specify its key.
 -->
-&lt;!ATTLIST prop key CDATA #REQUIRED>
-</programlisting></para>
+&lt;!ATTLIST prop key CDATA #REQUIRED></programlisting></para>
 </appendix>
