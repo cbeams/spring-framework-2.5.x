@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,7 +199,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #setAutodetectTransactionManager
 	 */
 	public static final String[] FALLBACK_TRANSACTION_MANAGER_NAMES =
-			new String[] {"java:comp/TransactionManager", "java:/TransactionManager"};
+			new String[] {"java:comp/TransactionManager", "java:pm/TransactionManager", "java:/TransactionManager"};
 
 
 	private transient JndiTemplate jndiTemplate = new JndiTemplate();
@@ -553,11 +553,15 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			String jndiName = FALLBACK_TRANSACTION_MANAGER_NAMES[i];
 			try {
 				TransactionManager tm = lookupTransactionManager(jndiName);
-				logger.debug("JTA TransactionManager found at fallback JNDI location [" + jndiName + "]");
+				if (logger.isDebugEnabled()) {
+					logger.debug("JTA TransactionManager found at fallback JNDI location [" + jndiName + "]");
+				}
 				return tm;
 			}
 			catch (TransactionSystemException ex) {
-				logger.debug("No JTA TransactionManager found at fallback JNDI location [" + jndiName + "]", ex);
+				if (logger.isDebugEnabled()) {
+					logger.debug("No JTA TransactionManager found at fallback JNDI location [" + jndiName + "]", ex);
+				}
 			}
 		}
 
