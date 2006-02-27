@@ -50,7 +50,7 @@ Package org.springframework.context
 * AbstractApplicationContext discovers its context MessageSource as "messageSource" bean even through an alias
 
 Package org.springframework.jdbc
-* refined default SQL error codes for MS SQL, MySQL, and Oracle
+* added further default SQL error codes for MS SQL, MySQL, and Oracle
 * OracleLobHandler lazily initializes Oracle driver classes, always loading via the actual Connection's class loader
 * fixed DataSourceUtils to correctly re-suspend a Connection even if the Connection hasn't been used since resume
 * refined DataSourceUtils to expect an "afterCompletion" callback from a different thread (in case of JTA transaction)
@@ -122,7 +122,7 @@ Package org.springframework.util
 * fixed ResponseTimeMonitorImpl to properly synchronize access to its instance variables in a multithreading environment
 
 Package org.springframework.web
-* use NestedServletException wherever a root cause gets wrapped by a ServletException (for nicer root cause handling)
+* used NestedServletException wherever a root cause gets wrapped by a ServletException (for nicer root cause handling)
 * "contextConfigLocation" params in "web.xml" support "${...}" style placeholders for system properties
 * deprecated BindUtils and BindInitializer in package "web.bind" in favor of direct ServletRequestDataBinder usage
 * fixed DispatcherServlet to keep and restore previous thread-bound LocaleContext
