@@ -338,15 +338,14 @@ public class VelocityViewTests extends TestCase {
 	}
 
 	public void testVelocityViewResolver() throws Exception {
-		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
 			public VelocityEngine getVelocityEngine() {
-				return new TestVelocityEngine("prefix_test_suffix", expectedTemplate);
+				return new TestVelocityEngine("prefix_test_suffix", new Template());
 			}
 		};
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.getBeanFactory().registerSingleton("configurer",vc);
+		wac.getBeanFactory().registerSingleton("configurer", vc);
 
 		VelocityViewResolver vr = new VelocityViewResolver();
 		vr.setPrefix("prefix_");
@@ -367,15 +366,14 @@ public class VelocityViewTests extends TestCase {
 	}
 
 	public void testVelocityViewResolverWithToolbox() throws Exception {
-		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
 			public VelocityEngine getVelocityEngine() {
-				return new TestVelocityEngine("prefix_test_suffix", expectedTemplate);
+				return new TestVelocityEngine("prefix_test_suffix", new Template());
 			}
 		};
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.getBeanFactory().registerSingleton("configurer",vc);
+		wac.getBeanFactory().registerSingleton("configurer", vc);
 
 		String toolbox = "org/springframework/web/servlet/view/velocity/toolbox.xml";
 
@@ -392,15 +390,17 @@ public class VelocityViewTests extends TestCase {
 	}
 
 	public void testVelocityViewResolverWithToolboxSubclass() throws Exception {
-		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
 			public VelocityEngine getVelocityEngine() {
-				return new TestVelocityEngine("prefix_test_suffix", expectedTemplate);
+				TestVelocityEngine ve = new TestVelocityEngine();
+				ve.addTemplate("prefix_test_suffix", new Template());
+				ve.addTemplate(VelocityLayoutView.DEFAULT_LAYOUT_URL, new Template());
+				return ve;
 			}
 		};
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.getBeanFactory().registerSingleton("configurer",vc);
+		wac.getBeanFactory().registerSingleton("configurer", vc);
 
 		String toolbox = "org/springframework/web/servlet/view/velocity/toolbox.xml";
 
@@ -418,15 +418,17 @@ public class VelocityViewTests extends TestCase {
 	}
 
 	public void testVelocityLayoutViewResolver() throws Exception {
-		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
 			public VelocityEngine getVelocityEngine() {
-				return new TestVelocityEngine("prefix_test_suffix", expectedTemplate);
+				TestVelocityEngine ve = new TestVelocityEngine();
+				ve.addTemplate("prefix_test_suffix", new Template());
+				ve.addTemplate("myLayoutUrl", new Template());
+				return ve;
 			}
 		};
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.getBeanFactory().registerSingleton("configurer",vc);
+		wac.getBeanFactory().registerSingleton("configurer", vc);
 
 		VelocityLayoutViewResolver vr = new VelocityLayoutViewResolver();
 		vr.setPrefix("prefix_");
