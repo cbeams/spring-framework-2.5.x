@@ -16,7 +16,6 @@
 
 package org.springframework.aop;
 
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 /**
