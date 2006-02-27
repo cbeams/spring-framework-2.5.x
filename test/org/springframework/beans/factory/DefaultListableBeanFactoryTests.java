@@ -54,7 +54,7 @@ import org.springframework.beans.propertyeditors.CustomNumberEditor;
  * @author Juergen Hoeller
  */
 public class DefaultListableBeanFactoryTests extends TestCase {
-    
+
 	public void testUnreferencedSingletonWasInstantiated() {
 		KnowsIfInstantiated.clearInstantiationRecord();
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
@@ -294,29 +294,29 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 	}
 
 	public void testCanReferenceParentBeanFromChildViaAlias() {
-	 final String PARENTS_ALIAS = "alias";
-	 final String EXPECTED_NAME = "Juergen";
-	 final int EXPECTED_AGE = 41;
+		final String PARENTS_ALIAS = "alias";
+		final String EXPECTED_NAME = "Juergen";
+		final int EXPECTED_AGE = 41;
 
-	 RootBeanDefinition parentDefinition = new RootBeanDefinition(TestBean.class);
-	 parentDefinition.setAbstract(true);
-	 parentDefinition.getPropertyValues().addPropertyValue("name", EXPECTED_NAME);
-	 parentDefinition.getPropertyValues().addPropertyValue("age", new Integer(EXPECTED_AGE));
+		RootBeanDefinition parentDefinition = new RootBeanDefinition(TestBean.class);
+		parentDefinition.setAbstract(true);
+		parentDefinition.getPropertyValues().addPropertyValue("name", EXPECTED_NAME);
+		parentDefinition.getPropertyValues().addPropertyValue("age", new Integer(EXPECTED_AGE));
 
-	 ChildBeanDefinition childDefinition = new ChildBeanDefinition(PARENTS_ALIAS);
+		ChildBeanDefinition childDefinition = new ChildBeanDefinition(PARENTS_ALIAS);
 
-	 DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-	 factory.registerBeanDefinition("parent", parentDefinition);
-	 factory.registerBeanDefinition("child", childDefinition);
-	 factory.registerAlias("parent", PARENTS_ALIAS);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition("parent", parentDefinition);
+		factory.registerBeanDefinition("child", childDefinition);
+		factory.registerAlias("parent", PARENTS_ALIAS);
 
-	 TestBean child = (TestBean) factory.getBean("child");
-	 assertEquals(EXPECTED_NAME, child.getName());
-	 assertEquals(EXPECTED_AGE, child.getAge());
+		TestBean child = (TestBean) factory.getBean("child");
+		assertEquals(EXPECTED_NAME, child.getName());
+		assertEquals(EXPECTED_AGE, child.getAge());
 
-	 assertEquals("Use cached merged bean definition",
+		assertEquals("Use cached merged bean definition",
 			 factory.getMergedBeanDefinition("child"), factory.getMergedBeanDefinition("child"));
- }
+	}
 
 	public void testNameAlreadyBound() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
