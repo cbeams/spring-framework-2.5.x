@@ -17,16 +17,17 @@
 package org.springframework.beans.factory.xml;
 
 import org.springframework.beans.factory.support.ReaderContext;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 
 /**
  * @author Rob Harrop
  * @since 2.0
  */
-public class ParserContext {
+public final class ParserContext {
 
-	private ReaderContext readerContext;
+	private final ReaderContext readerContext;
 
-	private XmlBeanDefinitionParserHelper helper;
+	private final XmlBeanDefinitionParserHelper helper;
 
 	public ParserContext(ReaderContext readerContext, XmlBeanDefinitionParserHelper helper) {
 		this.readerContext = readerContext;
@@ -39,5 +40,9 @@ public class ParserContext {
 
 	public XmlBeanDefinitionParserHelper getHelper() {
 		return helper;
+	}
+
+	public BeanDefinitionRegistry getRegistry() {
+		return getReaderContext().getReader().getBeanFactory();
 	}
 }

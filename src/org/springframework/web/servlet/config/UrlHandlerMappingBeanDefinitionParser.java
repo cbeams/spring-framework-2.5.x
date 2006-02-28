@@ -24,6 +24,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -72,11 +73,13 @@ public class UrlHandlerMappingBeanDefinitionParser extends MvcBeanDefinitionPars
 	 * bean definition. Except for all the normal behavior, adds behavior
 	 * for HandlerInterceptors matched on a specific path.
 	 */
-	public void parse(Element element, BeanDefinitionRegistry registry) {
+	public void parse(Element element, ParserContext parserContext) {
+
 		Assert.notNull(element);
-		Assert.notNull(registry);
-		
-		NodeList handlerMappingChildren = element.getChildNodes();		
+		Assert.notNull(parserContext);
+
+		BeanDefinitionRegistry registry = parserContext.getRegistry();
+		NodeList handlerMappingChildren = element.getChildNodes();
 		
 		int handlerCount = 0;
 		for (int i = 0; i < handlerMappingChildren.getLength(); i++) {

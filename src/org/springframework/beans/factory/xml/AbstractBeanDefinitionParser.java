@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryBuilder;
 import org.w3c.dom.Element;
 
@@ -26,8 +25,8 @@ import org.w3c.dom.Element;
  */
 public abstract class AbstractBeanDefinitionParser implements BeanDefinitionParser {
 
-	public final void parse(Element element, BeanDefinitionRegistry registry) {
-		doParse(element, new BeanDefinitionRegistryBuilder(registry));
+	public final void parse(Element element, ParserContext parserContext) {
+		doParse(element, new BeanDefinitionRegistryBuilder(parserContext.getRegistry()));
 	}
 
 	protected abstract void doParse(Element element, BeanDefinitionRegistryBuilder registryBuilder);

@@ -38,65 +38,63 @@ import org.springframework.beans.factory.xml.NamespaceHandler;
  */
 public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 
-    /**
-     * Stores the {@link BeanDefinitionParser} implementations keyed by the
-     * local name of the {@link Element Elements} they handle.
-     */
-    private final Map parsers = new HashMap();
+	/**
+	 * Stores the {@link BeanDefinitionParser} implementations keyed by the
+	 * local name of the {@link Element Elements} they handle.
+	 */
+	private final Map parsers = new HashMap();
 
-    /**
-     * Stores the {@link BeanDefinitionDecorator} implementations keyed by the
-     * local name of the {@link Element Elements} they handle.
-     */
-    private final Map decorators = new HashMap();
+	/**
+	 * Stores the {@link BeanDefinitionDecorator} implementations keyed by the
+	 * local name of the {@link Element Elements} they handle.
+	 */
+	private final Map decorators = new HashMap();
 
-    // TODO: polish error handling
+	/**
+	 * Locates the {@link BeanDefinitionParser} from the register implementations using
+	 * the local name of the supplied {@link Element}.
+	 */
+	public final BeanDefinitionParser findParserForElement(Element element) {
+		BeanDefinitionParser parser = (BeanDefinitionParser) this.parsers.get(element.getLocalName());
 
-    /**
-     * Locates the {@link BeanDefinitionParser} from the register implementations using
-     * the local name of the supplied {@link Element}.
-     */
-    public final BeanDefinitionParser findParserForElement(Element element) {
-        BeanDefinitionParser parser = (BeanDefinitionParser) this.parsers.get(element.getLocalName());
+		if (parser == null) {
+			throw new IllegalArgumentException("Cannot locate BeanDefinitionParser for element [" +
+							element.getLocalName() + "].");
+		}
 
-        if(parser == null) {
-            throw new IllegalArgumentException("Cannot locate BeanDefinitionParser for element [" +
-                    element.getLocalName() + "].");
-        }
+		return parser;
+	}
 
-        return parser;
-    }
+	/**
+	 * Locates the {@link BeanDefinitionParser} from the register implementations using
+	 * the local name of the supplied {@link Element}.
+	 */
+	public final BeanDefinitionDecorator findDecoratorForElement(Element element) {
+		BeanDefinitionDecorator decorator = (BeanDefinitionDecorator) this.decorators.get(element.getLocalName());
 
-    /**
-     * Locates the {@link BeanDefinitionParser} from the register implementations using
-     * the local name of the supplied {@link Element}.
-     */
-    public final BeanDefinitionDecorator findDecoratorForElement(Element element) {
-        BeanDefinitionDecorator decorator = (BeanDefinitionDecorator) this.decorators.get(element.getLocalName());
+		if (decorator == null) {
+			throw new IllegalArgumentException("Cannot locate BeanDefinitionDecorator for element [" +
+							element.getLocalName() + "].");
+		}
 
-        if(decorator == null) {
-            throw new IllegalArgumentException("Cannot locate BeanDefinitionDecorator for element [" +
-                    element.getLocalName() + "].");
-        }
+		return decorator;
+	}
 
-        return decorator;
-    }
+	/**
+	 * Subclasses can call this to register the supplied {@link BeanDefinitionParser} to
+	 * handle the specified element. The element name is the local (non-namespace qualified)
+	 * name.
+	 */
+	protected void registerBeanDefinitionParser(String elementName, BeanDefinitionParser parser) {
+		this.parsers.put(elementName, parser);
+	}
 
-    /**
-     * Subclasses can call this to register the supplied {@link BeanDefinitionParser} to
-     * handle the specified element. The element name is the local (non-namespace qualified)
-     * name.
-     */
-    protected void registerBeanDefinitionParser(String elementName, BeanDefinitionParser parser) {
-        this.parsers.put(elementName, parser);
-    }
-
-    /**
-     * Subclasses can call this to register the supplied {@link BeanDefinitionDecorator} to
-     * handle the specified element. The element name is the local (non-namespace qualified)
-     * name.
-     */
-    protected void registerBeanDefinitionDecorator(String elementName, BeanDefinitionDecorator decorator) {
-        this.decorators.put(elementName, decorator);
-    }
+	/**
+	 * Subclasses can call this to register the supplied {@link BeanDefinitionDecorator} to
+	 * handle the specified element. The element name is the local (non-namespace qualified)
+	 * name.
+	 */
+	protected void registerBeanDefinitionDecorator(String elementName, BeanDefinitionDecorator decorator) {
+		this.decorators.put(elementName, decorator);
+	}
 }

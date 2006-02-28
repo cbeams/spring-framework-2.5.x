@@ -22,6 +22,7 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.springframework.beans.factory.xml.ParserContext;
 
 /**
  * <code>NamespaceHandler</code> for the <code>aop</code> namespace.
@@ -74,8 +75,8 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 
-		public void parse(Element element, BeanDefinitionRegistry registry) {
-			NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(registry);
+		public void parse(Element element, ParserContext parserContext) {
+			NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(parserContext.getRegistry());
 		}
 	}
 

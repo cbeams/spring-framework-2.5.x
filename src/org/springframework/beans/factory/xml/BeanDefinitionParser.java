@@ -35,7 +35,7 @@ public interface BeanDefinitionParser {
 
     /**
      * Parse the specified {@link Element} and register resulting <code>BeanDefinitions</code>
-     * with the supplied {@link BeanDefinitionRegistry}.
+     * with{@link BeanDefinitionRegistry} embedded in the supplied {@link ParserContext}.
      */
-    void parse(Element element, BeanDefinitionRegistry registry);
+    void parse(Element element, ParserContext parserContext);
 }

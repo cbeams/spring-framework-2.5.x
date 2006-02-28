@@ -16,17 +16,8 @@
 
 package org.springframework.transaction.config;
 
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-import org.springframework.transaction.interceptor.TransactionInterceptor;
-import org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor;
 import org.springframework.util.ClassUtils;
-import org.springframework.aop.config.NamespaceHandlerUtils;
-import org.w3c.dom.Element;
 
 /**
  * @author Rob Harrop
@@ -51,33 +42,6 @@ public class TxNamespaceHandler extends NamespaceHandlerSupport {
 		}
 		catch (ClassNotFoundException e) {
 			throw new IllegalStateException("Unable to locate AnnotationTransactionAttributeSource. Are you running on Java 1.5?");
-		}
-	}
-
-	private static class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
-
-		private static final String TRANSACTION_ATTRIBUTE_SOURCE_ADVISOR_NAME = ".transactionAttributeSourceAdvisor";
-
-		public static final String TRANSACTION_INTERCEPTOR = "transactionInterceptor";
-
-		public void parse(Element element, BeanDefinitionRegistry registry) {
-			// register the APC if needed
-			NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
-
-			String transactionManagerName = element.getAttribute(TRANSACTION_MANAGER);
-
-			// create the TransactionInterceptor definition
-			RootBeanDefinition interceptorDefinition = new RootBeanDefinition(TransactionInterceptor.class);
-			interceptorDefinition.setPropertyValues(new MutablePropertyValues());
-			interceptorDefinition.getPropertyValues().addPropertyValue(TRANSACTION_MANAGER, new RuntimeBeanReference(transactionManagerName));
-			interceptorDefinition.getPropertyValues().addPropertyValue(TRANSACTION_ATTRIBUTE_SOURCE, new RootBeanDefinition(getAnnotationSourceClass()));
-
-			// create the TransactionAttributeSourceAdvisor definition
-			RootBeanDefinition advisorDefinition = new RootBeanDefinition(TransactionAttributeSourceAdvisor.class);
-			advisorDefinition.setPropertyValues(new MutablePropertyValues());
-			advisorDefinition.getPropertyValues().addPropertyValue(TRANSACTION_INTERCEPTOR, interceptorDefinition);
-
-			registry.registerBeanDefinition(TRANSACTION_ATTRIBUTE_SOURCE_ADVISOR_NAME, advisorDefinition);
 		}
 	}
 

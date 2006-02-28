@@ -169,7 +169,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 					beanDefinitionCount += parseDefaultElement(ele, helper);
 				}
 				else {
-					beanDefinitionCount += parseCustomElement(ele);
+					beanDefinitionCount += parseCustomElement(ele, helper);
 				}
 			}
 		}
@@ -211,7 +211,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		return this.namespaceHandlerResolver;
 	}
 
-	protected int parseCustomElement(Element ele) {
+	protected int parseCustomElement(Element ele, XmlBeanDefinitionParserHelper helper) {
 		String namespaceUri = ele.getNamespaceURI();
 		NamespaceHandler handler = getNamespaceHandlerResolver().resolve(namespaceUri);
 
@@ -222,7 +222,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 		int countBefore = getBeanDefinitionCount();
 		BeanDefinitionParser parser = handler.findParserForElement(ele);
-		parser.parse(ele, getReaderContext().getReader().getBeanFactory());
+		ParserContext parserContext = new ParserContext(getReaderContext(), helper);
+		parser.parse(ele, parserContext);
 		return (getBeanDefinitionCount() - countBefore);
 	}
 

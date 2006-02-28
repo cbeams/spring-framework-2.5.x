@@ -45,6 +45,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
@@ -110,8 +111,9 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private final Log logger = LogFactory.getLog(getClass());
 
 
-	public void parse(Element element, BeanDefinitionRegistry registry) {
-		
+	public void parse(Element element, ParserContext parserContext) {
+
+		BeanDefinitionRegistry registry = parserContext.getRegistry();
 		ParseContext parseContext = new ParseContext();
 		
 		NodeList childNodes = element.getChildNodes();

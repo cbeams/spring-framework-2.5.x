@@ -16,12 +16,10 @@
 
 package org.springframework.aop.config;
 
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.ClassUtils;
 import org.w3c.dom.Element;
 
@@ -40,12 +38,12 @@ class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 
 	private boolean registered;
 
-	public void parse(Element element, BeanDefinitionRegistry registry) {
+	public void parse(Element element, ParserContext parserContext) {
 		if (this.registered) {
 			return;
 		}
 
-		BeanDefinitionRegistryBuilder registryBuilder = new BeanDefinitionRegistryBuilder(registry);
+		BeanDefinitionRegistryBuilder registryBuilder = new BeanDefinitionRegistryBuilder(parserContext.getRegistry());
 		registryBuilder.register(BeanDefinitionBuilder.rootBeanDefinition(getBeanConfigurerClass(), ASPECT_OF));
 		this.registered = true;
 	}

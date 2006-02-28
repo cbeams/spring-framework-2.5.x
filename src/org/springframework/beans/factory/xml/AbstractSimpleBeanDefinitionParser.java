@@ -30,21 +30,25 @@ import org.w3c.dom.Attr;
  */
 public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-    protected final void doParse(Element element, BeanDefinitionBuilder builder) {
+	protected final void doParse(Element element, BeanDefinitionBuilder builder) {
 
-        NamedNodeMap attributes = element.getAttributes();
-        for(int x = 0; x < attributes.getLength(); x++) {
-            Attr attribute = (Attr) attributes.item(x);
-            String name = attribute.getLocalName();
+		NamedNodeMap attributes = element.getAttributes();
+		for (int x = 0; x < attributes.getLength(); x++) {
+			Attr attribute = (Attr) attributes.item(x);
+			String name = attribute.getLocalName();
 
-            if(ID_ATTRIBUTE.equals(name)) {
-                continue;
-            }
+			if (ID_ATTRIBUTE.equals(name)) {
+				continue;
+			}
 
-            builder.addPropertyValue(attribute.getLocalName(), attribute.getValue());
-        }
+			builder.addPropertyValue(extractPropertyName(name), attribute.getValue());
+		}
 		postProcess(builder, element);
-    }
+	}
+
+	protected String extractPropertyName(String attributeName) {
+		return attributeName;
+	}
 
 
 	protected void postProcess(BeanDefinitionBuilder beanDefinition, Element element) {
