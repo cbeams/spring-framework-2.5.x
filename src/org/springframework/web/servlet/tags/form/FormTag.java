@@ -139,8 +139,7 @@ public class FormTag extends AbstractFormTag {
 	 * May be a runtime expression.
 	 */
 	public void setAction(String action) {
-		Assert.hasText(action, "'action' cannot be null or zero length.");
-		this.action = action;
+		this.action = (action != null ? action : "");
 	}
 
 	/**
