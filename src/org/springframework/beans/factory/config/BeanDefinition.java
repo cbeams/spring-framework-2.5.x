@@ -28,6 +28,7 @@ import org.springframework.beans.MutablePropertyValues;
  * access and modify property values.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 19.03.2004
  * @see ConfigurableListableBeanFactory#getBeanDefinition
  * @see BeanFactoryPostProcessor
@@ -36,6 +37,31 @@ import org.springframework.beans.MutablePropertyValues;
  * @see org.springframework.beans.factory.support.ChildBeanDefinition
  */
 public interface BeanDefinition {
+
+	/**
+	 * Role hint indicating that a <code>BeanDefinition</code> is a major part
+	 * of the application. Typically corresponds to a user-defined bean.
+	 */
+	static final int ROLE_APPLICATION = 0;
+
+	/**
+	 * Role hint indicating that a <code>BeanDefinition</code> is a supporting
+	 * part of some larger configuration, typically an outer
+	 * {@link org.springframework.beans.factory.support.ComponentDefinition}.
+	 * <code>SUPPORT</code> beans are considered important enough to be aware
+	 * of when looking more closely at a particular
+	 * {@link org.springframework.beans.factory.support.ComponentDefinition}, but
+	 * not when looking at the overall configuration of an application.
+	 */
+	static final int ROLE_SUPPORT = 1;
+
+	/**
+	 * Role hint indicating that a <code>BeanDefinition</code> is providing
+	 * an entirely background role and has no relevance to the end-user. This
+	 * hint is used when registering beans that are completely part of the internal
+	 * workings of a {@link org.springframework.beans.factory.support.ComponentDefinition}. 
+	 */
+	static final int ROLE_INFRASTRUCTURE = 2;
 
 	/**
 	 * Return whether this bean is "abstract", i.e. not meant to be instantiated.
@@ -74,4 +100,21 @@ public interface BeanDefinition {
 	 */
 	String getResourceDescription();
 
+	/**
+	 * Returns the <code>Object</code> that was the source of this definition
+	 * in the configuration. May be <code>null</code>. The exact type of this
+	 * source <code>Object</code> will depend on the configuration mechanism
+	 * used.
+	 */
+	Object getSource();
+
+	/**
+	 * Gets the role hint for this <code>BeanDefinition</code>. The role hint
+	 * provides tool with an indication of the importance of a particular
+	 * <code>BeanDefinition</code>.
+	 * @see #ROLE_APPLICATION
+	 * @see #ROLE_INFRASTRUCTURE
+	 * @see #ROLE_SUPPORT
+	 */
+	int getRole();
 }

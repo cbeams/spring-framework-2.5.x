@@ -24,15 +24,11 @@ import org.springframework.beans.factory.config.BeanDefinition;
  */
 public interface ComponentDefinition {
 
-	static final int ROLE_APPLICATION = 0;
-
-	static final int ROLE_SUPPORT = 1;
-
-	static final int ROLE_INFRASTRUCTURE = 2;
-
 	String getName();
 
-	int getRole();
-
+	/**
+	 * Returns the {@link BeanDefinition BeanDefinitions} associated with this
+	 * <code>ComponentDefinition</code>.
+	 */
 	BeanDefinition[] getBeanDefinitions();
 }

@@ -31,6 +31,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -366,6 +367,9 @@ public class XmlBeanDefinitionParserHelper {
 			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
 							className, parent, cargs, pvs, getReaderContext().getReader().getBeanClassLoader());
 
+			// store the configuration source
+			bd.setSource(ele);
+
 			if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 				String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
 				bd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn, BEAN_NAME_DELIMITERS));
@@ -626,7 +630,9 @@ public class XmlBeanDefinitionParserHelper {
 			}
 			this.parseState.property(propertyName);
 			Object val = parsePropertyValue(ele, propertyName);
-			pvs.addPropertyValue(propertyName, val);
+			PropertyValue pv = new PropertyValue(propertyName, val);
+			pv.setSource(ele);
+			pvs.addPropertyValue(pv);
 		}
 		finally {
 			this.parseState.pop();

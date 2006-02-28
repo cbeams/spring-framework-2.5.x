@@ -133,6 +133,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	private String resourceDescription;
 
+	private Object source;
+
+	private int role = BeanDefinition.ROLE_APPLICATION;
 
 	/**
 	 * Create a new AbstractBeanDefinition with default settings.
@@ -584,6 +587,31 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		return resourceDescription;
 	}
 
+	/**
+	 * Returns the <code>Object</code> that was the source of this definition
+	 * in the configuration. May be <code>null</code>. The exact type of this
+	 * source <code>Object</code> will depend on the configuration mechanism
+	 * used.
+	 */
+	public Object getSource() {
+		return source;
+	}
+
+	/**
+	 * Sets the <code>Object</code> representing the configuration source
+	 * for this <code>BeanDefinition</code>.
+	 */
+	public void setSource(Object source) {
+		this.source = source;
+	}
+
+	public int getRole() {
+		return role;
+	}
+
+	public void setRole(int role) {
+		this.role = role;
+	}
 
 	/**
 	 * Validate this bean definition.

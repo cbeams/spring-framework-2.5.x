@@ -19,9 +19,10 @@ package org.springframework.beans.factory.xml;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.ReaderContext;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
+import org.springframework.beans.factory.support.BeanComponentDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.StringUtils;
@@ -190,16 +191,14 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		else if (BEAN_ELEMENT.equals(ele.getNodeName())) {
 			BeanDefinitionHolder bdHolder = helper.parseBeanDefinitionElement(ele, false);
 			if (bdHolder != null) {
-				decorateAndRegisterBeanDefinition(ele, bdHolder);
+				bdHolder = decorateBeanDefinitionIfRequired(ele, bdHolder);
+				// Register the final decorated instance.
+				BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getReader().getBeanFactory());
+
+				// send registration event
+				getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));
 			}
 		}
-	}
-
-	private NamespaceHandlerResolver getNamespaceHandlerResolver() {
-		if (this.namespaceHandlerResolver == null) {
-			this.namespaceHandlerResolver = createNamespaceHandlerResolver();
-		}
-		return this.namespaceHandlerResolver;
 	}
 
 	protected void parseCustomElement(Element ele, XmlBeanDefinitionParserHelper helper) {
@@ -216,7 +215,14 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		parser.parse(ele, parserContext);
 	}
 
-	private void decorateAndRegisterBeanDefinition(Element element, BeanDefinitionHolder definitionHolder) {
+	private NamespaceHandlerResolver getNamespaceHandlerResolver() {
+		if (this.namespaceHandlerResolver == null) {
+			this.namespaceHandlerResolver = createNamespaceHandlerResolver();
+		}
+		return this.namespaceHandlerResolver;
+	}
+
+	private BeanDefinitionHolder decorateBeanDefinitionIfRequired(Element element, BeanDefinitionHolder definitionHolder) {
 		BeanDefinitionHolder finalDefinition = definitionHolder;
 
 		NodeList children = element.getChildNodes();
@@ -233,8 +239,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 			}
 		}
-		// Register the final decorated instance.
-		BeanDefinitionReaderUtils.registerBeanDefinition(finalDefinition, getReaderContext().getReader().getBeanFactory());
+		return finalDefinition;
 	}
 
 	/**

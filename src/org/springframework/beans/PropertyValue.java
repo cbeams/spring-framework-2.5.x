@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.util.ObjectUtils;
  * this object doesn't know anything about the objects it will be applied to.
  *
  * @author Rod Johnson
+ * @author Rob Harrop
  * @since 13 May 2001
  * @see PropertyValues
  * @see BeanWrapper
@@ -40,6 +41,8 @@ public class PropertyValue implements Serializable {
 	private final String name;
 
 	private final Object value;
+
+	private Object source;
 
 	/**
 	 * Create a new PropertyValue instance.
@@ -75,6 +78,23 @@ public class PropertyValue implements Serializable {
 		return "PropertyValue: name='" + this.name + "', value=[" + this.value + "]";
 	}
 
+	/**
+	 * Gets the configuration source <code>Object</code> for this
+	 * <code>PropertyValue</code>. Exact type will depend on the
+	 * configuration mechanism used.
+	 */
+	public Object getSource() {
+		return source;
+	}
+
+	/**
+	 * Sets the configuration source <code>Object</code> for this
+	 * <code>PropertyValue</code>.
+	 */
+	public void setSource(Object source) {
+		this.source = source;
+	}
+
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -83,7 +103,9 @@ public class PropertyValue implements Serializable {
 			return false;
 		}
 		PropertyValue otherPv = (PropertyValue) other;
-		return (this.name.equals(otherPv.name) && ObjectUtils.nullSafeEquals(this.value, otherPv.value));
+		return (this.name.equals(otherPv.name)
+						&& ObjectUtils.nullSafeEquals(this.value, otherPv.value)
+						&& ObjectUtils.nullSafeEquals(this.source, otherPv.source));
 	}
 
 	public int hashCode() {

@@ -34,10 +34,6 @@ public class BeanComponentDefinition implements ComponentDefinition {
 		return this.holder.getBeanName();
 	}
 
-	public int getRole() {
-		return ROLE_APPLICATION;
-	}
-
 	public BeanDefinition[] getBeanDefinitions() {
 		return new BeanDefinition[]{this.holder.getBeanDefinition()};
 	}

@@ -74,4 +74,7 @@ public class ReaderContext {
 		this.problemReporter.warning(new Problem(message, parseState, cause, location));
 	}
 
+	public void fireComponentRegistered(ComponentDefinition componentDefinition) {
+		this.eventListener.componentRegistered(componentDefinition);
+	}
 }
