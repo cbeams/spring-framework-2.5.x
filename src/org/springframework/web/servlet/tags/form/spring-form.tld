@@ -130,6 +130,12 @@
 		</attribute>
 
 		<attribute>
+			<name>method</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
 			<name>enctype</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
