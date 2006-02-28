@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.tags.form;
 
 import org.springframework.beans.TestBean;
+import org.springframework.web.servlet.tags.NestedPathTag;
 
 import javax.servlet.jsp.tagext.Tag;
 import java.io.StringWriter;
@@ -148,6 +149,22 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "maxlength", maxlength);
 		assertContainsAttribute(output, "alt", alt);
 		assertContainsAttribute(output, "onselect", onselect);
+	}
+
+	public void testWithNestedBind() throws Exception {
+		getPageContext().setAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, "spouse");
+
+		this.tag.setPath("name");
+
+		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+
+		String output = getWriter().toString();
+
+		assertTagOpened(output);
+		assertTagClosed(output);
+
+		assertContainsAttribute(output, "type", getType());
+		assertContainsAttribute(output, "value", "Sally");
 	}
 
 	private void assertTagClosed(String output) {

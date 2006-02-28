@@ -18,6 +18,7 @@ package org.springframework.web.servlet.tags.form;
 
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.servlet.tags.NestedPathTag;
 
 import javax.servlet.jsp.JspException;
 
@@ -123,8 +124,30 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 		return this.bindStatus;
 	}
 
+	/**
+	 * Gets the final bind path including the exposed {@link FormTag command name} and
+	 * any {@link NestedPathTag nested paths}.
+	 */
 	private String getBindPath(String resolvedSubPath) {
-		return getCommandName() + "." + resolvedSubPath;
+
+		StringBuffer sb = new StringBuffer();
+		sb.append(getCommandName()).append('.');
+
+		String nestedPath = getNestedPath();
+		if(nestedPath != null) {
+			sb.append(nestedPath).append('.');
+		}
+
+		return sb.append(resolvedSubPath).toString();
+	}
+
+	/**
+	 * Gets the value of the nested path that may have been exposed by the
+	 * {@link NestedPathTag}.
+	 */
+	private String getNestedPath() {
+		String nestedPath = (String) this.pageContext.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME);
+		return nestedPath;
 	}
 
 	private String getCommandName() {
