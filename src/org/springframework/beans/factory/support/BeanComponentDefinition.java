@@ -16,11 +16,29 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.BeanDefinition;
+
 /**
  * @author Rob Harrop
- * @since 2.0
  */
-public interface ReaderEventListener {
+public class BeanComponentDefinition implements ComponentDefinition {
 
-	void componentRegistered(ComponentDefinition componentDefinition);
+	private final BeanDefinitionHolder holder;
+
+	public BeanComponentDefinition(BeanDefinitionHolder holder) {
+		this.holder = holder;
+	}
+
+	public String getName() {
+		return this.holder.getBeanName();
+	}
+
+	public int getRole() {
+		return ROLE_APPLICATION;
+	}
+
+	public BeanDefinition[] getBeanDefinitions() {
+		return new BeanDefinition[]{this.holder.getBeanDefinition()};
+	}
 }

@@ -43,10 +43,9 @@ public interface XmlBeanDefinitionParser {
 	 * and register them with the given bean factory.
 	 * @param doc the DOM document
 	 * @param readerContext the current context of the reader. Includes the resource being parsed.
-	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of parsing errors
 	 */
-	int registerBeanDefinitions(Document doc, ReaderContext readerContext)
+	void registerBeanDefinitions(Document doc, ReaderContext readerContext)
 			throws BeanDefinitionStoreException;
 
 }

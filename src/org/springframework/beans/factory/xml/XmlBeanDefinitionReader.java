@@ -41,6 +41,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ReaderContext;
 import org.springframework.beans.factory.support.ProblemReporter;
 import org.springframework.beans.factory.support.ReaderEventListener;
+import org.springframework.beans.factory.support.ComponentDefinition;
 import org.springframework.core.Constants;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
@@ -474,7 +475,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeansException {
 		XmlBeanDefinitionParser parser = createXmlBeanDefinitionParser();
-		return parser.registerBeanDefinitions(doc, createReaderContext(resource));
+		int countBefore = this.getBeanFactory().getBeanDefinitionCount();
+		parser.registerBeanDefinitions(doc, createReaderContext(resource));
+		return this.getBeanFactory().getBeanDefinitionCount() - countBefore;
 	}
 
 	/**
@@ -490,5 +493,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private static class NullReaderEventListener implements ReaderEventListener {
 
+		public void componentRegistered(ComponentDefinition componentDefinition) {
+			// no-op
+		}
 	}
 }

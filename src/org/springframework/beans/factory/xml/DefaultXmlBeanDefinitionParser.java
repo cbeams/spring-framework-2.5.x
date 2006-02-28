@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.ReaderContext;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.StringUtils;
@@ -81,7 +82,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * specified at <code>&lt;beans&gt;</code> level; then parses
 	 * the contained bean definitions.
 	 */
-	public int registerBeanDefinitions(Document doc, ReaderContext readerContext) {
+	public void registerBeanDefinitions(Document doc, ReaderContext readerContext) {
 
 		this.readerContext = readerContext;
 
@@ -93,13 +94,12 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		initDefaults(root, helper);
 
 		preProcessXml(root);
-		int beanDefinitionCount = parseBeanDefinitions(root, helper);
+		parseBeanDefinitions(root, helper);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Found [" + beanDefinitionCount + "] <bean> elements in [" + readerContext.getResource() + "].");
+			BeanDefinitionRegistry registry = readerContext.getReader().getBeanFactory();
+			logger.debug("Found [" + registry.getBeanDefinitionCount() + "] <bean> elements in [" + readerContext.getResource() + "].");
 		}
 		postProcessXml(root);
-
-		return beanDefinitionCount;
 	}
 
 	/**
@@ -155,52 +155,43 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * Parse the elements at the root level in the document:
 	 * "import", "alias", "bean".
 	 * @param root the DOM root element of the document
-	 * @return the number of bean definitions found
 	 */
-	protected int parseBeanDefinitions(Element root, XmlBeanDefinitionParserHelper helper) {
+	protected void parseBeanDefinitions(Element root, XmlBeanDefinitionParserHelper helper) {
 		NodeList nl = root.getChildNodes();
-		int beanDefinitionCount = 0;
+
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element) {
 				Element ele = (Element) node;
 				String namespaceUri = ele.getNamespaceURI();
 				if (isDefaultNamespace(namespaceUri)) {
-					beanDefinitionCount += parseDefaultElement(ele, helper);
+					parseDefaultElement(ele, helper);
 				}
 				else {
-					beanDefinitionCount += parseCustomElement(ele, helper);
+					parseCustomElement(ele, helper);
 				}
 			}
 		}
-		return beanDefinitionCount;
 	}
 
 	private boolean isDefaultNamespace(String namespaceUri) {
 		return (!StringUtils.hasLength(namespaceUri) || BEANS_NAMESPACE_URI.equals(namespaceUri));
 	}
 
-	private int parseDefaultElement(Element ele, XmlBeanDefinitionParserHelper helper) {
+	private void parseDefaultElement(Element ele, XmlBeanDefinitionParserHelper helper) {
 		if (IMPORT_ELEMENT.equals(ele.getNodeName())) {
 			importBeanDefinitionResource(ele);
-			return 0;
 		}
 		else if (ALIAS_ELEMENT.equals(ele.getNodeName())) {
 			String name = ele.getAttribute(NAME_ATTRIBUTE);
 			String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
 			getReaderContext().getReader().getBeanFactory().registerAlias(name, alias);
-			return 0;
 		}
 		else if (BEAN_ELEMENT.equals(ele.getNodeName())) {
 			BeanDefinitionHolder bdHolder = helper.parseBeanDefinitionElement(ele, false);
 			if (bdHolder != null) {
-				return decorateAndRegisterBeanDefinition(ele, bdHolder);
+				decorateAndRegisterBeanDefinition(ele, bdHolder);
 			}
-			return 0;
-		}
-		else {
-			// non-important element
-			return 0;
 		}
 	}
 
@@ -211,24 +202,21 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		return this.namespaceHandlerResolver;
 	}
 
-	protected int parseCustomElement(Element ele, XmlBeanDefinitionParserHelper helper) {
+	protected void parseCustomElement(Element ele, XmlBeanDefinitionParserHelper helper) {
 		String namespaceUri = ele.getNamespaceURI();
 		NamespaceHandler handler = getNamespaceHandlerResolver().resolve(namespaceUri);
 
 		if (handler == null) {
 			getReaderContext().error("Unable to locate NamespaceHandler for namespace [" + namespaceUri + "].", ele);
-			return 0;
+			return;
 		}
 
-		int countBefore = getBeanDefinitionCount();
 		BeanDefinitionParser parser = handler.findParserForElement(ele);
 		ParserContext parserContext = new ParserContext(getReaderContext(), helper);
 		parser.parse(ele, parserContext);
-		return (getBeanDefinitionCount() - countBefore);
 	}
 
-	private int decorateAndRegisterBeanDefinition(Element element, BeanDefinitionHolder definitionHolder) {
-		int registeredCount = 1;
+	private void decorateAndRegisterBeanDefinition(Element element, BeanDefinitionHolder definitionHolder) {
 		BeanDefinitionHolder finalDefinition = definitionHolder;
 
 		NodeList children = element.getChildNodes();
@@ -240,18 +228,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				// A node from a namespace outside of the standard - should map to a decorator.
 				NamespaceHandler handler = getNamespaceHandlerResolver().resolve(uri);
 				BeanDefinitionDecorator decorator = handler.findDecoratorForElement(childElement);
-				int countBefore = getBeanDefinitionCount();
+
 				finalDefinition = decorator.decorate(childElement, finalDefinition, getReaderContext().getReader().getBeanFactory());
-				registeredCount += (getBeanDefinitionCount() - countBefore);
+
 			}
 		}
 		// Register the final decorated instance.
 		BeanDefinitionReaderUtils.registerBeanDefinition(finalDefinition, getReaderContext().getReader().getBeanFactory());
-		return registeredCount;
-	}
-
-	private int getBeanDefinitionCount() {
-		return getReaderContext().getReader().getBeanFactory().getBeanDefinitionCount();
 	}
 
 	/**
