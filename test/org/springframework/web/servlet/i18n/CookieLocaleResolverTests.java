@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 /**
  * @author Alef Arendsen
+ * @author Juergen Hoeller
  */
 public class CookieLocaleResolverTests extends TestCase {
 
@@ -55,6 +56,7 @@ public class CookieLocaleResolverTests extends TestCase {
 		assertEquals(null, cookie.getDomain());
 		assertEquals(CookieLocaleResolver.DEFAULT_COOKIE_PATH, cookie.getPath());
 		assertEquals(CookieLocaleResolver.DEFAULT_COOKIE_MAX_AGE, cookie.getMaxAge());
+		assertFalse(cookie.getSecure());
 
 		request = new MockHttpServletRequest();
 		request.setCookies(new Cookie[] {cookie});
@@ -73,6 +75,7 @@ public class CookieLocaleResolverTests extends TestCase {
 		resolver.setCookieDomain(".springframework.org");
 		resolver.setCookiePath("/mypath");
 		resolver.setCookieMaxAge(10000);
+		resolver.setCookieSecure(true);
 		resolver.setLocale(request, response, new Locale("nl", ""));
 
 		Cookie cookie = response.getCookie("LanguageKoek");
@@ -81,6 +84,7 @@ public class CookieLocaleResolverTests extends TestCase {
 		assertEquals(".springframework.org", cookie.getDomain());
 		assertEquals("/mypath", cookie.getPath());
 		assertEquals(10000, cookie.getMaxAge());
+		assertTrue(cookie.getSecure());
 
 		request = new MockHttpServletRequest();
 		request.setCookies(new Cookie[] {cookie});
