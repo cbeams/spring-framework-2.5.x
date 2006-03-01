@@ -28,6 +28,7 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
 import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -50,7 +51,9 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
-	public final BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry) {
+	public final BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definitionHolder, ParserContext parserContext) {
+		BeanDefinitionRegistry registry = parserContext.getRegistry();
+		
 		// get the root bean name - will be the name of the generated proxy factory bean
 		String existingBeanName = definitionHolder.getBeanName();
 		BeanDefinition existingDefinition = definitionHolder.getBeanDefinition();

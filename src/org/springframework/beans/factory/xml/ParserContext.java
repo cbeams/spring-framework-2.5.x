@@ -35,11 +35,11 @@ public final class ParserContext {
 	}
 
 	public ReaderContext getReaderContext() {
-		return readerContext;
+		return this.readerContext;
 	}
 
 	public XmlBeanDefinitionParserHelper getHelper() {
-		return helper;
+		return this.helper;
 	}
 
 	public BeanDefinitionRegistry getRegistry() {

@@ -47,7 +47,7 @@ public class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class TestBeanDefinitionParser implements BeanDefinitionParser {
 
-		public void parse(Element element, ParserContext parserContext) {
+		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			RootBeanDefinition definition = new RootBeanDefinition();
 			definition.setBeanClass(TestBean.class);
 
@@ -57,12 +57,14 @@ public class TestNamespaceHandler extends NamespaceHandlerSupport {
 			definition.setPropertyValues(mpvs);
 
 			parserContext.getRegistry().registerBeanDefinition(element.getAttribute("id"), definition);
+
+			return null;
 		}
 	}
 
 	private static class PropertyModifyingBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
-		public BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
+		public BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definition, ParserContext parserContext) {
 			BeanDefinition def = definition.getBeanDefinition();
 
 			MutablePropertyValues mpvs = (def.getPropertyValues() == null) ? new MutablePropertyValues() : def.getPropertyValues();

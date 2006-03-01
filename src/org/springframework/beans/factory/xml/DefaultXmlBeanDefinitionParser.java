@@ -98,6 +98,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		parseBeanDefinitions(root, helper);
 		if (logger.isDebugEnabled()) {
 			BeanDefinitionRegistry registry = readerContext.getReader().getBeanFactory();
+			// todo: count here is wrong
 			logger.debug("Found [" + registry.getBeanDefinitionCount() + "] <bean> elements in [" + readerContext.getResource() + "].");
 		}
 		postProcessXml(root);
@@ -191,7 +192,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		else if (BEAN_ELEMENT.equals(ele.getNodeName())) {
 			BeanDefinitionHolder bdHolder = helper.parseBeanDefinitionElement(ele, false);
 			if (bdHolder != null) {
-				bdHolder = decorateBeanDefinitionIfRequired(ele, bdHolder);
+				bdHolder = decorateBeanDefinitionIfRequired(ele, bdHolder, helper);
 				// Register the final decorated instance.
 				BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getReader().getBeanFactory());
 
@@ -211,8 +212,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		}
 
 		BeanDefinitionParser parser = handler.findParserForElement(ele);
-		ParserContext parserContext = new ParserContext(getReaderContext(), helper);
-		parser.parse(ele, parserContext);
+		parser.parse(ele, new ParserContext(getReaderContext(), helper));
 	}
 
 	private NamespaceHandlerResolver getNamespaceHandlerResolver() {
@@ -222,7 +222,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		return this.namespaceHandlerResolver;
 	}
 
-	private BeanDefinitionHolder decorateBeanDefinitionIfRequired(Element element, BeanDefinitionHolder definitionHolder) {
+	private BeanDefinitionHolder decorateBeanDefinitionIfRequired(Element element, BeanDefinitionHolder definitionHolder, XmlBeanDefinitionParserHelper helper) {
 		BeanDefinitionHolder finalDefinition = definitionHolder;
 
 		NodeList children = element.getChildNodes();
@@ -235,7 +235,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				NamespaceHandler handler = getNamespaceHandlerResolver().resolve(uri);
 				BeanDefinitionDecorator decorator = handler.findDecoratorForElement(childElement);
 
-				finalDefinition = decorator.decorate(childElement, finalDefinition, getReaderContext().getReader().getBeanFactory());
+				finalDefinition = decorator.decorate(childElement, finalDefinition, new ParserContext(getReaderContext(), helper));
 
 			}
 		}

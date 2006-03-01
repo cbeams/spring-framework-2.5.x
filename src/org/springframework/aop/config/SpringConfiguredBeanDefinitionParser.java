@@ -20,6 +20,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.util.ClassUtils;
 import org.w3c.dom.Element;
 
@@ -38,14 +39,14 @@ class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 
 	private boolean registered;
 
-	public void parse(Element element, ParserContext parserContext) {
-		if (this.registered) {
-			return;
+	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		if (!this.registered) {
+			BeanDefinitionRegistryBuilder registryBuilder = new BeanDefinitionRegistryBuilder(parserContext.getRegistry());
+			registryBuilder.register(BeanDefinitionBuilder.rootBeanDefinition(getBeanConfigurerClass(), ASPECT_OF));
+			this.registered = true;
 		}
 
-		BeanDefinitionRegistryBuilder registryBuilder = new BeanDefinitionRegistryBuilder(parserContext.getRegistry());
-		registryBuilder.register(BeanDefinitionBuilder.rootBeanDefinition(getBeanConfigurerClass(), ASPECT_OF));
-		this.registered = true;
+		return null;
 	}
 
 	/**

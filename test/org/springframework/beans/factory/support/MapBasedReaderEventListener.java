@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.xml;
+package org.springframework.beans.factory.support;
 
-import org.springframework.beans.factory.support.BeanDefinitionRegistryBuilder;
-import org.w3c.dom.Element;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Rob Harrop
- * @since 2.0
  */
-public abstract class AbstractBeanDefinitionParser implements BeanDefinitionParser {
+public class MapBasedReaderEventListener implements ReaderEventListener {
 
-	public final void parse(Element element, ParserContext parserContext) {
-		doParse(element, new BeanDefinitionRegistryBuilder(parserContext.getRegistry()));
+	private Map components = new HashMap();
+
+	public void componentRegistered(ComponentDefinition componentDefinition) {
+		this.components.put(componentDefinition.getName(), componentDefinition);
 	}
 
-	protected abstract void doParse(Element element, BeanDefinitionRegistryBuilder registryBuilder);
+	public ComponentDefinition getComponentDefinition(String name) {
+		return (ComponentDefinition) this.components.get(name);
+	}
 }

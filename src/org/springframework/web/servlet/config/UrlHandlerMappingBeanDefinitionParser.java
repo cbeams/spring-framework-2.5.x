@@ -19,6 +19,7 @@ package org.springframework.web.servlet.config;
 import java.util.Properties;
 
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ManagedList;
@@ -73,7 +74,7 @@ public class UrlHandlerMappingBeanDefinitionParser extends MvcBeanDefinitionPars
 	 * bean definition. Except for all the normal behavior, adds behavior
 	 * for HandlerInterceptors matched on a specific path.
 	 */
-	public void parse(Element element, ParserContext parserContext) {
+	public BeanDefinition parse(Element element, ParserContext parserContext) {
 
 		Assert.notNull(element);
 		Assert.notNull(parserContext);
@@ -92,7 +93,9 @@ public class UrlHandlerMappingBeanDefinitionParser extends MvcBeanDefinitionPars
 				registry.registerBeanDefinition(BeanDefinitionReaderUtils.generateBeanName(
 						handlerMappingDefinition, registry, false), handlerMappingDefinition);				
 			}
-		}		
+		}
+
+		return null;
 	}
 	
 	private RootBeanDefinition parseHandlerMappingDefinition(Element element, BeanDefinitionRegistry registry) {

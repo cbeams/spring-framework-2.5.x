@@ -17,6 +17,7 @@
 package org.springframework.aop.config;
 
 import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -38,8 +39,9 @@ class ScopeBeanDefinitionDefinition implements BeanDefinitionDecorator {
 
 	private static String SESSION_SCOPE_MAP = "org.springframework.web.context.scope.SessionScopeMap";
 
-	public BeanDefinitionHolder decorate(
-			Element element, BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
+	public BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definition, ParserContext parserContext) {
+
+		BeanDefinitionRegistry registry = parserContext.getRegistry();
 
 		// must use class proxying for any AOP advice now
 		NamespaceHandlerUtils.forceAutoProxyCreatorToUseClassProxying(registry);

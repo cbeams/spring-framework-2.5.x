@@ -37,10 +37,10 @@ public class Location {
 	}
 
 	public Resource getResource() {
-		return resource;
+		return this.resource;
 	}
 
 	public Object getSource() {
-		return source;
+		return this.source;
 	}
 }

@@ -18,6 +18,8 @@ package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Constructor;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -98,6 +100,8 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 */
 	public static final int DEPENDENCY_CHECK_ALL = 3;
 
+
+	private final Map attributes = new HashMap();
 
 	private Object beanClass;
 
@@ -587,6 +591,14 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		return resourceDescription;
 	}
 
+	public void setAttribute(String key, Object value) {
+		this.attributes.put(key, value);
+	}
+
+	public Object getAttribute(String key) {
+		return this.attributes.get(key);
+	}
+
 	/**
 	 * Returns the <code>Object</code> that was the source of this definition
 	 * in the configuration. May be <code>null</code>. The exact type of this
@@ -605,10 +617,16 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		this.source = source;
 	}
 
+	/**
+	 * Gets the role hint for this <code>BeanDefinition</code>.
+	 */
 	public int getRole() {
 		return role;
 	}
 
+	/**
+	 * Sets the role hint for this <code>BeanDefinition</code>.
+	 */
 	public void setRole(int role) {
 		this.role = role;
 	}

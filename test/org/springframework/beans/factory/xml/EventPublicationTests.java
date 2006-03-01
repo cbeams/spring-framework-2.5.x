@@ -20,12 +20,9 @@ import junit.framework.TestCase;
 import org.springframework.beans.factory.support.BeanComponentDefinition;
 import org.springframework.beans.factory.support.ComponentDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.ReaderEventListener;
+import org.springframework.beans.factory.support.MapBasedReaderEventListener;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.io.ClassPathResource;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Rob Harrop
@@ -50,16 +47,4 @@ public class EventPublicationTests extends TestCase {
 		assertNotNull("Underlying BeanDefinition is null", beanDefinition);
 	}
 
-	private static class MapBasedReaderEventListener implements ReaderEventListener {
-
-		private Map components = new HashMap();
-
-		public void componentRegistered(ComponentDefinition componentDefinition) {
-			this.components.put(componentDefinition.getName(), componentDefinition);
-		}
-
-		public ComponentDefinition getComponentDefinition(String name) {
-			return (ComponentDefinition) this.components.get(name);
-		}
-	}
 }

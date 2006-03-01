@@ -101,6 +101,18 @@ public interface BeanDefinition {
 	String getResourceDescription();
 
 	/**
+	 * Attaches a generic, keyed metadata attribute to this <code>BeanDefinition</code>.
+	 * User's should take care to prevent overlaps with other metadata attributes by using
+	 * fully-qualified names, perhaps using <code>Class</code> or <code>Package</code> names.
+	 */
+	void setAttribute(String key, Object value);
+
+	/**
+	 * Gets the metadata attribute for the given key.
+	 */
+	Object getAttribute(String key);
+
+	/**
 	 * Returns the <code>Object</code> that was the source of this definition
 	 * in the configuration. May be <code>null</code>. The exact type of this
 	 * source <code>Object</code> will depend on the configuration mechanism

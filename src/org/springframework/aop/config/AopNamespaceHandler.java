@@ -23,6 +23,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
  * <code>NamespaceHandler</code> for the <code>aop</code> namespace.
@@ -75,8 +76,9 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 
-		public void parse(Element element, ParserContext parserContext) {
+		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(parserContext.getRegistry());
+			return null;
 		}
 	}
 

@@ -16,22 +16,31 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.w3c.dom.Element;
 
 /**
  * @author Rob Harrop
  */
-public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDefinitionParser {
+public abstract class AbstractSingleBeanDefinitionParser implements BeanDefinitionParser {
 
 	public static final String ID_ATTRIBUTE = "id";
 
-	protected final void doParse(Element element, BeanDefinitionRegistryBuilder registryBuilder) {
-		String id = element.getAttribute(ID_ATTRIBUTE);
+	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder.rootBeanDefinition(getBeanClass(element));
 		doParse(element, definitionBuilder);
-		registryBuilder.register(id, definitionBuilder);
+		BeanDefinition definition = definitionBuilder.getBeanDefinition();
+
+		String id = element.getAttribute(ID_ATTRIBUTE);
+		BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
+		BeanDefinitionReaderUtils.registerBeanDefinition(holder, parserContext.getRegistry());
+		parserContext.getReaderContext().fireComponentRegistered(new BeanComponentDefinition(holder));
+
+		return definition;
 	}
 
 	protected abstract Class getBeanClass(Element element);

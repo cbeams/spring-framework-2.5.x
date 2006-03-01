@@ -18,6 +18,7 @@ package org.springframework.beans.factory.xml;
 
 import org.w3c.dom.Element;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
  * Interface used by the {@link org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser}
@@ -33,9 +34,14 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  */
 public interface BeanDefinitionParser {
 
-    /**
-     * Parse the specified {@link Element} and register resulting <code>BeanDefinitions</code>
-     * with{@link BeanDefinitionRegistry} embedded in the supplied {@link ParserContext}.
-     */
-    void parse(Element element, ParserContext parserContext);
+		/**
+		 * Parse the specified {@link Element} and register resulting <code>BeanDefinitions</code>
+		 * with{@link BeanDefinitionRegistry} embedded in the supplied {@link ParserContext}.
+		 * <p/>Implementations should return the primary <code>BeanDefinition</code> that results
+		 * from the parse phase if they which to be used nested inside <code>&lt;property&gt;</code> tag.
+		 * Implementations may return <code>null</code> if they will <strong>not</strong> be used in
+		 * a nested scenario. 
+		 * @return the primary <code>BeanDefinition</code>.
+		 */
+		BeanDefinition parse(Element element, ParserContext parserContext);
 }

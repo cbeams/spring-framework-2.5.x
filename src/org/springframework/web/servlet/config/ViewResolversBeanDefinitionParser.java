@@ -21,6 +21,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
@@ -63,7 +64,7 @@ public class ViewResolversBeanDefinitionParser extends MvcBeanDefinitionParserSu
 	// Instance section
 	//---------------------------------------------------------------------
 
-	public void parse(Element element, ParserContext parserContext) {
+	public BeanDefinition parse(Element element, ParserContext parserContext) {
 
 		Assert.notNull(element);
 		Assert.notNull(parserContext);
@@ -98,6 +99,8 @@ public class ViewResolversBeanDefinitionParser extends MvcBeanDefinitionParserSu
 								viewResolverDefinition, registry, false), viewResolverDefinition);
 			}
 		}
+
+		return null;
 	}
 
 	private RootBeanDefinition parseBeanNameViewResolver(Element viewResolverElement, BeanDefinitionRegistry registry) {

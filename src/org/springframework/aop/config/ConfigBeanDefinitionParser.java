@@ -111,7 +111,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private final Log logger = LogFactory.getLog(getClass());
 
 
-	public void parse(Element element, ParserContext parserContext) {
+	public BeanDefinition parse(Element element, ParserContext parserContext) {
 
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 		ParseContext parseContext = new ParseContext();
@@ -140,6 +140,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 				}
 			}
 		}
+
+		return null;
 	}
 	
 	/**
