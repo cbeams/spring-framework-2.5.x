@@ -320,7 +320,8 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 		Class[] parameterTypes = this.aspectJAdviceMethod.getParameterTypes();
 		if (maybeBindJoinPoint(parameterTypes[0])) {
 			numUnboundArgs--;
-		} else if (maybeBindJoinPointStaticPart(parameterTypes[0])) {
+		} 
+		else if (maybeBindJoinPointStaticPart(parameterTypes[0])) {
 			numUnboundArgs--;
 		}
 			
@@ -344,7 +345,8 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 		if (candidateParameterType.equals(JoinPoint.StaticPart.class)) {
 			this.joinPointStaticPartArgumentIndex = 0;
 			return true;
-		} else {
+		} 
+		else {
 			return false;
 		}
 	}
@@ -369,7 +371,8 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 		if (this.argumentNames != null) {
 			// we have been able to determine the arg names
 			bindExplicitArguments(numArgumentsExpectingToBind);
-		} else {
+		} 
+		else {
 			throw new IllegalStateException("Advice method [" + this.aspectJAdviceMethod.getName() + "] " +
 					      "requires " + numArgumentsExpectingToBind + " arguments to be bound by name, but " +
 					      "the argument names were not specified and could not be discovered.");
@@ -396,7 +399,8 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 			if (!this.argumentBindings.containsKey(this.returningName)) {
 				throw new IllegalStateException("Returning argument name '" 
 						+ this.returningName + "' was not bound in advice arguments");
-			} else {
+			} 
+			else {
 				Integer index = (Integer) this.argumentBindings.get(this.returningName);
 				this.discoveredReturningType = this.aspectJAdviceMethod.getParameterTypes()[index.intValue()];
 			}
@@ -405,7 +409,8 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 			if (!this.argumentBindings.containsKey(this.throwingName)) {
 				throw new IllegalStateException("Throwing argument name '" 
 						+ this.throwingName + "' was not bound in advice arguments");
-			} else {
+			} 
+			else {
 				Integer index = (Integer) this.argumentBindings.get(this.throwingName);
 				this.discoveredThrowingType = this.aspectJAdviceMethod.getParameterTypes()[index.intValue()];				
 			}
@@ -468,7 +473,8 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 		if (this.joinPointArgumentIndex != -1) {
 			adviceInvocationArgs[this.joinPointArgumentIndex] = jp;
 			numBound++;
-		} else if (this.joinPointStaticPartArgumentIndex != -1) {
+		} 
+		else if (this.joinPointStaticPartArgumentIndex != -1) {
 			adviceInvocationArgs[this.joinPointStaticPartArgumentIndex] = jp.getStaticPart();
 			numBound++;
 		}
@@ -549,7 +555,6 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 	}
 
 	protected Object invokeAdviceMethodWithGivenArgs(Object[] args) throws Throwable {
-		// TODO really a hack
 		if (this.aspectJAdviceMethod.getParameterTypes().length == 0) {
 			args = null;
 		}
@@ -565,6 +570,11 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 		catch (InvocationTargetException ex) {
 			throw ex.getTargetException();
 		}
+	}
+	
+	public String toString() {
+		return getClass().getName() + ": adviceMethod=" + aspectJAdviceMethod + "; " +
+			"aspectName='" + aspectName + "'";
 	}
 
 }
