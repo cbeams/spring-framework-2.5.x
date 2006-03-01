@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.tags.form;
 
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.Assert;
 
 import javax.servlet.jsp.JspException;
 
@@ -46,6 +47,12 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	public static final String ONSELECT_ATTRIBUTE = "onselect";
 
 	/**
+	 * The name of the '<code>size</code>' attribute.
+	 */
+	public static final String SIZE_ATTRIBUTE = "size";
+
+
+	/**
 	 * The value of the '<code>maxlength</code>' attribute.
 	 */
 	private String maxlength;
@@ -61,10 +68,16 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	private String onselect;
 
 	/**
+	 * The value of the '<code>size</code>' attribute.
+	 */
+	private String size;
+
+	/**
 	 * Sets the value of the '<code>maxlength</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setMaxlength(String maxlength) {
+		Assert.hasText(maxlength, "'maxlength' cannot be null or zero length.");
 		this.maxlength = maxlength;
 	}
 
@@ -73,6 +86,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 * May be a runtime expression.
 	 */
 	public void setAlt(String alt) {
+		Assert.hasText(alt, "'alt' cannot be null or zero length.");
 		this.alt = alt;
 	}
 
@@ -81,7 +95,17 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 * May be a runtime expression.
 	 */
 	public void setOnselect(String onselect) {
+		Assert.hasText(onselect, "'onselect' cannot be null or zero length.");
 		this.onselect = onselect;
+	}
+
+	/**
+	 * Sets the value of the '<code>size</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setSize(String size) {
+		Assert.hasText(size, "'size' cannot be null or zero length.");
+		this.size = size;
 	}
 
 	/**
@@ -102,13 +126,23 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		tagWriter.startTag("input");
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute("type", getType());
-		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(getValue()));
+		writeValue(tagWriter);
 
 		// custom optional attributes
+		writeOptionalAttribute(tagWriter, SIZE_ATTRIBUTE, this.size);
 		writeOptionalAttribute(tagWriter, MAXLENGTH_ATTRIBUTE, this.maxlength);
 		writeOptionalAttribute(tagWriter, ALT_ATTRIBUTE, this.alt);
 		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, this.onselect);
 		tagWriter.endTag();
 		return EVAL_PAGE;
+	}
+
+	/**
+	 * Writes the '<code>value</code>' attribute to the supplied {@link TagWriter}.
+	 * Subclasses may choose to override this implementation to control exactly
+	 * when the value is written.
+	 */
+	protected void writeValue(TagWriter tagWriter) throws JspException {
+		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(getValue()));
 	}
 }

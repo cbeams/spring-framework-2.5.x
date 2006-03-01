@@ -67,6 +67,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	public void testWithAllAttributes() throws Exception {
 		String title = "aTitle";
 		String id = "123";
+		String size = "12";
 		String cssClass = "textfield";
 		String cssStyle = "width:10px";
 		String lang = "en";
@@ -92,6 +93,7 @@ public class InputTagTests extends AbstractFormTagTests {
 
 		this.tag.setId(id);
 		this.tag.setPath("name");
+		this.tag.setSize(size);
 		this.tag.setCssClass(cssClass);
 		this.tag.setCssStyle(cssStyle);
 		this.tag.setTitle(title);
@@ -126,6 +128,7 @@ public class InputTagTests extends AbstractFormTagTests {
 
 		assertContainsAttribute(output, "id", id);
 		assertContainsAttribute(output, "value", "Rob");
+		assertContainsAttribute(output, "size", size);
 		assertContainsAttribute(output, "class", cssClass);
 		assertContainsAttribute(output, "style", cssStyle);
 		assertContainsAttribute(output, "title", title);

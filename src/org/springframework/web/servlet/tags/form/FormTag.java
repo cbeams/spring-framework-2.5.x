@@ -66,6 +66,11 @@ public class FormTag extends AbstractFormTag {
 	public static final String COMMAND_NAME_ATTRIBUTE = "commandName";
 
 	/**
+	 * The name of the '<code>name</code>' attribute.
+	 */
+	public static final String NAME_ATTRIBUTE = "name";
+
+	/**
 	 * The name of the '<code>onsubmit</code>' attribute.
 	 */
 	public static final String ONSUBMIT_ATTRIBUTE = "onsubmit";
@@ -101,6 +106,11 @@ public class FormTag extends AbstractFormTag {
 	private String commandName = DEFAULT_COMMAND_NAME;
 
 	/**
+	 * The value of the '<code>name</code>' attribute.
+	 */
+	private String name;
+
+	/**
 	 * The value of the '<code>action</code>' attribute.
 	 */
 	private String action;
@@ -132,6 +142,14 @@ public class FormTag extends AbstractFormTag {
 	public void setCommandName(String commandName) {
 		Assert.notNull(commandName, "'commandName' cannot be null");
 		this.commandName = commandName;
+	}
+
+	/**
+	 * Sets the value of the '<code>name</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	/**
@@ -188,6 +206,7 @@ public class FormTag extends AbstractFormTag {
 
 		this.tagWriter.writeAttribute(METHOD_ATTRIBUTE,
 						ObjectUtils.nullSafeToString(evaluate(METHOD_ATTRIBUTE, this.method)));
+		writeOptionalAttribute(tagWriter, NAME_ATTRIBUTE, this.name);
 		writeOptionalAttribute(tagWriter, ACTION_ATTRIBUTE, this.action);
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, this.enctype);
 		writeOptionalAttribute(tagWriter, ONSUBMIT_ATTRIBUTE, this.onsubmit);
