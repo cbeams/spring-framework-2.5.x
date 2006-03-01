@@ -58,6 +58,7 @@ import org.springframework.jmx.export.notification.NotificationPublisherAware;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.MBeanRegistrationSupport;
 import org.springframework.util.ObjectUtils;
+import org.springframework.core.Constants;
 
 /**
  * A bean that allows for any Spring-managed bean to be exposed to a JMX
@@ -90,6 +91,27 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		implements InitializingBean, DisposableBean, MBeanExportOperations, BeanFactoryAware {
 
 	/**
+	 * Autodetection mode indicating that no autodetection should be used.
+	 */
+	public static final int AUTODETECT_NONE = 0;
+
+	/**
+	 * Autodetection mode indicating that only valid MBeans should be autodetected.
+	 */
+	public static final int AUTODETECT_MBEAN = 1;
+
+	/**
+	 * Autodetection mode indicating that only the {@link MBeanInfoAssembler} should be able
+	 * to autodetect beans.
+	 */
+	public static final int AUTODETECT_ASSEMBLER = 2;
+
+	/**
+	 * Autodetection mode indicating that all autodetection mechanisms should be used.
+	 */
+	public static final int AUTODETECT_ALL = AUTODETECT_MBEAN | AUTODETECT_ASSEMBLER;
+
+	/**
 	 * Constant for the JMX <code>mr_type</code> "ObjectReference".
 	 */
 	private static final String MR_TYPE_OBJECT_REFERENCE = "ObjectReference";
@@ -100,6 +122,10 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 */
 	private static final String WILDCARD = "*";
 
+	/**
+	 * {@link Constants} instance for this class.
+	 */
+	private static final Constants constants = new Constants(MBeanExporter.class);
 
 	/**
 	 * The beans to be exposed as JMX managed resources.
@@ -107,9 +133,10 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	private Map beans;
 
 	/**
-	 * Whether to autodetect MBeans in the bean factory.
+	 * The autodetect mode to use for this <code>MBeanExporter</code>.
+	 * Default value is {@link #AUTODETECT_NONE}.
 	 */
-	private boolean autodetect = false;
+	private int autodetectMode = AUTODETECT_NONE;
 
 	/**
 	 * Indicates whether Spring should modify generated {@link ObjectName ObjectNames}
@@ -182,11 +209,35 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * @see #setAssembler
 	 * @see AutodetectCapableMBeanInfoAssembler
 	 * @see org.springframework.jmx.support.JmxUtils#isMBean
+	 * @deprecated in favor of {@link #setAutodetectModeName(String)}
 	 */
 	public void setAutodetect(boolean autodetect) {
-		this.autodetect = autodetect;
+		this.autodetectMode = (autodetect ? AUTODETECT_ALL : AUTODETECT_NONE);
 	}
 
+	/**
+	 * Sets the autodetection mode to use.
+	 * @see #setAutodetectModeName(String)
+	 * @see #AUTODETECT_ALL
+	 * @see #AUTODETECT_ASSEMBLER
+	 * @see #AUTODETECT_MBEAN
+	 * @see #AUTODETECT_NONE
+	 */
+	public void setAutodetectMode(int autodetectMode) {
+		this.autodetectMode = autodetectMode;
+	}
+
+	/**
+	 * Sets the autodetection mode to use by name.
+	 * @see #setAutodetectMode(int) 
+	 * @see #AUTODETECT_ALL
+	 * @see #AUTODETECT_ASSEMBLER
+	 * @see #AUTODETECT_MBEAN
+	 * @see #AUTODETECT_NONE
+	 */
+	public void setAutodetectModeName(String autodetectMode) {
+		this.autodetectMode = constants.asNumber(autodetectMode).intValue();
+	}
 	/**
 	 * Set the implementation of the <code>MBeanInfoAssembler</code> interface to use
 	 * for this exporter. Default is a <code>SimpleReflectiveMBeanInfoAssembler</code>.
@@ -410,17 +461,20 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		}
 
 		// Perform autodetection, if desired.
-		if (this.autodetect) {
+		if (this.autodetectMode != AUTODETECT_NONE) {
 			if (this.beanFactory == null) {
 				throw new MBeanExportException("Cannot autodetect MBeans if not running in a BeanFactory");
 			}
 
-			// Autodetect any beans that are already MBeans.
-			logger.info("Autodetecting user-defined JMX MBeans");
-			autodetectMBeans();
+			if (isAutodetectModeEnabled(AUTODETECT_MBEAN)) {
+				// Autodetect any beans that are already MBeans.
+				logger.info("Autodetecting user-defined JMX MBeans");
+				autodetectMBeans();
+			}
 
 			// Allow the assembler a chance to vote for bean inclusion.
-			if (this.assembler instanceof AutodetectCapableMBeanInfoAssembler) {
+			if (isAutodetectModeEnabled(AUTODETECT_ASSEMBLER)
+							&& this.assembler instanceof AutodetectCapableMBeanInfoAssembler) {
 				autodetectBeans((AutodetectCapableMBeanInfoAssembler) this.assembler);
 			}
 		}
@@ -684,6 +738,14 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	//---------------------------------------------------------------------
 
 	/**
+	 * Returns <code>true</code> if the particular autodetect mode is enabled
+	 * otherwise returns <code>false</code>.
+	 */
+	private boolean isAutodetectModeEnabled(int mode) {
+		return (this.autodetectMode & mode) == mode;
+	}
+
+	/**
 	 * Invoked when using an <code>AutodetectCapableMBeanInfoAssembler</code>.
 	 * Gives the assembler the opportunity to add additional beans from the
 	 * <code>BeanFactory</code> to the list of beans to be exposed via JMX.
@@ -763,7 +825,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 */
 	private void injectNotificationPublisherIfNecessary(Object managedResource, ModelMBean modelMBean) {
 		if (managedResource instanceof NotificationPublisherAware) {
-		  ((NotificationPublisherAware) managedResource).setNotificationPublisher(
+			((NotificationPublisherAware) managedResource).setNotificationPublisher(
 					new ModelMBeanNotificationPublisher(modelMBean));
 		}
 	}
