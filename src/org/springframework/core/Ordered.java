@@ -32,7 +32,7 @@ public interface Ordered {
 	/**
 	 * Useful constant for the lowest precedence value.
 	 *
-	 * @see {@link Integer.MAX_VALUE}
+	 * @see java.lang.Integer#MAX_VALUE
 	 */
 	public static final int LOWEST_PRECEDENCE = Integer.MAX_VALUE;
 
@@ -51,7 +51,7 @@ public interface Ordered {
 	 * (somewhat analogous to Servlet "load-on-startup" values).
 	 *
 	 * @return the order value
-	 * @see {@link #LOWEST_PRECEDENCE}
+	 * @see #LOWEST_PRECEDENCE
 	 */
 	public int getOrder();
 
