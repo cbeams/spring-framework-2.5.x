@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import javax.jms.Session;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * The simplest possible implementation of the ServerSessionFactory SPI:
@@ -49,7 +51,14 @@ import org.springframework.jms.support.JmsUtils;
  */
 public class SimpleServerSessionFactory implements ServerSessionFactory {
 
-	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("SimpleServerSessionFactory");
+	/**
+	 * Default thread name prefix: "SimpleServerSessionFactory-".
+	 */
+	public static final String DEFAULT_THREAD_NAME_PREFIX =
+			ClassUtils.getShortName(SimpleServerSessionFactory.class) + "-";
+
+
+	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor(DEFAULT_THREAD_NAME_PREFIX);
 
 
 	/**
@@ -63,6 +72,7 @@ public class SimpleServerSessionFactory implements ServerSessionFactory {
 	 * @see org.springframework.scheduling.timer.TimerTaskExecutor
 	 */
 	public void setTaskExecutor(TaskExecutor taskExecutor) {
+		Assert.notNull(taskExecutor, "taskExecutor is required");
 		this.taskExecutor = taskExecutor;
 	}
 
