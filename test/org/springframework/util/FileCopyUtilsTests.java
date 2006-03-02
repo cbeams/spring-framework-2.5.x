@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,12 @@ import java.util.Arrays;
 import junit.framework.TestCase;
 
 /**
+ * Unit tests for the FileCopyUtils class.
+ *
  * @author Juergen Hoeller
  * @since 12.03.2005
  */
-public class FileCopyUtilTests extends TestCase {
+public class FileCopyUtilsTests extends TestCase {
 
 	public void testCopyFromInputStream() throws IOException {
 		byte[] content = "content".getBytes();
