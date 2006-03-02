@@ -19,11 +19,16 @@ package org.springframework.jmx.export;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
+import org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler;
+import org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler;
 import org.springframework.jmx.export.naming.SelfNaming;
 import org.springframework.jmx.support.ObjectNameManager;
 
@@ -159,8 +164,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 				server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=false"));
 				fail("MBean with name spring:mbean=false should have been excluded");
 			}
-			catch (InstanceNotFoundException ex) {
-				// success
+			catch (InstanceNotFoundException expected) {
 			}
 		}
 		finally {
@@ -326,6 +330,196 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		assertEquals("Incorrect updated name.", otherName, bean.getName());
 	}
 
+	public void testBonaFideMBeanIsNotExportedWhenAutoDetectIsTotallyTurnedOff() throws Exception {
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(Person.class);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition("^&_invalidObjectName_(*", builder.getBeanDefinition());
+		String exportedBeanName = "export.me.please";
+		factory.registerSingleton(exportedBeanName, new TestBean());
+
+		MBeanExporter exporter = new MBeanExporter();
+		Map beansToExport = new HashMap();
+		beansToExport.put(OBJECT_NAME, exportedBeanName);
+		exporter.setBeans(beansToExport);
+		exporter.setServer(getServer());
+		exporter.setBeanFactory(factory);
+		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_NONE);
+		// MBean has a bad ObjectName, so if said MBean is autodetected, an exception will be thrown...
+		exporter.afterPropertiesSet();
+	}
+
+	public void testOnlyBonaFideMBeanIsExportedWhenAutoDetectIsMBeanOnly() throws Exception {
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(Person.class);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition(OBJECT_NAME, builder.getBeanDefinition());
+		String exportedBeanName = "spring:type=TestBean";
+		factory.registerSingleton(exportedBeanName, new TestBean());
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(getServer());
+		exporter.setAssembler(new NamedBeanAutodetectCapableMBeanInfoAssemblerStub(exportedBeanName));
+		exporter.setBeanFactory(factory);
+		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_MBEAN);
+		exporter.afterPropertiesSet();
+		assertIsRegistered("Bona fide MBean not autodetected in AUTODETECT_MBEAN mode",
+				ObjectNameManager.getInstance(OBJECT_NAME));
+		assertIsNotRegistered("Bean autodetected and (only) AUTODETECT_MBEAN mode is on",
+				ObjectNameManager.getInstance(exportedBeanName));
+	}
+
+	public void testAutodetectionWhenAutoDetectIsMBeanOrredWithAssembler() throws Exception {
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(Person.class);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition(OBJECT_NAME, builder.getBeanDefinition());
+		String exportedBeanName = "spring:type=TestBean";
+		factory.registerSingleton(exportedBeanName, new TestBean());
+		String notToBeExportedBeanName = "spring:type=NotToBeExported";
+		factory.registerSingleton(notToBeExportedBeanName, new TestBean());
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(getServer());
+		exporter.setAssembler(new NamedBeanAutodetectCapableMBeanInfoAssemblerStub(exportedBeanName));
+		exporter.setBeanFactory(factory);
+		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_MBEAN | MBeanExporter.AUTODETECT_ASSEMBLER);
+		exporter.afterPropertiesSet();
+		assertIsRegistered("Bona fide MBean not autodetected in (AUTODETECT_MBEAN | AUTODETECT_ASSEMBLER) mode",
+				ObjectNameManager.getInstance(OBJECT_NAME));
+		assertIsRegistered("Bean not autodetected in (AUTODETECT_MBEAN | AUTODETECT_ASSEMBLER) mode",
+				ObjectNameManager.getInstance(exportedBeanName));
+		assertIsNotRegistered("Bean autodetected and did not satisfy the autodetect info assembler",
+				ObjectNameManager.getInstance(notToBeExportedBeanName));
+	}
+
+	public void testBonaFideMBeanIsNotExportedWhenAutoDetectModeIsAssemblerOnly() throws Exception {
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(Person.class);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition(OBJECT_NAME, builder.getBeanDefinition());
+		String exportedBeanName = "spring:type=TestBean";
+		factory.registerSingleton(exportedBeanName, new TestBean());
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(getServer());
+		exporter.setAssembler(new NamedBeanAutodetectCapableMBeanInfoAssemblerStub(exportedBeanName));
+		exporter.setBeanFactory(factory);
+		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ASSEMBLER);
+		exporter.afterPropertiesSet();
+		assertIsNotRegistered("Bona fide MBean was autodetected in AUTODETECT_ASSEMBLER mode - must not have been",
+				ObjectNameManager.getInstance(OBJECT_NAME));
+		assertIsRegistered("Bean not autodetected in AUTODETECT_ASSEMBLER mode",
+				ObjectNameManager.getInstance(exportedBeanName));
+	}
+
+	/**
+	 * Want to ensure that said MBean is not exported twice.
+	 */
+	public void testBonaFideMBeanExplictlyExportedAndAutodetectionIsOn() throws Exception {
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(Person.class);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition(OBJECT_NAME, builder.getBeanDefinition());
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(getServer());
+		Map beansToExport = new HashMap();
+		beansToExport.put(OBJECT_NAME, OBJECT_NAME);
+		exporter.setBeans(beansToExport);
+		exporter.setAssembler(new NamedBeanAutodetectCapableMBeanInfoAssemblerStub(OBJECT_NAME));
+		exporter.setBeanFactory(factory);
+		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ASSEMBLER);
+		exporter.afterPropertiesSet();
+		assertIsRegistered("Explicitly exported bona fide MBean obviously not exported.",
+				ObjectNameManager.getInstance(OBJECT_NAME));
+	}
+
+	public void testSetAutoDetectModeToOutOfRangeNegativeValue() throws Exception {
+		try {
+			MBeanExporter exporter = new MBeanExporter();
+			exporter.setAutodetectMode(-1);
+			fail("Must have failed when supplying an invalid negative out-of-range autodetect mode");
+		}
+		catch (IllegalArgumentException expected) {}
+	}
+
+	public void testSetAutoDetectModeToOutOfRangePositiveValue() throws Exception {
+		try {
+			MBeanExporter exporter = new MBeanExporter();
+			exporter.setAutodetectMode(5);
+			fail("Must have failed when supplying an invalid positive out-of-range autodetect mode");
+		}
+		catch (IllegalArgumentException expected) {}
+	}
+
+	public void testSetAutoDetectModeNameToNull() throws Exception {
+		try {
+			MBeanExporter exporter = new MBeanExporter();
+			exporter.setAutodetectModeName(null);
+			fail("Must have failed when supplying a null autodetect mode name");
+		}
+		catch (IllegalArgumentException expected) {}
+	}
+
+	public void testSetAutoDetectModeNameToAnEmptyString() throws Exception {
+		try {
+			MBeanExporter exporter = new MBeanExporter();
+			exporter.setAutodetectModeName("");
+			fail("Must have failed when supplying an empty autodetect mode name");
+		}
+		catch (IllegalArgumentException expected) {}
+	}
+
+	public void testSetAutoDetectModeNameToAWhitespacedString() throws Exception {
+		try {
+			MBeanExporter exporter = new MBeanExporter();
+			exporter.setAutodetectModeName("  \t");
+			fail("Must have failed when supplying a whitespace-only autodetect mode name");
+		}
+		catch (IllegalArgumentException expected) {}
+	}
+
+	public void testSetAutoDetectModeNameToARubbishValue() throws Exception {
+		try {
+			MBeanExporter exporter = new MBeanExporter();
+			exporter.setAutodetectModeName("That Hansel is... *sssooo* hot right now!");
+			fail("Must have failed when supplying a whitespace-only autodetect mode name");
+		}
+		catch (IllegalArgumentException expected) {}
+	}
+
+	public void testNoBeansForExportAndAutodetectionTurnedOff() throws Exception {
+		try {
+			new MBeanExporter().afterPropertiesSet();
+			fail("Expecting exception because MBeanExporter has nothing to export");
+		}
+		catch (IllegalArgumentException expected) {}
+	}
+
+	public void testNotRunningInBeanFactoryAndPassedBeanNameToExport() throws Exception {
+		try {
+			MBeanExporter exporter = new MBeanExporter();
+			Map beans = new HashMap();
+			beans.put(OBJECT_NAME, "beanName");
+			exporter.setBeans(beans);
+			exporter.afterPropertiesSet();
+			fail("Expecting exception because MBeanExporter is not running in a BeanFactory and was passed bean name to (lookup and then) export");
+		}
+		catch (MBeanExportException expected) {}
+	}
+
+	public void testNotRunningInBeanFactoryAndAutodetectionIsOn() throws Exception {
+		try {
+			MBeanExporter exporter = new MBeanExporter();
+			exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ALL);
+			exporter.afterPropertiesSet();
+			fail("Expecting exception because MBeanExporter is not running in a BeanFactory and was configured to autodetect beans");
+		}
+		catch (MBeanExportException expected) {}
+	}
+	
+
+	private Map getBeanMap() {
+		Map map = new HashMap();
+		map.put(OBJECT_NAME, new JmxTestBean());
+		return map;
+	}
 
 	private void assertListener(MockMBeanExporterListener listener) throws MalformedObjectNameException {
 		ObjectName desired = ObjectNameManager.getInstance(OBJECT_NAME);
@@ -333,12 +527,6 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		assertEquals("Incorrect number of unregistrations", 1, listener.getUnregistered().size());
 		assertEquals("Incorrect ObjectName in register", desired, listener.getRegistered().get(0));
 		assertEquals("Incorrect ObjectName in unregister", desired, listener.getUnregistered().get(0));
-	}
-
-	private Map getBeanMap() {
-		Map map = new HashMap();
-		map.put(OBJECT_NAME, new JmxTestBean());
-		return map;
 	}
 
 
@@ -403,6 +591,19 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+	}
+	
+	private static final class NamedBeanAutodetectCapableMBeanInfoAssemblerStub extends SimpleReflectiveMBeanInfoAssembler implements AutodetectCapableMBeanInfoAssembler {
+		
+		private String namedBean;
+
+		public NamedBeanAutodetectCapableMBeanInfoAssemblerStub(String namedBean) {
+			this.namedBean = namedBean;
+		}
+
+		public boolean includeBean(Class beanClass, String beanName) {
+			return this.namedBean.equals(beanName);
 		}
 	}
 
