@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,13 @@ import javax.jms.Topic;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.scheduling.SchedulingAwareRunnable;
+import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -78,19 +81,17 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	public static final long DEFAULT_RECEIVE_TIMEOUT = 1000;
 
 
-	private final Object monitor = new Object();
-
 	private boolean pubSubNoLocal = false;
+
+	private TaskExecutor taskExecutor;
 
 	private int concurrentConsumers = 1;
 
-	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor(DEFAULT_THREAD_NAME_PREFIX);
+	private int maxMessagesPerTask = Integer.MIN_VALUE;
 
 	private TransactionTemplate transactionTemplate = new TransactionTemplate();
 
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
-
-	private int listenersRunning = 0;
 
 
 	/**
@@ -110,14 +111,6 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	}
 
 	/**
-	 * Specify the number of concurrent consumers to create.
-	 * Default is 1.
-	 */
-	public void setConcurrentConsumers(int concurrentConsumers) {
-		this.concurrentConsumers = concurrentConsumers;
-	}
-
-	/**
 	 * Set the Spring TaskExecutor to use for running the listener threads.
 	 * Default is SimpleAsyncTaskExecutor, starting up a number of new threads,
 	 * according to the specified number of concurrent consumers.
@@ -132,6 +125,37 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 */
 	public void setTaskExecutor(TaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
+	}
+
+	/**
+	 * Specify the number of concurrent consumers to create.
+	 * Default is 1.
+	 */
+	public void setConcurrentConsumers(int concurrentConsumers) {
+		Assert.isTrue(concurrentConsumers > 0, "concurrentConsumers must be positive");
+		this.concurrentConsumers = concurrentConsumers;
+	}
+
+	/**
+	 * Set the maximum number of messages to process in one task.
+	 * More concretely, this limits the number of message reception attempts,
+	 * which includes receive iterations that did not actually pick up a
+	 * message until they hit their timeout (see "receiveTimeout" property).
+	 * <p>Default is unlimited (-1) in case of a standard TaskExecutor,
+	 * and 1 in case of a SchedulingTaskExecutor that indicates a preference for
+	 * short-lived tasks. Specify a number of 10 to 100 messages to balance
+	 * between extremely long-lived and extremely short-lived tasks here.
+	 * <p>Long-lived tasks avoid frequent thread context switches through
+	 * sticking with the same thread all the way through, while short-lived
+	 * tasks allow thread pools to control the scheduling. Hence, thread
+	 * pools will usually prefer short-lived tasks.
+	 * @see #setTaskExecutor
+	 * @see #setReceiveTimeout
+	 * @see org.springframework.scheduling.SchedulingTaskExecutor#isShortLivedPreferred()
+	 */
+	public void setMaxMessagesPerTask(int maxMessagesPerTask) {
+		Assert.isTrue(maxMessagesPerTask != 0, "maxMessagesPerTask must not be 0");
+		this.maxMessagesPerTask = maxMessagesPerTask;
 	}
 
 	/**
@@ -189,6 +213,24 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	//-------------------------------------------------------------------------
 	// Implementation of AbstractMessageListenerContainer's template methods
 	//-------------------------------------------------------------------------
+
+	public void initialize() {
+		// Prepare taskExecutor and maxMessagesPerTask.
+		if (this.taskExecutor == null) {
+			this.taskExecutor = new SimpleAsyncTaskExecutor(DEFAULT_THREAD_NAME_PREFIX);
+		}
+		else if (this.taskExecutor instanceof SchedulingTaskExecutor &&
+				((SchedulingTaskExecutor) this.taskExecutor).isShortLivedPreferred() &&
+				this.maxMessagesPerTask == Integer.MIN_VALUE) {
+			// TaskExecutor indicated a preference for short-lived tasks. According to
+			// setMaxMessagesPerTask javadoc, we'll use 1 message per task in this case
+			// unless the user specified a custom value.
+			this.maxMessagesPerTask = 1;
+		}
+
+		// Proceed with actual listener initialization.
+		super.initialize();
+	}
 
 	/**
 	 * Creates the specified number of concurrent consumers,
@@ -256,13 +298,12 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 */
 	protected void destroyListener() throws JMSException {
 		logger.debug("Shutting down JMS message listener invokers");
+		// Give the async receive tasks a typical time to finish.
 		if (this.receiveTimeout > 0) {
-			while (this.listenersRunning > 0) {
-				try {
-					Thread.sleep(this.receiveTimeout);
-				}
-				catch (InterruptedException ex) {
-				}
+			try {
+				Thread.sleep(this.receiveTimeout);
+			}
+			catch (InterruptedException ex) {
 			}
 		}
 	}
@@ -300,31 +341,60 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	/**
 	 * Runnable that performs looped <code>MessageConsumer.receive()</code> calls.
 	 */
-	private class AsyncMessageListenerInvoker implements Runnable {
+	private class AsyncMessageListenerInvoker implements SchedulingAwareRunnable {
+
+		private Session session;
+
+		private MessageConsumer consumer;
 
 		public void run() {
-			synchronized (monitor) {
-				listenersRunning++;
-			}
-			Session session = null;
-			MessageConsumer consumer = null;
 			try {
-				session = createSession(getConnection());
-				consumer = createListenerConsumer(session);
-				while (isActive()) {
-					executeListener(session, consumer);
+				initResourcesIfNecessary();
+				if (maxMessagesPerTask < 0) {
+					while (isActive()) {
+						executeListener(this.session, this.consumer);
+					}
+				}
+				else {
+					int messageCount = 0;
+					while (isActive() && messageCount < maxMessagesPerTask) {
+						executeListener(this.session, this.consumer);
+						messageCount++;
+					}
 				}
 			}
-			catch (JMSException ex) {
+			catch (Throwable ex) {
 				logger.error("Setup of JMS message listener invoker failed", ex);
+				clearResources();
 			}
-			finally {
-				JmsUtils.closeMessageConsumer(consumer);
-				JmsUtils.closeSession(session);
-				synchronized (monitor) {
-					listenersRunning--;
-				}
+			if (isActive()) {
+				// Reschedule this Runnable for receiving another message.
+				// Reuses the Session and MessageConsumer unless an infrastructure
+				// exception was raised during the last attempt.
+				taskExecutor.execute(this);
 			}
+			else {
+				// We're shutting down completely.
+				clearResources();
+			}
+		}
+
+		private void initResourcesIfNecessary() throws JMSException {
+			if (this.session == null) {
+				this.session = createSession(getConnection());
+				this.consumer = createListenerConsumer(this.session);
+			}
+		}
+
+		private void clearResources() {
+			JmsUtils.closeMessageConsumer(this.consumer);
+			JmsUtils.closeSession(this.session);
+			this.consumer = null;
+			this.session = null;
+		}
+
+		public boolean isLongLived() {
+			return (maxMessagesPerTask < 0);
 		}
 	}
 
