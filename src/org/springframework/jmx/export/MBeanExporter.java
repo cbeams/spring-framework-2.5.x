@@ -58,7 +58,9 @@ import org.springframework.jmx.export.notification.NotificationPublisherAware;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.MBeanRegistrationSupport;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.Assert;
 import org.springframework.core.Constants;
+import org.springframework.core.ConstantException;
 
 /**
  * A bean that allows for any Spring-managed bean to be exposed to a JMX
@@ -217,6 +219,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 
 	/**
 	 * Sets the autodetection mode to use.
+	 * @exception IllegalArgumentException if the supplied value is not one of the <code>AUTODETECT_</code> values
 	 * @see #setAutodetectModeName(String)
 	 * @see #AUTODETECT_ALL
 	 * @see #AUTODETECT_ASSEMBLER
@@ -224,20 +227,29 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * @see #AUTODETECT_NONE
 	 */
 	public void setAutodetectMode(int autodetectMode) {
-		this.autodetectMode = autodetectMode;
+		try {
+			constants.toCode(Integer.valueOf(autodetectMode), "AUTODETECT_");
+			this.autodetectMode = autodetectMode;
+		}
+		catch (ConstantException ex) {
+			throw new IllegalArgumentException("Invalid autodetect mode", ex);
+		}
 	}
 
 	/**
 	 * Sets the autodetection mode to use by name.
-	 * @see #setAutodetectMode(int) 
+	 * @exception IllegalArgumentException if the supplied value is not resolvable to one of the <code>AUTODETECT_</code> values or is <code>null</code>
+	 * @see #setAutodetectMode(int)
 	 * @see #AUTODETECT_ALL
 	 * @see #AUTODETECT_ASSEMBLER
 	 * @see #AUTODETECT_MBEAN
 	 * @see #AUTODETECT_NONE
 	 */
 	public void setAutodetectModeName(String autodetectMode) {
+		Assert.hasText(autodetectMode, "AutodetectModeName argument cannot be null");
 		this.autodetectMode = constants.asNumber(autodetectMode).intValue();
 	}
+
 	/**
 	 * Set the implementation of the <code>MBeanInfoAssembler</code> interface to use
 	 * for this exporter. Default is a <code>SimpleReflectiveMBeanInfoAssembler</code>.
@@ -774,8 +786,9 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * Performs the actual autodetection process, delegating to an instance
-	 * <code>AutodetectCallback</code> to vote on the inclusion of a given bean.
+	 * Performs the actual autodetection process, delegating to an
+	 * <code>AutodetectCallback</code> instance to vote on the inclusion of a
+	 * given bean.
 	 * @param callback the <code>AutodetectCallback</code> to use when deciding
 	 * whether to include a bean or not
 	 */
@@ -783,7 +796,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		String[] beanNames = this.beanFactory.getBeanNamesForType(null);
 		for (int i = 0; i < beanNames.length; i++) {
 			String beanName = beanNames[i];
-
 			if (!isExcluded(beanName)) {
 				Class beanClass = this.beanFactory.getType(beanName);
 				if (beanClass != null && callback.include(beanClass, beanName)) {
