@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
-
-import org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer;
 
 /**
  * A subclass of ServerSessionMessageListenerContainer that uses the JMS 1.0.2 specification,
@@ -62,11 +60,11 @@ public class ServerSessionMessageListenerContainer102 extends ServerSessionMessa
 
 		if (isPubSubDomain()) {
 			return ((TopicConnection) con).createConnectionConsumer(
-					(Topic) destination, getMessageSelector(), pool, getMaxMessages());
+					(Topic) destination, getMessageSelector(), pool, getMaxMessagesPerTask());
 		}
 		else {
 			return ((QueueConnection) con).createConnectionConsumer(
-					(Queue) destination, getMessageSelector(), pool, getMaxMessages());
+					(Queue) destination, getMessageSelector(), pool, getMaxMessagesPerTask());
 		}
 	}
 

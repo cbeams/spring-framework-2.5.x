@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,6 @@ import javax.jms.ServerSessionPool;
 import javax.jms.Session;
 
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
-import org.springframework.jms.listener.serversession.SimpleServerSessionFactory;
-import org.springframework.jms.listener.serversession.ListenerSessionManager;
 import org.springframework.jms.support.JmsUtils;
 
 /**
@@ -57,7 +55,7 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 
 	private ServerSessionFactory serverSessionFactory = new SimpleServerSessionFactory();
 
-	private int maxMessages = 1;
+	private int maxMessagesPerTask = 1;
 
 	private ConnectionConsumer consumer;
 
@@ -89,15 +87,15 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	 * argument for details.
 	 * @see javax.jms.Connection#createConnectionConsumer
 	 */
-	public void setMaxMessages(int maxMessages) {
-		this.maxMessages = maxMessages;
+	public void setMaxMessagesPerTask(int maxMessagesPerTask) {
+		this.maxMessagesPerTask = maxMessagesPerTask;
 	}
 
 	/**
 	 * Return the maximum number of messages to load into a JMS Session.
 	 */
-	protected int getMaxMessages() {
-		return maxMessages;
+	protected int getMaxMessagesPerTask() {
+		return maxMessagesPerTask;
 	}
 
 
@@ -222,7 +220,7 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	protected ConnectionConsumer createConsumer(Connection con, Destination destination, ServerSessionPool pool)
 			throws JMSException {
 
-		return con.createConnectionConsumer(destination, getMessageSelector(), pool, getMaxMessages());
+		return con.createConnectionConsumer(destination, getMessageSelector(), pool, getMaxMessagesPerTask());
 	}
 
 }
