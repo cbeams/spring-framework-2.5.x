@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 
 /**
@@ -55,7 +55,7 @@ import org.springframework.util.Assert;
  * @see java.util.concurrent.Executors
  * @see ConcurrentTaskExecutor
  */
-public class ThreadPoolTaskExecutor implements TaskExecutor, Executor, InitializingBean, DisposableBean {
+public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -131,10 +131,18 @@ public class ThreadPoolTaskExecutor implements TaskExecutor, Executor, Initializ
 
 
 	/**
+	 * Calls <code>initialize()</code> after the container applied all property values.
+	 * @see #initialize()
+	 */
+	public void afterPropertiesSet() {
+		initialize();
+	}
+
+	/**
 	 * Creates the BlockingQueue and the ThreadPoolExecutor.
 	 * @see #createQueue
 	 */
-	public void afterPropertiesSet() {
+	public void initialize() {
 		logger.info("Creating ThreadPoolExecutor");
 		BlockingQueue queue = createQueue(this.queueCapacity);
 		this.executorService = new ThreadPoolExecutor(
@@ -173,6 +181,10 @@ public class ThreadPoolTaskExecutor implements TaskExecutor, Executor, Initializ
 		this.executorService.execute(task);
 	}
 
+	public boolean isShortLivedPreferred() {
+		return true;
+	}
+
 
 	/**
 	 * Perform a shutdown on the ThreadPoolExecutor.
@@ -184,3 +196,4 @@ public class ThreadPoolTaskExecutor implements TaskExecutor, Executor, Initializ
 	}
 
 }
+

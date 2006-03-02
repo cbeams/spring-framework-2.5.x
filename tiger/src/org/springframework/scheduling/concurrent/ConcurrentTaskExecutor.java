@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.scheduling.concurrent;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.SchedulingTaskExecutor;
 
 /**
  * Adapter that takes a JDK 1.5 <code>java.util.concurrent.Executor</code>
@@ -38,7 +38,7 @@ import org.springframework.core.task.TaskExecutor;
  * @see java.util.concurrent.Executors
  * @see ThreadPoolTaskExecutor
  */
-public class ConcurrentTaskExecutor implements TaskExecutor, Executor {
+public class ConcurrentTaskExecutor implements SchedulingTaskExecutor, Executor {
 
 	private Executor concurrentExecutor;
 
@@ -76,6 +76,10 @@ public class ConcurrentTaskExecutor implements TaskExecutor, Executor {
 	 */
 	public void execute(Runnable task) {
 		this.concurrentExecutor.execute(task);
+	}
+
+	public boolean isShortLivedPreferred() {
+		return true;
 	}
 
 }

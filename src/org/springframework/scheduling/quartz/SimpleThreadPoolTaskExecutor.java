@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.quartz.simpl.SimpleThreadPool;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.SchedulingTaskExecutor;
 
 /**
  * Subclass of Quartz's SimpleThreadPool that implements Spring's
@@ -40,7 +40,7 @@ import org.springframework.core.task.TaskExecutor;
  * @see SchedulerFactoryBean#setTaskExecutor
  */
 public class SimpleThreadPoolTaskExecutor extends SimpleThreadPool
-		implements TaskExecutor, InitializingBean, DisposableBean {
+		implements SchedulingTaskExecutor, InitializingBean, DisposableBean {
 
 	private boolean waitForJobsToCompleteOnShutdown = false;
 
@@ -54,14 +54,19 @@ public class SimpleThreadPoolTaskExecutor extends SimpleThreadPool
 		this.waitForJobsToCompleteOnShutdown = waitForJobsToCompleteOnShutdown;
 	}
 
-
 	public void afterPropertiesSet() throws SchedulerConfigException {
 		initialize();
 	}
 
+
 	public void execute(Runnable task) {
 		runInThread(task);
 	}
+
+	public boolean isShortLivedPreferred() {
+		return true;
+	}
+
 
 	public void destroy() {
 		shutdown(this.waitForJobsToCompleteOnShutdown);

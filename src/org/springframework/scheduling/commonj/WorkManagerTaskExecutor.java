@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import commonj.work.WorkListener;
 import commonj.work.WorkManager;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.scheduling.SchedulingException;
+import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 
 /**
@@ -51,7 +51,7 @@ import org.springframework.util.Assert;
  * @since 2.0
  */
 public class WorkManagerTaskExecutor extends JndiLocatorSupport
-		implements TaskExecutor, WorkManager, InitializingBean {
+		implements SchedulingTaskExecutor, WorkManager, InitializingBean {
 
 	private WorkManager workManager;
 
@@ -91,7 +91,7 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 
 
 	//-------------------------------------------------------------------------
-	// Implementation of the Spring TaskExecutor interface
+	// Implementation of the Spring SchedulingTaskExecutor interface
 	//-------------------------------------------------------------------------
 
 	public void execute(Runnable task) {
@@ -102,6 +102,10 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		catch (WorkException ex) {
 			throw new SchedulingException("Could not schedule work on CommonJ WorkManager", ex);
 		}
+	}
+
+	public boolean isShortLivedPreferred() {
+		return true;
 	}
 
 

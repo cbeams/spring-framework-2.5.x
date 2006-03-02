@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 
 /**
@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  * @since 2.0
  * @see java.util.Timer
  */
-public class TimerTaskExecutor implements TaskExecutor, InitializingBean, DisposableBean {
+public class TimerTaskExecutor implements SchedulingTaskExecutor, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -45,6 +45,24 @@ public class TimerTaskExecutor implements TaskExecutor, InitializingBean, Dispos
 
 	private boolean internalTimer = false;
 
+
+	/**
+	 * Create a new TimerTaskExecutor that needs to be further
+	 * configured and initialized.
+	 * @see #setTimer
+	 * @see #afterPropertiesSet
+	 */
+	public TimerTaskExecutor() {
+	}
+
+	/**
+	 * Create a new TimerTaskExecutor for the given Timer.
+	 * @param timer the Timer to wrap
+	 */
+	public TimerTaskExecutor(Timer timer) {
+		Assert.notNull(timer, "Timer must not be null");
+		this.timer = timer;
+	}
 
 	/**
 	 * Set the <code>java.util.Timer</code> to use for this TaskExecutor,
@@ -93,6 +111,10 @@ public class TimerTaskExecutor implements TaskExecutor, InitializingBean, Dispos
 	public void execute(Runnable task) {
 		Assert.notNull(this.timer, "timer is required");
 		this.timer.schedule(new DelegatingTimerTask(task), this.delay);
+	}
+
+	public boolean isShortLivedPreferred() {
+		return true;
 	}
 
 
