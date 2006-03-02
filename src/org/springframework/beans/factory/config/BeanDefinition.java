@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public interface BeanDefinition {
 	 * Role hint indicating that a <code>BeanDefinition</code> is a major part
 	 * of the application. Typically corresponds to a user-defined bean.
 	 */
-	static final int ROLE_APPLICATION = 0;
+	int ROLE_APPLICATION = 0;
 
 	/**
 	 * Role hint indicating that a <code>BeanDefinition</code> is a supporting
@@ -53,7 +53,7 @@ public interface BeanDefinition {
 	 * {@link org.springframework.beans.factory.support.ComponentDefinition}, but
 	 * not when looking at the overall configuration of an application.
 	 */
-	static final int ROLE_SUPPORT = 1;
+	int ROLE_SUPPORT = 1;
 
 	/**
 	 * Role hint indicating that a <code>BeanDefinition</code> is providing
@@ -61,7 +61,8 @@ public interface BeanDefinition {
 	 * hint is used when registering beans that are completely part of the internal
 	 * workings of a {@link org.springframework.beans.factory.support.ComponentDefinition}. 
 	 */
-	static final int ROLE_INFRASTRUCTURE = 2;
+	int ROLE_INFRASTRUCTURE = 2;
+
 
 	/**
 	 * Return whether this bean is "abstract", i.e. not meant to be instantiated.
@@ -101,27 +102,14 @@ public interface BeanDefinition {
 	String getResourceDescription();
 
 	/**
-	 * Attaches a generic, keyed metadata attribute to this <code>BeanDefinition</code>.
-	 * User's should take care to prevent overlaps with other metadata attributes by using
-	 * fully-qualified names, perhaps using <code>Class</code> or <code>Package</code> names.
-	 */
-	void setAttribute(String key, Object value);
-
-	/**
-	 * Gets the metadata attribute for the given key.
-	 */
-	Object getAttribute(String key);
-
-	/**
-	 * Returns the <code>Object</code> that was the source of this definition
-	 * in the configuration. May be <code>null</code>. The exact type of this
-	 * source <code>Object</code> will depend on the configuration mechanism
-	 * used.
+	 * Return the <code>Object</code> that was the source of this definition in the
+	 * configuration. May be <code>null</code>. The exact type of this source
+	 * <code>Object</code> will depend on the configuration mechanism used.
 	 */
 	Object getSource();
 
 	/**
-	 * Gets the role hint for this <code>BeanDefinition</code>. The role hint
+	 * Get the role hint for this <code>BeanDefinition</code>. The role hint
 	 * provides tool with an indication of the importance of a particular
 	 * <code>BeanDefinition</code>.
 	 * @see #ROLE_APPLICATION
@@ -129,4 +117,20 @@ public interface BeanDefinition {
 	 * @see #ROLE_SUPPORT
 	 */
 	int getRole();
+
+	/**
+	 * Attaches a generic, keyed metadata attribute to this <code>BeanDefinition</code>.
+	 * Users should take care to prevent overlaps with other metadata attributes by using
+	 * fully-qualified names, perhaps using class or package names.
+	 * @param key the unique attribute key
+	 * @param value the attribute value to be attached
+	 */
+	void setAttribute(String key, Object value);
+
+	/**
+	 * Get the metadata attribute for the given key, if any.
+	 * @return the attribute value, or <code>null</code> if none
+	 */
+	Object getAttribute(String key);
+
 }

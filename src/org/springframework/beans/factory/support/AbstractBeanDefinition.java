@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,14 +17,15 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.HashMap;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -101,8 +102,6 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	public static final int DEPENDENCY_CHECK_ALL = 3;
 
 
-	private final Map attributes = new HashMap();
-
 	private Object beanClass;
 
 	private boolean abstractFlag = false;
@@ -140,6 +139,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	private Object source;
 
 	private int role = BeanDefinition.ROLE_APPLICATION;
+
+	private final Map attributes = new HashMap();
+
 
 	/**
 	 * Create a new AbstractBeanDefinition with default settings.
@@ -526,7 +528,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Specifies whether or not the configured init method is the default.
+	 * Specify whether or not the configured init method is the default.
 	 * Default value is <code>false</code>.
 	 * @see #setInitMethodName
 	 */
@@ -535,7 +537,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Indicates whether the configured init method is the default.
+	 * Indicate whether the configured init method is the default.
 	 * @see #getInitMethodName()
 	 */
 	public boolean isEnforceInitMethod() {
@@ -558,7 +560,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Specifies whether or not the configured destroy method is the default.
+	 * Specify whether or not the configured destroy method is the default.
 	 * Default value is <code>false</code>.
 	 * @see #setDestroyMethodName
 	 */
@@ -567,7 +569,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Indicates whether the configured destroy method is the default.
+	 * Indicate whether the configured destroy method is the default.
 	 * @see #getDestroyMethodName
 	 */
 	public boolean isEnforceDestroyMethod() {
@@ -591,45 +593,44 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		return resourceDescription;
 	}
 
-	public void setAttribute(String key, Object value) {
-		this.attributes.put(key, value);
-	}
-
-	public Object getAttribute(String key) {
-		return this.attributes.get(key);
-	}
-
 	/**
-	 * Returns the <code>Object</code> that was the source of this definition
-	 * in the configuration. May be <code>null</code>. The exact type of this
-	 * source <code>Object</code> will depend on the configuration mechanism
-	 * used.
-	 */
-	public Object getSource() {
-		return source;
-	}
-
-	/**
-	 * Sets the <code>Object</code> representing the configuration source
+	 * Set the <code>Object</code> representing the configuration source
 	 * for this <code>BeanDefinition</code>.
 	 */
 	public void setSource(Object source) {
 		this.source = source;
 	}
 
-	/**
-	 * Gets the role hint for this <code>BeanDefinition</code>.
-	 */
-	public int getRole() {
-		return role;
+	public Object getSource() {
+		return source;
 	}
 
 	/**
-	 * Sets the role hint for this <code>BeanDefinition</code>.
+	 * Set the role hint for this <code>BeanDefinition</code>.
 	 */
 	public void setRole(int role) {
 		this.role = role;
 	}
+
+	public int getRole() {
+		return role;
+	}
+
+	public void setAttribute(String key, Object value) {
+		Assert.notNull(key, "Attribute key must not be null");
+		if (value != null) {
+			this.attributes.put(key, value);
+		}
+		else {
+			this.attributes.remove(key);
+		}
+	}
+
+	public Object getAttribute(String key) {
+		Assert.notNull(key, "Attribute key must not be null");
+		return this.attributes.get(key);
+	}
+
 
 	/**
 	 * Validate this bean definition.
@@ -693,4 +694,5 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		}
 		return sb.toString();
 	}
+
 }
