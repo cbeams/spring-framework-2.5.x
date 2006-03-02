@@ -50,7 +50,7 @@ public abstract class JdbcUtils {
 	/**
 	 * Close the given JDBC Connection and ignore any thrown exception.
 	 * This is useful for typical finally blocks in manual JDBC code.
-	 * @param con the JDBC Connection to close
+	 * @param con the JDBC Connection to close (may be <code>null</code>)
 	 */
 	public static void closeConnection(Connection con) {
 		if (con != null) {
@@ -70,7 +70,7 @@ public abstract class JdbcUtils {
 	/**
 	 * Close the given JDBC Statement and ignore any thrown exception.
 	 * This is useful for typical finally blocks in manual JDBC code.
-	 * @param stmt the JDBC Statement to close
+	 * @param stmt the JDBC Statement to close (may be <code>null</code>)
 	 */
 	public static void closeStatement(Statement stmt) {
 		if (stmt != null) {
@@ -90,7 +90,7 @@ public abstract class JdbcUtils {
 	/**
 	 * Close the given JDBC ResultSet and ignore any thrown exception.
 	 * This is useful for typical finally blocks in manual JDBC code.
-	 * @param rs the JDBC ResultSet to close
+	 * @param rs the JDBC ResultSet to close (may be <code>null</code>)
 	 */
 	public static void closeResultSet(ResultSet rs) {
 		if (rs != null) {
@@ -272,7 +272,7 @@ public abstract class JdbcUtils {
 	 * <code>str</code>. The character <code>placeholder</code> is not counted if it
 	 * appears within a literal as determined by the <code>delim</code> that is passed in.
 	 * Delegates to the overloaded method that takes a String with multiple delimiters.
-	 * @param str string to search in. Returns 0 if this is null.
+	 * @param str string to search in. Returns 0 if this is <code>null</code>.
 	 * @param placeholder the character to search for and count
 	 * @param delim the delimiter for character literals
 	 * @deprecated Use the countParameterPlaceholders(str) method in NamedParameterUtils instead.
