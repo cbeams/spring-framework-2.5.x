@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package org.springframework.core;
+
+import org.springframework.util.StringUtils;
+import org.springframework.util.Assert;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -51,16 +54,18 @@ public class Constants {
 
 	/**
 	 * Create a new Constants converter class wrapping the given class.
-	 * All public static final variables will be exposed, whatever their type.
+	 * <p>
+	 * All <b>public</b> static final variables will be exposed, whatever their type.
 	 * @param clazz the class to analyze
+	 * @throws IllegalArgumentException if the supplied <code>clazz</code> is <code>null</code>
 	 */
 	public Constants(Class clazz) {
+		Assert.notNull(clazz);
 		this.className = clazz.getName();
 		Field[] fields = clazz.getFields();
 		for (int i = 0; i < fields.length; i++) {
 			Field field = fields[i];
-			if (Modifier.isFinal(field.getModifiers()) && Modifier.isStatic(field.getModifiers())	&&
-			    Modifier.isPublic(field.getModifiers())) {
+			if (isPublicStaticAndFinal(field)) {
 				String name = field.getName();
 				try {
 					Object value = field.get(null);
@@ -141,11 +146,19 @@ public class Constants {
 
 	/**
 	 * Return all values of the given group of constants.
-	 * @param namePrefix prefix of the constant names to search
+	 * <p>
+	 * Please note that this method assumes that constants are named
+	 * in accordance with the standard Java convention for constant
+	 * values (i.e. all uppercase). The supplied <code>namePrefix</code>
+	 * will be uppercased (in a locale-insensitive fashion) prior to
+	 * the main logic of this method kicking in. 
+	 * 
+	 * @param namePrefix prefix of the constant names to search (may be <code>null</code>)
 	 * @return the set of values
 	 */
 	public Set getValues(String namePrefix) {
-		String prefixToUse = namePrefix.toUpperCase();
+		String prefixToUse = StringUtils.hasText(namePrefix)
+				? namePrefix.trim().toUpperCase() : "";
 		Set values = new HashSet();
 		for (Iterator it = this.fieldCache.keySet().iterator(); it.hasNext();) {
 			String code = (String) it.next();
@@ -226,6 +239,14 @@ public class Constants {
 	    }
 	  }
 		return parsedPrefix.toString();
+	}
+	
+
+	private static boolean isPublicStaticAndFinal(Field field) {
+		final int modifiers = field.getModifiers();
+		return Modifier.isFinal(modifiers)
+				&& Modifier.isStatic(modifiers)
+				&& Modifier.isPublic(modifiers);
 	}
 
 }

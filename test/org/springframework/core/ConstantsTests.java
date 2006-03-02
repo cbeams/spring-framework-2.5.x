@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,11 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 /**
+ * Unit tests for the Constants class.
+ * 
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rick Evans
  * @since 28.04.2003
  */
 public class ConstantsTests extends TestCase {
@@ -40,7 +43,7 @@ public class ConstantsTests extends TestCase {
 			c.asNumber("bogus");
 			fail("Can't get bogus field");
 		}
-		catch (ConstantException ex) {
+		catch (ConstantException expected) {
 		}
 
 		assertTrue(c.asString("S1").equals(A.S1));
@@ -48,7 +51,7 @@ public class ConstantsTests extends TestCase {
 			c.asNumber("S1");
 			fail("Wrong type");
 		}
-		catch (ConstantException ex) {
+		catch (ConstantException expected) {
 		}
 
 		Set values = c.getValues("");
@@ -81,8 +84,7 @@ public class ConstantsTests extends TestCase {
 			c.toCode("bogus", "bogus");
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException ex) {
-			// expected
+		catch (ConstantException expected) {
 		}
 
 		assertEquals(c.toCodeForProperty(new Integer(1), "myProperty"), "MY_PROPERTY_NO");
@@ -91,13 +93,48 @@ public class ConstantsTests extends TestCase {
 			c.toCodeForProperty("bogus", "bogus");
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException ex) {
-			// expected
+		catch (ConstantException expected) {
 		}
 	}
+
+	public void testGetValuesWithNullPrefix() throws Exception {
+		Constants c = new Constants(A.class);
+		Set values = c.getValues(null);
+		assertEquals("Must have returned *all* public static final values", 5, values.size());
+	}
+
+	public void testGetValuesWithEmptyStringPrefix() throws Exception {
+		Constants c = new Constants(A.class);
+		Set values = c.getValues("");
+		assertEquals("Must have returned *all* public static final values", 5, values.size());
+	}
+
+	public void testGetValuesWithWhitespacedStringPrefix() throws Exception {
+		Constants c = new Constants(A.class);
+		Set values = c.getValues(" ");
+		assertEquals("Must have returned *all* public static final values", 5, values.size());
+	}
+
+	public void testWithClassThatExposesNoConstants() throws Exception {
+		Constants c = new Constants(NoConstants.class);
+		assertEquals(0, c.getSize());
+		final Set values = c.getValues("");
+		assertNotNull(values);
+		assertEquals(0, values.size());
+	}
+
+	public void testCtorWithNullClass() throws Exception {
+		try {
+			new Constants(null);
+			fail("Must have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException expected) {}
+	}
+
+
+	private static final class NoConstants {}
 	
-	
-	public static class A {
+	private static final class A {
 		
 		public static final int DOG = 0;
 		public static final int CAT = 66;
