@@ -16,8 +16,6 @@
 
 package org.springframework.aop.aspectj;
 
-import java.lang.reflect.Field;
-
 import org.aopalliance.aop.Advice;
 import org.aopalliance.aop.AspectException;
 import org.springframework.aop.ClassFilter;
@@ -47,8 +45,8 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 	 * @param typePattern type pattern the introduction is restricted to
 	 * @param defaultImpl default implementation class
 	 */
-	public DeclareParentsAdvisor(Field introductionField, String typePattern, Class defaultImpl) {
-		this.introducedInterface = introductionField.getType();
+	public DeclareParentsAdvisor(Class interfaceType, String typePattern, Class defaultImpl) {
+		this.introducedInterface = interfaceType;
 		ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
 		// Excludes methods implemented
 		ClassFilter exclusion = new ClassFilter() {
@@ -64,13 +62,19 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 			this.advice = new DelegatingIntroductionInterceptor(newIntroductionInstanceToUse);
 		} 
 		catch (IllegalArgumentException ex) {
-			throw new AspectException("Cannot evaluate static introduction field " + introductionField, ex);
+			throw new AspectException("Cannot create default implementation for '" + 
+					                  interfaceType.getName() + "' mixin (" + 
+					                  defaultImpl.getName() + ")" , ex);	 
 		} 
 		catch (IllegalAccessException ex) {
-			throw new AspectException("Cannot evaluate static introduction field " + introductionField, ex);
+			throw new AspectException("Cannot create default implementation for '" + 
+	                  interfaceType.getName() + "' mixin (" + 
+	                  defaultImpl.getName() + ")" , ex);
 		} 
 		catch (InstantiationException ex) {
-			throw new AspectException("Cannot instantiate class determined from static introduction field " + introductionField, ex);
+			throw new AspectException("Cannot create default implementation for '" + 
+	                  interfaceType.getName() + "' mixin (" + 
+	                  defaultImpl.getName() + ")" , ex);
 		}
 	}
 	

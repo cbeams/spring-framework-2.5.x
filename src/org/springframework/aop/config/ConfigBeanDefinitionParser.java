@@ -74,9 +74,9 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private static final String KIND = "kind";
 	private static final String BEFORE = "before";
 	private static final String DECLARE_PARENTS = "declare-parents";
-	private static final String TYPE_PATTERN = "type-pattern";
+	private static final String TYPE_PATTERN = "types-matching";
 	private static final String DEFAULT_IMPL = "default-impl";
-	private static final String FIELD = "field";
+	private static final String IMPLEMENT_INTERFACE = "implement-interface";
 	private static final String AFTER = "after";
 	private static final String AFTER_RETURNING = "afterReturning";
 	private static final String AFTER_THROWING = "afterThrowing";
@@ -245,19 +245,15 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 	private void parseDeclareParents(String aspectName, Element declareParentsElement, 
 			BeanDefinitionRegistryBuilder registryBuilder, ParseContext parseContext) {
-		BeanDefinitionBuilder fieldBuilder = BeanDefinitionBuilder.rootBeanDefinition(FieldLocatingFactoryBean.class).
-				addConstructorArg(aspectName).
-				addConstructorArg(declareParentsElement.getAttribute(FIELD));
-		registryBuilder.register(fieldBuilder);
-
 		// new DeclareParentsAdvisor(Field introductionField, String typePattern, Class defaultImpl)
 		registryBuilder.register(
 				BeanDefinitionBuilder.rootBeanDefinition(DeclareParentsAdvisor.class).
-						addConstructorArgReference(fieldBuilder).
+						addConstructorArg(declareParentsElement.getAttribute(IMPLEMENT_INTERFACE)).
 						addConstructorArg(declareParentsElement.getAttribute(TYPE_PATTERN)).
 						// Will automatically be converted to a type
 						addConstructorArg(declareParentsElement.getAttribute(DEFAULT_IMPL))
-		);
+				);
+		
 	}
 
 	/**

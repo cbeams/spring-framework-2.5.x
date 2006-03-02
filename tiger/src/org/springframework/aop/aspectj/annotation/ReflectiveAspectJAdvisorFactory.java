@@ -120,7 +120,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 			throw new AspectException("defaultImpl must be set on DeclareParents");
 		}
 		
-		return new DeclareParentsAdvisor(introductionField, declareParents.value(), declareParents.defaultImpl());
+		return new DeclareParentsAdvisor(introductionField.getType(), declareParents.value(), declareParents.defaultImpl());
 	}
 	
 	

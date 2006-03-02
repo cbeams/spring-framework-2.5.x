@@ -75,13 +75,9 @@
 	</xsd:complexType>
 	
 	<xsd:complexType name="declareParentsType">
-		<xsd:attribute name="type-pattern" type="xsd:string"/>
-		<xsd:attribute name="field" type="xsd:string" use="required"/>
+		<xsd:attribute name="types-matching" type="xsd:string" use="required"/>
+		<xsd:attribute name="implement-interface" type="xsd:string" use="required"/>
 		<xsd:attribute name="default-impl" type="xsd:string" use="required"/>
-
-		<!-- there is a case to make this next one an element with one sub-element for each
-		     argument name, but that is a lot more verbose that a comma-delimited list of arg names -->
-		<xsd:attribute name="arg-names" type="xsd:string"/>
 	</xsd:complexType>
 
 	<xsd:complexType name="adviceType">
