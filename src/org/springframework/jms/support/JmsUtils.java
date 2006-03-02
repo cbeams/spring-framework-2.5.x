@@ -49,7 +49,7 @@ public abstract class JmsUtils {
 	/**
 	 * Close the given JMS Connection and ignore any thrown exception.
 	 * This is useful for typical finally blocks in manual JMS code.
-	 * @param con the JMS Connection to close
+	 * @param con the JMS Connection to close (may be <code>null</code>)
 	 */
 	public static void closeConnection(Connection con) {
 		if (con != null) {
@@ -65,7 +65,7 @@ public abstract class JmsUtils {
 	/**
 	 * Close the given JMS Session and ignore any thrown exception.
 	 * This is useful for typical finally blocks in manual JMS code.
-	 * @param session the JMS Session to close
+	 * @param session the JMS Session to close (may be <code>null</code>)
 	 */
 	public static void closeSession(Session session) {
 		if (session != null) {
@@ -81,7 +81,7 @@ public abstract class JmsUtils {
 	/**
 	 * Close the given JMS MessageProducer and ignore any thrown exception.
 	 * This is useful for typical finally blocks in manual JMS code.
-	 * @param producer the JMS MessageProducer to close
+	 * @param producer the JMS MessageProducer to close (may be <code>null</code>)
 	 */
 	public static void closeMessageProducer(MessageProducer producer) {
 		if (producer != null) {
@@ -97,7 +97,7 @@ public abstract class JmsUtils {
 	/**
 	 * Close the given JMS MessageConsumer and ignore any thrown exception.
 	 * This is useful for typical finally blocks in manual JMS code.
-	 * @param consumer the JMS MessageConsumer to close
+	 * @param consumer the JMS MessageConsumer to close (may be <code>null</code>)
 	 */
 	public static void closeMessageConsumer(MessageConsumer consumer) {
 		if (consumer != null) {
