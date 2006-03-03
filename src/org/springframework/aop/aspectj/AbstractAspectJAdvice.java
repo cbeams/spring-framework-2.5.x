@@ -227,13 +227,15 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 		// name could be a variable or a type...
 		if (isVariableName(name)) {
 			this.returningName = name;
-		} else {
+		}
+		else {
 			// assume a type
 			try {
 				this.discoveredReturningType = Class.forName(name);
-			} catch (ClassNotFoundException cnfEx) {
-				throw new IllegalArgumentException("Returning name '" + name 
-						 + "' is neither a valid argument name, nor the fully-qualified name of the Java type on the classpath");
+			}
+			catch (ClassNotFoundException cnfEx) {
+				throw new IllegalArgumentException("Returning name '" + name  +
+						"' is neither a valid argument name, nor the fully-qualified name of the Java type on the classpath");
 			}
 		}
 	}
@@ -254,11 +256,13 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 		// name could be a variable or a type...
 		if (isVariableName(name)) {
 			this.throwingName = name;
-		} else {
+		}
+		else {
 			// assume a type
 			try {
 				this.discoveredThrowingType = Class.forName(name);
-			} catch (ClassNotFoundException cnfEx) {
+			}
+			catch (ClassNotFoundException cnfEx) {
 				throw new IllegalArgumentException("Throwing name '" + name 
 						 + "' is neither a valid argument name, nor the fully-qualified name of the Java type on the classpath");
 			}
@@ -309,7 +313,6 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 	 * value. We need to calculate which advice parameter needs to be bound
 	 * to which argument name. There are multiple strategies for determining
 	 * this binding, which are arranged in a ChainOfResponsibility.
-	 *
 	 */
 	private void calculateArgumentBindings() {
 		// the simple case... nothing to bind.
@@ -336,7 +339,8 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 			(candidateParameterType.equals(ProceedingJoinPoint.class))) {
 			this.joinPointArgumentIndex = 0;
 			return true;
-		} else {
+		}
+		else {
 			return false;
 		}
 	}
@@ -353,7 +357,7 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 	
 	private void bindArgumentsByName(int numArgumentsExpectingToBind) {
 		if (this.argumentNames == null) {
-			// we need to discover them, or if that fails, guess,
+			// We need to discover them, or if that fails, guess,
 			// and if we can't guess with 100% accuracy, fail.
 			PrioritizedParameterNameDiscoverer discoverer = new PrioritizedParameterNameDiscoverer();
 			discoverer.addDiscoverer(new LocalVariableTableParameterNameDiscover());
@@ -365,17 +369,18 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 			adviceParameterNameDiscoverer.setRaiseExceptions(true);
 			discoverer.addDiscoverer(adviceParameterNameDiscoverer);
 			
-			this.argumentNames = discoverer.getParameterNames(this.aspectJAdviceMethod,this.aspectJAdviceMethod.getDeclaringClass());
+			this.argumentNames = discoverer.getParameterNames(
+					this.aspectJAdviceMethod,this.aspectJAdviceMethod.getDeclaringClass());
 		}
 		
 		if (this.argumentNames != null) {
-			// we have been able to determine the arg names
+			// We have been able to determine the arg names
 			bindExplicitArguments(numArgumentsExpectingToBind);
 		} 
 		else {
 			throw new IllegalStateException("Advice method [" + this.aspectJAdviceMethod.getName() + "] " +
-					      "requires " + numArgumentsExpectingToBind + " arguments to be bound by name, but " +
-					      "the argument names were not specified and could not be discovered.");
+					"requires " + numArgumentsExpectingToBind + " arguments to be bound by name, but " +
+					"the argument names were not specified and could not be discovered.");
 		}
 	}
 
@@ -465,7 +470,6 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 	 * @return the empty array if there are no arguments
 	 */
 	protected Object[] argBinding(JoinPoint jp, JoinPointMatch jpMatch, Object returnValue, Throwable t) {
-		
 		// AMC start
 		Object[] adviceInvocationArgs = new Object[this.numAdviceInvocationArguments];
 		int numBound = 0;

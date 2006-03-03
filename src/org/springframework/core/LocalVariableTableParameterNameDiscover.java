@@ -1,18 +1,19 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core;
 
 import java.io.IOException;
@@ -28,29 +29,23 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 
 /**
- * Implementation of ParameterNameDiscover that uses the 
- * LocalVariableTable information in the method attributes
- * to discover parameter names.
+ * Implementation of ParameterNameDiscover that uses the LocalVariableTable
+ * information in the method attributes to discover parameter names.
  * 
- * Returns null if the class file was compiled without debug
- * information.
+ * Returns <code>null</code> if the class file was compiled without debug information.
  * 
  * @author Adrian Colyer
  * @since 2.0
  */
-public class LocalVariableTableParameterNameDiscover implements
-		ParameterNameDiscoverer {
+public class LocalVariableTableParameterNameDiscover implements ParameterNameDiscoverer {
 
-	/** Logger available to subclasses */
 	private final Log logger = LogFactory.getLog(getClass());
 
-	/* (non-Javadoc)
-	 * @see org.springframework.core.ParameterNameDiscoverer#getParameterNames(java.lang.reflect.Method, java.lang.Class)
-	 */
-	public String[] getParameterNames(Method m, Class clazz) {
+
+	public String[] getParameterNames(Method method, Class clazz) {
 		ParameterNameDiscoveringVisitor visitor = null;
 		try {
-			visitor = visitMethod(m);
+			visitor = visitMethod(method);
 			if (visitor.foundTargetMember()) {
 				return visitor.getParameterNames();
 			} 
@@ -59,22 +54,18 @@ public class LocalVariableTableParameterNameDiscover implements
 			}
 		} 
 		catch (IOException ex) {
-			// we couldn't load the class file, which is not
-			// fatal as it simply means this method of discovering
-			// parameter names won't work.
+			// We couldn't load the class file, which is not fatal as it
+			// simply means this method of discovering parameter names won't work.
 			if (logger.isInfoEnabled()) {
-				logger.info("IOException whilst attempting to read .class file for class " +
-						m.getDeclaringClass().getName() + 
-						" - unable to determine parameter names for method " +
-						m.getName(),ex);
+				logger.info("IOException whilst attempting to read .class file for class [" +
+						method.getDeclaringClass().getName() +
+						"] - unable to determine parameter names for method " +
+						method.getName(),ex);
 			}
 		}
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.core.ParameterNameDiscoverer#getParameterNames(java.lang.reflect.Constructor)
-	 */
 	public String[] getParameterNames(Constructor ctor) {
 		ParameterNameDiscoveringVisitor visitor = null;
 		try {
@@ -87,23 +78,19 @@ public class LocalVariableTableParameterNameDiscover implements
 			}
 		} 
 		catch (IOException ex) {
-			// we couldn't load the class file, which is not
-			// fatal as it simply means this method of discovering
-			// parameter names won't work.
+			// We couldn't load the class file, which is not fatal as it
+			// simply means this method of discovering parameter names won't work.
 			if (logger.isInfoEnabled()) {
-				logger.info("IOException whilst attempting to read .class file for class " +
+				logger.info("IOException whilst attempting to read .class file for class [" +
 						ctor.getDeclaringClass().getName() + 
-						" - unable to determine parameter names for constructor",ex);
+						"] - unable to determine parameter names for constructor",ex);
 			}
 		}
 		return null;
 	}
 
 	/**
-	 * visit the given method and discover its parameter names
-	 * @param m
-	 * @return
-	 * @throws IOException
+	 * Visit the given method and discover its parameter names.
 	 */
 	private ParameterNameDiscoveringVisitor visitMethod(Method m) throws IOException {
 		ClassReader reader = new ClassReader(m.getDeclaringClass().getName());
@@ -113,10 +100,7 @@ public class LocalVariableTableParameterNameDiscover implements
 	}
 
 	/**
-	 * visit the given constructor and discover its parameter names
-	 * @param c
-	 * @return
-	 * @throws IOException
+	 * Visit the given constructor and discover its parameter names.
 	 */
 	private ParameterNameDiscoveringVisitor visitConstructor(Constructor c) throws IOException {
 		ClassReader reader = new ClassReader(c.getDeclaringClass().getName());
@@ -125,13 +109,13 @@ public class LocalVariableTableParameterNameDiscover implements
 		return classVisitor;
 	}
 
+
 	/**
 	 * Helper class that looks for a given member name and descriptor, and then
 	 * attempts to find the parameter names for that member.
-	 * @author Adrian
-	 *
 	 */
 	private static abstract class ParameterNameDiscoveringVisitor extends EmptyVisitor {
+
 		private String methodNameToMatch;
 		private String descriptorToMatch;
 		private int numParamsExpected;
@@ -175,7 +159,8 @@ public class LocalVariableTableParameterNameDiscover implements
 			this.parameterNames = names;
 		}
 	}
-	
+
+
 	private static class FindMethodParamNamesClassVisitor extends ParameterNameDiscoveringVisitor {
 		
 		public FindMethodParamNamesClassVisitor(Method method) {
@@ -183,7 +168,8 @@ public class LocalVariableTableParameterNameDiscover implements
 			setDescriptorToMatch(Type.getMethodDescriptor(method));
 		}
 	}
-	
+
+
 	private static class FindConstructorParamNamesClassVisitor extends ParameterNameDiscoveringVisitor {
 		
 		public FindConstructorParamNamesClassVisitor(Constructor cons) {
@@ -195,8 +181,10 @@ public class LocalVariableTableParameterNameDiscover implements
 			setDescriptorToMatch(Type.getMethodDescriptor(Type.VOID_TYPE,pTypes));
 		}
 	}
-	
+
+
 	private static class LocalVariableTableVisitor extends EmptyVisitor {
+
 		private ParameterNameDiscoveringVisitor memberVisitor;
 		private int numParameters;
 		private String[] parameterNames;
@@ -221,4 +209,5 @@ public class LocalVariableTableParameterNameDiscover implements
 			}
 		}
 	}
+
 }
