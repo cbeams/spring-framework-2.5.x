@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.core.io.Resource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  */
 public class BeanDefinitionStoreException extends FatalBeanException {
 
@@ -49,6 +50,14 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 	 */
 	public BeanDefinitionStoreException(String msg, Throwable ex) {
 		super(msg, ex);
+	}
+
+	/**
+	 * Create a new <code>BeanDefinitionStoreException</code>
+	 */
+	public BeanDefinitionStoreException(String resourceDescription, ParseState parseState, String msg, Throwable ex) {
+		super("Error '" + msg + "' in resource'" + resourceDescription + "' at:\n" + parseState, ex);
+		this.resourceDescription = resourceDescription;
 	}
 
 	/**

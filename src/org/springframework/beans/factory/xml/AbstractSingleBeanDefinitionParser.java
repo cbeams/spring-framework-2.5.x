@@ -21,6 +21,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -30,16 +31,17 @@ public abstract class AbstractSingleBeanDefinitionParser implements BeanDefiniti
 
 	public static final String ID_ATTRIBUTE = "id";
 
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
+	public final BeanDefinition parse(Element element, ParserContext parserContext) {
 		BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder.rootBeanDefinition(getBeanClass(element));
 		doParse(element, definitionBuilder);
 		BeanDefinition definition = definitionBuilder.getBeanDefinition();
 
 		String id = element.getAttribute(ID_ATTRIBUTE);
-		BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
-		BeanDefinitionReaderUtils.registerBeanDefinition(holder, parserContext.getRegistry());
-		parserContext.getReaderContext().fireComponentRegistered(new BeanComponentDefinition(holder));
-
+		if (StringUtils.hasText(id)) {
+			BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
+			BeanDefinitionReaderUtils.registerBeanDefinition(holder, parserContext.getRegistry());
+			parserContext.getReaderContext().fireComponentRegistered(new BeanComponentDefinition(holder));
+		}
 		return definition;
 	}
 

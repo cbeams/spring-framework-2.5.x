@@ -44,7 +44,7 @@ class FailFastProblemReporter implements ProblemReporter {
 	 */
 	public void error(Problem problem) {
 		throw new BeanDefinitionStoreException(problem.getResourceDescription(),
-						problem.getParseState().toString(),
+						problem.getParseState(),
 						problem.getMessage(),
 						problem.getRootCause());
 	}

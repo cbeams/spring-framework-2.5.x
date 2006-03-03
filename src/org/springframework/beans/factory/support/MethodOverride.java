@@ -34,6 +34,7 @@ public abstract class MethodOverride {
 
 	private boolean overloaded = true;
 
+	private Object source;
 
 	/**
 	 * Construct a new override for the given method.
@@ -67,6 +68,19 @@ public abstract class MethodOverride {
 		return overloaded;
 	}
 
+	/**
+	 * Gets the source metadata for this object.
+	 */
+	public Object getSource() {
+		return source;
+	}
+
+	/**
+	 * Sets the source metadata for this object.
+	 */
+	public void setSource(Object source) {
+		this.source = source;
+	}
 
 	/**
 	 * Subclasses must override this to indicate whether they match

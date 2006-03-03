@@ -34,6 +34,7 @@ public class ManagedList extends ArrayList implements Mergeable {
 
 	private boolean mergeEnabled;
 
+	private Object source;
 
 	public ManagedList() {
 	}
@@ -51,6 +52,13 @@ public class ManagedList extends ArrayList implements Mergeable {
 		return mergeEnabled;
 	}
 
+	public Object getSource() {
+		return source;
+	}
+
+	public void setSource(Object source) {
+		this.source = source;
+	}
 
 	public synchronized Object merge(Object parent) {
 		if (!this.mergeEnabled) {

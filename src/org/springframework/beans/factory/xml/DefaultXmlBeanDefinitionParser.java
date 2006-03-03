@@ -20,12 +20,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.ReaderContext;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanComponentDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.util.SystemPropertyUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -57,12 +55,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	public static final String BEAN_NAME_DELIMITERS = ",; ";
 
-	public static final String DEFAULT_LAZY_INIT_ATTRIBUTE = "default-lazy-init";
-	public static final String DEFAULT_AUTOWIRE_ATTRIBUTE = "default-autowire";
-	public static final String DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE = "default-dependency-check";
-	public static final String DEFAULT_INIT_METHOD_ATTRIBUTE = "default-init-method";
-	public static final String DEFAULT_DESTROY_METHOD_ATTRIBUTE = "default-destroy-method";
-	public static final String DEFAULT_MERGE_ATTRIBUTE = "default-merge";
+
 	public static final String IMPORT_ELEMENT = "import";
 	public static final String RESOURCE_ATTRIBUTE = "resource";
 	public static final String ALIAS_ELEMENT = "alias";
@@ -90,18 +83,17 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		logger.debug("Loading bean definitions");
 		Element root = doc.getDocumentElement();
 
-		XmlBeanDefinitionParserHelper helper = new XmlBeanDefinitionParserHelper(readerContext);
-
-		initDefaults(root, helper);
+		XmlBeanDefinitionParserHelper helper = createHelper(readerContext, root);
 
 		preProcessXml(root);
 		parseBeanDefinitions(root, helper);
-		if (logger.isDebugEnabled()) {
-			BeanDefinitionRegistry registry = readerContext.getReader().getBeanFactory();
-			// todo: count here is wrong
-			logger.debug("Found [" + registry.getBeanDefinitionCount() + "] <bean> elements in [" + readerContext.getResource() + "].");
-		}
 		postProcessXml(root);
+	}
+
+	protected XmlBeanDefinitionParserHelper createHelper(ReaderContext readerContext, Element root) {
+		XmlBeanDefinitionParserHelper helper = new XmlBeanDefinitionParserHelper(readerContext, createNamespaceHandlerResolver());
+		helper.initDefaults(root);
+		return helper;
 	}
 
 	/**
@@ -109,23 +101,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 */
 	protected final ReaderContext getReaderContext() {
 		return this.readerContext;
-	}
-
-	/**
-	 * Initialize the default lazy-init, autowire and dependency check settings passing them
-	 * to the supplied {@link XmlBeanDefinitionParserHelper}.
-	 */
-	protected void initDefaults(Element root, XmlBeanDefinitionParserHelper helper) {
-		helper.setDefaultLazyInit(root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE));
-		helper.setDefaultAutowire(root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE));
-		helper.setDefaultDependencyCheck(root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE));
-		if (root.hasAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE)) {
-			helper.setDefaultInitMethod(root.getAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE));
-		}
-		if (root.hasAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE)) {
-			helper.setDefaultDestroyMethod(root.getAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE));
-		}
-		helper.setDefaultMerge(root.getAttribute(DEFAULT_MERGE_ATTRIBUTE));
 	}
 
 	/**
@@ -166,18 +141,14 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			if (node instanceof Element) {
 				Element ele = (Element) node;
 				String namespaceUri = ele.getNamespaceURI();
-				if (isDefaultNamespace(namespaceUri)) {
+				if (helper.isDefaultNamespace(namespaceUri)) {
 					parseDefaultElement(ele, helper);
 				}
 				else {
-					parseCustomElement(ele, helper);
+					helper.parseCustomElement(ele);
 				}
 			}
 		}
-	}
-
-	private boolean isDefaultNamespace(String namespaceUri) {
-		return (!StringUtils.hasLength(namespaceUri) || BEANS_NAMESPACE_URI.equals(namespaceUri));
 	}
 
 	private void parseDefaultElement(Element ele, XmlBeanDefinitionParserHelper helper) {
@@ -192,7 +163,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		else if (BEAN_ELEMENT.equals(ele.getNodeName())) {
 			BeanDefinitionHolder bdHolder = helper.parseBeanDefinitionElement(ele, false);
 			if (bdHolder != null) {
-				bdHolder = decorateBeanDefinitionIfRequired(ele, bdHolder, helper);
+				bdHolder = helper.decorateBeanDefinitionIfRequired(ele, bdHolder);
 				// Register the final decorated instance.
 				BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getReader().getBeanFactory());
 
@@ -200,46 +171,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));
 			}
 		}
-	}
-
-	protected void parseCustomElement(Element ele, XmlBeanDefinitionParserHelper helper) {
-		String namespaceUri = ele.getNamespaceURI();
-		NamespaceHandler handler = getNamespaceHandlerResolver().resolve(namespaceUri);
-
-		if (handler == null) {
-			getReaderContext().error("Unable to locate NamespaceHandler for namespace [" + namespaceUri + "].", ele);
-			return;
-		}
-
-		BeanDefinitionParser parser = handler.findParserForElement(ele);
-		parser.parse(ele, new ParserContext(getReaderContext(), helper));
-	}
-
-	private NamespaceHandlerResolver getNamespaceHandlerResolver() {
-		if (this.namespaceHandlerResolver == null) {
-			this.namespaceHandlerResolver = createNamespaceHandlerResolver();
-		}
-		return this.namespaceHandlerResolver;
-	}
-
-	private BeanDefinitionHolder decorateBeanDefinitionIfRequired(Element element, BeanDefinitionHolder definitionHolder, XmlBeanDefinitionParserHelper helper) {
-		BeanDefinitionHolder finalDefinition = definitionHolder;
-
-		NodeList children = element.getChildNodes();
-		for (int i = 0; i < children.getLength(); i++) {
-			Node node = children.item(i);
-			String uri = node.getNamespaceURI();
-			if (node.getNodeType() == Node.ELEMENT_NODE && !isDefaultNamespace(uri)) {
-				Element childElement = (Element) node;
-				// A node from a namespace outside of the standard - should map to a decorator.
-				NamespaceHandler handler = getNamespaceHandlerResolver().resolve(uri);
-				BeanDefinitionDecorator decorator = handler.findDecoratorForElement(childElement);
-
-				finalDefinition = decorator.decorate(childElement, finalDefinition, new ParserContext(getReaderContext(), helper));
-
-			}
-		}
-		return finalDefinition;
 	}
 
 	/**

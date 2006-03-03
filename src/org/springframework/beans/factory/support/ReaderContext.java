@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.factory.ParseState;
 import org.springframework.core.io.Resource;
 
 /**
@@ -25,19 +26,26 @@ import org.springframework.core.io.Resource;
  */
 public class ReaderContext {
 
-	private Resource resource;
+	private final Resource resource;
 
-	private ProblemReporter problemReporter;
+	private final ProblemReporter problemReporter;
 
-	private ReaderEventListener eventListener;
+	private final ReaderEventListener eventListener;
 
-	private BeanDefinitionReader reader;
+	private final BeanDefinitionReader reader;
 
-	public ReaderContext(XmlBeanDefinitionReader reader, Resource resource, ProblemReporter problemReporter, ReaderEventListener eventListener) {
+	private final SourceExtractor sourceExtractor;
+
+	public ReaderContext(XmlBeanDefinitionReader reader,
+											 Resource resource,
+											 ProblemReporter problemReporter,
+											 ReaderEventListener eventListener,
+											 SourceExtractor sourceExtractor) {
 		this.reader = reader;
 		this.resource = resource;
 		this.problemReporter = problemReporter;
 		this.eventListener = eventListener;
+		this.sourceExtractor = sourceExtractor;
 	}
 
 	public BeanDefinitionReader getReader() {
@@ -76,5 +84,9 @@ public class ReaderContext {
 
 	public void fireComponentRegistered(ComponentDefinition componentDefinition) {
 		this.eventListener.componentRegistered(componentDefinition);
+	}
+
+	public SourceExtractor getSourceExtractor() {
+		return sourceExtractor;
 	}
 }

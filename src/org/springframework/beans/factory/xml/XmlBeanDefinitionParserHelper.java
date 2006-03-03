@@ -45,11 +45,15 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
-import org.springframework.beans.factory.support.ParseState;
 import org.springframework.beans.factory.support.ReaderContext;
 import org.springframework.beans.factory.support.ReplaceOverride;
+import org.springframework.beans.factory.ParseState;
+import org.springframework.beans.factory.PropertyEntry;
+import org.springframework.beans.factory.ConstructorArgEntry;
+import org.springframework.beans.factory.BeanEntry;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.xml.DomUtils;
 
 /**
@@ -63,6 +67,8 @@ import org.springframework.util.xml.DomUtils;
  * @since 2.0
  */
 public class XmlBeanDefinitionParserHelper {
+
+	public static final String BEANS_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
 
 	private static final String BEAN_NAME_DELIMITERS = ",; ";
 
@@ -178,6 +184,12 @@ public class XmlBeanDefinitionParserHelper {
 
 	private static final String MERGE_ATTRIBUTE = "merge";
 
+	public static final String DEFAULT_LAZY_INIT_ATTRIBUTE = "default-lazy-init";
+	public static final String DEFAULT_AUTOWIRE_ATTRIBUTE = "default-autowire";
+	public static final String DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE = "default-dependency-check";
+	public static final String DEFAULT_INIT_METHOD_ATTRIBUTE = "default-init-method";
+	public static final String DEFAULT_DESTROY_METHOD_ATTRIBUTE = "default-destroy-method";
+	public static final String DEFAULT_MERGE_ATTRIBUTE = "default-merge";
 	/**
 	 * {@link Log} instance for this class.
 	 */
@@ -188,7 +200,9 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * The {@link ReaderContext} used for error reporting.
 	 */
-	private ReaderContext readerContext;
+	private final ReaderContext readerContext;
+
+	private final NamespaceHandlerResolver handlerResolver;
 
 	private String defaultLazyInit;
 
@@ -203,14 +217,6 @@ public class XmlBeanDefinitionParserHelper {
 	private String defaultMerge;
 
 	/**
-	 * Creates a new <code>XmlBeanDefinitionParserHelper</code> associated with the
-	 * supplied {@link ReaderContext}.
-	 */
-	public XmlBeanDefinitionParserHelper(ReaderContext readerContext) {
-		this.readerContext = readerContext;
-	}
-
-	/**
 	 * Gets the {@link ReaderContext} associated with this helper instance.
 	 */
 	public ReaderContext getReaderContext() {
@@ -220,85 +226,113 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Set the default lazy-init flag for the document that's currently parsed.
 	 */
-	protected final void setDefaultLazyInit(String defaultLazyInit) {
+	public final void setDefaultLazyInit(String defaultLazyInit) {
 		this.defaultLazyInit = defaultLazyInit;
 	}
 
 	/**
 	 * Return the default lazy-init flag for the document that's currently parsed.
 	 */
-	protected final String getDefaultLazyInit() {
+	public final String getDefaultLazyInit() {
 		return defaultLazyInit;
 	}
 
 	/**
 	 * Set the default autowire setting for the document that's currently parsed.
 	 */
-	protected final void setDefaultAutowire(String defaultAutowire) {
+	public final void setDefaultAutowire(String defaultAutowire) {
 		this.defaultAutowire = defaultAutowire;
 	}
 
 	/**
 	 * Return the default autowire setting for the document that's currently parsed.
 	 */
-	protected final String getDefaultAutowire() {
+	public final String getDefaultAutowire() {
 		return defaultAutowire;
 	}
 
 	/**
 	 * Set the default dependency-check setting for the document that's currently parsed.
 	 */
-	protected final void setDefaultDependencyCheck(String defaultDependencyCheck) {
+	public final void setDefaultDependencyCheck(String defaultDependencyCheck) {
 		this.defaultDependencyCheck = defaultDependencyCheck;
 	}
 
 	/**
 	 * Return the default dependency-check setting for the document that's currently parsed.
 	 */
-	protected final String getDefaultDependencyCheck() {
+	public final String getDefaultDependencyCheck() {
 		return defaultDependencyCheck;
 	}
 
 	/**
 	 * Set the default init-method setting for the document that's currently parsed.
 	 */
-	protected final void setDefaultInitMethod(String defaultInitMethod) {
+	public final void setDefaultInitMethod(String defaultInitMethod) {
 		this.defaultInitMethod = defaultInitMethod;
 	}
 
 	/**
 	 * Return the default init-method setting for the document that's currently parsed.
 	 */
-	protected final String getDefaultInitMethod() {
+	public final String getDefaultInitMethod() {
 		return defaultInitMethod;
 	}
 
 	/**
 	 * Set the default destroy-method setting for the document that's currently parsed.
 	 */
-	protected final void setDefaultDestroyMethod(String defaultDestroyMethod) {
+	public final void setDefaultDestroyMethod(String defaultDestroyMethod) {
 		this.defaultDestroyMethod = defaultDestroyMethod;
 	}
 
 	/**
 	 * Return the default destroy-method setting for the document that's currently parsed.
 	 */
-	protected final String getDefaultDestroyMethod() {
+	public final String getDefaultDestroyMethod() {
 		return defaultDestroyMethod;
 	}
 
 	/**
 	 * Set the default merge setting for the document that's currently parsed.
 	 */
-	protected final void setDefaultMerge(String defaultMerge) {
+	public final void setDefaultMerge(String defaultMerge) {
 		this.defaultMerge = defaultMerge;
 	}
 
 	/**
 	 * Return the default merge setting for the document that's currently parsed.
 	 */
-	protected final String getDefaultMerge() {
+	public final String getDefaultMerge() {
 		return defaultMerge;
+	}
+
+	/**
+	 * Creates a new <code>XmlBeanDefinitionParserHelper</code> associated with the
+	 * supplied {@link ReaderContext}.
+	 */
+	public XmlBeanDefinitionParserHelper(ReaderContext readerContext, NamespaceHandlerResolver handlerResolver) {
+		Assert.notNull(readerContext, "'readerContext' cannot be null.");
+		Assert.notNull(handlerResolver, "'handlerResolver' cannot be null.");
+		this.readerContext = readerContext;
+		this.handlerResolver = handlerResolver;
+	}
+
+	/**
+	 * Initialize the default lazy-init, autowire, dependency check settings,
+	 * init-method, destroy-method and merge settings.
+	 */
+	public void initDefaults(Element root) {
+		setDefaultLazyInit(root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE));
+		setDefaultAutowire(root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE));
+		setDefaultDependencyCheck(root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE));
+		if (root.hasAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE)) {
+			setDefaultInitMethod(root.getAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE));
+		}
+		if (root.hasAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE)) {
+			setDefaultDestroyMethod(root.getAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE));
+		}
+		setDefaultMerge(root.getAttribute(DEFAULT_MERGE_ATTRIBUTE));
 	}
 
 	/**
@@ -306,7 +340,7 @@ public class XmlBeanDefinitionParserHelper {
 	 * if there were errors during parse. Errors are reported to the
 	 * {@link org.springframework.beans.factory.support.ProblemReporter}.
 	 */
-	protected BeanDefinitionHolder parseBeanDefinitionElement(Element ele, boolean isInnerBean) {
+	public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, boolean isInnerBean) {
 
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
@@ -348,7 +382,7 @@ public class XmlBeanDefinitionParserHelper {
 	 * Parse the BeanDefinition itself, without regard to name or aliases. May return
 	 * <code>null</code> if problems occured during the parse of the bean definition.
 	 */
-	protected BeanDefinition parseBeanDefinitionElement(Element ele, String beanName) {
+	public BeanDefinition parseBeanDefinitionElement(Element ele, String beanName) {
 
 		String className = null;
 		if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
@@ -360,7 +394,7 @@ public class XmlBeanDefinitionParserHelper {
 		}
 
 		try {
-			this.parseState.bean(beanName);
+			this.parseState.push(new BeanEntry(beanName));
 			ConstructorArgumentValues cargs = parseConstructorArgElements(ele);
 			MutablePropertyValues pvs = parsePropertyElements(ele);
 
@@ -368,7 +402,7 @@ public class XmlBeanDefinitionParserHelper {
 							className, parent, cargs, pvs, getReaderContext().getReader().getBeanClassLoader());
 
 			// store the configuration source
-			bd.setSource(ele);
+			bd.setSource(extractSource(ele));
 
 			if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 				String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
@@ -458,7 +492,15 @@ public class XmlBeanDefinitionParserHelper {
 		return null;
 	}
 
-	protected int getDependencyCheck(String att) {
+	/**
+	 * Invokes the {@link org.springframework.beans.factory.support.SourceExtractor} to pull the
+	 * source metadata from the supplied {@link Element}.
+	 */
+	private Object extractSource(Element ele) {
+		return getReaderContext().getSourceExtractor().extract(ele);
+	}
+
+	public int getDependencyCheck(String att) {
 		int dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_NONE;
 		if (DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE.equals(att)) {
 			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_ALL;
@@ -473,7 +515,7 @@ public class XmlBeanDefinitionParserHelper {
 		return dependencyCheckCode;
 	}
 
-	protected int getAutowireMode(String att) {
+	public int getAutowireMode(String att) {
 		int autowire = AbstractBeanDefinition.AUTOWIRE_NO;
 		if (AUTOWIRE_BY_NAME_VALUE.equals(att)) {
 			autowire = AbstractBeanDefinition.AUTOWIRE_BY_NAME;
@@ -494,7 +536,7 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse constructor-arg sub-elements of the given bean element.
 	 */
-	protected ConstructorArgumentValues parseConstructorArgElements(Element beanEle) {
+	public ConstructorArgumentValues parseConstructorArgElements(Element beanEle) {
 
 		NodeList nl = beanEle.getChildNodes();
 		ConstructorArgumentValues cargs = new ConstructorArgumentValues();
@@ -510,7 +552,7 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse property sub-elements of the given bean element.
 	 */
-	protected MutablePropertyValues parsePropertyElements(Element beanEle) {
+	public MutablePropertyValues parsePropertyElements(Element beanEle) {
 
 		NodeList nl = beanEle.getChildNodes();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -526,7 +568,7 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse lookup-override sub-elements of the given bean element.
 	 */
-	protected void parseLookupOverrideSubElements(Element beanEle, MethodOverrides overrides) {
+	public void parseLookupOverrideSubElements(Element beanEle, MethodOverrides overrides) {
 
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -535,7 +577,9 @@ public class XmlBeanDefinitionParserHelper {
 				Element ele = (Element) node;
 				String methodName = ele.getAttribute(NAME_ATTRIBUTE);
 				String beanRef = ele.getAttribute(BEAN_ELEMENT);
-				overrides.addOverride(new LookupOverride(methodName, beanRef));
+				LookupOverride override = new LookupOverride(methodName, beanRef);
+				override.setSource(extractSource(ele));
+				overrides.addOverride(override);
 			}
 		}
 	}
@@ -543,7 +587,7 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse replaced-method sub-elements of the given bean element.
 	 */
-	protected void parseReplacedMethodSubElements(Element beanEle, MethodOverrides overrides) {
+	public void parseReplacedMethodSubElements(Element beanEle, MethodOverrides overrides) {
 
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -559,6 +603,7 @@ public class XmlBeanDefinitionParserHelper {
 					Element argTypeEle = (Element) it.next();
 					replaceOverride.addTypeIdentifier(argTypeEle.getAttribute(ARG_TYPE_MATCH_ATTRIBUTE));
 				}
+				replaceOverride.setSource(extractSource(replacedMethodEle));
 				overrides.addOverride(replaceOverride);
 			}
 		}
@@ -567,7 +612,7 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse a constructor-arg element.
 	 */
-	protected void parseConstructorArgElement(Element ele, ConstructorArgumentValues cargs) {
+	public void parseConstructorArgElement(Element ele, ConstructorArgumentValues cargs) {
 
 		String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
 		String typeAttr = ele.getAttribute(TYPE_ATTRIBUTE);
@@ -579,7 +624,7 @@ public class XmlBeanDefinitionParserHelper {
 				}
 
 				try {
-					this.parseState.constructor(index);
+					this.parseState.push(new ConstructorArgEntry(index));
 					Object val = parsePropertyValue(ele, null);
 					if (StringUtils.hasLength(typeAttr)) {
 						cargs.addIndexedArgumentValue(index, val, typeAttr);
@@ -598,7 +643,7 @@ public class XmlBeanDefinitionParserHelper {
 		}
 		else {
 			try {
-				this.parseState.constructor();
+				this.parseState.push(new ConstructorArgEntry());
 				Object val = parsePropertyValue(ele, null);
 				if (StringUtils.hasLength(typeAttr)) {
 					cargs.addGenericArgumentValue(val, typeAttr);
@@ -616,22 +661,23 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse a property element.
 	 */
-	protected void parsePropertyElement(Element ele, MutablePropertyValues pvs) {
-
+	public void parsePropertyElement(Element ele, MutablePropertyValues pvs) {
+		String propertyName = ele.getAttribute(NAME_ATTRIBUTE);
+		if (!StringUtils.hasLength(propertyName)) {
+			error("Tag 'property' must have a 'name' attribute", ele);
+			return;
+		}
+		this.parseState.push(new PropertyEntry(propertyName));
 		try {
-			String propertyName = ele.getAttribute(NAME_ATTRIBUTE);
-			if (!StringUtils.hasLength(propertyName)) {
-				error("Tag 'property' must have a 'name' attribute", ele);
-				return;
-			}
+
 			if (pvs.contains(propertyName)) {
 				error("Multiple 'property' definitions for property '" + propertyName + "'", ele);
 				return;
 			}
-			this.parseState.property(propertyName);
+
 			Object val = parsePropertyValue(ele, propertyName);
 			PropertyValue pv = new PropertyValue(propertyName, val);
-			pv.setSource(ele);
+			pv.setSource(extractSource(ele));
 			pvs.addPropertyValue(pv);
 		}
 		finally {
@@ -644,7 +690,7 @@ public class XmlBeanDefinitionParserHelper {
 	 * Get the value of a property element. May be a list etc.
 	 * Also used for constructor arguments, "propertyName" being null in this case.
 	 */
-	protected Object parsePropertyValue(Element ele, String propertyName) {
+	public Object parsePropertyValue(Element ele, String propertyName) {
 
 		String elementName = (propertyName != null) ?
 						"<property> element for property '" + propertyName + "'" :
@@ -656,7 +702,10 @@ public class XmlBeanDefinitionParserHelper {
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
 				Element candidateEle = (Element) nl.item(i);
-				if (DESCRIPTION_ELEMENT.equals(candidateEle.getTagName())) {
+				if (!isDefaultNamespace(candidateEle.getNamespaceURI())) {
+					return parseNestedCustomElement(candidateEle);
+				}
+				else if (DESCRIPTION_ELEMENT.equals(candidateEle.getTagName())) {
 					// Keep going: we don't use this value for now.
 				}
 				else {
@@ -700,7 +749,7 @@ public class XmlBeanDefinitionParserHelper {
 	 * constructor-arg element.
 	 * @param ele subelement of property element; we don't know which yet
 	 */
-	protected Object parsePropertySubElement(Element ele) {
+	public Object parsePropertySubElement(Element ele) {
 		if (ele.getTagName().equals(BEAN_ELEMENT)) {
 			return parseBeanDefinitionElement(ele, true);
 		}
@@ -775,9 +824,10 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse a list element.
 	 */
-	protected List parseListElement(Element collectionEle) {
+	public List parseListElement(Element collectionEle) {
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedList list = new ManagedList(nl.getLength());
+		list.setSource(extractSource(collectionEle));
 		list.setMergeEnabled(parseMergeAttribute(collectionEle));
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
@@ -791,9 +841,10 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse a set element.
 	 */
-	protected Set parseSetElement(Element collectionEle) {
+	public Set parseSetElement(Element collectionEle) {
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedSet set = new ManagedSet(nl.getLength());
+		set.setSource(extractSource(collectionEle));
 		set.setMergeEnabled(parseMergeAttribute(collectionEle));
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
@@ -807,10 +858,11 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse a map element.
 	 */
-	protected Map parseMapElement(Element mapEle) {
+	public Map parseMapElement(Element mapEle) {
 		List entryEles = DomUtils.getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
 		ManagedMap map = new ManagedMap(entryEles.size());
 		map.setMergeEnabled(parseMergeAttribute(mapEle));
+		map.setSource(extractSource(mapEle));
 
 		for (Iterator it = entryEles.iterator(); it.hasNext();) {
 			Element entryEle = (Element) it.next();
@@ -901,7 +953,7 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse a key sub-element of a map element.
 	 */
-	protected Object parseKeyElement(Element keyEle) {
+	public Object parseKeyElement(Element keyEle) {
 		NodeList nl = keyEle.getChildNodes();
 		Element subElement = null;
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -921,8 +973,9 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse a props element.
 	 */
-	protected Properties parsePropsElement(Element propsEle) {
+	public Properties parsePropsElement(Element propsEle) {
 		ManagedProperties props = new ManagedProperties();
+		props.setSource(extractSource(propsEle));
 		props.setMergeEnabled(parseMergeAttribute(propsEle));
 		List propEles = DomUtils.getChildElementsByTagName(propsEle, PROP_ELEMENT);
 		for (Iterator it = propEles.iterator(); it.hasNext();) {
@@ -939,12 +992,58 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parse the merge attribute of a collection element, if any.
 	 */
-	protected boolean parseMergeAttribute(Element collectionElement) {
+	public boolean parseMergeAttribute(Element collectionElement) {
 		String value = collectionElement.getAttribute(MERGE_ATTRIBUTE);
 		if (DEFAULT_VALUE.equals(value)) {
 			value = getDefaultMerge();
 		}
 		return TRUE_VALUE.equals(value);
+	}
+
+	public BeanDefinition parseCustomElement(Element ele) {
+		String namespaceUri = ele.getNamespaceURI();
+		NamespaceHandler handler = this.handlerResolver.resolve(namespaceUri);
+
+		if (handler == null) {
+			getReaderContext().error("Unable to locate NamespaceHandler for namespace [" + namespaceUri + "].", ele);
+			return null;
+		}
+
+		BeanDefinitionParser parser = handler.findParserForElement(ele);
+		return parser.parse(ele, new ParserContext(getReaderContext(), this));
+	}
+
+	public BeanDefinitionHolder decorateBeanDefinitionIfRequired(Element element, BeanDefinitionHolder definitionHolder) {
+		BeanDefinitionHolder finalDefinition = definitionHolder;
+
+		NodeList children = element.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			Node node = children.item(i);
+			String uri = node.getNamespaceURI();
+			if (node.getNodeType() == Node.ELEMENT_NODE && !isDefaultNamespace(uri)) {
+				Element childElement = (Element) node;
+				// A node from a namespace outside of the standard - should map to a decorator.
+				NamespaceHandler handler = this.handlerResolver.resolve(uri);
+				BeanDefinitionDecorator decorator = handler.findDecoratorForElement(childElement);
+
+				finalDefinition = decorator.decorate(childElement, finalDefinition, new ParserContext(getReaderContext(), this));
+			}
+		}
+		return finalDefinition;
+	}
+
+	public boolean isDefaultNamespace(String namespaceUri) {
+		return (!StringUtils.hasLength(namespaceUri) || BEANS_NAMESPACE_URI.equals(namespaceUri));
+	}
+
+	private Object parseNestedCustomElement(Element candidateEle) {
+		BeanDefinition innerDefinition = parseCustomElement(candidateEle);
+		if(innerDefinition == null) {
+			error("Incorrect usage of element '" + candidateEle.getNodeName()
+							+ "' in a nested manner. This tag cannot be used nested inside <property>.", candidateEle);
+			return null;
+		}
+		return innerDefinition;
 	}
 
 	private void error(String message, Object source) {

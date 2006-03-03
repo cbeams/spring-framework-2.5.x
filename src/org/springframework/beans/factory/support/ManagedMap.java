@@ -42,6 +42,7 @@ public class ManagedMap implements Map, Mergeable {
 
 	private boolean mergeEnabled;
 
+	private Object source;
 
 	public ManagedMap() {
 		this(16);
@@ -62,6 +63,14 @@ public class ManagedMap implements Map, Mergeable {
 
 	public boolean isMergeEnabled() {
 		return mergeEnabled;
+	}
+
+	public Object getSource() {
+		return source;
+	}
+
+	public void setSource(Object source) {
+		this.source = source;
 	}
 
 	public synchronized Object merge(Object parent) {

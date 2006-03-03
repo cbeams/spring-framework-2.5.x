@@ -25,6 +25,7 @@ import org.springframework.beans.factory.support.MapBasedReaderEventListener;
 import org.springframework.beans.factory.support.ComponentDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -65,4 +66,9 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertEquals("Incorrect BeanDefinition", FieldRetrievingFactoryBean.class, constantBean.getBeanClass());
 	}
 
+	public void testNestedProperties() throws Exception {
+		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
+		Properties props = bean.getSomeProperties();
+		assertEquals("Incorrect property value", "bar", props.get("foo"));		
+	}
 }

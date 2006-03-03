@@ -9,14 +9,14 @@
 	<!-- TODO: need base complex type for things with an ID attribute -->
 	<xsd:element name="properties">
 		<xsd:complexType>
-			<xsd:attribute name="id" type="xsd:string" use="required"/>
+			<xsd:attribute name="id" type="xsd:string"/>
 			<xsd:attribute name="location" type="xsd:string" use="required"/>
 		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="constant">
 		<xsd:complexType>
-			<xsd:attribute name="id" type="xsd:string" use="required"/>
+			<xsd:attribute name="id" type="xsd:string"/>
 			<xsd:attribute name="staticField" type="xsd:string" use="required"/>
 		</xsd:complexType>
 	</xsd:element>

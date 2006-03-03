@@ -9,4 +9,10 @@
 					 location="classpath:org/springframework/beans/factory/config/util.properties"/>
 
 	<util:constant id="min" staticField="java.lang.Integer.MIN_VALUE"/>
+
+	<bean id="testBean" class="org.springframework.beans.TestBean">
+		<property name="someProperties">
+			<util:properties location="classpath:org/springframework/beans/factory/config/util.properties"/>
+		</property>
+	</bean>
 </beans>

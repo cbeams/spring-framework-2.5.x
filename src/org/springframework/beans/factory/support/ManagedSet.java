@@ -42,6 +42,7 @@ public class ManagedSet implements Set, Mergeable {
 
 	private boolean mergeEnabled;
 
+	private Object source;
 
 	public ManagedSet() {
 		this(16);
@@ -62,6 +63,14 @@ public class ManagedSet implements Set, Mergeable {
 
 	public boolean isMergeEnabled() {
 		return mergeEnabled;
+	}
+
+	public Object getSource() {
+		return source;
+	}
+
+	public void setSource(Object source) {
+		this.source = source;
 	}
 
 	public synchronized Object merge(Object parent) {

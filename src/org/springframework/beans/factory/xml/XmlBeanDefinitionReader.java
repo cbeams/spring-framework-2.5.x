@@ -42,6 +42,8 @@ import org.springframework.beans.factory.support.ReaderContext;
 import org.springframework.beans.factory.support.ProblemReporter;
 import org.springframework.beans.factory.support.ReaderEventListener;
 import org.springframework.beans.factory.support.ComponentDefinition;
+import org.springframework.beans.factory.support.SourceExtractor;
+import org.springframework.beans.factory.support.NullSourceExtractor;
 import org.springframework.core.Constants;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
@@ -146,6 +148,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	private ReaderEventListener eventListener = new NullReaderEventListener();
 
 	/**
+	 * The {@link SourceExtractor} to use when extracting
+	 * {@link org.springframework.beans.factory.config.BeanDefinition#getSource() source objects}
+	 * from the configuration data.
+	 */
+	private SourceExtractor sourceExtractor = new NullSourceExtractor();
+
+	/**
 	 * Create new XmlBeanDefinitionReader for the given bean factory.
 	 */
 	public XmlBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
@@ -211,6 +220,17 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	public void setEventListener(ReaderEventListener eventListener) {
 		Assert.notNull(eventListener, "'eventListener' cannot be null.");
 		this.eventListener = eventListener;
+	}
+
+	/**
+	 * Specifies the {@link SourceExtractor} to use. The default implementation is
+	 * {@link NullSourceExtractor} which simply returns <code>null</code> as the source object.
+	 * This means that during normal runtime execution no additional source metadata is attached
+	 * to the bean configuration metadata.
+	 */
+	public void setSourceExtractor(SourceExtractor sourceExtractor) {
+		Assert.notNull(sourceExtractor, "'sourceExtractor' cannot be null.");
+		this.sourceExtractor = sourceExtractor;
 	}
 
 	/**
@@ -484,7 +504,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Creates the {@link ReaderContext} to pass over to the parser.
 	 */
 	protected ReaderContext createReaderContext(Resource resource) {
-		return new ReaderContext(this, resource, this.problemReporter, this.eventListener);
+		return new ReaderContext(this, resource, this.problemReporter, this.eventListener, this.sourceExtractor);
 	}
 
 	protected XmlBeanDefinitionParser createXmlBeanDefinitionParser() {

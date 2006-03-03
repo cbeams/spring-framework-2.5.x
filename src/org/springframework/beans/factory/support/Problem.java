@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.beans.factory.ParseState;
+
 /**
  * Represents a problem with a bean definition configuration. May be a
  * potential fatal problem (an error) or simply just a warning.
