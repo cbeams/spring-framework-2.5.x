@@ -70,6 +70,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	private ReaderContext readerContext;
 
+
 	/**
 	 * Parses bean definitions according to the "spring-beans" DTD.
 	 * <p>Opens a DOM Document; then initializes the default settings
@@ -77,7 +78,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * the contained bean definitions.
 	 */
 	public void registerBeanDefinitions(Document doc, ReaderContext readerContext) {
-
 		this.readerContext = readerContext;
 
 		logger.debug("Loading bean definitions");

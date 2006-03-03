@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,7 +42,7 @@ public interface XmlBeanDefinitionParser {
 	 * Parse bean definitions from the given DOM document,
 	 * and register them with the given bean factory.
 	 * @param doc the DOM document
-	 * @param readerContext the current context of the reader. Includes the resource being parsed.
+	 * @param readerContext the current context of the reader. Includes the resource being parsed
 	 * @throws BeanDefinitionStoreException in case of parsing errors
 	 */
 	void registerBeanDefinitions(Document doc, ReaderContext readerContext)
