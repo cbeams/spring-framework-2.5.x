@@ -16,6 +16,11 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - included in spring.jar and spring-aop.jar
 
+* asm/asm*-2.2.1.jar
+- ObjectWeb ASM 2.2.1 (http://asm.objectweb.org)
+- required for building the framework
+- required at runtime when using parameter name discovery with AspectJ
+
 * aspectj/aspectjweaver.jar, aspectj/aspectjrt.jar, aspectj/aspectjtools.jar
 - AspectJ 1.5.0 (http://www.aspectj.org)
 - required for building the framework
