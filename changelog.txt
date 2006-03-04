@@ -74,15 +74,18 @@ Package org.springframework.validation
 * added "BindingResult getBindingResult()" method to DataBinder, deprecating the "BindException getErrors()" method 
 
 Package org.springframework.web
+* changed WebApplicationContext's "ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE" to actually start with the package name
 * fixed DispatcherServlet to keep and restore previous thread-bound LocaleContext and RequestAttributes
 * added overloaded "getModelAndView" method with HttpServletRequest argument to SimpleMappingExceptionResolver
 * added "cookieSecure" property to CookieGenerator, indicating that cookies should only be sent using HTTPS connections
 * added schema support for configuring a SimpleUrlHandlerMapping using spring-web.xsd
+* renamed "Handler" interface to "RequestHandler", to differentiate it from the dispatcher's generic "handler" concept
+* moved ControllerClassNameHandlerMapping from package "web.servlet.mvc.mapping" to "web.servlet.mvc"
+* added overloaded "onFormChange" method with BindException argument to SimpleFormController
+* MultiActionController does not consider "handleRequest" itself as handler method (to avoid potential stack overflow)
+* added full JSP 1.2 form tag library in package "web.servlet.tags", complementing the existing base tag library
 * upgraded VelocityToolboxView to use Velocity Tools 1.2+ API and avoid using deprecated earlier API
 * added VelocityLayoutViewResolver, a convenience subclass of VelocityViewResolver with support for VelocityLayoutView
-* MultiActionController does not consider "handleRequest" itself as handler method (to avoid potential stack overflow)
-* added overloaded "onFormChange" method with BindException argument to SimpleFormController
-* added full JSP 1.2 form tag library in package "web.servlet.tags", complementing the existing base tag library
 * added protected "callNextHandlerInChain" method to DecoratingNavigationHandler, to be called by subclasses
 
 
