@@ -31,7 +31,7 @@ import org.springframework.util.StringUtils;
  * @author Alef Arendsen
  * @author Arjen Poutsma
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see #forProperty(String, Class)
  */
 final class PropertyMatches {
