@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Plain Handler interface that does not expose any ModelAndView capability
+ * Plain handler interface that does not expose any ModelAndView capability
  * and only allows to throw ServletException and IOException.
  * Essentially the direct equivalent of a Servlet, reduced to a handle method.
  *
@@ -32,12 +32,18 @@ import javax.servlet.http.HttpServletResponse;
  * return value gives a clearer signature to callers other than the
  * DispatcherServlet, indicating there will never be a view to render.
  *
+ * <p>RequestHandlers can optionally implement the LastModified interface.
+ *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
+ * @see LastModified
+ * @see SimpleRequestHandlerAdapter
+ * @see Controller
  * @see org.springframework.web.servlet.ModelAndView
- * @see org.springframework.web.servlet.mvc.Controller
+ * @see org.springframework.mock.web.MockHttpServletRequest
+ * @see org.springframework.mock.web.MockHttpServletResponse
  */
-public interface Handler {
+public interface RequestHandler {
 
 	/**
 	 * Handle the given request, generating a response.

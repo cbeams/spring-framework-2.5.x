@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationBasedExporter;
 import org.springframework.remoting.support.RemoteInvocationResult;
 import org.springframework.util.Assert;
-import org.springframework.web.servlet.mvc.Handler;
+import org.springframework.web.servlet.mvc.RequestHandler;
 import org.springframework.web.util.NestedServletException;
 
 /**
@@ -58,7 +58,7 @@ import org.springframework.web.util.NestedServletException;
  * @see org.springframework.remoting.caucho.BurlapServiceExporter
  */
 public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
-		implements Handler, InitializingBean {
+		implements RequestHandler, InitializingBean {
 
 	protected static final String CONTENT_TYPE_SERIALIZED_OBJECT = "application/x-java-serialized-object";
 

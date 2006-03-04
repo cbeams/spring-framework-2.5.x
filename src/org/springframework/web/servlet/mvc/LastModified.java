@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,20 +23,21 @@ import javax.servlet.http.HttpServletRequest;
  * Same contract as for the Servlet API's <code>getLastModified</code> method.
  *
  * <p>Delegated to by a HandlerAdapter's <code>getLastModified</code> implementation.
- * By default, any Controller or Handler within Spring's default framework can
- * implement this interface to enable last-modified checking.
+ * By default, any Controller or RequestHandler within Spring's default framework
+ * can implement this interface to enable last-modified checking.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see javax.servlet.http.HttpServlet#getLastModified
  * @see Controller
  * @see SimpleControllerHandlerAdapter
- * @see Handler
- * @see SimpleHandlerAdapter
+ * @see RequestHandler
+ * @see SimpleRequestHandlerAdapter
  */
 public interface LastModified {
 	
 	/**
-	 * Same contract as for HttpServlet's getLastModified method.
+	 * Same contract as for HttpServlet's <code>getLastModified</code> method.
 	 * Invoked <b>before</b> request processing.
 	 * <p>The return value will be sent to the HTTP client as Last-Modified header,
 	 * and compared with If-Modified-Since headers that the client sends back.

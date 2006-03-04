@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,27 +23,27 @@ import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Adapter to use the plain Handler interface with the generic DispatcherServlet.
+ * Adapter to use the plain RequestHandler interface with the generic DispatcherServlet.
  * Supports handlers that implement the LastModified interface.
  *
  * <p>This is an SPI class, not used directly by application code.
  *
  * @author Juergen Hoeller
- * @since 1.3
+ * @since 2.0
  * @see org.springframework.web.servlet.DispatcherServlet
- * @see Handler
+ * @see RequestHandler
  * @see LastModified
  */
-public class SimpleHandlerAdapter implements HandlerAdapter {
+public class SimpleRequestHandlerAdapter implements HandlerAdapter {
 
 	public boolean supports(Object handler) {
-		return (handler instanceof Handler);
+		return (handler instanceof RequestHandler);
 	}
 
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 
-		((Handler) handler).handleRequest(request, response);
+		((RequestHandler) handler).handleRequest(request, response);
 		return null;
 	}
 
