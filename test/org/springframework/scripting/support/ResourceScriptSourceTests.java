@@ -63,13 +63,18 @@ public final class ResourceScriptSourceTests extends TestCase {
 		mock.verify();
 	}
 
-	/*public void testLastModifiedWorks() throws Exception {
+	public void testLastModifiedWorksWithResourceThatDoesNotSupportFileBasedReading() throws Exception {
 		MockControl mock = MockControl.createControl(Resource.class);
 		Resource resource = (Resource) mock.getMock();
-		resource.getInputStream();
-		mock.setReturnValue(new ByteArrayInputStream("".getBytes()));
+		// underlying File is asked for so that the last modified time can be checked...
 		resource.getFile();
 		mock.setReturnValue(new TouchableFileStub(100));
+		// underlying File is asked for so that the contents can be read in...
+		resource.getFile();
+		mock.setReturnValue(new TouchableFileStub(100));
+		// does not support File-based reading; delegates to InputStream-style reading...
+		resource.getInputStream();
+		mock.setReturnValue(new ByteArrayInputStream("".getBytes()));
 		// Mock the file 'not' changing; i.e. the File says it has not been modified
 		resource.getFile();
 		mock.setReturnValue(new TouchableFileStub(100));
@@ -85,7 +90,36 @@ public final class ResourceScriptSourceTests extends TestCase {
 		// Must now report back as having been modified
 		assertTrue("ResourceScriptSource must report back as being modified if the underlying File resource is reporting a changed lastModified time.", scriptSource.isModified());
 		mock.verify();
-	}*/
+	}
+
+	public void testLastModifiedWorksWithResourceThatDoesNotSupportFileBasedAccessAtAll() throws Exception {
+		MockControl mock = MockControl.createControl(Resource.class);
+		Resource resource = (Resource) mock.getMock();
+		// underlying File is asked for so that the last modified time can be checked...
+		resource.getFile();
+		mock.setThrowable(new IOException("Does not support access as a File."));
+		// first time in, the script is always flagged as 'modified', so the underlying File is asked for so that the contents can be read in...
+		resource.getFile();
+		mock.setThrowable(new IOException("Does not support access as a File."));
+		// does not support File-based access; delegates to InputStream-style reading...
+		resource.getInputStream();
+		mock.setReturnValue(new ByteArrayInputStream("".getBytes()));
+		// ask for the file to check the modification date (will fail and return 0);
+		resource.getFile();
+		mock.setThrowable(new IOException("Does not support access as a File."));
+		// ask for the file to check the modification date (will fail and return 0);
+		resource.getFile();
+		mock.setThrowable(new IOException("Does not support access as a File."));
+		mock.replay();
+
+		ResourceScriptSource scriptSource = new ResourceScriptSource(resource);
+		assertTrue("ResourceScriptSource must start off in the 'isModified' state (it obviously isn't).", scriptSource.isModified());
+		scriptSource.getScriptAsString();
+		assertFalse("ResourceScriptSource must not report back as being modified if the underlying File resource is not reporting a changed lastModified time.", scriptSource.isModified());
+		// Must now continue to report back as not having been modified 'cos the Resource does not support access as a File (and so the lastModified date cannot be determined).
+		assertFalse("ResourceScriptSource must not report back as being modified if the underlying File resource is not reporting a changed lastModified time.", scriptSource.isModified());
+		mock.verify();
+	}
 
 
 	private static final class TouchableFileStub extends File {
