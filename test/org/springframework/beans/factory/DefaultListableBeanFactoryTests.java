@@ -855,13 +855,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		List tbNames = Arrays.asList(lbf.getBeanNamesForType(TestBean.class));
 		assertTrue(tbNames.contains("fmWithProperties"));
 		assertTrue(tbNames.contains("fmWithArgs"));
-		if (singleton) {
-			assertEquals(3, tbNames.size());
-			assertTrue(tbNames.contains("fmGeneric"));
-		}
-		else {
-			assertEquals(2, tbNames.size());
-		}
+		assertEquals(2, tbNames.size());
 
 		TestBean tb = (TestBean) lbf.getBean("fmWithProperties");
 		TestBean second = (TestBean) lbf.getBean("fmWithProperties");

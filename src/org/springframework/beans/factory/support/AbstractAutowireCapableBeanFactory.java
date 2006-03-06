@@ -425,23 +425,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * This implementation determines the type matching <code>createBean</code>'s
-	 * different creation strategies.
-	 * <p>As far as possible, we'll perform static type checking to avoid creation
-	 * of the target bean. However, in case of a non-lazy-init singleton with a
-	 * "factory-bean" reference, checking the actual return type is preferable:
-	 * For example, a generic service factory might be declared with return type
-	 * "Object" or a generic service marker interface, where static type checking
-	 * wouldn't reveal any actual type.
+	 * different creation strategies. As far as possible, we'll perform static
+	 * type checking to avoid creation of the target bean.
 	 */
 	protected Class getTypeForFactoryMethod(String beanName, RootBeanDefinition mergedBeanDefinition) {
-		// Create bean in case of "factory-bean" declaration, to find out actual type.
-		// Essentially, this is treated like an implementation of the FactoryBean interface.
-		// If not a singleton or marked as lazy-init, we'll resort to static type checking.
-		if (mergedBeanDefinition.getFactoryBeanName() != null &&
-				mergedBeanDefinition.isSingleton() && !mergedBeanDefinition.isLazyInit()) {
-			return getBean(beanName).getClass();
-		}
-
 		Class factoryClass = null;
 		boolean isStatic = true;
 
