@@ -92,7 +92,7 @@ public class ResourceScriptSource implements ScriptSource {
 		if (this.lastModified < 0) {
 			return true;
 		}
-        return (retrieveLastModifiedTime() > this.lastModified);
+		return (retrieveLastModifiedTime() > this.lastModified);
 	}
 
 

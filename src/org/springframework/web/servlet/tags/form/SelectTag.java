@@ -199,11 +199,8 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * {@link #setItemLabel itemLabel} property is used when rendering the label.
 	 */
 	private void renderFromCollection(Collection itemList, TagWriter tagWriter) throws JspException {
-		if (this.itemValue == null) {
-			throw new IllegalArgumentException("Attribute 'itemValue' is required when defining 'items' as a Collection.");
-		}
 
-		String valueProperty = ObjectUtils.nullSafeToString(evaluate("itemValue", this.itemValue));
+		String valueProperty = (this.itemValue == null ? null :ObjectUtils.nullSafeToString(evaluate("itemValue", this.itemValue)));
 		String labelProperty = (this.itemLabel == null ? null : ObjectUtils.nullSafeToString(evaluate("itemLabel", this.itemLabel)));
 
 
@@ -211,7 +208,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 			Object item = iterator.next();
 			BeanWrapper wrapper = new BeanWrapperImpl(item);
 
-			Object value = wrapper.getPropertyValue(valueProperty).toString();
+			Object value = (valueProperty == null ? item.toString(): wrapper.getPropertyValue(valueProperty).toString());
 			String label = (labelProperty == null ? item.toString() : ObjectUtils.nullSafeToString(wrapper.getPropertyValue(labelProperty)));
 
 			renderOption(tagWriter, item, value, label);

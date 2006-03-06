@@ -16,20 +16,20 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.dom4j.io.SAXReader;
-import org.dom4j.Document;
-import org.dom4j.Element;
-import org.dom4j.DocumentException;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
+import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.io.StringReader;
 
 /**
  * @author Rob Harrop
@@ -80,18 +80,6 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 	}
 
-	public void testWithListAndNoValue() throws Exception {
-		this.tag.setPath("country");
-		this.tag.setItems("${countries}");
-		try {
-			this.tag.doStartTag();
-			fail("Should not be able to start tag with only 'items' specified");
-		}
-		catch (IllegalArgumentException e) {
-			// success
-		}
-	}
-
 	public void testWithInvalidList() throws Exception {
 		this.tag.setPath("country");
 		this.tag.setItems("${other}");
@@ -125,6 +113,33 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "name", "country");
 	}
 
+	public void testWithResolvedStringArray() throws Exception {
+		this.tag.setPath("name");
+		this.tag.setItems("${names}");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertTrue(output.startsWith("<select "));
+		assertTrue(output.endsWith("</select>"));
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		assertEquals("select", rootElement.getName());
+		assertEquals("name", rootElement.attribute("name").getValue());
+
+		List children = rootElement.elements();
+		assertEquals("Incorrect number of children", 4, children.size());
+
+		Element e = (Element) rootElement.selectSingleNode("option[@value = 'Rob']");
+		assertEquals("Rob node not selected", "true", e.attribute("selected").getValue());
+	}
+
+	private String[] getNames() {
+		return new String[]{"Rod", "Rob", "Juergen", "Adrian"};
+	}
+
 	private List getCountries() {
 		List countries = new ArrayList();
 		countries.add(new Country("AT", "Austria"));
@@ -146,9 +161,10 @@ public class SelectTagTests extends AbstractFormTagTests {
 		request.setAttribute("countries", getCountries());
 		request.setAttribute("sexes", getSexes());
 		request.setAttribute("other", new TestBean());
+		request.setAttribute("names", getNames());
 	}
 
-		private void validateOutput(String output) throws DocumentException {
+	private void validateOutput(String output) throws DocumentException {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
@@ -161,9 +177,10 @@ public class SelectTagTests extends AbstractFormTagTests {
 		Element e = (Element) rootElement.selectSingleNode("option[@value = 'UK']");
 		assertEquals("UK node not selected", "true", e.attribute("selected").getValue());
 	}
-	
+
 	protected TestBean createTestBean() {
 		TestBean bean = new TestBean();
+		bean.setName("Rob");
 		bean.setCountry("UK");
 		bean.setSex("M");
 		return bean;
