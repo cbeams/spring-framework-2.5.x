@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.ui.context.HierarchicalThemeSource;
 import org.springframework.ui.context.ThemeSource;
 
@@ -53,7 +52,7 @@ public abstract class UiApplicationContextUtils {
 	 * @see #THEME_SOURCE_BEAN_NAME
 	 */
 	public static ThemeSource initThemeSource(ApplicationContext context) {
-		if (containsLocalBean(context, THEME_SOURCE_BEAN_NAME)) {
+		if (context.containsLocalBean(THEME_SOURCE_BEAN_NAME)) {
 			ThemeSource themeSource = (ThemeSource) context.getBean(THEME_SOURCE_BEAN_NAME, ThemeSource.class);
 			// Make ThemeSource aware of parent ThemeSource.
 			if (context.getParent() instanceof ThemeSource && themeSource instanceof HierarchicalThemeSource) {
@@ -88,18 +87,4 @@ public abstract class UiApplicationContextUtils {
 		}
 	}
 
-	/**
-	 * Return whether the local bean factory of this context contains a bean
-	 * of the given name, ignoring beans defined in ancestor contexts.
-	 * <p>Needs to check both bean definitions and manually registered singletons.
-	 * We cannot use <code>containsBean</code> here, as we do not want a bean
-	 * from an ancestor bean factory.
-	 */
-	private static boolean containsLocalBean(ApplicationContext context, String beanName) {
-		return (context.containsBeanDefinition(beanName) ||
-				(context instanceof ConfigurableApplicationContext &&
-				((ConfigurableApplicationContext) context).getBeanFactory().containsSingleton(beanName)));
-	}
-
 }
-
