@@ -241,6 +241,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		applyPropertyValues(beanName, bd, bw, bd.getPropertyValues());
 	}
 
+	public Object configureBean(Object existingBean, String beanName) throws BeansException {
+		RootBeanDefinition bd = getMergedBeanDefinition(beanName, true);
+		BeanWrapper bw = new BeanWrapperImpl(existingBean);
+		initBeanWrapper(bw);
+		populateBean(beanName, bd, bw);
+		return initializeBean(beanName, existingBean, bd);
+	}
+
 	public Object initializeBean(Object existingBean, String beanName) {
 		return initializeBean(beanName, existingBean, null);
 	}
@@ -248,9 +256,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Apply InstantiationAwareBeanPostProcessors to the specified bean definition
 	 * (by class and name), invoking their <code>postProcessBeforeInstantiation</code> methods.
-     * <p>Any returned object will be used as the bean instead of actually instantiating the target
-	 * bean. A <code>null</code> return value from the post-processor will result in the target bean being
-	 * instantiated.
+	 * <p>Any returned object will be used as the bean instead of actually instantiating
+	 * the target bean. A <code>null</code> return value from the post-processor will
+	 * result in the target bean being instantiated.
 	 * @param beanClass the class of the bean to be instantiated
 	 * @param beanName the name of the bean
 	 * @return the bean object to use instead of a default instance of the target bean, or <code>null</code>

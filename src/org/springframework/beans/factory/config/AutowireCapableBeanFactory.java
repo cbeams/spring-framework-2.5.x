@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -163,6 +163,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * an existing bean instance.
 	 * @param existingBean the existing bean instance
 	 * @param beanName the name of the bean definition in the bean factory
+	 * (a bean definition of that name has to be available)
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if there is no bean with the given name
 	 * @throws BeansException if applying the property values failed
@@ -171,11 +172,33 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException;
 
 	/**
+	 * Configure the given bean instance: autowiring bean properties, applying
+	 * bean property values, applying factory callbacks such as <code>setBeanName</code>
+	 * and <code>setBeanFactory</code>, and also applying all bean post processors.
+	 * <p>This is effectively a superset of what <code>initializeBean</code>
+	 * provides, fully applying the configuration specified by the corresponding
+	 * bean definition.
+	 * @param existingBean the existing bean instance
+	 * @param beanName the name of the bean, to be passed to it if necessary
+	 * (a bean definition of that name has to be available)
+	 * @return the bean instance to use, either the original or a wrapped one
+	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
+	 * if there is no bean with the given name
+	 * @throws BeansException if the initialization failed
+	 * @see #initializeBean
+	 */
+	Object configureBean(Object existingBean, String beanName) throws BeansException;
+
+	/**
 	 * Initialize the given bean instance, applying factory callbacks
 	 * such as <code>setBeanName</code> and <code>setBeanFactory</code>,
 	 * also applying all bean post processors.
+	 * <p>Note that no bean definition of the given name has to exist
+	 * in the bean factory. The passed-in bean name will simply be used
+	 * for callbacks but not checked against the registered bean definitions.
 	 * @param existingBean the existing bean instance
 	 * @param beanName the name of the bean, to be passed to it if necessary
+	 * (only passed to BeanPostProcessors)
 	 * @return the bean instance to use, either the original or a wrapped one
 	 * @throws BeansException if the initialization failed
 	 */
