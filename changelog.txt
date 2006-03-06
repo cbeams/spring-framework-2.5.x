@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 M3 (6.3.2006)
+Changes in version 2.0 M3 (8.3.2006)
 ------------------------------------
 
 Package org.springframework.aop
@@ -14,6 +14,7 @@ Package org.springframework.aop
 * fixed DebugInterceptor to properly synchronize access to its count field in a multithreading environment
 
 Package org.springframework.beans
+* BeanWrapperImpl supports PropertyEditors exposed by PropertyDescriptors (typically from BeanInfo classes)
 * BeanWrapperImpl passes a null value to a PropertyEditor's "setValue" method, allowing for conversion of null values
 * changed MutablePropertyValues's "addPropertyValue" signature back to void, to remain binary compatible with Spring 1.2
 * fixed PropertyTypeConverter to never build "null[...]" property paths that lead to exceptions in "findCustomEditor"
@@ -23,6 +24,8 @@ Package org.springframework.beans
 * fixed AbstractBeanFactory to use canonical bean name (id) for prototype creation, exposing it to BeanPostProcessors
 * fixed AbstractBeanFactory to destroy a failed bean completely, including dependent beans (in case of eager references)
 * fixed AbstractBeanFactory's definition caching to allow for proper placeholder substitution even with parent/child
+* added "configureBean" method to AutowireCapableBeanFactory, fully configuring an instance based on a bean definition
+* DefaultListableBeanFactory does not instantiate "factory-bean" references anymore, not even for eager-init singletons
 * re-added support for deprecated "class" property to PropertiesBeanDefinitionReader, alongside "(class)"
 * DefaultXmlBeanDefinitionParser considers "" as default namespace as well, for compatibility with the Oracle XML parser
 
@@ -61,12 +64,14 @@ Package org.springframework.scheduling
 * CommonJ WorkManagerTaskExecutor/DelegatingWork exposes SchedulingAwareRunnable's "isLongLived" flag appropriately
 
 Package org.springframework.transaction
+* added CompositeTransactionAttributeSource and "setTransactionAttributeSources([])" method for TransactionInterceptor
 * JtaTransactionManager autodetects JNDI location "java:pm/TransactionManager" on Borland and Sun application servers
 
 Package org.springframework.util
 * fixed ResponseTimeMonitorImpl to properly synchronize access to its instance variables in a multithreading environment
 
 Package org.springframework.validation
+* added further accessors to Errors interface: hasFieldErrors(), getFieldErrorCount(), getFieldErrors(), getFieldError()
 * introduced BindingResult interface, as extension of the Errors interface
 * reworked BindException to implement the BindingResult interface, wrapping an existing BindingResult
 * added BeanBindingResult and MapBindingResult implementations, based on a refactoring of BindException
@@ -279,7 +284,7 @@ Package org.springframework.beans
 * refined BeanWrapperImpl to perform the accessible checking for read/write methods before every invocation
 * changed "MutablePropertyValues.addPropertyValue(String, Object)" to return 'this'
 * removed deprecated "getBeanDefinitionNames(type)" method from ListableBeanFactory and BeanFactoryUtils
-* added "createBean" and "instantiateBean" methods to AutowireCapableBeanFactory interface
+* added "createBean" and "initializeBean" methods to AutowireCapableBeanFactory interface
 * fixed AbstractBeanFactory to allow child bean definitions to refer to a parent via its alias name
 * DefaultListableBeanFactory is able to call non-public factory methods as well
 * PropertiesBeanDefinitionReader trims String values for special keys such as "(class)", "(parent)", etc
