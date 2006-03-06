@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.FileReader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -73,18 +75,24 @@ public class ResourceScriptSource implements ScriptSource {
 		return resource;
 	}
 
-
-	public String getScriptAsString() throws IOException {
-		this.lastModified = retrieveLastModifiedTime();
-		InputStream is = this.resource.getInputStream();
-		return FileCopyUtils.copyToString(new InputStreamReader(is));
-	}
+    public String getScriptAsString() throws IOException {
+        this.lastModified = retrieveLastModifiedTime();
+        Reader reader = null;
+        try {
+            // try to get a FileReader first - generally more reliable
+            reader = new FileReader(this.resource.getFile());
+        }
+        catch (IOException ex) {
+            reader = new InputStreamReader(this.resource.getInputStream());
+        }
+        return FileCopyUtils.copyToString(reader);
+    }
 
 	public boolean isModified() {
 		if (this.lastModified < 0) {
 			return true;
 		}
-		return (retrieveLastModifiedTime() > this.lastModified);
+        return (retrieveLastModifiedTime() > this.lastModified);
 	}
 
 
