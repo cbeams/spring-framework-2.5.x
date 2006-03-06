@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.util.ConcurrencyThrottleSupport;
  * executing it asynchronously.
  *
  * <p>Supports limiting concurrent threads through the "concurrencyLimit"
- * bean property. By default, only 1 concurrent thread is allowed.
+ * bean property. By default, the number of concurrent threads is unlimited.
  *
  * <p>Does not reuse threads: Consider a thread-pooling TaskExecutor
  * implementation instead.
@@ -36,6 +36,8 @@ import org.springframework.util.ConcurrencyThrottleSupport;
  * @see #setConcurrencyLimit
  * @see SyncTaskExecutor
  * @see org.springframework.scheduling.timer.TimerTaskExecutor
+ * @see org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+ * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
  */
 public class SimpleAsyncTaskExecutor extends ConcurrencyThrottleSupport
 		implements TaskExecutor, Serializable {
