@@ -31,12 +31,13 @@ import org.springframework.util.ObjectUtils;
  * Pointcut pc = new ComposablePointcut().union(classFilter).intersection(methodMatcher).intersection(pointcut);
  * </code>
  *
- * <p>There is no union() method on this class. Use the Pointcuts.union()
- * method for this.
+ * <p>There is no <code>union(Pointcut, Pointcut)</code> method on this class.
+ * Use the <code>Pointcuts.union</code> method for this.
  *
  * @author Rod Johnson
  * @author Rob Harrop
  * @since 11.11.2003
+ * @see Pointcuts#union(org.springframework.aop.Pointcut, org.springframework.aop.Pointcut)
  */
 public class ComposablePointcut implements Pointcut, Serializable {
 
