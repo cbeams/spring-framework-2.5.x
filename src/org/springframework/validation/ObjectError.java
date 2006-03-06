@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.validation;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 
 /**
- * Class that encapsulates an object error, i.e. a global reason for
+ * Class that encapsulates an object error, that is, a global reason for
  * rejecting an object.
  *
  * <p>See DefaultMessageCodesResolver javadoc for details on how a message
@@ -34,6 +34,7 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 
   private final String objectName;
 
+
   /**
    * Create a new ObjectError instance.
 	 * @param objectName the name of the affected object
@@ -46,6 +47,7 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 		this.objectName = objectName;
 	}
 
+
   /**
 	 * Return the name of the affected object.
 	 */
@@ -53,7 +55,9 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 		return objectName;
 	}
 
+
 	public String toString() {
-  		return "Error in object '" + this.objectName + "': " + resolvableToString();
-  	}
+		return "Error in object '" + this.objectName + "': " + resolvableToString();
+	}
+
 }

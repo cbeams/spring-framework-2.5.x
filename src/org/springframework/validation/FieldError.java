@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.validation;
 
 /**
- * Class that encapsulates a field error, i.e. a reason for rejecting
+ * Class that encapsulates a field error, that is, a reason for rejecting
  * a specific field value.
  *
  * <p>See DefaultMessageCodesResolver javadoc for details on how a message
@@ -36,6 +36,7 @@ public class FieldError extends ObjectError {
 
 	private final boolean bindingFailure;
 
+
 	/**
 	 * Create a new FieldError instance.
 	 * @param objectName the name of the affected object
@@ -50,11 +51,13 @@ public class FieldError extends ObjectError {
 	public FieldError(
 			String objectName, String field, Object rejectedValue, boolean bindingFailure,
 			String[] codes, Object[] arguments, String defaultMessage) {
+
 		super(objectName, codes, arguments, defaultMessage);
 		this.field = field;
 		this.rejectedValue = rejectedValue;
 		this.bindingFailure = bindingFailure;
 	}
+
 
 	/**
 	 * Return the affected field of the object.
@@ -77,6 +80,7 @@ public class FieldError extends ObjectError {
 	public boolean isBindingFailure() {
 		return bindingFailure;
 	}
+
 
 	public String toString() {
 		return "Field error in object '" + getObjectName() + "' on field '" + this.field +
