@@ -33,7 +33,17 @@ import org.springframework.util.SerializationTestUtils;
  * @since 16.03.2003
  */
 public class TransactionInterceptorTests extends AbstractTransactionAspectTests {
-	
+
+	protected Object advised(Object target, PlatformTransactionManager ptm, TransactionAttributeSource[] tas) throws Exception {
+		TransactionInterceptor ti = new TransactionInterceptor();
+		ti.setTransactionManager(ptm);
+		ti.setTransactionAttributeSources(tas);
+
+		ProxyFactory pf = new ProxyFactory(target);
+		pf.addAdvice(0, ti);
+		return pf.getProxy();
+	}
+
 	/**
 	 * Template method to create an advised object given the 
 	 * target object and transaction setup.
@@ -51,15 +61,15 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 		return pf.getProxy();
 	}
 	
-	/**
+/**
 	 * A TransactionInterceptor should be serializable if its 
 	 * PlatformTransactionManager is.
 	 */
 	public void testSerializableWithAttributeProperties() throws Exception {
 		TransactionInterceptor ti = new TransactionInterceptor();
-		Properties p = new Properties();
-		p.setProperty("methodName", "PROPAGATION_REQUIRED");
-		ti.setTransactionAttributes(p);
+		Properties props = new Properties();
+		props.setProperty("methodName", "PROPAGATION_REQUIRED");
+		ti.setTransactionAttributes(props);
 		PlatformTransactionManager ptm = new SerializableTransactionManager();
 		ti.setTransactionManager(ptm);
 		ti = (TransactionInterceptor) SerializationTestUtils.serializeAndDeserialize(ti);
@@ -68,6 +78,30 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 		assertNotNull(ti.logger);
 		assertTrue(ti.getTransactionManager() instanceof SerializableTransactionManager);
 		assertNotNull(ti.getTransactionAttributeSource());
+	}
+
+	public void testSerializableWithCompositeSource() throws Exception {
+		NameMatchTransactionAttributeSource tas1 = new NameMatchTransactionAttributeSource();
+		Properties props = new Properties();
+		props.setProperty("methodName", "PROPAGATION_REQUIRED");
+		tas1.setProperties(props);
+
+		NameMatchTransactionAttributeSource tas2 = new NameMatchTransactionAttributeSource();
+		props = new Properties();
+		props.setProperty("otherMethodName", "PROPAGATION_REQUIRES_NEW");
+		tas2.setProperties(props);
+
+		TransactionInterceptor ti = new TransactionInterceptor();
+		ti.setTransactionAttributeSources(new TransactionAttributeSource[] {tas1, tas2});
+		PlatformTransactionManager ptm = new SerializableTransactionManager();
+		ti.setTransactionManager(ptm);
+		ti = (TransactionInterceptor) SerializationTestUtils.serializeAndDeserialize(ti);
+
+		assertTrue(ti.getTransactionManager() instanceof SerializableTransactionManager);
+		assertTrue(ti.getTransactionAttributeSource() instanceof CompositeTransactionAttributeSource);
+		CompositeTransactionAttributeSource ctas = (CompositeTransactionAttributeSource) ti.getTransactionAttributeSource();
+		assertTrue(ctas.getTransactionAttributeSources()[0] instanceof NameMatchTransactionAttributeSource);
+		assertTrue(ctas.getTransactionAttributeSources()[1] instanceof NameMatchTransactionAttributeSource);
 	}
 
 

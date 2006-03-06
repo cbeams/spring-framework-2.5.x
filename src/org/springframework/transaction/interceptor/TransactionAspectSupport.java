@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,6 +147,19 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
 		tas.setProperties(transactionAttributes);
 		this.transactionAttributeSource = tas;
+	}
+
+	/**
+	 * Set multiple transaction attribute sources which are used to find transaction
+	 * attributes. Will build a CompositeTransactionAttributeSource for the given sources.
+	 * @see CompositeTransactionAttributeSource
+	 * @see MethodMapTransactionAttributeSource
+	 * @see NameMatchTransactionAttributeSource
+	 * @see AttributesTransactionAttributeSource
+	 * @see org.springframework.transaction.annotation.AnnotationTransactionAttributeSource
+	 */
+	public void setTransactionAttributeSources(TransactionAttributeSource[] transactionAttributeSources) {
+		this.transactionAttributeSource = new CompositeTransactionAttributeSource(transactionAttributeSources);
 	}
 
 	/**

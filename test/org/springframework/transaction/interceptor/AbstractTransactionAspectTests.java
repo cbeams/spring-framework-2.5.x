@@ -51,7 +51,8 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	protected Method getNameMethod;
 	
 	protected Method setNameMethod;
-	
+
+
 	public AbstractTransactionAspectTests() {
 		try {
 			// Cache the methods we'll be testing
@@ -63,19 +64,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 			throw new RuntimeException("Shouldn't happen", ex);
 		}
 	}
-	
-	/**
-	 * Subclasses must implement this to create an advised object based on the
-	 * given target. In the case of AspectJ, the  advised object will already
-	 * have been created, as there's no distinction between target and proxy.
-	 * In the case of Spring's own AOP framework, a proxy must be created
-	 * using a suitably configured transaction interceptor
-	 * @param target target if there's a distinct target. If not (AspectJ),
-	 * return target.
-	 * @return transactional advised object
-	 */
-	protected abstract Object advised(
-			Object target, PlatformTransactionManager ptm, TransactionAttributeSource tas) throws Exception;
+
 
 	public void testNoTransaction() throws Exception {
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
@@ -105,9 +94,8 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	public void testTransactionShouldSucceed() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
-		Method m = getNameMethod;
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
-		tas.register(m, txatt);
+		tas.register(getNameMethod, txatt);
 
 		TransactionStatus status = transactionStatusForNewTransaction();
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
@@ -120,26 +108,56 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		ptxControl.replay();
 
 		TestBean tb = new TestBean();
-		
 		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
 
 		checkTransactionStatus(false);
-		// verification!?
 		itb.getName();
 		checkTransactionStatus(false);
 
 		ptxControl.verify();
 	}
-	
+
+	/**
+	 * Check that two transactions are created and committed.
+	 */
+	public void testTwoTransactionsShouldSucceed() throws Exception {
+		TransactionAttribute txatt = new DefaultTransactionAttribute();
+
+		MapTransactionAttributeSource tas1 = new MapTransactionAttributeSource();
+		tas1.register(getNameMethod, txatt);
+		MapTransactionAttributeSource tas2 = new MapTransactionAttributeSource();
+		tas2.register(setNameMethod, txatt);
+
+		TransactionStatus status = transactionStatusForNewTransaction();
+		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
+		// expect a transaction
+		ptm.getTransaction(txatt);
+		ptxControl.setReturnValue(status, 2);
+		ptm.commit(status);
+		ptxControl.setVoidCallable(2);
+		ptxControl.replay();
+
+		TestBean tb = new TestBean();
+		ITestBean itb = (ITestBean) advised(tb, ptm, new TransactionAttributeSource[] {tas1, tas2});
+
+		checkTransactionStatus(false);
+		itb.getName();
+		checkTransactionStatus(false);
+		itb.setName("myName");
+		checkTransactionStatus(false);
+
+		ptxControl.verify();
+	}
+
 	/**
 	 * Check that a transaction is created and committed.
 	 */
 	public void testTransactionShouldSucceedWithNotNew() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
-		Method m = getNameMethod;
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
-		tas.register(m, txatt);
+		tas.register(getNameMethod, txatt);
 
 		MockControl statusControl = MockControl.createControl(TransactionStatus.class);
 		TransactionStatus status = (TransactionStatus) statusControl.getMock();
@@ -153,7 +171,6 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		ptxControl.replay();
 
 		TestBean tb = new TestBean();
-
 		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
 
 		checkTransactionStatus(false);
@@ -167,9 +184,8 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	public void testEnclosingTransactionWithNonTransactionMethodOnAdvisedInside() throws Throwable {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
-		Method m = exceptionalMethod;
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
-		tas.register(m, txatt);
+		tas.register(exceptionalMethod, txatt);
 
 		TransactionStatus status = transactionStatusForNewTransaction();
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
@@ -509,5 +525,25 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 			}
 		}
 	}
+
+
+	protected Object advised(
+			Object target, PlatformTransactionManager ptm, TransactionAttributeSource[] tas) throws Exception {
+
+		return advised(target, ptm, new CompositeTransactionAttributeSource(tas));
+	}
+
+	/**
+	 * Subclasses must implement this to create an advised object based on the
+	 * given target. In the case of AspectJ, the  advised object will already
+	 * have been created, as there's no distinction between target and proxy.
+	 * In the case of Spring's own AOP framework, a proxy must be created
+	 * using a suitably configured transaction interceptor
+	 * @param target target if there's a distinct target. If not (AspectJ),
+	 * return target.
+	 * @return transactional advised object
+	 */
+	protected abstract Object advised(
+			Object target, PlatformTransactionManager ptm, TransactionAttributeSource tas) throws Exception;
 
 }
