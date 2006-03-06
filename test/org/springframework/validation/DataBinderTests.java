@@ -481,7 +481,9 @@ public class DataBinderTests extends TestCase {
 		spouseValidator.validate(tb.getSpouse(), errors);
 
 		errors.setNestedPath("");
+		assertTrue(errors.hasErrors());
 		assertEquals(6, errors.getErrorCount());
+
 		assertEquals(2, errors.getGlobalErrorCount());
 		assertEquals("NAME_TOUCHY_MISMATCH", errors.getGlobalError().getCode());
 		assertEquals("NAME_TOUCHY_MISMATCH", ((ObjectError) errors.getGlobalErrors().get(0)).getCode());
@@ -493,6 +495,20 @@ public class DataBinderTests extends TestCase {
 		assertEquals("GENERAL_ERROR", ((ObjectError) errors.getGlobalErrors().get(1)).getCodes()[1]);
 		assertEquals("msg", ((ObjectError) errors.getGlobalErrors().get(1)).getDefaultMessage());
 		assertEquals("arg", ((ObjectError) errors.getGlobalErrors().get(1)).getArguments()[0]);
+
+		assertTrue(errors.hasFieldErrors());
+		assertEquals(4, errors.getFieldErrorCount());
+		assertEquals("TOO_YOUNG", errors.getFieldError().getCode());
+		assertEquals("TOO_YOUNG", ((FieldError) errors.getFieldErrors().get(0)).getCode());
+		assertEquals("age", ((FieldError) errors.getFieldErrors().get(0)).getField());
+		assertEquals("AGE_NOT_ODD", ((FieldError) errors.getFieldErrors().get(1)).getCode());
+		assertEquals("age", ((FieldError) errors.getFieldErrors().get(1)).getField());
+		assertEquals("NOT_ROD", ((FieldError) errors.getFieldErrors().get(2)).getCode());
+		assertEquals("name", ((FieldError) errors.getFieldErrors().get(2)).getField());
+		assertEquals("TOO_YOUNG", ((FieldError) errors.getFieldErrors().get(3)).getCode());
+		assertEquals("spouse.age", ((FieldError) errors.getFieldErrors().get(3)).getField());
+
+		assertTrue(errors.hasFieldErrors("age"));
 		assertEquals(2, errors.getFieldErrorCount("age"));
 		assertEquals("TOO_YOUNG", errors.getFieldError("age").getCode());
 		assertEquals("TOO_YOUNG", ((FieldError) errors.getFieldErrors("age").get(0)).getCode());
@@ -500,6 +516,8 @@ public class DataBinderTests extends TestCase {
 		assertEquals("age", ((FieldError) errors.getFieldErrors("age").get(0)).getField());
 		assertEquals(new Integer(0), ((FieldError) errors.getFieldErrors("age").get(0)).getRejectedValue());
 		assertEquals("AGE_NOT_ODD", ((FieldError) errors.getFieldErrors("age").get(1)).getCode());
+
+		assertTrue(errors.hasFieldErrors("name"));
 		assertEquals(1, errors.getFieldErrorCount("name"));
 		assertEquals("NOT_ROD", errors.getFieldError("name").getCode());
 		assertEquals("NOT_ROD.tb.name", errors.getFieldError("name").getCodes()[0]);
@@ -508,6 +526,8 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_ROD", errors.getFieldError("name").getCodes()[3]);
 		assertEquals("name", ((FieldError) errors.getFieldErrors("name").get(0)).getField());
 		assertEquals(null, ((FieldError) errors.getFieldErrors("name").get(0)).getRejectedValue());
+
+		assertTrue(errors.hasFieldErrors("spouse.age"));
 		assertEquals(1, errors.getFieldErrorCount("spouse.age"));
 		assertEquals("TOO_YOUNG", errors.getFieldError("spouse.age").getCode());
 		assertEquals("tb", ((FieldError) errors.getFieldErrors("spouse.age").get(0)).getObjectName());

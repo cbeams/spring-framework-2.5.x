@@ -16,6 +16,7 @@
 
 package org.springframework.validation;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.EmptyStackException;
 import java.util.HashMap;
@@ -26,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import java.io.Serializable;
 
 import org.springframework.util.StringUtils;
 
@@ -241,6 +241,35 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 			ObjectError objectError = (ObjectError) it.next();
 			if (!(objectError instanceof FieldError)) {
 				return objectError;
+			}
+		}
+		return null;
+	}
+
+	public boolean hasFieldErrors() {
+		return (getFieldErrorCount() > 0);
+	}
+
+	public int getFieldErrorCount() {
+		return getFieldErrors().size();
+	}
+
+	public List getFieldErrors() {
+		List result = new LinkedList();
+		for (Iterator it = this.errors.iterator(); it.hasNext();) {
+			Object error = it.next();
+			if (error instanceof FieldError) {
+				result.add(error);
+			}
+		}
+		return Collections.unmodifiableList(result);
+	}
+
+	public FieldError getFieldError() {
+		for (Iterator it = this.errors.iterator(); it.hasNext();) {
+			Object error = it.next();
+			if (error instanceof FieldError) {
+				return (FieldError) error;
 			}
 		}
 		return null;

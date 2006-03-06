@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,8 +54,18 @@ public class EscapedErrorsTests extends TestCase {
 		ObjectError globalErrorInAllList = (ObjectError) errors.getAllErrors().get(3);
 		assertTrue("Same global error in list", globalError.getDefaultMessage().equals(globalErrorInAllList.getDefaultMessage()));
 
+		assertTrue("Correct field errors flag", errors.hasFieldErrors());
+		assertTrue("Correct number of field errors", errors.getFieldErrorCount() == 3);
+		assertTrue("Correct number of field errors in list", errors.getFieldErrors().size() == 3);
+		FieldError fieldError = errors.getFieldError();
+		assertTrue("Field error code not escaped", "NAME_EMPTY &".equals(fieldError.getCode()));
+		assertTrue("Field value escaped", "empty &amp;".equals(errors.getFieldValue("name")));
+		FieldError fieldErrorInList = (FieldError) errors.getFieldErrors().get(0);
+		assertTrue("Same field error in list", fieldError.getDefaultMessage().equals(fieldErrorInList.getDefaultMessage()));
+
 		assertTrue("Correct name errors flag", errors.hasFieldErrors("name"));
 		assertTrue("Correct number of name errors", errors.getFieldErrorCount("name") == 1);
+		assertTrue("Correct number of name errors in list", errors.getFieldErrors("name").size() == 1);
 		FieldError nameError = errors.getFieldError("name");
 		assertTrue("Name error message escaped", "message: &amp;".equals(nameError.getDefaultMessage()));
 		assertTrue("Name error code not escaped", "NAME_EMPTY &".equals(nameError.getCode()));
@@ -65,6 +75,7 @@ public class EscapedErrorsTests extends TestCase {
 
 		assertTrue("Correct age errors flag", errors.hasFieldErrors("age"));
 		assertTrue("Correct number of age errors", errors.getFieldErrorCount("age") == 2);
+		assertTrue("Correct number of age errors in list", errors.getFieldErrors("age").size() == 2);
 		FieldError ageError = errors.getFieldError("age");
 		assertTrue("Age error message escaped", "message: &lt;tag&gt;".equals(ageError.getDefaultMessage()));
 		assertTrue("Age error code not escaped", "AGE_NOT_SET <tag>".equals(ageError.getCode()));

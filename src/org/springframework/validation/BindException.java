@@ -168,6 +168,22 @@ public class BindException extends Exception implements BindingResult {
 		return this.bindingResult.getGlobalError();
 	}
 
+	public boolean hasFieldErrors() {
+		return this.bindingResult.hasFieldErrors();
+	}
+
+	public int getFieldErrorCount() {
+		return this.bindingResult.getFieldErrorCount();
+	}
+
+	public List getFieldErrors() {
+		return this.bindingResult.getFieldErrors();
+	}
+
+	public FieldError getFieldError() {
+		return this.bindingResult.getFieldError();
+	}
+
 	public boolean hasFieldErrors(String field) {
 		return this.bindingResult.hasFieldErrors(field);
 	}
