@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,8 +36,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * FactoryBean that takes an interface which must have one or more methods with
- * the signatures <code>MyType xxx()<code> or <code>MyType xxx(MyIdType id)<code>
- * (typically, <code>MyService getService()<code> or <code>MyService getService(String id)<code>)
+ * the signatures <code>MyType xxx()</code> or <code>MyType xxx(MyIdType id)</code>
+ * (typically, <code>MyService getService()</code> or <code>MyService getService(String id)</code>)
  * and creates a dynamic proxy which implements that interface, delegating to the
  * Spring BeanFactory underneath.
  *
@@ -82,8 +82,8 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 
 	/**
 	 * Set the service locator interface to use, which must have one or more methods with
-	 * the signatures <code>MyType xxx()<code> or <code>MyType xxx(MyIdType id)<code>
-	 * (typically, <code>MyService getService()<code> or <code>MyService getService(String id)<code>).
+	 * the signatures <code>MyType xxx()</code> or <code>MyType xxx(MyIdType id)</code>
+	 * (typically, <code>MyService getService()</code> or <code>MyService getService(String id)</code>).
 	 * See class-level javadoc for information on the semantics of such methods.
 	 */
 	public void setServiceLocatorInterface(Class interfaceName) {
