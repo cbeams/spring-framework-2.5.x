@@ -80,8 +80,6 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	private static final Log logger = LogFactory.getLog(BeanWrapperImpl.class);
 
 
-	private final PropertyTypeConverter propertyTypeConverter;
-
 	/** The wrapped object */
 	private Object object;
 
@@ -90,6 +88,8 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	private Object rootObject;
 
 	private boolean extractOldValueForEditor = false;
+
+	private PropertyTypeConverter propertyTypeConverter;
 
 	/**
 	 * Cached introspections results for this object, to prevent encountering
@@ -119,10 +119,10 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	 * @see #setWrappedInstance
 	 */
 	public BeanWrapperImpl(boolean registerDefaultEditors) {
-		this.propertyTypeConverter = new PropertyTypeConverter(this);
 		if (registerDefaultEditors) {
 			registerDefaultEditors();
 		}
+		this.propertyTypeConverter = new PropertyTypeConverter(this);
 	}
 
 	/**
@@ -130,7 +130,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	 * @param object object wrapped by this BeanWrapper
 	 */
 	public BeanWrapperImpl(Object object) {
-		this();
+		registerDefaultEditors();
 		setWrappedInstance(object);
 	}
 
@@ -139,7 +139,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	 * @param clazz class to instantiate and wrap
 	 */
 	public BeanWrapperImpl(Class clazz) {
-		this();
+		registerDefaultEditors();
 		setWrappedInstance(BeanUtils.instantiateClass(clazz));
 	}
 
@@ -151,7 +151,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	 * @param rootObject the root object at the top of the path
 	 */
 	public BeanWrapperImpl(Object object, String nestedPath, Object rootObject) {
-		this();
+		registerDefaultEditors();
 		setWrappedInstance(object, nestedPath, rootObject);
 	}
 
@@ -163,7 +163,6 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	 * @param superBw the containing BeanWrapper (must not be <code>null</code>)
 	 */
 	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl superBw) {
-		this.propertyTypeConverter = new PropertyTypeConverter(this);
 		setWrappedInstance(object, nestedPath, superBw.getWrappedInstance());
 		setExtractOldValueForEditor(superBw.isExtractOldValueForEditor());
 	}
@@ -195,6 +194,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 		this.nestedPath = (nestedPath != null ? nestedPath : "");
 		this.rootObject = (!"".equals(this.nestedPath) ? rootObject : object);
 		this.nestedBeanWrappers = null;
+		this.propertyTypeConverter = new PropertyTypeConverter(this, object);
 		setIntrospectionClass(object.getClass());
 	}
 
@@ -609,7 +609,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 					if (this.extractOldValueForEditor) {
 						oldValue = Array.get(propValue, arrayIndex);
 					}
-					Object convertedValue = this.propertyTypeConverter.doTypeConversionIfNecessary(
+					Object convertedValue = this.propertyTypeConverter.convertIfNecessary(
 							propertyName, oldValue, newValue, requiredType);
 					Array.set(propValue, Integer.parseInt(key), convertedValue);
 				}
@@ -636,7 +636,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 					oldValue = list.get(index);
 				}
 				try {
-					Object convertedValue = this.propertyTypeConverter.doTypeConversionIfNecessary(
+					Object convertedValue = this.propertyTypeConverter.convertIfNecessary(
 							propertyName, oldValue, newValue, requiredType);
 					if (index < list.size()) {
 						list.set(index, convertedValue);
@@ -677,11 +677,11 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 				}
 				// IMPORTANT: Do not pass full property name in here - property editors
 				// must not kick in for map keys but rather only for map values.
-				Object convertedMapKey = this.propertyTypeConverter.doTypeConversionIfNecessary(
+				Object convertedMapKey = this.propertyTypeConverter.convertIfNecessary(
 						null, null, key, mapKeyType);
 				// Pass full property name and old value in here, since we want full
 				// conversion ability for map values.
-				Object convertedMapValue = this.propertyTypeConverter.doTypeConversionIfNecessary(
+				Object convertedMapValue = this.propertyTypeConverter.convertIfNecessary(
 						propertyName, oldValue, newValue, mapValueType);
 				map.put(convertedMapKey, convertedMapValue);
 			}
@@ -720,9 +720,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 			}
 
 			try {
-				Object convertedValue = this.propertyTypeConverter.doTypeConversionIfNecessary(
-						propertyName, oldValue, newValue, pd.getPropertyType(),
-						new MethodParameter(writeMethod, 0));
+				Object convertedValue = this.propertyTypeConverter.convertIfNecessary(oldValue, newValue, pd);
 
 				if (pd.getPropertyType().isPrimitive() && (convertedValue == null || "".equals(convertedValue))) {
 					throw new IllegalArgumentException("Invalid value [" + newValue + "] for property '" +
@@ -850,7 +848,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	public Object doTypeConversionIfNecessary(
 			Object value, Class requiredType, MethodParameter methodParam) throws TypeMismatchException {
 		try {
-			return this.propertyTypeConverter.doTypeConversionIfNecessary(null, null, value, requiredType, methodParam);
+			return this.propertyTypeConverter.convertIfNecessary(value, requiredType, methodParam);
 		}
 		catch (IllegalArgumentException ex) {
 			throw new TypeMismatchException(value, requiredType, ex);

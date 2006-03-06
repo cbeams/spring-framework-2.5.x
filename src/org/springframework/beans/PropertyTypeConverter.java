@@ -16,6 +16,7 @@
 
 package org.springframework.beans;
 
+import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.lang.reflect.Array;
@@ -30,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.GenericsHelper;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -49,15 +51,31 @@ class PropertyTypeConverter {
 
 	private final PropertyEditorRegistrySupport propertyEditorRegistry;
 
+	private final Object beanInstance;
 
+
+	/**
+	 * Create a new PropertyTypeConverter for the given editor registry.
+	 * @param propertyEditorRegistry the editor registry to use
+	 */
 	public PropertyTypeConverter(PropertyEditorRegistrySupport propertyEditorRegistry) {
+		this(propertyEditorRegistry, null);
+	}
+
+	/**
+	 * Create a new PropertyTypeConverter for the given editor registry and bean instance.
+	 * @param propertyEditorRegistry the editor registry to use
+	 * @param beanInstance the bean instance to work on (as context that can be passed to editors)
+	 */
+	public PropertyTypeConverter(PropertyEditorRegistrySupport propertyEditorRegistry, Object beanInstance) {
+		Assert.notNull(propertyEditorRegistry, "Property editor registry must not be null");
 		this.propertyEditorRegistry = propertyEditorRegistry;
+		this.beanInstance = beanInstance;
 	}
 
 
 	/**
-	 * Convert the value to the required type (if necessary from a String),
-	 * for the specified property.
+	 * Convert the value to the required type for the specified property.
 	 * @param propertyName name of the property
 	 * @param oldValue previous value, if available (may be <code>null</code>)
 	 * @param newValue proposed change value
@@ -66,12 +84,46 @@ class PropertyTypeConverter {
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
-	public Object doTypeConversionIfNecessary(
+	public Object convertIfNecessary(
 			String propertyName, Object oldValue, Object newValue, Class requiredType)
 			throws IllegalArgumentException {
 
-		return doTypeConversionIfNecessary(propertyName, oldValue, newValue, requiredType, null);
+		return convertIfNecessary(propertyName, oldValue, newValue, requiredType, null, null);
 	}
+
+	/**
+	 * Convert the value to the required type for the specified property.
+	 * @param oldValue previous value, if available (may be <code>null</code>)
+	 * @param newValue proposed change value
+	 * @param descriptor the JavaBeans descriptor for the property
+	 * @return the new value, possibly the result of type conversion
+	 * @throws IllegalArgumentException if type conversion failed
+	 */
+	public Object convertIfNecessary(Object oldValue, Object newValue, PropertyDescriptor descriptor)
+			throws IllegalArgumentException {
+
+		Assert.notNull(descriptor, "PropertyDescriptor must not be null");
+		return convertIfNecessary(
+				descriptor.getName(), oldValue, newValue, descriptor.getPropertyType(), descriptor,
+				new MethodParameter(descriptor.getWriteMethod(), 0));
+	}
+
+	/**
+	 * Convert the value to the specified required type.
+	 * @param newValue proposed change value
+	 * @param requiredType the type we must convert to
+	 * (or <code>null</code> if not known, for example in case of a collection element)
+	 * @param methodParam the method parameter that is the target of the conversion
+	 * (may be <code>null</code>)
+	 * @return the new value, possibly the result of type conversion
+	 * @throws IllegalArgumentException if type conversion failed
+	 */
+	public Object convertIfNecessary(Object newValue, Class requiredType, MethodParameter methodParam)
+			throws IllegalArgumentException {
+
+		return convertIfNecessary(null, null, newValue, requiredType, null, methodParam);
+	}
+
 
 	/**
 	 * Convert the value to the required type (if necessary from a String),
@@ -86,8 +138,9 @@ class PropertyTypeConverter {
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
-	public Object doTypeConversionIfNecessary(
-			String propertyName, Object oldValue, Object newValue, Class requiredType, MethodParameter methodParam)
+	protected Object convertIfNecessary(
+			String propertyName, Object oldValue, Object newValue, Class requiredType,
+			PropertyDescriptor descriptor, MethodParameter methodParam)
 			throws IllegalArgumentException {
 
 		Object convertedValue = newValue;
@@ -99,14 +152,24 @@ class PropertyTypeConverter {
 		if (pe != null ||
 				(requiredType != null && !requiredType.isInstance(convertedValue))) {
 
-			if (requiredType != null) {
-				if (pe == null) {
-					// No custom editor -> check BeanWrapperImpl's default editors.
-					pe = (PropertyEditor) this.propertyEditorRegistry.getDefaultEditor(requiredType);
-					if (pe == null) {
-						// No BeanWrapper default editor -> check standard JavaBean editors.
-						pe = PropertyEditorManager.findEditor(requiredType);
+			if (pe == null && descriptor != null) {
+				if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
+					pe = descriptor.createPropertyEditor(this.beanInstance);
+				}
+				else {
+					Class editorClass = descriptor.getPropertyEditorClass();
+					if (editorClass != null) {
+						pe = (PropertyEditor) BeanUtils.instantiateClass(editorClass);
 					}
+				}
+			}
+
+			if (pe == null && requiredType != null) {
+				// No custom editor -> check BeanWrapperImpl's default editors.
+				pe = (PropertyEditor) this.propertyEditorRegistry.getDefaultEditor(requiredType);
+				if (pe == null) {
+					// No BeanWrapper default editor -> check standard JavaBean editors.
+					pe = PropertyEditorManager.findEditor(requiredType);
 				}
 			}
 
@@ -203,7 +266,7 @@ class PropertyTypeConverter {
 			Object result = Array.newInstance(componentType, coll.size());
 			int i = 0;
 			for (Iterator it = coll.iterator(); it.hasNext(); i++) {
-				Object value = doTypeConversionIfNecessary(
+				Object value = convertIfNecessary(
 						buildIndexedPropertyName(propertyName, i), null, it.next(), componentType);
 				Array.set(result, i, value);
 			}
@@ -214,7 +277,7 @@ class PropertyTypeConverter {
 			int arrayLength = Array.getLength(input);
 			Object result = Array.newInstance(componentType, arrayLength);
 			for (int i = 0; i < arrayLength; i++) {
-				Object value = doTypeConversionIfNecessary(
+				Object value = convertIfNecessary(
 						buildIndexedPropertyName(propertyName, i), null, Array.get(input, i), componentType);
 				Array.set(result, i, value);
 			}
@@ -223,7 +286,7 @@ class PropertyTypeConverter {
 		else {
 			// A plain value: convert it to an array with a single component.
 			Object result = Array.newInstance(componentType, 1);
-			Object value = doTypeConversionIfNecessary(
+			Object value = convertIfNecessary(
 					buildIndexedPropertyName(propertyName, 0), null, input, componentType);
 			Array.set(result, 0, value);
 			return result;
@@ -241,7 +304,7 @@ class PropertyTypeConverter {
 			Collection convertedCopy = (Collection) BeanUtils.instantiateClass(original.getClass());
 			int i = 0;
 			for (Iterator it = original.iterator(); it.hasNext(); i++) {
-				Object convertedElement = doTypeConversionIfNecessary(
+				Object convertedElement = convertIfNecessary(
 						buildIndexedPropertyName(propertyName, i), null, it.next(), elementType);
 				convertedCopy.add(convertedElement);
 			}
@@ -262,9 +325,9 @@ class PropertyTypeConverter {
 			for (Iterator it = original.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
 				Object key = entry.getKey();
-				Object convertedMapKey = doTypeConversionIfNecessary(
+				Object convertedMapKey = convertIfNecessary(
 						buildKeyedPropertyName(propertyName, key), null, entry.getKey(), mapKeyType);
-				Object convertedMapValue = doTypeConversionIfNecessary(
+				Object convertedMapValue = convertIfNecessary(
 						buildKeyedPropertyName(propertyName, key), null, entry.getValue(), mapValueType);
 				convertedCopy.put(convertedMapKey, convertedMapValue);
 			}
