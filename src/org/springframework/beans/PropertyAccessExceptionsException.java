@@ -20,7 +20,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 /**
- * Combined exception, composed of individual binding propertyAccessExceptions.
+ * Combined exception, composed of individual PropertyAccessException instances.
  * An object of this class is created at the beginning of the binding
  * process, and errors added to it as necessary.
  *
@@ -34,39 +34,19 @@ import java.io.PrintWriter;
  */
 public class PropertyAccessExceptionsException extends BeansException {
 
-	/** BeanWrapper wrapping the target object for binding */
-	private BeanWrapper beanWrapper;
-
 	/** List of PropertyAccessException objects */
 	private PropertyAccessException[] propertyAccessExceptions;
 
 
 	/**
 	 * Create a new PropertyAccessExceptionsException.
-	 * @param beanWrapper the BeanWrapper that wraps the target object
 	 * @param propertyAccessExceptions the List of PropertyAccessExceptions
 	 */
-	public PropertyAccessExceptionsException(
-			BeanWrapper beanWrapper, PropertyAccessException[] propertyAccessExceptions) {
+	public PropertyAccessExceptionsException(PropertyAccessException[] propertyAccessExceptions) {
 		super("");
-		this.beanWrapper = beanWrapper;
 		this.propertyAccessExceptions = propertyAccessExceptions;
 	}
 
-
-	/**
-	 * Return the BeanWrapper that generated this exception.
-	 */
-	public BeanWrapper getBeanWrapper() {
-		return beanWrapper;
-	}
-
-	/**
-	 * Return the object we're binding to.
-	 */
-	public Object getBindObject() {
-		return this.beanWrapper.getWrappedInstance();
-	}
 
 	/**
 	 * If this returns 0, no errors were encountered during binding.
