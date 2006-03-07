@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,6 +105,20 @@ public abstract class ReflectionUtils {
 			handleReflectionException(ex);
 			throw new IllegalStateException(
 					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+		}
+	}
+
+	/**
+	 * Make the given field accessible, explicitly setting it accessible if necessary.
+	 * The <code>setAccessible(true)</code> method is only called when actually necessary,
+	 * to avoid unnecessary conflicts with a JVM SecurityManager (if active).
+	 * @param field the field to make accessible
+	 * @see java.lang.reflect.Field#setAccessible
+	 */
+	public static void makeAccessible(Field field) {
+		if (!Modifier.isPublic(field.getModifiers()) ||
+				!Modifier.isPublic(field.getDeclaringClass().getModifiers())) {
+			field.setAccessible(true);
 		}
 	}
 
@@ -227,12 +241,10 @@ public abstract class ReflectionUtils {
 					"] must be same or subclass as source class [" + src.getClass().getName() + "]");
 		}
 		doWithFields(src.getClass(), new ReflectionUtils.FieldCallback() {
-			public void doWith(Field f) throws IllegalArgumentException, IllegalAccessException {
-				if (!f.isAccessible()) {
-					f.setAccessible(true);
-				}
-				Object srcValue = f.get(src);
-				f.set(dest, srcValue);
+			public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
+				makeAccessible(field);
+				Object srcValue = field.get(src);
+				field.set(dest, srcValue);
 			}
 		}, ReflectionUtils.COPYABLE_FIELDS);
 	}
