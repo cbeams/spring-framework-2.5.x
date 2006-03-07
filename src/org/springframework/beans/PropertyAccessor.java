@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,32 @@ public interface PropertyAccessor {
 
 
 	/**
+	 * Return whether this property is readable.
+	 * Returns false if the property doesn't exist.
+	 * @param propertyName property to check status for
+	 * @return whether this property is readable
+	 */
+	boolean isReadableProperty(String propertyName) throws BeansException;
+
+	/**
+	 * Return whether this property is writable.
+	 * Returns false if the property doesn't exist.
+	 * @param propertyName property to check status for
+	 * @return whether this property is writable
+	 */
+	boolean isWritableProperty(String propertyName) throws BeansException;
+
+	/**
+	 * Determine the property type for a particular property, either checking
+	 * the property descriptor or checking the value in case of an indexed or
+	 * mapped element.
+	 * @param propertyName property to check status for
+	 * @return the property type for the particular property, or <code>null</code>
+	 * if not determinable
+	 */
+	Class getPropertyType(String propertyName) throws BeansException;
+
+	/**
 	 * Get the value of a property.
 	 * @param propertyName name of the property to get the value of
 	 * @return the value of the property
@@ -60,8 +86,7 @@ public interface PropertyAccessor {
 	Object getPropertyValue(String propertyName) throws BeansException;
 
 	/**
-	 * Set a property value. This method is provided for convenience only.
-	 * The setPropertyValue(PropertyValue) method is more powerful.
+	 * Set a property value.
 	 * @param propertyName name of the property to set value of
 	 * @param value the new value
 	 * @throws FatalBeanException if there is no such property, if the property
@@ -70,9 +95,8 @@ public interface PropertyAccessor {
 	void setPropertyValue(String propertyName, Object value) throws BeansException;
 
 	/**
-	 * Update a property value.
-	 * <b>This is the preferred way to update an individual property.</b>
-	 * @param pv object containing new property value
+	 * Set a property value.
+	 * @param pv object containing the new property value
 	 * @throws FatalBeanException if there is no such property, if the property
 	 * isn't writable, or if the property setter throws an exception.
 	 */
@@ -117,7 +141,6 @@ public interface PropertyAccessor {
 	 * PropertyAccessExceptionsException containing all the individual errors.
 	 * This exception can be examined later to see all binding errors.
 	 * Properties that were successfully updated stay changed.
-	 * <p>Does not allow unknown fields.
 	 * @param pvs PropertyValues to set on the target object
 	 * @param ignoreUnknown should we ignore unknown values (not found in the bean)
 	 * @throws FatalBeanException if there is no such property, if the property

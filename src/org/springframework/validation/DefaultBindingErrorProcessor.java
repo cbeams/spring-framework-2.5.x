@@ -34,8 +34,8 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
  * @since 1.2
  * @see #MISSING_FIELD_ERROR_CODE
  * @see DataBinder#setBindingErrorProcessor
- * @see BeanBindingResult#addError
- * @see BeanBindingResult#resolveMessageCodes
+ * @see BeanPropertyBindingResult#addError
+ * @see BeanPropertyBindingResult#resolveMessageCodes
  * @see org.springframework.beans.PropertyAccessException#getErrorCode
  * @see org.springframework.beans.TypeMismatchException#ERROR_CODE
  * @see org.springframework.beans.MethodInvocationException#ERROR_CODE
@@ -50,7 +50,7 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 	public static final String MISSING_FIELD_ERROR_CODE = "required";
 
 
-	public void processMissingFieldError(String missingField, BeanBindingResult bindingResult) {
+	public void processMissingFieldError(String missingField, BindingResult bindingResult) {
 		// Create field error with code "required".
 		String[] codes = bindingResult.resolveMessageCodes(MISSING_FIELD_ERROR_CODE, missingField);
 		Object[] arguments = getArgumentsForBindError(bindingResult.getObjectName(), missingField);
@@ -59,7 +59,7 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 				codes, arguments, "Field '" + missingField + "' is required"));
 	}
 
-	public void processPropertyAccessException(PropertyAccessException ex, BeanBindingResult bindingResult) {
+	public void processPropertyAccessException(PropertyAccessException ex, BindingResult bindingResult) {
 		// Create field error with the exceptions's code, e.g. "typeMismatch".
 		String field = ex.getPropertyChangeEvent().getPropertyName();
 		Object value = ex.getPropertyChangeEvent().getNewValue();

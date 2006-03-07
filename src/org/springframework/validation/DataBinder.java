@@ -24,13 +24,14 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessException;
 import org.springframework.beans.PropertyAccessExceptionsException;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -98,7 +99,11 @@ public class DataBinder implements PropertyEditorRegistry {
 	 */
 	protected static final Log logger = LogFactory.getLog(DataBinder.class);
 
-	private final BeanBindingResult bindingResult;
+	private final Object target;
+
+	private final String objectName;
+
+	private AbstractPropertyBindingResult bindingResult;
 
 	private BindException bindException;
 
@@ -117,7 +122,8 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
 	public DataBinder(Object target) {
-		this(target, DEFAULT_OBJECT_NAME);
+		this.target = target;
+		this.objectName = DEFAULT_OBJECT_NAME;
 	}
 
 	/**
@@ -126,45 +132,75 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @param objectName name of the target object
 	 */
 	public DataBinder(Object target, String objectName) {
-		this.bindingResult = createBindingResult(target, objectName);
-		setExtractOldValueForEditor(true);
+		this.target = target;
+		this.objectName = objectName;
 	}
 
-
-	/**
-	 * Create a new Errors instance for this data binder.
-	 * Can be overridden in subclasses to.
-	 * Needs to be a subclass of BindException.
-	 * @param target target object to bind onto
-	 * @param objectName name of the target object
-	 * @return the Errors instance
-	 * @see #close
-	 */
-	protected BeanBindingResult createBindingResult(Object target, String objectName) {
-		return new BeanBindingResult(target, objectName);
-	}
 
 	/**
 	 * Return the wrapped target object.
 	 */
 	public Object getTarget() {
-		return this.bindingResult.getTarget();
+		return target;
 	}
 
 	/**
 	 * Return the name of the bound object.
 	 */
 	public String getObjectName() {
-		return this.bindingResult.getObjectName();
+		return objectName;
 	}
 
 	/**
-	 * Return the Errors instance for this data binder.
-	 * @return the Errors instance, to be treated as Errors or as BindException
+	 * Initialize standard JavaBean property access for this DataBinder.
+	 * <p>This is the default; an explicit call just leads to eager initialization.
+	 */
+	public void initBeanPropertyAccess() {
+		Assert.isNull(this.bindingResult,
+				"DataBinder is already initialized - call initBeanPropertyAccess before any other configuration methods");
+		this.bindingResult = new BeanPropertyBindingResult(getTarget(), getObjectName());
+	}
+
+	/**
+	 * Initialize direct field access for this DataBinder.
+	 * <p>This is the default; an explicit call just leads to eager initialization.
+	 */
+	public void initDirectFieldAccess() {
+		Assert.isNull(this.bindingResult,
+				"DataBinder is already initialized - call initDirectFieldAccess before any other configuration methods");
+		this.bindingResult = new DirectFieldBindingResult(getTarget(), getObjectName());
+	}
+
+	/**
+	 * Return the internal BindingResult held by this DataBinder,
+	 * as AbstractPropertyBindingResult.
+	 */
+	protected AbstractPropertyBindingResult getInternalBindingResult() {
+		if (this.bindingResult == null) {
+			initBeanPropertyAccess();
+		}
+		return this.bindingResult;
+	}
+
+	/**
+	 * Return the underlying PropertyAccessor of this binder's BindingResult.
+	 * To be used by binder subclasses that need property checks.
+	 */
+	protected ConfigurablePropertyAccessor getPropertyAccessor() {
+		return getInternalBindingResult().getPropertyAccessor();
+	}
+
+	/**
+	 * Return the BindingResult instance created by this DataBinder.
+	 * This allows for convenient access to the binding results after
+	 * a bind operation.
+	 * @return the BindingResult instance, to be treated as BindingResult
+	 * or as Errors instance (Errors is a super-interface of BindingResult)
 	 * @see Errors
+	 * @see #bind
 	 */
 	public BindingResult getBindingResult() {
-		return bindingResult;
+		return getInternalBindingResult();
 	}
 
 	/**
@@ -175,19 +211,11 @@ public class DataBinder implements PropertyEditorRegistry {
 	 */
 	public BindException getErrors() {
 		if (this.bindException == null) {
-			this.bindException = new BindException(this.bindingResult);
+			this.bindException = new BindException(getBindingResult());
 		}
 		return this.bindException;
 	}
 
-
-	/**
-	 * Return the underlying BeanWrapper of the Errors object.
-	 * To be used by binder subclasses that need bean property checks.
-	 */
-	protected BeanWrapper getBeanWrapper() {
-		return this.bindingResult.getBeanWrapper();
-	}
 
 	/**
 	 * Set whether to ignore unknown fields, i.e. whether to ignore request
@@ -264,30 +292,30 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * Turn this to "false" to avoid side effects caused by getters.
 	 */
 	public void setExtractOldValueForEditor(boolean extractOldValueForEditor) {
-		this.bindingResult.getBeanWrapper().setExtractOldValueForEditor(extractOldValueForEditor);
+		getPropertyAccessor().setExtractOldValueForEditor(extractOldValueForEditor);
 	}
 
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
-		this.bindingResult.getBeanWrapper().registerCustomEditor(requiredType, propertyEditor);
+		getPropertyAccessor().registerCustomEditor(requiredType, propertyEditor);
 	}
 
 	public void registerCustomEditor(Class requiredType, String field, PropertyEditor propertyEditor) {
-		getBeanWrapper().registerCustomEditor(requiredType, field, propertyEditor);
+		getPropertyAccessor().registerCustomEditor(requiredType, field, propertyEditor);
 	}
 
 	public PropertyEditor findCustomEditor(Class requiredType, String propertyPath) {
-		return getBeanWrapper().findCustomEditor(requiredType, propertyPath);
+		return getPropertyAccessor().findCustomEditor(requiredType, propertyPath);
 	}
 
 	/**
 	 * Set the strategy to use for resolving errors into message codes.
 	 * Applies the given strategy to the underlying errors holder.
 	 * <p>Default is a DefaultMessageCodesResolver.
-	 * @see BeanBindingResult#setMessageCodesResolver
+	 * @see BeanPropertyBindingResult#setMessageCodesResolver
 	 * @see DefaultMessageCodesResolver
 	 */
 	public void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
-		this.bindingResult.setMessageCodesResolver(messageCodesResolver);
+		getInternalBindingResult().setMessageCodesResolver(messageCodesResolver);
 	}
 
 	/**
@@ -356,7 +384,7 @@ public class DataBinder implements PropertyEditorRegistry {
 			String field = pvArray[i].getName();
 			if (!((allowedFieldsList != null && allowedFieldsList.contains(field)) || isAllowed(field))) {
 				mpvs.removePropertyValue(pvArray[i]);
-				this.bindingResult.recordSuppressedField(pvArray[i].getName());
+				getBindingResult().recordSuppressedField(pvArray[i].getName());
 				if (logger.isDebugEnabled()) {
 					logger.debug("Field [" + pvArray[i] + "] has been removed from PropertyValues " +
 							"and will not be bound, because it has not been found in the list of allowed fields " +
@@ -409,7 +437,7 @@ public class DataBinder implements PropertyEditorRegistry {
 						(pv.getValue() instanceof String && !StringUtils.hasText((String) pv.getValue()))) {
 					// Use bind error processor to create FieldError.
 					String field = requiredFields[i];
-					getBindingErrorProcessor().processMissingFieldError(field, this.bindingResult);
+					getBindingErrorProcessor().processMissingFieldError(field, getInternalBindingResult());
 					// Remove property from property values to bind:
 					// It has already caused a field error with a rejected value.
 					mpvs.removePropertyValue(field);
@@ -425,7 +453,7 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * default be ignored.
 	 * @param mpvs the property values to be bound (can be modified)
 	 * @see #getTarget
-	 * @see #getBeanWrapper
+	 * @see #getPropertyAccessor
 	 * @see #isIgnoreUnknownFields
 	 * @see #getBindingErrorProcessor
 	 * @see BindingErrorProcessor#processPropertyAccessException
@@ -433,16 +461,17 @@ public class DataBinder implements PropertyEditorRegistry {
 	protected void applyPropertyValues(MutablePropertyValues mpvs) {
 		try {
 			// Bind request parameters onto target object.
-			getBeanWrapper().setPropertyValues(mpvs, isIgnoreUnknownFields());
+			getPropertyAccessor().setPropertyValues(mpvs, isIgnoreUnknownFields());
 		}
 		catch (PropertyAccessExceptionsException ex) {
 			// Use bind error processor to create FieldErrors.
 			PropertyAccessException[] exs = ex.getPropertyAccessExceptions();
 			for (int i = 0; i < exs.length; i++) {
-				getBindingErrorProcessor().processPropertyAccessException(exs[i], this.bindingResult);
+				getBindingErrorProcessor().processPropertyAccessException(exs[i], getInternalBindingResult());
 			}
 		}
 	}
+
 
 	/**
 	 * Close this DataBinder, which may result in throwing

@@ -65,29 +65,22 @@ public class BindException extends Exception implements BindingResult {
 	 * Create a new BindException instance for a target bean.
 	 * @param target target bean to bind onto
 	 * @param objectName the name of the target object
-	 * @see BeanBindingResult
+	 * @see BeanPropertyBindingResult
 	 */
 	public BindException(Object target, String objectName) {
 		Assert.notNull(target, "Target object must not be null");
-		this.bindingResult = new BeanBindingResult(target, objectName);
+		this.bindingResult = new BeanPropertyBindingResult(target, objectName);
 	}
 
 	/**
 	 * Return the BindingResult that this BindException wraps.
-	 * Will typically be a BeanBindingResult.
-	 * @see BeanBindingResult
+	 * Will typically be a BeanPropertyBindingResult.
+	 * @see BeanPropertyBindingResult
 	 */
 	public final BindingResult getBindingResult() {
 		return bindingResult;
 	}
 
-
-	/**
-	 * Return the wrapped target object.
-	 */
-	public Object getTarget() {
-		return this.bindingResult.getTarget();
-	}
 
 	public String getObjectName() {
 		return this.bindingResult.getObjectName();
@@ -205,6 +198,14 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 
+	public Object getTarget() {
+		return this.bindingResult.getTarget();
+	}
+
+	public Map getModel() {
+		return this.bindingResult.getModel();
+	}
+
 	public void recordSuppressedField(String fieldName) {
 		this.bindingResult.recordSuppressedField(fieldName);
 	}
@@ -213,8 +214,12 @@ public class BindException extends Exception implements BindingResult {
 		return this.bindingResult.getSuppressedFields();
 	}
 
-	public Map getModel() {
-		return this.bindingResult.getModel();
+	public void addError(ObjectError error) {
+		this.bindingResult.addError(error);
+	}
+
+	public String[] resolveMessageCodes(String errorCode, String field) {
+		return this.bindingResult.resolveMessageCodes(errorCode, field);
 	}
 
 

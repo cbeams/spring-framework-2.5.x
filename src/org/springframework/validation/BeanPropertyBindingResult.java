@@ -16,31 +16,30 @@
 
 package org.springframework.validation;
 
-import java.beans.PropertyEditor;
 import java.io.Serializable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of the Errors interface, supporting
- * registration and evaluation of binding errors on JavaBean objects.
+ * Default implementation of the Errors and BindingResult interfaces,
+ * supporting registration and evaluation of binding errors on JavaBean objects.
+ * Performs standard JavaBean property access.
  *
  * <p>Normally, application code will work with the Errors interface
  * or the BindingResult interface. A DataBinder returns its BindingResult
  * via <code>getBindingResult()</code>.
  *
- * <p>Supports exporting a model, suitable for example for web MVC.
- * Thus, it is sometimes used as parameter type instead of the Errors interface
- * itself - if extracting the model makes sense in the particular context.
- *
  * @author Juergen Hoeller
  * @since 2.0
  * @see DataBinder#getBindingResult()
+ * @see DataBinder#initBeanPropertyAccess()
+ * @see DirectFieldBindingResult
  */
-public class BeanBindingResult extends AbstractBindingResult implements Serializable {
+public class BeanPropertyBindingResult extends AbstractPropertyBindingResult implements Serializable {
 
 	private final Object target;
 
@@ -48,67 +47,34 @@ public class BeanBindingResult extends AbstractBindingResult implements Serializ
 
 
 	/**
-	 * Create a new BeanBindingResult instance.
+	 * Create a new BeanPropertyBindingResult instance.
 	 * @param target the target bean to bind onto
 	 * @param objectName the name of the target object
 	 */
-	public BeanBindingResult(Object target, String objectName) {
+	public BeanPropertyBindingResult(Object target, String objectName) {
 		super(objectName);
 		Assert.notNull(target, "Target bean must not be null");
 		this.target = target;
+	}
+
+	public Object getTarget() {
+		return this.target;
 	}
 
 	/**
 	 * Return the BeanWrapper that this instance uses.
 	 * Creates a new one if none existed before.
 	 */
-	protected BeanWrapper getBeanWrapper() {
+	public ConfigurablePropertyAccessor getPropertyAccessor() {
 		if (this.beanWrapper == null) {
 			this.beanWrapper = new BeanWrapperImpl(this.target);
+			this.beanWrapper.setExtractOldValueForEditor(true);
 		}
 		return this.beanWrapper;
 	}
 
-	/**
-	 * Retrieve the custom PropertyEditor for the given field, if any.
-	 * @param field the field name
-	 * @return the custom PropertyEditor, or <code>null</code>
-	 */
-	public PropertyEditor getCustomEditor(String field) {
-		String fixedField = fixedField(field);
-		Class type = getBeanWrapper().getPropertyType(fixedField);
-		return getBeanWrapper().findCustomEditor(type, fixedField);
-	}
-
-
-	public Object getTarget() {
-		return this.target;
-	}
-
 	protected String canonicalFieldName(String field) {
 		return BeanUtils.canonicalName(field);
-	}
-
-	protected Class getFieldType(String field) {
-		return getBeanWrapper().getPropertyType(field);
-	}
-
-	protected Object getActualFieldValue(String field) {
-		return getBeanWrapper().getPropertyValue(field);
-	}
-
-	protected Object formatFieldValue(String field, Object value) {
-		PropertyEditor customEditor = getCustomEditor(field);
-		if (customEditor != null) {
-			customEditor.setValue(value);
-			String textValue = customEditor.getAsText();
-			// If the PropertyEditor returned null, there is no appropriate
-			// text representation for this value: only use it if non-null.
-			if (textValue != null) {
-				return textValue;
-			}
-		}
-		return value;
 	}
 
 }

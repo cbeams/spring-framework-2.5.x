@@ -33,22 +33,26 @@ import org.springframework.util.Assert;
  * @since 2.0
  * @see java.util.Map
  */
-public class MapBindingResult extends AbstractBindingResult implements Serializable {
+public class SimpleMapBindingResult extends AbstractBindingResult implements Serializable {
 
 	private final Map target;
 
 
 	/**
-	 * Create a new MapBindingResult instance.
+	 * Create a new SimpleMapBindingResult instance.
 	 * @param target the target Map to bind onto
 	 * @param objectName the name of the target object
 	 */
-	public MapBindingResult(Map target, String objectName) {
+	public SimpleMapBindingResult(Map target, String objectName) {
 		super(objectName);
 		Assert.notNull(target, "Target Map must not be null");
 		this.target = target;
 	}
 
+
+	public Map getTargetMap() {
+		return this.target;
+	}
 
 	public Object getTarget() {
 		return this.target;

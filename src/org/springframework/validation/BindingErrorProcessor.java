@@ -40,12 +40,12 @@ public interface BindingErrorProcessor {
 	 * @param missingField the field that was missing during binding
 	 * @param bindingResult the errors object to add the error(s) to.
 	 * You can add more than just one error or maybe even ignore it.
-	 * The <code>BeanBindingResult</code> object features convenience utils such as
-	 * a <code>MessageCodesResolver</code> to resolve an error code into message codes.
-	 * @see BeanBindingResult#addError
-	 * @see BeanBindingResult#resolveMessageCodes
+	 * The <code>BindingResult</code> object features convenience utils such as
+	 * a <code>resolveMessageCodes</code> method to resolve an error code.
+	 * @see BeanPropertyBindingResult#addError
+	 * @see BeanPropertyBindingResult#resolveMessageCodes
 	 */
-	void processMissingFieldError(String missingField, BeanBindingResult bindingResult);
+	void processMissingFieldError(String missingField, BindingResult bindingResult);
 
 	/**
 	 * Translate the given <code>PropertyAccessException</code> to an appropriate
@@ -56,15 +56,15 @@ public interface BindingErrorProcessor {
 	 * @param ex the <code>PropertyAccessException</code> to translate
 	 * @param bindingResult the errors object to add the error(s) to.
 	 * You can add more than just one error or maybe even ignore it.
-	 * The <code>BeanBindingResult</code> object features convenience utils such as
-	 * a <code>MessageCodesResolver</code> to resolve an error code into message codes.
+	 * The <code>BindingResult</code> object features convenience utils such as
+	 * a <code>resolveMessageCodes</code> method to resolve an error code.
 	 * @see Errors
 	 * @see FieldError
 	 * @see ObjectError
 	 * @see MessageCodesResolver
-	 * @see BeanBindingResult#addError
-	 * @see BeanBindingResult#resolveMessageCodes
+	 * @see BeanPropertyBindingResult#addError
+	 * @see BeanPropertyBindingResult#resolveMessageCodes
 	 */
-	void processPropertyAccessException(PropertyAccessException ex, BeanBindingResult bindingResult);
+	void processPropertyAccessException(PropertyAccessException ex, BindingResult bindingResult);
 
 }

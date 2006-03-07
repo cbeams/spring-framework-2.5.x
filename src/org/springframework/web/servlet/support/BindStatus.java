@@ -23,7 +23,7 @@ import java.util.List;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.BeanBindingResult;
+import org.springframework.validation.AbstractPropertyBindingResult;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
@@ -151,7 +151,7 @@ public class BindStatus {
 
 	/**
 	 * Find a custom editor for the given field, if any.
-	 * @see org.springframework.validation.BeanBindingResult#getCustomEditor(String)
+	 * @see org.springframework.validation.AbstractPropertyBindingResult#getCustomEditor(String)
 	 */
 	private PropertyEditor getCustomEditor(Errors errors, String field) {
 		Errors bindingResult = errors;
@@ -159,8 +159,8 @@ public class BindStatus {
 		if (errors instanceof BindException) {
 			bindingResult = ((BindException) errors).getBindingResult();
 		}
-		if (bindingResult instanceof BeanBindingResult) {
-			return ((BeanBindingResult) bindingResult).getCustomEditor(field);
+		if (bindingResult instanceof AbstractPropertyBindingResult) {
+			return ((AbstractPropertyBindingResult) bindingResult).getCustomEditor(field);
 		}
 		return null;
 	}

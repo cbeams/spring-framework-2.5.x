@@ -72,7 +72,7 @@ import org.springframework.util.StringUtils;
  * @see BeanWrapper
  * @see PropertyEditorRegistrySupport
  */
-public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements BeanWrapper {
+public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWrapper {
 
 	/**
 	 * We'll create a lot of these objects, so we don't want a new logger every time.
@@ -86,8 +86,6 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 	private String nestedPath = "";
 
 	private Object rootObject;
-
-	private boolean extractOldValueForEditor = false;
 
 	private PropertyTypeConverter propertyTypeConverter;
 
@@ -241,14 +239,6 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 		}
 	}
 
-	public void setExtractOldValueForEditor(boolean extractOldValueForEditor) {
-		this.extractOldValueForEditor = extractOldValueForEditor;
-	}
-
-	public boolean isExtractOldValueForEditor() {
-		return extractOldValueForEditor;
-	}
-
 
 	public PropertyDescriptor[] getPropertyDescriptors() {
 		return this.cachedIntrospectionResults.getBeanInfo().getPropertyDescriptors();
@@ -268,7 +258,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 
 	/**
 	 * Internal version of getPropertyDescriptor:
-	 * Returns null if not found rather than throwing an exception.
+	 * Returns <code>null</code> if not found rather than throwing an exception.
 	 */
 	protected PropertyDescriptor getPropertyDescriptorInternal(String propertyName) throws BeansException {
 		Assert.state(this.object != null, "BeanWrapper does not hold a bean instance");
@@ -606,7 +596,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 				int arrayIndex = Integer.parseInt(key);
 				Object oldValue = null;
 				try {
-					if (this.extractOldValueForEditor) {
+					if (isExtractOldValueForEditor()) {
 						oldValue = Array.get(propValue, arrayIndex);
 					}
 					Object convertedValue = this.propertyTypeConverter.convertIfNecessary(
@@ -632,7 +622,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 				List list = (List) propValue;
 				int index = Integer.parseInt(key);
 				Object oldValue = null;
-				if (this.extractOldValueForEditor && index < list.size()) {
+				if (isExtractOldValueForEditor() && index < list.size()) {
 					oldValue = list.get(index);
 				}
 				try {
@@ -672,7 +662,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 				}
 				Map map = (Map) propValue;
 				Object oldValue = null;
-				if (this.extractOldValueForEditor) {
+				if (isExtractOldValueForEditor()) {
 					oldValue = map.get(key);
 				}
 				// IMPORTANT: Do not pass full property name in here - property editors
@@ -705,7 +695,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 			Method writeMethod = pd.getWriteMethod();
 			Object oldValue = null;
 
-			if (this.extractOldValueForEditor && readMethod != null) {
+			if (isExtractOldValueForEditor() && readMethod != null) {
 				if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
 					readMethod.setAccessible(true);
 				}
@@ -760,55 +750,6 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
 				throw new MethodInvocationException(pce, ex);
 			}
-		}
-	}
-
-	public void setPropertyValue(PropertyValue pv) throws BeansException {
-		setPropertyValue(pv.getName(), pv.getValue());
-	}
-
-	/**
-	 * Bulk update from a Map.
-	 * Bulk updates from PropertyValues are more powerful: this method is
-	 * provided for convenience.
-	 * @param map map containing properties to set, as name-value pairs.
-	 * The map may include nested properties.
-	 * @throws BeansException if there's a fatal, low-level exception
-	 */
-	public void setPropertyValues(Map map) throws BeansException {
-		setPropertyValues(new MutablePropertyValues(map));
-	}
-
-	public void setPropertyValues(PropertyValues pvs) throws BeansException {
-		setPropertyValues(pvs, false);
-	}
-
-	public void setPropertyValues(PropertyValues propertyValues, boolean ignoreUnknown) throws BeansException {
-		List propertyAccessExceptions = new ArrayList();
-		PropertyValue[] pvs = propertyValues.getPropertyValues();
-		for (int i = 0; i < pvs.length; i++) {
-			try {
-				// This method may throw any BeansException, which won't be caught
-				// here, if there is a critical failure such as no matching field.
-				// We can attempt to deal only with less serious exceptions.
-				setPropertyValue(pvs[i]);
-			}
-			catch (NotWritablePropertyException ex) {
-				if (!ignoreUnknown) {
-					throw ex;
-				}
-				// Otherwise, just ignore it and continue...
-			}
-			catch (PropertyAccessException ex) {
-				propertyAccessExceptions.add(ex);
-			}
-		}
-
-		// If we encountered individual exceptions, throw the composite exception.
-		if (!propertyAccessExceptions.isEmpty()) {
-			Object[] paeArray =
-					propertyAccessExceptions.toArray(new PropertyAccessException[propertyAccessExceptions.size()]);
-			throw new PropertyAccessExceptionsException(this, (PropertyAccessException[]) paeArray);
 		}
 	}
 

@@ -472,7 +472,7 @@ public class DataBinderTests extends TestCase {
 	public void testValidatorWithErrors() {
 		TestBean tb = new TestBean();
 		tb.setSpouse(new TestBean());
-		Errors errors = new BeanBindingResult(tb, "tb");
+		Errors errors = new BeanPropertyBindingResult(tb, "tb");
 		Validator testValidator = new TestBeanValidator();
 		testValidator.validate(tb, errors);
 		errors.setNestedPath("spouse.");
@@ -919,7 +919,7 @@ public class DataBinderTests extends TestCase {
 		binder.bind(pvs);
 		Errors errors = binder.getBindingResult();
 
-		BeanBindingResult errors2 = new BeanBindingResult(rod, "person");
+		BeanPropertyBindingResult errors2 = new BeanPropertyBindingResult(rod, "person");
 		errors.rejectValue("name", "badName");
 		errors.addAllErrors(errors2);
 
@@ -951,7 +951,7 @@ public class DataBinderTests extends TestCase {
 		tb.setName("myName");
 		tb.setAge(99);
 
-		BeanBindingResult ex = new BeanBindingResult(tb, "tb");
+		BeanPropertyBindingResult ex = new BeanPropertyBindingResult(tb, "tb");
 		ex.reject("invalid");
 		ex.rejectValue("age", "invalidField");
 

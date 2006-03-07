@@ -42,9 +42,10 @@ import java.beans.PropertyDescriptor;
  * @see PropertyEditorRegistry
  * @see BeanWrapperImpl
  * @see org.springframework.beans.factory.BeanFactory
- * @see org.springframework.validation.DataBinder
+ * @see org.springframework.validation.BeanPropertyBindingResult
+ * @see org.springframework.validation.DataBinder#initBeanPropertyAccess()
  */
-public interface BeanWrapper extends PropertyAccessor, PropertyEditorRegistry {
+public interface BeanWrapper extends ConfigurablePropertyAccessor {
 
 	/**
 	 * Change the wrapped object. Implementations are required
@@ -66,21 +67,6 @@ public interface BeanWrapper extends PropertyAccessor, PropertyEditorRegistry {
 	Class getWrappedClass();
 
 	/**
-	 * Set whether to extract the old property value when applying a
-	 * property editor to a new value for a property.
-	 * <p>Default is "false", avoiding side effects caused by getters.
-	 * Turn this to "true" to expose previous property values to custom editors.
-	 */
-	void setExtractOldValueForEditor(boolean extractOldValueForEditor);
-
-	/**
-	 * Return whether to extract the old property value when applying a
-	 * property editor to a new value for a property.
-	 */
-	boolean isExtractOldValueForEditor();
-
-
-	/**
 	 * Get the PropertyDescriptors identified on this object
 	 * (standard JavaBeans introspection).
 	 * @return the PropertyDescriptors identified on this object
@@ -94,32 +80,5 @@ public interface BeanWrapper extends PropertyAccessor, PropertyEditorRegistry {
 	 * @throws InvalidPropertyException if there is no such property
 	 */
 	PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException;
-
-	/**
-	 * Return whether this property is readable.
-	 * Returns false if the property doesn't exist.
-	 * @param propertyName property to check status for
-	 * @return whether this property is readable
-	 */
-	boolean isReadableProperty(String propertyName) throws BeansException;
-
-	/**
-	 * Return whether this property is writable.
-	 * Returns false if the property doesn't exist.
-	 * @param propertyName property to check status for
-	 * @return whether this property is writable
-	 */
-	boolean isWritableProperty(String propertyName) throws BeansException;
-
-	/**
-	 * Determine the property type for a particular property, either checking
-	 * the property descriptor or checking the value in case of an indexed or
-	 * mapped element.
-	 * @param propertyName property to check status for
-	 * @return the property type for the particular property, or <code>null</code>
-	 * if not determinable (can only happen with an indexed or mapped element)
-	 * @throws InvalidPropertyException if there is no such property
-	 */
-	Class getPropertyType(String propertyName) throws BeansException;
 
 }

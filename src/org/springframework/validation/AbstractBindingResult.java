@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Abstract implementation of the BindingResult interface and its
- * superinterface Errors. Encapsulates common management of
+ * super-interface Errors. Encapsulates common management of
  * ObjectErrors and FieldErrors.
  *
  * @author Juergen Hoeller
@@ -56,7 +56,7 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 
 
 	/**
-	 * Create a new BindException instance.
+	 * Create a new AbstractBindingResult instance.
 	 * @param objectName the name of the target object
 	 * @see DefaultMessageCodesResolver
 	 */
@@ -173,29 +173,12 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 		return getMessageCodesResolver().resolveMessageCodes(errorCode, getObjectName());
 	}
 
-	/**
-	 * Resolve the given error code into message codes for the given field.
-	 * Calls the MessageCodesResolver with appropriate parameters.
-	 * @param errorCode the error code to resolve into message codes
-	 * @param field the field to resolve message codes for
-	 * @return the resolved message codes
-	 * @see #setMessageCodesResolver
-	 */
 	public String[] resolveMessageCodes(String errorCode, String field) {
 		String fixedField = fixedField(field);
 		Class fieldType = getFieldType(fixedField);
 		return getMessageCodesResolver().resolveMessageCodes(errorCode, getObjectName(), fixedField, fieldType);
 	}
 
-	/**
-	 * Add an ObjectError or FieldError to the errors list.
-	 * <p>Intended to be used by subclasses like DataBinder,
-	 * or by cooperating strategies like a BindingErrorProcessor.
-	 * @see ObjectError
-	 * @see FieldError
-	 * @see DataBinder
-	 * @see BindingErrorProcessor
-	 */
 	public void addError(ObjectError error) {
 		this.errors.add(error);
 	}

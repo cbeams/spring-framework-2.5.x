@@ -31,8 +31,8 @@ import java.util.Map;
  * @see DataBinder#getBindingResult()
  * @see Errors
  * @see Validator
- * @see BeanBindingResult
- * @see MapBindingResult
+ * @see BeanPropertyBindingResult
+ * @see SimpleMapBindingResult
  */
 public interface BindingResult extends Errors {
 
@@ -83,5 +83,25 @@ public interface BindingResult extends Errors {
 	 * @see DataBinder#setAllowedFields
 	 */
 	String[] getSuppressedFields();
+
+	/**
+	 * Add an ObjectError or FieldError to the errors list.
+	 * <p>Intended to be used by subclasses like DataBinder,
+	 * or by cooperating strategies like a BindingErrorProcessor.
+	 * @see ObjectError
+	 * @see FieldError
+	 * @see DataBinder
+	 * @see BindingErrorProcessor
+	 */
+	void addError(ObjectError error);
+
+	/**
+	 * Resolve the given error code into message codes for the given field.
+	 * Calls the MessageCodesResolver with appropriate parameters.
+	 * @param errorCode the error code to resolve into message codes
+	 * @param field the field to resolve message codes for
+	 * @return the resolved message codes
+	 */
+	String[] resolveMessageCodes(String errorCode, String field);
 
 }
