@@ -51,7 +51,7 @@ class PropertyTypeConverter {
 
 	private final PropertyEditorRegistrySupport propertyEditorRegistry;
 
-	private final Object beanInstance;
+	private final Object targetObject;
 
 
 	/**
@@ -65,12 +65,12 @@ class PropertyTypeConverter {
 	/**
 	 * Create a new PropertyTypeConverter for the given editor registry and bean instance.
 	 * @param propertyEditorRegistry the editor registry to use
-	 * @param beanInstance the bean instance to work on (as context that can be passed to editors)
+	 * @param targetObject the target object to work on (as context that can be passed to editors)
 	 */
-	public PropertyTypeConverter(PropertyEditorRegistrySupport propertyEditorRegistry, Object beanInstance) {
+	public PropertyTypeConverter(PropertyEditorRegistrySupport propertyEditorRegistry, Object targetObject) {
 		Assert.notNull(propertyEditorRegistry, "Property editor registry must not be null");
 		this.propertyEditorRegistry = propertyEditorRegistry;
-		this.beanInstance = beanInstance;
+		this.targetObject = targetObject;
 	}
 
 
@@ -154,7 +154,7 @@ class PropertyTypeConverter {
 
 			if (pe == null && descriptor != null) {
 				if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
-					pe = descriptor.createPropertyEditor(this.beanInstance);
+					pe = descriptor.createPropertyEditor(this.targetObject);
 				}
 				else {
 					Class editorClass = descriptor.getPropertyEditorClass();
