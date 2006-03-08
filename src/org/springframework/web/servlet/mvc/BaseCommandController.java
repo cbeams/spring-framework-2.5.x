@@ -401,6 +401,9 @@ public abstract class BaseCommandController extends AbstractController {
 	    throws Exception {
 
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName());
+		if (useDirectFieldAccess()) {
+			binder.initDirectFieldAccess();
+		}
 		if (this.messageCodesResolver != null) {
 			binder.setMessageCodesResolver(this.messageCodesResolver);
 		}
@@ -414,6 +417,15 @@ public abstract class BaseCommandController extends AbstractController {
 		}
 		initBinder(request, binder);
 		return binder;
+	}
+
+	/**
+	 * Determine whether to use direct field access instead of bean property access.
+	 * <p>Default is "false". Can be overridden in subclasses.
+	 * @see org.springframework.validation.DataBinder#initDirectFieldAccess()
+	 */
+	protected boolean useDirectFieldAccess() {
+		return false;
 	}
 
 	/**
