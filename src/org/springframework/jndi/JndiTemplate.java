@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -122,7 +123,7 @@ public class JndiTemplate {
 			public Object doInContext(Context ctx) throws NamingException {
 				Object located = ctx.lookup(name);
 				if (located == null) {
-					throw new NamingException(
+					throw new NameNotFoundException(
 							"JNDI object with [" + name + "] not found: JNDI implementation returned null");
 				}
 				return located;
@@ -145,7 +146,7 @@ public class JndiTemplate {
 	public Object lookup(String name, Class requiredType) throws NamingException {
 		Object jndiObject = lookup(name);
 		if (requiredType != null && !requiredType.isInstance(jndiObject)) {
-			throw new NamingException(
+			throw new TypeMismatchNamingException(
 					"Object [" + jndiObject + "] available at JNDI location [" +
 					name + "] is not assignable to [" + requiredType.getName() + "]");
 		}
