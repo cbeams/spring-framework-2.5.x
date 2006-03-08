@@ -1,13 +1,12 @@
-
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -141,6 +140,44 @@ public class JndiObjectFactoryBeanTests extends TestCase {
 		}
 	}
 
+	public void testLookupWithDefaultObject() throws Exception {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		String s = "";
+		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", s));
+		jof.setJndiName("myFoo");
+		jof.setExpectedType(String.class);
+		jof.setDefaultObject("myString");
+		jof.afterPropertiesSet();
+		assertEquals("myString", jof.getObject());
+	}
+
+	public void testLookupWithDefaultObjectAndExpectedType() throws Exception {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		String s = "";
+		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", s));
+		jof.setJndiName("myFoo");
+		jof.setExpectedType(String.class);
+		jof.setDefaultObject("myString");
+		jof.afterPropertiesSet();
+		assertEquals("myString", jof.getObject());
+	}
+
+	public void testLookupWithDefaultObjectAndExpectedTypeNoMatch() throws Exception {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		String s = "";
+		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", s));
+		jof.setJndiName("myFoo");
+		jof.setExpectedType(String.class);
+		jof.setDefaultObject(Boolean.TRUE);
+		try {
+			jof.afterPropertiesSet();
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
 	public void testLookupWithProxyInterface() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		TestBean tb = new TestBean();
@@ -153,6 +190,22 @@ public class JndiObjectFactoryBeanTests extends TestCase {
 		assertEquals(0, tb.getAge());
 		proxy.setAge(99);
 		assertEquals(99, tb.getAge());
+	}
+
+	public void testLookupWithProxyInterfaceAndDefaultObject() throws Exception {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		TestBean tb = new TestBean();
+		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", tb));
+		jof.setJndiName("myFoo");
+		jof.setProxyInterface(ITestBean.class);
+		jof.setDefaultObject(Boolean.TRUE);
+		try {
+			jof.afterPropertiesSet();
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
 	}
 
 	public void testLookupWithProxyInterfaceAndLazyLookup() throws Exception {
