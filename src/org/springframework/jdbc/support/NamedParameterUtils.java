@@ -95,9 +95,9 @@ public class NamedParameterUtils {
 	}
 
 	/**
-	 * Parse the SQL statement and locate any placeholders or named parameters.  Named
-	 * parameters are substituted for a JDBC placeholder.
-	 * @param sql the SQL statement.
+	 * Parse the SQL statement and locate any placeholders or named parameters.
+	 * Named parameters are substituted for a JDBC placeholder.
+	 * @param sql the SQL statement
 	 */
 	public static ParsedSql parseSqlStatement(String sql) {
 		List namedParameters = new ArrayList();
@@ -154,7 +154,6 @@ public class NamedParameterUtils {
 		parsedSql.setParameterCount(parameterCount);
 		parsedSql.setNewSql(newSql.toString());
 		parsedSql.setNamedParameters(namedParameters);
-		System.out.println("->" + parsedSql.getNewSql());
 		return parsedSql;
 	}
 
@@ -244,14 +243,14 @@ public class NamedParameterUtils {
 	}
 
 	/**
-	 * Convert a Map of parameter values to a corresponding array.  This is necessary in
-	 * order to reuse existing methods on JdbcTemplate.
+	 * Convert a Map of parameter values to a corresponding array.
+	 * <p>This is necessary in order to reuse existing methods on JdbcTemplate.
 	 * See below for additional info.
 	 * @param sql the SQL statement.
 	 * @param argMap the Map of parameters.
 	 */
 	public static Object[] convertArgMapToArray(String sql, Map argMap) {
-		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		ParsedSql parsedSql = parseSqlStatement(sql);
 		return convertArgMapToArray(argMap, parsedSql);
 	}
 
