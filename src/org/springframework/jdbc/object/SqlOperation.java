@@ -88,7 +88,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * @param params parameter array. May be <code>null</code>.
 	 */
 	protected final PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
-		preparedStatementFactory.setSqlToUse(NamedParameterUtils.parseSqlStatement(getSql()).getNewSql());
+		this.preparedStatementFactory.setSqlToUse(NamedParameterUtils.parseSqlStatement(getSql()).getNewSql());
 		return this.preparedStatementFactory.newPreparedStatementCreator(params);
 	}
 
