@@ -14,6 +14,7 @@ Package org.springframework.aop
 * fixed DebugInterceptor to properly synchronize access to its count field in a multithreading environment
 
 Package org.springframework.beans
+* factored out extended PropertyAccessor and ConfigurablePropertyAccessor interfaces from BeanWrapper/BeanWrapperImpl
 * BeanWrapperImpl supports PropertyEditors exposed by PropertyDescriptors (typically from BeanInfo classes)
 * BeanWrapperImpl passes a null value to a PropertyEditor's "setValue" method, allowing for conversion of null values
 * changed MutablePropertyValues's "addPropertyValue" signature back to void, to remain binary compatible with Spring 1.2
@@ -48,6 +49,9 @@ Package org.springframework.jms
 Package org.springframework.jmx
 * fixed MBeanServerConnectionFactoryBean to avoid potential initialization of unused JMX Connector on shutdown
 
+Package org.springframework.jndi
+* added "defaultObject" property to JndiObjectFactoryBean, allowing to fall back to default object if JNDI lookup fails
+
 Package org.springframework.mock
 * MockServletContext's "getResourcePaths" correctly resolves directories as paths that end with a slash
 * MockHttpServletResponse detects charset specification in "setContentType" and sets character encoding accordingly
@@ -63,6 +67,9 @@ Package org.springframework.scheduling
 * added SchedulingAwareRunnable interface, exposing an "isLongLived" flag (analogous to CommonJ's "isDaemon")
 * CommonJ WorkManagerTaskExecutor/DelegatingWork exposes SchedulingAwareRunnable's "isLongLived" flag appropriately
 
+Package org.springframework.scripting
+* fixed ScriptFactoryPostProcessor to let scripts receive bean references up the entire container hierarchy
+
 Package org.springframework.transaction
 * added CompositeTransactionAttributeSource and "setTransactionAttributeSources([])" method for TransactionInterceptor
 * JtaTransactionManager autodetects JNDI location "java:pm/TransactionManager" on Borland and Sun application servers
@@ -74,18 +81,21 @@ Package org.springframework.validation
 * added further accessors to Errors interface: hasFieldErrors(), getFieldErrorCount(), getFieldErrors(), getFieldError()
 * introduced BindingResult interface, as extension of the Errors interface
 * reworked BindException to implement the BindingResult interface, wrapping an existing BindingResult
-* added BeanBindingResult and MapBindingResult implementations, based on a refactoring of BindException
-* adapted BindingErrorProcessor interface to operate on a BeanBindingResult instead of a BindException
-* added "BindingResult getBindingResult()" method to DataBinder, deprecating the "BindException getErrors()" method 
+* added BeanPropertyBindingResult and SimpleMapBindingResult implementations, based on a refactoring of BindException
+* added "BindingResult getBindingResult()" method to DataBinder, deprecating the "BindException getErrors()" method
+* adapted BindingErrorProcessor interface to operate on a BindingResult instead of a BindException
+* added support for direct field access in the form of DirectFieldBindingResult and DataBinder's "initDirectFieldAccess"
 
 Package org.springframework.web
 * changed WebApplicationContext's "ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE" to actually start with the package name
+* ContextLoader throws IllegalStateException if there is already a root application context present
 * fixed DispatcherServlet to keep and restore previous thread-bound LocaleContext and RequestAttributes
 * added overloaded "getModelAndView" method with HttpServletRequest argument to SimpleMappingExceptionResolver
 * added "cookieSecure" property to CookieGenerator, indicating that cookies should only be sent using HTTPS connections
 * added schema support for configuring a SimpleUrlHandlerMapping using spring-web.xsd
 * renamed "Handler" interface to "RequestHandler", to differentiate it from the dispatcher's generic "handler" concept
 * moved ControllerClassNameHandlerMapping from package "web.servlet.mvc.mapping" to "web.servlet.mvc"
+* added "useDirectFieldAccess()" template method to BaseCommandController, for initializing the DataBinder accordingly
 * added overloaded "onFormChange" method with BindException argument to SimpleFormController
 * MultiActionController does not consider "handleRequest" itself as handler method (to avoid potential stack overflow)
 * added full JSP 1.2 form tag library in package "web.servlet.tags", complementing the existing base tag library
