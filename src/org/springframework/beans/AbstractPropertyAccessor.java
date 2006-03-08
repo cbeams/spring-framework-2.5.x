@@ -87,11 +87,6 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 	}
 
 
-	/**
-	 * PropertyEditor
-	 * @param propertyPath
-	 * @return
-	 */
 	public Class getPropertyType(String propertyPath) {
 		return null;
 	}
