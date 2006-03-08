@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,18 @@ import org.springframework.beans.PropertyAccessException;
  * <p>The error processor is pluggable so you can treat errors differently
  * if you want to. A default implementation is provided for typical needs.
  *
+ * <p>Note: As of Spring 2.0, this interface operates on a given BindingResult,
+ * to be compatible with any binding strategy (bean property, direct field access, etc).
+ * It can still receive a BindException as argument (since a BindException implements
+ * the BindingResult interface as well) but no longer operates on it directly.
+ *
  * @author Alef Arendsen
  * @author Juergen Hoeller
  * @since 1.2
  * @see DataBinder#setBindingErrorProcessor
  * @see DefaultBindingErrorProcessor
+ * @see BindingResult
+ * @see BindException
  */
 public interface BindingErrorProcessor {
 
