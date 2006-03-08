@@ -90,7 +90,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~1895 KB)
+* "spring" (~1915 KB)
 - Convenient jar file that combines all standard modules (see "module jars" below)
 - Note: Does NOT include extension modules! (see "extension module jars" below)
 
@@ -100,7 +100,7 @@ MODULE JARS (dist/modules):
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~285 KB)
+* "spring-beans" (~295 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
@@ -108,7 +108,7 @@ MODULE JARS (dist/modules):
 - Contents: AOP framework, source-level metadata support, AOP Alliance interfaces
 - Dependencies: spring-core, (spring-beans, CGLIB, Commons Attributes)
 
-* "spring-context" (~135 KB)
+* "spring-context" (~140 KB)
 - Contents: application context, validation, JNDI, UI context support, scripting
 - Dependencies: spring-beans, (Velocity, FreeMarker, JasperReports)
 
