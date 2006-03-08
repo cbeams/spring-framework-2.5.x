@@ -28,6 +28,9 @@ import org.springframework.util.ReflectionUtils;
  * PropertyAccessor implementation that directly accesses instance fields.
  * Allows for direct binding to fields instead of going through JavaBean setters.
  *
+ * <p>This implementation just supports fields in the actual target object.
+ * It is not able to traverse nested fields.
+ *
  * @author Juergen Hoeller
  * @since 2.0
  * @see BeanWrapper

@@ -25,6 +25,9 @@ import org.springframework.util.Assert;
  * supporting registration and evaluation of binding errors on value objects.
  * Performs direct field access instead of going through JavaBean getters.
  *
+ * <p>This implementation just supports fields in the actual target object.
+ * It is not able to traverse nested fields.
+ *
  * @author Juergen Hoeller
  * @since 2.0
  * @see DataBinder#getBindingResult()
