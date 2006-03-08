@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,8 +29,8 @@ import org.springframework.mail.MailSendException;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
- * 
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 09.04.2003
  */
 public class RuleBasedTransactionAttributeTests extends TestCase {
@@ -44,13 +44,12 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 	}
 	
 	/**
-	 * Test one checked exception that should roll back
-	 *
+	 * Test one checked exception that should roll back.
 	 */
 	public void testRuleForRollbackOnChecked() {
-		List l = new LinkedList();
-		l.add(new RollbackRuleAttribute("javax.servlet.ServletException"));
-		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, l);
+		List list = new LinkedList();
+		list.add(new RollbackRuleAttribute("javax.servlet.ServletException"));
+		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
 		
 		assertTrue(rta.rollbackOn(new RuntimeException()));
 		assertTrue(rta.rollbackOn(new MailSendException("")));
@@ -60,10 +59,10 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 	}
 	
 	public void testRuleForCommitOnUnchecked() {
-		List l = new LinkedList();
-		l.add(new NoRollbackRuleAttribute("org.springframework.mail.MailSendException"));
-		l.add(new RollbackRuleAttribute("javax.servlet.ServletException"));
-		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, l);
+		List list = new LinkedList();
+		list.add(new NoRollbackRuleAttribute("org.springframework.mail.MailSendException"));
+		list.add(new RollbackRuleAttribute("javax.servlet.ServletException"));
+		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
 		
 		assertTrue(rta.rollbackOn(new RuntimeException()));
 		// Check default behaviour is overridden
@@ -77,16 +76,16 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 		List l = new LinkedList();
 		l.add(new RollbackRuleAttribute("java.rmi.RemoteException"));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, l);
-		testRuleForSelectiveRollbackOnChecked(rta);
+		doTestRuleForSelectiveRollbackOnChecked(rta);
 	}
 	
 	public void testRuleForSelectiveRollbackOnCheckedWithClass() {
 		List l = Collections.singletonList(new RollbackRuleAttribute(RemoteException.class));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, l);
-		testRuleForSelectiveRollbackOnChecked(rta);
+		doTestRuleForSelectiveRollbackOnChecked(rta);
 	}
 	
-	private void testRuleForSelectiveRollbackOnChecked(RuleBasedTransactionAttribute rta) {
+	private void doTestRuleForSelectiveRollbackOnChecked(RuleBasedTransactionAttribute rta) {
 		assertTrue(rta.rollbackOn(new RuntimeException()));
 		// Check default behaviour is overridden
 		assertTrue(!rta.rollbackOn(new Exception()));
@@ -99,12 +98,12 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 	 * when Exception prompts a rollback.
 	 */
 	public void testRuleForCommitOnSubclassOfChecked() {
-		List l = new LinkedList();
+		List list = new LinkedList();
 		// Note that it's important to ensure that we have this as
 		// a FQN: otherwise it will match everything!
-		l.add(new RollbackRuleAttribute("java.lang.Exception"));
-		l.add(new NoRollbackRuleAttribute("ServletException"));
-		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, l);
+		list.add(new RollbackRuleAttribute("java.lang.Exception"));
+		list.add(new NoRollbackRuleAttribute("ServletException"));
+		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
 
 		assertTrue(rta.rollbackOn(new RuntimeException()));
 		assertTrue(rta.rollbackOn(new Exception()));
@@ -113,10 +112,26 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 	}
 	
 	public void testRollbackNever() {
-		List l = new LinkedList();
-		l.add(new NoRollbackRuleAttribute("Throwable"));
-		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, l);
+		List list = new LinkedList();
+		list.add(new NoRollbackRuleAttribute("Throwable"));
+		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
 	
+		assertTrue(!rta.rollbackOn(new Throwable()));
+		assertTrue(!rta.rollbackOn(new RuntimeException()));
+		assertTrue(!rta.rollbackOn(new MailSendException("")));
+		assertTrue(!rta.rollbackOn(new Exception()));
+		assertTrue(!rta.rollbackOn(new ServletException()));
+	}
+
+	public void testToStringMatchesEditor() {
+		List list = new LinkedList();
+		list.add(new NoRollbackRuleAttribute("Throwable"));
+		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
+
+		TransactionAttributeEditor tae = new TransactionAttributeEditor();
+		tae.setAsText(rta.toString());
+		rta = (RuleBasedTransactionAttribute) tae.getValue();
+
 		assertTrue(!rta.rollbackOn(new Throwable()));
 		assertTrue(!rta.rollbackOn(new RuntimeException()));
 		assertTrue(!rta.rollbackOn(new MailSendException("")));
