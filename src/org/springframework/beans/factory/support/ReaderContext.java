@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.factory.ParseState;
 import org.springframework.core.io.Resource;
 
@@ -36,17 +35,18 @@ public class ReaderContext {
 
 	private final SourceExtractor sourceExtractor;
 
-	public ReaderContext(XmlBeanDefinitionReader reader,
-											 Resource resource,
-											 ProblemReporter problemReporter,
-											 ReaderEventListener eventListener,
-											 SourceExtractor sourceExtractor) {
+
+	public ReaderContext(
+			BeanDefinitionReader reader, Resource resource, ProblemReporter problemReporter,
+			ReaderEventListener eventListener, SourceExtractor sourceExtractor) {
+
 		this.reader = reader;
 		this.resource = resource;
 		this.problemReporter = problemReporter;
 		this.eventListener = eventListener;
 		this.sourceExtractor = sourceExtractor;
 	}
+
 
 	public BeanDefinitionReader getReader() {
 		return reader;
@@ -55,6 +55,7 @@ public class ReaderContext {
 	public Resource getResource() {
 		return this.resource;
 	}
+
 
 	public void error(String message, Object source) {
 		error(message, source, null, null);
@@ -89,4 +90,5 @@ public class ReaderContext {
 	public SourceExtractor getSourceExtractor() {
 		return sourceExtractor;
 	}
+
 }
