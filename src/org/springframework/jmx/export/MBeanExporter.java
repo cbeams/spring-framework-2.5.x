@@ -47,6 +47,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.core.Constants;
 import org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler;
 import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
 import org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler;
@@ -58,9 +59,6 @@ import org.springframework.jmx.export.notification.NotificationPublisherAware;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.MBeanRegistrationSupport;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.Assert;
-import org.springframework.core.Constants;
-import org.springframework.core.ConstantException;
 
 /**
  * A bean that allows for any Spring-managed bean to be exposed to a JMX
@@ -113,10 +111,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 */
 	public static final int AUTODETECT_ALL = AUTODETECT_MBEAN | AUTODETECT_ASSEMBLER;
 
-	/**
-	 * Constant for the JMX <code>mr_type</code> "ObjectReference".
-	 */
-	private static final String MR_TYPE_OBJECT_REFERENCE = "ObjectReference";
 
 	/**
 	 * Wildcard used to map a {@link javax.management.NotificationListener}
@@ -124,14 +118,17 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 */
 	private static final String WILDCARD = "*";
 
-	/**
-	 * {@link Constants} instance for this class.
-	 */
+	/** Constant for the JMX <code>mr_type</code> "ObjectReference" */
+	private static final String MR_TYPE_OBJECT_REFERENCE = "ObjectReference";
+
+	/** Prefix for the autodetect constants defined in this class */
+	private static final String CONSTANT_PREFIX_AUTODETECT = "AUTODETECT_";
+
+
+	/** Constants instance for this class */
 	private static final Constants constants = new Constants(MBeanExporter.class);
 
-	/**
-	 * The beans to be exposed as JMX managed resources.
-	 */
+	/** The beans to be exposed as JMX managed resources */
 	private Map beans;
 
 	/**
@@ -219,7 +216,8 @@ public class MBeanExporter extends MBeanRegistrationSupport
 
 	/**
 	 * Sets the autodetection mode to use.
-	 * @exception IllegalArgumentException if the supplied value is not one of the <code>AUTODETECT_</code> values
+	 * @exception IllegalArgumentException if the supplied value is not
+	 * one of the <code>AUTODETECT_</code> constants
 	 * @see #setAutodetectModeName(String)
 	 * @see #AUTODETECT_ALL
 	 * @see #AUTODETECT_ASSEMBLER
@@ -227,27 +225,27 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * @see #AUTODETECT_NONE
 	 */
 	public void setAutodetectMode(int autodetectMode) {
-		try {
-			constants.toCode(Integer.valueOf(autodetectMode), "AUTODETECT_");
-			this.autodetectMode = autodetectMode;
+		if (!constants.getValues(CONSTANT_PREFIX_AUTODETECT).contains(new Integer(autodetectMode))) {
+			throw new IllegalArgumentException("Only values of autodetect constants allowed");
 		}
-		catch (ConstantException ex) {
-			throw new IllegalArgumentException("Invalid autodetect mode", ex);
-		}
+		this.autodetectMode = autodetectMode;
 	}
 
 	/**
 	 * Sets the autodetection mode to use by name.
-	 * @exception IllegalArgumentException if the supplied value is not resolvable to one of the <code>AUTODETECT_</code> values or is <code>null</code>
+	 * @exception IllegalArgumentException if the supplied value is not resolvable
+	 * to one of the <code>AUTODETECT_</code> constants or is <code>null</code>
 	 * @see #setAutodetectMode(int)
 	 * @see #AUTODETECT_ALL
 	 * @see #AUTODETECT_ASSEMBLER
 	 * @see #AUTODETECT_MBEAN
 	 * @see #AUTODETECT_NONE
 	 */
-	public void setAutodetectModeName(String autodetectMode) {
-		Assert.hasText(autodetectMode, "AutodetectModeName argument cannot be null");
-		this.autodetectMode = constants.asNumber(autodetectMode).intValue();
+	public void setAutodetectModeName(String constantName) {
+		if (constantName == null || !constantName.startsWith(CONSTANT_PREFIX_AUTODETECT)) {
+			throw new IllegalArgumentException("Only autodetect constants allowed");
+		}
+		this.autodetectMode = constants.asNumber(constantName).intValue();
 	}
 
 	/**
