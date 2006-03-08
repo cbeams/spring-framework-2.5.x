@@ -16,24 +16,24 @@
 
 package org.springframework.transaction.config;
 
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
-import org.springframework.transaction.interceptor.RollbackRuleAttribute;
-import org.springframework.transaction.interceptor.TransactionInterceptor;
-import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
-import org.springframework.transaction.interceptor.NameMatchTransactionAttributeSource;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.util.StringUtils;
-import org.springframework.util.xml.DomUtils;
-import org.w3c.dom.Element;
-
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+
+import org.w3c.dom.Element;
+
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
+import org.springframework.transaction.interceptor.NameMatchTransactionAttributeSource;
+import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
+import org.springframework.transaction.interceptor.RollbackRuleAttribute;
+import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
+import org.springframework.util.StringUtils;
+import org.springframework.util.xml.DomUtils;
 
 /**
  * @author Rob Harrop
@@ -63,7 +63,6 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 	}
 
 	protected void doParse(Element element, BeanDefinitionBuilder builder) {
-
 		// set the transaction manager property
 		builder.addPropertyReference(TxNamespaceHandler.TRANSACTION_MANAGER, element.getAttribute(TxNamespaceHandler.TRANSACTION_MANAGER));
 
@@ -86,7 +85,6 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	private void parseAttributes(Element attributesElement, BeanDefinitionBuilder builder) {
 		List methods = DomUtils.getChildElementsByTagName(attributesElement, "method", true);
-
 		Map transactionAttributeMap = new HashMap(methods.size());
 
 		for (int i = 0; i < methods.size(); i++) {
@@ -95,8 +93,10 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 			String name = methodElement.getAttribute("name");
 
 			RuleBasedTransactionAttribute attribute = new RuleBasedTransactionAttribute();
-			attribute.setPropagationBehaviorName(TransactionDefinition.PROPAGATION_CONSTANT_PREFIX + methodElement.getAttribute(PROPAGATION));
-			attribute.setIsolationLevelName(TransactionDefinition.ISOLATION_CONSTANT_PREFIX + methodElement.getAttribute(ISOLATION));
+			attribute.setPropagationBehaviorName(
+					RuleBasedTransactionAttribute.PREFIX_PROPAGATION + methodElement.getAttribute(PROPAGATION));
+			attribute.setIsolationLevelName(
+					RuleBasedTransactionAttribute.PREFIX_ISOLATION + methodElement.getAttribute(ISOLATION));
 			attribute.setTimeout(Integer.parseInt(methodElement.getAttribute(TIMEOUT)));
 			attribute.setReadOnly(Boolean.valueOf(methodElement.getAttribute(READ_ONLY)).booleanValue());
 			
@@ -121,10 +121,6 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 		builder.addPropertyValue(TxNamespaceHandler.TRANSACTION_ATTRIBUTE_SOURCE, attributeSourceDefinition);
 	}
 
-	/**
-	 * @param rollbackRules
-	 * @param rollbackForValue
-	 */
 	private void addRollbackRuleAttributesTo(List rollbackRules, String rollbackForValue) {
 		String[] exceptionTypeNames = StringUtils.commaDelimitedListToStringArray(rollbackForValue);
 		for (int i = 0; i < exceptionTypeNames.length; i++) {
@@ -132,14 +128,11 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 		}
 	}
 
-	/**
-	 * @param rollbackRules
-	 * @param noRollbackForValue
-	 */
 	private void addNoRollbackRuleAttributesTo(List rollbackRules, String noRollbackForValue) {
 		String[] exceptionTypeNames = StringUtils.commaDelimitedListToStringArray(noRollbackForValue);
 		for (int i = 0; i < exceptionTypeNames.length; i++) {
 			rollbackRules.add(new NoRollbackRuleAttribute(StringUtils.trimWhitespace(exceptionTypeNames[i])));
 		}
 	}
+
 }

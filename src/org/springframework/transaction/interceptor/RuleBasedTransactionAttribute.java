@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,8 +18,8 @@ package org.springframework.transaction.interceptor;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,11 +36,19 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @since 09.04.2003
+ * @see TransactionAttributeEditor
  */
 public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute {
 	
+	/** Prefix for rollback-on-exception rules in description strings */
+	public static final String PREFIX_ROLLBACK_RULE = "-";
+
+	/** Prefix for commit-on-exception rules in description strings */
+	public static final String PREFIX_COMMIT_RULE = "+";
+
+
 	/** Static for optimal serializability */
-	protected static final Log logger = LogFactory.getLog(RuleBasedTransactionAttribute.class);
+	private static final Log logger = LogFactory.getLog(RuleBasedTransactionAttribute.class);
 
 	private List rollbackRules;
 
@@ -57,7 +65,6 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute {
 	 */
 	public RuleBasedTransactionAttribute() {
 		super();
-		this.rollbackRules = new ArrayList();
 	}
 
 	/**
@@ -101,10 +108,14 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute {
 	}
 
 	/**
-	 * Return the list of <code>RollbackRuleAttribute</code> objects.
+	 * Return the list of <code>RollbackRuleAttribute</code> objects
+	 * (never <code>null</code>).
 	 */
 	public List getRollbackRules() {
-		return rollbackRules;
+		if (this.rollbackRules == null) {
+			this.rollbackRules = new LinkedList();
+		}
+		return this.rollbackRules;
 	}
 
 
@@ -137,8 +148,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute {
 			logger.debug("Winning rollback rule is: " + winner);
 		}
 
-		// User superclass behavior (rollback on unchecked)
-		// if no rule matches.
+		// User superclass behavior (rollback on unchecked) if no rule matches.
 		if (winner == null) {
 			logger.debug("No relevant rollback rule found: applying superclass default");
 			return super.rollbackOn(ex);
@@ -147,17 +157,15 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute {
 		return !(winner instanceof NoRollbackRuleAttribute);
 	}
 
+
 	public String toString() {
 		StringBuffer result = getDefinitionDescription();
-		TreeSet rules = new TreeSet();
-		for (Iterator it = rollbackRules.iterator(); it.hasNext();) {
-			RollbackRuleAttribute rule = (RollbackRuleAttribute) it.next();
-			String sign = (rule instanceof NoRollbackRuleAttribute) ? COMMIT_RULE_PREFIX : ROLLBACK_RULE_PREFIX;
-			rules.add(sign + rule.getExceptionName());
-		}
-		for (Iterator it = rules.iterator(); it.hasNext();) {
-			result.append(',');
-			result.append(it.next());
+		if (this.rollbackRules != null) {
+			for (Iterator it = this.rollbackRules.iterator(); it.hasNext();) {
+				RollbackRuleAttribute rule = (RollbackRuleAttribute) it.next();
+				String sign = (rule instanceof NoRollbackRuleAttribute ? PREFIX_COMMIT_RULE : PREFIX_ROLLBACK_RULE);
+				result.append(',').append(sign).append(rule.getExceptionName());
+			}
 		}
 		return result.toString();
 	}

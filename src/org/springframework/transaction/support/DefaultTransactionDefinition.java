@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,8 +35,14 @@ import org.springframework.transaction.TransactionDefinition;
  */
 public class DefaultTransactionDefinition implements TransactionDefinition, Serializable {
 
+	/** Prefix for the propagation constants defined in TransactionDefinition */
+	public static final String PREFIX_PROPAGATION = "PROPAGATION_";
+
+	/** Prefix for the isolation constants defined in TransactionDefinition */
+	public static final String PREFIX_ISOLATION = "ISOLATION_";
+
 	/** Prefix for transaction timeout values in description strings */
-	public static final String TIMEOUT_PREFIX = "timeout_";
+	public static final String PREFIX_TIMEOUT = "timeout_";
 
 	/** Marker for read-only transactions in description strings */
 	public static final String READ_ONLY_MARKER = "readOnly";
@@ -102,12 +108,13 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * Set the propagation behavior by the name of the corresponding constant in
 	 * TransactionDefinition, e.g. "PROPAGATION_REQUIRED".
 	 * @param constantName name of the constant
-	 * @throws java.lang.IllegalArgumentException if an invalid constant was specified
+	 * @exception IllegalArgumentException if the supplied value is not resolvable
+	 * to one of the <code>PROPAGATION_</code> constants or is <code>null</code>
 	 * @see #setPropagationBehavior
 	 * @see #PROPAGATION_REQUIRED
 	 */
 	public final void setPropagationBehaviorName(String constantName) throws IllegalArgumentException {
-		if (constantName == null || !constantName.startsWith(PROPAGATION_CONSTANT_PREFIX)) {
+		if (constantName == null || !constantName.startsWith(PREFIX_PROPAGATION)) {
 			throw new IllegalArgumentException("Only propagation constants allowed");
 		}
 		setPropagationBehavior(constants.asNumber(constantName).intValue());
@@ -116,10 +123,12 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	/**
 	 * Set the propagation behavior. Must be one of the propagation constants
 	 * in the TransactionDefinition interface. Default is PROPAGATION_REQUIRED.
+	 * @exception IllegalArgumentException if the supplied value is not
+	 * one of the <code>PROPAGATION_</code> constants
 	 * @see #PROPAGATION_REQUIRED
 	 */
 	public final void setPropagationBehavior(int propagationBehavior) {
-		if (!constants.getValues(PROPAGATION_CONSTANT_PREFIX).contains(new Integer(propagationBehavior))) {
+		if (!constants.getValues(PREFIX_PROPAGATION).contains(new Integer(propagationBehavior))) {
 			throw new IllegalArgumentException("Only values of propagation constants allowed");
 		}
 		this.propagationBehavior = propagationBehavior;
@@ -133,12 +142,13 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * Set the isolation level by the name of the corresponding constant in
 	 * TransactionDefinition, e.g. "ISOLATION_DEFAULT".
 	 * @param constantName name of the constant
-	 * @throws java.lang.IllegalArgumentException if an invalid constant was specified
+	 * @exception IllegalArgumentException if the supplied value is not resolvable
+	 * to one of the <code>ISOLATION_</code> constants or is <code>null</code>
 	 * @see #setIsolationLevel
 	 * @see #ISOLATION_DEFAULT
 	 */
 	public final void setIsolationLevelName(String constantName) throws IllegalArgumentException {
-		if (constantName == null || !constantName.startsWith(ISOLATION_CONSTANT_PREFIX)) {
+		if (constantName == null || !constantName.startsWith(PREFIX_ISOLATION)) {
 			throw new IllegalArgumentException("Only isolation constants allowed");
 		}
 		setIsolationLevel(constants.asNumber(constantName).intValue());
@@ -147,10 +157,12 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	/**
 	 * Set the isolation level. Must be one of the isolation constants
 	 * in the TransactionDefinition interface. Default is ISOLATION_DEFAULT.
+	 * @exception IllegalArgumentException if the supplied value is not
+	 * one of the <code>ISOLATION_</code> constants
 	 * @see #ISOLATION_DEFAULT
 	 */
 	public final void setIsolationLevel(int isolationLevel) {
-		if (!constants.getValues(ISOLATION_CONSTANT_PREFIX).contains(new Integer(isolationLevel))) {
+		if (!constants.getValues(PREFIX_ISOLATION).contains(new Integer(isolationLevel))) {
 			throw new IllegalArgumentException("Only values of isolation constants allowed");
 		}
 		this.isolationLevel = isolationLevel;
@@ -236,12 +248,12 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 */
 	protected final StringBuffer getDefinitionDescription() {
 		StringBuffer desc = new StringBuffer();
-		desc.append(constants.toCode(new Integer(this.propagationBehavior), PROPAGATION_CONSTANT_PREFIX));
+		desc.append(constants.toCode(new Integer(this.propagationBehavior), PREFIX_PROPAGATION));
 		desc.append(',');
-		desc.append(constants.toCode(new Integer(this.isolationLevel), ISOLATION_CONSTANT_PREFIX));
+		desc.append(constants.toCode(new Integer(this.isolationLevel), PREFIX_ISOLATION));
 		if (this.timeout != TIMEOUT_DEFAULT) {
 			desc.append(',');
-			desc.append(TIMEOUT_PREFIX + this.timeout);
+			desc.append(PREFIX_TIMEOUT + this.timeout);
 		}
 		if (this.readOnly) {
 			desc.append(',');

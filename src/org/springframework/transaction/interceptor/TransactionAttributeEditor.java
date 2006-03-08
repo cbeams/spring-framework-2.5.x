@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,6 @@ package org.springframework.transaction.interceptor;
 
 import java.beans.PropertyEditorSupport;
 
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.util.StringUtils;
 
 /**
@@ -60,23 +59,23 @@ public class TransactionAttributeEditor extends PropertyEditorSupport {
 
 			for (int i = 0; i < tokens.length; i++) {
 				String token = tokens[i].trim();
-				if (token.startsWith(TransactionDefinition.PROPAGATION_CONSTANT_PREFIX)) {
+				if (token.startsWith(RuleBasedTransactionAttribute.PREFIX_PROPAGATION)) {
 					attr.setPropagationBehaviorName(token);
 				}
-				else if (token.startsWith(TransactionDefinition.ISOLATION_CONSTANT_PREFIX)) {
+				else if (token.startsWith(RuleBasedTransactionAttribute.PREFIX_ISOLATION)) {
 					attr.setIsolationLevelName(token);
 				}
-				else if (token.startsWith(DefaultTransactionAttribute.TIMEOUT_PREFIX)) {
-					String value = token.substring(DefaultTransactionAttribute.TIMEOUT_PREFIX.length());
+				else if (token.startsWith(RuleBasedTransactionAttribute.PREFIX_TIMEOUT)) {
+					String value = token.substring(DefaultTransactionAttribute.PREFIX_TIMEOUT.length());
 					attr.setTimeout(Integer.parseInt(value));
 				}
-				else if (token.equals(DefaultTransactionAttribute.READ_ONLY_MARKER)) {
+				else if (token.equals(RuleBasedTransactionAttribute.READ_ONLY_MARKER)) {
 					attr.setReadOnly(true);
 				}
-				else if (token.startsWith(DefaultTransactionAttribute.COMMIT_RULE_PREFIX)) {
+				else if (token.startsWith(RuleBasedTransactionAttribute.PREFIX_COMMIT_RULE)) {
 					attr.getRollbackRules().add(new NoRollbackRuleAttribute(token.substring(1)));
 				}
-				else if (token.startsWith(DefaultTransactionAttribute.ROLLBACK_RULE_PREFIX)) {
+				else if (token.startsWith(RuleBasedTransactionAttribute.PREFIX_ROLLBACK_RULE)) {
 					attr.getRollbackRules().add(new RollbackRuleAttribute(token.substring(1)));
 				}
 				else {
