@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -99,17 +99,14 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Return all resources that are bound to the current thread.
 	 * <p>Mainly for debugging purposes. Resource managers should always invoke
-	 * hasResource for a specific resource key that they are interested in.
+	 * <code>hasResource</code> for a specific resource key that they are interested in.
 	 * @return Map with resource keys and resource objects,
 	 * or empty Map if currently none bound
 	 * @see #hasResource
 	 */
 	public static Map getResourceMap() {
 		Map map = (Map) resources.get();
-		if (map == null) {
-			map = new HashMap();
-		}
-		return Collections.unmodifiableMap(map);
+		return (map != null ? Collections.unmodifiableMap(map) : Collections.EMPTY_MAP);
 	}
 
 	/**
