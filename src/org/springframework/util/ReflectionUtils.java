@@ -109,6 +109,15 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
+	 * Determine whether the given field is a "public static final" constant.
+	 * @param field the field to check
+	 */
+	public static boolean isPublicStaticFinal(Field field) {
+		int modifiers = field.getModifiers();
+		return (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers));
+	}
+
+	/**
 	 * Make the given field accessible, explicitly setting it accessible if necessary.
 	 * The <code>setAccessible(true)</code> method is only called when actually necessary,
 	 * to avoid unnecessary conflicts with a JVM SecurityManager (if active).
@@ -122,48 +131,6 @@ public abstract class ReflectionUtils {
 		}
 	}
 
-
-	/**
-	 * Invoke the given callback on all private fields in the target class,
-	 * going up the class hierarchy to get all declared fields.
-	 * @param targetClass the target class to analyze
-	 * @param fc the callback to invoke for each field
-	 */
-	public static void doWithFields(Class targetClass, FieldCallback fc) throws IllegalArgumentException {
-		doWithFields(targetClass, fc, null);
-	}
-
-	/**
-	 * Invoke the given callback on all private fields in the target class,
-	 * going up the class hierarchy to get all declared fields.
-	 * @param targetClass the target class to analyze
-	 * @param fc the callback to invoke for each field
-	 * @param ff the filter that determines the fields to apply the callback to
-	 */
-	public static void doWithFields(Class targetClass, FieldCallback fc, FieldFilter ff)
-			throws IllegalArgumentException {
-
-		// Keep backing up the inheritance hierarchy.
-		do {
-			// Copy each field declared on this class unless it's static or file.
-			Field[] fields = targetClass.getDeclaredFields();
-			for (int i = 0; i < fields.length; i++) {
-				// Skip static and final fields.
-				if (ff != null && !ff.matches(fields[i])) {
-					continue;
-				}
-				try {
-					fc.doWith(fields[i]);
-				}
-				catch (IllegalAccessException ex) {
-					throw new IllegalStateException(
-							"Shouldn't be illegal to access field '" + fields[i].getName() + "': " + ex);
-				}
-			}
-			targetClass = targetClass.getSuperclass();
-		}
-		while (targetClass != null && targetClass != Object.class);
-	}
 
 	/**
 	 * Perform the given callback operation on all matching methods of the given class
@@ -224,6 +191,48 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
+	 * Invoke the given callback on all private fields in the target class,
+	 * going up the class hierarchy to get all declared fields.
+	 * @param targetClass the target class to analyze
+	 * @param fc the callback to invoke for each field
+	 */
+	public static void doWithFields(Class targetClass, FieldCallback fc) throws IllegalArgumentException {
+		doWithFields(targetClass, fc, null);
+	}
+
+	/**
+	 * Invoke the given callback on all private fields in the target class,
+	 * going up the class hierarchy to get all declared fields.
+	 * @param targetClass the target class to analyze
+	 * @param fc the callback to invoke for each field
+	 * @param ff the filter that determines the fields to apply the callback to
+	 */
+	public static void doWithFields(Class targetClass, FieldCallback fc, FieldFilter ff)
+			throws IllegalArgumentException {
+
+		// Keep backing up the inheritance hierarchy.
+		do {
+			// Copy each field declared on this class unless it's static or file.
+			Field[] fields = targetClass.getDeclaredFields();
+			for (int i = 0; i < fields.length; i++) {
+				// Skip static and final fields.
+				if (ff != null && !ff.matches(fields[i])) {
+					continue;
+				}
+				try {
+					fc.doWith(fields[i]);
+				}
+				catch (IllegalAccessException ex) {
+					throw new IllegalStateException(
+							"Shouldn't be illegal to access field '" + fields[i].getName() + "': " + ex);
+				}
+			}
+			targetClass = targetClass.getSuperclass();
+		}
+		while (targetClass != null && targetClass != Object.class);
+	}
+
+	/**
 	 * Given the source object and the destination, which must be the same class or a subclass,
 	 * copy all fields, including inherited fields. Designed to work on objects with public
 	 * no-arg constructors.
@@ -251,32 +260,6 @@ public abstract class ReflectionUtils {
 
 
 	/**
-	 * Callback interface invoked on each field in the hierarchy.
-	 */
-	public static interface FieldCallback {
-
-		/**
-		 * Perform an operation using the given field.
-		 * @param field field which will have been made accessible before this invocation
-		 */
-		void doWith(Field field) throws IllegalArgumentException, IllegalAccessException;
-	}
-
-
-	/**
-	 * Callback optionally used to filter fields to be operated on by a field callback.
-	 */
-	public static interface FieldFilter {
-
-		/**
-		 * Return whether the given field matches.
-		 * @param field the field to check
-		 */
-		boolean matches(Field field);
-	}
-
-
-	/**
 	 * Action to take on each method
 	 */
 	public static interface MethodCallback {
@@ -299,6 +282,32 @@ public abstract class ReflectionUtils {
 		 * @param method the method to check
 		 */
 		boolean matches(Method method);
+	}
+
+
+	/**
+	 * Callback interface invoked on each field in the hierarchy.
+	 */
+	public static interface FieldCallback {
+
+		/**
+		 * Perform an operation using the given field.
+		 * @param field field which will have been made accessible before this invocation
+		 */
+		void doWith(Field field) throws IllegalArgumentException, IllegalAccessException;
+	}
+
+
+	/**
+	 * Callback optionally used to filter fields to be operated on by a field callback.
+	 */
+	public static interface FieldFilter {
+
+		/**
+		 * Return whether the given field matches.
+		 * @param field the field to check
+		 */
+		boolean matches(Field field);
 	}
 
 
