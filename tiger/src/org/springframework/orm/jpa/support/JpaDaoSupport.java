@@ -83,7 +83,7 @@ public abstract class JpaDaoSupport extends DaoSupport {
 	 * @see #createJpaTemplate
 	 * @see #setJpaTemplate
 	 */
-	public final void setEntityManager(EntityManagerFactory entityManager) {
+	public final void setEntityManager(EntityManager entityManager) {
 	  this.jpaTemplate = createJpaTemplate(entityManager);
 	}
 
