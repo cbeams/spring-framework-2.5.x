@@ -419,6 +419,9 @@ public class CustomEditorTests extends TestCase {
 
 		bw.setPropertyValue("myChar", "\u0041");
 		assertEquals('A', cb.getMyChar());
+
+		bw.setPropertyValue("myChar", "\\u0022");
+		assertEquals('"', cb.getMyChar());
 	}
 
 	public void testCharacterEditorWithAllowEmpty() {
