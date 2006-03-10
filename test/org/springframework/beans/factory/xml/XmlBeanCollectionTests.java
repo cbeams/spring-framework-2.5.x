@@ -16,16 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 import junit.framework.TestCase;
 import org.apache.commons.collections.map.LinkedMap;
@@ -270,13 +261,14 @@ public class XmlBeanCollectionTests extends TestCase {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("emptyProps");
 		assertTrue(hasMap.getProps().size() == 0);
-	}
+        assertEquals(hasMap.getProps().getClass(), Properties.class);
+    }
 
 	public void testPopulatedProps() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("props");
 		assertTrue(hasMap.getProps().size() == 2);
-		assertTrue(hasMap.getProps().get("foo").equals("bar"));
+        assertTrue(hasMap.getProps().get("foo").equals("bar"));
 		assertTrue(hasMap.getProps().get("2").equals("TWO"));
 	}
 
