@@ -51,11 +51,15 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 */
 	public static final String SIZE_ATTRIBUTE = "size";
 
-
-	/**
-	 * The value of the '<code>maxlength</code>' attribute.
+    /**
+	 * The name of the '<code>readonly</code>' attribute.
 	 */
-	private String maxlength;
+    public static final String READONLY_ATTRIBUTE = "readonly";
+
+    /**
+     * The value of the '<code>maxlength</code>' attribute.
+     */
+    private String maxlength;
 
 	/**
 	 * The value of the '<code>alt</code>' attribute.
@@ -72,14 +76,19 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 */
 	private String size;
 
-	/**
-	 * Sets the value of the '<code>maxlength</code>' attribute.
-	 * May be a runtime expression.
+    /**
+	 * The value of the '<code>readonly</code>' attribute.
 	 */
-	public void setMaxlength(String maxlength) {
-		Assert.hasText(maxlength, "'maxlength' cannot be null or zero length.");
-		this.maxlength = maxlength;
-	}
+    private String readonly;
+
+    /**
+     * Sets the value of the '<code>maxlength</code>' attribute.
+     * May be a runtime expression.
+     */
+    public void setMaxlength(String maxlength) {
+        Assert.hasText(maxlength, "'maxlength' cannot be null or zero length.");
+        this.maxlength = maxlength;
+    }
 
 	/**
 	 * Sets the value of the '<code>alt</code>' attribute.
@@ -108,7 +117,15 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		this.size = size;
 	}
 
-	/**
+    /**
+     * Sets the value of the '<code>readonly</code>' attribute.
+     * May be a runtime expression.
+     */
+    public void setReadonly(String readonly) {
+        this.readonly = readonly;
+    }
+
+    /**
 	 * Gets the value of the '<code>type</code>' attribute. Subclasses
 	 * can override this to change the type of '<code>input</code>' element
 	 * rendered. Default value is '<code>text</code>'.
@@ -133,7 +150,9 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		writeOptionalAttribute(tagWriter, MAXLENGTH_ATTRIBUTE, this.maxlength);
 		writeOptionalAttribute(tagWriter, ALT_ATTRIBUTE, this.alt);
 		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, this.onselect);
-		tagWriter.endTag();
+        writeOptionalAttribute(tagWriter, READONLY_ATTRIBUTE, this.readonly);
+        writeOptionalAttribute(tagWriter, DISABLED_ATTRIBUTE, this.disabled);
+        tagWriter.endTag();
 		return EVAL_PAGE;
 	}
 

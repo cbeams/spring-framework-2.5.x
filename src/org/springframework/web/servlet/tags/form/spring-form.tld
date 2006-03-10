@@ -215,7 +215,19 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 
-		<attribute>
+        <attribute>
+            <name>readonly</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+
+        <attribute>
+            <name>disabled</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+
+        <attribute>
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -381,7 +393,19 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 
-		<attribute>
+        <attribute>
+            <name>readonly</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+
+        <attribute>
+            <name>disabled</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+
+        <attribute>
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -567,7 +591,13 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 
-		<attribute>
+        <attribute>
+            <name>disabled</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+
+        <attribute>
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -752,7 +782,13 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 
-		<attribute>
+        <attribute>
+            <name>disabled</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+
+        <attribute>
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -899,7 +935,13 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 
-		<attribute>
+        <attribute>
+            <name>disabled</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+
+        <attribute>
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1046,7 +1088,13 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 
-		<attribute>
+        <attribute>
+            <name>disabled</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        
+        <attribute>
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>

@@ -73,7 +73,9 @@ public class InputTagTests extends AbstractFormTagTests {
 		String lang = "en";
 		String dir = "ltr";
 		String tabindex = "2";
-		String onclick = "doClick()";
+        String readOnly = "true";
+        String disabled = "false";
+        String onclick = "doClick()";
 		String ondblclick = "doDblclick()";
 		String onkeydown = "doKeydown()";
 		String onkeypress = "doKeypress()";
@@ -100,7 +102,9 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setLang(lang);
 		this.tag.setDir(dir);
 		this.tag.setTabindex(tabindex);
-		this.tag.setOnclick(onclick);
+        this.tag.setReadonly(readOnly);
+        this.tag.setDisabled(disabled);
+        this.tag.setOnclick(onclick);
 		this.tag.setOndblclick(ondblclick);
 		this.tag.setOnkeydown(onkeydown);
 		this.tag.setOnkeypress(onkeypress);
@@ -135,6 +139,8 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "lang", lang);
 		assertContainsAttribute(output, "dir", dir);
 		assertContainsAttribute(output, "tabindex", tabindex);
+		assertContainsAttribute(output, "readonly", readOnly);
+		assertContainsAttribute(output, "disabled", disabled);
 		assertContainsAttribute(output, "onclick", onclick);
 		assertContainsAttribute(output, "ondblclick", ondblclick);
 		assertContainsAttribute(output, "onkeydown", onkeydown);
