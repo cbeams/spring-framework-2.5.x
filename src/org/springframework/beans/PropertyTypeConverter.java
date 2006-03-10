@@ -283,13 +283,17 @@ class PropertyTypeConverter {
 			}
 			return result;
 		}
-		else {
+		else if (input != null) {
 			// A plain value: convert it to an array with a single component.
 			Object result = Array.newInstance(componentType, 1);
 			Object value = convertIfNecessary(
 					buildIndexedPropertyName(propertyName, 0), null, input, componentType);
 			Array.set(result, 0, value);
 			return result;
+		}
+		else {
+			// Turn the null input into a null array value.
+			return null;
 		}
 	}
 

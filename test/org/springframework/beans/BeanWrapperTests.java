@@ -380,6 +380,9 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("stringArray length = 4", pt.stringArray.length == 4);
 		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
 				pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
+
+		bw.setPropertyValue("stringArray", null);
+		assertTrue("stringArray is null", pt.stringArray == null);
 	}
 
 	public void testStringArrayPropertyWithCustomStringEditor() throws Exception {
