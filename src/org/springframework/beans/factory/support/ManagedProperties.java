@@ -34,6 +34,7 @@ public class ManagedProperties extends Properties implements Mergeable {
 
 	private Object source;
 
+
 	public void setMergeEnabled(boolean mergeEnabled) {
 		this.mergeEnabled = mergeEnabled;
 	}
@@ -42,17 +43,17 @@ public class ManagedProperties extends Properties implements Mergeable {
 		return mergeEnabled;
 	}
 
-	public Object getSource() {
-		return source;
-	}
-
 	public void setSource(Object source) {
 		this.source = source;
 	}
 
+	public Object getSource() {
+		return source;
+	}
+
 	public synchronized Object merge(Object parent) {
 		if (!this.mergeEnabled) {
-			throw new IllegalStateException("Cannot merge when the mergeEnabled property is false.");
+			throw new IllegalStateException("Cannot merge when the mergeEnabled property is false");
 		}
 		Assert.notNull(parent);
 		if (parent instanceof Properties) {

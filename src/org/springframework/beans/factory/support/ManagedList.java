@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,11 +16,11 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.Mergeable;
-import org.springframework.util.Assert;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.beans.Mergeable;
+import org.springframework.util.Assert;
 
 /**
  * Tag subclass used to hold managed List elements, which may
@@ -35,6 +35,7 @@ public class ManagedList extends ArrayList implements Mergeable {
 	private boolean mergeEnabled;
 
 	private Object source;
+
 
 	public ManagedList() {
 	}
@@ -52,17 +53,17 @@ public class ManagedList extends ArrayList implements Mergeable {
 		return mergeEnabled;
 	}
 
-	public Object getSource() {
-		return source;
-	}
-
 	public void setSource(Object source) {
 		this.source = source;
 	}
 
+	public Object getSource() {
+		return source;
+	}
+
 	public synchronized Object merge(Object parent) {
 		if (!this.mergeEnabled) {
-			throw new IllegalStateException("Cannot merge when the mergeEnabled property is false.");
+			throw new IllegalStateException("Cannot merge when the mergeEnabled property is false");
 		}
 		Assert.notNull(parent);
 		if (parent instanceof List) {

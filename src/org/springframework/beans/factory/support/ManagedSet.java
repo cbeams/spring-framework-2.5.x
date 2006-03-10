@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,33 +16,34 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.Mergeable;
-import org.springframework.core.CollectionFactory;
-import org.springframework.util.Assert;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.springframework.beans.Mergeable;
+import org.springframework.core.CollectionFactory;
+import org.springframework.util.Assert;
+
 /**
  * Tag collection class used to hold managed Set values,
  * which may include runtime bean references.
- * <p/>
+ *
  * <p>Wraps a target Set, which will be a linked set if possible
  * (that is, if running on JDK 1.4 or if Commons Collections 3.x is available).
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @see org.springframework.core.CollectionFactory#createLinkedSetIfPossible
  * @since 21.01.2004
+ * @see org.springframework.core.CollectionFactory#createLinkedSetIfPossible
  */
 public class ManagedSet implements Set, Mergeable {
 
-	private Set targetSet;
+	private final Set targetSet;
 
 	private boolean mergeEnabled;
 
 	private Object source;
+
 
 	public ManagedSet() {
 		this(16);
@@ -65,17 +66,17 @@ public class ManagedSet implements Set, Mergeable {
 		return mergeEnabled;
 	}
 
-	public Object getSource() {
-		return source;
-	}
-
 	public void setSource(Object source) {
 		this.source = source;
 	}
 
+	public Object getSource() {
+		return source;
+	}
+
 	public synchronized Object merge(Object parent) {
 		if (!this.mergeEnabled) {
-			throw new IllegalStateException("Cannot merge when the mergeEnabled property is false.");
+			throw new IllegalStateException("Cannot merge when the mergeEnabled property is false");
 		}
 		Assert.notNull(parent);
 		if (parent instanceof Set) {

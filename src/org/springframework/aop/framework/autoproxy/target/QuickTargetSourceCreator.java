@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,7 @@ import org.springframework.aop.target.ThreadLocalTargetSource;
  * <li>: CommonsPoolTargetSource
  * <li>% ThreadLocalTargetSource
  * <li>! PrototypeTargetSource
+ *
  * @author Rod Johnson
  * @see org.springframework.aop.target.CommonsPoolTargetSource
  * @see org.springframework.aop.target.ThreadLocalTargetSource
@@ -35,9 +36,7 @@ import org.springframework.aop.target.ThreadLocalTargetSource;
 public class QuickTargetSourceCreator extends AbstractBeanFactoryBasedTargetSourceCreator {
 
 	public static final String PREFIX_COMMONS_POOL = ":";
-
 	public static final String PREFIX_THREAD_LOCAL = "%";
-
 	public static final String PREFIX_PROTOTYPE = "!";
 
 	protected final AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
