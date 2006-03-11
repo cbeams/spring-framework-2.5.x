@@ -16,7 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -113,12 +118,12 @@ class BeanDefinitionValueResolver {
 			// May need to resolve contained runtime references.
 			return resolveManagedMap(argName, (Map) value);
 		}
-        else if (value instanceof ManagedProperties) {
-            Properties copy = new Properties();
-            copy.putAll((Properties)value);
-            return copy;
-        }
-        else if (value instanceof TypedStringValue) {
+		else if (value instanceof ManagedProperties) {
+			Properties copy = new Properties();
+			copy.putAll((Properties) value);
+			return copy;
+		}
+		else if (value instanceof TypedStringValue) {
 			// Convert value to target type here.
 			TypedStringValue typedStringValue = (TypedStringValue) value;
 			try {

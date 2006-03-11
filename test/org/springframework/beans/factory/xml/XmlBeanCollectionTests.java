@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,17 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import junit.framework.TestCase;
 import org.apache.commons.collections.map.LinkedMap;
@@ -261,8 +271,8 @@ public class XmlBeanCollectionTests extends TestCase {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("emptyProps");
 		assertTrue(hasMap.getProps().size() == 0);
-        assertEquals(hasMap.getProps().getClass(), Properties.class);
-    }
+		assertEquals(hasMap.getProps().getClass(), Properties.class);
+	}
 
 	public void testPopulatedProps() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
