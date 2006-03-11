@@ -1,4 +1,4 @@
-THE SPRING FRAMEWORK, release 2.0 M3 (March 2006)
+THE SPRING FRAMEWORK, release 2.0 M4 (March 2006)
 -------------------------------------------------
 http://www.springframework.org
 

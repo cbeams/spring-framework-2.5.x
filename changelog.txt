@@ -3,6 +3,25 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0 M4 (29.3.2006)
+-------------------------------------
+
+Package org.springframework.aop
+* deprecated Commons Attributes based TargetSourceCreators (PoolingAttribute, PrototypeAttribute, ThreadLocalAttribute)
+* fixed CustomizableTraceInterceptor to expose the actual invocation time for exception messages
+
+Package org.springframework.beans
+* fixed BeanWrapperImpl to convert a null input for an array type to a null value rather than an array with null element
+* fixed BeanWrapperImpl to convert a ManagedProperties instance into a plain Properties instance before applying it
+
+Package org.springframework.orm
+* fixed JpaDaoSupport's "setEntityManager" method to accept an EntityManager instead of an EntityManagerFactory
+
+Package org.springframework.web
+* added optional caching of JSP 2.0 Expressions, driven by "cacheJspExpressions" context-param in web.xml (true/false)
+* refined AbstractRefreshablePortletApplicationContext to take PortletContext from PortletConfig if not explicitly set
+
+
 Changes in version 2.0 M3 (8.3.2006)
 ------------------------------------
 
