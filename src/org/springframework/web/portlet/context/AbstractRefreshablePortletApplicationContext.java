@@ -119,6 +119,9 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 
 	public void setPortletConfig(PortletConfig portletConfig) {
 		this.portletConfig = portletConfig;
+		if (portletConfig != null && this.portletContext == null) {
+			this.portletContext = portletConfig.getPortletContext();
+		}
 	}
 
 	public PortletConfig getPortletConfig() {
