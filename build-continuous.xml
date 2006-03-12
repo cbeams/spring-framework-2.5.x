@@ -63,14 +63,17 @@
     
     <target name="email-failure" depends="guard.smtp.host">
     	<mail mailhost="${smtp.host}" subject="Spring ${label} FAILED" tolist="framework-developer@lists.sourceforge.net, alef@interface21.com" from="alef@interface21.com">
-    		<message>Have a look at http://static.springframework.org/spring/build/index.html
-    			for more details.</message>
+    		<message>Errors and a list of modifications can be found in the build log (http://static.springframework.org/spring/build/index.html).</message>
     	</mail>
     </target>
     
     <target name="email-success" depends="guard.smtp.host">
     	<mail mailhost="${smtp.host}" subject="Spring ${label} SUCCEEDED" tolist="framework-developer@lists.sourceforge.net, alef@interface21.com" from="alef@interface21.com">
-    		<message>Snapshot has been uploaded to http://static.springframework.org/downloads/nightly/</message>
+    		<message>
+    			Snapshot has been uploaded to http://static.springframework.org/downloads/nightly/
+    			
+    			The list of modifications for this build can be found in the build log (http://static.springframework.org/spring/build/index.html).    			
+			</message>
     	</mail>
 	</target>
 	
