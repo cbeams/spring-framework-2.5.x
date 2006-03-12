@@ -18,8 +18,6 @@
 	<!-- targets for uploading binaries, creating snapshots, et cetera -->
     <!--
             properties needed (some are set in CruiseControl configuration)
-            - release.zip         release zip (set by build.xml)
-            - release.version     release version (set by build.xml)
             - target.release.dir  release directory (set by build.xml)
             - upload.tmp.dir      temporary directory to use when uploading
             - label               build label (usually passed by CC)
@@ -44,7 +42,7 @@
     <target name="upload" depends="upload-log, upload-binaries"/>
 
     <!-- SCP needs an SSH library on the classpath (see Ant documentation for more info) -->
-    <target name="upload-log" depends="init, guard.upload.tmp.dir, guard.upload.log.dir, guard.upload.username, guard.upload.password, guard.upload.url">
+    <target name="upload-log" depends="guard.upload.tmp.dir, guard.upload.log.dir, guard.upload.username, guard.upload.password, guard.upload.url">
         <scp todir="${upload.username}@${upload.url}:${upload.log.dir}" password="${upload.password}">
             <fileset dir="${upload.tmp.dir}">
                 <include name="*.html"/>
@@ -52,7 +50,7 @@
         </scp>
     </target>
 
-    <target name="upload-binaries" depends="init, guard.upload.tmp.dir, guard.upload.binaries.dir, guard.upload.url, guard.upload.password, guard.upload.username">
+    <target name="upload-binaries" depends="guard.upload.tmp.dir, guard.upload.binaries.dir, guard.upload.url, guard.upload.password, guard.upload.username">
         <scp todir="${upload.username}@${upload.url}:${upload.binaries.dir}" password="${upload.password}">
             <fileset dir="${upload.tmp.dir}">
                 <include name="spring-*.zip"/>
