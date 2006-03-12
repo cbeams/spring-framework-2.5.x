@@ -29,7 +29,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  *
  * <p>This is an alternative to the classic JdbcOperations interface,
  * implemented by NamedParameterJdbcTemplate. This interface is not often used
- * directly, but provides is a useful option to enhance testability, as it can
+ * directly, but provides a useful option to enhance testability, as it can
  * easily be mocked or stubbed.
  *
  * @author Thomas Risberg

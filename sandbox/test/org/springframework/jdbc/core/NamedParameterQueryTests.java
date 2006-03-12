@@ -113,7 +113,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterValues parms = new SqlNamedParameterValues();
+		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
 		parms.addValue("id", new Integer(3));
 		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
@@ -150,7 +150,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterValues parms = new SqlNamedParameterValues();
+		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
 		parms.addValue("id", new Integer(3));
 		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
@@ -194,7 +194,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterValues parms = new SqlNamedParameterValues();
+		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
 		parms.addValue("id", new Integer(3));
 		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
@@ -239,7 +239,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterValues parms = new SqlNamedParameterValues();
+		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
 		parms.addValue("id", new Integer(3));
 		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
@@ -284,7 +284,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterValues parms = new SqlNamedParameterValues();
+		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
 		parms.addValue("id", new Integer(3));
 		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
@@ -321,7 +321,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterValues parms = new SqlNamedParameterValues();
+		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
 		parms.addValue("id", new Integer(3));
 		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
@@ -369,7 +369,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterValues parms = new SqlNamedParameterValues();
+		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
 		parms.addValue("id", new Integer(3));
 		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
@@ -413,7 +413,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterValues parms = new SqlNamedParameterValues();
+		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
 		parms.addValue("id", new Integer(3));
 		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
@@ -457,7 +457,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterValues parms = new SqlNamedParameterValues();
+		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
 		parms.addValue("id", new Integer(3));
 		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 

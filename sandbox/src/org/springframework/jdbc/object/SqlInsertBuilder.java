@@ -2,7 +2,7 @@ package org.springframework.jdbc.object;
 
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.core.SqlNamedParameterHolder;
-import org.springframework.jdbc.core.SqlNamedParameterValues;
+import org.springframework.jdbc.core.SqlNamedParameterWrapper;
 import org.springframework.jdbc.core.SqlNamedParameterTypes;
 
 import java.util.Iterator;
@@ -92,7 +92,7 @@ public class SqlInsertBuilder {
     }
 
     public SqlNamedParameterHolder getNamedParameterHolder() {
-            return new SqlNamedParameterValues(this.dataValues, this.sqlTypes);
+            return new SqlNamedParameterWrapper(this.dataValues, this.sqlTypes);
     }
 
     public SqlNamedParameterTypes getNamedParameterTypes() {

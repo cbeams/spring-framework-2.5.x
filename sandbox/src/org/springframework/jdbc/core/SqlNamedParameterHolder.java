@@ -19,13 +19,20 @@ package org.springframework.jdbc.core;
 import java.util.Map;
 
 /**
- * SQL values wrapper to hold the column values for a row.
+ * Interface defining common functionality need for implementations that will hold parameter values for named
+ * parameters used by SqlCommand.  This interface provides for the specification of SQL type in addition to
+ * parameter values. All parameter values and types are identified by specifying the name of the parameter.
+ * This clas provides methods that will make adding several values easier.  The addValue method returns a
+ * reference to the Map itself so you can string several method calls together within a single statement.
  *
  * <p>Intended to wrap various implementatations like a Map or
  * a JavaBean with a consistent interface.
  *
  * @author Thomas Risberg
  * @since 2.0
+ * @see org.springframework.jdbc.object.SqlCommand
+ * @see org.springframework.jdbc.core.SqlNamedParameterWrapper
+ * @see org.springframework.jdbc.core.SqlParameterBeanWrapper
  */
 public interface SqlNamedParameterHolder {
 

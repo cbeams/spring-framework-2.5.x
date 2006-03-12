@@ -224,7 +224,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		private final int[] argTypes;
 
 		public ArgMapPreparedStatementSetter(String sql, Map argMap) {
-			this(sql, new SqlNamedParameterValues(argMap), new SqlNamedParameterTypes());
+			this(sql, new SqlNamedParameterWrapper(argMap), new SqlNamedParameterTypes());
 		}
 
 		public ArgMapPreparedStatementSetter(String sql, SqlNamedParameterHolder namedParameters, SqlNamedParameterTypes namedTypes) {

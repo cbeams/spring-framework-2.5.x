@@ -27,41 +27,40 @@ import java.util.Map;
  * @author Thomas Risberg
  * @since 2.0
  */
-public class SqlNamedParameterValues implements SqlNamedParameterHolder {
+public class SqlNamedParameterWrapper implements SqlNamedParameterHolder {
 
 	private Map dataValues = new HashMap();
 
 	private Map sqlTypes = new HashMap();
 
 
-	public SqlNamedParameterValues() {
+	public SqlNamedParameterWrapper() {
 	}
 
-	public SqlNamedParameterValues(Map dataMap) {
+	public SqlNamedParameterWrapper(Map dataMap) {
 		this.dataValues.putAll(dataMap);
 	}
 
-	public SqlNamedParameterValues(Map dataMap, Map sqlTypes) {
+	public SqlNamedParameterWrapper(Map dataMap, Map sqlTypes) {
 		this.dataValues.putAll(dataMap);
 		this.sqlTypes.putAll(sqlTypes);
 	}
 
-	public SqlNamedParameterValues(String columnName, Object value) {
+	public SqlNamedParameterWrapper(String columnName, Object value) {
 		this.dataValues.put(columnName, value);
 	}
 
-	public SqlNamedParameterValues(String columnName, Object value, int sqlType) {
+	public SqlNamedParameterWrapper(String columnName, Object value, int sqlType) {
 		this.dataValues.put(columnName, value);
 		this.sqlTypes.put(columnName, new Integer(sqlType));
 	}
 
-	public SqlNamedParameterValues addValue(String columnName, Object value) {
+	public SqlNamedParameterWrapper addValue(String columnName, Object value) {
 		this.dataValues.put(columnName, value);
-		this.sqlTypes.put(columnName, value);
 		return this;
 	}
 
-	public SqlNamedParameterValues addValue(String columnName, Object value, int sqlType) {
+	public SqlNamedParameterWrapper addValue(String columnName, Object value, int sqlType) {
 		this.dataValues.put(columnName, value);
 		this.sqlTypes.put(columnName, new Integer(sqlType));
 		return this;

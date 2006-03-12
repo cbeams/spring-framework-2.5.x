@@ -16,11 +16,11 @@
 
 package org.springframework.jdbc.core;
 
+import org.springframework.beans.BeanWrapperImpl;
+
 import java.beans.PropertyDescriptor;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.springframework.beans.BeanWrapperImpl;
 
 /**
  * SQL values wrapper to hold the column values for a row or parameter
