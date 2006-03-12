@@ -19,6 +19,7 @@ package org.springframework.jdbc.support;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,7 +51,7 @@ public class NamedParameterUtils {
 	public static int countParameterPlaceholders(String sql) {
 		byte[] statement = (sql == null) ? new byte[0] : sql.getBytes();
 		boolean withinQuotes = false;
-		List namedParameters = new ArrayList();
+		Map namedParameters = new HashMap();
 		char currentQuote = '-';
 		int parameterCount = 0;
 		int i = 0;
@@ -76,9 +77,9 @@ public class NamedParameterUtils {
 							j++;
 						}
 						if (j - i > 1) {
-							if (!namedParameters.contains(parameter.toString())) {
+							if (!namedParameters.containsKey(parameter.toString())) {
 								parameterCount++;
-								namedParameters.add(parameter.toString());
+								namedParameters.put(parameter.toString(), parameter);
 								i = j - 1;
 							}
 						}
@@ -100,8 +101,9 @@ public class NamedParameterUtils {
 	 * @param sql the SQL statement
 	 */
 	public static ParsedSql parseSqlStatement(String sql) {
-		List namedParameters = new ArrayList();
-		ParsedSql parsedSql = new ParsedSql(sql);
+		List parameters = new ArrayList();
+        Map namedParameters = new HashMap();
+        ParsedSql parsedSql = new ParsedSql(sql);
 
 		byte[] statement = (sql == null) ? new byte[0] : sql.getBytes();
 		StringBuffer newSql = new StringBuffer();
@@ -134,11 +136,14 @@ public class NamedParameterUtils {
 						}
 						if (j - i > 1) {
 							String parameter = sql.substring(i+1, j);
-							namedParameters.add(parameter);
+                            if (!namedParameters.containsKey(parameter)) {
+                                namedParameters.put(parameter, parameter);
+                                namedParameterCount++;
+                            }
 							newSql.append("?");
+                            parameters.add(parameter);
 							parameterCount++;
-							namedParameterCount++;
-						}
+                        }
 						i = j - 1;
 					}
 					else {
@@ -153,7 +158,7 @@ public class NamedParameterUtils {
 		parsedSql.setNamedParameterCount(namedParameterCount);
 		parsedSql.setParameterCount(parameterCount);
 		parsedSql.setNewSql(newSql.toString());
-		parsedSql.setNamedParameters(namedParameters);
+		parsedSql.setParameters(parameters);
 		return parsedSql;
 	}
 
@@ -226,7 +231,6 @@ public class NamedParameterUtils {
 			}
 			i++;
 		}
-		System.out.println("=>" + newSql.toString());
 		return newSql.toString();
 	}
 
@@ -263,14 +267,10 @@ public class NamedParameterUtils {
 	 * @param parsedSql the parsed SQL statement.
 	 */
 	public static Object[] convertArgMapToArray(Map parameters, ParsedSql parsedSql) {
-		Object[] args = new Object[parsedSql.getNamedParameterCount()];
-		if (parsedSql.getNamedParameterCount() != parsedSql.getParameterCount()) {
-			throw new InvalidDataAccessApiUsageException("You must supply named parameter placeholders for all " +
-					"parameters when using a Map for the parameter values");
-		}
+		Object[] args = new Object[parsedSql.getParameterCount()];
 		if (parsedSql.getNamedParameterCount() != parameters.size()) {
 			if (parsedSql.getNamedParameterCount() > parameters.size()) {
-			throw new InvalidDataAccessApiUsageException("Wrong number of parameters/values supplied. You have " +
+    			throw new InvalidDataAccessApiUsageException("Wrong number of parameters/values supplied. You have " +
 					parsedSql.getNamedParameterCount() + " named parameter(s) and supplied " + parameters.size() +
 					" parameter value(s)");
 			}
@@ -280,12 +280,12 @@ public class NamedParameterUtils {
 					" parameter value(s)");
 			}
 		}
-		for (int i = 0; i < parsedSql.getNamedParameters().size(); i++) {
-			if (!parameters.containsKey(parsedSql.getNamedParameters().get(i))) {
+		for (int i = 0; i < parsedSql.getParameters().size(); i++) {
+			if (!parameters.containsKey(parsedSql.getParameters().get(i))) {
 				throw new InvalidDataAccessApiUsageException("No entry supplied for the '" +
-						parsedSql.getNamedParameters().get(i) + "' parameter");
+						parsedSql.getParameters().get(i) + "' parameter");
 			}
-			args[i] = parameters.get(parsedSql.getNamedParameters().get(i));
+			args[i] = parameters.get(parsedSql.getParameters().get(i));
 		}
 		return args;
 	}
@@ -299,7 +299,7 @@ public class NamedParameterUtils {
 	 * @param parsedSql the parsed SQL statement.
 	 */
 	public static int[] convertTypeMapToArray(Map typeMap, ParsedSql parsedSql) {
-		int[] types = new int[parsedSql.getNamedParameterCount()];
+		int[] types = new int[parsedSql.getParameterCount()];
 		if (parsedSql.getNamedParameterCount() != typeMap.size()) {
 			if (parsedSql.getNamedParameterCount() < typeMap.size()) {
 				logger.warn("You have additional entries in the type map supplied.  There are " +
@@ -307,15 +307,15 @@ public class NamedParameterUtils {
 					" type value(s)");
 			}
 		}
-		for (int i = 0; i < parsedSql.getNamedParameters().size(); i++) {
-			if (typeMap.containsKey(parsedSql.getNamedParameters().get(i))) {
-				types[i] = ((Integer) typeMap.get(parsedSql.getNamedParameters().get(i))).intValue();
+		for (int i = 0; i < parsedSql.getParameters().size(); i++) {
+			if (typeMap.containsKey(parsedSql.getParameters().get(i))) {
+				types[i] = ((Integer) typeMap.get(parsedSql.getParameters().get(i))).intValue();
 			}
 			else {
 				types[i] = SqlTypeValue.TYPE_UNKNOWN;
 			}
 		}
-		return types;
+        return types;
 	}
 
 }

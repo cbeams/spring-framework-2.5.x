@@ -17,6 +17,8 @@
 package org.springframework.jdbc.support;
 
 import java.sql.Types;
+import java.util.Map;
+import java.util.HashMap;
 
 import junit.framework.TestCase;
 
@@ -47,6 +49,56 @@ public class NamedParameterUtilsTests extends TestCase {
 		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big &parameter, &newparameter, &parameter bad wolf") == 2);
 		assertTrue(NamedParameterUtils.countParameterPlaceholders("The \"big &x  \" 'ba''ad&p' &parameter wolf") == 1);
 		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big :parameter, &newparameter, &parameter bad wolf") == 2);
+		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big :parameter, &sameparameter, &sameparameter bad wolf") == 2);
+		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big :parameter, :sameparameter, :sameparameter bad wolf") == 2);
 	}
+
+    public void testParseSql() {
+        String sql = "xxx :a yyyy :b :c :a zzzzz";
+        String sql2 = "xxx &a yyyy ? zzzzz";
+        ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
+        assertEquals("xxx ? yyyy ? ? ? zzzzz", psql.getNewSql());
+        assertEquals("a", psql.getParameters().get(0));
+        assertEquals("c", psql.getParameters().get(2));
+        assertEquals("a", psql.getParameters().get(3));
+        assertEquals(4, psql.getParameterCount());
+        assertEquals(3, psql.getNamedParameterCount());
+        ParsedSql psql2 = NamedParameterUtils.parseSqlStatement(sql2);
+        assertEquals("xxx ? yyyy ? zzzzz", psql2.getNewSql());
+        assertEquals("a", psql2.getParameters().get(0));
+        assertEquals(2, psql2.getParameterCount());
+        assertEquals(1, psql2.getNamedParameterCount());
+    }
+
+    public void testSubstituteNamedParameters() {
+        Map argMap = new HashMap();
+        argMap.put("a","a");
+        argMap.put("b","b");
+        argMap.put("c","c");
+        assertEquals("xxx ? ? ?", NamedParameterUtils.substituteNamedParameters("xxx :a :b :c", argMap));
+        assertEquals("xxx ? ? ? xx ? ?", NamedParameterUtils.substituteNamedParameters("xxx :a :b :c xx :a :a", argMap));
+    }
+
+    public void testConvertArgMapToArray() {
+        Map argMap = new HashMap();
+        argMap.put("a","a");
+        argMap.put("b","b");
+        argMap.put("c","c");
+        assertTrue(3 == NamedParameterUtils.convertArgMapToArray("xxx :a :b :c", argMap).length);
+        assertTrue(5 == NamedParameterUtils.convertArgMapToArray("xxx :a :b :c xx :a :b", argMap).length);
+        assertTrue(5 == NamedParameterUtils.convertArgMapToArray("xxx :a :a :a xx :a :a", argMap).length);
+        assertEquals("b", NamedParameterUtils.convertArgMapToArray("xxx :a :b :c xx :a :b", argMap)[4]);
+    }
+
+    public void testConvertTypeMapToArray() {
+        Map typeMap = new HashMap();
+        typeMap.put("a", new Integer(1));
+        typeMap.put("b", new Integer(2));
+        typeMap.put("c", new Integer(3));
+        assertTrue(3 == NamedParameterUtils.convertTypeMapToArray(typeMap, NamedParameterUtils.parseSqlStatement("xxx :a :b :c")).length);
+        assertTrue(5 == NamedParameterUtils.convertTypeMapToArray(typeMap, NamedParameterUtils.parseSqlStatement("xxx :a :b :c xx :a :b")).length);
+        assertTrue(5 == NamedParameterUtils.convertTypeMapToArray(typeMap, NamedParameterUtils.parseSqlStatement("xxx :a :a :a xx :a :a")).length);
+        assertEquals(2, NamedParameterUtils.convertTypeMapToArray(typeMap, NamedParameterUtils.parseSqlStatement("xxx :a :b :c xx :a :b"))[4]);
+    }
 
 }

@@ -25,7 +25,7 @@ import java.util.List;
  * @since 2.0
  */
 public class ParsedSql {
-	private List namedParameters;
+	private List parameters;
 	private String newSql;
 	private String sql;
 	private int parameterCount;
@@ -38,12 +38,12 @@ public class ParsedSql {
 		this.sql = sql;
 	}
 
-	public List getNamedParameters() {
-		return namedParameters;
+	public List getParameters() {
+		return parameters;
 	}
 
-	public void setNamedParameters(List namedParameters) {
-		this.namedParameters = namedParameters;
+	public void setParameters(List parameters) {
+		this.parameters = parameters;
 	}
 
 	public String getNewSql() {
