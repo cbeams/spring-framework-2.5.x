@@ -57,4 +57,36 @@ public class JasperReportViewResolverTests extends TestCase {
 		}
 	}
 
+	public void testWithViewNamesAndEndsWithPattern() throws Exception {
+		doViewNamesTest(new String[]{"DataSource*"});
+	}
+
+	public void testWithViewNamesAndStartsWithPattern() throws Exception {
+		doViewNamesTest(new String[]{"*Report"});
+	}
+
+	public void testWithViewNamesAndStatic() throws Exception {
+		doViewNamesTest(new String[]{"DataSourceReport"});
+	}
+
+	private void doViewNamesTest(String[] viewNames) throws Exception {
+		 StaticApplicationContext ctx = new StaticApplicationContext();
+
+		String prefix = "org/springframework/ui/jasperreports/";
+		String suffix = ".jasper";
+		String viewName = "DataSourceReport";
+
+		JasperReportsViewResolver viewResolver = new JasperReportsViewResolver();
+		viewResolver.setViewClass(JasperReportsHtmlView.class);
+		viewResolver.setPrefix(prefix);
+		viewResolver.setSuffix(suffix);
+		viewResolver.setViewNames(viewNames);
+		viewResolver.setApplicationContext(ctx);
+
+		AbstractJasperReportsView view =
+				(AbstractJasperReportsView) viewResolver.resolveViewName(viewName, Locale.ENGLISH);
+		assertNotNull("View should not be null", view);
+		assertEquals("Incorrect URL", prefix + viewName + suffix, view.getUrl());
+		assertNull(viewResolver.resolveViewName("foo", Locale.ENGLISH));
+	}
 }

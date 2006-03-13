@@ -95,6 +95,8 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 
 	private String suffix = "";
 
+	private String[] viewNames = null;
+
 	private String contentType;
 
 	private boolean redirectContextRelative = true;
@@ -287,6 +289,16 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 		return this.staticAttributes;
 	}
 
+	/**
+	 * Sets the view names (or name patterns) that can be handled by this
+	 * {@link org.springframework.web.servlet.ViewResolver}. View names can contain
+	 * wildcards such that 'my*', '*Report' and 'myReport' will all match the
+	 * view name 'myReport'.
+	 */
+	public void setViewNames(String[] viewNames) {
+		this.viewNames = (viewNames == null ? new String[]{"*"} : viewNames);
+	}
+
 	protected void initApplicationContext() {
 		super.initApplicationContext();
 		if (getViewClass() == null) {
@@ -312,19 +324,44 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	 * @see #requiredViewClass
 	 */
 	protected View createView(String viewName, Locale locale) throws Exception {
-		// Check for special "redirect:" prefix.
-		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
-			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
-			return new RedirectView(
-			    redirectUrl, isRedirectContextRelative(), isRedirectHttp10Compatible());
+		if (canHandle(viewName, locale)) {
+			// Check for special "redirect:" prefix.
+			if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
+				String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
+				return new RedirectView(
+								redirectUrl, isRedirectContextRelative(), isRedirectHttp10Compatible());
+			}
+			// Check for special "forward:" prefix.
+			if (viewName.startsWith(FORWARD_URL_PREFIX)) {
+				String forwardUrl = viewName.substring(FORWARD_URL_PREFIX.length());
+				return new InternalResourceView(forwardUrl);
+			}
+			// Else fall back to superclass implementation: calling loadView.
+			return super.createView(viewName, locale);
 		}
-		// Check for special "forward:" prefix.
-		if (viewName.startsWith(FORWARD_URL_PREFIX)) {
-			String forwardUrl = viewName.substring(FORWARD_URL_PREFIX.length());
-			return new InternalResourceView(forwardUrl);
+		else {
+			return null;
 		}
-		// Else fall back to superclass implementation: calling loadView.
-		return super.createView(viewName, locale);
+	}
+
+	protected boolean canHandle(String viewName, Locale locale) {
+		if (this.viewNames == null) {
+			return true;
+		}
+
+		for (int i = 0; i < this.viewNames.length; i++) {
+			String mappedName = this.viewNames[i];
+			if (viewName.equals(mappedName) || isMatch(viewName, mappedName)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean isMatch(String viewName, String mappedName) {
+		return (mappedName.endsWith("*") && viewName.startsWith(mappedName.substring(0, mappedName.length() - 1))) ||
+						(mappedName.startsWith("*") && viewName.endsWith(mappedName.substring(1)));
 	}
 
 	/**
