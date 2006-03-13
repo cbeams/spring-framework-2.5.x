@@ -23,6 +23,7 @@ import java.util.Properties;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.servlet.View;
+import org.springframework.core.Ordered;
 
 /**
  * Simple implementation of ViewResolver that allows for direct resolution of
@@ -59,6 +60,7 @@ import org.springframework.web.servlet.View;
  * the underlying resource actually exists.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 13.12.2003
  * @see #setViewClass
  * @see #setPrefix
@@ -70,7 +72,7 @@ import org.springframework.web.servlet.View;
  * @see org.springframework.web.servlet.view.velocity.VelocityView
  * @see org.springframework.web.servlet.view.freemarker.FreeMarkerView
  */
-public class UrlBasedViewResolver extends AbstractCachingViewResolver {
+public class UrlBasedViewResolver extends AbstractCachingViewResolver implements Ordered {
 
 	/**
 	 * Prefix for special view names that specify a redirect URL (usually
@@ -105,6 +107,8 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 
 	private String requestContextAttribute;
 
+	private int order = Integer.MAX_VALUE;
+
 	/** Map of static attributes, keyed by attribute name (String) */
 	private final Map	staticAttributes = new HashMap();
 
@@ -118,7 +122,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	public void setViewClass(Class viewClass) {
 		if (viewClass == null || !requiredViewClass().isAssignableFrom(viewClass)) {
 			throw new IllegalArgumentException(
-			    "Given view class [" + (viewClass != null ? viewClass.getName() : null) +
+					"Given view class [" + (viewClass != null ? viewClass.getName() : null) +
 					"] is not of type [" + requiredViewClass().getName() + "]");
 		}
 		this.viewClass = viewClass;
@@ -126,7 +130,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 
 	/**
 	 * Return the view class to be used to create views.
-	 */ 
+	 */
 	protected Class getViewClass() {
 		return viewClass;
 	}
@@ -290,6 +294,22 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	}
 
 	/**
+	 * Gets the order in which this {@link org.springframework.web.servlet.ViewResolver}
+	 * is evaluated.
+	 */
+	public int getOrder() {
+		return order;
+	}
+
+	/**
+	 * Sets the order in which this {@link org.springframework.web.servlet.ViewResolver}
+	 * is evaluated.
+	 */
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	/**
 	 * Sets the view names (or name patterns) that can be handled by this
 	 * {@link org.springframework.web.servlet.ViewResolver}. View names can contain
 	 * wildcards such that 'my*', '*Report' and 'myReport' will all match the
@@ -344,6 +364,12 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 		}
 	}
 
+	/**
+	 * Indicates whether or not this {@link org.springframework.web.servlet.ViewResolver} can
+	 * handle the supplied view name. If not, {@link #createView(String, java.util.Locale)} will
+	 * return <code>null</code>. The default implementation checks against the configured
+	 * {@link #setViewNames view names}.
+	 */
 	protected boolean canHandle(String viewName, Locale locale) {
 		if (this.viewNames == null) {
 			return true;
