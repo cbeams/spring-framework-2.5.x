@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,10 @@ package org.springframework.remoting.jaxrpc;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.Enumeration;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.xml.namespace.QName;
@@ -81,7 +84,8 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 	private boolean maintainSession;
 
-	private Properties customProperties;
+	/** Map of custom properties, keyed by property name (String) */
+	private final Map	customPropertyMap = new HashMap();
 
 	private Class serviceInterface;
 
@@ -200,14 +204,44 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * @see javax.xml.rpc.Call#setProperty
 	 */
 	public void setCustomProperties(Properties customProperties) {
-		this.customProperties = customProperties;
+		setCustomPropertyMap(customProperties);
+	}
+
+	/**
+	 * Set custom properties to be set on the stub or call.
+	 * @see javax.xml.rpc.Stub#_setProperty
+	 * @see javax.xml.rpc.Call#setProperty
+	 */
+	public void setCustomPropertyMap(Map customProperties) {
+		if (customProperties != null) {
+			Iterator it = customProperties.entrySet().iterator();
+			while (it.hasNext()) {
+				Map.Entry entry = (Map.Entry) it.next();
+				if (!(entry.getKey() instanceof String)) {
+					throw new IllegalArgumentException(
+							"Illegal property key [" + entry.getKey() + "]: only Strings allowed");
+				}
+				addCustomProperty((String) entry.getKey(), entry.getValue());
+			}
+		}
+	}
+
+	/**
+	 * Add a custom property to this JAX-RPC Stub/Call.
+	 * @param name the name of the attribute to expose
+	 * @param value the attribute value to expose
+	 * @see javax.xml.rpc.Stub#_setProperty
+	 * @see javax.xml.rpc.Call#setProperty
+	 */
+	public void addCustomProperty(String name, Object value) {
+		this.customPropertyMap.put(name, value);
 	}
 
 	/**
 	 * Return custom properties to be set on the stub or call.
 	 */
-	public Properties getCustomProperties() {
-		return customProperties;
+	public Map getCustomPropertyMap() {
+		return Collections.unmodifiableMap(this.customPropertyMap);
 	}
 
 	/**
@@ -421,11 +455,10 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		if (this.maintainSession) {
 			stub._setProperty(Stub.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 		}
-		if (this.customProperties != null) {
-			Enumeration en = this.customProperties.propertyNames();
-			while (en.hasMoreElements()) {
-				String key = (String) en.nextElement();
-				stub._setProperty(key, this.customProperties.getProperty(key));
+		if (this.customPropertyMap != null) {
+			for (Iterator it = this.customPropertyMap.keySet().iterator(); it.hasNext();) {
+				String key = (String) it.next();
+				stub._setProperty(key, this.customPropertyMap.get(key));
 			}
 		}
 	}
@@ -577,11 +610,10 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		if (this.maintainSession) {
 			call.setProperty(Call.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 		}
-		if (this.customProperties != null) {
-			Enumeration en = this.customProperties.propertyNames();
-			while (en.hasMoreElements()) {
-				String key = (String) en.nextElement();
-				call.setProperty(key, this.customProperties.getProperty(key));
+		if (this.customPropertyMap != null) {
+			for (Iterator it = this.customPropertyMap.keySet().iterator(); it.hasNext();) {
+				String key = (String) it.next();
+				call.setProperty(key, this.customPropertyMap.get(key));
 			}
 		}
 	}

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -137,6 +137,64 @@ public class JaxRpcSupportTests extends TestCase {
 		assertEquals("pw", stub._getProperty(Stub.PASSWORD_PROPERTY));
 		assertEquals("ea", stub._getProperty(Stub.ENDPOINT_ADDRESS_PROPERTY));
 		assertTrue(((Boolean) stub._getProperty(Stub.SESSION_MAINTAIN_PROPERTY)).booleanValue());
+
+		assertTrue(factory.getObject() instanceof IRemoteBean);
+		IRemoteBean proxy = (IRemoteBean) factory.getObject();
+		proxy.setName("myName");
+		assertEquals("myName", RemoteBean.name);
+		MockServiceFactory.service1Control.verify();
+	}
+
+	public void testJaxRpcPortProxyFactoryBeanWithCustomProperties() throws Exception {
+		JaxRpcPortProxyFactoryBean factory = new JaxRpcPortProxyFactoryBean();
+		factory.setServiceFactoryClass(MockServiceFactory.class);
+		factory.setNamespaceUri("myNamespace");
+		factory.setServiceName("myService1");
+		factory.setPortName("myPort");
+		factory.setUsername("user");
+		factory.setPassword("pw");
+		Properties customProps = new Properties();
+		customProps.setProperty("myProp", "myValue");
+		factory.setCustomProperties(customProps);
+		factory.setServiceInterface(IRemoteBean.class);
+		factory.afterPropertiesSet();
+		assertTrue("Correct singleton value", factory.isSingleton());
+
+		assertTrue(factory.getPortStub() instanceof Stub);
+		Stub stub = (Stub) factory.getPortStub();
+		assertEquals("user", stub._getProperty(Stub.USERNAME_PROPERTY));
+		assertEquals("pw", stub._getProperty(Stub.PASSWORD_PROPERTY));
+		assertEquals("myValue", stub._getProperty("myProp"));
+
+		assertTrue(factory.getObject() instanceof IRemoteBean);
+		IRemoteBean proxy = (IRemoteBean) factory.getObject();
+		proxy.setName("myName");
+		assertEquals("myName", RemoteBean.name);
+		MockServiceFactory.service1Control.verify();
+	}
+
+	public void testJaxRpcPortProxyFactoryBeanWithCustomPropertyMap() throws Exception {
+		JaxRpcPortProxyFactoryBean factory = new JaxRpcPortProxyFactoryBean();
+		factory.setServiceFactoryClass(MockServiceFactory.class);
+		factory.setNamespaceUri("myNamespace");
+		factory.setServiceName("myService1");
+		factory.setPortName("myPort");
+		factory.setEndpointAddress("ea");
+		factory.setMaintainSession(true);
+		Map customProps = new HashMap();
+		customProps.put("myProp", new Integer(1));
+		factory.setCustomPropertyMap(customProps);
+		factory.addCustomProperty("myOtherProp", "myOtherValue");
+		factory.setServiceInterface(IRemoteBean.class);
+		factory.afterPropertiesSet();
+		assertTrue("Correct singleton value", factory.isSingleton());
+
+		assertTrue(factory.getPortStub() instanceof Stub);
+		Stub stub = (Stub) factory.getPortStub();
+		assertEquals("ea", stub._getProperty(Stub.ENDPOINT_ADDRESS_PROPERTY));
+		assertTrue(((Boolean) stub._getProperty(Stub.SESSION_MAINTAIN_PROPERTY)).booleanValue());
+		assertEquals(new Integer(1), stub._getProperty("myProp"));
+		assertEquals("myOtherValue", stub._getProperty("myOtherProp"));
 
 		assertTrue(factory.getObject() instanceof IRemoteBean);
 		IRemoteBean proxy = (IRemoteBean) factory.getObject();
