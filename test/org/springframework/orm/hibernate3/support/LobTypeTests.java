@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -265,6 +265,28 @@ public class LobTypeTests extends TestCase {
 			assertEquals(1, synchs.size());
 			((TransactionSynchronization) synchs.get(0)).beforeCompletion();
 			((TransactionSynchronization) synchs.get(0)).afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
+		}
+		finally {
+			TransactionSynchronizationManager.clearSynchronization();
+		}
+	}
+
+	public void testBlobStringTypeWithNull() throws Exception {
+		lobHandler.getBlobAsBytes(rs, "column");
+		lobHandlerControl.setReturnValue(null);
+		lobCreator.setBlobAsBytes(ps, 1, null);
+
+		lobHandlerControl.replay();
+		lobCreatorControl.replay();
+
+		BlobStringType type = new BlobStringType(lobHandler, null);
+		assertEquals(null, type.nullSafeGet(rs, new String[] {"column"}, null));
+		TransactionSynchronizationManager.initSynchronization();
+		try {
+			type.nullSafeSet(ps, null, 1);
+			List synchs = TransactionSynchronizationManager.getSynchronizations();
+			assertEquals(1, synchs.size());
+			((TransactionSynchronization) synchs.get(0)).beforeCompletion();
 		}
 		finally {
 			TransactionSynchronizationManager.clearSynchronization();
