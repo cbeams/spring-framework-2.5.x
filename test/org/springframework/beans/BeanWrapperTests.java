@@ -1064,6 +1064,22 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue(tb.getList().containsAll(list));
 	}
 
+	public void testCollectionsWithStringValuesAndCustomEditor() {
+		IndexedTestBean tb = new IndexedTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		bw.registerCustomEditor(String.class, "set", new StringTrimmerEditor(false));
+		bw.registerCustomEditor(String.class, "list", new StringTrimmerEditor(false));
+		bw.setPropertyValue("set", "set1 ");
+		bw.setPropertyValue("sortedSet", "sortedSet1");
+		bw.setPropertyValue("list", "list1 ");
+		assertEquals(1, tb.getSet().size());
+		assertTrue(tb.getSet().contains("set1"));
+		assertEquals(1, tb.getSortedSet().size());
+		assertTrue(tb.getSortedSet().contains("sortedSet1"));
+		assertEquals(1, tb.getList().size());
+		assertTrue(tb.getList().contains("list1"));
+	}
+
 	public void testSetNumberProperties() {
     NumberPropertyBean bean = new NumberPropertyBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);

@@ -149,9 +149,7 @@ class PropertyTypeConverter {
 		PropertyEditor pe = this.propertyEditorRegistry.findCustomEditor(requiredType, propertyName);
 
 		// Value not of required type?
-		if (pe != null ||
-				(requiredType != null && !requiredType.isInstance(convertedValue))) {
-
+		if (pe != null || (requiredType != null && !BeanUtils.isAssignable(requiredType, convertedValue))) {
 			if (pe == null && descriptor != null) {
 				if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
 					pe = descriptor.createPropertyEditor(this.targetObject);
@@ -163,7 +161,6 @@ class PropertyTypeConverter {
 					}
 				}
 			}
-
 			if (pe == null && requiredType != null) {
 				// No custom editor -> check BeanWrapperImpl's default editors.
 				pe = (PropertyEditor) this.propertyEditorRegistry.getDefaultEditor(requiredType);
@@ -172,44 +169,40 @@ class PropertyTypeConverter {
 					pe = PropertyEditorManager.findEditor(requiredType);
 				}
 			}
-
 			convertedValue = convertValue(convertedValue, requiredType, pe, oldValue);
 		}
 
 		if (requiredType != null) {
-			// Array required -> apply appropriate conversion of elements.
-			if (requiredType.isArray()) {
+			// Try to apply some standard type conversion rules if appropriate.
+
+			if (convertedValue != null && requiredType.isArray()) {
+				// Array required -> apply appropriate conversion of elements.
 				return convertToTypedArray(convertedValue, propertyName, requiredType.getComponentType());
 			}
-
-			if (methodParam != null) {
-				if (convertedValue instanceof Collection) {
-					convertedValue = convertToTypedCollection((Collection) convertedValue, propertyName, methodParam);
+			else if (convertedValue instanceof Collection && Collection.class.isAssignableFrom(requiredType)) {
+				// Convert elements to target type, if determined.
+				return convertToTypedCollection((Collection) convertedValue, propertyName, methodParam);
+			}
+			else if (convertedValue instanceof Map && Map.class.isAssignableFrom(requiredType)) {
+				// Convert keys and values to respective target type, if determined.
+				return convertToTypedMap((Map) convertedValue, propertyName, methodParam);
+			}
+			else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
+				// Try field lookup as fallback: for JDK 1.5 enum or custom enum
+				// with values defined as static fields. Resulting value still needs
+				// to be checked, hence we don't return it right away.
+				try {
+					Field enumField = requiredType.getField((String) convertedValue);
+					convertedValue = enumField.get(null);
 				}
-				else if (convertedValue instanceof Map) {
-					convertedValue = convertToTypedMap((Map) convertedValue, propertyName, methodParam);
+				catch (Exception ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Field [" + convertedValue + "] isn't an enum value", ex);
+					}
 				}
 			}
 
-			// If the resulting value definitely doesn't match the required type,
-			// try field lookup as fallback. If no matching field found,
-			// throw explicit TypeMismatchException with full context information.
-			if (convertedValue != null && !requiredType.isPrimitive() && !requiredType.isInstance(convertedValue)) {
-
-				// In case of String value, try to find matching field (for JDK 1.5
-				// enum or custom enum with values defined as static fields).
-				if (convertedValue instanceof String) {
-					try {
-						Field enumField = requiredType.getField((String) convertedValue);
-						return enumField.get(null);
-					}
-					catch (Exception ex) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Field [" + convertedValue + "] isn't an enum value", ex);
-						}
-					}
-				}
-
+			if (!BeanUtils.isAssignable(requiredType, convertedValue)) {
 				// Definitely doesn't match: throw IllegalArgumentException.
 				throw new IllegalArgumentException("No matching editors or conversion strategy found");
 			}
@@ -272,7 +265,7 @@ class PropertyTypeConverter {
 			}
 			return result;
 		}
-		else if (input != null && input.getClass().isArray()) {
+		else if (input.getClass().isArray()) {
 			// Convert Collection elements to array elements.
 			int arrayLength = Array.getLength(input);
 			Object result = Array.newInstance(componentType, arrayLength);
@@ -283,7 +276,7 @@ class PropertyTypeConverter {
 			}
 			return result;
 		}
-		else if (input != null) {
+		else {
 			// A plain value: convert it to an array with a single component.
 			Object result = Array.newInstance(componentType, 1);
 			Object value = convertIfNecessary(
@@ -291,53 +284,48 @@ class PropertyTypeConverter {
 			Array.set(result, 0, value);
 			return result;
 		}
-		else {
-			// Turn the null input into a null array value.
-			return null;
-		}
 	}
 
 	protected Collection convertToTypedCollection(
 			Collection original, String propertyName, MethodParameter methodParam) {
 
 		Class elementType = null;
-		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
+		if (methodParam != null && JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
 			elementType = GenericsHelper.getCollectionParameterType(methodParam);
 		}
-		if (elementType != null) {
-			Collection convertedCopy = (Collection) BeanUtils.instantiateClass(original.getClass());
-			int i = 0;
-			for (Iterator it = original.iterator(); it.hasNext(); i++) {
-				Object convertedElement = convertIfNecessary(
-						buildIndexedPropertyName(propertyName, i), null, it.next(), elementType);
-				convertedCopy.add(convertedElement);
-			}
-			return convertedCopy;
+		Collection convertedCopy = (Collection) BeanUtils.instantiateClass(original.getClass());
+		boolean actuallyConverted = false;
+		int i = 0;
+		for (Iterator it = original.iterator(); it.hasNext(); i++) {
+			Object element = it.next();
+			String indexedPropertyName = buildIndexedPropertyName(propertyName, i);
+			Object convertedElement = convertIfNecessary(indexedPropertyName, null, element, elementType);
+			convertedCopy.add(convertedElement);
+			actuallyConverted = actuallyConverted || (element != convertedElement);
 		}
-		return original;
+		return (actuallyConverted ? convertedCopy : original);
 	}
 
 	protected Map convertToTypedMap(Map original, String propertyName, MethodParameter methodParam) {
-		Class mapKeyType = null;
-		Class mapValueType = null;
-		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
-			mapKeyType = GenericsHelper.getMapKeyParameterType(methodParam);
-			mapValueType = GenericsHelper.getMapValueParameterType(methodParam);
+		Class keyType = null;
+		Class valueType = null;
+		if (methodParam != null && JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
+			keyType = GenericsHelper.getMapKeyParameterType(methodParam);
+			valueType = GenericsHelper.getMapValueParameterType(methodParam);
 		}
-		if (mapKeyType != null || mapValueType != null) {
-			Map convertedCopy = (Map) BeanUtils.instantiateClass(original.getClass());
-			for (Iterator it = original.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				Object key = entry.getKey();
-				Object convertedMapKey = convertIfNecessary(
-						buildKeyedPropertyName(propertyName, key), null, entry.getKey(), mapKeyType);
-				Object convertedMapValue = convertIfNecessary(
-						buildKeyedPropertyName(propertyName, key), null, entry.getValue(), mapValueType);
-				convertedCopy.put(convertedMapKey, convertedMapValue);
-			}
-			return convertedCopy;
+		Map convertedCopy = (Map) BeanUtils.instantiateClass(original.getClass());
+		boolean actuallyConverted = false;
+		for (Iterator it = original.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			Object key = entry.getKey();
+			Object value = entry.getValue();
+			String keyedPropertyName = buildKeyedPropertyName(propertyName, key);
+			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key, keyType);
+			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value, valueType);
+			convertedCopy.put(convertedKey, convertedValue);
+			actuallyConverted = actuallyConverted || (key != convertedKey) || (value != convertedValue);
 		}
-		return original;
+		return (actuallyConverted ? convertedCopy : original);
 	}
 
 	private String buildIndexedPropertyName(String propertyName, int index) {
