@@ -837,7 +837,6 @@ public class CustomEditorTests extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("array" + text);
 			}
-
 			public String getAsText() {
 				return ((String) getValue()).substring(5);
 			}
@@ -846,7 +845,6 @@ public class CustomEditorTests extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("list" + text);
 			}
-
 			public String getAsText() {
 				return ((String) getValue()).substring(4);
 			}
@@ -855,7 +853,6 @@ public class CustomEditorTests extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("map" + text);
 			}
-
 			public String getAsText() {
 				return ((String) getValue()).substring(4);
 			}
@@ -993,7 +990,6 @@ public class CustomEditorTests extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("array0" + text, 99));
 			}
-
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -1002,7 +998,6 @@ public class CustomEditorTests extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("array1" + text, 99));
 			}
-
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -1011,7 +1006,6 @@ public class CustomEditorTests extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("list0" + text, 99));
 			}
-
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -1020,7 +1014,6 @@ public class CustomEditorTests extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("list1" + text, 99));
 			}
-
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -1029,7 +1022,6 @@ public class CustomEditorTests extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("mapkey1" + text, 99));
 			}
-
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -1038,7 +1030,6 @@ public class CustomEditorTests extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("mapkey2" + text, 99));
 			}
-
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
