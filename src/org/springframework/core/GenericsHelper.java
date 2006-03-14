@@ -20,6 +20,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import org.springframework.util.Assert;
+
 /**
  * Helper class for determining generic types of collections and maps.
  *
@@ -91,6 +93,7 @@ public abstract class GenericsHelper {
 	 * @return the generic type, or <code>null</code> if none
 	 */
 	private static Class getGenericParameterType(MethodParameter methodParam, int typeIndex) {
+		Assert.notNull(methodParam, "MethodParameter must not be null");
 		if (methodParam.getConstructor() != null) {
 			return extractType(
 					methodParam.getConstructor().getGenericParameterTypes()[methodParam.getParameterIndex()], typeIndex);
@@ -109,6 +112,7 @@ public abstract class GenericsHelper {
 	 * @return the generic type, or <code>null</code> if none
 	 */
 	private static Class getGenericReturnType(Method method, int typeIndex) {
+		Assert.notNull(method, "Method must not be null");
 		return extractType(method.getGenericReturnType(), typeIndex);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public interface PropertyEditorRegistry {
 	 * @param requiredType type of the property (can be <code>null</code> if a property
 	 * is given but should be specified in any case for consistency checking)
 	 * @param propertyPath path of the property (name or nested path), or
-	 * null if registering an editor for all properties of the given type
+	 * <code>null</code> if registering an editor for all properties of the given type
 	 * @param propertyEditor editor to register
 	 */
 	void registerCustomEditor(Class requiredType, String propertyPath, PropertyEditor propertyEditor);
@@ -66,7 +66,7 @@ public interface PropertyEditorRegistry {
 	 * @param requiredType type of the property (can be <code>null</code> if a property
 	 * is given but should be specified in any case for consistency checking)
 	 * @param propertyPath path of the property (name or nested path), or
-	 * null if looking for an editor for all properties of the given type
+	 * <code>null</code> if looking for an editor for all properties of the given type
 	 * @return the registered editor, or <code>null</code> if none
 	 */
 	PropertyEditor findCustomEditor(Class requiredType, String propertyPath);

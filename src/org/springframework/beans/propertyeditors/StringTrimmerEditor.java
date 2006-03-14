@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,11 +28,10 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @see org.springframework.validation.DataBinder#registerCustomEditor
  * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
- * @see org.springframework.web.bind.BindInitializer#initBinder
  */
 public class StringTrimmerEditor extends PropertyEditorSupport {
 
-	private String charsToDelete;
+	private final String charsToDelete;
 
 	private final boolean emptyAsNull;
 
@@ -42,6 +41,7 @@ public class StringTrimmerEditor extends PropertyEditorSupport {
 	 * @param emptyAsNull whether to transform an empty string to null
 	 */
 	public StringTrimmerEditor(boolean emptyAsNull) {
+		this.charsToDelete = null;
 		this.emptyAsNull = emptyAsNull;
 	}
 
