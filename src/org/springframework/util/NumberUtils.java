@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +51,8 @@ public abstract class NumberUtils {
 	public static Number convertNumberToTargetClass(Number number, Class targetClass)
 			throws IllegalArgumentException {
 
-		Assert.notNull(number, "number must not be null");
-		Assert.notNull(targetClass, "targetClass must not be null");
+		Assert.notNull(number, "Number must not be null");
+		Assert.notNull(targetClass, "Target class must not be null");
 
 		if (targetClass.isInstance(number)) {
 			return number;
@@ -110,8 +110,8 @@ public abstract class NumberUtils {
 	 * @see java.math.BigDecimal#BigDecimal(String)
 	 */
 	public static Number parseNumber(String text, Class targetClass) {
-		Assert.notNull(text, "text must not be null");
-		Assert.notNull(targetClass, "targetClass must not be null");
+		Assert.notNull(text, "Text must not be null");
+		Assert.notNull(targetClass, "Target class must not be null");
 
 		String trimmed = text.trim();
 
@@ -162,8 +162,8 @@ public abstract class NumberUtils {
 	 */
 	public static Number parseNumber(String text, Class targetClass, NumberFormat numberFormat) {
 		if (numberFormat != null) {
-			Assert.notNull(text, "text must not be null");
-			Assert.notNull(targetClass, "targetClass must not be null");
+			Assert.notNull(text, "Text must not be null");
+			Assert.notNull(targetClass, "Target class must not be null");
 			try {
 				Number number = numberFormat.parse(text.trim());
 				return convertNumberToTargetClass(number, targetClass);
