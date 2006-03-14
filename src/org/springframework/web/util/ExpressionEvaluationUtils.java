@@ -30,6 +30,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager;
 
+import org.springframework.util.Assert;
+
 /**
  * Convenience methods for easy access to the JSP 2.0 ExpressionEvaluator or
  * the ExpressionEvaluatorManager of Jakarta's JSTL implementation.
@@ -66,6 +68,10 @@ public abstract class ExpressionEvaluationUtils {
 	 * (i.e. a context-param in <code>web.xml</code>): "cacheJspExpressions".
 	 */
 	public static final String EXPRESSION_CACHE_CONTEXT_PARAM = "cacheJspExpressions";
+
+	public static final String EXPRESSION_PREFIX = "${";
+
+	public static final String EXPRESSION_SUFFIX = "}";
 
 
 	private static final String EXPRESSION_CACHE_FLAG_CONTEXT_ATTR =
@@ -117,7 +123,7 @@ public abstract class ExpressionEvaluationUtils {
 	 * <code>false</code> otherwise
 	 */
 	public static boolean isExpressionLanguage(String value) {
-		return (value != null && value.indexOf("${") != -1);
+		return (value != null && value.indexOf(EXPRESSION_PREFIX) != -1);
 	}
 
 	/**
@@ -136,7 +142,7 @@ public abstract class ExpressionEvaluationUtils {
 	    throws JspException {
 
 		if (isExpressionLanguage(attrValue)) {
-			return helper.evaluate(attrName, attrValue, resultClass, pageContext);
+			return doEvaluate(attrName, attrValue, resultClass, pageContext);
 		}
 		else if (attrValue != null && resultClass != null && !resultClass.isInstance(attrValue)) {
 			throw new JspException("Attribute value \"" + attrValue + "\" is neither a JSP EL expression nor " +
@@ -159,7 +165,7 @@ public abstract class ExpressionEvaluationUtils {
 	    throws JspException {
 
 		if (isExpressionLanguage(attrValue)) {
-			return helper.evaluate(attrName, attrValue, Object.class, pageContext);
+			return doEvaluate(attrName, attrValue, Object.class, pageContext);
 		}
 		else {
 			return attrValue;
@@ -178,7 +184,7 @@ public abstract class ExpressionEvaluationUtils {
 	    throws JspException {
 
 		if (isExpressionLanguage(attrValue)) {
-			return (String) helper.evaluate(attrName, attrValue, String.class, pageContext);
+			return (String) doEvaluate(attrName, attrValue, String.class, pageContext);
 		}
 		else {
 			return attrValue;
@@ -197,7 +203,7 @@ public abstract class ExpressionEvaluationUtils {
 	    throws JspException {
 
 		if (isExpressionLanguage(attrValue)) {
-			return ((Integer) helper.evaluate(attrName, attrValue, Integer.class, pageContext)).intValue();
+			return ((Integer) doEvaluate(attrName, attrValue, Integer.class, pageContext)).intValue();
 		}
 		else {
 			return Integer.parseInt(attrValue);
@@ -216,13 +222,78 @@ public abstract class ExpressionEvaluationUtils {
 	    throws JspException {
 
 		if (isExpressionLanguage(attrValue)) {
-			return ((Boolean) helper.evaluate(attrName, attrValue, Boolean.class, pageContext)).booleanValue();
+			return ((Boolean) doEvaluate(attrName, attrValue, Boolean.class, pageContext)).booleanValue();
 		}
 		else {
 			return Boolean.valueOf(attrValue).booleanValue();
 		}
 	}
 
+
+	/**
+	 * Actually evaluate the given expression (be it EL or a literal String value)
+	 * to an Object of a given type. Supports concatenated expressions,
+	 * for example: "${var1}text${var2}"
+	 * @param attrName name of the attribute
+	 * @param attrValue value of the attribute
+	 * @param resultClass class that the result should have
+	 * @param pageContext current JSP PageContext
+	 * @return the result of the evaluation
+	 * @throws JspException in case of parsing errors
+	 */
+	private static Object doEvaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
+	    throws JspException {
+
+		Assert.notNull(attrValue, "Attribute value must not be null");
+		Assert.notNull(resultClass, "Result class must not be null");
+		Assert.notNull(pageContext, "PageContext must not be null");
+
+		if (resultClass.isAssignableFrom(String.class)) {
+			StringBuffer resultValue = null;
+			int exprPrefixIndex = -1;
+			int exprSuffixIndex = 0;
+			do {
+				exprPrefixIndex = attrValue.indexOf(EXPRESSION_PREFIX, exprSuffixIndex);
+				if (exprPrefixIndex != -1) {
+					int prevExprSuffixIndex = exprSuffixIndex;
+					exprSuffixIndex = attrValue.indexOf(EXPRESSION_SUFFIX, exprPrefixIndex + EXPRESSION_PREFIX.length());
+					String expr = null;
+					if (exprSuffixIndex != -1) {
+						exprSuffixIndex += EXPRESSION_SUFFIX.length();
+						expr = attrValue.substring(exprPrefixIndex, exprSuffixIndex);
+					}
+					else {
+						expr = attrValue.substring(exprPrefixIndex);
+					}
+					if (expr.length() == attrValue.length()) {
+						// A single expression without static prefix or suffix ->
+						// parse it with the specified result class rather than String.
+						return helper.evaluate(attrName, attrValue, resultClass, pageContext);
+					}
+					else {
+						// We actually need to concatenate partial expressions into a String.
+						if (resultValue == null) {
+							resultValue = new StringBuffer();
+						}
+						resultValue.append(attrValue.substring(prevExprSuffixIndex, exprPrefixIndex));
+						resultValue.append(helper.evaluate(attrName, expr, String.class, pageContext));
+					}
+				}
+				else {
+					if (resultValue == null) {
+						resultValue = new StringBuffer();
+					}
+					resultValue.append(attrValue.substring(exprSuffixIndex));
+				}
+			}
+			while (exprPrefixIndex != -1 && exprSuffixIndex != -1);
+			return resultValue.toString();
+		}
+
+		else {
+			return helper.evaluate(attrName, attrValue, resultClass, pageContext);
+		}
+	}
 
 	/**
 	 * Determine whether JSP 2.0 expressions are supposed to be cached

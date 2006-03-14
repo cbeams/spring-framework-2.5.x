@@ -38,33 +38,17 @@ import org.springframework.mock.web.MockServletContext;
 public class ExpressionEvaluationUtilsTests extends TestCase {
 
 	public void testIsExpressionLanguage() {
-		// should be true
-		String expr = "${bla}";		
-		assertTrue(ExpressionEvaluationUtils.isExpressionLanguage(expr));
-		
-		// should be true
-		expr = "bla${bla}";
-		assertTrue(ExpressionEvaluationUtils.isExpressionLanguage(expr));
-		
-		// should be false
-		expr = "bla{bla";
-		assertFalse(ExpressionEvaluationUtils.isExpressionLanguage(expr));
-		
-		// should be false
-		expr = "bla$b{";
-		assertFalse(ExpressionEvaluationUtils.isExpressionLanguage(expr));
-		
-		// ok, tested enough ;-)
+		assertTrue(ExpressionEvaluationUtils.isExpressionLanguage("${bla}"));
+		assertTrue(ExpressionEvaluationUtils.isExpressionLanguage("bla${bla}"));
+		assertFalse(ExpressionEvaluationUtils.isExpressionLanguage("bla{bla"));
+		assertFalse(ExpressionEvaluationUtils.isExpressionLanguage("bla$b{"));
 	}
 
 	public void testEvaluate() throws Exception {
 		PageContext ctx = new MockPageContext();
 		ctx.setAttribute("bla", "blie");
-		String expr = "${bla}";
-		
-		Object o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
-		assertEquals(o, "blie");
-		
+
+		assertEquals("blie", ExpressionEvaluationUtils.evaluate("test", "${bla}", String.class, ctx));
 		assertEquals("test", ExpressionEvaluationUtils.evaluate("test", "test", String.class, ctx));
 
 		try {
@@ -76,70 +60,196 @@ public class ExpressionEvaluationUtilsTests extends TestCase {
 		}
 	}
 
+	public void testEvaluateWithConcatenation() throws Exception {
+		PageContext ctx = new MockPageContext();
+		ctx.setAttribute("bla", "blie");
+
+		String expr = "text${bla}text${bla}text";
+		Object o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
+		assertEquals("textblietextblietext", o);
+
+		expr = "${bla}text${bla}text";
+		o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
+		assertEquals("blietextblietext", o);
+
+		expr = "${bla}text${bla}";
+		o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
+		assertEquals("blietextblie", o);
+
+		expr = "${bla}text${bla}";
+		o = ExpressionEvaluationUtils.evaluate("test", expr, Object.class, ctx);
+		assertEquals("blietextblie", o);
+
+		try {
+			expr = "${bla}text${bla";
+			ExpressionEvaluationUtils.evaluate("test", expr, Object.class, ctx);
+			fail("Should have thrown JspException");
+		}
+		catch (JspException ex) {
+			// expected
+		}
+
+		try {
+			expr = "${bla}text${bla}";
+			ExpressionEvaluationUtils.evaluate("test", expr, Float.class, ctx);
+			fail("Should have thrown JspException");
+		}
+		catch (JspException ex) {
+			// expected
+		}
+	}
+
 	public void testEvaluateString() throws Exception {
 		PageContext ctx = new MockPageContext();
 		ctx.setAttribute("bla", "blie");
-		String expr = "${bla}";
 
-		Object o = ExpressionEvaluationUtils.evaluateString("test", expr, ctx);
-		assertEquals(o, "blie");
-		
+		assertEquals("blie", ExpressionEvaluationUtils.evaluateString("test", "${bla}", ctx));
 		assertEquals("blie", ExpressionEvaluationUtils.evaluateString("test", "blie", ctx));
+	}
+
+	public void testEvaluateStringWithConcatenation() throws Exception {
+		PageContext ctx = new MockPageContext();
+		ctx.setAttribute("bla", "blie");
+
+		String expr = "text${bla}text${bla}text";
+		String s = ExpressionEvaluationUtils.evaluateString("test", expr, ctx);
+		assertEquals("textblietextblietext", s);
+
+		expr = "${bla}text${bla}text";
+		s = ExpressionEvaluationUtils.evaluateString("test", expr, ctx);
+		assertEquals("blietextblietext", s);
+
+		expr = "${bla}text${bla}";
+		s = ExpressionEvaluationUtils.evaluateString("test", expr, ctx);
+		assertEquals("blietextblie", s);
+
+		expr = "${bla}text${bla}";
+		s = ExpressionEvaluationUtils.evaluateString("test", expr, ctx);
+		assertEquals("blietextblie", s);
+
+		try {
+			expr = "${bla}text${bla";
+			ExpressionEvaluationUtils.evaluateString("test", expr, ctx);
+			fail("Should have thrown JspException");
+		}
+		catch (JspException ex) {
+			// expected
+		}
+
 	}
 
 	public void testEvaluateInteger() throws Exception {
 		PageContext ctx = new MockPageContext();
 		ctx.setAttribute("bla", new Integer(1));
-		String expr = "${bla}";
-		
-		int i = ExpressionEvaluationUtils.evaluateInteger("test", expr, ctx);
-		assertEquals(i, 1);
-		
+
+		assertEquals(1, ExpressionEvaluationUtils.evaluateInteger("test", "${bla}", ctx));
 		assertEquals(21, ExpressionEvaluationUtils.evaluateInteger("test", "21", ctx));
 	}
 
 	public void testEvaluateBoolean() throws Exception {
 		PageContext ctx = new MockPageContext();
 		ctx.setAttribute("bla", new Boolean(true));
-		String expr = "${bla}";
-		
-		boolean b = ExpressionEvaluationUtils.evaluateBoolean("test", expr, ctx);
-		assertEquals(b, true);
-		
-		assertEquals(true, ExpressionEvaluationUtils.evaluateBoolean("test", "true", ctx));
+
+		assertTrue(ExpressionEvaluationUtils.evaluateBoolean("test", "${bla}", ctx));
+		assertTrue(ExpressionEvaluationUtils.evaluateBoolean("test", "true", ctx));
 	}
 
 	public void testEvaluateWithoutCaching() throws Exception {
 		PageContext ctx = new CountingMockPageContext();
 		CountingMockExpressionEvaluator eval = (CountingMockExpressionEvaluator) ctx.getExpressionEvaluator();
 		ctx.setAttribute("bla", "blie");
-		String expr = "${bla}";
+		ctx.setAttribute("blo", "blue");
 
-		Object o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
-		assertEquals(o, "blie");
+		assertEquals("blie", ExpressionEvaluationUtils.evaluate("test", "${bla}", String.class, ctx));
 		assertEquals(1, eval.evaluateCount);
 
-		o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
-		assertEquals(o, "blie");
+		assertEquals("blue", ExpressionEvaluationUtils.evaluate("test", "${blo}", String.class, ctx));
 		assertEquals(2, eval.evaluateCount);
+
+		assertEquals("blie", ExpressionEvaluationUtils.evaluate("test", "${bla}", String.class, ctx));
+		assertEquals(3, eval.evaluateCount);
+
+		assertEquals("blue", ExpressionEvaluationUtils.evaluate("test", "${blo}", String.class, ctx));
+		assertEquals(4, eval.evaluateCount);
 	}
 
 	public void testEvaluateWithCaching() throws Exception {
 		PageContext ctx = new CountingMockPageContext();
 		CountingMockExpressionEvaluator eval = (CountingMockExpressionEvaluator) ctx.getExpressionEvaluator();
 		ctx.setAttribute("bla", "blie");
-		String expr = "${bla}";
+		ctx.setAttribute("blo", "blue");
 
 		MockServletContext sc = (MockServletContext) ctx.getServletContext();
 		sc.addInitParameter(ExpressionEvaluationUtils.EXPRESSION_CACHE_CONTEXT_PARAM, "true");
 
-		Object o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
-		assertEquals(o, "blie");
+		assertEquals("blie", ExpressionEvaluationUtils.evaluate("test", "${bla}", String.class, ctx));
 		assertEquals(1, eval.parseExpressionCount);
 
+		assertEquals("blue", ExpressionEvaluationUtils.evaluate("test", "${blo}", String.class, ctx));
+		assertEquals(2, eval.parseExpressionCount);
+
+		assertEquals("blie", ExpressionEvaluationUtils.evaluate("test", "${bla}", String.class, ctx));
+		assertEquals(2, eval.parseExpressionCount);
+
+		assertEquals("blue", ExpressionEvaluationUtils.evaluate("test", "${blo}", String.class, ctx));
+		assertEquals(2, eval.parseExpressionCount);
+	}
+
+	public void testEvaluateWithConcatenationWithoutCaching() throws Exception {
+		PageContext ctx = new CountingMockPageContext();
+		CountingMockExpressionEvaluator eval = (CountingMockExpressionEvaluator) ctx.getExpressionEvaluator();
+		ctx.setAttribute("bla", "blie");
+		ctx.setAttribute("blo", "blue");
+
+		String expr = "text${bla}text${blo}text";
+		Object o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
+		assertEquals("textblietextbluetext", o);
+		assertEquals(2, eval.evaluateCount);
+
+		expr = "${bla}text${blo}text";
 		o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
-		assertEquals(o, "blie");
-		assertEquals(1, eval.parseExpressionCount);
+		assertEquals("blietextbluetext", o);
+		assertEquals(4, eval.evaluateCount);
+
+		expr = "${bla}text${blo}";
+		o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
+		assertEquals("blietextblue", o);
+		assertEquals(6, eval.evaluateCount);
+
+		expr = "${bla}text${blo}";
+		o = ExpressionEvaluationUtils.evaluate("test", expr, Object.class, ctx);
+		assertEquals("blietextblue", o);
+		assertEquals(8, eval.evaluateCount);
+	}
+
+	public void testEvaluateWithConcatenationWithCaching() throws Exception {
+		PageContext ctx = new CountingMockPageContext();
+		CountingMockExpressionEvaluator eval = (CountingMockExpressionEvaluator) ctx.getExpressionEvaluator();
+		ctx.setAttribute("bla", "blie");
+		ctx.setAttribute("blo", "blue");
+
+		MockServletContext sc = (MockServletContext) ctx.getServletContext();
+		sc.addInitParameter(ExpressionEvaluationUtils.EXPRESSION_CACHE_CONTEXT_PARAM, "true");
+
+		String expr = "text${bla}text${blo}text";
+		Object o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
+		assertEquals("textblietextbluetext", o);
+		assertEquals(2, eval.parseExpressionCount);
+
+		expr = "${bla}text${blo}text";
+		o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
+		assertEquals("blietextbluetext", o);
+		assertEquals(2, eval.parseExpressionCount);
+
+		expr = "${bla}text${blo}";
+		o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
+		assertEquals("blietextblue", o);
+		assertEquals(2, eval.parseExpressionCount);
+
+		expr = "${bla}text${blo}";
+		o = ExpressionEvaluationUtils.evaluate("test", expr, Object.class, ctx);
+		assertEquals("blietextblue", o);
+		assertEquals(2, eval.parseExpressionCount);
 	}
 
 
