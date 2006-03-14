@@ -321,7 +321,7 @@ public class CustomEditorTests extends TestCase {
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(short.class, new CustomNumberEditor(Short.class, nf, false));
 		bw.registerCustomEditor(Short.class, new CustomNumberEditor(Short.class, nf, false));
-		bw.registerCustomEditor(int.class, new CustomNumberEditor(Short.class, nf, false));
+		bw.registerCustomEditor(int.class, new CustomNumberEditor(Integer.class, nf, false));
 		bw.registerCustomEditor(Integer.class, new CustomNumberEditor(Integer.class, nf, false));
 		bw.registerCustomEditor(long.class, new CustomNumberEditor(Long.class, nf, false));
 		bw.registerCustomEditor(Long.class, new CustomNumberEditor(Long.class, nf, false));
