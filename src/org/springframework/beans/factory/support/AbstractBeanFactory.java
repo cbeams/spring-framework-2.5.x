@@ -1087,44 +1087,50 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	protected void invokeCustomDestroyMethod(
 			String beanName, Object bean, String destroyMethodName, boolean enforceDestroyMethod) {
 
-		Method destroyMethod =
-				BeanUtils.findDeclaredMethodWithMinimalParameters(bean.getClass(), destroyMethodName);
-		if (destroyMethod == null) {
-			if (enforceDestroyMethod) {
-				logger.error("Couldn't find a destroy method named '" + destroyMethodName +
-						"' on bean with name '" + beanName + "'");
-			}
-		}
-		else {
-			Class[] paramTypes = destroyMethod.getParameterTypes();
-			if (paramTypes.length > 1) {
-				logger.error("Method '" + destroyMethodName + "' of bean '" + beanName +
-						"' has more than one parameter - not supported as destroy method");
-			}
-			else if (paramTypes.length == 1 && !paramTypes[0].equals(boolean.class)) {
-				logger.error("Method '" + destroyMethodName + "' of bean '" + beanName +
-						"' has a non-boolean parameter - not supported as destroy method");
+		try {
+			Method destroyMethod = BeanUtils.findMethodWithMinimalParameters(bean.getClass(), destroyMethodName);
+			if (destroyMethod == null) {
+				if (enforceDestroyMethod) {
+					logger.error("Couldn't find a destroy method named '" + destroyMethodName +
+							"' on bean with name '" + beanName + "'");
+				}
 			}
 			else {
-				Object[] args = new Object[paramTypes.length];
-				if (paramTypes.length == 1) {
-					args[0] = Boolean.TRUE;
+				Class[] paramTypes = destroyMethod.getParameterTypes();
+				if (paramTypes.length > 1) {
+					logger.error("Method '" + destroyMethodName + "' of bean '" + beanName +
+							"' has more than one parameter - not supported as destroy method");
 				}
-				if (!Modifier.isPublic(destroyMethod.getModifiers())) {
-					destroyMethod.setAccessible(true);
+				else if (paramTypes.length == 1 && !paramTypes[0].equals(boolean.class)) {
+					logger.error("Method '" + destroyMethodName + "' of bean '" + beanName +
+							"' has a non-boolean parameter - not supported as destroy method");
 				}
-				try {
-					destroyMethod.invoke(bean, args);
-				}
-				catch (InvocationTargetException ex) {
-					logger.error("Couldn't invoke destroy method '" + destroyMethodName +
-							"' of bean with name '" + beanName + "'", ex.getTargetException());
-				}
-				catch (Throwable ex) {
-					logger.error("Couldn't invoke destroy method '" + destroyMethodName +
-							"' of bean with name '" + beanName + "'", ex);
+				else {
+					Object[] args = new Object[paramTypes.length];
+					if (paramTypes.length == 1) {
+						args[0] = Boolean.TRUE;
+					}
+					if (!Modifier.isPublic(destroyMethod.getModifiers())) {
+						destroyMethod.setAccessible(true);
+					}
+					try {
+						destroyMethod.invoke(bean, args);
+					}
+					catch (InvocationTargetException ex) {
+						logger.error("Couldn't invoke destroy method '" + destroyMethodName +
+								"' of bean with name '" + beanName + "'", ex.getTargetException());
+					}
+					catch (Throwable ex) {
+						logger.error("Couldn't invoke destroy method '" + destroyMethodName +
+								"' of bean with name '" + beanName + "'", ex);
+					}
 				}
 			}
+		}
+		catch (IllegalArgumentException ex) {
+			// thrown from findMethodWithMinimalParameters
+			logger.error("Couldn't find a unique destroy method on bean with name '" +
+					beanName + ": " + ex.getMessage());
 		}
 	}
 
