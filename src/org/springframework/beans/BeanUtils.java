@@ -71,7 +71,7 @@ public abstract class BeanUtils {
 	 * @return if the type is assignable from the value
 	 */
 	public static boolean isAssignable(Class type, Object value) {
-		Assert.notNull(type, "type must not be null");
+		Assert.notNull(type, "Type must not be null");
 		return (value != null ? isAssignable(type, value.getClass()) : !type.isPrimitive());
 	}
 
@@ -85,8 +85,8 @@ public abstract class BeanUtils {
 	 * @return if the target type is assignable from the value type
 	 */
 	public static boolean isAssignable(Class targetType, Class valueType) {
-		Assert.notNull(targetType, "targetType must not be null");
-		Assert.notNull(valueType, "valueType must not be null");
+		Assert.notNull(targetType, "Target type must not be null");
+		Assert.notNull(valueType, "Value type must not be null");
 		return (targetType.isAssignableFrom(valueType) ||
 				targetType.equals(primitiveWrapperTypeMap.get(valueType)));
 	}
@@ -99,7 +99,7 @@ public abstract class BeanUtils {
 	 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#checkDependencies
 	 */
 	public static boolean isSimpleProperty(Class clazz) {
-		Assert.notNull(clazz, "clazz must not be null");
+		Assert.notNull(clazz, "Class must not be null");
 		return clazz.isPrimitive() || isPrimitiveArray(clazz) ||
 				isPrimitiveWrapper(clazz) || isPrimitiveWrapperArray(clazz) ||
 				clazz.equals(String.class) || clazz.equals(String[].class) ||
@@ -141,17 +141,15 @@ public abstract class BeanUtils {
 	 * @return the new instance
 	 */
 	public static Object instantiateClass(Class clazz) throws BeansException {
-		Assert.notNull(clazz, "clazz must not be null");
+		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isInterface()) {
-			throw new FatalBeanException(
-					"Class [" + clazz.getName() + "] cannot be instantiated: it is an interface");
+			throw new BeanInstantiationException(clazz, "Specified class is an interface");
 		}
 		try {
 			return instantiateClass(clazz.getDeclaredConstructor((Class[]) null), null);
 		}
 		catch (NoSuchMethodException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + clazz.getName() +
-					"]: no default constructor found", ex);
+			throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 		}
 	}
 
@@ -165,7 +163,7 @@ public abstract class BeanUtils {
 	 * @return the new instance
 	 */
 	public static Object instantiateClass(Constructor ctor, Object[] args) throws BeansException {
-		Assert.notNull(ctor, "ctor must not be null");
+		Assert.notNull(ctor, "Constructor must not be null");
 		try {
 			if (!Modifier.isPublic(ctor.getModifiers()) ||
 					!Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) {
@@ -174,20 +172,20 @@ public abstract class BeanUtils {
 			return ctor.newInstance(args);
 		}
 		catch (InstantiationException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + ctor.getDeclaringClass().getName() +
-					"]: Is it an abstract class?", ex);
+			throw new BeanInstantiationException(ctor.getDeclaringClass(),
+					"Is it an abstract class?", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + ctor.getDeclaringClass().getName() +
-					"]: Has the class definition changed? Is the constructor accessible?", ex);
+			throw new BeanInstantiationException(ctor.getDeclaringClass(),
+					"Has the class definition changed? Is the constructor accessible?", ex);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + ctor.getDeclaringClass().getName() +
-					"]: illegal args for constructor", ex);
+			throw new BeanInstantiationException(ctor.getDeclaringClass(),
+					"Illegal arguments for constructor", ex);
 		}
 		catch (InvocationTargetException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + ctor.getDeclaringClass().getName() +
-					"]; constructor threw exception", ex.getTargetException());
+			throw new BeanInstantiationException(ctor.getDeclaringClass(),
+					"Constructor threw exception", ex.getTargetException());
 		}
 	}
 
@@ -201,7 +199,7 @@ public abstract class BeanUtils {
 	 * @param clazz the class to check
 	 * @param methodName the name of the method to find
 	 * @param paramTypes the parameter types of the method to find
-	 * @return the method object, or <code>null</code> if not found
+	 * @return the Method object, or <code>null</code> if not found
 	 * @see java.lang.Class#getMethod
 	 * @see #findDeclaredMethod
 	 */
@@ -222,7 +220,7 @@ public abstract class BeanUtils {
 	 * @param clazz the class to check
 	 * @param methodName the name of the method to find
 	 * @param paramTypes the parameter types of the method to find
-	 * @return the method object, or <code>null</code> if not found
+	 * @return the Method object, or <code>null</code> if not found
 	 * @see java.lang.Class#getDeclaredMethod
 	 */
 	public static Method findDeclaredMethod(Class clazz, String methodName, Class[] paramTypes) {
@@ -246,12 +244,56 @@ public abstract class BeanUtils {
 	 * methods without issues even in environments with restricted Java security settings.
 	 * @param clazz the class to check
 	 * @param methodName the name of the method to find
-	 * @return the method object, or <code>null</code> if not found
+	 * @return the Method object, or <code>null</code> if not found
+	 * @throws IllegalArgumentException if methods of the given name were found but
+	 * could not be resolved to a unique method with minimal parameters
 	 * @see java.lang.Class#getMethods
 	 * @see #findDeclaredMethodWithMinimalParameters
 	 */
-	public static Method findMethodWithMinimalParameters(Class clazz, String methodName) {
-		Method[] methods = clazz.getMethods();
+	public static Method findMethodWithMinimalParameters(Class clazz, String methodName)
+			throws IllegalArgumentException {
+
+		Method targetMethod = doFindMethodWithMinimalParameters(clazz.getDeclaredMethods(), methodName);
+		if (targetMethod == null) {
+			return findDeclaredMethodWithMinimalParameters(clazz, methodName);
+		}
+		return targetMethod;
+	}
+
+	/**
+	 * Find a method with the given method name and minimal parameters (best case: none),
+	 * declared on the given class or one of its superclasses. Will return a public,
+	 * protected, package access, or private method.
+	 * <p>Checks <code>Class.getDeclaredMethods</code>, cascading upwards to all superclasses.
+	 * @param clazz the class to check
+	 * @param methodName the name of the method to find
+	 * @return the Method object, or <code>null</code> if not found
+	 * @throws IllegalArgumentException if methods of the given name were found but
+	 * could not be resolved to a unique method with minimal parameters
+	 * @see java.lang.Class#getDeclaredMethods
+	 */
+	public static Method findDeclaredMethodWithMinimalParameters(Class clazz, String methodName)
+			throws IllegalArgumentException {
+
+		Method targetMethod = doFindMethodWithMinimalParameters(clazz.getDeclaredMethods(), methodName);
+		if (targetMethod == null && clazz.getSuperclass() != null) {
+			return findDeclaredMethodWithMinimalParameters(clazz.getSuperclass(), methodName);
+		}
+		return targetMethod;
+	}
+
+	/**
+	 * Find a method with the given method name and minimal parameters (best case: none)
+	 * in the given list of methods.
+	 * @param methods the methods to check
+	 * @param methodName the name of the method to find
+	 * @return the Method object, or <code>null</code> if not found
+	 * @throws IllegalArgumentException if methods of the given name were found but
+	 * could not be resolved to a unique method with minimal parameters
+	 */
+	private static Method doFindMethodWithMinimalParameters(Method[] methods, String methodName)
+			throws IllegalArgumentException {
+
 		Method targetMethod = null;
 		int numMethodsFoundWithCurrentMinimumArgs = 0;
 		for (int i = 0; i < methods.length; i++) {
@@ -264,77 +306,19 @@ public abstract class BeanUtils {
 				}
 				else {
 					if (targetMethod.getParameterTypes().length == numParams) {
-						// additional candidate with same length
+						// Additional candidate with same length.
 						numMethodsFoundWithCurrentMinimumArgs++;
 					}
 				}
 			}
 		}
-		if (targetMethod != null) {
-			if (numMethodsFoundWithCurrentMinimumArgs == 1) {
-				return targetMethod;
-			}
-			else {
-				String msg = "Cannot resolve method '" + methodName + 
-				             "' to a unique method. Attempted to resolve to overloaded method with " +
-				             "the least number of parameters, but there were " + 
-				             numMethodsFoundWithCurrentMinimumArgs + " candidates";
-				throw new IllegalArgumentException(msg);
-			}
+		if (numMethodsFoundWithCurrentMinimumArgs > 1) {
+			throw new IllegalArgumentException("Cannot resolve method '" + methodName +
+					"' to a unique method. Attempted to resolve to overloaded method with " +
+					"the least number of parameters, but there were " +
+					numMethodsFoundWithCurrentMinimumArgs + " candidates.");
 		}
-		else {
-			return findDeclaredMethodWithMinimalParameters(clazz, methodName);
-		}
-	}
-
-	/**
-	 * Find a method with the given method name and minimal parameters (best case: none),
-	 * declared on the given class or one of its superclasses. Will return a public,
-	 * protected, package access, or private method.
-	 * <p>Checks <code>Class.getDeclaredMethods</code>, cascading upwards to all superclasses.
-	 * @param clazz the class to check
-	 * @param methodName the name of the method to find
-	 * @return the method object, or <code>null</code> if not found
-	 * @see java.lang.Class#getDeclaredMethods
-	 */
-	public static Method findDeclaredMethodWithMinimalParameters(Class clazz, String methodName) {
-		Method[] methods = clazz.getDeclaredMethods();
-		Method targetMethod = null;
-		int numMethodsFoundWithCurrentMinimumArgs = 0;
-		for (int i = 0; i < methods.length; i++) {
-			if (methods[i].getName().equals(methodName)) {
-				int numParams = methods[i].getParameterTypes().length;
-				if (targetMethod == null ||
-						methods[i].getParameterTypes().length < targetMethod.getParameterTypes().length) {
-					targetMethod = methods[i];
-					numMethodsFoundWithCurrentMinimumArgs = 1;
-				}
-				else {
-					if (targetMethod.getParameterTypes().length == numParams) {
-						// additional candidate with same length
-						numMethodsFoundWithCurrentMinimumArgs++;
-					}
-				}
-			}
-		}
-		if (targetMethod != null) {
-			if (numMethodsFoundWithCurrentMinimumArgs == 1) {
-				return targetMethod;
-			}
-			else {
-				String msg = "Cannot resolve method '" + methodName + 
-				             "' to a unique method. Attempted to resolve to overloaded method with " +
-				             "the least number of parameters, but there were " + 
-				             numMethodsFoundWithCurrentMinimumArgs + " candidates";
-				throw new IllegalArgumentException(msg);
-			}
-		}
-		else {
-			if (clazz.getSuperclass() != null) {
-				return findDeclaredMethodWithMinimalParameters(clazz.getSuperclass(), methodName);
-			}
-			return null;
-		}
+		return targetMethod;
 	}
 
 	/**
@@ -353,8 +337,8 @@ public abstract class BeanUtils {
 	 * @see #findMethodWithMinimalParameters
 	 */
 	public static Method resolveSignature(String signature, Class clazz) {
-		Assert.hasText(signature, "signature must not be null or zero-length");
-		Assert.notNull(clazz, "clazz must not be null");
+		Assert.hasText(signature, "Signature must not be null or zero-length");
+		Assert.notNull(clazz, "Class must not be null");
 
 		int firstParen = signature.indexOf("(");
 		int lastParen = signature.indexOf(")");
@@ -367,7 +351,7 @@ public abstract class BeanUtils {
 			throw new IllegalArgumentException("Invalid method signature '" + signature +
 					"': expected opening '(' for args list");
 		}
-		else if(firstParen == -1 && lastParen == -1) {
+		else if (firstParen == -1 && lastParen == -1) {
 			return findMethodWithMinimalParameters(clazz, signature);
 		}
 		else {
@@ -424,7 +408,7 @@ public abstract class BeanUtils {
 	 * @throws BeansException if PropertyDescriptor lookup fails
 	 */
 	public static PropertyDescriptor findPropertyForMethod(Method method) throws BeansException {
-		Assert.notNull(method, "method must not be null");
+		Assert.notNull(method, "Method must not be null");
 		PropertyDescriptor[] pds = getPropertyDescriptors(method.getDeclaringClass());
 		for (int i = 0; i < pds.length; i++) {
 			if (method.equals(pds[i].getReadMethod()) || method.equals(pds[i].getWriteMethod())) {
@@ -564,8 +548,8 @@ public abstract class BeanUtils {
 	private static void copyProperties(Object source, Object target, Class editable, String[] ignoreProperties)
 			throws BeansException {
 
-		Assert.notNull(source, "source must not be null");
-		Assert.notNull(target, "target must not be null");
+		Assert.notNull(source, "Source must not be null");
+		Assert.notNull(target, "Target must not be null");
 
 		Class actualEditable = target.getClass();
 		if (editable != null) {
