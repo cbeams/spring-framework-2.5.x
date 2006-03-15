@@ -78,8 +78,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see #setEntityManagerFactory
  * @see #setDataSource
  * @see LocalEntityManagerFactoryBean
- * @see EntityManagerFactoryUtils#doGetEntityManager
  * @see JpaTemplate#execute
+ * @see org.springframework.orm.jpa.support.SharedEntityManagerAdapter
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
  * @see org.springframework.jdbc.core.JdbcTemplate
@@ -175,7 +175,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 	 * @see JpaDialect#getJdbcConnection
 	 */
 	public void setJpaDialect(JpaDialect jpaDialect) {
-		this.jpaDialect = jpaDialect;
+		this.jpaDialect = (jpaDialect != null ? jpaDialect : new DefaultJpaDialect());
 	}
 
 	/**
@@ -399,16 +399,15 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 
 	/**
 	 * Convert the given PersistenceException to an appropriate exception from the
-	 * org.springframework.dao hierarchy. Delegates to the JpaDialect if set, falls
-	 * back to EntityManagerFactoryUtils' standard exception translation else.
+	 * <code>org.springframework.dao</code> hierarchy.
+	 * <p>Default implementation delegates to the JdoDialect.
 	 * May be overridden in subclasses.
 	 * @param ex PersistenceException that occured
 	 * @return the corresponding DataAccessException instance
 	 * @see JpaDialect#translateException
-	 * @see EntityManagerFactoryUtils#convertJpaAccessException
 	 */
 	protected DataAccessException convertJpaAccessException(PersistenceException ex) {
-		return EntityManagerFactoryUtils.convertJpaAccessException(ex);
+		return getJpaDialect().translateException(ex);
 	}
 
 
