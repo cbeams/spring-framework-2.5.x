@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.zip.GZIPInputStream;
 
 import org.springframework.remoting.support.RemoteInvocationResult;
 
@@ -94,8 +95,11 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 	protected void prepareConnection(HttpURLConnection con, int contentLength) throws IOException {
 		con.setDoOutput(true);
 		con.setRequestMethod(HTTP_METHOD_POST);
-		con.setRequestProperty(HTTP_HEADER_CONTENT_TYPE, CONTENT_TYPE_SERIALIZED_OBJECT);
+		con.setRequestProperty(HTTP_HEADER_CONTENT_TYPE, getContentType());
 		con.setRequestProperty(HTTP_HEADER_CONTENT_LENGTH, Integer.toString(contentLength));
+		if (isAcceptGzipEncoding()) {
+			con.setRequestProperty(HTTP_HEADER_ACCEPT_ENCODING, ENCODING_GZIP);
+		}
 	}
 
 	/**
@@ -142,13 +146,14 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 	 * Extract the response body from the given executed remote invocation
 	 * request.
 	 * <p>The default implementation simply reads the serialized invocation
-	 * from the HttpURLConnection's InputStream. This can be overridden,
-	 * for example, to check for GZIP response encoding and wrap the
-	 * returned InputStream in a GZIPInputStream.
+	 * from the HttpURLConnection's InputStream. If the response is recognized
+	 * as GZIP response, the InputStream will get wrapped in a GZIPInputStream.
 	 * @param config the HTTP invoker configuration that specifies the target service
 	 * @param con the HttpURLConnection to read the response body from
 	 * @return an InputStream for the response body
 	 * @throws IOException if thrown by I/O methods
+	 * @see #isGzipResponse
+	 * @see java.util.zip.GZIPInputStream
 	 * @see java.net.HttpURLConnection#getInputStream()
 	 * @see java.net.HttpURLConnection#getHeaderField(int)
 	 * @see java.net.HttpURLConnection#getHeaderFieldKey(int)
@@ -156,7 +161,25 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
 	protected InputStream readResponseBody(HttpInvokerClientConfiguration config, HttpURLConnection con)
 			throws IOException {
 
-		return con.getInputStream();
+		if (isGzipResponse(con)) {
+			// GZIP response found - need to unzip.
+			return new GZIPInputStream(con.getInputStream());
+		}
+		else {
+			// Plain response found.
+			return con.getInputStream();
+		}
+	}
+
+	/**
+	 * Determine whether the given response is a GZIP response.
+	 * <p>Default implementation checks whether the HTTP "Content-Encoding"
+	 * header contains "gzip" (in any casing).
+	 * @param con the HttpURLConnection to check
+	 */
+	protected boolean isGzipResponse(HttpURLConnection con) {
+		String encodingHeader = con.getHeaderField(HTTP_HEADER_CONTENT_ENCODING);
+		return (encodingHeader != null && encodingHeader.toLowerCase().indexOf(ENCODING_GZIP) != -1);
 	}
 
 }
