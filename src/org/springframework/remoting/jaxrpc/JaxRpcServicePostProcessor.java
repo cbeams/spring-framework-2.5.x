@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import javax.xml.rpc.Service;
  * or one of its subclasses: LocalJaxRpcServiceFactoryBean,
  * JaxRpcPortClientInterceptor, JaxRpcPortProxyFactoryBean.
  *
- * <p>Useful, for example, to register custom type mappings.
- * See the JPetStore sample app for an example: It features a
- * BeanMappingServicePostProcessor class that registers
- * Axis-specific bean mappings for JPetStore's domain objects.
+ * <p>Useful, for example, to register custom type mappings. See the
+ * AxisBeanMappingServicePostProcessor class that registers Axis-specific
+ * bean mappings for specified bean classes. This is defined for the
+ * domain objects in the JPetStore same application, for example.
  *
  * @author Juergen Hoeller
  * @since 1.1.4
@@ -35,6 +35,7 @@ import javax.xml.rpc.Service;
  * @see LocalJaxRpcServiceFactoryBean#setServicePostProcessors
  * @see JaxRpcPortClientInterceptor#setServicePostProcessors
  * @see JaxRpcPortProxyFactoryBean#setServicePostProcessors
+ * @see org.springframework.remoting.jaxrpc.support.AxisBeanMappingServicePostProcessor
  * @see javax.xml.rpc.Service#getTypeMappingRegistry
  */
 public interface JaxRpcServicePostProcessor {
