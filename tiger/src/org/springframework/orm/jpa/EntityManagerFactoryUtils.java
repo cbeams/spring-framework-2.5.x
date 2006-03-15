@@ -16,8 +16,13 @@
 
 package org.springframework.orm.jpa;
 
+import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
+import javax.persistence.OptimisticLockException;
 import javax.persistence.PersistenceException;
 import javax.persistence.TransactionRequiredException;
 
@@ -26,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -60,22 +66,16 @@ public abstract class EntityManagerFactoryUtils {
 
 
 	/**
-	 * Get a JPA EntityManager from the given factory. Is aware of a
+	 * Obtain a JPA EntityManager from the given factory. Is aware of a
 	 * corresponding EntityManager bound to the current thread,
 	 * for example when using JpaTransactionManager.
-	 * <p>Same as <code>doGetEntityManager</code>, but asking the
-	 * EntityManagerFactory for its current EntityManager as fallback.
-	 * This is the version typically used by applications.
+	 * <p>Note: Will return <code>null</code> if no thread-bound EntityManager found!
 	 * @param emf EntityManagerFactory to create the EntityManager with
-	 * @return the EntityManager
+	 * @return the EntityManager, or <code>null</code> if none found
 	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
-	 * @throws IllegalStateException if no thread-bound EntityManager found
-	 * @see #doGetEntityManager(javax.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
 	 */
-	public static EntityManager getEntityManager(EntityManagerFactory emf)
-	    throws DataAccessResourceFailureException, IllegalStateException {
-
+	public static EntityManager getEntityManager(EntityManagerFactory emf) throws DataAccessResourceFailureException {
 		try {
 			return doGetEntityManager(emf);
 		}
@@ -85,22 +85,17 @@ public abstract class EntityManagerFactoryUtils {
 	}
 
 	/**
-	 * Get a JPA EntityManager from the given factory. Is aware of a
+	 * Obtain a JPA EntityManager from the given factory. Is aware of a
 	 * corresponding EntityManager bound to the current thread,
 	 * for example when using JpaTransactionManager.
-	 * <p>Same as <code>getEntityManager</code>, but <i>not</i> asking the
-	 * EntityManagerFactory for its current EntityManager as fallback.
-	 * This is the version used by EntityManagerFactory proxies.
+	 * <p>Same as <code>getEntityManager</code>, but throwing the original PersistenceException.
 	 * @param emf EntityManagerFactory to create the EntityManager with
-	 * @return the EntityManager
+	 * @return the EntityManager, or <code>null</code> if none found
 	 * @throws javax.persistence.PersistenceException if the EntityManager couldn't be created
-	 * @throws IllegalStateException if no thread-bound EntityManager found
 	 * @see #getEntityManager(javax.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
 	 */
-	public static EntityManager doGetEntityManager(EntityManagerFactory emf)
-	    throws PersistenceException, IllegalStateException {
-
+	public static EntityManager doGetEntityManager(EntityManagerFactory emf) throws PersistenceException {
 		Assert.notNull(emf, "No EntityManagerFactory specified");
 
 		EntityManagerHolder emHolder =
@@ -124,8 +119,8 @@ public abstract class EntityManagerFactoryUtils {
 		}
 
 		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-			throw new IllegalStateException("No JPA EntityManager bound to thread, " +
-					"and configuration does not allow creation of non-transactional one here");
+			// Indicate that we can't obtain a transactional EntityManager.
+			return null;
 		}
 
 		// Create a new EntityManager with PersistenceContextType.EXTENDED,
@@ -149,26 +144,9 @@ public abstract class EntityManagerFactoryUtils {
 	}
 
 	/**
-	 * Return whether the given JPA EntityManager is transactional, that is,
-	 * bound to the current thread by Spring's transaction facilities.
-	 * @param em the JPA EntityManager to check
-	 * @param emf JPA EntityManagerFactory that the EntityManager
-	 * was created with (can be <code>null</code>)
-	 * @return whether the EntityManager is transactional
-	 */
-	public static boolean isEntityManagerTransactional(EntityManager em, EntityManagerFactory emf) {
-		if (emf == null) {
-			return false;
-		}
-		EntityManagerHolder emHolder =
-				(EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
-		return (emHolder != null && em == emHolder.getEntityManager());
-	}
-
-	/**
 	 * Convert the given PersistenceException to an appropriate exception from the
-	 * org.springframework.dao hierarchy.
-	 * <p>The most important cases like object not found or optimistic verification
+	 * <code>org.springframework.dao</code> hierarchy.
+	 * <p>The most important cases like object not found or optimistic locking
 	 * failure are covered here. For more fine-granular conversion, JpaAccessor and
 	 * JpaTransactionManager support sophisticated translation of exceptions via a
 	 * JpaDialect.
@@ -179,8 +157,22 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see JpaDialect#translateException
 	 */
 	public static DataAccessException convertJpaAccessException(PersistenceException ex) {
-		// TODO: find matching exceptions
-		// fallback: assuming internal exception
+		if (ex instanceof EntityNotFoundException) {
+			return new JpaObjectRetrievalFailureException((EntityNotFoundException) ex);
+		}
+		if (ex instanceof OptimisticLockException) {
+			return new JpaOptimisticLockingFailureException((OptimisticLockException) ex);
+		}
+		if (ex instanceof EntityExistsException) {
+			throw new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
+		}
+		if (ex instanceof NoResultException) {
+			throw new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
+		}
+		if (ex instanceof NonUniqueResultException) {
+			throw new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
+		}
+		// fallback
 		return new JpaSystemException(ex);
 	}
 
