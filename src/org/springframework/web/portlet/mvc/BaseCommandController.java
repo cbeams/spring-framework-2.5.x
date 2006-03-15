@@ -211,21 +211,6 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * Set the Validators for this controller.
-	 * The Validator must support the specified command class.
-	 */
-	public final void setValidators(Validator[] validators) {
-		this.validators = validators;
-	}
-
-	/**
-	 * Return the Validators for this controller.
-	 */
-	public final Validator[] getValidators() {
-		return validators;
-	}
-
-	/**
 	 * Set the primary Validator for this controller. The Validator
 	 * must support the specified command class. If there are one
 	 * or more existing validators set already when this method is
@@ -241,6 +226,21 @@ public abstract class BaseCommandController extends AbstractController {
 	 */
 	public final Validator getValidator() {
 		return (validators != null && validators.length > 0 ? validators[0] : null);
+	}
+
+	/**
+	 * Set the Validators for this controller.
+	 * The Validator must support the specified command class.
+	 */
+	public final void setValidators(Validator[] validators) {
+		this.validators = validators;
+	}
+
+	/**
+	 * Return the Validators for this controller.
+	 */
+	public final Validator[] getValidators() {
+		return validators;
 	}
 
 	/**
@@ -295,6 +295,17 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
+	 * Specify a single PropertyEditorRegistrar to be applied
+	 * to every DataBinder that this controller uses.
+	 * <p>Allows for factoring out the registration of PropertyEditors
+	 * to separate objects, as an alternative to <code>initBinder</code>.
+	 * @see #initBinder
+	 */
+	public final void setPropertyEditorRegistrar(PropertyEditorRegistrar propertyEditorRegistrar) {
+		this.propertyEditorRegistrars = new PropertyEditorRegistrar[] {propertyEditorRegistrar};
+	}
+
+	/**
 	 * Specify one or more PropertyEditorRegistrars to be applied
 	 * to every DataBinder that this controller uses.
 	 * <p>Allows for factoring out the registration of PropertyEditors
@@ -312,6 +323,7 @@ public abstract class BaseCommandController extends AbstractController {
 	public final PropertyEditorRegistrar[] getPropertyEditorRegistrars() {
 		return propertyEditorRegistrars;
 	}
+
 
 	protected void initApplicationContext() {
 		if (this.validators != null) {
