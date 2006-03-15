@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -222,7 +222,7 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 				// We're running against Hibernate 3.1 RC1, where Hibernate will
 				// automatically disconnect the Session after a transaction.
 				// We'll reconnect it here, as the Session is likely gonna be
-				// used for lazy loading during an "open session in view" pase.
+				// used for lazy loading during an "open session in view" phase.
 				session.reconnect();
 			}
 		}
