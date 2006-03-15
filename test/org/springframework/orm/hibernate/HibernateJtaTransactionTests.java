@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -694,8 +694,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
-		MockControl tx1Control = MockControl.createControl(javax.transaction.Transaction.class);
-		javax.transaction.Transaction tx1 = (javax.transaction.Transaction) tx1Control.getMock();
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl session1Control = MockControl.createControl(Session.class);
@@ -709,9 +707,10 @@ public class HibernateJtaTransactionTests extends TestCase {
 		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		ut.begin();
 		utControl.setVoidCallable(2);
+		MockJtaTransaction transaction = new MockJtaTransaction();
 		tm.suspend();
-		tmControl.setReturnValue(tx1, 1);
-		tm.resume(tx1);
+		tmControl.setReturnValue(transaction, 1);
+		tm.resume(transaction);
 		tmControl.setVoidCallable(1);
 		if (rollback) {
 			ut.rollback();
