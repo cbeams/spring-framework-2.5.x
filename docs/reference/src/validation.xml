@@ -201,8 +201,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
     </sect2>
 
     <sect2 id="beans-beans-conversion">
-      <title>Built-in <literal>PropertyEditors</literal>, converting
-      types</title>
+      <title>Built-in <interface>PropertyEditor</interface> implementations</title>
 
       <para>Spring heavily uses the concept of
       <literal>PropertyEditors</literal>. Sometimes it might be handy to be
@@ -374,15 +373,61 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
           </tgroup>
         </table></para>
 
-      <para>Spring uses the
-      <literal>java.beans.PropertyEditorManager</literal> to set the
-      search path for property editors that might be needed. The search path
-      also includes <literal>sun.bean.editors</literal>, which includes
-      PropertyEditors for Font, Color and all the primitive types. Note also
-      that the standard JavaBeans infrastructure will automatically discover
-      PropertyEditors (without you having to register them) if they are in the
-      same package as the class they handle, and have the same name as that
-      class, with 'Editor' appended.</para>
+      <para>
+		Spring uses the <interfacename>java.beans.PropertyEditorManager</interfacename> to set
+		the search path for property editors that might be needed. The search path also includes
+		<literal>sun.bean.editors</literal>, which includes
+		<interfacename>PropertyEditor</interfacename> implementations for types such as
+		<classname>Font</classname>, <classname>Color</classname>, and most fo the primitive types.
+		Note also that the standard JavaBeans infrastructure will automatically discover
+		<interfacename>PropertyEditor</interfacename> classes (without you having to register them
+		explicitly)if they are in the same package as the class they handle, and have the same name
+		as that class, with <literal>'Editor'</literal> appended; for example, one could have the
+		following class and package structure, which would be sufficent for the
+		<classname>FooEditor</classname> class to be recognized and used as the
+		<interfacename>PropertyEditor</interfacename> for <classname>Foo</classname>-typed
+		properties.
+	  </para>
+	  <programlisting><![CDATA[com
+  chank
+    pop
+      Foo
+      FooEditor   ]]><lineannotation>// the <interfacename>PropertyEditor</interfacename> for the <classname>Foo</classname> class</lineannotation></programlisting>
+      <para>
+		Note that you can also use the standard <interfacename>BeanInfo</interfacename> JavaBeans
+		mechanism here as well (described
+		<ulink url="http://java.sun.com/docs/books/tutorial/javabeans/customization/index.html">in not-amazing-detail here</ulink>).
+		Find below an example of using the <interfacename>BeanInfo</interfacename> mechanism for
+		explicitly registering one or more <interfacename>PropertyEditor</interfacename> instances
+		with the properties of an associated class.
+      </para>
+	  <programlisting><![CDATA[com
+  chank
+    pop
+      Foo
+      FooBeanInfo   ]]><lineannotation>// the <interfacename>BeanInfo</interfacename> for the <classname>Foo</classname> class</lineannotation></programlisting>
+      <para>
+		And here is the Java source code for the referenced <classname>FooBeanInfo</classname> class. This
+		would associate a <classname>CustomNumberEditor</classname> with the <literal>age</literal>
+		property of the <classname>Foo</classname> class.
+	  </para>
+	  <programlisting><![CDATA[    public class FooBeanInfo extends SimpleBeanInfo {
+      
+    public PropertyDescriptor[] getPropertyDescriptors() {
+        try {
+            final PropertyEditor numberPE = new CustomNumberEditor(Integer.class, true);
+            PropertyDescriptor ageDescriptor = new PropertyDescriptor("age", Foo.class) {
+                public PropertyEditor createPropertyEditor(Object bean) {
+                    return numberPE;
+                };
+            };
+            return new PropertyDescriptor[] { ageDescriptor };
+        }
+        catch (IntrospectionException ex) {
+            throw new Error(ex.toString());
+        }
+    }
+}]]></programlisting>
     </sect2>
 
     <sect2 id="beans-beans-other">

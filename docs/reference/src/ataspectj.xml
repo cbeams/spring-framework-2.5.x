@@ -3,8 +3,7 @@
   <title>AspectJ within Spring AOP</title>
 
   <sect1>
-    <title>Overview: Using the AspectJ pointcut language with Spring
-    AOP</title>
+    <title>Overview: Using the AspectJ pointcut language with Spring AOP</title>
 
     <para>Spring AOP does not define a true pointcut expression language:
     merely convenient pointcuts that work with regular expressions.</para>
@@ -50,8 +49,7 @@
   </sect1>
 
   <sect1>
-    <title>Using the AspectJ 5 @AspectJ annotation-style syntax in Spring
-    AOP</title>
+    <title>Using the AspectJ 5 @AspectJ annotation-style syntax in Spring AOP</title>
 
     <sect2>
       <title>Overview</title>

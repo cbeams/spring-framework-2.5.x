@@ -43,8 +43,7 @@
   </sect1>
 
   <sect1 id="jdbc-core">
-    <title>Using the JDBC Core classes to control basic JDBC processing and
-    error handling</title>
+    <title>Using the JDBC Core classes to control basic JDBC processing and error handling</title>
 
     <sect2 id="jdbc-JdbcTemplate">
       <title>JdbcTemplate</title>

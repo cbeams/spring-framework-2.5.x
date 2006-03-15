@@ -760,8 +760,7 @@ List queryByCriteria(Order criteria);</programlisting>Used in bare form, this
         settings.</para>
 
         <para><table>
-            <title>Properties of the <literal>Transactional</literal>
-            Annotation</title>
+            <title>Properties of the <literal>Transactional</literal> Annotation</title>
 
             <tgroup cols="3">
               <thead>
@@ -886,8 +885,7 @@ interface TestService {
         </sect4>
 
         <sect4>
-          <title>Telling Spring to apply the <literal>Transactional</literal>
-          annotation</title>
+          <title>Telling Spring to apply the <literal>Transactional</literal> annotation</title>
 
           <para>By itself, adding instances of this annotation to interface or
           class elements will not result in transactional wrapping of the
@@ -921,8 +919,7 @@ interface TestService {
         </sect4>
 
         <sect4>
-          <title>Using AOP to ensure the <literal>Transactional</literal>
-          annotation is applied</title>
+          <title>Using AOP to ensure the <literal>Transactional</literal> annotation is applied</title>
 
           <para>The previous example is still more work than would be ideal.
           There is in principle no need for XML for each proxy (to point to
@@ -988,9 +985,7 @@ interface TestService {
     </sect2>
 
     <sect2>
-      <title
-      id="beannameautoproxycreator-for-transactions">BeanNameAutoProxyCreator,
-      another declarative approach</title>
+      <title id="beannameautoproxycreator-for-transactions">BeanNameAutoProxyCreator, another declarative approach</title>
 
       <para><classname>TransactionProxyFactoryBean</classname> is very useful,
       and gives you full control when wrapping objects with a transactional
@@ -1123,8 +1118,7 @@ interface TestService {
   </sect1>
 
   <sect1>
-    <title>Choosing between programmatic and declarative transaction
-    management</title>
+    <title>Choosing between programmatic and declarative transaction management</title>
 
     <para>Programmatic transaction management is usually a good idea only if
     you have a small number of transactional operations. For example, if you
@@ -1142,8 +1136,7 @@ interface TestService {
   </sect1>
 
   <sect1>
-    <title>Do you need an application server for transaction
-    management?</title>
+    <title>Do you need an application server for transaction management?</title>
 
     <para>Spring's transaction management capabilities--and especially its
     declarative transaction management--significantly changes traditional
@@ -1231,8 +1224,7 @@ interface TestService {
     <title>Common problems</title>
 
     <sect2>
-      <title>Use of the wrong transaction manager for a specific
-      DataSource</title>
+      <title>Use of the wrong transaction manager for a specific DataSource</title>
 
       <para>Developers should take care to use the correct
       <emphasis><literal>PlatformTransactionManager</literal></emphasis>
@@ -1253,8 +1245,7 @@ interface TestService {
     </sect2>
 
     <sect2>
-      <title>Spurious AppServer warnings about the transaction or DataSource
-      no longer being active</title>
+      <title>Spurious AppServer warnings about the transaction or DataSource no longer being active</title>
 
       <para>In some JTA environments with very strict XADataSource
       implementations -- currently only some WebLogic and WebSphere versions

@@ -266,8 +266,7 @@
     </sect2>
 
     <sect2>
-      <title>Inversion of Control: HibernateTemplate and
-      HibernateCallback</title>
+      <title>Inversion of Control: HibernateTemplate and HibernateCallback</title>
 
       <para>The basic programming model for templating looks as follows, for
       methods that can be part of any custom data access object or business
@@ -826,8 +825,7 @@
     </sect2>
 
     <sect2 id="orm-hibernate-invalid-jdbc-access-error">
-      <title>Spurious AppServer warnings about the transaction or DataSource
-      no longer being active</title>
+      <title>Spurious AppServer warnings about the transaction or DataSource no longer being active</title>
 
       <para>In some JTA environments with very strict XADataSource
       implementations -- currently only some WebLogic and WebSphere versions
