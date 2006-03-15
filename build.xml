@@ -1113,6 +1113,8 @@
 			<arg value="${basedir}/${dist.ref.dir}/pdf/docbook_fop.tmp"/>
 			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
 			<arg value="${basedir}/${doc.ref.dir}/styles/fopdf.xsl"/>
+			<!-- controls the double sided pagination style -->
+			<arg value="double.sided=${double.sided}"/>
 		</java>
 
 		<java classname="org.apache.fop.apps.Fop" fork="true" maxmemory="256m" dir="${doc.ref.dir}">
