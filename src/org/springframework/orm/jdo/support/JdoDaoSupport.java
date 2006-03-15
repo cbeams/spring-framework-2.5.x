@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,24 +30,25 @@ import org.springframework.orm.jdo.PersistenceManagerFactoryUtils;
  * Convenient super class for JDO data access objects.
  *
  * <p>Requires a PersistenceManagerFactory to be set, providing a JdoTemplate
- * based on it to subclasses. Can alternatively be initialized directly via a
- * JdoTemplate, to reuse the latter's settings like PersistenceManagerFactory,
+ * based on it to subclasses. Can alternatively be initialized directly with a
+ * JdoTemplate, to reuse the latter's settings such as the PersistenceManagerFactory,
  * JdoDialect, flush mode, etc.
  *
  * <p>This base class is mainly intended for JdoTemplate usage but can also
- * be used when working with PersistenceManagerFactoryUtils directly, e.g. in
- * combination with JdoInterceptor-managed PersistenceManagers. Convenience
+ * be used when working with PersistenceManagerFactoryUtils directly, for example
+ * in combination with JdoInterceptor-managed PersistenceManagers. Convenience
  * <code>getPersistenceManager</code> and <code>releasePersistenceManager</code>
  * methods are provided for that usage style.
  *
  * <p>This class will create its own JdoTemplate if only a PersistenceManagerFactory
- * is passed in. The allowCreate flag on that JdoTemplate will be true by default.
+ * is passed in. The "allowCreate" flag on that JdoTemplate will be "true" by default.
  * A custom JdoTemplate instance can be used through overriding <code>createJdoTemplate</code>.
  *
  * @author Juergen Hoeller
  * @since 28.07.2003
  * @see #setPersistenceManagerFactory
  * @see #setJdoTemplate
+ * @see #createJdoTemplate
  * @see #getPersistenceManager
  * @see #releasePersistenceManager
  * @see org.springframework.orm.jdo.JdoTemplate

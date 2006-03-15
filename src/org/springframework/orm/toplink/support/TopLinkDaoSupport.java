@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,13 @@ import org.springframework.orm.toplink.TopLinkTemplate;
  * Convenient super class for TopLink data access objects.
  *
  * <p>Requires a SessionFactory to be set, providing a TopLinkTemplate
- * based on it to subclasses. Can alternatively be initialized directly via
- * a TopLinkTemplate, to reuse the latter's settings like SessionFactory,
+ * based on it to subclasses. Can alternatively be initialized directly with
+ * a TopLinkTemplate, to reuse the latter's settings such as the SessionFactory,
  * exception translator, etc.
  *
  * <p>This base class is mainly intended for TopLinkTemplate usage
  * but can also be used when working with SessionFactoryUtils directly,
- * e.g. in combination with TopLinkInterceptor-managed Sessions.
+ * for example in combination with TopLinkInterceptor-managed Sessions.
  * Convenience <code>getSession</code> and <code>releaseSession</code>
  * methods are provided for that usage style.
  *

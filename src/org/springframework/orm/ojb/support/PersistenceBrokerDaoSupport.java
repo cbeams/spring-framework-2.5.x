@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.orm.ojb.PersistenceBrokerTemplate;
  *
  * <p>Allows a JDBC Connection Descriptor alias to be set, providing a
  * PersistenceBrokerTemplate based on it to subclasses. Can alternatively
- * be initialized directly via a PersistenceBrokerTemplate, to reuse the
+ * be initialized directly with a PersistenceBrokerTemplate, to reuse the
  * latter's settings like PBKey, DataSource, etc.
  *
  * <p>This base class is mainly intended for PersistenceBrokerTemplate usage but
@@ -39,8 +39,8 @@ import org.springframework.orm.ojb.PersistenceBrokerTemplate;
  * methods are provided for that usage style.
  *
  * <p>This class will create its own PersistenceBrokerTemplate if no explicit
- * instance is passed in. The allowCreate flag on that PersistenceBrokerTemplate
- * will be true by default. A custom PersistenceBrokerTemplate instance can be
+ * instance is passed in. The "allowCreate" flag on that PersistenceBrokerTemplate
+ * will be "true" by default. A custom PersistenceBrokerTemplate instance can be
  * used through overriding <code>createHibernateTemplate</code>.
  *
  * @author Juergen Hoeller

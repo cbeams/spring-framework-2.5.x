@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,19 +30,19 @@ import org.springframework.orm.hibernate3.SessionFactoryUtils;
  * Convenient super class for Hibernate data access objects.
  *
  * <p>Requires a SessionFactory to be set, providing a HibernateTemplate
- * based on it to subclasses. Can alternatively be initialized directly via
- * a HibernateTemplate, to reuse the latter's settings like SessionFactory,
+ * based on it to subclasses. Can alternatively be initialized directly with
+ * a HibernateTemplate, to reuse the latter's settings such as the SessionFactory,
  * exception translator, flush mode, etc.
  *
  * <p>This base class is mainly intended for HibernateTemplate usage
  * but can also be used when working with SessionFactoryUtils directly,
- * e.g. in combination with HibernateInterceptor-managed Sessions.
+ * for example in combination with HibernateInterceptor-managed Sessions.
  * Convenience <code>getSession</code> and <code>releaseSession</code>
  * methods are provided for that usage style.
- * 
+ *
  * <p>This class will create its own HibernateTemplate if only a SessionFactory
- * is passed in. The allowCreate flag on that HibernateTemplate will be true by
- * default. A custom HibernateTemplate instance can be used through overriding
+ * is passed in. The "allowCreate" flag on that HibernateTemplate will be "true"
+ * by default. A custom HibernateTemplate instance can be used through overriding
  * <code>createHibernateTemplate</code>.
  *
  * @author Juergen Hoeller
