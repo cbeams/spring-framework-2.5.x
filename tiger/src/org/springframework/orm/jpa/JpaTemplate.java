@@ -30,7 +30,6 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.util.ClassUtils;
 
@@ -100,8 +99,6 @@ import org.springframework.util.ClassUtils;
  */
 public class JpaTemplate extends JpaAccessor implements JpaOperations {
 
-	private boolean allowCreate = true;
-
 	private boolean exposeNativeEntityManager = false;
 
 
@@ -122,18 +119,6 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 
 	/**
 	 * Create a new JpaTemplate instance.
-	 * @param emf EntityManagerFactory to create EntityManagers
-	 * @param allowCreate if a non-transactional EntityManager should be created
-	 * when no transactional EntityManager can be found for the current thread
-	 */
-	public JpaTemplate(EntityManagerFactory emf, boolean allowCreate) {
-		setEntityManagerFactory(emf);
-		setAllowCreate(allowCreate);
-		afterPropertiesSet();
-	}
-
-	/**
-	 * Create a new JpaTemplate instance.
 	 * @param em EntityManager to use
 	 */
 	public JpaTemplate(EntityManager em) {
@@ -141,27 +126,6 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		afterPropertiesSet();
 	}
 
-
-	/**
-	 * Set if a new EntityManager should be created when no transactional
-	 * EntityManager can be found for the current thread.
-	 * <p>JpaTemplate is aware of a corresponding EntityManager bound to the
-	 * current thread, for example when using JpaTransactionManager.
-	 * If allowCreate is true, a new non-transactional EntityManager will be
-	 * created if none found, which needs to be closed at the end of the operation.
-	 * If false, an IllegalStateException will get thrown in this case.
-	 * @see EntityManagerFactoryUtils#getEntityManager(javax.persistence.EntityManagerFactory)
-	 */
-	public void setAllowCreate(boolean allowCreate) {
-		this.allowCreate = allowCreate;
-	}
-
-	/**
-	 * Return if a new EntityManager should be created if no thread-bound found.
-	 */
-	public boolean isAllowCreate() {
-		return allowCreate;
-	}
 
 	/**
 	 * Set whether to expose the native JPA EntityManager to JpaCallback
@@ -215,18 +179,11 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		EntityManager em = getEntityManager();
 		boolean isNewEm = false;
 		if (em == null) {
-			try {
-				try {
-					em = EntityManagerFactoryUtils.getEntityManager(getEntityManagerFactory());
-				}
-				catch (IllegalStateException ex) {
-					logger.debug("Creating new EntityManager for JPA template");
-					em = getEntityManagerFactory().createEntityManager();
-					isNewEm = true;
-				}
-			}
-			catch (PersistenceException ex) {
-				throw new DataAccessResourceFailureException("Could not open JPA EntityManager", ex);
+			em = EntityManagerFactoryUtils.getEntityManager(getEntityManagerFactory());
+			if (em == null) {
+				logger.debug("Creating new EntityManager for JPA template execution");
+				em = getEntityManagerFactory().createEntityManager();
+				isNewEm = true;
 			}
 		}
 
@@ -245,7 +202,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		}
 		finally {
 			if (isNewEm) {
-				logger.debug("Closing new EntityManager for JPA template");
+				logger.debug("Closing new EntityManager after JPA template execution");
 				em.close();
 			}
 		}
