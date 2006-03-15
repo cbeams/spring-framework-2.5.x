@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,16 @@
 
 package org.springframework.remoting.httpinvoker;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 
 import org.springframework.remoting.support.RemoteInvocationResult;
@@ -119,7 +121,9 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	 */
 	protected PostMethod createPostMethod(HttpInvokerClientConfiguration config) throws IOException {
 		PostMethod postMethod = new PostMethod(config.getServiceUrl());
-		postMethod.setRequestHeader(HTTP_HEADER_CONTENT_TYPE, CONTENT_TYPE_SERIALIZED_OBJECT);
+		if (isAcceptGzipEncoding()) {
+			postMethod.addRequestHeader(HTTP_HEADER_ACCEPT_ENCODING, ENCODING_GZIP);
+		}
 		return postMethod;
 	}
 
@@ -142,8 +146,7 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 			HttpInvokerClientConfiguration config, PostMethod postMethod, ByteArrayOutputStream baos)
 			throws IOException {
 
-		// Need to call setRequestBody for compatibility with Commons HttpClient 2.0
-		postMethod.setRequestBody(new ByteArrayInputStream(baos.toByteArray()));
+		postMethod.setRequestEntity(new ByteArrayRequestEntity(baos.toByteArray(), getContentType()));
 	}
 
 	/**
@@ -186,19 +189,40 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	 * Extract the response body from the given executed remote invocation
 	 * request.
 	 * <p>The default implementation simply fetches the PostMethod's response
-	 * body stream. This can be overridden, for example, to check for GZIP
-	 * response encoding and wrap the returned InputStream in a GZIPInputStream.
+	 * body stream. If the response is recognized as GZIP response, the
+	 * InputStream will get wrapped in a GZIPInputStream.
 	 * @param config the HTTP invoker configuration that specifies the target service
 	 * @param postMethod the PostMethod to read the response body from
 	 * @return an InputStream for the response body
 	 * @throws IOException if thrown by I/O methods
+	 * @see #isGzipResponse
+	 * @see java.util.zip.GZIPInputStream
 	 * @see org.apache.commons.httpclient.methods.PostMethod#getResponseBodyAsStream()
 	 * @see org.apache.commons.httpclient.methods.PostMethod#getResponseHeader(String)
 	 */
 	protected InputStream getResponseBody(HttpInvokerClientConfiguration config, PostMethod postMethod)
 			throws IOException {
 
-		return postMethod.getResponseBodyAsStream();
+		if (isGzipResponse(postMethod)) {
+			return new GZIPInputStream(postMethod.getResponseBodyAsStream());
+		}
+		else {
+			return postMethod.getResponseBodyAsStream();
+		}
+	}
+
+	/**
+	 * Determine whether the given response is a GZIP response.
+	 * <p>Default implementation checks whether the HTTP "Content-Encoding"
+	 * header contains "gzip" (in any casing).
+	 * @param postMethod the PostMethod to check
+	 */
+	protected boolean isGzipResponse(PostMethod postMethod) {
+		Header encodingHeader = postMethod.getResponseHeader(HTTP_HEADER_CONTENT_ENCODING);
+		if (encodingHeader == null || encodingHeader.getValue() == null) {
+			return false;
+		}
+		return (encodingHeader.getValue().toLowerCase().indexOf(ENCODING_GZIP) != -1);
 	}
 
 }
