@@ -60,9 +60,32 @@ import org.springframework.web.util.NestedServletException;
 public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 		implements RequestHandler, InitializingBean {
 
-	protected static final String CONTENT_TYPE_SERIALIZED_OBJECT = "application/x-java-serialized-object";
+	/**
+	 * Default content type: "application/x-java-serialized-object"
+	 */
+	public static final String CONTENT_TYPE_SERIALIZED_OBJECT = "application/x-java-serialized-object";
+
+
+	private String contentType = CONTENT_TYPE_SERIALIZED_OBJECT;
 
 	private Object proxy;
+
+
+	/**
+	 * Specify the content type to use for sending HTTP invoker responses.
+	 * <p>Default is "application/x-java-serialized-object".
+	 */
+	public void setContentType(String contentType) {
+		Assert.notNull(contentType, "contentType must not be null");
+		this.contentType = contentType;
+	}
+
+	/**
+	 * Return the content type to use for sending HTTP invoker responses.
+	 */
+	public String getContentType() {
+		return contentType;
+	}
 
 
 	public void afterPropertiesSet() {
@@ -197,8 +220,6 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 
 	/**
 	 * Write the given RemoteInvocationResult to the given HTTP response.
-	 * <p>Note that a request argument was introduced for Spring 1.1.3, which
-	 * is not backwards-compatible for subclasses that override this method.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param result the RemoteInvocationResult object
@@ -208,7 +229,7 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 			HttpServletRequest request, HttpServletResponse response, RemoteInvocationResult result)
 			throws IOException {
 
-		response.setContentType(CONTENT_TYPE_SERIALIZED_OBJECT);
+		response.setContentType(getContentType());
 		writeRemoteInvocationResult(request, response, result, response.getOutputStream());
 	}
 

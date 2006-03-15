@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.remoting.rmi.CodebaseAwareObjectInputStream;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationResult;
+import org.springframework.util.Assert;
 
 /**
  * Abstract base implementation of the HttpInvokerRequestExecutor interface.
@@ -43,18 +44,68 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  */
 public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerRequestExecutor {
 
-	private static final int SERIALIZED_INVOCATION_BYTE_ARRAY_INITIAL_SIZE = 1024;
+	/**
+	 * Default content type: "application/x-java-serialized-object"
+	 */
+	public static final String CONTENT_TYPE_SERIALIZED_OBJECT = "application/x-java-serialized-object";
 
-	protected static final String CONTENT_TYPE_SERIALIZED_OBJECT = "application/x-java-serialized-object";
+
+	protected static final String HTTP_METHOD_POST = "POST";
 
 	protected static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
 
 	protected static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
 
-	protected static final String HTTP_METHOD_POST = "POST";
+	protected static final String HTTP_HEADER_ACCEPT_ENCODING = "Accept-Encoding";
+
+	protected static final String HTTP_HEADER_CONTENT_ENCODING = "Content-Encoding";
+
+	protected static final String ENCODING_GZIP = "gzip";
+
+
+	private static final int SERIALIZED_INVOCATION_BYTE_ARRAY_INITIAL_SIZE = 1024;
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	private String contentType = CONTENT_TYPE_SERIALIZED_OBJECT;
+
+	private boolean acceptGzipEncoding = true;
+
+
+	/**
+	 * Specify the content type to use for sending HTTP invoker requests.
+	 * <p>Default is "application/x-java-serialized-object".
+	 */
+	public void setContentType(String contentType) {
+		Assert.notNull(contentType, "contentType must not be null");
+		this.contentType = contentType;
+	}
+
+	/**
+	 * Return the content type to use for sending HTTP invoker requests.
+	 */
+	public String getContentType() {
+		return contentType;
+	}
+
+	/**
+	 * Set whether to accept GZIP encoding, that is, whether to
+	 * send the HTTP "Accept-Encoding" header with "gzip" as value.
+	 * <p>Default is "true". Turn this flag off if you do not want
+	 * GZIP response compression even if enabled on the HTTP server.
+	 */
+	public void setAcceptGzipEncoding(boolean acceptGzipEncoding) {
+		this.acceptGzipEncoding = acceptGzipEncoding;
+	}
+
+	/**
+	 * Return whether to accept GZIP encoding, that is, whether to
+	 * send the HTTP "Accept-Encoding" header with "gzip" as value.
+	 */
+	public boolean isAcceptGzipEncoding() {
+		return acceptGzipEncoding;
+	}
 
 
 	public final RemoteInvocationResult executeRequest(
