@@ -39,7 +39,7 @@ import org.springframework.core.OrderComparator;
  *
  * <p>Resource management code should check for thread-bound resources, e.g. JDBC
  * Connections or Hibernate Sessions, via <code>getResource</code>. Such code is
- * normally not supposed to bind resources to threads, as this is the responsiblity
+ * normally not supposed to bind resources to threads, as this is the responsibility
  * of transaction managers. A further option is to lazily bind on first use if
  * transaction synchronization is active, for performing transactions that span
  * an arbitrary number of resources.
@@ -215,7 +215,8 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Register a new transaction synchronization for the current thread.
 	 * Typically called by resource management code.
-	 * <p>Note that synchronizations can implemented the Ordered interface.
+	 * <p>Note that synchronizations can implement the
+	 * {@link org.springframework.core.Ordered} interface.
 	 * They will be executed in an order according to their order value (if any).
 	 * @throws IllegalStateException if synchronization is not active
 	 * @see org.springframework.core.Ordered
