@@ -24,6 +24,9 @@ import java.lang.reflect.Proxy;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 
@@ -88,6 +91,8 @@ public class SharedEntityManagerAdapter implements FactoryBean {
 	 */
 	private static class SharedEntityManagerInvocationHandler implements InvocationHandler {
 
+		private final Log logger = LogFactory.getLog(getClass());
+
 		private final EntityManagerFactory targetFactory;
 
 		public SharedEntityManagerInvocationHandler(EntityManagerFactory target) {
@@ -121,12 +126,10 @@ public class SharedEntityManagerAdapter implements FactoryBean {
 
 			// Determine current EntityManager: either the transactional one
 			// managed by the factory or a temporary one for the given invocation.
-			EntityManager target = null;
+			EntityManager target = EntityManagerFactoryUtils.doGetEntityManager(this.targetFactory);
 			boolean isNewEm = false;
-			try {
-				target = EntityManagerFactoryUtils.getEntityManager(this.targetFactory);
-			}
-			catch (IllegalStateException ex) {
+			if (target == null) {
+				logger.debug("Creating new EntityManager for shared EntityManager invocation");
 				target = this.targetFactory.createEntityManager();
 				isNewEm = true;
 			}
