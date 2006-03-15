@@ -11,15 +11,40 @@ Package org.springframework.aop
 * fixed CustomizableTraceInterceptor to expose the actual invocation time for exception messages
 
 Package org.springframework.beans
+* BeanUtils throws explicit BeanInstantiationException in case of bean instantiation failure
 * fixed BeanWrapperImpl to convert a null input for an array type to a null value rather than an array with null element
+* fixed BeanWrapperImpl to apply property-specific editors to elements even for collections without generic type
 * fixed BeanWrapperImpl to convert a ManagedProperties instance into a plain Properties instance before applying it
+* CharacterEditor supports unicode specification passed in as literal String, for example "\u00F6"
 
 Package org.springframework.orm
+* updated JDO API 2.0 jar to 2.0 RC1 from the Apache JDO project
+* updated JPA API 1.0 jar to build 40 from the GlassFish project
+* fixed LocalSessionFactoryBean's "updateDatabaseSchema" to declare the correct exception (DataAccessException)
+* fixed BlobStringType for Hibernate2/3 to correctly handle SQL NULL
+* refined JDO PersistenceManagerFactoryUtils to explicitly suspend pre-bound PM in the course of transaction suspension
+* refined JPA EntityManagerFactoryUtils to explicitly suspend pre-bound EM in the course of transaction suspension
+* removed support for obsolete "EntityManagerFactory.getEntityManager()" method from LocalEntityManagerFactoryBean
+* adapted OpenEntityManagerInViewFilter/Interceptor to not specify obsolete PersistenceContextType.EXTENDED anymore
 * fixed JpaDaoSupport's "setEntityManager" method to accept an EntityManager instead of an EntityManagerFactory
+* removed "getEntityManager()"/"getEntityManagerFactory()" accessor methods from JpaDaoSupport
+* removed "allowCreate" flag from JpaTemplate, always allowing creation (analogous to shared EntityManager)
+
+Package org.springframework.remoting
+* added "setContentType" configuration method to HttpInvokerServiceExporter and AbstractHttpInvokerRequestExecutor
+* built client-side HTTP GZIP response support into SimpleHttpInvokerRequestExecutor/CommonsHttpInvokerRequestExecutor
+* added "setCustomPropertyMap" method to JaxRpcPortClientInterceptor/ProxyFactoryBean, accepting String-Object pairs
+* added AxisBeanMappingServicePostProcessor to "jaxrpc.support" package, for declarative registration of bean mappings
+
+Package org.springframework.transaction
+* AbstractPlatformTransactionManager logs "Should roll back transaction but cannot" message at debug level (not warn)
 
 Package org.springframework.web
-* added optional caching of JSP 2.0 Expressions, driven by "cacheJspExpressions" context-param in web.xml (true/false)
 * refined AbstractRefreshablePortletApplicationContext to take PortletContext from PortletConfig if not explicitly set
+* added "propertyEditorRegistrar" bean property to BaseCommandController, as convenience option for a single registrar
+* optimized BeanNameViewResolver to avoid internal throwing and catching of NoSuchBeanDefinitionExceptions
+* ExpressionEvaluationManager supports concatenated expressions (e.g. "${var1}text${var2}") on all JSP 2.0 engines
+* added optional caching of JSP 2.0 Expressions, driven by "cacheJspExpressions" context-param in web.xml (true/false)
 
 
 Changes in version 2.0 M3 (8.3.2006)
