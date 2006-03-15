@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,10 +33,16 @@ import org.springframework.beans.BeanUtils;
  * Factory for locally defined JAX-RPC Service references.
  * Uses a JAX-RPC ServiceFactory underneath.
  *
+ * <p>Serves as base class for LocalJaxRpcServiceFactoryBean as well
+ * as JaxRpcPortClientInterceptor and JaxRpcPortProxyFactoryBean.
+ *
  * @author Juergen Hoeller
  * @since 15.12.2003
  * @see javax.xml.rpc.ServiceFactory
  * @see javax.xml.rpc.Service
+ * @see LocalJaxRpcServiceFactoryBean
+ * @see JaxRpcPortClientInterceptor
+ * @see JaxRpcPortProxyFactoryBean
  */
 public class LocalJaxRpcServiceFactory {
 
@@ -214,7 +220,7 @@ public class LocalJaxRpcServiceFactory {
 	 * @see #setNamespaceUri
 	 */
 	protected QName getQName(String name) {
-		return (getNamespaceUri() != null) ? new QName(getNamespaceUri(), name) : new QName(name);
+		return (getNamespaceUri() != null ? new QName(getNamespaceUri(), name) : new QName(name));
 	}
 
 	/**
