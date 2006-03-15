@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,29 +25,26 @@ import org.springframework.dao.support.DaoSupport;
 import org.springframework.orm.jpa.JpaTemplate;
 
 /**
- * Convenient super class for JPA data access objects.
+ * Convenient super class for JPA data access objects. Intended for
+ * JpaTemplate usage. Alternatively, JPA-based DAOs can be coded
+ * against the plain JPA EntityManagerFactory/EntityManager API.
  *
- * <p>Requires a EntityManagerFactory to be set, providing a JpaTemplate
- * based on it to subclasses. Can alternatively be initialized directly via a
- * JpaTemplate, to reuse the latter's settings like EntityManagerFactory,
- * JpaDialect, flush mode, etc.
+ * <p>Requires an EntityManagerFactory or EntityManager to be set,
+ * providing a JpaTemplate based on it to subclasses. Can alternatively
+ * be initialized directly via a JpaTemplate, to reuse the latter's
+ * settings such as the EntityManagerFactory, JpaDialect, flush mode, etc.
  *
- * <p>This base class is mainly intended for JpaTemplate usage but can also
- * be used when working with EntityManagerFactoryUtils directly, e.g. in
- * combination with JpaInterceptor-managed EntityManagers. Convenience
- * <code>doGetEntityManager</code> and <code>releaseEntityManager</code>
- * methods are provided for that usage style.
- *
- * <p>This class will create its own JpaTemplate if only a EntityManagerFactory
- * is passed in. The allowCreate flag on that JpaTemplate will be true by default.
- * A custom JpaTemplate instance can be used through overriding <code>createJpaTemplate</code>.
+ * <p>This class will create its own JpaTemplate if an EntityManagerFactory
+ * or EntityManager reference is passed in. A custom JpaTemplate instance
+ * can be used through overriding <code>createJpaTemplate</code>.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see #setEntityManagerFactory
+ * @see #setEntityManager
+ * @see #createJpaTemplate
  * @see #setJpaTemplate
  * @see org.springframework.orm.jpa.JpaTemplate
- * @see org.springframework.orm.jpa.JpaInterceptor
  */
 public abstract class JpaDaoSupport extends DaoSupport {
 
@@ -98,20 +95,6 @@ public abstract class JpaDaoSupport extends DaoSupport {
 	 */
 	protected JpaTemplate createJpaTemplate(EntityManager entityManager) {
 		return new JpaTemplate(entityManager);
-	}
-
-	/**
-	 * Return the JPA EntityManagerFactory used by this DAO.
-	 */
-	public final EntityManagerFactory getEntityManagerFactory() {
-		return (this.jpaTemplate != null ? this.jpaTemplate.getEntityManagerFactory() : null);
-	}
-
-	/**
-	 * Return the JPA EntityManager used by this DAO.
-	 */
-	public final EntityManager getEntityManager() {
-		return (this.jpaTemplate != null ? this.jpaTemplate.getEntityManager() : null);
 	}
 
 	/**
