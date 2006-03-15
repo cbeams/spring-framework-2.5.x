@@ -53,7 +53,8 @@ import org.springframework.web.portlet.handler.HandlerInterceptorAdapter;
  * @see OpenEntityManagerInViewFilter
  * @see org.springframework.orm.jpa.JpaInterceptor
  * @see org.springframework.orm.jpa.JpaTransactionManager
- * @see org.springframework.orm.jpa.EntityManagerFactoryUtils#doGetEntityManager
+ * @see org.springframework.orm.jpa.JpaTemplate#execute
+ * @see SharedEntityManagerAdapter
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class PortletOpenEntityManagerInViewInterceptor extends HandlerInterceptorAdapter {

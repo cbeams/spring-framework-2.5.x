@@ -94,7 +94,7 @@ public abstract class JpaAccessor implements InitializingBean {
 	/**
 	 * Set the JPA dialect to use for this accessor.
 	 * <p>The dialect object can be used to retrieve the underlying JDBC
-	 * connection and to eagerly flush changes to the database.
+	 * connection, for example.
 	 */
 	public void setJpaDialect(JpaDialect jpaDialect) {
 		this.jpaDialect = (jpaDialect != null ? jpaDialect : new DefaultJpaDialect());
@@ -160,14 +160,12 @@ public abstract class JpaAccessor implements InitializingBean {
 
 	/**
 	 * Convert the given PersistenceException to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy. Delegates to the JpaDialect
-	 * if set, falling back to EntityManagerFactoryUtils' standard exception
-	 * translation else.
-	 * <p>May be overridden in subclasses.
+	 * <code>org.springframework.dao</code> hierarchy.
+	 * <p>Default implementation delegates to the JdoDialect.
+	 * May be overridden in subclasses.
 	 * @param ex PersistenceException that occured
 	 * @return the corresponding DataAccessException instance
 	 * @see JpaDialect#translateException
-	 * @see EntityManagerFactoryUtils#convertJpaAccessException
 	 */
 	public DataAccessException convertJpaAccessException(PersistenceException ex) {
 		return getJpaDialect().translateException(ex);

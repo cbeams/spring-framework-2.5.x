@@ -18,7 +18,6 @@ package org.springframework.orm.jpa.support;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,10 +50,11 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter
+ * @see OpenEntityManagerInViewFilter
  * @see org.springframework.orm.jpa.JpaInterceptor
  * @see org.springframework.orm.jpa.JpaTransactionManager
- * @see org.springframework.orm.jpa.EntityManagerFactoryUtils#doGetEntityManager
+ * @see org.springframework.orm.jpa.JpaTemplate#execute
+ * @see SharedEntityManagerAdapter
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class OpenEntityManagerInViewInterceptor extends HandlerInterceptorAdapter {

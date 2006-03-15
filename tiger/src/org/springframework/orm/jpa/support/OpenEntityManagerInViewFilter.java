@@ -54,10 +54,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor
+ * @see OpenEntityManagerInViewInterceptor
  * @see org.springframework.orm.jpa.JpaInterceptor
  * @see org.springframework.orm.jpa.JpaTransactionManager
- * @see org.springframework.orm.jpa.EntityManagerFactoryUtils#doGetEntityManager
+ * @see org.springframework.orm.jpa.JpaTemplate#execute
+ * @see SharedEntityManagerAdapter
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
