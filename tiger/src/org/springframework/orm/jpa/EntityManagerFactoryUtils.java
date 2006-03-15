@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,11 +19,13 @@ package org.springframework.orm.jpa;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
+import javax.persistence.TransactionRequiredException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -66,23 +68,19 @@ public abstract class EntityManagerFactoryUtils {
 	 * This is the version typically used by applications.
 	 * @param emf EntityManagerFactory to create the EntityManager with
 	 * @return the EntityManager
-	 * @throws javax.persistence.PersistenceException if the EntityManager couldn't be created
+	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
 	 * @throws IllegalStateException if no thread-bound EntityManager found
 	 * @see #doGetEntityManager(javax.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
-	 * @see javax.persistence.EntityManagerFactory#getEntityManager()
 	 */
 	public static EntityManager getEntityManager(EntityManagerFactory emf)
-	    throws PersistenceException, IllegalStateException {
+	    throws DataAccessResourceFailureException, IllegalStateException {
 
 		try {
-			return doGetEntityManager((EntityManagerFactory) emf);
+			return doGetEntityManager(emf);
 		}
-		catch (IllegalStateException ex) {
-			// Not within a Spring-managed transaction with Spring synchronization:
-			// delegate to persistence provider's own synchronization mechanism.
-			// Will throw IllegalStateException if not supported by persistence provider.
-			return emf.getEntityManager();
+		catch (PersistenceException ex) {
+			throw new DataAccessResourceFailureException("Could not obtain JPA EntityManager", ex);
 		}
 	}
 
@@ -108,6 +106,20 @@ public abstract class EntityManagerFactoryUtils {
 		EntityManagerHolder emHolder =
 				(EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
 		if (emHolder != null) {
+			if (!emHolder.isSynchronizedWithTransaction() &&
+					TransactionSynchronizationManager.isSynchronizationActive()) {
+				// Try to explicitly synchronize the EntityManager itself
+				// with an ongoing JTA transaction, if any.
+				try {
+					emHolder.getEntityManager().joinTransaction();
+				}
+				catch (TransactionRequiredException ex) {
+					logger.debug("Could not join JTA transaction because none was active", ex);
+				}
+				emHolder.setSynchronizedWithTransaction(true);
+				TransactionSynchronizationManager.registerSynchronization(
+						new EntityManagerSynchronization(emHolder, emf, false));
+			}
 			return emHolder.getEntityManager();
 		}
 
@@ -129,7 +141,7 @@ public abstract class EntityManagerFactoryUtils {
 			emHolder = new EntityManagerHolder(em);
 			emHolder.setSynchronizedWithTransaction(true);
 			TransactionSynchronizationManager.registerSynchronization(
-					new EntityManagerSynchronization(emHolder, emf));
+					new EntityManagerSynchronization(emHolder, emf, true));
 			TransactionSynchronizationManager.bindResource(emf, emHolder);
 		}
 
@@ -184,11 +196,15 @@ public abstract class EntityManagerFactoryUtils {
 
 		private final EntityManagerFactory entityManagerFactory;
 
+		private final boolean newEntityManager;
+
 		private boolean holderActive = true;
 
-		public EntityManagerSynchronization(EntityManagerHolder emHolder, EntityManagerFactory emf) {
+		public EntityManagerSynchronization(
+				EntityManagerHolder emHolder, EntityManagerFactory emf, boolean newEntityManager) {
 			this.entityManagerHolder = emHolder;
 			this.entityManagerFactory = emf;
+			this.newEntityManager = newEntityManager;
 		}
 
 		public int getOrder() {
@@ -208,9 +224,15 @@ public abstract class EntityManagerFactoryUtils {
 		}
 
 		public void beforeCompletion() {
-			TransactionSynchronizationManager.unbindResource(this.entityManagerFactory);
-			this.holderActive = false;
-			this.entityManagerHolder.getEntityManager().close();
+			if (this.newEntityManager) {
+				TransactionSynchronizationManager.unbindResource(this.entityManagerFactory);
+				this.holderActive = false;
+				this.entityManagerHolder.getEntityManager().close();
+			}
+		}
+
+		public void afterCompletion(int status) {
+			this.entityManagerHolder.setSynchronizedWithTransaction(false);
 		}
 	}
 
