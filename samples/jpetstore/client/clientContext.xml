@@ -43,6 +43,15 @@
 		<property name="serviceInterface">
 			<value>org.springframework.samples.jpetstore.domain.logic.OrderService</value>
 		</property>
+		<!--
+		Comment the following in to use Apache Commons HttpClient instead of the JDK's
+		standard HttpURLConnection (as used by the default SimpleHttpInvokerRequestExecutor).
+		-->
+		<!--
+		<property name="httpInvokerRequestExecutor">
+			<bean class="org.springframework.remoting.httpinvoker.CommonsHttpInvokerRequestExecutor"/>
+		</property>
+ 		-->
 	</bean>
 
 	<!-- Proxy for the JAX-RPC/Axis-exported OrderService -->
@@ -78,7 +87,18 @@
 		-->
 		<property name="servicePostProcessors">
 			<list>
-				<bean class="org.springframework.samples.jpetstore.service.client.BeanMappingServicePostProcessor"/>
+				<bean class="org.springframework.remoting.jaxrpc.support.AxisBeanMappingServicePostProcessor">
+					<property name="encodingStyleUri" value="http://schemas.xmlsoap.org/soap/encoding/"/>
+					<property name="typeNamespaceUri" value="urn:JPetStore"/>
+					<property name="beanClasses">
+						<list>
+							<value>org.springframework.samples.jpetstore.domain.Order</value>
+							<value>org.springframework.samples.jpetstore.domain.LineItem</value>
+							<value>org.springframework.samples.jpetstore.domain.Item</value>
+							<value>org.springframework.samples.jpetstore.domain.Product</value>
+						</list>
+					</property>
+				</bean>
 			</list>
 		</property>
 	</bean>
