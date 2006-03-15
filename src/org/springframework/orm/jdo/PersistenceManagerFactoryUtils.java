@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -99,7 +99,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * @param allowCreate if a non-transactional PersistenceManager should be created
 	 * when no transactional PersistenceManager can be found for the current thread
 	 * @return the PersistenceManager
-	 * @throws DataAccessResourceFailureException if the PersistenceManager couldn't be created
+	 * @throws DataAccessResourceFailureException if the PersistenceManager couldn't be obtained
 	 * @throws IllegalStateException if no thread-bound PersistenceManager found and allowCreate false
 	 */
 	public static PersistenceManager getPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate)
@@ -109,7 +109,7 @@ public abstract class PersistenceManagerFactoryUtils {
 			return doGetPersistenceManager(pmf, allowCreate);
 		}
 		catch (JDOException ex) {
-			throw new DataAccessResourceFailureException("Could not open JDO PersistenceManager", ex);
+			throw new DataAccessResourceFailureException("Could not obtain JDO PersistenceManager", ex);
 		}
 	}
 
@@ -134,6 +134,12 @@ public abstract class PersistenceManagerFactoryUtils {
 		PersistenceManagerHolder pmHolder =
 				(PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
 		if (pmHolder != null) {
+			if (!pmHolder.isSynchronizedWithTransaction() &&
+					TransactionSynchronizationManager.isSynchronizationActive()) {
+				pmHolder.setSynchronizedWithTransaction(true);
+				TransactionSynchronizationManager.registerSynchronization(
+						new PersistenceManagerSynchronization(pmHolder, pmf, false));
+			}
 			return pmHolder.getPersistenceManager();
 		}
 
@@ -152,7 +158,7 @@ public abstract class PersistenceManagerFactoryUtils {
 			pmHolder = new PersistenceManagerHolder(pm);
 			pmHolder.setSynchronizedWithTransaction(true);
 			TransactionSynchronizationManager.registerSynchronization(
-					new PersistenceManagerSynchronization(pmHolder, pmf));
+					new PersistenceManagerSynchronization(pmHolder, pmf, true));
 			TransactionSynchronizationManager.bindResource(pmf, pmHolder);
 		}
 
@@ -287,11 +293,15 @@ public abstract class PersistenceManagerFactoryUtils {
 
 		private final PersistenceManagerFactory persistenceManagerFactory;
 
+		private final boolean newPersistenceManager;
+
 		private boolean holderActive = true;
 
-		public PersistenceManagerSynchronization(PersistenceManagerHolder pmHolder, PersistenceManagerFactory pmf) {
+		public PersistenceManagerSynchronization(
+				PersistenceManagerHolder pmHolder, PersistenceManagerFactory pmf, boolean newPersistenceManager) {
 			this.persistenceManagerHolder = pmHolder;
 			this.persistenceManagerFactory = pmf;
+			this.newPersistenceManager = newPersistenceManager;
 		}
 
 		public int getOrder() {
@@ -312,11 +322,16 @@ public abstract class PersistenceManagerFactoryUtils {
 		}
 
 		public void beforeCompletion() {
-			TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
-			this.holderActive = false;
-			releasePersistenceManager(
-			    this.persistenceManagerHolder.getPersistenceManager(),
-			    this.persistenceManagerFactory);
+			if (this.newPersistenceManager) {
+				TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
+				this.holderActive = false;
+				releasePersistenceManager(
+						this.persistenceManagerHolder.getPersistenceManager(), this.persistenceManagerFactory);
+			}
+		}
+
+		public void afterCompletion(int status) {
+			this.persistenceManagerHolder.setSynchronizedWithTransaction(false);
 		}
 	}
 
