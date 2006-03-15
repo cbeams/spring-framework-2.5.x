@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -49,9 +49,20 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 * @param identifier the ID of the object for which the locking failed
 	 */
 	public ObjectOptimisticLockingFailureException(Class persistentClass, Object identifier) {
+		this(persistentClass, identifier, null);
+	}
+
+	/**
+	 * Create a new ObjectOptimisticLockingFailureException for the given object,
+	 * with the default "optimistic locking failed" message.
+	 * @param persistentClass the persistent class
+	 * @param identifier the ID of the object for which the locking failed
+	 * @param ex source exception
+	 */
+	public ObjectOptimisticLockingFailureException(Class persistentClass, Object identifier, Throwable ex) {
 		this(persistentClass, identifier,
 				"Object of class [" + persistentClass.getName() + "] with identifier [" + identifier +
-				"]: optimistic locking failed", null);
+				"]: optimistic locking failed", ex);
 	}
 
 	/**
@@ -77,9 +88,20 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 * @param identifier the ID of the object for which the locking failed
 	 */
 	public ObjectOptimisticLockingFailureException(String persistentClassName, Object identifier) {
+		this(persistentClassName, identifier, null);
+	}
+
+	/**
+	 * Create a new ObjectOptimisticLockingFailureException for the given object,
+	 * with the default "optimistic locking failed" message.
+	 * @param persistentClassName the name of the persistent class
+	 * @param identifier the ID of the object for which the locking failed
+	 * @param ex source exception
+	 */
+	public ObjectOptimisticLockingFailureException(String persistentClassName, Object identifier, Throwable ex) {
 		this(persistentClassName, identifier,
 				"Object of class [" + persistentClassName + "] with identifier [" + identifier +
-				"]: optimistic locking failed", null);
+				"]: optimistic locking failed", ex);
 	}
 
 	/**
