@@ -258,9 +258,9 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's JasperReports support
 
 * jdo/jdo2.jar
-- JDO API 2.0 beta (http://www.jpox.org, corresponding to JPOX 1.1.0-beta-6)
+- JDO API 2.0 RC1 (jdo2-api-2.0-rc1.jar from the Apache JDO project)
 - required for building the framework
-- required at runtime when using Spring's JDO support
+- required at runtime when using Spring's JDO support (or jdo.jar for JDO 1.0)
 
 * jexcelapi/jxl.jar
 - JExcelApi 2.5.7 (http://jexcelapi.sourceforge.net)
@@ -293,7 +293,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's XAPoolNativeJdbcExtractor
 
 * jpa/persistence.jar
-- Java Persistence API 1.0 M4 (http://glassfish.dev.java.net/javaee5/persistence)
+- Java Persistence API 1.0 b40 (http://glassfish.dev.java.net/javaee5/persistence)
 - required for building the framework
 - required at runtime when using Spring's JPA support
 
