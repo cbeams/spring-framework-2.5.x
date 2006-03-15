@@ -91,7 +91,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	}
 
 	/**
-	 * Get a JDO PersistenceManager via the given factory. Is aware of a
+	 * Obtain a JDO PersistenceManager via the given factory. Is aware of a
 	 * corresponding PersistenceManager bound to the current thread,
 	 * for example when using JdoTransactionManager. Will create a new
 	 * PersistenceManager else, if allowCreate is true.
@@ -101,6 +101,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * @return the PersistenceManager
 	 * @throws DataAccessResourceFailureException if the PersistenceManager couldn't be obtained
 	 * @throws IllegalStateException if no thread-bound PersistenceManager found and allowCreate false
+	 * @see JdoTransactionManager
 	 */
 	public static PersistenceManager getPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate)
 	    throws DataAccessResourceFailureException, IllegalStateException {
@@ -114,7 +115,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	}
 
 	/**
-	 * Get a JDO PersistenceManager via the given factory. Is aware of a
+	 * Obtain a JDO PersistenceManager via the given factory. Is aware of a
 	 * corresponding PersistenceManager bound to the current thread,
 	 * for example when using JdoTransactionManager. Will create a new
 	 * PersistenceManager else, if allowCreate is true.
@@ -125,6 +126,8 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * @return the PersistenceManager
 	 * @throws JDOException if the PersistenceManager couldn't be created
 	 * @throws IllegalStateException if no thread-bound PersistenceManager found and allowCreate false
+	 * @see #getPersistenceManager(javax.jdo.PersistenceManagerFactory, boolean)
+	 * @see JdoTransactionManager
 	 */
 	public static PersistenceManager doGetPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate)
 	    throws JDOException, IllegalStateException {
@@ -205,8 +208,8 @@ public abstract class PersistenceManagerFactoryUtils {
 
 	/**
 	 * Convert the given JDOException to an appropriate exception from the
-	 * org.springframework.dao hierarchy.
-	 * <p>The most important cases like object not found or optimistic verification
+	 * <code>org.springframework.dao</code> hierarchy.
+	 * <p>The most important cases like object not found or optimistic locking
 	 * failure are covered here. For more fine-granular conversion, JdoAccessor and
 	 * JdoTransactionManager support sophisticated translation of exceptions via a
 	 * JdoDialect.
@@ -220,25 +223,23 @@ public abstract class PersistenceManagerFactoryUtils {
 		if (ex instanceof JDOObjectNotFoundException) {
 			throw new JdoObjectRetrievalFailureException((JDOObjectNotFoundException) ex);
 		}
-		else if (ex instanceof JDOOptimisticVerificationException) {
+		if (ex instanceof JDOOptimisticVerificationException) {
 			throw new JdoOptimisticLockingFailureException((JDOOptimisticVerificationException) ex);
 		}
-		else if (ex instanceof JDODataStoreException) {
+		if (ex instanceof JDODataStoreException) {
 			return new JdoResourceFailureException((JDODataStoreException) ex);
 		}
-		else if (ex instanceof JDOFatalDataStoreException) {
+		if (ex instanceof JDOFatalDataStoreException) {
 			return new JdoResourceFailureException((JDOFatalDataStoreException) ex);
 		}
-		else if (ex instanceof JDOUserException) {
+		if (ex instanceof JDOUserException) {
 			return new JdoUsageException((JDOUserException) ex);
 		}
-		else if (ex instanceof JDOFatalUserException) {
+		if (ex instanceof JDOFatalUserException) {
 			return new JdoUsageException((JDOFatalUserException) ex);
 		}
-		else {
-			// fallback: assuming internal exception
-			return new JdoSystemException(ex);
-		}
+		// fallback
+		return new JdoSystemException(ex);
 	}
 
 	/**

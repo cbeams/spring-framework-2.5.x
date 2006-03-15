@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 public class JdoOptimisticLockingFailureException extends ObjectOptimisticLockingFailureException {
 
 	public JdoOptimisticLockingFailureException(JDOOptimisticVerificationException ex) {
-		// extract information about the failed object from the JDOException, if available
+		// Extract information about the failed object from the JDOException, if available.
 		super((ex.getFailedObject() != null ? ex.getFailedObject().getClass() : null),
 				(ex.getFailedObject() != null ? JDOHelper.getObjectId(ex.getFailedObject()) : null),
 				ex.getMessage(), ex);

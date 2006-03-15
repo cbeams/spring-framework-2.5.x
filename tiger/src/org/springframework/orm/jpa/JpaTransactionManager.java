@@ -39,7 +39,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /**
  * PlatformTransactionManager implementation for a single JPA EntityManagerFactory.
  * Binds a JPA EntityManager from the specified factory to the thread, potentially
- * allowing for one thread EntityManager per factory. EntityManagerFactoryUtils
+ * allowing for one thread EntityManager per factory. SharedEntityManagerAdapter
  * and JpaTemplate are aware of thread-bound entity managers and participate in such
  * transactions automatically. Using either is required for JPA access code supporting
  * this transaction management mechanism.
@@ -400,7 +400,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 	/**
 	 * Convert the given PersistenceException to an appropriate exception from the
 	 * <code>org.springframework.dao</code> hierarchy.
-	 * <p>Default implementation delegates to the JdoDialect.
+	 * <p>Default implementation delegates to the JpaDialect.
 	 * May be overridden in subclasses.
 	 * @param ex PersistenceException that occured
 	 * @return the corresponding DataAccessException instance

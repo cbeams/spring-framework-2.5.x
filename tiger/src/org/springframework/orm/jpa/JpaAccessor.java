@@ -141,7 +141,6 @@ public abstract class JpaAccessor implements InitializingBean {
 		if (getEntityManagerFactory() == null && getEntityManager() == null) {
 			throw new IllegalArgumentException("entityManagerFactory or entityManager is required");
 		}
-		getJpaDialect();
 	}
 
 
@@ -152,7 +151,7 @@ public abstract class JpaAccessor implements InitializingBean {
 	 * @throws javax.persistence.PersistenceException in case of JPA flushing errors
 	 */
 	public void flushIfNecessary(EntityManager em, boolean existingTransaction) throws PersistenceException {
-		if (this.flushEager) {
+		if (isFlushEager()) {
 			logger.debug("Eagerly flushing JPA entity manager");
 			em.flush();
 		}
@@ -161,7 +160,7 @@ public abstract class JpaAccessor implements InitializingBean {
 	/**
 	 * Convert the given PersistenceException to an appropriate exception from the
 	 * <code>org.springframework.dao</code> hierarchy.
-	 * <p>Default implementation delegates to the JdoDialect.
+	 * <p>Default implementation delegates to the JpaDialect.
 	 * May be overridden in subclasses.
 	 * @param ex PersistenceException that occured
 	 * @return the corresponding DataAccessException instance

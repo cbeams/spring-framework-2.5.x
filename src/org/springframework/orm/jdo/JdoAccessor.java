@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,7 +140,7 @@ public abstract class JdoAccessor implements InitializingBean {
 	 * @throws JDOException in case of JDO flushing errors
 	 */
 	public void flushIfNecessary(PersistenceManager pm, boolean existingTransaction) throws JDOException {
-		if (this.flushEager) {
+		if (isFlushEager()) {
 			logger.debug("Eagerly flushing JDO persistence manager");
 			getJdoDialect().flush(pm);
 		}
@@ -148,14 +148,12 @@ public abstract class JdoAccessor implements InitializingBean {
 
 	/**
 	 * Convert the given JDOException to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy. Delegates to the JdoDialect
-	 * if set, falling back to PersistenceManagerFactoryUtils' standard exception
-	 * translation else.
-	 * <p>May be overridden in subclasses.
+	 * <code>org.springframework.dao</code> hierarchy.
+	 * <p>Default implementation delegates to the JdoDialect.
+	 * May be overridden in subclasses.
 	 * @param ex JDOException that occured
 	 * @return the corresponding DataAccessException instance
 	 * @see JdoDialect#translateException
-	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException
 	 */
 	public DataAccessException convertJdoAccessException(JDOException ex) {
 		return getJdoDialect().translateException(ex);
