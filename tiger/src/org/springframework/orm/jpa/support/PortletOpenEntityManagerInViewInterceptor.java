@@ -18,7 +18,6 @@ package org.springframework.orm.jpa.support;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceException;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
@@ -104,7 +103,7 @@ public class PortletOpenEntityManagerInViewInterceptor extends HandlerIntercepto
 		else {
 			logger.debug("Opening JPA persistence manager in OpenEntityManagerInViewInterceptor");
 			try {
-				EntityManager em = getEntityManagerFactory().createEntityManager(PersistenceContextType.EXTENDED);
+				EntityManager em = getEntityManagerFactory().createEntityManager();
 				TransactionSynchronizationManager.bindResource(getEntityManagerFactory(), new EntityManagerHolder(em));
 			}
 			catch (PersistenceException ex) {

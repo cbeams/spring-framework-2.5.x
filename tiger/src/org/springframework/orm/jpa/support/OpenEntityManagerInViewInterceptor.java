@@ -104,7 +104,7 @@ public class OpenEntityManagerInViewInterceptor extends HandlerInterceptorAdapte
 		else {
 			logger.debug("Opening JPA persistence manager in OpenEntityManagerInViewInterceptor");
 			try {
-				EntityManager em = getEntityManagerFactory().createEntityManager(PersistenceContextType.EXTENDED);
+				EntityManager em = getEntityManagerFactory().createEntityManager();
 				TransactionSynchronizationManager.bindResource(getEntityManagerFactory(), new EntityManagerHolder(em));
 			}
 			catch (PersistenceException ex) {

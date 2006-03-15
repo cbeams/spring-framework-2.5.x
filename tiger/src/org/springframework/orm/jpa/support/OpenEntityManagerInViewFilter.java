@@ -20,7 +20,6 @@ import java.io.IOException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -101,7 +100,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 		else {
 			logger.debug("Opening JPA persistence manager in OpenEntityManagerInViewFilter");
 			try {
-				em = emf.createEntityManager(PersistenceContextType.EXTENDED);
+				em = emf.createEntityManager();
 				TransactionSynchronizationManager.bindResource(emf, new EntityManagerHolder(em));
 			}
 			catch (PersistenceException ex) {
