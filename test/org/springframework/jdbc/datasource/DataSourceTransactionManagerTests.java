@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,7 +30,7 @@ import org.easymock.MockControl;
 import org.springframework.core.JdkVersion;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.UncategorizedSQLException;
-import org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor;
+import org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -85,6 +85,10 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		if (lazyConnection) {
 			ds.getConnection();
 			dsControl.setReturnValue(con, 1);
+			if (createStatement) {
+				con.getMetaData();
+				conControl.setReturnValue(null, 1);
+			}
 			con.getAutoCommit();
 			conControl.setReturnValue(autoCommit, 1);
 			con.getTransactionIsolation();
@@ -140,7 +144,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 				try {
 					if (createStatement) {
 						tCon.createStatement();
-						assertEquals(con, new CommonsDbcpNativeJdbcExtractor().getNativeConnection(tCon));
+						assertEquals(con, new SimpleNativeJdbcExtractor().getNativeConnection(tCon));
 					}
 				}
 				catch (SQLException ex) {
@@ -707,6 +711,8 @@ public class DataSourceTransactionManagerTests extends TestCase {
 
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
+		con.getMetaData();
+		conControl.setReturnValue(null, 1);
 		con.getAutoCommit();
 		conControl.setReturnValue(true, 1);
 		con.setAutoCommit(false);
@@ -733,7 +739,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 				TransactionAwareDataSourceProxy dsProxy = new TransactionAwareDataSourceProxy(ds);
 				try {
 					assertEquals(con, ((ConnectionProxy) dsProxy.getConnection()).getTargetConnection());
-					assertEquals(con, new CommonsDbcpNativeJdbcExtractor().getNativeConnection(dsProxy.getConnection()));
+					assertEquals(con, new SimpleNativeJdbcExtractor().getNativeConnection(dsProxy.getConnection()));
 					// should be ignored
 					dsProxy.getConnection().close();
 				}

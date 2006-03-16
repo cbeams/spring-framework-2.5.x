@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,13 +32,13 @@ import org.apache.commons.logging.LogFactory;
  * <p>This extractor should work with any pool that does not wrap DatabaseMetaData,
  * and will also work with any plain JDBC driver. Note that a pool can still wrap
  * Statements, PreparedStatements, etc: The only requirement of this extractor is
- * that java.sql.DatabaseMetaData does not get wrapped, returning the native
- * Connection of the JDBC driver on <code>metaData.getConnection()</code>.
+ * that <code>java.sql.DatabaseMetaData</code> does not get wrapped, returning the
+ * native Connection of the JDBC driver on <code>metaData.getConnection()</code>.
  *
  * <p>Customize this extractor by setting the "nativeConnectionNecessaryForXxx"
  * flags accordingly: If Statements, PreparedStatements, and/or CallableStatements
  * are wrapped by your pool, set the corresponding "nativeConnectionNecessaryForXxx"
- * flags to true. If none of the statement types is wrapped - or you solely need
+ * flags to "true". If none of the statement types is wrapped - or you solely need
  * Connection unwrapping in the first place -, the defaults are fine.
  *
  * <p>SimpleNativeJdbcExtractor is a common choice for use with OracleLobHandler,
@@ -59,7 +59,7 @@ import org.apache.commons.logging.LogFactory;
  * <li>Use a default SimpleNativeJdbcExtractor for Resin and SJSAS (no JDBC
  * Statement objects are wrapped, therefore no special unwrapping is necessary).
  * <li>Use a SimpleNativeJdbcExtractor with all "nativeConnectionNecessaryForXxx"
- * flags set to true for OC4J and C3P0 (all JDBC Statement objects are wrapped,
+ * flags set to "true" for OC4J and C3P0 (all JDBC Statement objects are wrapped,
  * but none of the wrappers allow for unwrapping).
  * <li>Use a CommonsDbcpNativeJdbcExtractor for Jakarta Commons DBCP respectively
  * a JBossNativeJdbcExtractor for JBoss (all JDBC Statement objects are wrapped,
@@ -79,8 +79,6 @@ import org.apache.commons.logging.LogFactory;
  * @see org.springframework.jdbc.support.lob.OracleLobHandler#setNativeJdbcExtractor
  */
 public class SimpleNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private boolean nativeConnectionNecessaryForNativeStatements = false;
 
@@ -147,20 +145,6 @@ public class SimpleNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 		return nativeConnectionNecessaryForNativeCallableStatements;
-	}
-
-
-	/**
-	 * Retrieve the Connection via the DatabaseMetaData object, which will
-	 * result in the native JDBC Connection with many connection pools.
-	 * @see java.sql.DatabaseMetaData#getConnection
-	 */
-	protected Connection doGetNativeConnection(Connection con) throws SQLException {
-		Connection nativeCon = con.getMetaData().getConnection();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Returning native Connection [" + nativeCon + "] for given Connection handle [" + con + "]");
-		}
-		return nativeCon;
 	}
 
 }
