@@ -133,4 +133,8 @@ public interface BeanDefinition {
 	 */
 	Object getAttribute(String key);
 
+	/**
+	 * Gets all attribute names.
+	 */
+	String[] attributeNames();
 }

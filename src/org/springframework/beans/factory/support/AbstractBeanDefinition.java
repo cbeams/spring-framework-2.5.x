@@ -20,6 +20,7 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -631,6 +632,10 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		return this.attributes.get(key);
 	}
 
+	public String[] attributeNames() {
+		Set attributeNames = this.attributes.keySet();
+		return (String[]) attributeNames.toArray(new String[attributeNames.size()]);
+	}
 
 	/**
 	 * Validate this bean definition.
