@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="beans">
-  <title>Beans, BeanFactory and the ApplicationContext</title>
+  <title>The IoC container</title>
 
   <sect1 id="beans-introduction">
     <title>Introduction</title>
@@ -1337,20 +1337,21 @@ public class ReplacementComputeValue implements MethodReplacer {
     <sect2 id="beans-factory-autowire">
       <title>Autowiring collaborators</title>
 
-      <para>A BeanFactory is able to <emphasis>autowire</emphasis>
-      relationships between collaborating beans. This means it's possible to
+      <para>
+		A <interfacename>BeanFactory</interfacename> is able to <emphasis>autowire</emphasis>
+      relationships between collaborating beans. This means that it is possible to
       automatically let Spring resolve collaborators (other beans) for your
-      bean by inspecting the contents of the BeanFactory. The autowiring
+      bean by inspecting the contents of the <interfacename>BeanFactory</interfacename>. The autowiring
       functionality has five modes. Autowiring is specified
       <emphasis>per</emphasis> bean and can thus be enabled for some beans,
       while other beans won't be autowired. Using autowiring, it is possible
       to reduce or eliminate the need to specify properties or constructor
       arguments, saving a significant amount of typing.<footnote>
           <para>See <xref linkend="beans-factory-collaborators" /></para>
-        </footnote>In an XmlBeanFactory, the autowire mode for a bean
+        </footnote>In an <classname>XmlBeanFactory</classname>, the autowire mode for a bean
       definition is specified by using the <literal>autowire</literal>
-      attribute of the bean element. The following values are allowed.<table
-          frame="all">
+      attribute of the bean element. The following values are allowed.
+      <table frame="all">
           <title>Autowiring modes</title>
 
           <tgroup cols="2">
@@ -1382,12 +1383,12 @@ public class ReplacementComputeValue implements MethodReplacer {
                 <entry>byName</entry>
 
                 <entry>Autowiring by property name. This option will inspect
-                the BeanFactory and look for a bean named exactly the same as
+                the <interfacename>BeanFactory</interfacename> and look for a bean named exactly the same as
                 the property which needs to be autowired. For example, if you
                 have a bean definition which is set to autowire by name, and
                 it contains a <emphasis>master</emphasis> property (that is,
                 it has a <emphasis>setMaster</emphasis>(...) method), Spring
-                will look for a bean definition named master, and use it to
+                will look for a bean definition named <literal>master</literal>, and use it to
                 set the property.</entry>
               </row>
 
@@ -1395,7 +1396,7 @@ public class ReplacementComputeValue implements MethodReplacer {
                 <entry>byType</entry>
 
                 <entry>Allows a property to be autowired if there is exactly
-                one bean of the property type in the BeanFactory. If there is
+                one bean of the property type in the <interfacename>BeanFactory</interfacename>. If there is
                 more than one, a fatal exception is thrown, and this indicates
                 that you may not use <emphasis>byType</emphasis> autowiring
                 for that bean. If there are no matching beans, nothing
@@ -1426,31 +1427,42 @@ public class ReplacementComputeValue implements MethodReplacer {
           </tgroup>
         </table></para>
 
-      <para>Note that explicit dependencies in <literal>property</literal> and
-      <literal>constructor-arg</literal> elements always override autowiring.
-      Autowire behavior can be combined with dependency checking, which will
-      be performed after all autowiring has been
-      completed.<emphasis></emphasis></para>
-
-      <para>It's important to understand the pros and cons around autowiring.
-      Some advantages of autowiring:</para>
+      <para>
+		Note that explicit dependencies in <literal>property</literal> and
+		<literal>constructor-arg</literal> settings <interfacename>always</interfacename>
+		override autowiring. Please also note that it is not currently possible to autowire
+		so-called <emphasis>simple</emphasis> properties such as primitives,
+		<classname>Strings</classname>, and <classname>Classes</classname> (and arrays of such
+		simple properties).(This is by-design and should be considered a <emphasis>feature</emphasis>.)
+		Autowire behavior can be combined with dependency checking, which will
+		be performed after all autowiring has been completed.
+	  </para>
+      <para>
+		It is important to understand the pros and cons of autowiring. Some advantages of autowiring
+		include:
+	  </para>
 
       <itemizedlist>
         <listitem>
-          <para>It can significantly reduce the volume of configuration
-          required. (However, mechanisms such as the use of a configuration
-          "template," discussed elsewhere in this chapter, are also valuable
-          here.)</para>
+          <para>
+          Autowiring can significantly reduce the volume of configuration
+          required. However, mechanisms such as the use of a configuration
+          "template"
+          (<link linkend="beans-child-bean-definitions">discussed elsewhere in this chapter</link>)
+          are also valuable in this regard.
+          </para>
         </listitem>
 
         <listitem>
-          <para>It can cause configuration to keep itself up to date as your
-          objects evolve. For example, if you need to add an additional
-          dependency to a class, that dependency can be satisfied
-          automatically without the need to modify configuration. Thus there
-          may be a strong case for autowiring during development, without
-          ruling out the option of switching to explicit wiring when the code
-          base becomes more stable.</para>
+          <para>
+			Autowiring can cause configuration to keep itself up to date as your
+			objects evolve. For example, if you need to add an additional
+			dependency to a class, that dependency can be satisfied
+			automatically without the need to modify configuration. Thus there
+			may be a strong case for autowiring during development, without
+			ruling out the option of switching to explicit wiring when the code
+			base becomes more stable.
+          </para>
         </listitem>
       </itemizedlist>
 
@@ -1458,16 +1470,20 @@ public class ReplacementComputeValue implements MethodReplacer {
 
       <itemizedlist>
         <listitem>
-          <para>It's more magical than explicit wiring. Although, as noted in
-          the above table, Spring is careful to avoid guessing in case of
-          ambiguity which might have unexpected results, the relationships
-          between your Spring-managed objects is no longer explicitly
-          documented.</para>
+          <para>
+			Autowiring is more magical than explicit wiring. Although, as noted in
+			the above table, Spring is careful to avoid guessing in case of
+			ambiguity which might have unexpected results, the relationships
+			between your Spring-managed objects is no longer explicitly
+			documented.
+          </para>
         </listitem>
 
         <listitem>
-          <para>Wiring information may not be available to tools that may
-          generate documentation from a Spring application context.</para>
+          <para>
+			Wiring information may not be available to tools that may
+			generate documentation from a Spring container.
+		  </para>
         </listitem>
 
         <listitem>
@@ -3173,12 +3189,14 @@ public class Client {
       url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink></literal> by
       viewing their respective JavaDocs.</para>
 
-      <para>As mentioned in the chapter on EJBs, the Spring convenience base
-      classes for EJBs normally use a non-singleton
-      <literal>BeanFactoryLocator</literal> implementation, which is easily
-      replaced by the use of <literal>SingletonBeanFactoryLocator</literal>
-      and <literal>ContextSingletonBeanFactoryLocator</literal> if there is a
-      need.</para>
+		<para>
+		  As mentioned in the <link linkend="ejb">chapter on EJBs</link>, the Spring convenience base
+		  classes for EJBs normally use a non-singleton
+		  <classname>BeanFactoryLocator</classname> implementation, which is easily
+		  replaced by the use of <classname>SingletonBeanFactoryLocator</classname>
+		  and <classname>ContextSingletonBeanFactoryLocator</classname> if there is a
+		  need.
+		</para>
     </sect2>
   </sect1>
 </chapter>
