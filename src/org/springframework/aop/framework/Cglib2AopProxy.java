@@ -58,9 +58,8 @@ import org.springframework.aop.support.AopUtils;
  * <p>Proxies created using this class are thread-safe if the underlying
  * (target) class is thread-safe.
  *
- * <p>Built and tested against CGLIB 2.0.2, as of Spring 1.1.
- * Basic functionality will still work on CGLIB 2.0.1, but it is
- * generally recommended to use CGLIB 2.0.2 or later.
+ * <p>Built and tested against CGLIB 2.1, as of Spring 2.0.
+ * Earlier CGLIB versions are not supported anymore.
  *
  * @author Rod Johnson
  * @author Rob Harrop
@@ -84,29 +83,21 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	private static final int INVOKE_EQUALS = 5;
 
 
-	/**
-	 * Static to optimize serialization
-	 */
+	/** Static to optimize serialization */
 	protected final static Log logger = LogFactory.getLog(Cglib2AopProxy.class);
 
-	/**
-	 * Keeps track of the <code>Class</code>es that we have validated for final methods
-	 */
-	private static Set validatedClasses = new HashSet();
+	/** Keeps track of the Classes that we have validated for final methods */
+	private static final Set validatedClasses = new HashSet();
 
 
-	/**
-	 * Config used to configure this proxy
-	 */
+	/** Config used to configure this proxy */
 	protected final AdvisedSupport advised;
 
 	private Object[] constructorArgs;
 
 	private Class[] constructorArgTypes;
 
-	/**
-	 * Dispatcher used for methods on <code>Advised</code>
-	 */
+	/** Dispatcher used for methods on Advised */
 	private final transient AdvisedDispatcher advisedDispatcher = new AdvisedDispatcher();
 
 	private transient int fixedInterceptorOffset;
@@ -168,7 +159,12 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			Class rootClass = this.advised.getTargetSource().getTargetClass();
 			Class proxySuperClass = (AopUtils.isCglibProxyClass(rootClass)) ? rootClass.getSuperclass() : rootClass;
 
-			// validate the class, writing log messages as necessary
+			// Create proxy in specific ClassLoader, if given.
+			if (classLoader != null) {
+				enhancer.setClassLoader(classLoader);
+			}
+
+			// Validate the class, writing log messages as necessary.
 			validateClassIfNecessary(proxySuperClass);
 
 			enhancer.setSuperclass(proxySuperClass);
@@ -190,7 +186,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			}
 			enhancer.setCallbackTypes(types);
 
-			// generate the proxy class and create a proxy instance
+			// Generate the proxy class and create a proxy instance.
 			Object proxy;
 			if (this.constructorArgs != null) {
 				proxy = enhancer.create(this.constructorArgTypes, this.constructorArgs);
