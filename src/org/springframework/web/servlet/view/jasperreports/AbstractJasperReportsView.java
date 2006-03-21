@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,6 @@ import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.core.io.Resource;
@@ -127,21 +126,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	protected static final String CONTENT_DISPOSITION_INLINE = "inline";
 
-	private static JRCompiler defaultReportCompiler;
-
-
-	static {
-		// Check whether JR 1.0.1 JRDefaultCompiler.getInstance() method is available.
-		try {
-			JRDefaultCompiler.class.getMethod("getInstance", new Class[0]);
-			defaultReportCompiler = JRDefaultCompiler.getInstance();
-		}
-		catch (NoSuchMethodException ex) {
-			// Fall back to public JRDefaultCompiler no-arg constructor (<= JR 1.0.0)
-			defaultReportCompiler = null;
-		}
-	}
-
 
 	/**
 	 * A String key used to lookup the <code>JRDataSource</code> in the model.
@@ -185,7 +169,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Holds the JRCompiler implementation to use for compiling reports on-the-fly.
 	 */
-	private JRCompiler reportCompiler = defaultReportCompiler;
+	private JRCompiler reportCompiler = JRDefaultCompiler.getInstance();
 
 	/**
 	 * The <code>JasperReport</code> that is used to render the view.
@@ -316,18 +300,13 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @see net.sf.jasperreports.engine.design.JRDefaultCompiler
 	 */
 	public void setReportCompiler(JRCompiler reportCompiler) {
-		this.reportCompiler = reportCompiler;
+		this.reportCompiler = (reportCompiler != null ? reportCompiler : JRDefaultCompiler.getInstance());
 	}
 
 	/**
 	 * Return the JRCompiler instance to use for compiling ".jrxml" report files.
 	 */
 	protected JRCompiler getReportCompiler() {
-		if (this.reportCompiler == null) {
-			// No JR 1.0.1 JRDefaultCompiler.getInstance() method available -
-			// assuming public JRDefaultCompiler no-arg constructor (<= JR 1.0.0)
-			this.reportCompiler = (JRCompiler) BeanUtils.instantiateClass(JRDefaultCompiler.class);
-		}
 		return reportCompiler;
 	}
 
@@ -503,6 +482,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		}
 	}
 
+
 	/**
 	 * Finds the report data to use for rendering the report and then invokes the
 	 * <code>renderReport</code> method that should be implemented by the subclass.
@@ -513,12 +493,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
-
-		response.reset();
-		response.setContentType(getContentType());
-
-		// Populate HTTP headers.
-		populateHeaders(response);
 
 		if (this.subReports != null) {
 			// Expose sub-reports as model attributes.
@@ -536,9 +510,13 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		// Expose Spring-managed Locale and MessageSource.
 		exposeLocalizationContext(model, request);
 
-		// Fill and render the report.
+		// Fill the report.
 		JasperPrint filledReport = fillReport(model);
 		postProcessReport(filledReport, model);
+
+		// Prepare response and render report.
+		response.reset();
+		populateHeaders(response);
 		renderReport(filledReport, model, response);
 	}
 
@@ -619,7 +597,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Populates the headers in the <code>HttpServletResponse.</code> with the
+	 * Populates the headers in the <code>HttpServletResponse</code> with the
 	 * headers supplied by the user.
 	 */
 	private void populateHeaders(HttpServletResponse response) {
@@ -730,10 +708,21 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
 	/**
 	 * Subclasses should implement this method to perform the actual rendering process.
+	 * <p>Note that the content type has not been set yet: Implementors should build
+	 * a content type String and set it via <code>response.setContentType</code>.
+	 * If necessary, this can include a charset clause for a specific encoding.
+	 * The latter will only be necessary for textual output onto a Writer, and only
+	 * in case of the encoding being specified in the JasperReports exporter parameters.
+	 * <p><b>WARNING:</b> Implementors should not use <code>response.setCharacterEncoding</code>
+	 * unless they are willing to depend on Servlet API 2.4 or higher. Prefer a
+	 * concatenated content type String with a charset clause instead.
 	 * @param populatedReport the populated <code>JasperPrint</code> to render
 	 * @param model the map containing report parameters
 	 * @param response the HTTP response the report should be rendered to
 	 * @throws Exception if rendering failed
+	 * @see #getContentType()
+	 * @see javax.servlet.ServletResponse#setContentType
+	 * @see javax.servlet.ServletResponse#setCharacterEncoding
 	 */
 	protected abstract void renderReport(JasperPrint populatedReport, Map model, HttpServletResponse response)
 			throws Exception;
