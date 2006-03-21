@@ -17,7 +17,10 @@
  */
 package org.springframework.osgi.context.support;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Properties;
 
 import org.osgi.framework.Bundle;
@@ -86,6 +89,7 @@ public class OsgiBundleXmlApplicationContext extends
 		this.configLocations = configLocations;
 		this.osgiBundleContext = aBundleContext;
 		this.osgiBundle = this.osgiBundleContext.getBundle();
+		this.setClassLoader(createBundleClassLoader(this.osgiBundle));
 		refresh();
 
 		publishContextAsOsgiService();
@@ -191,5 +195,29 @@ public class OsgiBundleXmlApplicationContext extends
 		beanFactory.addBeanPostProcessor(new BundleContextAwareProcessor(this.osgiBundleContext));
 		beanFactory.ignoreDependencyInterface(BundleContextAware.class);
 	}
-	
+
+	private ClassLoader createBundleClassLoader(Bundle bundle) {
+		return new BundleClassLoader(bundle);
+	}
+
+	private static class BundleClassLoader extends ClassLoader {
+		
+		private Bundle backingBundle;
+		
+		public BundleClassLoader(Bundle aBundle) {
+			this.backingBundle = aBundle;
+		}
+		
+		protected Class findClass(String name) throws ClassNotFoundException {
+			return this.backingBundle.loadClass(name);
+		}
+		
+		protected URL findResource(String name) {
+			return this.backingBundle.getResource(name);
+		}
+		
+		protected Enumeration findResources(String name) throws IOException {
+			return this.backingBundle.getResources(name);
+		}
+	}
 }
