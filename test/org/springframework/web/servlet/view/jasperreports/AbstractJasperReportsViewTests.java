@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,6 @@
 
 package org.springframework.web.servlet.view.jasperreports;
 
-import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.data.JRAbstractBeanDataSourceProvider;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import org.easymock.MockControl;
-import org.springframework.context.ApplicationContextException;
-import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.ui.jasperreports.PersonBean;
-
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -35,16 +23,25 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.sql.DataSource;
+
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRAbstractBeanDataSourceProvider;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import org.easymock.MockControl;
+
+import org.springframework.context.ApplicationContextException;
+import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.ui.jasperreports.PersonBean;
+
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
 public abstract class AbstractJasperReportsViewTests extends AbstractJasperReportsTests {
-
-	protected abstract AbstractJasperReportsView getViewImplementation();
-
-	protected abstract String getDesiredContentType();
-
 
 	protected AbstractJasperReportsView getView(String url) throws Exception {
 		AbstractJasperReportsView view = getViewImplementation();
@@ -102,10 +99,6 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 	public void testContentType() throws Exception {
 		AbstractJasperReportsView view = getView(COMPILED_REPORT);
-
-		// removed assert because not all views no in advance what the content type will be,
-		// plus the important test is the finished response.
-		//assertEquals("View content type is incorrect", getDesiredContentType(), view.getContentType());
 		view.render(getModel(), request, response);
 		assertEquals("Response content type is incorrect", getDesiredContentType(), response.getContentType());
 	}
@@ -328,7 +321,6 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 		assertNotNull("Header not present", response.getHeader(key));
 		assertEquals("Invalid header value", value, response.getHeader(key));
-
 	}
 
 	public void testWithSqlDataSource() throws Exception {
@@ -396,6 +388,12 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		return ds;
 	}
 
+
+	protected abstract AbstractJasperReportsView getViewImplementation();
+
+	protected abstract String getDesiredContentType();
+
+
 	private class MockDataSourceProvider extends JRAbstractBeanDataSourceProvider {
 
 		public MockDataSourceProvider(Class clazz) {
@@ -410,4 +408,5 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 		}
 	}
+
 }
