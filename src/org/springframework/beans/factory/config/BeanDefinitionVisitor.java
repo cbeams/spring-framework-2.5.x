@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,14 +55,10 @@ public abstract class BeanDefinitionVisitor {
 	 */
 	public void visitBeanDefinition(BeanDefinition beanDefinition) {
 		MutablePropertyValues pvs = beanDefinition.getPropertyValues();
-		if (pvs != null) {
-			visitPropertyValues(pvs);
-		}
+		visitPropertyValues(pvs);
 		ConstructorArgumentValues cas = beanDefinition.getConstructorArgumentValues();
-		if (cas != null) {
-			visitIndexedArgumentValues(cas.getIndexedArgumentValues());
-			visitGenericArgumentValues(cas.getGenericArgumentValues());
-		}
+		visitIndexedArgumentValues(cas.getIndexedArgumentValues());
+		visitGenericArgumentValues(cas.getGenericArgumentValues());
 	}
 
 	protected void visitPropertyValues(MutablePropertyValues pvs) {

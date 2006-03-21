@@ -81,19 +81,21 @@ public interface BeanDefinition {
 	 */
 	boolean isLazyInit();
 
+
 	/**
-	 * Return the PropertyValues to be applied to a new instance of the bean, if any.
+	 * Return the constructor argument values for this bean.
 	 * Can be modified during bean factory post-processing.
-	 * @return the PropertyValues object, or <code>null</code>
+	 * @return the ConstructorArgumentValues object (never <code>null</code>)
+	 */
+	ConstructorArgumentValues getConstructorArgumentValues();
+
+	/**
+	 * Return the property values to be applied to a new instance of the bean.
+	 * Can be modified during bean factory post-processing.
+	 * @return the MutablePropertyValues object (never <code>null</code>)
 	 */
 	MutablePropertyValues getPropertyValues();
 
-	/**
-	 * Return the constructor argument values for this bean, if any.
-	 * Can be modified during bean factory post-processing.
-	 * @return the ConstructorArgumentValues object, or <code>null</code>
-	 */
-	ConstructorArgumentValues getConstructorArgumentValues();
 
 	/**
 	 * Return a description of the resource that this bean definition
@@ -118,10 +120,11 @@ public interface BeanDefinition {
 	 */
 	int getRole();
 
+
 	/**
-	 * Attaches a generic, keyed metadata attribute to this <code>BeanDefinition</code>.
-	 * Users should take care to prevent overlaps with other metadata attributes by using
-	 * fully-qualified names, perhaps using class or package names.
+	 * Attach a generic, keyed metadata attribute to this bean definition.
+	 * Users should take care to prevent overlaps with other metadata attributes by
+	 * using fully-qualified names, perhaps using class or package names as prefix.
 	 * @param key the unique attribute key
 	 * @param value the attribute value to be attached
 	 */
@@ -134,7 +137,8 @@ public interface BeanDefinition {
 	Object getAttribute(String key);
 
 	/**
-	 * Gets all attribute names.
+	 * Return the names of all registered attributes as String array.
 	 */
 	String[] attributeNames();
+
 }

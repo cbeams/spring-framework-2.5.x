@@ -435,7 +435,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Return constructor argument values for this bean, if any.
+	 * Return constructor argument values for this bean (never <code>null</code>).
 	 */
 	public ConstructorArgumentValues getConstructorArgumentValues() {
 		return constructorArgumentValues;
@@ -445,7 +445,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 * Return if there are constructor argument values defined for this bean.
 	 */
 	public boolean hasConstructorArgumentValues() {
-		return (constructorArgumentValues != null && !constructorArgumentValues.isEmpty());
+		return !this.constructorArgumentValues.isEmpty();
 	}
 
 	/**
@@ -456,12 +456,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Return property values for this bean, if any. Never returns <code>null</code>.
+	 * Return property values for this bean (never <code>null</code>).
 	 */
 	public MutablePropertyValues getPropertyValues() {
-		if (this.propertyValues == null) {
-			this.propertyValues = new MutablePropertyValues();
-		}
 		return this.propertyValues;
 	}
 
@@ -469,7 +466,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 * Specify method overrides for the bean, if any.
 	 */
 	public void setMethodOverrides(MethodOverrides methodOverrides) {
-		this.methodOverrides = (methodOverrides != null) ? methodOverrides : new MethodOverrides();
+		this.methodOverrides = (methodOverrides != null ? methodOverrides : new MethodOverrides());
 	}
 
 	/**
