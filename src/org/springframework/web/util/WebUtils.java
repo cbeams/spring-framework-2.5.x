@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,15 +42,20 @@ import org.springframework.util.StringUtils;
 public abstract class WebUtils {
 
 	/**
-	 * Default character encoding to use when request.getCharacterEncoding
-	 * returns null, according to the Servlet spec.
+	 * Prefix of the charset clause in a content type String: ";charset="
+	 */
+	public static final String CONTENT_TYPE_CHARSET_PREFIX = ";charset=";
+
+	/**
+	 * Default character encoding to use when <code>request.getCharacterEncoding</code>
+	 * returns <code>null</code>, according to the Servlet spec.
 	 * @see ServletRequest#getCharacterEncoding
 	 */
 	public static final String DEFAULT_CHARACTER_ENCODING = "ISO-8859-1";
 
 	/**
 	 * Standard Servlet spec context attribute that specifies a temporary
-	 * directory for the current web application, of type java.io.File
+	 * directory for the current web application, of type <code>java.io.File</code>.
 	 */
 	public static final String TEMP_DIR_CONTEXT_ATTRIBUTE = "javax.servlet.context.tempdir";
 
@@ -69,11 +74,11 @@ public abstract class WebUtils {
 	/** Default web app root key: "webapp.root" */
 	public static final String DEFAULT_WEB_APP_ROOT_KEY = "webapp.root";
 
-	/* Key for the mutex session attribute */
-	public static final String SESSION_MUTEX_ATTRIBUTE = WebUtils.class.getName() + ".MUTEX";
-
 	/** Name suffixes in case of image buttons */
 	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
+
+	/* Key for the mutex session attribute */
+	public static final String SESSION_MUTEX_ATTRIBUTE = WebUtils.class.getName() + ".MUTEX";
 
 
 	/**
