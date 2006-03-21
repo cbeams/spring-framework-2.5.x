@@ -83,7 +83,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 			Object resolvedValue = evaluate("value", this.value);
 
 			if (boundValue != null && boundValue.getClass().isArray()) {
-				renderFromCollection(resolvedValue, CollectionUtils.toList(boundValue), tagWriter);
+				renderFromCollection(resolvedValue, CollectionUtils.arrayToList(boundValue), tagWriter);
 			}
 			else if (boundValue instanceof Collection) {
 				renderFromCollection(resolvedValue, (Collection) boundValue, tagWriter);

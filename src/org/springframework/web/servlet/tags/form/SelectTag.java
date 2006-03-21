@@ -155,7 +155,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 			Object itemsObject = evaluate("items", this.items);
 
 			if (itemsObject.getClass().isArray()) {
-				renderFromCollection(CollectionUtils.toList(itemsObject), tagWriter);
+				renderFromCollection(CollectionUtils.arrayToList(itemsObject), tagWriter);
 			}
 			else if (itemsObject instanceof Collection) {
 				renderFromCollection((Collection) itemsObject, tagWriter);
