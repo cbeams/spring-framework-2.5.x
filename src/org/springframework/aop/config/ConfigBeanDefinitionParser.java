@@ -118,7 +118,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		
 		NodeList childNodes = element.getChildNodes();
 
-		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
+		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(registry);
 
 		boolean proxyTargetClass = TRUE.equals(element.getAttribute(PROXY_TARGET_CLASS));
 		if (proxyTargetClass) {
@@ -318,13 +318,11 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 		// create the method factory bean
 		RootBeanDefinition methodDefinition = new RootBeanDefinition(MethodLocatingFactoryBean.class);
-		methodDefinition.setPropertyValues(new MutablePropertyValues());
 		methodDefinition.getPropertyValues().addPropertyValue("targetBeanName", aspectName);
 		methodDefinition.getPropertyValues().addPropertyValue("methodName", adviceElement.getAttribute("method"));
 
 		// create instance factory definition
 		RootBeanDefinition instanceFactoryDefinition = new RootBeanDefinition(BeanFactoryAspectInstanceFactory.class);
-		instanceFactoryDefinition.setPropertyValues(new MutablePropertyValues());
 		instanceFactoryDefinition.getPropertyValues().addPropertyValue("aspectBeanName", aspectName);
 
 		// create the advice
@@ -340,8 +338,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			adviceDefinition = new RootBeanDefinition(getAdviceClass(adviceElement));
 			isAroundAdvice = AROUND.equals(adviceElement.getLocalName());
 		}
-		adviceDefinition.setPropertyValues(new MutablePropertyValues());
-		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_NAME_PROPERTY,aspectName);		
+		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_NAME_PROPERTY,aspectName);
 		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_BEAN_PROPERTY, new RuntimeBeanReference(aspectName));		
 		adviceDefinition.getPropertyValues().addPropertyValue(DECLARATION_ORDER_PROPERTY,new Integer(order));		
 		if (adviceElement.hasAttribute(RETURNING)) {

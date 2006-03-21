@@ -21,4 +21,10 @@
 		</xsd:complexType>
 	</xsd:element>
 
+	<xsd:element name="property-path">
+		<xsd:complexType>
+			<xsd:attribute name="id" type="xsd:string"/>
+			<xsd:attribute name="path" type="xsd:string" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
 </xsd:schema>

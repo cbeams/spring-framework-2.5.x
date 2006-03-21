@@ -31,6 +31,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 	public UtilNamespaceHandler() {
 		registerBeanDefinitionParser("properties", new PropertiesBeanDefinitionParser());
 		registerBeanDefinitionParser("constant", new ConstantBeanDefinitionParser());
+		registerBeanDefinitionParser("property-path", new PropertyPathBeanDefinitionParser());
 	}
 
 

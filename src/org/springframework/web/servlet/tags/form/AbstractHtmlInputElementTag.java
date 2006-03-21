@@ -50,12 +50,12 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	 */
 	public static final String ACCESSKEY_ATTRIBUTE = "accesskey";
 
-    /**
-     * The name of the '<code>disabled</code>' attribute.
-     */
-    public static final String DISABLED_ATTRIBUTE = "disabled";
+	/**
+	 * The name of the '<code>disabled</code>' attribute.
+	 */
+	public static final String DISABLED_ATTRIBUTE = "disabled";
 
-    /**
+	/**
 	 * The value of the '<code>onfocus</code>' attribute.
 	 */
 	private String onfocus;
@@ -75,18 +75,18 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	 */
 	private String accesskey;
 
-    /**
-     * The value of the '<code>disabled</code>' attribute.
-     */
-    protected String disabled;
+	/**
+	 * The value of the '<code>disabled</code>' attribute.
+	 */
+	protected String disabled;
 
-    /**
-     * Sets the value of the '<code>onfocus</code>' attribute.
-     * May be a runtime expression.
-     */
-    public void setOnfocus(String onfocus) {
-        this.onfocus = onfocus;
-    }
+	/**
+	 * Sets the value of the '<code>onfocus</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setOnfocus(String onfocus) {
+		this.onfocus = onfocus;
+	}
 
 	/**
 	 * Sets the value of the '<code>onblur</code>' attribute.
@@ -112,13 +112,13 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 		this.accesskey = accesskey;
 	}
 
-    /**
-     * Sets the value of the '<code>disabled</code>' attribute.
-     * May be a runtime expression.
-     */
-    public void setDisabled(String disabled) {
-        this.disabled = disabled;
-    }
+	/**
+	 * Sets the value of the '<code>disabled</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setDisabled(String disabled) {
+		this.disabled = disabled;
+	}
     
     /**
 	 * Writes the default attributes configured via this base class to the supplied {@link TagWriter}.

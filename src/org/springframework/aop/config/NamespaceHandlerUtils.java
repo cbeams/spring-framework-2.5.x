@@ -16,7 +16,7 @@
 
 package org.springframework.aop.config;
 
-import org.springframework.aop.aspectj.autoproxy.AspectJInvocationContextExposingAdvisorAutoProxyCreator;
+import org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvisorAutoProxyCreator;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -29,9 +29,6 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class NamespaceHandlerUtils {
 
-	// TODO: Can short-circuit these methods when previously registered via this class.
-	// TODO: How eagerly should this try to look for user-registered auto-proxy creators?
-
 	public static final String AUTO_PROXY_CREATOR_BEAN_NAME =
 			"org.springframework.aop.config.internalAutoProxyCreator";
 
@@ -43,16 +40,14 @@ public abstract class NamespaceHandlerUtils {
 
 
 	public static void registerAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
-		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
-			// already have the apc
-			return;
+		if (!registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
+			RootBeanDefinition definition = new RootBeanDefinition(InvocationContextExposingAdvisorAutoProxyCreator.class);
+			registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, definition);
 		}
-		RootBeanDefinition definition = new RootBeanDefinition(AspectJInvocationContextExposingAdvisorAutoProxyCreator.class);
-		registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, definition);
 	}
 
 	public static void registerAspectJAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
-		Class baseApcClass = AspectJInvocationContextExposingAdvisorAutoProxyCreator.class;
+		Class baseApcClass = InvocationContextExposingAdvisorAutoProxyCreator.class;
 		Class ajApcClass = getAspectJAutoProxyCreatorClassIfPossible();
 
 		if (ajApcClass == null) {
@@ -85,7 +80,6 @@ public abstract class NamespaceHandlerUtils {
 			 }
 
 			 definition.getPropertyValues().addPropertyValue("proxyTargetClass", Boolean.TRUE);
-
 		 }
 	}
 

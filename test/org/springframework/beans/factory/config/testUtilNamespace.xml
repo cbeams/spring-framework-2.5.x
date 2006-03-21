@@ -10,9 +10,19 @@
 
 	<util:constant id="min" staticField="java.lang.Integer.MIN_VALUE"/>
 
+
+	<util:property-path id="name" path="configuredBean.name"/>
+
 	<bean id="testBean" class="org.springframework.beans.TestBean">
+		<property name="name">
+			<util:property-path path="configuredBean.name"/>
+		</property>
 		<property name="someProperties">
 			<util:properties location="classpath:org/springframework/beans/factory/config/util.properties"/>
 		</property>
+	</bean>
+
+	<bean id="configuredBean" class="org.springframework.beans.TestBean">
+		<property name="name" value="Rob Harrop"/>
 	</bean>
 </beans>

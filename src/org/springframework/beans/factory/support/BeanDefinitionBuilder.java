@@ -102,9 +102,6 @@ public class BeanDefinitionBuilder  {
 	 * Adds the supplied property value under the given name.
 	 */
 	public BeanDefinitionBuilder addPropertyValue(String name, Object value) {
-		if(this.beanDefinition.getPropertyValues() == null) {
-			this.beanDefinition.setPropertyValues(new MutablePropertyValues());
-		}
 		this.beanDefinition.getPropertyValues().addPropertyValue(new PropertyValue(name, value));
 		return this;
 	}
@@ -133,10 +130,6 @@ public class BeanDefinitionBuilder  {
 	 * additions are at the present point.
 	 */
 	public BeanDefinitionBuilder addConstructorArg(Object value) {
-		if(this.beanDefinition.getConstructorArgumentValues() == null) {
-			this.beanDefinition.setConstructorArgumentValues(new ConstructorArgumentValues());
-		}
-
 		this.beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(constructorArgIndex++, value);
 		return this;
 	}

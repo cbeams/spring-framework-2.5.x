@@ -456,10 +456,13 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Return property values for this bean, if any.
+	 * Return property values for this bean, if any. Never returns <code>null</code>.
 	 */
 	public MutablePropertyValues getPropertyValues() {
-		return propertyValues;
+		if (this.propertyValues == null) {
+			this.propertyValues = new MutablePropertyValues();
+		}
+		return this.propertyValues;
 	}
 
 	/**

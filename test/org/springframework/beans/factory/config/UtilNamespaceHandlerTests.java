@@ -71,4 +71,14 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		Properties props = bean.getSomeProperties();
 		assertEquals("Incorrect property value", "bar", props.get("foo"));		
 	}
+
+	public void testPropertyPath() throws Exception {
+		String name = (String) this.beanFactory.getBean("name");
+		assertEquals("Rob Harrop", name);
+	}
+
+	public void testNestedPropertyPath() throws Exception {
+		TestBean bean = (TestBean)this.beanFactory.getBean("testBean");
+		assertEquals("Rob Harrop", bean.getName());
+	}
 }

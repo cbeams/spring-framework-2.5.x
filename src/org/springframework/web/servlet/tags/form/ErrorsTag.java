@@ -26,6 +26,9 @@ import javax.servlet.jsp.JspException;
  */
 public class ErrorsTag extends AbstractHtmlElementTag {
 
+	/**
+	 * The HTML '<code>span</code>' tag.
+	 */
 	public static final String SPAN_TAG = "span";
 
 	private String delimiter = "<br/>";
