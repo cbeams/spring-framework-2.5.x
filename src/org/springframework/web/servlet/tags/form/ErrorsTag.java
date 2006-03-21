@@ -30,8 +30,16 @@ public class ErrorsTag extends AbstractHtmlElementTag {
 
 	private String delimiter = "<br/>";
 
+	public void setDelimiter(String delimiter) {
+		this.delimiter = delimiter;
+	}
+
 	protected boolean shouldRender() throws JspException {
 		return getBindStatus().isError();
+	}
+
+	protected String getName() throws JspException {
+		return getPath() + ".errors";
 	}
 
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
@@ -50,9 +58,5 @@ public class ErrorsTag extends AbstractHtmlElementTag {
 			tagWriter.endTag();
 		}
 		return EVAL_PAGE;
-	}
-
-	protected String getName() throws JspException {
-		return getPath() + ".errors";
 	}
 }
