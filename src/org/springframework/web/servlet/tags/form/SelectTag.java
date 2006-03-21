@@ -69,10 +69,10 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	public static final String LIST_VALUE_PAGE_ATTRIBUTE = "org.springframework.web.servlet.tags.form.SelectTag.listValue";
 
 	/**
-	 * The {@link Collection} of objects used to generate the inner
+	 * The {@link Collection}, {@link Map} or array of objects used to generate the inner
 	 * '<code>option</code>' tags.
 	 */
-	private String items;
+	private Object items;
 
 	/**
 	 * The name of the property mapped to the '<code>value</code>' attribute
@@ -99,14 +99,14 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	private TagWriter tagWriter;
 
 	/**
-	 * Sets the {@link Collection} of objects used to generate the inner
-	 * '<code>option</code>' tags. Required when wishing to render
+	 * Sets the {@link Collection}, {@link Map} or array of objects used to generate
+	 * the inner '<code>option</code>' tags. Required when wishing to render
 	 * '<code>option</code>' tags from an array, {@link Collection} or
 	 * {@link Map}.
 	 * Typically a runtime expression.
 	 */
-	public void setItems(String items) {
-		Assert.hasText(items, "'items' cannot be null or zero length.");
+	public void setItems(Object items) {
+		Assert.notNull(items, "'items' cannot be null.");
 		this.items = items;
 	}
 
@@ -152,7 +152,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 		tagWriter.writeOptionalAttributeValue("size", ObjectUtils.nullSafeToString(evaluate("size", this.size)));
 
 		if (this.items != null) {
-			Object itemsObject = evaluate("items", this.items);
+			Object itemsObject = (this.items instanceof String ? evaluate("items", (String)this.items) : this.items);
 
 			if (itemsObject.getClass().isArray()) {
 				renderFromCollection(CollectionUtils.arrayToList(itemsObject), tagWriter);

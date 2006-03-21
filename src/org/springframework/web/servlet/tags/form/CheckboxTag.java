@@ -49,13 +49,13 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	/**
 	 * The value of the '<code>value</code>' attribute.
 	 */
-	private String value;
+	private Object value;
 
 	/**
 	 * Sets the value of the '<code>value</code>' attribute.
 	 * May be a runtime expression.
 	 */
-	public void setValue(String value) {
+	public void setValue(Object value) {
 		Assert.notNull(value, "'value' cannot be null.");
 		this.value = value;
 	}
@@ -80,7 +80,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 				throw new IllegalArgumentException("Attribute 'value' is required when binding to non-Boolean values.");
 			}
 
-			Object resolvedValue = evaluate("value", this.value);
+			Object resolvedValue = (this.value instanceof String ? evaluate("value", (String)this.value) : this.value);
 
 			if (boundValue != null && boundValue.getClass().isArray()) {
 				renderFromCollection(resolvedValue, CollectionUtils.arrayToList(boundValue), tagWriter);

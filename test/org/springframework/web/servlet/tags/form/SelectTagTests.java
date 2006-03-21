@@ -49,7 +49,17 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 	public void testWithList() throws Exception {
 		this.tag.setPath("country");
+		this.tag.setItems(getCountries());
+		assertList();
+	}
+
+	public void testWithResolvedList() throws Exception {
+		this.tag.setPath("country");
 		this.tag.setItems("${countries}");
+		assertList();
+	}
+
+	private void assertList() throws JspException, DocumentException {
 		this.tag.setItemValue("isoCode");
 		this.tag.setItemLabel("name");
 		this.tag.setSize("5");
@@ -113,9 +123,19 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "name", "country");
 	}
 
+	public void testWithStringArray() throws Exception {
+		this.tag.setPath("name");
+		this.tag.setItems(getNames());
+		assertStringArray();
+	}
+
 	public void testWithResolvedStringArray() throws Exception {
 		this.tag.setPath("name");
 		this.tag.setItems("${names}");
+		assertStringArray();
+	}
+
+	private void assertStringArray() throws JspException, DocumentException {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 

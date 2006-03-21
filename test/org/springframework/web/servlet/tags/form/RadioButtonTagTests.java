@@ -51,6 +51,37 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "checked", "true");
 	}
 
+	public void testWithCheckedObjectValue() throws Exception {
+		this.tag.setPath("myFloat");
+		this.tag.setValue(getFloat());
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertTagOpened(output);
+		assertTagClosed(output);
+		assertContainsAttribute(output, "name", "myFloat");
+		assertContainsAttribute(output, "type", "radio");
+		assertContainsAttribute(output, "value", getFloat().toString());
+		assertContainsAttribute(output, "checked", "true");
+	}
+
+	public void testWithUncheckedObjectValue() throws Exception {
+		Float value = new Float("99.45");
+		this.tag.setPath("myFloat");
+		this.tag.setValue(value);
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertTagOpened(output);
+		assertTagClosed(output);
+		assertContainsAttribute(output, "name", "myFloat");
+		assertContainsAttribute(output, "type", "radio");
+		assertContainsAttribute(output, "value", value.toString());
+		assertAttributeNotPresent(output, "checked");
+	}
+
 	public void testWithUncheckedValue() throws Exception {
 		this.tag.setPath("sex");
 		this.tag.setValue("F");
@@ -74,9 +105,14 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		assertTrue(output.indexOf("/>") > -1);
 	}
 
+	private Float getFloat() {
+		return new Float("12.99");
+	}
+
 	protected TestBean createTestBean() {
 		TestBean bean = new TestBean();
 		bean.setSex("M");
+		bean.setMyFloat(getFloat());
 		return bean;
 	}
 }

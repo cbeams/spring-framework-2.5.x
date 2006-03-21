@@ -22,10 +22,11 @@ import org.dom4j.io.SAXReader;
 import org.springframework.beans.TestBean;
 
 import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.JspException;
 import java.io.StringReader;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Calendar;
 
 /**
  * @author Rob Harrop
@@ -193,6 +194,51 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("foo", checkboxElement.attribute("value").getValue());
 	}
 
+	public void testWithObjectChecked() throws Exception {
+		this.tag.setPath("date");
+		this.tag.setValue(getDate());
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
+		assertEquals("date", checkboxElement.attribute("name").getValue());
+		assertEquals("true", checkboxElement.attribute("checked").getValue());
+		assertEquals(getDate().toString(), checkboxElement.attribute("value").getValue());
+	}
+
+	public void testWithObjectUnchecked() throws Exception {
+		this.tag.setPath("date");
+		Date date = new Date();
+		this.tag.setValue(date);
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
+		assertEquals("date", checkboxElement.attribute("name").getValue());
+		assertNull(checkboxElement.attribute("checked"));
+		assertEquals(date.toString(), checkboxElement.attribute("value").getValue());
+	}
+
 	public void testWithNullValue() throws Exception {
 		try {
 			this.tag.setPath("name");
@@ -203,8 +249,21 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 			// success
 		}
 	}
+
+	private Date getDate() {
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.YEAR, 10);
+		cal.set(Calendar.MONTH, 10);
+		cal.set(Calendar.DATE, 10);
+		cal.set(Calendar.HOUR, 10);
+		cal.set(Calendar.MINUTE, 10);
+		cal.set(Calendar.SECOND, 10);
+		return cal.getTime();
+	}
+
 	protected TestBean createTestBean() {
 		this.bean = new TestBean();
+		this.bean.setDate(getDate());
 		this.bean.setName("Rob Harrop");
 		this.bean.setJedi(true);
 		this.bean.setStringArray(new String[]{"foo", "bar"});

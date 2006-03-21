@@ -25,7 +25,7 @@ import javax.servlet.jsp.JspException;
  * element with a '<code>type</code>' of '<code>radio</code>'.
  * <p/>
  * Rendered elements are marked as 'checked' if the configured
- * {@link #setValue(String) value} matches the {@link #getValue bound value}.
+ * {@link #setValue(Object) value} matches the {@link #getValue bound value}.
  * <p/>
  * A typical usage pattern will involved multiple tag instances bound
  * to the same property but with different values.
@@ -38,19 +38,19 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 	/**
 	 * The value of the '<code>value</code>' attribute.
 	 */
-	private String value;
+	private Object value;
 
 	/**
 	 * Sets the value of the '<code>value</code>' attribute.
 	 * May be a runtime expression.
 	 */
-	public void setValue(String value) {
+	public void setValue(Object value) {
 		this.value = value;
 	}
 
 	/**
 	 * Renders the '<code>input(radio)</code>' element with the configured
-	 * {@link #setValue(String) value}. Marks the element as checked if the
+	 * {@link #setValue(Object) value}. Marks the element as checked if the
 	 * value matches the {@link #getValue bound value}.
 	 */
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
@@ -58,7 +58,7 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute("type", "radio");
 
-		Object resolvedValue = evaluate("value", this.value);
+		Object resolvedValue = (this.value instanceof String ? evaluate("value", (String)this.value) : this.value);
 		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(resolvedValue));
 
 		if (isActiveValue(resolvedValue)) {
