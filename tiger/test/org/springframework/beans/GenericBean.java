@@ -18,7 +18,6 @@ package org.springframework.beans;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +33,8 @@ public class GenericBean {
 	private Set<Integer> integerSet;
 
 	private List<Resource> resourceList;
+
+	private Map plainMap;
 
 	private Map<Short, Integer> shortMap;
 
@@ -64,10 +65,9 @@ public class GenericBean {
 		this.resourceList = Collections.singletonList(resource);
 	}
 
-	public GenericBean(Map map, Map<Short, Integer> shortMap) {
-		this.shortMap = new HashMap<Short, Integer>();
-		this.shortMap.putAll(map);
-		this.shortMap.putAll(shortMap);
+	public GenericBean(Map plainMap, Map<Short, Integer> shortMap) {
+		this.plainMap = plainMap;
+		this.shortMap = shortMap;
 	}
 
 	public GenericBean(Map<Long, ?> longMap) {
@@ -93,6 +93,10 @@ public class GenericBean {
 
 	public void setResourceList(List<Resource> resourceList) {
 		this.resourceList = resourceList;
+	}
+
+	public Map getPlainMap() {
+		return plainMap;
 	}
 
 	public Map<Short, Integer> getShortMap() {
