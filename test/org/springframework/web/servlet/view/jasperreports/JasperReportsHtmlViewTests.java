@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,15 +36,18 @@ public class JasperReportsHtmlViewTests extends AbstractJasperReportsViewTests {
 		return "text/html";
 	}
 
-	public void testConfigureExporterParametersWithPropertiesFile() {
+	public void testConfigureExporterParametersWithEncodingFromPropertiesFile() throws Exception {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		BeanDefinitionReader reader = new PropertiesBeanDefinitionReader(applicationContext);
 		reader.loadBeanDefinitions(new ClassPathResource("view.properties", getClass()));
+		applicationContext.refresh();
 
 		AbstractJasperReportsView view = (AbstractJasperReportsView) applicationContext.getBean("report");
-		view.convertExporterParameters();
 		String encoding = (String) view.getConvertedExporterParameters().get(JRHtmlExporterParameter.CHARACTER_ENCODING);
 		assertEquals("UTF-8", encoding);
+
+		view.render(getModel(), request, response);
+		assertEquals("Response content type is incorrect", "text/html;charset=UTF-8", response.getContentType());
 	}
 
 }

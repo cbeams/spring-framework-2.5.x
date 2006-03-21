@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ import org.springframework.util.ClassUtils;
 public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 
 	/**
-	 * Default value used for format key.
+	 * Default value used for format key: "format"
 	 */
 	public static final String DEFAULT_FORMAT_KEY = "format";
 
@@ -203,21 +203,19 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 		// has been done - just need to convert parameters on the sub view.
 		view.convertExporterParameters();
 
-		response.setContentType(view.getContentType());
-
-		populateContentDispositionIfNecessary(format, response);
-
+		// Prepare response and render report.
+		populateContentDispositionIfNecessary(response, format);
 		view.renderReport(populatedReport, model, response);
 	}
 
 	/**
 	 * Adds/overwrites the <code>Content-Disposition</code> header value with the format-specific
 	 * value if the mappings have been specified and a valid one exists for the given format.
-	 * @param format the format key of the mapping
 	 * @param response the <code>HttpServletResponse</code> to set the header in
+	 * @param format the format key of the mapping
 	 * @see #setContentDispositionMappings
 	 */
-	private void populateContentDispositionIfNecessary(String format, HttpServletResponse response) {
+	private void populateContentDispositionIfNecessary(HttpServletResponse response, String format) {
 		if (this.contentDispositionMappings != null) {
 			String header = this.contentDispositionMappings.getProperty(format);
 			if (header != null) {
