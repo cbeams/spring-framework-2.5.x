@@ -60,6 +60,21 @@ public class MockFilterConfig implements FilterConfig {
 		this.filterName = filterName;
 	}
 
+	/**
+	 * Create new MockServletConfig with a MockServletContext.
+	 */
+	public MockFilterConfig() {
+		this(new MockServletContext());
+	}
+
+	/**
+	 * Create new MockServletConfig with a MockServletContext.
+	 * @param filterName the name of the filter
+	 */
+	public MockFilterConfig(String filterName) {
+		this(new MockServletContext(), filterName);
+	}
+
 
 	public String getFilterName() {
 		return filterName;
