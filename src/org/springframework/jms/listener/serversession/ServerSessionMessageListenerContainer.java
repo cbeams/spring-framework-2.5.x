@@ -113,7 +113,7 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 		Connection con = getConnection();
 		Destination destination = getDestination();
 		if (destination == null) {
-			Session session = con.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			Session session = createSession(con);
 			try {
 				destination = resolveDestinationName(session, getDestinationName());
 			}
