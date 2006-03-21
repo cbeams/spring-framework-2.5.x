@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,15 +173,15 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 	}
 
 	public void testThreeMappings() {
-		Exception oddException = new AnotherSomeOddException();
+		Exception oddException = new AnotherOddException();
 		Properties props = new Properties();
 		props.setProperty("java.lang.Exception", "error");
 		props.setProperty("SomeOddException", "another-error");
-		props.setProperty("AnotherSomeOddException", "another-some-error");
+		props.setProperty("AnotherOddException", "another-some-error");
 		exceptionResolver.setMappedHandlers(Collections.singleton(handler1));
 		exceptionResolver.setExceptionMappings(props);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, oddException);
-		assertEquals("another-error", mav.getViewName());
+		assertEquals("another-some-error", mav.getViewName());
 	}
 
 
@@ -190,7 +190,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 	}
 
 
-	private static class AnotherSomeOddException extends Exception {
+	private static class AnotherOddException extends Exception {
 
 	}
 
