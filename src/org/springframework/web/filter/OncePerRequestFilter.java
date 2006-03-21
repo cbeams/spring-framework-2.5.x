@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,7 +50,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 
 
 	/**
-	 * This doFilter implementation stores a request attribute for
+	 * This <code>doFilter</code> implementation stores a request attribute for
 	 * "already filtered", proceeding without filtering again if the
 	 * attribute is already there.
 	 * @see #getAlreadyFilteredAttributeName
@@ -80,19 +80,25 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 
 	/**
 	 * Return the name of the request attribute that identifies that a request
-	 * is already filtered. Default implementation takes the configured name
-	 * of the concrete filter instance and appends ".FILTERED".
+	 * is already filtered.
+	 * <p>Default implementation takes the configured name of the concrete filter
+	 * instance and appends ".FILTERED". If the filter is not fully initialized,
+	 * it falls back to its class name.
 	 * @see #getFilterName
 	 * @see #ALREADY_FILTERED_SUFFIX
 	 */
 	protected String getAlreadyFilteredAttributeName() {
-		return getFilterName() + ALREADY_FILTERED_SUFFIX;
+		String name = getFilterName();
+		if (name == null) {
+			name = getClass().getName();
+		}
+		return name + ALREADY_FILTERED_SUFFIX;
 	}
 
 	/**
-	 * Can return true to avoid filtering of the given request.
-	 * The default implementation always returns false.
-	 * Can be overridden in subclasses for custom filtering control.
+	 * Can be overridden in subclasses for custom filtering control,
+	 * returning <code>true</code> to avoid filtering of the given request.
+	 * <p>The default implementation always returns <code>false</code>.
 	 * @param request current HTTP request
 	 * @return whether the given request should <i>not</i> be filtered
 	 * @throws ServletException in case of errors
