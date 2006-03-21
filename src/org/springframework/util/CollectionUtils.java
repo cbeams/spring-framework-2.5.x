@@ -16,12 +16,12 @@
 
 package org.springframework.util;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.List;
-import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Miscellaneous collection utility methods.
@@ -99,10 +99,12 @@ public abstract class CollectionUtils {
 		if (coll.isEmpty()) {
 			return false;
 		}
+		boolean hasCandidate = false;
 		Object candidate = null;
 		for (Iterator it = coll.iterator(); it.hasNext();) {
 			Object elem = it.next();
-			if (candidate == null) {
+			if (!hasCandidate) {
+				hasCandidate = true;
 				candidate = elem;
 			}
 			else if (candidate != elem) {
@@ -155,18 +157,19 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Converts the supplied array into a {@link List}. Primitive arrays are correctly
-	 * converted into {@link List Lists} of the appropriate wrapper type.
+	 * Converts the supplied array into a List. Primitive arrays are
+	 * correctly converted into Lists of the appropriate wrapper type.
+	 * @param source the original array
+	 * @return the converted List result
 	 */
-	public static List toList(Object source) {
-		Assert.notNull(source, "'source' cannot be null.");
-
+	public static List arrayToList(Object source) {
+		Assert.notNull(source, "Source array must not be null");
 		if (!source.getClass().isArray()) {
-			throw new IllegalArgumentException("'source' is not an array");
+			throw new IllegalArgumentException("Source is not an array: " + source);
 		}
-
 		boolean primitive = source.getClass().getComponentType().isPrimitive();
 		Object[] array = (primitive ? ObjectUtils.toObjectArray(source) : (Object[]) source);
 		return Arrays.asList(array);
 	}
+
 }
