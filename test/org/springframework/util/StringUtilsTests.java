@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -413,8 +413,12 @@ public class StringUtilsTests extends TestCase {
 	public void testEndsWithIgnoreCase() {
 		String suffix = "fOo";
 
+		assertTrue(StringUtils.endsWithIgnoreCase("foo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("Foo", suffix));
 		assertTrue(StringUtils.endsWithIgnoreCase("barfoo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barbarfoo", suffix));
 		assertTrue(StringUtils.endsWithIgnoreCase("barFoo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barBarFoo", suffix));
 		assertTrue(StringUtils.endsWithIgnoreCase("barfoO", suffix));
 		assertTrue(StringUtils.endsWithIgnoreCase("barFOO", suffix));
 		assertTrue(StringUtils.endsWithIgnoreCase("barfOo", suffix));

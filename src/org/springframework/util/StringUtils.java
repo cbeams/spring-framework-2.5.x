@@ -202,7 +202,7 @@ public abstract class StringUtils {
 			return false;
 		}
 
-		String lcStr = str.substring(suffix.length()).toLowerCase();
+		String lcStr = str.substring(str.length() - suffix.length()).toLowerCase();
 		String lcSuffix = suffix.toLowerCase();
 		return lcStr.equals(lcSuffix);
 	}
