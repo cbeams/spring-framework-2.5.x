@@ -50,7 +50,44 @@
 					<xsd:attribute name="map-class" type="xsd:string">
 						<xsd:annotation>
 							<xsd:appinfo>
+								<expected-type class="java.util.Class"/>
 								<assignable-from class="java.util.Map"/>
+							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="list">
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="beans:listType">
+					<xsd:attribute name="id" type="xsd:string" use="required"/>
+					<xsd:attribute name="list-class" type="xsd:string">
+						<xsd:annotation>
+							<xsd:appinfo>
+								<expected-type class="java.util.Class"/>
+								<assignable-from class="java.util.List"/>
+							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="set">
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="beans:setType">
+					<xsd:attribute name="id" type="xsd:string" use="required"/>
+					<xsd:attribute name="set-class" type="xsd:string">
+						<xsd:annotation>
+							<xsd:appinfo>
+								<expected-type class="java.util.Class"/>
+								<assignable-from class="java.util.Set"/>
 							</xsd:appinfo>
 						</xsd:annotation>
 					</xsd:attribute>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<xsd:schema xmlns="http://www.springframework.org/schema/beans" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.springframework.org/schema/beans">
+<xsd:schema xmlns="http://www.springframework.org/schema/beans" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+						targetNamespace="http://www.springframework.org/schema/beans">
 	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
 	<!-- base types -->
 	<xsd:complexType name="identifiedType" abstract="true">
@@ -262,57 +263,28 @@
 		</xsd:complexType>
 	</xsd:element>
 	<!-- Collection Elements -->
-	<xsd:element name="list">
-		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:choice minOccurs="0" maxOccurs="unbounded">
-					<xsd:element ref="bean"/>
-					<xsd:element ref="ref"/>
-					<xsd:element ref="idref"/>
-					<xsd:element ref="value"/>
-					<xsd:element ref="null"/>
-					<xsd:element ref="list"/>
-					<xsd:element ref="set"/>
-					<xsd:element ref="map"/>
-					<xsd:element ref="props"/>
-				</xsd:choice>
-			</xsd:sequence>
-		</xsd:complexType>
-	</xsd:element>
-	<xsd:element name="set">
-		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:choice minOccurs="0" maxOccurs="unbounded">
-					<xsd:element ref="bean"/>
-					<xsd:element ref="ref"/>
-					<xsd:element ref="idref"/>
-					<xsd:element ref="value"/>
-					<xsd:element ref="null"/>
-					<xsd:element ref="list"/>
-					<xsd:element ref="set"/>
-					<xsd:element ref="map"/>
-					<xsd:element ref="props"/>
-				</xsd:choice>
-			</xsd:sequence>
-		</xsd:complexType>
-	</xsd:element>
+	<xsd:group name="collectionElements">
+		<xsd:sequence>
+			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+				<xsd:element ref="bean"/>
+				<xsd:element ref="ref"/>
+				<xsd:element ref="idref"/>
+				<xsd:element ref="value"/>
+				<xsd:element ref="null"/>
+				<xsd:element ref="list"/>
+				<xsd:element ref="set"/>
+				<xsd:element ref="map"/>
+				<xsd:element ref="props"/>
+			</xsd:choice>
+		</xsd:sequence>
+	</xsd:group>
+	<xsd:element name="list" type="listType"/>
+	<xsd:element name="set" type="setType"/>
 	<xsd:element name="map" type="mapType"/>
 	<xsd:element name="entry" type="entryType"/>
 	<xsd:element name="key">
 		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:choice>
-					<xsd:element ref="bean"/>
-					<xsd:element ref="ref"/>
-					<xsd:element ref="idref"/>
-					<xsd:element ref="value"/>
-					<xsd:element ref="null"/>
-					<xsd:element ref="list"/>
-					<xsd:element ref="set"/>
-					<xsd:element ref="map"/>
-					<xsd:element ref="props"/>
-				</xsd:choice>
-			</xsd:sequence>
+			<xsd:group ref="collectionElements"/>
 		</xsd:complexType>
 	</xsd:element>
 	<xsd:element name="props">
@@ -341,21 +313,17 @@
 	<xsd:complexType name="entryType">
 		<xsd:sequence>
 			<xsd:element ref="key" minOccurs="0"/>
-			<xsd:choice minOccurs="0">
-				<xsd:element ref="bean"/>
-				<xsd:element ref="ref"/>
-				<xsd:element ref="idref"/>
-				<xsd:element ref="value"/>
-				<xsd:element ref="null"/>
-				<xsd:element ref="list"/>
-				<xsd:element ref="set"/>
-				<xsd:element ref="map"/>
-				<xsd:element ref="props"/>
-			</xsd:choice>
+			<xsd:group ref="collectionElements"/>
 		</xsd:sequence>
 		<xsd:attribute name="key" type="xsd:string"/>
 		<xsd:attribute name="key-ref" type="xsd:string"/>
 		<xsd:attribute name="value" type="xsd:string"/>
 		<xsd:attribute name="value-ref" type="xsd:string"/>
+	</xsd:complexType>
+	<xsd:complexType name="listType">
+		<xsd:group ref="collectionElements"/>
+	</xsd:complexType>
+	<xsd:complexType name="setType">
+		<xsd:group ref="collectionElements"/>
 	</xsd:complexType>
 </xsd:schema>

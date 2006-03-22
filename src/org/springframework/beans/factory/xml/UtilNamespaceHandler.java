@@ -16,18 +16,23 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
-import org.springframework.beans.factory.config.MapFactoryBean;
-import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
+import org.springframework.beans.factory.config.PropertiesFactoryBean;
+import org.springframework.beans.factory.config.MapFactoryBean;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.SetFactoryBean;
+import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
 import java.util.Map;
+import java.util.List;
+import java.util.Set;
 
 /**
  * {@link NamespaceHandler} for the <code>util</code> namespace.
+ *
  * @author Rob Harrop
  * @since 2.0
  */
@@ -38,8 +43,9 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionParser("constant", new ConstantBeanDefinitionParser());
 		registerBeanDefinitionParser("property-path", new PropertyPathBeanDefinitionParser());
 		registerBeanDefinitionParser("map", new MapBeanDefinitionParser());
+		registerBeanDefinitionParser("list", new ListBeanDefinitionParser());
+		registerBeanDefinitionParser("set", new SetBeanDefinitionParser());
 	}
-
 
 	public static class PropertiesBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
@@ -69,6 +75,40 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			}
 			parserContext.getRegistry().registerBeanDefinition(id, builder.getBeanDefinition());
 			// cannot be used in a 'inner-bean' setting (use plain <map>)
+			return null;
+		}
+	}
+
+	public static class ListBeanDefinitionParser implements BeanDefinitionParser {
+		public BeanDefinition parse(Element element, ParserContext parserContext) {
+			String id = element.getAttribute("id");
+			String listClass = element.getAttribute("list-class");
+
+			List parsedList = parserContext.getHelper().parseListElement(element);
+			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ListFactoryBean.class);
+			builder.addPropertyValue("sourceList", parsedList);
+			if (StringUtils.hasText(listClass)) {
+				builder.addPropertyValue("targetListClass", listClass);
+			}
+			parserContext.getRegistry().registerBeanDefinition(id, builder.getBeanDefinition());
+			// cannot be used in a 'inner-bean' setting (use plain <list>)
+			return null;
+		}
+	}
+
+	public static class SetBeanDefinitionParser implements BeanDefinitionParser {
+		public BeanDefinition parse(Element element, ParserContext parserContext) {
+			String id = element.getAttribute("id");
+			String setClass = element.getAttribute("set-class");
+
+			Set parsedSet = parserContext.getHelper().parseSetElement(element);
+			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(SetFactoryBean.class);
+			builder.addPropertyValue("sourceSet", parsedSet);
+			if (StringUtils.hasText(setClass)) {
+				builder.addPropertyValue("targetSetClass", setClass);
+			}
+			parserContext.getRegistry().registerBeanDefinition(id, builder.getBeanDefinition());
+			// cannot be used in a 'inner-bean' setting (use plain <set>)
 			return null;
 		}
 	}

@@ -18,6 +18,9 @@ package org.springframework.beans.factory.config;
 
 import java.util.Properties;
 import java.util.Map;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeMap;
 
 import junit.framework.TestCase;
 
@@ -70,7 +73,7 @@ public class UtilNamespaceHandlerTests extends TestCase {
 	public void testNestedProperties() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		Properties props = bean.getSomeProperties();
-		assertEquals("Incorrect property value", "bar", props.get("foo"));		
+		assertEquals("Incorrect property value", "bar", props.get("foo"));
 	}
 
 	public void testPropertyPath() throws Exception {
@@ -79,12 +82,28 @@ public class UtilNamespaceHandlerTests extends TestCase {
 	}
 
 	public void testNestedPropertyPath() throws Exception {
-		TestBean bean = (TestBean)this.beanFactory.getBean("testBean");
+		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		assertEquals("Rob Harrop", bean.getName());
 	}
 
 	public void testSimpleMap() throws Exception {
-		Map map = (Map)this.beanFactory.getBean("simpleMap");
+		Map map = (Map) this.beanFactory.getBean("simpleMap");
 		assertEquals("bar", map.get("foo"));
+	}
+
+	public void testSimpleList() throws Exception {
+		List list = (List) this.beanFactory.getBean("simpleList");
+		assertEquals("Rob Harrop", list.get(0));
+	}
+
+	public void testSimpleSet() throws Exception {
+		Set list = (Set) this.beanFactory.getBean("simpleSet");
+		assertTrue(list.contains("Rob Harrop"));
+	}
+
+	public void testMapWithRef() throws Exception {
+		Map map = (Map) this.beanFactory.getBean("mapWithRef");
+		assertTrue(map instanceof TreeMap);
+		assertEquals(this.beanFactory.getBean("testBean"), map.get("bean"));
 	}
 }
