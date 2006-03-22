@@ -8,8 +8,7 @@
 	<util:properties id="myProperties"
 					 location="classpath:org/springframework/beans/factory/config/util.properties"/>
 
-	<util:constant id="min" staticField="java.lang.Integer.MIN_VALUE"/>
-
+	<util:constant id="min" static-field="java.lang.Integer.MIN_VALUE"/>
 
 	<util:property-path id="name" path="configuredBean.name"/>
 
@@ -28,5 +27,9 @@
 
 	<util:map id="simpleMap">
 		<entry key="foo" value="bar"/>
+	</util:map>
+
+	<util:map id="mapWithRef">
+		<entry key="bean" value-ref="testBean"/>
 	</util:map>
 </beans>

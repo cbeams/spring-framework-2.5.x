@@ -9,7 +9,6 @@
 
 	<xsd:import namespace="http://www.springframework.org/schema/beans" />
 
-	<!-- TODO: need base complex type for things with an ID attribute -->
 	<xsd:element name="properties">
 		<xsd:complexType>
 			<xsd:attribute name="id" type="xsd:string"/>
@@ -18,13 +17,25 @@
 	</xsd:element>
 
 	<xsd:element name="constant">
+		<xsd:annotation>
+			<xsd:documentation>
+				Reference a public, static field on a type and expose its value as
+				a bean. For example &lt;util:constant static-field=&quot;java.lang.Integer.MAX_VALUE&quot;/&gt;.
+			</xsd:documentation>
+		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:attribute name="id" type="xsd:string"/>
-			<xsd:attribute name="staticField" type="xsd:string" use="required"/>
+			<xsd:attribute name="static-field" type="xsd:string" use="required"/>
 		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="property-path">
+		<xsd:annotation>
+			<xsd:documentation>
+				Reference a property on a bean (or as a nested value) and expose its values as
+				a bean. For example &lt;util:property-path path=&quot;order.customer.name&quot;/&gt;.
+			</xsd:documentation>
+		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:attribute name="id" type="xsd:string"/>
 			<xsd:attribute name="path" type="xsd:string" use="required"/>
