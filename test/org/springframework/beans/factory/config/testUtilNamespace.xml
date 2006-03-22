@@ -25,4 +25,8 @@
 	<bean id="configuredBean" class="org.springframework.beans.TestBean">
 		<property name="name" value="Rob Harrop"/>
 	</bean>
+
+	<util:map id="simpleMap">
+		<entry key="foo" value="bar"/>
+	</util:map>
 </beans>

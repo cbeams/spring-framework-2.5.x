@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.util.Properties;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -80,5 +81,10 @@ public class UtilNamespaceHandlerTests extends TestCase {
 	public void testNestedPropertyPath() throws Exception {
 		TestBean bean = (TestBean)this.beanFactory.getBean("testBean");
 		assertEquals("Rob Harrop", bean.getName());
+	}
+
+	public void testSimpleMap() throws Exception {
+		Map map = (Map)this.beanFactory.getBean("simpleMap");
+		assertEquals("bar", map.get("foo"));
 	}
 }

@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-
-<xsd:schema xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	targetNamespace="http://www.springframework.org/schema/beans">
-
+<xsd:schema xmlns="http://www.springframework.org/schema/beans" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.springframework.org/schema/beans">
 	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
-
 	<!-- base types -->
 	<xsd:complexType name="identifiedType" abstract="true">
 		<xsd:attribute name="id" type="xsd:ID"/>
 	</xsd:complexType>
-
 	<!-- Top-level <beans> tag -->
 	<xsd:element name="beans">
 		<xsd:complexType>
@@ -20,9 +14,7 @@
 					<xsd:element ref="import"/>
 					<xsd:element ref="alias"/>
 					<xsd:element ref="bean"/>
-					<xsd:any namespace="##other"
-						minOccurs="0" maxOccurs="unbounded"
-						processContents="strict"/>
+					<xsd:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="unbounded"/>
 				</xsd:choice>
 			</xsd:sequence>
 			<xsd:attribute name="default-lazy-init" default="false">
@@ -54,8 +46,8 @@
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:attribute>
-			<xsd:attribute name="default-init-method" default="-" type="xsd:string"/>
-			<xsd:attribute name="default-destroy-method" default="-" type="xsd:string"/>
+			<xsd:attribute name="default-init-method" type="xsd:string" default="-"/>
+			<xsd:attribute name="default-destroy-method" type="xsd:string" default="-"/>
 		</xsd:complexType>
 	</xsd:element>
 	<xsd:element name="description">
@@ -72,7 +64,6 @@
 			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
-
 	<xsd:element name="alias">
 		<xsd:complexType>
 			<xsd:complexContent>
@@ -83,7 +74,6 @@
 			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
-
 	<xsd:group name="beanElements">
 		<xsd:sequence>
 			<xsd:element ref="description" minOccurs="0"/>
@@ -92,13 +82,10 @@
 				<xsd:element ref="property"/>
 				<xsd:element ref="lookup-method"/>
 				<xsd:element ref="replaced-method"/>
-				<xsd:any namespace="##other"
-					minOccurs="0" maxOccurs="unbounded"
-					processContents="strict"/>
+				<xsd:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="unbounded"/>
 			</xsd:choice>
 		</xsd:sequence>
 	</xsd:group>
-
 	<!-- definition of an attribute group -->
 	<xsd:attributeGroup name="beanAttributes">
 		<!--<xsd:attribute name="id" type="xsd:ID"/>-->
@@ -158,9 +145,8 @@
 		<xsd:attribute name="destroy-method" type="xsd:string"/>
 		<xsd:attribute name="factory-method" type="xsd:string"/>
 		<xsd:attribute name="factory-bean" type="xsd:string"/>
-		<xsd:anyAttribute processContents="strict" namespace="##other"/>
+		<xsd:anyAttribute namespace="##other" processContents="strict"/>
 	</xsd:attributeGroup>
-
 	<!-- the <bean> element -->
 	<xsd:element name="bean">
 		<xsd:complexType>
@@ -172,7 +158,6 @@
 			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
-
 	<xsd:element name="constructor-arg">
 		<xsd:complexType>
 			<xsd:sequence>
@@ -209,9 +194,7 @@
 					<xsd:element ref="set"/>
 					<xsd:element ref="map"/>
 					<xsd:element ref="props"/>
-					<xsd:any namespace="##other"
-						minOccurs="0" maxOccurs="unbounded"
-						processContents="strict"/>
+					<xsd:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="unbounded"/>
 				</xsd:choice>
 			</xsd:sequence>
 			<xsd:attribute name="name" type="xsd:string" use="required"/>
@@ -278,6 +261,7 @@
 			<xsd:choice minOccurs="0" maxOccurs="unbounded"/>
 		</xsd:complexType>
 	</xsd:element>
+	<!-- Collection Elements -->
 	<xsd:element name="list">
 		<xsd:complexType>
 			<xsd:sequence>
@@ -312,37 +296,8 @@
 			</xsd:sequence>
 		</xsd:complexType>
 	</xsd:element>
-	<xsd:element name="map">
-		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:choice minOccurs="0" maxOccurs="unbounded">
-					<xsd:element ref="entry"/>
-				</xsd:choice>
-			</xsd:sequence>
-		</xsd:complexType>
-	</xsd:element>
-	<xsd:element name="entry">
-		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:element ref="key" minOccurs="0"/>
-				<xsd:choice minOccurs="0">
-					<xsd:element ref="bean"/>
-					<xsd:element ref="ref"/>
-					<xsd:element ref="idref"/>
-					<xsd:element ref="value"/>
-					<xsd:element ref="null"/>
-					<xsd:element ref="list"/>
-					<xsd:element ref="set"/>
-					<xsd:element ref="map"/>
-					<xsd:element ref="props"/>
-				</xsd:choice>
-			</xsd:sequence>
-			<xsd:attribute name="key" type="xsd:string"/>
-			<xsd:attribute name="key-ref" type="xsd:string"/>
-			<xsd:attribute name="value" type="xsd:string"/>
-			<xsd:attribute name="value-ref" type="xsd:string"/>
-		</xsd:complexType>
-	</xsd:element>
+	<xsd:element name="map" type="mapType"/>
+	<xsd:element name="entry" type="entryType"/>
 	<xsd:element name="key">
 		<xsd:complexType>
 			<xsd:sequence>
@@ -375,5 +330,32 @@
 			<xsd:attribute name="key" type="xsd:string" use="required"/>
 		</xsd:complexType>
 	</xsd:element>
-
+	<!-- Collection Types -->
+	<xsd:complexType name="mapType">
+		<xsd:sequence>
+			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+				<xsd:element ref="entry"/>
+			</xsd:choice>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="entryType">
+		<xsd:sequence>
+			<xsd:element ref="key" minOccurs="0"/>
+			<xsd:choice minOccurs="0">
+				<xsd:element ref="bean"/>
+				<xsd:element ref="ref"/>
+				<xsd:element ref="idref"/>
+				<xsd:element ref="value"/>
+				<xsd:element ref="null"/>
+				<xsd:element ref="list"/>
+				<xsd:element ref="set"/>
+				<xsd:element ref="map"/>
+				<xsd:element ref="props"/>
+			</xsd:choice>
+		</xsd:sequence>
+		<xsd:attribute name="key" type="xsd:string"/>
+		<xsd:attribute name="key-ref" type="xsd:string"/>
+		<xsd:attribute name="value" type="xsd:string"/>
+		<xsd:attribute name="value-ref" type="xsd:string"/>
+	</xsd:complexType>
 </xsd:schema>

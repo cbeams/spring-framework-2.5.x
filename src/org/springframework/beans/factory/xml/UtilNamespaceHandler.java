@@ -16,13 +16,18 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
+import org.springframework.beans.factory.config.MapFactoryBean;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
+
+import java.util.Map;
 
 /**
  * {@link NamespaceHandler} for the <code>util</code> namespace.
- *
  * @author Rob Harrop
  * @since 2.0
  */
@@ -32,6 +37,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionParser("properties", new PropertiesBeanDefinitionParser());
 		registerBeanDefinitionParser("constant", new ConstantBeanDefinitionParser());
 		registerBeanDefinitionParser("property-path", new PropertyPathBeanDefinitionParser());
+		registerBeanDefinitionParser("map", new MapBeanDefinitionParser());
 	}
 
 
@@ -49,4 +55,21 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 
+	public static class MapBeanDefinitionParser implements BeanDefinitionParser {
+
+		public BeanDefinition parse(Element element, ParserContext parserContext) {
+			String id = element.getAttribute("id");
+			String mapClass = element.getAttribute("map-class");
+
+			Map parsedMap = parserContext.getHelper().parseMapElement(element);
+			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(MapFactoryBean.class);
+			builder.addPropertyValue("sourceMap", parsedMap);
+			if (StringUtils.hasText(mapClass)) {
+				builder.addPropertyValue("targetMapClass", mapClass);
+			}
+			parserContext.getRegistry().registerBeanDefinition(id, builder.getBeanDefinition());
+			// cannot be used in a 'inner-bean' setting (use plain <map>)
+			return null;
+		}
+	}
 }
