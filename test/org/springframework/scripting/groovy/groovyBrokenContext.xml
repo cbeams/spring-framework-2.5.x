@@ -6,6 +6,6 @@
 	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
 
 	<bean id="broken" class="org.springframework.scripting.groovy.GroovyScriptFactory">
-		<constructor-arg value="classpath:org/springframework/scripting/groovy/Broken.groovy"/>
+		<constructor-arg value="classpath:org/springframework/scripting/groovy/Broken.groovyb"/>
 	</bean>
 </beans>
