@@ -381,7 +381,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
 		<classname>Font</classname>, <classname>Color</classname>, and most fo the primitive types.
 		Note also that the standard JavaBeans infrastructure will automatically discover
 		<interfacename>PropertyEditor</interfacename> classes (without you having to register them
-		explicitly)if they are in the same package as the class they handle, and have the same name
+		explicitly) if they are in the same package as the class they handle, and have the same name
 		as that class, with <literal>'Editor'</literal> appended; for example, one could have the
 		following class and package structure, which would be sufficent for the
 		<classname>FooEditor</classname> class to be recognized and used as the
@@ -411,7 +411,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
 		would associate a <classname>CustomNumberEditor</classname> with the <literal>age</literal>
 		property of the <classname>Foo</classname> class.
 	  </para>
-	  <programlisting><![CDATA[    public class FooBeanInfo extends SimpleBeanInfo {
+	  <programlisting><![CDATA[public class FooBeanInfo extends SimpleBeanInfo {
       
     public PropertyDescriptor[] getPropertyDescriptors() {
         try {
