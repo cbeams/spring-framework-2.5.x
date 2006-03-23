@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,61 +20,117 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.util.Assert;
 
 /**
- * <p>FactoryBean which returns a value which is an ObjectFactory that returns
- * a bean from the BeanFactory. As such, this may be used to avoid having a client
- * bean directly calling getBean() the BeanFactory to get a prototype bean out
- * of the BeanFactory, a violation of inversion of control. Instead, with the use
- * of this class, the client bean can be fed an ObjectFactory as a property which
- * directly returns only the one target (usually prototype) bean.</p>
+ * A {@link org.springframework.beans.factory.FactoryBean} implementation that
+ * returns a value which is an {@link org.springframework.beans.factory.ObjectFactory}
+ * that in turn returns a bean sourced from a {@link org.springframework.beans.factory.BeanFactory}.
  * 
- * <p>A Sample config in an XML BeanFactory might look as follows:</p>
- *
- * <pre>&lt;beans>
+ * <p>As such, this may be used to avoid having a client object directly calling
+ * {@link org.springframework.beans.factory.BeanFactory#getBean(String)} to get
+ * a (typically prototype) bean from a
+ * {@link org.springframework.beans.factory.BeanFactory}, which would be a
+ * violation of the inversion of control principle. Instead, with the use
+ * of this class, the client object can be fed an
+ * {@link org.springframework.beans.factory.ObjectFactory} instance as a
+ * property which directly returns only the one target bean (again, which is
+ * typically a prototype bean).
+ * 
+ * <p>A sample config in an XML-based
+ * {@link org.springframework.beans.factory.BeanFactory} might look as follows:
+ * 
+ * <pre class="code">&lt;beans>
  *
  *   &lt;!-- Prototype bean since we have state -->
- *   &lt;bean id="myService" class="a.b.c.MyService" singleton="false">
- *   &lt;/bean>
+ *   &lt;bean id="myService" class="a.b.c.MyService" singleton="false"/>
  * 
- *   &lt;bean id="myServiceFactory" class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
+ *   &lt;bean id="myServiceFactory"
+ *            class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
  *     &lt;property name="targetBeanName">&lt;idref local="myService"/>&lt;/property>
  *   &lt;/bean> 
  *  
  *   &lt;bean id="clientBean" class="a.b.c.MyClientBean">
- *     &lt;property name="myServiceFactory">&lt;ref local="myServiceFactory"/>&lt;/property>
+ *     &lt;property name="myServiceFactory" ref="myServiceFactory"/>
  *   &lt;/bean>
  *
- * &lt;/beans></pre>
+ *&lt;/beans></pre>
+ * 
+ * <p>The attendant <code>MyClientBean</code> class implementation might look
+ * something like this:
+ * 
+ * <pre class="code">package a.b.c;
+ * 
+ *import org.springframework.beans.factory.ObjectFactory;
+ * 
+ *public class MyClientBean {
+ * 
+ *    private ObjectFactory myServiceFactory;
+ * 
+ *    public void setMyServiceFactory(ObjectFactory myServiceFactory) {
+ *        this.myServiceFactory = myServiceFactory;
+ *    }
+ * 
+ *    public void someBusinessMethod() {
+ *        // get a 'fresh', brand new MyService instance
+ *        MyService service = this.myServiceFactory.getObject();
+ *        // use the service object to effect the business logic...
+ *    }
+ *}</pre>
+ * 
+ * <p>An alternate approach to this application of an object creational pattern
+ * would be to use the {@link ServiceLocatorFactoryBean}
+ * to source (prototype) beans. The {@link ServiceLocatorFactoryBean} approach
+ * has the advantage of the fact that one doesn't have to depend on any
+ * Spring-specific interface such as {@link org.springframework.beans.factory.ObjectFactory},
+ * but has the disadvantage of requiring runtime class generation. Please do
+ * consult the
+ * {@link ServiceLocatorFactoryBean ServiceLocatorFactoryBean JavaDoc} for a
+ * fuller discussion of this issue.
  *
  * @author Colin Sampaleanu
  * @since 2004-05-11
  * @see org.springframework.beans.factory.ObjectFactory
+ * @see ServiceLocatorFactoryBean
  */
-public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean implements BeanFactoryAware {
-	
+public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean
+		implements BeanFactoryAware {
+
 	private String targetBeanName;
 
 	private BeanFactory beanFactory;
-	
+
+
 	/**
 	 * Set the name of the target bean.
-	 * The target has to be a prototype bean.
+	 * <p>
+	 * The target does not <i>have</> to be a prototype bean, but realisticially
+	 * always will be (because if the target bean were a singleton, then said
+	 * singleton bean could simply be injected straight into the dependent object,
+	 * thus obviating the need for the extra level of indirection afforded by
+	 * the approach encapsulated by this class). Please note that no exception
+	 * will be thrown if the supplied <code>targetBeanName</code> does not
+	 * reference a prototype bean.
 	 */
 	public void setTargetBeanName(String targetBeanName) {
 		this.targetBeanName = targetBeanName;
 	}
-	
+
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
-	
+
 	protected Object createInstance() {
 		return new ObjectFactory() {
 			public Object getObject() throws BeansException {
 				return beanFactory.getBean(targetBeanName);
 			}
 		};
+	}
+
+	public void afterPropertiesSet() throws Exception {
+		Assert.hasText(targetBeanName, "targetBeanName is required");
+		super.afterPropertiesSet();
 	}
 
 	public Class getObjectType() {

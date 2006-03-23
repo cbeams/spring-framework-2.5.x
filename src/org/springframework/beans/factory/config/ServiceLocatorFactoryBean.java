@@ -35,37 +35,158 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.util.StringUtils;
 
 /**
- * FactoryBean that takes an interface which must have one or more methods with
+ * A {@link org.springframework.beans.factory.FactoryBean} implementation that
+ * takes an interface which must have one or more methods with
  * the signatures <code>MyType xxx()</code> or <code>MyType xxx(MyIdType id)</code>
  * (typically, <code>MyService getService()</code> or <code>MyService getService(String id)</code>)
- * and creates a dynamic proxy which implements that interface, delegating to the
- * Spring BeanFactory underneath.
+ * and creates a dynamic proxy which implements that interface, delegating to a
+ * underlying {@link org.springframework.beans.factory.BeanFactory}.
  *
- * <p>Such service locator allow to decouple the caller from Spring BeanFactory API, using an
- * appropriate custom locator interface. They will typically be used for <b>prototype beans</b>,
- * i.e. for factory methods that are supposed to return a new instance for each call.
- * The client receives a reference to the service locator via setter or constructor injection,
- * being able to invoke the locator's factory methods on demand. <b>For singleton beans,
- * direct setter or constructor injection of the target bean is preferable.</b>
+ * <p>Such service locators permit the decoupling of calling code from
+ * the {@link org.springframework.beans.factory.BeanFactory} API, by using an
+ * appropriate custom locator interface. They will typically be used for
+ * <b>prototype beans</b>, i.e. for factory methods that are supposed to
+ * return a new instance for each call. The client receives a reference to the
+ * service locator via setter or constructor injection, to be able to invoke
+ * the locator's factory methods on demand. <b>For singleton beans, direct
+ * setter or constructor injection of the target bean is preferable.</b>
  *
- * <p>On invocation of the no-arg factory method, or the single-arg factory method with an id
- * of null or empty String, if exactly one bean in the factory matches the return type of the
- * factory method, that is returned, otherwise a NoSuchBeanDefinitionException is thrown.
+ * <p>On invocation of the no-arg factory method, or the single-arg factory
+ * method with a String id of <code>null</code> or empty String, if exactly
+ * one bean in the factory matches the return type of the factory method, that
+ * is returned, otherwise a
+ * {@link org.springframework.beans.factory.NoSuchBeanDefinitionException}
+ * is thrown.
  *
- * <p>On invocation of the single-arg factory method with a non-null (and non-empty) argument,
- * the proxy returns the result of a <code>BeanFactory.getBean(name)</code> call, using a
- * stringified version of the passed-in id as bean name.
+ * <p>On invocation of the single-arg factory method with a non-null (and
+ * non-empty) argument, the proxy returns the result of a
+ * {@link org.springframework.beans.factory.BeanFactory#getBean(String)} call,
+ * using a stringified version of the passed-in id as bean name.
  *
- * <p>A factory method argument will usually be a String, but can also be an int or a custom
- * enumeration type, for example, stringified via <code>toString</code>. The resulting String
- * can be used as bean name as-is, provided that corresponding beans are defined in the bean
- * factory. Alternatively, mappings between service ids and bean names can be defined.
+ * <p>A factory method argument will usually be a String, but can also be an
+ * int or a custom enumeration type, for example, stringified via
+ * <code>toString</code>. The resulting String can be used as bean name as-is,
+ * provided that corresponding beans are defined in the bean factory.
+ * Alternatively, {@link #setServiceMappings(java.util.Properties) a custom mapping}
+ * between service ids and bean names can be defined.
+ * 
+ * <p>By way of an example, consider the following service locator interface.
+ * Note that this interface is not dependant on any Spring APIs.
+ * 
+ * <pre class="code">package a.b.c;
+ * 
+ *public interface ServiceFactory {
+ *
+ *    public MyService getService ();
+ *}</pre>
+ * 
+ * <p>A sample config in an XML-based
+ * {@link org.springframework.beans.factory.BeanFactory} might look as follows:
+ * 
+ * <pre class="code">&lt;beans>
+ *
+ *   &lt;!-- Prototype bean since we have state -->
+ *   &lt;bean id="myService" class="a.b.c.MyService" singleton="false"/>
+ * 
+ *   &lt;!-- will lookup the above 'myService' bean by *TYPE* -->
+ *   &lt;bean id="myServiceFactory"
+ *            class="org.springframework.beans.factory.config.ServiceLocatorFactoryBean">
+ *     &lt;property name="serviceLocatorInterface" value="a.b.c.ServiceFactory"/>
+ *   &lt;/bean> 
+ *  
+ *   &lt;bean id="clientBean" class="a.b.c.MyClientBean">
+ *     &lt;property name="myServiceFactory" ref="myServiceFactory"/>
+ *   &lt;/bean>
+ *
+ *&lt;/beans></pre>
+ * 
+ * <p>The attendant <code>MyClientBean</code> class implementation might then
+ * look something like this:
+ * 
+ * <pre class="code">package a.b.c;
+ * 
+ *public class MyClientBean {
+ * 
+ *    private ServiceFactory myServiceFactory;
+ * 
+ *    // actual implementation provided by the Spring container 
+ *    public void setServiceFactory(ServiceFactory myServiceFactory) {
+ *        this.myServiceFactory = myServiceFactory;
+ *    }
+ * 
+ *    public void someBusinessMethod() {
+ *        // get a 'fresh', brand new MyService instance
+ *        MyService service = this.myServiceFactory.getService();
+ *        // use the service object to effect the business logic...
+ *    }
+ *}</pre>
+ * 
+ * <p>By way of an example that looks up a bean <b>by name</b>, consider
+ * the following service locator interface. Again, note that this
+ * interface is not dependant on any Spring APIs.
+ * 
+ * <pre class="code">package a.b.c;
+ * 
+ *public interface ServiceFactory {
+ *
+ *    public MyService getService (String serviceName);
+ *}</pre>
+ * 
+ * <p>A sample config in an XML-based
+ * {@link org.springframework.beans.factory.BeanFactory} might look as follows:
+ * 
+ * <pre class="code">&lt;beans>
+ *
+ *   &lt;!-- Prototype beans since we have state (both extend MyService) -->
+ *   &lt;bean id="specialService" class="a.b.c.SpecialService" singleton="false"/>
+ *   &lt;bean id="anotherService" class="a.b.c.AnotherService" singleton="false"/>
+ *
+ *   &lt;bean id="myServiceFactory"
+ *            class="org.springframework.beans.factory.config.ServiceLocatorFactoryBean">
+ *     &lt;property name="serviceLocatorInterface" value="a.b.c.ServiceFactory"/>
+ *   &lt;/bean> 
+ *  
+ *   &lt;bean id="clientBean" class="a.b.c.MyClientBean">
+ *     &lt;property name="myServiceFactory" ref="myServiceFactory"/>
+ *   &lt;/bean>
+ *
+ *&lt;/beans></pre>
+ * 
+ * <p>The attendant <code>MyClientBean</code> class implementation might then
+ * look something like this:
+ * 
+ * <pre class="code">package a.b.c;
+ * 
+ *public class MyClientBean {
+ * 
+ *    private ServiceFactory myServiceFactory;
+ * 
+ *    // actual implementation provided by the Spring container 
+ *    public void setServiceFactory(ServiceFactory myServiceFactory) {
+ *        this.myServiceFactory = myServiceFactory;
+ *    }
+ * 
+ *    public void someBusinessMethod() {
+ *        // get a 'fresh', brand new MyService instance
+ *        MyService service = this.myServiceFactory.getService("specialService");
+ *        // use the service object to effect the business logic...
+ *    }
+ * 
+ *    public void anotherBusinessMethod() {
+ *        // get a 'fresh', brand new MyService instance
+ *        MyService service = this.myServiceFactory.getService("anotherService");
+ *        // use the service object to effect the business logic...
+ *    }
+ *}</pre>
+ * 
+ * <p>See {@link ObjectFactoryCreatingFactoryBean} for an alternate approach.
  *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 1.1.4
  * @see #setServiceLocatorInterface
  * @see #setServiceMappings
+ * @see ObjectFactoryCreatingFactoryBean
  */
 public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware, InitializingBean {
 
@@ -84,15 +205,17 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 	 * Set the service locator interface to use, which must have one or more methods with
 	 * the signatures <code>MyType xxx()</code> or <code>MyType xxx(MyIdType id)</code>
 	 * (typically, <code>MyService getService()</code> or <code>MyService getService(String id)</code>).
-	 * See class-level javadoc for information on the semantics of such methods.
+	 * See the {@link ServiceLocatorFactoryBean class-level Javadoc} for
+	 * information on the semantics of such methods.
+	 * @param interfaceType the {@link java.lang.Class} of the interface to be used for the service locator
 	 */
-	public void setServiceLocatorInterface(Class interfaceName) {
-		this.serviceLocatorInterface = interfaceName;
+	public void setServiceLocatorInterface(Class interfaceType) {
+		this.serviceLocatorInterface = interfaceType;
 	}
 
 	/**
 	 * Set the exception class that the service locator should throw if service
-	 * lookup failed. The specified exception class should have a constructor
+	 * lookup failed. The specified exception class must have a constructor
 	 * with one of the following parameter types: <code>(String, Throwable)</code>
 	 * or <code>(Throwable)</code> or <code>(String)</code>.
 	 * <p>If not specified, subclasses of Spring's BeansException will be thrown,
