@@ -82,7 +82,7 @@ distribution/website before using any of them in your own applications.
 - required for running PetClinic (by Hibernate)
 
 * freemarker/freemarker.jar
-- FreeMarker 2.3.4 (http://www.freemarker.org)
+- FreeMarker 2.3.6 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
@@ -336,8 +336,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's Portlet support
 
-* quartz/quartz-1.5.1.jar
-- Quartz 1.5.1 (http://www.opensymphony.com/quartz)
+* quartz/quartz-1.5.2.jar
+- Quartz 1.5.2 (http://www.opensymphony.com/quartz)
 - required for building the framework
 - required at runtime when using Spring's Quartz scheduling support
 
