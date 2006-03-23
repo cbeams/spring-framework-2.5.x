@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
  * <p>The default concurrency limit of this support class is -1.
  * Subclasses may override this default; check the concrete class's javadoc.
  *
- * <p>This class is designed for serializablility, to allow for serializing
+ * <p>This class is designed for serializability, to allow for serializing
  * interceptors that derive from it. Note that the subclass needs to explicitly
  * implement the Serializable marker interface if it is actually serializable.
  *
@@ -48,12 +48,25 @@ import org.apache.commons.logging.LogFactory;
  */
 public abstract class ConcurrencyThrottleSupport implements Serializable {
 
+	/**
+	 * Permit any number of concurrent invocations; i.e. don't throttle
+	 * concurrency.
+	 */
+	public static final int UNBOUNDED_CONCURRENCY = -1;
+
+	/**
+	 * Switch concurrency 'off', i.e. don't allow any concurrent
+	 * invocations.
+	 */
+	public static final int NO_CONCURRENCY = 0;
+	
+
 	/** Transient to optimize serialization */
 	protected transient Log logger = LogFactory.getLog(getClass());
 
 	private transient Object monitor = new Object();
 
-	private int concurrencyLimit = -1;
+	private int concurrencyLimit = UNBOUNDED_CONCURRENCY;
 
 	private int concurrencyCount = 0;
 
@@ -61,11 +74,12 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 	/**
 	 * Set the maximum number of parallel accesses allowed.
 	 * -1 indicates no concurrency limit at all.
-	 * <p>This limit can in principle be changed at runtime,
-	 * although it is generally designed as config time setting.
+	 * <p>In principle, this limit can be changed at runtime,
+	 * although it is generally designed as a config time setting.
 	 * NOTE: Do not switch between -1 and any concrete limit at runtime,
 	 * as this will lead to inconsistent concurrency counts: A limit
 	 * of -1 effectively turns off concurrency counting completely.
+	 * @see #UNBOUNDED_CONCURRENCY
 	 */
 	public void setConcurrencyLimit(int concurrencyLimit) {
 		this.concurrencyLimit = concurrencyLimit;
@@ -80,15 +94,24 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 	/**
 	 * Return whether this throttle is currently active.
+	 * @return <code>true</code> if the concurrency limit for this instance is active
+	 * @see #getConcurrencyLimit()
+	 * @see #setConcurrencyLimit(int) 
 	 */
 	public boolean isThrottleActive() {
 		return (this.concurrencyLimit > 0);
 	}
 
 
+	/**
+	 * To be invoked before the main execution logic of concrete subclasses.
+	 * <p>
+	 * This implementation applies the concurrency throttle.
+	 * @see #afterAccess() 
+	 */
 	protected void beforeAccess() {
-		if (this.concurrencyLimit == 0) {
-			throw new IllegalStateException("Currently no invocations allowed - concurrency limit set to 0");
+		if (this.concurrencyLimit == NO_CONCURRENCY) {
+			throw new IllegalStateException("Currently no invocations allowed - concurrency limit set to NO_CONCURRENCY");
 		}
 		if (this.concurrencyLimit > 0) {
 			boolean debug = logger.isDebugEnabled();
@@ -101,7 +124,7 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 					try {
 						this.monitor.wait();
 					}
-					catch (InterruptedException ex) {
+					catch (InterruptedException ignored) {
 					}
 				}
 				if (debug) {
@@ -112,6 +135,10 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 		}
 	}
 
+	/**
+	 * To be invoked after the main execution logic of concrete subclasses.
+	 * @see #beforeAccess() 
+	 */
 	protected void afterAccess() {
 		if (this.concurrencyLimit >= 0) {
 			synchronized (this.monitor) {

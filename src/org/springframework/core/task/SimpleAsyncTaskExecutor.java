@@ -131,11 +131,15 @@ public class SimpleAsyncTaskExecutor extends ConcurrencyThrottleSupport
 	/**
 	 * Executes the given task, within a concurrency throttle
 	 * if configured (through the superclass's settings).
+	 * @throws NullPointerException if the supplied task is <code>null</code>
 	 * @see #beforeAccess()
 	 * @see #doExecute(Runnable)
 	 * @see #afterAccess()
 	 */
 	public final void execute(Runnable task) {
+		if (task == null) {
+			throw new NullPointerException("A Runnable instance is required.");
+		}
 		beforeAccess();
 		doExecute(new ConcurrencyThrottlingRunnable(task));
 	}
@@ -184,7 +188,7 @@ public class SimpleAsyncTaskExecutor extends ConcurrencyThrottleSupport
 
 	/**
 	 * This Runnable calls <code>afterAccess()</code> after the
-	 * target Runnable finished its execution.
+	 * target Runnable has finished its execution.
 	 */
 	private class ConcurrencyThrottlingRunnable implements Runnable {
 
