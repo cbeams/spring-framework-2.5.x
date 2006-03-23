@@ -207,7 +207,7 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("txt", StringUtils.getFilenameExtension("mypath/myfile.txt"));
 	}
 
-	public void stripFilenameExtension() {
+	public void testStripFilenameExtension() {
 		assertEquals(null, StringUtils.stripFilenameExtension(null));
 		assertEquals("", StringUtils.stripFilenameExtension(""));
 		assertEquals("myfile", StringUtils.stripFilenameExtension("myfile"));
@@ -216,6 +216,16 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("mypath/myfile", StringUtils.stripFilenameExtension("mypath/myfile."));
 		assertEquals("myfile", StringUtils.stripFilenameExtension("myfile.txt"));
 		assertEquals("mypath/myfile", StringUtils.stripFilenameExtension("mypath/myfile.txt"));
+	}
+
+	public void testCleanPath() {
+		assertEquals("mypath/myfile", StringUtils.cleanPath("mypath/myfile"));
+		assertEquals("mypath/myfile", StringUtils.cleanPath("mypath\\myfile"));
+		assertEquals("mypath/myfile", StringUtils.cleanPath("mypath/../mypath/myfile"));
+		assertEquals("mypath/myfile", StringUtils.cleanPath("mypath/myfile/../../mypath/myfile"));
+		assertEquals("../mypath/myfile", StringUtils.cleanPath("../mypath/myfile"));
+		assertEquals("../mypath/myfile", StringUtils.cleanPath("../mypath/../mypath/myfile"));
+		assertEquals("../mypath/myfile", StringUtils.cleanPath("mypath/../../mypath/myfile"));
 	}
 
 	public void testPathEquals() {
