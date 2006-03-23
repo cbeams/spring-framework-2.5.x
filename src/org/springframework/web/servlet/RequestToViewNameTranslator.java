@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * Strategy interface used to translate an incoming
  * {@link javax.servlet.http.HttpServletRequest} into a view name
- * when no view name is supplied by the user.
+ * when no view name is explicitly supplied.
  *
  * @author Rob Harrop
  * @since 2.0
@@ -30,6 +30,8 @@ public interface RequestToViewNameTranslator {
 
 	/**
 	 * Translate the given {@link HttpServletRequest} into a view name.
+	 * @param request the incoming {@link HttpServletRequest} providing the
+	 *                context from which a view name is to be resolved
 	 * @return the view name (never <code>null</code>)
 	 * @throws Exception if view name translation failed
 	 */
