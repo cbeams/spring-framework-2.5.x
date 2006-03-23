@@ -448,9 +448,9 @@ public class DataBinder implements PropertyEditorRegistry {
 
 	/**
 	 * Apply given property values to the target object.
-	 * <p>Default implementation applies them all of them as bean property
-	 * values via the corresponding BeanWrapper. Unknown fields will by
-	 * default be ignored.
+	 * <p>Default implementation applies all of the supplied property
+	 * values as bean property values. By default, unknown fields will
+	 * be ignored.
 	 * @param mpvs the property values to be bound (can be modified)
 	 * @see #getTarget
 	 * @see #getPropertyAccessor
