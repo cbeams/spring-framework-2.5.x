@@ -430,6 +430,34 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertEquals(2, beansOfType.size());
 	}
 
+	public void testRegisterExistingSingletonWithNameOverriding() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		Properties p = new Properties();
+		p.setProperty("test.(class)", "org.springframework.beans.TestBean");
+		p.setProperty("test.name", "Tony");
+		p.setProperty("test.age", "48");
+		p.setProperty("test.spouse(ref)", "singletonObject");
+		p.setProperty("singletonObject.(class)", "org.springframework.beans.factory.config.PropertiesFactoryBean");
+		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
+		Object singletonObject = new TestBean();
+		lbf.registerSingleton("singletonObject", singletonObject);
+		lbf.preInstantiateSingletons();
+
+		assertTrue(lbf.isSingleton("singletonObject"));
+		assertEquals(TestBean.class, lbf.getType("singletonObject"));
+		TestBean test = (TestBean) lbf.getBean("test");
+		assertEquals(singletonObject, lbf.getBean("singletonObject"));
+		assertEquals(singletonObject, test.getSpouse());
+
+		Map beansOfType = lbf.getBeansOfType(TestBean.class, false, true);
+		assertEquals(2, beansOfType.size());
+		assertTrue(beansOfType.containsValue(test));
+		assertTrue(beansOfType.containsValue(singletonObject));
+
+		beansOfType = lbf.getBeansOfType(null, false, true);
+		assertEquals(2, beansOfType.size());
+	}
+
 	public void testRegisterExistingSingletonWithAutowire() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
