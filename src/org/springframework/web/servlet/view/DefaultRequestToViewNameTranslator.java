@@ -19,21 +19,26 @@ package org.springframework.web.servlet.view;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.StringUtils;
+import org.springframework.util.Assert;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Default implementation of the {@link RequestToViewNameTranslator} interface that
- * simply transforms the URI of the incoming request into the view name.
- * Can be explicitly defined as "viewNameTranslator" bean in a DispatcherServlet
- * context; else, a plain default instance will be used.
+ * Default implementation of the {@link RequestToViewNameTranslator} interface
+ * that simply transforms the URI of the incoming request into the view name.
+ * Can be explicitly defined as the "viewNameTranslator" bean in a
+ * {@link org.springframework.web.servlet.DispatcherServlet} context; else, a
+ * plain default instance will be used.
  *
- * <p>The default transformation simply strips the leading slash and file extension
- * of the URI and returns the result as the view name with the configured "prefix"
- * and "suffix" added as appropriate.
+ * <p>The default transformation simply strips the leading slash and file
+ * extension of the URI and returns the result as the view name with the
+ * configured {@link #setPrefix(String) "prefix"} and and
+ * {@link #setSuffix(String) "suffix"} added as appropriate.
  *
- * <p>Stripping of the leading slash and file extension can be disabled using the
- * "stripLeadingSlash" and "stripExtension" properties, respectively.
+ * <p>Stripping of the leading slash and file extension can be disabled using
+ * the {@link #setStripLeadingSlash(boolean) "stripLeadingSlash"} and
+ * {@link #setStripExtension(boolean) "stripExtension"} properties,
+ * respectively.
  *
  * @author Rob Harrop
  * @since 2.0
@@ -49,7 +54,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 
 	private String suffix = "";
 
-	private String separator = "/";
+	private String separator = SLASH;
 
 	private boolean stripLeadingSlash = true;
 
@@ -60,6 +65,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 
 	/**
 	 * Set the prefix to prepend to generated view names.
+	 * @param prefix the prefix to prepend to generated view names
 	 */
 	public void setPrefix(String prefix) {
 		this.prefix = (prefix == null ? "" : prefix);
@@ -67,6 +73,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 
 	/**
 	 * Set the suffix to append to generated view names.
+	 * @param suffix the suffix to append to generated view names
 	 */
 	public void setSuffix(String suffix) {
 		this.suffix = (suffix == null ? "" : suffix);
@@ -76,14 +83,16 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * Set the value that will replace '<code>/</code>' as the separator
 	 * in the view name. The default behavior simply leaves '<code>/</code>'
 	 * as the separator.
+	 * @param separator the desired separator value
 	 */
 	public void setSeparator(String separator) {
 		this.separator = separator;
 	}
 
 	/**
-	 * Set whether or not leadng slashes should be stripped from the URI when
+	 * Set whether or not leading slashes should be stripped from the URI when
 	 * generating the view name. Default is "true".
+	 * @param stripLeadingSlash <code>true</code> if leading slashes are to be stripped
 	 */
 	public void setStripLeadingSlash(boolean stripLeadingSlash) {
 		this.stripLeadingSlash = stripLeadingSlash;
@@ -92,6 +101,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	/**
 	 * Set whether or not file extensions should be stripped from the URI when
 	 * generating the view name. Default is "true".
+	 * @param stripExtension <code>true</code> if file extensions should be stripped
 	 */
 	public void setStripExtension(boolean stripExtension) {
 		this.stripExtension = stripExtension;
@@ -102,6 +112,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * context. Else, the path within the current servlet mapping is used
 	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
 	 * Default is "false".
+	 * @param alwaysUseFullPath <code>true</code> if URL lookup should always use the full path
 	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
 	 */
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
@@ -109,7 +120,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	}
 
 	/**
-	 * Set if context path and request URI should be URL-decoded.
+	 * Set if the context path and request URI should be URL-decoded.
 	 * Both are returned <i>undecoded</i> by the Servlet API,
 	 * in contrast to the servlet path.
 	 * <p>Uses either the request encoding or the default encoding according
@@ -117,6 +128,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * <p>Note: Setting this to "true" requires JDK 1.4 if the encoding differs
 	 * from the VM's platform default encoding, as JDK 1.3's URLDecoder class
 	 * does not offer a way to specify the encoding.
+	 * @param urlDecode <code>true</code> if the context path and request URI should be URL-decoded
 	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
 	 */
 	public void setUrlDecode(boolean urlDecode) {
@@ -124,11 +136,15 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	}
 
 	/**
-	 * Set the UrlPathHelper to use for resolution of lookup paths.
+	 * Set the {@link org.springframework.web.util.UrlPathHelper} to use for
+	 * the resolution of lookup paths.
 	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
 	 * or to share common UrlPathHelper settings across multiple web components.
+	 * @param urlPathHelper the desired helper
+	 * @throws IllegalArgumentException if the supplied UrlPathHelper is <code>null</code>
 	 */
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		Assert.notNull(urlPathHelper);
 		this.urlPathHelper = urlPathHelper;
 	}
 
