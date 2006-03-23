@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,12 @@ import org.springframework.core.NestedCheckedException;
 import org.springframework.core.NestedRuntimeException;
 
 /**
+ * Unit tests for the ServiceLocatorFactoryBean class.
+ * 
  * @author Colin Sampaleanu
+ * @author Rick Evans
  */
-public class ServiceLocatorFactoryBeanTests extends TestCase {
+public final class ServiceLocatorFactoryBeanTests extends TestCase {
 
 	public void testNoArgGetter() {
 		StaticApplicationContext ctx = new StaticApplicationContext();
@@ -39,7 +42,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 		ctx.refresh();
 
 		TestServiceLocator factory = (TestServiceLocator) ctx.getBean("factory");
-		TestService testBean = factory.getTestService();
+		factory.getTestService();
 	}
 
 	public void testErrorOnTooManyOrTooFew() throws Exception {
@@ -59,27 +62,24 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 
 		TestServiceLocator factory = (TestServiceLocator) ctx.getBean("factory");
 		try {
-			TestService testService = factory.getTestService();
-			fail("should fail on more than one matching type");
+			factory.getTestService();
+			fail("Must fail on more than one matching type");
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// expected
+		catch (NoSuchBeanDefinitionException expected) {
 		}
 		TestServiceLocator2 factory2 = (TestServiceLocator2) ctx.getBean("factory2");
 		try {
-			TestService testService = factory2.getTestService(null);
-			fail("should fail on more than one matching type");
+			factory2.getTestService(null);
+			fail("Must fail on more than one matching type");
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// expected
+		catch (NoSuchBeanDefinitionException expected) {
 		}
 		TestService2Locator factory3 = (TestService2Locator) ctx.getBean("factory3");
 		try {
-			TestService2 testService2 = factory3.getTestService();
-			fail("should fail on no matching types");
+			factory3.getTestService();
+			fail("Must fail on no matching types");
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// expected
+		catch (NoSuchBeanDefinitionException expected) {
 		}
 	}
 
@@ -103,29 +103,26 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 
 		TestServiceLocator factory = (TestServiceLocator) ctx.getBean("factory");
 		try {
-			TestService testService = factory.getTestService();
-			fail("should fail on more than one matching type");
+			factory.getTestService();
+			fail("Must fail on more than one matching type");
 		}
-		catch (CustomServiceLocatorException1 ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof NoSuchBeanDefinitionException);
+		catch (CustomServiceLocatorException1 expected) {
+			assertTrue(expected.getCause() instanceof NoSuchBeanDefinitionException);
 		}
 		TestServiceLocator2 factory2 = (TestServiceLocator2) ctx.getBean("factory2");
 		try {
-			TestService testService = factory2.getTestService(null);
-			fail("should fail on more than one matching type");
+			factory2.getTestService(null);
+			fail("Must fail on more than one matching type");
 		}
-		catch (CustomServiceLocatorException2 ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof NoSuchBeanDefinitionException);
+		catch (CustomServiceLocatorException2 expected) {
+			assertTrue(expected.getCause() instanceof NoSuchBeanDefinitionException);
 		}
 		TestService2Locator factory3 = (TestService2Locator) ctx.getBean("factory3");
 		try {
-			TestService2 testService2 = factory3.getTestService();
-			fail("should fail on no matching types");
+			factory3.getTestService();
+			fail("Must fail on no matching types");
 		}
-		catch (CustomServiceLocatorException3 ex) {
-			// expected
+		catch (CustomServiceLocatorException3 expected) {
 		}
 	}
 
@@ -147,8 +144,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 			testBean = factory.getTestService("bogusTestService");
 			fail("illegal operation allowed");
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// expected
+		catch (NoSuchBeanDefinitionException expected) {
 		}
 	}
 
@@ -203,6 +199,54 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 		assertTrue(testBean4 instanceof ExtendedTestService);
 	}
 
+	public void testNoServiceLocatorInterfaceSupplied() throws Exception {
+		try {
+			new ServiceLocatorFactoryBean().afterPropertiesSet();
+			fail("Must have thrown an IllegalArgumentException : no serviceLocator interface supplied");
+		}
+		catch (IllegalArgumentException expected) {}
+	}
+
+	public void testWhenServiceLocatorInterfaceIsNotAnInterfaceType() throws Exception {
+		try {
+			ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
+			factory.setServiceLocatorInterface(getClass());
+			factory.afterPropertiesSet();
+			fail("Must have thrown an IllegalArgumentException : bad (non-interface-type) serviceLocator interface supplied");
+		}
+		catch (IllegalArgumentException expected) {}
+	}
+
+	public void testWhenServiceLocatorExceptionClassToExceptionTypeWithOnlyNoArgCtor() throws Exception {
+		try {
+			ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
+			factory.setServiceLocatorExceptionClass(ExceptionClassWithOnlyZeroArgCtor.class);
+			fail("Must have thrown an IllegalArgumentException : bad (invalid-Exception-type) serviceLocatorException class supplied");
+		}
+		catch (IllegalArgumentException expected) {}
+	}
+
+	public void testWhenServiceLocatorExceptionClassIsNotAnExceptionSubclass() throws Exception {
+		try {
+			ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
+			factory.setServiceLocatorExceptionClass(getClass());
+			fail("Must have thrown an IllegalArgumentException : bad (non-Exception-type) serviceLocatorException class supplied");
+		}
+		catch (IllegalArgumentException expected) {}
+	}
+
+	public void testWhenServiceLocatorMethodCalledWithTooManyParameters() throws Exception {
+		ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
+		factory.setServiceLocatorInterface(ServiceLocatorInterfaceWithExtraNonCompliantMethod.class);
+		factory.afterPropertiesSet();
+		ServiceLocatorInterfaceWithExtraNonCompliantMethod locator = (ServiceLocatorInterfaceWithExtraNonCompliantMethod) factory.getObject();
+		try {
+			locator.getTestService("not", "allowed");
+			fail("Must have thrown an UnsupportedOperationException : bad method (too many args, doesn't obey class contract)");
+		}
+		catch (UnsupportedOperationException expected) {}
+	}
+
 
 	public static class TestService {
 	}
@@ -246,6 +290,14 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 	}
 
 
+	public static interface ServiceLocatorInterfaceWithExtraNonCompliantMethod {
+		
+		TestService2 getTestService();
+		
+		TestService2 getTestService(String serviceName, String defaultNotAllowedParameter);
+	}
+
+
 	public static class CustomServiceLocatorException1 extends NestedRuntimeException {
 
 		public CustomServiceLocatorException1(String message, Throwable cause) {
@@ -267,6 +319,10 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 		public CustomServiceLocatorException3(String message) {
 			super(message);
 		}
+	}
+	
+	
+	public static class ExceptionClassWithOnlyZeroArgCtor extends Exception {
 	}
 
 }
