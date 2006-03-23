@@ -45,10 +45,11 @@ public class CharacterEditor extends PropertyEditorSupport {
 
 	/**
 	 * Create a new CharacterEditor instance.
-	 * <p>The "allowEmpty" parameter states if an empty String should
-	 * be allowed for parsing, i.e. get interpreted as null value.
-	 * Else, an IllegalArgumentException gets thrown in that case.
-	 * @param allowEmpty if empty strings should be allowed
+	 * <p>The "allowEmpty" parameter controls whether an empty String is
+	 * to be allowed in parsing, i.e. be interpreted as 
+	 * the <code>null</code> value. Else, an IllegalArgumentException gets
+	 * thrown in that case.
+	 * @param allowEmpty if empty strings are to be allowed
 	 */
 	public CharacterEditor(boolean allowEmpty) {
 		this.allowEmpty = allowEmpty;
