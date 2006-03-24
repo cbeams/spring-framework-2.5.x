@@ -80,4 +80,24 @@
 			<xsl:apply-templates mode="titlepage.mode" />
 		</div>
 	</xsl:template>
+<!--###################################################
+                     Headers and Footers
+    ################################################### --> 
+    
+    <!-- lets have a Spring and I21 banner across the top of each page -->
+    <xsl:template name="user.header.navigation">
+		<div style="background-color:#86AEA5;border:none;height:73px;border:1px solid black;">
+			<a style="border:none;background: url();" href="http://www.springframework.org/" title="The Spring Framework">
+				<img style="border:none;" src="images/xdev-spring_logo.jpg"/>
+			</a>
+			<a style="border:none;background: url();" href="http://www.interface21.com/" title="Interface21 - Spring from the Source">
+				<img style="border:none;position:absolute;padding-top:7px;right:32px;" src="images/i21-banner-stamped.jpg"/>
+			</a>
+		</div>
+	</xsl:template> 
+	
+	<!-- no header navigation -->
+    <xsl:template name="header.navigation"/>
+    <xsl:param name="navig.showtitles">1</xsl:param>
+
 </xsl:stylesheet>

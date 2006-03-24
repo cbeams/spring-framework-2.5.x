@@ -4,8 +4,32 @@ BODY {
    margin-left: 2em;
 }
 
+A[accesskey^="p"] {
+    font-family: Verdana, Arial, helvetica, sans-serif;
+    font-size: 12px;
+	color: #003399;
+}
+
+A[accesskey^="u"] {
+    font-family: Verdana, Arial, helvetica, sans-serif;
+    font-size: 12px;
+	color: #003399;
+}
+
+A[accesskey^="h"] {
+    font-family: Verdana, Arial, helvetica, sans-serif;
+    font-size: 12px;
+	color: #003399;
+}
+
+A[accesskey^="n"] {
+    font-family: Verdana, Arial, helvetica, sans-serif;
+    font-size: 12px;
+	color: #003399;
+}
+
 A {
-    color: #003399;
+	color: #003399;
 }
 
 A:active {
@@ -14,6 +38,14 @@ A:active {
 
 A:visited {
     color: #888888;
+}
+
+P {
+	font-family: Verdana, Arial;
+}
+
+DT {
+	font-family: Verdana, Arial;
 }
 
 P, DL, DT, DD, BLOCKQUOTE {
@@ -33,14 +65,15 @@ P, BLOCKQUOTE {
 }
 
 P.releaseinfo {
-    font-size: 120%; font-weight: bold; 
-    font-family: Arial, helvetica, sans-serif;
+    font-size: 100%;
+    font-weight: bold;
+    font-family: Verdana, Arial, helvetica, sans-serif;
     padding-top: 10px;
 }
 
 P.pubdate {
     font-size: 120%; font-weight: bold; 
-    font-family: Arial, helvetica, sans-serif;
+    font-family: Verdana, Arial, helvetica, sans-serif;
 }
 
 td {
@@ -49,6 +82,16 @@ td {
 
 TD, TH, SPAN {
     color: #000000;
+}
+
+TD[width^="40%"] {
+    font-family: Verdana, Arial, helvetica, sans-serif;
+    font-size: 12px;
+	color: #003399;
+}
+
+TABLE[summary^="Navigation header"] tbody tr th[colspan^="3"] {
+    font-family: Verdana, Arial, helvetica, sans-serif;
 }
 
 BLOCKQUOTE {
@@ -60,7 +103,7 @@ H1, H2, H3, H4, H5, H6    {
     font-weight:500;
     margin-top:0px;
     padding-top:14px;
-    font-family: Arial, helvetica, sans-serif;
+    font-family: Verdana, Arial, helvetica, sans-serif;
     margin-bottom: 0px;
 }
 
@@ -74,13 +117,9 @@ H2.subtitle {
     margin-bottom: 20px;
 }
 
-H3.author {
-    color: #000000;
-    font-weight:500;
-    margin-top:0px;
-    padding-top:0px;
-    font-family: Arial, helvetica, sans-serif;
-    margin-bottom: 0px;
+.firstname, .surname {
+	font-size: 12px;
+    font-family: Verdana, Arial, helvetica, sans-serif;
 }
 
 TABLE  {
@@ -161,5 +200,7 @@ HR  {
 }
 
 .legalnotice {
-    font-size: 70%;
+    font-family: Verdana, Arial, helvetica, sans-serif;
+    font-size: 12px;
+    font-style: italic;
 }
