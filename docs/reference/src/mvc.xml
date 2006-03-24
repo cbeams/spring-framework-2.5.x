@@ -1722,118 +1722,145 @@ background=/themes/cool/img/coolBg.jpg
     </sect2>
   </sect1>
 
-  <sect1 id="mvc-multipart">
+  <section id="mvc-multipart">
     <title>Spring's multipart (fileupload) support</title>
-
-    <sect2 id="mvc-multipart-introduction">
+    <section id="mvc-multipart-introduction">
       <title>Introduction</title>
+      <para>
+			Spring has built-in multipart support to handle fileuploads in web
+			applications. The design for the multipart support is done with
+			pluggable <interfacename>MultipartResolver</interfacename> objects,
+			defined in the <literal>org.springframework.web.multipart</literal>
+			package. Out of the	box, Spring provides
+			<interfacename>MultipartResolver</interfacename>s for use with
+			<emphasis>Commons FileUpload</emphasis>
+			(<ulink	url="http://jakarta.apache.org/commons/fileupload"></ulink>) and
+			<emphasis>COS FileUpload</emphasis>
+			(<ulink	url="http://www.servlets.com/cos"></ulink>). How uploading
+			files is supported will be described in the rest of this chapter.
+      </para>
+      <para>
+			By default, no multipart handling will be done by Spring, as some
+			developers will want to handle multiparts themselves. You will have to
+			enable it yourself by adding a multipart resolver to the web
+			application's context. After you have done that, each request will be
+			inspected to see if it contains a multipart. If no multipart is found,
+			the request will continue as expected. However, if a multipart is found
+			in the request, the <classname>MultipartResolver</classname> that has
+			been declared in your context will be used. After that, the multipart
+			attribute in your request will be treated like any other attribute.
+		</para>
+    </section>
 
-      <para>Spring has built-in multipart support to handle fileuploads in web
-      applications. The design for the multipart support is done with
-      pluggable <literal>MultipartResolver</literal> objects, defined in the
-      <literal>org.springframework.web.multipart</literal> package. Out of the
-      box, Spring provides <literal>MultipartResolver</literal>s for use with
-      <emphasis>Commons FileUpload</emphasis> (<ulink
-      url="http://jakarta.apache.org/commons/fileupload"></ulink>) and
-      <emphasis>COS FileUpload</emphasis> (<ulink
-      url="http://www.servlets.com/cos"></ulink>). How uploading files is
-      supported will be described in the rest of this chapter.</para>
+    <section id="mvc-multipart-resolver">
+      <title>Using the <interfacename>MultipartResolver</interfacename></title>
+      <para>
+			The following example shows how to use the <classname>CommonsMultipartResolver</classname>:
+      </para>
+      <programlisting><![CDATA[<bean id="multipartResolver"
+    class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
 
-      <para>By default, no multipart handling will be done by Spring, as some
-      developers will want to handle multiparts themselves. You will have to
-      enable it yourself by adding a multipart resolver to the web
-      application's context. After you have done that, each request will be
-      inspected to see if it contains a multipart. If no multipart is found,
-      the request will continue as expected. However, if a multipart is found
-      in the request, the MultipartResolver that has been declared in your
-      context will be used. After that, the multipart attribute in your
-      request will be treated like any other attribute.</para>
-    </sect2>
+    <!-- one of the properties available; the maximum file size in bytes -->
+    <property name="maxUploadSize" value="100000"/>
+</bean>]]></programlisting>
+	  <para>
+			This is an example using the <classname>CosMultipartResolver</classname>:
+	  </para>
+	  <programlisting><![CDATA[<bean id="multipartResolver" class="org.springframework.web.multipart.cos.CosMultipartResolver">
 
-    <sect2 id="mvc-multipart-resolver">
-      <title>Using the <literal>MultipartResolver</literal></title>
+    <!-- one of the properties available; the maximum file size in bytes -->
+    <property name="maxUploadSize" value="100000"/>
+</bean>]]></programlisting>
+      <para>
+			Of course you also need to put the appropriate jars in your classpath
+			for the multipart resolver to work. In the case of the
+			<classname>CommonsMultipartResolver</classname>, you need to use
+			<literal>commons-fileupload.jar</literal>; in the case of the
+			<classname>CosMultipartResolver</classname>, use <literal>cos.jar</literal>.
+	  </para>
+      <para>
+			Now that you have seen how to set Spring up to handle multipart
+			requests, let's talk about how to actually use it. When the Spring
+			<classname>DispatcherServlet</classname> detects a multi-part request,
+			it activates the resolver that has been declared in your context and
+			hands over the request. What the resolver then does is wrap the current
+			<classname>HttpServletRequest</classname> into a
+			<classname>MultipartHttpServletRequest</classname> that has support for
+			multipart file uploads. Using the <classname>MultipartHttpServletRequest</classname>
+			you can get information about the multiparts contained by this request
+			and actually get access to the multipart files themselves in your controllers.
+		</para>
+    </section>
 
-      <para>The following example shows how to use the
-      <literal>CommonsMultipartResolver</literal>: <programlisting>&lt;bean id="multipartResolver"
-    class="org.springframework.web.multipart.commons.CommonsMultipartResolver"&gt;
+    <section id="mvc-multipart-forms">
+      <title>Handling a file upload in a form</title>
+      <para>
+			After the <classname>MultipartResolver</classname> has finished doing its
+			job, the request will be processed like any other. To use it, you create a form
+			with an upload field (see immediately below), then let Spring bind the file
+			onto your form (backing object). To actually let the user upload a file, we
+			have to create a (HTML) form:
+      </para>
+      <programlisting><![CDATA[<html>
+    <head>
+        <title>Upload a file please</title>
+    </head>
+    <body>
+        <h1>Please upload a file</h1>
+        <form method="post" action="upload.form" enctype="multipart/form-data">
+            <input type="file" name="file"/>
+            <input type="submit"/>
+        </form>
+    </body>
+</html>]]></programlisting>
+        <para>
+			As you can see, we've created a field named after the property of the bean
+			that holds the <literal>byte[]</literal>. Furthermore we've added the
+			encoding attribute (<literal>enctype="multipart/form-data"</literal>) which is
+			necessary to let the browser know how to encode the multipart fields (do not
+			forget this!).
+		</para>
+	  <para>
+			Just as with any other property that's not automagically convertible to a
+			string or primitive type, to be able to put binary data in your objects
+			you have to register a custom editor with the
+			<classname>ServletRequestDatabinder</classname>. There are a couple of
+			editors available for handling files and setting the results on an object.
+			There's a <classname>StringMultipartEditor</classname> capable of converting
+			files to Strings (using a user-defined character set) and there is a
+			<classname>ByteArrayMultipartEditor</classname> which converts files to byte
+			arrays. They function just as the <classname>CustomDateEditor</classname>
+			does.
+      </para>
+      <para>
+			So, to be able to upload files using a (HTML) form, declare the resolver,
+			a url mapping to a controller that will process the bean, and the controller
+			itself.
+	  </para>
+	  <programlisting><![CDATA[<beans>
+	<!-- lets use the Commons-based implementation of the MultipartResolver interface -->
+    <bean id="multipartResolver"
+        class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 
-    &lt;!-- one of the properties available; the maximum file size in bytes --&gt;
-    &lt;property name="maxUploadSize"&gt;
-        &lt;value&gt;100000&lt;/value&gt;
-    &lt;/property&gt;
-&lt;/bean&gt;</programlisting> This is an example using the
-      <literal>CosMultipartResolver</literal>: <programlisting>&lt;bean id="multipartResolver"
-    class="org.springframework.web.multipart.cos.CosMultipartResolver"&gt;
+    <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="mappings">
+            <value>
+                /upload.form=fileUploadController
+            </value>
+        </property>
+    </bean>
 
-    &lt;!-- one of the properties available; the maximum file size in bytes --&gt;
-    &lt;property name="maxUploadSize"&gt;
-        &lt;value&gt;100000&lt;/value&gt;
-    &lt;/property&gt;
-&lt;/bean&gt;</programlisting></para>
+    <bean id="fileUploadController" class="examples.FileUploadController">
+        <property name="commandClass" value="examples.FileUploadBean"/>
+        <property name="formView" value="fileuploadform"/>
+        <property name="successView" value="confirmation"/>
+    </bean>
 
-      <para>Of course you need to stick the appropriate jars in your classpath
-      for the multipart resolver to work. In the case of the
-      CommonsMultipartResolver, you need to use
-      <literal>commons-fileupload.jar</literal>, while in the case of the
-      CosMultipartResolver, use <literal>cos.jar</literal>.</para>
-
-      <para>Now that you have seen how to set Spring up to handle multipart
-      requests, let's talk about how to actually use it. When the Spring
-      DispatcherServlet detects a Multipart request, it activates the resolver
-      that has been declared in your context and hands over the request. What
-      it basically does is wrap the current
-      <literal>HttpServletRequest</literal> into a
-      <literal>MultipartHttpServletRequest</literal> that has support for
-      multiparts. Using the MultipartHttpServletRequest you can get
-      information about the multiparts contained by this request and actually
-      get the multiparts themselves in your controllers.</para>
-    </sect2>
-
-    <sect2 id="mvc-multipart-forms">
-      <title>Handling a fileupload in a form</title>
-
-      <para>After the MultipartResolver has finished doing its job, the
-      request will be processed like any other. To use it, you create a form
-      with an upload field, then let Spring bind the file on your form. Just
-      as with any other property that's not automagically convertible to a
-      String or primitive type, to be able to put binary data in your beans
-      you have to register a custom editor with the
-      <literal>ServletRequestDatabinder</literal>. There are a couple of
-      editors available for handling files and setting the results on a bean.
-      There's a <literal>StringMultipartEditor</literal> capable of converting
-      files to Strings (using a user-defined character set) and there is a
-      <literal>ByteArrayMultipartEditor</literal> which converts files to byte
-      arrays. They function just as the <literal>CustomDateEditor</literal>
-      does.</para>
-
-      <para>So, to be able to upload files using a form in a website, declare
-      the resolver, a url mapping to a controller that will process the bean,
-      and the controller itself. <programlisting>&lt;beans&gt;
-
-    ...
-
-    &lt;bean id="multipartResolver"
-        class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/&gt;
-
-    &lt;bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&gt;
-        &lt;property name="mappings"&gt;
-            &lt;props&gt;
-                &lt;prop key="/upload.form"&gt;fileUploadController&lt;/prop&gt;
-            &lt;/props&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
-
-    &lt;bean id="fileUploadController" class="examples.FileUploadController"&gt;
-        &lt;property name="commandClass"&gt;&lt;value&gt;examples.FileUploadBean&lt;/value&gt;&lt;/property&gt;
-        &lt;property name="formView"&gt;&lt;value&gt;fileuploadform&lt;/value&gt;&lt;/property&gt;
-        &lt;property name="successView"&gt;&lt;value&gt;confirmation&lt;/value&gt;&lt;/property&gt;
-    &lt;/bean&gt;
-
-&lt;/beans&gt;</programlisting></para>
-
-      <para>After that, create the controller and the actual bean to hold the
-      file property <programlisting>// snippet from FileUploadController
-public class FileUploadController extends SimpleFormController {
+</beans>]]></programlisting>
+      <para>
+			After that, create the controller and the actual class to hold the file property.
+	  </para>
+	  <programlisting><![CDATA[public class FileUploadController extends SimpleFormController {
 
     protected ModelAndView onSubmit(
         HttpServletRequest request,
@@ -1843,7 +1870,7 @@ public class FileUploadController extends SimpleFormController {
         throws ServletException, IOException {
 
         // cast the bean
-        FileUploadBean bean = (FileUploadBean)command;
+        FileUploadBean bean = (FileUploadBean) command;
 
         // let's see if there's content there
         byte[] file = bean.getFile();
@@ -1855,21 +1882,18 @@ public class FileUploadController extends SimpleFormController {
         return super.onSubmit(request, response, command, errors);
     }
 
-    protected void initBinder(
-        HttpServletRequest request,
-        ServletRequestDataBinder binder)
+    protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder)
         throws ServletException {
         // to actually be able to convert Multipart instance to byte[]
-        // we have to register a custom editor (in this case the
-        // ByteArrayMultipartEditor
+        // we have to register a custom editor
         binder.registerCustomEditor(byte[].class, new ByteArrayMultipartFileEditor());
         // now Spring knows how to handle multipart object and convert them
     }
 
 }
 
-// snippet from FileUploadBean
 public class FileUploadBean {
+
     private byte[] file;
 
     public void setFile(byte[] file) {
@@ -1879,33 +1903,112 @@ public class FileUploadBean {
     public byte[] getFile() {
         return file;
     }
-}</programlisting> As you can see, the FileUploadBean has a property typed
-      byte[] that holds the file. The controller registers a custom editor to
-      let Spring know how to actually convert the multipart objects the
-      resolver has found to properties specified by the bean. In these
-      examples, nothing is done with the byte[] property of the bean itself,
-      but in practice you can do whatever you want (save it in a database,
-      mail it to somebody, etc).</para>
+}]]></programlisting>
+	  <para>
+			As you can see, the <classname>FileUploadBean</classname> has a property typed
+			<literal>byte[]</literal> that holds the file. The controller registers
+			a custom editor to let Spring know how to actually convert the multipart
+			objects the resolver has found to properties specified by the bean. In
+			this example, nothing is done with the <literal>byte[]</literal>
+			property of the bean itself, but in practice you can do whatever you
+			want (save it in a database, mail it to somebody, etc).
+      </para>
+      <para>
+			An equivalent example in which a file is bound straight to a String-typed
+			property on a (form backing) object might look like this:
+      </para>
+      <programlisting><![CDATA[public class FileUploadController extends SimpleFormController {
 
-      <para>But we're still not finished. To actually let the user upload
-      something, we have to create a form: <programlisting>&lt;html&gt;
-    &lt;head&gt;
-        &lt;title&gt;Upload a file please&lt;/title&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-        &lt;h1&gt;Please upload a file&lt;/h1&gt;
-        &lt;form method="post" action="upload.form" enctype="multipart/form-data"&gt;
-            &lt;input type="file" name="file"/&gt;
-            &lt;input type="submit"/&gt;
-        &lt;/form&gt;
-    &lt;/body&gt;
-&lt;/html&gt;</programlisting> As you can see, we've created a field named
-      after the property of the bean that holds the byte[]. Furthermore we've
-      added the encoding attribute which is necessary to let the browser know
-      how to encode the multipart fields (do not forget this!). Now everything
-      should work.</para>
-    </sect2>
-  </sect1>
+    protected ModelAndView onSubmit(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        Object command,
+        BindException errors)
+        throws ServletException, IOException {
+
+        // cast the bean
+        FileUploadBean bean = (FileUploadBean) command;
+
+        // let's see if there's content there
+        String file = bean.getFile();
+        if (file == null) {
+            // hmm, that's strange, the user did not upload anything
+        }
+
+        // well, let's do nothing with the bean for now and return:
+        return super.onSubmit(request, response, command, errors);
+    }
+
+    protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder)
+        throws ServletException {
+        // to actually be able to convert Multipart instance to a String
+        // we have to register a custom editor
+        binder.registerCustomEditor(String.class, new StringMultipartFileEditor());
+        // now Spring knows how to handle multipart object and convert them
+    }
+
+}
+
+public class FileUploadBean {
+
+    private String file;
+
+    public void setFile(String file) {
+        this.file = file;
+    }
+
+    public String getFile() {
+        return file;
+    }
+}]]></programlisting>
+        <para>
+            Of course, this last example only makes (logical) sense in the context of uploading
+            a plain text file (it wouldn't work so well in the case of uploading an image file).
+        </para>
+        <para>
+            The third (and final) option is where one binds directly to a 
+            <interfacename>MultipartFile</interfacename> property declared on the
+            (form backing) object's class. In this case one does not need to register any
+            custom <interfacename>PropertyEditor</interfacename> because there is no
+            type conversion to be performed.
+        </para>
+      <programlisting><![CDATA[public class FileUploadController extends SimpleFormController {
+
+    protected ModelAndView onSubmit(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        Object command,
+        BindException errors)
+        throws ServletException, IOException {
+
+        // cast the bean
+        FileUploadBean bean = (FileUploadBean) command;
+
+        // let's see if there's content there
+        MultipartFile file = bean.getFile();
+        if (file == null) {
+            // hmm, that's strange, the user did not upload anything
+        }
+
+        // well, let's do nothing with the bean for now and return:
+        return super.onSubmit(request, response, command, errors);
+    }
+}
+
+public class FileUploadBean {
+
+    private MultipartFile file;
+
+    public void setFile(MultipartFile file) {
+        this.file = file;
+    }
+
+    public MultipartFile getFile() {
+        return file;
+    }
+}]]></programlisting>
+    </section>
+  </section>
 
   <sect1 id="mvc-exceptionhandlers">
     <title>Handling exceptions</title>

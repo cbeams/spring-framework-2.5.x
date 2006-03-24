@@ -25,8 +25,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Custom PropertyEditor for converting MultipartFiles to Strings.
- * Allows to specify the charset to use.
+ * Custom {@link java.beans.PropertyEditor} for converting
+ * {@link org.springframework.web.multipart.MultipartFile MultipartFiles}
+ * to Strings.
+ * 
+ * <p>Allows one to specify the charset to use.
  *
  * @author Juergen Hoeller
  * @since 13.10.2003
@@ -40,14 +43,14 @@ public class StringMultipartFileEditor extends PropertyEditorSupport {
 
 
 	/**
-	 * Create a new StringMultipartFileEditor, using the default charset.
+	 * Create a new {@link StringMultipartFileEditor}, using the default charset.
 	 */
 	public StringMultipartFileEditor() {
 		this.charsetName = null;
 	}
 
 	/**
-	 * Create a new StringMultipartFileEditor, using the given charset.
+	 * Create a new {@link StringMultipartFileEditor}, using the given charset.
 	 * @param charsetName valid charset name
 	 * @see java.lang.String#String(byte[],String)
 	 */

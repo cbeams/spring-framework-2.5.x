@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Interface which represents an uploaded file received in a multipart request.
+ * A representation of an uploaded file received in a multipart request.
  *
  * <p>The file contents are either stored in memory or temporarily on disk.
  * In either case, the user is responsible for copying file contents to a
- * session-level or persistent store if desired. The temporary storages
+ * session-level or persistent store as and if desired. The temporary storages
  * will be cleared at the end of request processing.
  *
  * @author Juergen Hoeller

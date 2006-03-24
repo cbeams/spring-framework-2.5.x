@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,17 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Interface which provides additional methods for dealing with multipart
- * content within a servlet request, allowing to access uploaded files.
- * Implementations also need to override the standard ServletRequest
- * methods for parameter access, making multipart parameters available.
+ * Provides additional methods for dealing with multipart content within a
+ * servlet request, allowing to access uploaded files.
+ * Implementations also need to override the standard
+ * {@link javax.servlet.ServletRequest} methods for parameter access, making
+ * multipart parameters available.
  *
- * <p>A concrete implementation is DefaultMultipartHttpServletRequest. As an
- * intermediate step, AbstractMultipartHttpServletRequest can be subclassed.
+ * <p>A concrete implementation is
+ * {@link org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest}.
+ * As an intermediate step,
+ * {@link org.springframework.web.multipart.support.AbstractMultipartHttpServletRequest}
+ * can be subclassed.
  *
  * @author Juergen Hoeller
  * @author Trevor D. Cook
@@ -44,9 +48,10 @@ import javax.servlet.http.HttpServletRequest;
 public interface MultipartHttpServletRequest extends HttpServletRequest {
 
 	/**
-	 * Return an Iterator of String objects containing the parameter names of the
-	 * multipart files contained in this request. These are the field names of
-	 * the form (like with normal parameters), not the original file names.
+	 * Return an {@link java.util.Iterator} of String objects containing the
+	 * parameter names of the multipart files contained in this request. These
+	 * are the field names of the form (like with normal parameters), not the
+	 * original file names.
 	 * @return the names of the files
 	 */
 	Iterator getFileNames();
@@ -55,14 +60,14 @@ public interface MultipartHttpServletRequest extends HttpServletRequest {
 	 * Return the contents plus description of an uploaded file in this request,
 	 * or <code>null</code> if it does not exist.
 	 * @param name a String specifying the parameter name of the multipart file
-	 * @return the uploaded content in the form of a MultipartFile object
+	 * @return the uploaded content in the form of a {@link org.springframework.web.multipart.MultipartFile} object
 	 */
 	MultipartFile getFile(String name);
 
 	/**
-	 * Return a Map of the multipart files contained in this request.
+	 * Return a {@link java.util.Map} of the multipart files contained in this request.
 	 * @return a map containing the parameter names as keys, and the
-	 * MultipartFile objects as values
+	 * {@link org.springframework.web.multipart.MultipartFile} objects as values
 	 * @see MultipartFile
 	 */
 	Map getFileMap();

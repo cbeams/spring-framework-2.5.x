@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,30 +19,36 @@ package org.springframework.web.multipart;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Interface for multipart resolution strategies that handle file uploads as
- * defined in <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>.
- * Implementations are typically usable both within any application context
+ * A strategy interface for multipart file upload resolution in accordance
+ * with <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>.
+ * Implementations are typically usable both within an application context
  * and standalone.
  *
  * <p>There are two concrete implementations included in Spring:
  * <ul>
- * <li>CommonsMultipartResolver for Jakarta Commons FileUpload
- * <li>CosMultipartResolver for Jason Hunter's COS (com.oreilly.servlet)
+ * <li>{@link org.springframework.web.multipart.commons.CommonsMultipartResolver} for Jakarta Commons FileUpload
+ * <li>{@link org.springframework.web.multipart.cos.CosMultipartResolver} for Jason Hunter's COS (com.oreilly.servlet)
  * </ul>
  *
- * <p>There is no default resolver implementation used for Spring DispatcherServlets,
+ * <p>There is no default resolver implementation used for Spring
+ * {@link org.springframework.web.servlet.DispatcherServlet DispatcherServlets},
  * as an application might choose to parse its multipart requests itself. To define
  * an implementation, create a bean with the id "multipartResolver" in a
- * DispatcherServlet's application context. Such a resolver gets applied to all
- * requests handled by that DispatcherServlet.
+ * {@link org.springframework.web.servlet.DispatcherServlet DispatcherServlet's}
+ * application context. Such a resolver gets applied to all requests handled
+ * by that {@link org.springframework.web.servlet.DispatcherServlet}.
  *
- * <p>If a DispatcherServlet detects a multipart request, it will resolve it
- * via the configured MultipartResolver and pass on a wrapped HttpServletRequest.
- * Controllers can then cast their given request to the MultipartHttpServletRequest
- * interface, being able to access MultipartFiles. Note that this cast is only
- * supported in case of an actual multipart request.
+ * <p>If a {@link org.springframework.web.servlet.DispatcherServlet} detects
+ * a multipart request, it will resolve it via the configured
+ * {@link org.springframework.web.multipart.MultipartResolver} and pass on a
+ * wrapped {@link javax.servlet.http.HttpServletRequest}.
+ * Controllers can then cast their given request to the
+ * {@link org.springframework.web.multipart.MultipartHttpServletRequest}
+ * interface, which permits access to any
+ * {@link org.springframework.web.multipart.MultipartFile MultipartFiles}.
+ * Note that this cast is only supported in case of an actual multipart request.
  *
- * <pre>
+ * <pre class="code">
  * public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) {
  *   MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
  *   MultipartFile multipartFile = multipartRequest.getFile("image");
@@ -50,18 +56,26 @@ import javax.servlet.http.HttpServletRequest;
  * }</pre>
  *
  * Instead of direct access, command or form controllers can register a
- * ByteArrayMultipartFileEditor or StringMultipartFileEditor with their data
- * binder, to automatically apply multipart content to command bean properties.
+ * {@link org.springframework.web.multipart.support.ByteArrayMultipartFileEditor}
+ * or {@link org.springframework.web.multipart.support.StringMultipartFileEditor}
+ * with their data binder, to automatically apply multipart content to command
+ * bean properties.
  *
- * <p>As an alternative to using a MultipartResolver with a DispatcherServlet,
- * a MultipartFilter can be registered in <code>web.xml</code>. It will delegate
- * to a corresponding MultipartResolver bean in the root application context.
- * This is mainly intended for applications that do not use Spring's own
- * web MVC framework.
+ * <p>As an alternative to using a
+ * {@link org.springframework.web.multipart.MultipartResolver} with a
+ * {@link org.springframework.web.servlet.DispatcherServlet},
+ * a {@link org.springframework.web.multipart.support.MultipartFilter} can be
+ * registered in <code>web.xml</code>. It will delegate to a corresponding
+ * {@link org.springframework.web.multipart.MultipartResolver} bean in the root
+ * application context. This is mainly intended for applications that do not
+ * use Spring's own web MVC framework.
  *
- * <p>Note: There is hardly ever a need to access the MultipartResolver itself
+ * <p>Note: There is hardly ever a need to access the
+ * {@link org.springframework.web.multipart.MultipartResolver} itself
  * from application code. It will simply do its work behind the scenes,
- * making MultipartHttpServletRequests available to controllers.
+ * making
+ * {@link org.springframework.web.multipart.MultipartHttpServletRequest MultipartHttpServletRequests}
+ * available to controllers.
  *
  * @author Juergen Hoeller
  * @author Trevor D. Cook
@@ -87,7 +101,8 @@ public interface MultipartResolver {
 
 	/**
 	 * Parse the given HTTP request into multipart files and parameters,
-	 * and wrap the request inside a MultipartHttpServletRequest object
+	 * and wrap the request inside a
+	 * {@link org.springframework.web.multipart.MultipartHttpServletRequest} object
 	 * that provides access to file descriptors and makes contained
 	 * parameters accessible via the standard ServletRequest methods.
 	 * @param request the servlet request to wrap (must be of a multipart content type)
