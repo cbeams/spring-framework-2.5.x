@@ -30,10 +30,8 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  */
 public class WebNamespaceHandler extends NamespaceHandlerSupport {
 	
-	public WebNamespaceHandler() {
+	public void init() {
 		registerBeanDefinitionParser("urlmappings", new UrlHandlerMappingBeanDefinitionParser());
-		
-		
 	}
 
 }

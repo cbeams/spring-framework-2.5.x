@@ -30,7 +30,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  */
 public class MvcNamespaceHandler extends NamespaceHandlerSupport {
 	
-	public MvcNamespaceHandler() {
+	public void init() {
 		registerBeanDefinitionParser("url-mappings", new UrlHandlerMappingBeanDefinitionParser());
 		registerBeanDefinitionParser("view-resolvers", new ViewResolversBeanDefinitionParser());		
 	}

@@ -32,7 +32,7 @@ import org.w3c.dom.NodeList;
  */
 public class JndiNamespaceHandler extends NamespaceHandlerSupport {
 
-	public JndiNamespaceHandler() {
+	public void init() {
 		registerBeanDefinitionParser("lookup", new LookupBeanDefinitionParser());
 	}
 

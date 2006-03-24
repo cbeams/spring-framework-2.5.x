@@ -61,11 +61,10 @@ import org.springframework.beans.factory.config.BeanDefinition;
 public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 	/**
-	 * Construct a new <code>AopNamespaceHandler</code> and register the
-	 * {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
-	 * for the <code>config</code> tag.
+	 * Register the {@link BeanDefinitionParser BeanDefinitionParsers} for the
+	 * '<code>config</code>', '<code>spring-configured</code>' and '<code>aspectj-autoproxy</code>' tag.
 	 */
-	public AopNamespaceHandler() {
+	public void init() {
 		registerBeanDefinitionParser("config", new ConfigBeanDefinitionParser());
 		registerBeanDefinitionParser("spring-configured", new SpringConfiguredBeanDefinitionParser());
 		registerBeanDefinitionParser("aspectj-autoproxy", new AspectJAutoProxyBeanDefinitionParser());

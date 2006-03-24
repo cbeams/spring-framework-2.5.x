@@ -115,7 +115,9 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 					throw new IllegalArgumentException("Class [" + className +
 							"] does not implement the NamespaceHandler interface");
 				}
-				this.handlerMappings.put(namespaceUri, BeanUtils.instantiateClass(handlerClass));
+				NamespaceHandler namespaceHandler = (NamespaceHandler) BeanUtils.instantiateClass(handlerClass);
+				namespaceHandler.init();
+				this.handlerMappings.put(namespaceUri, namespaceHandler);
 			}
 			catch (ClassNotFoundException ex) {
 				if (logger.isInfoEnabled()) {

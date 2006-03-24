@@ -34,7 +34,7 @@ public class TxNamespaceHandler extends NamespaceHandlerSupport {
 
 	public static final String ANNOTATION_SOURCE_CLASS_NAME = "org.springframework.transaction.annotation.AnnotationTransactionAttributeSource";
 
-	public TxNamespaceHandler() {
+	public void init() {
 		registerBeanDefinitionParser("advice", new TxAdviceBeanDefinitionParser());
 		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenBeanDefinitionParser());
 	}

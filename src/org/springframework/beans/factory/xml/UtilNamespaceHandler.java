@@ -38,7 +38,7 @@ import java.util.Set;
  */
 public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
-	public UtilNamespaceHandler() {
+	public void init() {
 		registerBeanDefinitionParser("properties", new PropertiesBeanDefinitionParser());
 		registerBeanDefinitionParser("constant", new ConstantBeanDefinitionParser());
 		registerBeanDefinitionParser("property-path", new PropertyPathBeanDefinitionParser());
