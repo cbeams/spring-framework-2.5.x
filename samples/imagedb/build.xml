@@ -40,10 +40,11 @@
 		<echo message=""/>
 		<echo message="Available targets are:"/>
 		<echo message=""/>
-		<echo message="clean    --> Clean output dirs"/>
-		<echo message="build    --> Compile main Java sources and copy libraries"/>
-		<echo message="warfile  --> Build the web application archive"/>
-		<echo message="all      --> Clean, build, warfile"/>
+		<echo message="clean             --> Clean output dirs"/>
+		<echo message="build             --> Compile main Java sources and copy libraries"/>
+		<echo message="warfile           --> Build the web application archive"/>
+		<echo message="all               --> Clean, build, warfile"/>
+		<echo message="geronimo.warfile  --> Build the web application archive (specifically for Geronimo)"/>
 		<echo message=""/>
 
 	</target>
@@ -123,6 +124,36 @@
 
 	<target name="warfile" depends="build" description="Build the web application archive">
 
+		<antcall target="create.warfile">
+			<!-- not interested in Geronimo deploy plan -->
+			<param name="warfile.excludes" value="WEB-INF/geronimo-web.xml"/>
+		</antcall>
+
+	</target>
+
+
+	<target name="all" depends="clean,build,warfile" description="Clean,build,warfile"/>
+
+
+	<!--
+	If you are going to deploy the application into Geronimo (or an
+	application server variant of Geronimo), run this target in preference
+	to the plain 'warfile'. This is required because of the Geronimo
+	commons-logging issue.
+	-->
+	<target name="geronimo.warfile" depends="build"
+			description="Build the web application archive packaged specifically for Geronimo">
+
+		<antcall target="create.warfile">
+			<!-- do not deploy commons-logging with the web app -->
+			<param name="warfile.excludes" value="WEB-INF/lib/commons-logging.jar"/>
+		</antcall>
+
+	</target>	
+
+
+	<target name="create.warfile" depends="build">
+
 		<mkdir dir="${dist.dir}"/>
 
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
@@ -132,11 +163,9 @@
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/views/**"/>
 			<exclude name="**/.*"/>
+			<exclude name="${warfile.excludes}"/>
 		</war>
 
 	</target>
-
-
-	<target name="all" depends="clean,build,warfile" description="Clean,build,warfile"/>
 
 </project>
