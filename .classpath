@@ -118,5 +118,6 @@
 	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/easymock/easymockclassextension.jar"/>
 	<classpathentry kind="lib" path="lib/dom4j/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/osgi/org.eclipse.osgi_3.1.1.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
