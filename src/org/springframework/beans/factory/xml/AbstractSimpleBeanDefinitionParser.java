@@ -22,6 +22,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.core.Conventions;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Attr;
@@ -49,23 +50,7 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
 	}
 
 	protected String extractPropertyName(String attributeName) {
-		Assert.notNull(attributeName, "'attributeName' cannot be null.");
-		if (attributeName.indexOf("-") == -1) {
-			return attributeName;
-		}
-		String[] parts = StringUtils.split(attributeName, "-");
-		StringBuffer result = new StringBuffer(attributeName.length());
-		for (int i = 0; i < parts.length; i++) {
-			String part = parts[i];
-			if (i == 0) {
-				result.append(part);
-			}
-			else {
-				result.append(Character.toUpperCase(part.charAt(0)));
-				result.append(part.substring(1));
-			}
-		}
-		return result.toString();
+		return Conventions.attributeNameToPropertyName(attributeName);
 	}
 
 	protected void postProcess(BeanDefinitionBuilder beanDefinition, Element element) {

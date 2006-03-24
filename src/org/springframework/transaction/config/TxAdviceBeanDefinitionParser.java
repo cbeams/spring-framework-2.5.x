@@ -53,9 +53,9 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 	public static final String PROPAGATION = "propagation";
 
 	public static final String ISOLATION = "isolation";
-	
+
 	public static final String ROLLBACK_FOR = "rollback-for";
-	
+
 	public static final String NO_ROLLBACK_FOR = "no-rollback-for";
 
 	protected Class getBeanClass(Element element) {
@@ -64,7 +64,7 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	protected void doParse(Element element, BeanDefinitionBuilder builder) {
 		// set the transaction manager property
-		builder.addPropertyReference(TxNamespaceHandler.TRANSACTION_MANAGER, element.getAttribute(TxNamespaceHandler.TRANSACTION_MANAGER));
+		builder.addPropertyReference(TxNamespaceHandler.TRANSACTION_MANAGER_PROPERTY, element.getAttribute(TxNamespaceHandler.TRANSACTION_MANAGER_ATTRIBUTE));
 
 		List txAttributes = DomUtils.getChildElementsByTagName(element, ATTRIBUTES, true);
 
@@ -99,7 +99,7 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 					RuleBasedTransactionAttribute.PREFIX_ISOLATION + methodElement.getAttribute(ISOLATION));
 			attribute.setTimeout(Integer.parseInt(methodElement.getAttribute(TIMEOUT)));
 			attribute.setReadOnly(Boolean.valueOf(methodElement.getAttribute(READ_ONLY)).booleanValue());
-			
+
 			List rollbackRules = new LinkedList();
 			if (methodElement.hasAttribute(ROLLBACK_FOR)) {
 				String rollbackForValue = methodElement.getAttribute(ROLLBACK_FOR);
@@ -110,7 +110,7 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 				addNoRollbackRuleAttributesTo(rollbackRules,noRollbackForValue);
 			}
 			attribute.setRollbackRules(rollbackRules);
-			
+
 			transactionAttributeMap.put(name, attribute);
 		}
 

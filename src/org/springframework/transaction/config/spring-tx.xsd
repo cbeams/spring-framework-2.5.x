@@ -12,13 +12,13 @@
 				<xsd:element name="attributes" type="attributesType" minOccurs="0" maxOccurs="1"/>
 			</xsd:sequence>
 			<xsd:attribute name="id" type="xsd:ID" use="required"/>
-			<xsd:attribute name="transactionManager" type="xsd:string" default="transactionManager"/>
+			<xsd:attribute name="transaction-manager" type="xsd:string" default="transactionManager"/>
 		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="annotation-driven">
 		<xsd:complexType>
-			<xsd:attribute name="transactionManager" type="xsd:string" default="transactionManager"/>
+			<xsd:attribute name="transaction-manager" type="xsd:string" default="transactionManager"/>
 		</xsd:complexType>
 	</xsd:element>
 

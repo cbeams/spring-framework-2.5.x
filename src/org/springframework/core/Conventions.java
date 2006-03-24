@@ -21,6 +21,7 @@ import java.util.Iterator;
 
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.Assert;
 
 /**
  * Provides methods to support various naming and other conventions used
@@ -66,6 +67,35 @@ public abstract class Conventions {
 
 		String name = StringUtils.uncapitalize(ClassUtils.getShortName(valueClass));
 		return (pluralize ? pluralize(name) : name);
+	}
+
+	/**
+	 * Converts <code>String</code>s in attribute name format (lowercase, hyphens separating words)
+	 * into property name format (camel-cased). For example, <code>transaction-manager</code> is
+	 * converted into <code>transactionManager</code>.
+	 */
+	public static String attributeNameToPropertyName(String attributeName) {
+		Assert.notNull(attributeName, "'attributeName' cannot be null.");
+		if (attributeName.indexOf("-") == -1) {
+			return attributeName;
+		}
+		char[] chars = attributeName.toCharArray();
+		char[] result = new char[chars.length -1]; // not completely accurate but good guess
+		int currPos = 0;
+		boolean upperCaseNext = false;
+		for (int i = 0; i < chars.length; i++) {
+			char c = chars[i];
+			if(c == '-') {
+				upperCaseNext = true;
+				continue;
+			} else if (upperCaseNext) {
+				result[currPos++] = Character.toUpperCase(c);
+				upperCaseNext = false;
+			} else {
+				result[currPos++] = c;
+			}
+		}
+		return new String(result, 0, currPos);
 	}
 
 	/**

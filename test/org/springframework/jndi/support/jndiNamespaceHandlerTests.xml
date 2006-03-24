@@ -6,17 +6,17 @@
        http://www.springframework.org/schema/jndi http://www.springframework.org/schema/jndi/spring-jndi.xsd">
 
 	
-	<jndi:lookup id="simple" jndiName="jdbc/MyDataSource"/>
+	<jndi:lookup id="simple" jndi-name="jdbc/MyDataSource"/>
 
 	<jndi:lookup id="complex"
-				 jndiName="jdbc/MyDataSource"
+				 jndi-name="jdbc/MyDataSource"
 				 cache="true"
-				 resourceRef="true"
-				 lookupOnStartup="true"
-				 expectedType="com.myapp.DefaultFoo"
-				 proxyInterface="com.myapp.Foo"/>
+				 resource-ref="true"
+				 lookup-on-startup="true"
+				 expected-type="com.myapp.DefaultFoo"
+				 proxy-interface="com.myapp.Foo"/>
 
-	<jndi:lookup id="withEnvironment" jndiName="jdbc/MyDataSource">
+	<jndi:lookup id="withEnvironment" jndi-name="jdbc/MyDataSource">
 		<jndi:environment>foo=bar</jndi:environment>
 	</jndi:lookup>
 </beans>

@@ -59,4 +59,9 @@ public class ConventionsTests extends TestCase {
 		}
 	}
 
+	public void testAttributeNameToPropertyName() throws Exception {
+		assertEquals("transactionManager", Conventions.attributeNameToPropertyName("transaction-manager"));
+		assertEquals("pointcutRef", Conventions.attributeNameToPropertyName("pointcut-ref"));
+		assertEquals("lookupOnStartup", Conventions.attributeNameToPropertyName("lookup-on-startup"));
+	}
 }

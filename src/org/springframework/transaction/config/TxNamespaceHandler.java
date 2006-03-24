@@ -18,6 +18,7 @@ package org.springframework.transaction.config;
 
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.util.ClassUtils;
+import org.springframework.core.Conventions;
 
 /**
  * @author Rob Harrop
@@ -25,7 +26,9 @@ import org.springframework.util.ClassUtils;
  */
 public class TxNamespaceHandler extends NamespaceHandlerSupport {
 
-	public static final String TRANSACTION_MANAGER = "transactionManager";
+	public static final String TRANSACTION_MANAGER_ATTRIBUTE = "transaction-manager";
+
+	public static final String TRANSACTION_MANAGER_PROPERTY = Conventions.attributeNameToPropertyName(TRANSACTION_MANAGER_ATTRIBUTE);
 
 	public static final String TRANSACTION_ATTRIBUTE_SOURCE = "transactionAttributeSource";
 

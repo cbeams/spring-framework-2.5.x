@@ -44,12 +44,12 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		// register the APC if needed
 		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
 
-		String transactionManagerName = element.getAttribute(TxNamespaceHandler.TRANSACTION_MANAGER);
+		String transactionManagerName = element.getAttribute(TxNamespaceHandler.TRANSACTION_MANAGER_ATTRIBUTE);
 
 		// create the TransactionInterceptor definition
 		RootBeanDefinition interceptorDefinition = new RootBeanDefinition(TransactionInterceptor.class);
 		interceptorDefinition.setPropertyValues(new MutablePropertyValues());
-		interceptorDefinition.getPropertyValues().addPropertyValue(TxNamespaceHandler.TRANSACTION_MANAGER, new RuntimeBeanReference(transactionManagerName));
+		interceptorDefinition.getPropertyValues().addPropertyValue(TxNamespaceHandler.TRANSACTION_MANAGER_PROPERTY, new RuntimeBeanReference(transactionManagerName));
 		interceptorDefinition.getPropertyValues().addPropertyValue(TxNamespaceHandler.TRANSACTION_ATTRIBUTE_SOURCE, new RootBeanDefinition(TxNamespaceHandler.getAnnotationSourceClass()));
 
 		// create the TransactionAttributeSourceAdvisor definition
