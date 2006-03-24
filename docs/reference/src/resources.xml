@@ -5,7 +5,7 @@
 		<title>Overview</title>
 		<para>
 			Java's standard <classname>java.net.URL</classname> interface and
-			standard handlers for various URL prefixes  unfortunately not quite
+			standard handlers for various URL prefixes are unfortunately not quite
 			adequate enough for all access to low-level resources. For example,
 			there is no standardized URL implementation which may be used to
 			access a resource that needs to be obtained from somewhere on the
