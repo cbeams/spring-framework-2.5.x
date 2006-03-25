@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ package org.springframework.util;
  *
  * <p>Some examples:<br>
  * <ul>
- * <li><code>com/t?st.jsp</code> - matches <code>test.jsp</code> but also
- * <code>tast.jsp</code> or <code>txst.jsp</code></li>
+ * <li><code>com/t?st.jsp</code> - matches <code>com/test.jsp</code> but also
+ * <code>com/tast.jsp</code> or <code>com/txst.jsp</code></li>
  * <li><code>com/*.jsp</code> - matches all <code>.jsp</code> files in the
  * <code>com</code> directory</li>
  * <li><code>com/&#42;&#42;/test.jsp</code> - matches all <code>test.jsp</code>
