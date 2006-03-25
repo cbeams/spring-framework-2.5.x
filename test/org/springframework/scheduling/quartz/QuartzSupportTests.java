@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,7 @@ import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobListener;
+import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerContext;
 import org.quartz.SchedulerException;
@@ -130,6 +131,190 @@ public class QuartzSupportTests extends TestCase {
 			schedulerFactoryBean.setJobDetails(new JobDetail[] {jobDetail0});
 		}
 		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
+		try {
+			schedulerFactoryBean.afterPropertiesSet();
+		}
+		finally {
+			schedulerFactoryBean.destroy();
+		}
+
+		schedulerControl.verify();
+	}
+
+	public void testSchedulerFactoryBeanWithExistingJobs() throws Exception {
+		doTestSchedulerFactoryBeanWithExistingJobs(false);
+	}
+
+	public void testSchedulerFactoryBeanWithOverwriteExistingJobs() throws Exception {
+		doTestSchedulerFactoryBeanWithExistingJobs(true);
+	}
+
+	private void doTestSchedulerFactoryBeanWithExistingJobs(boolean overwrite) throws Exception {
+		TestBean tb = new TestBean("tb", 99);
+		JobDetailBean jobDetail0 = new JobDetailBean();
+		jobDetail0.setJobClass(Job.class);
+		jobDetail0.setBeanName("myJob0");
+		Map jobData = new HashMap();
+		jobData.put("testBean", tb);
+		jobDetail0.setJobDataAsMap(jobData);
+		jobDetail0.afterPropertiesSet();
+		assertEquals(tb, jobDetail0.getJobDataMap().get("testBean"));
+
+		CronTriggerBean trigger0 = new CronTriggerBean();
+		trigger0.setBeanName("myTrigger0");
+		trigger0.setJobDetail(jobDetail0);
+		trigger0.setCronExpression("0/1 * * * * ?");
+		trigger0.afterPropertiesSet();
+
+		TestMethodInvokingTask task1 = new TestMethodInvokingTask();
+		MethodInvokingJobDetailFactoryBean mijdfb = new MethodInvokingJobDetailFactoryBean();
+		mijdfb.setBeanName("myJob1");
+		mijdfb.setTargetObject(task1);
+		mijdfb.setTargetMethod("doSomething");
+		mijdfb.afterPropertiesSet();
+		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+
+		SimpleTriggerBean trigger1 = new SimpleTriggerBean();
+		trigger1.setBeanName("myTrigger1");
+		trigger1.setJobDetail(jobDetail1);
+		trigger1.setStartDelay(0);
+		trigger1.setRepeatInterval(20);
+		trigger1.afterPropertiesSet();
+
+		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
+		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
+		scheduler.getContext();
+		schedulerControl.setReturnValue(new SchedulerContext());
+		scheduler.getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
+		schedulerControl.setReturnValue(null);
+		scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
+		schedulerControl.setReturnValue(new SimpleTrigger());
+		if (overwrite) {
+			scheduler.addJob(jobDetail1, true);
+			schedulerControl.setVoidCallable();
+			scheduler.rescheduleJob("myTrigger1", Scheduler.DEFAULT_GROUP, trigger1);
+			schedulerControl.setReturnValue(new Date());
+		}
+		else {
+			scheduler.getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
+			schedulerControl.setReturnValue(null);
+		}
+		scheduler.addJob(jobDetail0, true);
+		schedulerControl.setVoidCallable();
+		scheduler.scheduleJob(trigger0);
+		schedulerControl.setReturnValue(new Date());
+		scheduler.start();
+		schedulerControl.setVoidCallable();
+		scheduler.shutdown(false);
+		schedulerControl.setVoidCallable();
+		schedulerControl.replay();
+
+		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
+				return scheduler;
+			}
+		};
+		Map schedulerContext = new HashMap();
+		schedulerContext.put("otherTestBean", tb);
+		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
+		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
+		if (overwrite) {
+			schedulerFactoryBean.setOverwriteExistingJobs(true);
+		}
+		try {
+			schedulerFactoryBean.afterPropertiesSet();
+		}
+		finally {
+			schedulerFactoryBean.destroy();
+		}
+
+		schedulerControl.verify();
+	}
+
+	public void testSchedulerFactoryBeanWithExistingJobsAndRaceCondition() throws Exception {
+		doTestSchedulerFactoryBeanWithExistingJobsAndRaceCondition(false);
+	}
+
+	public void testSchedulerFactoryBeanWithOverwriteExistingJobsAndRaceCondition() throws Exception {
+		doTestSchedulerFactoryBeanWithExistingJobsAndRaceCondition(true);
+	}
+
+	private void doTestSchedulerFactoryBeanWithExistingJobsAndRaceCondition(boolean overwrite) throws Exception {
+		TestBean tb = new TestBean("tb", 99);
+		JobDetailBean jobDetail0 = new JobDetailBean();
+		jobDetail0.setJobClass(Job.class);
+		jobDetail0.setBeanName("myJob0");
+		Map jobData = new HashMap();
+		jobData.put("testBean", tb);
+		jobDetail0.setJobDataAsMap(jobData);
+		jobDetail0.afterPropertiesSet();
+		assertEquals(tb, jobDetail0.getJobDataMap().get("testBean"));
+
+		CronTriggerBean trigger0 = new CronTriggerBean();
+		trigger0.setBeanName("myTrigger0");
+		trigger0.setJobDetail(jobDetail0);
+		trigger0.setCronExpression("0/1 * * * * ?");
+		trigger0.afterPropertiesSet();
+
+		TestMethodInvokingTask task1 = new TestMethodInvokingTask();
+		MethodInvokingJobDetailFactoryBean mijdfb = new MethodInvokingJobDetailFactoryBean();
+		mijdfb.setBeanName("myJob1");
+		mijdfb.setTargetObject(task1);
+		mijdfb.setTargetMethod("doSomething");
+		mijdfb.afterPropertiesSet();
+		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+
+		SimpleTriggerBean trigger1 = new SimpleTriggerBean();
+		trigger1.setBeanName("myTrigger1");
+		trigger1.setJobDetail(jobDetail1);
+		trigger1.setStartDelay(0);
+		trigger1.setRepeatInterval(20);
+		trigger1.afterPropertiesSet();
+
+		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
+		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
+		scheduler.getContext();
+		schedulerControl.setReturnValue(new SchedulerContext());
+		scheduler.getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
+		schedulerControl.setReturnValue(null);
+		scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
+		schedulerControl.setReturnValue(new SimpleTrigger());
+		if (overwrite) {
+			scheduler.addJob(jobDetail1, true);
+			schedulerControl.setVoidCallable();
+			scheduler.rescheduleJob("myTrigger1", Scheduler.DEFAULT_GROUP, trigger1);
+			schedulerControl.setReturnValue(new Date());
+		}
+		else {
+			scheduler.getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
+			schedulerControl.setReturnValue(null);
+		}
+		scheduler.addJob(jobDetail0, true);
+		schedulerControl.setVoidCallable();
+		scheduler.scheduleJob(trigger0);
+		schedulerControl.setThrowable(new ObjectAlreadyExistsException(""));
+		if (overwrite) {
+			scheduler.rescheduleJob("myTrigger0", Scheduler.DEFAULT_GROUP, trigger0);
+			schedulerControl.setReturnValue(new Date());
+		}
+		scheduler.start();
+		schedulerControl.setVoidCallable();
+		scheduler.shutdown(false);
+		schedulerControl.setVoidCallable();
+		schedulerControl.replay();
+
+		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
+				return scheduler;
+			}
+		};
+		Map schedulerContext = new HashMap();
+		schedulerContext.put("otherTestBean", tb);
+		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
+		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
+		if (overwrite) {
+			schedulerFactoryBean.setOverwriteExistingJobs(true);
+		}
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
 		}
