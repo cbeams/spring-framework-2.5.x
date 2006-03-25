@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,7 +51,14 @@ public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor impl
 
 	public void afterPropertiesSet() throws ServiceException {
 		if (getServiceInterface() == null) {
-			throw new IllegalArgumentException("serviceInterface is required");
+			// Use JAX-RPC port interface (a traditional RMI interface)
+			// as service interface if none explicitly specified.
+			if (getPortInterface() != null) {
+				setServiceInterface(getPortInterface());
+			}
+			else {
+				throw new IllegalArgumentException("serviceInterface is required");
+			}
 		}
 		super.afterPropertiesSet();
 		this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(), this);

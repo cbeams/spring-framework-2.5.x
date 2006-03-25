@@ -248,14 +248,15 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Set the interface of the service that this factory should create a proxy for.
 	 * This will typically be a non-RMI business interface, although you can also
 	 * use an RMI port interface as recommended by JAX-RPC here.
-	 * <p>If the specified service interface is a non-RMI business interface,
-	 * invocations will either be translated to the underlying RMI port interface
-	 * (in case of a "portInterface" being specified) or to JAX-RPC dynamic calls.
+	 * <p>Calls on the specified service interface will either be translated to the
+	 * underlying RMI port interface (in case of a "portInterface" being specified)
+	 * or to dynamic calls (using the JAX-RPC Dynamic Invocation Interface).
 	 * <p>The dynamic call mechanism has the advantage that you don't need to
 	 * maintain an RMI port interface in addition to an existing non-RMI business
 	 * interface. In terms of configuration, specifying the business interface
 	 * as "serviceInterface" will be enough; this interceptor will automatically
-	 * switch to dynamic calls in such a scenario.
+	 * use dynamic calls in such a scenario.
+	 * @see javax.xml.rpc.Service#createCall
 	 * @see #setPortInterface
 	 */
 	public void setServiceInterface(Class serviceInterface) {
@@ -273,15 +274,18 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	}
 
 	/**
-	 * Set the JAX-RPC port interface to use. Only needs to be set if the exposed
-	 * service interface is different from the port interface, i.e. when using
-	 * a non-RMI business interface as service interface for exposed proxies,
-	 * and if the JAX-RPC dynamic call mechanism is not desirable. See the
-	 * javadoc of the "serviceInterface" property for more details.
-	 * <p>The interface must be suitable for a JAX-RPC port, i.e. it must be an
-	 * RMI service interface (that extends <code>java.rmi.Remote</code>).
-	 * @see #setServiceInterface
+	 * Set the JAX-RPC port interface to use. Only needs to be set if a JAX-RPC
+	 * port stub should be used instead of the dynamic call mechanism.
+	 * See the javadoc of the "serviceInterface" property for more details.
+	 * <p>The interface must be suitable for a JAX-RPC port, that is, it must be
+	 * an RMI service interface (that extends <code>java.rmi.Remote</code>).
+	 * <p><b>NOTE:</b> Check whether your JAX-RPC provider returns thread-safe
+	 * port stubs. If not, use the dynamic call mechanism instead, which will
+	 * always be thread-safe. In particular, do not use JAX-RPC port stubs
+	 * with Apache Axis, whose port stubs are known to be non-thread-safe.
+	 * @see javax.xml.rpc.Service#getPort
 	 * @see java.rmi.Remote
+	 * @see #setServiceInterface
 	 */
 	public void setPortInterface(Class portInterface) {
 		if (portInterface != null &&
@@ -347,19 +351,14 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			postProcessJaxRpcService(this.jaxRpcService);
 		}
 
-		// Determine interface to use at the JAX-RPC port level:
-		// Use portInterface if specified, else fall back to serviceInterface.
-		Class actualInterface = (this.portInterface != null ? this.portInterface : this.serviceInterface);
-
-		if (actualInterface != null && Remote.class.isAssignableFrom(actualInterface) &&
-				!alwaysUseJaxRpcCall()) {
+		if (this.portInterface != null && !alwaysUseJaxRpcCall()) {
 			// JAX-RPC-compliant port interface -> using JAX-RPC stub for port.
 
 			if (logger.isInfoEnabled()) {
 				logger.info("Creating JAX-RPC proxy for JAX-RPC port [" + this.portQName +
-						"], using port interface [" + actualInterface.getName() + "]");
+						"], using port interface [" + this.portInterface.getName() + "]");
 			}
-			Remote remoteObj = this.jaxRpcService.getPort(this.portQName, actualInterface);
+			Remote remoteObj = this.jaxRpcService.getPort(this.portQName, this.portInterface);
 
 			if (logger.isInfoEnabled()) {
 				if (this.serviceInterface != null) {
@@ -563,7 +562,11 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		QName portQName = getPortQName();
 
 		// Create JAX-RPC call object, using the method name as operation name.
-		Call call = service.createCall(portQName, invocation.getMethod().getName());
+		// Synchronized because of non-thread-safe Axis implementation!
+		Call call = null;
+		synchronized (service) {
+			call = service.createCall(portQName, invocation.getMethod().getName());
+		}
 
 		// Apply properties to JAX-RPC stub.
 		prepareJaxRpcCall(call);

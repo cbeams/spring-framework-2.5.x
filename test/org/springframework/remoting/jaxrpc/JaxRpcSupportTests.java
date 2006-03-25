@@ -105,7 +105,7 @@ public class JaxRpcSupportTests extends TestCase {
 		factory.setNamespaceUri("myNamespace");
 		factory.setServiceName("myService1");
 		factory.setPortName("myPort");
-		factory.setServiceInterface(IRemoteBean.class);
+		factory.setPortInterface(IRemoteBean.class);
 		factory.afterPropertiesSet();
 		assertTrue("Correct singleton value", factory.isSingleton());
 		assertTrue(factory.getPortStub() instanceof Stub);
@@ -127,7 +127,7 @@ public class JaxRpcSupportTests extends TestCase {
 		factory.setPassword("pw");
 		factory.setEndpointAddress("ea");
 		factory.setMaintainSession(true);
-		factory.setServiceInterface(IRemoteBean.class);
+		factory.setPortInterface(IRemoteBean.class);
 		factory.afterPropertiesSet();
 		assertTrue("Correct singleton value", factory.isSingleton());
 
@@ -156,7 +156,7 @@ public class JaxRpcSupportTests extends TestCase {
 		Properties customProps = new Properties();
 		customProps.setProperty("myProp", "myValue");
 		factory.setCustomProperties(customProps);
-		factory.setServiceInterface(IRemoteBean.class);
+		factory.setPortInterface(IRemoteBean.class);
 		factory.afterPropertiesSet();
 		assertTrue("Correct singleton value", factory.isSingleton());
 
@@ -185,7 +185,7 @@ public class JaxRpcSupportTests extends TestCase {
 		customProps.put("myProp", new Integer(1));
 		factory.setCustomPropertyMap(customProps);
 		factory.addCustomProperty("myOtherProp", "myOtherValue");
-		factory.setServiceInterface(IRemoteBean.class);
+		factory.setPortInterface(IRemoteBean.class);
 		factory.afterPropertiesSet();
 		assertTrue("Correct singleton value", factory.isSingleton());
 
@@ -286,7 +286,7 @@ public class JaxRpcSupportTests extends TestCase {
 		factory.setNamespaceUri("myNamespace");
 		factory.setServiceName("myService1");
 		factory.setPortName("myPort");
-		factory.setServiceInterface(IRemoteBean.class);
+		factory.setPortInterface(IRemoteBean.class);
 		factory.afterPropertiesSet();
 
 		assertTrue(factory.getPortStub() instanceof Stub);
