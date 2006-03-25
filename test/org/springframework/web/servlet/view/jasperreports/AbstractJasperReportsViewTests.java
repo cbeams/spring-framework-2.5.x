@@ -323,13 +323,13 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		assertEquals("Invalid header value", value, response.getHeader(key));
 	}
 
-	public void testWithSqlDataSource() throws Exception {
+	public void testWithJdbcDataSource() throws Exception {
 		if (!canCompileReport) {
 			return;
 		}
 
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
-		view.setJdbcDataSource(getMockSqlDataSource());
+		view.setJdbcDataSource(getMockJdbcDataSource());
 
 		Map model = getModel();
 		model.remove("dataSource");
@@ -343,13 +343,33 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		}
 	}
 
-	public void testJRDataSourceOverridesDataSource() throws Exception {
+	public void testWithJdbcDataSourceInModel() throws Exception {
 		if (!canCompileReport) {
 			return;
 		}
 
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
-		view.setJdbcDataSource(getMockSqlDataSource());
+
+		Map model = getModel();
+		model.remove("dataSource");
+		model.put("someKey", getMockJdbcDataSource());
+
+		try {
+			view.render(model, request, response);
+			fail("DataSource was not used as report DataSource");
+		}
+		catch (SQLException ex) {
+			// expected
+		}
+	}
+
+	public void testJRDataSourceOverridesJdbcDataSource() throws Exception {
+		if (!canCompileReport) {
+			return;
+		}
+
+		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
+		view.setJdbcDataSource(getMockJdbcDataSource());
 
 		try {
 			view.render(getModel(), request, response);
@@ -357,6 +377,15 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		catch (SQLException ex) {
 			fail("javax.sql.DataSource was used when JRDataSource should have overriden it");
 		}
+	}
+
+	private DataSource getMockJdbcDataSource() throws SQLException {
+		MockControl ctl = MockControl.createControl(DataSource.class);
+		DataSource ds = (DataSource) ctl.getMock();
+		ds.getConnection();
+		ctl.setThrowable(new SQLException());
+		ctl.replay();
+		return ds;
 	}
 
 	public void testWithCharacterEncoding() throws Exception {
@@ -375,17 +404,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		view.convertExporterParameters();
 
 		view.render(getModel(), this.request, this.response);
-
 		assertEquals(characterEncoding, this.response.getCharacterEncoding());
-	}
-
-	private DataSource getMockSqlDataSource() throws SQLException {
-		MockControl ctl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) ctl.getMock();
-		ds.getConnection();
-		ctl.setThrowable(new SQLException());
-		ctl.replay();
-		return ds;
 	}
 
 

@@ -564,11 +564,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		// Determine JRDataSource for main report.
 		JRDataSource jrDataSource = getReportData(model);
 
-		if (jrDataSource == null && this.jdbcDataSource == null) {
-			throw new IllegalArgumentException(
-					"No report data source found in model and no [javax.sql.DataSource] specified in configuration");
-		}
-
 		if (jrDataSource != null) {
 			// Use the JasperReports JRDataSource.
 			if (logger.isDebugEnabled()) {
@@ -576,7 +571,17 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			}
 			return JasperFillManager.fillReport(this.report, model, jrDataSource);
 		}
+
 		else {
+			if (this.jdbcDataSource == null) {
+				this.jdbcDataSource = (DataSource) CollectionUtils.findValueOfType(model.values(), DataSource.class);
+				if (this.jdbcDataSource == null) {
+					throw new IllegalArgumentException(
+							"No report data source found in model, " +
+							"and no [javax.sql.DataSource] specified in configuration or in model");
+				}
+			}
+
 			// Use the JDBC DataSource.
 			if (logger.isDebugEnabled()) {
 				logger.debug("Filling report with JDBC DataSource [" + this.jdbcDataSource + "].");
