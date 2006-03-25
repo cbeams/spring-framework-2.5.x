@@ -999,6 +999,7 @@
 
 			<!-- Must go first to ensure the jndi.properties takes precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.tigertestclasses.dir}"/>
 			<classpath location="${target.mockclasses.dir}"/>
 			<classpath location="${target.clover.dir}"/>
 
@@ -1012,6 +1013,7 @@
 
 			<batchtest fork="yes" todir="${reports.dir}">
 				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+				<fileset dir="${target.tigertestclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
 			</batchtest>
 
 		</junit>
