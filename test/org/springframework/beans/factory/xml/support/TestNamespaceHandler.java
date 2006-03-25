@@ -37,7 +37,7 @@ import org.w3c.dom.Element;
  */
 public class TestNamespaceHandler extends NamespaceHandlerSupport {
 
-	public TestNamespaceHandler() {
+	public void init() {
 		registerBeanDefinitionParser("testBean", new TestBeanDefinitionParser());
 
 		registerBeanDefinitionDecorator("set", new PropertyModifyingBeanDefinitionDecorator());
