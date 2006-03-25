@@ -1044,7 +1044,7 @@
 	<target name="clover.html" depends="clover.tests" description="Run Clover tests and generate HTML coverage reports">
 
 		<java classname="com.cenqua.clover.reporters.html.HtmlReporter" fork="yes">
-			<arg line="-o '${target.clover.html.dir}' -i '${clover.initstring}' -t 'Spring Framework'"/>
+			<arg line="-o '${target.clover.html.dir}' -i '${clover.initstring}' -t 'Spring Framework - Clover Code Coverage Report'"/>
 			<classpath refid="all-libs"/>
 		</java>
 
@@ -1062,7 +1062,7 @@
 
 	<target name="doc.prepare" description="Extra preparation for the documentation">
 
-		<fail message="XSLT supporting lib not installed. Please see docs/reference/readme.txt for instructions.">
+		<fail message="XSLT supporting lib not installed. Please see '${doc.ref.dir}/readme.txt' for instructions.">
 			<condition>
 				<not>
 					<available file="${basedir}/${doc.ref.dir}/lib"/>
