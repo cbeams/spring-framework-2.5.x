@@ -199,11 +199,27 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	}
 
 	/**
+	 * Gets the value of the '<code>class</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getCssClass() {
+		return this.cssClass;
+	}
+
+	/**
 	 * Sets the value of the '<code>style</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setCssStyle(String cssStyle) {
 		this.cssStyle = cssStyle;
+	}
+
+	/**
+	 * Gets the value of the '<code>style</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getCssStyle() {
+		return this.cssStyle;
 	}
 
 	/**
@@ -215,11 +231,27 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	}
 
 	/**
+	 * Gets the value of the '<code>lang</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getLang() {
+		return this.lang;
+	}
+
+	/**
 	 * Sets the value of the '<code>title</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	/**
+	 * Gets the value of the '<code>title</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getTitle() {
+		return this.title;
 	}
 
 	/**
@@ -231,11 +263,27 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	}
 
 	/**
+	 * Gets the value of the '<code>dir</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getDir() {
+		return this.dir;
+	}
+
+	/**
 	 * Sets the value of the '<code>tabindex</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setTabindex(String tabindex) {
 		this.tabindex = tabindex;
+	}
+
+	/**
+	 * Gets the value of the '<code>tabindex</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getTabindex() {
+		return this.tabindex;
 	}
 
 	/**
@@ -247,11 +295,27 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	}
 
 	/**
+	 * Gets the value of the '<code>onclick</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnclick() {
+		return this.onclick;
+	}
+
+	/**
 	 * Sets the value of the '<code>ondblclick</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOndblclick(String ondblclick) {
 		this.ondblclick = ondblclick;
+	}
+
+	/**
+	 * Gets the value of the '<code>ondblclick</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOndblclick() {
+		return this.ondblclick;
 	}
 
 	/**
@@ -263,11 +327,27 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	}
 
 	/**
+	 * Gets the value of the '<code>onmousedown</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnmousedown() {
+		return this.onmousedown;
+	}
+
+	/**
 	 * Sets the value of the '<code>onmouseup</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnmouseup(String onmouseup) {
 		this.onmouseup = onmouseup;
+	}
+
+	/**
+	 * Gets the value of the '<code>onmouseup</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnmouseup() {
+		return this.onmouseup;
 	}
 
 	/**
@@ -279,6 +359,14 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	}
 
 	/**
+	 * Gets the value of the '<code>onmouseover</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnmouseover() {
+		return this.onmouseover;
+	}
+
+	/**
 	 * Sets the value of the '<code>onmousemove</code>' attribute.
 	 * May be a runtime expression.
 	 */
@@ -287,11 +375,26 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	}
 
 	/**
+	 * Gets the value of the '<code>onmousemove</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnmousemove() {
+		return this.onmousemove;
+	}
+
+	/**
 	 * Sets the value of the '<code>onmouseout</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnmouseout(String onmouseout) {
 		this.onmouseout = onmouseout;
+	}
+	/**
+	 * Gets the value of the '<code>onmouseout</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnmouseout() {
+		return this.onmouseout;
 	}
 
 	/**
@@ -303,11 +406,27 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	}
 
 	/**
+	 * Gets the value of the '<code>onkeypress</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnkeypress() {
+		return this.onkeypress;
+	}
+
+	/**
 	 * Sets the value of the '<code>onkeyup</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnkeyup(String onkeyup) {
 		this.onkeyup = onkeyup;
+	}
+
+	/**
+	 * Gets the value of the '<code>onkeyup</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnkeyup() {
+		return this.onkeyup;
 	}
 
 	/**
@@ -319,28 +438,34 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	}
 
 	/**
+	 * Gets the value of the '<code>onkeydown</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnkeydown() {
+		return this.onkeydown;
+	}
+
+	/**
 	 * Writes the default attributes configured via this base class to the supplied {@link TagWriter}.
 	 * Subclasses should call this when they want the base attribute set to be written to the output.
 	 */
 	protected void writeDefaultAttributes(TagWriter tagWriter) throws JspException {
 		super.writeDefaultAttributes(tagWriter);
-		tagWriter.writeOptionalAttributeValue(CLASS_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate("cssClass", this.cssClass)));
-		tagWriter.writeOptionalAttributeValue(STYLE_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate("cssStyle", this.cssStyle)));
-		writeOptionalAttribute(tagWriter, LANG_ATTRIBUTE, this.lang);
-		writeOptionalAttribute(tagWriter, TITLE_ATTRIBUTE, this.title);
-		writeOptionalAttribute(tagWriter, DIR_ATTRIBUTE, this.dir);
-		writeOptionalAttribute(tagWriter, TABINDEX_ATTRIBUTE, this.tabindex);
-		writeOptionalAttribute(tagWriter, ONCLICK_ATTRIBUTE, this.onclick);
-		writeOptionalAttribute(tagWriter, ONDBLCLICK_ATTRIBUTE, this.ondblclick);
-		writeOptionalAttribute(tagWriter, ONMOUSEDOWN_ATTRIBUTE, this.onmousedown);
-		writeOptionalAttribute(tagWriter, ONMOUSEUP_ATTRIBUTE, this.onmouseup);
-		writeOptionalAttribute(tagWriter, ONMOUSEOVER_ATTRIBUTE, this.onmouseover);
-		writeOptionalAttribute(tagWriter, ONMOUSEMOVE_ATTRIBUTE, this.onmousemove);
-		writeOptionalAttribute(tagWriter, ONMOUSEOUT_ATTRIBUTE, this.onmouseout);
-		writeOptionalAttribute(tagWriter, ONKEYPRESS_ATTRIBUTE, this.onkeypress);
-		writeOptionalAttribute(tagWriter, ONKEYUP_ATTRIBUTE, this.onkeyup);
-		writeOptionalAttribute(tagWriter, ONKEYDOWN_ATTRIBUTE, this.onkeydown);
+		tagWriter.writeOptionalAttributeValue(CLASS_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate("cssClass", getCssClass())));
+		tagWriter.writeOptionalAttributeValue(STYLE_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate("cssStyle", getCssStyle())));
+		writeOptionalAttribute(tagWriter, LANG_ATTRIBUTE, getLang());
+		writeOptionalAttribute(tagWriter, TITLE_ATTRIBUTE, getTitle());
+		writeOptionalAttribute(tagWriter, DIR_ATTRIBUTE, getDir());
+		writeOptionalAttribute(tagWriter, TABINDEX_ATTRIBUTE, getTabindex());
+		writeOptionalAttribute(tagWriter, ONCLICK_ATTRIBUTE, getOnclick());
+		writeOptionalAttribute(tagWriter, ONDBLCLICK_ATTRIBUTE, getOndblclick());
+		writeOptionalAttribute(tagWriter, ONMOUSEDOWN_ATTRIBUTE, getOnmousedown());
+		writeOptionalAttribute(tagWriter, ONMOUSEUP_ATTRIBUTE, getOnmouseup());
+		writeOptionalAttribute(tagWriter, ONMOUSEOVER_ATTRIBUTE, getOnmouseover());
+		writeOptionalAttribute(tagWriter, ONMOUSEMOVE_ATTRIBUTE, getOnmousemove());
+		writeOptionalAttribute(tagWriter, ONMOUSEOUT_ATTRIBUTE, getOnmouseout());
+		writeOptionalAttribute(tagWriter, ONKEYPRESS_ATTRIBUTE, getOnkeypress());
+		writeOptionalAttribute(tagWriter, ONKEYUP_ATTRIBUTE, getOnkeyup());
+		writeOptionalAttribute(tagWriter, ONKEYDOWN_ATTRIBUTE, getOnkeydown());
 	}
-
-
 }

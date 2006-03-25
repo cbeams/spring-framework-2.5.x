@@ -18,6 +18,9 @@ package org.springframework.web.servlet.tags.form;
 
 import junit.framework.TestCase;
 import org.springframework.web.servlet.tags.AbstractTagTests;
+import org.springframework.web.servlet.tags.RequestContextAwareTag;
+import org.springframework.web.servlet.support.JspAwareRequestContext;
+import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.mock.web.MockPageContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 
@@ -60,9 +63,15 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 						contents.indexOf(desiredContents) > -1);
 	}
 
+	protected final RequestContext getRequestContext() {
+		return (RequestContext) getPageContext().getAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE);
+	}
+
 	protected MockPageContext createAndPopulatePageContext() {
 		MockPageContext pageContext = createPageContext();
 		MockHttpServletRequest request = (MockHttpServletRequest) pageContext.getRequest();
+		RequestContext requestContext = new JspAwareRequestContext(pageContext);
+	  pageContext.setAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE, requestContext);
 		extendRequest(request);
 		extendPageContext(pageContext);
 		return pageContext;

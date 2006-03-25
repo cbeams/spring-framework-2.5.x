@@ -16,48 +16,23 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.servlet.support.BindStatus;
 
 import javax.servlet.jsp.JspException;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
  * Databinding-aware JSP tag that renders an HTML '<code>select</code>' element.
- * Inner '<code>option</code>' tags can be rendered using one of three approaches.
- * <h3>Approach One</h3>
- * In the first approach you specify an array or {@link Collection} of
- * {@link #setItems objects} which are used to render the inner '<code>option</code>'
- * tags. When using this approach you specify the name of the property on the
- * objects which corresponds to the {@link #setItemValue value} of the rendered
- * '<code>option</code>' and, optionally, the name of the property that
- * corresponds to the {@link #setItemLabel label}. When the {@link #setItemLabel label}
- * property name is ommitted the name of the {@link #setItemValue value}
- * property is used.
- * <h3>Approach Two</h3>
- * In the second approach, '<code>option</code>' tags are rendered from a source
- * {@link Map}. The key and value of the entries in the {@link Map} correspond
- * to the value and label of the rendered '<code>option</code>'.
- * <h3>Approach Three</h3>
- * In the third approach, '<code>option</code>' tags are defined using nested
- * {@link OptionTag OptionTags}. This tag simply
- * {@link #LIST_VALUE_PAGE_ATTRIBUTE exposes the bound value} so that the nested
- * {@link OptionTag OptionTags} can mark themselves as 'selected' as appropriate.
- * When {@link #doEndTag() closing the tag} the block '<code>select</code>' tag
- * is closed. This approach is only used if the {@link #setItems items} property
- * is ommitted.
- * <p/>
- * When using any of these approaches, an '<code>option</code>' is marked
- * as 'selected' if its key {@link #isActiveValue matches} the value that
- * is bound to the tag instance.
- * 
+ * Inner '<code>option</code>' tags can be rendered using one of three approaches
+ * supported by the {@link OptionWriter}.
+ * <p/>Also supports the use of nested {@link OptionTag OptionTags}.
+ *
  * @author Rob Harrop
  * @see OptionTag
+ * @see OptionWriter
  * @since 2.0
  */
 public class SelectTag extends AbstractHtmlInputElementTag {
@@ -93,6 +68,12 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	private String size;
 
 	/**
+	 * Indicates whether or not the '<code>select</code>' tag allows
+	 * multiple-selections.
+	 */
+	private Object multiple = Boolean.FALSE;
+
+	/**
 	 * The {@link TagWriter} instance that the output is being written.
 	 * Only used in conjunction with nested {@link OptionTag OptionTags}.
 	 */
@@ -111,6 +92,14 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
+	 * Gets the value of the '<code>items</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected Object getItems() {
+		return items;
+	}
+
+	/**
 	 * Sets the name of the property mapped to the '<code>value</code>' attribute
 	 * of the '<code>option</code>' tag. Required when wishing to render
 	 * '<code>option</code>' tags from an array or {@link Collection}.
@@ -119,6 +108,14 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	public void setItemValue(String itemValue) {
 		Assert.hasText(itemValue, "'itemValue' cannot be null or zero length.");
 		this.itemValue = itemValue;
+	}
+
+	/**
+	 * Gets the value of the '<code>itemValue</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getItemValue() {
+		return itemValue;
 	}
 
 	/**
@@ -131,6 +128,14 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
+	 * Gets the value of the '<code>itemLabel</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getItemLabel() {
+		return itemLabel;
+	}
+
+	/**
 	 * Sets the value of the HTML '<code>size</code>' attribute rendered
 	 * on the final '<code>select</code>' element. May be a runtime
 	 * expression.
@@ -138,6 +143,23 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	public void setSize(String size) {
 		Assert.hasText(size, "'size' cannot be null or zero length.");
 		this.size = size;
+	}
+
+	protected String getSize() {
+		return size;
+	}
+
+	/**
+	 * Sets the value of the HTML '<code>multiple</code>' attribute rendered
+	 * on the final '<code>select</code>' element. May be a runtime
+	 * expression.
+	 */
+	public void setMultiple(Object multiple) {
+		this.multiple = multiple;
+	}
+
+	protected Object getMultiple() {
+		return multiple;
 	}
 
 	/**
@@ -149,86 +171,76 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("select");
 		writeDefaultAttributes(tagWriter);
-		tagWriter.writeOptionalAttributeValue("size", ObjectUtils.nullSafeToString(evaluate("size", this.size)));
 
-		if (this.items != null) {
-			Object itemsObject = (this.items instanceof String ? evaluate("items", (String)this.items) : this.items);
+		if(isMultiple()) {
+			tagWriter.writeAttribute("multiple", "true");
+		}
 
-			if (itemsObject.getClass().isArray()) {
-				renderFromCollection(CollectionUtils.arrayToList(itemsObject), tagWriter);
-			}
-			else if (itemsObject instanceof Collection) {
-				renderFromCollection((Collection) itemsObject, tagWriter);
-			}
-			else if (itemsObject instanceof Map) {
-				renderFromMap((Map) itemsObject, tagWriter);
-			}
-			else {
-				throw new JspException("Property 'items' must be of type '" + Collection.class.getName() + "'.");
-			}
+		tagWriter.writeOptionalAttributeValue("size", ObjectUtils.nullSafeToString(evaluate("size", getSize())));
+
+		Object items = getItems();
+		if (items != null) {
+			Object itemsObject = (items instanceof String ? evaluate("items", (String) items) : items);
+
+			String valueProperty = (getItemValue() == null ? null :
+							ObjectUtils.nullSafeToString(evaluate("itemValue", getItemValue())));
+			String labelProperty = (getItemLabel() == null ? null :
+							ObjectUtils.nullSafeToString(evaluate("itemLabel", getItemLabel())));
+
+			OptionWriter optionWriter = new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty);
+			optionWriter.writeOptions(tagWriter);
 
 			tagWriter.endTag();
 			return EVAL_PAGE;
-
 		}
 		else {
 			// using nested <form:option/> tags so just expose the value in the PageContext
 			tagWriter.forceBlock();
 			this.tagWriter = tagWriter;
-			this.pageContext.setAttribute(LIST_VALUE_PAGE_ATTRIBUTE, getValue());
+			this.pageContext.setAttribute(LIST_VALUE_PAGE_ATTRIBUTE, getBindStatus());
 			return EVAL_BODY_INCLUDE;
 		}
 	}
 
 	/**
-	 * Renders the inner '<code>option</code>' tags using the supplied {@link Map} as
-	 * the source.
-	 * @see #renderOption
+	 * Returns '<code>true</code>' if the '<code>multiple</code>' attribute is
+	 * set to '<code>true</code>' or if {@link #forceMultiple()} returns '<code>true</code>'.
 	 */
-	private void renderFromMap(Map map, TagWriter tagWriter) throws JspException {
-		for (Iterator iterator = map.entrySet().iterator(); iterator.hasNext();) {
-			Map.Entry entry = (Map.Entry) iterator.next();
-			renderOption(tagWriter, entry, entry.getKey().toString(), entry.getValue().toString());
+	private boolean isMultiple() throws JspException {
+		Object multiple = getMultiple();
+		if (Boolean.TRUE.equals(multiple) || "true".equals(multiple)) {
+			return true;
 		}
+		else if (this.multiple instanceof String) {
+			Object evaluatedValue = evaluate("multiple", (String) multiple);
+			return Boolean.TRUE.equals(evaluatedValue);
+		}
+		return forceMultiple();
 	}
 
 	/**
-	 * Renders the inner '<code>option</code>' tags using the supplied {@link Collection} of
-	 * objects as the source. The value of the {@link #setItemValue itemValue} property is used
-	 * when rendering the '<code>value</code>' of the '<code>option</code>' and the value of the
-	 * {@link #setItemLabel itemLabel} property is used when rendering the label.
+	 * Returns '<code>true</code>' if the bound value requires the resultan'<code>select</code>'
+	 * tag to be multi-select.
 	 */
-	private void renderFromCollection(Collection itemList, TagWriter tagWriter) throws JspException {
-
-		String valueProperty = (this.itemValue == null ? null :ObjectUtils.nullSafeToString(evaluate("itemValue", this.itemValue)));
-		String labelProperty = (this.itemLabel == null ? null : ObjectUtils.nullSafeToString(evaluate("itemLabel", this.itemLabel)));
-
-
-		for (Iterator iterator = itemList.iterator(); iterator.hasNext();) {
-			Object item = iterator.next();
-			BeanWrapper wrapper = new BeanWrapperImpl(item);
-
-			Object value = (valueProperty == null ? item.toString(): wrapper.getPropertyValue(valueProperty).toString());
-			String label = (labelProperty == null ? item.toString() : ObjectUtils.nullSafeToString(wrapper.getPropertyValue(labelProperty)));
-
-			renderOption(tagWriter, item, value, label);
+	private boolean forceMultiple() throws JspException {
+		BindStatus bindStatus = getBindStatus();
+		if (typeRequiresMultiple(bindStatus.getValue().getClass())) {
+			return true;
 		}
+		else if (bindStatus.getEditor() != null) {
+			Object editorValue = bindStatus.getEditor().getValue();
+			if (editorValue != null) {
+				return typeRequiresMultiple(editorValue.getClass());
+			}
+		}
+		return false;
 	}
 
 	/**
-	 * Renders an HTML '<code>option</code>' with the supplied value and label. Marks the
-	 * value as 'selected' if either the item itself or its {@link #setItemValue value}
-	 * match the bound value.
-	 * @see #isActiveValue
+	 * Returns '<code>true</code>' for arrays, {@link Collection Collections} and {@link Map Maps}.
 	 */
-	private void renderOption(TagWriter tagWriter, Object item, Object value, String label) throws JspException {
-		tagWriter.startTag("option");
-		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(value));
-		if (isActiveValue(value) || isActiveValue(item)) {
-			tagWriter.writeAttribute("selected", "true");
-		}
-		tagWriter.appendValue(label);
-		tagWriter.endTag();
+	private boolean typeRequiresMultiple(Class type) {
+		return (type.isArray() || Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type));
 	}
 
 	/**
@@ -249,5 +261,6 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	public void doFinally() {
 		super.doFinally();
 		this.tagWriter = null;
+		this.pageContext.removeAttribute(LIST_VALUE_PAGE_ATTRIBUTE);
 	}
 }

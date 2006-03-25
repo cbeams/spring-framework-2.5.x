@@ -16,12 +16,24 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import org.springframework.beans.Colour;
+import org.springframework.beans.TestBean;
+import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.util.StringUtils;
+
 import javax.servlet.jsp.tagext.Tag;
+import java.beans.PropertyEditor;
 
 /**
  * @author Rob Harrop
  */
 public class OptionTagTests extends AbstractHtmlElementTagTests {
+
+	private static final String ARRAY_SOURCE = "abc,123,def";
+
+	private static final String[] ARRAY = StringUtils.commaDelimitedListToStringArray(ARRAY_SOURCE);
 
 	private OptionTag tag;
 
@@ -35,7 +47,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testRenderNotSelected() throws Exception {
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, "foo");
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.name", false));
 		this.tag.setValue("bar");
 		this.tag.setLabel("Bar");
 		int result = this.tag.doStartTag();
@@ -50,7 +62,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testRenderSelected() throws Exception {
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, "foo");
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.name", false));
 		this.tag.setValue("foo");
 		this.tag.setLabel("Foo");
 		int result = this.tag.doStartTag();
@@ -66,7 +78,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testWithNoLabel() throws Exception {
-	  getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, "foo");
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.name", false));
 		this.tag.setValue("bar");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
@@ -91,11 +103,85 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		}
 	}
 
+	public void testWithEnum() throws Exception {
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.favouriteColour", false));
+
+		String value = Colour.GREEN.getCode().toString();
+		String label = Colour.GREEN.getLabel();
+
+		this.tag.setValue(value);
+		this.tag.setLabel(label);
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		assertOptionTagOpened(output);
+		assertOptionTagClosed(output);
+		assertContainsAttribute(output, "value", value);
+		assertContainsAttribute(output, "selected", "true");
+		assertBlockTagContains(output, label);
+	}
+
+	public void testWithEnumNotSelected() throws Exception {
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.favouriteColour", false));
+
+		String value = Colour.BLUE.getCode().toString();
+		String label = Colour.BLUE.getLabel();
+
+		this.tag.setValue(value);
+		this.tag.setLabel(label);
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		assertOptionTagOpened(output);
+		assertOptionTagClosed(output);
+		assertContainsAttribute(output, "value", value);
+		assertAttributeNotPresent(output, "selected");
+		assertBlockTagContains(output, label);
+	}
+
+	public void testWithPropertyEditor() throws Exception {
+		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.stringArray", false) {
+			public PropertyEditor getEditor() {
+				return new StringArrayPropertyEditor();
+			}
+		};
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
+
+		this.tag.setValue(ARRAY_SOURCE);
+		this.tag.setLabel("someArray");
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		assertOptionTagOpened(output);
+		assertOptionTagClosed(output);
+		assertContainsAttribute(output, "value", ARRAY_SOURCE);
+		assertContainsAttribute(output, "selected", "true");
+		assertBlockTagContains(output, "someArray");
+
+	}
+
 	private void assertOptionTagOpened(String output) {
 		assertTrue(output.startsWith("<option "));
 	}
 
 	private void assertOptionTagClosed(String output) {
 		assertTrue(output.endsWith("</option>"));
+	}
+
+	protected void extendRequest(MockHttpServletRequest request) {
+		TestBean bean = new TestBean();
+		bean.setName("foo");
+		bean.setFavouriteColour(Colour.GREEN);
+		bean.setStringArray(ARRAY);
+		request.setAttribute("testBean", bean);
 	}
 }

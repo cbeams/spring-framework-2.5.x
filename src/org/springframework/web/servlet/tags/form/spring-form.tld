@@ -215,19 +215,19 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 
-        <attribute>
-            <name>readonly</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-        </attribute>
+		<attribute>
+			<name>readonly</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
 
-        <attribute>
-            <name>disabled</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-        </attribute>
+		<attribute>
+			<name>disabled</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
 
-        <attribute>
+		<attribute>
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -393,19 +393,19 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 
-        <attribute>
-            <name>readonly</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-        </attribute>
+		<attribute>
+			<name>readonly</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
 
-        <attribute>
-            <name>disabled</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-        </attribute>
+		<attribute>
+			<name>disabled</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
 
-        <attribute>
+		<attribute>
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -591,13 +591,13 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 
-        <attribute>
-            <name>disabled</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-        </attribute>
+		<attribute>
+			<name>disabled</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
 
-        <attribute>
+		<attribute>
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -705,6 +705,12 @@
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
+
+		<attribute>
+			<name>multiple</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
 	</tag>
 
 	<!-- <form:option/> -->
@@ -725,6 +731,34 @@
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
+	</tag>
+
+	<!-- <form:options/> -->
+	<tag>
+		<name>options</name>
+		<tag-class>org.springframework.web.servlet.tags.form.OptionsTag</tag-class>
+		<body-content>empty</body-content>
+		<description>Renders a list of HTML 'option' tags. Sets 'selected' as appropriate based on bound
+			value.</description>
+
+		<attribute>
+			<name>items</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
+			<name>itemValue</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
+			<name>itemLabel</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
 	</tag>
 
 	<!-- <form:radiobutton/> -->
@@ -782,13 +816,13 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 
-        <attribute>
-            <name>disabled</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-        </attribute>
+		<attribute>
+			<name>disabled</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
 
-        <attribute>
+		<attribute>
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -935,13 +969,13 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 
-        <attribute>
-            <name>disabled</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-        </attribute>
+		<attribute>
+			<name>disabled</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
 
-        <attribute>
+		<attribute>
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1088,13 +1122,13 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 
-        <attribute>
-            <name>disabled</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-        </attribute>
-        
-        <attribute>
+		<attribute>
+			<name>disabled</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1223,7 +1257,7 @@
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
-		
+
 		<attribute>
 			<name>cssClass</name>
 			<required>false</required>

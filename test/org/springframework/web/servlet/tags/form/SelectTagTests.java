@@ -22,6 +22,7 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.servlet.support.BindStatus;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
@@ -38,6 +39,8 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 	private SelectTag tag;
 
+	private TestBean bean;
+
 	protected void onSetUp() {
 		this.tag = new SelectTag() {
 			protected TagWriter createTagWriter() {
@@ -49,7 +52,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 	public void testWithList() throws Exception {
 		this.tag.setPath("country");
-		this.tag.setItems(getCountries());
+		this.tag.setItems(Country.getCountries());
 		assertList();
 	}
 
@@ -101,7 +104,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		catch (JspException e) {
 			String message = e.getMessage();
 			assertTrue(message.indexOf("'items'") > -1);
-			assertTrue(message.indexOf("'java.util.Collection'") > -1);
+			assertTrue(message.indexOf("'org.springframework.beans.TestBean'") > -1);
 		}
 	}
 
@@ -110,8 +113,8 @@ public class SelectTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, result);
 
-		String value = (String) getPageContext().getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
-		assertEquals("Selected country not exposed in page context", "UK", value);
+		BindStatus value = (BindStatus) getPageContext().getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
+		assertEquals("Selected country not exposed in page context", "UK", value.getValue());
 
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
@@ -133,6 +136,72 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setPath("name");
 		this.tag.setItems("${names}");
 		assertStringArray();
+	}
+
+	public void testWithMultiList() throws Exception {
+		List list = new ArrayList();
+		list.add(Country.COUNTRY_UK);
+		list.add(Country.COUNTRY_AT);
+		this.bean.setSomeList(list);
+
+		this.tag.setPath("someList");
+		this.tag.setItems("${countries}");
+		this.tag.setItemValue("isoCode");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		System.out.println(output);
+		assertTrue(output.startsWith("<select "));
+		assertTrue(output.endsWith("</select>"));
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		assertEquals("select", rootElement.getName());
+		assertEquals("someList", rootElement.attribute("name").getValue());
+
+		List children = rootElement.elements();
+		assertEquals("Incorrect number of children", 4, children.size());
+
+		Element e = (Element) rootElement.selectSingleNode("option[@value = 'UK']");
+		assertEquals("UK node not selected", "true", e.attribute("selected").getValue());
+
+		e = (Element) rootElement.selectSingleNode("option[@value = 'AT']");
+		assertEquals("AT node not selected", "true", e.attribute("selected").getValue());
+	}
+
+	public void testWithMultiMap() throws Exception {
+		Map someMap = new HashMap();
+		someMap.put("M", "Male");
+		someMap.put("F", "Female");
+		this.bean.setSomeMap(someMap);
+
+		this.tag.setPath("someMap");
+		this.tag.setItems("${sexes}");
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		System.out.println(output);
+		assertTrue(output.startsWith("<select "));
+		assertTrue(output.endsWith("</select>"));
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		assertEquals("select", rootElement.getName());
+		assertEquals("someMap", rootElement.attribute("name").getValue());
+
+		List children = rootElement.elements();
+		assertEquals("Incorrect number of children", 2, children.size());
+
+		Element e = (Element) rootElement.selectSingleNode("option[@value = 'M']");
+		assertEquals("M node not selected", "true", e.attribute("selected").getValue());
+
+		e = (Element) rootElement.selectSingleNode("option[@value = 'F']");
+		assertEquals("F node not selected", "true", e.attribute("selected").getValue());
 	}
 
 	private void assertStringArray() throws JspException, DocumentException {
@@ -160,15 +229,6 @@ public class SelectTagTests extends AbstractFormTagTests {
 		return new String[]{"Rod", "Rob", "Juergen", "Adrian"};
 	}
 
-	private List getCountries() {
-		List countries = new ArrayList();
-		countries.add(new Country("AT", "Austria"));
-		countries.add(new Country("NL", "Netherlands"));
-		countries.add(new Country("UK", "United Kingdom"));
-		countries.add(new Country("US", "United States"));
-		return countries;
-	}
-
 	private Map getSexes() {
 		Map sexes = new HashMap();
 		sexes.put("F", "Female");
@@ -178,7 +238,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 	protected void extendRequest(MockHttpServletRequest request) {
 		super.extendRequest(request);
-		request.setAttribute("countries", getCountries());
+		request.setAttribute("countries", Country.getCountries());
 		request.setAttribute("sexes", getSexes());
 		request.setAttribute("other", new TestBean());
 		request.setAttribute("names", getNames());
@@ -199,34 +259,11 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	protected TestBean createTestBean() {
-		TestBean bean = new TestBean();
-		bean.setName("Rob");
-		bean.setCountry("UK");
-		bean.setSex("M");
-		return bean;
+		this.bean = new TestBean();
+		this.bean.setName("Rob");
+		this.bean.setCountry("UK");
+		this.bean.setSex("M");
+		return this.bean;
 	}
 
-	public static class Country {
-
-		private String isoCode;
-
-		private String name;
-
-		public Country(String isoCode, String name) {
-			this.isoCode = isoCode;
-			this.name = name;
-		}
-
-		public String getIsoCode() {
-			return isoCode;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String toString() {
-			return this.name + "(" + this.isoCode + ")";
-		}
-	}
 }

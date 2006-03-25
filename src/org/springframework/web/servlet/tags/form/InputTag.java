@@ -51,15 +51,15 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 */
 	public static final String SIZE_ATTRIBUTE = "size";
 
-    /**
+	/**
 	 * The name of the '<code>readonly</code>' attribute.
 	 */
-    public static final String READONLY_ATTRIBUTE = "readonly";
+	public static final String READONLY_ATTRIBUTE = "readonly";
 
-    /**
-     * The value of the '<code>maxlength</code>' attribute.
-     */
-    private String maxlength;
+	/**
+	 * The value of the '<code>maxlength</code>' attribute.
+	 */
+	private String maxlength;
 
 	/**
 	 * The value of the '<code>alt</code>' attribute.
@@ -76,19 +76,27 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 */
 	private String size;
 
-    /**
+	/**
 	 * The value of the '<code>readonly</code>' attribute.
 	 */
-    private String readonly;
+	private String readonly;
 
-    /**
-     * Sets the value of the '<code>maxlength</code>' attribute.
-     * May be a runtime expression.
-     */
-    public void setMaxlength(String maxlength) {
-        Assert.hasText(maxlength, "'maxlength' cannot be null or zero length.");
-        this.maxlength = maxlength;
-    }
+	/**
+	 * Sets the value of the '<code>maxlength</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setMaxlength(String maxlength) {
+		Assert.hasText(maxlength, "'maxlength' cannot be null or zero length.");
+		this.maxlength = maxlength;
+	}
+
+	/**
+	 * Gets the value of the '<code>maxlength</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getMaxlength() {
+		return this.maxlength;
+	}
 
 	/**
 	 * Sets the value of the '<code>alt</code>' attribute.
@@ -97,6 +105,14 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	public void setAlt(String alt) {
 		Assert.hasText(alt, "'alt' cannot be null or zero length.");
 		this.alt = alt;
+	}
+
+	/**
+	 * Gets the value of the '<code>alt</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getAlt() {
+		return this.alt;
 	}
 
 	/**
@@ -109,6 +125,14 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
+	 * Gets the value of the '<code>onselect</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnselect() {
+		return this.onselect;
+	}
+
+	/**
 	 * Sets the value of the '<code>size</code>' attribute.
 	 * May be a runtime expression.
 	 */
@@ -117,15 +141,31 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		this.size = size;
 	}
 
-    /**
-     * Sets the value of the '<code>readonly</code>' attribute.
-     * May be a runtime expression.
-     */
-    public void setReadonly(String readonly) {
-        this.readonly = readonly;
-    }
+	/**
+	 * Gets the value of the '<code>size</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getSize() {
+		return this.size;
+	}
 
-    /**
+	/**
+	 * Sets the value of the '<code>readonly</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setReadonly(String readonly) {
+		this.readonly = readonly;
+	}
+
+	/**
+	 * Gets the value of the '<code>readonly</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getReadonly() {
+		return readonly;
+	}
+
+	/**
 	 * Gets the value of the '<code>type</code>' attribute. Subclasses
 	 * can override this to change the type of '<code>input</code>' element
 	 * rendered. Default value is '<code>text</code>'.
@@ -146,13 +186,13 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		writeValue(tagWriter);
 
 		// custom optional attributes
-		writeOptionalAttribute(tagWriter, SIZE_ATTRIBUTE, this.size);
-		writeOptionalAttribute(tagWriter, MAXLENGTH_ATTRIBUTE, this.maxlength);
-		writeOptionalAttribute(tagWriter, ALT_ATTRIBUTE, this.alt);
-		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, this.onselect);
-        writeOptionalAttribute(tagWriter, READONLY_ATTRIBUTE, this.readonly);
-        writeOptionalAttribute(tagWriter, DISABLED_ATTRIBUTE, this.disabled);
-        tagWriter.endTag();
+		writeOptionalAttribute(tagWriter, SIZE_ATTRIBUTE, getSize());
+		writeOptionalAttribute(tagWriter, MAXLENGTH_ATTRIBUTE, getMaxlength());
+		writeOptionalAttribute(tagWriter, ALT_ATTRIBUTE, getAlt());
+		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, getOnselect());
+		writeOptionalAttribute(tagWriter, READONLY_ATTRIBUTE, getReadonly());
+		writeOptionalAttribute(tagWriter, DISABLED_ATTRIBUTE, getDisabled());
+		tagWriter.endTag();
 		return EVAL_PAGE;
 	}
 
@@ -162,6 +202,6 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 * when the value is written.
 	 */
 	protected void writeValue(TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(getValue()));
+		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(getBoundValue()));
 	}
 }

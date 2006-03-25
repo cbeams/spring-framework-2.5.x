@@ -38,13 +38,13 @@ public class HiddenInputTag extends AbstractDataBoundFormElementTag {
 	 * Writes the HTML '<code>input</code>' tag to the supplied {@link TagWriter} including the
 	 * databound value.
 	 * @see #writeDefaultAttributes(TagWriter)
-	 * @see #getValue()
+	 * @see #getBoundValue()
 	 */
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("input");
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute("type", "hidden");
-		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(getValue()));
+		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(getBoundValue()));
 		tagWriter.endTag();
 		return EVAL_PAGE;
 	}

@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.23 2006-02-03 19:57:31 robharrop Exp $
+ *	$Id: TestBean.java,v 1.24 2006-03-25 16:20:13 robharrop Exp $
  */
 
 /*
@@ -90,6 +90,16 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	private boolean destroyed = false;
 
 	private Number someNumber;
+
+	private Colour favouriteColour;
+
+	public Colour getFavouriteColour() {
+		return favouriteColour;
+	}
+
+	public void setFavouriteColour(Colour favouriteColour) {
+		this.favouriteColour = favouriteColour;
+	}
 
 
 	public TestBean() {

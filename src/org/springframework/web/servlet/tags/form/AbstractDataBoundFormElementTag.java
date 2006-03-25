@@ -72,6 +72,14 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	}
 
 	/**
+	 * Gets the value of the '<code>id</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public String getId() {
+		return this.id;
+	}
+
+	/**
 	 * Gets the {@link #evaluate resolved} property path from the
 	 * {@link FormTag#setCommandName command object}.
 	 */
@@ -88,7 +96,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 * to render default attributes.
 	 */
 	protected void writeDefaultAttributes(TagWriter tagWriter) throws JspException {
-		writeOptionalAttribute(tagWriter, ID_ATTRIBUTE, this.id);
+		writeOptionalAttribute(tagWriter, ID_ATTRIBUTE, getId());
 		tagWriter.writeAttribute("name", getName());
 	}
 
@@ -108,7 +116,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 * Gets the bound value.
 	 * @see #getBindStatus()
 	 */
-	protected final Object getValue() throws JspException {
+	protected final Object getBoundValue() throws JspException {
 		return getBindStatus().getValue();
 	}
 
@@ -146,8 +154,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 * {@link NestedPathTag}.
 	 */
 	private String getNestedPath() {
-		String nestedPath = (String) this.pageContext.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME);
-		return nestedPath;
+		return (String) this.pageContext.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME);
 	}
 
 	private String getCommandName() {

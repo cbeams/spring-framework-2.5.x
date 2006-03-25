@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.ObjectUtils;
-
 import javax.servlet.jsp.JspException;
 
 /**
@@ -89,11 +87,27 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
+	 * Sets the value of the '<code>onfocus</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnfocus() {
+		return this.onfocus;
+	}
+
+	/**
 	 * Sets the value of the '<code>onblur</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnblur(String onblur) {
 		this.onblur = onblur;
+	}
+
+	/**
+	 * Gets the value of the '<code>onblur</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnblur() {
+		return this.onblur;
 	}
 
 	/**
@@ -105,11 +119,27 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
+	 * Sets the value of the '<code>onchange</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnchange() {
+		return this.onchange;
+	}
+
+	/**
 	 * Sets the value of the '<code>accesskey</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setAccesskey(String accesskey) {
 		this.accesskey = accesskey;
+	}
+
+	/**
+	 * Sets the value of the '<code>accesskey</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getAccesskey() {
+		return this.accesskey;
 	}
 
 	/**
@@ -119,34 +149,25 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	public void setDisabled(String disabled) {
 		this.disabled = disabled;
 	}
-    
-    /**
+
+	/**
+	 * Sets the value of the '<code>disabled</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getDisabled() {
+		return disabled;
+	}
+
+	/**
 	 * Writes the default attributes configured via this base class to the supplied {@link TagWriter}.
 	 * Subclasses should call this when they want the base attribute set to be written to the output.
 	 */
 	protected void writeDefaultAttributes(TagWriter tagWriter) throws JspException {
 		super.writeDefaultAttributes(tagWriter);
-		writeOptionalAttribute(tagWriter, ONFOCUS_ATTRIBUTE, this.onfocus);
-		writeOptionalAttribute(tagWriter, ONBLUR_ATTRIBUTE, this.onblur);
-		writeOptionalAttribute(tagWriter, ONCHANGE_ATTRIBUTE, this.onchange);
-		writeOptionalAttribute(tagWriter, ACCESSKEY_ATTRIBUTE, this.accesskey);
-	}
-
-	/**
-	 * Checks to see whether or not the value of this tag is the active value, or the
-	 * value to which this tag is bound.
-	 * <p/>Performs a two stage comparison, first comparing objects using
-	 * {@link org.springframework.util.ObjectUtils#nullSafeEquals} and then finally comparing the <code>String</code>
-	 * values. This helps when object types might be statically incompatible but logically
-	 * equal in certain cases (i.e. <code>String</code> and <code>Character</code>).
-	 */
-	protected boolean isActiveValue(Object resolvedValue) throws JspException {
-		Object boundValue = getValue();
-		boolean equal = ObjectUtils.nullSafeEquals(resolvedValue, boundValue);
-
-		if (!equal && (resolvedValue != null && boundValue != null)) {
-			equal = resolvedValue.toString().equals(boundValue.toString());
-		}
-		return equal;
+		writeOptionalAttribute(tagWriter, ONFOCUS_ATTRIBUTE, getOnfocus());
+		writeOptionalAttribute(tagWriter, ONBLUR_ATTRIBUTE, getOnblur());
+		writeOptionalAttribute(tagWriter, ONCHANGE_ATTRIBUTE, getOnchange());
+		writeOptionalAttribute(tagWriter, ACCESSKEY_ATTRIBUTE, getAccesskey());
+		writeOptionalAttribute(tagWriter, DISABLED_ATTRIBUTE, getDisabled());
 	}
 }

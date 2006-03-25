@@ -18,8 +18,10 @@ package org.springframework.web.servlet.tags.form;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.servlet.support.BindStatus;
 
 import javax.servlet.jsp.JspException;
+import java.beans.PropertyEditor;
 
 /**
  * JSP tag for rendering an HTML '<code>option</code>' tag. Must be used nested
@@ -60,12 +62,28 @@ public class OptionTag extends AbstractFormTag {
 	}
 
 	/**
+	 * Gets the 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
+	 * May be a runtime expression.
+	 */
+	protected String getValue() {
+		return this.value;
+	}
+
+	/**
 	 * Sets the text body of the rendered HTML <code>&lt;option&gt;</code> tag.
 	 * May be a runtime expression.
 	 */
 	public void setLabel(String label) {
 		Assert.notNull(label, "'label' cannot be null.");
 		this.label = label;
+	}
+
+	/**
+	 * Gets the text body of the rendered HTML <code>&lt;option&gt;</code> tag.
+	 * May be a runtime expression.
+	 */
+	protected String getLabel() {
+		return this.label;
 	}
 
 	/**
@@ -79,10 +97,10 @@ public class OptionTag extends AbstractFormTag {
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("option");
 
-		Object resolvedValue = evaluate("value", this.value);
+		Object resolvedValue = evaluate("value", getValue());
 
 		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(resolvedValue));
-		if (getSelectedValue().equals(resolvedValue)) {
+		if (isSelected(resolvedValue)) {
 			tagWriter.writeAttribute("selected", "true");
 		}
 		tagWriter.appendValue(getLabelValue(resolvedValue));
@@ -92,6 +110,10 @@ public class OptionTag extends AbstractFormTag {
 		return EVAL_PAGE;
 	}
 
+	private boolean isSelected(Object resolvedValue) {
+		return SelectedValueComparator.isSelected(getBindStatus(), resolvedValue);
+	}
+
 	/**
 	 * Returns the value of the label for this '<code>option</code>' element.
 	 * If the {@link #setLabel label} property is set then the resolved value
@@ -99,18 +121,16 @@ public class OptionTag extends AbstractFormTag {
 	 * argument is used.
 	 */
 	private String getLabelValue(Object resolvedValue) throws JspException {
-		Object labelObj = (this.label == null ? resolvedValue : evaluate("label", this.label));
+		String label = getLabel();
+		Object labelObj = (label == null ? resolvedValue : evaluate("label", label));
 		return ObjectUtils.nullSafeToString(labelObj);
 	}
 
-	/**
-	 * Gets the value bound to the outer {@link SelectTag}.
-	 */
-	private Object getSelectedValue() {
-		Object selectedValue = this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
-		if (selectedValue == null) {
+	private BindStatus getBindStatus() {
+		BindStatus bindStatus = (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
+		if (bindStatus == null) {
 			throw new IllegalStateException("The 'option' tag can only be used inside a valid 'select' tag.");
 		}
-		return selectedValue;
+		return bindStatus;
 	}
 }

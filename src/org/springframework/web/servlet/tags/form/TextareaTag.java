@@ -67,11 +67,27 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
+	 * Gets the value of the '<code>rows</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getRows() {
+		return this.rows;
+	}
+
+	/**
 	 * Sets the value of the '<code>cols</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setCols(String cols) {
 		this.cols = cols;
+	}
+
+	/**
+	 * Gets the value of the '<code>cols</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getCols() {
+		return this.cols;
 	}
 
 	/**
@@ -82,13 +98,21 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 		this.onselect = onselect;
 	}
 
+	/**
+	 * Gets the value of the '<code>onselect</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnselect() {
+		return this.onselect;
+	}
+
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("textarea");
 		writeDefaultAttributes(tagWriter);
-		writeOptionalAttribute(tagWriter, ROWS_ATTRIBUTE, this.rows);
-		writeOptionalAttribute(tagWriter, COLS_ATTRIBUTE, this.cols);
-		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, this.onselect);
-		tagWriter.appendValue(ObjectUtils.nullSafeToString(getValue()));
+		writeOptionalAttribute(tagWriter, ROWS_ATTRIBUTE, getRows());
+		writeOptionalAttribute(tagWriter, COLS_ATTRIBUTE, getCols());
+		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, getOnselect());
+		tagWriter.appendValue(ObjectUtils.nullSafeToString(getBoundValue()));
 		tagWriter.endTag();
 		return EVAL_PAGE;
 	}

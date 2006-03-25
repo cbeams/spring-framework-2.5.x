@@ -49,6 +49,14 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
+	 * Gets the value of the '<code>value</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected Object getValue() {
+		return this.value;
+	}
+
+	/**
 	 * Renders the '<code>input(radio)</code>' element with the configured
 	 * {@link #setValue(Object) value}. Marks the element as checked if the
 	 * value matches the {@link #getValue bound value}.
@@ -58,10 +66,11 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute("type", "radio");
 
-		Object resolvedValue = (this.value instanceof String ? evaluate("value", (String)this.value) : this.value);
+		Object value = getValue();
+		Object resolvedValue = (value instanceof String ? evaluate("value", (String)value) : value);
 		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(resolvedValue));
 
-		if (isActiveValue(resolvedValue)) {
+		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
 			tagWriter.writeAttribute("checked", "true");
 		}
 

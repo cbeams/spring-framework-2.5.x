@@ -30,7 +30,7 @@ import java.util.Stack;
  * @author Rob Harrop
  * @since 2.0
  */
-class TagWriter {
+public class TagWriter {
 
 
 	/**
