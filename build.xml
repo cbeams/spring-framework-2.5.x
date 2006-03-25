@@ -658,7 +658,7 @@
 			<!-- EasyMock -->
 			<!-- EHCache -->
 			<link href="http://freemarker.sourceforge.net/docs/api/"/>
-			<link href="http://www.hibernate.org/hib_docs/api/"/>
+			<link href="http://www.hibernate.org/hib_docs/v3/api"/>
 			<link href="http://www.ibatis.com/common/javadocs/"/>
 			<!-- iText -->
 			<!-- Commons Attributes (api + compiler -->
@@ -1518,7 +1518,7 @@
 			<!-- EasyMock -->
 			<!-- EHCache -->
 			<link href="http://freemarker.sourceforge.net/docs/api/"/>
-			<link href="http://www.hibernate.org/hib_docs/api/"/>
+			<link href="http://www.hibernate.org/hib_docs/v3/api"/>
 			<link href="http://httpunit.sourceforge.net/doc/api/"/>
 			<link href="http://www.ibatis.com/common/javadocs/"/>
 			<!-- iText -->
