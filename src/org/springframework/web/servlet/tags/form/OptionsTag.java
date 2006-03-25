@@ -96,7 +96,7 @@ public class OptionsTag extends AbstractFormTag {
 
 		String itemValue = getItemValue();
 		String itemLabel = getItemLabel();
-		
+	
 		String valueProperty = (itemValue == null ? null :
 						ObjectUtils.nullSafeToString(evaluate("itemValue", itemValue)));
 		String labelProperty = (itemLabel == null ? null :
