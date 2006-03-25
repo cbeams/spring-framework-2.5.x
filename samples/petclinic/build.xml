@@ -255,10 +255,9 @@
 			for autobuilds testing.
 		-->
 	</target>
-
-
-	<target name="warfile" depends="build,docs" description="Build the web application archive">
-
+	
+	<target name="warfile" depends="build" description="Build the web application archive">
+		
 		<mkdir dir="${dist.dir}"/>
 
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
@@ -271,6 +270,35 @@
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
 			<exclude name="**/.*"/>
+			<exclude name="WEB-INF/geronimo-web.xml"/>
+		</war>
+
+	</target>
+
+	
+	<!--
+	If you are going to deploy the application into Geronimo (or an
+	application server variant of Geronimo), run this target in preference
+	to the plain 'warfile'. This is required because of Geronimo
+	classloading issues.
+	-->
+	<target name="geronimo.warfile" depends="build"
+			description="Build the web application archive packaged specifically for Geronimo">
+		
+		<mkdir dir="${dist.dir}"/>
+
+		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
+			<include name="*"/>
+			<include name="docs/**"/>
+			<include name="html/**"/>
+			<include name="WEB-INF/*.*"/>
+			<exclude name="WEB-INF/web.xml"/>
+			<include name="WEB-INF/classes/*.*"/>
+			<include name="WEB-INF/lib/**"/>
+			<include name="WEB-INF/jsp/**"/>
+			<exclude name="**/.*"/>
+			<exclude name="WEB-INF/lib/commons-logging.jar"/>
+			<exclude name="WEB-INF/lib/cglib*.jar"/>
 		</war>
 
 	</target>

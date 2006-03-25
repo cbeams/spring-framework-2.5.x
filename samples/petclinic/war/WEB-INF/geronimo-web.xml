@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns="http://geronimo.apache.org/xml/ns/j2ee/web-1.0"
 		 configId="org/springframework/samples/petclinic">
-	<!-- force the usage of the Spring jars deployed with the web application -->
-	<hidden-classes>
-		<filter>org.springframework</filter>
-	</hidden-classes>
-	<!-- only required if using Hibernate -->
-	<hidden-classes>
-		<filter>antlr</filter>
-	</hidden-classes>
 	<context-root>/petclinic</context-root>
-	<context-priority-classloader>false</context-priority-classloader>
+	<context-priority-classloader>true</context-priority-classloader>
 </web-app>
