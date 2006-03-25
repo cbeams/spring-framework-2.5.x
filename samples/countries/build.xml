@@ -128,7 +128,33 @@
 	</target>
 
 
-	<target name="warfile" depends="build,docs" description="Build the web application archive">
+	<target name="warfile" depends="build" description="Build the web application archive">
+
+		<antcall target="create.warfile">
+			<!-- not interested in Geronimo deploy plan -->
+			<param name="warfile.excludes" value="WEB-INF/geronimo-web.xml"/>
+		</antcall>
+
+	</target>
+
+	<!--
+	If you are going to deploy the application into Geronimo (or an
+	application server variant of Geronimo), run this target in preference
+	to the plain 'warfile'. This is required because of the Geronimo
+	commons-logging issue.
+	-->
+	<target name="geronimo.warfile" depends="build"
+			description="Build the web application archive packaged specifically for Geronimo">
+
+		<antcall target="create.warfile">
+			<!-- do not deploy commons-logging with the web app -->
+			<param name="warfile.excludes" value="WEB-INF/lib/commons-logging.jar"/>
+		</antcall>
+
+	</target>	
+
+
+	<target name="create.warfile" depends="build,docs" description="Build the web application archive">
 
 		<mkdir dir="${dist.dir}"/>
 
@@ -144,6 +170,7 @@
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/views/**"/>
 			<exclude name="**/.*"/>
+			<exclude name="${warfile.excludes}"/>
 		</war>
 
 	</target>
