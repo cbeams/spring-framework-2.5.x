@@ -6,7 +6,13 @@ http://www.springframework.org
 Changes in version 2.0 M4 (29.3.2006)
 -------------------------------------
 
+General
+* included "tiger" and "aspectj" source trees in source build (spring-src.zip)
+* included spring-src.zip in both release distributions as a convenience
+* basic distribution doesn't include build script and exploded source trees anymore
+
 Package org.springframework.aop
+* fixed Cglib2AopProxy to register an explicitly given ClassLoader with the CGLIB Enhancer
 * deprecated Commons Attributes based TargetSourceCreators (PoolingAttribute, PrototypeAttribute, ThreadLocalAttribute)
 * fixed CustomizableTraceInterceptor to expose the actual invocation time for exception messages
 
@@ -14,8 +20,23 @@ Package org.springframework.beans
 * BeanUtils throws explicit BeanInstantiationException in case of bean instantiation failure
 * fixed BeanWrapperImpl to convert a null input for an array type to a null value rather than an array with null element
 * fixed BeanWrapperImpl to apply property-specific editors to elements even for collections without generic type
+* refined BeanWrapperImpl to inject original collections as far as possible (i.e. unless element conversion necessary)
 * fixed BeanWrapperImpl to convert a ManagedProperties instance into a plain Properties instance before applying it
 * CharacterEditor supports unicode specification passed in as literal String, for example "\u00F6"
+* fixed DefaultListableBeanFactory to not preinstantiate bean definition if explicit singleton object already registered
+
+Package org.springframework.core
+* fixed FileSystemResource/UrlResource to retain leading "../" parts in paths, building correct relative paths for them
+
+Package org.springframework.jdbc
+* JdbcTemplate's "queryForString"/"queryForInt"/etc methods correctly detect incorrect result sizes even for null values
+* refined NativeJdbcExtractorAdapter to retry with DatabaseMetaData Connection if extraction failed (for Hibernate 3.1)
+
+Package org.springframework.jms
+* fixed ServerSessionMessageListenerContainer(102) to use "createSession(Connection)" method to avoid JMS 1.1 dependency
+
+Package org.springframework.mock
+* added overloaded constructors to MockFilterConfig, using a MockServletContext instead of a ServletContext argument
 
 Package org.springframework.orm
 * updated JDO API 2.0 jar to 2.0 RC1 from the Apache JDO project
@@ -33,18 +54,34 @@ Package org.springframework.orm
 Package org.springframework.remoting
 * added "setContentType" configuration method to HttpInvokerServiceExporter and AbstractHttpInvokerRequestExecutor
 * built client-side HTTP GZIP response support into SimpleHttpInvokerRequestExecutor/CommonsHttpInvokerRequestExecutor
+* JaxRpcPortClientInterceptor synchronizes creation of JAX-RPC Calls, to make dynamic invocations with Axis thread-safe
+* refined JaxRpcPortClientInterceptor to only use JAX-RPC port if "portInterface" specified (prefer dynamic invocations)
 * added "setCustomPropertyMap" method to JaxRpcPortClientInterceptor/ProxyFactoryBean, accepting String-Object pairs
 * added AxisBeanMappingServicePostProcessor to "jaxrpc.support" package, for declarative registration of bean mappings
+
+Package org.springframework.scheduling
+* refined Quartz SchedulerFactoryBean to re-register the associated JobDetail when overwriting a JobDetailAwareTrigger
+* fixed Quartz SchedulerFactoryBean to handle potential cluster race condition on trigger registration
 
 Package org.springframework.transaction
 * AbstractPlatformTransactionManager logs "Should roll back transaction but cannot" message at debug level (not warn)
 
+Package org.springframework.util
+* fixed StringUtils's "endsWithIgnoreCase" to correctly handle any String length
+* fixed CollectionsUtils's "hasUniqueObject" to correctly handle null values
+
 Package org.springframework.web
+* refined GenericFilterBean to fully support initialization as bean in a Spring bean factory (without FilterConfig)
+* refined OncePerRequestFilter to fall back to bean name or fully qualified class name if no filter name is available
 * refined AbstractRefreshablePortletApplicationContext to take PortletContext from PortletConfig if not explicitly set
 * added "propertyEditorRegistrar" bean property to BaseCommandController, as convenience option for a single registrar
+* fixed SimpleMappingExceptionResolver to correctly check the depth of all exception mappings before choosing a view
 * optimized BeanNameViewResolver to avoid internal throwing and catching of NoSuchBeanDefinitionExceptions
 * ExpressionEvaluationManager supports concatenated expressions (e.g. "${var1}text${var2}") on all JSP 2.0 engines
 * added optional caching of JSP 2.0 Expressions, driven by "cacheJspExpressions" context-param in web.xml (true/false)
+* AbstractJasperReportsView and subclasses require JasperReports 1.0.1 or higher (removed backwards compatibility check)
+* fixed AbstractJasperReportsView and subclasses to be compatible with J2EE <1.4 (avoid response.setCharacterEncoding)
+* AbstractJasperReportsView autodetects a JDBC DataSource in the model, as alternative to specifying it in configuration
 
 
 Changes in version 2.0 M3 (8.3.2006)
