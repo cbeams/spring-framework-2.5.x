@@ -18,14 +18,8 @@
 					<xsd:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="unbounded"/>
 				</xsd:choice>
 			</xsd:sequence>
-			<xsd:attribute name="default-lazy-init" default="false">
-				<xsd:simpleType>
-					<xsd:restriction base="xsd:NMTOKEN">
-						<xsd:enumeration value="true"/>
-						<xsd:enumeration value="false"/>
-					</xsd:restriction>
-				</xsd:simpleType>
-			</xsd:attribute>
+			<xsd:attribute name="default-lazy-init" default="false" type="xsd:boolean"/>
+			<xsd:attribute name="default-merge" default="false" type="xsd:boolean"/>
 			<xsd:attribute name="default-dependency-check" default="none">
 				<xsd:simpleType>
 					<xsd:restriction base="xsd:NMTOKEN">
@@ -47,8 +41,8 @@
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:attribute>
-			<xsd:attribute name="default-init-method" type="xsd:string" default="-"/>
-			<xsd:attribute name="default-destroy-method" type="xsd:string" default="-"/>
+			<xsd:attribute name="default-init-method" type="xsd:string" />
+			<xsd:attribute name="default-destroy-method" type="xsd:string" />
 		</xsd:complexType>
 	</xsd:element>
 	<xsd:element name="description">
@@ -93,31 +87,9 @@
 		<xsd:attribute name="name" type="xsd:string"/>
 		<xsd:attribute name="class" type="xsd:string"/>
 		<xsd:attribute name="parent" type="xsd:string"/>
-		<xsd:attribute name="abstract" default="false">
-			<xsd:simpleType>
-				<xsd:restriction base="xsd:NMTOKEN">
-					<xsd:enumeration value="true"/>
-					<xsd:enumeration value="false"/>
-				</xsd:restriction>
-			</xsd:simpleType>
-		</xsd:attribute>
-		<xsd:attribute name="singleton" default="true">
-			<xsd:simpleType>
-				<xsd:restriction base="xsd:NMTOKEN">
-					<xsd:enumeration value="true"/>
-					<xsd:enumeration value="false"/>
-				</xsd:restriction>
-			</xsd:simpleType>
-		</xsd:attribute>
-		<xsd:attribute name="lazy-init" default="default">
-			<xsd:simpleType>
-				<xsd:restriction base="xsd:NMTOKEN">
-					<xsd:enumeration value="default"/>
-					<xsd:enumeration value="true"/>
-					<xsd:enumeration value="false"/>
-				</xsd:restriction>
-			</xsd:simpleType>
-		</xsd:attribute>
+		<xsd:attribute name="abstract" default="false" type="xsd:boolean"/>
+		<xsd:attribute name="singleton" default="true" type="xsd:boolean"/>
+		<xsd:attribute name="lazy-init" default="default" type="defaultable-boolean"/>
 		<xsd:attribute name="autowire" default="default">
 			<xsd:simpleType>
 				<xsd:restriction base="xsd:NMTOKEN">
@@ -294,6 +266,7 @@
 					<xsd:element ref="prop"/>
 				</xsd:choice>
 			</xsd:sequence>
+			<xsd:attribute name="merge" type="defaultable-boolean"/>
 		</xsd:complexType>
 	</xsd:element>
 	<xsd:element name="prop">
@@ -309,6 +282,7 @@
 				<xsd:element ref="entry"/>
 			</xsd:choice>
 		</xsd:sequence>
+		<xsd:attribute name="merge" type="defaultable-boolean"/>
 	</xsd:complexType>
 	<xsd:complexType name="entryType">
 		<xsd:sequence>
@@ -322,8 +296,19 @@
 	</xsd:complexType>
 	<xsd:complexType name="listType">
 		<xsd:group ref="collectionElements"/>
+		<xsd:attribute name="merge" type="defaultable-boolean"/>
 	</xsd:complexType>
 	<xsd:complexType name="setType">
 		<xsd:group ref="collectionElements"/>
+		<xsd:attribute name="merge" type="defaultable-boolean"/>
 	</xsd:complexType>
+
+	<!-- internal types -->
+	<xsd:simpleType name="defaultable-boolean">
+			<xsd:restriction base="xsd:NMTOKEN">
+				<xsd:enumeration value="default"/>
+				<xsd:enumeration value="true"/>
+				<xsd:enumeration value="false"/>
+			</xsd:restriction>
+	</xsd:simpleType>
 </xsd:schema>
