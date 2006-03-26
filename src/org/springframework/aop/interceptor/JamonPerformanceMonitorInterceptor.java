@@ -37,6 +37,9 @@ import org.apache.commons.logging.Log;
  */
 public class JamonPerformanceMonitorInterceptor extends AbstractMonitoringInterceptor {
 
+	private boolean trackAllInvocations = false;
+
+
 	/**
 	 * Create a new JamonPerformanceMonitorInterceptor with a static logger.
 	 */
@@ -53,7 +56,48 @@ public class JamonPerformanceMonitorInterceptor extends AbstractMonitoringInterc
 		setUseDynamicLogger(useDynamicLogger);
 	}
 
+	/**
+	 * Create a new JamonPerformanceMonitorInterceptor with a dynamic or static logger,
+	 * according to the given flag.
+	 * @param useDynamicLogger whether to use a dynamic logger or a static logger
+	 * @param trackAllInvocations whether to track all invocations that go through
+	 * this interceptor, or just invocations with trace logging enabled
+	 * @see #setUseDynamicLogger
+	 */
+	public JamonPerformanceMonitorInterceptor(boolean useDynamicLogger, boolean trackAllInvocations) {
+		setUseDynamicLogger(useDynamicLogger);
+		setTrackAllInvocations(trackAllInvocations);
+	}
 
+
+	/**
+	 * Set whether to track all invocations that go through this interceptor,
+	 * or just invocations with trace logging enabled.
+	 * <p>Default is "false": Only invocations with trace logging enabled will
+	 * be monitored. Specify "true" to let JAMon track all invocations,
+	 * gathering statistics even when trace logging is disabled.
+	 */
+	public void setTrackAllInvocations(boolean trackAllInvocations) {
+		this.trackAllInvocations = trackAllInvocations;
+	}
+
+
+	/**
+	 * Always applies the interceptor if the "trackAllInvocations" flag has been set;
+	 * else just kicks in if the log is enabled.
+	 * @see #setTrackAllInvocations
+	 * @see #isLogEnabled
+	 */
+	protected boolean isInterceptorEnabled(MethodInvocation invocation, Log logger) {
+		return (this.trackAllInvocations || isLogEnabled(logger));
+	}
+
+	/**
+	 * Wraps the invocation with a JAMon Monitor and writes the current
+	 * performance statistics to the log (if enabled).
+	 * @see com.jamonapi.MonitorFactory#start
+	 * @see com.jamonapi.Monitor#stop
+	 */
 	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
 		String name = createInvocationTraceName(invocation);
 		Monitor monitor = MonitorFactory.start(name);
@@ -62,7 +106,9 @@ public class JamonPerformanceMonitorInterceptor extends AbstractMonitoringInterc
 		}
 		finally {
 			monitor.stop();
-			logger.trace("JAMon performance statistics for method [" + name + "]:\n" + monitor);
+			if (!this.trackAllInvocations || isLogEnabled(logger)) {
+				logger.trace("JAMon performance statistics for method [" + name + "]:\n" + monitor);
+			}
 		}
 	}
 

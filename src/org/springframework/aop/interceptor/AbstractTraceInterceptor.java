@@ -107,7 +107,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Log logger = getLoggerForInvocation(invocation);
-		if (isLogEnabled(logger)) {
+		if (isInterceptorEnabled(invocation, logger)) {
 			return invokeUnderTrace(invocation, logger);
 		}
 		else {
@@ -153,25 +153,46 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	}
 
 	/**
-	 * Is the {@link Log} instance enabled. Default implementation returns
-	 * <code>true</code> when <code>TRACE</code> level is enabled. Sub-classes
-	 * can override this to change the level under which 'tracing' occurs.
+	 * Determine whether the interceptor should kick in, that is,
+	 * whether the <code>invokeUnderTrace</code> method should be called.
+	 * <p>Default behavior is to check whether the given <code>Log</code>
+	 * instance is enabled. Subclasses can override this to apply the
+	 * interceptor in other cases as well.
+	 * @param invocation the <code>MethodInvocation</code> being traced
+	 * @param logger the <code>Log</code> instance to check
+	 * @see #invokeUnderTrace
+	 * @see #isLogEnabled
+	 */
+	protected boolean isInterceptorEnabled(MethodInvocation invocation, Log logger) {
+		return isLogEnabled(logger);
+	}
+
+	/**
+	 * Determine whether the given {@link Log} instance is enabled.
+	 * <p>Default is <code>true</code> when the "trace" level is enabled.
+	 * Subclasses can override this to change the level under which 'tracing' occurs.
+	 * @param logger the <code>Log</code> instance to check
 	 */
 	protected boolean isLogEnabled(Log logger) {
 		return logger.isTraceEnabled();
 	}
+
 
 	/**
 	 * Subclasses must override this method to perform any tracing around the
 	 * supplied <code>MethodInvocation</code>. Subclasses are responsible for
 	 * ensuring that the <code>MethodInvocation</code> actually executes by
 	 * calling <code>MethodInvocation.proceed()</code>.
-	 * <p>The passed-in <code>Log</code> instance will have log level "trace"
-	 * enabled. Subclasses do not have to check for this again.
+	 * <p>By default, the passed-in <code>Log</code> instance will have log level
+	 * "trace" enabled. Subclasses do not have to check for this again, unless
+	 * they overwrite the <code>isInterceptorEnabled</code> method to modify
+	 * the default behavior.
 	 * @param logger the <code>Log</code> to write trace messages to
 	 * @return the result of the call to <code>MethodInvocation.proceed()</code>
 	 * @throws Throwable if the call to <code>MethodInvocation.proceed()</code>
 	 * encountered any errors
+	 * @see #isInterceptorEnabled
+	 * @see #isLogEnabled
 	 */
 	protected abstract Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable;
 
