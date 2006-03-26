@@ -644,8 +644,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				throw new UnsatisfiedDependencyException(
 						mergedBeanDefinition.getResourceDescription(), beanName, propertyName,
 						"There are " + matchingBeans.size() + " beans of type [" + requiredType +
-						"] for autowire by type. There should have been 1 to be able to autowire property '" +
-						propertyName + "' of bean '" + beanName + "'.");
+						"] for autowire by type. There should have been exactly 1 to be able to autowire property '" +
+						propertyName + "' of bean '" + beanName + "'. Consider using autowire by name instead.");
 			}
 			else {
 				if (logger.isDebugEnabled()) {
@@ -708,7 +708,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				if (unsatisfied) {
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, pds[i].getName(),
-							"set this property value or disable dependency checking for this bean");
+							"Set this property value or disable dependency checking for this bean.");
 				}
 			}
 		}
