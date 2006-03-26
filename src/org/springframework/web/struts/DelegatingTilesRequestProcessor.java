@@ -29,11 +29,10 @@ import org.apache.struts.config.ModuleConfig;
 import org.apache.struts.tiles.TilesRequestProcessor;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Subclass of Struts' TilesRequestProcessor that looks up Spring-managed
+ * Subclass of Struts's TilesRequestProcessor that autowires
  * Struts Actions defined in ContextLoaderPlugIn's WebApplicationContext
  * (or, as a fallback, in the root WebApplicationContext).
  *
@@ -54,6 +53,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @see DelegatingRequestProcessor
  * @see DelegatingActionProxy
  * @see DelegatingActionUtils
+ * @see ContextLoaderPlugIn
  */
 public class DelegatingTilesRequestProcessor extends TilesRequestProcessor {
 
@@ -91,6 +91,7 @@ public class DelegatingTilesRequestProcessor extends TilesRequestProcessor {
 		return webApplicationContext;
 	}
 
+
 	/**
 	 * Override the base class method to return the delegate action.
 	 * @see #getDelegateAction
@@ -98,12 +99,12 @@ public class DelegatingTilesRequestProcessor extends TilesRequestProcessor {
 	protected Action processActionCreate(
 			HttpServletRequest request, HttpServletResponse response, ActionMapping mapping)
 			throws IOException {
-		try {
-			return getDelegateAction(mapping);
+
+		Action action = getDelegateAction(mapping);
+		if (action != null) {
+			return action;
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			return super.processActionCreate(request, response, mapping);
-		}
+		return super.processActionCreate(request, response, mapping);
 	}
 
 	/**
@@ -112,13 +113,16 @@ public class DelegatingTilesRequestProcessor extends TilesRequestProcessor {
 	 * given ActionMapping and looks up the corresponding bean in the
 	 * WebApplicationContext.
 	 * @param mapping the Struts ActionMapping
-	 * @return the delegate Action
+	 * @return the delegate Action, or <code>null</code> if none found
 	 * @throws BeansException if thrown by WebApplicationContext methods
 	 * @see #determineActionBeanName
 	 */
 	protected Action getDelegateAction(ActionMapping mapping) throws BeansException {
 		String beanName = determineActionBeanName(mapping);
-		return (Action) this.webApplicationContext.getBean(beanName, Action.class);
+		if (!getWebApplicationContext().containsBean(beanName)) {
+			return null;
+		}
+		return (Action) getWebApplicationContext().getBean(beanName, Action.class);
 	}
 
 	/**
