@@ -223,7 +223,7 @@ public class SingleUseDataSource extends SingleConnectionDataSource {
 
             private static final String GET_TARGET_PREPARED_STATEMENT_METHOD_NAME = "getTargetPreparedStatement";
 
-            private static final String CONNECTION_CLOSE_METHOD_NAME = "close";
+            private static final String PREPARED_STATEMENT_CLOSE_METHOD_NAME = "close";
 
             private final PreparedStatement target;
 
@@ -240,7 +240,7 @@ public class SingleUseDataSource extends SingleConnectionDataSource {
                 }
 
                 // Handle close method: don't pass the call on.
-                if (method.getName().equals(CONNECTION_CLOSE_METHOD_NAME)) {
+                if (method.getName().equals(PREPARED_STATEMENT_CLOSE_METHOD_NAME)) {
                     return null;
                 }
 
