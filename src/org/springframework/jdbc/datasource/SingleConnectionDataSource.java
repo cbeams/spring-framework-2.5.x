@@ -65,6 +65,9 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	/** Proxy connection */
 	private Connection connection;
 
+	/** Override AutoCommit? */
+	private Boolean autoCommit = null;
+
 
 	/**
 	 * Constructor for bean-style configuration.
@@ -154,6 +157,14 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 
 
 	/**
+	 * Set if the returned connection's autoCommit setting should be overridden
+	 */
+	public void setAutoCommit(boolean autoCommit) {
+		this.autoCommit = Boolean.valueOf(autoCommit);
+	}
+
+
+	/**
 	 * This is a single connection: Do not close it when returning to the "pool".
 	 */
 	public boolean shouldClose(Connection con) {
@@ -165,6 +176,14 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 */
 	protected void init() throws SQLException {
 		init(getConnectionFromDriverManager());
+		if (autoCommit != null && this.connection.getAutoCommit() != autoCommit.booleanValue()) {
+			this.connection.setAutoCommit(autoCommit.booleanValue());
+		}
+		if (logger.isDebugEnabled()) {
+			if (autoCommit != null) {
+				logger.debug("AutoCommit is: " + this.autoCommit);
+			}
+		}
 	}
 
 	/**
