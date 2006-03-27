@@ -543,10 +543,10 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	/**
 	 * Clear the resource bundle cache.
-	 * Following resolve calls will lead to reloading of the properties files.
+	 * Subsequent resolve calls will lead to reloading of the properties files.
 	 */
 	public void clearCache() {
-		logger.info("Clearing resource bundle cache");
+		logger.debug("Clearing entire resource bundle cache");
 		synchronized (this.cachedProperties) {
 			this.cachedProperties.clear();
 		}
