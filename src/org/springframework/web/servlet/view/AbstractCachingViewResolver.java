@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -86,7 +86,16 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 			}
 		}
 	}
-	
+
+	/**
+	 * Return the cache key for the given viewName and the given locale.
+	 * Needs to regard the locale in general, as a different locale can lead to a
+	 * different view! Can be overridden in subclasses.
+	 */
+	protected String getCacheKey(String viewName, Locale locale) {
+		return viewName + "_" + locale;
+	}
+
 	/**
 	 * Provides functionality to clear the cache for a certain view.
 	 * This can be handy in case developer are able to modify views
@@ -104,7 +113,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 			String cacheKey = getCacheKey(viewName, locale);
 			Object cachedView = null;
 			synchronized (this.viewCache) {
-				this.viewCache.remove(cacheKey);
+				cachedView = this.viewCache.remove(cacheKey);
 			}
 			if (cachedView == null) {
 				// Some debug output might be useful...
@@ -114,20 +123,23 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 			} 
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Cach for view " + cacheKey + " has been cleared");
+					logger.debug("Cache for view " + cacheKey + " has been cleared");
 				}
 			}
 		}
 	}
 
 	/**
-	 * Return the cache key for the given viewName and the given locale.
-	 * Needs to regard the locale in general, as a different locale can lead to a
-	 * different view! Can be overridden in subclasses.
+	 * Clear the entire view cache, removing all cached view objects.
+	 * Subsequent resolve calls will lead to recreation of demanded view objects.
 	 */
-	protected String getCacheKey(String viewName, Locale locale) {
-		return viewName + "_" + locale;
+	public void clearCache() {
+		logger.debug("Clearing entire view cache");
+		synchronized (this.viewCache) {
+			this.viewCache.clear();
+		}
 	}
+
 
 	/**
 	 * Create the actual View object.
