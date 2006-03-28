@@ -35,6 +35,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.SqlNamedParameterMap;
 
 /**
  * @author Trevor Cook
@@ -50,9 +51,13 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		"select forename from custmr WHERE 1 = 2";
 	private static final String SELECT_ID_FORENAME_WHERE =
 		"select id, forename from custmr where forename = ?";
+	private static final String SELECT_ID_FORENAME_WHERE_NAMED_PARAMETER_1 =
+		"select id, forename from custmr where id = ?";
+	private static final String SELECT_ID_FORENAME_WHERE_NAMED_PARAMETER_2 =
+		"select id, forename from custmr where id = :id";
 	private static final String SELECT_ID_FORENAME_WHERE_ID =
 		"select id, forename from custmr where id <= ?";
-	
+
 	private static final String[] COLUMN_NAMES = new String[] { "id", "forename" };
 	private static final int[] COLUMN_TYPES = new int[] { Types.INTEGER, Types.VARCHAR };
 
@@ -152,6 +157,33 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		try {
 			List list = query.execute();
 			fail("Shouldn't succeed in running query without enough params");
+		}
+		catch (InvalidDataAccessApiUsageException ex) {
+			// OK
+		}
+	}
+
+	public void testQueryWithMissingMapParams() {
+		replay();
+
+		MappingSqlQuery query = new MappingSqlQuery() {
+			protected Object mapRow(ResultSet rs, int rownum)
+				throws SQLException {
+				return new Integer(rs.getInt(1));
+			}
+
+		};
+		query.setDataSource(mockDataSource);
+		query.setSql(SELECT_ID_WHERE);
+		query.declareParameter(
+			new SqlParameter(COLUMN_NAMES[0], COLUMN_TYPES[0]));
+		query.declareParameter(
+			new SqlParameter(COLUMN_NAMES[1], COLUMN_TYPES[1]));
+		query.compile();
+
+		try {
+			List list = query.execute(new SqlNamedParameterMap(COLUMN_NAMES[0], "Value"));
+			fail("Shouldn't succeed in running query with missing params");
 		}
 		catch (InvalidDataAccessApiUsageException ex) {
 			// OK
@@ -801,6 +833,120 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		assertTrue("Customer id was assigned correctly", cust.getId() == 1);
 		assertTrue("Customer forename was assigned correctly", cust.getForename().equals("rod"));
 	}
+
+	public void testUnnamedParameterDeclarationWithNamedParameterQuery() throws SQLException {
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(1);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("rod");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(
+				SELECT_ID_FORENAME_WHERE, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+
+		replay();
+
+		class CustomerQuery extends MappingSqlQuery {
+
+			public CustomerQuery(DataSource ds) {
+				super(ds, SELECT_ID_FORENAME_WHERE);
+				setResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE);
+				declareParameter(new SqlParameter(Types.NUMERIC));
+				compile();
+			}
+
+			protected Object mapRow(ResultSet rs, int rownum)
+				throws SQLException {
+				Customer cust = new Customer();
+				cust.setId(rs.getInt(COLUMN_NAMES[0]));
+				cust.setForename(rs.getString(COLUMN_NAMES[1]));
+				return cust;
+			}
+
+			public Customer findCustomer(int id) {
+				return (Customer) execute(new SqlNamedParameterMap("id", new Integer(id))).get(0);
+			}
+		}
+		CustomerQuery query = new CustomerQuery(mockDataSource);
+		try {
+			Customer cust = query.findCustomer(1);
+			fail("Query should not succeed since parameter declaration did not specify parameter name");
+		}
+		catch (InvalidDataAccessApiUsageException ex) {
+			// OK - it worked
+		}
+	}
+
+	public void testNamedParameterCustomerQuery() throws SQLException {
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(1);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("rod");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(
+				SELECT_ID_FORENAME_WHERE_NAMED_PARAMETER_1, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+
+		replay();
+
+		class CustomerQuery extends MappingSqlQuery {
+
+			public CustomerQuery(DataSource ds) {
+				super(ds, SELECT_ID_FORENAME_WHERE_NAMED_PARAMETER_2);
+				setResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE);
+				declareParameter(new SqlParameter("id", Types.NUMERIC));
+				compile();
+			}
+
+			protected Object mapRow(ResultSet rs, int rownum)
+				throws SQLException {
+				Customer cust = new Customer();
+				cust.setId(rs.getInt(COLUMN_NAMES[0]));
+				cust.setForename(rs.getString(COLUMN_NAMES[1]));
+				return cust;
+			}
+
+			public Customer findCustomer(int id) {
+				return (Customer) execute(new SqlNamedParameterMap("id", new Integer(id))).get(0);
+			}
+		}
+		CustomerQuery query = new CustomerQuery(mockDataSource);
+		Customer cust = query.findCustomer(1);
+
+		assertTrue("Customer id was assigned correctly", cust.getId() == 1);
+		assertTrue("Customer forename was assigned correctly", cust.getForename().equals("rod"));
+	}
+
 
 	public void testUpdateCustomers() throws SQLException {
 		mockResultSet.next();

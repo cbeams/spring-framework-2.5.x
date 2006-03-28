@@ -20,7 +20,9 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
+import org.springframework.jdbc.core.SqlNamedParameterMap;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.NamedParameterUtils;
 
 /**
  * RdbmsOperation subclass representing a SQL update.
@@ -162,6 +164,21 @@ public class SqlUpdate extends SqlOperation {
 	}
 
 	/**
+	 * Generic method to execute the update given arguments.
+	 * All other update methods invoke this method.
+	 * @param argMap SqlNamedParameterMap of object arguments matching
+	 * named parameters specified in SQL statement
+	 * @return the number of rows affected by the update
+	 */
+	public int update(SqlNamedParameterMap argMap) throws DataAccessException {
+		validateParameters(argMap);
+		Object[] args = NamedParameterUtils.convertArgMapToArray(getSql(), argMap);
+		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(args));
+		checkRowsAffected(rowsAffected);
+		return rowsAffected;
+	}
+
+	/**
 	 * Method to execute the update given arguments and 
 	 * retrieve the generated keys using a KeyHolder.
 	 * @param args array of object arguments
@@ -174,6 +191,23 @@ public class SqlUpdate extends SqlOperation {
 		checkRowsAffected(rowsAffected);
 		return rowsAffected;
 	}
+
+	/**
+	 * Method to execute the update given arguments and
+	 * retrieve the generated keys using a KeyHolder.
+	 * @param argMap SqlNamedParametermap of object arguments matching
+	 * named parameters specified in SQL statement
+	 * @param generatedKeyHolder KeyHolder that will hold the generated keys
+	 * @return the number of rows affected by the update
+	 */
+	public int update(SqlNamedParameterMap argMap, KeyHolder generatedKeyHolder) throws DataAccessException {
+		validateParameters(argMap);
+		Object[] args = NamedParameterUtils.convertArgMapToArray(getSql(), argMap);
+		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(args), generatedKeyHolder);
+		checkRowsAffected(rowsAffected);
+		return rowsAffected;
+	}
+
 
 	/**
 	 * Convenience method to execute an update with no parameters.

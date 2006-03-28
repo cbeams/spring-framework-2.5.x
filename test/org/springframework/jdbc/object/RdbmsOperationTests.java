@@ -17,6 +17,7 @@
 package org.springframework.jdbc.object;
 
 import java.sql.Types;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -25,6 +26,7 @@ import junit.framework.TestCase;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.SqlNamedParameterMap;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
@@ -76,8 +78,21 @@ public class RdbmsOperationTests extends TestCase {
 		operation.setSql("select * from mytable");
 		operation.setTypes(new int[] { Types.INTEGER });
 		try {
-			operation.validateParameters(null);
+			operation.validateParameters((Object[])null);
 			fail("Shouldn't validate without enough parameters"); 
+		}
+		catch (InvalidDataAccessApiUsageException idaauex) {
+			// OK
+		}
+	}
+
+	public void testTooFewMapParameters() {
+		TestRdbmsOperation operation = new TestRdbmsOperation();
+		operation.setSql("select * from mytable");
+		operation.setTypes(new int[] { Types.INTEGER });
+		try {
+			operation.validateParameters((Map)null);
+			fail("Shouldn't validate without enough parameters");
 		}
 		catch (InvalidDataAccessApiUsageException idaauex) {
 			// OK
@@ -104,6 +119,18 @@ public class RdbmsOperationTests extends TestCase {
 		try {
 			operation.validateParameters(new Object[] { new Integer(1), new Integer(2) });
 			fail("Shouldn't validate with too many parameters"); 
+		}
+		catch (InvalidDataAccessApiUsageException idaauex) {
+			// OK
+		}
+	}
+
+	public void testUnspecifiedMapParameters() {
+		TestRdbmsOperation operation = new TestRdbmsOperation();
+		operation.setSql("select * from mytable");
+		try {
+			operation.validateParameters(new SqlNamedParameterMap("col1", "value"));
+			fail("Shouldn't validate with unspecified parameters");
 		}
 		catch (InvalidDataAccessApiUsageException idaauex) {
 			// OK

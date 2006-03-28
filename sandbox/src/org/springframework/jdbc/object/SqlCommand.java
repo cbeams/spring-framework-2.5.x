@@ -20,14 +20,12 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlNamedParameterHolder;
-import org.springframework.jdbc.core.SqlNamedParameterTypes;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.NamedParameterUtils;
 import org.springframework.jdbc.support.ParsedSql;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +41,6 @@ import java.util.Map;
 public class SqlCommand implements SqlCommandOperations {
     private String sql;
     private ParsedSql parsedSql;
-    private SqlNamedParameterTypes defaultSqlTypes = new SqlNamedParameterTypes(new HashMap());
     private NamedParameterJdbcTemplate namedParameteJdbcTemplate;
 
     //-------------------------------------------------------------------------
@@ -61,33 +58,6 @@ public class SqlCommand implements SqlCommandOperations {
         this.namedParameteJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
-    //-------------------------------------------------------------------------
-    // Bean properties
-    //-------------------------------------------------------------------------
-
-    /**
-     * Set the default SQL types that should be used for setting parameter values.
-     * Can be overridden at execution time.
-     */
-    public Map getDefaultSqlTypes() {
-        return defaultSqlTypes.getTypes();
-    }
-
-    /**
-     * Set the default SQL types that should be used for setting parameter values.
-     * Can be overridden at execution time.
-     */
-    public void setDefaultSqlTypes(Map types) {
-        this.defaultSqlTypes.getTypes().putAll(types);
-    }
-
-    /**
-     * Get the default SQL types that should be used for setting parameter values.
-     */
-    public void setDefaultSqlTypes(SqlNamedParameterTypes namedTypes) {
-        this.defaultSqlTypes.getTypes().putAll(namedTypes.getTypes());
-    }
-
 
     //-------------------------------------------------------------------------
     // Execute methods
@@ -102,7 +72,7 @@ public class SqlCommand implements SqlCommandOperations {
     }
 
     public Object executeScalar(SqlNamedParameterHolder parameterHolder) {
-        return namedParameteJdbcTemplate.queryForObject(sql, parameterHolder, defaultSqlTypes, Object.class);
+        return namedParameteJdbcTemplate.queryForObject(sql, parameterHolder, Object.class);
     }
 
     public Object executeObject(RowMapper rowMapper) {
@@ -114,7 +84,7 @@ public class SqlCommand implements SqlCommandOperations {
     }
 
     public Object executeObject(RowMapper rowMapper, SqlNamedParameterHolder parameterHolder) {
-        return namedParameteJdbcTemplate.queryForObject(sql, parameterHolder, defaultSqlTypes, rowMapper);
+        return namedParameteJdbcTemplate.queryForObject(sql, parameterHolder, rowMapper);
     }
 
     public List executeQuery() {
@@ -126,7 +96,7 @@ public class SqlCommand implements SqlCommandOperations {
     }
 
     public List executeQuery(SqlNamedParameterHolder parameterHolder) {
-        return namedParameteJdbcTemplate.queryForList(sql, parameterHolder, defaultSqlTypes);
+        return namedParameteJdbcTemplate.queryForList(sql, parameterHolder);
     }
 
     public List executeQuery(RowMapper rowMapper) {
@@ -138,7 +108,7 @@ public class SqlCommand implements SqlCommandOperations {
     }
 
     public List executeQuery(RowMapper rowMapper, SqlNamedParameterHolder parameterHolder) {
-        return namedParameteJdbcTemplate.query(sql, parameterHolder, defaultSqlTypes, rowMapper);
+        return namedParameteJdbcTemplate.query(sql, parameterHolder, rowMapper);
     }
 
     public SqlRowSet executeRowSet() {
@@ -150,7 +120,7 @@ public class SqlCommand implements SqlCommandOperations {
     }
 
     public SqlRowSet executeRowSet(SqlNamedParameterHolder parameterHolder) {
-        return namedParameteJdbcTemplate.queryForRowSet(sql, parameterHolder, defaultSqlTypes);
+        return namedParameteJdbcTemplate.queryForRowSet(sql, parameterHolder);
     }
 
     public int executeUpdate() {
@@ -162,17 +132,7 @@ public class SqlCommand implements SqlCommandOperations {
     }
 
     public int executeUpdate(SqlNamedParameterHolder parameterHolder) {
-        Map typesToUse = new HashMap();
-        System.out.println("..... " + typesToUse);
-        typesToUse.putAll(defaultSqlTypes.getTypes());
-        System.out.println(">>>>> " + typesToUse);
-        if (parameterHolder.getTypes().size() > 0) {
-            typesToUse.putAll(parameterHolder.getTypes());
-            System.out.println("+++++ " + parameterHolder.getTypes());
-        }
-        System.out.println("===== " + typesToUse);
-        parameterHolder.setTypes(typesToUse);
-        return namedParameteJdbcTemplate.update(sql, parameterHolder, defaultSqlTypes);
+        return namedParameteJdbcTemplate.update(sql, parameterHolder);
     }
 
     public int executeUpdate(SqlNamedParameterHolder parameterHolder, KeyHolder keyHolder) {
@@ -180,16 +140,17 @@ public class SqlCommand implements SqlCommandOperations {
     }
 
     public int executeUpdate(SqlNamedParameterHolder parameterHolder, KeyHolder keyHolder, String[] keyColumnNames) {
-        return namedParameteJdbcTemplate.update(sql, parameterHolder, defaultSqlTypes, keyHolder, keyColumnNames);
+        return namedParameteJdbcTemplate.update(sql, parameterHolder, keyHolder, keyColumnNames);
     }
 
 
     public int executeInsert(SqlInsertBuilder insertBuilder) {
         if (insertBuilder.getKeyHolder() == null) {
-            return namedParameteJdbcTemplate.update(insertBuilder.buildSqlToUse(sql), insertBuilder.getNamedParameterHolder(), insertBuilder.getNamedParameterTypes());
+            return namedParameteJdbcTemplate.update(insertBuilder.buildSqlToUse(sql), insertBuilder.getNamedParameterHolder());
         }
         else {
-            return namedParameteJdbcTemplate.update(insertBuilder.buildSqlToUse(sql), insertBuilder.getNamedParameterHolder(), insertBuilder.getNamedParameterTypes(), insertBuilder.getKeyHolder(), insertBuilder.getKeyColumnNames());
+            return namedParameteJdbcTemplate.update(insertBuilder.buildSqlToUse(sql), insertBuilder.getNamedParameterHolder(),
+                    insertBuilder.getKeyHolder(), insertBuilder.getKeyColumnNames());
         }
     }
 

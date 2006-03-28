@@ -21,6 +21,7 @@ import java.sql.Types;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -377,9 +378,61 @@ public abstract class RdbmsOperation implements InitializingBean {
 		}
 		else {
 			// no parameters were supplied
-			if (!this.declaredParameters.isEmpty()) {
+			if (this.declaredParameters != null && !this.declaredParameters.isEmpty()) {
 				throw new InvalidDataAccessApiUsageException(
 						this.declaredParameters.size() + " parameters must be supplied");
+			}
+		}
+	}
+
+	/**
+	 * Validate the named parameters passed to an execute method based on declared parameters.
+	 * Subclasses should invoke this method before every executeQuery() or update() method.
+	 * @param parameters parameter Map supplied. May be <code>null</code>.
+	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
+	 */
+	protected void validateParameters(Map parameters) throws InvalidDataAccessApiUsageException {
+		if (!this.compiled) {
+			logger.debug("SQL operation not compiled before execution - invoking compile");
+			compile();
+		}
+
+		if (this.declaredParameters != null) {
+			Iterator it = this.declaredParameters.iterator();
+			while (it.hasNext()) {
+				Object param = it.next();
+				if (!(param instanceof SqlOutParameter) && !(param instanceof SqlReturnResultSet)) {
+					if (!supportsLobParameters() &&
+							(((SqlParameter)param).getSqlType() == Types.BLOB ||
+							((SqlParameter)param).getSqlType() == Types.CLOB)) {
+						throw new InvalidDataAccessApiUsageException(
+								"BLOB or CLOB parameters are not allowed for this kind of operation.");
+					}
+					if (((SqlParameter)param).getName() == null) {
+						throw new InvalidDataAccessApiUsageException(
+								"All parameters must have name specified when using the methods " +
+									"dedicated to named parameter support");
+					}
+					if (!parameters.containsKey(((SqlParameter)param).getName())) {
+						throw new InvalidDataAccessApiUsageException(
+								"The parameter named '" + ((SqlParameter)param).getName() +
+									"' were not among the parameters supplied: " +
+									parameters.keySet());
+					}
+				}
+			}
+		}
+
+		if (parameters != null && parameters.size() > 0) {
+			if (this.declaredParameters == null) {
+				throw new InvalidDataAccessApiUsageException("Didn't expect any parameters: none was declared");
+			}
+		}
+		else {
+			// no parameters were supplied
+			if (this.declaredParameters != null && !this.declaredParameters.isEmpty()) {
+				throw new InvalidDataAccessApiUsageException(
+						"Parameters must be supplied");
 			}
 		}
 	}

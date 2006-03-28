@@ -71,7 +71,4 @@ public interface SqlCommandOperations {
 
     int executeUpdate(SqlNamedParameterHolder parameters);
 
-    public Map getDefaultSqlTypes();
-
-    public void setDefaultSqlTypes(Map sqlTypes);
 }

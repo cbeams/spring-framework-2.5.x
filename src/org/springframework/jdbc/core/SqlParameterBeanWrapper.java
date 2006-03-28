@@ -23,39 +23,69 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * SQL values wrapper to hold the column values for a row or parameter
- * values in a plain JavaBean where the properties correspond to the
- * column/parameter names used in the SQL.
+ * BeanWrapper to hold a bean containing parameter values and SQL types representing all parameters for
+ * a specific SQL statement.  This class is intended for passing in a set of parameter values to methods
+ * of the NamedParameterJdbcTemplate class.  This class provides methods that will make adding several types
+ * to the Map easier.  The addType method returns a reference to the Map itself so you can chain several
+ * method calls together within a single statement.
+ *
+ * <p>This class can also be used when passing in named parameter values to an SqlCommand object.
  *
  * @author Thomas Risberg
  * @since 2.0
+ * @see org.springframework.jdbc.core.NamedParameterJdbcOperations
+ * //ToDo: @see org.springframework.jdbc.object.SqlCommand
  */
 public class SqlParameterBeanWrapper extends BeanWrapperImpl implements SqlNamedParameterHolder {
 
 	private Map sqlTypes = new HashMap();
 
 
+	/**
+	 * Create SqlParameterBeanWrapper
+	 */
 	public SqlParameterBeanWrapper() {
 	}
 
+	/**
+	 * Create SqlParameterBeanWrapper
+	 * @param object the wrapped bean instance
+	 */
 	public SqlParameterBeanWrapper(Object object) {
 		super(object);
 	}
 
 
-	public void setTypes(Map sqlTypes) {
-		this.sqlTypes.putAll(sqlTypes);
-	}
-
+	/**
+	 * Get the parameter value for the specified property/parameter
+	 * @param columnName the name of the parameter
+	 * @return the value of the specified parameter
+	 */
 	public Object getValue(String columnName) {
 		return this.getPropertyValue(columnName);
 	}
 
+	/**
+	 * Get the parameter value for the specified property/parameter
+	 * @param columnName the name of the parameter
+	 * @return the value of the specified parameter
+	 */
 	public int getType(String columnName) {
 		if (sqlTypes.containsKey(columnName)) {
 			return ((Integer) sqlTypes.get(columnName)).intValue();
 		}
 		return 0;
+	}
+
+	/**
+	 * Add a property's/parameter's SQL type to this Wrapper
+	 * @param columnName the name of the parameter
+	 * @param sqlType the SQL type of the parameter
+	 * @return a reference of this Map so it's possible to chain several calls together
+	 */
+	public SqlParameterBeanWrapper addType(String columnName, int sqlType) {
+		sqlTypes.put(columnName, new Integer(sqlType));
+		return this;
 	}
 
 	public void setValues(Map valueMap) {
@@ -75,11 +105,7 @@ public class SqlParameterBeanWrapper extends BeanWrapperImpl implements SqlNamed
 		return values;
 	}
 
-	public void setSqlTypes(SqlNamedParameterTypes sqlTypesHolder) {
-		this.sqlTypes.putAll(sqlTypesHolder.getTypes());
-	}
-
-	public void setSqlTypes(Map sqlTypes) {
+	public void setTypes(Map sqlTypes) {
 		this.sqlTypes.putAll(sqlTypes);
 	}
 

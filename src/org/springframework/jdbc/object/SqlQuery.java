@@ -24,6 +24,8 @@ import javax.sql.DataSource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SqlNamedParameterMap;
+import org.springframework.jdbc.support.NamedParameterUtils;
 
 /**
  * Reusable object to represent a SQL query. Like all RdbsOperation
@@ -38,9 +40,10 @@ import org.springframework.jdbc.core.RowMapper;
  * analogous to the different convenient JDO query execute methods. Subclasses
  * can either rely on one of these inherited methods, or can add their own
  * custom execution methods, with meaningful names and typed parameters. Each
- * custom query method will invoke one of this class's untype query methods.
+ * custom query method will invoke one of this class's untyped query methods.
  *
  * @author Rod Johnson
+ * @author Thomas Risberg
  * @author Jean-Pierre Pawlak
  */
 public abstract class SqlQuery extends SqlOperation {
@@ -98,7 +101,7 @@ public abstract class SqlQuery extends SqlOperation {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Central execution method. All execution goes through this method.
+	 * Central execution method. All un-named parameter execution goes through this method.
 	 * @param parameters parameters, similar to JDO query parameters.
 	 * Primitive parameters must be represented by their Object wrapper type.
 	 * The ordering of parameters is significant.
@@ -115,6 +118,25 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 	/**
+	 * Central execution method. All named parameter execution goes through this method.
+	 * @param parameterMap parameters associated with the name specified while declaring
+	 * the SqlParameters.  Primitive parameters must be represented by their Object wrapper
+	 * type. The ordering of parameters is not significant since they are supplied in a
+	 * SqlParameterMap which is an implementation of the Map interface.
+	 * @param context contextual information passed to the callback mapRow method.
+	 * This parameter doesn't rely on the JDBC request itself, but can be useful
+	 * for creating the objects of the result list.
+	 * @return a List of objects, one per row of the ResultSet. Normally all these
+	 * will be of the same class, although it is possible to use different types.
+	 */
+	public List execute(final SqlNamedParameterMap parameterMap, Map context) throws DataAccessException {
+		validateParameters(parameterMap);
+		Object[] parameters = NamedParameterUtils.convertArgMapToArray(getSql(), parameterMap);
+		RowMapper rowMapper = newRowMapper(parameters, context);
+		return getJdbcTemplate().query(newPreparedStatementCreator(parameters), rowMapper);
+	}
+
+	/**
 	 * Convenient method to execute without context.
 	 * @param parameters parameters, as to JDO queries. Primitive parameters must
 	 * be represented by their Object wrapper type. The ordering of parameters is
@@ -122,6 +144,17 @@ public abstract class SqlQuery extends SqlOperation {
 	 */
 	public List execute(final Object[] parameters) throws DataAccessException {
 		return execute(parameters, null);
+	}
+
+	/**
+	 * Convenient method to execute without context.
+	 * @param parameterMap parameters associated with the name specified while declaring
+	 * the SqlParameters.  Primitive parameters must be represented by their Object wrapper
+	 * type. The ordering of parameters is not significant since they are supplied in a
+	 * SqlParameterMap which is an implementation of the Map interface.
+	 */
+	public List execute(final SqlNamedParameterMap parameterMap) throws DataAccessException {
+		return execute(parameterMap, null);
 	}
 
 	/**

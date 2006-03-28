@@ -30,9 +30,10 @@ import java.util.Map;
  *
  * @author Thomas Risberg
  * @since 2.0
- * @see org.springframework.jdbc.object.SqlCommand
+ * @see org.springframework.jdbc.core.NamedParameterJdbcOperations
  * @see org.springframework.jdbc.core.SqlNamedParameterWrapper
  * @see org.springframework.jdbc.core.SqlParameterBeanWrapper
+ * //ToDo: @see org.springframework.jdbc.object.SqlCommand
  */
 public interface SqlNamedParameterHolder {
 
