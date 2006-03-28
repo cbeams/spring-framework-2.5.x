@@ -91,12 +91,17 @@ public class SqlInsertBuilder {
         return this.sqlTypes;
     }
 
+    public void setNamedParameterHolder(SqlNamedParameterHolder namedParameterHolder) {
+        this.dataValues.putAll(namedParameterHolder.getValues());
+        this.sqlTypes.putAll(namedParameterHolder.getTypes());
+    }
+
     public SqlNamedParameterHolder getNamedParameterHolder() {
-            return new SqlNamedParameterWrapper(this.dataValues, this.sqlTypes);
+        return new SqlNamedParameterWrapper(this.dataValues, this.sqlTypes);
     }
 
     public SqlNamedParameterTypes getNamedParameterTypes() {
-            return new SqlNamedParameterTypes(this.sqlTypes);
+        return new SqlNamedParameterTypes(this.sqlTypes);
     }
 
 }
