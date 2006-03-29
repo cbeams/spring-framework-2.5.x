@@ -350,7 +350,6 @@ public class MultiActionController extends AbstractController implements LastMod
 			// method shouldn't be called unless a previous invocation of this class
 			// has generated content. Do nothing, that's OK: We'll return default.
 		}
-		// the default if we didn't find a method
 		return -1L;
 	}
 
@@ -359,6 +358,12 @@ public class MultiActionController extends AbstractController implements LastMod
 	// Implementation of AbstractController
 	//---------------------------------------------------------------------
 
+	/**
+	 * Determine a handler method and invoke it.
+	 * @see MethodNameResolver#getHandlerMethodName
+	 * @see #invokeNamedMethod
+	 * @see #handleNoSuchRequestHandlingMethod
+	 */
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 	    throws Exception {
 		try {
@@ -366,12 +371,30 @@ public class MultiActionController extends AbstractController implements LastMod
 			return invokeNamedMethod(methodName, request, response);
 		}
 		catch (NoSuchRequestHandlingMethodException ex) {
-			pageNotFoundLogger.warn(ex.getMessage());
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return null;
+			return handleNoSuchRequestHandlingMethod(ex, request, response);
 		}
 	}
-	
+
+	/**
+	 * Handle the case where no request handler method was found.
+	 * <p>The default implementation logs a warning and sends an HTTP 404 error.
+	 * Alternatively, a fallback view could be chosen, or the
+	 * NoSuchRequestHandlingMethodException could be rethrown as-is.
+	 * @param ex the NoSuchRequestHandlingMethodException to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @return a ModelAndView to render, or <code>null</code> if handled directly
+	 * @throws Exception an Exception that should be thrown as result of the servlet request
+	 */
+	protected ModelAndView handleNoSuchRequestHandlingMethod(
+			NoSuchRequestHandlingMethodException ex, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
+		pageNotFoundLogger.warn(ex.getMessage());
+		response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		return null;
+	}
+
 	/**
 	 * Invokes the named method.
 	 * <p>Uses a custom exception handler if possible; otherwise, throw an
@@ -618,7 +641,7 @@ public class MultiActionController extends AbstractController implements LastMod
 			if (targetEx instanceof Error) {
 				throw (Error) targetEx;
 			}
-			// shouldn't happen
+			// Should never happen!
 			throw new NestedServletException("Unknown Throwable type encountered", targetEx);
 		}
 	}
