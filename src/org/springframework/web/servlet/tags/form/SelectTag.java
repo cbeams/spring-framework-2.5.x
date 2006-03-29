@@ -16,24 +16,26 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.util.Collection;
+import java.util.Map;
+
+import javax.servlet.jsp.JspException;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
-
-import javax.servlet.jsp.JspException;
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * Databinding-aware JSP tag that renders an HTML '<code>select</code>' element.
  * Inner '<code>option</code>' tags can be rendered using one of three approaches
  * supported by the {@link OptionWriter}.
- * <p/>Also supports the use of nested {@link OptionTag OptionTags}.
+ *
+ * <p>Also supports the use of nested {@link OptionTag OptionTags}.
  *
  * @author Rob Harrop
+ * @since 2.0
  * @see OptionTag
  * @see OptionWriter
- * @since 2.0
  */
 public class SelectTag extends AbstractHtmlInputElementTag {
 
@@ -224,13 +226,14 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 */
 	private boolean forceMultiple() throws JspException {
 		BindStatus bindStatus = getBindStatus();
-		if (typeRequiresMultiple(bindStatus.getValue().getClass())) {
+		Object statusValue = bindStatus.getValue();
+		if (statusValue != null && typeRequiresMultiple(statusValue.getClass())) {
 			return true;
 		}
 		else if (bindStatus.getEditor() != null) {
 			Object editorValue = bindStatus.getEditor().getValue();
-			if (editorValue != null) {
-				return typeRequiresMultiple(editorValue.getClass());
+			if (editorValue != null && typeRequiresMultiple(editorValue.getClass())) {
+				return true;
 			}
 		}
 		return false;
@@ -263,4 +266,5 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 		this.tagWriter = null;
 		this.pageContext.removeAttribute(LIST_VALUE_PAGE_ATTRIBUTE);
 	}
+
 }

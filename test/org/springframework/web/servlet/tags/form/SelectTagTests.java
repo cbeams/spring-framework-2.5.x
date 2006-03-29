@@ -16,21 +16,24 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
-import org.springframework.beans.TestBean;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.web.servlet.support.BindStatus;
-
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.Tag;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.Tag;
+
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.Attribute;
+import org.dom4j.io.SAXReader;
+
+import org.springframework.beans.TestBean;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.servlet.support.BindStatus;
 
 /**
  * @author Rob Harrop
@@ -53,25 +56,29 @@ public class SelectTagTests extends AbstractFormTagTests {
 	public void testWithList() throws Exception {
 		this.tag.setPath("country");
 		this.tag.setItems(Country.getCountries());
-		assertList();
+		assertList(true);
 	}
 
 	public void testWithResolvedList() throws Exception {
 		this.tag.setPath("country");
 		this.tag.setItems("${countries}");
-		assertList();
+		assertList(true);
 	}
 
-	private void assertList() throws JspException, DocumentException {
-		this.tag.setItemValue("isoCode");
-		this.tag.setItemLabel("name");
-		this.tag.setSize("5");
-		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+	public void testWithOtherValue() throws Exception {
+		TestBean tb = (TestBean) getPageContext().getRequest().getAttribute(COMMAND_NAME);
+		tb.setCountry("AT");
+		this.tag.setPath("country");
+		this.tag.setItems(Country.getCountries());
+		assertList(false);
+	}
 
-		String output = getWriter().toString();
-		validateOutput(output);
-		assertContainsAttribute(output, "size", "5");
+	public void testWithNullValue() throws Exception {
+		TestBean tb = (TestBean) getPageContext().getRequest().getAttribute(COMMAND_NAME);
+		tb.setCountry(null);
+		this.tag.setPath("country");
+		this.tag.setItems(Country.getCountries());
+		assertList(false);
 	}
 
 	public void testWithListAndNoLabel() throws Exception {
@@ -80,8 +87,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItemValue("isoCode");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
-
-		validateOutput(getWriter().toString());
+		validateOutput(getWriter().toString(), true);
 	}
 
 	public void testWithMap() throws Exception {
@@ -89,8 +95,6 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItems("${sexes}");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
-		System.out.println(getWriter());
-
 	}
 
 	public void testWithInvalidList() throws Exception {
@@ -244,7 +248,19 @@ public class SelectTagTests extends AbstractFormTagTests {
 		request.setAttribute("names", getNames());
 	}
 
-	private void validateOutput(String output) throws DocumentException {
+	private void assertList(boolean selected) throws JspException, DocumentException {
+		this.tag.setItemValue("isoCode");
+		this.tag.setItemLabel("name");
+		this.tag.setSize("5");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		validateOutput(output, selected);
+		assertContainsAttribute(output, "size", "5");
+	}
+
+	private void validateOutput(String output, boolean selected) throws DocumentException {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
@@ -255,7 +271,13 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals("Incorrect number of children", 4, children.size());
 
 		Element e = (Element) rootElement.selectSingleNode("option[@value = 'UK']");
-		assertEquals("UK node not selected", "true", e.attribute("selected").getValue());
+		Attribute selectedAttr = e.attribute("selected");
+		if (selected) {
+			assertTrue(selectedAttr != null && "true".equals(selectedAttr.getValue()));
+		}
+		else {
+			assertNull(selectedAttr);
+		}
 	}
 
 	protected TestBean createTestBean() {
