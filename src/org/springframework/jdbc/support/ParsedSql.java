@@ -31,6 +31,7 @@ public class ParsedSql {
 	private String sql;
 	private int parameterCount;
 	private int namedParameterCount;
+	private int unNamedParameterCount;
 
 
 	/**
@@ -122,10 +123,26 @@ public class ParsedSql {
 
 	/**
 	 * Sets the count of all of the named parameters to the SQL statement.
-	 * @param namedParameterCount the count of all of the (named) parameters to the SQL statement
+	 * @param namedParameterCount the count of all of the named parameters to the SQL statement
 	 */
 	public void setNamedParameterCount(int namedParameterCount) {
 		this.namedParameterCount = namedParameterCount;
+	}
+
+	/**
+	 * Gets the count of all of the named parameters to the SQL statement.
+	 * @return the count of all of the unnamed parameters to the SQL statement
+	 */
+	public int getUnNamedParameterCount() {
+		return unNamedParameterCount;
+	}
+
+	/**
+	 * Sets the count of all of the named parameters to the SQL statement.
+	 * @param unNamedParameterCount the count of all of the unnamed parameters to the SQL statement
+	 */
+	public void setUnNamedParameterCount(int unNamedParameterCount) {
+		this.unNamedParameterCount = unNamedParameterCount;
 	}
 
 }

@@ -111,6 +111,7 @@ public class NamedParameterUtils {
 		char currentQuote = '-';
 		int parameterCount = 0;
 		int namedParameterCount = 0;
+		int unNamedParameterCount = 0;
 
 		int i = 0;
 		while (i < statement.length) {
@@ -148,13 +149,16 @@ public class NamedParameterUtils {
 					}
 					else {
 						newSql.append((char)statement[i]);
-						if (statement[i] == '?')
+						if (statement[i] == '?') {
+							unNamedParameterCount++;
 							parameterCount++;
+						}
 					}
 				}
 			}
 			i++;
 		}
+		parsedSql.setUnNamedParameterCount(unNamedParameterCount);
 		parsedSql.setNamedParameterCount(namedParameterCount);
 		parsedSql.setParameterCount(parameterCount);
 		parsedSql.setNewSql(newSql.toString());
@@ -268,6 +272,11 @@ public class NamedParameterUtils {
 	 */
 	public static Object[] convertArgMapToArray(Map parameters, ParsedSql parsedSql) {
 		Object[] args = new Object[parsedSql.getParameterCount()];
+		if (parsedSql.getNamedParameterCount() > 0 && parsedSql.getUnNamedParameterCount() > 0) {
+		    throw new InvalidDataAccessApiUsageException("You can't mix named and traditional ? placeholders. You have " +
+				parsedSql.getNamedParameterCount() + " named parameter(s) and " + parsedSql.getUnNamedParameterCount() +
+				" traditonal placeholder(s) in [" + parsedSql.getSql() + "]");
+		}
 		if (parsedSql.getNamedParameterCount() != parameters.size()) {
 			if (parsedSql.getNamedParameterCount() > parameters.size()) {
     			throw new InvalidDataAccessApiUsageException("Wrong number of parameters/values supplied. You have " +

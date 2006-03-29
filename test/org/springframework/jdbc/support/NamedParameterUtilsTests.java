@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import junit.framework.TestCase;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 /**
  * @author Rod Johnson
@@ -88,6 +89,13 @@ public class NamedParameterUtilsTests extends TestCase {
         assertTrue(5 == NamedParameterUtils.convertArgMapToArray("xxx :a :b :c xx :a :b", argMap).length);
         assertTrue(5 == NamedParameterUtils.convertArgMapToArray("xxx :a :a :a xx :a :a", argMap).length);
         assertEquals("b", NamedParameterUtils.convertArgMapToArray("xxx :a :b :c xx :a :b", argMap)[4]);
+		try {
+			NamedParameterUtils.convertArgMapToArray("xxx :a :b ?", argMap);
+			fail("mixed named parameters and ? placeholders not detected");
+		}
+		catch (InvalidDataAccessApiUsageException ex) {
+			// ok - it works
+		}
     }
 
     public void testConvertTypeMapToArray() {
