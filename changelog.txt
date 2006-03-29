@@ -31,6 +31,8 @@ Package org.springframework.core
 Package org.springframework.jdbc
 * JdbcTemplate's "queryForString"/"queryForInt"/etc methods correctly detect incorrect result sizes even for null values
 * refined NativeJdbcExtractorAdapter to retry with DatabaseMetaData Connection if extraction failed (for Hibernate 3.1)
+* added NamedParameterJdbcTemplate which provides named parameters support for query and update functionality
+* added named parameters support for SqlQuery, SqlUpdate hierarchy of classes
 
 Package org.springframework.jms
 * fixed ServerSessionMessageListenerContainer(102) to use "createSession(Connection)" method to avoid JMS 1.1 dependency
