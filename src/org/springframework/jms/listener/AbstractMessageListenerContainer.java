@@ -32,19 +32,78 @@ import org.springframework.jms.support.destination.DynamicDestinationResolver;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
 
 /**
- * Abstract base class for message listener containers.
- * Cam either host a standard JMS MessageListener or a
- * Spring SessionAwareMessageListener.
+ * Abstract base class for message listener containers. Can either host
+ * a standard JMS MessageListener or a Spring SessionAwareMessageListener.
  *
- * <p>Holds a single JMS Connection that all listeners are
- * supposed to be registered on. The actual registration
- * process is up to concrete subclasses.
+ * <p>Holds a single JMS Connection that all listeners are supposed to be
+ * registered on. The actual registration process is up to concrete subclasses.
+ *
+ * <p><b>NOTE:</b> The default behavior of this message listener container
+ * is to never propagate an exception thrown by a message listener up to
+ * the JMS provider. Instead, it will log any such exception at error level.
+ * From the JMS provider's perspective, no such listener will ever fail.
+ *
+ * <p>The listener container offers the following message acknowledgment options:
+ * <ul>
+ * <li>"sessionAcknowledgeMode" set to "AUTO_ACKNOWLEDGE" (default):
+ * Automatic message acknowledgment <i>before</i> listener execution;
+ * no redelivery in case of exception thrown.
+ * <li>"sessionAcknowledgeMode" set to "CLIENT_ACKNOWLEDGE":
+ * Automatic message acknowledgment <i>after</i> successful listener execution;
+ * no redelivery in case of exception thrown.
+ * <li>"sessionAcknowledgeMode" set to "DUPS_OK_ACKNOWLEDGE":
+ * <i>Lazy</i> message acknowledgment during or after listener execution;
+ * <i>potential redelivery</i> in case of exception thrown.
+ * <li>"sessionTransacted" set to "true":
+ * Transactional acknowledgment after successful listener execution;
+ * <i>guaranteed redelivery</i> in case of exception thrown.
+ * </ul>
+ * The exact behavior might vary according to the concrete listener container
+ * and JMS provider used.
+ *
+ * <p>Note that there is a corner case when using "sessionTransacted",
+ * where the listener might have returned successfully but the server
+ * died before acknowledging the message. As a consequence, a message
+ * <i>might get redelivered even after successful processing</i> -
+ * potentially leading to duplicate processing of the message.
+ * This violates "exactly-once" semantics, at least potentially.
+ *
+ * <p>There are two solutions to the duplicate processing problem:
+ * <ul>
+ * <li>Either add <i>duplicate message detection</i> to your listener, in the
+ * form of a business entity existence check or a protocol table check. This
+ * usually just needs to be done in case of the JMSRedelivered flag being
+ * set on the incoming message (else just process straightforwardly).
+ * <li>Or wrap the <i>entire processing with an XA transaction</i>, covering the
+ * reception of the message as well as the execution of the message listener.
+ * This is only supported by DefaultMessageListenerContainer, through specifying
+ * a "transactionManager" (typically a JtaTransactionManager, with corresponding
+ * XA-aware JMS ConnectionFactory passed in as "connectionFactory").
+ * </ul>
+ * Note that XA transaction coordination adds significant runtime overhead,
+ * so it might be feasible to avoid it unless absolutely necessary.
+ *
+ * <p><b>Recommendations:</b>
+ * <ul>
+ * <li>The general recommendation is to set "sessionTransacted" to "true",
+ * typically in combination with local database transactions triggered by the
+ * listener implementation, through Spring's standard transaction facilities.
+ * This will work nicely in Tomcat or in a standalone environment, often
+ * combined with custom duplicate message detection (if it is unacceptable
+ * to ever process the same message twice).
+ * <li>Alternatively, specify a JtaTransactionManager as "transactionManager"
+ * for a full XA-aware JMS provider - typically when running on a J2EE server,
+ * but also for other environments with a JTA transaction manager present.
+ * This will give full "exactly-once" guarantees without custom duplicate
+ * message checks, at the price of additional runtime processing overhead.
+ * </ul>
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see #setMessageListener
  * @see javax.jms.MessageListener
  * @see SessionAwareMessageListener
+ * @see #handleListenerException
  * @see DefaultMessageListenerContainer
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
@@ -504,9 +563,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @throws org.springframework.jms.JmsException in case of a rollback error
 	 */
 	protected void rollbackOnExceptionIfNecessary(Session session, Throwable ex) throws JmsException {
-		// Transacted session created by this container -> rollback.
 		try {
 			if (session.getTransacted() && isSessionTransacted()) {
+					// Transacted session created by this container -> rollback.
 				if (logger.isDebugEnabled()) {
 					logger.debug("Initiating transaction rollback on application exception", ex);
 				}

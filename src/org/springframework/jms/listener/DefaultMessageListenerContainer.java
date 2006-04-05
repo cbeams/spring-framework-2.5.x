@@ -58,6 +58,9 @@ import org.springframework.util.ClassUtils;
  * in combination with a JTA-aware ConnectionFactory that this message listener
  * container fetches its Connections from.
  *
+ * <p>See the {@link AbstractMessageListenerContainer AbstractMessageListenerContainer}
+ * javadoc for details on acknowledge modes and transaction options.
+ *
  * <p>This class requires a JMS 1.1+ provider, because it builds on the
  * domain-independent API. <b>Use the {@link DefaultMessageListenerContainer102
  * DefaultMessageListenerContainer102} subclass for JMS 1.0.2 providers.</b>
@@ -67,6 +70,8 @@ import org.springframework.util.ClassUtils;
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see #setTransactionManager
+ * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see javax.jms.MessageConsumer#receive(long)
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer

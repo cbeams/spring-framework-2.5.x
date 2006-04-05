@@ -41,6 +41,9 @@ import org.springframework.jms.support.JmsUtils;
  * advantage is its low level of complexity and the minimum requirements
  * on the JMS provider: Not even the ServerSessionPool facility is required.
  *
+ * <p>See the {@link AbstractMessageListenerContainer AbstractMessageListenerContainer}
+ * javadoc for details on acknowledge modes and transaction options.
+ *
  * <p>For a different style of MessageListener handling, through looped
  * <code>MessageConsumer.receive()</code> calls that also allow for
  * transactional reception of messages (registering them with XA transactions),

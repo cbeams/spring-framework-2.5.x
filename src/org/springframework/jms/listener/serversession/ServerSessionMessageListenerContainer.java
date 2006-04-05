@@ -42,6 +42,9 @@ import org.springframework.jms.support.JmsUtils;
  * Consider specifying a CommonsPoolServerSessionFactory to reuse JMS Sessions
  * and/or to limit the number of concurrent ServerSession executions
  *
+ * <p>See the {@link AbstractMessageListenerContainer AbstractMessageListenerContainer}
+ * javadoc for details on acknowledge modes and transaction options.
+ *
  * <p>For a simpler message listener container, in particular if using
  * a JMS provider without ServerSessionPool support, consider using
  * SimpleMessageListenerContainer.
