@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -492,6 +492,13 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}, false);
 	}
 
+	/**
+	 * Send the given JMS message.
+	 * @param session the JMS Session to operate on
+	 * @param destination the JMS Destination to send to
+	 * @param messageCreator callback to create a JMS Message
+	 * @throws JMSException if thrown by JMS API methods
+	 */
 	protected void doSend(Session session, Destination destination, MessageCreator messageCreator)
 			throws JMSException {
 
@@ -514,6 +521,12 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}
 	}
 
+	/**
+	 * Actually send the given JMS message.
+	 * @param producer the JMS MessageProducer to send with
+	 * @param message the JMS Message to send
+	 * @throws JMSException if thrown by JMS API methods
+	 */
 	protected void doSend(MessageProducer producer, Message message) throws JMSException {
 		if (isExplicitQosEnabled()) {
 			producer.send(message, getDeliveryMode(), getPriority(), getTimeToLive());
@@ -651,12 +664,26 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}, true);
 	}
 
+	/**
+	 * Receive a JMS message.
+	 * @param session the JMS Session to operate on
+	 * @param destination the JMS Destination to receive from
+	 * @param messageSelector the message selector for this consumer (can be <code>null</code>)
+	 * @throws JMSException if thrown by JMS API methods
+	 */
 	protected Message doReceive(Session session, Destination destination, String messageSelector)
 			throws JMSException {
 
 		return doReceive(session, createConsumer(session, destination, messageSelector));
 	}
 
+	/**
+	 * Actually receive a JMS message.
+	 * @param session the JMS Session to operate on
+	 * @param consumer the JMS MessageConsumer to send with
+	 * @return the JMS Message received, or <code>null</code> if none
+	 * @throws JMSException if thrown by JMS API methods
+	 */
 	protected Message doReceive(Session session, MessageConsumer consumer) throws JMSException {
 		try {
 			// Use transaction timeout (if available).
@@ -733,6 +760,11 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		return doConvertFromMessage(receiveSelected(destinationName, messageSelector));
 	}
 
+	/**
+	 * Extract the content from the given JMS message.
+	 * @param message the JMS Message to convert (can be <code>null</code>)
+	 * @return the content of the message, or <code>null</code> if none
+	 */
 	protected Object doConvertFromMessage(Message message) {
 		if (message != null) {
 			try {
