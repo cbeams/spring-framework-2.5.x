@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,13 @@ package org.springframework.aop.target.scope;
  * flag is set to true, the proxy will have been bound to the thread
  * before the TargetSource and ScopeMap are invoked.
  *
- * <p>Can be implemented over the top of a session API
- * such as the HttpSession interface.
+ * <p>Can be implemented on top of a session API such as the
+ * Servlet API's HttpSession interface.
  *
  * @author Rod Johnson
  * @since 2.0
  * @see org.springframework.aop.target.scope.ScopedTargetSource
+ * @see javax.servlet.http.HttpSession
  */
 public interface ScopeMap {
 
