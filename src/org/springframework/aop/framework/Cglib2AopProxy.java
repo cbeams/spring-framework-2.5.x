@@ -154,7 +154,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 					(targetClass != null ? " for [" + targetClass.getName() + "]" : ""));
 		}
 
-		Enhancer enhancer = new Enhancer();
+		Enhancer enhancer = createEnhancer();
 		try {
 			Class rootClass = this.advised.getTargetSource().getTargetClass();
 			Class proxySuperClass = (AopUtils.isCglibProxyClass(rootClass)) ? rootClass.getSuperclass() : rootClass;
@@ -213,6 +213,14 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			// TargetSource.getTarget failed
 			throw new AspectException("Unexpected AOP exception", ex);
 		}
+	}
+
+	/**
+	 * Creates the CGLIB {@link Enhancer}. Subclasses may wish to override this to return a custom
+	 * {@link Enhancer} implementation.
+	 */
+	protected Enhancer createEnhancer() {
+		return new Enhancer();
 	}
 
 	/**
