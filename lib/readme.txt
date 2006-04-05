@@ -97,7 +97,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's Hibernate 2.1 support
 
 * hibernate/hibernate3.jar
-- Hibernate 3.1.2 (http://www.hibernate.org)
+- Hibernate 3.1.3 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate 3.x support
 
