@@ -79,7 +79,7 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Invoke the specified {@link Method} against the supplied target object with no arguments
-	 * The target object can be null when invoking a static {@link Method}.
+	 * The target object can be <code>null</code> when invoking a static {@link Method}.
 	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
 	 */
 	public static Object invokeMethod(Method method, Object target) {
