@@ -58,6 +58,10 @@ import org.springframework.util.ClassUtils;
  * in combination with a JTA-aware ConnectionFactory that this message listener
  * container fetches its Connections from.
  *
+ * <p>This class requires a JMS 1.1+ provider, because it builds on the
+ * domain-independent API. <b>Use the {@link DefaultMessageListenerContainer102
+ * DefaultMessageListenerContainer102} subclass for JMS 1.0.2 providers.</b>
+ *
  * <p>For dynamic adaptation of the active number of Sessions, consider using
  * ServerSessionMessageListenerContainer.
  *
@@ -66,6 +70,7 @@ import org.springframework.util.ClassUtils;
  * @see javax.jms.MessageConsumer#receive(long)
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
+ * @see DefaultMessageListenerContainer102
  */
 public class DefaultMessageListenerContainer extends AbstractMessageListenerContainer {
 
@@ -167,7 +172,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * @see #setTransactionManager
 	 */
 	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
-		this.transactionTemplate = transactionTemplate;
+		this.transactionTemplate = (transactionTemplate != null ? transactionTemplate : new TransactionTemplate());
 	}
 
 	/**

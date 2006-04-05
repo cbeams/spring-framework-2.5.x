@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,11 +47,16 @@ import org.springframework.jms.support.JmsUtils;
  * see DefaultMessageListenerContainer. For dynamic adaptation of the active
  * number of Sessions, consider using ServerSessionMessageListenerContainer.
  *
+ * <p>This class requires a JMS 1.1+ provider, because it builds on the
+ * domain-independent API. <b>Use the {@link SimpleMessageListenerContainer102
+ * SimpleMessageListenerContainer102} subclass for JMS 1.0.2 providers.</b>
+ *
  * @author Juergen Hoeller
  * @since 2.0
  * @see javax.jms.MessageConsumer#setMessageListener
  * @see DefaultMessageListenerContainer
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
+ * @see SimpleMessageListenerContainer102
  */
 public class SimpleMessageListenerContainer extends AbstractMessageListenerContainer {
 

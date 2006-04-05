@@ -46,9 +46,14 @@ import org.springframework.jms.support.JmsUtils;
  * a JMS provider without ServerSessionPool support, consider using
  * SimpleMessageListenerContainer.
  *
+ * <p>This class requires a JMS 1.1+ provider, because it builds on the
+ * domain-independent API. <b>Use the {@link ServerSessionMessageListenerContainer102
+ * ServerSessionMessageListenerContainer102} subclass for JMS 1.0.2 providers.</b>
+ *
  * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.jms.listener.SimpleMessageListenerContainer
+ * @see ServerSessionMessageListenerContainer102
  */
 public class ServerSessionMessageListenerContainer extends AbstractMessageListenerContainer
 		implements ListenerSessionManager {
