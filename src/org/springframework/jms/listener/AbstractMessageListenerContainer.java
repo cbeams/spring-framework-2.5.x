@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.jms.listener;
 
 import javax.jms.Connection;
 import javax.jms.Destination;
+import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -56,6 +57,8 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	private String messageSelector;
 
 	private Object messageListener;
+
+	private ExceptionListener exceptionListener;
 
 	private boolean exposeListenerSession = true;
 
@@ -163,6 +166,22 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 */
 	protected Object getMessageListener() {
 		return messageListener;
+	}
+
+	/**
+	 * Set the JMS ExceptionListener to notify in case of a JMSException
+	 * thrown by the registered message listener.
+	 */
+	public void setExceptionListener(ExceptionListener exceptionListener) {
+		this.exceptionListener = exceptionListener;
+	}
+
+	/**
+	 * Return the JMS ExceptionListener to notify in case of a JMSException
+	 * thrown by the registered message listener, if any.
+	 */
+	protected ExceptionListener getExceptionListener() {
+		return exceptionListener;
 	}
 
 	/**
@@ -334,18 +353,17 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * committing or rolling back the transaction afterwards (if necessary).
 	 * @param session the JMS Session to work on
 	 * @param message the received JMS Message
-	 * @throws org.springframework.jms.JmsException if listener execution failed
 	 * @see #invokeListener(javax.jms.Session, javax.jms.Message)
 	 * @see #commitIfNecessary
 	 * @see #rollbackOnExceptionIfNecessary
-	 * @see #convertJmsAccessException
+	 * @see #handleListenerException
 	 */
-	protected void executeListener(Session session, Message message) throws JmsException {
+	protected void executeListener(Session session, Message message) {
 		try {
 			doExecuteListener(session, message);
 		}
-		catch (JMSException ex) {
-			convertJmsAccessException(ex);
+		catch (Throwable ex) {
+			handleListenerException(ex);
 		}
 	}
 
@@ -365,6 +383,10 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 			invokeListener(session, message);
 		}
 		catch (JMSException ex) {
+			ExceptionListener exceptionListener = getExceptionListener();
+			if (exceptionListener != null) {
+				exceptionListener.onException(ex);
+			}
 			rollbackOnExceptionIfNecessary(session, ex);
 			throw ex;
 		}
@@ -381,7 +403,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	/**
 	 * Invoke the specified listener: either as standard JMS MessageListener
-	 * or as Spring SessionAwareMessageListener
+	 * or (preferably) as Spring SessionAwareMessageListener.
 	 * @param session the JMS Session to work on
 	 * @param message the received JMS Message
 	 * @throws JMSException if thrown by JMS API methods
@@ -389,11 +411,11 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @see #invokeListener(javax.jms.MessageListener, javax.jms.Message)
 	 */
 	protected void invokeListener(Session session, Message message) throws JMSException {
-		if (getMessageListener() instanceof MessageListener) {
-			((MessageListener) getMessageListener()).onMessage(message);
-		}
-		else if (getMessageListener() instanceof SessionAwareMessageListener) {
+		if (getMessageListener() instanceof SessionAwareMessageListener) {
 			invokeListener((SessionAwareMessageListener) getMessageListener(), session, message);
+		}
+		else if (getMessageListener() instanceof MessageListener) {
+			((MessageListener) getMessageListener()).onMessage(message);
 		}
 		else {
 			throw new IllegalArgumentException("Only MessageListener and SessionAwareMessageListener supported");
@@ -503,6 +525,15 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 			logger.error("Application exception overridden by rollback error", ex);
 			throw err;
 		}
+	}
+
+	/**
+	 * Handle the given exception that arose during listener execution.
+	 * The default implementation logs the exception at error level.
+	 * @param ex the exception to handle
+	 */
+	protected void handleListenerException(Throwable ex) {
+		logger.error("Execution of JMS message listener failed", ex);
 	}
 
 

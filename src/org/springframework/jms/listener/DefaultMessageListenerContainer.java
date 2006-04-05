@@ -274,8 +274,11 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 						doExecuteListener(session, consumer);
 					}
 					catch (Throwable ex) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Rolling back transaction because of listener exception thrown: " + ex);
+						}
 						status.setRollbackOnly();
-						logger.error("Execution of JMS message listener failed - rolling back transaction", ex);
+						handleListenerException(ex);
 					}
 				}
 			});
@@ -284,8 +287,8 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 			try {
 				doExecuteListener(session, consumer);
 			}
-			catch (JMSException ex) {
-				logger.error("Execution of JMS message listener failed", ex);
+			catch (Throwable ex) {
+				handleListenerException(ex);
 			}
 		}
 	}
