@@ -19,8 +19,10 @@ package org.springframework.web.servlet.tags.form;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.util.TagUtils;
 
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.Tag;
 import java.beans.PropertyEditor;
 
 /**
@@ -95,6 +97,7 @@ public class OptionTag extends AbstractFormTag {
 	 * with the value of <code>true</code>.
 	 */
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
+		assertUnderSelectTag();
 		tagWriter.startTag("option");
 
 		Object resolvedValue = evaluate("value", getValue());
@@ -108,6 +111,12 @@ public class OptionTag extends AbstractFormTag {
 		tagWriter.endTag();
 
 		return EVAL_PAGE;
+	}
+
+	private void assertUnderSelectTag() {
+		if (!TagUtils.hasAncestorOfType(this, SelectTag.class)) {
+			throw new IllegalStateException("The 'option' tag can only be used inside a valid 'select' tag.");
+		}
 	}
 
 	private boolean isSelected(Object resolvedValue) {
@@ -127,10 +136,6 @@ public class OptionTag extends AbstractFormTag {
 	}
 
 	private BindStatus getBindStatus() {
-		BindStatus bindStatus = (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
-		if (bindStatus == null) {
-			throw new IllegalStateException("The 'option' tag can only be used inside a valid 'select' tag.");
-		}
-		return bindStatus;
+	 return  (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
 	}
 }

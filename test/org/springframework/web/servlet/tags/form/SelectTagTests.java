@@ -142,6 +142,36 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertStringArray();
 	}
 
+	public void testWithIntegerArray() throws Exception {
+		this.tag.setPath("someIntegerArray");
+		Integer[] array = new Integer[50];
+		for (int i = 0; i < array.length; i++) {
+			array[i] = new Integer(i);
+		}
+		this.tag.setItems(array);
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertTrue(output.startsWith("<select "));
+		assertTrue(output.endsWith("</select>"));
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		assertEquals("select", rootElement.getName());
+		assertEquals("someIntegerArray", rootElement.attribute("name").getValue());
+
+		List children = rootElement.elements();
+		assertEquals("Incorrect number of children", 50, children.size());
+
+		Element e = (Element) rootElement.selectSingleNode("option[@value = '12']");
+		assertEquals("'12' node not selected", "true", e.attribute("selected").getValue());
+
+		e = (Element) rootElement.selectSingleNode("option[@value = '34']");
+		assertEquals("'34' node not selected", "true", e.attribute("selected").getValue());
+	}
+
 	public void testWithMultiList() throws Exception {
 		List list = new ArrayList();
 		list.add(Country.COUNTRY_UK);
@@ -285,6 +315,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.bean.setName("Rob");
 		this.bean.setCountry("UK");
 		this.bean.setSex("M");
+		this.bean.setSomeIntegerArray(new Integer[]{new Integer(12), new Integer(34)});
 		return this.bean;
 	}
 

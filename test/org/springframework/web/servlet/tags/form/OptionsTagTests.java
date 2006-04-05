@@ -41,6 +41,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 				return new TagWriter(getWriter());
 			}
 		};
+		this.tag.setParent(new SelectTag());
 		this.tag.setPageContext(getPageContext());
 	}
 

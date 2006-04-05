@@ -43,6 +43,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 				return new TagWriter(getWriter());
 			}
 		};
+		this.tag.setParent(new SelectTag());
 		this.tag.setPageContext(getPageContext());
 	}
 
@@ -92,6 +93,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testWithoutContext() throws Exception {
+		this.tag.setParent(null);
 		this.tag.setValue("foo");
 		this.tag.setLabel("Foo");
 		try {

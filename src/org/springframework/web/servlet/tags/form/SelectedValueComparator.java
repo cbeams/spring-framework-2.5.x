@@ -19,6 +19,7 @@ package org.springframework.web.servlet.tags.form;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.core.enums.LabeledEnum;
 
 import java.util.Collection;
@@ -43,35 +44,53 @@ final class SelectedValueComparator {
 			return false;
 		}
 
-		if (boundValue instanceof Collection) {
-			Collection boundCollection = (Collection) boundValue;
-			if (boundCollection.contains(boundValue)) {
-				return true;
-			}
-			else {
-				return exhaustiveCollectionCompare(boundCollection, candidateValue, bindStatus.getEditor());
-			}
+		boolean selected = false;
+
+		if (boundValue.getClass().isArray()) {
+			selected = collectionCompare(CollectionUtils.arrayToList(boundValue), candidateValue, bindStatus);
+		}
+		else if (boundValue instanceof Collection) {
+			selected = collectionCompare((Collection) boundValue, candidateValue, bindStatus);
 		}
 		else if (boundValue instanceof Map) {
-			Map boundMap = (Map) boundValue;
-			if (boundMap.containsKey(boundValue)) {
-				return true;
+			selected = mapCompare((Map) boundValue, candidateValue, bindStatus);
+		}
+
+
+		if (!selected) {
+			if (ObjectUtils.nullSafeEquals(boundValue, candidateValue)) {
+				selected = true;
 			}
 			else {
-				return exhaustiveCollectionCompare(boundMap.keySet(), candidateValue, bindStatus.getEditor());
+				selected = exhaustiveCompare(boundValue, candidateValue, bindStatus.getEditor());
 			}
 		}
+
+		return selected;
+	}
+
+	private static boolean mapCompare(Map boundMap, Object candidateValue, BindStatus bindStatus) {
+		if (boundMap.containsKey(candidateValue)) {
+			return true;
+		}
 		else {
-			if (ObjectUtils.nullSafeEquals(boundValue, candidateValue)) {
-				return true;
-			}
-			else {
-				return exhaustiveCompare(boundValue, candidateValue, bindStatus.getEditor());
-			}
+			return exhaustiveCollectionCompare(boundMap.keySet(), candidateValue, bindStatus.getEditor());
+		}
+	}
+
+	private static boolean collectionCompare(Collection boundCollection, Object candidateValue, BindStatus bindStatus) {
+		if (boundCollection.contains(candidateValue)) {
+			return true;
+		}
+		else {
+			return exhaustiveCollectionCompare(boundCollection, candidateValue, bindStatus.getEditor());
 		}
 	}
 
 	private static Object getBoundValue(BindStatus bindStatus) {
+		if(bindStatus == null) {
+			return null;
+		}
 		if(bindStatus.getEditor() != null) {
 			Object editorValue = bindStatus.getEditor().getValue();
 			if(editorValue != null) {

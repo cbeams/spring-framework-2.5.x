@@ -16,7 +16,11 @@
 
 package org.springframework.web.util;
 
+import org.springframework.web.servlet.tags.form.SelectTag;
+import org.springframework.util.Assert;
+
 import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.tagext.Tag;
 
 /**
  * Utility class to transform Strings to scopes:
@@ -75,4 +79,23 @@ public abstract class TagUtils {
 		}
 	}
 
+	/**
+	 * Returns <code>true</code> if the supplied {@link Tag} has any ancestor tag of
+	 * the supplied type.
+	 */
+	public static boolean hasAncestorOfType(Tag tag, Class parentTagClass) {
+		Assert.notNull(tag, "'tag' cannot be null.");
+		Assert.notNull(parentTagClass, "'parentTagClass' cannot be null.");
+		if (!Tag.class.isAssignableFrom(parentTagClass)) {
+			throw new IllegalArgumentException("Class '" + parentTagClass.getName() + "' is not a valid Tag type.");
+		}
+		Tag ancestor = tag.getParent();
+		while (ancestor != null) {
+			if (parentTagClass.equals(ancestor.getClass())) {
+				return true;
+			}
+			ancestor = ancestor.getParent();
+		}
+		return false;
+	}
 }

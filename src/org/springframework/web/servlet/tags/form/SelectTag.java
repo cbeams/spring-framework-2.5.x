@@ -40,7 +40,7 @@ import org.springframework.web.servlet.support.BindStatus;
 public class SelectTag extends AbstractHtmlInputElementTag {
 
 	/**
-	 * The {@link javax.servlet.jsp.PageContext} attribute under which
+	 * The {@link PageContext} attribute under which
 	 * the bound value is exposed to inner {@link OptionTag OptionTags}.
 	 */
 	public static final String LIST_VALUE_PAGE_ATTRIBUTE = "org.springframework.web.servlet.tags.form.SelectTag.listValue";
