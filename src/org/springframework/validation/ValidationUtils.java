@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,8 +26,6 @@ import org.springframework.util.StringUtils;
  * and for rejecting empty fields. Empty field checks in Validator
  * implementations can become one-liners.
  *
- * <p>Used by BindUtils' <code>bindAndValidate</code> method.
- *
  * @author Juergen Hoeller
  * @author Dmitriy Kopylenko
  * @since 06.05.2003
@@ -42,19 +40,19 @@ public abstract class ValidationUtils {
 	/**
 	 * Invoke the given validator for the given object and Errors instance.
 	 * @param validator validator to be invoked, or <code>null</code> if no validation
-	 * @param object object to bind the parameters to
+	 * @param obj object to bind the parameters to
 	 * @param errors Errors instance that should store the errors
 	 */
-	public static void invokeValidator(Validator validator, Object object, Errors errors) {
+	public static void invokeValidator(Validator validator, Object obj, Errors errors) {
 		if (validator != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Invoking validator [" + validator + "]");
 			}
-			if (!validator.supports(object.getClass())) {
+			if (obj != null && !validator.supports(obj.getClass())) {
 				throw new IllegalArgumentException("Validator " + validator.getClass() +
-						" does not support " + object.getClass());
+						" does not support " + obj.getClass());
 			}
-			validator.validate(object, errors);
+			validator.validate(obj, errors);
 			if (logger.isDebugEnabled()) {
 				if (errors.hasErrors()) {
 					logger.debug("Validator found " + errors.getErrorCount() + " errors");
