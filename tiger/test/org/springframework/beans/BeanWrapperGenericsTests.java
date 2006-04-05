@@ -18,12 +18,12 @@ package org.springframework.beans;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collection;
 
 import junit.framework.TestCase;
 
@@ -103,6 +103,7 @@ public class BeanWrapperGenericsTests extends TestCase {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("longMap[4]", "5");
 		assertEquals("5", gb.getLongMap().get(new Long("4")));
+		assertEquals("5", bw.getPropertyValue("longMap[4]"));
 	}
 
 	public void testGenericMapWithCollectionValue() {

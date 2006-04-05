@@ -504,7 +504,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						value = list.get(Integer.parseInt(key));
 					}
 					else if (value instanceof Set) {
-						// apply index to Iterator in case of a Set
+						// Apply index to Iterator in case of a Set.
 						Set set = (Set) value;
 						int index = Integer.parseInt(key);
 						if (index < 0 || index >= set.size()) {
@@ -523,7 +523,17 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					}
 					else if (value instanceof Map) {
 						Map map = (Map) value;
-						value = map.get(key);
+						Class mapKeyType = null;
+						if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
+							mapKeyType = GenericsHelper.getMapKeyReturnType(pd.getReadMethod());
+						}
+						// IMPORTANT: Do not pass full property name in here - property editors
+						// must not kick in for map keys but rather only for map values.
+						Object convertedMapKey = this.propertyTypeConverter.convertIfNecessary(
+								null, null, key, mapKeyType);
+						// Pass full property name and old value in here, since we want full
+						// conversion ability for map values.
+						value = map.get(convertedMapKey);
 					}
 					else {
 						throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
