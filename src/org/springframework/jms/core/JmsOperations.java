@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public interface JmsOperations {
 	/**
 	 * Send a message to the default destination.
 	 * <p>This will only work with a default destination specified!
-	 * @param messageCreator callback to create a message.
+	 * @param messageCreator callback to create a message
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	void send(MessageCreator messageCreator) throws JmsException;
@@ -83,7 +83,7 @@ public interface JmsOperations {
 	 * Send a message to the specified destination.
 	 * The MessageCreator callback creates the message given a Session.
 	 * @param destination the destination to send this message to
-	 * @param messageCreator callback to create a message.
+	 * @param messageCreator callback to create a message
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	void send(Destination destination, MessageCreator messageCreator) throws JmsException;
@@ -93,7 +93,7 @@ public interface JmsOperations {
 	 * The MessageCreator callback creates the message given a Session.
 	 * @param destinationName the name of the destination to send this message to
 	 * (to be resolved to an actual destination by a DestinationResolver)
-	 * @param messageCreator callback to create a message.
+	 * @param messageCreator callback to create a message
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	void send(String destinationName, MessageCreator messageCreator) throws JmsException;
