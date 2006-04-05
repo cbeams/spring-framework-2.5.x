@@ -91,13 +91,12 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	 * if there is one.
 	 */
 	public String getMessage() {
-		if (getCause() == null) {
-			return super.getMessage();
+		String message = super.getMessage();
+		Throwable cause = getCause();
+		if (cause != null) {
+			return message + "; nested exception is " + cause;
 		}
-		else {
-			return super.getMessage() + "; nested exception is " + getCause().getClass().getName() +
-					": " + getCause().getMessage();
-		}
+		return message;
 	}
 
 	/**
