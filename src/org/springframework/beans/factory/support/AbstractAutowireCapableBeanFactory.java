@@ -44,6 +44,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Abstract BeanFactory superclass that implements default bean creation,
@@ -76,11 +77,11 @@ import org.springframework.util.StringUtils;
  * @see RootBeanDefinition
  * @see #findMatchingBeans(Class)
  * @see DefaultListableBeanFactory
- * @see org.springframework.beans.factory.ListableBeanFactory
- * @see org.springframework.beans.factory.support.BeanDefinitionRegistry
+ * @see ListableBeanFactory
+ * @see BeanDefinitionRegistry
  */
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
-    implements AutowireCapableBeanFactory {
+		implements AutowireCapableBeanFactory {
 
 	private InstantiationStrategy instantiationStrategy = new CglibSubclassingInstantiationStrategy();
 
@@ -178,8 +179,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * BeanFactoryAware or ApplicationContext through ApplicationContextAware.
 	 * <p>By default, only the BeanFactoryAware interface is ignored.
 	 * For further types to ignore, invoke this method for each type.
-	 * @see org.springframework.beans.factory.BeanFactoryAware
-	 * @see org.springframework.context.ApplicationContextAware
+	 * @see BeanFactoryAware
+	 * @see ApplicationContextAware
 	 */
 	public void ignoreDependencyInterface(Class ifc) {
 		this.ignoredDependencyInterfaces.add(ifc);
@@ -316,7 +317,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (result == null) {
 				throw new BeanCreationException(beanName,
 						"postProcessAfterInitialization method of BeanPostProcessor [" + beanProcessor +
-				    "] returned null for bean [" + result + "] with name [" + beanName + "]");
+						"] returned null for bean [" + result + "] with name [" + beanName + "]");
 			}
 		}
 		return result;
@@ -394,7 +395,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 			// Initialize the bean instance.
 			errorMessage = "Initialization of bean failed";
-			
+
 			// Give any InstantiationAwareBeanPostProcessors the opportunity to modify the state
 			// of the bean before properties are set. This can be used, for example,
 			// to support styles of field injection.
@@ -409,7 +410,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					}
 				}
 			}
-			
+
 			if (continueWithPropertyPopulation) {
 				populateBean(beanName, mergedBeanDefinition, instanceWrapper);
 			}
@@ -628,6 +629,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// look for a matching type
 			Class requiredType = bw.getPropertyDescriptor(propertyName).getPropertyType();
 			Map matchingBeans = findMatchingBeans(requiredType);
+			filterMatches(beanName, matchingBeans);
 			if (matchingBeans != null && matchingBeans.size() == 1) {
 				String autowiredBeanName = (String) matchingBeans.keySet().iterator().next();
 				Object autowiredBean = matchingBeans.values().iterator().next();
@@ -656,6 +658,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 	}
 
+	private void filterMatches(String beanName, Map matchingBeans) {
+		for (Iterator iterator = matchingBeans.keySet().iterator(); iterator.hasNext();) {
+			String name = (String) iterator.next();
+			if (containsBeanDefinition(name)) {
+				AbstractBeanDefinition definition = (AbstractBeanDefinition) getBeanDefinition(name);
+				if (ObjectUtils.nullSafeEquals(beanName, name) || !definition.isAutowireCandidate()) {
+					matchingBeans.remove(name);
+				}
+			}
+		}
+	}
+
 	/**
 	 * Return an array of non-simple bean properties that are unsatisfied.
 	 * These are probably unsatisfied references to other beans in the
@@ -663,7 +677,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mergedBeanDefinition the bean definition the bean was created with
 	 * @param bw the BeanWrapper the bean was created with
 	 * @return an array of bean property names
-	 * @see org.springframework.beans.BeanUtils#isSimpleProperty
+	 * @see BeanUtils#isSimpleProperty
 	 */
 	protected String[] unsatisfiedNonSimpleProperties(RootBeanDefinition mergedBeanDefinition, BeanWrapper bw) {
 		Set result = new TreeSet();
@@ -671,7 +685,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		PropertyDescriptor[] pds = bw.getPropertyDescriptors();
 		for (int i = 0; i < pds.length; i++) {
 			if (pds[i].getWriteMethod() != null && !isExcludedFromDependencyCheck(pds[i]) &&
-			    !pvs.contains(pds[i].getName()) && !BeanUtils.isSimpleProperty(pds[i].getPropertyType())) {
+					!pvs.contains(pds[i].getName()) && !BeanUtils.isSimpleProperty(pds[i].getPropertyType())) {
 				result.add(pds[i].getName());
 			}
 		}
@@ -686,7 +700,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mergedBeanDefinition the bean definition the bean was created with
 	 * @param bw the BeanWrapper the bean was created with
 	 * @param pvs the property values to be applied to the bean
-	 * @see #isExcludedFromDependencyCheck(java.beans.PropertyDescriptor)
+	 * @see #isExcludedFromDependencyCheck(PropertyDescriptor)
 	 */
 	protected void checkDependencies(
 			String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw, PropertyValues pvs)
@@ -700,7 +714,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		PropertyDescriptor[] pds = bw.getPropertyDescriptors();
 		for (int i = 0; i < pds.length; i++) {
 			if (pds[i].getWriteMethod() != null && !isExcludedFromDependencyCheck(pds[i]) &&
-			    !pvs.contains(pds[i].getName())) {
+					!pvs.contains(pds[i].getName())) {
 				boolean isSimple = BeanUtils.isSimpleProperty(pds[i].getPropertyType());
 				boolean unsatisfied = (dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_ALL) ||
 					(isSimple && dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_SIMPLE) ||
@@ -721,7 +735,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * are defined by an ignored dependency interface.
 	 * @param pd the PropertyDescriptor of the bean property
 	 * @return whether the bean property is excluded
-	 * @see AutowireUtils#isExcludedFromDependencyCheck(java.beans.PropertyDescriptor)
+	 * @see AutowireUtils#isExcludedFromDependencyCheck(PropertyDescriptor)
 	 * @see #ignoreDependencyType(Class)
 	 * @see #ignoreDependencyInterface(Class)
 	 * @see AutowireUtils#isExcludedFromDependencyCheck
@@ -793,8 +807,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param bean new bean instance we may need to initialize
 	 * @param mergedBeanDefinition the bean definition that the bean was created with
 	 * (can also be <code>null</code>, if given an existing bean instance)
-	 * @see org.springframework.beans.factory.BeanNameAware
-	 * @see org.springframework.beans.factory.BeanFactoryAware
+	 * @see BeanNameAware
+	 * @see BeanFactoryAware
 	 * @see #applyBeanPostProcessorsBeforeInitialization
 	 * @see #invokeInitMethods
 	 * @see #applyBeanPostProcessorsAfterInitialization
@@ -932,7 +946,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		protected Map findMatchingBeans(Class requiredType) throws BeansException {
-			return AbstractAutowireCapableBeanFactory.this.findMatchingBeans(requiredType);
+			Map results = AbstractAutowireCapableBeanFactory.this.findMatchingBeans(requiredType);
+			filterMatches(null, results);
+			return results;
 		}
 	}
 

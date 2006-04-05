@@ -29,9 +29,12 @@ public final class ParserContext {
 
 	private final XmlBeanDefinitionParserHelper helper;
 
-	public ParserContext(ReaderContext readerContext, XmlBeanDefinitionParserHelper helper) {
+	private final boolean nested;
+
+	public ParserContext(ReaderContext readerContext, XmlBeanDefinitionParserHelper helper, boolean nested) {
 		this.readerContext = readerContext;
 		this.helper = helper;
+		this.nested = nested;
 	}
 
 	public ReaderContext getReaderContext() {
@@ -42,7 +45,12 @@ public final class ParserContext {
 		return this.helper;
 	}
 
+	public boolean isNested() {
+		return nested;
+	}
+
 	public BeanDefinitionRegistry getRegistry() {
 		return getReaderContext().getReader().getBeanFactory();
 	}
+
 }

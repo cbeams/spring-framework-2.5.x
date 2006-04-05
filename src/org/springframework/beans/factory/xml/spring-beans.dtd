@@ -184,6 +184,12 @@
 <!ATTLIST bean lazy-init (true | false | default) "default">
 
 <!--
+  Indicates whether or not this bean should be considered when looking
+  for candidates to satisfy another beans autowiring requirements.
+-->
+<!ATTLIST bean autowire-candidate (true | false) "true">
+
+<!--
 	Optional attribute controlling whether to "autowire" bean properties.
 	This is an automagical process in which bean references don't need to be coded
 	explicitly in the XML bean definition file, but Spring works out dependencies.

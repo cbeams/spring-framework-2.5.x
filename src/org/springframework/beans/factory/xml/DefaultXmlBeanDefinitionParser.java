@@ -145,7 +145,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 					parseDefaultElement(ele, helper);
 				}
 				else {
-					helper.parseCustomElement(ele);
+					helper.parseCustomElement(ele, false);
 				}
 			}
 		}

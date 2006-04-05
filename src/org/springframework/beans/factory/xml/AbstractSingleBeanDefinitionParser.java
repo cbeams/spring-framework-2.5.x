@@ -41,6 +41,9 @@ public abstract class AbstractSingleBeanDefinitionParser implements BeanDefiniti
 			BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
 			BeanDefinitionReaderUtils.registerBeanDefinition(holder, parserContext.getRegistry());
 			parserContext.getReaderContext().fireComponentRegistered(new BeanComponentDefinition(holder));
+		} else if(!parserContext.isNested()) {
+			throw new IllegalArgumentException("Attribute '" + ID_ATTRIBUTE + "' is required for element '"
+							+ element.getLocalName() + "' when used as a top-level tag.");
 		}
 		return definition;
 	}

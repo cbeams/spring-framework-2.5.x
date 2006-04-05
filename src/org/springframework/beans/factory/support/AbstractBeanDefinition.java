@@ -111,6 +111,8 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	private boolean lazyInit = false;
 
+	private boolean autowireCandidate = true;
+
 	private int autowireMode = AUTOWIRE_NO;
 
 	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
@@ -337,6 +339,14 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 */
 	public boolean isLazyInit() {
 		return lazyInit;
+	}
+
+	public boolean isAutowireCandidate() {
+		return autowireCandidate;
+	}
+
+	public void setAutowireCandidate(boolean autowireCandidate) {
+		this.autowireCandidate = autowireCandidate;
 	}
 
 	/**

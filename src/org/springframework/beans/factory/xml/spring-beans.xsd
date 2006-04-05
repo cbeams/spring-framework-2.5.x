@@ -118,6 +118,7 @@
 		<xsd:attribute name="destroy-method" type="xsd:string"/>
 		<xsd:attribute name="factory-method" type="xsd:string"/>
 		<xsd:attribute name="factory-bean" type="xsd:string"/>
+		<xsd:attribute name="autowire-candidate" type="xsd:boolean" default="true"/>
 		<xsd:anyAttribute namespace="##other" processContents="strict"/>
 	</xsd:attributeGroup>
 	<!-- the <bean> element -->
@@ -126,7 +127,7 @@
 			<xsd:complexContent>
 				<xsd:extension base="identifiedType">
 					<xsd:group ref="beanElements"/>
-					<xsd:attributeGroup ref="beanAttributes"/>
+					<xsd:attributeGroup ref="beanAttributes"/>                    
 				</xsd:extension>
 			</xsd:complexContent>
 		</xsd:complexType>

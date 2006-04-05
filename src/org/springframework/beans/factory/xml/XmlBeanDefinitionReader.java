@@ -66,25 +66,29 @@ import org.springframework.util.xml.SimpleSaxErrorHandler;
  * @see #setParserClass
  * @see XmlBeanDefinitionParser
  * @see DefaultXmlBeanDefinitionParser
- * @see org.springframework.beans.factory.support.BeanDefinitionRegistry
- * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
+ * @see BeanDefinitionRegistry
+ * @see DefaultListableBeanFactory
  */
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
-	 * Indicates that the the validation mode should be detected automatically.
+	 * Indicates that the validation should be disabled.
 	 */
-	public static final int VALIDATION_AUTO = 0;
+	public static final int VALIDATION_NONE = 0;
+
+	/**
+	 * Indicates that the validation mode should be detected automatically.
+	 */
+	public static final int VALIDATION_AUTO = 1;
 
 	/**
 	 * Indicates that DTD validation should be used.
 	 */
-	public static final int VALIDATION_DTD = 1;
-
+	public static final int VALIDATION_DTD = 2;
 	/**
 	 * Indicates that XSD validation should be used.
 	 */
-	public static final int VALIDATION_XSD = 2;
+	public static final int VALIDATION_XSD = 3;
 
 	/**
 	 * JAXP attribute used to configure the schema language for validation.
@@ -111,11 +115,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Are namespaces important?
 	 */
 	private boolean namespaceAware = false;
-
-	/**
-	 * Is validation enabled?
-	 */
-	private boolean validating = true;
 
 	/**
 	 * The current validation mode. Defaults to {@link #VALIDATION_AUTO}.
@@ -149,7 +148,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * The {@link SourceExtractor} to use when extracting
-	 * {@link org.springframework.beans.factory.config.BeanDefinition#getSource() source objects}
+	 * {@link BeanDefinition#getSource() source objects}
 	 * from the configuration data.
 	 */
 	private SourceExtractor sourceExtractor = new NullSourceExtractor();
@@ -176,14 +175,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public void setNamespaceAware(boolean namespaceAware) {
 		this.namespaceAware = namespaceAware;
-	}
-
-	/**
-	 * Set if the XML parser should validate the document and thus enforce a DTD.
-	 * Default is <code>true</code>.
-	 */
-	public void setValidating(boolean validating) {
-		this.validating = validating;
 	}
 
 	/**
@@ -215,7 +206,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Specifies which {@link ReaderEventListener} to use. Default implementation is
 	 * NullReaderEventListener which discards every event notification. External tools
 	 * can provide an alternative implementation to monitor the components being registered in
-	 * the {@link org.springframework.beans.factory.BeanFactory}.
+	 * the {@link BeanFactory}.
 	 */
 	public void setEventListener(ReaderEventListener eventListener) {
 		Assert.notNull(eventListener, "'eventListener' cannot be null.");
@@ -239,7 +230,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * <p>If not set, a default SimpleSaxErrorHandler is used that simply
 	 * logs warnings using the logger instance of the view class,
 	 * and rethrows errors to discontinue the XML transformation.
-	 * @see org.springframework.util.xml.SimpleSaxErrorHandler
+	 * @see SimpleSaxErrorHandler
 	 */
 	public void setErrorHandler(ErrorHandler errorHandler) {
 		this.errorHandler = errorHandler;
@@ -249,7 +240,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Set a SAX entity resolver to be used for parsing. By default,
 	 * BeansDtdResolver will be used. Can be overridden for custom entity
 	 * resolution, for example relative to some specific base path.
-	 * @see org.springframework.beans.factory.xml.BeansDtdResolver
+	 * @see BeansDtdResolver
 	 */
 	public void setEntityResolver(EntityResolver entityResolver) {
 		this.entityResolver = entityResolver;
@@ -349,7 +340,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	protected int doLoadBeanDefinitions(InputSource inputSource, Resource resource) throws BeansException {
 		try {
-			DocumentBuilderFactory factory = createDocumentBuilderFactory(resource);
+			DocumentBuilderFactory factory = createDocumentBuilderFactory(resource, getValidationModeForResource(resource));
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using JAXP provider [" + factory + "]");
 			}
@@ -373,18 +364,21 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 	}
 
-	protected DocumentBuilderFactory createDocumentBuilderFactory(Resource resource)
+	/**
+	 * Creates the {@link DocumentBuilderFactory} instance.
+	 * @param resource the {@link Resource} being parsed.
+	 * @param validationMode the resolved validation mode. Correctly reflects any mode that was detected automatically.
+	 */
+	protected DocumentBuilderFactory createDocumentBuilderFactory(Resource resource, int resolvedValidationMode)
 			throws ParserConfigurationException {
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setValidating(this.validating);
 		factory.setNamespaceAware(this.namespaceAware);
 
-		if (this.validating) {
-			// now see how validation should be configured
-			int validationMode = getValidationModeForResource(resource);
+		if (resolvedValidationMode != VALIDATION_NONE) {
+			factory.setValidating(true);
 
-			if (validationMode == VALIDATION_XSD) {
+			if (resolvedValidationMode == VALIDATION_XSD) {
 				// enforce namespace aware for XSD
 				factory.setNamespaceAware(true);
 				try {
@@ -414,7 +408,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * Detects which kind of validation to perform on the XML file identified
-	 * by the supplied {@link org.springframework.core.io.Resource}. If the
+	 * by the supplied {@link Resource}. If the
 	 * file has a <code>DOCTYPE</code> definition then DTD validation is used
 	 * otherwise XSD validation is assumed.
 	 */
