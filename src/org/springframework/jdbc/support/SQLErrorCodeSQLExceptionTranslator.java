@@ -31,6 +31,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DeadlockLoserDataAccessException;
+import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 
@@ -230,6 +231,10 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getDataAccessResourceFailureCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
 					return new DataAccessResourceFailureException(buildMessage(task, sql, sqlEx), sqlEx);
+				}
+				else if (Arrays.binarySearch(this.sqlErrorCodes.getPermissionDeniedCodes(), errorCode) >= 0) {
+					logTranslation(task, sql, sqlEx, false);
+					return new PermissionDeniedDataAccessException(buildMessage(task, sql, sqlEx), sqlEx);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getDataIntegrityViolationCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
