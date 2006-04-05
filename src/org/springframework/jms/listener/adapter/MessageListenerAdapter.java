@@ -312,7 +312,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 		}
 		catch (InvocationTargetException ex) {
 			throw new ListenerExecutionFailedException(
-					"Listener method '" + methodName + "' threw exception", ex);
+					"Listener method '" + methodName + "' threw exception", ex.getTargetException());
 		}
 		catch (Throwable ex) {
 			throw new ListenerExecutionFailedException(
