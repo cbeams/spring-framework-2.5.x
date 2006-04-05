@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
+import org.springframework.beans.propertyeditors.CharArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.CharacterEditor;
 import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.CustomBooleanEditor;
@@ -105,7 +106,6 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 		// Simple editors, without parameterization capabilities.
 		// The JDK does not contain a default editor for any of these target types.
-		this.defaultEditors.put(byte[].class, new ByteArrayPropertyEditor());
 		this.defaultEditors.put(Class.class, new ClassEditor());
 		this.defaultEditors.put(File.class, new FileEditor());
 		this.defaultEditors.put(InputStream.class, new InputStreamEditor());
@@ -121,6 +121,10 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(Set.class, new CustomCollectionEditor(Set.class));
 		this.defaultEditors.put(SortedSet.class, new CustomCollectionEditor(SortedSet.class));
 		this.defaultEditors.put(List.class, new CustomCollectionEditor(List.class));
+
+		// Default editors for primitive arrays.
+		this.defaultEditors.put(byte[].class, new ByteArrayPropertyEditor());
+		this.defaultEditors.put(char[].class, new CharArrayPropertyEditor());
 
 		// Default instances of character and boolean editors.
 		// Can be overridden by registering custom instances of those as custom editors.
