@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,6 +34,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
+import org.springframework.remoting.RemoteProxyFailureException;
 import org.springframework.remoting.support.RemoteInvocation;
 
 /**
@@ -173,6 +174,26 @@ public class RmiSupportTests extends TestCase {
 		assertEquals(1, factory.counter);
 	}
 
+	public void testRmiProxyFactoryBeanWithWrongBusinessInterface() throws Exception {
+		CountingRmiProxyFactoryBean factory = new CountingRmiProxyFactoryBean();
+		factory.setServiceInterface(IWrongBusinessBean.class);
+		factory.setServiceUrl("rmi://localhost:1090/test");
+		factory.afterPropertiesSet();
+		assertTrue(factory.getObject() instanceof IWrongBusinessBean);
+		IWrongBusinessBean proxy = (IWrongBusinessBean) factory.getObject();
+		assertFalse(proxy instanceof IRemoteBean);
+		try {
+			proxy.setOtherName("name");
+			fail("Should have thrown RemoteProxyFailureException");
+		}
+		catch (RemoteProxyFailureException ex) {
+			assertTrue(ex.getCause() instanceof NoSuchMethodException);
+			assertTrue(ex.getMessage().indexOf("setOtherName") != -1);
+			assertTrue(ex.getMessage().indexOf("IWrongBusinessBean") != -1);
+		}
+		assertEquals(1, factory.counter);
+	}
+
 	public void testRmiProxyFactoryBeanWithBusinessInterfaceAndRemoteException() throws Exception {
 		doTestRmiProxyFactoryBeanWithBusinessInterfaceAndException(
 				RemoteException.class, RemoteAccessException.class);
@@ -215,6 +236,7 @@ public class RmiSupportTests extends TestCase {
 
 	private void doTestRmiProxyFactoryBeanWithBusinessInterfaceAndException(
 			Class rmiExceptionClass, Class springExceptionClass) throws Exception {
+
 		CountingRmiProxyFactoryBean factory = new CountingRmiProxyFactoryBean();
 		factory.setServiceInterface(IBusinessBean.class);
 		factory.setServiceUrl("rmi://localhost:1090/test");
@@ -398,6 +420,13 @@ public class RmiSupportTests extends TestCase {
 	public static interface IBusinessBean {
 
 		public void setName(String name);
+
+	}
+
+
+	public static interface IWrongBusinessBean {
+
+		public void setOtherName(String name);
 
 	}
 
