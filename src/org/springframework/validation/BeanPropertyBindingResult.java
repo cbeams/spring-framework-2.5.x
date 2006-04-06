@@ -26,8 +26,8 @@ import org.springframework.util.Assert;
 
 /**
  * Default implementation of the Errors and BindingResult interfaces,
- * supporting registration and evaluation of binding errors on JavaBean objects.
- * Performs standard JavaBean property access.
+ * for registration and evaluation of binding errors on JavaBean objects.
+ * Performs standard JavaBean property access, also supporting nested properties.
  *
  * <p>Normally, application code will work with the Errors interface
  * or the BindingResult interface. A DataBinder returns its BindingResult
@@ -74,7 +74,7 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	}
 
 	protected String canonicalFieldName(String field) {
-		return BeanUtils.canonicalName(field);
+		return BeanUtils.canonicalPropertyName(field);
 	}
 
 }
