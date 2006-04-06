@@ -21,7 +21,10 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -39,10 +42,6 @@ public abstract class ClassUtils {
 	/** Suffix for array class names */
 	public static final String ARRAY_SUFFIX = "[]";
 
-	/** All primitive classes */
-	private static Class[] PRIMITIVE_CLASSES = {
-		boolean.class, byte.class, char.class, short.class, int.class, long.class, float.class, double.class};
-
 	/** The package separator character '.' */
 	private static final char PACKAGE_SEPARATOR_CHAR = '.';
 
@@ -51,6 +50,35 @@ public abstract class ClassUtils {
 
 	/** The CGLIB class separator character "$$" */
 	private static final String CGLIB_CLASS_SEPARATOR_CHAR = "$$";
+
+
+	/**
+	 * Map with primitive wrapper type as key and corresponding primitive
+	 * type as value, for example: Integer.class -> int.class
+	 */
+	private static final Map primitiveWrapperTypeMap = new HashMap(8);
+
+	/**
+	 * Map with primitive type name as key and corresponding primitive
+	 * type as value, for example: "int" -> "int.class"
+	 */
+	private static final Map primitiveTypeNameMap = new HashMap(8);
+
+	static {
+		primitiveWrapperTypeMap.put(Boolean.class, boolean.class);
+		primitiveWrapperTypeMap.put(Byte.class, byte.class);
+		primitiveWrapperTypeMap.put(Character.class, char.class);
+		primitiveWrapperTypeMap.put(Double.class, double.class);
+		primitiveWrapperTypeMap.put(Float.class, float.class);
+		primitiveWrapperTypeMap.put(Integer.class, int.class);
+		primitiveWrapperTypeMap.put(Long.class, long.class);
+		primitiveWrapperTypeMap.put(Short.class, short.class);
+
+		for (Iterator it = primitiveWrapperTypeMap.values().iterator(); it.hasNext();) {
+			Class primitiveClass = (Class) it.next();
+			primitiveTypeNameMap.put(primitiveClass.getName(), primitiveClass);
+		}
+	}
 
 
 	/**
@@ -116,18 +144,14 @@ public abstract class ClassUtils {
 	 * a primitive class
 	 */
 	public static Class resolvePrimitiveClassName(String name) {
+		Class result = null;
 		// Most class names will be quite long, considering that they
 		// SHOULD sit in a package, so a length check is worthwhile.
-		if (name.length() <= 8) {
-			// could be a primitive - likely
-			for (int i = 0; i < PRIMITIVE_CLASSES.length; i++) {
-				Class clazz = PRIMITIVE_CLASSES[i];
-				if (clazz.getName().equals(name)) {
-					return clazz;
-				}
-			}
+		if (name != null && name.length() <= 8) {
+			// Could be a primitive - likely.
+			result = (Class) primitiveTypeNameMap.get(name);
 		}
-		return null;
+		return result;
 	}
 
 	/**
@@ -192,7 +216,7 @@ public abstract class ClassUtils {
 	 * @return the qualified name of the method
 	 */
 	public static String getQualifiedMethodName(Method method) {
-		Assert.notNull(method, "Method must not be empty");
+		Assert.notNull(method, "Method must not be null");
 		return method.getDeclaringClass().getName() + "." + method.getName();
 	}
 
@@ -281,6 +305,72 @@ public abstract class ClassUtils {
 		} catch (NoSuchMethodException ex) {
 		}
 		return null;
+	}
+
+
+	/**
+	 * Check if the given class represents a primitive wrapper,
+	 * i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double.
+	 */
+	public static boolean isPrimitiveWrapper(Class clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		return primitiveWrapperTypeMap.containsKey(clazz);
+	}
+
+	/**
+	 * Check if the given class represents a primitive (i.e. boolean, byte,
+	 * char, short, int, long, float, or double) or a primitive wrapper
+	 * (i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double).
+	 */
+	public static boolean isPrimitiveOrWrapper(Class clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		return (clazz.isPrimitive() || isPrimitiveWrapper(clazz));
+	}
+
+	/**
+	 * Check if the given class represents an array of primitives,
+	 * i.e. boolean, byte, char, short, int, long, float, or double.
+	 */
+	public static boolean isPrimitiveArray(Class clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		return (clazz.isArray() && clazz.getComponentType().isPrimitive());
+	}
+
+	/**
+	 * Check if the given class represents an array of primitive wrappers,
+	 * i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double.
+	 */
+	public static boolean isPrimitiveWrapperArray(Class clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		return (clazz.isArray() && isPrimitiveWrapper(clazz.getComponentType()));
+	}
+
+	/**
+	 * Determine if the given target type is assignable from the given value
+	 * type, assuming setting by reflection. Considers primitive wrapper
+	 * classes as assignable to the corresponding primitive types.
+	 * @param targetType the target type
+	 * @param valueType the value type that should be assigned to the target type
+	 * @return if the target type is assignable from the value type
+	 */
+	public static boolean isAssignable(Class targetType, Class valueType) {
+		Assert.notNull(targetType, "Target type must not be null");
+		Assert.notNull(valueType, "Value type must not be null");
+		return (targetType.isAssignableFrom(valueType) ||
+				targetType.equals(primitiveWrapperTypeMap.get(valueType)));
+	}
+
+	/**
+	 * Determine if the given type is assignable from the given value,
+	 * assuming setting by reflection. Considers primitive wrapper classes
+	 * as assignable to the corresponding primitive types.
+	 * @param type the target type
+	 * @param value the value that should be assigned to the type
+	 * @return if the type is assignable from the value
+	 */
+	public static boolean isAssignableValue(Class type, Object value) {
+		Assert.notNull(type, "Type must not be null");
+		return (value != null ? isAssignable(type, value.getClass()) : !type.isPrimitive());
 	}
 
 

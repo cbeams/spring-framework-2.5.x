@@ -19,9 +19,9 @@ package org.springframework.beans.support;
 import java.beans.PropertyEditor;
 import java.lang.reflect.Method;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
 
 /**
@@ -69,7 +69,7 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 					int numberOfCorrectArguments = 0;
 					for (int j = 0; j < argCount; j++) {
 						// Verify that the supplied argument is assignable to the method parameter.
-						if (BeanUtils.isAssignable(paramTypes[j], arguments[j])) {
+						if (ClassUtils.isAssignableValue(paramTypes[j], arguments[j])) {
 							numberOfCorrectArguments++;
 						}
 					}

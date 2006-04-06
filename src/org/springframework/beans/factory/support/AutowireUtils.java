@@ -25,7 +25,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -80,13 +79,13 @@ abstract class AutowireUtils {
 	public static int getTypeDifferenceWeight(Class[] paramTypes, Object[] args) {
 		int result = 0;
 		for (int i = 0; i < paramTypes.length; i++) {
-			if (!BeanUtils.isAssignable(paramTypes[i], args[i])) {
+			if (!ClassUtils.isAssignableValue(paramTypes[i], args[i])) {
 				return Integer.MAX_VALUE;
 			}
 			if (args[i] != null) {
 				Class superClass = args[i].getClass().getSuperclass();
 				while (superClass != null) {
-					if (BeanUtils.isAssignable(paramTypes[i], superClass)) {
+					if (ClassUtils.isAssignable(paramTypes[i], superClass)) {
 						result++;
 						superClass = superClass.getSuperclass();
 					}

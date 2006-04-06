@@ -49,6 +49,7 @@ import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
+import org.springframework.util.ClassUtils;
 
 /**
  * Base implementation of the PropertyEditorRegistry interface.
@@ -420,8 +421,8 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 			// for elements.)
 			if (this.registeredType == null ||
 					(requiredType != null &&
-					(BeanUtils.isAssignable(this.registeredType, requiredType) ||
-					BeanUtils.isAssignable(requiredType, this.registeredType))) ||
+					(ClassUtils.isAssignable(this.registeredType, requiredType) ||
+					ClassUtils.isAssignable(requiredType, this.registeredType))) ||
 					(requiredType == null &&
 					(!Collection.class.isAssignableFrom(this.registeredType) && !this.registeredType.isArray()))) {
 				return this.propertyEditor;

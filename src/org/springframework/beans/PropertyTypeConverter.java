@@ -32,6 +32,7 @@ import org.springframework.core.GenericsHelper;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -149,7 +150,7 @@ class PropertyTypeConverter {
 		PropertyEditor pe = this.propertyEditorRegistry.findCustomEditor(requiredType, propertyName);
 
 		// Value not of required type?
-		if (pe != null || (requiredType != null && !BeanUtils.isAssignable(requiredType, convertedValue))) {
+		if (pe != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
 			if (pe == null && descriptor != null) {
 				if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
 					pe = descriptor.createPropertyEditor(this.targetObject);
@@ -202,7 +203,7 @@ class PropertyTypeConverter {
 				}
 			}
 
-			if (!BeanUtils.isAssignable(requiredType, convertedValue)) {
+			if (!ClassUtils.isAssignableValue(requiredType, convertedValue)) {
 				// Definitely doesn't match: throw IllegalArgumentException.
 				throw new IllegalArgumentException("No matching editors or conversion strategy found");
 			}
