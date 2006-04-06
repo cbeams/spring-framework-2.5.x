@@ -400,22 +400,28 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       (<literal>,</literal>), semicolon (<literal>;</literal>), or whitespace
       via the <literal>name</literal> attribute.</para>
 
-      <para>Please note that you are not required to supply a name for a bean. If
-      no name is supplied explicitly, the container will generate a (unique) name
-      for said bean. The motivations for not supplying a name for a bean will be
-      discussed later (one use case is inner beans).</para>
+      <para>
+		Please note that you are not required to supply a name for a bean. If
+		no name is supplied explicitly, the container will generate a (unique) name
+		for said bean. The motivations for not supplying a name for a bean will be
+		discussed later (one use case is
+		<link linkend="beans-inner-beans">inner beans</link>).
+      </para>
       
-      <para>Finally, please do take some care to be consistent when naming beans.
-      The convention (at least amongst the Spring development team) is to use
-      the standard Java convention for instance field names when naming beans. That is,
-      bean names start with a lowercase letter, and are camel-cased from then on.
-      Examples of such names would be (sans quotes) <literal>'accountManager'</literal>,
-      <literal>'accountService'</literal>, <literal>'userDao'</literal>,
-      <literal>'loginController'</literal>etc. Adopting a standard way of
-      naming your beans will go a long way towards making your configuration
-      easy to read and understand; adopting such naming standards is not hard to do,
-      and if you are using SpringAOP it can pay off handsomely when it comes to applying
-      advice to a set of beans related by name.</para>
+      <para>
+		Finally, please do take some care to be consistent when naming beans.
+		The convention (at least amongst the Spring development team) is to use
+		the standard Java convention for instance field names when naming beans.
+		That is, bean names start with a lowercase letter, and are camel-cased
+		from then on. Examples of such names would be (sans quotes)
+		<literal>'accountManager'</literal>, <literal>'accountService'</literal>,
+		<literal>'userDao'</literal>, <literal>'loginController'</literal>etc.
+		Adopting a standard way of naming your beans will go a long way towards
+		making your configuration easy to read and understand; adopting such
+		naming standards is not hard to do, and if you are using SpringAOP it can
+		pay off handsomely when it comes to applying advice to a set of beans
+		related by name.
+	  </para>
     </sect2>
 
     <sect2 id="beans-factory-modes">
@@ -623,13 +629,28 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
             still override this default behavior and set any of these
             singleton beans to lazy-load (not be pre-instantiated).</para>
           </listitem>
-        </orderedlist></para>
-
+        </orderedlist>
+      </para>
+      <para>
+        Finally, if it is not immediately apparent, it is worth mentioning that when
+        one or more collaborating beans are being injected into a dependent bean, each
+        collaborating bean is <emphasis>totally</emphasis> configured prior to being
+        passed (via one of the Dependency Injection flavours) to the dependent bean.
+        This means that if bean A has a dependency on bean B, the Spring IoC container
+        will <emphasis>totally</emphasis> configure bean B prior to invoking (for example)
+        the attendant setter method on bean A; you can read '<emphasis>totally configure</emphasis>'
+        to mean that the bean will be instantiated (if not a pre-instantiated singleton),
+        all of its dependencies will be set, and the relevant lifecycle methods (such as
+        a <link linkend="beans-factory-lifecycle-initializingbean">configured init method</link>
+        or the
+        <link linkend="beans-factory-lifecycle-initializingbean">IntializingBean callback method</link>
+        will all be invoked.
+      </para>
       <para>Some examples:</para>
 
-      <para>First, an example of using the BeanFactory for setter-based
+      <para>First, an example of using the <interfacename>BeanFactory</interfacename> for setter-based
       dependency injection. Below is a small part of an
-      <literal>XmlBeanFactory</literal> configuration file specifying some
+      <classname>XmlBeanFactory</classname> configuration file specifying some
       bean definitions. Following is the code for the actual main bean itself,
       showing the appropriate setters declared. <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
   &lt;property name="beanOne"&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/property&gt;
