@@ -22,9 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -42,94 +40,6 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  */
 public abstract class BeanUtils {
-
-	/**
-	 * Map with primitive wrapper type as key and corresponding primitive
-	 * type as value, for example: Integer.class -> int.class
-	 */
-	private static final Map primitiveWrapperTypeMap = new HashMap(8);
-
-	static {
-		primitiveWrapperTypeMap.put(Boolean.class, boolean.class);
-		primitiveWrapperTypeMap.put(Byte.class, byte.class);
-		primitiveWrapperTypeMap.put(Character.class, char.class);
-		primitiveWrapperTypeMap.put(Double.class, double.class);
-		primitiveWrapperTypeMap.put(Float.class, float.class);
-		primitiveWrapperTypeMap.put(Integer.class, int.class);
-		primitiveWrapperTypeMap.put(Long.class, long.class);
-		primitiveWrapperTypeMap.put(Short.class, short.class);
-	}
-
-
-	/**
-	 * Determine if the given type is assignable from the given value,
-	 * assuming setting by reflection. Considers primitive wrapper classes
-	 * as assignable to the corresponding primitive types.
-	 * <p>For example used in a bean factory's constructor resolution.
-	 * @param type the target type
-	 * @param value the value that should be assigned to the type
-	 * @return if the type is assignable from the value
-	 */
-	public static boolean isAssignable(Class type, Object value) {
-		Assert.notNull(type, "Type must not be null");
-		return (value != null ? isAssignable(type, value.getClass()) : !type.isPrimitive());
-	}
-
-	/**
-	 * Determine if the given target type is assignable from the given value
-	 * type, assuming setting by reflection. Considers primitive wrapper
-	 * classes as assignable to the corresponding primitive types.
-	 * <p>For example used in BeanWrapperImpl's custom editor matching.
-	 * @param targetType the target type
-	 * @param valueType the value type that should be assigned to the target type
-	 * @return if the target type is assignable from the value type
-	 */
-	public static boolean isAssignable(Class targetType, Class valueType) {
-		Assert.notNull(targetType, "Target type must not be null");
-		Assert.notNull(valueType, "Value type must not be null");
-		return (targetType.isAssignableFrom(valueType) ||
-				targetType.equals(primitiveWrapperTypeMap.get(valueType)));
-	}
-
-	/**
-	 * Check if the given class represents a "simple" property,
-	 * i.e. a primitive, a String, a Class, or a corresponding array.
-	 * Used to determine properties to check for a "simple" dependency-check.
-	 * @see org.springframework.beans.factory.support.RootBeanDefinition#DEPENDENCY_CHECK_SIMPLE
-	 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#checkDependencies
-	 */
-	public static boolean isSimpleProperty(Class clazz) {
-		Assert.notNull(clazz, "Class must not be null");
-		return clazz.isPrimitive() || isPrimitiveArray(clazz) ||
-				isPrimitiveWrapper(clazz) || isPrimitiveWrapperArray(clazz) ||
-				clazz.equals(String.class) || clazz.equals(String[].class) ||
-				clazz.equals(Class.class) || clazz.equals(Class[].class);
-	}
-
-	/**
-	 * Check if the given class represents an array of primitives,
-	 * i.e. boolean, byte, char, short, int, long, float, or double.
-	 */
-	public static boolean isPrimitiveArray(Class clazz) {
-		return (clazz.isArray() && clazz.getComponentType().isPrimitive());
-	}
-
-	/**
-	 * Check if the given class represents a primitive wrapper,
-	 * i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double.
-	 */
-	public static boolean isPrimitiveWrapper(Class clazz) {
-		return primitiveWrapperTypeMap.containsKey(clazz);
-	}
-
-	/**
-	 * Check if the given class represents an array of primitive wrappers,
-	 * i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double.
-	 */
-	public static boolean isPrimitiveWrapperArray(Class clazz) {
-		return (clazz.isArray() && isPrimitiveWrapper(clazz.getComponentType()));
-	}
-
 
 	/**
 	 * Convenience method to instantiate a class using its no-arg constructor.
@@ -445,7 +355,7 @@ public abstract class BeanUtils {
 	 * @param propertyName the bean property path
 	 * @return the canonical representation of the property path
 	 */
-	public static String canonicalName(String propertyName) {
+	public static String canonicalPropertyName(String propertyName) {
 		if (propertyName == null) {
 			return "";
 		}
@@ -474,6 +384,49 @@ public abstract class BeanUtils {
 			}
 		}
 		return buf.toString();
+	}
+
+	/**
+	 * Check if the given class represents a "simple" property,
+	 * i.e. a primitive, a String, a Class, or a corresponding array.
+	 * Used to determine properties to check for a "simple" dependency-check.
+	 * @see org.springframework.beans.factory.support.RootBeanDefinition#DEPENDENCY_CHECK_SIMPLE
+	 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#checkDependencies
+	 */
+	public static boolean isSimpleProperty(Class clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		return clazz.isPrimitive() || ClassUtils.isPrimitiveArray(clazz) ||
+				ClassUtils.isPrimitiveWrapper(clazz) || ClassUtils.isPrimitiveWrapperArray(clazz) ||
+				clazz.equals(String.class) || clazz.equals(String[].class) ||
+				clazz.equals(Class.class) || clazz.equals(Class[].class);
+	}
+
+	/**
+	 * Determine if the given target type is assignable from the given value
+	 * type, assuming setting by reflection. Considers primitive wrapper
+	 * classes as assignable to the corresponding primitive types.
+	 * @param targetType the target type
+	 * @param valueType the value type that should be assigned to the target type
+	 * @return if the target type is assignable from the value type
+	 * @deprecated as of Spring 2.0, in favor of <code>ClassUtils.isAssignable</code>
+	 * @see org.springframework.util.ClassUtils#isAssignable(Class, Class)
+	 */
+	public static boolean isAssignable(Class targetType, Class valueType) {
+		return ClassUtils.isAssignable(targetType, valueType);
+	}
+
+	/**
+	 * Determine if the given type is assignable from the given value,
+	 * assuming setting by reflection. Considers primitive wrapper classes
+	 * as assignable to the corresponding primitive types.
+	 * @param type the target type
+	 * @param value the value that should be assigned to the type
+	 * @return if the type is assignable from the value
+	 * @deprecated as of Spring 2.0, in favor of <code>ClassUtils.isAssignableValue</code>
+	 * @see org.springframework.util.ClassUtils#isAssignableValue(Class, Object)
+	 */
+	public static boolean isAssignable(Class type, Object value) {
+		return ClassUtils.isAssignableValue(type, value);
 	}
 
 
