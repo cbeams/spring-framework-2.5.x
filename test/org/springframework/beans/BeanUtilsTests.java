@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package org.springframework.beans;
 
-import junit.framework.TestCase;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.propertyeditors.CustomDateEditor;
-
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
+import junit.framework.TestCase;
+
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
 
 /**
  * @author Juergen Hoeller
@@ -74,16 +75,16 @@ public class BeanUtilsTests extends TestCase {
 		}
 	}
 
-	public void testCanonicalName() {
-		assertEquals("map", BeanUtils.canonicalName("map"));
-		assertEquals("map[key1]", BeanUtils.canonicalName("map[key1]"));
-		assertEquals("map[key1]", BeanUtils.canonicalName("map['key1']"));
-		assertEquals("map[key1]", BeanUtils.canonicalName("map[\"key1\"]"));
-		assertEquals("map[key1][key2]", BeanUtils.canonicalName("map[key1][key2]"));
-		assertEquals("map[key1][key2]", BeanUtils.canonicalName("map['key1'][\"key2\"]"));
-		assertEquals("map[key1].name", BeanUtils.canonicalName("map[key1].name"));
-		assertEquals("map[key1].name", BeanUtils.canonicalName("map['key1'].name"));
-		assertEquals("map[key1].name", BeanUtils.canonicalName("map[\"key1\"].name"));
+	public void testCanonicalPropertyName() {
+		assertEquals("map", BeanUtils.canonicalPropertyName("map"));
+		assertEquals("map[key1]", BeanUtils.canonicalPropertyName("map[key1]"));
+		assertEquals("map[key1]", BeanUtils.canonicalPropertyName("map['key1']"));
+		assertEquals("map[key1]", BeanUtils.canonicalPropertyName("map[\"key1\"]"));
+		assertEquals("map[key1][key2]", BeanUtils.canonicalPropertyName("map[key1][key2]"));
+		assertEquals("map[key1][key2]", BeanUtils.canonicalPropertyName("map['key1'][\"key2\"]"));
+		assertEquals("map[key1].name", BeanUtils.canonicalPropertyName("map[key1].name"));
+		assertEquals("map[key1].name", BeanUtils.canonicalPropertyName("map['key1'].name"));
+		assertEquals("map[key1].name", BeanUtils.canonicalPropertyName("map[\"key1\"].name"));
 	}
 
 	public void testCopyProperties() throws Exception {
@@ -234,6 +235,7 @@ public class BeanUtilsTests extends TestCase {
 		assertEquals(desiredMethod, BeanUtils.resolveSignature(signature, MethodSignatureBean.class));
 	}
 
+
 	private static class NameAndSpecialProperty {
 
 		private String name;
@@ -257,6 +259,7 @@ public class BeanUtilsTests extends TestCase {
 		}
 	}
 
+
 	private static class ContainerBean {
 
 		private ContainedBean[] containedBeans;
@@ -269,6 +272,7 @@ public class BeanUtilsTests extends TestCase {
 			this.containedBeans = containedBeans;
 		}
 	}
+
 
 	private static class ContainedBean {
 
@@ -287,31 +291,25 @@ public class BeanUtilsTests extends TestCase {
 	private static class MethodSignatureBean {
 
 		public void doSomething() {
-
 		}
 
 		public void doSomethingElse(String s, int x) {
-
 		}
 
 		public void overloaded() {
-
 		}
 
 		public void overloaded(String s) {
-
 		}
 
 		public void overloaded(String s, BeanFactory beanFactory) {
-
 		}
 
 		public void doSomethingWithAnArray(String[] strings) {
-
 		}
 
 		public void doSomethingWithAMultiDimensionalArray(String[][] strings) {
-
 		}
 	}
+
 }
