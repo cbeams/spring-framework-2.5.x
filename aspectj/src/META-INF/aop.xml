@@ -7,8 +7,4 @@
 		<aspect name="org.springframework.transaction.aspectj.AnnotationTransactionAspect"/>
 	</aspects>
 
-	<weaver>
-		<exclude within="org.springframework..*"/>
-	</weaver>
-
 </aspectj>
