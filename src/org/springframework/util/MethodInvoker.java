@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -200,17 +200,27 @@ public class MethodInvoker {
 	 * @see #getArguments()
 	 */
 	protected Method findMatchingMethod() {
+		String targetMethod = getTargetMethod();
+		Object[] arguments = getArguments();
+		int argCount = arguments.length;
+
 		Method[] candidates = getTargetClass().getMethods();
-		int argCount = getArguments().length;
 		Method matchingMethod = null;
 		int numberOfMatchingMethods = 0;
 
 		for (int i = 0; i < candidates.length; i++) {
-			// Check if the inspected method has the correct name and number of parameters.
-			if (candidates[i].getName().equals(getTargetMethod()) &&
-					candidates[i].getParameterTypes().length == argCount) {
-				matchingMethod = candidates[i];
-				numberOfMatchingMethods++;
+			Method candidate = candidates[i];
+			Class[] paramTypes = candidate.getParameterTypes();
+			int paramCount = paramTypes.length;
+			if (candidate.getName().equals(targetMethod) && paramCount == argCount) {
+				boolean match = true;
+				for (int j = 0; j < paramCount && match; j++) {
+					match = match && ClassUtils.isAssignableValue(paramTypes[j], arguments[j]);
+				}
+				if (match) {
+					matchingMethod = candidate;
+					numberOfMatchingMethods++;
+				}
 			}
 		}
 
