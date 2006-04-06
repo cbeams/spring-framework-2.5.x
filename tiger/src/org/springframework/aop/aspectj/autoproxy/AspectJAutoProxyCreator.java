@@ -149,11 +149,24 @@ public class AspectJAutoProxyCreator extends AspectJInvocationContextExposingAdv
 
 	public AspectJAutoProxyCreator() {
 		super();
-		// we need to always use class proxying for @AspectJ aspects, as there is no
-		// guarantee that all of the advice methods are contained in any interface
-		// that the aspect may implement (typically, an @AspectJ aspect won't implement
-		// any interfaces anyway, so this is not a big loss).
-		setProxyTargetClass(true);
+		// previously we setProxyTargetClass(true) here, but that has too broad an
+		// impact. Instead we now override isInfrastructureClass to avoid proxying
+		// aspects. I'm not entirely happy with that as there is no good reason not
+		// to advise aspects, except that it causes advice invocation to go through a
+		// proxy, and if the aspect implements e.g the Ordered interface it will be
+		// proxied by that interface and fail at runtime as the advice method is not
+		// defined on the interface. We could potentially relax the restriction about
+		// not advising aspects in the future.
+	}
+
+	// see comment in constructor for why we do this...
+	protected boolean isInfrastructureClass(Class beanClass, String beanName) {
+		if (this.aspectJAdvisorFactory.isAspect(beanClass)) {
+			return true;
+		}
+		else {
+			return super.isInfrastructureClass(beanClass,beanName);
+		}
 	}
 	
 	public void setAspectJAdvisorFactory(AspectJAdvisorFactory aspectJAdvisorFactory) {
