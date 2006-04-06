@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -196,7 +197,7 @@ public abstract class AopUtils {
 			return false;
 		}
 		
-		Set classes = ClassUtils.getAllInterfacesForClassAsSet(targetClass);
+		Set classes = new HashSet(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
 		classes.add(targetClass);
 		for (Iterator it = classes.iterator(); it.hasNext();) {
 			Class clazz = (Class) it.next();
