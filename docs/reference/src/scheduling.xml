@@ -6,7 +6,7 @@
 		<para>
   			Spring features integration classes for scheduling support. Currently, Spring
   			supports the <classname>Timer</classname>, part of the JDK since 1.3, and the
-  			Quartz Scheduler (<ulink url="http://www.quartzscheduler.org" />). Both schedulers
+  			Quartz Scheduler (<ulink url="http://www.opensymphony.com/quartz/"/>). Both schedulers
   			are set up using a <interfacename>FactoryBean</interfacename> with optional references
   			to <classname>Timer</classname> or <classname>Trigger</classname> instances, respectively.
   			Furthermore, a convenience class for both the Quartz Scheduler and the <classname>Timer</classname> is
@@ -124,8 +124,7 @@ public class ExampleJob extends QuartzJobBean {
   <property name="targetObject" ref="exampleBusinessObject" />
   <property name="targetMethod" value="doIt" />
   <property name="concurrent" value="false" />
-</bean>
-			]]></programlisting>
+</bean>]]></programlisting>
 			<note>
 				<para>
 					By default, jobs will run in a concurrent fashion.
@@ -163,7 +162,7 @@ public class ExampleJob extends QuartzJobBean {
     <property name="jobDetail" ref="exampleJob" />
     <!-- run every morning at 6 AM -->
     <property name="cronExpression" value="0 0 6 * * ?" />
-</bean>	]]></programlisting>
+</bean>]]></programlisting>
 			<para>
 				OK, now we've set up two triggers, one running every 50 seconds with a starting delay of
 				10 seconds and one every morning at 6 AM. To finalize everything, we need to set up the
@@ -180,8 +179,8 @@ public class ExampleJob extends QuartzJobBean {
 			<para>
 				More properties are available for the <classname>SchedulerFactoryBean</classname> for you
 				to set, such as the	calendars used by the job details, properties to customize Quartz with,
-				etc. Have a look at the JavaDoc
-				(<ulink url="http://www.springframework.org/docs/api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html" />)
+				etc. Have a look at the
+				<ulink url="http://www.springframework.org/docs/api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html">SchedulerFactoryBean Javadoc</ulink>
 				for more information.
 			</para>
 		</section>
@@ -287,9 +286,6 @@ public class ExampleJob extends QuartzJobBean {
         </list>
     </property>
 </bean>]]></programlisting>
-			<para>
-				That's all!
-			</para>
 		</section>
 	</section>
 </chapter>
