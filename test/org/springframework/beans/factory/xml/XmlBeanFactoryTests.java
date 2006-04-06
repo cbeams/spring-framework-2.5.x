@@ -75,7 +75,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testRefToSeparatePrototypeInstances() throws Exception {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(false);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
 
 		TestBean emma = (TestBean) xbf.getBean("emma");
@@ -93,7 +93,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testRefToSingleton() throws Exception {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(false);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		Resource resource = new ClassPathResource("reftypes.xml", getClass());
 		reader.loadBeanDefinitions(new EncodedResource(resource, "ISO-8859-1"));
 
@@ -110,7 +110,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 
-		reader.setValidating(false);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		InputStream inputStream = getClass().getResourceAsStream("reftypes.xml");
 		try {
 			reader.loadBeanDefinitions(new InputSource(inputStream));
@@ -167,7 +167,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testFailsOnInnerBean() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(false);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
 
 		try {
@@ -366,7 +366,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testCircularReferences() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(false);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		TestBean david = (TestBean) xbf.getBean("david");
@@ -380,7 +380,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		xbf.setAllowCircularReferences(false);
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(false);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
 		try {
 			xbf.getBean("jenny");
@@ -934,7 +934,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testLookupOverrideMethodsWithSetterInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
 
 		testLookupOverrideMethodsWithSetterInjection(xbf, "overrideOneMethod", true);
@@ -998,7 +998,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testReplaceMethodOverrideWithSetterInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("delegationOverrides.xml", getClass()));
 
 		OverrideOneMethod oom = (OverrideOneMethod) xbf.getBean("overrideOneMethod");
@@ -1043,7 +1043,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testLookupOverrideOneMethodWithConstructorInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("constructorOverrides.xml", getClass()));
 
 		ConstructorInjectedOverrides cio = (ConstructorInjectedOverrides) xbf.getBean("constructorOverrides");
@@ -1067,7 +1067,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testRejectsOverrideOfBogusMethodName() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		try {
 			reader.loadBeanDefinitions(new ClassPathResource("invalidOverridesNoSuchMethod.xml", getClass()));
 			fail("Shouldn't allow override of bogus method");
@@ -1094,7 +1094,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void BUGtestSerializableMethodReplacerAndSuperclass() throws IOException, ClassNotFoundException {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("delegationOverrides.xml", getClass()));
 		SerializableMethodReplacerCandidate s = (SerializableMethodReplacerCandidate) xbf.getBean("serializableReplacer");
 		String forwards = "this is forwards";
@@ -1108,7 +1108,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testFactoryMethodsSingletonOnTargetClass() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 
 		TestBean tb = (TestBean) xbf.getBean("defaultTestBean");
@@ -1142,7 +1142,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testFactoryMethodsWithNull() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 
 		FactoryMethods fm = (FactoryMethods) xbf.getBean("fullWithNull");
@@ -1159,7 +1159,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testFactoryMethodsWithAutowire() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 
 		FactoryMethods fm = (FactoryMethods) xbf.getBean("fullWithAutowire");
@@ -1171,7 +1171,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testProtectedFactoryMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 
 		TestBean tb = (TestBean) xbf.getBean("defaultTestBean.protected");
@@ -1181,7 +1181,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testPrivateFactoryMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 
 		TestBean tb = (TestBean) xbf.getBean("defaultTestBean.private");
@@ -1191,7 +1191,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testFactoryMethodsPrototypeOnTargetClass() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 		FactoryMethods fm = (FactoryMethods) xbf.getBean("defaultPrototype");
 		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("defaultPrototype");
@@ -1235,7 +1235,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testFactoryMethodsOnExternalClass() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 
 		assertEquals(TestBean.class, xbf.getType("externalFactoryMethodWithoutArgs"));
@@ -1261,7 +1261,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testInstanceFactoryMethodWithoutArgs() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 
 		InstanceFactory.count = 0;
@@ -1279,7 +1279,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testFactoryMethodNoMatchingStaticMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 		try {
 			xbf.getBean("noMatchPrototype");
@@ -1293,7 +1293,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testCanSpecifyFactoryMethodArgumentsOnFactoryMethodPrototype() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 		TestBean tbArg = new TestBean();
 		tbArg.setName("arg1");
@@ -1318,7 +1318,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testCannotSpecifyFactoryMethodArgumentsOnSingleton() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 		try {
 			xbf.getBean("testBeanOnly", new Object[]{new TestBean()});
@@ -1332,7 +1332,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testFactoryMethodWithDifferentReturnType() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 
 		// Check that listInstance is not considered a bean of type FactoryMethods.
@@ -1355,7 +1355,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testFactoryMethodForJavaMailSession() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 
 		Session session = (Session) xbf.getBean("javaMailSession");
@@ -1366,7 +1366,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testCannotSpecifyFactoryMethodArgumentsExceptWithFactoryMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidating(true);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
 		try {
 			xbf.getBean("overrideOnPrototype", new Object[]{new TestBean()});

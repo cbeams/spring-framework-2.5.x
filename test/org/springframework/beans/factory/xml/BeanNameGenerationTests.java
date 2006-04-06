@@ -32,7 +32,7 @@ public class BeanNameGenerationTests extends TestCase {
 	public void setUp() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
-		reader.setValidating(false);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(new ClassPathResource("beanNameGeneration.xml", getClass()));
 	}
 
