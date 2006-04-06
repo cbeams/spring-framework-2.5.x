@@ -134,7 +134,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * Create a new AbstractMessageListenerContainer,
 	 * with a DynamicDestinationResolver as default DestinationResolver.
 	 */
-	protected AbstractMessageListenerContainer() {
+	public AbstractMessageListenerContainer() {
 		setDestinationResolver(new DynamicDestinationResolver());
 	}
 
@@ -588,7 +588,10 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	/**
 	 * Handle the given exception that arose during listener execution.
-	 * The default implementation logs the exception at error level.
+	 * <p>The default implementation logs the exception at error level,
+	 * not propagating it to the JMS provider - assuming that all handling of
+	 * acknowledgement and/or transactions is done by this listener container.
+	 * This can be overridden in subclasses.
 	 * @param ex the exception to handle
 	 */
 	protected void handleListenerException(Throwable ex) {

@@ -28,13 +28,14 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Converts objects to string form, generally for debugging purposes, using
- * Spring's <code>toString</code> styling conventions.
+ * Converts objects to string form, generally for debugging purposes,
+ * using Spring's <code>toString</code> styling conventions.
  *
- * <p>Underneath the hood, uses the reflective visitor pattern to nicely encapsulate
- * styling algorithms for each type of styled object.
+ * <p>Uses the reflective visitor pattern underneath the hood to nicely
+ * encapsulate styling algorithms for each type of styled object.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 1.2.2
  */
 public class DefaultValueStyler implements ValueStyler {
@@ -48,7 +49,7 @@ public class DefaultValueStyler implements ValueStyler {
 	private static final String ARRAY = "array";
 
 
-	private ReflectiveVisitorHelper reflectiveVisitorHelper = new ReflectiveVisitorHelper();
+	private final ReflectiveVisitorHelper reflectiveVisitorHelper = new ReflectiveVisitorHelper();
 
 
 	public String style(Object value) {
@@ -155,7 +156,7 @@ public class DefaultValueStyler implements ValueStyler {
 			return ObjectUtils.toObjectArray(value);
 		}
 		else {
-			return (Object[])value;
+			return (Object[]) value;
 		}
 	}
 
