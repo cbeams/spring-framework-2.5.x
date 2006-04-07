@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,11 +16,10 @@
 
 package org.springframework.web.util;
 
-import org.springframework.web.servlet.tags.form.SelectTag;
-import org.springframework.util.Assert;
-
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
+
+import org.springframework.util.Assert;
 
 /**
  * Utility class to transform Strings to scopes:
@@ -37,35 +36,34 @@ import javax.servlet.jsp.tagext.Tag;
  * </ul>
  *
  * @author Alef Arendsen
+ * @author Rob Harrop
  */
 public abstract class TagUtils {
 
-	/** constant identifying the page scope String */
+	/** Constant identifying the page scope */
 	public static final String SCOPE_PAGE = "page";
 
-	/** constant identifying the request scope String */
+	/** Constant identifying the request scope */
 	public static final String SCOPE_REQUEST = "request";
 
-	/** constant identifying the session scope String */
+	/** Constant identifying the session scope */
 	public static final String SCOPE_SESSION = "session";
 
-	/** constant identifying the application scope String */
+	/** Constant identifying the application scope */
 	public static final String SCOPE_APPLICATION = "application";
 
+
 	/**
-	 * Determines the scope for a given input String. If the string does not match
-	 * 'request', 'session', 'page' or 'application', the method will return
-	 * PageContext.PAGE_SCOPE.
-	 * @param scope the string to inspect
-	 * @return the scope found, or PageContext.PAGE_SCOPE if no scope matched.
-	 * @throws java.lang.IllegalArgumentException if the scope is null
+	 * Determines the scope for a given input String. If the String
+	 * does not match 'request', 'session', 'page' or 'application',
+	 * the method will return <code>PageContext.PAGE_SCOPE</code>.
+	 * @param scope the String to inspect
+	 * @return the scope found, or <code>PageContext.PAGE_SCOPE</code>
+	 * if no scope matched
 	 */
 	public static int getScope(String scope) {
-		if (scope == null) {
-			throw new IllegalArgumentException(
-					"Scope to search for cannot be null");
-		}
-		else if (scope.equals(SCOPE_REQUEST)) {
+		Assert.notNull(scope, "Scope to search for cannot be null");
+		if (scope.equals(SCOPE_REQUEST)) {
 			return PageContext.REQUEST_SCOPE;
 		}
 		else if (scope.equals(SCOPE_SESSION)) {
@@ -80,14 +78,15 @@ public abstract class TagUtils {
 	}
 
 	/**
-	 * Returns <code>true</code> if the supplied {@link Tag} has any ancestor tag of
-	 * the supplied type.
+	 * Determine whether the supplied {@link Tag} has any ancestor tag
+	 * of the supplied type.
 	 */
 	public static boolean hasAncestorOfType(Tag tag, Class parentTagClass) {
-		Assert.notNull(tag, "'tag' cannot be null.");
-		Assert.notNull(parentTagClass, "'parentTagClass' cannot be null.");
+		Assert.notNull(tag, "Tag cannot be null");
+		Assert.notNull(parentTagClass, "Parent tag class cannot be null");
 		if (!Tag.class.isAssignableFrom(parentTagClass)) {
-			throw new IllegalArgumentException("Class '" + parentTagClass.getName() + "' is not a valid Tag type.");
+			throw new IllegalArgumentException(
+					"Class '" + parentTagClass.getName() + "' is not a valid Tag type");
 		}
 		Tag ancestor = tag.getParent();
 		while (ancestor != null) {
@@ -98,4 +97,5 @@ public abstract class TagUtils {
 		}
 		return false;
 	}
+
 }

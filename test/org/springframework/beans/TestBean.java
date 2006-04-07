@@ -1,9 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.25 2006-04-05 20:00:08 robharrop Exp $
- */
-
-/*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +16,16 @@
 
 package org.springframework.beans;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -37,10 +33,9 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Simple test bean used for testing bean factories,
- * AOP framework etc.
+ * Simple test bean used for testing bean factories, AOP framework etc.
  *
- * @author  Rod Johnson
+ * @author Rod Johnson
  * @since 15 April 2001
  */
 public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOther, Comparable {
@@ -95,6 +90,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private Colour favouriteColour;
 
+
 	public Colour getFavouriteColour() {
 		return favouriteColour;
 	}
@@ -124,6 +120,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.spouse = spouse;
 		this.someProperties = someProperties;
 	}
+
 
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
@@ -217,6 +214,14 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	public void setStringArray(String[] stringArray) {
 		this.stringArray = stringArray;
+	}
+
+	public Integer[] getSomeIntegerArray() {
+		return someIntegerArray;
+	}
+
+	public void setSomeIntegerArray(Integer[] someIntegerArray) {
+		this.someIntegerArray = someIntegerArray;
 	}
 
 	public Date getDate() {
@@ -374,11 +379,4 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		return s;
 	}
 
-	public Integer[] getSomeIntegerArray() {
-		return someIntegerArray;
-	}
-
-	public void setSomeIntegerArray(Integer[] someIntegerArray) {
-		this.someIntegerArray = someIntegerArray;
-	}
 }
