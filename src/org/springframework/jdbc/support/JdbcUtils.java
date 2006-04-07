@@ -44,6 +44,13 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  */
 public abstract class JdbcUtils {
 
+	/**
+	 * Constant that indicates an unknown (or unspecified) SQL type.
+	 * @see java.sql.Types
+	 */
+	public static final int TYPE_UNKNOWN = Integer.MIN_VALUE;
+
+
 	private static final Log logger = LogFactory.getLog(JdbcUtils.class);
 
 

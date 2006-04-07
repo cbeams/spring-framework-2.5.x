@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.jdbc.core;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
+import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * Interface to be implemented for setting values for more complex database specific
@@ -42,12 +44,12 @@ public interface SqlTypeValue {
 
 	/**
 	 * Constant that indicates an unknown (or unspecified) SQL type.
-	 * Passed into setTypeValue if the original operation method does
-	 * not specify a SQL type.
+	 * Passed into <code>setTypeValue</code> if the original operation method
+	 * does not specify a SQL type.
 	 * @see java.sql.Types
 	 * @see JdbcOperations#update(String, Object[])
 	 */
-	int TYPE_UNKNOWN = Integer.MIN_VALUE;
+	int TYPE_UNKNOWN = JdbcUtils.TYPE_UNKNOWN;
 
 	/**
 	 * Set the type value on the given PreparedStatement.
