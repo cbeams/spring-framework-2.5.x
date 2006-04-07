@@ -518,7 +518,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if there is any problem
 	 */
-	protected Object query(
+	public Object query(
 			PreparedStatementCreator psc, final PreparedStatementSetter pss, final ResultSetExtractor rse)
 			throws DataAccessException {
 
