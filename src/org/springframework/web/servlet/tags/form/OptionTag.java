@@ -16,25 +16,23 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import javax.servlet.jsp.JspException;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.util.TagUtils;
-
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.Tag;
-import java.beans.PropertyEditor;
 
 /**
  * JSP tag for rendering an HTML '<code>option</code>' tag. Must be used nested
  * inside a {@link SelectTag}. Provides full support for databinding by marking
  * an '<code>option</code>' as 'selected' if the {@link #setValue(String) value}
  * matches the value bound to the out {@link SelectTag}.
- * <p/>
- * The {@link #setValue(String) value} property is required and corresponds to
+ *
+ * <p>The {@link #setValue(String) value} property is required and corresponds to
  * the '<code>value</code>' attribute of the rendered '<code>option</code>'.
- * <p/>
- * An optional {@link #setLabel label} property can be specified, the value of
+ *
+ * <p>An optional {@link #setLabel label} property can be specified, the value of
  * which corresponds to inner text of the rendered '<code>option</code>' tag.
  * If no {@link #setLabel label} is specified then the {@link #setValue(String) value}
  * property will be used when rendering the inner text.
@@ -53,6 +51,7 @@ public class OptionTag extends AbstractFormTag {
 	 * The text body of the rendered HTML <code>&lt;option&gt;</code> tag.
 	 */
 	private String label;
+
 
 	/**
 	 * Sets the 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
@@ -88,6 +87,7 @@ public class OptionTag extends AbstractFormTag {
 		return this.label;
 	}
 
+
 	/**
 	 * Renders an HTML <code>&lt;option&gt;</code> using configured
 	 * {@link #setValue value} and {@link #setLabel label} values.
@@ -102,7 +102,7 @@ public class OptionTag extends AbstractFormTag {
 
 		Object resolvedValue = evaluate("value", getValue());
 
-		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(resolvedValue));
+		tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(resolvedValue));
 		if (isSelected(resolvedValue)) {
 			tagWriter.writeAttribute("selected", "true");
 		}
@@ -132,10 +132,11 @@ public class OptionTag extends AbstractFormTag {
 	private String getLabelValue(Object resolvedValue) throws JspException {
 		String label = getLabel();
 		Object labelObj = (label == null ? resolvedValue : evaluate("label", label));
-		return ObjectUtils.nullSafeToString(labelObj);
+		return ObjectUtils.getDisplayString(labelObj);
 	}
 
 	private BindStatus getBindStatus() {
 	 return  (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
 	}
+
 }

@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.Assert;
-
 import javax.servlet.jsp.JspException;
+
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 
 /**
@@ -56,6 +56,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 */
 	public static final String READONLY_ATTRIBUTE = "readonly";
 
+
 	/**
 	 * The value of the '<code>maxlength</code>' attribute.
 	 */
@@ -80,6 +81,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 * The value of the '<code>readonly</code>' attribute.
 	 */
 	private String readonly;
+
 
 	/**
 	 * Sets the value of the '<code>maxlength</code>' attribute.
@@ -174,6 +176,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		return "text";
 	}
 
+
 	/**
 	 * Writes the '<code>input</code>' tag to the supplied {@link TagWriter}.
 	 * Uses the value returned by {@link #getType()} to determine which
@@ -202,6 +205,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 * when the value is written.
 	 */
 	protected void writeValue(TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(getBoundValue()));
+		tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(getBoundValue()));
 	}
+
 }

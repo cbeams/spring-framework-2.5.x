@@ -16,22 +16,24 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.web.servlet.support.BindStatus;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.jsp.JspException;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Iterator;
+
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.servlet.support.BindStatus;
 
 /**
  * Provides supporting functionality to render a list of '<code>option</code>'
  * tags based on some source object. This object can be either an array, a
  * {@link Collection} or a {@link Map}.
+ *
  * <h3>Using an array or a {@link Collection}</h3>
  * In the first approach you specify an array or {@link Collection} source object
  * which are used to render the inner '<code>option</code>' tags. When using
@@ -46,7 +48,8 @@ import java.util.Iterator;
  * In the second approach, '<code>option</code>' tags are rendered from a source
  * {@link Map}. The key and value of the entries in the {@link Map} correspond
  * to the value and label of the rendered '<code>option</code>'.
- * <p/>When using any of these approaches, an '<code>option</code>' is marked
+ *
+ * <p>When using any of these approaches, an '<code>option</code>' is marked
  * as 'selected' if its key {@link #isSelected matches} the value that
  * is bound to the tag instance.
  *
@@ -62,6 +65,7 @@ final class OptionWriter {
 	private String valueProperty;
 
 	private String labelProperty;
+
 
 	/**
 	 * Creates a new <code>OptionWriter</code> for the supplied <code>objectSource</code>.
@@ -142,7 +146,7 @@ final class OptionWriter {
 			Object value = (this.valueProperty == null ? item.toString() :
 							wrapper.getPropertyValue(this.valueProperty).toString());
 			String label = (this.labelProperty == null ? item.toString() :
-							ObjectUtils.nullSafeToString(wrapper.getPropertyValue(this.labelProperty)));
+							ObjectUtils.getDisplayString(wrapper.getPropertyValue(this.labelProperty)));
 
 			renderOption(tagWriter, item, value, label);
 		}
@@ -154,7 +158,7 @@ final class OptionWriter {
 	 */
 	private void renderOption(TagWriter tagWriter, Object item, Object value, String label) throws JspException {
 		tagWriter.startTag("option");
-		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(value));
+		tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(value));
 		if (isSelected(value) || isSelected(item)) {
 			tagWriter.writeAttribute("selected", "true");
 		}
@@ -169,4 +173,5 @@ final class OptionWriter {
 	private boolean isSelected(Object resolvedValue) {
 		return SelectedValueComparator.isSelected(this.bindStatus, resolvedValue);
 	}
+
 }

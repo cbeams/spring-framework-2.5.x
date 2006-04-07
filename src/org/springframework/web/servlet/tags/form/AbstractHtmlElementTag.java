@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.ObjectUtils;
-
 import javax.servlet.jsp.JspException;
+
+import org.springframework.util.ObjectUtils;
 
 /**
  * Base class for databinding-aware JSP tags that render HTML element. Provides
@@ -110,6 +110,7 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	 */
 	public static final String ONKEYDOWN_ATTRIBUTE = "onkeydown";
 
+
 	/**
 	 * The value of the '<code>class</code>' attribute.
 	 */
@@ -189,6 +190,7 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	 * The value of the '<code>onkeydown</code>' attribute.
 	 */
 	private String onkeydown;
+
 
 	/**
 	 * Sets the value of the '<code>class</code>' attribute.
@@ -445,14 +447,15 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 		return this.onkeydown;
 	}
 
+
 	/**
 	 * Writes the default attributes configured via this base class to the supplied {@link TagWriter}.
 	 * Subclasses should call this when they want the base attribute set to be written to the output.
 	 */
 	protected void writeDefaultAttributes(TagWriter tagWriter) throws JspException {
 		super.writeDefaultAttributes(tagWriter);
-		tagWriter.writeOptionalAttributeValue(CLASS_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate("cssClass", getCssClass())));
-		tagWriter.writeOptionalAttributeValue(STYLE_ATTRIBUTE, ObjectUtils.nullSafeToString(evaluate("cssStyle", getCssStyle())));
+		tagWriter.writeOptionalAttributeValue(CLASS_ATTRIBUTE, ObjectUtils.getDisplayString(evaluate("cssClass", getCssClass())));
+		tagWriter.writeOptionalAttributeValue(STYLE_ATTRIBUTE, ObjectUtils.getDisplayString(evaluate("cssStyle", getCssStyle())));
 		writeOptionalAttribute(tagWriter, LANG_ATTRIBUTE, getLang());
 		writeOptionalAttribute(tagWriter, TITLE_ATTRIBUTE, getTitle());
 		writeOptionalAttribute(tagWriter, DIR_ATTRIBUTE, getDir());
@@ -468,4 +471,5 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 		writeOptionalAttribute(tagWriter, ONKEYUP_ATTRIBUTE, getOnkeyup());
 		writeOptionalAttribute(tagWriter, ONKEYDOWN_ATTRIBUTE, getOnkeydown());
 	}
+
 }

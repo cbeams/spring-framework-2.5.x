@@ -16,23 +16,23 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import javax.servlet.jsp.JspException;
+
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.tags.HtmlEscapingAwareTag;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 
-import javax.servlet.jsp.JspException;
-
 /**
  * Base class for all JSP form tags. Provides utility methods for
  * null-safe EL evaluation and for accessing and working with a {@link TagWriter}.
- * <p/>
- * Sub-classes should implement the {@link #writeTagContent(TagWriter)} to perform
+ *
+ * <p>Subclasses should implement the {@link #writeTagContent(TagWriter)} to perform
  * actual tag rendering.
- * <p/>
- * Sub-classes (or test classes) can override the {@link #createTagWriter()} method to
+ *
+ * <p>Subclasses (or test classes) can override the {@link #createTagWriter()} method to
  * redirect output to a {@link java.io.Writer} other than the {@link javax.servlet.jsp.JspWriter}
  * associated with the current {@link javax.servlet.jsp.PageContext}.
- * 
+ *
  * @author Rob Harrop
  * @since 2.0
  */
@@ -53,13 +53,13 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	/**
 	 * Optionally writes the supplied value under the supplied attribute name into the supplied
 	 * {@link TagWriter}. In this case, the supplied value is {@link #evaluate evaluated} first
-	 * and then the {@link ObjectUtils#nullSafeToString String representation} is written as the
+	 * and then the {@link ObjectUtils#getDisplayString String representation} is written as the
 	 * attribute value. If the resultant <code>String</code> representation is <code>null</code>
 	 * or empty, no attribute is written.
 	 * @see TagWriter#writeOptionalAttributeValue(String, String)
 	 */
 	protected final void writeOptionalAttribute(TagWriter tagWriter, String attributeName, String value) throws JspException {
-		tagWriter.writeOptionalAttributeValue(attributeName, ObjectUtils.nullSafeToString(evaluate(attributeName, value)));
+		tagWriter.writeOptionalAttributeValue(attributeName, ObjectUtils.getDisplayString(evaluate(attributeName, value)));
 	}
 
 	/**
@@ -86,4 +86,5 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * @return valid tag render instruction as per {@link javax.servlet.jsp.tagext.Tag#doStartTag()}.
 	 */
 	protected abstract int writeTagContent(TagWriter tagWriter) throws JspException;
+
 }

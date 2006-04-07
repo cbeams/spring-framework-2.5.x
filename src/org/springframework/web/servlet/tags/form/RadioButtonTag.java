@@ -16,18 +16,18 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.ObjectUtils;
-
 import javax.servlet.jsp.JspException;
+
+import org.springframework.util.ObjectUtils;
 
 /**
  * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
  * element with a '<code>type</code>' of '<code>radio</code>'.
- * <p/>
- * Rendered elements are marked as 'checked' if the configured
+ *
+ * <p>Rendered elements are marked as 'checked' if the configured
  * {@link #setValue(Object) value} matches the {@link #getValue bound value}.
- * <p/>
- * A typical usage pattern will involved multiple tag instances bound
+ *
+ * <p>A typical usage pattern will involved multiple tag instances bound
  * to the same property but with different values.
  * 
  * @author Rob Harrop
@@ -39,6 +39,7 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 	 * The value of the '<code>value</code>' attribute.
 	 */
 	private Object value;
+
 
 	/**
 	 * Sets the value of the '<code>value</code>' attribute.
@@ -56,6 +57,7 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 		return this.value;
 	}
 
+
 	/**
 	 * Renders the '<code>input(radio)</code>' element with the configured
 	 * {@link #setValue(Object) value}. Marks the element as checked if the
@@ -68,7 +70,7 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 
 		Object value = getValue();
 		Object resolvedValue = (value instanceof String ? evaluate("value", (String)value) : value);
-		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(resolvedValue));
+		tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(resolvedValue));
 
 		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
 			tagWriter.writeAttribute("checked", "true");

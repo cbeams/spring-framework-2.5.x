@@ -16,25 +16,22 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.web.servlet.support.BindStatus;
-import org.springframework.util.ObjectUtils;
+import java.beans.PropertyEditor;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.springframework.core.enums.LabeledEnum;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.core.enums.LabeledEnum;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.Iterator;
-import java.beans.PropertyEditor;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.servlet.support.BindStatus;
 
 /**
  * @author Rob Harrop
  * @since 2.0
  */
-final class SelectedValueComparator {
-
-	private SelectedValueComparator() {
-	}
+abstract class SelectedValueComparator {
 
 	public static boolean isSelected(BindStatus bindStatus, Object candidateValue) {
 		Assert.notNull(candidateValue, "'candidateValue' cannot be null.");
@@ -55,7 +52,6 @@ final class SelectedValueComparator {
 		else if (boundValue instanceof Map) {
 			selected = mapCompare((Map) boundValue, candidateValue, bindStatus);
 		}
-
 
 		if (!selected) {
 			if (ObjectUtils.nullSafeEquals(boundValue, candidateValue)) {
@@ -111,14 +107,13 @@ final class SelectedValueComparator {
 	}
 
 	private static boolean exhaustiveCompare(Object value, Object candidate, PropertyEditor propertyEditor) {
-
 		if (value instanceof LabeledEnum) {
-			String enumCodeAtString = ObjectUtils.nullSafeToString(((LabeledEnum) value).getCode());
-			if (enumCodeAtString.equals(ObjectUtils.nullSafeToString(candidate))) {
+			String enumCodeAtString = ObjectUtils.getDisplayString(((LabeledEnum) value).getCode());
+			if (enumCodeAtString.equals(ObjectUtils.getDisplayString(candidate))) {
 				return true;
 			}
 		}
-		else if (ObjectUtils.nullSafeToString(value).equals(ObjectUtils.nullSafeToString(candidate))) {
+		else if (ObjectUtils.getDisplayString(value).equals(ObjectUtils.getDisplayString(candidate))) {
 			return true;
 		}
 		else if (propertyEditor != null && candidate instanceof String) {
@@ -134,4 +129,5 @@ final class SelectedValueComparator {
 		}
 		return false;
 	}
+
 }

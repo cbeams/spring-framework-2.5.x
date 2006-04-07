@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.ObjectUtils;
-
 import javax.servlet.jsp.JspException;
+
+import org.springframework.util.ObjectUtils;
 
 /**
  * @author Rob Harrop
@@ -26,16 +26,17 @@ import javax.servlet.jsp.JspException;
  */
 public class ErrorsTag extends AbstractHtmlElementTag {
 
-	/**
-	 * The HTML '<code>span</code>' tag.
-	 */
+	/** The HTML '<code>span</code>' tag */
 	public static final String SPAN_TAG = "span";
 
+
 	private String delimiter = "<br/>";
+
 
 	public void setDelimiter(String delimiter) {
 		this.delimiter = delimiter;
 	}
+
 
 	protected boolean shouldRender() throws JspException {
 		return getBindStatus().isError();
@@ -49,7 +50,7 @@ public class ErrorsTag extends AbstractHtmlElementTag {
 		if (shouldRender()) {
 			tagWriter.startTag(SPAN_TAG);
 			writeDefaultAttributes(tagWriter);
-			String delimiter = ObjectUtils.nullSafeToString(evaluate("delimiter", this.delimiter));
+			String delimiter = ObjectUtils.getDisplayString(evaluate("delimiter", this.delimiter));
 			String[] errorMessages = getBindStatus().getErrorMessages();
 			for (int i = 0; i < errorMessages.length; i++) {
 				String errorMessage = errorMessages[i];
@@ -62,4 +63,5 @@ public class ErrorsTag extends AbstractHtmlElementTag {
 		}
 		return EVAL_PAGE;
 	}
+
 }

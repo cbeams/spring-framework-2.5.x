@@ -16,12 +16,12 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import javax.servlet.jsp.JspException;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.util.TagUtils;
-
-import javax.servlet.jsp.JspException;
 
 /**
  * @author Rob Harrop
@@ -46,6 +46,7 @@ public class OptionsTag extends AbstractFormTag {
 	 * '<code>option</code>' tag.
 	 */
 	private String itemLabel;
+
 
 	/**
 	 * Sets the {@link java.util.Collection}, {@link java.util.Map} or array of objects used to generate
@@ -91,6 +92,7 @@ public class OptionsTag extends AbstractFormTag {
 		return this.itemLabel;
 	}
 
+
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		assertUnderSelectTag();
 		Object items = getItems();
@@ -100,9 +102,9 @@ public class OptionsTag extends AbstractFormTag {
 		String itemLabel = getItemLabel();
 
 		String valueProperty = (itemValue == null ? null :
-						ObjectUtils.nullSafeToString(evaluate("itemValue", itemValue)));
+						ObjectUtils.getDisplayString(evaluate("itemValue", itemValue)));
 		String labelProperty = (itemLabel == null ? null :
-						ObjectUtils.nullSafeToString(evaluate("itemLabel", itemLabel)));
+						ObjectUtils.getDisplayString(evaluate("itemLabel", itemLabel)));
 
 		OptionWriter optionWriter = new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty);
 		optionWriter.writeOptions(tagWriter);
@@ -118,4 +120,5 @@ public class OptionsTag extends AbstractFormTag {
 	private BindStatus getBindStatus() {
 		return (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
 	}
+
 }

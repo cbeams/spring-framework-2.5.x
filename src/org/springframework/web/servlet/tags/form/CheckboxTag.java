@@ -16,19 +16,21 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.util.Collection;
+
+import javax.servlet.jsp.JspException;
+
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import javax.servlet.jsp.JspException;
-import java.util.Collection;
-
 /**
  * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
  * element with a '<code>type</code>' of '<code>checkbox</code>'.
- * <p/>
- * May be used in one of three different approaches depending on the
+ *
+ * <p>May be used in one of three different approaches depending on the
  * type of the {@link #getValue bound value}.
+ *
  * <h3>Approach One</h3>
  * When the bound value is of type {@link Boolean} then the '<code>input(checkbox)</code>'
  * is marked as 'checked' if the bound value is <code>true</code>. The '<code>value</code>'
@@ -51,6 +53,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	 */
 	private Object value;
 
+
 	/**
 	 * Sets the value of the '<code>value</code>' attribute.
 	 * May be a runtime expression.
@@ -67,6 +70,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	protected Object getValue() {
 		return this.value;
 	}
+
 
 	/**
 	 * Writes the '<code>input(checkbox)</code>' to the supplied {@link TagWriter}
@@ -120,7 +124,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	 * bound value.
 	 */
 	private void renderSingleValue(Object resolvedValue, TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(resolvedValue));
+		tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(resolvedValue));
 
 		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
 			tagWriter.writeAttribute("checked", "true");
@@ -133,7 +137,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	 * in the bound {@link Collection} value.
 	 */
 	private void renderFromCollection(Object resolvedValue, Collection boundValue, TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", ObjectUtils.nullSafeToString(resolvedValue));
+		tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(resolvedValue));
 
 		if (boundValue.contains(resolvedValue)) {
 			tagWriter.writeAttribute("checked", "true");
@@ -151,4 +155,5 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 			tagWriter.writeAttribute("checked", "true");
 		}
 	}
+
 }

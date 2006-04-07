@@ -16,31 +16,30 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
-
 import javax.servlet.jsp.JspException;
 
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Data-binding aware JSP tag for rendering an HTML '<code>form</code>' whose
  * inner elements are bound to properties on a {@link #setCommandName command object}.
- * <p/>
- * Users should place the command object into the {@link org.springframework.web.servlet.ModelAndView}
+ *
+ * <p>Users should place the command object into the {@link org.springframework.web.servlet.ModelAndView}
  * when populating the data for their view. The name of this command object must
  * be configured using the {@link #setCommandName commandName} property.
- * <p/>
- * The default value for the {@link #setCommandName commandName} property is
+ *
+ * <p>The default value for the {@link #setCommandName commandName} property is
  * '<code>command</code>' which corresponds to the default name when using the
  * {@link org.springframework.web.servlet.mvc.SimpleFormController}.
- * <p/>
- * Inner tags can access the name of the command object via the
+ *
+ * <p>Inner tags can access the name of the command object via the
  * {@link javax.servlet.jsp.PageContext}. The attribute name is defined in
  * {@link #COMMAND_NAME_VARIABLE_NAME}.
  *
  * @author Rob Harrop
- * @see org.springframework.web.servlet.mvc.SimpleFormController
  * @since 2.0
+ * @see org.springframework.web.servlet.mvc.SimpleFormController
  */
 public class FormTag extends AbstractFormTag {
 
@@ -95,6 +94,7 @@ public class FormTag extends AbstractFormTag {
 	 */
 	public static final String ENCTYPE_ATTRIBUTE = "enctype";
 
+
 	/**
 	 * The {@link TagWriter} instance used by this tag.
 	 */
@@ -135,6 +135,7 @@ public class FormTag extends AbstractFormTag {
 	 */
 	private String onreset;
 
+
 	/**
 	 * Sets the name of the command object.
 	 * May be a runtime expression.
@@ -174,7 +175,7 @@ public class FormTag extends AbstractFormTag {
 	 * May be a runtime expression.
 	 */
 	public void setEnctype(String enctype) {
-		Assert.hasText(enctype, "'enctype' cannot be null or zero length.");
+		Assert.hasText(enctype, "'enctype' cannot be null or zero length");
 		this.enctype = enctype;
 	}
 
@@ -183,7 +184,7 @@ public class FormTag extends AbstractFormTag {
 	 * May be a runtime expression.
 	 */
 	public void setOnsubmit(String onsubmit) {
-		Assert.hasText(onsubmit, "'onsubmit' cannot be null or zero length.");
+		Assert.hasText(onsubmit, "'onsubmit' cannot be null or zero length");
 		this.onsubmit = onsubmit;
 	}
 
@@ -192,9 +193,10 @@ public class FormTag extends AbstractFormTag {
 	 * May be a runtime expression.
 	 */
 	public void setOnreset(String onreset) {
-		Assert.hasText(onreset, "'onreset' cannot be null or zero length.");
+		Assert.hasText(onreset, "'onreset' cannot be null or zero length");
 		this.onreset = onreset;
 	}
+
 
 	/**
 	 * Writes the opening part of the block	'<code>form</code>' tag and exposes
@@ -205,7 +207,7 @@ public class FormTag extends AbstractFormTag {
 		this.tagWriter.startTag("form");
 
 		this.tagWriter.writeAttribute(METHOD_ATTRIBUTE,
-						ObjectUtils.nullSafeToString(evaluate(METHOD_ATTRIBUTE, this.method)));
+						ObjectUtils.getDisplayString(evaluate(METHOD_ATTRIBUTE, this.method)));
 		writeOptionalAttribute(tagWriter, NAME_ATTRIBUTE, this.name);
 		writeOptionalAttribute(tagWriter, ACTION_ATTRIBUTE, this.action);
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, this.enctype);
@@ -226,7 +228,7 @@ public class FormTag extends AbstractFormTag {
 	private String resolveCommandName() throws JspException {
 		Object resolvedCommmandName = evaluate(COMMAND_NAME_ATTRIBUTE, this.commandName);
 		if (resolvedCommmandName == null) {
-			throw new IllegalArgumentException("'commandName' cannot be null.");
+			throw new IllegalArgumentException("'commandName' cannot be null");
 		}
 		return (String) resolvedCommmandName;
 	}
@@ -248,4 +250,5 @@ public class FormTag extends AbstractFormTag {
 		super.doFinally();
 		this.tagWriter = null;
 	}
+
 }

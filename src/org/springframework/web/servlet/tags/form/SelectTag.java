@@ -45,6 +45,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 */
 	public static final String LIST_VALUE_PAGE_ATTRIBUTE = "org.springframework.web.servlet.tags.form.SelectTag.listValue";
 
+
 	/**
 	 * The {@link Collection}, {@link Map} or array of objects used to generate the inner
 	 * '<code>option</code>' tags.
@@ -80,6 +81,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * Only used in conjunction with nested {@link OptionTag OptionTags}.
 	 */
 	private TagWriter tagWriter;
+
 
 	/**
 	 * Sets the {@link Collection}, {@link Map} or array of objects used to generate
@@ -164,6 +166,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 		return multiple;
 	}
 
+
 	/**
 	 * Renders the HTML '<code>select</code>' tag to supplied {@link TagWriter}.
 	 * Renders nested '<code>option</code>' tags if the {@link #setItems items}
@@ -178,16 +181,16 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 			tagWriter.writeAttribute("multiple", "true");
 		}
 
-		tagWriter.writeOptionalAttributeValue("size", ObjectUtils.nullSafeToString(evaluate("size", getSize())));
+		tagWriter.writeOptionalAttributeValue("size", ObjectUtils.getDisplayString(evaluate("size", getSize())));
 
 		Object items = getItems();
 		if (items != null) {
 			Object itemsObject = (items instanceof String ? evaluate("items", (String) items) : items);
 
 			String valueProperty = (getItemValue() == null ? null :
-							ObjectUtils.nullSafeToString(evaluate("itemValue", getItemValue())));
+							ObjectUtils.getDisplayString(evaluate("itemValue", getItemValue())));
 			String labelProperty = (getItemLabel() == null ? null :
-							ObjectUtils.nullSafeToString(evaluate("itemLabel", getItemLabel())));
+							ObjectUtils.getDisplayString(evaluate("itemLabel", getItemLabel())));
 
 			OptionWriter optionWriter = new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty);
 			optionWriter.writeOptions(tagWriter);
