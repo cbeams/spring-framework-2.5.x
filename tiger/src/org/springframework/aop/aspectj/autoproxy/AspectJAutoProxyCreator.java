@@ -58,6 +58,23 @@ public class AspectJAutoProxyCreator extends AspectJInvocationContextExposingAdv
 	private static final Log staticLogger = LogFactory.getLog(AspectJAutoProxyCreator.class);
 	private static final String ORDER_PROPERTY = "order"; 
 	
+	/*
+	 * The mere presence of an aop:config element is enough to cause this
+	 * AspectJAutoProxyCreator to be created. But that *does not* mean we
+	 * want it to interpret beans that happen to be @AspectJ aspects. This
+	 * behaviour should *only be enabled by the <aop:aspectj-autoproxy> element,
+	 * which sets this property to true.
+	 */
+	private static boolean useAtAspectJAspects = false;
+	
+	/*
+	 * Called by the namespace handler when an <aop:aspectj-autoproxy> element
+	 * is detected.
+	 */
+	public static void enableAtAspectJAutoproxying() {
+		useAtAspectJAspects = true;
+	}
+	
 	/**
 	 * Look for AspectJ annotated aspect classes in the current bean factory,
 	 * and return to a list of Spring AOP advisors representing them.
@@ -72,6 +89,11 @@ public class AspectJAutoProxyCreator extends AspectJInvocationContextExposingAdv
 			throws BeansException, IllegalStateException {
 
 		List<Advisor> advisors = new LinkedList<Advisor>();
+		
+		if (!useAtAspectJAspects) {
+			// NOT Collections.EMPTY_LIST as others may try to add elements later
+			return advisors;
+		}
 
 		// Safety of cast is already enforced by superclass
 		String[] beanDefinitionNames = BeanFactoryUtils.beanNamesIncludingAncestors((ListableBeanFactory) beanFactory);		
