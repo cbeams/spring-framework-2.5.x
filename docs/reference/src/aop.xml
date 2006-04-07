@@ -1073,110 +1073,261 @@ public interface IntroductionInfo {
 
     <sect2 id="aop-pfb-2">
       <title>JavaBean properties</title>
-
-      <para>Like most FactoryBean implementations provided with Spring,
-      <literal>ProxyFactoryBean</literal> is itself a JavaBean. Its properties
-      are used to:</para>
-
+      <para>
+		In common with most <interfacename>FactoryBean</interfacename> implementations
+		provided with Spring, the <classname>ProxyFactoryBean</classname> class is
+		itself a JavaBean. Its properties are used to:
+	  </para>
       <itemizedlist>
         <listitem>
           <para>Specify the target you want to proxy</para>
         </listitem>
-
         <listitem>
-          <para>Specify whether to use CGLIB</para>
+          <para>Specify whether to use CGLIB (see below and also the the section entitled
+			<xref linkend="aop-pfb-proxy-types"/>)</para>
         </listitem>
       </itemizedlist>
-
-      <para>Some key properties are inherited from
-      <literal>org.springframework.aop.framework.ProxyConfig</literal>: the
-      superclass for all AOP proxy factories. These include:</para>
-
+      <para>
+		Some key properties are inherited from
+		<classname>org.springframework.aop.framework.ProxyConfig</classname> (the
+		superclass for all AOP proxy factories in Spring). These key properties
+		include:
+      </para>
       <itemizedlist>
         <listitem>
-          <para><literal>proxyTargetClass</literal>: true if we should proxy
-          the target class, rather than its interfaces. If this is true we
-          need to use CGLIB.</para>
+          <para>
+			<literal>proxyTargetClass</literal>: <literal>true</literal> if the
+			target class is to be proxied, rather than the target class' interfaces.
+			If this property value is set to <literal>true</literal>, then CGLIB proxies
+			will be created (but see also below the section entitled
+			<xref linkend="aop-pfb-proxy-types"/>).
+		  </para>
         </listitem>
-
         <listitem>
-          <para><literal>optimize</literal>: whether to apply aggressive
-          optimization to created proxies. Don't use this setting unless you
-          understand how the relevant AOP proxy handles optimization. This is
-          currently used only for CGLIB proxies; it has no effect with JDK
-          dynamic proxies (the default).</para>
+          <para>
+			<literal>optimize</literal>: controls whether or not aggressive
+			optimizations are applied to proxies <emphasis>created via CGLIB</emphasis>.
+			One should not blithely use this setting unless one fully understands
+			how the relevant AOP proxy handles optimization. This is currently used only
+			for CGLIB proxies; it has no effect with JDK dynamic proxies (the default).
+          </para>
         </listitem>
-
         <listitem>
-          <para><literal>frozen</literal>: whether advice changes should be
-          disallowed once the proxy factory has been configured. Default is
-          false.</para>
+          <para>
+			<literal>frozen</literal>: controls whether or not advice changes
+			should be disallowed once the proxy factory has been configured. The
+			default is <literal>false</literal> (i.e. no changes to the proxy
+			configuration are allowed after the proxy has been configured).
+		  </para>
         </listitem>
-
         <listitem>
-          <para><literal>exposeProxy</literal>: whether the current proxy
-          should be exposed in a ThreadLocal so that it can be accessed by the
-          target. (It's available via the MethodInvocation without the need
-          for a ThreadLocal.) If a target needs to obtain the proxy and
-          exposeProxy is true, the target can use the
-          <literal>AopContext.currentProxy()</literal> method.</para>
+          <para>
+			<literal>exposeProxy</literal>: determines whether or not the current
+			proxy should be exposed in a <classname>ThreadLocal</classname> so that
+			it can be accessed by the target. (It's available via the
+			<interfacename>MethodInvocation</interfacename> without the need
+			for a <classname>ThreadLocal</classname>.) If a target needs to obtain
+			the proxy and the <literal>exposeProxy</literal> property is set to
+			<literal>true</literal>, the target can use the
+			<literal>AopContext.currentProxy()</literal> method.
+          </para>
         </listitem>
-
         <listitem>
-          <para><literal>aopProxyFactory</literal>: the implementation of
-          AopProxyFactory to use. Offers a way of customizing whether to use
-          dynamic proxies, CGLIB or any other proxy strategy. The default
-          implementation will choose dynamic proxies or CGLIB appropriately.
-          There should be no need to use this property; it's intended to allow
-          the addition of new proxy types in Spring 1.1.</para>
+          <para>
+			<literal>aopProxyFactory</literal>: the implementation of
+			<interfacename>AopProxyFactory</interfacename> to use. Offers a way of
+			customizing whether to use dynamic proxies, CGLIB or any other proxy
+			strategy. The default implementation will choose dynamic proxies or
+			CGLIB appropriately. There should be no need to use this property;
+			it is intended to allow the addition of new proxy types in Spring 1.1.
+          </para>
         </listitem>
       </itemizedlist>
-
-      <para>Other properties specific to <literal>ProxyFactory</literal>Bean
-      include:</para>
-
+      <para>
+		Other properties specific to <classname>ProxyFactoryBean</classname> include:
+	  </para>
       <itemizedlist>
         <listitem>
-          <para><literal>proxyInterfaces</literal>: array of String interface
-          names. If this isn't supplied, a CGLIB proxy for the target class
-          will be used</para>
+          <para>
+			<literal>proxyInterfaces</literal>: array of String interface
+			names. If this isn't supplied, a CGLIB proxy for the target class
+			will be used (but see also below the section entitled
+			<xref linkend="aop-pfb-proxy-types"/>).
+          </para>
         </listitem>
-
         <listitem>
-          <para><literal>interceptorNames</literal>: String array of Advisor,
-          interceptor or other advice names to apply. Ordering is significant.
-          First come, first serve that is. The first interceptor in the list
-          will be the first to be able to intercept the invocation (of course
-          if it concerns a regular <literal>MethodInterceptor</literal> or
-          <literal>BeforeAdvice</literal>).</para>
-
-          <para>The names are bean names in the current factory, including
-          bean names from ancestor factories. You can't mention bean
-          references here since doing so would result in the ProxyFactoryBean
-          ignoring the singleton setting of the advise.</para>
-
-          <para>You can append an interceptor name with an asterisk (*). This
-          will result in the application of all advisor beans with names
-          starting with the part before the asterisk to be applied. An example
-          of using this feature can be found below.</para>
+          <para>
+			<literal>interceptorNames</literal>: String array of
+			<interfacename>Advisor</interfacename>, interceptor or other advice
+			names to apply. Ordering is significant, on a first come-first served
+			basis. That is to say that the first interceptor in the list
+			will be the first to be able to intercept the invocation.
+          </para>
+          <para>
+			The names are bean names in the current factory, including
+			bean names from ancestor factories. You can't mention bean
+			references here since doing so would result in the
+			<classname>ProxyFactoryBean</classname> ignoring the singleton
+			setting of the advice.
+          </para>
+          <para>
+			You can append an interceptor name with an asterisk
+			(<literal>*</literal>). This will result in the application of all
+			advisor beans with names starting with the part before the asterisk
+			to be applied. An example of using this feature can be found below.
+          </para>
         </listitem>
-
         <listitem>
-          <para>singleton: whether or not the factory should return a single
-          object, no matter how often the <literal>getObject()</literal>
-          method is called. Several <literal>FactoryBean</literal>
-          implementations offer such a method. Default value is true. If you
-          want to use stateful advice--for example, for stateful mixins--use
-          prototype advices along with a singleton value of false.</para>
+          <para>
+			singleton: whether or not the factory should return a single
+			object, no matter how often the <literal>getObject()</literal>
+			method is called. Several <interfacename>FactoryBean</interfacename>
+			implementations offer such a method. The default value is
+			<literal>true</literal>. If you	want to use stateful advice --
+			for example, for stateful mixins -- use	prototype advices along
+			with a singleton value of <literal>false</literal>.
+          </para>
         </listitem>
       </itemizedlist>
+    </sect2>
+    
+    <sect2 id="aop-pfb-proxy-types">
+		<title>JDK- and CGLIB-based proxies</title>
+        <para>
+			This section serves as the definitive documentation as to how the
+			<classname>ProxyFactoryBean</classname> chooses to create one of
+			either a JDK- and CGLIB-based proxy for a particular target object
+			(that is to be proxied).
+        </para>
+        <note>
+			<para>
+				The behaviour of the <classname>ProxyFactoryBean</classname> with regard
+				to creating JDK- or CGLIB-based proxies changed between versions 1.2.x and
+				2.0 of Spring. The <classname>ProxyFactoryBean</classname> now
+				exhibits similar semantics with regard to auto-detecting interfaces
+				as those of the <classname>TransactionProxyFactoryBean</classname> class.		
+			</para>
+        </note>
+		<para>
+			If the class of a target object that is to be proxied (hereafter simply
+			referred to as the target class) doesn't implement any interfaces, then
+			a CGLIB-based proxy will be created. This is the easiest scenario, because
+			JDK proxies are interface based, and no interfaces means no JDK proxying
+			is even possible. One simply plugs in the target bean, and specifies the
+			list of interceptors via the <literal>interceptorNames</literal> property.
+			Note that a CGLIB-based proxy will be created even if the
+			<literal>proxyTargetClass</literal> property of the
+			<classname>ProxyFactoryBean</classname> has been set to <literal>false</literal>.
+			(Obviously this makes no sense, and is best removed from the bean
+			definition because it is at best redundant, and at worst confusing.)
+		</para>
+		<para>
+			If the target class implements one (or more) interfaces, then the type of
+			proxy that is created depends on the configuration of the
+			<classname>ProxyFactoryBean</classname>.
+		</para>
+		<para>
+			If the <literal>proxyTargetClass</literal> property of the
+			<classname>ProxyFactoryBean</classname> has been set to <literal>true</literal>,
+			then a CGLIB-based proxy will be created. This makes sense, and is in
+			keeping with the principle of least surprise. Even if the
+			<literal>proxyInterfaces</literal> property of the
+			<classname>ProxyFactoryBean</classname> has been set to one or more
+			fully qualified interface names, the fact that the
+			<literal>proxyTargetClass</literal> property is set to 
+			<literal>true</literal> <emphasis>will</emphasis> cause
+			CGLIB-based proxying to be in effect.
+		</para>
+		<para>
+			If the <literal>proxyInterfaces</literal> property of the
+			<classname>ProxyFactoryBean</classname> has been set to one or more
+			fully qualified interface names, then a JDK-based proxy will be created.
+			The created proxy will implement all of the interfaces that were specified
+			in the <literal>proxyInterfaces</literal> property; if the target class
+			happens to implement a whole lot more interfaces than those specified in
+			the <literal>proxyInterfaces</literal> property, that is all well and
+			good but those additional interfaces will not be implemented by the
+			returned proxy.
+		</para>
+		<para>
+			If the <literal>proxyInterfaces</literal> property of the
+			<classname>ProxyFactoryBean</classname> has <emphasis>not</emphasis> been
+			set, but the target class <emphasis>does implement one (or more)</emphasis>
+			interfaces, then the <classname>ProxyFactoryBean</classname> will auto-detect
+			the fact that the target class does actually implement at least one interface,
+			and a JDK-based proxy will be created. The interfaces that are actually
+			proxied will be <emphasis>all</emphasis> of the interfaces that the target
+			class implements; in effect, this is the same as simply supplying a list
+			of each and every interface that the target class implements to the
+			<literal>proxyInterfaces</literal> property. However, it is significantly less
+			work, and less prone to typos.
+		</para>
+		<sect3 id="aop-pfb-proxy-types-spring2">
+			<title>JDK- and CGLIB-based proxies : Spring 2.0's <literal>&lt;aop-config/&gt;</literal></title>
+			<para>
+				Spring 2.0 introduced a new, streamlined style of XML configuration; one of
+				the areas where this new style configuration is most visible is in the area
+				of defining aspects, pointcuts and the like. All of the old-style configuration
+				(as described above) continues to work in <emphasis>exactly</emphasis> the
+				same way; this section highlights the differences between the old-style
+				configuration and the new Spring 2.0 <literal>&lt;aop-config/&gt;</literal>
+				configuration with regard to JDK- and CGLIB-based proxies.
+			</para>
+			<para>
+				For the purpose of having something concrete to illustrate the proxying strategy
+				semantics in Spring 2.0, find below a snippet of Spring XML 2.0 AOP configuration.
+			</para>
+			<programlisting><![CDATA[<aop:config>
+]]><lineannotation>&lt;!-- pointcut that matches beans that have methods starting with 'h' --&gt;</lineannotation><![CDATA[
+    <aop:pointcut id="anyMethod" expression="execution(* *.h*(..)))"/>
+    <aop:aspect id="the.advice" ref="advice">
+        <aop:advice kind="before" method="intercept" pointcut-ref="anyMethod"/>
+    </aop:aspect>
+</aop:config>
+
+]]><lineannotation>&lt;!-- the advice that is to be applied at picked out joinpoints --&gt;</lineannotation><![CDATA[
+<bean id="advice" class="x.y.Advice"/>
+
+]]><lineannotation>&lt;!-- a class that doesn't implement any interfaces --&gt;</lineannotation><![CDATA[
+<bean id="plain" class="x.y.PlainClass"/>
+
+]]><lineannotation>&lt;!-- a class that implements exactly one interface --&gt;</lineannotation><![CDATA[
+<bean id="one" class="x.y.OneInterface"/>]]></programlisting>
+		</sect3>
+		<para>
+			In the case of the above configuration (and assuming that both of the
+			<literal>'plain'</literal> and <literal>'one'</literal> beans have methods
+			starting with <literal>'h'</literal>), the <literal>'plain'</literal> bean
+			will be proxied using CGLIB, whereas the <literal>'one'</literal> bean will
+			be proxied using the JDK dynamic proxying mechanism.
+		</para>
+		<para>
+			If  one wants to force CGLIB-based proxying, one can specify this explicitly
+			on the <literal>&lt;aop-config/&gt;</literal> element; to wit...
+		</para>
+			<programlisting><![CDATA[<aop:config ]]><emphasis role="bold">proxyTargetClass="true"</emphasis><![CDATA[>
+    <aop:pointcut id="anyMethod" expression="execution(* *.h*(..)))"/>
+    <aop:aspect id="the.advice" ref="advice">
+        <aop:advice kind="before" method="intercept" pointcut-ref="anyMethod"/>
+    </aop:aspect>
+</aop:config>
+
+]]><lineannotation>&lt;!-- rest of configuration as before --&gt;</lineannotation></programlisting>
+		<para>
+			Please note that this setting applies on a
+			<emphasis>per <literal>&lt;aop-config/&gt;</literal></emphasis> basis; i.e. one
+			can have multiple <literal>&lt;aop-config/&gt;</literal></emphasis> elements,
+			with some configured to force CGLIB-based proxying and some not to.
+		</para>
     </sect2>
 
     <sect2>
       <title>Proxying interfaces</title>
 
-      <para>Let's look at a simple example of ProxyFactoryBean in action. This
-      example involves:</para>
+      <para>
+		Let's look at a simple example of <classname>ProxyFactoryBean</classname>
+		in action. This example involves:
+      </para>
 
       <itemizedlist>
         <listitem>
