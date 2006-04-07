@@ -56,6 +56,8 @@ import org.springframework.core.annotation.AnnotationUtils;
  */
 public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFactory {
 	
+	private static final String AJC_MAGIC = "ajc$";
+	
 	protected enum AspectJAnnotationType { 
 		AtPointcut, 
 		AtBefore, 
@@ -207,7 +209,24 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	}
 
 	public boolean isAspect(Class<?> clazz) {
-		return AjTypeSystem.getAjType(clazz).isAspect();
+		boolean couldBeAtAspectJAspect = AjTypeSystem.getAjType(clazz).isAspect();
+		if (!couldBeAtAspectJAspect) {
+			return false;
+		} 
+		else {
+			// we know it's an aspect, but we don't know whether it is an 
+			// @AspectJ aspect or a code style aspect.
+			// This is an *unclean* test whilst waiting for AspectJ to provide
+			// us with something better
+			Method[] methods = clazz.getDeclaredMethods();
+			for(Method m : methods) {
+				if (m.getName().startsWith(AJC_MAGIC)) {
+					// must be a code style aspect
+					return false;
+				}
+			}
+			return true;
+		}
 	}
 
 	public void validate(Class<?> aspectClass) throws AopConfigException {
