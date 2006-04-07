@@ -16,6 +16,8 @@
 
 package org.springframework.aop.config;
 
+import java.lang.reflect.Method;
+
 import org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvisorAutoProxyCreator;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -38,6 +40,8 @@ public abstract class NamespaceHandlerUtils {
 	public static final String ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME =
 			"org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator";
 
+	private static final String ENABLE_AT_ASPECTJ_AUTOPROXYING = 
+		    "enableAtAspectJAutoproxying";
 
 	public static void registerAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
 		if (!registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
@@ -46,7 +50,12 @@ public abstract class NamespaceHandlerUtils {
 		}
 	}
 
+
 	public static void registerAspectJAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
+		registerAspectJAutoProxyCreatorIfNecessary(registry,false);
+	}
+
+	public static void registerAspectJAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry, boolean enableAutoProxying) {
 		Class baseApcClass = InvocationContextExposingAdvisorAutoProxyCreator.class;
 		Class ajApcClass = getAspectJAutoProxyCreatorClassIfPossible();
 
@@ -64,11 +73,26 @@ public abstract class NamespaceHandlerUtils {
 				// switch APC type
 				definition.setBeanClass(ajApcClass);
 			}
-			return;
 		}
-
-		RootBeanDefinition definition = new RootBeanDefinition(ajApcClass);
-		registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, definition);
+		else {
+			RootBeanDefinition definition = new RootBeanDefinition(ajApcClass);
+			registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, definition);
+		}
+		
+		if (enableAutoProxying) {
+			// reflective invoke of method in Java5 class
+			try {
+				Method enableMethod = ajApcClass.getMethod(ENABLE_AT_ASPECTJ_AUTOPROXYING, new Class[]{});
+				enableMethod.invoke(null, new Object[0]);
+			}
+			catch (Exception ex) {
+				// there are a cast of thousands of exceptions that can be thrown by
+				// the above, but they all boil down to the same thing...
+				throw new IllegalStateException(
+						"Unable to enable AspectJ AutoProxying for @AspectJ aspects",
+						ex);
+			}
+		}
 	}
 
 	public static void forceAutoProxyCreatorToUseClassProxying(BeanDefinitionRegistry registry) {

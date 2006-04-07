@@ -76,7 +76,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 	private static class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
-			NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(parserContext.getRegistry());
+			NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(parserContext.getRegistry(),true);
 			return null;
 		}
 	}
