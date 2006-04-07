@@ -1276,7 +1276,7 @@ public interface IntroductionInfo {
 			<para>
 				For the purpose of having something concrete to illustrate the proxying strategy
 				semantics in Spring 2.0, find below a snippet of Spring XML 2.0 AOP configuration.
-			</para>
+			</para>			
 			<programlisting><![CDATA[<aop:config>
 ]]><lineannotation>&lt;!-- pointcut that matches beans that have methods starting with 'h' --&gt;</lineannotation><![CDATA[
     <aop:pointcut id="anyMethod" expression="execution(* *.h*(..)))"/>
@@ -1293,18 +1293,17 @@ public interface IntroductionInfo {
 
 ]]><lineannotation>&lt;!-- a class that implements exactly one interface --&gt;</lineannotation><![CDATA[
 <bean id="one" class="x.y.OneInterface"/>]]></programlisting>
-		</sect3>
-		<para>
-			In the case of the above configuration (and assuming that both of the
-			<literal>'plain'</literal> and <literal>'one'</literal> beans have methods
-			starting with <literal>'h'</literal>), the <literal>'plain'</literal> bean
-			will be proxied using CGLIB, whereas the <literal>'one'</literal> bean will
-			be proxied using the JDK dynamic proxying mechanism.
-		</para>
-		<para>
-			If  one wants to force CGLIB-based proxying, one can specify this explicitly
-			on the <literal>&lt;aop-config/&gt;</literal> element; to wit...
-		</para>
+			<para>
+				In the case of the above configuration (and assuming that both of the
+				<literal>'plain'</literal> and <literal>'one'</literal> beans have methods
+				starting with <literal>'h'</literal>), the <literal>'plain'</literal> bean
+				will be proxied using CGLIB, whereas the <literal>'one'</literal> bean will
+				be proxied using the JDK dynamic proxying mechanism.
+			</para>
+			<para>
+				If one wants to force CGLIB-based proxying, one can specify this explicitly
+				on the <literal>&lt;aop-config/&gt;</literal> element; to wit...
+			</para>
 			<programlisting><![CDATA[<aop:config ]]><emphasis role="bold">proxyTargetClass="true"</emphasis><![CDATA[>
     <aop:pointcut id="anyMethod" expression="execution(* *.h*(..)))"/>
     <aop:aspect id="the.advice" ref="advice">
@@ -1313,12 +1312,13 @@ public interface IntroductionInfo {
 </aop:config>
 
 ]]><lineannotation>&lt;!-- rest of configuration as before --&gt;</lineannotation></programlisting>
-		<para>
-			Please note that this setting applies on a
-			<emphasis>per <literal>&lt;aop-config/&gt;</literal></emphasis> basis; i.e. one
-			can have multiple <literal>&lt;aop-config/&gt;</literal></emphasis> elements,
-			with some configured to force CGLIB-based proxying and some not to.
-		</para>
+			<para>
+				Please note that this setting applies on a
+				<emphasis>per <literal>&lt;aop-config/&gt;</literal></emphasis> basis; i.e. one
+				can have multiple <literal>&lt;aop-config/&gt;</literal> elements,
+				with some configured to force CGLIB-based proxying and some not to.
+			</para>
+		</sect3>
     </sect2>
 
     <sect2>
