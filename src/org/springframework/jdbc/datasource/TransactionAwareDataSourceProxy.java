@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  * <p>Data access code that should remain unaware of Spring's data access support
  * can work with this proxy to seamlessly participate in Spring-managed transactions.
  * Note that the transaction manager, for example DataSourceTransactionManager,
- * still needs to work with underlying DataSource, <i>not</i> with this proxy.
+ * still needs to work with the underlying DataSource, <i>not</i> with this proxy.
  *
  * <p><b>Make sure that TransactionAwareDataSourceProxy is the outermost DataSource
  * of a chain of DataSource proxies/adapters.</b> TransactionAwareDataSourceProxy
