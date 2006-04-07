@@ -1,16 +1,12 @@
-/*
- * Created on Nov 7, 2004
- */
 package org.springframework.util.logging;
 
 import java.util.Properties;
 
-import org.apache.axis.components.logger.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
- * @author robh
- * 
+ * @author Rob Harrop
  */
 public class PropertiesCommonsLogProvider implements CommonsLogProvider {
 
@@ -37,4 +33,5 @@ public class PropertiesCommonsLogProvider implements CommonsLogProvider {
 	public void setProperties(Properties properties) {
 		this.properties = properties;
 	}
+
 }

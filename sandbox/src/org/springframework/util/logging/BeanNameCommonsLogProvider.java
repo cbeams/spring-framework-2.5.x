@@ -1,14 +1,10 @@
-/*
- * Created on Nov 7, 2004
- */
 package org.springframework.util.logging;
 
-import org.apache.axis.components.logger.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
- * @author robh
- *
+ * @author Rob Harrop
  */
 public class BeanNameCommonsLogProvider implements CommonsLogProvider {
 
