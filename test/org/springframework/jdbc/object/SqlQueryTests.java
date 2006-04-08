@@ -35,7 +35,6 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.SqlNamedParameterMap;
 
 /**
  * @author Trevor Cook
@@ -182,7 +181,9 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		query.compile();
 
 		try {
-			List list = query.execute(new SqlNamedParameterMap(COLUMN_NAMES[0], "Value"));
+			Map params = new HashMap();
+			params.put(COLUMN_NAMES[0], "Value");
+			List list = query.executeByNamedParam(params);
 			fail("Shouldn't succeed in running query with missing params");
 		}
 		catch (InvalidDataAccessApiUsageException ex) {
@@ -879,7 +880,9 @@ public class SqlQueryTests extends AbstractJdbcTests {
 			}
 
 			public Customer findCustomer(int id) {
-				return (Customer) execute(new SqlNamedParameterMap("id", new Integer(id))).get(0);
+				Map params = new HashMap();
+				params.put("id", new Integer(id));
+				return (Customer) executeByNamedParam(params).get(0);
 			}
 		}
 		CustomerQuery query = new CustomerQuery(mockDataSource);
@@ -937,7 +940,9 @@ public class SqlQueryTests extends AbstractJdbcTests {
 			}
 
 			public Customer findCustomer(int id) {
-				return (Customer) execute(new SqlNamedParameterMap("id", new Integer(id))).get(0);
+				Map params = new HashMap();
+				params.put("id", new Integer(id));
+				return (Customer) executeByNamedParam(params).get(0);
 			}
 		}
 		CustomerQuery query = new CustomerQuery(mockDataSource);
