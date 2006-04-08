@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -319,8 +319,7 @@ public interface JdbcOperations {
 	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws DataAccessException if there is any problem
 	 */
-	Object execute(String sql, PreparedStatementCallback action)
-			throws DataAccessException;
+	Object execute(String sql, PreparedStatementCallback action) throws DataAccessException;
 
 	/**
 	 * Query using a prepared statement, reading the ResultSet with a
@@ -330,8 +329,7 @@ public interface JdbcOperations {
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if there is any problem
 	 */
-	Object query(PreparedStatementCreator psc, ResultSetExtractor rse)
-			throws DataAccessException;
+	Object query(PreparedStatementCreator psc, ResultSetExtractor rse) throws DataAccessException;
 
 	/**
 	 * Query using a prepared statement, reading the ResultSet with a
@@ -453,7 +451,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 */
 	List query(String sql, PreparedStatementSetter pss, RowMapper rowMapper)
-	    throws DataAccessException;
+			throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -553,8 +551,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForObject(String, Class)
 	 */
-	Object queryForObject(String sql, Object[] args, Class requiredType)
-	    throws DataAccessException;
+	Object queryForObject(String sql, Object[] args, Class requiredType) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -847,8 +844,7 @@ public interface JdbcOperations {
 	 * @return an array of the number of rows affected by each statement
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	int[] batchUpdate(String sql, BatchPreparedStatementSetter pss)
-			throws DataAccessException;
+	int[] batchUpdate(String sql, BatchPreparedStatementSetter pss) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
@@ -884,8 +880,7 @@ public interface JdbcOperations {
 	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws DataAccessException if there is any problem
 	 */
-	Object execute(String callString, CallableStatementCallback action)
-			throws DataAccessException;
+	Object execute(String callString, CallableStatementCallback action) throws DataAccessException;
 
 	/**
 	 * Execute a SQL call using a CallableStatementCreator to provide SQL and any
@@ -895,7 +890,6 @@ public interface JdbcOperations {
 	 * @return Map of extracted out parameters
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	Map call(CallableStatementCreator csc, List declaredParameters)
-			throws DataAccessException;
+	Map call(CallableStatementCreator csc, List declaredParameters) throws DataAccessException;
 
 }
