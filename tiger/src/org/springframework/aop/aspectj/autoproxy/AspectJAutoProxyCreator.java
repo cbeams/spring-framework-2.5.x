@@ -195,6 +195,15 @@ public class AspectJAutoProxyCreator extends AspectJInvocationContextExposingAdv
 		this.aspectJAdvisorFactory = aspectJAdvisorFactory;
 	}
 
+	/**
+	 * If configuring AtAspectJAutoProxying via DTD rather than
+	 * using <aop:aspectj-autoproxying> then you need to set this 
+	 * property to true.
+	 * @param enabled
+	 */
+	public void setAspectJAutoProxying(boolean enabled) {
+		AspectJAutoProxyCreator.useAtAspectJAspects = enabled;
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
