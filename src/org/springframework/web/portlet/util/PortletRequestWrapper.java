@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.portlet.util;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
+import java.security.Principal;
 
 import javax.portlet.PortalContext;
 import javax.portlet.PortletMode;
@@ -30,8 +31,10 @@ import javax.portlet.WindowState;
 import org.springframework.util.Assert;
 
 /**
- * Simple wrapper for a PortletRequest, delegating all calls to the underlying request.
- * In the style of the Servlet API's ServletRequestWrapper.
+ * Simple wrapper for a {@link javax.portlet.PortletRequest}, delegating all
+ * calls to the underlying request.
+ * 
+ * <p>(In the style of the Servlet API's {@link javax.servlet.ServletRequestWrapper}.)
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -45,8 +48,9 @@ public class PortletRequestWrapper implements PortletRequest {
 
 
 	/**
-	 * Create a PortletRequestWrapper for the given portletRequest.
-	 * @param request the original portletRequest to wrap
+	 * Create a PortletRequestWrapper for the given {@link javax.portlet.PortletRequest}.
+	 * @param request the original {@link javax.portlet.PortletRequest} to wrap
+	 * @throws IllegalArgumentException if the supplied <code>request</code> is <code>null</code>
 	 */
 	public PortletRequestWrapper(PortletRequest request) {
 		Assert.notNull(request, "Request is required");
@@ -98,7 +102,7 @@ public class PortletRequestWrapper implements PortletRequest {
 		return this.portletRequest.getPortalContext();
 	}
 
-	public java.lang.String getAuthType() {
+	public String getAuthType() {
 		return this.portletRequest.getAuthType();
 	}
 
@@ -106,15 +110,15 @@ public class PortletRequestWrapper implements PortletRequest {
 		return this.portletRequest.getContextPath();
 	}
 
-	public java.lang.String getRemoteUser() {
+	public String getRemoteUser() {
 		return this.portletRequest.getRemoteUser();
 	}
 
-	public java.security.Principal getUserPrincipal() {
+	public Principal getUserPrincipal() {
 		return this.portletRequest.getUserPrincipal();
 	}
 
-	public boolean isUserInRole(java.lang.String role) {
+	public boolean isUserInRole(String role) {
 		return this.portletRequest.isUserInRole(role);
 	}
 
@@ -146,8 +150,8 @@ public class PortletRequestWrapper implements PortletRequest {
 		return this.portletRequest.isSecure();
 	}
 
-	public void setAttribute(String name, Object o) {
-		this.portletRequest.setAttribute(name, o);
+	public void setAttribute(String name, Object value) {
+		this.portletRequest.setAttribute(name, value);
 	}
 
 	public void removeAttribute(String name) {

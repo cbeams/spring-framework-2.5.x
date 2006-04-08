@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,10 @@ import java.io.UnsupportedEncodingException;
 import javax.portlet.ActionRequest;
 
 /**
- * Simple wrapper for a Portlet ActionRequest, delegating all calls to the
- * underlying request. In the style of the Servlet API's HttpServletRequestWrapper.
+ * Simple wrapper for a Portlet {@link javax.portlet.ActionRequest},
+ * delegating all calls to the underlying request.
+ * 
+ * <p>(In the style of the Servlet API's {@link javax.servlet.http.HttpServletRequestWrapper}.)
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -41,6 +43,7 @@ public class ActionRequestWrapper extends PortletRequestWrapper implements Actio
 	/**
 	 * Create a ActionRequestWrapper for the given request.
 	 * @param request the original request to wrap
+	 * @throws IllegalArgumentException if the supplied <code>request</code> is <code>null</code>
 	 */
 	public ActionRequestWrapper(ActionRequest request) {
 		super(request);
