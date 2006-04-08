@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@
 package org.springframework.jdbc.object;
 
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -26,7 +27,6 @@ import junit.framework.TestCase;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.SqlNamedParameterMap;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
@@ -78,7 +78,7 @@ public class RdbmsOperationTests extends TestCase {
 		operation.setSql("select * from mytable");
 		operation.setTypes(new int[] { Types.INTEGER });
 		try {
-			operation.validateParameters((Object[])null);
+			operation.validateParameters((Object[]) null);
 			fail("Shouldn't validate without enough parameters"); 
 		}
 		catch (InvalidDataAccessApiUsageException idaauex) {
@@ -91,7 +91,7 @@ public class RdbmsOperationTests extends TestCase {
 		operation.setSql("select * from mytable");
 		operation.setTypes(new int[] { Types.INTEGER });
 		try {
-			operation.validateParameters((Map)null);
+			operation.validateParameters((Map) null);
 			fail("Shouldn't validate without enough parameters");
 		}
 		catch (InvalidDataAccessApiUsageException idaauex) {
@@ -117,7 +117,7 @@ public class RdbmsOperationTests extends TestCase {
 		TestRdbmsOperation operation = new TestRdbmsOperation();
 		operation.setSql("select * from mytable");
 		try {
-			operation.validateParameters(new Object[] { new Integer(1), new Integer(2) });
+			operation.validateParameters(new Object[] {new Integer(1), new Integer(2)});
 			fail("Shouldn't validate with too many parameters"); 
 		}
 		catch (InvalidDataAccessApiUsageException idaauex) {
@@ -129,7 +129,9 @@ public class RdbmsOperationTests extends TestCase {
 		TestRdbmsOperation operation = new TestRdbmsOperation();
 		operation.setSql("select * from mytable");
 		try {
-			operation.validateParameters(new SqlNamedParameterMap("col1", "value"));
+			Map params = new HashMap();
+			params.put("col1", "value");
+			operation.validateParameters(params);
 			fail("Shouldn't validate with unspecified parameters");
 		}
 		catch (InvalidDataAccessApiUsageException idaauex) {
