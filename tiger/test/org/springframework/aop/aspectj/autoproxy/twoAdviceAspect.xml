@@ -5,7 +5,9 @@
 <beans>
 
 	<bean 
-		class="org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator" />
+		class="org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator" >
+		<property name="aspectJAutoProxying" value="true"/>
+	</bean>
 	
 	<bean 
 		class="org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests$TwoAdviceAspect" 
