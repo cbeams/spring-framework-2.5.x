@@ -25,7 +25,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 
 import javax.sql.DataSource;
 
@@ -272,76 +271,6 @@ public abstract class JdbcUtils {
 			logger.warn("JDBC driver does not support JDBC 2.0 'supportsBatchUpdates' method", err);
 		}
 		return false;
-	}
-
-	/**
-	 * Count the occurrences of the character <code>placeholder</code> in an SQL string
-	 * <code>str</code>. The character <code>placeholder</code> is not counted if it
-	 * appears within a literal as determined by the <code>delim</code> that is passed in.
-	 * Delegates to the overloaded method that takes a String with multiple delimiters.
-	 * @param str string to search in. Returns 0 if this is <code>null</code>.
-	 * @param placeholder the character to search for and count
-	 * @param delim the delimiter for character literals
-	 * @deprecated Use the countParameterPlaceholders(str) method in NamedParameterUtils instead.
-	 */
-	public static int countParameterPlaceholders(String str, char placeholder, char delim) {
-		return countParameterPlaceholders(str, placeholder, "" + delim);
-	}
-
-	/**
-	 * Count the occurrences of the character <code>placeholder</code> in an SQL string
-	 * <code>str</code>. The character <code>placeholder</code> is not counted if it
-	 * appears within a literal as determined by the <code>delimiters</code> that are passed in.
-	 * <p>Examples: If one of the delimiters is the single quote, and the character to count the
-	 * occurrences of is the question mark, then:
-	 * <p><code>The big ? 'bad wolf?'</code> gives a count of one.<br>
-	 * <code>The big ?? bad wolf</code> gives a count of two.<br>
-	 * <code>The big  'ba''ad?' ? wolf</code> gives a count of one.
-	 * <p>The grammar of the string passed in should obey the rules of the JDBC spec
-	 * which is close to no rules at all: one placeholder per parameter, and it should
-	 * be valid SQL for the target database.
-	 * @param str string to search in
-	 * @param placeholder the character to search for and count
-	 * @param delimiters the delimiters for character literals
-	 * @deprecated Use the countParameterPlaceholders(str) method in NamedParameterUtils instead.
-	 */
-	public static int countParameterPlaceholders(String str, char placeholder, String delimiters) {
-		int count = 0;
-		boolean insideLiteral = false;
-		int activeLiteral = -1;
-		for (int i = 0; str != null && i < str.length(); i++) {
-			if (str.charAt(i) == placeholder) {
-				if (!insideLiteral)
-					count++;
-			}
-			 else {
-				if (delimiters.indexOf(str.charAt(i)) > -1) {
-					if (!insideLiteral) {
-						insideLiteral = true;
-						activeLiteral = delimiters.indexOf(str.charAt(i));
-					}
-					else {
-						if (activeLiteral == delimiters.indexOf(str.charAt(i))) {
-							insideLiteral = false;
-							activeLiteral = -1;
-						}
-					}
-				}
-			}
-		}
-		return count;
-	}
-
-	/**
-	 * Check that a SQL type is numeric.
-	 * @param sqlType the SQL type to be checked
-	 * @return if the type is numeric
-	 */
-	public static boolean isNumeric(int sqlType) {
-		return Types.BIT == sqlType || Types.BIGINT == sqlType || Types.DECIMAL == sqlType ||
-				Types.DOUBLE == sqlType || Types.FLOAT == sqlType || Types.INTEGER == sqlType ||
-				Types.NUMERIC == sqlType || Types.REAL == sqlType || Types.SMALLINT == sqlType ||
-				Types.TINYINT == sqlType;
 	}
 
 }
