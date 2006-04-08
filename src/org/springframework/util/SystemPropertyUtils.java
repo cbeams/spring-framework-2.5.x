@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Helper class for resolving placeholders in texts.
- * Usually applied to file paths.
+ * Helper class for resolving placeholders in texts. Usually applied to file paths.
  *
- * <p>A text may contain ${...} placeholders, to be resolved as
- * system properties: e.g. ${user.dir}.
+ * <p>A text may contain <code>${...}</code> placeholders, to be resolved as
+ * system properties: e.g. <code>${user.dir}</code>.
  *
  * @author Juergen Hoeller
  * @since 1.2.5
@@ -63,17 +62,31 @@ public abstract class SystemPropertyUtils {
 			int endIndex = buf.toString().indexOf(PLACEHOLDER_SUFFIX, startIndex + PLACEHOLDER_PREFIX.length());
 			if (endIndex != -1) {
 				String placeholder = buf.substring(startIndex + PLACEHOLDER_PREFIX.length(), endIndex);
-				String propVal = System.getProperty(placeholder);
-				if (propVal != null) {
-					buf.replace(startIndex, endIndex + PLACEHOLDER_SUFFIX.length(), propVal);
-					startIndex = buf.toString().indexOf(PLACEHOLDER_PREFIX, startIndex + propVal.length());
-				}
-				else {
-					if (logger.isWarnEnabled()) {
-						logger.warn("Could not resolve placeholder '" + placeholder + "' in [" + text + "] as system property");
+				int nextIndex = endIndex + PLACEHOLDER_SUFFIX.length();
+				try {
+					String propVal = System.getProperty(placeholder);
+					if (propVal == null) {
+						// Fall back to searching the system environment.
+						propVal = System.getenv(placeholder);
 					}
-					startIndex = buf.toString().indexOf(PLACEHOLDER_PREFIX, endIndex + PLACEHOLDER_SUFFIX.length());
+					if (propVal != null) {
+						buf.replace(startIndex, endIndex + PLACEHOLDER_SUFFIX.length(), propVal);
+						nextIndex = startIndex + propVal.length();
+					}
+					else {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Could not resolve placeholder '" + placeholder + "' in [" + text +
+									"] as system property: neither system property nor environment variable found");
+						}
+					}
 				}
+				catch (SecurityException ex) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Could not resolve placeholder '" + placeholder + "' in [" + text +
+								"] as system property: " + ex);
+					}
+				}
+				startIndex = buf.toString().indexOf(PLACEHOLDER_PREFIX, nextIndex);
 			}
 			else {
 				startIndex = -1;
