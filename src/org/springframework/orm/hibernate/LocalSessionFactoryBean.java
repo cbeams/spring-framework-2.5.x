@@ -604,7 +604,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
 					Connection con = session.connection();
-					final Dialect dialect = Dialect.getDialect(configuration.getProperties());
+					Dialect dialect = Dialect.getDialect(configuration.getProperties());
 					String[] sql = configuration.generateSchemaCreationScript(dialect);
 					executeSchemaScript(con, sql);
 					return null;
@@ -636,7 +636,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
 					Connection con = session.connection();
-					final Dialect dialect = Dialect.getDialect(configuration.getProperties());
+					Dialect dialect = Dialect.getDialect(configuration.getProperties());
 					DatabaseMetadata metadata = new DatabaseMetadata(con, dialect);
 					String[] sql = configuration.generateSchemaUpdateScript(dialect, metadata);
 					executeSchemaScript(con, sql);
