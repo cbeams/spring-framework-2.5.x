@@ -36,9 +36,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  * @since 1.1
  * @see java.sql.Types
  * @see java.sql.PreparedStatement#setObject
- * @see JdbcTemplate#update(String, Object[], int[])
- * @see org.springframework.jdbc.object.SqlUpdate#update(Object[])
- * @see org.springframework.jdbc.object.StoredProcedure#execute(java.util.Map)
+ * @see JdbcOperations#update(String, Object[], int[])
  */
 public interface SqlTypeValue {
 
@@ -50,6 +48,7 @@ public interface SqlTypeValue {
 	 * @see JdbcOperations#update(String, Object[])
 	 */
 	int TYPE_UNKNOWN = JdbcUtils.TYPE_UNKNOWN;
+
 
 	/**
 	 * Set the type value on the given PreparedStatement.
