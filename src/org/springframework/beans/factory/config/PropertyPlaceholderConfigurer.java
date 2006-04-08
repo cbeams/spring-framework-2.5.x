@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.core.Constants;
  * <pre>
  * ${...}</pre>
  *
- * <p>Example XML context definition:
+ * Example XML context definition:
  *
  * <pre>
  * &lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
@@ -123,7 +123,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 	private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
 
-	private boolean searchSystemEnvironment = false;
+	private boolean searchSystemEnvironment = true;
 
 	private boolean ignoreUnresolvablePlaceholders = false;
 
@@ -182,9 +182,9 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 * if no matching system property has been found. Only applied when
 	 * "systemPropertyMode" is active (i.e. "fallback" or "override"), right
 	 * after checking JVM system properties.
-	 * <p>Default is "false". Switch this setting on to resolve placeholders
-	 * as system environment variables as well. However, it is recommended to
-	 * pass external values in as JVM system properties: This can easily be
+	 * <p>Default is "true". Switch this setting off to never resolve placeholders
+	 * against system environment variables. Note that it is generally recommended
+	 * to pass external values in as JVM system properties: This can easily be
 	 * achieved in a startup script, even for existing environment variables.
 	 * @see #setSystemPropertiesMode
 	 * @see java.lang.System#getProperty(String)
@@ -371,11 +371,19 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 * @see java.lang.System#getenv(String)
 	 */
 	protected String resolveSystemProperty(String key) {
-		String value = System.getProperty(key);
-		if (value == null && this.searchSystemEnvironment) {
-			value = System.getenv(key);
+		try {
+			String value = System.getProperty(key);
+			if (value == null && this.searchSystemEnvironment) {
+				value = System.getenv(key);
+			}
+			return value;
 		}
-		return value;
+		catch (SecurityException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not access system property '" + key + "': " + ex);
+			}
+			return null;
+		}
 	}
 
 
