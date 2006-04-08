@@ -20,7 +20,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.PreparedStatementSetter;
-import org.springframework.jdbc.support.NamedParameterUtils;
+import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 
 /**
  * RdbmsOperation using a JdbcTemplate and representing a SQL-based
@@ -47,19 +47,12 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * based on our declared parameters.
 	 */
 	protected final void compileInternal() {
-		// validate parameter count
-		try {
-			int bindVarCount = NamedParameterUtils.countParameterPlaceholders(getSql());
-			//int bindVarCount = JdbcUtils.countParameterPlaceholders(getSql());
-			if (bindVarCount != getDeclaredParameters().size()) {
-				throw new InvalidDataAccessApiUsageException(
-						"SQL '" + getSql() + "' requires " + bindVarCount + " bind variables, but " +
-						getDeclaredParameters().size() + " variables were declared for this object");
-			}
-		}
-		catch (IllegalArgumentException ex) {
-			// transform JDBC-agnostic error to data access error
-			throw new InvalidDataAccessApiUsageException(ex.getMessage());
+		// Validate parameter count.
+		int bindVarCount = NamedParameterUtils.countParameterPlaceholders(getSql());
+		if (bindVarCount != getDeclaredParameters().size()) {
+			throw new InvalidDataAccessApiUsageException(
+					"SQL '" + getSql() + "' requires " + bindVarCount + " bind variables, but " +
+					getDeclaredParameters().size() + " variables were declared for this object");
 		}
 
 		this.preparedStatementFactory = new PreparedStatementCreatorFactory(getSql(), getDeclaredParameters());
@@ -70,6 +63,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 			this.preparedStatementFactory.setGeneratedKeysColumnNames(getGeneratedKeysColumnNames());
 		}
 		this.preparedStatementFactory.setNativeJdbcExtractor(getJdbcTemplate().getNativeJdbcExtractor());
+		this.preparedStatementFactory.setSqlToUse(NamedParameterUtils.parseSqlStatementIntoString(getSql()));
 
 		onCompileInternal();
 	}
@@ -88,7 +82,6 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * @param params parameter array. May be <code>null</code>.
 	 */
 	protected final PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
-		this.preparedStatementFactory.setSqlToUse(NamedParameterUtils.parseSqlStatement(getSql()).getNewSql());
 		return this.preparedStatementFactory.newPreparedStatementCreator(params);
 	}
 

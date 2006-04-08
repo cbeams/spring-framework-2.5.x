@@ -16,21 +16,22 @@
 
 package org.springframework.jdbc.object;
 
+import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
-import org.springframework.jdbc.core.SqlNamedParameterMap;
+import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.NamedParameterUtils;
 
 /**
  * RdbmsOperation subclass representing a SQL update.
  * Like a query, an update object is reusable. Like all RdbmsOperation
  * objects, an update can have parameters and is defined in SQL.
  *
- * <p>This class provides a number of update() methods analogous to the
- * execute() methods of query objects.
+ * <p>This class provides a number of <code>update()</code> methods,
+ * analogous to the <code>execute()</code> methods of query objects.
  *
  * <p>This class is concrete. Although it can be subclassed (for example
  * to add a custom update method) it can easily be parameterized by setting
@@ -151,29 +152,14 @@ public class SqlUpdate extends SqlOperation {
 
 
 	/**
-	 * Generic method to execute the update given arguments.
+	 * Generic method to execute the update given parameters.
 	 * All other update methods invoke this method.
-	 * @param args array of object arguments
+	 * @param params array of parameters objects
 	 * @return the number of rows affected by the update
 	 */
-	public int update(Object[] args) throws DataAccessException {
-		validateParameters(args);
-		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(args));
-		checkRowsAffected(rowsAffected);
-		return rowsAffected;
-	}
-
-	/**
-	 * Generic method to execute the update given arguments.
-	 * All other update methods invoke this method.
-	 * @param argMap SqlNamedParameterMap of object arguments matching
-	 * named parameters specified in SQL statement
-	 * @return the number of rows affected by the update
-	 */
-	public int update(SqlNamedParameterMap argMap) throws DataAccessException {
-		validateParameters(argMap);
-		Object[] args = NamedParameterUtils.convertArgMapToArray(getSql(), argMap);
-		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(args));
+	public int update(Object[] params) throws DataAccessException {
+		validateParameters(params);
+		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(params));
 		checkRowsAffected(rowsAffected);
 		return rowsAffected;
 	}
@@ -181,33 +167,16 @@ public class SqlUpdate extends SqlOperation {
 	/**
 	 * Method to execute the update given arguments and 
 	 * retrieve the generated keys using a KeyHolder.
-	 * @param args array of object arguments
+	 * @param params array of parameter objects
 	 * @param generatedKeyHolder KeyHolder that will hold the generated keys
 	 * @return the number of rows affected by the update
 	 */
-	public int update(Object[] args, KeyHolder generatedKeyHolder) throws DataAccessException {
-		validateParameters(args);
-		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(args), generatedKeyHolder);
+	public int update(Object[] params, KeyHolder generatedKeyHolder) throws DataAccessException {
+		validateParameters(params);
+		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(params), generatedKeyHolder);
 		checkRowsAffected(rowsAffected);
 		return rowsAffected;
 	}
-
-	/**
-	 * Method to execute the update given arguments and
-	 * retrieve the generated keys using a KeyHolder.
-	 * @param argMap SqlNamedParametermap of object arguments matching
-	 * named parameters specified in SQL statement
-	 * @param generatedKeyHolder KeyHolder that will hold the generated keys
-	 * @return the number of rows affected by the update
-	 */
-	public int update(SqlNamedParameterMap argMap, KeyHolder generatedKeyHolder) throws DataAccessException {
-		validateParameters(argMap);
-		Object[] args = NamedParameterUtils.convertArgMapToArray(getSql(), argMap);
-		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(args), generatedKeyHolder);
-		checkRowsAffected(rowsAffected);
-		return rowsAffected;
-	}
-
 
 	/**
 	 * Convenience method to execute an update with no parameters.
@@ -256,6 +225,37 @@ public class SqlUpdate extends SqlOperation {
 	 */
 	public int update(String p1, String p2) throws DataAccessException {
 		return update(new Object[] {p1, p2});
+	}
+
+	/**
+	 * Generic method to execute the update given named parameters.
+	 * All other update methods invoke this method.
+	 * @param paramMap Map of parameter name to parameter object,
+	 * matching named parameters specified in the SQL statement
+	 * @return the number of rows affected by the update
+	 */
+	public int updateByNamedParam(Map paramMap) throws DataAccessException {
+		validateParameters(paramMap);
+		Object[] params = NamedParameterUtils.buildValueArray(getSql(), paramMap);
+		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(params));
+		checkRowsAffected(rowsAffected);
+		return rowsAffected;
+	}
+
+	/**
+	 * Method to execute the update given arguments and
+	 * retrieve the generated keys using a KeyHolder.
+	 * @param paramMap Map of parameter name to parameter object,
+	 * matching named parameters specified in the SQL statement
+	 * @param generatedKeyHolder KeyHolder that will hold the generated keys
+	 * @return the number of rows affected by the update
+	 */
+	public int updateByNamedParam(Map paramMap, KeyHolder generatedKeyHolder) throws DataAccessException {
+		validateParameters(paramMap);
+		Object[] params = NamedParameterUtils.buildValueArray(getSql(), paramMap);
+		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(params), generatedKeyHolder);
+		checkRowsAffected(rowsAffected);
+		return rowsAffected;
 	}
 
 }

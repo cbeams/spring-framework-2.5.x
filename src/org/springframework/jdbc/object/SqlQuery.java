@@ -24,8 +24,7 @@ import javax.sql.DataSource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.SqlNamedParameterMap;
-import org.springframework.jdbc.support.NamedParameterUtils;
+import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 
 /**
  * Reusable object to represent a SQL query. Like all RdbsOperation
@@ -52,10 +51,6 @@ public abstract class SqlQuery extends SqlOperation {
 	private int rowsExpected = 0;
 
 
-	//-------------------------------------------------------------------------
-	// Constructors
-	//-------------------------------------------------------------------------
-
 	/**
 	 * Constructor to allow use as a JavaBean. DataSource and SQL
 	 * must be supplied before compilation and use.
@@ -75,10 +70,6 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 
-	//-------------------------------------------------------------------------
-	// Bean properties
-	//-------------------------------------------------------------------------
-
 	/**
 	 * Set the number of rows expected. This can be used to ensure
 	 * efficient storage of results. The default behavior is not to
@@ -96,70 +87,36 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 
-	//-------------------------------------------------------------------------
-	// Execute methods
-	//-------------------------------------------------------------------------
-
 	/**
 	 * Central execution method. All un-named parameter execution goes through this method.
-	 * @param parameters parameters, similar to JDO query parameters.
+	 * @param params parameters, similar to JDO query parameters.
 	 * Primitive parameters must be represented by their Object wrapper type.
 	 * The ordering of parameters is significant.
-	 * @param context contextual information passed to the callback mapRow method.
-	 * This parameter doesn't rely on the JDBC request itself, but can be useful
-	 * for creating the objects of the result list.
+	 * @param context contextual information passed to the callback <code>mapRow</code> method.
+	 * The JDBC operation itself doesn't rely on this parameter, but can be useful for
+	 * creating the objects of the result list.
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
 	 * will be of the same class, although it is possible to use different types.
 	 */
-	public List execute(final Object[] parameters, Map context) throws DataAccessException {
-		validateParameters(parameters);
-		RowMapper rowMapper = newRowMapper(parameters, context);
-		return getJdbcTemplate().query(newPreparedStatementCreator(parameters), rowMapper);
-	}
-
-	/**
-	 * Central execution method. All named parameter execution goes through this method.
-	 * @param parameterMap parameters associated with the name specified while declaring
-	 * the SqlParameters.  Primitive parameters must be represented by their Object wrapper
-	 * type. The ordering of parameters is not significant since they are supplied in a
-	 * SqlParameterMap which is an implementation of the Map interface.
-	 * @param context contextual information passed to the callback mapRow method.
-	 * This parameter doesn't rely on the JDBC request itself, but can be useful
-	 * for creating the objects of the result list.
-	 * @return a List of objects, one per row of the ResultSet. Normally all these
-	 * will be of the same class, although it is possible to use different types.
-	 */
-	public List execute(final SqlNamedParameterMap parameterMap, Map context) throws DataAccessException {
-		validateParameters(parameterMap);
-		Object[] parameters = NamedParameterUtils.convertArgMapToArray(getSql(), parameterMap);
-		RowMapper rowMapper = newRowMapper(parameters, context);
-		return getJdbcTemplate().query(newPreparedStatementCreator(parameters), rowMapper);
+	public List execute(Object[] params, Map context) throws DataAccessException {
+		validateParameters(params);
+		RowMapper rowMapper = newRowMapper(params, context);
+		return getJdbcTemplate().query(newPreparedStatementCreator(params), rowMapper);
 	}
 
 	/**
 	 * Convenient method to execute without context.
-	 * @param parameters parameters, as to JDO queries. Primitive parameters must
+	 * @param params parameters for the query. Primitive parameters must
 	 * be represented by their Object wrapper type. The ordering of parameters is
 	 * significant.
 	 */
-	public List execute(final Object[] parameters) throws DataAccessException {
-		return execute(parameters, null);
-	}
-
-	/**
-	 * Convenient method to execute without context.
-	 * @param parameterMap parameters associated with the name specified while declaring
-	 * the SqlParameters.  Primitive parameters must be represented by their Object wrapper
-	 * type. The ordering of parameters is not significant since they are supplied in a
-	 * SqlParameterMap which is an implementation of the Map interface.
-	 */
-	public List execute(final SqlNamedParameterMap parameterMap) throws DataAccessException {
-		return execute(parameterMap, null);
+	public List execute(final Object[] params) throws DataAccessException {
+		return execute(params, null);
 	}
 
 	/**
 	 * Convenient method to execute without parameters.
-	 * @param context The contextual information for object creation
+	 * @param context the contextual information for object creation
 	 */
 	public List execute(Map context) throws DataAccessException {
 		return execute((Object[]) null, context);
@@ -243,11 +200,41 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 	/**
-	 * Generic findObject method, used by all other findObject() methods.
-	 * findObject() methods are like EJB entity bean finders, in that it is
+	 * Central execution method. All named parameter execution goes through this method.
+	 * @param paramMap parameters associated with the name specified while declaring
+	 * the SqlParameters. Primitive parameters must be represented by their Object wrapper
+	 * type. The ordering of parameters is not significant since they are supplied in a
+	 * SqlParameterMap which is an implementation of the Map interface.
+	 * @param context contextual information passed to the callback <code>mapRow</code> method.
+	 * The JDBC operation itself doesn't reyl on this parameter, but can be useful for
+	 * creating the objects of the result list.
+	 * @return a List of objects, one per row of the ResultSet. Normally all these
+	 * will be of the same class, although it is possible to use different types.
+	 */
+	public List executeByNamedParam(Map paramMap, Map context) throws DataAccessException {
+		validateParameters(paramMap);
+		Object[] parameters = NamedParameterUtils.buildValueArray(getSql(), paramMap);
+		RowMapper rowMapper = newRowMapper(parameters, context);
+		return getJdbcTemplate().query(newPreparedStatementCreator(parameters), rowMapper);
+	}
+
+	/**
+	 * Convenient method to execute without context.
+	 * @param paramMap parameters associated with the name specified while declaring
+	 * the SqlParameters. Primitive parameters must be represented by their Object wrapper
+	 * type. The ordering of parameters is not significant.
+	 */
+	public List executeByNamedParam(Map paramMap) throws DataAccessException {
+		return executeByNamedParam(paramMap, null);
+	}
+
+
+	/**
+	 * Generic object finder method, used by all other <code>findObject</code> methods.
+	 * Object finder methods are like EJB entity bean finders, in that it is
 	 * considered an error if they return more than one result.
-	 * @return null if not found. Subclasses may choose to treat this
-	 * as an error and throw an exception.
+	 * @return the result object, or <code>null</code> if not found. Subclasses may
+	 * choose to treat this as an error and throw an exception.
 	 * @see org.springframework.dao.support.DataAccessUtils#uniqueResult
 	 */
 	public Object findObject(Object[] parameters, Map context) throws DataAccessException {
@@ -258,8 +245,8 @@ public abstract class SqlQuery extends SqlOperation {
 	/**
 	 * Convenient method to find a single object without context.
 	 */
-	public Object findObject(Object[] parameters) throws DataAccessException {
-		return findObject(parameters, null);
+	public Object findObject(Object[] params) throws DataAccessException {
+		return findObject(params, null);
 	}
 
 	/**
@@ -320,6 +307,30 @@ public abstract class SqlQuery extends SqlOperation {
 	 */
 	public Object findObject(String p1) throws DataAccessException {
 		return findObject(p1, null);
+	}
+
+	/**
+	 * Generic object finder method for named parameters.
+	 * @param paramMap Map of parameter name to parameter object,
+	 * matching named parameters specified in the SQL statement.
+	 * Ordering is not significant.
+	 * @param context contextual information passed to the callback mapRow method.
+	 * @return a List of objects, one per row of the ResultSet. Normally all these
+	 * will be of the same class, although it is possible to use different types.
+	 */
+	public Object findObjectByNamedParam(Map paramMap, Map context) throws DataAccessException {
+		List results = executeByNamedParam(paramMap, context);
+		return DataAccessUtils.uniqueResult(results);
+	}
+
+	/**
+	 * Convenient method to execute without context.
+	 * @param paramMap Map of parameter name to parameter object,
+	 * matching named parameters specified in the SQL statement.
+	 * Ordering is not significant.
+	 */
+	public Object findObjectByNamedParam(Map paramMap) throws DataAccessException {
+		return findObjectByNamedParam(paramMap, null);
 	}
 
 

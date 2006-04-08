@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.core;
+package org.springframework.jdbc.core.namedparam;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,15 +26,13 @@ import java.util.Map;
 import org.easymock.MockControl;
 
 import org.springframework.jdbc.AbstractJdbcTests;
+import org.springframework.jdbc.core.RowMapper;
 
 /**
- * @author Juergen Hoeller
- * @since 19.12.2004
+ * @author Thomas Risberg
  */
 public class NamedParameterQueryTests extends AbstractJdbcTests {
 
-	//private MockControl ctrlStatement;
-	//private Statement mockStatement;
 	private MockControl ctrlPreparedStatement;
 	private PreparedStatement mockPreparedStatement;
 	private MockControl ctrlResultSet;
@@ -44,9 +42,6 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-
-		//ctrlStatement = MockControl.createControl(Statement.class);
-		//mockStatement = (Statement) ctrlStatement.getMock();
 		ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
 		mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
 		ctrlResultSet = MockControl.createControl(ResultSet.class);
@@ -57,7 +52,6 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 	protected void replay() {
 		super.replay();
-		//ctrlStatement.replay();
 		ctrlPreparedStatement.replay();
 		ctrlResultSet.replay();
 		ctrlResultSetMetaData.replay();
@@ -66,14 +60,13 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (shouldVerify()) {
-			//ctrlStatement.verify();
 			ctrlPreparedStatement.verify();
 			ctrlResultSet.verify();
 			ctrlResultSetMetaData.verify();
 		}
 	}
 
-	public void testQueryForListWithArgMap() throws Exception {
+	public void testQueryForListWithParamMap() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < :id";
 		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID < ?";
 
@@ -113,17 +106,16 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
+		SimpleSqlParameterSource parms = new SimpleSqlParameterSource();
 		parms.addValue("id", new Integer(3));
-		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
-		List li = template.queryForList(sql, parms, types);
+		List li = template.queryForList(sql, parms);
 		assertEquals("All rows returned", 2, li.size());
 		assertEquals("First row is Integer", 11, ((Integer)((Map)li.get(0)).get("age")).intValue());
 		assertEquals("Second row is Integer", 12, ((Integer)((Map)li.get(1)).get("age")).intValue());
 	}
 
-	public void testQueryForListWithArgMapAndEmptyResult() throws Exception {
+	public void testQueryForListWithParamMapAndEmptyResult() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < :id";
 		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID < ?";
 
@@ -150,15 +142,14 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
+		SimpleSqlParameterSource parms = new SimpleSqlParameterSource();
 		parms.addValue("id", new Integer(3));
-		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
-		List li = template.queryForList(sql, parms, types);
+		List li = template.queryForList(sql, parms);
 		assertEquals("All rows returned", 0, li.size());
 	}
 
-	public void testQueryForListWithArgMapAndSingleRowAndColumn() throws Exception {
+	public void testQueryForListWithParamMapAndSingleRowAndColumn() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < :id";
 		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID < ?";
 
@@ -194,16 +185,15 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
+		SimpleSqlParameterSource parms = new SimpleSqlParameterSource();
 		parms.addValue("id", new Integer(3));
-		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
-		List li = template.queryForList(sql, parms, types);
+		List li = template.queryForList(sql, parms);
 		assertEquals("All rows returned", 1, li.size());
 		assertEquals("First row is Integer", 11, ((Integer)((Map)li.get(0)).get("age")).intValue());
 	}
 
-	public void testQueryForListWithArgMapAndIntegerElementAndSingleRowAndColumn() throws Exception {
+	public void testQueryForListWithParamMapAndIntegerElementAndSingleRowAndColumn() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < :id";
 		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID < ?";
 
@@ -239,16 +229,15 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
+		SimpleSqlParameterSource parms = new SimpleSqlParameterSource();
 		parms.addValue("id", new Integer(3));
-		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
-		List li = template.queryForList(sql, parms, types, Integer.class);
+		List li = template.queryForList(sql, parms, Integer.class);
 		assertEquals("All rows returned", 1, li.size());
 		assertEquals("First row is Integer", 11, ((Integer) li.get(0)).intValue());
 	}
 
-	public void testQueryForMapWithArgMapAndSingleRowAndColumn() throws Exception {
+	public void testQueryForMapWithParamMapAndSingleRowAndColumn() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < :id";
 		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID < ?";
 
@@ -284,15 +273,14 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
+		SimpleSqlParameterSource parms = new SimpleSqlParameterSource();
 		parms.addValue("id", new Integer(3));
-		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
-		Map map = template.queryForMap(sql, parms, types);
+		Map map = template.queryForMap(sql, parms);
 		assertEquals("Row is Integer", 11, ((Integer) map.get("age")).intValue());
 	}
 
-	public void testQueryForObjectWithArgMapAndRowMapper() throws Exception {
+	public void testQueryForObjectWithParamMapAndRowMapper() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = :id";
 		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 
@@ -321,11 +309,10 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
+		SimpleSqlParameterSource parms = new SimpleSqlParameterSource();
 		parms.addValue("id", new Integer(3));
-		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
-		Object o = template.queryForObject(sql, parms, types, new RowMapper() {
+		Object o = template.queryForObject(sql, parms, new RowMapper() {
 			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 				return new Integer(rs.getInt(1));
 			}
@@ -333,7 +320,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 		assertTrue("Correct result type", o instanceof Integer);
 	}
 
-	public void testQueryForObjectWithArgMapAndInteger() throws Exception {
+	public void testQueryForObjectWithParamMapAndInteger() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = :id";
 		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 
@@ -369,15 +356,14 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
+		SimpleSqlParameterSource parms = new SimpleSqlParameterSource();
 		parms.addValue("id", new Integer(3));
-		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
-		Object o = template.queryForObject(sql, parms, types, Integer.class);
+		Object o = template.queryForObject(sql, parms, Integer.class);
 		assertTrue("Correct result type", o instanceof Integer);
 	}
 
-	public void testQueryForIntWithArgMap() throws Exception {
+	public void testQueryForIntWithParamMap() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = :id";
 		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 
@@ -413,15 +399,14 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
+		SimpleSqlParameterSource parms = new SimpleSqlParameterSource();
 		parms.addValue("id", new Integer(3));
-		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
 
-		int i = template.queryForInt(sql, parms, types);
+		int i = template.queryForInt(sql, parms);
 		assertEquals("Return of an int", 22, i);
 	}
 
-	public void testQueryForLongWithArgMap() throws Exception {
+	public void testQueryForLongWithParamBean() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = :id";
 		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 
@@ -457,12 +442,24 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		SqlNamedParameterWrapper parms = new SqlNamedParameterWrapper();
-		parms.addValue("id", new Integer(3));
-		SqlNamedParameterTypes types = new SqlNamedParameterTypes();
+		BeanPropertySqlParameterSource parms = new BeanPropertySqlParameterSource(new ParameterBean(3));
 
-		long l = template.queryForLong(sql, parms, types);
+		long l = template.queryForLong(sql, parms);
 		assertEquals("Return of a long", 87, l);
+	}
+
+
+	private static class ParameterBean {
+
+		private int id;
+
+		public ParameterBean(int id) {
+			this.id = id;
+		}
+
+		public int getId() {
+			return id;
+		}
 	}
 
 }

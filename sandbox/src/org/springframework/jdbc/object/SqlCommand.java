@@ -16,18 +16,16 @@
 
 package org.springframework.jdbc.object;
 
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.SqlNamedParameterHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.NamedParameterUtils;
-import org.springframework.jdbc.support.ParsedSql;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-
-import javax.sql.DataSource;
 import java.util.List;
 import java.util.Map;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
  * Implementation providing a basic set of JDBC operations expressed as a command object.
@@ -39,128 +37,96 @@ import java.util.Map;
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
 public class SqlCommand implements SqlCommandOperations {
-    private String sql;
-    private ParsedSql parsedSql;
-    private NamedParameterJdbcTemplate namedParameteJdbcTemplate;
 
-    //-------------------------------------------------------------------------
-    // Constructor
-    //-------------------------------------------------------------------------
+	private final String sql;
 
-    /**
-     * Convenient constructor with DataSource and SQL string.
-     * @param dataSource DataSource to use to get connections
-     * @param sql to execute.
-     */
-    public SqlCommand(DataSource dataSource, String sql) {
-        this.sql = sql;
-        this.parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-        this.namedParameteJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-    }
+	private final String parsedSql;
+
+	private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 
-    //-------------------------------------------------------------------------
-    // Execute methods
-    //-------------------------------------------------------------------------
-
-    public Object executeScalar() {
-        return namedParameteJdbcTemplate.getJdbcOperations().queryForObject(sql, Object.class);
-    }
-
-    public Object executeScalar(Map parameters) {
-        return namedParameteJdbcTemplate.queryForObject(sql, parameters, Object.class);
-    }
-
-    public Object executeScalar(SqlNamedParameterHolder parameterHolder) {
-        return namedParameteJdbcTemplate.queryForObject(sql, parameterHolder, Object.class);
-    }
-
-    public Object executeObject(RowMapper rowMapper) {
-        return namedParameteJdbcTemplate.getJdbcOperations().queryForObject(parsedSql.getNewSql(), rowMapper);
-    }
-
-    public Object executeObject(RowMapper rowMapper, Map parameters) {
-        return namedParameteJdbcTemplate.queryForObject(sql, parameters, rowMapper);
-    }
-
-    public Object executeObject(RowMapper rowMapper, SqlNamedParameterHolder parameterHolder) {
-        return namedParameteJdbcTemplate.queryForObject(sql, parameterHolder, rowMapper);
-    }
-
-    public List executeQuery() {
-        return namedParameteJdbcTemplate.getJdbcOperations().queryForList(parsedSql.getNewSql());
-    }
-
-    public List executeQuery(Map parameters) {
-        return namedParameteJdbcTemplate.queryForList(sql, parameters);
-    }
-
-    public List executeQuery(SqlNamedParameterHolder parameterHolder) {
-        return namedParameteJdbcTemplate.queryForList(sql, parameterHolder);
-    }
-
-    public List executeQuery(RowMapper rowMapper) {
-        return namedParameteJdbcTemplate.getJdbcOperations().query(parsedSql.getNewSql(), rowMapper);
-    }
-
-    public List executeQuery(RowMapper rowMapper, Map parameters) {
-        return namedParameteJdbcTemplate.query(sql, parameters, rowMapper);
-    }
-
-    public List executeQuery(RowMapper rowMapper, SqlNamedParameterHolder parameterHolder) {
-        return namedParameteJdbcTemplate.query(sql, parameterHolder, rowMapper);
-    }
-
-    public SqlRowSet executeRowSet() {
-        return namedParameteJdbcTemplate.getJdbcOperations().queryForRowSet(parsedSql.getNewSql());
-    }
-
-    public SqlRowSet executeRowSet(Map parameters) {
-        return namedParameteJdbcTemplate.queryForRowSet(sql, parameters);
-    }
-
-    public SqlRowSet executeRowSet(SqlNamedParameterHolder parameterHolder) {
-        return namedParameteJdbcTemplate.queryForRowSet(sql, parameterHolder);
-    }
-
-    public int executeUpdate() {
-        return namedParameteJdbcTemplate.getJdbcOperations().update(parsedSql.getNewSql());
-    }
-
-    public int executeUpdate(Map parameters) {
-        return namedParameteJdbcTemplate.update(sql, parameters);
-    }
-
-    public int executeUpdate(SqlNamedParameterHolder parameterHolder) {
-        return namedParameteJdbcTemplate.update(sql, parameterHolder);
-    }
-
-    public int executeUpdate(SqlNamedParameterHolder parameterHolder, KeyHolder keyHolder) {
-        return executeUpdate(parameterHolder, keyHolder, null);
-    }
-
-    public int executeUpdate(SqlNamedParameterHolder parameterHolder, KeyHolder keyHolder, String[] keyColumnNames) {
-        return namedParameteJdbcTemplate.update(sql, parameterHolder, keyHolder, keyColumnNames);
-    }
+	/**
+	 * Convenient constructor with DataSource and SQL String.
+	 * @param dataSource DataSource to use to get Connections
+	 * @param sql to execute
+	 */
+	public SqlCommand(DataSource dataSource, String sql) {
+		this.sql = sql;
+		this.parsedSql = NamedParameterUtils.parseSqlStatementIntoString(sql);
+		this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+	}
 
 
-    public int executeInsert(SqlInsertBuilder insertBuilder) {
-        if (insertBuilder.getKeyHolder() == null) {
-            return namedParameteJdbcTemplate.update(insertBuilder.buildSqlToUse(sql), insertBuilder.getNamedParameterHolder());
-        }
-        else {
-            return namedParameteJdbcTemplate.update(insertBuilder.buildSqlToUse(sql), insertBuilder.getNamedParameterHolder(),
-                    insertBuilder.getKeyHolder(), insertBuilder.getKeyColumnNames());
-        }
-    }
+	public Object executeScalar() {
+		return this.namedParameterJdbcTemplate.getJdbcOperations().queryForObject(this.sql, Object.class);
+	}
 
-    public Map executeCall(SqlCallBuilder callBuilder) {
-        StoredProcedure proc = new StoredProcedure() {
-            public Map execute(Map map) throws DataAccessException {
-                return super.execute(map);
-            }
-        };
-        return proc.execute((Map)null);
-    }
+	public Object executeScalar(Map parameters) {
+		return this.namedParameterJdbcTemplate.queryForObject(this.sql, parameters, Object.class);
+	}
+
+	public Object executeScalar(SqlParameterSource parameterSource) {
+		return this.namedParameterJdbcTemplate.queryForObject(this.sql, parameterSource, Object.class);
+	}
+
+	public Object executeObject(RowMapper rowMapper) {
+		return this.namedParameterJdbcTemplate.getJdbcOperations().queryForObject(this.parsedSql, rowMapper);
+	}
+
+	public Object executeObject(RowMapper rowMapper, Map parameters) {
+		return this.namedParameterJdbcTemplate.queryForObject(this.sql, parameters, rowMapper);
+	}
+
+	public Object executeObject(RowMapper rowMapper, SqlParameterSource parameterSource) {
+		return this.namedParameterJdbcTemplate.queryForObject(this.sql, parameterSource, rowMapper);
+	}
+
+	public List executeQuery() {
+		return this.namedParameterJdbcTemplate.getJdbcOperations().queryForList(this.parsedSql);
+	}
+
+	public List executeQuery(Map parameters) {
+		return this.namedParameterJdbcTemplate.queryForList(this.sql, parameters);
+	}
+
+	public List executeQuery(SqlParameterSource parameterSource) {
+		return this.namedParameterJdbcTemplate.queryForList(this.sql, parameterSource);
+	}
+
+	public List executeQuery(RowMapper rowMapper) {
+		return this.namedParameterJdbcTemplate.getJdbcOperations().query(this.parsedSql, rowMapper);
+	}
+
+	public List executeQuery(RowMapper rowMapper, Map parameters) {
+		return this.namedParameterJdbcTemplate.query(this.sql, parameters, rowMapper);
+	}
+
+	public List executeQuery(RowMapper rowMapper, SqlParameterSource parameterSource) {
+		return this.namedParameterJdbcTemplate.query(this.sql, parameterSource, rowMapper);
+	}
+
+	public SqlRowSet executeRowSet() {
+		return this.namedParameterJdbcTemplate.getJdbcOperations().queryForRowSet(this.parsedSql);
+	}
+
+	public SqlRowSet executeRowSet(Map parameters) {
+		return this.namedParameterJdbcTemplate.queryForRowSet(this.sql, parameters);
+	}
+
+	public SqlRowSet executeRowSet(SqlParameterSource parameterSource) {
+		return this.namedParameterJdbcTemplate.queryForRowSet(this.sql, parameterSource);
+	}
+
+	public int executeUpdate() {
+		return this.namedParameterJdbcTemplate.getJdbcOperations().update(this.parsedSql);
+	}
+
+	public int executeUpdate(Map parameters) {
+		return this.namedParameterJdbcTemplate.update(this.sql, parameters);
+	}
+
+	public int executeUpdate(SqlParameterSource parameterSource) {
+		return this.namedParameterJdbcTemplate.update(this.sql, parameterSource);
+	}
 
 }
