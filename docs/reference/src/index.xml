@@ -27,6 +27,8 @@
 <!ENTITY testing			SYSTEM "testing.xml">
 <!ENTITY scripting			SYSTEM "scripting.xml">
 <!ENTITY dtd				SYSTEM "dtd.xml">
+<!ENTITY spring.tld         SYSTEM "spring.tld.xml">
+<!ENTITY spring-form.tld    SYSTEM "spring-form.tld.xml">
 ]>
 <book>
     <bookinfo>
@@ -115,4 +117,6 @@
 	&scheduling;
 	&scripting;
 	&dtd;
+	&spring.tld;
+	&spring-form.tld;
 </book>
