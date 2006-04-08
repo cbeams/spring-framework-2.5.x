@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -57,6 +59,7 @@ public class PreparedStatementCreatorFactory {
 
 	private String sqlToUse = null;
 
+
 	/**
 	 * Create a new factory. Will need to add parameters
 	 * via the addParameter() method or have no parameters.
@@ -86,6 +89,7 @@ public class PreparedStatementCreatorFactory {
 		this.sql = sql;
 		this.declaredParameters = declaredParameters;
 	}
+
 
 	/**
 	 * Add a new declared parameter.
@@ -168,7 +172,7 @@ public class PreparedStatementCreatorFactory {
 	 * @param params parameter array. May be <code>null</code>.
 	 */
 	public PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
-		return new PreparedStatementCreatorImpl((params != null) ? Arrays.asList(params) : Collections.EMPTY_LIST);
+		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.EMPTY_LIST);
 	}
 
 	/**
@@ -233,7 +237,7 @@ public class PreparedStatementCreatorFactory {
 		}
 
 		public void setValues(PreparedStatement ps) throws SQLException {
-			// determine PreparedStatement to pass to custom types
+			// Determine PreparedStatement to pass to custom types.
 			PreparedStatement psToUse = ps;
 			if (nativeJdbcExtractor != null) {
 				psToUse = nativeJdbcExtractor.getNativePreparedStatement(ps);
@@ -244,9 +248,11 @@ public class PreparedStatementCreatorFactory {
 			for (int i = 0; i < this.parameters.size(); i++) {
 				SqlParameter declaredParameter = (SqlParameter) declaredParameters.get(i);
 				Object in = this.parameters.get(i);
-				if (in instanceof List) {
-					for (int j = 0; j < ((List)in).size(); j++) {
-						StatementCreatorUtils.setParameterValue(psToUse, sqlColIndx++, declaredParameter, ((List)in).get(j));
+				if (in instanceof Collection) {
+					Collection entries = (Collection) in;
+					for (Iterator it = entries.iterator(); it.hasNext();) {
+						Object entry = it.next();
+						StatementCreatorUtils.setParameterValue(psToUse, sqlColIndx++, declaredParameter, entry);
 					}
 				}
 				else {
