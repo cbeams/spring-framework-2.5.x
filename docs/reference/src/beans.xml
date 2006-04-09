@@ -1572,10 +1572,12 @@ public class ReplacementComputeValue implements MethodReplacer {
         </listitem>
       </itemizedlist>
 
-      <para>There is no "wrong" or "right" answer in all cases. We recommend a
-      degree of consistency across a project. For example, if autowiring is
-      not used in general, it might be confusing to developers to use it just
-      to one or two bean definitions.</para>
+      <para>
+		There is no "wrong" or "right" answer in all cases. A degree of
+		consistency across a project is best though; for example, if autowiring is
+		not used in general, it might be confusing to developers to use it just
+		to wire one or two bean definitions.
+	  </para>
     </sect2>
 
     <sect2 id="beans-factory-dependencies">
