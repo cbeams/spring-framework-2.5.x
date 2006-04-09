@@ -180,77 +180,60 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       below, along with a link to further documentation about each of them.
       <table frame="all">
           <title>Bean definition explanation</title>
-
           <tgroup cols="2">
             <colspec colname="c1" colwidth="2*" />
-
             <colspec colname="c2" colwidth="4*" />
-
             <thead>
               <row>
                 <entry>Feature</entry>
-
                 <entry>More info</entry>
               </row>
             </thead>
-
             <tbody>
               <row>
                 <entry>class</entry>
-
                 <entry><xref linkend="beans-factory-class" /></entry>
               </row>
-
               <row>
                 <entry>id and name</entry>
-
                 <entry><xref linkend="beans-beanname" /></entry>
               </row>
-
               <row>
                 <entry>singleton or prototype</entry>
-
                 <entry><xref linkend="beans-factory-modes" /></entry>
               </row>
-
               <row>
                 <entry>constructor arguments</entry>
-
                 <entry><xref linkend="beans-factory-collaborators" /></entry>
               </row>
-
               <row>
                 <entry>bean properties</entry>
-
                 <entry><xref linkend="beans-factory-collaborators" /></entry>
               </row>
-
               <row>
                 <entry>autowiring mode</entry>
-
                 <entry><xref linkend="beans-factory-autowire" /></entry>
               </row>
-
               <row>
                 <entry>dependency checking mode</entry>
-
                 <entry><xref linkend="beans-factory-dependencies" /></entry>
               </row>
-
+              <row>
+                <entry>lazy-initialization mode</entry>
+                <entry><xref linkend="beans-factory-lazy-init" /></entry>
+              </row>
               <row>
                 <entry>initialization method</entry>
-
                 <entry><xref linkend="beans-factory-lifecycle" /></entry>
               </row>
-
               <row>
                 <entry>destruction method</entry>
-
                 <entry><xref linkend="beans-factory-lifecycle" /></entry>
               </row>
             </tbody>
           </tgroup>
-        </table></para>
+        </table>
+      </para>
 
       <para>A bean definition is represented internally by the
       <literal>org.springframework.beans.factory.config.BeanDefinition</literal> interface,
@@ -610,24 +593,29 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
           </listitem>
 
           <listitem>
-            <para>You can generally trust Spring to do the right thing. It
-            will pick up configuration issues, including references to
-            non-existent beans and circular dependencies, at BeanFactory
-            load-time. It will actually set properties and resolve
-            dependencies (i.e. create those dependencies if needed) as late as
-            possible, which is when the bean is actually created. This does
-            mean that a BeanFactory which has loaded correctly, can later
-            generate an exception when you request a bean, if there is a
-            problem creating that bean or one of its dependencies. This could
-            happen if the bean throws an exception as a result of a missing or
-            invalid property, for example. This potentially delayed visibility
-            of some configuration issues is why ApplicationContext by default
-            pre-instantiates singleton beans. At the cost of some upfront time
-            and memory to create these beans before they are actually needed,
-            you find out about configuration issues when the
-            ApplicationContext is created, not later. If you wish, you can
-            still override this default behavior and set any of these
-            singleton beans to lazy-load (not be pre-instantiated).</para>
+            <para>
+				You can generally trust Spring to do the right thing. It
+				will pick up configuration issues, including references to
+				non-existent beans and circular dependencies, at
+				<interfacename>BeanFactory</interfacename>
+				load-time. It will actually set properties and resolve
+				dependencies (i.e. create those dependencies if needed) as late as
+				possible, which is when the bean is actually created. This does
+				mean that a <interfacename>BeanFactory</interfacename> which has loaded
+				correctly, can later
+				generate an exception when you request a bean, if there is a
+				problem creating that bean or one of its dependencies. This could
+				happen if the bean throws an exception as a result of a missing or
+				invalid property, for example. This potentially delayed visibility
+				of some configuration issues is why
+				<interfacename>ApplicationContext</interfacename> implementations by default
+				pre-instantiate singleton beans. At the cost of some upfront time
+				and memory to create these beans before they are actually needed,
+				you find out about configuration issues when the
+				<interfacename>ApplicationContext</interfacename> is created, not later.
+				If you wish, you can still override this default behavior and set any of these
+				singleton beans to lazy-initialize (i.e. not be pre-instantiated).
+			</para>
           </listitem>
         </orderedlist>
       </para>
@@ -1330,29 +1318,98 @@ public class ReplacementComputeValue implements MethodReplacer {
     <sect2 id="beans-factory-dependson">
       <title>Using <literal>depends-on</literal></title>
 
-      <para>For most situations, the fact that a bean is a dependency of
-      another is expressed simply by the fact that one bean is set as a
-      property of another. This is typically done with the
-      <literal>ref</literal> element in the XmlBeanFactory. In a variation of
-      this, sometimes a bean which is aware of the container is simply given
-      the id of its dependency (using a string value or alternately the
-      <literal>idref</literal> element, which evaluates the same as a string
-      value). The first bean then programmatically asks the container for its
-      dependency. In either case, the dependency is properly initialized
-      before the dependent bean.</para>
+      <para>
+		For most situations, the fact that a bean is a dependency of
+		another is expressed simply by the fact that one bean is set as a
+		property of another. This is typically done with the
+		<literal>ref</literal> element in the XmlBeanFactory. In a variation of
+		this, sometimes a bean which is aware of the container is simply given
+		the id of its dependency (using a string value or alternately the
+		<literal>idref</literal> element, which evaluates the same as a string
+		value). The first bean then programmatically asks the container for its
+		dependency. In either case, the dependency is properly initialized
+		before the dependent bean.
+      </para>
 
-      <para>For the relatively infrequent situations where dependencies
-      between beans are less direct (for example, when a static initializer in
-      a class needs to be triggered, such as database driver registration),
-      the <literal>depends-on</literal> element may be used to explicitly
-      force one or more beans to be initialized before the bean using this
-      element is initialized.</para>
+      <para>
+		For the relatively infrequent situations where dependencies
+		between beans are less direct (for example, when a static initializer in
+		a class needs to be triggered, such as database driver registration),
+		the <literal>depends-on</literal> element may be used to explicitly
+		force one or more beans to be initialized before the bean using this
+		element is initialized.
+      </para>
 
-      <para>Following is an example configuration:<programlisting>&lt;bean id="beanOne" class="ExampleBean" depends-on="manager"&gt;
-  &lt;property name="manager"&gt;&lt;ref local="manager"/&gt;&lt;/property&gt;
-&lt;/bean&gt;
+      <para>
+		Find below an example of using <literal>depends-on</literal>
+      </para>
+      <programlisting><![CDATA[<bean id="beanOne" class="ExampleBean" depends-on="manager">
+  <property name="manager" ref="manager"/>
+</bean>
 
-&lt;bean id="manager" class="ManagerBean"/&gt;</programlisting></para>
+<bean id="manager" class="ManagerBean"/>]]></programlisting>
+    </sect2>
+
+    <sect2 id="beans-factory-lazy-init">
+      <title>Using <literal>lazy-init</literal></title>
+      <para>
+		When using an <interfacename>ApplicationContext</interfacename> implementation, be aware that
+		the contract of the <interfacename>ApplicationContext</interfacename> requires that
+		<emphasis><literal>singleton</literal></emphasis> beans be <emphasis>pre-instantiated</emphasis>
+		at startup. Pre-instantiated means that an <interfacename>ApplicationContext</interfacename>
+		implementation instance will eagerly create and configure all of it's singleton beans
+		as part of its initialization process. This is generally <emphasis>a good thing</emphasis>,
+		because it means that any errors in the configuration or in the attendant environment
+		will be discovered immediately (as opposed to possibly hours or even days down the line).
+	  </para>
+	  <para>
+		However, there are times when this behaviour is <emphasis>not</emphasis> what is wanted.
+		If you do not want a singleton bean to be pre-instantiated when using
+		an <interfacename>ApplicationContext</interfacename> implementation, you can (on
+		a bean-definition by bean-definition basis) selectively control this by marking a bean-definition
+		as lazy-initialized. A lazily-initialized beans indicates to the IoC container whether or not
+		a bean instance should be created at startup or when it is first requested.
+      </para>
+      <para>
+		When one is configuring beans via XML, this lazy loading is controlled by the
+		<literal>'lazy-init'</literal> attribute on the <literal>&lt;bean/&gt;</literal>
+		element; to wit...
+      </para>
+      <programlisting><![CDATA[<bean id="lazy" class="com.foo.ExpensiveToCreateBean" lazy-init="true">
+    ]]><lineannotation>&lt;!-- various properties here... --&gt;</lineannotation><![CDATA[
+</bean>
+
+<bean name="not.lazy" class="com.foo.AnotherBean">
+    ]]><lineannotation>&lt;!-- various properties here... --&gt;</lineannotation><![CDATA[
+</bean>]]></programlisting>
+	  <para>
+		When the above configuration is consumed by an <interfacename>ApplicationContext</interfacename>
+		implementation, the <literal>'lazy'</literal> bean will <emphasis>not</emphasis>
+		be eagerly pre-instantiated when the <interfacename>ApplicationContext</interfacename>
+		is starting up, whereas the <literal>'not.lazy'</literal> bean will be eagerly pre-instantiated.
+	  </para>
+	  <para>
+		One thing to understand about lazy-initialization is that even though a bean definition
+		may be marked up as being lazy-initialized, if the lazy-initialized bean is the dependency
+		of a singleton bean that is not lazy-initialized, when the
+		<interfacename>ApplicationContext</interfacename> is eagerly pre-instantiating the singleton,
+		it will (of course) have to satisfy all of said singletons's dependencies, one of
+		which will be the lazy-initialized bean! So don't be confused if the IoC container
+		creates one of the beans that you have explicitly configured as lazy-initialized
+		at startup; all that means is that the lazy-initialized bean probably is being injected
+		into a non-lazy-initialized singleton bean elsewhere in your configuration.
+	  </para>
+	  <para>
+		It is also possible to control lazy-initialization at the <interfacename>ApplicationContext</interfacename>
+		level by using the <literal>'default-lazy-init'</literal> attribute on the <literal>&lt;beans/&gt;</literal>
+		element; to wit...
+	  </para>
+	  <programlisting><![CDATA[<beans default-lazy-init="true">
+    ]]><lineannotation>&lt;!-- no beans will be eagerly pre-instantiated... --&gt;</lineannotation><![CDATA[
+</beans>]]></programlisting>
+	  <para>
+	  
+	  </para>
     </sect2>
 
     <sect2 id="beans-factory-autowire">
