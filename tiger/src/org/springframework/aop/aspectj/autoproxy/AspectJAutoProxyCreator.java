@@ -57,23 +57,7 @@ public class AspectJAutoProxyCreator extends AspectJInvocationContextExposingAdv
 	private static final long serialVersionUID = -3347584141231774337L;
 	private static final Log staticLogger = LogFactory.getLog(AspectJAutoProxyCreator.class);
 	private static final String ORDER_PROPERTY = "order"; 
-	
-	/*
-	 * The mere presence of an aop:config element is enough to cause this
-	 * AspectJAutoProxyCreator to be created. But that *does not* mean we
-	 * want it to interpret beans that happen to be @AspectJ aspects. This
-	 * behaviour should *only be enabled by the <aop:aspectj-autoproxy> element,
-	 * which sets this property to true.
-	 */
-	private static boolean useAtAspectJAspects = false;
-	
-	/*
-	 * Called by the namespace handler when an <aop:aspectj-autoproxy> element
-	 * is detected.
-	 */
-	public static void enableAtAspectJAutoproxying() {
-		useAtAspectJAspects = true;
-	}
+
 	
 	/**
 	 * Look for AspectJ annotated aspect classes in the current bean factory,
@@ -84,16 +68,11 @@ public class AspectJAutoProxyCreator extends AspectJInvocationContextExposingAdv
 	 * @return a list of Spring AOP advisors resulting from AspectJ annotated
 	 * classes in the current Spring bean factory
 	 */
-	public static List<Advisor> createAspectJAdvisors(
+	public List<Advisor> createAspectJAdvisors (
 			AspectJAdvisorFactory aspectJAdvisorFactory, BeanFactory beanFactory)
 			throws BeansException, IllegalStateException {
 
 		List<Advisor> advisors = new LinkedList<Advisor>();
-		
-		if (!useAtAspectJAspects) {
-			// NOT Collections.EMPTY_LIST as others may try to add elements later
-			return advisors;
-		}
 
 		// Safety of cast is already enforced by superclass
 		String[] beanDefinitionNames = BeanFactoryUtils.beanNamesIncludingAncestors((ListableBeanFactory) beanFactory);		
@@ -139,7 +118,7 @@ public class AspectJAutoProxyCreator extends AspectJInvocationContextExposingAdv
 
 	// TODO: consider creating intermediate OrderedPointcutAdvisor interface between
 	// PointcutAdvisor and InstantiationModelAwarePointcutAdvisor
-	private static void setAdvisorOrderIfNecessary(List<Advisor> advisors, Object beanInstance) {
+	private void setAdvisorOrderIfNecessary(List<Advisor> advisors, Object beanInstance) {
 		if (beanInstance instanceof Ordered) {
 			int order = ((Ordered)beanInstance).getOrder();
 			for (Advisor advisor : advisors) {
@@ -152,7 +131,7 @@ public class AspectJAutoProxyCreator extends AspectJInvocationContextExposingAdv
 	
 	// we can't instantiate a bean instance, so we look for a prototype order property value
 	// and use that instead...
-	private static void setAdvisorOrderIfNecessary(List<Advisor> advisors, BeanFactory beanFactory, String beanName) {
+	private void setAdvisorOrderIfNecessary(List<Advisor> advisors, BeanFactory beanFactory, String beanName) {
 		if (beanFactory instanceof ConfigurableListableBeanFactory) {
 			BeanDefinition beanDef = ((ConfigurableListableBeanFactory)beanFactory).getBeanDefinition(beanName);
 			MutablePropertyValues mpvs = beanDef.getPropertyValues();
@@ -195,16 +174,6 @@ public class AspectJAutoProxyCreator extends AspectJInvocationContextExposingAdv
 		this.aspectJAdvisorFactory = aspectJAdvisorFactory;
 	}
 
-	/**
-	 * If configuring AtAspectJAutoProxying via DTD rather than
-	 * using <aop:aspectj-autoproxying> then you need to set this 
-	 * property to true.
-	 * @param enabled
-	 */
-	public void setAspectJAutoProxying(boolean enabled) {
-		AspectJAutoProxyCreator.useAtAspectJAspects = enabled;
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	protected List findCandidateAdvisors() {
@@ -213,7 +182,7 @@ public class AspectJAutoProxyCreator extends AspectJInvocationContextExposingAdv
 		// Add all the Spring advisors found according to superclass rules
 		advisors.addAll(super.findCandidateAdvisors());
 
-		advisors.addAll(createAspectJAdvisors(aspectJAdvisorFactory, getBeanFactory()));
+		advisors.addAll(createAspectJAdvisors(this.aspectJAdvisorFactory, getBeanFactory()));
 		return advisors;
 	}
 

@@ -5,10 +5,8 @@
 <beans>
 
 	<bean 
-		class="org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator">
-		<property name="aspectJAutoProxying" value="true"/>
-	</bean>
-	
+		class="org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator"/>
+
 	<bean 
 		class="org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests$PerTargetAspect" 
 		singleton="false" >

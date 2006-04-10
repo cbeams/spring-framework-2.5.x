@@ -59,7 +59,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(
 			"/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
 		GenericApplicationContext childAc = new GenericApplicationContext(ac);
-		// Create a child factory with a bean that should be weaved
+		// Create a child factory with a bean that should be weaved                                              
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, true);
 		bd.getPropertyValues().addPropertyValue(new PropertyValue("name", "Adrian")).
 			addPropertyValue(new PropertyValue("age", new Integer(34)));

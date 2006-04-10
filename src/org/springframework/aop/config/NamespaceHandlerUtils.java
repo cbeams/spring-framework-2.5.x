@@ -16,14 +16,17 @@
 
 package org.springframework.aop.config;
 
-import java.lang.reflect.Method;
-
+import org.springframework.aop.aspectj.autoproxy.AspectJInvocationContextExposingAdvisorAutoProxyCreator;
 import org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvisorAutoProxyCreator;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Rob Harrop
@@ -32,79 +35,70 @@ import org.springframework.util.ClassUtils;
 public abstract class NamespaceHandlerUtils {
 
 	public static final String AUTO_PROXY_CREATOR_BEAN_NAME =
-			"org.springframework.aop.config.internalAutoProxyCreator";
-
-	public static final String CONFIGURABLE_TARGET_SOURCE_CREATOR_NAME =
-			"org.springframework.aop.framework.target.internalTargetSourceCreator";
+					"org.springframework.aop.config.internalAutoProxyCreator";
 
 	public static final String ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME =
-			"org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator";
+					"org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator";
 
-	private static final String ENABLE_AT_ASPECTJ_AUTOPROXYING = 
-		    "enableAtAspectJAutoproxying";
+	private static final List APC_PRIORITY_LIST = new ArrayList();
+
+	static {
+		APC_PRIORITY_LIST.add(InvocationContextExposingAdvisorAutoProxyCreator.class.getName());
+		APC_PRIORITY_LIST.add(AspectJInvocationContextExposingAdvisorAutoProxyCreator.class.getName());
+		APC_PRIORITY_LIST.add(ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME);
+	}
 
 	public static void registerAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
-		if (!registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
-			RootBeanDefinition definition = new RootBeanDefinition(InvocationContextExposingAdvisorAutoProxyCreator.class);
-			registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, definition);
-		}
+		registryOrEscalateApcAsRequired(InvocationContextExposingAdvisorAutoProxyCreator.class, registry);
 	}
-
 
 	public static void registerAspectJAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
-		registerAspectJAutoProxyCreatorIfNecessary(registry,false);
+		registryOrEscalateApcAsRequired(AspectJInvocationContextExposingAdvisorAutoProxyCreator.class, registry);
 	}
 
-	public static void registerAspectJAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry, boolean enableAutoProxying) {
-		Class baseApcClass = InvocationContextExposingAdvisorAutoProxyCreator.class;
-		Class ajApcClass = getAspectJAutoProxyCreatorClassIfPossible();
-
-		if (ajApcClass == null) {
-			throw new IllegalStateException(
-					"Unable to register AspectJ AutoProxyCreator. Cannot find class [" +
+	public static void registerAtAspectJAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
+		Class cls = getAspectJAutoProxyCreatorClassIfPossible();
+		if (cls == null) {
+			throw new IllegalStateException("Unable to register AspectJ AutoProxyCreator. Cannot find class [" +
 					ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME + "]. Are you running on Java 5.0+?");
 		}
+		registryOrEscalateApcAsRequired(cls, registry);
+	}
 
+	private static void registryOrEscalateApcAsRequired(Class cls, BeanDefinitionRegistry registry) {
+		Assert.notNull(cls, "'cls' cannot be null.");
+		Assert.notNull(registry, "'registry' cannot be null.");
 
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
-			AbstractBeanDefinition definition =
-					(AbstractBeanDefinition) registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
-			if (baseApcClass.equals(definition.getBeanClass())) {
-				// switch APC type
-				definition.setBeanClass(ajApcClass);
+			AbstractBeanDefinition abd = (AbstractBeanDefinition) registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
+
+			if (cls.equals(abd.getBeanClass())) {
+				return;
+			}
+
+			int currentPriority = findPriorityForClass(abd.getBeanClass().getName());
+			int requiredPriority = findPriorityForClass(cls.getName());
+
+			if (currentPriority < requiredPriority) {
+				abd.setBeanClass(cls);
 			}
 		}
 		else {
-			RootBeanDefinition definition = new RootBeanDefinition(ajApcClass);
-			registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, definition);
-		}
-		
-		if (enableAutoProxying) {
-			// reflective invoke of method in Java5 class
-			try {
-				Method enableMethod = ajApcClass.getMethod(ENABLE_AT_ASPECTJ_AUTOPROXYING, new Class[]{});
-				enableMethod.invoke(null, new Object[0]);
-			}
-			catch (Exception ex) {
-				// there are a cast of thousands of exceptions that can be thrown by
-				// the above, but they all boil down to the same thing...
-				throw new IllegalStateException(
-						"Unable to enable AspectJ AutoProxying for @AspectJ aspects",
-						ex);
-			}
+			registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, new RootBeanDefinition(cls));
 		}
 	}
 
+
 	public static void forceAutoProxyCreatorToUseClassProxying(BeanDefinitionRegistry registry) {
-		 if(registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
-			 AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
+		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
+			AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
 
-			 if(definition.getPropertyValues() == null) {
-				 definition.setPropertyValues(new MutablePropertyValues());
-			 }
+			if (definition.getPropertyValues() == null) {
+				definition.setPropertyValues(new MutablePropertyValues());
+			}
 
-			 definition.getPropertyValues().addPropertyValue("proxyTargetClass", Boolean.TRUE);
-		 }
+			definition.getPropertyValues().addPropertyValue("proxyTargetClass", Boolean.TRUE);
+		}
 	}
 
 	private static Class getAspectJAutoProxyCreatorClassIfPossible() {
@@ -114,6 +108,26 @@ public abstract class NamespaceHandlerUtils {
 		catch (ClassNotFoundException ex) {
 			return null;
 		}
+	}
+
+	private static Class getAtAspectJAutoProxyCreatorClassIfPossible() {
+		try {
+			return ClassUtils.forName(ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME);
+		}
+		catch (ClassNotFoundException ex) {
+			return null;
+		}
+	}
+
+	private static final int findPriorityForClass(String className) {
+		Assert.notNull(className, "'className' cannot be null.");
+		for (int i = 0; i < APC_PRIORITY_LIST.size(); i++) {
+			String s = (String) APC_PRIORITY_LIST.get(i);
+			if (className.equals(s)) {
+				return i;
+			}
+		}
+		throw new IllegalArgumentException("Class name '" + className + "' is not a known APC class.");
 	}
 
 }
