@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 M4 (29.3.2006)
+Changes in version 2.0 M4 (14.4.2006)
 -------------------------------------
 
 General
@@ -15,27 +15,52 @@ Package org.springframework.aop
 * fixed Cglib2AopProxy to register an explicitly given ClassLoader with the CGLIB Enhancer
 * deprecated Commons Attributes based TargetSourceCreators (PoolingAttribute, PrototypeAttribute, ThreadLocalAttribute)
 * fixed CustomizableTraceInterceptor to expose the actual invocation time for exception messages
+* added "trackAllInvocations" flag to JamonPerformanceMonitorInterceptor, for gathering statistics without logging
 
 Package org.springframework.beans
 * BeanUtils throws explicit BeanInstantiationException in case of bean instantiation failure
+* deprecated BeanUtils's "isAssignable" methods in favor of new "isAssignable"/"isAssignableValue" methods on ClassUtils
 * fixed BeanWrapperImpl to convert a null input for an array type to a null value rather than an array with null element
 * fixed BeanWrapperImpl to apply property-specific editors to elements even for collections without generic type
+* refined BeanWrapperImpl to apply map key conversion on property access as well, not just on property setting
 * refined BeanWrapperImpl to inject original collections as far as possible (i.e. unless element conversion necessary)
+* BeanWrapperImpl does not register a StringArrayPropertyEditor by default anymore
 * fixed BeanWrapperImpl to convert a ManagedProperties instance into a plain Properties instance before applying it
+* fixed BeanArrayPropertyEditor to translate null value to null byte array
+* added CharArrayPropertyEditor to translate String value into char array
 * CharacterEditor supports unicode specification passed in as literal String, for example "\u00F6"
 * fixed DefaultListableBeanFactory to not preinstantiate bean definition if explicit singleton object already registered
+* PropertyPlaceholderConfigurer catches and logs SecurityException on system property access, continuing resolution
+
+Package org.springframework.context
+* refined AbstractMessageSource to resolve arguments eagerly, for message defined in parent and msg arg defined in child
 
 Package org.springframework.core
+* refined NestedXxxException to properly handle null message in root cause, through using the cause's "toString()"
 * fixed FileSystemResource/UrlResource to retain leading "../" parts in paths, building correct relative paths for them
+* ResourceEditor resolves placeholders in resource locations against system environment variables as well
+
+Package org.springframework.dao
+* introduced PermissionDeniedDataAccessException, thrown for valid operation that was rejected due to lack of permission
 
 Package org.springframework.jdbc
+* added "permissionDeniedCodes" category to SQLErrorCodes, with default code 229 for MS SQL Server in sql-error-codes
 * JdbcTemplate's "queryForString"/"queryForInt"/etc methods correctly detect incorrect result sizes even for null values
+* turned JdbcTemplate's "query(PreparedStatementCreator,PreparedStatementSetter,ResultSetExtractor rse)" method public
+* JdbcTemplate does not check static SQL for bind parameters anymore, to avoid overhead of double parsing
 * refined NativeJdbcExtractorAdapter to retry with DatabaseMetaData Connection if extraction failed (for Hibernate 3.1)
 * added NamedParameterJdbcTemplate which provides named parameters support for query and update functionality
-* added named parameters support for SqlQuery, SqlUpdate hierarchy of classes
+* added named parameters support to SqlQuery/SqlUpdate hierarchy of classes
 
 Package org.springframework.jms
+* AbstractMessageListenerContainer prefers SessionAwareMessageListener over MessageListener (if both are implemented)
+* added "exceptionListener" property to AbstractMessageListenerContainer, accepting a standard JMS ExceptionListener
+* added "handleListenerException" template method to AbstractMessageListenerContainer, by default logging at error level
 * fixed ServerSessionMessageListenerContainer(102) to use "createSession(Connection)" method to avoid JMS 1.1 dependency
+* added MessageListenerAdapter(102), delegating to listener methods that operate on content types (String, byte array)
+
+Package org.springframework.mail
+* refined JavaMailSenderImpl to use "Session.getInstance(properties, null)", for compatibility with (old) JavaMail 1.1
 
 Package org.springframework.mock
 * added overloaded constructors to MockFilterConfig, using a MockServletContext instead of a ServletContext argument
@@ -52,8 +77,10 @@ Package org.springframework.orm
 * fixed JpaDaoSupport's "setEntityManager" method to accept an EntityManager instead of an EntityManagerFactory
 * removed "getEntityManager()"/"getEntityManagerFactory()" accessor methods from JpaDaoSupport
 * removed "allowCreate" flag from JpaTemplate, always allowing creation (analogous to shared EntityManager)
+* added "exceptionConversionEnabled" flag to HibernateInterceptor, TopLinkInterceptor, JdoInterceptor, JpaInterceptor
 
 Package org.springframework.remoting
+* RmiClientInterceptorUtils throws clearer exception message in case of proxy mismatch (for underlying RMI stubs)
 * added "setContentType" configuration method to HttpInvokerServiceExporter and AbstractHttpInvokerRequestExecutor
 * built client-side HTTP GZIP response support into SimpleHttpInvokerRequestExecutor/CommonsHttpInvokerRequestExecutor
 * JaxRpcPortClientInterceptor synchronizes creation of JAX-RPC Calls, to make dynamic invocations with Axis thread-safe
@@ -69,21 +96,34 @@ Package org.springframework.transaction
 * AbstractPlatformTransactionManager logs "Should roll back transaction but cannot" message at debug level (not warn)
 
 Package org.springframework.util
+* added null-safe hashCode and toString methods to ObjectUtils (analogous to JDK 1.5), moved over from Spring Modules
 * fixed StringUtils's "endsWithIgnoreCase" to correctly handle any String length
 * fixed CollectionsUtils's "hasUniqueObject" to correctly handle null values
+* reworked MethodInvoker to match arguments against parameter types when searching for a matching method
+
+Package org.springframework.validation
+* DataBinder does not use a default StringArrayPropertyEditor anymore, to nicely handle select list entries with commas
+* fixed ValidationUtils's "invokeValidator" to work correctly even in case of a null reference as object to be validated
 
 Package org.springframework.web
 * refined GenericFilterBean to fully support initialization as bean in a Spring bean factory (without FilterConfig)
 * refined OncePerRequestFilter to fall back to bean name or fully qualified class name if no filter name is available
+* refined FrameworkServlet to log a request handling failure at debug level rather than error level
 * refined AbstractRefreshablePortletApplicationContext to take PortletContext from PortletConfig if not explicitly set
-* added "propertyEditorRegistrar" bean property to BaseCommandController, as convenience option for a single registrar
+* factored out "handleNoSuchRequestHandlingMethod" method in MultiActionController, to be overridden in subclasses
 * fixed SimpleMappingExceptionResolver to correctly check the depth of all exception mappings before choosing a view
+* refined SimpleMappingExceptionResolver to only apply a "defaultStatusCode" to a top-level request (not to an include)
+* added "clearCache()" method to AbstractCachingViewResolver, for removing all cached view objects
 * optimized BeanNameViewResolver to avoid internal throwing and catching of NoSuchBeanDefinitionExceptions
 * ExpressionEvaluationManager supports concatenated expressions (e.g. "${var1}text${var2}") on all JSP 2.0 engines
 * added optional caching of JSP 2.0 Expressions, driven by "cacheJspExpressions" context-param in web.xml (true/false)
+* fixed JSP SelectTag to correctly handle null values
 * AbstractJasperReportsView and subclasses require JasperReports 1.0.1 or higher (removed backwards compatibility check)
 * fixed AbstractJasperReportsView and subclasses to be compatible with J2EE <1.4 (avoid response.setCharacterEncoding)
 * AbstractJasperReportsView autodetects a JDBC DataSource in the model, as alternative to specifying it in configuration
+* Struts ContextLoaderPlugIn ignores "Action.setServlet(ActionServlet)" method when performing a dependency check
+* optimized Struts Delegating(Tiles)RequestProcessor to avoid unnecessary NoSuchBeanDefinitionException throw+catch
+* added Autowiring(Tiles)RequestProcessor, autowiring created Actions (configurable through ActionServlet init-params)
 
 
 Changes in version 2.0 M3 (8.3.2006)
@@ -149,6 +189,7 @@ Package org.springframework.scheduling
 * all thread-pool-backed executors implement SchedulingTaskExecutor to expose a preference for short-lived tasks
 * added SchedulingAwareRunnable interface, exposing an "isLongLived" flag (analogous to CommonJ's "isDaemon")
 * CommonJ WorkManagerTaskExecutor/DelegatingWork exposes SchedulingAwareRunnable's "isLongLived" flag appropriately
+* fixed TimerFactoryBean to properly initialize even without "scheduledTimerTasks" configured
 
 Package org.springframework.scripting
 * fixed ScriptFactoryPostProcessor to let scripts receive bean references up the entire container hierarchy
