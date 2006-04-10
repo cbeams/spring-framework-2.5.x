@@ -75,10 +75,7 @@ public class SqlCommand implements SqlCommandOperations {
     }
 
     public Object executeObject(RowMapper rowMapper, Map parameters) {
-        Object o = this.namedParameterJdbcTemplate.queryForObject(this.sql, parameters, rowMapper);
-        System.out.println(">>>>>" + o.getClass().getName());
-        System.out.println(">>>>>" + o);
-        return o;
+        return this.namedParameterJdbcTemplate.queryForObject(this.sql, parameters, rowMapper);
     }
 
     public Object executeObject(RowMapper rowMapper, SqlParameterSource parameterSource) {
@@ -140,6 +137,5 @@ public class SqlCommand implements SqlCommandOperations {
     public int executeUpdate(SqlParameterSource parameterSource, KeyHolder keyHolder, String[] keyColumnNames) {
         return this.namedParameterJdbcTemplate.update(sql, parameterSource, keyHolder, keyColumnNames);
     }
-
 
 }
