@@ -226,6 +226,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		if (locale == null) {
 			locale = Locale.getDefault();
 		}
+		Object[] argsToUse = args;
 
 		if (!isAlwaysUseMessageFormat() && ObjectUtils.isEmpty(args)) {
 			// Optimized resolution: no arguments to apply,
@@ -237,17 +238,23 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 				return message;
 			}
 		}
+
 		else {
+			// Resolve arguments eagerly, for the case where the message
+			// is defined in a parent MessageSource but resolvable arguments
+			// are defined in the child MessageSource.
+			argsToUse = resolveArguments(args, locale);
+
 			MessageFormat messageFormat = resolveCode(code, locale);
 			if (messageFormat != null) {
 				synchronized (messageFormat) {
-					return messageFormat.format(resolveArguments(args, locale));
+					return messageFormat.format(argsToUse);
 				}
 			}
 		}
 
 		// Not found -> check parent, if any.
-		return getMessageFromParent(code, args, locale);
+		return getMessageFromParent(code, argsToUse, locale);
 	}
 
 	/**
