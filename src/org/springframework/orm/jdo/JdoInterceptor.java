@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jdo;
 
+import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -34,29 +35,19 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * to be able to detect a thread-bound PersistenceManager. It is preferable to use
  * <code>getPersistenceManager</code> with allowCreate=false, if the code relies on
  * the interceptor to provide proper PersistenceManager handling. Typically, the code
- * will look as follows:
+ * will look like as follows:
  *
  * <pre>
- * public void doJdoAction() {
+ * public void doSomeDataAccessAction() {
  *   PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(this.pmf, false);
- *   try {
- *     ...
- *   }
- *   catch (JDOException ex) {
- *     throw PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
- *   }
+ *   ...
  * }</pre>
  *
- * Note that the application must care about handling JDOExceptions itself,
- * preferably via delegating to the <code>PersistenceManagerFactoryUtils.convertJdoAccessException</code>
+ * <p>Note that this interceptor automatically translates JDOExceptions, via
+ * delegating to the <code>PersistenceManagerFactoryUtils.convertJdoAccessException</code>
  * method that converts them to exceptions that are compatible with the
  * <code>org.springframework.dao</code> exception hierarchy (like JdoTemplate does).
- *
- * <p>This interceptor could convert unchecked JDOExceptions to unchecked dao ones
- * on-the-fly. The intercepted method wouldn't have to throw any special checked
- * exceptions to be able to achieve this. Nevertheless, such a mechanism would
- * effectively break the contract of the intercepted method (runtime exceptions
- * can be considered part of the contract too), therefore it isn't supported.
+ * This can be turned off if the raw exceptions are preferred.
  *
  * <p>This class can be considered a declarative alternative to JdoTemplate's
  * callback approach. The advantages are:
@@ -65,11 +56,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <li>the possibility to throw any application exceptions from within data access code.
  * </ul>
  *
- * <p>The drawbacks are:
- * <ul>
- * <li>the dependency on interceptor configuration;
- * <li>the delegating try/catch blocks.
- * </ul>
+ * <p>The drawback is the dependency on interceptor configuration. However, note
+ * that this interceptor is usually <i>not</i> necessary in scenarios where the
+ * data access code always executes within transactions. A transaction will always
+ * have a thread-bound PersistenceManager in the first place, so adding this interceptor
+ * to the configuration just adds value when fine-tuning PersistenceManager settings
+ * like the flush mode - or when relying on exception translation.
  *
  * @author Juergen Hoeller
  * @since 13.06.2003
@@ -78,6 +70,21 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see JdoTemplate
  */
 public class JdoInterceptor extends JdoAccessor implements MethodInterceptor {
+
+	private boolean exceptionConversionEnabled = true;
+
+
+	/**
+	 * Set whether to convert any JDOException raised to a Spring DataAccessException,
+	 * compatible with the <code>org.springframework.dao</code> exception hierarchy.
+	 * <p>Default is "true". Turn this flag off to let the caller receive raw exceptions
+	 * as-is, without any wrapping.
+	 * @see org.springframework.dao.DataAccessException
+	 */
+	public void setExceptionConversionEnabled(boolean exceptionConversionEnabled) {
+		this.exceptionConversionEnabled = exceptionConversionEnabled;
+	}
+
 
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		boolean existingTransaction = false;
@@ -94,6 +101,14 @@ public class JdoInterceptor extends JdoAccessor implements MethodInterceptor {
 			Object retVal = methodInvocation.proceed();
 			flushIfNecessary(pm, existingTransaction);
 			return retVal;
+		}
+		catch (JDOException ex) {
+			if (this.exceptionConversionEnabled) {
+				throw convertJdoAccessException(ex);
+			}
+			else {
+				throw ex;
+			}
 		}
 		finally {
 			if (existingTransaction) {

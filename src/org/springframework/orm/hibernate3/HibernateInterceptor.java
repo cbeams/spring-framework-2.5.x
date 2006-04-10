@@ -34,10 +34,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <p>Application code must retrieve a Hibernate Session via the
  * <code>SessionFactoryUtils.getSession</code> method or - preferably -
  * Hibernate's own <code>SessionFactory.getCurrentSession()</code> method, to be
- * able to detect a thread-bound Session. Typically, the code will look as follows:
+ * able to detect a thread-bound Session. Typically, the code will look like as follows:
  *
- * <pre class="code">
- * public void doHibernateAction() {
+ * <pre>
+ * public void doSomeDataAccessAction() {
  *   Session session = this.sessionFactory.getCurrentSession();
  *   ...
  *   // No need to close the Session or translate exceptions!
@@ -47,6 +47,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * via delegating to the <code>SessionFactoryUtils.convertHibernateAccessException</code>
  * method that converts them to exceptions that are compatible with the
  * <code>org.springframework.dao</code> exception hierarchy (like HibernateTemplate does).
+ * This can be turned off if the raw exceptions are preferred.
  *
  * <p>This class can be considered a declarative alternative to HibernateTemplate's
  * callback approach. The advantages are:
@@ -70,6 +71,21 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class HibernateInterceptor extends HibernateAccessor implements MethodInterceptor {
 
+	private boolean exceptionConversionEnabled = true;
+
+
+	/**
+	 * Set whether to convert any HibernateException raised to a Spring DataAccessException,
+	 * compatible with the <code>org.springframework.dao</code> exception hierarchy.
+	 * <p>Default is "true". Turn this flag off to let the caller receive raw exceptions
+	 * as-is, without any wrapping.
+	 * @see org.springframework.dao.DataAccessException
+	 */
+	public void setExceptionConversionEnabled(boolean exceptionConversionEnabled) {
+		this.exceptionConversionEnabled = exceptionConversionEnabled;
+	}
+
+
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		Session session = getSession();
 		boolean existingTransaction = SessionFactoryUtils.isSessionTransactional(session, getSessionFactory());
@@ -90,7 +106,12 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 			return retVal;
 		}
 		catch (HibernateException ex) {
-			throw convertHibernateAccessException(ex);
+			if (this.exceptionConversionEnabled) {
+				throw convertHibernateAccessException(ex);
+			}
+			else {
+				throw ex;
+			}
 		}
 		finally {
 			if (existingTransaction) {

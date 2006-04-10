@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,26 +31,21 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * takes part in it.
  *
  * <p>Application code must retrieve a TopLink Session via the
- * <code>SessionFactoryUtils.getSession</code> method, to be able to detect a
- * thread-bound Session. It is preferable to use <code>getSession</code> with
- * allowCreate=false, if the code relies on the interceptor to provide proper
- * Session handling. Typically, the code will look as follows:
+ * <code>SessionFactoryUtils.getSession</code> method or - preferably -
+ * TopLink's own <code>Session.getActiveSession()</code> method, to be able to
+ * detect a thread-bound Session. Typically, the code will look like as follows:
  *
  * <pre>
- * public void doTopLinkAction() {
- *   Session session = SessionFactoryUtils.getSession(this.sessionFactory, false);
- *   try {
- *     ...
- *   }
- *   catch (TopLinkException ex) {
- *     throw SessionFactoryUtils.convertTopLinkAccessException(ex);
- *   }
+ * public void doSomeDataAccessAction() {
+ *   Session session = this.serverSession.getActiveSession();
+ *   ...
  * }</pre>
  *
- * Note that the application must care about handling TopLinkExceptions itself,
- * preferably via delegating to the <code>SessionFactoryUtils.convertTopLinkAccessException</code>
+ * Note that this interceptor automatically translates TopLinkExceptions,
+ * via delegating to the <code>SessionFactoryUtils.convertTopLikAccessException</code>
  * method that converts them to exceptions that are compatible with the
  * <code>org.springframework.dao</code> exception hierarchy (like TopLinkTemplate does).
+ * This can be turned off if the raw exceptions are preferred.
  *
  * <p>This class can be considered a declarative alternative to TopLinkTemplate's
  * callback approach. The advantages are:
@@ -59,16 +54,32 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <li>the possibility to throw any application exceptions from within data access code.
  * </ul>
  *
- * <p>The drawbacks are:
- * <ul>
- * <li>the dependency on interceptor configuration;
- * <li>the delegating try/catch blocks.
- * </ul>
+ * <p>The drawback is the dependency on interceptor configuration. However, note
+ * that this interceptor is usually <i>not</i> necessary in scenarios where the
+ * data access code always executes within transactions. A transaction will always
+ * have a thread-bound Session in the first place, so adding this interceptor to the
+ * configuration just adds value when potentially executing outside of transactions
+ * and/or when relying on exception translation.
  *
  * @author Juergen Hoeller
  * @since 1.2
  */
 public class TopLinkInterceptor extends TopLinkAccessor implements MethodInterceptor {
+
+	private boolean exceptionConversionEnabled = true;
+
+
+	/**
+	 * Set whether to convert any TopLinkException raised to a Spring DataAccessException,
+	 * compatible with the <code>org.springframework.dao</code> exception hierarchy.
+	 * <p>Default is "true". Turn this flag off to let the caller receive raw exceptions
+	 * as-is, without any wrapping.
+	 * @see org.springframework.dao.DataAccessException
+	 */
+	public void setExceptionConversionEnabled(boolean exceptionConversionEnabled) {
+		this.exceptionConversionEnabled = exceptionConversionEnabled;
+	}
+
 
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		boolean existingTransaction = false;
@@ -85,7 +96,12 @@ public class TopLinkInterceptor extends TopLinkAccessor implements MethodInterce
 			return methodInvocation.proceed();
 		}
 		catch (TopLinkException ex) {
-			throw convertTopLinkAccessException(ex);
+			if (this.exceptionConversionEnabled) {
+				throw convertTopLinkAccessException(ex);
+			}
+			else {
+				throw ex;
+			}
 		}
 		finally {
 			if (existingTransaction) {

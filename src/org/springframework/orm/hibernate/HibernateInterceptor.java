@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,10 +35,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <code>SessionFactoryUtils.getSession</code> method, to be able to detect a
  * thread-bound Session. It is preferable to use <code>getSession</code> with
  * allowCreate=false, if the code relies on the interceptor to provide proper
- * Session handling. Typically, the code will look as follows:
+ * Session handling. Typically, the code will look like as follows:
  *
  * <pre>
- * public void doHibernateAction() {
+ * public void doSomeDataAccessAction() {
  *   Session session = SessionFactoryUtils.getSession(this.sessionFactory, false);
  *   try {
  *     ...
@@ -54,9 +54,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <code>org.springframework.dao</code> exception hierarchy (like HibernateTemplate does).
  *
  * <p>Unfortunately, this interceptor cannot convert checked HibernateExceptions
- * to unchecked dao ones automatically. The intercepted method would have to throw
- * HibernateException to be able to achieve this - thus the caller would still have
- * to catch or rethrow it, even if it will never be thrown if intercepted.
+ * to unchecked dao ones transparently. The intercepted method would have to declare
+ * the checked HibernateException - thus the caller would still have to catch or
+ * rethrow it, even if it will never be thrown if intercepted. Any such exception
+ * will nevertheless get converted by default.
  *
  * <p>This class can be considered a declarative alternative to HibernateTemplate's
  * callback approach. The advantages are:
@@ -81,6 +82,22 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class HibernateInterceptor extends HibernateAccessor implements MethodInterceptor {
 
+	private boolean exceptionConversionEnabled = true;
+
+
+	/**
+	 * Set whether to convert any HibernateException raised to a Spring DataAccessException,
+	 * compatible with the <code>org.springframework.dao</code> exception hierarchy.
+	 * <p>Default is "true". Turn this flag off to let the caller receive raw exceptions
+	 * as-is, without any wrapping. Note that this means that the DAO methods will have
+	 * to declare the checked HibernateException, and callers will be forced to handle it.
+	 * @see org.springframework.dao.DataAccessException
+	 */
+	public void setExceptionConversionEnabled(boolean exceptionConversionEnabled) {
+		this.exceptionConversionEnabled = exceptionConversionEnabled;
+	}
+
+
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		Session session = getSession();
 		boolean existingTransaction = SessionFactoryUtils.isSessionTransactional(session, getSessionFactory());
@@ -100,7 +117,12 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 			return retVal;
 		}
 		catch (HibernateException ex) {
-			throw convertHibernateAccessException(ex);
+			if (this.exceptionConversionEnabled) {
+				throw convertHibernateAccessException(ex);
+			}
+			else {
+				throw ex;
+			}
 		}
 		finally {
 			if (existingTransaction) {
