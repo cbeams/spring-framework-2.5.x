@@ -80,7 +80,7 @@ public abstract class SystemPropertyUtils {
 						}
 					}
 				}
-				catch (SecurityException ex) {
+				catch (Throwable ex) {
 					if (logger.isWarnEnabled()) {
 						logger.warn("Could not resolve placeholder '" + placeholder + "' in [" + text +
 								"] as system property: " + ex);

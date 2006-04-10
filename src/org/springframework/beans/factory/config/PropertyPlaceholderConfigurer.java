@@ -378,9 +378,9 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 			}
 			return value;
 		}
-		catch (SecurityException ex) {
+		catch (Throwable t) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Could not access system property '" + key + "': " + ex);
+				logger.debug("Could not access system property '" + key + "': " + t);
 			}
 			return null;
 		}
