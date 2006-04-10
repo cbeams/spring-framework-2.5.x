@@ -20,16 +20,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.*;
+import java.util.*;
 
 import javax.sql.DataSource;
 
@@ -1199,10 +1191,21 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 
 		public void setValues(PreparedStatement ps) throws SQLException {
-			if (this.args != null) {
+            int argIndx = 1;
+            if (this.args != null) {
 				for (int i = 0; i < this.args.length; i++) {
-					StatementCreatorUtils.setParameterValue(ps, i + 1, this.argTypes[i], null, this.args[i]);
-				}
+                    Object arg = this.args[i];
+                    if (arg instanceof Collection && this.argTypes[i] != Types.ARRAY) {
+                        Collection entries = (Collection) arg;
+                        for (Iterator it = entries.iterator(); it.hasNext();) {
+                            Object entry = it.next();
+                            StatementCreatorUtils.setParameterValue(ps, argIndx++, this.argTypes[i], null, entry);
+                        }
+                    }
+                    else {
+                        StatementCreatorUtils.setParameterValue(ps, argIndx++, this.argTypes[i], null, arg);
+                    }
+                }
 			}
 		}
 

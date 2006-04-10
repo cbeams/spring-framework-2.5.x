@@ -22,6 +22,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 import org.easymock.MockControl;
 
@@ -358,6 +359,51 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		SimpleSqlParameterSource parms = new SimpleSqlParameterSource();
 		parms.addValue("id", new Integer(3));
+
+		Object o = template.queryForObject(sql, parms, Integer.class);
+		assertTrue("Correct result type", o instanceof Integer);
+	}
+
+	public void testQueryForObjectWithParamMapAndList() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID IN (:ids)";
+		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID IN (?, ?)";
+
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt(1);
+		ctrlResultSet.setReturnValue(22);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		mockPreparedStatement.setObject(1, new Integer(3));
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setObject(2, new Integer(4));
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(sqlToUse);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+
+		replay();
+
+		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
+
+		SimpleSqlParameterSource parms = new SimpleSqlParameterSource();
+		parms.addValue("ids", Arrays.asList(new Object[] {new Integer(3), new Integer(4)}));
 
 		Object o = template.queryForObject(sql, parms, Integer.class);
 		assertTrue("Correct result type", o instanceof Integer);
