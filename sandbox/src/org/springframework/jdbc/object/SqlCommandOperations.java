@@ -22,6 +22,7 @@ import java.util.Map;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.support.KeyHolder;
 
 /**
  * Interface specifying a basic set of JDBC operations expressed as a object object.
@@ -35,40 +36,41 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  */
 public interface SqlCommandOperations {
 
-	Object executeScalar();
+    Object executeScalar();
 
-	Object executeScalar(Map parameters);
+    Object executeScalar(Map parameters);
 
-	Object executeScalar(SqlParameterSource parameters);
+    Object executeScalar(SqlParameterSource parameters);
 
-	Object executeObject(RowMapper rowMapper);
+    Object executeObject(RowMapper rowMapper);
 
-	Object executeObject(RowMapper rowMapper, Map parameters);
+    Object executeObject(RowMapper rowMapper, Map parameters);
 
-	Object executeObject(RowMapper rowMapper, SqlParameterSource parameters);
+    Object executeObject(RowMapper rowMapper, SqlParameterSource parameters);
 
-	List executeQuery();
+    List executeQuery();
 
-	List executeQuery(Map parameters);
+    List executeQuery(Map parameters);
 
-	List executeQuery(SqlParameterSource parameters);
+    List executeQuery(SqlParameterSource parameters);
 
-	List executeQuery(RowMapper rowMapper);
+    List executeQuery(RowMapper rowMapper);
 
-	List executeQuery(RowMapper rowMapper, Map parameters);
+    List executeQuery(RowMapper rowMapper, Map parameters);
 
-	List executeQuery(RowMapper rowMapper, SqlParameterSource parameters);
+    List executeQuery(RowMapper rowMapper, SqlParameterSource parameters);
 
-	SqlRowSet executeRowSet();
+    SqlRowSet executeRowSet();
 
-	SqlRowSet executeRowSet(Map parameters);
+    SqlRowSet executeRowSet(Map parameters);
 
-	SqlRowSet executeRowSet(SqlParameterSource parameters);
+    SqlRowSet executeRowSet(SqlParameterSource parameters);
 
-	int executeUpdate();
+    int executeUpdate();
 
-	int executeUpdate(Map parameters);
+    int executeUpdate(Map parameters);
 
-	int executeUpdate(SqlParameterSource parameters);
+    int executeUpdate(SqlParameterSource parameters);
 
+    public int executeUpdate(SqlParameterSource parameterSource, KeyHolder keyHolder);
 }

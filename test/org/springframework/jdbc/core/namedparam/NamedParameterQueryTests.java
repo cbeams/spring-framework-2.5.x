@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import org.easymock.MockControl;
 
@@ -318,6 +319,49 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 				return new Integer(rs.getInt(1));
 			}
 		});
+		assertTrue("Correct result type", o instanceof Integer);
+	}
+
+	public void testQueryForObjectWithMapAndInteger() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID = :id";
+		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID = ?";
+
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt(1);
+		ctrlResultSet.setReturnValue(22);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		mockPreparedStatement.setObject(1, new Integer(3));
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(sqlToUse);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+
+		replay();
+
+		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
+
+		Map parms = new HashMap();
+		parms.put("id", new Integer(3));
+
+		Object o = template.queryForObject(sql, parms, Integer.class);
 		assertTrue("Correct result type", o instanceof Integer);
 	}
 

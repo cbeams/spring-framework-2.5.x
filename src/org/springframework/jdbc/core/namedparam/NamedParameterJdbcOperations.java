@@ -395,4 +395,16 @@ public interface NamedParameterJdbcOperations {
 	 */
 	int update(String sql, Map paramMap) throws DataAccessException;
 
+    /**
+     * Issue an update via a prepared statement, binding the given arguments.
+     * @param sql SQL, containing bind parameters
+     * @param paramSource container of arguments and SQL types to bind to the query
+     * @param generatedKeyHolder KeyHolder that will hold the generated keys
+     * @param keyColumnNames names of the columns that will have keys generated for them
+     * @return the number of rows affected
+     * @throws org.springframework.dao.DataAccessException if there is any problem issuing the update
+     */
+    int update(String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, String[] keyColumnNames) throws DataAccessException;
+
+
 }
