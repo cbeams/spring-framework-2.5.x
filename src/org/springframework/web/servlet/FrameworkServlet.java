@@ -410,7 +410,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 		finally {
 			if (failureCause != null) {
-				logger.error("Could not complete request", failureCause);
+				logger.debug("Could not complete request", failureCause);
 			}
 			else {
 				logger.debug("Successfully completed request");
