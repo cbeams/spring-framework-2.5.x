@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,9 +105,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <i>Note that Hibernate itself does not support nested transactions! Hence,
  * do not expect Hibernate access code to participate in a nested transaction.</i>
  *
- * <p>Requires Hibernate 3.0.3 or later. As of Spring 1.3, this transaction manager
- * autodetects Hibernate 3.1 and use its advanced timeout functionality, while
- * continuing to work with Hibernate 3.0 as well.
+ * <p>Requires Hibernate 3.0.3 or later. As of Spring 2.0, this transaction manager
+ * autodetects Hibernate 3.1 and uses its advanced timeout functionality, while
+ * remaining compatible with Hibernate 3.0 as well. Running against Hibernate 3.1.3+
+ * is recommended, unless you need to remain compatible with JDK 1.3. (Note that
+ * Hibernate 3.1+ only runs on JDK 1.4+!)
  *
  * @author Juergen Hoeller
  * @since 1.2
