@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Spring Controller implementation that forwards to a named servlet,
@@ -127,8 +127,8 @@ public class ServletForwardingController extends AbstractController implements B
 		if (rd == null) {
 			throw new ServletException("No servlet with name '" + this.servletName + "' defined in web.xml");
 		}
-		// if already included, include again, else forward
-		if (request.getAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE) != null) {
+		// If already included, include again, else forward.
+		if (useInclude(request, response)) {
 			rd.include(request, response);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Included servlet [" + this.servletName +
@@ -143,6 +143,24 @@ public class ServletForwardingController extends AbstractController implements B
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Determine whether to use RequestDispatcher's <code>include</code> or
+	 * <code>forward</code> method.
+	 * <p>Performs a check whether an include URI attribute is found in the request,
+	 * indicating an include request, and whether the response has already been committed.
+	 * In both cases, an include will be performed, as a forward is not possible anymore.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @return <code>true</code> for include, <code>false</code> for forward
+	 * @see javax.servlet.RequestDispatcher#forward
+	 * @see javax.servlet.RequestDispatcher#include
+	 * @see javax.servlet.ServletResponse#isCommitted
+	 * @see org.springframework.web.util.WebUtils#isIncludeRequest
+	 */
+	protected boolean useInclude(HttpServletRequest request, HttpServletResponse response) {
+		return (WebUtils.isIncludeRequest(request) || response.isCommitted());
 	}
 
 }

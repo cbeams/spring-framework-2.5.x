@@ -56,7 +56,7 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.util.NestedServletException;
-import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Central dispatcher for use within the web MVC framework,
@@ -705,7 +705,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// Keep a snapshot of the request attributes in case of an include,
 		// to be able to restore the original attributes after the include.
 		Map attributesSnapshot = null;
-		if (request.getAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE) != null) {
+		if (WebUtils.isIncludeRequest(request)) {
 			logger.debug("Taking snapshot of request attributes before include");
 			attributesSnapshot = new HashMap();
 			Enumeration attrNames = request.getAttributeNames();

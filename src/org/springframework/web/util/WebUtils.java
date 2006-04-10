@@ -60,6 +60,12 @@ public abstract class WebUtils {
 	public static final String TEMP_DIR_CONTEXT_ATTRIBUTE = "javax.servlet.context.tempdir";
 
 	/**
+	 * Standard Servlet spec request attribute that implies that we're within an include
+	 * request. Any of the attributes associated with include paths does the job here.
+	 */
+	private static final String INCLUDE_REQUEST_ATTRIBUTE = "javax.servlet.include.request_uri";
+
+	/**
 	 * HTML escape parameter at the servlet context level
 	 * (i.e. a context-param in <code>web.xml</code>): "defaultHtmlEscape".
 	 */
@@ -347,6 +353,18 @@ public abstract class WebUtils {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Determine whether the given request is an include request,
+	 * that is, not a top-level HTTP request coming in from the outside.
+	 * <p>Checks the presence of the "javax.servlet.include.request_uri"
+	 * request attribute. Could check any request attribute that is only
+	 * present in an include request.
+	 * @param request current servlet request
+	 */
+	public static boolean isIncludeRequest(ServletRequest request) {
+		return (request.getAttribute(INCLUDE_REQUEST_ATTRIBUTE) != null);
 	}
 
 	/**
