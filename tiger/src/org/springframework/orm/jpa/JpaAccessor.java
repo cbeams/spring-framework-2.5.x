@@ -30,13 +30,6 @@ import org.springframework.dao.DataAccessException;
  * Base class for JpaTemplate and JpaInterceptor, defining common
  * properties like EntityManagerFactory and flushing behavior.
  *
- * <p>Note: With JPA, modifications to persistent objects are just possible
- * within a transaction (in contrast to Hibernate). Therefore, eager flushing
- * will just get applied when in a transaction. Furthermore, there is no
- * explicit notion of flushing never, as this would not imply a performance
- * gain due to JPA's field interception mechanism that doesn't involve
- * the overhead of snapshot comparisons.
- *
  * <p>Eager flushing is just available for specific JPA implementations.
  * You need to a corresponding JpaDialect to make eager flushing work.
  *

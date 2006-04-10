@@ -73,8 +73,8 @@ import org.springframework.util.ClassUtils;
  * configuration, neither affecting application code.
  *
  * <p>LocalEntityManagerFactoryBean is the preferred way of obtaining a
- * reference to an EntityManagerFactory outside of a full J2EE environment.
- * Within a J2EE environment, you will typically work with either an
+ * reference to an EntityManagerFactory outside of a full Java EE 5 environment.
+ * Within a Java EE 5 environment, you will typically work with either an
  * EntityManagerFactory obtained from JNDI or a shared EntityManager proxy
  * obtained from JNDI (via Spring's JndiObjectFactoryBean).
  *

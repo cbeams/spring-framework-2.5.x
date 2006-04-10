@@ -49,15 +49,14 @@ import org.springframework.beans.factory.InitializingBean;
  * <p>This EntityManager handling strategy is most appropriate for
  * applications that solely use JPA for data access. If you want to set up
  * your persistence provider for global transactions, you will need to
- * deploy it into a full J2EE application server and access the deployed
- * EntityManagerFactory through JNDI (-> JndiObjectFactoryBean).
+ * deploy it into a full Java EE 5 application server and access the
+ * deployed EntityManagerFactory via JNDI (-> JndiObjectFactoryBean).
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see JpaTemplate#setEntityManagerFactory
  * @see JpaTransactionManager#setEntityManagerFactory
  * @see org.springframework.jndi.JndiObjectFactoryBean
- * @see javax.persistence.EntityManagerFactory#close
  */
 public class LocalEntityManagerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
@@ -79,6 +78,7 @@ public class LocalEntityManagerFactoryBean implements FactoryBean, InitializingB
 	 * the <code>Persistence</code> class will be used to create the
 	 * EntityManagerFactory, relying on JPA's autodetection mechanism.
 	 * @see javax.persistence.spi.PersistenceProvider
+	 * @see javax.persistence.Persistence
 	 */
 	public void setPersistenceProviderClass(Class persistenceProviderClass) {
 		if (persistenceProviderClass != null &&

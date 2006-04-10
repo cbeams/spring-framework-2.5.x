@@ -33,8 +33,8 @@ import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 /**
  * FactoryBean that exposes a shared JPA EntityManager reference for a
  * given EntityManagerFactory. Typically used for an EntityManagerFactory
- * created by LocalEntityManagerFactoryBean, as direct alternative to
- * a JndiObjectFactoryBean definition for a J2EE server's EntityManager.
+ * created by LocalEntityManagerFactoryBean, as direct alternative to a
+ * JndiObjectFactoryBean definition for a Java EE 5 server's EntityManager.
  *
  * <p>The shared EntityManager will behave just like an EntityManager
  * fetched from an application server's JNDI environment, as defined
