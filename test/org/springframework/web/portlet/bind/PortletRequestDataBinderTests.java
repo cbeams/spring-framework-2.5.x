@@ -27,6 +27,7 @@ import junit.framework.TestCase;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.core.CollectionFactory;
 import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.validation.BindingResult;
@@ -100,13 +101,28 @@ public class PortletRequestDataBinderTests extends TestCase {
 		assertEquals(30, bean.getAge());
 	}
 
-	public void testBindingArray() {
+	public void testBindingStringWithCommaSeparatedValue() throws Exception {
+	  TestBean bean = new TestBean();
+
+		MockPortletRequest request = new MockPortletRequest();
+		request.addParameter("stringArray", "test1,test2");
+
+		PortletRequestDataBinder binder = new PortletRequestDataBinder(bean);
+		binder.bind(request);
+
+		assertNotNull(bean.getStringArray());
+		assertEquals(1, bean.getStringArray().length);
+		assertEquals("test1,test2", bean.getStringArray()[0]);
+	}
+
+	public void testBindingStringArrayWithSplitting() {
 		TestBean bean = new TestBean();
 
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("stringArray", "test1,test2");
 
 		PortletRequestDataBinder binder = new PortletRequestDataBinder(bean);
+		binder.registerCustomEditor(String[].class, new StringArrayPropertyEditor());
 		binder.bind(request);
 
 		assertNotNull(bean.getStringArray());

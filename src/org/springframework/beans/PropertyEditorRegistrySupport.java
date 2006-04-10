@@ -113,7 +113,6 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(Locale.class, new LocaleEditor());
 		this.defaultEditors.put(Properties.class, new PropertiesEditor());
 		this.defaultEditors.put(Resource[].class, new ResourceArrayPropertyEditor());
-		this.defaultEditors.put(String[].class, new StringArrayPropertyEditor());
 		this.defaultEditors.put(URL.class, new URLEditor());
 
 		// Default instances of collection editors.

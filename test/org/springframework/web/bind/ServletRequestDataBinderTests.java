@@ -23,6 +23,7 @@ import org.springframework.beans.AbstractPropertyValuesTests;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Rod Johnson
@@ -109,4 +110,20 @@ public class ServletRequestDataBinderTests extends AbstractPropertyValuesTests {
 		assertEquals("Correct values", Arrays.asList(values), Arrays.asList(original));
 	}
 
+	public void testWithCommaSeparatedStringArray() throws Exception {
+		TestBean target = new TestBean();
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("stringArray", "bar");
+		request.addParameter("stringArray", "abc");
+		request.addParameter("stringArray", "123,def");
+		binder.bind(request);
+		assertEquals("Expected all three items to be bound", 3, target.getStringArray().length);
+
+		request.removeParameter("stringArray");
+		request.addParameter("stringArray", "123,def");
+		binder.bind(request);
+		assertEquals("Expected only 1 item to be bound", 1, target.getStringArray().length);
+	}
 }

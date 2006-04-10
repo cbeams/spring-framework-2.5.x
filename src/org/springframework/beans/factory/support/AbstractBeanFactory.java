@@ -37,6 +37,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -614,6 +615,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param bw the BeanWrapper to initialize
 	 */
 	protected void initBeanWrapper(BeanWrapper bw) {
+		bw.registerCustomEditor(String[].class, new StringArrayPropertyEditor());
 		for (Iterator it = getCustomEditors().entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			Class clazz = (Class) entry.getKey();
