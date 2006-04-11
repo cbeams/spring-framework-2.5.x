@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class RemoteInvocationResult implements Serializable {
 
-	/** use serialVersionUID from Spring 1.1 for interoperability */
+	/** Use serialVersionUID from Spring 1.1 for interoperability */
 	private static final long serialVersionUID = 2138555143707773549L;
 
 
@@ -79,7 +79,8 @@ public class RemoteInvocationResult implements Serializable {
 
 	/**
 	 * Return whether this invocation result holds an exception.
-	 * If this returns false, the result value applies (even if null).
+	 * If this returns <code>false</code>, the result value applies
+	 * (even if <code>null</code>).
 	 * @see #getValue
 	 * @see #getException
 	 */
@@ -97,10 +98,12 @@ public class RemoteInvocationResult implements Serializable {
 	 */
 	public Object recreate() throws Throwable {
 		if (this.exception != null) {
+			Throwable exToThrow = this.exception;
 			if (this.exception instanceof InvocationTargetException) {
-				throw ((InvocationTargetException) this.exception).getTargetException();
+				exToThrow = ((InvocationTargetException) this.exception).getTargetException();
 			}
-			throw this.exception;
+			RemoteInvocationUtils.fillInClientStackTraceIfPossible(exToThrow);
+			throw exToThrow;
 		}
 		else {
 			return this.value;
