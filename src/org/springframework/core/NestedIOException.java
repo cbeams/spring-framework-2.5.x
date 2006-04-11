@@ -60,6 +60,7 @@ public class NestedIOException extends IOException {
 		this.cause = ex;
 	}
 
+
 	/**
 	 * Return the nested cause, or <code>null</code> if none.
 	 */
@@ -94,6 +95,7 @@ public class NestedIOException extends IOException {
 		}
 		else {
 			ps.println(this);
+			ps.print("Caused by: ");
 			getCause().printStackTrace(ps);
 		}
 	}
@@ -108,6 +110,7 @@ public class NestedIOException extends IOException {
 		}
 		else {
 			pw.println(this);
+			pw.print("Caused by: ");
 			getCause().printStackTrace(pw);
 		}
 	}

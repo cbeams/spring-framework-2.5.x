@@ -49,6 +49,10 @@ import java.io.PrintWriter;
  */
 public abstract class NestedRuntimeException extends RuntimeException {
 
+	/** Use serialVersionUID from Spring 1.2 for interoperability */
+	private static final long serialVersionUID = 5439915454935047936L;
+
+
 	/** Root cause of this nested exception */
 	private Throwable cause;
 
@@ -71,6 +75,7 @@ public abstract class NestedRuntimeException extends RuntimeException {
 		super(msg);
 		this.cause = ex;
 	}
+
 
 	/**
 	 * Return the nested cause, or <code>null</code> if none.
@@ -109,6 +114,7 @@ public abstract class NestedRuntimeException extends RuntimeException {
 		}
 		else {
 			ps.println(this);
+			ps.print("Caused by: ");
 			getCause().printStackTrace(ps);
 		}
 	}
@@ -123,9 +129,11 @@ public abstract class NestedRuntimeException extends RuntimeException {
 		}
 		else {
 			pw.println(this);
+			pw.print("Caused by: ");
 			getCause().printStackTrace(pw);
 		}
 	}
+
 
 	/**
 	 * Retrieve the innermost cause of this exception, if any.

@@ -49,6 +49,10 @@ import java.io.PrintWriter;
  */
 public abstract class NestedCheckedException extends Exception {
 
+	/** Use serialVersionUID from Spring 1.2 for interoperability */
+	private static final long serialVersionUID = 7100714597678207546L;
+
+
 	/** Root cause of this nested exception */
 	private Throwable cause;
 
@@ -71,6 +75,7 @@ public abstract class NestedCheckedException extends Exception {
 		super(msg);
 		this.cause = ex;
 	}
+
 
 	/**
 	 * Return the nested cause, or <code>null</code> if none.
@@ -109,6 +114,7 @@ public abstract class NestedCheckedException extends Exception {
 		}
 		else {
 			ps.println(this);
+			ps.print("Caused by: ");
 			getCause().printStackTrace(ps);
 		}
 	}
@@ -123,9 +129,11 @@ public abstract class NestedCheckedException extends Exception {
 		}
 		else {
 			pw.println(this);
+			pw.print("Caused by: ");
 			getCause().printStackTrace(pw);
 		}
 	}
+
 
 	/**
 	 * Retrieve the innermost cause of this exception, if any.

@@ -40,6 +40,10 @@ import javax.servlet.ServletException;
  */
 public class NestedServletException extends ServletException {
 
+	/** Use serialVersionUID from Spring 1.2 for interoperability */
+	private static final long serialVersionUID = -5292377985529381145L;
+
+
 	/**
 	 * Construct a <code>NestedServletException</code> with the specified detail message.
 	 * @param msg the detail message
@@ -57,6 +61,7 @@ public class NestedServletException extends ServletException {
 	public NestedServletException(String msg, Throwable ex) {
 		super(msg, ex);
 	}
+
 
 	/**
 	 * Return the nested cause, or <code>null</code> if none.
@@ -92,6 +97,7 @@ public class NestedServletException extends ServletException {
 		}
 		else {
 			ps.println(this);
+			ps.print("Caused by: ");
 			getCause().printStackTrace(ps);
 		}
 	}
@@ -106,6 +112,7 @@ public class NestedServletException extends ServletException {
 		}
 		else {
 			pw.println(this);
+			pw.print("Caused by: ");
 			getCause().printStackTrace(pw);
 		}
 	}
