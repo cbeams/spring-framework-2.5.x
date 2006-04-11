@@ -42,10 +42,9 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * The returned bean object may be a proxy to use instead of the target bean,
 	 * effectively suppressing default instantiation of the target bean.
 	 * <p>If a non-null object is returned by this method, the bean creation process
-	 * will be short-circuited. The returned bean object will not be processed any
-	 * further; in particular, no further BeanPostProcessor callbacks will be applied
-	 * to it. This mechanism is mainly intended for exposing a proxy instead of an
-	 * actual target bean.
+	 * will be short-circuited. The only further processing applied is the
+	 * {@link #postProcessAfterInitialization} callback from the configured
+	 * {@link BeanPostProcessor BeanPostProcessors}.
 	 * <p>This callback will only be applied to bean definitions with a bean class.
 	 * In particular, it will not be applied to beans with a "factory-method".
 	 * @param beanClass the class of the bean to be instantiated

@@ -351,6 +351,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (mergedBeanDefinition.hasBeanClass()) {
 			bean = applyBeanPostProcessorsBeforeInstantiation(mergedBeanDefinition.getBeanClass(), beanName);
 			if (bean != null) {
+				bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
 				return bean;
 			}
 		}
