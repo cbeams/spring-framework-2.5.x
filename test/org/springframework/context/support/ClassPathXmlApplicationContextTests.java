@@ -44,6 +44,12 @@ import org.springframework.util.FileCopyUtils;
  */
 public class ClassPathXmlApplicationContextTests extends TestCase {
 
+	public void testSingleConfigLocation() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				"/org/springframework/context/support/simpleContext.xml");
+		assertTrue(ctx.containsBean("someMessageSource"));
+	}
+
 	public void testMultipleConfigLocations() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				new String[] {
@@ -58,6 +64,20 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 	public void testConfigLocationPattern() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"/org/springframework/context/support/context*.xml");
+		assertTrue(ctx.containsBean("service"));
+		assertTrue(ctx.containsBean("logicOne"));
+		assertTrue(ctx.containsBean("logicTwo"));
+	}
+
+	public void testSingleConfigLocationWithClass() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				"simpleContext.xml", getClass());
+		assertTrue(ctx.containsBean("someMessageSource"));
+	}
+
+	public void testMultipleConfigLocationsWithClass() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				new String[] {"contextB.xml", "contextC.xml", "contextA.xml"}, getClass());
 		assertTrue(ctx.containsBean("service"));
 		assertTrue(ctx.containsBean("logicOne"));
 		assertTrue(ctx.containsBean("logicTwo"));

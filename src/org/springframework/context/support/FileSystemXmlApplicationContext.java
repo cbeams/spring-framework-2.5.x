@@ -71,23 +71,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * @param configLocations array of file paths
 	 */
 	public FileSystemXmlApplicationContext(String[] configLocations) throws BeansException {
-		this(configLocations, true);
-	}
-
-	/**
-	 * Create a new FileSystemXmlApplicationContext, loading the definitions
-	 * from the given XML files.
-	 * @param configLocations array of file paths
-	 * @param refresh whether to automatically refresh the context,
-	 * loading all bean definitions and creating all singletons.
-	 * Alternatively, call refresh manually after further configuring the context.
-	 * @see #refresh()
-	 */
-	public FileSystemXmlApplicationContext(String[] configLocations, boolean refresh) throws BeansException {
-		this.configLocations = configLocations;
-		if (refresh) {
-			refresh();
-		}
+		this(configLocations, null);
 	}
 
 	/**
@@ -100,7 +84,23 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	public FileSystemXmlApplicationContext(String[] configLocations, ApplicationContext parent)
 			throws BeansException {
 
-		this(configLocations, true, parent);
+		super(parent);
+		this.configLocations = configLocations;
+		refresh();
+	}
+
+
+	/**
+	 * Create a new FileSystemXmlApplicationContext, loading the definitions
+	 * from the given XML files.
+	 * @param configLocations array of file paths
+	 * @param refresh whether to automatically refresh the context,
+	 * loading all bean definitions and creating all singletons.
+	 * Alternatively, call refresh manually after further configuring the context.
+	 * @see #refresh()
+	 */
+	public FileSystemXmlApplicationContext(String[] configLocations, boolean refresh) throws BeansException {
+		this(configLocations, refresh, null);
 	}
 
 	/**
@@ -115,6 +115,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 */
 	public FileSystemXmlApplicationContext(String[] configLocations, boolean refresh, ApplicationContext parent)
 			throws BeansException {
+
 		super(parent);
 		this.configLocations = configLocations;
 		if (refresh) {
