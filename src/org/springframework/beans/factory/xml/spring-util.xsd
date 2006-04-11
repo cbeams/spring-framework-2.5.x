@@ -63,7 +63,7 @@
 	<xsd:element name="list">
 		<xsd:complexType>
 			<xsd:complexContent>
-				<xsd:extension base="beans:listType">
+				<xsd:extension base="beans:listOrSetType">
 					<xsd:attribute name="id" type="xsd:string" use="required"/>
 					<xsd:attribute name="list-class" type="xsd:string">
 						<xsd:annotation>
@@ -81,7 +81,7 @@
 	<xsd:element name="set">
 		<xsd:complexType>
 			<xsd:complexContent>
-				<xsd:extension base="beans:setType">
+				<xsd:extension base="beans:listOrSetType">
 					<xsd:attribute name="id" type="xsd:string" use="required"/>
 					<xsd:attribute name="set-class" type="xsd:string">
 						<xsd:annotation>

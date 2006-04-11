@@ -539,6 +539,9 @@
 <!-- Enable/disable merging for collections when using parent/child beans -->
 <!ATTLIST list merge (true | false | default) "default">
 
+<!-- Specify the default Java type for nested values -->
+<!ATTLIST list value-type CDATA #IMPLIED>
+
 <!--
 	A set can contain multiple inner bean, ref, collection, or value elements.
 	Java sets are untyped, pending generics support in Java 1.5,
@@ -551,6 +554,8 @@
 <!-- Enable/disable merging for collections when using parent/child beans -->
 <!ATTLIST set merge (true | false | default) "default">
 
+<!-- Specify the default Java type for nested values -->
+<!ATTLIST set value-type CDATA #IMPLIED>
 
 <!--
 	A Spring map is a mapping from a string key to object.
@@ -562,6 +567,12 @@
 
 <!-- Enable/disable merging for collections when using parent/child beans -->
 <!ATTLIST map merge (true | false | default) "default">
+
+<!-- Specify the default Java type for nested entry keys -->
+<!ATTLIST map key-type CDATA #IMPLIED>
+
+<!-- Specify the default Java type for nested entry values -->
+<!ATTLIST map value-type CDATA #IMPLIED>
 
 <!--
 	A map entry can be an inner bean, ref, value, or collection.

@@ -134,6 +134,10 @@ public class XmlBeanDefinitionParserHelper {
 
 	public static final String TYPE_ATTRIBUTE = "type";
 
+	public static final String VALUE_TYPE_ATTRIBUTE = "value-type";
+
+	public static final String KEY_TYPE_ATTRIBUTE = "key-type";
+
 	public static final String PROPERTY_ELEMENT = "property";
 
 	public static final String REF_ATTRIBUTE = "ref";
@@ -748,12 +752,18 @@ public class XmlBeanDefinitionParserHelper {
 		return parsePropertySubElement(subElement);
 	}
 
+	public Object parsePropertySubElement(Element ele) {
+		return parsePropertySubElement(ele, null);
+	}
+
 	/**
 	 * Parse a value, ref or collection sub-element of a property or
 	 * constructor-arg element.
 	 * @param ele subelement of property element; we don't know which yet
+	 * @param defaultTypeClassName the default type (class name) for any <code>&lt;value&gt;</code> tag that might
+	 * be created.
 	 */
-	public Object parsePropertySubElement(Element ele) {
+	public Object parsePropertySubElement(Element ele, String defaultTypeClassName) {
 		if (ele.getTagName().equals(BEAN_ELEMENT)) {
 			return parseBeanDefinitionElement(ele, true);
 		}
@@ -793,8 +803,11 @@ public class XmlBeanDefinitionParserHelper {
 		else if (ele.getTagName().equals(VALUE_ELEMENT)) {
 			// It's a literal value.
 			String value = DomUtils.getTextValue(ele);
-			if (ele.hasAttribute(TYPE_ATTRIBUTE)) {
-				String typeClassName = ele.getAttribute(TYPE_ATTRIBUTE);
+			String typeClassName = ele.getAttribute(TYPE_ATTRIBUTE);
+			if(!StringUtils.hasText(typeClassName)) {
+				typeClassName = defaultTypeClassName;
+			}
+			if (StringUtils.hasText(typeClassName)) {
 				try {
 					Class typeClass = ClassUtils.forName(typeClassName, getReaderContext().getReader().getBeanClassLoader());
 					return new TypedStringValue(value, typeClass);
@@ -829,6 +842,7 @@ public class XmlBeanDefinitionParserHelper {
 	 * Parse a list element.
 	 */
 	public List parseListElement(Element collectionEle) {
+		String defaultTypeClassName = collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedList list = new ManagedList(nl.getLength());
 		list.setSource(extractSource(collectionEle));
@@ -836,7 +850,7 @@ public class XmlBeanDefinitionParserHelper {
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
 				Element ele = (Element) nl.item(i);
-				list.add(parsePropertySubElement(ele));
+				list.add(parsePropertySubElement(ele, defaultTypeClassName));
 			}
 		}
 		return list;
@@ -846,6 +860,7 @@ public class XmlBeanDefinitionParserHelper {
 	 * Parse a set element.
 	 */
 	public Set parseSetElement(Element collectionEle) {
+		String defaultTypeClassName = collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedSet set = new ManagedSet(nl.getLength());
 		set.setSource(extractSource(collectionEle));
@@ -853,7 +868,7 @@ public class XmlBeanDefinitionParserHelper {
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
 				Element ele = (Element) nl.item(i);
-				set.add(parsePropertySubElement(ele));
+				set.add(parsePropertySubElement(ele, defaultTypeClassName));
 			}
 		}
 		return set;
@@ -863,6 +878,9 @@ public class XmlBeanDefinitionParserHelper {
 	 * Parse a map element.
 	 */
 	public Map parseMapElement(Element mapEle) {
+		String defaultKeyTypeClassName = mapEle.getAttribute(KEY_TYPE_ATTRIBUTE);
+		String defaultValueTypeClassName = mapEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
+
 		List entryEles = DomUtils.getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
 		ManagedMap map = new ManagedMap(entryEles.size());
 		map.setMergeEnabled(parseMergeAttribute(mapEle));
@@ -905,7 +923,7 @@ public class XmlBeanDefinitionParserHelper {
 								"a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element", entryEle);
 			}
 			if (hasKeyAttribute) {
-				key = entryEle.getAttribute(KEY_ATTRIBUTE);
+				key = extractTypedStringValueIfNecessary(mapEle, entryEle.getAttribute(KEY_ATTRIBUTE), defaultKeyTypeClassName);
 			}
 			else if (hasKeyRefAttribute) {
 				String refName = entryEle.getAttribute(KEY_REF_ATTRIBUTE);
@@ -915,7 +933,7 @@ public class XmlBeanDefinitionParserHelper {
 				key = new RuntimeBeanReference(refName);
 			}
 			else if (keyEle != null) {
-				key = parseKeyElement(keyEle);
+				key = parseKeyElement(keyEle, defaultKeyTypeClassName);
 			}
 			else {
 				error("<entry> element must specify a key", entryEle);
@@ -931,7 +949,7 @@ public class XmlBeanDefinitionParserHelper {
 								"'value' attribute OR 'value-ref' attribute OR <value> sub-element", entryEle);
 			}
 			if (hasValueAttribute) {
-				value = entryEle.getAttribute(VALUE_ATTRIBUTE);
+				value = extractTypedStringValueIfNecessary(mapEle, entryEle.getAttribute(VALUE_ATTRIBUTE), defaultValueTypeClassName);
 			}
 			else if (hasValueRefAttribute) {
 				String refName = entryEle.getAttribute(VALUE_REF_ATTRIBUTE);
@@ -941,7 +959,7 @@ public class XmlBeanDefinitionParserHelper {
 				value = new RuntimeBeanReference(refName);
 			}
 			else if (valueEle != null) {
-				value = parsePropertySubElement(valueEle);
+				value = parsePropertySubElement(valueEle, defaultValueTypeClassName);
 			}
 			else {
 				error("<entry> element must specify a value", entryEle);
@@ -955,9 +973,30 @@ public class XmlBeanDefinitionParserHelper {
 	}
 
 	/**
+	 * if the supplied <code>defaultTypeClassName</code> argument is <code>null</code> or zero-length then
+	 * the value of the <code>attributeValue</code> is returned. Otherwise, if the <code>Class</code> named
+	 * by the <code>defaultTypeClassName</code> can be loaded, a {@link TypedStringValue} instance wrapping
+	 * this <code>Class</code> and the <code>attributeValue</code> is returned. Otherwise, <code>null</code>
+	 * is returned.
+	 */
+	private Object extractTypedStringValueIfNecessary(Element mapElement, String attributeValue, String defaultTypeClassName) {
+		if (!StringUtils.hasText(defaultTypeClassName)) {
+			return attributeValue;
+		}                                                               
+		Class type = null;
+		try {
+			type = ClassUtils.forName(defaultTypeClassName, getReaderContext().getReader().getBeanClassLoader());
+		}
+		catch (ClassNotFoundException e) {
+			error("Unable to load class '" + defaultTypeClassName + "' for Map key/value type.", mapElement, e);
+			return null;
+		}
+		return new TypedStringValue(attributeValue, type);
+	}
+	/**
 	 * Parse a key sub-element of a map element.
 	 */
-	public Object parseKeyElement(Element keyEle) {
+	public Object parseKeyElement(Element keyEle, String defaultKeyTypeClassName) {
 		NodeList nl = keyEle.getChildNodes();
 		Element subElement = null;
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -971,7 +1010,7 @@ public class XmlBeanDefinitionParserHelper {
 				subElement = candidateEle;
 			}
 		}
-		return parsePropertySubElement(subElement);
+		return parsePropertySubElement(subElement, defaultKeyTypeClassName);
 	}
 
 	/**
