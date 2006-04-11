@@ -5,7 +5,7 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-	<aop:config proxyTargetClass="true">
+	<aop:config proxy-target-class="true">
 		<aop:pointcut id="getNameCalls" expression="execution(* getName(..)) and within(*..ITestBean+)"/>
 		<aop:advisor id="getAgeAdvisor" pointcut="execution(* *..ITestBean.getAge(..))" advice-ref="getAgeCounter"/>
 		<aop:advisor id="getNameAdvisor" pointcut-ref="getNameCalls" advice-ref="getNameCounter"/>

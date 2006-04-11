@@ -47,7 +47,6 @@ public class ReaderContext {
 		this.sourceExtractor = sourceExtractor;
 	}
 
-
 	public BeanDefinitionReader getReader() {
 		return reader;
 	}

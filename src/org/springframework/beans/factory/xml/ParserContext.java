@@ -45,8 +45,14 @@ public final class ParserContext {
 		return this.helper;
 	}
 
+	/**
+	 * Indicates whether or not the custom tag being parsed is nested under a
+	 * <code>&lt;property&gt;</code> or other such container tag.
+	 * @return <code>false</code> when parsing a tag nested under <code>&lt;beans&gt;</code>
+	 * or <code>&lt;bean&gt;</code> tag otherwise returns <code>true</code>.
+	 */
 	public boolean isNested() {
-		return nested;
+		return this.nested;
 	}
 
 	public BeanDefinitionRegistry getRegistry() {

@@ -42,6 +42,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.PointcutAdvisor;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * CGLIB2-based AopProxy implementation for the Spring AOP framework.
@@ -175,11 +179,8 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 			Callback[] callbacks = getCallbacks(rootClass);
 			enhancer.setCallbacks(callbacks);
+			enhancer.setInterceptDuringConstruction(false);
 
-			if(CglibUtils.canSkipConstructorInterception()) {
-				enhancer.setInterceptDuringConstruction(false);
-			}
-			
 			Class[] types = new Class[callbacks.length];
 			for (int x = 0; x < types.length; x++) {
 				types[x] = callbacks[x].getClass();
@@ -400,7 +401,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		}
 
 		public Object intercept(Object proxy, Method method, Object[] args,
-				MethodProxy methodProxy) throws Throwable {
+														MethodProxy methodProxy) throws Throwable {
 
 			Object retVal = methodProxy.invoke(target, args);
 			return massageReturnTypeIfNecessary(proxy, target, retVal);
@@ -421,7 +422,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		}
 
 		public Object intercept(Object proxy, Method method, Object[] args,
-				MethodProxy methodProxy) throws Throwable {
+														MethodProxy methodProxy) throws Throwable {
 			Object oldProxy = null;
 			try {
 				oldProxy = AopContext.setCurrentProxy(proxy);
@@ -443,7 +444,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	private class DynamicUnadvisedInterceptor implements MethodInterceptor, Serializable {
 
 		public Object intercept(Object proxy, Method method, Object[] args,
-				MethodProxy methodProxy) throws Throwable {
+														MethodProxy methodProxy) throws Throwable {
 
 			Object target = advised.getTargetSource().getTarget();
 
@@ -465,7 +466,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	private class DynamicUnadvisedExposedInterceptor implements MethodInterceptor, Serializable {
 
 		public Object intercept(Object proxy, Method method, Object[] args,
-				MethodProxy methodProxy) throws Throwable {
+														MethodProxy methodProxy) throws Throwable {
 
 			Object oldProxy = null;
 			Object target = advised.getTargetSource().getTarget();
@@ -528,7 +529,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		}
 
 		public Object intercept(Object proxy, Method method, Object[] args,
-				MethodProxy methodProxy) throws Throwable {
+														MethodProxy methodProxy) throws Throwable {
 
 			Object other = args[0];
 
@@ -601,7 +602,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	private class DynamicAdvisedInterceptor implements MethodInterceptor, Serializable {
 
 		public Object intercept(Object proxy, Method method, Object[] args,
-				MethodProxy methodProxy) throws Throwable {
+														MethodProxy methodProxy) throws Throwable {
 
 			MethodInvocation invocation = null;
 			Object oldProxy = null;
@@ -612,7 +613,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 			try {
 				Object retVal = null;
-				
+
 				if (advised.exposeProxy) {
 					// Make invocation available if necessary.
 					oldProxy = AopContext.setCurrentProxy(proxy);
@@ -689,7 +690,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		private boolean protectedMethod;
 
 		public CglibMethodInvocation(Object proxy, Object target, Method method, Object[] arguments,
-				Class targetClass, List interceptorsAndDynamicMethodMatchers, MethodProxy methodProxy) {
+																 Class targetClass, List interceptorsAndDynamicMethodMatchers, MethodProxy methodProxy) {
 			super(proxy, target, method, arguments, targetClass, interceptorsAndDynamicMethodMatchers);
 			this.methodProxy = methodProxy;
 			this.protectedMethod = Modifier.isProtected(method.getModifiers());
@@ -699,7 +700,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		 * Gives a marginal performance improvement versus using reflection to
 		 * invoke the target when invoking public methods.
 		 *
-		 * @see org.springframework.aop.framework.ReflectiveMethodInvocation#invokeJoinpoint
+		 * @see ReflectiveMethodInvocation#invokeJoinpoint
 		 */
 		protected Object invokeJoinpoint() throws Throwable {
 			if (this.protectedMethod) {
@@ -751,7 +752,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		 * used.</dd>
 		 * <dt>For non-advised methods:</dt>
 		 * <dd>Where it can be determined that the method will not return
-		 * <code>this</code> or when ProxyFactory.getExposeProxy() return false
+		 * <code>this</code> or when ProxyFactory.getExposeProxy() returns false
 		 * then a Dispatcher is used. For static targets the StaticDispatcher
 		 * is used and for dynamic targets a DynamicUnadvisedInterceptor is used.
 		 * If it possible for the method to return <code>this</code> then a
@@ -759,7 +760,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		 * DynamicUnadvisedInterceptor already considers this.</dd>
 		 * </dl>
 		 *
-		 * @see net.sf.cglib.proxy.CallbackFilter#accept(java.lang.reflect.Method)
+		 * @see CallbackFilter#accept(Method)
 		 */
 		public int accept(Method method) {
 
@@ -898,34 +899,44 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 				return false;
 			}
 
-			return (AopProxyUtils.equalsProxiedInterfaces(this.advised, otherCallbackFilter.advised) &&
-					AopProxyUtils.equalsAdvisors(advised, otherCallbackFilter.advised));
+			if (!AopProxyUtils.equalsProxiedInterfaces(this.advised, otherCallbackFilter.advised)) {
+				return false;
+			}
+			// advice instance identity is unimportant to the proxy class - all that matters
+			// is type and ordering
+			Advisor[] thisAdvisors = this.advised.getAdvisors();
+			Advisor[] thatAdvisors = otherCallbackFilter.advised.getAdvisors();
+
+			if (thisAdvisors.length != thatAdvisors.length) {
+				return false;
+			}
+
+			for (int i = 0; i < thisAdvisors.length; i++) {
+				Advisor thisAdvisor = thisAdvisors[i];
+				Advisor thatAdvisor = thatAdvisors[i];
+				if (!equalsAdviceClasses(thisAdvisor, thatAdvisor)) {
+					return false;
+				}
+
+				if (!equalsPointcuts(thisAdvisor, thatAdvisor)) {
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 
-
-	/**
-	 * Helper class that determines whether the CGLIB Enhancer
-	 * supports the <code>setInterceptDuringConstruction</code> method
-	 * (which it should as of CGLIB 2.1).
-	 */
-	private static class CglibUtils {
-
-		private static boolean canSkipConstructorInterception;
-
-		static {
-			try {
-				Enhancer.class.getMethod("setInterceptDuringConstruction", new Class[] {boolean.class});
-				canSkipConstructorInterception = true;
-			}
-			catch (NoSuchMethodException ex) {
-				canSkipConstructorInterception = false;
-			}
-		}
-
-		public static boolean canSkipConstructorInterception() {
-			return canSkipConstructorInterception;
-		}
+	private boolean equalsAdviceClasses(Advisor a, Advisor b) {
+		return a.getAdvice().getClass().equals(b.getAdvice().getClass());
 	}
 
+	private boolean equalsPointcuts(Advisor a, Advisor b) {
+		if (a instanceof PointcutAdvisor && b instanceof PointcutAdvisor) {
+			return ObjectUtils.nullSafeEquals(((PointcutAdvisor) a).getPointcut(), ((PointcutAdvisor) b).getPointcut());
+		}
+		else {
+			// can't sensibly make any other assumptions here.
+			return false;
+		}
+	}
 }

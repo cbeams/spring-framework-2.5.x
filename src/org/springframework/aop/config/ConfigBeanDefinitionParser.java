@@ -83,7 +83,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private static final String AFTER_RETURNING_ELEMENT = "after-returning";
 	private static final String AFTER_THROWING_ELEMENT = "after-throwing";
 	private static final String AROUND = "around";
-	private static final String PROXY_TARGET_CLASS = "proxyTargetClass";
+	private static final String PROXY_TARGET_CLASS = "proxy-target-class";
 	private static final String TRUE = "true";
 	private static final String RETURNING = "returning";
 	private static final String RETURNING_PROPERTY = "returningName";
