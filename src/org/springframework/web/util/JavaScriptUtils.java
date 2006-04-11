@@ -55,6 +55,9 @@ public class JavaScriptUtils {
 			else if (c == '\\') {
 				filtered.append("\\\\");
 			}
+			else if (c == '/') {
+				filtered.append("\\/");
+			}
 			else if (c == '\t') {
 				filtered.append("\\t");
 			}
