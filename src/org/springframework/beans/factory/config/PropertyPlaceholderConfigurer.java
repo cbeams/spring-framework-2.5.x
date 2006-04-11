@@ -72,7 +72,9 @@ import org.springframework.core.Constants;
  * of the specified properties. This can be customized via "systemPropertiesMode".
  *
  * <p>Note that the context definition <i>is</i> aware of being incomplete;
- * this is immediately obvious when looking at the XML definition file.
+ * this is immediately obvious to users when looking at the XML definition file.
+ * Hence, placeholders have to be resolved; any desired defaults have to be
+ * defined as placeholder values as well (for example in a default properties file).
  *
  * <p>Property values can be converted after reading them in, through overriding
  * the <code>convertPropertyValue</code> method. For example, encrypted values
@@ -378,9 +380,9 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 			}
 			return value;
 		}
-		catch (Throwable t) {
+		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Could not access system property '" + key + "': " + t);
+				logger.debug("Could not access system property '" + key + "': " + ex);
 			}
 			return null;
 		}
