@@ -17,34 +17,30 @@
 package org.springframework.beans.factory.xml;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
+import org.xml.sax.InputSource;
 
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 
 /**
- * Unit tests for the XmlBeanDefinitionReader class.
- *
  * @author Rick Evans
- * @since 03.01.2006
+ * @author Juergen Hoeller
  */
 public final class XmlBeanDefinitionReaderTests extends TestCase {
 
-	private MockControl mock;
-	private BeanDefinitionRegistry registry;
-
-	public void setUp() {
-		this.mock = MockControl.createControl(BeanDefinitionRegistry.class);
-		this.registry = (BeanDefinitionRegistry) mock.getMock();
+	public void testSetParserClassSunnyDay() {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(factory).setParserClass(DefaultXmlBeanDefinitionParser.class);
 	}
 
-	public void testSetParserClassSunnyDay() throws Exception {
-		new XmlBeanDefinitionReader(this.registry).setParserClass(DefaultXmlBeanDefinitionParser.class);
-	}
-
-	public void testSetParserClassToNull() throws Exception {
+	public void testSetParserClassToNull() {
 		try {
-			new XmlBeanDefinitionReader(this.registry).setParserClass(null);
-			fail("An IllegalArgumentException must have been thrown (null parserClass).");
+			DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+			new XmlBeanDefinitionReader(factory).setParserClass(null);
+			fail("Should have thrown IllegalArgumentException (null parserClass)");
 		}
 		catch (IllegalArgumentException expected) {
 		}
@@ -52,11 +48,56 @@ public final class XmlBeanDefinitionReaderTests extends TestCase {
 
 	public void testSetParserClassToUnsupportedParserType() throws Exception {
 		try {
-			new XmlBeanDefinitionReader(this.registry).setParserClass(String.class);
-			fail("An IllegalArgumentException must have been thrown (usupported parserClass).");
+			DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+			new XmlBeanDefinitionReader(factory).setParserClass(String.class);
+			fail("Should have thrown IllegalArgumentException (unsupported parserClass)");
 		}
 		catch (IllegalArgumentException expected) {
 		}
+	}
+
+	public void testWithOpenInputStream() {
+		try {
+			DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+			Resource resource = new InputStreamResource(getClass().getResourceAsStream("test.xml"));
+			new XmlBeanDefinitionReader(factory).loadBeanDefinitions(resource);
+			fail("Should have thrown BeanDefinitionStoreException (can't determine validation mode)");
+		}
+		catch (BeanDefinitionStoreException expected) {
+		}
+	}
+
+	public void testWithOpenInputStreamAndExplicitValidationMode() {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		Resource resource = new InputStreamResource(getClass().getResourceAsStream("test.xml"));
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_DTD);
+		reader.loadBeanDefinitions(resource);
+	}
+
+	public void testWithInputSource() {
+		try {
+			DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+			InputSource resource = new InputSource(getClass().getResourceAsStream("test.xml"));
+			new XmlBeanDefinitionReader(factory).loadBeanDefinitions(resource);
+			fail("Should have thrown BeanDefinitionStoreException (can't determine validation mode)");
+		}
+		catch (BeanDefinitionStoreException expected) {
+		}
+	}
+
+	public void testWithInputSourceAndExplicitValidationMode() {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		InputSource resource = new InputSource(getClass().getResourceAsStream("test.xml"));
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_DTD);
+		reader.loadBeanDefinitions(resource);
+	}
+
+	public void testWithFreshInputStream() {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		Resource resource = new ClassPathResource("test.xml", getClass());
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(resource);
 	}
 
 }

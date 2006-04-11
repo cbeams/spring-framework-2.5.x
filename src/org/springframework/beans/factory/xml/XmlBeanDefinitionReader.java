@@ -67,7 +67,7 @@ import org.springframework.util.xml.SimpleSaxErrorHandler;
  * @see XmlBeanDefinitionParser
  * @see DefaultXmlBeanDefinitionParser
  * @see BeanDefinitionRegistry
- * @see DefaultListableBeanFactory
+ * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
  */
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
@@ -105,6 +105,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * a file looking for the <code>DOCTYPE</code> definition.
 	 */
 	private static final int MAX_PEEK_LINES = 5;
+
 
 	/**
 	 * {@link Constants} instance for this class.
@@ -148,10 +149,11 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * The {@link SourceExtractor} to use when extracting
-	 * {@link BeanDefinition#getSource() source objects}
+	 * {@link org.springframework.beans.factory.config.BeanDefinition#getSource() source objects}
 	 * from the configuration data.
 	 */
 	private SourceExtractor sourceExtractor = new NullSourceExtractor();
+
 
 	/**
 	 * Create new XmlBeanDefinitionReader for the given bean factory.
@@ -205,8 +207,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/**
 	 * Specifies which {@link ReaderEventListener} to use. Default implementation is
 	 * NullReaderEventListener which discards every event notification. External tools
-	 * can provide an alternative implementation to monitor the components being registered in
-	 * the {@link BeanFactory}.
+	 * can provide an alternative implementation to monitor the components being registered
+	 * in the BeanFactory.
 	 */
 	public void setEventListener(ReaderEventListener eventListener) {
 		Assert.notNull(eventListener, "'eventListener' cannot be null.");
@@ -263,6 +265,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 		this.parserClass = parserClass;
 	}
+
 
 	/**
 	 * Load bean definitions from the specified XML file.
@@ -340,7 +343,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	protected int doLoadBeanDefinitions(InputSource inputSource, Resource resource) throws BeansException {
 		try {
-			DocumentBuilderFactory factory = createDocumentBuilderFactory(resource, getValidationModeForResource(resource));
+			DocumentBuilderFactory factory =
+					createDocumentBuilderFactory(resource, getValidationModeForResource(resource));
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using JAXP provider [" + factory + "]");
 			}
@@ -364,38 +368,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 	}
 
-	/**
-	 * Creates the {@link DocumentBuilderFactory} instance.
-	 * @param resource the {@link Resource} being parsed.
-	 * @param validationMode the resolved validation mode. Correctly reflects any mode that was detected automatically.
-	 */
-	protected DocumentBuilderFactory createDocumentBuilderFactory(Resource resource, int resolvedValidationMode)
-			throws ParserConfigurationException {
-
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setNamespaceAware(this.namespaceAware);
-
-		if (resolvedValidationMode != VALIDATION_NONE) {
-			factory.setValidating(true);
-
-			if (resolvedValidationMode == VALIDATION_XSD) {
-				// enforce namespace aware for XSD
-				factory.setNamespaceAware(true);
-				try {
-					factory.setAttribute(SCHEMA_LANGUAGE_ATTRIBUTE, XSD_SCHEMA_LANGUAGE);
-				}
-				catch (IllegalArgumentException ex) {
-					throw new FatalBeanException(
-							"Unable to validate using XSD: Your JAXP provider [" +
-							factory + "] does not support XML Schema. " +
-							"Are you running on Java 1.4 or below with Apache Crimson? " +
-							"Upgrade to Apache Xerces (or Java 1.5) for full XSD support.");
-				}
-			}
-		}
-
-		return factory;
-	}
 
 	/**
 	 * Gets the validation mode for the specified {@link Resource}. If no explicit
@@ -412,8 +384,16 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * file has a <code>DOCTYPE</code> definition then DTD validation is used
 	 * otherwise XSD validation is assumed.
 	 */
-	private int detectValidationMode(Resource resource) {
-		//peek into the file to look for DOCTYPE
+	protected int detectValidationMode(Resource resource) {
+		if (resource.isOpen()) {
+			throw new BeanDefinitionStoreException(
+					"Passed-in Resource [" + resource + "] contains an open stream: " +
+					"cannot determine validation mode automatically. Either pass in a Resource " +
+					"that is able to create fresh streams, or explicitly specify the validationMode " +
+					"on your XmlBeanDefinitionReader instance.");
+		}
+
+		// Peek into the file to look for DOCTYPE.
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
@@ -422,7 +402,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			for (int x = 0; x < MAX_PEEK_LINES; x++) {
 				String line = reader.readLine();
 				if (line == null) {
-					// end of stream
+					// End of stream...
 					break;
 				}
 				else if (line.indexOf("DOCTYPE") > -1) {
@@ -433,9 +413,10 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			return (isDtdValidated ? VALIDATION_DTD : VALIDATION_XSD);
 		}
 		catch (IOException ex) {
-			throw new FatalBeanException(
-					"Unable to determine validation mode for [" + resource +
-					"]. Did you attempt to load directly from a SAX InputSource?", ex);
+			throw new BeanDefinitionStoreException(
+					"Unable to determine validation mode for [" + resource + "]: cannot open InputStream. " +
+					"Did you attempt to load directly from a SAX InputSource without specifying the " +
+					"validationMode on your XmlBeanDefinitionReader instance?", ex);
 		}
 		finally {
 			if (reader != null) {
@@ -449,6 +430,40 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Creates the {@link DocumentBuilderFactory} instance.
+	 * @param resource the {@link Resource} being parsed.
+	 * @param validationMode the resolved validation mode.
+	 * Correctly reflects any mode that was detected automatically.
+	 */
+	protected DocumentBuilderFactory createDocumentBuilderFactory(Resource resource, int validationMode)
+			throws ParserConfigurationException {
+
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setNamespaceAware(this.namespaceAware);
+
+		if (validationMode != VALIDATION_NONE) {
+			factory.setValidating(true);
+
+			if (validationMode == VALIDATION_XSD) {
+				// enforce namespace aware for XSD
+				factory.setNamespaceAware(true);
+				try {
+					factory.setAttribute(SCHEMA_LANGUAGE_ATTRIBUTE, XSD_SCHEMA_LANGUAGE);
+				}
+				catch (IllegalArgumentException ex) {
+					throw new FatalBeanException(
+							"Unable to validate using XSD: Your JAXP provider [" +
+							factory + "] does not support XML Schema. " +
+							"Are you running on Java 1.4 or below with Apache Crimson? " +
+							"Upgrade to Apache Xerces (or Java 1.5) for full XSD support.");
+				}
+			}
+		}
+
+		return factory;
 	}
 
 	/**
@@ -472,6 +487,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 		return docBuilder;
 	}
+
 
 	/**
 	 * Register the bean definitions contained in the given DOM document.
