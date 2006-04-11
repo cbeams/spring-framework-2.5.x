@@ -42,9 +42,9 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Abstract BeanFactory superclass that implements default bean creation,
@@ -77,7 +77,6 @@ import org.springframework.util.ObjectUtils;
  * @see RootBeanDefinition
  * @see #findMatchingBeans(Class)
  * @see DefaultListableBeanFactory
- * @see ListableBeanFactory
  * @see BeanDefinitionRegistry
  */
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
@@ -180,7 +179,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * <p>By default, only the BeanFactoryAware interface is ignored.
 	 * For further types to ignore, invoke this method for each type.
 	 * @see BeanFactoryAware
-	 * @see ApplicationContextAware
+	 * @see org.springframework.context.ApplicationContextAware
 	 */
 	public void ignoreDependencyInterface(Class ifc) {
 		this.ignoredDependencyInterfaces.add(ifc);
@@ -630,7 +629,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// look for a matching type
 			Class requiredType = bw.getPropertyDescriptor(propertyName).getPropertyType();
 			Map matchingBeans = findMatchingBeans(requiredType);
-			filterMatches(beanName, matchingBeans);
+			filterMatchingBeans(matchingBeans, beanName);
 			if (matchingBeans != null && matchingBeans.size() == 1) {
 				String autowiredBeanName = (String) matchingBeans.keySet().iterator().next();
 				Object autowiredBean = matchingBeans.values().iterator().next();
@@ -659,13 +658,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 	}
 
-	private void filterMatches(String beanName, Map matchingBeans) {
-		for (Iterator iterator = matchingBeans.keySet().iterator(); iterator.hasNext();) {
-			String name = (String) iterator.next();
+	/**
+	 * Filter the given map of matching beans for autowiring.
+	 * <p>Do not consider a bean as autowire candidate if constitutes a reference
+	 * back to the same bean or if it has been explicitly excluded from autowiring.
+	 * @param matchingBeans the map of matching beans
+	 * @param beanName the name of the bean to be autowired (may be <code>null</code>)
+	 */
+	private void filterMatchingBeans(Map matchingBeans, String beanName) {
+		for (Iterator it = matchingBeans.keySet().iterator(); it.hasNext();) {
+			String name = (String) it.next();
 			if (containsBeanDefinition(name)) {
-				AbstractBeanDefinition definition = (AbstractBeanDefinition) getBeanDefinition(name);
+				RootBeanDefinition definition = getMergedBeanDefinition(name);
 				if (ObjectUtils.nullSafeEquals(beanName, name) || !definition.isAutowireCandidate()) {
-					matchingBeans.remove(name);
+					it.remove();
 				}
 			}
 		}
@@ -936,6 +942,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected abstract Map findMatchingBeans(Class requiredType) throws BeansException;
 
 
+	//---------------------------------------------------------------------
+	// Inner classes that serve as internal helpers
+	//---------------------------------------------------------------------
+
 	/**
 	 * Subclass of ConstructorResolver that delegates to surrounding
 	 * AbstractAutowireCapableBeanFactory facilities.
@@ -948,7 +958,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		protected Map findMatchingBeans(Class requiredType) throws BeansException {
 			Map results = AbstractAutowireCapableBeanFactory.this.findMatchingBeans(requiredType);
-			filterMatches(null, results);
+			filterMatchingBeans(results, null);
 			return results;
 		}
 	}
