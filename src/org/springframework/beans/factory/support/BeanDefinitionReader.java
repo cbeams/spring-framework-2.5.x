@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,5 +102,14 @@ public interface BeanDefinitionReader {
 	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource[])
 	 */
 	int loadBeanDefinitions(String location) throws BeanDefinitionStoreException;
+
+	/**
+	 * Load bean definitions from the specified resource locations.
+	 * @param locations the resource locations, to be loaded with the ResourceLoader
+	 * (or ResourcePatternResolver) of this bean definition reader
+	 * @return the number of bean definitions found
+	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
+	 */
+	int loadBeanDefinitions(String[] locations) throws BeanDefinitionStoreException;
 
 }
