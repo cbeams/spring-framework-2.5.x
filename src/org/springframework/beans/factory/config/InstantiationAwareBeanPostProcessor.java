@@ -32,7 +32,6 @@ import org.springframework.beans.BeansException;
  * @author Rod Johnson
  * @since 1.2
  * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#setCustomTargetSourceCreators
- * @see org.springframework.aop.framework.autoproxy.target.AbstractPoolingTargetSourceCreator
  * @see org.springframework.aop.framework.autoproxy.target.LazyInitTargetSourceCreator
  */
 public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
@@ -49,7 +48,8 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * In particular, it will not be applied to beans with a "factory-method".
 	 * @param beanClass the class of the bean to be instantiated
 	 * @param beanName the name of the bean
-	 * @return the bean object to expose instead of a default instance of the target bean
+	 * @return the bean object to expose instead of a default instance of the target bean,
+	 * or <code>null</code> to proceed with default instantiation
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#hasBeanClass
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#getFactoryMethodName
