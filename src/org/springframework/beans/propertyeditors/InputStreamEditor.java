@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
+import org.springframework.util.Assert;
 
 /**
  * One-way PropertyEditor, which can convert from a text string to a
@@ -60,6 +61,7 @@ public class InputStreamEditor extends PropertyEditorSupport {
 	 * @param resourceEditor the ResourceEditor to use
 	 */
 	public InputStreamEditor(ResourceEditor resourceEditor) {
+		Assert.notNull(resourceEditor, "ResourceEditor must not be null");
 		this.resourceEditor = resourceEditor;
 	}
 
