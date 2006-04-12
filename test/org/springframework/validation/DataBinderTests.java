@@ -112,6 +112,17 @@ public class DataBinderTests extends TestCase {
 			assertTrue("Same object", tb.equals(rod));
 
 			BindingResult br = (BindingResult) map.get(BindingResult.MODEL_KEY_PREFIX + "person");
+			assertSame(br, BindingResultUtils.getBindingResult(map, "person"));
+			assertSame(br, BindingResultUtils.getRequiredBindingResult(map, "person"));
+
+			assertNull(BindingResultUtils.getBindingResult(map, "someOtherName"));
+			try {
+				BindingResultUtils.getRequiredBindingResult(map, "someOtherName");
+				fail("Should have thrown IllegalStateException");
+			}
+			catch (IllegalStateException expected) {
+			}
+
 			assertTrue("Added itself to map", br == binder.getBindingResult());
 			assertTrue(br.hasErrors());
 			assertTrue("Correct number of errors", br.getErrorCount() == 2);
