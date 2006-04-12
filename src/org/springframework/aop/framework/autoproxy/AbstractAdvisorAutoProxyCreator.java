@@ -17,15 +17,19 @@
 package org.springframework.aop.framework.autoproxy;
 
 import java.util.List;
+import java.util.LinkedList;
 
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.Advisor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.core.ControlFlow;
 import org.springframework.core.ControlFlowFactory;
 
 /**
- * Abstract BeanPostProcessor implementation that creates AOP proxies. 
+ * Abstract BeanPostProcessor implementation that creates AOP proxies.
  * This class is completely generic; it contains no special code to handle
  * any particular aspects, such as pooling aspects.
  *
@@ -99,7 +103,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 		// TODO consider pulling this test into AbstractBeanFactory.applyPostProcessors(),
 		// to protect all PostProcessors.
 		ControlFlow cflow = ControlFlowFactory.createControlFlow();
-		return cflow.under(getClass(), "findCandidateAdvisors");
+		return cflow.under(AbstractAdvisorAutoProxyCreator.class, "findCandidateAdvisors");
 	}
 
 
@@ -107,7 +111,31 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * Find all candidate advisors to use in auto-proxying.
 	 * @return list of Advisors
 	 */
-	protected abstract List findCandidateAdvisors();
+	protected List findCandidateAdvisors() {
+		if (!(getBeanFactory() instanceof ListableBeanFactory)) {
+			throw new IllegalStateException(
+					"Cannot use DefaultAdvisorAutoProxyCreator without a ListableBeanFactory");
+		}
+		ListableBeanFactory owningFactory = (ListableBeanFactory) getBeanFactory();
+
+		// Do not initialize FactoryBeans here: We need to leave all regular beans
+		// uninitialized to let the auto-proxy creator apply to them!
+		String[] adviceNames =
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(owningFactory, Advisor.class, true, false);
+		List candidateAdvisors = new LinkedList();
+		for (int i = 0; i < adviceNames.length; i++) {
+			String name = adviceNames[i];
+			if (isEligibleForProxying(name)) {
+				Advisor advisor = (Advisor) owningFactory.getBean(name);
+				candidateAdvisors.add(advisor);
+			}
+		}
+		return candidateAdvisors;
+	}
+
+	protected boolean isEligibleForProxying(String beanName) {
+		return true;
+	}
 
 	/**
 	 * Extension hook that subclasses can choose to use to additional Advisors,

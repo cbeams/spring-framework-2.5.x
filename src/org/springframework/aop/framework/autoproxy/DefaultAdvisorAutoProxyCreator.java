@@ -91,30 +91,8 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 		}
 	}
 
+	protected boolean isEligibleForProxying(String beanName) {
+		return (!this.usePrefix || beanName.startsWith(this.advisorBeanNamePrefix));
+	}              
 
-	/**
-	 * Find all candidate advisors to use in auto-proxying.
-	 * @return list of Advisor
-	 */
-	protected List findCandidateAdvisors() {
-		if (!(getBeanFactory() instanceof ListableBeanFactory)) {
-			throw new IllegalStateException(
-					"Cannot use DefaultAdvisorAutoProxyCreator without a ListableBeanFactory");
-		}
-		ListableBeanFactory owningFactory = (ListableBeanFactory) getBeanFactory();
-
-		// Do not initialize FactoryBeans here: We need to leave all regular beans
-		// uninitialized to let the auto-proxy creator apply to them!
-		String[] adviceNames =
-				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(owningFactory, Advisor.class, true, false);
-		List candidateAdvisors = new LinkedList();
-		for (int i = 0; i < adviceNames.length; i++) {
-			String name = adviceNames[i];
-			if (!this.usePrefix || name.startsWith(this.advisorBeanNamePrefix)) {
-				Advisor advisor = (Advisor) owningFactory.getBean(name);
-				candidateAdvisors.add(advisor);
-			}
-		}
-		return candidateAdvisors;
-	}
 }

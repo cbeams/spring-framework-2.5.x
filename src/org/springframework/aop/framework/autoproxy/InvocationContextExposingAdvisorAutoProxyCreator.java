@@ -20,21 +20,27 @@ import java.util.List;
 
 import org.springframework.aop.aspectj.AspectJProxyUtils;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
+import org.springframework.core.ControlFlow;
+import org.springframework.core.ControlFlowFactory;
 
 /**
  * Extension of {@link DefaultAdvisorAutoProxyCreator} that adds an
  * {@link ExposeInvocationInterceptor} to the beginning of the advice chain.
  * These additional advices are needed when using AspectJ expression pointcuts
  * and when using AspectJ-style advice.
- * 
+ *
  * @author Rob Harrop
  * @author Rod Johnson
  * @since 2.0
  */
-public class InvocationContextExposingAdvisorAutoProxyCreator extends DefaultAdvisorAutoProxyCreator {
+public class InvocationContextExposingAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCreator {
 
 	protected void extendCandidateAdvisors(List candidateAdvisors) {
 		AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(candidateAdvisors);
 	}
 
+	protected boolean shouldSkip(Class beanClass, String name) {
+		ControlFlow cflow = ControlFlowFactory.createControlFlow();
+		return cflow.under(getClass(), "findCandidateAdvisors");
+	}
 }
