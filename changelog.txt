@@ -29,13 +29,17 @@ Package org.springframework.beans
 * fixed BeanArrayPropertyEditor to translate null value to null byte array
 * added CharArrayPropertyEditor to translate String value into char array
 * CharacterEditor supports unicode specification passed in as literal String, for example "\u00F6"
-* fixed DefaultListableBeanFactory to not preinstantiate bean definition if explicit singleton object already registered
+* refined FileEditor to treat absolute file paths as straight files (no ResourceLoader), for Spring 1.2 compatibility
 * PropertyPlaceholderConfigurer catches and logs SecurityException on system property access, continuing resolution
+* fixed DefaultListableBeanFactory to not preinstantiate bean definition if explicit singleton object already registered
+* added "loadBeanDefinitions(String[] locations)" method to BeanDefinitionReader and AbstractBeanDefinitionReader
 
 Package org.springframework.context
 * refined AbstractMessageSource to resolve arguments eagerly, for message defined in parent and msg arg defined in child
+* added (String[], Class) constructors to ClassPathXmlApplicationContext, allowing to load relative to a specified class
 
 Package org.springframework.core
+* refined NestedXxxException to be serialization-compatible with Spring 1.2
 * refined NestedXxxException to properly handle null message in root cause, through using the cause's "toString()"
 * fixed FileSystemResource/UrlResource to retain leading "../" parts in paths, building correct relative paths for them
 * ResourceEditor resolves placeholders in resource locations against system environment variables as well
@@ -80,6 +84,7 @@ Package org.springframework.orm
 * added "exceptionConversionEnabled" flag to HibernateInterceptor, TopLinkInterceptor, JdoInterceptor, JpaInterceptor
 
 Package org.springframework.remoting
+* HTTP invoker and RMI invoker fill the client-side portion of the stack trace into transferred exceptions now
 * RmiClientInterceptorUtils throws clearer exception message in case of proxy mismatch (for underlying RMI stubs)
 * added "setContentType" configuration method to HttpInvokerServiceExporter and AbstractHttpInvokerRequestExecutor
 * built client-side HTTP GZIP response support into SimpleHttpInvokerRequestExecutor/CommonsHttpInvokerRequestExecutor
@@ -94,16 +99,19 @@ Package org.springframework.scheduling
 
 Package org.springframework.transaction
 * AbstractPlatformTransactionManager logs "Should roll back transaction but cannot" message at debug level (not warn)
+* TransactionInterceptor logs application exception at error level if commit throws an exception
 
 Package org.springframework.util
 * added null-safe hashCode and toString methods to ObjectUtils (analogous to JDK 1.5), moved over from Spring Modules
 * fixed StringUtils's "endsWithIgnoreCase" to correctly handle any String length
 * fixed CollectionsUtils's "hasUniqueObject" to correctly handle null values
+* refined NumberUtils to perform a value-in-range check for any Number returned from a NumberFormat
 * reworked MethodInvoker to match arguments against parameter types when searching for a matching method
 
 Package org.springframework.validation
 * DataBinder does not use a default StringArrayPropertyEditor anymore, to nicely handle select list entries with commas
 * fixed ValidationUtils's "invokeValidator" to work correctly even in case of a null reference as object to be validated
+* added BindingResultUtils, providing convenience methods for looking up BindingResults in a model Map
 
 Package org.springframework.web
 * refined GenericFilterBean to fully support initialization as bean in a Spring bean factory (without FilterConfig)
@@ -117,6 +125,7 @@ Package org.springframework.web
 * optimized BeanNameViewResolver to avoid internal throwing and catching of NoSuchBeanDefinitionExceptions
 * ExpressionEvaluationManager supports concatenated expressions (e.g. "${var1}text${var2}") on all JSP 2.0 engines
 * added optional caching of JSP 2.0 Expressions, driven by "cacheJspExpressions" context-param in web.xml (true/false)
+* "javaScriptEscape" feature of Spring tags correctly escapes "</script>" inside a literal value
 * fixed JSP SelectTag to correctly handle null values
 * AbstractJasperReportsView and subclasses require JasperReports 1.0.1 or higher (removed backwards compatibility check)
 * fixed AbstractJasperReportsView and subclasses to be compatible with J2EE <1.4 (avoid response.setCharacterEncoding)
