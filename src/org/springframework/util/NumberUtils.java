@@ -58,12 +58,24 @@ public abstract class NumberUtils {
 			return number;
 		}
 		else if(targetClass.equals(Byte.class)) {
+			long value = number.longValue();
+			if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
+				raiseOverflowException(number, targetClass);
+			}
 			return new Byte(number.byteValue());
 		}
 		else if (targetClass.equals(Short.class)) {
+			long value = number.longValue();
+			if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
+				raiseOverflowException(number, targetClass);
+			}
 			return new Short(number.shortValue());
 		}
 		else if (targetClass.equals(Integer.class)) {
+			long value = number.longValue();
+			if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+				raiseOverflowException(number, targetClass);
+			}
 			return new Integer(number.intValue());
 		}
 		else if (targetClass.equals(Long.class)) {
@@ -84,17 +96,26 @@ public abstract class NumberUtils {
 			return new BigDecimal(number.toString());
 		}
 		else {
-			throw new IllegalArgumentException("Couldn't convert number [" + number + "] of type [" +
-					number.getClass().getName() + "] to target class [" + targetClass.getName() + "]");
+			throw new IllegalArgumentException("Could not convert number [" + number + "] of type [" +
+					number.getClass().getName() + "] to unknown target class [" + targetClass.getName() + "]");
 		}
+	}
+
+	/**
+	 * Raise an overflow exception for the given number and target class.
+	 * @param number the number we tried to convert
+	 * @param targetClass the target class we tried to convert to
+	 */
+	private static void raiseOverflowException(Number number, Class targetClass) {
+		throw new IllegalArgumentException("Could not convert number [" + number + "] of type [" +
+				number.getClass().getName() + "] to target class [" + targetClass.getName() + "]: overflow");
 	}
 
 	/**
 	 * Parse the given text into a number instance of the given target class,
 	 * using the corresponding default <code>decode</code> methods. Trims the
-	 * input <code>String</code> before attempting to parse the number.
-	 * Supports numbers in hex format (with leading 0x) and in octal format (with
-	 * leading 0).
+	 * input <code>String</code> before attempting to parse the number. Supports
+	 * numbers in hex format (with leading 0x) and in octal format (with leading 0).
 	 * @param text the text to convert
 	 * @param targetClass the target class to parse into
 	 * @return the parsed number

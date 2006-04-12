@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.util;
 
 import java.math.BigInteger;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import junit.framework.TestCase;
 
@@ -41,6 +43,23 @@ public class NumberUtilsTests extends TestCase {
 		assertEquals("Double did not parse", new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
 	}
 
+	public void testParseNumberUsingNumberFormat() {
+		NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+		String aByte = "" + Byte.MAX_VALUE;
+		String aShort = "" + Short.MAX_VALUE;
+		String anInteger = "" + Integer.MAX_VALUE;
+		String aLong = "" + Long.MAX_VALUE;
+		String aFloat = "" + Float.MAX_VALUE;
+		String aDouble = "" + Double.MAX_VALUE;
+
+		assertEquals("Byte did not parse", new Byte(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class, nf));
+		assertEquals("Short did not parse", new Short(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class, nf));
+		assertEquals("Integer did not parse", new Integer(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class, nf));
+		assertEquals("Long did not parse", new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
+		assertEquals("Float did not parse", new Float(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class, nf));
+		assertEquals("Double did not parse", new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
+	}
+
 	public void testParseWithTrim() {
 		String aByte = " " + Byte.MAX_VALUE + " ";
 		String aShort = " " + Short.MAX_VALUE + " ";
@@ -55,6 +74,23 @@ public class NumberUtilsTests extends TestCase {
 		assertEquals("Long did not parse", new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
 		assertEquals("Float did not parse", new Float(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class));
 		assertEquals("Double did not parse", new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
+	}
+
+	public void testParseWithTrimUsingNumberFormat() {
+		NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+		String aByte = " " + Byte.MAX_VALUE + " ";
+		String aShort = " " + Short.MAX_VALUE + " ";
+		String anInteger = " " + Integer.MAX_VALUE + " ";
+		String aLong = " " + Long.MAX_VALUE + " ";
+		String aFloat = " " + Float.MAX_VALUE + " ";
+		String aDouble = " " + Double.MAX_VALUE + " ";
+
+		assertEquals("Byte did not parse", new Byte(Byte.MAX_VALUE), NumberUtils.parseNumber(aByte, Byte.class, nf));
+		assertEquals("Short did not parse", new Short(Short.MAX_VALUE), NumberUtils.parseNumber(aShort, Short.class, nf));
+		assertEquals("Integer did not parse", new Integer(Integer.MAX_VALUE), NumberUtils.parseNumber(anInteger, Integer.class, nf));
+		assertEquals("Long did not parse", new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
+		assertEquals("Float did not parse", new Float(Float.MAX_VALUE), NumberUtils.parseNumber(aFloat, Float.class, nf));
+		assertEquals("Double did not parse", new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
 	}
 
 	public void testParseAsHex() {
@@ -100,6 +136,128 @@ public class NumberUtilsTests extends TestCase {
 		assertNegativeLongEquals(aLong);
 		assertEquals("BigInteger did not parse",
 				new BigInteger(aReallyBigInt, 16).negate(), NumberUtils.parseNumber("-0x" + aReallyBigInt, BigInteger.class));
+	}
+
+	public void testParseOverflow() {
+		String aLong = "" + Long.MAX_VALUE;
+		String aDouble = "" + Double.MAX_VALUE;
+
+		try {
+			NumberUtils.parseNumber(aLong, Byte.class);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+
+		try {
+			NumberUtils.parseNumber(aLong, Short.class);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+
+		try {
+			NumberUtils.parseNumber(aLong, Integer.class);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+
+		assertEquals(new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
+
+		assertEquals(new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
+	}
+
+	public void testParseNegativeOverflow() {
+		String aLong = "" + Long.MIN_VALUE;
+		String aDouble = "" + Double.MIN_VALUE;
+
+		try {
+			NumberUtils.parseNumber(aLong, Byte.class);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+
+		try {
+			NumberUtils.parseNumber(aLong, Short.class);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+
+		try {
+			NumberUtils.parseNumber(aLong, Integer.class);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+
+		assertEquals(new Long(Long.MIN_VALUE), NumberUtils.parseNumber(aLong, Long.class));
+
+		assertEquals(new Double(Double.MIN_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
+	}
+
+	public void testParseOverflowUsingNumberFormat() {
+		NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+		String aLong = "" + Long.MAX_VALUE;
+		String aDouble = "" + Double.MAX_VALUE;
+
+		try {
+			NumberUtils.parseNumber(aLong, Byte.class, nf);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+
+		try {
+			NumberUtils.parseNumber(aLong, Short.class, nf);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+
+		try {
+			NumberUtils.parseNumber(aLong, Integer.class, nf);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+
+		assertEquals(new Long(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
+
+		assertEquals(new Double(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
+	}
+
+	public void testParseNegativeOverflowUsingNumberFormat() {
+		NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+		String aLong = "" + Long.MIN_VALUE;
+		String aDouble = "" + Double.MIN_VALUE;
+
+		try {
+			NumberUtils.parseNumber(aLong, Byte.class, nf);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+
+		try {
+			NumberUtils.parseNumber(aLong, Short.class, nf);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+
+		try {
+			NumberUtils.parseNumber(aLong, Integer.class, nf);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+
+		assertEquals(new Long(Long.MIN_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
+
+		assertEquals(new Double(Double.MIN_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
 	}
 
 	private void assertLongEquals(String aLong) {
