@@ -17,9 +17,13 @@
 package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
+import java.io.Serializable;
 
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.aop.support.AbstractPointcutAdvisor;
+import org.springframework.aop.Pointcut;
 import org.springframework.util.Assert;
 
 /**
@@ -35,9 +39,11 @@ import org.springframework.util.Assert;
  * @see org.springframework.transaction.interceptor.TransactionInterceptor
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
-public class TransactionAttributeSourceAdvisor extends StaticMethodMatcherPointcutAdvisor {
+public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 	
 	private TransactionAttributeSource transactionAttributeSource;
+
+	private TransactionAttributeSourcePointcut pointcut;
 
 
 	/**
@@ -65,12 +71,25 @@ public class TransactionAttributeSourceAdvisor extends StaticMethodMatcherPointc
 					"TransactionInterceptor that has no TransactionAttributeSource configured");
 		}
 		this.transactionAttributeSource = interceptor.getTransactionAttributeSource();
+		this.pointcut = new TransactionAttributeSourcePointcut(this.transactionAttributeSource);
+	}
+
+	public Pointcut getPointcut() {
+		return this.pointcut;
 	}
 
 
-	public boolean matches(Method method, Class targetClass) {
-		Assert.notNull(this.transactionAttributeSource, "transactionAttributeSource is required");
-		return (this.transactionAttributeSource.getTransactionAttribute(method, targetClass) != null);
-	}
+	private static class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
 
+		private final TransactionAttributeSource transactionAttributeSource;
+
+		public TransactionAttributeSourcePointcut(TransactionAttributeSource transactionAttributeSource) {
+			this.transactionAttributeSource = transactionAttributeSource;
+		}
+
+		public boolean matches(Method method, Class targetClass) {
+			Assert.notNull(this.transactionAttributeSource, "transactionAttributeSource is required");
+			return (this.transactionAttributeSource.getTransactionAttribute(method, targetClass) != null);
+		}
+	}
 }

@@ -866,7 +866,17 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		}
 
 		public int hashCode() {
-			return 0;
+			int result = 27;
+			Advisor[] advisors = this.advised.getAdvisors();
+			for (int i = 0; i < advisors.length; i++) {
+				Advisor advisor = advisors[i];
+				result = 13 * result + advisor.getAdvice().getClass().hashCode();
+			}
+			result = 13 * result  + (this.advised.isFrozen() ? 1 : 0);
+			result = 13 * result  + (this.advised.isExposeProxy() ? 1 : 0);
+			result = 13 * result  + (this.advised.isOptimize() ? 1 : 0);
+			result = 13 * result  + (this.advised.isOpaque() ? 1 : 0);
+			return result;
 		}
 
 		public boolean equals(Object other) {

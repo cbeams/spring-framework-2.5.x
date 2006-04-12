@@ -20,6 +20,7 @@ import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
+import org.springframework.aop.support.AbstractPointcutAdvisor;
 
 /**
  * Spring AOP Advisor that can be used for any AspectJ pointcut expression.
@@ -27,24 +28,36 @@ import org.springframework.aop.PointcutAdvisor;
  * @author Rob Harrop
  * @since 2.0
  */
-public class AspectJExpressionPointcutAdvisor extends AspectJExpressionPointcut implements PointcutAdvisor {
+public class AspectJExpressionPointcutAdvisor extends AbstractPointcutAdvisor {
 
-	private Advice advice;
+	private final AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
 
 	public Pointcut getPointcut() {
-		return this;
+		return this.pointcut;
 	}
 
-	public boolean isPerInstance() {
-		throw new UnsupportedOperationException("perInstance property of Advisor is not yet supported in Spring");
+	public void setExpression(String expression) {
+		this.pointcut.setExpression(expression);
 	}
 
-	public Advice getAdvice() {
-		return this.advice;
+	public void setLocation(String location) {
+		this.pointcut.setLocation(location);
 	}
 
-	public void setAdvice(Advice advice) {
-		this.advice = advice;
+	public void setParameterTypes(Class[] types) {
+		this.pointcut.setParameterTypes(types);
+	}
+
+	public void setParameterNames(String[] names) {
+		this.pointcut.setParameterNames(names);
+	}
+
+	public String getLocation() {
+		return this.pointcut.getLocation();
+	}
+
+	public String getExpression() {
+		return this.pointcut.getExpression();
 	}
 
 }

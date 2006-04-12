@@ -21,6 +21,10 @@ import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.Pointcut;
+import org.springframework.aop.ClassFilter;
+import org.springframework.aop.MethodMatcher;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContext;
@@ -168,7 +172,6 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	public void testMultipleProxies() {
-
 		TestBean target = new TestBean();
 		target.setAge(20);
 		TestBean target2 = new TestBean();
@@ -185,8 +188,21 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		ProxyFactory pf = new ProxyFactory(new Class[]{ITestBean.class});
 		pf.setProxyTargetClass(true);
 
-		MethodInterceptor static1 = new NopInterceptor();
-		pf.addAdvice(static1);
+		MethodInterceptor advice = new NopInterceptor();
+		Pointcut pointcut = new Pointcut() {
+			public ClassFilter getClassFilter() {
+				return ClassFilter.TRUE;
+			}
+
+			public MethodMatcher getMethodMatcher() {
+				return MethodMatcher.TRUE;
+			}
+
+			public boolean equals(Object obj) {
+				return true;
+			}
+		};
+		pf.addAdvisor(new DefaultPointcutAdvisor(pointcut, advice));
 
 		pf.setTarget(target);
 		pf.setFrozen(true);

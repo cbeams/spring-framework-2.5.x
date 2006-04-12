@@ -30,61 +30,36 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  */
-public class NameMatchMethodPointcutAdvisor extends NameMatchMethodPointcut
-		implements PointcutAdvisor, Ordered {
+public class NameMatchMethodPointcutAdvisor extends AbstractPointcutAdvisor {
 
-	private int order = Integer.MAX_VALUE;
 
-	private Advice advice;
+	private final NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
 
 
 	public NameMatchMethodPointcutAdvisor() {
 	}
 
 	public NameMatchMethodPointcutAdvisor(Advice advice) {
-		this.advice = advice;
+		setAdvice(advice);
 	}
-
-
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	public int getOrder() {
-		return this.order;
-	}
-
-	public void setAdvice(Advice advice) {
-		this.advice = advice;
-	}
-
-	public Advice getAdvice() {
-		return this.advice;
-	}
-
 
 	public Pointcut getPointcut() {
-		return this;
+		return this.pointcut;
 	}
 
 	public boolean isPerInstance() {
 		throw new UnsupportedOperationException("perInstance property of Advisor is not yet supported in Spring");
 	}
 
-	public boolean equals(Object other) {
-		if (!super.equals(other)) {
-			return false;
-		}
-		return (other instanceof NameMatchMethodPointcutAdvisor &&
-				ObjectUtils.nullSafeEquals(((NameMatchMethodPointcutAdvisor) other).advice, this.advice));
+	public NameMatchMethodPointcut addMethodName(String name) {
+		return this.pointcut.addMethodName(name);
 	}
 
-	public int hashCode() {
-		int code = 17;
-		code = 37 * code + super.hashCode();
-		if (this.advice != null) {
-			code = 37 * code + this.advice.hashCode();
-		}
-		return code;
+	public void setMappedName(String mappedName) {
+		this.pointcut.setMappedName(mappedName);
+	}
+
+	public void setMappedNames(String[] mappedNames) {
+		this.pointcut.setMappedNames(mappedNames);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,13 @@ import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.Ordered;
 
 /**
- * Convenient superclass for Advisors that are also dynamic pointcuts.
- * Serializable if Advice and subclass is.
+ * Convenient superclass for {@link Advisor Advisors} that are also dynamic pointcuts.
+ * Serializable if both {@link Advice} and subclass are.
  *
  * @author Rod Johnson
+ * @author Rob Harrop
+ * @deprecated since 2.0, in favor of using {@link DefaultPointcutAdvisor} with a
+ * runtime {@link DynamicMethodMatcherPointcut}.
  */
 public abstract class DynamicMethodMatcherPointcutAdvisor extends DynamicMethodMatcherPointcut
     implements PointcutAdvisor, Ordered, Serializable {

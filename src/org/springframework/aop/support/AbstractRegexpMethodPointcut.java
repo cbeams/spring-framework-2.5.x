@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,12 +47,13 @@ import org.springframework.util.Assert;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 1.1
  * @see Perl5RegexpMethodPointcut
  * @see JdkRegexpMethodPointcut
  */
 public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPointcut
-		implements ClassFilter, Serializable {
+		implements Serializable {
 
 	/** Transient as it's reinitialized on deserialization */
 	protected transient Log logger = LogFactory.getLog(getClass());
@@ -172,16 +174,31 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 		return false;
 	}
 
-	public boolean matches(Class clazz) {
-		// TODO do with regexp
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		AbstractRegexpMethodPointcut that = (AbstractRegexpMethodPointcut) o;
+
+		if (!Arrays.equals(excludedPatterns, that.excludedPatterns)) return false;
+		if (!Arrays.equals(patterns, that.patterns)) return false;
+
 		return true;
 	}
 
-	public final ClassFilter getClassFilter() {
-		return this;
+	public int hashCode() {
+		int result = 27;
+		for (int i = 0; i < patterns.length; i++) {
+			String pattern = patterns[i];
+			result = 13 * result + pattern.hashCode();
+		}
+		for (int i = 0; i < excludedPatterns.length; i++) {
+			String excludedPattern = excludedPatterns[i];
+			result = 13 * result + excludedPattern.hashCode();
+		}
+		return result;
 	}
-
-
+	
 	//---------------------------------------------------------------------
 	// Serialization support
 	//---------------------------------------------------------------------
