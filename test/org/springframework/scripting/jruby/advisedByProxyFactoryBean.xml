@@ -12,7 +12,7 @@
 	</bean>
 
 	<bean id="messenger" class="org.springframework.aop.framework.ProxyFactoryBean">
-	  <property name="target" ref="messengerTarget"/>
+		<property name="target" ref="messengerTarget"/>
 		<property name="interceptorNames" value="advice"/>
 	</bean>
 

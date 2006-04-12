@@ -73,6 +73,7 @@
 		<xsd:sequence>
 			<xsd:element ref="description" minOccurs="0"/>
 			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+				<xsd:element ref="meta"/>
 				<xsd:element ref="constructor-arg"/>
 				<xsd:element ref="property"/>
 				<xsd:element ref="lookup-method"/>
@@ -81,9 +82,9 @@
 			</xsd:choice>
 		</xsd:sequence>
 	</xsd:group>
-	<!-- definition of an attribute group -->
+
+	<!-- Attibutes for the <beans> tag -->
 	<xsd:attributeGroup name="beanAttributes">
-		<!--<xsd:attribute name="id" type="xsd:ID"/>-->
 		<xsd:attribute name="name" type="xsd:string"/>
 		<xsd:attribute name="class" type="xsd:string"/>
 		<xsd:attribute name="parent" type="xsd:string"/>
@@ -121,6 +122,15 @@
 		<xsd:attribute name="autowire-candidate" type="xsd:boolean" default="true"/>
 		<xsd:anyAttribute namespace="##other" processContents="strict"/>
 	</xsd:attributeGroup>
+
+	<!-- the <meta> element -->
+	<xsd:element name="meta" type="metaType"/>
+
+	<xsd:complexType name="metaType">
+		<xsd:attribute name="key" type="xsd:string" use="required"/>
+		<xsd:attribute name="value" type="xsd:string" use="required"/>
+	</xsd:complexType>
+
 	<!-- the <bean> element -->
 	<xsd:element name="bean">
 		<xsd:complexType>

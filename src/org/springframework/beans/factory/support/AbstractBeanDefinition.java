@@ -189,6 +189,8 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		setEnforceDestroyMethod(original.isEnforceDestroyMethod());
 
 		setResourceDescription(original.getResourceDescription());
+
+		copyAttributesFrom(original);
 	}
 
 	/**
@@ -237,6 +239,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		}
 
 		setResourceDescription(other.getResourceDescription());
+		copyAttributesFrom(other);
 	}
 
 
@@ -688,6 +691,18 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		else if (count == 1) {
 			// Mark override as not overloaded, to avoid the overhead of arg type checking.
 			mo.setOverloaded(false);
+		}
+	}
+
+	/**
+	 * Copies the attributes from the supplied {@link BeanDefinition} to this
+	 * {@link BeanDefinition}.
+	 */
+	private void copyAttributesFrom(BeanDefinition original) {
+		String[] attributeNames = original.attributeNames();
+		for (int i = 0; i < attributeNames.length; i++) {
+			String attributeName = attributeNames[i];
+			setAttribute(attributeName, original.getAttribute(attributeName));
 		}
 	}
 

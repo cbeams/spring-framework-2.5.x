@@ -100,6 +100,8 @@ public class XmlBeanDefinitionParserHelper {
 
 	public static final String BEAN_ELEMENT = "bean";
 
+	public static final String META_ELEMENT = "meta";
+
 	public static final String ID_ATTRIBUTE = "id";
 
 	public static final String PARENT_ATTRIBUTE = "parent";
@@ -407,6 +409,8 @@ public class XmlBeanDefinitionParserHelper {
 			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
 							className, parent, cargs, pvs, getReaderContext().getReader().getBeanClassLoader());
 
+			parseMetaElements(ele, bd);
+
 			// store the configuration source
 			bd.setSource(extractSource(ele));
 
@@ -498,6 +502,20 @@ public class XmlBeanDefinitionParserHelper {
 		}
 
 		return null;
+	}
+
+	public void parseMetaElements(Element ele, AbstractBeanDefinition bd) {
+		NodeList nl = ele.getChildNodes();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		for (int i = 0; i < nl.getLength(); i++) {
+			Node node = nl.item(i);
+			if (node instanceof Element && META_ELEMENT.equals(node.getNodeName())) {
+				Element metaElement = (Element) node;
+				String key = metaElement.getAttribute(KEY_ATTRIBUTE);
+				String value = metaElement.getAttribute(VALUE_ATTRIBUTE);
+				bd.setAttribute(key, value);
+			}
+		}
 	}
 
 	/**

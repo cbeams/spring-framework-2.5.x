@@ -93,6 +93,20 @@
 -->
 <!ATTLIST alias alias CDATA #REQUIRED>
 
+<!--
+  Allows for arbitrary metadata to be attached to a bean definition.
+-->
+<!ELEMENT meta EMPTY>
+
+<!--
+  Specifies the key name of the metdata parameter being defined
+-->
+<!ATTLIST meta key CDATA #REQUIRED>
+
+<!--
+  Specifies the value of the metadata parameter being defined as a String
+-->
+<!ATTLIST meta value CDATA #REQUIRED>
 
 <!--
 	Defines a single (usually named) bean.
@@ -103,7 +117,7 @@
 -->
 <!ELEMENT bean (
 	description?,
-	(constructor-arg | property | lookup-method | replaced-method)*
+	(meta | constructor-arg | property | lookup-method | replaced-method)*
 )>
 
 <!--
@@ -313,7 +327,6 @@
 	Injection, and an instance (rather than static) method to be used.
 -->
 <!ATTLIST bean factory-bean CDATA #IMPLIED>
-
 
 <!--
 	Bean definitions can specify zero or more constructor arguments.

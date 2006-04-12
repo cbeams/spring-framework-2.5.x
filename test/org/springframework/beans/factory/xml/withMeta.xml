@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
+				"http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+	<bean id="testBean1" class="org.springframework.beans.TestBean">
+		<meta key="foo" value="bar"/>
+	</bean>
+	<bean id="testBean2" class="org.springframework.beans.TestBean" parent="testBean1">
+		<meta key="abc" value="123"/>
+	</bean>
+</beans>
