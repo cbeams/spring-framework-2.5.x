@@ -481,6 +481,31 @@ public class CustomEditorTests extends TestCase {
 		assertEquals((new File("myfile.txt")).getPath(), fileEditor.getAsText());
 	}
 
+	public void testFileEditorWithRelativePath() {
+		PropertyEditor fileEditor = new FileEditor();
+		try {
+			fileEditor.setAsText("myfile.txt");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected: should get resolved as class path resource,
+			// and there is no such resource in the class path...
+		}
+	}
+
+	public void testFileEditorWithAbsolutePath() {
+		PropertyEditor fileEditor = new FileEditor();
+		// testing on Windows
+		if (new File("C:/myfile.txt").isAbsolute()) {
+			fileEditor.setAsText("C:/myfile.txt");
+			assertEquals(new File("C:/myfile.txt"), fileEditor.getValue());
+		}
+		// testing on Unix
+		if (new File("/myfile.txt").isAbsolute()) {
+			fileEditor.setAsText("/myfile.txt");
+			assertEquals(new File("/myfile.txt"), fileEditor.getValue());
+		}
+	}
+
 	public void testLocaleEditor() {
 		PropertyEditor localeEditor = new LocaleEditor();
 		localeEditor.setAsText("en_CA");
