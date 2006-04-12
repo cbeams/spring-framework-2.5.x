@@ -17,12 +17,14 @@
 package org.springframework.scripting.jruby;
 
 import junit.framework.TestCase;
+
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.CountingBeforeAdvice;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.JdkVersion;
 import org.springframework.scripting.Messenger;
-import org.springframework.aop.framework.CountingBeforeAdvice;
-import org.springframework.aop.framework.Advised;
-import org.springframework.aop.support.AopUtils;
 
 /**
  * @author Rob Harrop
@@ -31,7 +33,12 @@ import org.springframework.aop.support.AopUtils;
 public class AdvisedJRubyScriptFactoryTests extends TestCase {
 
 	public void testAdviseWithProxyFactoryBean() throws Exception {
-		ApplicationContext context = new ClassPathXmlApplicationContext("org/springframework/scripting/jruby/advisedByProxyFactoryBean.xml");
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		ApplicationContext context =
+				new ClassPathXmlApplicationContext("advisedByProxyFactoryBean.xml", getClass());
 		Messenger bean = (Messenger) context.getBean("messenger");
 		assertTrue("Bean is not a proxy", AopUtils.isAopProxy(bean));
 		assertTrue("Bean is not an Advised object", bean instanceof Advised);
@@ -42,7 +49,12 @@ public class AdvisedJRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testAdviseWithBeanNameAutoProxyCreator() throws Exception {
-		ApplicationContext context = new ClassPathXmlApplicationContext("org/springframework/scripting/jruby/advisedByBeanNameAutoProxyCreator.xml");
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		ApplicationContext context =
+				new ClassPathXmlApplicationContext("advisedByBeanNameAutoProxyCreator.xml", getClass());
 		Messenger bean = (Messenger) context.getBean("messenger");
 		assertTrue("Bean is not a proxy", AopUtils.isAopProxy(bean));
 		assertTrue("Bean is not an Advised object", bean instanceof Advised);
@@ -51,4 +63,5 @@ public class AdvisedJRubyScriptFactoryTests extends TestCase {
 		bean.getMessage();
 		assertEquals(1, advice.getCalls());
 	}
+
 }
