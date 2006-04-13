@@ -28,6 +28,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.core.AttributeAccessorSupport;
 
 /**
  * Base class for bean definition objects, factoring out common
@@ -42,7 +43,7 @@ import org.springframework.util.ClassUtils;
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
  */
-public abstract class AbstractBeanDefinition implements BeanDefinition {
+public abstract class AbstractBeanDefinition extends AttributeAccessorSupport implements BeanDefinition {
 
 	/**
 	 * Constant that indicates no autowiring at all.
@@ -142,8 +143,6 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	private Object source;
 
 	private int role = BeanDefinition.ROLE_APPLICATION;
-
-	private final Map attributes = new HashMap();
 
 
 	/**
@@ -630,26 +629,6 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		return role;
 	}
 
-	public void setAttribute(String key, Object value) {
-		Assert.notNull(key, "Attribute key must not be null");
-		if (value != null) {
-			this.attributes.put(key, value);
-		}
-		else {
-			this.attributes.remove(key);
-		}
-	}
-
-	public Object getAttribute(String key) {
-		Assert.notNull(key, "Attribute key must not be null");
-		return this.attributes.get(key);
-	}
-
-	public String[] attributeNames() {
-		Set attributeNames = this.attributes.keySet();
-		return (String[]) attributeNames.toArray(new String[attributeNames.size()]);
-	}
-
 	/**
 	 * Validate this bean definition.
 	 * @throws BeanDefinitionValidationException in case of validation failure
@@ -662,10 +641,10 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 		if (!getMethodOverrides().isEmpty() && getFactoryMethodName() != null) {
 			throw new BeanDefinitionValidationException(
-			    "Cannot combine static factory method with method overrides: " +
-			    "the static factory method must create the instance");
+					"Cannot combine static factory method with method overrides: " +
+					"the static factory method must create the instance");
 		}
-		
+
 		if (hasBeanClass()) {
 			// Check that lookup methods exists
 			for (Iterator it = getMethodOverrides().getOverrides().iterator(); it.hasNext(); ) {
@@ -685,8 +664,8 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		int count = ClassUtils.getMethodCountForName(getBeanClass(), mo.getMethodName());
 		if (count == 0) {
 			throw new BeanDefinitionValidationException(
-			    "Invalid method override: no method with name '" + mo.getMethodName() +
-			    "' on class [" + getBeanClassName() + "]");
+					"Invalid method override: no method with name '" + mo.getMethodName() +
+					"' on class [" + getBeanClassName() + "]");
 		}
 		else if (count == 1) {
 			// Mark override as not overloaded, to avoid the overhead of arg type checking.

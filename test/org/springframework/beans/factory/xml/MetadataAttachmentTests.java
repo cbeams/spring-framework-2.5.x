@@ -19,6 +19,7 @@ package org.springframework.beans.factory.xml;
 import junit.framework.TestCase;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.PropertyValue;
 
 /**
  * @author Rob Harrop
@@ -38,8 +39,14 @@ public class MetadataAttachmentTests extends TestCase {
 	}
 
 	public void testMetadataIsInherited() throws Exception {
-		BeanDefinition beanDefinition2 = this.beanFactory.getMergedBeanDefinition("testBean2");
-		assertEquals("Metadata not inherited", "bar", beanDefinition2.getAttribute("foo"));
-		assertEquals("Child metdata not attached", "123", beanDefinition2.getAttribute("abc"));
+		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("testBean2");
+		assertEquals("Metadata not inherited", "bar", beanDefinition.getAttribute("foo"));
+		assertEquals("Child metdata not attached", "123", beanDefinition.getAttribute("abc"));
+	}
+
+	public void testPropertyMetadata() throws Exception {
+		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("testBean3");
+		PropertyValue pv = beanDefinition.getPropertyValues().getPropertyValue("name");
+		assertEquals("Harrop", pv.getAttribute("surname"));
 	}
 }

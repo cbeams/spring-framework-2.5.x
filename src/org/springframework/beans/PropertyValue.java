@@ -17,8 +17,11 @@
 package org.springframework.beans;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.springframework.util.ObjectUtils;
+import org.springframework.core.AttributeAccessorSupport;
 
 /**
  * Class to hold information and value for an individual property.
@@ -36,7 +39,7 @@ import org.springframework.util.ObjectUtils;
  * @see PropertyValues
  * @see BeanWrapper
  */
-public class PropertyValue implements Serializable {
+public class PropertyValue extends AttributeAccessorSupport implements Serializable {
 
 	private final String name;
 
@@ -111,5 +114,4 @@ public class PropertyValue implements Serializable {
 	public int hashCode() {
 		return this.name.hashCode() * 29 + (this.value == null ? 0 : this.value.hashCode());
 	}
-
 }

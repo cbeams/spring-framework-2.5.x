@@ -55,6 +55,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.xml.DomUtils;
+import org.springframework.core.AttributeAccessor;
 
 /**
  * Stateful helper class used to parse XML bean definitions. Intended for use
@@ -504,16 +505,15 @@ public class XmlBeanDefinitionParserHelper {
 		return null;
 	}
 
-	public void parseMetaElements(Element ele, AbstractBeanDefinition bd) {
+	public void parseMetaElements(Element ele, AttributeAccessor attributeAccessor) {
 		NodeList nl = ele.getChildNodes();
-		MutablePropertyValues pvs = new MutablePropertyValues();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element && META_ELEMENT.equals(node.getNodeName())) {
 				Element metaElement = (Element) node;
 				String key = metaElement.getAttribute(KEY_ATTRIBUTE);
 				String value = metaElement.getAttribute(VALUE_ATTRIBUTE);
-				bd.setAttribute(key, value);
+				attributeAccessor.setAttribute(key, value);
 			}
 		}
 	}
@@ -703,6 +703,7 @@ public class XmlBeanDefinitionParserHelper {
 
 			Object val = parsePropertyValue(ele, propertyName);
 			PropertyValue pv = new PropertyValue(propertyName, val);
+			parseMetaElements(ele, pv);
 			pv.setSource(extractSource(ele));
 			pvs.addPropertyValue(pv);
 		}
@@ -736,7 +737,7 @@ public class XmlBeanDefinitionParserHelper {
 				}
 				else {
 					// Child element is what we're looking for.
-					if (subElement != null) {
+					if (subElement != null && !META_ELEMENT.equals(subElement.getTagName())) {
 						error(elementName + " must not contain more than one sub-element", ele);
 					}
 					subElement = candidateEle;
@@ -1000,7 +1001,7 @@ public class XmlBeanDefinitionParserHelper {
 	private Object extractTypedStringValueIfNecessary(Element mapElement, String attributeValue, String defaultTypeClassName) {
 		if (!StringUtils.hasText(defaultTypeClassName)) {
 			return attributeValue;
-		}                                                               
+		}
 		Class type = null;
 		try {
 			type = ClassUtils.forName(defaultTypeClassName, getReaderContext().getReader().getBeanClassLoader());

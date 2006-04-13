@@ -9,4 +9,10 @@
 	<bean id="testBean2" class="org.springframework.beans.TestBean" parent="testBean1">
 		<meta key="abc" value="123"/>
 	</bean>
+	<bean id="testBean3" class="org.springframework.beans.TestBean">
+	  <property name="name">
+			<meta key="surname" value="Harrop"/>
+			<value>Rob</value>
+		</property>
+	</bean>
 </beans>

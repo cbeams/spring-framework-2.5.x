@@ -378,7 +378,7 @@
 	beans in the same or related factories, lists, maps and properties.
 -->
 <!ELEMENT property (
-	description?,
+	description?, meta*,
 	(bean | ref | idref | value | null | list | set | map | props)?
 )>
 

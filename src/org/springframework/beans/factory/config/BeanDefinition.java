@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.core.AttributeAccessor;
 
 /**
  * A BeanDefinition describes a bean instance, which has property values,
@@ -36,7 +37,7 @@ import org.springframework.beans.MutablePropertyValues;
  * @see org.springframework.beans.factory.support.RootBeanDefinition
  * @see org.springframework.beans.factory.support.ChildBeanDefinition
  */
-public interface BeanDefinition {
+public interface BeanDefinition extends AttributeAccessor {
 
 	/**
 	 * Role hint indicating that a <code>BeanDefinition</code> is a major part
