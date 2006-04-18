@@ -93,7 +93,7 @@
 		<title>Using the JDBC Core classes to control basic JDBC processing and error handling</title>
 		<section id="jdbc-JdbcTemplate">
 			<title><classname>JdbcTemplate</classname></title>
-			<para>T
+			<para>
 				The <classname>JdbcTemplate</classname> class is the central class in
 				the JDBC core package. It simplifies the use of JDBC since it handles the
 				creation and release of resources. This helps to avoid common errors such
@@ -127,9 +127,225 @@
 				case given to the service directly, in the second case to the prepared
 				template. Because this class is parameterizable by the callback interfaces
 				and the <interfacename>SQLExceptionTranslator</interfacename> interface, it
-				isn't necessary to subclass it. Finally, please be aware that all SQL
-				issued by this class is logged.
+				isn't necessary to subclass it.
 			</para>
+			<para>
+				Finally, please be aware that all of the SQL issued by this class is logged
+				at the <literal>'DEBUG'</literal> level under the category corresponding
+				to the fully qualified class name of the template instance (typically
+				<classname>JdbcTemplate</classname>, but it may be different if a custom
+				subclass of the <classname>JdbcTemplate</classname> class is being used).
+			</para>
+		</section>
+		<section id="jdbc-NamedParameterJdbcTemplate">
+			<title><classname>NamedParameterJdbcTemplate</classname></title>
+			<para>
+				The <classname>NamedParameterJdbcTemplate</classname> class adds support
+				for programming JDBC statements using named parameters (as opposed to
+				programming JDBC statements using only classic placeholder
+				(<literal>'?'</literal>) arguments.
+			</para>
+			<para>
+				The <classname>NamedParameterJdbcTemplate</classname> class wraps
+				a vanilla <classname>JdbcTemplate</classname>, and delegates to the
+				wrapped <classname>JdbcTemplate</classname> to do much of its work.
+				This section will describe only those areas of the
+				<classname>NamedParameterJdbcTemplate</classname> class that differ from
+				the <classname>JdbcTemplate</classname> itself; namely, programming
+				JDBC statements using named parameters.
+			</para>
+			<para>
+				The expect usage pattern for the <classname>NamedParameterJdbcTemplate</classname>
+				class is perhaps best illustrated by looking at an example (the finer
+				points will be addressed immediately thereafter).
+			</para>
+			<programlisting><lineannotation>// some JDBC-backed DAO class...</lineannotation><![CDATA[
+public int countOfActorsByFirstName(String firstName) {
+
+    String sql = "select count(0) from T_ACTOR where first_name = :first_name";
+
+    NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.getDataSource());
+    SqlParameterSource namedParameters = new SimpleSqlParameterSource("first_name", firstName);
+
+    return template.queryForInt(sql, namedParameters);
+}]]></programlisting>
+			<para>
+				Notice the use of the named parameter notation in the value assigned
+				to the <literal>'sql'</literal> variable, and the corresponding value
+				that is plugged into the <literal>'namedParameters'</literal> variable
+				(of type <classname>SimpleSqlParameterSource</classname>).
+			</para>
+			<para>
+				If you like, you can also pass along named parameters (and their
+				corresponding values) to a <classname>NamedParameterJdbcTemplate</classname>
+				instance using the (perhaps more familiar)
+				<interfacename>Map</interfacename>-based style.
+				(The rest of the methods exposed by the
+				<interfacename>NamedParameterJdbcOperations</interfacename> - and implemented by the <classname>NamedParameterJdbcTemplate</classname> class)
+				follow a similar pattern and will not be covered here.)
+			</para>
+<programlisting><lineannotation>// some JDBC-backed DAO class...</lineannotation><![CDATA[
+public int countOfActorsByFirstName(String firstName) {
+
+    String sql = "select count(0) from T_ACTOR where first_name = :first_name";
+
+    NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.getDataSource());
+    Map namedParameters = new HashMap();
+    namedParameters.put("first_name", firstName);
+
+    return template.queryForInt(sql, namedParameters);
+}]]></programlisting>
+			<para>
+				Another nice feature related to the <classname>NamedParameterJdbcTemplate</classname>
+				(and existing in the same Java package) is the <interfacename>SqlParameterSource</interfacename>
+				interface. You have already seen an example of an implementation of this
+				interface in one of the preceding code snippets (the
+				<classname>SimpleSqlParameterSource</classname> class). The entire
+				point of the <interfacename>SqlParameterSource</interfacename> is to serve as
+				a source of named parameter values to a <classname>NamedParameterJdbcTemplate</classname>.
+				The <classname>SimpleSqlParameterSource</classname> class is (as the name implies)
+				a very simple implementation, that is simply an adapter around a
+				<interfacename>java.util.Map</interfacename>, and its use (should) be
+				self-evident (if it is not then do raise a JIRA issue asking for more
+				documentation in this regard).
+			</para>
+			<para>
+				Another, more interesting, implementation of the
+				<interfacename>SqlParameterSource</interfacename> interface is the
+				<classname>BeanPropertySqlParameterSource</classname> class. This
+				class wraps an arbitrary JavaBean-like object, and uses the properties
+				of the wrapped object as the source of named parameter values. An
+				example will perhaps make its use clear.
+			</para>
+			<programlisting><lineannotation>// some JavaBean-like class...</lineannotation><![CDATA[
+public class Actor {
+
+    private Long id;
+    private String firstName;
+    private String lastName;
+    
+    public String getFirstName() {
+        return this.firstName;
+    }
+    
+    public String getLastName() {
+        return this.lastName;
+    }
+    
+    public Long getId() {
+        return this.id;
+    }
+    
+    ]]><lineannotation>// setters omitted...</lineannotation><![CDATA[
+
+}]]></programlisting>
+			<programlisting><lineannotation>// some JDBC-backed DAO class...</lineannotation><![CDATA[
+public int countOfActors(Actor exampleActor) {
+
+	]]><lineannotation>// notice how the named parameters match the properties of the above 'Actor' class</lineannotation><![CDATA[
+    String sql = "select count(0) from T_ACTOR where first_name = :firstName and last_name = :lastName";
+
+    NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.getDataSource());
+    SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(exampleActor);
+
+    return template.queryForInt(sql, namedParameters);
+}]]></programlisting>
+			<para>
+				Rememeber that the <classname>NamedParameterJdbcTemplate</classname> class
+				<emphasis>wraps</emphasis> a classic <classname>JdbcTemplate</classname>
+				template... if you need access to the wrapped
+				<classname>JdbcTemplate</classname> instance (to access some of the
+				functionality only present in the <classname>JdbcTemplate</classname>
+				class), then you can use the <literal>getJdbcOperations()</literal>
+				method to access the wrapped <classname>JdbcTemplate</classname>
+				<emphasis>via the <interfacename>JdbcOperations</interfacename>
+				interface</emphasis>.
+			</para>
+			<para>
+				The <classname>NamedParameterJdbcTemplate</classname> class is threadsafe,
+				and the expected usage pattern is not to instantiate a new
+				<classname>NamedParameterJdbcTemplate</classname> instance per operation, but
+				rather to simply configure a single <classname>NamedParameterJdbcTemplate</classname>
+				instance per <interfacename>DataSource</interfacename> (typically via a Spring
+				IoC container if you are using Spring's IoC technology) and then share
+				that same instance amongst those DAOs (typically) that need it.
+			</para>
+		</section>
+		<section id="jdbc-SimpleJdbcTemplate">
+			<title><classname>SimpleJdbcTemplate</classname></title>
+			<note>
+				<para>
+					<emphasis>Please be aware that the functionality offered by this class is
+					only available to you if you are using Java 5 (Tiger).</emphasis>
+				</para>
+			</note>
+			<para>
+				The <classname>SimpleJdbcTemplate</classname> class is a wrapper around
+				the classic Spring <classname>JdbcTemplate</classname>, that takes advantage
+				Java 5 language features such as varargs and autoboxing. The
+				<classname>SimpleJdbcTemplate</classname> class is somewhat of a sop
+				to the syntactic-sugar-like features of Java 5, but as anyone who has
+				developed on Java 5 and then had to move back to developing on a
+				previous version of the JDK will know, those syntactic-sugar-like features
+				sure are nice.
+			</para>
+			<para>
+				The value-add of the <classname>SimpleJdbcTemplate</classname> class
+				in the area of syntactic-sugar is definitely best illustrated with a
+				<emphasis>'before and after'</emphasis> example. The following code
+				snippet shows first some data access code using the classic Spring
+				<classname>JdbcTemplate</classname>, followed immediately thereafter
+				by a code snippet that does the same job, only this time using the
+				<classname>SimpleJdbcTemplate</classname>.
+			</para>
+			<programlisting><lineannotation>// classic <classname>JdbcTemplate</classname>-style...</lineannotation><![CDATA[
+public Actor findActor(long id) {
+    String sql = "select id, first_name, last_name from T_ACTOR where id = ?";
+    
+    RowMapper mapper = new RowMapper() {
+    
+        public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Actor actor = new Actor();
+            actor.setid(rs.getLong(Long.valueOf(rs.getLong("id"))));
+            actor.setFirstName(rs.getString("first_name"));
+            actor.setLastName(rs.getString("last_name"));
+            return actor;
+        }
+    };
+    
+    ]]><lineannotation>// normally this would be dependency injected of course...</lineannotation><![CDATA[
+    JdbcTemplate jdbcTemplate = new JdbcTemplate(this.getDataSource());
+    
+    ]]><lineannotation>// notice the cast, and the wrapping up of the 'id' argument
+    // in an array, and the boxing of the 'id' argument as a reference type</lineannotation><![CDATA[
+    return (Actor) jdbcTemplate.queryForObject(sql, mapper, new Object[] {Long.valueOf(id)});
+}]]></programlisting>
+			<para>
+				Here is the same method, only this time using the
+				<classname>SimpleJdbcTemplate</classname>; notice how much 'cleaner'
+				the code is.
+			</para>
+			<programlisting><lineannotation>// <classname>SimpleJdbcTemplate</classname>-style...</lineannotation><![CDATA[
+public Actor findActor(long id) {
+    String sql = "select id, first_name, last_name from T_ACTOR where id = ?";
+
+    ParameterizedRowMapper<Actor> mapper = new ParameterizedRowMapper()<Actor> {
+    
+        ]]><lineannotation>// notice the return type (c.f. Java 5 covariant return types)</lineannotation><![CDATA[
+        public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Actor actor = new Actor();
+            actor.setid(rs.getLong(Long.valueOf(rs.getLong("id"))));
+            actor.setFirstName(rs.getString("first_name"));
+            actor.setLastName(rs.getString("last_name"));
+            return actor;
+        }
+    };
+
+    ]]><lineannotation>// again, normally this would be dependency injected of course...</lineannotation><![CDATA[
+    SimpleJdbcTemplate simpleJdbcTemplate = new SimpleJdbcTemplate(this.getDataSource());
+
+    return simpleJdbcTemplate.queryForObject(sql, mapper, id);
+}]]></programlisting>
 		</section>
 		<section>
 			<title><interfacename>DataSource</interfacename></title>
