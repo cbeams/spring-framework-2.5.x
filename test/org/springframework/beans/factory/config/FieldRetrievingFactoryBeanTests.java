@@ -94,13 +94,12 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		}
 	}
 
-// Commented out until the JIRA issue [SPR-1903] is resolved.
-//    public void testWithConstantOnClassWithPackageLevelVisibility() throws Exception {
-//        FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
-//        fr.setBeanName("org.springframework.beans.factory.PackageLevelVisibleBean.CONSTANT");
-//        fr.afterPropertiesSet();
-//        assertEquals("Wuby", fr.getObject());
-//    }
+	public void testWithConstantOnClassWithPackageLevelVisibility() throws Exception {
+		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
+		fr.setBeanName("org.springframework.beans.factory.PackageLevelVisibleBean.CONSTANT");
+		fr.afterPropertiesSet();
+		assertEquals("Wuby", fr.getObject());
+	}
 
 
 	private static class PublicFieldHolder {

@@ -172,6 +172,10 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, I
 		// try to get the exact method first
 		Class targetClass = (this.targetObject != null) ? this.targetObject.getClass() : this.targetClass;
 		this.fieldObject = targetClass.getField(this.targetField);
+
+		if(!this.fieldObject.isAccessible()) {
+			this.fieldObject.setAccessible(true);
+		}
 	}
 
 
