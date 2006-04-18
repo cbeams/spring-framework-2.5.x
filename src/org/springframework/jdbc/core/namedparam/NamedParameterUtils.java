@@ -22,9 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 /**
@@ -37,8 +34,6 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  */
 public abstract class NamedParameterUtils {
 
-	private static final Log logger = LogFactory.getLog(NamedParameterUtils.class);
-
 
 	/**
 	 * Count the occurrences of the character <code>placeholder</code> in an SQL string
@@ -46,10 +41,10 @@ public abstract class NamedParameterUtils {
 	 * appears within a literal -- surrounded by single or double quotes.  This method will
 	 * count traditional placeholders in the form of a question mark ('?') as well as
 	 * named parameters indicated with a leading ':' or '&'.
-	 * @param sql string to search in. Returns 0 if this is null
+	 * @param sql string to search in. Returns 0 if this is <code>null</code> 
 	 */
 	public static int countParameterPlaceholders(String sql) {
-		byte[] statement = (sql == null) ? new byte[0] : sql.getBytes();
+		byte[] statement = getBytesNullSafe(sql);
 		boolean withinQuotes = false;
 		Map namedParameters = new HashMap();
 		char currentQuote = '-';
@@ -114,7 +109,7 @@ public abstract class NamedParameterUtils {
 		Map namedParameters = new HashMap();
 		ParsedSql parsedSql = new ParsedSql(sql);
 
-		byte[] statement = (sql == null) ? new byte[0] : sql.getBytes();
+		byte[] statement = getBytesNullSafe(sql);
 		StringBuffer newSql = new StringBuffer();
 		boolean withinQuotes = false;
 		char currentQuote = '-';
@@ -174,88 +169,76 @@ public abstract class NamedParameterUtils {
 		return parsedSql;
 	}
 
-	/**
-	 * Parse the SQL statement and locate any placeholders or named parameters.
-	 * Named parameters are substituted for a JDBC placeholder and any select list
-	 * is expanded to the required number of placeholders.
-	 * <p>The parameter values passed in are used to determine the number of
-	 * placeholder to be used for a select list. Select lists should be limited
-	 * to 100 or fewer elements. A larger number of elements is not guaramteed to
-	 * be supported by the database and is strictly vendor-dependent.
-	 * @param sql the SQL statement
-	 * @param paramSource the source for named parameters
-	 */
-	public static String substituteNamedParameters(String sql, SqlParameterSource paramSource) {
-		byte[] statement = (sql != null ? sql.getBytes() : new byte[0]);
-		StringBuffer newSql = new StringBuffer();
-		boolean withinQuotes = false;
-		char currentQuote = '-';
+    /**
+     * Parse the SQL statement and locate any placeholders or named parameters.
+     * Named parameters are substituted for a JDBC placeholder and any select list
+     * is expanded to the required number of placeholders.
+     * <p>The parameter values passed in are used to determine the number of
+     * placeholder to be used for a select list. Select lists should be limited
+     * to 100 or fewer elements. A larger number of elements is not guaramteed to
+     * be supported by the database and is strictly vendor-dependent.
+     * @param sql the SQL statement
+     * @param paramSource the source for named parameters
+     */
+    public static String substituteNamedParameters(String sql, SqlParameterSource paramSource) {
+        byte[] statement = getBytesNullSafe(sql);
+        StringBuffer newSql = new StringBuffer();
+        boolean withinQuotes = false;
+        char currentQuote = '-';
 
-		int i = 0;
-		while (i < statement.length) {
-			if (withinQuotes) {
-				if (statement[i] == currentQuote) {
-					withinQuotes = false;
-					currentQuote = '-';
-				}
-				newSql.append((char) statement[i]);
-			}
-			else {
-				if (statement[i] == '"' || statement[i] == '\'') {
-					withinQuotes = true;
-					currentQuote = (char) statement[i];
-					newSql.append((char) statement[i]);
-				}
-				else {
-					if (statement[i] == ':' || statement[i] == '&') {
-						int j = i + 1;
-						while (j < statement.length && parameterNameContinues(statement, j)) {
-							j++;
-						}
-						if (j - i > 1) {
-							String paramName = sql.substring(i + 1, j);
-							if (paramSource != null && paramSource.hasValue(paramName)) {
-								Object value = paramSource.getValue(paramName);
-								if (value instanceof Collection) {
-									Collection entries = (Collection) value;
-									for (int k = 0; k < entries.size(); k++) {
-										if (k > 0) {
-											newSql.append(", ");
-										}
-										newSql.append("?");
-									}
-								}
-								else {
-									newSql.append("?");
-								}
-							}
-							else {
-								newSql.append("?");
-							}
-						}
-						i = j - 1;
-					}
-					else {
-						newSql.append((char) statement[i]);
-					}
-				}
-			}
-			i++;
-		}
-		return newSql.toString();
-	}
-
-	/**
-	 * Determine whether a parameter name continues at the current position,
-	 * that is, does not end delimited by any whitespace character yet.
-	 * @param statement the SQL statement
-	 * @param j the position within the statement
-	 */
-	private static boolean parameterNameContinues(byte[] statement, int j) {
-		return (statement[j] != ' ' && statement[j] != ',' && statement[j] != ')' &&
-				statement[j] != '"' && statement[j] != '\'' && statement[j] != '|' &&
-				statement[j] != ';' && statement[j] != '\n' && statement[j] != '\r');
-	}
+        int i = 0;
+        while (i < statement.length) {
+            if (withinQuotes) {
+                if (statement[i] == currentQuote) {
+                    withinQuotes = false;
+                    currentQuote = '-';
+                }
+                newSql.append((char) statement[i]);
+            }
+            else {
+                if (statement[i] == '"' || statement[i] == '\'') {
+                    withinQuotes = true;
+                    currentQuote = (char) statement[i];
+                    newSql.append((char) statement[i]);
+                }
+                else {
+                    if (statement[i] == ':' || statement[i] == '&') {
+                        int j = i + 1;
+                        while (j < statement.length && parameterNameContinues(statement, j)) {
+                            j++;
+                        }
+                        if (j - i > 1) {
+                            String paramName = sql.substring(i + 1, j);
+                            if (paramSource != null && paramSource.hasValue(paramName)) {
+                                Object value = paramSource.getValue(paramName);
+                                if (value instanceof Collection) {
+                                    Collection entries = (Collection) value;
+                                    for (int k = 0; k < entries.size(); k++) {
+                                        if (k > 0) {
+                                            newSql.append(", ");
+                                        }
+                                        newSql.append("?");
+                                    }
+                                }
+                                else {
+                                    newSql.append("?");
+                                }
+                            }
+                            else {
+                                newSql.append("?");
+                            }
+                        }
+                        i = j - 1;
+                    }
+                    else {
+                        newSql.append((char) statement[i]);
+                    }
+                }
+            }
+            i++;
+        }
+        return newSql.toString();
+    }
 
 	/**
 	 * Convert a Map of named parameter values to a corresponding array.
@@ -315,6 +298,23 @@ public abstract class NamedParameterUtils {
 			sqlTypes[i] = paramSource.getSqlType(paramNames[i]);
 		}
 		return sqlTypes;
+	}
+    
+
+    private static byte[] getBytesNullSafe(String sql) {
+        return (sql == null) ? new byte[0] : sql.getBytes();
+    }
+
+	/**
+	 * Determine whether a parameter name continues at the current position,
+	 * that is, does not end delimited by any whitespace character yet.
+	 * @param statement the SQL statement
+	 * @param j the position within the statement
+	 */
+	private static boolean parameterNameContinues(byte[] statement, int j) {
+		return (statement[j] != ' ' && statement[j] != ',' && statement[j] != ')' &&
+				statement[j] != '"' && statement[j] != '\'' && statement[j] != '|' &&
+				statement[j] != ';' && statement[j] != '\n' && statement[j] != '\r');
 	}
 
 }
