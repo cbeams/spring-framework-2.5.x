@@ -22,6 +22,7 @@ import java.util.Iterator;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.Assert;
+import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 
 /**
  * Provides methods to support various naming and other conventions used
@@ -121,4 +122,14 @@ public abstract class Conventions {
 		}
 	}
 
+	/**
+	 * Returns an attribute name qualified by the supplied enclosing {@link Class}. For example,
+	 * the attribute name '<code>foo</code>' qualified by {@link Class} '<code>com.myapp.SomeClass</code>'
+	 * would be '<code>com.myapp.SomeClass.foo</code>'
+	 */
+	public static String getQualifiedAttributeName(Class enclosingClass, String attributeName) {
+		Assert.notNull(enclosingClass, "'enclosingClass' cannot be null.");
+		Assert.notNull(attributeName, "'attributeName' cannot be null.");
+		return enclosingClass.getName() + "." + attributeName;
+	}
 }

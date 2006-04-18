@@ -64,4 +64,11 @@ public class ConventionsTests extends TestCase {
 		assertEquals("pointcutRef", Conventions.attributeNameToPropertyName("pointcut-ref"));
 		assertEquals("lookupOnStartup", Conventions.attributeNameToPropertyName("lookup-on-startup"));
 	}
+
+	public void testGetQualifiedAttributeName() throws Exception {
+		String baseName = "foo";
+		Class cls = String.class;
+		String desiredResult = "java.lang.String.foo";
+		assertEquals(desiredResult, Conventions.getQualifiedAttributeName(cls, baseName));
+	}
 }
