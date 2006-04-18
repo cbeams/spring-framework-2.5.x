@@ -38,6 +38,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.Conventions;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
@@ -103,7 +104,7 @@ public class ScriptFactoryPostProcessor
 	 */
 	public static final String INLINE_SCRIPT_PREFIX = "inline:";
 
-	public static final String REFRESH_CHECK_DELAY_ATTRIBUTE = ScriptFactoryPostProcessor.class.getName() + ".refreshCheckDelay";
+	public static final String REFRESH_CHECK_DELAY_ATTRIBUTE = Conventions.getQualifiedAttributeName(ScriptFactoryPostProcessor.class, "refreshCheckDelay");
 
 	private static final String SCRIPT_FACTORY_NAME_PREFIX = "scriptFactory.";
 

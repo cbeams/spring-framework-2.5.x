@@ -253,4 +253,36 @@ public class GroovyScriptFactoryTests extends TestCase {
 		}
 	}
 
+	public void testResourceScriptFromGroovyTag() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
+		Messenger messenger = (Messenger) ctx.getBean("messenger");
+		assertEquals("Hello World!", messenger.getMessage());
+		assertFalse(messenger instanceof Refreshable);
+	}
+
+	public void testInlineScriptFromGroovyTag() throws Exception {
+	  if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
+		Calculator calculator = (Calculator) ctx.getBean("calculator");
+		assertNotNull(calculator);
+		assertFalse(calculator instanceof Refreshable);
+	}
+
+	public void testRefreshableFromGroovyTag() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
+		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
+		assertEquals("Hello World!", messenger.getMessage());
+		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
+	}                                  
 }

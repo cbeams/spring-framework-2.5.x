@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<xsd:schema xmlns="http://www.springframework.org/schema/lang"
+						xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+						xmlns:beans="http://www.springframework.org/schema/beans"
+						targetNamespace="http://www.springframework.org/schema/lang"
+						elementFormDefault="qualified"
+						attributeFormDefault="unqualified">
+
+	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
+
+	<xsd:element name="groovy" type="simpleScriptType"/>
+	<xsd:element name="jruby" type="dynamicScriptType"/>
+	<xsd:element name="bsh" type="dynamicScriptType"/>
+
+	<!-- Script Types -->
+	<xsd:complexType name="simpleScriptType">
+		<xsd:complexContent>
+			<xsd:extension base="beans:identifiedType">
+				<xsd:sequence>
+					<xsd:element name="inline-script" minOccurs="0" maxOccurs="1"/>
+					<xsd:element name="property" type="beans:propertyType" minOccurs="0"/>
+				</xsd:sequence>
+				<xsd:attribute name="refresh-check-delay" type="xsd:long"/>
+				<xsd:attribute name="script-source" type="xsd:string"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="dynamicScriptType">
+		<xsd:complexContent>
+			<xsd:extension base="simpleScriptType">
+				<xsd:attribute name="script-interfaces" use="required"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+</xsd:schema>

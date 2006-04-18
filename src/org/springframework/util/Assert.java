@@ -325,6 +325,22 @@ public abstract class Assert {
 				"' must be an instance of '" + clazz.getName() + "'");
 	}
 
+	/**
+	 * Assert that the <code>superType.isAssignableFrom(subType)</code> is <code>true</code>.
+	 */
+	public static void isAssignableFrom(Class superType, Class subType) {
+		isAssignableFrom(superType, subType, "");
+	}
+
+	/**
+	 * Assert that the <code>superType.isAssignableFrom(subType)</code> is <code>true</code>.
+	 */
+	public static void isAssignableFrom(Class superType, Class subType, String message) {
+		Assert.notNull(superType, "'superType' cannot be null.");
+		Assert.notNull(subType, "'subType' cannot be null.");
+		Assert.isTrue(superType.isAssignableFrom(subType), message + "Type '" + subType.getName()
+						+ "' is not assignable to type '" + superType.getName() + "'");
+	}
 
 	/**
 	 * Assert a boolean expression, throwing <code>IllegalStateException</code>
