@@ -11,10 +11,10 @@
     <para>AspectJ provides a powerful, well thought out pointcut expression
     language.</para>
 
-    <para>As of the AspectJ 5, the AspectJ weaver has been split from the
+    <para>As of the AspectJ 5 release, the AspectJ weaver has been split from the
     <literal>ajc</literal> compiler, making it available to back a generic Spring
     AOP pointcut implementation. This
-    implementation--AspectJExpressionPointcut--is added to Spring in Spring
+    implementation - AspectJExpressionPointcut - is added to Spring in Spring
     2.0. This enables Spring AOP to work with AspectJ pointcut
     expressions.</para>
 
@@ -188,7 +188,7 @@ public void doubleArg(ProceedingJoinPoint pjp, int x) throws Throwable {
       <para>pertypewithin</para>
 
       <para>If you use a binding type that is not supported, Spring will
-      through an exception. Thus you cannot get unexpected semantics.</para>
+      throw an exception. Thus you cannot get unexpected semantics.</para>
 
       <para>TODO example of binding models</para>
     </sect2>
