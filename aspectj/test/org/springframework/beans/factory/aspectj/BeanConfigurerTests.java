@@ -58,13 +58,13 @@ public class BeanConfigurerTests extends TestCase {
 
 	public void testConfigurableWithImplicitBeanName() {
 		ShouldBeConfiguredBySpringUsingTypeNameAsBeanName myObject =
-			new ShouldBeConfiguredBySpringUsingTypeNameAsBeanName();
+				new ShouldBeConfiguredBySpringUsingTypeNameAsBeanName();
 		assertEquals("Rob", myObject.getName());
 	}
 
 	public void testConfigurableUsingAutowireByType() {
 		ShouldBeConfiguredBySpringUsingAutowireByType myObject =
-			new ShouldBeConfiguredBySpringUsingAutowireByType();
+				new ShouldBeConfiguredBySpringUsingAutowireByType();
 		assertNotNull(myObject.getFriend());
 		assertEquals("Ramnivas", myObject.getFriend().getName());
 	}
@@ -109,8 +109,8 @@ public class BeanConfigurerTests extends TestCase {
 		oos.close();
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		ObjectInputStream ois = new ObjectInputStream(bais);
-		ShouldBeConfiguredBySpring deserializedDomainObject = 
-			(ShouldBeConfiguredBySpring) ois.readObject();
+		ShouldBeConfiguredBySpring deserializedDomainObject =
+				(ShouldBeConfiguredBySpring) ois.readObject();
 		assertEquals("Dependency injected on deserialization","Rod",deserializedDomainObject.getName());
 	}
 	
