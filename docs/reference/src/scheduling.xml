@@ -210,7 +210,7 @@ public class ExampleJob extends QuartzJobBean {
   }
   
   public void run() {
-	]]><lineannotation>// iterate over all email addresses and archive them</lineannotation><![CDATA[
+    ]]><lineannotation>// iterate over all email addresses and archive them</lineannotation><![CDATA[
   }
 }]]></programlisting>
 			<para>
@@ -227,16 +227,16 @@ public class ExampleJob extends QuartzJobBean {
 </bean>
 
 <bean id="scheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
-    <!-- wait 10 seconds before starting repeated execution -->
+    ]]><lineannotation>&lt;!-- wait 10 seconds before starting repeated execution --&gt;</lineannotation><![CDATA[
     <property name="delay" value="10000" />
-    <!-- run every 50 seconds -->
+    ]]><lineannotation>&lt;!-- run every 50 seconds --&gt;</lineannotation><![CDATA[
     <property name="period" value="50000" />
     <property name="timerTask" ref="checkEmail" />
 </bean>]]></programlisting>
 			<para>
 				<emphasis>
 					Letting the task only run once can be done by changing the
-					<literal>period</literal> property to -1 (or some other	negative value).
+					<literal>period</literal> property to 0 (or a negative value).
 				</emphasis>
 			</para>
 		</section>
@@ -281,7 +281,7 @@ public class ExampleJob extends QuartzJobBean {
 			<programlisting><![CDATA[<bean id="timerFactory" class="org.springframework.scheduling.timer.TimerFactoryBean">
     <property name="scheduledTimerTasks">
         <list>
-			<!-- see the example above -->
+            ]]><lineannotation>&lt;!-- see the example above --&gt;</lineannotation><![CDATA[
             <ref bean="scheduledTask" />
         </list>
     </property>
