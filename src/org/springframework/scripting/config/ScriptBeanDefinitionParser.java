@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.scripting;
+package org.springframework.scripting.config;
+
+import java.util.List;
+
+import org.w3c.dom.Element;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -25,27 +29,24 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
+import org.springframework.scripting.ScriptFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.w3c.dom.Element;
-
-import java.util.List;
 
 /**
- * {@link BeanDefinitionParser} implementation for the '<code>&lt;lang:groovy/&gt;</code>',
- * '<code>&lt;lang:jruby/&gt;</code>' and '<code>&lt;lang:bsh/&gt;</code>' tags. Allows for
- * objects written using dynamic languages to be easily exposed with the
- * {@link org.springframework.beans.factory.BeanFactory}.
- * <p/>
- * The script for each object can be specified either as a reference to the {@link Resource}
+ * BeanDefinitionParser implementation for the '<code>&lt;lang:groovy/&gt;</code>',
+ * '<code>&lt;lang:jruby/&gt;</code>' and '<code>&lt;lang:bsh/&gt;</code>' tags.
+ * Allows for objects written using dynamic languages to be easily exposed with
+ * the {@link org.springframework.beans.factory.BeanFactory}.
+ *
+ * <p>The script for each object can be specified either as a reference to the Resource
  * containing it (using the '<code>script-source</code>' attribute) or inline in the XML configuration
  * itself (using the '<code>inline-script</code>' attribute.
- * <p/>
- * By default, dynamic objects created with these tags are <strong>not</strong> {@link Refreshable}.
+ *
+ * <p>By default, dynamic objects created with these tags are <strong>not</strong> refreshable.
  * To enable refreshing, specify the refresh check delay for each object (in milliseconds) using the
  * '<code>refresh-check-delay</code>' attribute.
- * <p/>
  *
  * @author Rob Harrop
  * @since 2.0
@@ -58,12 +59,6 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	 */
 	private static final String SCRIPT_FACTORY_POST_PROCESSOR_BEAN_NAME = ".scriptFactoryPostProcessor";
 
-	/**
-	 * The {@link ScriptFactory} class that this parser instance will create
-	 * {@link BeanDefinition BeanDefinitions} for.
-	 */
-	private final Class scriptFactoryClass;
-
 	private static final String SCRIPT_SOURCE_ATTRIBUTE = "script-source";
 
 	private static final String INLINE_SCRIPT_ELEMENT = "inline-script";
@@ -72,14 +67,23 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private static final String REFRESH_CHECK_DELAY_ATTRIBUTE = "refresh-check-delay";
 
+
+	/**
+	 * The {@link org.springframework.scripting.ScriptFactory} class that this parser instance will create
+	 * {@link BeanDefinition BeanDefinitions} for.
+	 */
+	private final Class scriptFactoryClass;
+
+
 	/**
 	 * Creates a new instance of this class that creates {@link BeanDefinition BeanDefinitions}
-	 * for the supplied {@link ScriptFactory} class.
+	 * for the supplied {@link org.springframework.scripting.ScriptFactory} class.
 	 */
 	public ScriptBeanDefinitionParser(Class scriptFactoryClass) {
 		Assert.isAssignableFrom(ScriptFactory.class, scriptFactoryClass);
 		this.scriptFactoryClass = scriptFactoryClass;
 	}
+
 
 	/**
 	 * Parses the dynamic object element and returns the resulting {@link BeanDefinition}.
@@ -87,27 +91,27 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	 */
 	protected BeanDefinition parseInternal(Element element, ParserContext parserContext) {
 
-		// resolve the script source
+		// Resolve the script source.
 		String value = resolveScriptSource(element, parserContext.getReaderContext());
 		if (value == null) {
 			return null;
 		}
 
-		// set up infrastructure
+		// Set up infrastructure.
 		registerScriptFactoryPostProcessorIfNecessary(parserContext.getRegistry());
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(this.scriptFactoryClass);
 
-		// attach any refresh metadata
+		// Attach any refresh metadata.
 		parseRefreshMetadata(element, beanDefinition);
 
-		// add constructor arg(s)
+		// Add constructor arguments.
 		ConstructorArgumentValues cav = beanDefinition.getConstructorArgumentValues();
 		cav.addIndexedArgumentValue(0, value);
 		if (element.hasAttribute(SCRIPT_INTERFACES_ATTRIBUTE)) {
 			cav.addIndexedArgumentValue(1, element.getAttribute(SCRIPT_INTERFACES_ATTRIBUTE));
 		}
 
-		// add any property definitions that need adding
+		// Add any property definitions that need adding.
 		MutablePropertyValues mutablePropertyValues = parserContext.getHelper().parsePropertyElements(element);
 		beanDefinition.setPropertyValues(mutablePropertyValues);
 
@@ -162,4 +166,5 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			registry.registerBeanDefinition(SCRIPT_FACTORY_POST_PROCESSOR_BEAN_NAME, beanDefinition);
 		}
 	}
+
 }

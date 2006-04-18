@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.scripting;
+package org.springframework.scripting.config;
 
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.scripting.bsh.BshScriptFactory;
@@ -32,4 +32,5 @@ public class LangNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionParser("jruby", new ScriptBeanDefinitionParser(JRubyScriptFactory.class));
 		registerBeanDefinitionParser("bsh", new ScriptBeanDefinitionParser(BshScriptFactory.class));
 	}
+
 }
