@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -46,6 +46,7 @@ import java.util.Map;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
+ * @author Rob Harrop
  * @author Erwin Vervaet
  * @since 1.1.2
  */
@@ -313,7 +314,7 @@ public abstract class Assert {
 	 * @param obj the object to check
 	 * @param message a message which will be prepended to the message produced by
 	 * the function itself, and which may be used to provide context. It should
-	 * normally end in a ":" or ". " so that the function generate message looks
+	 * normally end in a ": " or ". " so that the function generate message looks
 	 * ok when prepended to it.
 	 * @throws IllegalArgumentException if the object is not an instance of clazz
 	 * @see Class#isInstance
@@ -327,6 +328,11 @@ public abstract class Assert {
 
 	/**
 	 * Assert that the <code>superType.isAssignableFrom(subType)</code> is <code>true</code>.
+	 * <pre>
+	 * Assert.isAssignableFrom(Number.class, myClass);</pre>
+	 * @param superType the super type to check
+	 * @param subType the sub type to check
+	 * @throws IllegalArgumentException if the classes are not assignable
 	 */
 	public static void isAssignableFrom(Class superType, Class subType) {
 		isAssignableFrom(superType, subType, "");
@@ -334,13 +340,23 @@ public abstract class Assert {
 
 	/**
 	 * Assert that the <code>superType.isAssignableFrom(subType)</code> is <code>true</code>.
+	 * <pre>
+	 * Assert.isAssignableFrom(Number.class, myClass);</pre>
+	 * @param superType the super type to check
+	 * @param subType the sub type to check
+	 * @param message a message which will be prepended to the message produced by
+	 * the function itself, and which may be used to provide context. It should
+	 * normally end in a ": " or ". " so that the function generate message looks
+	 * ok when prepended to it.
+	 * @throws IllegalArgumentException if the classes are not assignable
 	 */
 	public static void isAssignableFrom(Class superType, Class subType, String message) {
-		Assert.notNull(superType, "'superType' cannot be null.");
-		Assert.notNull(subType, "'subType' cannot be null.");
-		Assert.isTrue(superType.isAssignableFrom(subType), message + "Type '" + subType.getName()
-						+ "' is not assignable to type '" + superType.getName() + "'");
+		Assert.notNull(superType, "superType cannot be null");
+		Assert.notNull(subType, "subType cannot be null");
+		Assert.isTrue(superType.isAssignableFrom(subType), message + "Type [" + subType.getName()
+						+ "] is not assignable to type [" + superType.getName() + "]");
 	}
+
 
 	/**
 	 * Assert a boolean expression, throwing <code>IllegalStateException</code>
