@@ -70,8 +70,7 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		try {
 			fr.afterPropertiesSet();
 		}
-		catch (IllegalArgumentException ex) {
-			// expected
+		catch (IllegalArgumentException expected) {
 		}
 	}
 
@@ -81,8 +80,7 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		try {
 			fr.afterPropertiesSet();
 		}
-		catch (IllegalArgumentException ex) {
-			// expected
+		catch (IllegalArgumentException expected) {
 		}
 	}
 
@@ -92,10 +90,17 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		try {
 			fr.afterPropertiesSet();
 		}
-		catch (IllegalArgumentException ex) {
-			// expected
+		catch (IllegalArgumentException expected) {
 		}
 	}
+
+// Commented out until the JIRA issue [SPR-1903] is resolved.
+//    public void testWithConstantOnClassWithPackageLevelVisibility() throws Exception {
+//        FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
+//        fr.setBeanName("org.springframework.beans.factory.PackageLevelVisibleBean.CONSTANT");
+//        fr.afterPropertiesSet();
+//        assertEquals("Wuby", fr.getObject());
+//    }
 
 
 	private static class PublicFieldHolder {
