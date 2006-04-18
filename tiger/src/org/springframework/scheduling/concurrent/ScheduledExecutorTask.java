@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * there is no point in a default for it.
  *
  * <p>The JDK 1.5 ScheduledExecutorService does not offer more sophisticated
- * scheduling options such as  cron expressions. Consider using Quartz for
+ * scheduling options such as cron expressions. Consider using Quartz for
  * such advanced needs.
  *
  * <p>Note that ScheduledExecutorService uses a Runnable instance that is
@@ -136,6 +136,7 @@ public class ScheduledExecutorTask {
 	 * <p>Note that the semantics of the period vary between fixed-rate
 	 * and fixed-delay execution.
 	 * @see #setFixedRate
+     * @see #isOneTimeTask() 
 	 */
 	public void setPeriod(long period) {
 		this.period = period;
@@ -182,5 +183,15 @@ public class ScheduledExecutorTask {
 	public boolean isFixedRate() {
 		return fixedRate;
 	}
+
+
+    /**
+     * Is this task only ever going to execute once?
+     * @return <code>true</code> if this task is only ever going to execute once.
+     * @see #getPeriod() 
+     */
+    public boolean isOneTimeTask() {
+        return this.period < 1;
+    }
 
 }
