@@ -48,7 +48,7 @@ import org.springframework.jms.support.destination.DynamicDestinationResolver;
  * "pubSubDomain" property. Point-to-Point (Queues) is the default domain.
  *
  * <p>The "pubSubDomain" property is an important setting due to the use of similar
- * but seperate class hierarchies in the JMS 1.0.2 API. JMS 1.1 provides a new
+ * but separate class hierarchies in the JMS 1.0.2 API. JMS 1.1 provides a new
  * domain-independent API that allows for easy mix-and-match use of Point-to-Point
  * and Publish/Subscribe domain.
  *
