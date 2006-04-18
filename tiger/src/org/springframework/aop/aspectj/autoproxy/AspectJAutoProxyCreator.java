@@ -16,8 +16,10 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +46,10 @@ import org.springframework.core.Ordered;
  * <p>Any AspectJ annotated classes will automatically be recognized, and their advice
  * applied if Spring AOP's proxy-based model is capable of applying it.
  * This covers method execution joinpoints.
+ * </p>
+ * 
+ * <p>If the <aop:include> element is used, only @AspectJ beans with names matched by
+ * an include pattern will be considered as defining aspects to use for Spring autoproxying</p>
  *
  * <p>Processing of Spring Advisors follows the rules established in {@link org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator}.
  *
@@ -58,6 +64,7 @@ public class AspectJAutoProxyCreator extends AspectJInvocationContextExposingAdv
 	private static final Log staticLogger = LogFactory.getLog(AspectJAutoProxyCreator.class);
 	private static final String ORDER_PROPERTY = "order"; 
 
+	private List<Pattern> includePatterns = null;
 	
 	/**
 	 * Look for AspectJ annotated aspect classes in the current bean factory,
@@ -78,6 +85,10 @@ public class AspectJAutoProxyCreator extends AspectJInvocationContextExposingAdv
 		String[] beanDefinitionNames = BeanFactoryUtils.beanNamesIncludingAncestors((ListableBeanFactory) beanFactory);		
 		
 		for (String beanName : beanDefinitionNames) {
+			if (!isIncluded(beanName)) {
+				continue;
+			}
+			
 			// We must be careful not to instantiate beans eagerly as in this
 			// case they would be cached by the Spring container but would not
 			// have been weaved
@@ -114,6 +125,32 @@ public class AspectJAutoProxyCreator extends AspectJInvocationContextExposingAdv
 			}
 		}
 		return advisors;
+	}
+	
+	public void setIncludePatterns(List<String> patterns) {
+		this.includePatterns = new ArrayList<Pattern>(patterns.size());
+		for(String patternText : patterns) {
+			this.includePatterns.add(Pattern.compile(patternText));
+		}
+	}
+	
+	/** 
+	 * If no &lt;aop:include&gt; elements were used then includePatterns will be
+	 * null and all beans are included. If includePatterns is non-null, then one
+	 * of the patterns must match.
+	 */
+	private boolean isIncluded(String beanName) {
+		if (this.includePatterns == null) {
+			return true;
+		}
+		else {
+			for(Pattern pattern : this.includePatterns) {
+				if (pattern.matcher(beanName).matches()) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 	// TODO: consider creating intermediate OrderedPointcutAdvisor interface between

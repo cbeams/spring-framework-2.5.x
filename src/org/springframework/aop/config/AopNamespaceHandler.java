@@ -16,9 +16,16 @@
 
 package org.springframework.aop.config;
 
-import org.w3c.dom.Element;
+import java.util.LinkedList;
+import java.util.List;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import org.apache.xerces.dom.DeferredNode;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
@@ -77,7 +84,25 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			NamespaceHandlerUtils.registerAtAspectJAutoProxyCreatorIfNecessary(parserContext.getRegistry());
+			if (element.hasChildNodes()) {
+				addIncludePatterns(element, parserContext.getRegistry());
+			}
 			return null;
+		}
+		
+		private void addIncludePatterns(Element element, BeanDefinitionRegistry registry) {
+			BeanDefinition beanDef = registry.getBeanDefinition(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+			List includePatterns = new LinkedList();
+			NodeList childNodes = element.getChildNodes();
+			for(int i = 0; i < childNodes.getLength(); i++) {
+				Node node = childNodes.item(i);
+				if (node instanceof Element) {
+					Element include = (Element) node;
+					String patternText = include.getAttribute("name");
+					includePatterns.add(patternText);
+				}
+			}
+			beanDef.getPropertyValues().addPropertyValue("includePatterns", includePatterns);
 		}
 	}
 

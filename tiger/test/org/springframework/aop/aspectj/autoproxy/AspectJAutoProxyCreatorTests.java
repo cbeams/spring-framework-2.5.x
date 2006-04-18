@@ -179,6 +179,15 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertTrue(aspectInstance.getLastMethodEntered().indexOf("TestBean.getAge())") != 0);		
 	}
 
+	public void testIncludeMechanism() {
+		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
+		"/org/springframework/aop/aspectj/autoproxy/usesInclude.xml");
+		ITestBean adrian = (ITestBean) bf.getBean("adrian");
+		
+		assertTrue(AopUtils.isAopProxy(adrian));
+		assertEquals(68, adrian.getAge());
+	}
+	
 	private void testPrototype(ITestBean adrian1, int start) {
 		assertTrue(AopUtils.isAopProxy(adrian1));
 		//TwoAdviceAspect twoAdviceAspect = (TwoAdviceAspect) bf.getBean(TwoAdviceAspect.class.getName());

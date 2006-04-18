@@ -37,9 +37,11 @@
 	</xsd:element>
 	
 	<xsd:element name="aspectj-autoproxy">
-		<xsd:simpleType>
-			<xsd:restriction base="xsd:string"/>
-		</xsd:simpleType>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="include" type="includeType" minOccurs="0" maxOccurs="unbounded"/>
+			</xsd:sequence>
+		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:complexType name="aspectType">
@@ -59,6 +61,10 @@
 		</xsd:sequence>
 		<xsd:attribute name="id" type="xsd:ID"/>
 		<xsd:attribute name="ref" type="xsd:string"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="includeType">
+	  <xsd:attribute name="name" type="xsd:string"/>
 	</xsd:complexType>
 
 	<xsd:complexType name="pointcutType">
