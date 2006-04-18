@@ -26,17 +26,20 @@ import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.util.Assert;
 
 /**
  * This class provides basic set of JDBC operations allowing the use of
  * named parameters rather than the traditional '?' placeholders.
  *
- * <p>It delegates to the JdbcTemplate once the substitution from named parameters
- * to JDBC style '?' placeholders is done at execution time. It also allows for
- * expanding a List of values to the appropriate number of placeholders.
+ * <p>It delegates to a wrapped {@link #getJdbcOperations() JdbcTemplate} once
+ * the substitution from named parameters to JDBC style '?' placeholders is done
+ * at execution time. It also allows for expanding a {@link java.util.List} of
+ * values to the appropriate number of placeholders.
  *
- * <p>The underlying JdbcTemplate is exposed to allow for convenient access
- * to the traditional JdbcTemplate methods.
+ * <p>The underlying {@link org.springframework.jdbc.core.JdbcTemplate} is
+ * exposed to allow for convenient access to the traditional
+ * {@link org.springframework.jdbc.core.JdbcTemplate} methods.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -51,19 +54,23 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 
     /**
-     * Create a new NamedParameterJdbcTemplate for the given DataSource.
-     * <p>Creates a classic Spring JdbcTemplate and wraps it.
-     * @param dataSource the JDBC DataSource to access
+     * Create a new NamedParameterJdbcTemplate for the given {@link DataSource}.
+     * <p>Creates a classic Spring {@link org.springframework.jdbc.core.JdbcTemplate} and wraps it.
+     * @param dataSource the JDBC {@link DataSource} to access
+	 * @throws IllegalArgumentException if the given {@link DataSource} is <code>null</code>
      */
     public NamedParameterJdbcTemplate(DataSource dataSource) {
+        Assert.notNull(dataSource, "The [dataSource] argument cannot be null.");
         this.classicJdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     /**
-     * Create a new SimpleJdbcTemplate for the given classic Spring JdbcTemplate.
-     * @param classicJdbcTemplate the classic Spring JdbcTemplate to wrap
+     * Create a new SimpleJdbcTemplate for the given classic Spring {@link org.springframework.jdbc.core.JdbcTemplate}.
+     * @param classicJdbcTemplate the classic Spring {@link org.springframework.jdbc.core.JdbcTemplate} to wrap
+	 * @throws IllegalArgumentException if the given {@link org.springframework.jdbc.core.JdbcTemplate} is <code>null</code>
      */
     public NamedParameterJdbcTemplate(JdbcOperations classicJdbcTemplate) {
+        Assert.notNull(classicJdbcTemplate, "The [classicJdbcTemplate] argument cannot be null.");
         this.classicJdbcTemplate = classicJdbcTemplate;
     }
 
