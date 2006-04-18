@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,22 +32,23 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 /**
- * FactoryBean that sets up a JDK 1.5 ScheduledExecutorService
- * (by default: ScheduledThreadPoolExecutor as implementation)
+ * {@link FactoryBean} that sets up a JDK 1.5 {@link ScheduledExecutorService}
+ * (by default: {@link ScheduledThreadPoolExecutor} as implementation)
  * and exposes it for bean references.
  *
- * <p>Allows for registration of ScheduledExecutorTasks, automatically starting
- * the ScheduledExecutorService on initialization and cancelling it on
- * destruction of the context. In scenarios that just require static
+ * <p>Allows for registration of {@link ScheduledExecutorTask ScheduledExecutorTasks},
+ * automatically starting the {@link ScheduledExecutorService} on initialization and
+ * cancelling it on destruction of the context. In scenarios that just require static
  * registration of tasks at startup, there is no need to access the
- * ScheduledExecutorService instance itself in application code.
+ * {@link ScheduledExecutorService} instance itself in application code.
  *
- * <p>Note that ScheduledExecutorService uses a Runnable instance that is
- * shared between repeated executions, in contrast to Quartz which
+ * <p>Note that {@link ScheduledExecutorService} uses a {@link Runnable} instance
+ * that is shared between repeated executions, in contrast to Quartz which
  * instantiates a new Job for each execution.
  *
- * <p>This is the direct analogon of the TimerFactoryBean class for
- * the JDK 1.3 Timer mechanism.
+ * <p>This class is the direct analogue of the
+ * {@link org.springframework.scheduling.timer.TimerFactoryBean} class for
+ * the JDK 1.3 {@link java.util.Timer} mechanism.
  *
  * @author Juergen Hoeller
  * @since 2.0
