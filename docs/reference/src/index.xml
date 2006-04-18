@@ -3,6 +3,7 @@
 [
 <!ENTITY overview			SYSTEM "overview.xml">
 <!ENTITY background			SYSTEM "background.xml">
+<!ENTITY whats-new-in-2.0   SYSTEM "new-in-2.0.xml">
 <!ENTITY beans				SYSTEM "beans.xml">
 <!ENTITY resources			SYSTEM "resources.xml">
 <!ENTITY validation			SYSTEM "validation.xml">
@@ -17,6 +18,7 @@
 <!ENTITY mvc				SYSTEM "mvc.xml">
 <!ENTITY views				SYSTEM "views.xml">
 <!ENTITY webintegration		SYSTEM "webintegration.xml">
+<!ENTITY portlet            SYSTEM "portlet.xml">
 <!ENTITY remoting			SYSTEM "remoting.xml">
 <!ENTITY ejb				SYSTEM "ejb.xml">
 <!ENTITY jms				SYSTEM "jms.xml">
@@ -26,6 +28,8 @@
 <!ENTITY scheduling			SYSTEM "scheduling.xml">
 <!ENTITY testing			SYSTEM "testing.xml">
 <!ENTITY scripting			SYSTEM "scripting.xml">
+<!ENTITY dynamic-languages   SYSTEM "dynamic-languages.xml">
+<!ENTITY schema-beans       SYSTEM "spring-beans.xsd.xml">
 <!ENTITY dtd				SYSTEM "dtd.xml">
 <!ENTITY spring.tld         SYSTEM "spring.tld.xml">
 <!ENTITY spring-form.tld    SYSTEM "spring-form.tld.xml">
@@ -80,6 +84,10 @@
 				<surname>Vervaet</surname>
 			</author>
 			<author>
+				<firstname>Portia</firstname>
+				<surname>Tung</surname>
+			</author>
+			<author>
 				<firstname>Rick</firstname>
 				<surname>Evans</surname>
 			</author>
@@ -90,32 +98,190 @@
 			Copyright Notice, whether distributed in print or electronically.
 		</legalnotice>
 	</bookinfo>
-    <toc/>
+	<!-- front matter -->
+    <toc />
 	&overview;
 	&background;
-	&beans;
-	&resources;
-	&validation;
-	&metadata;
-	&aop;
-	&ataspectj;
-	&aspectj;
-	&transaction;
-	&testing;
-	&dao;
-	&jdbc;
-	&orm;
-	&mvc;
-	&views;
-	&webintegration;
-	&remoting;
-	&ejb;
-	&jms;
-	&jmx;
-	&cci;
-	&mail;
-	&scheduling;
-	&scripting;
+	&whats-new-in-2.0;
+	<part>
+		<title>Core Technologies</title>
+		<partintro>
+			<para>
+				This initial part of the reference documentation covers all of those
+				technologies that are absolutely integral to the Spring Framework.
+			</para>
+			<para>
+				Foremost amongst these is the Spring Framework's Inversion of Control (IoC)
+				container.
+			</para>
+			<para>
+				A thorough treatment of the Spring Framework's IoC container is closely
+				followed by comprehensive coverage of Spring's Aspect-Oriented Programming (AOP)
+				technologies. The Spring Framework has its own AOP framework, which is
+				conceptually easy to understand, and which (successfully) addresses the 80%
+				sweet spot of AOP requirements in Java enterprise programming.
+			</para>
+			<itemizedlist>
+				<listitem>
+					<xref linkend="beans" />
+				</listitem>
+				<listitem>
+					<xref linkend="resources" />
+				</listitem>
+				<listitem>
+					<xref linkend="aop" />
+				</listitem>
+				<listitem>
+					<xref linkend="validation" />
+				</listitem>
+			</itemizedlist>
+		</partintro>
+		&beans;
+		&resources;
+		&validation;
+		&aop;
+	</part>
+	<part>
+		<title>Middle Tier Data Access</title>
+		<partintro>
+			<para>
+				This part of the reference documentation is concerned with the middle tier,
+				and specifically the data access responsibilities of said tier.
+			</para>
+			<para>
+				Spring's comprehensive transaction management support is covered in some detail,
+				followed by thorough coverage of the various middle tier data access frameworks
+				and technologies that the Spring Framework integrates with.
+			</para>
+			<itemizedlist>
+				<listitem>
+					<xref linkend="transaction" />
+				</listitem>
+				<listitem>
+					<xref linkend="dao" />
+				</listitem>
+				<listitem>
+					<xref linkend="jdbc" />
+				</listitem>
+				<listitem>
+					<xref linkend="orm" />
+				</listitem>
+				<listitem>
+					[TODO : link to the JPA section]
+				</listitem>
+			</itemizedlist>
+		</partintro>
+		&transaction;
+		&dao;
+		&jdbc;
+		&orm;
+	</part>	
+	<part>
+		<title>The Web</title>
+		<partintro>
+			<para>
+				This part of the reference documentation covers the Spring Framework's
+				support for the presentation tier (and specifically web-based presentation
+				tiers).
+			</para>
+			<para>
+				The Spring Framework's own web framework, <link linkend="mvc">Spring MVC</link>,
+				is coevered in the first couple of chapters. A number of the remaining chapters in
+				this part of the reference documentation are concerned with the Spring Framework's
+				integration with other web technologies, including as other web frameworks such as
+				<link linkend="struts">Struts</link> and <link linkend="jsf">JSF</link> (to name
+				but a few).
+			</para>
+			<para>
+				This section concludes with coverage of Spring's
+				<link linkend="portlet">portlet framework</link>.
+			</para>
+			<itemizedlist>
+				<listitem>
+					<xref linkend="mvc" />
+				</listitem>
+				<listitem>
+					<xref linkend="view" />
+				</listitem>
+				<listitem>
+					<xref linkend="webintegration" />
+				</listitem>
+				<listitem>
+					<xref linkend="portlet" />
+				</listitem>
+			</itemizedlist>
+		</partintro>
+		&mvc;
+		&views;
+		&webintegration;
+		&portlet;
+	</part>
+	<part>
+		<title>Integration</title>
+		<partintro>
+			<para>
+				This final part of the reference documentation covers the Spring Framework's
+				integration with a number of J2EE (and related) technologies.
+			</para>
+			<para>
+				Coverage of Spring's integration with AspectJ (currently the richest - in
+				terms of features - and certainly most mature AOP implementation in the
+				Java enterprise space) is also provided.
+			</para>
+			<itemizedlist>
+				<listitem>
+					<xref linkend="ataspectj" />
+				</listitem>
+				<listitem>
+					<xref linkend="aspectj" />
+				</listitem>
+				<listitem>
+					<xref linkend="remoting" />
+				</listitem>
+				<listitem>
+					<xref linkend="ejb" />
+				</listitem>
+				<listitem>
+					<xref linkend="jms" />
+				</listitem>
+				<listitem>
+					<xref linkend="jmx" />
+				</listitem>
+				<listitem>
+					<xref linkend="cci" />
+				</listitem>
+				<listitem>
+					<xref linkend="mail" />
+				</listitem>
+				<listitem>
+					<xref linkend="scheduling" />
+				</listitem>
+				<listitem>
+					<xref linkend="dynamic-language" />
+				</listitem>
+				<listitem>
+					<xref linkend="testing" />
+				</listitem>
+				<listitem>
+					<xref linkend="metadata" />
+				</listitem>
+			</itemizedlist>
+		</partintro>
+		&ataspectj;
+		&aspectj;
+		&remoting;
+		&ejb;
+		&jms;
+		&jmx;
+		&cci;
+		&mail;
+		&scheduling;
+		&dynamic-languages;
+		&testing;
+		&metadata;
+	</part>
+	<!-- back matter -->
+	&schema-beans;
 	&dtd;
 	&spring.tld;
 	&spring-form.tld;
