@@ -113,7 +113,7 @@ public interface BeanDefinition extends AttributeAccessor {
 
 	/**
 	 * Get the role hint for this <code>BeanDefinition</code>. The role hint
-	 * provides tool with an indication of the importance of a particular
+	 * provides tools with an indication of the importance of a particular
 	 * <code>BeanDefinition</code>.
 	 * @see #ROLE_APPLICATION
 	 * @see #ROLE_INFRASTRUCTURE
