@@ -584,7 +584,7 @@ public class XmlBeanDefinitionParserHelper {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && PROPERTY_ELEMENT.equals(node.getNodeName())) {
+			if (node instanceof Element && DomUtils.nodeNameEquals(node, PROPERTY_ELEMENT)) {
 				parsePropertyElement((Element) node, pvs);
 			}
 		}

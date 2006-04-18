@@ -199,13 +199,13 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private void parseAspect(Element aspectElement, BeanDefinitionRegistry registry, ParseContext parseContext) {
 		String aspectName = aspectElement.getAttribute(REF);
 
-		List pointcuts = DomUtils.getChildElementsByTagName(aspectElement, POINTCUT, true);
+		List pointcuts = DomUtils.getChildElementsByTagName(aspectElement, POINTCUT);
 		for (int i = 0; i < pointcuts.size(); i++) {
 			Element pointcutElement = (Element) pointcuts.get(i);
 			parsePointcut(pointcutElement, registry,true);
 		}
 
-		List declareParents = DomUtils.getChildElementsByTagName(aspectElement, DECLARE_PARENTS, true);
+		List declareParents = DomUtils.getChildElementsByTagName(aspectElement, DECLARE_PARENTS);
 		for (int i = METHOD_INDEX; i < declareParents.size(); i++) {
 			Element declareParentsElement = (Element) declareParents.get(i);
 			parseDeclareParents(aspectName, declareParentsElement, new BeanDefinitionRegistryBuilder(registry), parseContext);

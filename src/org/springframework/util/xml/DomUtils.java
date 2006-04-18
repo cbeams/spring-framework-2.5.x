@@ -24,6 +24,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.EntityReference;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.CharacterData;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Convenience methods for working with the DOM API,
@@ -49,30 +52,11 @@ public abstract class DomUtils {
 	 * @see org.w3c.dom.Element#getElementsByTagName
 	 */
 	public static List getChildElementsByTagName(Element ele, String childEleName) {
-		return getChildElementsByTagName(ele, childEleName, false);
-	}
-
-	/**
-	 * Retrieve all child elements of the given DOM element that match
-	 * the given element name. Only look at the direct child level of the
-	 * given element; do not go into further depth (in contrast to the
-	 * DOM API's <code>getElementsByTagName</code> method).
-	 * <p/>Can select whether or not to compare against the local name of
-	 * the {@link org.w3c.dom.Element}
-	 * @param ele the DOM element to analyze
-	 * @param childEleName the child element name to look for
-	 * @param localName whether to compare against the local node name
-	 * @return a List of child <code>org.w3c.dom.Element</code> instances
-	 * @see org.w3c.dom.Element
-	 * @see org.w3c.dom.Element#getElementsByTagName
-	 */
-	public static List getChildElementsByTagName(Element ele, String childEleName, boolean localName) {
 		NodeList nl = ele.getChildNodes();
 		List childEles = new ArrayList();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			String name = (localName) ? node.getLocalName() : node.getNodeName();
-			if (node instanceof Element && childEleName.equals(name)) {
+			if (node instanceof Element && nodeNameEquals(node, childEleName)) {
 				childEles.add(node);
 			}
 		}
@@ -84,16 +68,16 @@ public abstract class DomUtils {
 	 * ignoring XML comments.
 	 * <p>Appends all CharacterData nodes and EntityReference nodes
 	 * into a single String value, excluding Comment nodes.
-	 * @see org.w3c.dom.CharacterData
-	 * @see org.w3c.dom.EntityReference
-	 * @see org.w3c.dom.Comment
+	 * @see CharacterData
+	 * @see EntityReference
+	 * @see Comment
 	 */
 	public static String getTextValue(Element valueEle) {
 		StringBuffer value = new StringBuffer();
 		NodeList nl = valueEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node item = nl.item(i);
-			if ((item instanceof org.w3c.dom.CharacterData && !(item instanceof Comment)) ||
+			if ((item instanceof CharacterData && !(item instanceof Comment)) ||
 					item instanceof EntityReference) {
 				value.append(item.getNodeValue());
 			}
@@ -101,4 +85,14 @@ public abstract class DomUtils {
 		return value.toString();
 	}
 
+	/**
+	 * Namespace-aware equals comparison. Returns <code>true</code> if either
+	 * {@link Node#getLocalName} or {@link Node#getNodeName} equals <code>desiredName</code>,
+	 * otherwise returns <code>false</code>.
+	 */
+	public static boolean nodeNameEquals(Node node, String desiredName) {
+		Assert.notNull(node, "'node' cannot be null.");
+		Assert.notNull(desiredName, "'desiredName' cannot be null.");
+		return desiredName.equals(node.getNodeName()) || desiredName.equals(node.getLocalName());
+	}
 }

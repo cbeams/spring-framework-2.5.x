@@ -17,35 +17,20 @@
 package org.springframework.beans.factory.xml;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
 /**
  * @author Rob Harrop
  */
-public abstract class AbstractSingleBeanDefinitionParser implements BeanDefinitionParser {
+public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	public static final String ID_ATTRIBUTE = "id";
 
-	public final BeanDefinition parse(Element element, ParserContext parserContext) {
+	protected final BeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder.rootBeanDefinition(getBeanClass(element));
 		doParse(element, definitionBuilder);
-		BeanDefinition definition = definitionBuilder.getBeanDefinition();
-
-		String id = element.getAttribute(ID_ATTRIBUTE);
-		if (StringUtils.hasText(id)) {
-			BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
-			BeanDefinitionReaderUtils.registerBeanDefinition(holder, parserContext.getRegistry());
-			parserContext.getReaderContext().fireComponentRegistered(new BeanComponentDefinition(holder));
-		} else if(!parserContext.isNested()) {
-			throw new IllegalArgumentException("Attribute '" + ID_ATTRIBUTE + "' is required for element '"
-							+ element.getLocalName() + "' when used as a top-level tag.");
-		}
-		return definition;
+		return definitionBuilder.getBeanDefinition();
 	}
 
 	protected abstract Class getBeanClass(Element element);

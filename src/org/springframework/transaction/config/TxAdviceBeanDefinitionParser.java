@@ -66,7 +66,7 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 		// set the transaction manager property
 		builder.addPropertyReference(TxNamespaceHandler.TRANSACTION_MANAGER_PROPERTY, element.getAttribute(TxNamespaceHandler.TRANSACTION_MANAGER_ATTRIBUTE));
 
-		List txAttributes = DomUtils.getChildElementsByTagName(element, ATTRIBUTES, true);
+		List txAttributes = DomUtils.getChildElementsByTagName(element, ATTRIBUTES);
 
 		if (txAttributes.size() > 1) {
 			throw new IllegalStateException("Element 'attributes' is allowed at most once inside element 'advice'");
@@ -84,7 +84,7 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 	}
 
 	private void parseAttributes(Element attributesElement, BeanDefinitionBuilder builder) {
-		List methods = DomUtils.getChildElementsByTagName(attributesElement, "method", true);
+		List methods = DomUtils.getChildElementsByTagName(attributesElement, "method");
 		Map transactionAttributeMap = new HashMap(methods.size());
 
 		for (int i = 0; i < methods.size(); i++) {
