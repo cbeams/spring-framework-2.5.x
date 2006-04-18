@@ -2259,4 +2259,11 @@
       </sect3>
     </sect2>
   </sect1>
+
+  <sect1 id="orm-jpa">
+    <title>JPA</title>
+    <para>
+		...
+    </para>
+  </sect1>
 </chapter>

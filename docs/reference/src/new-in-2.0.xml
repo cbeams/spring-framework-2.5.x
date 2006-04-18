@@ -158,7 +158,7 @@
 			</para>
 			<para>
 				If you are interested in using a JPA-implementation as the backbone of
-				your persistence layer, the chapter entitled <xref linkend="jpa"/> is
+				your persistence layer, the section entitled <xref linkend="orm-jpa"/> is
 				dedicated to detailing Spring's support and value-add in this area.
 			</para>
 		</section>
