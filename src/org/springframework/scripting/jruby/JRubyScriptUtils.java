@@ -22,6 +22,7 @@ import java.lang.reflect.Proxy;
 
 import org.jruby.Ruby;
 import org.jruby.RubyNil;
+import org.jruby.IRuby;
 import org.jruby.exceptions.JumpException;
 import org.jruby.javasupport.JavaUtil;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -47,7 +48,7 @@ public abstract class JRubyScriptUtils {
 	 * @throws JumpException in case of JRuby parsing failure
 	 */
 	public static Object createJRubyObject(String scriptSource, Class[] interfaces) throws JumpException {
-		Ruby ruby = Ruby.getDefaultInstance();
+		IRuby ruby = Ruby.getDefaultInstance();
 		IRubyObject rubyObject = ruby.evalScript(scriptSource);
 		if(rubyObject instanceof RubyNil) {
 			throw new ScriptCompilationException("Compilation of JRuby script returned '" + rubyObject + "'");
@@ -64,9 +65,9 @@ public abstract class JRubyScriptUtils {
 
 		private final IRubyObject rubyObject;
 
-		private final Ruby ruby;
+		private final IRuby ruby;
 
-		public RubyObjectInvocationHandler(IRubyObject rubyObject, Ruby ruby) {
+		public RubyObjectInvocationHandler(IRubyObject rubyObject, IRuby ruby) {
 			this.rubyObject = rubyObject;
 			this.ruby = ruby;
 		}
