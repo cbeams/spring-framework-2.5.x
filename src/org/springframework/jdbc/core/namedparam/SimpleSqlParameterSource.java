@@ -20,19 +20,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * SqlParameterSource implementation that holds a given set of parameters.
+ * {@link SqlParameterSource} implementation that holds a given set of parameters.
  *
  * <p>This class is intended for passing in a simple set of parameter values
- * to methods of the NamedParameterJdbcTemplate class.
+ * to the methods of the {@link NamedParameterJdbcTemplate} class.
  *
  * <p>The <code>addValue</code> methods on this class will make adding several
- * values easier. The methods return a reference to the SimpleSqlParameterSource
+ * values easier. The methods return a reference to the {@link SimpleSqlParameterSource} 
  * itself, so you can chain several method calls together within a single statement.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 2.0
- * @see #addValue
+ * @see #addValue(String, Object) 
+ * @see #addValue(String, Object, int) 
  * @see #registerSqlType
  * @see NamedParameterJdbcTemplate
  */
@@ -41,21 +42,35 @@ public class SimpleSqlParameterSource extends AbstractSqlParameterSource {
 	private final Map parameterValues = new HashMap();
 
 
-	/**
-	 * Create an empty SimpleSqlParameterSource,
-	 * with values to be added via <code>addValue</code>.
-	 * @see #addValue
-	 */
+    /**
+     * Create an empty SimpleSqlParameterSource,
+     * with values to be added via <code>addValue</code>.
+     * @see #addValue(String, Object)
+     */
 	public SimpleSqlParameterSource() {
 	}
 
-	/**
-	 * Create a new SimpleSqlParameterSource based on a Map.
-	 * @param paramMap a Map holding existing parameter values
-	 */
-	public SimpleSqlParameterSource(Map paramMap) {
-		this.parameterValues.putAll(paramMap);
+    /**
+     * Create a new SimpleSqlParameterSource, with one value
+     * comprised of the supplied arguments.
+	 * @param paramName the name of the parameter
+	 * @param value the value of the parameter
+     * @see #addValue(String, Object)
+     */
+	public SimpleSqlParameterSource(String paramName, Object value) {
+        this.addValue(paramName, value);
 	}
+
+    /**
+     * Create a new SimpleSqlParameterSource based on a Map.
+     * @param parameterValues a Map holding existing parameter values (can be <code>null</code> -
+     * in which case no {@link Exception will be thrown} and the state of this object will not change) 
+     */
+	public SimpleSqlParameterSource(Map parameterValues) {
+        if (parameterValues != null) {
+            this.parameterValues.putAll(parameterValues);
+        }
+    }
 
 
 	/**
@@ -90,7 +105,7 @@ public class SimpleSqlParameterSource extends AbstractSqlParameterSource {
 	}
 
 	public Object getValue(String paramName) {
-		if (!this.parameterValues.containsKey(paramName)) {
+		if (!hasValue(paramName)) {
 			throw new IllegalArgumentException("No value registered for key '" + paramName + "'");
 		}
 		return this.parameterValues.get(paramName);
