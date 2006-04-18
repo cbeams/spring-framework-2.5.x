@@ -2362,8 +2362,11 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
   <sect1>
     <title>Further reading and resources</title>
 
-    <para>I recommend the excellent <emphasis>AspectJ in Action</emphasis> by
-    Ramnivas Laddad (Manning, 2003) for an introduction to AOP.</para>
+    <para>
+		The excellent <emphasis>AspectJ in Action</emphasis> by Ramnivas Laddad (Manning, 2003)
+		comes highly recommended as an introduction to AOP; the focus of the book is on
+		AspectJ, but a lot of general AOP themes are explored in some depth.
+    </para>
 
     <para>Please refer to the Spring sample applications for further examples
     of Spring AOP:</para>
@@ -2371,7 +2374,7 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
     <itemizedlist>
       <listitem>
         <para>The JPetStore's default configuration illustrates the use of the
-        TransactionProxyFactoryBean for declarative transaction
+        <classname>TransactionProxyFactoryBean</classname> for declarative transaction
         management</para>
       </listitem>
 
@@ -2382,8 +2385,10 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
       </listitem>
     </itemizedlist>
 
-    <para>If you are interested in more advanced capabilities of Spring AOP,
-    take a look at the test suite. The test coverage is over 90%, and this
-    illustrates advanced features not discussed in this document.</para>
+    <para>
+		Spring also has excellent integration with <emphasis>'the'</emphasis> Java AOP
+		framework, AspectJ; please do see the chapters entitled <xref linkend="aspectj"/>
+		and <xref linkend="ataspectj"/> for further details.
+    </para>
   </sect1>
 </chapter>
