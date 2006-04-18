@@ -48,7 +48,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Actual MessageListener execution happens in separate threads that are
  * created through Spring's TaskExecutor abstraction. By default, the appropriate
- * number of threads gets created on startup, according to the "concurrentConsumers"
+ * number of threads are created on startup, according to the "concurrentConsumers"
  * setting. Specify an alternative TaskExecutor to integrate with an existing
  * thread pool facility, for example.
  *
