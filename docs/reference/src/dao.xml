@@ -105,6 +105,16 @@
 					subclasses.
 				</para>
 			</listitem>
+			<listitem>
+				<para>
+					<classname>JpaDaoSupport</classname> - super class for JPA data
+					access objects. Requires a <interfacename>EntityManagerFactory</interfacename>
+					to be provided; in turn, this class provides a 
+					<classname>JpaTemplate</classname> instance initialized from the
+					supplied <interfacename>EntityManagerFactory</interfacename> to
+					subclasses.
+				</para>
+			</listitem>
 		</itemizedlist>
 	</section>
 </chapter>
