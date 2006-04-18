@@ -85,9 +85,11 @@
 
   <sect1>
     <title>JmsTemplate</title>
+    <para>
     Two implementations of the JmsTemplate are provided.  The class
     <literal>JmsTemplate</literal> uses the JMS 1.1 API and the
     subclass <literal>JmsTemplate102</literal> uses the JMS 1.0.2 API.
+    </para>
     <para>Code that uses the JmsTemplate only needs to implement callback
     interfaces giving them a clearly defined contract.  The 
     <literal>MessageCreator</literal> callback interface creates a message
