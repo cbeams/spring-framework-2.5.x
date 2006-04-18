@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter id="portlet">
+	<title>Portlet integration</title>
+	<section>
+		<title>Introduction</title>
+		<para>
+			...
+		</para>
+	</section>
+	<section id="portlet-resources">
+		<title>Further Resources</title>
+		<para>
+            Find below links to further resources about portlets in general.
+        </para>
+		<itemizedlist>
+			<listitem>
+				<para>The <ulink url="http://jcp.org/aboutJava/communityprocess/final/jsr168/index.html">JSR 168</ulink> specification</para>
+			</listitem>
+		</itemizedlist>
+	</section>
+</chapter>
