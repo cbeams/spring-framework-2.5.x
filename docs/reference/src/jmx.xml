@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="jmx">
-	<title>JMX Support</title>
+	<title>JMX</title>
 	<section id="jmx-introduction">
 		<title>Introduction</title>
 		<para>
 			The JMX support in Spring provides you with the features to easily and transparently integrate
-			your Spring application into a JMX infrastructure. Specifically, Spring's JMX support provides
-			four core features:
+			your Spring application into a JMX infrastructure.
+		</para>
+		<sidebar>
+			<title>JMX?</title>
+			<para>
+				This chapter is not an introduction to JMX... it doesn't try to explain the motivations of why one
+				might want to use JMX (or indeed what the letters JMX actually stand for). If you are new to JMX,
+				check out the section entitled <xref linkend="jmx-resources"/> at the end of this chapter.
+			</para>
+		</sidebar>
+		<para>
+			Specifically, Spring's JMX support provides four core features:
 		</para>
 		<itemizedlist>
 			<listitem>
@@ -27,11 +37,6 @@
 			or JMX interfaces and classes. Indeed, for the most part your application classes need not be aware
 			of either Spring or JMX in order to take advantage of the Spring JMX features.
 		</para>
-        <para>
-            This chapter is not an introduction to JMX... it doesn't try to explain the motivations of why one
-            might want to use JMX (or indeed what the letters JMX actually stand for). If you are new to JMX,
-            check out the section entitled <xref linkend="jmx-resources"/> at the end of this chapter.
-        </para>
 	</section>
 	<section id="jmx-exporting">
 		<title>Exporting your beans to JMX</title>
