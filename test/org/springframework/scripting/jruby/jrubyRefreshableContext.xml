@@ -4,7 +4,7 @@
 <beans>
 
 	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor">
-		<property name="refreshCheckDelay" value="1"/>
+		<property name="defaultRefreshCheckDelay" value="1"/>
 	</bean>
 
 	<bean id="calculator" class="org.springframework.scripting.jruby.JRubyScriptFactory">

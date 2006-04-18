@@ -31,6 +31,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -102,6 +103,8 @@ public class ScriptFactoryPostProcessor
 	 */
 	public static final String INLINE_SCRIPT_PREFIX = "inline:";
 
+	public static final String REFRESH_CHECK_DELAY_ATTRIBUTE = ScriptFactoryPostProcessor.class.getName() + ".refreshCheckDelay";
+
 	private static final String SCRIPT_FACTORY_NAME_PREFIX = "scriptFactory.";
 
 	private static final String SCRIPTED_OBJECT_NAME_PREFIX = "scriptedObject.";
@@ -110,7 +113,7 @@ public class ScriptFactoryPostProcessor
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private long refreshCheckDelay = -1;
+	private long defaultRefreshCheckDelay = -1;
 
 	private AbstractBeanFactory beanFactory;
 
@@ -127,8 +130,8 @@ public class ScriptFactoryPostProcessor
 	 * that it has been modified.
 	 * @see org.springframework.scripting.ScriptSource#isModified()
 	 */
-	public void setRefreshCheckDelay(long refreshCheckDelay) {
-		this.refreshCheckDelay = refreshCheckDelay;
+	public void setDefaultRefreshCheckDelay(long defaultRefreshCheckDelay) {
+		this.defaultRefreshCheckDelay = defaultRefreshCheckDelay;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
@@ -176,15 +179,18 @@ public class ScriptFactoryPostProcessor
 
 			RootBeanDefinition objectBd = createScriptedObjectBeanDefinition(
 					bd, scriptFactoryBeanName, scriptSource, interfaces);
-			if (this.refreshCheckDelay >= 0) {
+
+			long refreshCheckDelay = resolveRefreshCheckDelay(bd);
+
+			if (refreshCheckDelay >= 0) {
 				objectBd.setSingleton(false);
 			}
 			this.scriptBeanFactory.registerBeanDefinition(scriptedObjectBeanName, objectBd);
 
-			if (this.refreshCheckDelay >= 0) {
+			if (refreshCheckDelay >= 0) {
 				RefreshableScriptTargetSource ts =
 						new RefreshableScriptTargetSource(this.scriptBeanFactory, scriptedObjectBeanName, scriptSource);
-				ts.setRefreshCheckDelay(this.refreshCheckDelay);
+				ts.setRefreshCheckDelay(this.defaultRefreshCheckDelay);
 				return createRefreshableProxy(ts, interfaces);
 			}
 		}
@@ -204,6 +210,19 @@ public class ScriptFactoryPostProcessor
 		return bean;
 	}
 
+	/**
+	 * Gets the refresh check delay for the given {@link ScriptFactory} {@link BeanDefinition}.
+	 * If the {@link BeanDefinition} has a {@link org.springframework.core.AttributeAccessor metadata attribute}
+	 * under the key {@link #REFRESH_CHECK_DELAY_ATTRIBUTE} which is a valid {@link Number} type, then this value
+	 * is used. Otherwise, the the {@link #defaultRefreshCheckDelay} value is used.
+	 */
+	protected long resolveRefreshCheckDelay(BeanDefinition bd) {
+		Object attributeValue = bd.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
+		if (attributeValue instanceof Number) {
+			return ((Number) attributeValue).longValue();
+		}
+		return this.defaultRefreshCheckDelay;
+	}
 
 	/**
 	 * Create a ScriptFactory bean definition based on the given script definition,

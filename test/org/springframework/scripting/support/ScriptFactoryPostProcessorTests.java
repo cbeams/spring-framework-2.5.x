@@ -268,7 +268,7 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 	private static BeanDefinition createScriptFactoryPostProcessor(boolean isRefreshable) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ScriptFactoryPostProcessor.class);
 		if (isRefreshable) {
-			builder.addPropertyValue("refreshCheckDelay", new Long(1));
+			builder.addPropertyValue("defaultRefreshCheckDelay", new Long(1));
 		}
 		return builder.getBeanDefinition();
 	}
