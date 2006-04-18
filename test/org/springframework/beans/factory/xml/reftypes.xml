@@ -87,6 +87,30 @@
 		</constructor-arg>
 	</bean>
 
+	<bean id="hasInnerBeansWithoutDestroy" class="org.springframework.beans.TestBean">
+		<constructor-arg><value>hasInner</value></constructor-arg>
+		<constructor-arg index="1" type="int"><value>5</value></constructor-arg>
+		<property name="spouse">
+			<bean id="innerBean" class="org.springframework.beans.TestBean">
+				<constructor-arg><value>inner1</value></constructor-arg>
+				<constructor-arg type="int"><value>6</value></constructor-arg>
+			</bean>
+		</property>
+		<property name="friends">
+			<list>
+				<bean class="org.springframework.beans.DerivedTestBean">
+					<property name="name"><value>inner2</value></property>
+					<property name="age"><value>7</value></property>
+				</bean>
+				<bean id="innerBeanFactory" class="org.springframework.beans.factory.DummyFactory"/>
+				<bean id="innerBean" class="org.springframework.beans.TestBean">
+					<constructor-arg><value>inner5</value></constructor-arg>
+					<constructor-arg type="int"><value>6</value></constructor-arg>
+				</bean>
+			</list>
+		</property>
+	</bean>
+
 	<bean id="failsOnInnerBean" class="org.springframework.beans.TestBean">
 		<property name="someMap">
 			<map>
