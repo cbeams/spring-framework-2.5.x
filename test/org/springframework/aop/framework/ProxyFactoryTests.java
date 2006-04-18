@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.Advisor;
+import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -245,6 +246,60 @@ public class ProxyFactoryTests extends TestCase {
 		factory.addAdvice(0, diUnused);
 		assertTrue(factory.adviceIncluded(diUnused));
 		assertTrue(factory.countAdvicesOfType(NopInterceptor.class) == 2);
+	}
+
+	/**
+	 * Should see effect immediately on behavior.
+	 */
+	public void testCanAddAndRemoveAspectInterfacesOnSingleton() {
+		ProxyFactory config = new ProxyFactory(new TestBean());
+
+		assertFalse("Shouldn't implement TimeStamped before manipulation",
+				config.getProxy() instanceof TimeStamped);
+
+		long time = 666L;
+		TimestampIntroductionInterceptor ti = new TimestampIntroductionInterceptor();
+		ti.setTime(time);
+
+		// Add to front of interceptor chain
+		int oldCount = config.getAdvisors().length;
+		config.addAdvisor(0, new DefaultIntroductionAdvisor(ti, TimeStamped.class));
+
+		assertTrue(config.getAdvisors().length == oldCount + 1);
+
+		TimeStamped ts = (TimeStamped) config.getProxy();
+		assertTrue(ts.getTimeStamp() == time);
+
+		// Can remove
+		config.removeAdvice(ti);
+
+		assertTrue(config.getAdvisors().length == oldCount);
+
+		try {
+			// Existing reference will fail
+			ts.getTimeStamp();
+			fail("Existing object won't implement this interface any more");
+		}
+		catch (RuntimeException ex) {
+		}
+
+		assertFalse("Should no longer implement TimeStamped",
+				config.getProxy() instanceof TimeStamped);
+
+		// Now check non-effect of removing interceptor that isn't there
+		config.removeAdvice(new DebugInterceptor());
+
+		assertTrue(config.getAdvisors().length == oldCount);
+
+		ITestBean it = (ITestBean) ts;
+		DebugInterceptor debugInterceptor = new DebugInterceptor();
+		config.addAdvice(0, debugInterceptor);
+		it.getSpouse();
+		assertEquals(1, debugInterceptor.getCount());
+		config.removeAdvice(debugInterceptor);
+		it.getSpouse();
+		// not invoked again
+		assertTrue(debugInterceptor.getCount() == 1);
 	}
 
 }

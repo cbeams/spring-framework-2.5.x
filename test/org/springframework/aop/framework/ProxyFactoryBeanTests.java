@@ -234,19 +234,14 @@ public class ProxyFactoryBeanTests extends TestCase {
 		return prototype2FirstInstance;
 	}
 	
-	public void testCglibPrototypeInstancesAreIndependent() {
+	public void testCglibPrototypeInstance() {
 		Object prototype = testPrototypeInstancesAreIndependent("cglibPrototype");
 		assertTrue("It's a cglib proxy", AopUtils.isCglibProxy(prototype));
 		assertFalse("It's not a dynamic proxy", AopUtils.isJdkDynamicProxy(prototype));
 	}
 	
-	public void testPrototypeInstancesAreIndependentWithTargetName() {
-		Object prototype = testPrototypeInstancesAreIndependent("prototype");
-		//assertTrue("It's a dynamic proxy", AopUtils.isJdkDynamicProxy(prototype));
-	}
-	
 	/**
-	 * Test invoker is automatically added to manipulate target
+	 * Test invoker is automatically added to manipulate target.
 	 */
 	public void testAutoInvoker() {
 		String name = "Hieronymous";
@@ -310,68 +305,6 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertSame(itb, doit.tb);
 	}
 	
-	/**
-	 * Should see effect immediately on behavior.
-	 */
-	public void testCanAddAndRemoveAspectInterfacesOnSingleton() {
-		try {
-			TimeStamped ts = (TimeStamped) factory.getBean("test1");
-			fail("Shouldn't implement TimeStamped before manipulation");
-		}
-		catch (ClassCastException ex) {
-		}
-	
-		ProxyFactoryBean config = (ProxyFactoryBean) factory.getBean("&test1");
-		long time = 666L;
-		TimestampIntroductionInterceptor ti = new TimestampIntroductionInterceptor();
-		ti.setTime(time);
-		
-		// add to front of interceptor chain
-		int oldCount = config.getAdvisors().length;
-		config.addAdvisor(0, new DefaultIntroductionAdvisor(ti, TimeStamped.class));
-		
-		assertTrue(config.getAdvisors().length == oldCount + 1);
-	
-		TimeStamped ts = (TimeStamped) factory.getBean("test1");
-		assertTrue(ts.getTimeStamp() == time);
-	
-		// Can remove
-		config.removeAdvice(ti);
-
-		assertTrue(config.getAdvisors().length == oldCount);
-	
-		try {
-			// Existing reference will fail
-			ts.getTimeStamp();
-			fail("Existing object won't implement this interface any more");
-		}
-		catch (RuntimeException ex) {
-		}
-
-	
-		try {
-			ts = (TimeStamped) factory.getBean("test1");
-			fail("Should no longer implement TimeStamped");
-		}
-		catch (ClassCastException ex) {
-		}
-	
-		// Now check non-effect of removing interceptor that isn't there
-		config.removeAdvice(new DebugInterceptor());
-	
-		assertTrue(config.getAdvisors().length == oldCount);
-	
-		ITestBean it = (ITestBean) ts;
-		DebugInterceptor debugInterceptor = new DebugInterceptor();
-		config.addAdvice(0, debugInterceptor);
-		it.getSpouse();
-		assertEquals(1, debugInterceptor.getCount());
-		config.removeAdvice(debugInterceptor);
-		it.getSpouse();
-		// not invoked again
-		assertTrue(debugInterceptor.getCount() == 1);
-	}
-
 	/**
 	 * Try adding and removing interfaces and interceptors on prototype.
 	 * Changes will only affect future references obtained from the factory.
@@ -441,10 +374,9 @@ public class ProxyFactoryBeanTests extends TestCase {
 
 	/**
 	 * Note that we can't add or remove interfaces without reconfiguring the
-	 * singleton. 
-	 * TODO address this?
+	 * singleton.
 	 */
-	public void testCanAddAndRemoveAspectInterfacesOnSingletonByCasting() {
+	public void testCanAddAndRemoveAdvicesOnSingleton() {
 		ITestBean it = (ITestBean) factory.getBean("test1");
 		Advised pc = (Advised) it;
 		it.getAge();
