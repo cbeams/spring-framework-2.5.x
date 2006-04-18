@@ -10,20 +10,22 @@
         building enterprise-ready applications, while still supporting the
 		possibility of using declarative transaction management, remote access to
 		your logic using RMI or webservices, mailing facilities and various options
-		for persisting your data to a database. Spring provides an MVC framework,
-        transparent ways of integrating AOP into your software, and a 
-        well-structured exception hierarchy including automatic mapping from 
-		proprietary exception hierarchies.
+		for persisting your data to a database. Spring provides an
+		<link linkend="mvc-introduction">MVC framework</link>,
+        transparent ways of integrating <link linkend="aop-introduction">AOP</link>
+        into your software, and a well-structured exception hierarchy including
+        automatic mapping from proprietary exception hierarchies.
     </para>
 	<para>
         Spring could potentially be a one-stop-shop for all your enterprise
         applications; however, Spring is modular, allowing you to use just those parts
         of it that you need, without having to bring in the rest. You can use
-        the IoC container, with Struts on top, but you could also choose to just
-        use the Hibernate integration or the JDBC abstraction layer.
+        the IoC container, with Struts on top, but you could also choose to use just
+        the <link linkend="orm-hibernate">Hibernate integration code</link> or the
+        <link linkend="jdbc-introduction">JDBC abstraction layer</link>.
         Spring has been (and continues to be) designed to be non-intrusive, meaning
-        dependencies on the framework are generally none or absolutely minimal, depending
-        on the area of use..
+        dependencies on the framework are generally none (or absolutely minimal, depending
+        on the area of use).
     </para>
 	<para>
         This document provides a reference guide to Spring's features.
@@ -32,11 +34,11 @@
 		on the support forums at <ulink url="http://forum.springframework.org/"/>.
     </para>
 	<para>
-        Before we go on, a few words of gratitude are due to Chris Bauer (of the
-        Hibernate team), who prepared and adapted the DocBook-XSL software in
-		order to be able to create Hibernate's reference guide, thus also allowing
-        us to create this one. Also thanks to Russell Healy for doing an extensive
-        and valuable review of some of the material.
+        Before we go on, a few words of gratitude are due to Christian Bauer (of the
+        <ulink url="http://www.hibernate.org/">Hibernate</ulink> team), who prepared
+        and adapted the DocBook-XSL software in order to be able to create Hibernate's
+        reference guide, thus also allowing us to create this one. Also thanks to Russell
+        Healy for doing an extensive and valuable review of some of the material.
     </para>
 </preface>
 
@@ -96,8 +98,8 @@
 			the simple declarative transaction management feature mentioned previously.
 		</para>
 		<para>
-			Spring's <link linkend="aop-introduction"><emphasis>ORM</emphasis></link> package provides an 
-			<emphasis>AOP Alliance</emphasis>-compliant aspect-oriented
+			Spring's <link linkend="aop-introduction"><emphasis>AOP</emphasis></link>
+			package provides an <emphasis>AOP Alliance</emphasis>-compliant aspect-oriented
 			programming implementation allowing you to define, for example,
 			method-interceptors and pointcuts to cleanly decouple code
 			implementing functionality that should logically speaking be separated.
