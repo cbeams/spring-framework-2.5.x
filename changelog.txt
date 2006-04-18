@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 M4 (14.4.2006)
+Changes in version 2.0 M4 (20.4.2006)
 -------------------------------------
 
 General
@@ -16,6 +16,8 @@ Package org.springframework.aop
 * deprecated Commons Attributes based TargetSourceCreators (PoolingAttribute, PrototypeAttribute, ThreadLocalAttribute)
 * fixed CustomizableTraceInterceptor to expose the actual invocation time for exception messages
 * added "trackAllInvocations" flag to JamonPerformanceMonitorInterceptor, for gathering statistics without logging
+* auto-proxying works for objects created by FactoryBeans as well (rather than just on FactoryBean instances themselves)
+* BeanNameAutoProxyCreator always proxies exposed objects, with "&beanName" syntax for proxying FactoryBean instances
 
 Package org.springframework.beans
 * BeanUtils throws explicit BeanInstantiationException in case of bean instantiation failure
@@ -31,6 +33,12 @@ Package org.springframework.beans
 * CharacterEditor supports unicode specification passed in as literal String, for example "\u00F6"
 * refined FileEditor to treat absolute file paths as straight files (no ResourceLoader), for Spring 1.2 compatibility
 * PropertyPlaceholderConfigurer catches and logs SecurityException on system property access, continuing resolution
+* FieldRetrievingFactoryBean is able to access non-public fields as well
+* fixed AbstractBeanFactory to avoid potential deadlock on singleton destruction with concurrent singleton creation
+* AbstractBeanFactory always registers inner beans with a unique name, adapting overlapping names accordingly
+* AbstractBeanFactory caches objects returned from "FactoryBean.getObject()" now, in case of a singleton object
+* BeanPostProcessor's "postProcessAfterInitialization" gets applied to objects created by FactoryBeans as well
+* BeanPostProcessor's "postProcessAfterInitialization" gets applied after "postProcessBeforeInstantiation" as well
 * fixed DefaultListableBeanFactory to not preinstantiate bean definition if explicit singleton object already registered
 * added "loadBeanDefinitions(String[] locations)" method to BeanDefinitionReader and AbstractBeanDefinitionReader
 
@@ -96,6 +104,10 @@ Package org.springframework.remoting
 Package org.springframework.scheduling
 * refined Quartz SchedulerFactoryBean to re-register the associated JobDetail when overwriting a JobDetailAwareTrigger
 * fixed Quartz SchedulerFactoryBean to handle potential cluster race condition on trigger registration
+
+Package org.springframework.scripting
+* AOP-based auto-proxying works for scripted objects as well now
+* added "lang" namespace for XML schema definitions, providing configuration for beans written in dynamic languages
 
 Package org.springframework.transaction
 * AbstractPlatformTransactionManager logs "Should roll back transaction but cannot" message at debug level (not warn)
