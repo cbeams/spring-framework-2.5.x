@@ -21,11 +21,13 @@
    Author: Rick Evans (based on Tim - katentim - Nolan's original stylesheet)
 -->
 <xsl:stylesheet version="1.0"
-                xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:xalan="http://xml.apache.org/xalan">
 
     <xsl:output
             method="xml"
             indent="yes"
+            xalan:indent-amount="3"
             omit-xml-declaration="no"/>
 
     <xsl:param name="title"/>
@@ -73,8 +75,11 @@
         <xsl:element name="listitem">
             <xsl:element name="xref">
                 <xsl:attribute name="linkend">
-                    <xsl:value-of select="$title"/>
-                    <xsl:value-of select="./name"/>
+                    <xsl:call-template name="generate.id">
+                        <xsl:with-param name="id">
+                            <xsl:value-of select="./name"/>
+                        </xsl:with-param>
+                    </xsl:call-template>
                 </xsl:attribute>
             </xsl:element>
         </xsl:element>
@@ -83,8 +88,11 @@
     <xsl:template match="tag">
         <xsl:element name="section">
             <xsl:attribute name="id">
-                <xsl:value-of select="$title"/>
-                <xsl:value-of select="./name"/>
+                <xsl:call-template name="generate.id">
+                    <xsl:with-param name="id">
+                        <xsl:value-of select="./name"/>
+                    </xsl:with-param>
+                </xsl:call-template>
             </xsl:attribute>
             <xsl:element name="title">
                 <xsl:text>The </xsl:text>
@@ -185,6 +193,11 @@
                 </xsl:element>
             </xsl:element>
         </xsl:element>
+    </xsl:template>
+
+    <xsl:template name="generate.id">
+        <xsl:param name="id"/>
+        <xsl:value-of select="$title"/>.<xsl:value-of select="$id"/>
     </xsl:template>
     
 </xsl:stylesheet>
