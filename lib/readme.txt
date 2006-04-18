@@ -293,12 +293,12 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's XAPoolNativeJdbcExtractor
 
 * jpa/persistence.jar
-- Java Persistence API 1.0 b40 (http://glassfish.dev.java.net/javaee5/persistence)
+- Java Persistence API 1.0 b44 (http://glassfish.dev.java.net/javaee5/persistence)
 - required for building the framework
 - required at runtime when using Spring's JPA support
 
 * jruby/jruby.jar
-- JRuby 0.8.2 (http://jruby.sourceforge.net)
+- JRuby 0.8.3 (http://jruby.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JRuby support
 
