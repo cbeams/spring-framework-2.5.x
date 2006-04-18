@@ -346,17 +346,17 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	public void testBeanDefinitionOverriding() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class, null));
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class, null));
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
 		assertTrue(lbf.getBean("test") instanceof NestedTestBean);
 	}
 
 	public void testBeanDefinitionOverridingNotAllowed() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.setAllowBeanDefinitionOverriding(false);
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class, null));
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
 		try {
-			lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class, null));
+			lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
 			fail("Should have thrown BeanDefinitionStoreException");
 		}
 		catch (BeanDefinitionStoreException ex) {
@@ -802,7 +802,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	public void testBeanDefinitionWithInterface() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(ITestBean.class, null));
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(ITestBean.class));
 		try {
 			lbf.getBean("test");
 			fail("Should have thrown BeanCreationException");
@@ -815,7 +815,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	public void testBeanDefinitionWithAbstractClass() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(AbstractBeanFactory.class, null));
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(AbstractBeanFactory.class));
 		try {
 			lbf.getBean("test");
 			fail("Should have thrown BeanCreationException");
@@ -828,7 +828,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	public void testBeanPostProcessorWithWrappedObjectAndDisposableBean() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDisposableBean.class, null);
+		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDisposableBean.class);
 		lbf.registerBeanDefinition("test", bd);
 		lbf.addBeanPostProcessor(new BeanPostProcessor() {
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
@@ -846,7 +846,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	public void testBeanPostProcessorWithWrappedObjectAndDestroyMethod() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDestroyMethod.class, null);
+		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDestroyMethod.class);
 		bd.setDestroyMethodName("close");
 		lbf.registerBeanDefinition("test", bd);
 		lbf.addBeanPostProcessor(new BeanPostProcessor() {
@@ -957,7 +957,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	private void testFieldSettingWithInstantiationAwarePostProcessor(final boolean skipPropertyPopulation) {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, null);
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		int ageSetByPropertyValue = 27;
 		bd.getPropertyValues().addPropertyValue(new PropertyValue("age", new Integer(ageSetByPropertyValue)));
 		lbf.registerBeanDefinition("test", bd);
