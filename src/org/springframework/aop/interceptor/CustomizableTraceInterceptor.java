@@ -101,7 +101,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 
 	/**
 	 * The <code>$[argumentTypes]</code> placeholder.
-	 * Replaced with a comma seperated list of the argument types for the
+	 * Replaced with a comma separated list of the argument types for the
 	 * method invocation. Argument types are written as short class names.
 	 */
 	public static final String PLACEHOLDER_ARGUMENT_TYPES = "$[argumentTypes]";
