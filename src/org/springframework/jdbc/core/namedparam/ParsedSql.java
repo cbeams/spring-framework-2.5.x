@@ -127,7 +127,7 @@ class ParsedSql {
 	}
 
 	/**
-	 * Set the totoal count of all of the parameters in the SQL statement.
+	 * Set the total count of all of the parameters in the SQL statement.
 	 * Repeated occurences of the same parameter name do count here.
 	 */
 	public void setTotalParameterCount(int totalParameterCount) {
@@ -135,7 +135,7 @@ class ParsedSql {
 	}
 
 	/**
-	 * Get the totoal count of all of the parameters in the SQL statement.
+	 * Get the total count of all of the parameters in the SQL statement.
 	 * Repeated occurences of the same parameter name do count here.
 	 */
 	public int getTotalParameterCount() {
