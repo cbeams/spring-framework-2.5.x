@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
  * @author Adrian Colyer
  * @since 2.0
  */
-public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJPrecedenceInformation{
+public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJPrecedenceInformation {
 	
 	/**
 	 * Key used in ReflectiveMethodInvocation userAtributes map for the current
@@ -61,8 +61,7 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 	 * Spring AOP invocation.
 	 */
 	public static JoinPoint currentJoinPoint() {
-		ReflectiveMethodInvocation rmi =
-				(ReflectiveMethodInvocation) ExposeInvocationInterceptor.currentInvocation();
+		ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) ExposeInvocationInterceptor.currentInvocation();
 		JoinPoint jp = (JoinPoint) rmi.getUserAttributes().get(JOIN_POINT_KEY);
 		if (jp == null) {
 			jp = new MethodInvocationProceedingJoinPoint(rmi);
@@ -113,6 +112,7 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 	private String returningName = null;
 	
 	private Class discoveredReturningType = Object.class;
+
 	private Class discoveredThrowingType = Object.class;
 	
 	/** 
@@ -136,7 +136,7 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 	private final Map/*<adviceArgumentName,argumentIndex>*/ argumentBindings = new HashMap();
 
 
-	protected AbstractAspectJAdvice(
+	public AbstractAspectJAdvice(
 			Method aspectJAdviceMethod, AspectJExpressionPointcut pointcutExpression, AspectInstanceFactory aif) {
 
 		this.aspectJAdviceMethod = aspectJAdviceMethod;
@@ -147,7 +147,8 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 		this.pointcutExpression = pointcutExpression;
 		this.aif = aif;
 	}
-	
+
+
 	public Method getAspectJAdviceMethod() {
 		return this.aspectJAdviceMethod;
 	}
@@ -285,38 +286,35 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 		}
 		return true;
 	}
-	
+
+
 	/**
 	 * Argument names have to be discovered and set on the associated pointcut expression,
 	 * and we also calculate argument bindings for advice invocation so that actual dispatch
 	 * can be as fast as possible.
-	 * @throws Exception
 	 */
 	public void afterPropertiesSet() throws Exception {
 		calculateArgumentBindings();
 	}	
 	
 	/**
-	 * Do as much work as we can as part of the set-up so that
-	 * argument binding on subsequent advice invocations can be
-	 * as fast as possible. 
-	 * 
-	 * If the first argument is of type JoinPoint or ProceedingJoinPoint
-	 * then we pass a JoinPoint in that position (ProceedingJP for 
-	 * around advice).
-	 * 
-	 * If the first argument is of type JoinPoint.StaticPart then we
-	 * pass a JoinPoint.StaticPart in that position.
-	 * 
-	 * Remaining arguments have to be bound by pointcut evaluation at 
+	 * Do as much work as we can as part of the set-up so that argument binding
+	 * on subsequent advice invocations can be as fast as possible.
+	 * <p>If the first argument is of type JoinPoint or ProceedingJoinPoint then we
+	 * pass a JoinPoint in that position (ProceedingJoinPoint for around advice).
+	 * <p>If the first argument is of type <code>JoinPoint.StaticPart</code>
+	 * then we pass a <code>JoinPoint.StaticPart</code> in that position.
+	 * <p>Remaining arguments have to be bound by pointcut evaluation at
 	 * a given join point. We will get back a map from argument name to
 	 * value. We need to calculate which advice parameter needs to be bound
 	 * to which argument name. There are multiple strategies for determining
 	 * this binding, which are arranged in a ChainOfResponsibility.
 	 */
 	private void calculateArgumentBindings() {
-		// the simple case... nothing to bind.
-		if (this.numAdviceInvocationArguments == 0) return;
+		// The simple case... nothing to bind.
+		if (this.numAdviceInvocationArguments == 0) {
+			return;
+		}
 		
 		int numUnboundArgs = this.numAdviceInvocationArguments;
 		
@@ -374,7 +372,7 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 		}
 		
 		if (this.argumentNames != null) {
-			// We have been able to determine the arg names
+			// We have been able to determine the arg names.
 			bindExplicitArguments(numArgumentsExpectingToBind);
 		} 
 		else {
@@ -518,19 +516,20 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 		
 		return adviceInvocationArgs;
 	}
-	
-	// overridden in around advice to return proceeding join point
+
+
+	// Overridden in around advice to return proceeding join point.
 	protected JoinPoint getJoinPoint() {
 		return currentJoinPoint();
 	}
-	
-	// get the current join point match at the join point we are being dispatched on
+
+	// Get the current join point match at the join point we are being dispatched on.
 	protected JoinPointMatch getJoinPointMatch() {
 		ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) ExposeInvocationInterceptor.currentInvocation();
 		return getJoinPointMatch(rmi);
 	}
-	
-	// note - can't use JoinPointMatch.getClass().getName() as the key, since
+
+	// Note - can't use JoinPointMatch.getClass().getName() as the key, since
 	// Spring AOP does all the matching at a join point, and then all the invocations.
 	// Under this scenario, if we just use JoinPointMatch as the key, then
 	// 'last man wins' which is not what we want at all.
@@ -551,7 +550,7 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 		return invokeAdviceMethodWithGivenArgs(argBinding(getJoinPoint(), jpMatch, returnValue, t));
 	}
 
-	// as above, but in this case we are given the join point
+	// As above, but in this case we are given the join point.
 	protected Object invokeAdviceMethod(JoinPoint jp, JoinPointMatch jpMatch, Object returnValue, Throwable t)
 			throws Throwable {
 
@@ -575,10 +574,11 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 			throw ex.getTargetException();
 		}
 	}
-	
+
+
 	public String toString() {
-		return getClass().getName() + ": adviceMethod=" + aspectJAdviceMethod + "; " +
-			"aspectName='" + aspectName + "'";
+		return getClass().getName() + ": adviceMethod=" + this.aspectJAdviceMethod + "; " +
+			"aspectName='" + this.aspectName + "'";
 	}
 
 }

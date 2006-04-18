@@ -31,23 +31,25 @@ public class AfterAdviceBindingTests extends AbstractAdviceBindingTests {
 	private AdviceBindingTestAspect afterAdviceAspect;
 
 	private MockControl mockControl;
+
 	private AdviceBindingCollaborator mockCollaborator;
-	
+
+
 	protected String[] getConfigLocations() {
 		return new String[] {"org/springframework/aop/aspectj/after-advice-tests.xml"};
 	}
-	
+
+	public void setAfterAdviceAspect(AdviceBindingTestAspect anAspect) {
+		this.afterAdviceAspect = anAspect;
+	}
+
 	protected void onSetUp() throws Exception {
 		super.onSetUp();
 		mockControl = MockControl.createNiceControl(AdviceBindingCollaborator.class);
 		mockCollaborator = (AdviceBindingCollaborator) mockControl.getMock();
 		afterAdviceAspect.setCollaborator(mockCollaborator);
 	}
-	
-	public void setAfterAdviceAspect(AdviceBindingTestAspect anAspect) {
-		this.afterAdviceAspect = anAspect;
-	}
-	
+
 	
 	public void testOneIntArg() {
 		mockCollaborator.oneIntArg(5);

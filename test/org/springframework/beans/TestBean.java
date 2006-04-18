@@ -91,15 +91,6 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	private Colour favouriteColour;
 
 
-	public Colour getFavouriteColour() {
-		return favouriteColour;
-	}
-
-	public void setFavouriteColour(Colour favouriteColour) {
-		this.favouriteColour = favouriteColour;
-	}
-
-
 	public TestBean() {
 	}
 
@@ -302,6 +293,14 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	public void setSomeNumber(Number someNumber) {
 		this.someNumber = someNumber;
+	}
+
+	public Colour getFavouriteColour() {
+		return favouriteColour;
+	}
+
+	public void setFavouriteColour(Colour favouriteColour) {
+		this.favouriteColour = favouriteColour;
 	}
 
 	public IndexedTestBean getNestedIndexedBean() {
