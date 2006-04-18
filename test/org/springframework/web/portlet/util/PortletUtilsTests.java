@@ -594,6 +594,7 @@ public final class PortletUtilsTests extends TestCase {
     private static final class NoPublicCtor {
 
         private NoPublicCtor() {
+        	throw new IllegalArgumentException("Just for eclipse...");
         }
     }
 
