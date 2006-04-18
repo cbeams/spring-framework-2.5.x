@@ -2387,8 +2387,7 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
 
     <para>
 		Spring also has excellent integration with <emphasis>'the'</emphasis> Java AOP
-		framework, AspectJ; please do see the chapters entitled <xref linkend="aspectj"/>
-		and <xref linkend="ataspectj"/> for further details.
+		framework, AspectJ; please do see the chapter entitled <xref linkend="aspectj"/> for further details.
     </para>
   </sect1>
 </chapter>

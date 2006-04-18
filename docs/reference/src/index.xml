@@ -8,7 +8,6 @@
 <!ENTITY resources			SYSTEM "resources.xml">
 <!ENTITY validation			SYSTEM "validation.xml">
 <!ENTITY aop				SYSTEM "aop.xml">
-<!ENTITY ataspectj			SYSTEM "ataspectj.xml">
 <!ENTITY aspectj			SYSTEM "aspectj.xml">
 <!ENTITY transaction		SYSTEM "transaction.xml">
 <!ENTITY metadata			SYSTEM "metadata.xml">
@@ -121,6 +120,11 @@
 				conceptually easy to understand, and which (successfully) addresses the 80%
 				sweet spot of AOP requirements in Java enterprise programming.
 			</para>
+			<para>
+				Coverage of Spring's integration with AspectJ (currently the richest - in
+				terms of features - and certainly most mature AOP implementation in the
+				Java enterprise space) is also provided.
+			</para>
 			<itemizedlist>
 				<listitem>
 					<xref linkend="beans" />
@@ -129,10 +133,13 @@
 					<xref linkend="resources" />
 				</listitem>
 				<listitem>
+					<xref linkend="validation" />
+				</listitem>
+				<listitem>
 					<xref linkend="aop" />
 				</listitem>
 				<listitem>
-					<xref linkend="validation" />
+					<xref linkend="aspectj" />
 				</listitem>
 			</itemizedlist>
 		</partintro>
@@ -140,6 +147,7 @@
 		&resources;
 		&validation;
 		&aop;
+		&aspectj;
 	</part>
 	<part>
 		<title>Middle Tier Data Access</title>
@@ -223,18 +231,7 @@
 				This final part of the reference documentation covers the Spring Framework's
 				integration with a number of J2EE (and related) technologies.
 			</para>
-			<para>
-				Coverage of Spring's integration with AspectJ (currently the richest - in
-				terms of features - and certainly most mature AOP implementation in the
-				Java enterprise space) is also provided.
-			</para>
 			<itemizedlist>
-				<listitem>
-					<xref linkend="ataspectj" />
-				</listitem>
-				<listitem>
-					<xref linkend="aspectj" />
-				</listitem>
 				<listitem>
 					<xref linkend="remoting" />
 				</listitem>
@@ -267,8 +264,6 @@
 				</listitem>
 			</itemizedlist>
 		</partintro>
-		&ataspectj;
-		&aspectj;
 		&remoting;
 		&ejb;
 		&jms;
