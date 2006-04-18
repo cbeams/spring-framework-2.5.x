@@ -870,7 +870,7 @@
         </listitem>
       </itemizedlist>
 
-      <para>It is not necessary to read any more for proper usage, bu the full
+      <para>It is not necessary to read any more for proper usage, but the full
       sequence of events with and without Hibernate being aware of the JTA
       <literal>TransactionManager</literal> will now be described.</para>
 
