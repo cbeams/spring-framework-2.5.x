@@ -22,10 +22,14 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.test.AssertThrows;
 
 /**
+ * Unit tests for the {@link NamedParameterUtils} class.
+ * 
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Rick Evans
  */
 public class NamedParameterUtilsTests extends TestCase {
 
@@ -104,5 +108,44 @@ public class NamedParameterUtilsTests extends TestCase {
 		assertTrue(5 == NamedParameterUtils.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :a :a xx :a :a"), namedParams).length);
 		assertEquals(2, NamedParameterUtils.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :b :c xx :a :b"), namedParams)[4]);
 	}
+
+    public void testBuildValueArrayWithMissingParameterValue() throws Exception {
+        new AssertThrows(InvalidDataAccessApiUsageException.class) {
+            public void test() throws Exception {
+                String sql = "select count(0) from foo where id = :id";
+                NamedParameterUtils.buildValueArray(sql, new HashMap());
+            }
+        }.runTest();
+    }
+
+    public void testCountParameterPlaceholdersWithNullSqlString() throws Exception {
+        assertEquals(0, NamedParameterUtils.countParameterPlaceholders(null));
+    }
+
+    public void testParseSqlStatementWithNullSqlString() throws Exception {
+        ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(null);
+        assertNotNull(parsedSql);
+        assertNull(parsedSql.getSql());
+        assertEquals("", parsedSql.getNewSql());
+    }
+
+    public void testSubstituteNamedParametersWithNullString() throws Exception {
+        String sql = NamedParameterUtils.substituteNamedParameters(null, new SimpleSqlParameterSource());
+        assertEquals("", sql);
+    }
+
+    public void testSubstituteNamedParametersWithStringContainingQuotes() throws Exception {
+        String expectedSql = "select 'first name' from artists where id = ? and quote = 'exsqueeze me?'";
+        String sql = "select 'first name' from artists where id = :id and quote = 'exsqueeze me?'";
+        String newSql = NamedParameterUtils.substituteNamedParameters(sql, new SimpleSqlParameterSource());
+        assertEquals(expectedSql, newSql);
+    }
+
+    public void testParseSqlStatementWithStringContainingQuotes() throws Exception {
+        String expectedSql = "select 'first name' from artists where id = ? and quote = 'exsqueeze me?'";
+        String sql = "select 'first name' from artists where id = :id and quote = 'exsqueeze me?'";
+        ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+        assertEquals(expectedSql, parsedSql.getNewSql());
+    }
 
 }
