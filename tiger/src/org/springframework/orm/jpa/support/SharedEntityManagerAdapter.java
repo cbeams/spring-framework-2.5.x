@@ -28,7 +28,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
+import org.springframework.util.Assert;
 
 /**
  * FactoryBean that exposes a shared JPA EntityManager reference for a
@@ -36,25 +38,36 @@ import org.springframework.orm.jpa.EntityManagerFactoryUtils;
  * created by LocalEntityManagerFactoryBean, as direct alternative to a
  * JndiObjectFactoryBean definition for a Java EE 5 server's EntityManager.
  *
- * <p>The shared EntityManager will behave just like an EntityManager
- * fetched from an application server's JNDI environment, as defined
- * by the JPA specification. It will delegate all calls to the current
- * transactional EntityManager, if any; else, it will fall back to
- * a newly created EntityManager per operation.
+ * <p>The shared EntityManager will behave just like an EntityManager fetched
+ * from an application server's JNDI environment, as defined by the JPA
+ * specification. It will delegate all calls to the current transactional
+ * EntityManager, if any; else, it will fall back to a newly created
+ * EntityManager per operation.
  *
  * <p>Can be passed to DAOs that expect a shared EntityManager reference
  * rather than an EntityManagerFactory reference. Note that Spring's
  * JpaTransactionManager always needs an EntityManagerFactory reference,
  * to be able to create new transactional EntityManager instances.
  *
+ * <p>This adapter is also able to expose a vendor-extended EntityManager
+ * interface: Simply specify the extended interface as "entityManagerInterface".
+ * By default, only the standard <code>javax.persistence.EntityManager</code>
+ * interface will be exposed.
+ *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see #setEntityManagerFactory
+ * @see #setEntityManagerInterface
  * @see org.springframework.orm.jpa.LocalEntityManagerFactoryBean
  * @see org.springframework.orm.jpa.JpaTransactionManager
  */
-public class SharedEntityManagerAdapter implements FactoryBean {
+public class SharedEntityManagerAdapter implements FactoryBean, InitializingBean {
 
-	private EntityManager entityManager;
+	private EntityManagerFactory target;
+
+	private Class entityManagerInterface = EntityManager.class;
+
+	private EntityManager shared;
 
 
 	/**
@@ -63,16 +76,37 @@ public class SharedEntityManagerAdapter implements FactoryBean {
 	 * EntityManagerFactory, as accessed by JpaTransactionManager.
 	 * @see org.springframework.orm.jpa.JpaTransactionManager
 	 */
-	public void setEntityManagerFactory(EntityManagerFactory emf) {
-		this.entityManager = (EntityManager) Proxy.newProxyInstance(
+	public void setEntityManagerFactory(EntityManagerFactory target) {
+		this.target = target;
+	}
+
+	/**
+	 * Specify the EntityManager interface to expose.
+	 * <p>Default is the standard <code>javax.persistence.EntityManager</code>
+	 * interface. This can be overridden to make the proxy expose a
+	 * vendor-extended EntityManager interface.
+	 * @see javax.persistence.EntityManager
+	 */
+	public void setEntityManagerInterface(Class entityManagerInterface) {
+		Assert.notNull(entityManagerInterface, "entityManagerInterface must not be null");
+		Assert.isAssignableFrom(EntityManager.class, entityManagerInterface);
+		this.entityManagerInterface = entityManagerInterface;
+	}
+
+
+	public void afterPropertiesSet() {
+		if (this.target == null) {
+			throw new IllegalArgumentException("entityManagerFactory is required");
+		}
+		this.shared = (EntityManager) Proxy.newProxyInstance(
 				getClass().getClassLoader(),
-				new Class[] {EntityManager.class},
-				new SharedEntityManagerInvocationHandler(emf));
+				new Class[] {this.entityManagerInterface},
+				new SharedEntityManagerInvocationHandler(this.target));
 	}
 
 
 	public Object getObject() {
-		return this.entityManager;
+		return this.shared;
 	}
 
 	public Class getObjectType() {
