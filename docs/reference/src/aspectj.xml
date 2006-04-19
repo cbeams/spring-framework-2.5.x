@@ -225,7 +225,7 @@
 		<title>Using AspectJ pointcut expressions in Spring XML</title>
 		<para>[TODO]</para>
 	</section>
-	<section>
+	<section id="aspectj-ataspectj">
 		<title>Using the AspectJ 5 <literal>@AspectJ</literal> annotation-style syntax in Spring AOP</title>
 		<section>
 			<title>Overview</title>
@@ -464,6 +464,12 @@ public class MakeLockable {
 			</para>
 		</section>
 	</section>
+	<section id="aspectj-atconfigurable">
+		<title>Dependency injection using AspectJ with @<interfacename>Configurable</interfacename></title>
+		<para>
+			[TODO]
+		</para>
+	</section>
 	<section>
 		<title>AspectJ advice with pointcut expressions in Spring XML</title>
 		<para>
@@ -620,12 +626,14 @@ public class AdviceBindingTestAspect {
 		<para>
             Find below links to further resources about AspectJ.
         </para>
-		<para>
-			AspectJ is very well documented. The AspectJ
-			<ulink linkend="http://www.eclipse.org/aspectj/doc/released/progguide/index.html">Programmers Guide</ulink>,
-			included in the AspectJ 5 distribution, is an excellent starting point.
-		</para>
 		<itemizedlist>
+			<listitem>
+				<para>
+					The AspectJ
+					<ulink linkend="http://www.eclipse.org/aspectj/doc/released/progguide/index.html">Programmers Guide</ulink>,
+					included in the AspectJ 5 distribution, is an excellent starting point.
+				</para>
+			</listitem>
 			<listitem>
 				<para>The <ulink url="http://www.eclipse.org/aspectj/">AspectJ</ulink> homepage</para>
 			</listitem>

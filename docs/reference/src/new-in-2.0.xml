@@ -337,6 +337,12 @@
         <listitem>
           <xref linkend="metadata-annotations-required" />
         </listitem>
+		<listitem>
+			<para><xref linkend="aspectj-atconfigurable"/></para>
+		</listitem>
+		<listitem>
+			<para><xref linkend="aspectj-ataspectj"/></para>
+		</listitem>
       </itemizedlist>
     </section>
   </section>

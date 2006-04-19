@@ -736,21 +736,24 @@ txManager.commit(status);</programlisting></para>
       generally not much danger of undue coupling, since typically, code that
       is deployed as transactional is always deployed that way.</para>
 
-      <sect3>
-        <title>The <literal>Transactional</literal> Annotation</title>
+      <sect3 id="transaction-attransactional">
+        <title>@<interfacename>Transactional</interfacename></title>
 
-        <para>The
-        <literal>org.springframework.transaction.annotation.Transactional
-        Annotation</literal> is used to indicate that an interface, interface
+        <para>
+			The @<interfacename>Transactional</interfacename> annotation
+			(in the <literal>org.springframework.transaction.annotation</literal>
+			package) is used to indicate that an interface, interface
         method, class, or class method should have transaction
         semantics.</para>
 
-        <para><programlisting>@Transactional
+        <programlisting><![CDATA[@Transactional
 public interface OrderService {
 
 void createOrder(Order order);
-List queryByCriteria(Order criteria);</programlisting>Used in bare form, this
-        Annotation specifies that an interface, class, or method must be
+List queryByCriteria(Order criteria);]]></programlisting>
+
+		<para>
+			Used in bare form, this Annotation specifies that an interface, class, or method must be
         transactional. Default transaction semantics are read/write,
         PROPAGATION_REQUIRED, ISOLATION_DEFAULT, TIMEOUT_DEFAULT, with
         rollback on a <literal>RuntimeException</literal>, but not
@@ -760,7 +763,7 @@ List queryByCriteria(Order criteria);</programlisting>Used in bare form, this
         settings.</para>
 
         <para><table>
-            <title>Properties of the <literal>Transactional</literal> Annotation</title>
+            <title>Properties of the <interfacename>Transactional</interfacename> Annotation</title>
 
             <tgroup cols="3">
               <thead>
@@ -852,7 +855,7 @@ List queryByCriteria(Order criteria);</programlisting>Used in bare form, this
         when evaluating the transaction semantics of a method.</para>
 
         <sect4>
-          <title><literal>Transactional</literal> annotation examples</title>
+          <title><interfacename>Transactional</interfacename> annotation examples</title>
 
           <para>Annotating a class definition:</para>
 
@@ -885,7 +888,7 @@ interface TestService {
         </sect4>
 
         <sect4>
-          <title>Telling Spring to apply the <literal>Transactional</literal> annotation</title>
+          <title>Telling Spring to apply the <interfacename>Transactional</interfacename> annotation</title>
 
           <para>By itself, adding instances of this annotation to interface or
           class elements will not result in transactional wrapping of the
@@ -919,7 +922,7 @@ interface TestService {
         </sect4>
 
         <sect4>
-          <title>Using AOP to ensure the <literal>Transactional</literal> annotation is applied</title>
+          <title>Using AOP to ensure the <interfacename>Transactional</interfacename> annotation is applied</title>
 
           <para>The previous example is still more work than would be ideal.
           There is in principle no need for XML for each proxy (to point to
@@ -937,7 +940,7 @@ interface TestService {
           <literal>BeanPostProcessor</literal>. Because it is a bean post
           processor, it gets a chance to look at every bean that is created as
           it is created. If the bean contains the
-          <literal>Transactional</literal> annotation, a transactional proxy
+          <interfacename>Transactional</interfacename> annotation, a transactional proxy
           is automatically created to wrap it.</para>
 
           <para><programlisting>&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
