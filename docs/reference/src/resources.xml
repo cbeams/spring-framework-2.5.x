@@ -483,6 +483,33 @@
 				it's subsequently used as a <interfacename>ResourceLoader</interfacename>,
 				any unprefixed paths will still be treated as filesystem paths.
 			</para>
+			<section>
+				<title>Constructing <classname>ClassPathXmlApplicationContext</classname> instances - shortcuts</title>
+				<para>
+					The <classname>ClassPathXmlApplicationContext</classname> exposes a number of
+					constructors to enable convenient instantiation. The basic idea is that one
+					supplied merely a string array containing just the filenames of the XML files
+					themselves (without the leading path information), and one
+					<emphasis>also</emphasis> supplies a <classname>Class</classname>; the
+					<classname>ClassPathXmlApplicationContext</classname> will derive the
+					path information from the supplied class.
+				</para>
+				<para>
+					An example will hopefully make this clear. Consider a directory layout like so...
+				</para>
+				<programlisting><![CDATA[com/
+  foo/
+	services.xml
+	daos.xml
+	MessengerService.class]]></programlisting>
+			</section>
+			<para>
+				A <classname>ClassPathXmlApplicationContext</classname> instance composed of the
+				beans defined in the <literal>'services.xml'</literal> and <literal>'daos.xml'</literal>
+				could be instantiated like so...
+			</para>
+			<programlisting><![CDATA[ApplicationContext ctx = new ClassPathXmlApplicationContext(
+    new String[] {"services.xml", "daos.xml"}, MessengerService.class);]]></programlisting>
 		</section>
 		<section>
 			<title>The <literal>classpath*:</literal> prefix</title>
