@@ -174,9 +174,6 @@
 				<listitem>
 					<xref linkend="orm" />
 				</listitem>
-				<listitem>
-					[TODO : link to the JPA section]
-				</listitem>
 			</itemizedlist>
 		</partintro>
 		&transaction;
