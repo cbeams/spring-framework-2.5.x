@@ -25,6 +25,7 @@ import org.springframework.beans.factory.support.BeanComponentDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.SystemPropertyUtils;
+import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -55,7 +56,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	public static final String BEAN_NAME_DELIMITERS = ",; ";
 
-
 	public static final String IMPORT_ELEMENT = "import";
 	public static final String RESOURCE_ATTRIBUTE = "resource";
 	public static final String ALIAS_ELEMENT = "alias";
@@ -65,8 +65,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
-
-	private NamespaceHandlerResolver namespaceHandlerResolver;
 
 	private ReaderContext readerContext;
 
@@ -152,15 +150,15 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	}
 
 	private void parseDefaultElement(Element ele, XmlBeanDefinitionParserHelper helper) {
-		if (IMPORT_ELEMENT.equals(ele.getNodeName())) {
+		if (DomUtils.nodeNameEquals(ele, IMPORT_ELEMENT)) {
 			importBeanDefinitionResource(ele);
 		}
-		else if (ALIAS_ELEMENT.equals(ele.getNodeName())) {
+		else if (DomUtils.nodeNameEquals(ele, ALIAS_ELEMENT)) {
 			String name = ele.getAttribute(NAME_ATTRIBUTE);
 			String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
 			getReaderContext().getReader().getBeanFactory().registerAlias(name, alias);
 		}
-		else if (BEAN_ELEMENT.equals(ele.getNodeName())) {
+		else if (DomUtils.nodeNameEquals(ele, BEAN_ELEMENT)) {
 			BeanDefinitionHolder bdHolder = helper.parseBeanDefinitionElement(ele, false);
 			if (bdHolder != null) {
 				bdHolder = helper.decorateBeanDefinitionIfRequired(ele, bdHolder);

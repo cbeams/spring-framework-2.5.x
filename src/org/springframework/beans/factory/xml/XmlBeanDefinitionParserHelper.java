@@ -199,7 +199,8 @@ public class XmlBeanDefinitionParserHelper {
 	public static final String DEFAULT_INIT_METHOD_ATTRIBUTE = "default-init-method";
 	public static final String DEFAULT_DESTROY_METHOD_ATTRIBUTE = "default-destroy-method";
 	public static final String DEFAULT_MERGE_ATTRIBUTE = "default-merge";
-	/**
+	
+    /**
 	 * {@link Log} instance for this class.
 	 */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -347,7 +348,7 @@ public class XmlBeanDefinitionParserHelper {
 	/**
 	 * Parses the supplied <code>&lt;bean&gt;</code> element. May return <code>null</code>
 	 * if there were errors during parse. Errors are reported to the
-	 * {@link ProblemReporter}.
+	 * {@link org.springframework.beans.factory.support.ProblemReporter}.
 	 */
 	public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, boolean isInnerBean) {
 
@@ -509,7 +510,7 @@ public class XmlBeanDefinitionParserHelper {
 		NodeList nl = ele.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && META_ELEMENT.equals(node.getNodeName())) {
+			if (node instanceof Element && DomUtils.nodeNameEquals(node, META_ELEMENT)) {
 				Element metaElement = (Element) node;
 				String key = metaElement.getAttribute(KEY_ATTRIBUTE);
 				String value = metaElement.getAttribute(VALUE_ATTRIBUTE);
@@ -519,7 +520,7 @@ public class XmlBeanDefinitionParserHelper {
 	}
 
 	/**
-	 * Invokes the {@link SourceExtractor} to pull the
+	 * Invokes the {@link org.springframework.beans.factory.support.SourceExtractor} to pull the
 	 * source metadata from the supplied {@link Element}.
 	 */
 	private Object extractSource(Element ele) {
@@ -568,7 +569,7 @@ public class XmlBeanDefinitionParserHelper {
 		ConstructorArgumentValues cargs = new ConstructorArgumentValues();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && CONSTRUCTOR_ARG_ELEMENT.equals(node.getNodeName())) {
+			if (node instanceof Element && DomUtils.nodeNameEquals(node, CONSTRUCTOR_ARG_ELEMENT)) {
 				parseConstructorArgElement((Element) node, cargs);
 			}
 		}
@@ -599,7 +600,7 @@ public class XmlBeanDefinitionParserHelper {
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && LOOKUP_METHOD_ELEMENT.equals(node.getNodeName())) {
+			if (node instanceof Element && DomUtils.nodeNameEquals(node, LOOKUP_METHOD_ELEMENT)) {
 				Element ele = (Element) node;
 				String methodName = ele.getAttribute(NAME_ATTRIBUTE);
 				String beanRef = ele.getAttribute(BEAN_ELEMENT);
@@ -618,7 +619,7 @@ public class XmlBeanDefinitionParserHelper {
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && REPLACED_METHOD_ELEMENT.equals(node.getNodeName())) {
+			if (node instanceof Element && DomUtils.nodeNameEquals(node, REPLACED_METHOD_ELEMENT)) {
 				Element replacedMethodEle = (Element) node;
 				String name = replacedMethodEle.getAttribute(NAME_ATTRIBUTE);
 				String callback = replacedMethodEle.getAttribute(REPLACER_ATTRIBUTE);
