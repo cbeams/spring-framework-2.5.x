@@ -643,10 +643,10 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 				</para>
 				<programlisting><![CDATA[public class SimpleMovieLister {
 
-    ]]><lineannotation>// the <classname>SimpleMovieLister</classname> has a dependency on the <interfacename>MovieFinder</interfacename> <emphasis>interface</emphasis></lineannotation><![CDATA[
+    ]]><lineannotation>// the <classname>SimpleMovieLister</classname> has a dependency on the <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
     private MovieFinder movieFinder;
 
-    ]]><lineannotation>// a setter method so that the Spring container can 'inject' an appropriate <interfacename>MovieFinder</interfacename> <emphasis>implementation</emphasis></lineannotation><![CDATA[
+    ]]><lineannotation>// a setter method so that the Spring container can 'inject' a <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
     public void setMoveFinder(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
@@ -672,10 +672,10 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 				</para>
 				<programlisting><![CDATA[public class SimpleMovieLister {
 
-    ]]><lineannotation>// the <classname>SimpleMovieLister</classname> has a dependency on the <interfacename>MovieFinder</interfacename> <emphasis>interface</emphasis></lineannotation><![CDATA[
+    ]]><lineannotation>// the <classname>SimpleMovieLister</classname> has a dependency on the <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
     private MovieFinder movieFinder;
 
-    ]]><lineannotation>// a constructor so that the Spring container can 'inject' an appropriate <interfacename>MovieFinder</interfacename> <emphasis>implementation</emphasis></lineannotation><![CDATA[
+    ]]><lineannotation>// a constructor so that the Spring container can 'inject' a  <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
     public SimpleMovieLister(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
@@ -882,7 +882,8 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
     private YetAnotherBean beanTwo;
     private int i;
     
-    public ExampleBean(AnotherBean anotherBean, YetAnotherBean yetAnotherBean, int i) {
+    public ExampleBean(
+        AnotherBean anotherBean, YetAnotherBean yetAnotherBean, int i) {
         this.beanOne = anotherBean;
         this.beanTwo = yetAnotherBean;
         this.i = i;
@@ -914,9 +915,9 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
       ...
     }
     
-    // a static factory method
-    // the arguments to this method can be considered the dependencies of the bean that
-    // is returned, regardless of how those arguments are actually used.
+    // a static factory method; the arguments to this method can be
+    // considered the dependencies of the bean that is returned,
+    // regardless of how those arguments are actually used.
     public static ExampleBean createInstance (
             AnotherBean anotherBean, YetAnotherBean yetAnotherBean, int i) {
         ExampleBean eb = new ExampleBean (...);
@@ -988,8 +989,11 @@ public class Foo {
 
 public class ExampleBean {
 
-    private int years;             ]]><lineannotation>// No. of years to the calculate the Ultimate Answer</lineannotation><![CDATA[
-    private String ultimateAnswer; ]]><lineannotation>// The Answer to Life, the Universe, and Everything</lineannotation><![CDATA[
+    ]]><lineannotation>// No. of years to the calculate the Ultimate Answer</lineannotation><![CDATA[
+    private int years;
+    
+    ]]><lineannotation>// The Answer to Life, the Universe, and Everything</lineannotation><![CDATA[
+    private String ultimateAnswer;
 
     public ExampleBean(int years, String ultimateAnswer) {
         this.years = years;
@@ -1040,23 +1044,27 @@ public class ExampleBean {
       <literal>constructor-arg</literal> elements for this purpose.</para>
             <section id="beans-value-element">
                 <title>The <literal>value</literal> element</title>
-                <para>The <literal>value</literal> element specifies a property or
-        constructor argument as a human-readable string representation. As
-        mentioned in detail <link linkend="beans-factory-collaborators-propertyeditor">previously</link>,
-        JavaBeans PropertyEditors are used to convert these string values from
-        a <literal>java.lang.String</literal> to the actual property or
-        argument type.<programlisting>&lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-  &lt;!-- results in a setDriverClassName(String) call --&gt;
-  &lt;property name="driverClassName"&gt;
-    &lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt;
-  &lt;/property&gt;
-  &lt;property name="url"&gt;
-    &lt;value&gt;jdbc:mysql://localhost:3306/mydb&lt;/value&gt;
-  &lt;/property&gt;
-  &lt;property name="username"&gt;
-    &lt;value&gt;root&lt;/value&gt;
-  &lt;/property&gt;
-&lt;/bean&gt;</programlisting></para>
+                <para>
+					The <literal>value</literal> element specifies a property or
+					constructor argument as a human-readable string representation. As
+					mentioned in detail <link linkend="beans-factory-collaborators-propertyeditor">previously</link>,
+					JavaBeans PropertyEditors are used to convert these string values from
+					a <literal>java.lang.String</literal> to the actual property or
+					argument type.
+			</para>
+			<programlisting><![CDATA[<bean id="myDataSource" destroy-method="close"
+    class="org.apache.commons.dbcp.BasicDataSource">
+  <!-- results in a setDriverClassName(String) call -->
+  <property name="driverClassName">
+    <value>com.mysql.jdbc.Driver</value>
+  </property>
+  <property name="url">
+    <value>jdbc:mysql://localhost:3306/mydb</value>
+  </property>
+  <property name="username">
+    <value>root</value>
+  </property>
+</bean>]]></programlisting>
             </section>
             <section id="beans-null-element">
                 <title>The <literal>&lt;null/&gt;</literal> element</title>
@@ -1274,7 +1282,9 @@ support=support@somecompany.co.uk]]></programlisting>
             parse time.
         </para>
         <programlisting><![CDATA[<property name="targetName">
-   ]]><lineannotation>&lt;!-- a bean with an id of 'target' must exist, else an XML parse exception will be thrown --&gt;</lineannotation><![CDATA[
+   ]]><lineannotation>&lt;!--
+a bean with an id of 'target' must exist, else an XML exception will be thrown
+   --&gt;</lineannotation><![CDATA[
    <idref local="theTargetBean"/>
 </property>]]></programlisting>
         <para>
@@ -1817,57 +1827,67 @@ public class ReplacementComputeValue implements MethodReplacer {
         </section>
         <section id="beans-factory-dependencies">
             <title>Checking for dependencies</title>
-            <para>Spring has the ability to try to check for the existence of
-      unresolved dependencies of a bean deployed into the BeanFactory. These
-      are JavaBeans properties of the bean, which do not have actual values
-      set for them in the bean definition, or alternately provided
-      automatically by the autowiring feature.</para>
-            <para>This feature is sometimes useful when you want to ensure that all
-      properties (or all properties of a certain type) are set on a bean. Of
-      course, in many cases a bean class will have default values for many
-      properties, or some properties do not apply to all usage scenarios, so
-      this feature is of limited use. Dependency checking can also be enabled
-      and disabled per bean, just as with the autowiring functionality. The
-      default is to <emphasis>not</emphasis> check dependencies. Dependency
-      checking can be handled in several different modes. In an
-      XmlBeanFactory, this is specified via the
-      <literal>dependency-check</literal> attribute in a bean definition,
-      which may have the following values.<table frame="all">
-                    <title>Dependency checking modes</title>
-                    <tgroup cols="2">
-                        <colspec colname="c1" colwidth="1*" />
-                        <colspec colname="c2" colwidth="5*" />
-                        <thead>
-                            <row>
-                                <entry>Mode</entry>
-                                <entry>Explanation</entry>
-                            </row>
-                        </thead>
-                        <tbody>
-                            <row>
-                                <entry>none</entry>
-                                <entry>No dependency checking. Properties of the bean which
-                have no value specified for them are simply not set.</entry>
-                            </row>
-                            <row>
-                                <entry>simple</entry>
-                                <entry>Dependency checking is performed for primitive types
-                and collections (everything except collaborators, i.e. other
-                beans)</entry>
-                            </row>
-                            <row>
-                                <entry>object</entry>
-                                <entry>Dependency checking is performed for
-                collaborators</entry>
-                            </row>
-                            <row>
-                                <entry>all</entry>
-                                <entry>Dependency checking is done for collaborators,
-                primitive types and collections</entry>
-                            </row>
-                        </tbody>
-                    </tgroup>
-                </table></para>
+            <para>
+				Spring has the ability to try to check for the existence of
+				unresolved dependencies of a bean deployed into the BeanFactory. These
+				are JavaBeans properties of the bean, which do not have actual values
+				set for them in the bean definition, or alternately provided
+				automatically by the autowiring feature.
+			</para>
+            <para>
+				This feature is sometimes useful when you want to ensure that all
+				properties (or all properties of a certain type) are set on a bean. Of
+				course, in many cases a bean class will have default values for many
+				properties, or some properties do not apply to all usage scenarios, so
+				this feature is of limited use. Dependency checking can also be enabled
+				and disabled per bean, just as with the autowiring functionality. The
+				default is to <emphasis>not</emphasis> check dependencies. Dependency
+				checking can be handled in several different modes. In an
+				<classname>XmlBeanFactory</classname>, this is specified via the
+				<literal>dependency-check</literal> attribute in a bean definition,
+				which may have the following values.
+			</para>
+			<table frame="all">
+                <title>Dependency checking modes</title>
+                <tgroup cols="2">
+                    <colspec colname="c1" colwidth="1*" />
+                    <colspec colname="c2" colwidth="5*" />
+                    <thead>
+                        <row>
+                            <entry>Mode</entry>
+                            <entry>Explanation</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>none</entry>
+                            <entry>No dependency checking. Properties of the bean which
+            have no value specified for them are simply not set.</entry>
+                        </row>
+                        <row>
+                            <entry>simple</entry>
+                            <entry>Dependency checking is performed for primitive types
+            and collections (everything except collaborators, i.e. other
+            beans)</entry>
+                        </row>
+                        <row>
+                            <entry>object</entry>
+                            <entry>Dependency checking is performed for
+            collaborators</entry>
+                        </row>
+                        <row>
+                            <entry>all</entry>
+                            <entry>Dependency checking is done for collaborators,
+            primitive types and collections</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+            <para>
+				If you are using Java5 (and thus have access to source level annotations),
+				you may find the section entitled <xref linkend="metadata-annotations-required"/>
+				(in the chapter entitled <xref linkend="metadata"/>) to be of interest.
+            </para>
         </section>
     </section>
     <section id="beans-factory-nature">
@@ -2146,7 +2166,8 @@ public class NewsFeedManager {
                 <programlisting><![CDATA[<beans>
     <bean id="newsFeedManager" class="x.y.NewsFeedManager">
         <property name="factory">
-            <bean class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
+            <bean
+class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
                 <property name="targetBeanName">
                     <idref local="newsFeed" />
                 </property>
@@ -2171,7 +2192,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        <interfacename>ApplicationContext</interfacename> ctx = new ClassPathXmlApplicationContext("beans.xml");
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
         NewsFeedManager manager = (NewsFeedManager) ctx.getBean("newsFeedManager");
         manager.printNews();
         manager.printNews();
@@ -2258,7 +2279,8 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
   &lt;property name="age" value="1"/&gt;
 &lt;/bean&gt;
 
-&lt;bean id="inheritsWithDifferentClass" class="org.springframework.beans.DerivedTestBean"
+&lt;bean id="inheritsWithDifferentClass"
+    class="org.springframework.beans.DerivedTestBean"
     parent="inheritedTestBean" init-method="initialize"&gt;
   &lt;property name="name" value="override"/&gt;
   &lt;!-- age should inherit value of 1 from parent --&gt;
@@ -2460,7 +2482,8 @@ cfg.postProcessBeanFactory(factory);</programlisting>
       configure some properties from an external Properties file. At runtime,
       we will apply a <interfacename>PropertyPlaceholderConfigurer</interfacename> to the
       <interfacename>BeanFactory</interfacename> which will replace some properties of the datasource:</para>
-            <programlisting><![CDATA[<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+            <programlisting><![CDATA[<bean id="dataSource" destroy-method="close"
+    class="org.apache.commons.dbcp.BasicDataSource">
   <property name="driverClassName" value="${jdbc.driverClassName}"/>
   <property name="url" value="${jdbc.url}"/>
   <property name="username" value="${jdbc.username}"/>
@@ -2784,7 +2807,7 @@ argument.required=The '{0}' argument is required.]]></programlisting>
         of the application. For the purpose of this example though, we'll just manually
         specify the locale that we want to resolve our (British) messages against.</para>
             <programlisting><![CDATA[# in 'exceptions_en_GB.properties'
-argument.required=Ebagum lad, the '{0}' argument is required, I say, I say, required.]]></programlisting>
+argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]></programlisting>
             <programlisting><![CDATA[public static void main(final String[] args) {
     MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
     String message = resources.getMessage("argument.required",
@@ -2792,7 +2815,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, I say, requ
     System.out.println(message);
 }]]></programlisting>
             <para>The resulting output from the runnning of the above program will be...</para>
-            <programlisting><![CDATA[Ebagum lad, the 'userDao' argument is required, I say, I say, required.]]></programlisting>
+            <programlisting><![CDATA[Ebagum lad, the 'userDao' argument is required, I say, required.]]></programlisting>
             <para>The <classname>MessageSourceAware</classname> interface can also be used to acquire
         a reference to any <classname>MessageSource</classname> that has been defined. Any bean
         that is defined in an <classname>ApplicationContext</classname> that implements the
@@ -3158,18 +3181,20 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
 </bean>
 
 // will result in 11, which is the value of property 'spouse.age' of bean 'person'
-<bean id="theAge" class="org.springframework.beans.factory.config.PropertyPathFactoryBean">
-  <property name="targetBeanName"><value>person</value></property>
-  <property name="propertyPath"><value>spouse.age</value></property>
+<bean id="theAge"
+    class="org.springframework.beans.factory.config.PropertyPathFactoryBean">
+  <property name="targetBeanName" value="person"/>
+  <property name="propertyPath" value="spouse.age"/>
 </bean>]]></programlisting>
         <para>
 			In this example, a path is evaluated against an inner bean:
 		</para>
         <programlisting><![CDATA[// will result in 12, which is the value of property 'age' of the inner bean
-<bean id="theAge" class="org.springframework.beans.factory.config.PropertyPathFactoryBean">
+<bean id="theAge"
+    class="org.springframework.beans.factory.config.PropertyPathFactoryBean">
   <property name="targetObject">
     <bean class="org.springframework.beans.TestBean">
-      <property name="age"><value>12</value></property>
+      <property name="age" value="12"/>
     </bean>
   </property>
   <property name="propertyPath"><value>age</value></property>
@@ -3178,7 +3203,8 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
 			There is also a shortcut form, where the bean name is the property path.
 		</para>
 		<programlisting><![CDATA[// will result in 10, which is the value of property 'age' of bean 'person'
-<bean id="person.age" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>]]></programlisting>
+<bean id="person.age"
+    class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>]]></programlisting>
         <para>
 			This form does mean that there is no choice in the name of the bean,
 			any reference to it will also have to use the same id, which is the path.
@@ -3187,7 +3213,8 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
 		</para>
         <programlisting><![CDATA[<bean id="..." class="...">
   <property name="age">
-    <bean id="person.age" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+    <bean id="person.age"
+        class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
   </property>
 </bean>]]></programlisting>
 		<para>
@@ -3222,7 +3249,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
 			specified as a bean name:
 		</para>
         <programlisting><![CDATA[<bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
-      class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/>]]></programlisting>
+    class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/>]]></programlisting>
         <para>
 			This does mean that there is no longer any choice in what the bean id is (so
 			any other bean that refers to it will also have to use this longer name),
@@ -3233,7 +3260,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
         <programlisting><![CDATA[<bean id="..." class="...">
   <property name="isolation">
     <bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
-          class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean" />
+    class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean" />
   </property>
 </bean>]]></programlisting>
         <para>
@@ -3302,16 +3329,17 @@ public class Client {
 			definition which uses this class to force some sort of <literal>static</literal>
 			initialization:
 		</para>
-        <programlisting><![CDATA[&lt;bean id="force-init" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
-  &lt;property name="staticMethod"&gt;&lt;value&gt;com.example.MyClass.initialize&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;
+        <programlisting><![CDATA[<bean id="force-init"
+    class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+  <property name="staticMethod" value="com.example.MyClass.initialize"/>
+</bean>
 
-&lt;bean id="bean1" class="..." depends-on="force-init"&gt;
+<bean id="bean1" class="..." depends-on="force-init">
   ...
-&lt;/bean&gt;]]></programlisting>
+</bean>]]></programlisting>
 		<para>
-			Note that the definition for
-			<literal>bean1</literal> has used the <literal>depends-on</literal>
+			Note that the definition for the <literal>bean1</literal> bean
+			has used the <literal>depends-on</literal>
 			attribute to refer to the <literal>force-init</literal> bean, which will
 			trigger initializing <literal>force-init</literal> first, and thus calling
 			the <literal>static</literal> initializer method, when
@@ -3321,20 +3349,24 @@ public class Client {
 			Here's an example of a bean definition which uses this class to call
 			a <literal>static</literal> factory method:
 		</para>
-        <programlisting><![CDATA[<bean id="myClass" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-  <property name="staticMethod"><value>com.whatever.MyClassFactory.getInstance</value></property>
+        <programlisting><![CDATA[<bean id="myClass"
+    class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+  <property name="staticMethod"
+      value="com.whatever.MyClassFactory.getInstance"/>
 </bean>]]></programlisting>
         <para>
 			Find below an example of calling a <literal>static</literal> method
 			then an instance method to get at a Java System property. (Somewhat
 			verbose, but it works.)
 		</para>
-        <programlisting><![CDATA[<bean id="sysProps" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <programlisting><![CDATA[<bean id="sysProps"
+    class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
   <property name="targetClass"><value>java.lang.System</value></property>
   <property name="targetMethod"><value>getProperties</value></property>
 </bean>
 
-<bean id="javaVersion" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+<bean id="javaVersion"
+    class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
   <property name="targetObject"><ref local="sysProps"/></property>
   <property name="targetMethod"><value>getProperty</value></property>
   <property name="arguments">
@@ -3453,13 +3485,17 @@ public class Client {
 </context-param>
 
 <listener>
-  <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  <listener-class>
+  org.springframework.web.context.ContextLoaderListener
+  </listener-class>
 </listener>
 
 <!-- OR USE THE CONTEXTLOADERSERVLET INSTEAD OF THE LISTENER
 <servlet>
   <servlet-name>context</servlet-name>
-  <servlet-class>org.springframework.web.context.ContextLoaderServlet</servlet-class>
+  <servlet-class>
+  org.springframework.web.context.ContextLoaderServlet
+  </servlet-class>
   <load-on-startup>1</load-on-startup>
 </servlet>
 -->]]></programlisting>
