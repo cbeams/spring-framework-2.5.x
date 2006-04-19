@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <!--
   - Application context definition for JPetStore's data access layer.
@@ -10,7 +9,7 @@
   - using JNDI DataSources with JtaTransactionManager. It obviously depends on
   - JTA support in the container, and on pre-configured container DataSources.
   -
-  - This version also uses the jndi:xxx namespace introduced in Spring 2.0
+  - This version also uses the "jndi:" namespace introduced in Spring 2.0
   - to configured JNDI referenced objects.
   -->
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -24,12 +23,12 @@
 	<!-- Main JNDI DataSource for J2EE environments -->
 	<!-- Refers to the main database, containing product and account data -->
 	<!-- (see dataAccessContext-local.xml for an alternative) -->
-	<jndi:lookup id="dataSource" jndiName="java:comp/env/jdbc/jpetstore"/>
+	<jndi:lookup id="dataSource" jndi-name="java:comp/env/jdbc/jpetstore"/>
 
 	<!-- Additional JNDI DataSource for J2EE environments -->
 	<!-- Refers to the order database, containing order data -->
 	<!-- (see dataAccessContext-local.xml for an alternative) -->
-	<jndi:lookup id="dataSource" jndiName="java:comp/env/jdbc/jpetstore-order"/>
+	<jndi:lookup id="orderDataSource" jndi-name="java:comp/env/jdbc/jpetstore-order"/>
 
 	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
 	<!-- Necessary here due to the need for distributed transactions across two databases -->
