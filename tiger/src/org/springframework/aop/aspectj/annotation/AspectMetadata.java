@@ -61,7 +61,7 @@ public class AspectMetadata {
 		this.ajType = AjTypeSystem.getAjType(aspectClass);
 		
 		if (!ajType.isAspect()) {
-			throw new IllegalArgumentException(aspectClass + " is not an @AspectJ aspect");
+			throw new IllegalArgumentException("Class '" + aspectClass.getName() + "' is not an @AspectJ aspect");
 		}
 		validate();
 

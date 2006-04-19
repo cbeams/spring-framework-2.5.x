@@ -19,7 +19,12 @@ package org.springframework.aop.framework;
 import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.Advisor;
 import org.springframework.util.ClassUtils;
+
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Factory for AOP proxies for programmatic use, rather than via a bean
@@ -123,5 +128,4 @@ public class ProxyFactory extends AdvisedSupport implements AopProxy {
 		proxyFactory.setProxyTargetClass(true);
 		return proxyFactory.getProxy();
 	}
-
 }

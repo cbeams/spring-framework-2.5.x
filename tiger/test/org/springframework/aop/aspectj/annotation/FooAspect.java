@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.aspectj.autoproxy;
+package org.springframework.aop.aspectj.annotation;
 
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 
-@Aspect("perthis(execution(* getAge()))")
-public class PerThisAspect {
-
-	private int invocations = 0;
-
-	public int getInvocations() {
-		return this.invocations;
-	}
-
-	@Around("execution(* getAge())")
-	public int changeAge(ProceedingJoinPoint pjp) throws Throwable {
-		return invocations++;
-	}
+/**
+ * @author Rob Harrop
+ * @since 2.o
+ */
+@Aspect
+public class FooAspect {
 
 }

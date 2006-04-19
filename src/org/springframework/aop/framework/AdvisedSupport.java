@@ -389,15 +389,33 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		addAdvisor(pos, advisor);
 	}
 
+	public void addAllAdvisors(Advisor[] advisors) {
+		for (int i = 0; i < advisors.length; i++) {
+			Advisor advisor = advisors[i];
+			this.advisors.add(advisor);
+		}
+		updateAdvisorArray();
+		adviceChanged();
+	}
+
 	/**
 	 * Bring the array up to date with the list.
 	 */
-	private void updateAdvisorArray() {
+	protected final void updateAdvisorArray() {
 		this.advisorArray = (Advisor[]) this.advisors.toArray(new Advisor[this.advisors.size()]);
 	}
 	
 	public final Advisor[] getAdvisors() {
 		return this.advisorArray;
+	}
+
+	/**
+	 * Allows uncontrolled access to the {@link List} of {@link Advisor Advisors}.
+	 * Use with care, and remember to {@link #updateAdvisorArray() refresh the advisor array}
+	 * and {@link #adviceChanged() fire advice changed events} when making any modifications.
+	 */
+	protected final List getAdvisorsInternal() {
+		return this.advisors;
 	}
 
 	/**
@@ -461,7 +479,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/**
 	 * Invoked when advice has changed.
 	 */
-	private synchronized void adviceChanged() {
+	protected final synchronized void adviceChanged() {
 		if (this.isActive) {
 			for (int i = 0; i < this.listeners.size(); i++) {
 				((AdvisedSupportListener) this.listeners.get(i)).adviceChanged(this);

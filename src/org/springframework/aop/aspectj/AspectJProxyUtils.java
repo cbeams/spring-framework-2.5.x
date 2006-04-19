@@ -24,8 +24,9 @@ import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 
 /**
  * Utility methods for working with AspectJ proxies.
+ * 
  * @author Rod Johnson
- *
+ * @since 2.0
  */
 public abstract class AspectJProxyUtils {
 	
@@ -36,8 +37,9 @@ public abstract class AspectJProxyUtils {
 	 * JoinPoint. The call will have no effect if there are no AspectJ advisors
 	 * in the advisor chain.
 	 * @param advisors Advisors available
+	 * @return <code>true</code> if any special {@link Advisor Advisors} were added, otherwise <code>false</code>.
 	 */
-	public static void makeAdvisorChainAspectJCapableIfNecessary(List advisors) {
+	public static boolean makeAdvisorChainAspectJCapableIfNecessary(List advisors) {
 		// Don't add advisors to an empty list; may indicate that proxying is just not required
 		if (!advisors.isEmpty()) {
 			boolean foundAspectJAdvice = false;
@@ -52,8 +54,10 @@ public abstract class AspectJProxyUtils {
 			}
 			if (foundAspectJAdvice && !advisors.contains(ExposeInvocationInterceptor.ADVISOR)) {
 				advisors.add(0, ExposeInvocationInterceptor.ADVISOR);
+				return true;
 			}
 		}
+		return false;
 	}
 
 }
