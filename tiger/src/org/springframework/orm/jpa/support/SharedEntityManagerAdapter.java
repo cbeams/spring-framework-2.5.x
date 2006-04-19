@@ -89,7 +89,7 @@ public class SharedEntityManagerAdapter implements FactoryBean, InitializingBean
 	 */
 	public void setEntityManagerInterface(Class entityManagerInterface) {
 		Assert.notNull(entityManagerInterface, "entityManagerInterface must not be null");
-		Assert.isAssignableFrom(EntityManager.class, entityManagerInterface);
+		Assert.isAssignable(EntityManager.class, entityManagerInterface);
 		this.entityManagerInterface = entityManagerInterface;
 	}
 

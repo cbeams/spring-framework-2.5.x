@@ -327,21 +327,21 @@ public abstract class Assert {
 	}
 
 	/**
-	 * Assert that the <code>superType.isAssignableFrom(subType)</code> is <code>true</code>.
+	 * Assert that <code>superType.isAssignableFrom(subType)</code> is <code>true</code>.
 	 * <pre>
-	 * Assert.isAssignableFrom(Number.class, myClass);</pre>
+	 * Assert.isAssignable(Number.class, myClass);</pre>
 	 * @param superType the super type to check
 	 * @param subType the sub type to check
 	 * @throws IllegalArgumentException if the classes are not assignable
 	 */
-	public static void isAssignableFrom(Class superType, Class subType) {
-		isAssignableFrom(superType, subType, "");
+	public static void isAssignable(Class superType, Class subType) {
+		isAssignable(superType, subType, "");
 	}
 
 	/**
-	 * Assert that the <code>superType.isAssignableFrom(subType)</code> is <code>true</code>.
+	 * Assert that <code>superType.isAssignableFrom(subType)</code> is <code>true</code>.
 	 * <pre>
-	 * Assert.isAssignableFrom(Number.class, myClass);</pre>
+	 * Assert.isAssignable(Number.class, myClass);</pre>
 	 * @param superType the super type to check
 	 * @param subType the sub type to check
 	 * @param message a message which will be prepended to the message produced by
@@ -350,7 +350,7 @@ public abstract class Assert {
 	 * ok when prepended to it.
 	 * @throws IllegalArgumentException if the classes are not assignable
 	 */
-	public static void isAssignableFrom(Class superType, Class subType, String message) {
+	public static void isAssignable(Class superType, Class subType, String message) {
 		Assert.notNull(superType, "superType cannot be null");
 		Assert.notNull(subType, "subType cannot be null");
 		Assert.isTrue(superType.isAssignableFrom(subType), message + "Type [" + subType.getName()

@@ -80,7 +80,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	 * for the supplied {@link org.springframework.scripting.ScriptFactory} class.
 	 */
 	public ScriptBeanDefinitionParser(Class scriptFactoryClass) {
-		Assert.isAssignableFrom(ScriptFactory.class, scriptFactoryClass);
+		Assert.isAssignable(ScriptFactory.class, scriptFactoryClass);
 		this.scriptFactoryClass = scriptFactoryClass;
 	}
 
