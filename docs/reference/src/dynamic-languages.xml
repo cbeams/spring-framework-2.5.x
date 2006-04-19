@@ -95,7 +95,8 @@ public class DefaultBookingService implements BookingService {
 
     public void processBooking() {
         // use the injected Messenger object...
-    }}]]></programlisting>
+    }
+}]]></programlisting>
 		<para>
             Here is an implementation of the <interfacename>Messenger</interfacename>
             interface in Groovy.
@@ -363,7 +364,7 @@ class GroovyMessenger implements Messenger {
 		            language source file will incur a refresh.
 		            (Assigning a negative value to the <literal>'refresh-check-delay'</literal>
 		            attribute turns off the refresh behavior - but if one didn't want
-		            the refresh behaviour, one would simpy not define the attribute).
+		            the refresh behaviour, one would simply not define the attribute).
 		        </para>
 				<para>
 					If we then run the following application we can exercise the refreshable feature;
