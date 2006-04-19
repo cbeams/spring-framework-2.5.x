@@ -18,6 +18,7 @@ package org.springframework.orm.jpa;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
@@ -329,10 +330,11 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 					txObject.getEntityManagerHolder().getEntityManager() + "]");
 		}
 		try {
-			txObject.getEntityManagerHolder().getEntityManager().getTransaction().commit();
+			EntityTransaction tx = txObject.getEntityManagerHolder().getEntityManager().getTransaction();
+			tx.commit();
 		}
 		catch (PersistenceException ex) {
-			// assumably failed to flush changes to database
+			// Assumably failed to flush changes to database.
 			throw convertJpaAccessException(ex);
 		}
 	}
@@ -344,7 +346,10 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 					txObject.getEntityManagerHolder().getEntityManager() + "]");
 		}
 		try {
-			txObject.getEntityManagerHolder().getEntityManager().getTransaction().rollback();
+			EntityTransaction tx = txObject.getEntityManagerHolder().getEntityManager().getTransaction();
+			if (tx.isActive()) {
+				tx.rollback();
+			}
 		}
 		catch (PersistenceException ex) {
 			throw new TransactionSystemException("Could not roll back JPA transaction", ex);
