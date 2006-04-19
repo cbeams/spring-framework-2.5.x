@@ -18,7 +18,7 @@ package org.springframework.beans.factory.support;
 
 /**
  * Simple implementation of the {@link SourceExtractor} that simply passes
- * the candidate source metdata object through for attachment. Using this
+ * the candidate source metadata object through for attachment. Using this
  * implementation means that tools will get raw access to the underlying
  * configuration source metadata provided by the tool.
  * <p/>
@@ -37,4 +37,5 @@ public class PassThroughSourceExtractor implements SourceExtractor {
 	public Object extract(Object sourceCandidate) {
 		return sourceCandidate;
 	}
+
 }
