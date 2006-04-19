@@ -49,8 +49,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <p>This implementation is appropriate for applications that solely use JDO for
  * transactional data access. JTA (usually through JtaTransactionManager) is necessary for
  * accessing multiple transactional resources. Note that you need to configure your JDO
- * provider accordingly to make it participate in JTA transactions. In contrast to Hibernate,
- * this cannot be transparently provided by the Spring transaction manager implementation.
+ * provider accordingly to make it participate in JTA transactions.
  *
  * <p>With a JdoDialect specified, this implementation also supports direct DataSource
  * access within a transaction (i.e. plain JDBC code working with the same DataSource).
@@ -377,7 +376,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 			tx.commit();
 		}
 		catch (JDOException ex) {
-			// assumably failed to flush changes to database
+			// Assumably failed to flush changes to database.
 			throw convertJdoAccessException(ex);
 		}
 	}

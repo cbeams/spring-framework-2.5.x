@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,12 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 		this.allowCreate = allowCreate;
 	}
 
-	public boolean isAllowCreate() {
+	/**
+	 * Return whether the PersistenceManagerFactory proxy is allowed to create
+	 * a non-transactional PersistenceManager when no transactional
+	 * PersistenceManager can be found for the current thread.
+	 */
+	protected boolean isAllowCreate() {
 		return allowCreate;
 	}
 
