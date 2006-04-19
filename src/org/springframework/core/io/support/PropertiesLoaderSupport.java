@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public abstract class PropertiesLoaderSupport {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private Properties properties;
+	private Properties[] localProperties;
 
 	private Resource[] locations;
 
@@ -64,7 +64,15 @@ public abstract class PropertiesLoaderSupport {
 	 * loaded from files.
 	 */
 	public void setProperties(Properties properties) {
-		this.properties = properties;
+		this.localProperties = new Properties[] {properties};
+	}
+
+	/**
+	 * Set local properties, e.g. via the "props" tag in XML bean definitions,
+	 * allowing for merging multiple properties sets into one.
+	 */
+	public void setPropertiesArray(Properties[] propertiesArray) {
+		this.localProperties = propertiesArray;
 	}
 
 	/**
@@ -138,11 +146,14 @@ public abstract class PropertiesLoaderSupport {
 			loadProperties(result);
 		}
 
-		if (this.properties != null) {
-			// Use propertyNames enumeration to also catch default properties.
-			for (Enumeration en = this.properties.propertyNames(); en.hasMoreElements();) {
-				String key = (String) en.nextElement();
-				result.setProperty(key, this.properties.getProperty(key));
+		if (this.localProperties != null) {
+			for (int i = 0; i < this.localProperties.length; i++) {
+				Properties props = this.localProperties[i];
+				// Use propertyNames enumeration to also catch default properties.
+				for (Enumeration en = props.propertyNames(); en.hasMoreElements();) {
+					String key = (String) en.nextElement();
+					result.setProperty(key, props.getProperty(key));
+				}
 			}
 		}
 
