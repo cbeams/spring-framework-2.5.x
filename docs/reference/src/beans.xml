@@ -917,9 +917,9 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
     // a static factory method
     // the arguments to this method can be considered the dependencies of the bean that
     // is returned, regardless of how those arguments are actually used.
-    public static ExampleBean createInstance(
+    public static ExampleBean createInstance (
             AnotherBean anotherBean, YetAnotherBean yetAnotherBean, int i) {
-        ExampleBean eb = new ExampleBean(...);
+        ExampleBean eb = new ExampleBean (...);
         // some other operations
         ...
         return eb;
@@ -943,8 +943,42 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
             <title>Constructor Argument Resolution</title>
             <para>
 				Constructor argument resolution matching occurs using the
-				argument's type. When another bean is referenced, the type is known, and
-				matching can occur. When a simple type is used, such as
+				argument's type. If there is no potential for ambiguity in
+				the constructor arguments of a bean definition, then the order
+				in which the constructor arguments are defined in a bean definition
+				is the order in which those arguments will be supplied to the
+				appropriate constuctor when it is being instantiated. Consider the
+				following class...
+			</para>
+			<programlisting><![CDATA[package x.y;
+
+public class Foo {
+
+    public Foo(Bar bar, Baz baz) {
+        // ...
+    }
+}]]></programlisting>
+			<para>
+				There is no potential for ambiguity here (assuming of course that <classname>Bar</classname>
+				and <classname>Baz</classname> classes are not related in an inheritance hierarchy).
+				Thus the folowing configuration will work just fine, and one does not need to
+				specify the constructor argument indexes and / or types explicitly... it just plain
+				works as one would expect it to.
+			</para>
+			<programlisting><![CDATA[<beans>
+    <bean name="foo" class="x.y.Foo">
+        <constructor-arg>
+            <bean class="x.y.Bar"/>
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="x.y.Baz"/>
+        </constructor-arg>
+    </bean>
+</beans>]]></programlisting>
+			<para>
+				When another bean is referenced, the type is known, and
+				matching can occur (as was the case with the preceding example).
+				When a simple type is used, such as
 				<literal>&lt;value&gt;true&lt;value&gt;</literal>, Spring cannot
 				determine the type of the value, and so cannot match by type without
 				help. Consider the following class, which is used for the following two
