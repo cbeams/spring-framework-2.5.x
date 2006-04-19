@@ -26,7 +26,7 @@
 			</list>
 		</property>
 	</bean>
-	
+
 	<!-- MailSender used by EmailAdvice -->
 	<!--
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
