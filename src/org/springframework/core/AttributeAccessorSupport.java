@@ -26,8 +26,8 @@ import java.util.Set;
 /**
  * Support class for {@link AttributeAccessor AttributeAccessors}, providing a
  * base implementation of all methods.
- * <p/>
- * {@link Serializable} if sub-classes and all attribute values are {@link Serializable}.
+ * 
+ * <p>{@link Serializable} if sub-classes and all attribute values are {@link Serializable}.
  *
  * @author Rob Harrop
  * @since 2.0
@@ -39,7 +39,8 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 	 */
 	private final Map attributes = new HashMap();
 
-	public void setAttribute(String name, Object value) {
+
+    public void setAttribute(String name, Object value) {
 		Assert.notNull(name, "'name' cannot be null.");
 		if (value != null) {
 			this.attributes.put(name, value);
@@ -59,7 +60,6 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 		return this.attributes.remove(name);
 	}
 
-
 	public boolean hasAttribute(String name) {
 		Assert.notNull(name, "'name' cannot be null.");
 		return this.attributes.containsKey(name);
@@ -69,4 +69,5 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 		Set attributeNames = this.attributes.keySet();
 		return (String[]) attributeNames.toArray(new String[attributeNames.size()]);
 	}
+
 }

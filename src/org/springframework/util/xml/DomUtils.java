@@ -26,7 +26,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.CharacterData;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Convenience methods for working with the DOM API,
@@ -95,4 +94,5 @@ public abstract class DomUtils {
 		Assert.notNull(desiredName, "'desiredName' cannot be null.");
 		return desiredName.equals(node.getNodeName()) || desiredName.equals(node.getLocalName());
 	}
+
 }

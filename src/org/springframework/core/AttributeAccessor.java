@@ -29,21 +29,18 @@ public interface AttributeAccessor {
 	 * Sets the attribute defined by <code>name</code> to the supplied	<code>value</code>.
 	 * If <code>value</code> is <code>null</code>, the attribute is {@link #removeAttribute removed}.
 	 */
-
 	void setAttribute(String name, Object value);
 
 	/**
 	 * Gets the value of the attribute identified by <code>name</code>. Returns <code>null</code> if
 	 * the attribute doesn't exist.
 	 */
-
 	Object getAttribute(String name);
 
 	/**
 	 * Removes the attribute identified by <code>name</code> and returns its value. Returns <code>null</code>
 	 * if no attribute under <code>name</code> is found.
 	 */
-
 	Object removeAttribute(String name);
 
 	/**
@@ -56,4 +53,5 @@ public interface AttributeAccessor {
 	 * Returns the names of all attributes.
 	 */
 	String[] attributeNames();
+
 }
