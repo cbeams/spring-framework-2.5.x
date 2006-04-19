@@ -334,6 +334,9 @@
         <listitem>
           <xref linkend="jdbc-SimpleJdbcTemplate" />
         </listitem>
+        <listitem>
+          <xref linkend="metadata-annotations-required" />
+        </listitem>
       </itemizedlist>
     </section>
   </section>
