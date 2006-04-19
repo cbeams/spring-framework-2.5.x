@@ -19,7 +19,6 @@ package org.springframework.aop.framework;
 import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.TargetSource;
-import org.springframework.aop.Advisor;
 import org.springframework.util.ClassUtils;
 
 import java.util.List;
