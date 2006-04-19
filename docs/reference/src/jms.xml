@@ -17,7 +17,7 @@
     <classname>MessageListenerContainer</classname>s used to create
     message-driven POJOs.</para>
 
-    <para>The package <package>org.springframework.jms.core</package> provides
+    <para>The package <literal>org.springframework.jms.core</literal> provides
     the core functionality for using JMS. It contains JMS template classes
     that simplifies the use of the JMS by handling the creation and release of
     resources, much like the <classname>JdbcTemplate</classname> does for
@@ -29,22 +29,22 @@
     message synchronously, and exposing the JMS session and message producer
     to the user.</para>
 
-    <para>The package <package>org.springframework.jms.support</package>
+    <para>The package <literal>org.springframework.jms.support</literal>
     provides JMSException translation functionality. The translation converts
     the checked <classname>JMSException</classname> hierarchy to a mirrored
     hierarchy of unchecked exceptions. If there are any provider specific
     subclasses of the checked <classname>javax.jms.JMSException</classname>,
     this exception is wrapped in the unchecked
     <classname>UncategorizedJmsException</classname>. The package
-    <package>org.springframework.jms.support.converter</package> provides a
+    <literal>org.springframework.jms.support.converter</literal> provides a
     MessageConverter abstraction to convert between Java objects and JMS
     messages. The package
-    <package>org.springframework.jms.support.destination</package> provides
+    <literal>org.springframework.jms.support.destination</literal> provides
     various strategies for managing JMS destinations, such as providing a
     service locator for destinations stored in JNDI.</para>
 
     <para>Finally, the package
-    <package>org.springframework.jms.connection</package> provides an
+    <literal>org.springframework.jms.connection</literal> provides an
     implementation of the <classname>ConnectionFactory</classname> suitable
     for use in standalone applications. It also contains an implementation of
     Spring's
@@ -301,8 +301,7 @@ public class JmsQueueSender {
       }
     });
   }
-}
-      </programlisting>
+}</programlisting>
 
       <para>This example uses the <classname>MessageCreator</classname>
       callback to create a text message from the supplied
@@ -396,8 +395,7 @@ public void sendWithConversion() {
       return message;
     }
   });
-}
-      </programlisting>
+}</programlisting>
 
       <para>This results in a message of the form</para>
 
@@ -414,8 +412,7 @@ MapMessage={
     Name={String:Mark} 
     Age={Integer:35} 
   } 
-}
-      </programlisting>
+}</programlisting>
     </sect2>
 
     <sect2>
@@ -437,63 +434,67 @@ MapMessage={
 
   <sect1 id="jms-asynchronousMessageReception">
     <title>Asynchronous Message Reception</title>
-
-    <para>One of the most common uses of JMS messages in the EJB world is to
-    drive message-driven beans or MDBs. Spring offers a solution to create
-    message-driven POJOs or MDPs in a way that does not tie a user to an EJB
-    container.</para>
+    <para>
+		One of the most common uses of JMS messages in the EJB world is to
+		drive message-driven beans (MDBs). Spring offers a solution to create
+		message-driven POJOs (MDPs) in a way that does not tie a user to an EJB
+		container.
+	</para>
 
     <sect2>
       <title>Message-Driven POJO</title>
 
-      <para>Similar to an MDB in the EJB world, the message-drive POJO or MDP
-      acts as a receiver for JMS messages. The one restriction on this MDP is
-      that it must implement the
-      <classname>javax.jms.MessageListener</classname> interface. In the case
-      where your POJO will be receiving messages on mulitple threads, it's
-      important to ensure that your implementation is thread-safe.</para>
+      <para>
+		Similar to an MDB in the EJB world, the message-drive POJO or MDP
+		acts as a receiver for JMS messages. The one restriction on this MDP is
+		that it must implement the
+		<interfacename>javax.jms.MessageListener</interfacename> interface. In the case
+		where your POJO will be receiving messages on multiple threads, it's
+		important to ensure that your implementation is thread-safe.
+	  </para>
 
-      <programlisting>import javax.jms.JMSException;
+      <programlisting><![CDATA[import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 public class ExampleListener implements MessageListener {
 
- public void onMessage(Message message) {
-  if (message instanceof TextMessage) {
-   try {
-    System.out.println(((TextMessage) message).getText());
-   } catch (JMSException e) {
-    throw new RuntimeException(e);
-   }
-  } else {
-   throw new IllegalArgumentException(
-     "Message must be of type TestMessage");
+  public void onMessage(Message message) {
+    if (message instanceof TextMessage) {
+      try {
+        System.out.println(((TextMessage) message).getText());
+      } catch (JMSException e) {
+        throw new RuntimeException(e);
+      }
+    } else {
+      throw new IllegalArgumentException(
+        "Message must be of type TestMessage");
+    }
   }
- }
-
-}</programlisting>
+}]]></programlisting>
     </sect2>
 
     <sect2>
       <title>Message Listener Containers</title>
 
-      <para>A <classname>MessageListenerContainer</classname> is used to
-      receive messages from a JMS message queue and drive the MDPs that are
-      injected into it. The <classname>MessageListenerContainer</classname> is
-      responsible for all threading of message reception and dispatch into the
-      MDP for processing.</para>
+      <para>
+		An <classname>AbstractMessageListenerContainer</classname> is used to
+		receive messages from a JMS message queue and drive the MDPs that are
+		injected into it. The <classname>AbstractMessageListenerContainer</classname> is
+		responsible for all threading of message reception and dispatch into the
+		MDPs for processing.
+	  </para>
 
-      <programlisting>&lt;bean id="messageListener" class="jmsexample.ExampleListener" /&gt;
+      <programlisting><![CDATA[<bean id="messageListener" class="jmsexample.ExampleListener" />
 
-&lt;bean id="listenerContainer"
-  class="org.springframework.jms.listener.DefaultMessageListenerContainer"&gt;
-  &lt;property name="concurrentConsumers" value="5"/&gt;
-  &lt;property name="connectionFactory" ref="connectionFactory" /&gt;
-  &lt;property name="destination" ref="destination" /&gt;
-  &lt;property name="messageListener" ref="messageListener" /&gt;
-&lt;/bean&gt;</programlisting>
+<bean id="listenerContainer"
+  class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+  <property name="concurrentConsumers" value="5"/>
+  <property name="connectionFactory" ref="connectionFactory" />
+  <property name="destination" ref="destination" />
+  <property name="messageListener" ref="messageListener" />
+</bean>]]></programlisting>
     </sect2>
   </sect1>
 </chapter>
