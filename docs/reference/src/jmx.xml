@@ -138,6 +138,10 @@ public class JmxTestBean implements IJmxTestBean {
 
   <bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean"/>
 
+  ]]><lineannotation>&lt;!--
+    this bean needs to be eagerly pre-instantiated in order for the exporting to occur;
+    this means that it must <emphasis role="bold">not</emphasis> be marked as lazily initialized
+  --&gt;</lineannotation><![CDATA[
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
     <property name="beans">
       <map>
