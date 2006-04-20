@@ -25,6 +25,7 @@
 <!ENTITY cci				SYSTEM "cci.xml">
 <!ENTITY mail				SYSTEM "mail.xml">
 <!ENTITY scheduling			SYSTEM "scheduling.xml">
+<!ENTITY taskexecutor		SYSTEM "taskexecutor.xml">
 <!ENTITY testing			SYSTEM "testing.xml">
 <!ENTITY scripting			SYSTEM "scripting.xml">
 <!ENTITY dynamic-languages   SYSTEM "dynamic-languages.xml">
@@ -34,7 +35,7 @@
 <!ENTITY spring-form.tld    SYSTEM "spring-form.tld.xml">
 ]>
 <book>
-    <bookinfo>
+	<bookinfo>
 		<title>The Spring Framework - Reference Documentation</title>
 		<releaseinfo>Version 2.0 M4</releaseinfo>
 		<authorgroup>
@@ -90,15 +91,21 @@
 				<firstname>Rick</firstname>
 				<surname>Evans</surname>
 			</author>
+			<author>
+				<firstname>Ben</firstname>
+				<surname>Hale</surname>
+			</author>
 		</authorgroup>
 		<legalnotice>
-			Copies of this document may be made for your own use and for distribution to others, provided that
-			you do not charge any fee for such copies and further provided that each copy contains this
-			Copyright Notice, whether distributed in print or electronically.
+			Copies of this document may be made for your own use and for
+			distribution to others, provided that you do not charge any
+			fee for such copies and further provided that each copy
+			contains this Copyright Notice, whether distributed in print
+			or electronically.
 		</legalnotice>
 	</bookinfo>
 	<!-- front matter -->
-    <toc />
+	<toc />
 	&overview;
 	&background;
 	&whats-new-in-2.0;
@@ -106,24 +113,28 @@
 		<title>Core Technologies</title>
 		<partintro>
 			<para>
-				This initial part of the reference documentation covers all of those
-				technologies that are absolutely integral to the Spring Framework.
+				This initial part of the reference documentation covers
+				all of those technologies that are absolutely integral
+				to the Spring Framework.
 			</para>
 			<para>
-				Foremost amongst these is the Spring Framework's Inversion of Control (IoC)
-				container.
+				Foremost amongst these is the Spring Framework's
+				Inversion of Control (IoC) container.
 			</para>
 			<para>
-				A thorough treatment of the Spring Framework's IoC container is closely
-				followed by comprehensive coverage of Spring's Aspect-Oriented Programming (AOP)
-				technologies. The Spring Framework has its own AOP framework, which is
-				conceptually easy to understand, and which (successfully) addresses the 80%
-				sweet spot of AOP requirements in Java enterprise programming.
+				A thorough treatment of the Spring Framework's IoC
+				container is closely followed by comprehensive coverage
+				of Spring's Aspect-Oriented Programming (AOP)
+				technologies. The Spring Framework has its own AOP
+				framework, which is conceptually easy to understand, and
+				which (successfully) addresses the 80% sweet spot of AOP
+				requirements in Java enterprise programming.
 			</para>
 			<para>
-				Coverage of Spring's integration with AspectJ (currently the richest - in
-				terms of features - and certainly most mature AOP implementation in the
-				Java enterprise space) is also provided.
+				Coverage of Spring's integration with AspectJ (currently
+				the richest - in terms of features - and certainly most
+				mature AOP implementation in the Java enterprise space)
+				is also provided.
 			</para>
 			<itemizedlist>
 				<listitem>
@@ -153,13 +164,15 @@
 		<title>Middle Tier Data Access</title>
 		<partintro>
 			<para>
-				This part of the reference documentation is concerned with the middle tier,
-				and specifically the data access responsibilities of said tier.
+				This part of the reference documentation is concerned
+				with the middle tier, and specifically the data access
+				responsibilities of said tier.
 			</para>
 			<para>
-				Spring's comprehensive transaction management support is covered in some detail,
-				followed by thorough coverage of the various middle tier data access frameworks
-				and technologies that the Spring Framework integrates with.
+				Spring's comprehensive transaction management support is
+				covered in some detail, followed by thorough coverage of
+				the various middle tier data access frameworks and
+				technologies that the Spring Framework integrates with.
 			</para>
 			<itemizedlist>
 				<listitem>
@@ -180,26 +193,32 @@
 		&dao;
 		&jdbc;
 		&orm;
-	</part>	
+	</part>
 	<part>
 		<title>The Web</title>
 		<partintro>
 			<para>
-				This part of the reference documentation covers the Spring Framework's
-				support for the presentation tier (and specifically web-based presentation
-				tiers).
+				This part of the reference documentation covers the
+				Spring Framework's support for the presentation tier
+				(and specifically web-based presentation tiers).
 			</para>
 			<para>
-				The Spring Framework's own web framework, <link linkend="mvc">Spring MVC</link>,
-				is coevered in the first couple of chapters. A number of the remaining chapters in
-				this part of the reference documentation are concerned with the Spring Framework's
-				integration with other web technologies, including as other web frameworks such as
-				<link linkend="struts">Struts</link> and <link linkend="jsf">JSF</link> (to name
-				but a few).
+				The Spring Framework's own web framework,
+				<link linkend="mvc">Spring MVC</link>
+				, is coevered in the first couple of chapters. A number
+				of the remaining chapters in this part of the reference
+				documentation are concerned with the Spring Framework's
+				integration with other web technologies, including as
+				other web frameworks such as
+				<link linkend="struts">Struts</link>
+				and
+				<link linkend="jsf">JSF</link>
+				(to name but a few).
 			</para>
 			<para>
 				This section concludes with coverage of Spring's
-				<link linkend="portlet">portlet framework</link>.
+				<link linkend="portlet">portlet framework</link>
+				.
 			</para>
 			<itemizedlist>
 				<listitem>
@@ -225,8 +244,9 @@
 		<title>Integration</title>
 		<partintro>
 			<para>
-				This final part of the reference documentation covers the Spring Framework's
-				integration with a number of J2EE (and related) technologies.
+				This final part of the reference documentation covers
+				the Spring Framework's integration with a number of J2EE
+				(and related) technologies.
 			</para>
 			<itemizedlist>
 				<listitem>
@@ -251,6 +271,9 @@
 					<xref linkend="scheduling" />
 				</listitem>
 				<listitem>
+					<xref linkend="taskexecutor" />
+				</listitem>
+				<listitem>
 					<xref linkend="dynamic-language" />
 				</listitem>
 				<listitem>
@@ -268,6 +291,7 @@
 		&cci;
 		&mail;
 		&scheduling;
+		&taskexecutor;
 		&dynamic-languages;
 		&testing;
 		&metadata;
