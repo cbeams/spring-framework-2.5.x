@@ -303,13 +303,21 @@
 
       <itemizedlist>
         <listitem>
-          <para><xref linkend="jmx-exporting-registration-behavior" /></para>
+          <xref linkend="jmx-exporting-registration-behavior" />
         </listitem>
 
         <listitem>
-          <para><xref linkend="jmx-notifications" /></para>
+          <xref linkend="jmx-notifications" />
         </listitem>
       </itemizedlist>
+    </section>
+
+    <section id="new-in-2-other-taskexecutor">
+      <title>Task scheduling</title>
+
+      <para>Spring 2.0 offers an abstraction around the scheduling of tasks...
+      for the interested developer, the section entitled
+      <xref linkend="taskexecutor"/> contains all of the details.</para>
     </section>
 
     <section id="new-in-2-other-tooling-spi">
@@ -338,10 +346,10 @@
           <xref linkend="metadata-annotations-required" />
         </listitem>
 		<listitem>
-			<para><xref linkend="aspectj-atconfigurable"/></para>
+			<xref linkend="aspectj-atconfigurable"/>
 		</listitem>
 		<listitem>
-			<para><xref linkend="aspectj-ataspectj"/></para>
+			<xref linkend="aspectj-ataspectj"/>
 		</listitem>
       </itemizedlist>
     </section>
