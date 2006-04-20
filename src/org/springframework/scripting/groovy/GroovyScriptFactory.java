@@ -24,8 +24,8 @@ import org.codehaus.groovy.control.CompilationFailedException;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.springframework.scripting.ScriptFactory} implementation
@@ -54,7 +54,7 @@ public class GroovyScriptFactory implements ScriptFactory {
 	 * a Groovy script defines its Java interfaces itself.
 	 * @param scriptSourceLocator a locator that points to the source of the script.
 	 * Interpreted by the post-processor that actually creates the script.
-	 * @throws IllegalArgumentException if the supplied argument is <code>null></code> or consists wholly of whitespace
+	 * @throws IllegalArgumentException if the supplied String is empty
 	 */
 	public GroovyScriptFactory(String scriptSourceLocator) {
 		Assert.hasText(scriptSourceLocator);
