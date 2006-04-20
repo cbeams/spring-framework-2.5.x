@@ -62,13 +62,13 @@
     <target name="email" depends="email-success, email-failure"/>
     
     <target name="email-failure" depends="guard.smtp.host">
-    	<mail mailhost="${smtp.host}" subject="Spring ${label} FAILED" tolist="springframework-developer@lists.sourceforge.net,alef.arendsen@interface21.com" from="alef.arendsen@interface21.com">
+    	<mail mailhost="${smtp.host}" subject="Spring ${label} FAILED" tolist="springframework-developer@lists.sourceforge.net" from="build@interface21.com">
     		<message>Errors and a list of modifications can be found in the build log (http://static.springframework.org/spring/build/index.html).</message>
     	</mail>
     </target>
     
     <target name="email-success" depends="guard.smtp.host">
-    	<mail mailhost="${smtp.host}" subject="Spring ${label} SUCCEEDED" tolist="springframework-developer@lists.sourceforge.net,alef.arendsen@interface21.com" from="alef.arendsen@interface21.com">
+    	<mail mailhost="${smtp.host}" subject="Spring ${label} SUCCEEDED" tolist="springframework-developer@lists.sourceforge.net" from="build@interface21.com">
     		<message>Snapshot has been uploaded to http://www.springframework.org/snaphots
     			
 The list of modifications for this build can be found in the build log (http://static.springframework.org/spring/build/index.html).    			
@@ -109,7 +109,7 @@ The list of modifications for this build can be found in the build log (http://s
 		<cvs command="update -d" dest="${basedir}"/>
 	</target>
 	
-	<target name="automated-build" depends="cvs-update,clean,testsummary,release, snapshot"/>
+	<target name="automated-build" depends="clean,testsummary,release, snapshot"/>
     
     
     
