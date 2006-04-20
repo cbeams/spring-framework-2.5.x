@@ -20,8 +20,16 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.sql.*;
-import java.util.*;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -36,6 +44,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.util.Assert;
 
 /**
  * <b>This is the central class in the JDBC core package.</b>
@@ -308,9 +317,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public Object query(final String sql, final ResultSetExtractor rse) throws DataAccessException {
-		if (sql == null) {
-			throw new InvalidDataAccessApiUsageException("SQL must not be null");
-		}
+		Assert.notNull(sql, "SQL must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL query [" + sql + "]");
 		}
@@ -380,9 +387,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public int update(final String sql) throws DataAccessException {
-		if (sql == null) {
-			throw new InvalidDataAccessApiUsageException("SQL must not be null");
-		}
+		Assert.notNull(sql, "SQL must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL update [" + sql + "]");
 		}
@@ -402,9 +407,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public int[] batchUpdate(final String[] sql) throws DataAccessException {
-		if (sql == null) {
-			throw new InvalidDataAccessApiUsageException("SQL must not be null");
-		}
+		Assert.notNull(sql, "SQL must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update of " + sql.length + " statements");
 		}
@@ -541,16 +544,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(psc, null, rse);
 	}
 
-	public Object query(String sql, PreparedStatementSetter pss, final ResultSetExtractor rse)
-			throws DataAccessException {
-		if (sql == null) {
-			throw new InvalidDataAccessApiUsageException("SQL may not be null");
-		}
+	public Object query(String sql, PreparedStatementSetter pss, ResultSetExtractor rse) throws DataAccessException {
 		return query(new SimplePreparedStatementCreator(sql), pss, rse);
 	}
 
-	public Object query(String sql, Object[] args, int[] argTypes, ResultSetExtractor rse)
-			throws DataAccessException {
+	public Object query(String sql, Object[] args, int[] argTypes, ResultSetExtractor rse) throws DataAccessException {
 		return query(sql, new ArgTypePreparedStatementSetter(args, argTypes), rse);
 	}
 
@@ -562,43 +560,37 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		query(psc, new RowCallbackHandlerResultSetExtractor(rch));
 	}
 
-	public void query(String sql, PreparedStatementSetter pss, final RowCallbackHandler rch)
-			throws DataAccessException {
+	public void query(String sql, PreparedStatementSetter pss, RowCallbackHandler rch) throws DataAccessException {
 		query(sql, pss, new RowCallbackHandlerResultSetExtractor(rch));
 	}
 
-	public void query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rch)
-			throws DataAccessException {
+	public void query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rch) throws DataAccessException {
 		query(sql, new ArgTypePreparedStatementSetter(args, argTypes), rch);
 	}
 
-	public void query(String sql, Object[] args, RowCallbackHandler rch)
-			throws DataAccessException {
+	public void query(String sql, Object[] args, RowCallbackHandler rch) throws DataAccessException {
 		query(sql, new ArgPreparedStatementSetter(args), rch);
 	}
 
-	public List query(PreparedStatementCreator psc, RowMapper rowMapper)
-			throws DataAccessException {
+	public List query(PreparedStatementCreator psc, RowMapper rowMapper) throws DataAccessException {
 		return (List) query(psc, new RowMapperResultSetExtractor(rowMapper));
 	}
 
-	public List query(String sql, PreparedStatementSetter pss, RowMapper rowMapper)
-			throws DataAccessException {
+	public List query(String sql, PreparedStatementSetter pss, RowMapper rowMapper) throws DataAccessException {
 		return (List) query(sql, pss, new RowMapperResultSetExtractor(rowMapper));
 	}
 
-	public List query(String sql, Object[] args, int[] argTypes, RowMapper rowMapper)
-			throws DataAccessException {
+	public List query(String sql, Object[] args, int[] argTypes, RowMapper rowMapper) throws DataAccessException {
 		return (List) query(sql, args, argTypes, new RowMapperResultSetExtractor(rowMapper));
 	}
 
-	public List query(String sql, Object[] args, RowMapper rowMapper)
-			throws DataAccessException {
+	public List query(String sql, Object[] args, RowMapper rowMapper) throws DataAccessException {
 		return (List) query(sql, args, new RowMapperResultSetExtractor(rowMapper));
 	}
 
 	public Object queryForObject(String sql, Object[] args, int[] argTypes, RowMapper rowMapper)
 			throws DataAccessException {
+
 		List results = (List) query(sql, args, argTypes, new RowMapperResultSetExtractor(rowMapper, 1));
 		return DataAccessUtils.requiredUniqueResult(results);
 	}
@@ -610,6 +602,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	public Object queryForObject(String sql, Object[] args, int[] argTypes, Class requiredType)
 			throws DataAccessException {
+
 		return queryForObject(sql, args, argTypes, getSingleColumnRowMapper(requiredType));
 	}
 
@@ -645,12 +638,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return (number != null ? number.intValue() : 0);
 	}
 
-	public List queryForList(String sql, Object[] args, int[] argTypes, Class elementType)
-			throws DataAccessException {
+	public List queryForList(String sql, Object[] args, int[] argTypes, Class elementType) throws DataAccessException {
 		return query(sql, args, argTypes, getSingleColumnRowMapper(elementType));
 	}
 
-	public List queryForList(String sql, final Object[] args, Class elementType) throws DataAccessException {
+	public List queryForList(String sql, Object[] args, Class elementType) throws DataAccessException {
 		return query(sql, args, getSingleColumnRowMapper(elementType));
 	}
 
@@ -658,15 +650,15 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(sql, args, argTypes, getColumnMapRowMapper());
 	}
 
-	public List queryForList(String sql, final Object[] args) throws DataAccessException {
+	public List queryForList(String sql, Object[] args) throws DataAccessException {
 		return query(sql, args, getColumnMapRowMapper());
 	}
 
-	public SqlRowSet queryForRowSet(String sql, final Object[] args, int[] argTypes) throws DataAccessException {
+	public SqlRowSet queryForRowSet(String sql, Object[] args, int[] argTypes) throws DataAccessException {
 		return (SqlRowSet) query(sql, args, argTypes, new SqlRowSetResultSetExtractor());
 	}
 
-	public SqlRowSet queryForRowSet(String sql, final Object[] args) throws DataAccessException {
+	public SqlRowSet queryForRowSet(String sql, Object[] args) throws DataAccessException {
 		return (SqlRowSet) query(sql, args, new SqlRowSetResultSetExtractor());
 	}
 
@@ -735,15 +727,15 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return result.intValue();
 	}
 
-	public int update(String sql, final PreparedStatementSetter pss) throws DataAccessException {
+	public int update(String sql, PreparedStatementSetter pss) throws DataAccessException {
 		return update(new SimplePreparedStatementCreator(sql), pss);
 	}
 
-	public int update(String sql, final Object[] args, final int[] argTypes) throws DataAccessException {
+	public int update(String sql, Object[] args, int[] argTypes) throws DataAccessException {
 		return update(sql, new ArgTypePreparedStatementSetter(args, argTypes));
 	}
 
-	public int update(String sql, final Object[] args) throws DataAccessException {
+	public int update(String sql, Object[] args) throws DataAccessException {
 		return update(sql, new ArgPreparedStatementSetter(args));
 	}
 
@@ -833,7 +825,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 	}
 
-	public Object execute(final String callString, CallableStatementCallback action) throws DataAccessException {
+	public Object execute(String callString, CallableStatementCallback action) throws DataAccessException {
 		return execute(new SimpleCallableStatementCreator(callString), action);
 	}
 
@@ -1022,7 +1014,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (warning != null) {
 			if (isIgnoreWarnings()) {
 				if (logger.isWarnEnabled()) {
-					logger.warn("SQLWarning ignored: " + warning);
+					logger.warn("SQLWarning ignored: SQL state '" + warning.getSQLState() + "', error code '" +
+							warning.getErrorCode() + "', message [" + warning.getMessage() + "]");
 				}
 			}
 			else {
@@ -1103,12 +1096,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * Simple adapter for PreparedStatementCreator, allowing to use a plain SQL statement.
 	 */
-	private static class SimplePreparedStatementCreator
-			implements PreparedStatementCreator, SqlProvider {
+	private static class SimplePreparedStatementCreator implements PreparedStatementCreator, SqlProvider {
 
 		private final String sql;
 
 		public SimplePreparedStatementCreator(String sql) {
+			Assert.notNull(sql, "SQL must not be null");
 			this.sql = sql;
 		}
 
@@ -1125,12 +1118,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * Simple adapter for CallableStatementCreator, allowing to use a plain SQL statement.
 	 */
-	private static class SimpleCallableStatementCreator
-			implements CallableStatementCreator, SqlProvider {
+	private static class SimpleCallableStatementCreator implements CallableStatementCreator, SqlProvider {
 
 		private final String callString;
 
 		public SimpleCallableStatementCreator(String callString) {
+			Assert.notNull(callString, "Call string must not be null");
 			this.callString = callString;
 		}
 
@@ -1142,76 +1135,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			return callString;
 		}
 
-	}
-
-
-	/**
-	 * Simple adapter for PreparedStatementSetter that applies
-	 * a given array of arguments.
-	 */
-	private static class ArgPreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
-
-		private final Object[] args;
-
-		public ArgPreparedStatementSetter(Object[] args) {
-			this.args = args;
-		}
-
-		public void setValues(PreparedStatement ps) throws SQLException {
-			if (this.args != null) {
-				for (int i = 0; i < this.args.length; i++) {
-					StatementCreatorUtils.setParameterValue(ps, i + 1, SqlTypeValue.TYPE_UNKNOWN, null, this.args[i]);
-				}
-			}
-		}
-
-		public void cleanupParameters() {
-			StatementCreatorUtils.cleanupParameters(this.args);
-		}
-	}
-
-
-	/**
-	 * Simple adapter for PreparedStatementSetter that applies
-	 * given arrays of arguments and JDBC argument types.
-	 */
-	private static class ArgTypePreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
-
-		private final Object[] args;
-
-		private final int[] argTypes;
-
-		public ArgTypePreparedStatementSetter(Object[] args, int[] argTypes) {
-			if ((args != null && argTypes == null) || (args == null && argTypes != null) ||
-					(args != null && args.length != argTypes.length)) {
-				throw new InvalidDataAccessApiUsageException("args and argTypes parameters must match");
-			}
-			this.args = args;
-			this.argTypes = argTypes;
-		}
-
-		public void setValues(PreparedStatement ps) throws SQLException {
-            int argIndx = 1;
-            if (this.args != null) {
-				for (int i = 0; i < this.args.length; i++) {
-                    Object arg = this.args[i];
-                    if (arg instanceof Collection && this.argTypes[i] != Types.ARRAY) {
-                        Collection entries = (Collection) arg;
-                        for (Iterator it = entries.iterator(); it.hasNext();) {
-                            Object entry = it.next();
-                            StatementCreatorUtils.setParameterValue(ps, argIndx++, this.argTypes[i], null, entry);
-                        }
-                    }
-                    else {
-                        StatementCreatorUtils.setParameterValue(ps, argIndx++, this.argTypes[i], null, arg);
-                    }
-                }
-			}
-		}
-
-		public void cleanupParameters() {
-			StatementCreatorUtils.cleanupParameters(this.args);
-		}
 	}
 
 
