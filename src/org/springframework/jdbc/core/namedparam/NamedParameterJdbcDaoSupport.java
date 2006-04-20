@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,12 @@
 
 package org.springframework.jdbc.core.namedparam;
 
-import javax.sql.DataSource;
-
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
 /**
- * Extension of JdbcDaoSupport to expose a NamedParameterJdbcTemplate.
+ * Extension of JdbcDaoSupport that exposes a NamedParameterJdbcTemplate as well.
  * 
  * @author Thomas Risberg
- * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0
  * @see NamedParameterJdbcTemplate
@@ -36,16 +32,16 @@ public class NamedParameterJdbcDaoSupport extends JdbcDaoSupport {
 
 
 	/**
-	 * Overridden to not only create a JdbcTemplate but also a NamedParameterJdbcTemplate.
+	 * Overridden to create a NamedParameterJdbcTemplate based on the
+	 * configured JdbcTemplate.
 	 */
-	protected JdbcTemplate createJdbcTemplate(DataSource dataSource) {
-		JdbcTemplate jt = new JdbcTemplate(dataSource);
-		this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jt);
-		return jt;
+	protected void checkDaoConfig() {
+		super.checkDaoConfig();
+		this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
 	}
-	
+
 	/**
-	 * Return a NamedParameterJdbcTemplate wrapping the current JdbcTemplate.
+	 * Return a NamedParameterJdbcTemplate wrapping the configured JdbcTemplate.
 	 */
 	public NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
 	  return namedParameterJdbcTemplate;
