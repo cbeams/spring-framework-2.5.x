@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<appendix id="xsd-config">
+	<title>XML Schema-based configuration</title>
+	<section>
+		<title>Introduction</title>
+		<para>This section of the reference documentation details the XML Schema based
+    configuration that was introduced in Spring 2.0.</para>
+		<sidebar>
+			<title>DTD?</title>
+			<para>Authoring Spring configuration files using the older DTD style
+			is still totally supported.</para>
+			<para>Nothing will break if you forego the use of the new XML Schema-based
+			approach to authoring Spring XML configuration files. All that you lose
+			out on is more succinct and clearer configuration... in the end all of the
+			XML configuration, be it DTD- or Schema-based all boils down to the same
+			object model in the container.</para>
+		</sidebar>
+		<para>The central motivation for moving to XML Schema based configuration files was
+		to enable easier Spring (unsurprisingly). The <emphasis>'classic'</emphasis>
+		<literal>&lt;bean/&gt;</literal>-based approach is good (and it still continues
+		to be good), but it does suffer from being a tad generic.</para>
+		<para>From the Spring IoC containers point of view, <emphasis>everything</emphasis>
+		is a bean. Thats great news for the Spring IoC container, because if everything is
+		a bean then everything can be treated the same. The same is not true for
+		developers... the objects (or classes rather) that one defines in a Spring
+		XML configuration file are not all generic, vanilla beans.</para>
+		<para>Spring 2.0's new XML Schema-based configuration addresses this issue.
+		The <literal>&lt;bean/&gt;</literal> element is still present, and if one
+		wanted to one could continue to write the <emphasis>exact same</emphasis>
+		style of Spring XML configuration using only <literal>&lt;bean/&gt;</literal>
+		elements. The new XML Schema-based configuration does however result in
+		Spring XML configuration files that are substantially clearer to read, and
+		that allow one to express the intent of what a bean definition is.
+		</para>
+		<para>The examples included below will hopefully convince you that the inclusion
+		of XML Schema support in Spring 2.0 was a good idea. The Spting team certainly
+		thinks so, and the reception in the community has been encouraging; something that
+		is not covered in this section (at least not right now) is the fact that this
+		new configuration mechanism is totally customisable and extensible. This means
+		that one can write one's own domain specific configuration that allows one
+		to more succinctly express one's domain.</para>
+	</section>
+	<section id="xsd-config-body">
+		<title>XML Schema-based configuration</title>
+		<section id="xsd-config-body-referencing">
+			<title>Referencing the schemas</title>
+			<para>[TODO : explain how to locate and reference the correct schemas at the top of ones configuratio file]</para>
+		</section>
+		<section id="xsd-config-body-schemas-util">
+			<title>The <literal>util</literal> schema</title>
+			<para>[TODO : provide examples or links to examples (with screenshots)]</para>
+		</section>
+	</section>
+	<section id="xsd-config-setup">
+		<title>Setting up your IDE</title>
+		<para>This final section documents the steps involved in setting up a number of
+		popular Java IDEs to effect the easier editing of Spring's XML Schema-based
+		configuration files.</para>
+		<para>If your favourite Java IDE or editor is not included in the list of
+		documented IDEs, then please do raise an issue (or ticket) on the Spring
+		Framework
+		<ulink linkend="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA</ulink>
+		and the oversight <emphasis>may</emphasis> well be addressed in the next release.</para>
+		<section id="xsd-config-setup-eclipse">
+			<title>Setting up Eclipse</title>
+			<para>[TODO :  document setting up Eclipse (with screenshots)]</para>
+		</section>
+		<section id="xsd-config-setup-idea">
+			<title>Setting up IDEA</title>
+			<para>[TODO :  document setting up IDEA (with screenshots)]</para>
+		</section>
+	</section>
+</appendix>

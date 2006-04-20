@@ -51,8 +51,8 @@
       of the new XML configuration syntax. If you want to take advantage of
       the new tags that Spring provides (and the Spring team certainly suggest
       that you do because they make one's configuration much less verbose and
-      just plain easier to read), then do read the section entitled [TODO :
-      link to the new schema-based configuration section]</para>
+      just plain easier to read), then do read the section entitled
+      <xref linkend="xsd-config"/>.</para>
     </section>
 
     <section id="new-in-2-ioc-custom-configuration">
@@ -70,8 +70,12 @@
 
       <para>This feature may not be of interest to every single application
       developer or enterprise architect using Spring in their own projects,
-      and so it is detailed separately in the [appendix] entitled [TODO : link
-      to the 'Write your own namespace handler' section]</para>
+      and so it is not (as yet) detailed in this reference documentation. If
+      you are interested in writing your own Spring configuration tags, then
+      having a look at the source code for the current Spring tags is your
+      starting point (it would be wrong to say that the process is trivial,
+      but it isn't exactly hard either... one Java class and one XSD schema
+      document is what you're looking at having to write).</para>
     </section>
 
     <section id="new-in-2-ioc-scopes">
@@ -144,6 +148,12 @@
   <section id="new-in-2-middle-tier">
     <title>Middle tier (data access)</title>
 
+    <section id="new-in-2-middle-tier-transaction-configuration">
+      <title>Easier configuration of declarative transactions in XML</title>
+
+      <para>[TODO : coverage of the new XML transaction configuration]</para>
+    </section>
+
     <section id="new-in-2-middle-tier-jpa">
       <title>JPA</title>
 
@@ -174,8 +184,6 @@
 
     <section id="new-in-2-middle-tier-jdbc">
       <title>JDBC</title>
-
-      <para>[TODO : coverage of the new XML transaction configuration]</para>
 
       <para>There are some notable new classes in the area of Spring's JDBC
       abstraction framework. The first,

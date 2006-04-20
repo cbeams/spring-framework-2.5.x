@@ -28,7 +28,8 @@
 <!ENTITY taskexecutor		SYSTEM "taskexecutor.xml">
 <!ENTITY testing			SYSTEM "testing.xml">
 <!ENTITY scripting			SYSTEM "scripting.xml">
-<!ENTITY dynamic-languages   SYSTEM "dynamic-languages.xml">
+<!ENTITY dynamic-languages  SYSTEM "dynamic-languages.xml">
+<!ENTITY xsd-configuration  SYSTEM "xsd-configuration.xml">
 <!ENTITY schema-beans       SYSTEM "spring-beans.xsd.xml">
 <!ENTITY dtd				SYSTEM "dtd.xml">
 <!ENTITY spring.tld         SYSTEM "spring.tld.xml">
@@ -297,6 +298,7 @@
 		&metadata;
 	</part>
 	<!-- back matter -->
+	&xsd-configuration;
 	&schema-beans;
 	&dtd;
 	&spring.tld;
