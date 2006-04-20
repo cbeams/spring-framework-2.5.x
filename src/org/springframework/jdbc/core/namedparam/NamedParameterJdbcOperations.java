@@ -50,6 +50,10 @@ public interface NamedParameterJdbcOperations {
 	JdbcOperations getJdbcOperations();
 
 
+	//-------------------------------------------------------------------------
+	// Query operations
+	//-------------------------------------------------------------------------
+
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
 	 * arguments to bind to the query, reading the ResultSet on a per-row basis
@@ -376,9 +380,14 @@ public interface NamedParameterJdbcOperations {
 	 */
 	SqlRowSet queryForRowSet(String sql, Map paramMap) throws DataAccessException;
 
+
+	//-------------------------------------------------------------------------
+	// Update operations
+	//-------------------------------------------------------------------------
+
 	/**
 	 * Issue an update via a prepared statement, binding the given arguments.
-	 * @param sql SQL, containing bind parameters
+	 * @param sql SQL containing named parameters
 	 * @param paramSource container of arguments and SQL types to bind to the query
 	 * @return the number of rows affected
 	 * @throws org.springframework.dao.DataAccessException if there is any problem issuing the update
@@ -387,7 +396,7 @@ public interface NamedParameterJdbcOperations {
 
 	/**
 	 * Issue an update via a prepared statement, binding the given arguments.
-	 * @param sql SQL, containing bind parameters
+	 * @param sql SQL containing named parameters
 	 * @param paramMap map of parameters to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @return the number of rows affected
@@ -395,16 +404,34 @@ public interface NamedParameterJdbcOperations {
 	 */
 	int update(String sql, Map paramMap) throws DataAccessException;
 
-    /**
-     * Issue an update via a prepared statement, binding the given arguments.
-     * @param sql SQL, containing bind parameters
-     * @param paramSource container of arguments and SQL types to bind to the query
-     * @param generatedKeyHolder KeyHolder that will hold the generated keys
-     * @param keyColumnNames names of the columns that will have keys generated for them
-     * @return the number of rows affected
-     * @throws org.springframework.dao.DataAccessException if there is any problem issuing the update
-     */
-    int update(String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, String[] keyColumnNames) throws DataAccessException;
+	/**
+	 * Issue an update via a prepared statement, binding the given arguments,
+	 * returning generated keys.
+	 * @param sql SQL containing named parameters
+	 * @param paramSource container of arguments and SQL types to bind to the query
+	 * @param generatedKeyHolder KeyHolder that will hold the generated keys
+	 * @return the number of rows affected
+	 * @throws org.springframework.dao.DataAccessException if there is any problem issuing the update
+	 * @see SimpleSqlParameterSource
+	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 */
+	int update(String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder)
+			throws DataAccessException;
 
+	/**
+	 * Issue an update via a prepared statement, binding the given arguments,
+	 * returning generated keys.
+	 * @param sql SQL containing named parameters
+	 * @param paramSource container of arguments and SQL types to bind to the query
+	 * @param generatedKeyHolder KeyHolder that will hold the generated keys
+	 * @param keyColumnNames names of the columns that will have keys generated for them
+	 * @return the number of rows affected
+	 * @throws org.springframework.dao.DataAccessException if there is any problem issuing the update
+	 * @see SimpleSqlParameterSource
+	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+	 */
+	int update(
+			String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, String[] keyColumnNames)
+			throws DataAccessException;
 
 }

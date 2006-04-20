@@ -23,9 +23,17 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
-import org.springframework.jdbc.core.*;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.core.ColumnMapRowMapper;
+import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.RowMapperResultSetExtractor;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
+import org.springframework.jdbc.core.SqlRowSetResultSetExtractor;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.util.Assert;
 
 /**
@@ -49,169 +57,194 @@ import org.springframework.util.Assert;
  */
 public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations {
 
-    /** The JdbcTemplate we are wrapping */
-    private final JdbcOperations classicJdbcTemplate;
+	/**
+	 * The JdbcTemplate we are wrapping
+	 */
+	private final JdbcOperations classicJdbcTemplate;
 
 
-    /**
-     * Create a new NamedParameterJdbcTemplate for the given {@link DataSource}.
-     * <p>Creates a classic Spring {@link org.springframework.jdbc.core.JdbcTemplate} and wraps it.
-     * @param dataSource the JDBC {@link DataSource} to access
+	/**
+	 * Create a new NamedParameterJdbcTemplate for the given {@link DataSource}.
+	 * <p>Creates a classic Spring {@link org.springframework.jdbc.core.JdbcTemplate} and wraps it.
+	 * @param dataSource the JDBC {@link DataSource} to access
 	 * @throws IllegalArgumentException if the given {@link DataSource} is <code>null</code>
-     */
-    public NamedParameterJdbcTemplate(DataSource dataSource) {
-        Assert.notNull(dataSource, "The [dataSource] argument cannot be null.");
-        this.classicJdbcTemplate = new JdbcTemplate(dataSource);
-    }
+	 */
+	public NamedParameterJdbcTemplate(DataSource dataSource) {
+		Assert.notNull(dataSource, "The [dataSource] argument cannot be null.");
+		this.classicJdbcTemplate = new JdbcTemplate(dataSource);
+	}
 
-    /**
-     * Create a new SimpleJdbcTemplate for the given classic Spring {@link org.springframework.jdbc.core.JdbcTemplate}.
-     * @param classicJdbcTemplate the classic Spring {@link org.springframework.jdbc.core.JdbcTemplate} to wrap
+	/**
+	 * Create a new SimpleJdbcTemplate for the given classic Spring {@link org.springframework.jdbc.core.JdbcTemplate}.
+	 * @param classicJdbcTemplate the classic Spring {@link org.springframework.jdbc.core.JdbcTemplate} to wrap
 	 * @throws IllegalArgumentException if the given {@link org.springframework.jdbc.core.JdbcTemplate} is <code>null</code>
-     */
-    public NamedParameterJdbcTemplate(JdbcOperations classicJdbcTemplate) {
-        Assert.notNull(classicJdbcTemplate, "The [classicJdbcTemplate] argument cannot be null.");
-        this.classicJdbcTemplate = classicJdbcTemplate;
-    }
+	 */
+	public NamedParameterJdbcTemplate(JdbcOperations classicJdbcTemplate) {
+		Assert.notNull(classicJdbcTemplate, "The [classicJdbcTemplate] argument cannot be null.");
+		this.classicJdbcTemplate = classicJdbcTemplate;
+	}
 
-    /**
-     * Expose the classic Spring JdbcTemplate to allow invocation of
-     * less commonly used methods.
-     */
-    public JdbcOperations getJdbcOperations() {
-        return this.classicJdbcTemplate;
-    }
+	/**
+	 * Expose the classic Spring JdbcTemplate to allow invocation of
+	 * less commonly used methods.
+	 */
+	public JdbcOperations getJdbcOperations() {
+		return this.classicJdbcTemplate;
+	}
 
 
-    public void query(String sql, SqlParameterSource paramSource, RowCallbackHandler rch)
-            throws DataAccessException {
-        ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-        Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
-        int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
-        String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
-        getJdbcOperations().query(sqlToUse, args, argTypes, rch);
-    }
+	//-------------------------------------------------------------------------
+	// Query operations
+	//-------------------------------------------------------------------------
 
-    public void query(String sql, Map paramMap, RowCallbackHandler rch) throws DataAccessException {
-        query(sql, new SimpleSqlParameterSource(paramMap), rch);
-    }
+	public void query(String sql, SqlParameterSource paramSource, RowCallbackHandler rch)
+			throws DataAccessException {
 
-    public List query(String sql, SqlParameterSource paramSource, RowMapper rowMapper)
-            throws DataAccessException {
-        ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-        Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
-        int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
-        String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
-        return (List) getJdbcOperations().query(
-                sqlToUse, args, argTypes, new RowMapperResultSetExtractor(rowMapper));
-    }
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
+		int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
+		getJdbcOperations().query(sqlToUse, args, argTypes, rch);
+	}
 
-    public List query(String sql, Map paramMap, RowMapper rowMapper) throws DataAccessException {
-        return query(sql, new SimpleSqlParameterSource(paramMap), rowMapper);
-    }
+	public void query(String sql, Map paramMap, RowCallbackHandler rch) throws DataAccessException {
+		query(sql, new SimpleSqlParameterSource(paramMap), rch);
+	}
 
-    public Object queryForObject(String sql, SqlParameterSource paramSource, RowMapper rowMapper)
-            throws DataAccessException {
-        ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-        Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
-        int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
-        String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
-        List results = (List) getJdbcOperations().query(
-                sqlToUse, args, argTypes, new RowMapperResultSetExtractor(rowMapper, 1));
-        return DataAccessUtils.requiredUniqueResult(results);
-    }
+	public List query(String sql, SqlParameterSource paramSource, RowMapper rowMapper)
+			throws DataAccessException {
 
-    public Object queryForObject(String sql, Map paramMap, RowMapper rowMapper) throws DataAccessException {
-        return queryForObject(sql, new SimpleSqlParameterSource(paramMap), rowMapper);
-    }
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
+		int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
+		return (List) getJdbcOperations().query(
+				sqlToUse, args, argTypes, new RowMapperResultSetExtractor(rowMapper));
+	}
 
-    public Object queryForObject(String sql, SqlParameterSource paramSource, Class requiredType)
-            throws DataAccessException {
-        return queryForObject(sql, paramSource, new SingleColumnRowMapper(requiredType));
-    }
+	public List query(String sql, Map paramMap, RowMapper rowMapper) throws DataAccessException {
+		return query(sql, new SimpleSqlParameterSource(paramMap), rowMapper);
+	}
 
-    public Object queryForObject(String sql, Map paramMap, Class requiredType) throws DataAccessException {
-        return queryForObject(sql, paramMap, new SingleColumnRowMapper(requiredType));
-    }
+	public Object queryForObject(String sql, SqlParameterSource paramSource, RowMapper rowMapper)
+			throws DataAccessException {
 
-    public Map queryForMap(String sql, SqlParameterSource paramSource) throws DataAccessException {
-        return (Map) queryForObject(sql, paramSource, new ColumnMapRowMapper());
-    }
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
+		int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
+		List results = (List) getJdbcOperations().query(
+				sqlToUse, args, argTypes, new RowMapperResultSetExtractor(rowMapper, 1));
+		return DataAccessUtils.requiredUniqueResult(results);
+	}
 
-    public Map queryForMap(String sql, Map paramMap) throws DataAccessException {
-        return (Map) queryForObject(sql, paramMap, new ColumnMapRowMapper());
-    }
+	public Object queryForObject(String sql, Map paramMap, RowMapper rowMapper) throws DataAccessException {
+		return queryForObject(sql, new SimpleSqlParameterSource(paramMap), rowMapper);
+	}
 
-    public long queryForLong(String sql, SqlParameterSource paramSource) throws DataAccessException {
-        Number number = (Number) queryForObject(sql, paramSource, Number.class);
-        return (number != null ? number.longValue() : 0);
-    }
+	public Object queryForObject(String sql, SqlParameterSource paramSource, Class requiredType)
+			throws DataAccessException {
+		return queryForObject(sql, paramSource, new SingleColumnRowMapper(requiredType));
+	}
 
-    public long queryForLong(String sql, Map paramMap) throws DataAccessException {
-        return queryForLong(sql, new SimpleSqlParameterSource(paramMap));
-    }
+	public Object queryForObject(String sql, Map paramMap, Class requiredType) throws DataAccessException {
+		return queryForObject(sql, paramMap, new SingleColumnRowMapper(requiredType));
+	}
 
-    public int queryForInt(String sql, SqlParameterSource paramSource) throws DataAccessException {
-        Number number = (Number) queryForObject(sql, paramSource, Number.class);
-        return (number != null ? number.intValue() : 0);
-    }
+	public Map queryForMap(String sql, SqlParameterSource paramSource) throws DataAccessException {
+		return (Map) queryForObject(sql, paramSource, new ColumnMapRowMapper());
+	}
 
-    public int queryForInt(String sql, Map paramMap) throws DataAccessException {
-        return queryForInt(sql, new SimpleSqlParameterSource(paramMap));
-    }
+	public Map queryForMap(String sql, Map paramMap) throws DataAccessException {
+		return (Map) queryForObject(sql, paramMap, new ColumnMapRowMapper());
+	}
 
-    public List queryForList(String sql, SqlParameterSource paramSource, Class elementType)
-            throws DataAccessException {
-        return query(sql, paramSource, new SingleColumnRowMapper(elementType));
-    }
+	public long queryForLong(String sql, SqlParameterSource paramSource) throws DataAccessException {
+		Number number = (Number) queryForObject(sql, paramSource, Number.class);
+		return (number != null ? number.longValue() : 0);
+	}
 
-    public List queryForList(String sql, Map paramMap, Class elementType) throws DataAccessException {
-        return queryForList(sql, new SimpleSqlParameterSource(paramMap), elementType);
-    }
+	public long queryForLong(String sql, Map paramMap) throws DataAccessException {
+		return queryForLong(sql, new SimpleSqlParameterSource(paramMap));
+	}
 
-    public List queryForList(String sql, SqlParameterSource paramSource) throws DataAccessException {
-        return query(sql, paramSource, new ColumnMapRowMapper());
-    }
+	public int queryForInt(String sql, SqlParameterSource paramSource) throws DataAccessException {
+		Number number = (Number) queryForObject(sql, paramSource, Number.class);
+		return (number != null ? number.intValue() : 0);
+	}
 
-    public List queryForList(String sql, Map paramMap) throws DataAccessException {
-        return queryForList(sql, new SimpleSqlParameterSource(paramMap));
-    }
+	public int queryForInt(String sql, Map paramMap) throws DataAccessException {
+		return queryForInt(sql, new SimpleSqlParameterSource(paramMap));
+	}
 
-    public SqlRowSet queryForRowSet(String sql, SqlParameterSource paramSource) throws DataAccessException {
-        ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-        Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
-        int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
-        String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
-        return (SqlRowSet) getJdbcOperations().query(sqlToUse, args, argTypes, new SqlRowSetResultSetExtractor());
-    }
+	public List queryForList(String sql, SqlParameterSource paramSource, Class elementType)
+			throws DataAccessException {
+		return query(sql, paramSource, new SingleColumnRowMapper(elementType));
+	}
 
-    public SqlRowSet queryForRowSet(String sql, Map paramMap) throws DataAccessException {
-        return queryForRowSet(sql, new SimpleSqlParameterSource(paramMap));
-    }
+	public List queryForList(String sql, Map paramMap, Class elementType) throws DataAccessException {
+		return queryForList(sql, new SimpleSqlParameterSource(paramMap), elementType);
+	}
 
-    public int update(String sql, SqlParameterSource paramSource) throws DataAccessException {
-        ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-        Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
-        int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
-        String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
-        return getJdbcOperations().update(sqlToUse, args, argTypes);
-    }
+	public List queryForList(String sql, SqlParameterSource paramSource) throws DataAccessException {
+		return query(sql, paramSource, new ColumnMapRowMapper());
+	}
 
-    public int update(String sql, Map paramMap) throws DataAccessException {
-        return update(sql, new SimpleSqlParameterSource(paramMap));
-    }
+	public List queryForList(String sql, Map paramMap) throws DataAccessException {
+		return queryForList(sql, new SimpleSqlParameterSource(paramMap));
+	}
 
-    public int update(String sql, SqlParameterSource paramSource, KeyHolder keyHolder, String[] keyColumnNames) {
-        ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-        Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
-        int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
-        String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
-        PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, argTypes);
-        pscf.setReturnGeneratedKeys(true);
-        if (keyColumnNames != null) {
-            pscf.setGeneratedKeysColumnNames(keyColumnNames);
-        }
-        return getJdbcOperations().update(pscf.newPreparedStatementCreator(args), keyHolder);
-    }
+	public SqlRowSet queryForRowSet(String sql, SqlParameterSource paramSource) throws DataAccessException {
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
+		int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
+		return (SqlRowSet) getJdbcOperations().query(sqlToUse, args, argTypes, new SqlRowSetResultSetExtractor());
+	}
+
+	public SqlRowSet queryForRowSet(String sql, Map paramMap) throws DataAccessException {
+		return queryForRowSet(sql, new SimpleSqlParameterSource(paramMap));
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Update operations
+	//-------------------------------------------------------------------------
+
+	public int update(String sql, SqlParameterSource paramSource) throws DataAccessException {
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
+		int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
+		return getJdbcOperations().update(sqlToUse, args, argTypes);
+	}
+
+	public int update(String sql, Map paramMap) throws DataAccessException {
+		return update(sql, new SimpleSqlParameterSource(paramMap));
+	}
+
+	public int update(String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder)
+			throws DataAccessException {
+
+		return update(sql, paramSource, generatedKeyHolder, null);
+	}
+
+	public int update(
+			String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, String[] keyColumnNames)
+			throws DataAccessException {
+
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
+		int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
+		PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, argTypes);
+		if (keyColumnNames != null) {
+			pscf.setGeneratedKeysColumnNames(keyColumnNames);
+		}
+		else {
+			pscf.setReturnGeneratedKeys(true);
+		}
+		return getJdbcOperations().update(pscf.newPreparedStatementCreator(args), generatedKeyHolder);
+	}
 
 }
