@@ -32,7 +32,7 @@ import java.util.Map;
  * @see Errors
  * @see Validator
  * @see BeanPropertyBindingResult
- * @see SimpleMapBindingResult
+ * @see MapBindingResult
  */
 public interface BindingResult extends Errors {
 
