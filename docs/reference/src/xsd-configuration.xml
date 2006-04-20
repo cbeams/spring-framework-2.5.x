@@ -6,7 +6,7 @@
 		<para>This section of the reference documentation details the XML Schema based
     configuration that was introduced in Spring 2.0.</para>
 		<sidebar>
-			<title>DTD?</title>
+			<title>DTD suppport?</title>
 			<para>Authoring Spring configuration files using the older DTD style
 			is still totally supported.</para>
 			<para>Nothing will break if you forego the use of the new XML Schema-based
@@ -44,10 +44,46 @@
 		<title>XML Schema-based configuration</title>
 		<section id="xsd-config-body-referencing">
 			<title>Referencing the schemas</title>
-			<para>[TODO : explain how to locate and reference the correct schemas at the top of ones configuratio file]</para>
+			<para>To switch over from the DTD-style to the new XML Schema-style, one needs
+			to effect the following change...</para>
+			<programlisting><lineannotation>&lt;!-- DTDT-style --&gt;</lineannotation>
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+
+</beans>]]></programlisting>
+			<para>
+				The equivalent file in the XML Schema-style would be...
+			</para>
+			<programlisting><lineannotation>&lt;!-- DTDT-style --&gt;</lineannotation>
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+<beans>
+
+]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+
+</beans>]]></programlisting>
+			<para>
+				The above Spring XML configuration fragment is pretty much boilerplate;
+				one can certainly simply use this and continue to write
+				<literal>&lt;bean/&gt;</literal> definitions like one has always been doing.
+				However, the entire point of switching over is to enable one to
+				take advantage of the new Spring 2.0 XML tags to enable easier
+				configuration. The section entitled <xref linkend="xsd-config-body-schemas-util"/>
+				demonstrates how one can immediately use some of the more common utility tags.
+			</para>
 		</section>
 		<section id="xsd-config-body-schemas-util">
 			<title>The <literal>util</literal> schema</title>
+			<para>
+				For this first example of the new XML tags, lets immediately jump straight to
+				some before and after style configuration.
+			</para>
 			<para>[TODO : provide examples or links to examples (with screenshots)]</para>
 		</section>
 	</section>
