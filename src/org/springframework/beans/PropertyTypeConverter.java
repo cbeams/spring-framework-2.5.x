@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.GenericsHelper;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
@@ -294,7 +295,8 @@ class PropertyTypeConverter {
 		if (methodParam != null && JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
 			elementType = GenericsHelper.getCollectionParameterType(methodParam);
 		}
-		Collection convertedCopy = (Collection) BeanUtils.instantiateClass(original.getClass());
+		Collection convertedCopy =
+				CollectionFactory.createApproximateCollection(original.getClass(), original.size());
 		boolean actuallyConverted = false;
 		int i = 0;
 		for (Iterator it = original.iterator(); it.hasNext(); i++) {
@@ -314,7 +316,7 @@ class PropertyTypeConverter {
 			keyType = GenericsHelper.getMapKeyParameterType(methodParam);
 			valueType = GenericsHelper.getMapValueParameterType(methodParam);
 		}
-		Map convertedCopy = (Map) BeanUtils.instantiateClass(original.getClass());
+		Map convertedCopy = CollectionFactory.createApproximateMap(original.getClass(), original.size());
 		boolean actuallyConverted = false;
 		for (Iterator it = original.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,20 @@
 
 package org.springframework.core;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.collections.map.CaseInsensitiveMap;
 import org.apache.commons.collections.map.IdentityMap;
@@ -31,6 +38,8 @@ import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.util.Assert;
 
 /**
  * Factory for collections, being aware of JDK 1.4+ extended collections
@@ -169,6 +178,75 @@ public class CollectionFactory {
 		else {
 			logger.debug("Falling back to [java.util.HashMap] for identity map");
 			return new HashMap(initialCapacity);
+		}
+	}
+
+
+	/**
+	 * Create the most approximate collection for the given collection class.
+	 * <p>Tries to create the given collection class. If that fails,
+	 * an ArrayList, TreeSet or linked Set will be used as fallback for
+	 * a List, SortedSet or Set, respectively.
+	 * @param collectionClass the original collection class
+	 * @param initialCapacity the initial capacity
+	 * @return the new collection instance
+	 * @see java.util.ArrayList
+	 * @see java.util.TreeSet
+	 * @see #createLinkedSetIfPossible
+	 */
+	public static Collection createApproximateCollection(Class collectionClass, int initialCapacity) {
+		Assert.notNull(collectionClass, "Collection class must not be null");
+		if (!collectionClass.isInterface()) {
+			try {
+				return (Collection) collectionClass.newInstance();
+			}
+			catch (Exception ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(
+							"Could not instantiate collection type [" + collectionClass.getName() + "]: " + ex.getMessage());
+				}
+			}
+		}
+		if (List.class.isAssignableFrom(collectionClass)) {
+			return new ArrayList(initialCapacity);
+		}
+		else if (SortedSet.class.isAssignableFrom(collectionClass)) {
+			return new TreeSet();
+		}
+		else {
+			return createLinkedSetIfPossible(initialCapacity);
+		}
+	}
+
+	/**
+	 * Create the most approximate map for the given map class.
+	 * <p>Tries to create the given map class. If that fails, a TreeMap or
+	 * linked Map will be used as fallback for a SortedMap or Map, respectively.
+	 * @param mapClass the original map class
+	 * @param initialCapacity the initial capacity
+	 * @return the new collection instance
+	 * @see java.util.ArrayList
+	 * @see java.util.TreeSet
+	 * @see #createLinkedSetIfPossible
+	 */
+	public static Map createApproximateMap(Class mapClass, int initialCapacity) {
+		Assert.notNull(mapClass, "Map class must not be null");
+		if (!mapClass.isInterface()) {
+			try {
+				return (Map) mapClass.newInstance();
+			}
+			catch (Exception ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(
+							"Could not instantiate map type [" + mapClass.getName() + "]: " + ex.getMessage());
+				}
+			}
+		}
+		if (SortedMap.class.isAssignableFrom(mapClass)) {
+			return new TreeMap();
+		}
+		else {
+			return createLinkedMapIfPossible(initialCapacity);
 		}
 	}
 
