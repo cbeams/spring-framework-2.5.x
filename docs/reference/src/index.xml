@@ -25,7 +25,6 @@
 <!ENTITY cci				SYSTEM "cci.xml">
 <!ENTITY mail				SYSTEM "mail.xml">
 <!ENTITY scheduling			SYSTEM "scheduling.xml">
-<!ENTITY taskexecutor		SYSTEM "taskexecutor.xml">
 <!ENTITY testing			SYSTEM "testing.xml">
 <!ENTITY scripting			SYSTEM "scripting.xml">
 <!ENTITY dynamic-languages  SYSTEM "dynamic-languages.xml">
@@ -272,9 +271,6 @@
 					<xref linkend="scheduling" />
 				</listitem>
 				<listitem>
-					<xref linkend="taskexecutor" />
-				</listitem>
-				<listitem>
 					<xref linkend="dynamic-language" />
 				</listitem>
 				<listitem>
@@ -292,7 +288,6 @@
 		&cci;
 		&mail;
 		&scheduling;
-		&taskexecutor;
 		&dynamic-languages;
 		&testing;
 		&metadata;

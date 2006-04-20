@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+<!-- <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+                      "../lib/docbook-dtd/docbookx.dtd"> -->
+
 <chapter id="scheduling">
-	<title>Scheduling jobs using Quartz or Timer</title>
+	<title>Scheduling and Thread Pooling using Spring</title>
 	<section>
 		<title>Introduction</title>
 		<para>
@@ -12,6 +15,8 @@
   			Furthermore, a convenience class for both the Quartz Scheduler and the <classname>Timer</classname> is
   			available that allows you to invoke a method of an existing target object
 			(analogous to normal <classname>MethodInvokingFactoryBean</classname> operation).
+			Spring also features classes for thread pooling that abstract
+			away differences between Java 1.3, 1.4, 5 and JEE environments.
   		</para>
 	</section>
 	<section>
@@ -286,6 +291,217 @@ public class ExampleJob extends QuartzJobBean {
         </list>
     </property>
 </bean>]]></programlisting>
+		</section>
+	</section>
+	<section id="taskexecutor">
+		<title>
+			Using Spring's <classname>TaskExecutor</classname> abstraction
+		</title>
+
+		<para>
+			Spring 2.0 introduces a new abstraction for dealing with
+			Executors. Executors are the Java 5 name for the concept of
+			thread pools. The odd naming is due to the fact that there
+			is no guarentee that the underlying implementation of is
+			actually a pool. In fact in many cases the executor is
+			single threaded. Spring's abstraction helps bring thread
+			pooling to Java 1.3 and 1.4 environments as well as hiding
+			implementations details between 1.3, 1.4, 5, and JEE
+			environments.
+		</para>
+
+		<section>
+			<title>
+				The <classname>TaskExecutor</classname> 	Interface
+			</title>
+
+			<para>
+				Spring's <classname>TaskExecutor</classname> interface is
+				identical to the <classname>java.util.concurrent.Executor</classname>
+				interface. In fact it's primary reason for existence is
+				to abstract away the need for Java 5 when using thread
+				pools. The interface has a single method
+				<classname>execute(Runnable task)</classname>
+				which accepts a task for execution based on the
+				semantics and configuration of the thread pool.
+			</para>
+		</section>
+
+		<section>
+			<title>
+				Where to use a <classname>TaskExecutor</classname>
+			</title>
+
+			<para>
+				The <classname>TaskExecutor</classname> 	was originally
+				created to give other Spring components an abstraction
+				for thread pooling where needed. Components such as the
+				<classname>ApplicationEventMulticaster</classname>,
+				JMS's <classname>AbstractMessageListenerContainer</classname>,
+				and Quartz integration use the <classname>TaskExecutor</classname>
+				abstraction to pool threads. However, if your beans need
+				thread pooling behavior, it is possible to reuse this
+				abstraction for your own needs.
+			</para>
+		</section>
+		
+		<section>
+			<title>
+				Types of <classname>TaskExecutor</classname>s
+			</title>
+
+			<para>
+				There are a number of pre-built implementations of
+				<classname>TaskExecutor</classname> 	included with the
+				Spring distribution. In all likelihood, you shouldn't ever
+				need to implement your own.
+			</para>
+			
+			<itemizedlist>
+				<listitem>
+					<para>
+						<classname>SimpleAsyncTaskExecutor</classname>
+					</para>
+
+					<para>
+						This implementation does not reuse any threads,
+						rather it starts up a new thread for each
+						invocation. However, it does support a
+						concurrency limit which will block any
+						invocations that are over the limit until a slot
+						has been freed up. If you're looking for true
+						pooling, keep looking further down the page.
+					</para>
+				</listitem>
+				
+				<listitem id="syncTaskExecutor">
+					<para>
+						<classname>SyncTaskExecutor</classname>
+					</para>
+
+					<para>
+						This implementation doesn't even execution
+						invocations asynchronously. Instead each
+						invocation takes place in the calling thread. It
+						is primarily used in situations where
+						mutlithreading isn't necessary such as simple
+						test cases.
+					</para>
+				</listitem>
+				
+				<listitem id="concurrentTaskExecutor">
+					<para>
+						<classname>ConcurrentTaskExecutor</classname>
+					</para>
+
+					<para>
+						This implementation is a wrapper for a Java 5
+						<classname>java.util.concurrent.Executor</classname>.
+						There is an alternative,
+						<classname>ThreadPoolTaskExecutor</classname>,
+						that exposes the <classname>Executor</classname>
+						configuration parameters as bean properties. It
+						is rare to use the <classname>ConcurrentTaskExecutor</classname>
+						but if the
+						<link linkend="threadPoolTaskExecutor"><classname>ThreadPoolTaskExecutor</classname></link>
+						isn't robust enough for your needs, the
+						<classname>ConcurrentTaskExecutor</classname>
+						is there.
+					</para>
+				</listitem>
+				
+				<listitem id="simpleThreadPoolTaskExecutor">
+					<para>
+						<classname>SimpleThreadPoolTaskExecutor</classname>
+					</para>
+					
+					<para>
+						This implementation is actually a subclass of
+						Quartz's <classname>SimpleThreadPool</classname>
+						which listens to Spring's lifecycle callbacks.
+						This is typically used when you have a
+						threadpool that may need to be shared by both
+						Quartz and non-Quartz components.
+					</para>
+				</listitem>
+				
+				<listitem id="threadPoolTaskExecutor">
+					<para>
+						<classname>ThreadPoolTaskExecutor</classname>
+					</para>
+					
+					<sidebar>
+						<para>
+							It is not possible to use any backport or
+							alternate version of the
+							<classname>java.util.concurrent</classname>
+							package with this implementation. Both Doug
+							Lea's and Dawid Kurzyniec's implementations
+							use different package structures which will
+							prevent them from working correctly.
+						</para>
+					</sidebar>
+
+					<para>
+						This implementation can only be used in a Java 5
+						environment but is the most typically used
+						there. It exposes bean properties for
+						configuring a 
+						<classname>java.util.concurrent.ThreadPoolExecutor</classname>
+						and wraps it in a <classname>TaskExecutor</classname>.
+						If you need something advanced such as a
+						<classname>ScheduledThreadPoolExecutor</classname>,
+						it is recommended that you use a
+						<link linkend="concurrentTaskExecutor"><classname>ConcurrentTaskExecutor</classname>	</link>
+						instead.
+					</para>
+				</listitem>
+				
+				<listitem>
+					<para>
+						<classname>TimeTaskExecutor</classname>
+					</para>
+
+					<para>
+						This implementation uses a single
+						<classname>TimerTask</classname>
+						as it's backing implementation. It's different
+						from the
+						<link linkend="syncTaskExecutor"><classname>SyncTaskExecutor</classname></link>
+						in that the method invocations are executed in a
+						separate thread, although they are synchronous
+						in that thread.
+					</para>
+				</listitem>
+				
+				<listitem>
+					<para>
+						<classname>WorkManagerTaskExecutor</classname>
+					</para>
+					
+					<sidebar>
+						<para>
+							CommonJ is a set of specifications jointly
+							developed between BEA and IBM. These
+							specifications are not JEE standards, but
+							are standard across BEA's and IBM's
+							Application Server implementations.
+						</para>
+					</sidebar>
+
+					<para>
+						This implementation uses the CommonJ WorkManager
+						as its backing implementation and is the central
+						convience class for setting up a CommonJ
+						WorkManager reference in a Spring context.
+						Similarly to the
+						<link linkend="simpleThreadPoolTaskExecutor"><classname>SimpleThreadPoolTaskExecutor</classname></link>,
+						this class implements the WorkManager
+						interface and therefore can be used directly as
+						a WorkManager as well.
+					</para>
+				</listitem>
+			</itemizedlist>
 		</section>
 	</section>
 </chapter>
