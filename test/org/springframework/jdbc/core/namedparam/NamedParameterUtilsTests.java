@@ -74,7 +74,7 @@ public class NamedParameterUtilsTests extends TestCase {
 	}
 
 	public void testSubstituteNamedParameters() {
-		SimpleSqlParameterSource namedParams = new SimpleSqlParameterSource();
+		MapSqlParameterSource namedParams = new MapSqlParameterSource();
 		namedParams.addValue("a", "a").addValue("b", "b").addValue("c", "c");
 		assertEquals("xxx ? ? ?", NamedParameterUtils.substituteNamedParameters("xxx :a :b :c", namedParams));
 		assertEquals("xxx ? ? ? xx ? ?", NamedParameterUtils.substituteNamedParameters("xxx :a :b :c xx :a :a", namedParams));
@@ -99,7 +99,7 @@ public class NamedParameterUtilsTests extends TestCase {
 	}
 
 	public void testConvertTypeMapToArray() {
-		SimpleSqlParameterSource namedParams = new SimpleSqlParameterSource();
+		MapSqlParameterSource namedParams = new MapSqlParameterSource();
 		namedParams.addValue("a", "a", 1).addValue("b", "b", 2).addValue("c", "c", 3);
 		assertTrue(3 == NamedParameterUtils.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :b :c"), namedParams).length);
 		assertTrue(5 == NamedParameterUtils.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :b :c xx :a :b"), namedParams).length);
@@ -123,7 +123,7 @@ public class NamedParameterUtilsTests extends TestCase {
 	public void testSubstituteNamedParametersWithStringContainingQuotes() throws Exception {
 		String expectedSql = "select 'first name' from artists where id = ? and quote = 'exsqueeze me?'";
 		String sql = "select 'first name' from artists where id = :id and quote = 'exsqueeze me?'";
-		String newSql = NamedParameterUtils.substituteNamedParameters(sql, new SimpleSqlParameterSource());
+		String newSql = NamedParameterUtils.substituteNamedParameters(sql, new MapSqlParameterSource());
 		assertEquals(expectedSql, newSql);
 	}
 

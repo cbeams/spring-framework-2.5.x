@@ -412,7 +412,7 @@ public interface NamedParameterJdbcOperations {
 	 * @param generatedKeyHolder KeyHolder that will hold the generated keys
 	 * @return the number of rows affected
 	 * @throws org.springframework.dao.DataAccessException if there is any problem issuing the update
-	 * @see SimpleSqlParameterSource
+	 * @see MapSqlParameterSource
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
 	 */
 	int update(String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder)
@@ -427,7 +427,7 @@ public interface NamedParameterJdbcOperations {
 	 * @param keyColumnNames names of the columns that will have keys generated for them
 	 * @return the number of rows affected
 	 * @throws org.springframework.dao.DataAccessException if there is any problem issuing the update
-	 * @see SimpleSqlParameterSource
+	 * @see MapSqlParameterSource
 	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
 	 */
 	int update(

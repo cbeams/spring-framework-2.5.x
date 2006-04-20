@@ -259,7 +259,7 @@ public abstract class NamedParameterUtils {
 	 */
 	public static Object[] buildValueArray(String sql, Map paramMap) {
 		ParsedSql parsedSql = parseSqlStatement(sql);
-		return buildValueArray(parsedSql, new SimpleSqlParameterSource(paramMap));
+		return buildValueArray(parsedSql, new MapSqlParameterSource(paramMap));
 	}
 
 	/**

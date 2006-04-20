@@ -108,7 +108,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	public void query(String sql, Map paramMap, RowCallbackHandler rch) throws DataAccessException {
-		query(sql, new SimpleSqlParameterSource(paramMap), rch);
+		query(sql, new MapSqlParameterSource(paramMap), rch);
 	}
 
 	public List query(String sql, SqlParameterSource paramSource, RowMapper rowMapper)
@@ -123,7 +123,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	public List query(String sql, Map paramMap, RowMapper rowMapper) throws DataAccessException {
-		return query(sql, new SimpleSqlParameterSource(paramMap), rowMapper);
+		return query(sql, new MapSqlParameterSource(paramMap), rowMapper);
 	}
 
 	public Object queryForObject(String sql, SqlParameterSource paramSource, RowMapper rowMapper)
@@ -139,7 +139,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	public Object queryForObject(String sql, Map paramMap, RowMapper rowMapper) throws DataAccessException {
-		return queryForObject(sql, new SimpleSqlParameterSource(paramMap), rowMapper);
+		return queryForObject(sql, new MapSqlParameterSource(paramMap), rowMapper);
 	}
 
 	public Object queryForObject(String sql, SqlParameterSource paramSource, Class requiredType)
@@ -165,7 +165,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	public long queryForLong(String sql, Map paramMap) throws DataAccessException {
-		return queryForLong(sql, new SimpleSqlParameterSource(paramMap));
+		return queryForLong(sql, new MapSqlParameterSource(paramMap));
 	}
 
 	public int queryForInt(String sql, SqlParameterSource paramSource) throws DataAccessException {
@@ -174,7 +174,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	public int queryForInt(String sql, Map paramMap) throws DataAccessException {
-		return queryForInt(sql, new SimpleSqlParameterSource(paramMap));
+		return queryForInt(sql, new MapSqlParameterSource(paramMap));
 	}
 
 	public List queryForList(String sql, SqlParameterSource paramSource, Class elementType)
@@ -183,7 +183,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	public List queryForList(String sql, Map paramMap, Class elementType) throws DataAccessException {
-		return queryForList(sql, new SimpleSqlParameterSource(paramMap), elementType);
+		return queryForList(sql, new MapSqlParameterSource(paramMap), elementType);
 	}
 
 	public List queryForList(String sql, SqlParameterSource paramSource) throws DataAccessException {
@@ -191,7 +191,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	public List queryForList(String sql, Map paramMap) throws DataAccessException {
-		return queryForList(sql, new SimpleSqlParameterSource(paramMap));
+		return queryForList(sql, new MapSqlParameterSource(paramMap));
 	}
 
 	public SqlRowSet queryForRowSet(String sql, SqlParameterSource paramSource) throws DataAccessException {
@@ -203,7 +203,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	public SqlRowSet queryForRowSet(String sql, Map paramMap) throws DataAccessException {
-		return queryForRowSet(sql, new SimpleSqlParameterSource(paramMap));
+		return queryForRowSet(sql, new MapSqlParameterSource(paramMap));
 	}
 
 
@@ -220,7 +220,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	public int update(String sql, Map paramMap) throws DataAccessException {
-		return update(sql, new SimpleSqlParameterSource(paramMap));
+		return update(sql, new MapSqlParameterSource(paramMap));
 	}
 
 	public int update(String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder)

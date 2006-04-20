@@ -17,26 +17,25 @@
 package org.springframework.jdbc.core.namedparam;
 
 import junit.framework.TestCase;
+
 import org.springframework.test.AssertThrows;
 
 /**
- * Unit tests for the {@link SimpleSqlParameterSource} class.
- *
  * @author Rick Evans
  */
-public final class SimpleSqlParameterSourceTests extends TestCase {
+public final class MapSqlParameterSourceTests extends TestCase {
 
-    public void testNullParameterValuesPassedToCtorIsOk() throws Exception {
-        new SimpleSqlParameterSource(null);
-    }
+	public void testNullParameterValuesPassedToCtorIsOk() throws Exception {
+		new MapSqlParameterSource(null);
+	}
 
-    public void testGetValueChokesIfParameterIsNotPresent() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                SimpleSqlParameterSource source = new SimpleSqlParameterSource();
-                source.getValue("pechorin was right!");
-            }
-        }.runTest();
-    }
+	public void testGetValueChokesIfParameterIsNotPresent() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				MapSqlParameterSource source = new MapSqlParameterSource();
+				source.getValue("pechorin was right!");
+			}
+		}.runTest();
+	}
 
 }

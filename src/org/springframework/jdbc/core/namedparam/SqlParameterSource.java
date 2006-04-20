@@ -35,7 +35,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  * @since 2.0
  * @see NamedParameterJdbcOperations
  * @see NamedParameterJdbcTemplate
- * @see SimpleSqlParameterSource
+ * @see MapSqlParameterSource
  * @see BeanPropertySqlParameterSource
  */
 public interface SqlParameterSource {
