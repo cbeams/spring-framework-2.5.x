@@ -19,7 +19,6 @@ package org.springframework.aop.aspectj.annotation;
 import junit.framework.TestCase;
 import org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue;
 import org.springframework.aop.aspectj.autoproxy.PerThisAspect;
-import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.test.AssertThrows;
@@ -39,7 +38,7 @@ public class AspectProxyFactoryTests extends TestCase {
 		}.runTest();
 	}
 
-	public void testWithSimpleAspect() throws Exception {                     
+	public void testWithSimpleAspect() throws Exception {
 		TestBean bean = new TestBean();
 		bean.setAge(2);
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(bean);
@@ -65,5 +64,39 @@ public class AspectProxyFactoryTests extends TestCase {
 		assertEquals(1, proxy1.getAge());
 		assertEquals(0, proxy2.getAge());
 		assertEquals(2, proxy1.getAge());
+	}
+
+	public void testWithInstanceWithNonAspect() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				AspectJProxyFactory pf = new AspectJProxyFactory();
+				pf.addAspect(new TestBean());
+			}
+		}.runTest();
+	}
+
+	public void testWithInstance() throws Exception {
+		MultiplyReturnValue aspect = new MultiplyReturnValue();
+		int multiple = 3;
+		aspect.setMultiple(multiple);
+
+		TestBean target = new TestBean();
+		target.setAge(24);
+
+		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(target);
+		proxyFactory.addAspect(aspect);
+
+		ITestBean proxy = proxyFactory.getProxy();
+
+		assertEquals(target.getAge() * multiple, proxy.getAge());
+	}
+
+	public void testWithNonSingletonAspectInstance() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				AspectJProxyFactory pf = new AspectJProxyFactory();
+				pf.addAspect(new PerThisAspect());
+			}
+		}.runTest();
 	}
 }

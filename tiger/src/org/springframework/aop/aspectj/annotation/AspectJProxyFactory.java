@@ -44,6 +44,11 @@ import java.util.Map;
 public class AspectJProxyFactory extends AdvisedSupport {
 
 	/**
+	 * The {@link AspectJAdvisorFactory} used by this instance.
+	 */
+	private final AspectJAdvisorFactory aspectFactory = new ReflectiveAspectJAdvisorFactory();
+
+	/**
 	 * Caches singleton aspect instances.
 	 */
 	private static final Map aspectCache = new HashMap();
@@ -97,24 +102,56 @@ public class AspectJProxyFactory extends AdvisedSupport {
 	}
 
 	/**
+	 * Adds the supplied aspect instance to the chain. The type of the aspect instance
+	 * supplied must be a singleton aspect. True singleton lifecycle is not honoured when
+	 * using this method - the caller is responsible for managing the lifecycle of any
+	 * aspects added in this way.
+	 */
+	public void addAspect(Object aspect) {
+		Class aspectType = aspect.getClass();
+		String beanName = aspectType.getName();
+		AspectMetadata am = createAspectMetadata(aspectType, beanName);
+		if (am.getAjType().getPerClause().getKind() != PerClauseKind.SINGLETON) {
+			throw new IllegalArgumentException("Aspect type '" + aspectType.getName() + "' is not a singleton aspect.");
+		}
+		MetadataAwareAspectInstanceFactory instanceFactory = new SingletonMetadataAwareAspectInstanceFactory(aspect, beanName);
+		addAdvisorsFromAspectInstanceFactory(instanceFactory);
+	}
+
+	/**
 	 * Adds an aspect of the supplied type to the end of the advice chain.
 	 */
 	public void addAspect(Class aspectType) {
-
 		String beanName = aspectType.getName();
-		AspectJAdvisorFactory aspectFactory = new ReflectiveAspectJAdvisorFactory();
+		AspectMetadata am = createAspectMetadata(aspectType, beanName);
+		MetadataAwareAspectInstanceFactory instanceFactory = createAspectInstanceFactory(am, aspectType, beanName);
+		addAdvisorsFromAspectInstanceFactory(instanceFactory);
+	}
+
+	/**
+	 * Adds all {@link Advisor Advisors} from the supplied {@link MetadataAwareAspectInstanceFactory} to
+	 * the curren chain. Exposes any special purpose {@link Advisor Advisors} if needed.
+	 * @see #makeAdvisorChainAspectJCapableIfNecessary()
+	 */
+	private void addAdvisorsFromAspectInstanceFactory(MetadataAwareAspectInstanceFactory instanceFactory) {
+		List advisors = this.aspectFactory.getAdvisors(instanceFactory);
+		this.addAllAdvisors((Advisor[]) advisors.toArray(new Advisor[advisors.size()]));
+
+		makeAdvisorChainAspectJCapableIfNecessary();
+	}
+
+	/**
+	 * Creates an {@link AspectMetadata} instance for the supplied aspect type.
+	 * @throws IllegalArgumentException if the supplied {@link Class} is not a valid aspect type.
+	 */
+	private AspectMetadata createAspectMetadata(Class aspectType, String beanName) {
 		AspectMetadata am = new AspectMetadata(aspectType, beanName);
 
 		if (!am.getAjType().isAspect()) {
 			throw new IllegalArgumentException("Class '" + aspectType.getName() + "' is not a valid aspect type.");
 		}
 
-		MetadataAwareAspectInstanceFactory instanceFactory = createAspectInstanceFactory(am, aspectType, beanName);
-
-		List advisors = aspectFactory.getAdvisors(instanceFactory);
-		this.addAllAdvisors((Advisor[]) advisors.toArray(new Advisor[advisors.size()]));
-
-		makeAdvisorChainAspectJCapableIfNecessary();
+		return am;
 	}
 
 	/**
