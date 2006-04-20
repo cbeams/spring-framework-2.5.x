@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -156,7 +157,7 @@ public class PreparedStatementCreatorFactory {
 	 * @param params parameter array. May be <code>null</code>.
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
-		return new PreparedStatementCreatorImpl((params != null) ? Arrays.asList(params) : Collections.EMPTY_LIST);
+		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.EMPTY_LIST);
 	}
 
 	/**
@@ -209,13 +210,13 @@ public class PreparedStatementCreatorFactory {
 			if (sqlToUse == null) {
 				sqlToUse = sql;
 			}
-			if (returnGeneratedKeys) {
+			if (generatedKeysColumnNames != null || returnGeneratedKeys) {
 				try {
-					if (generatedKeysColumnNames == null) {
-						ps = con.prepareStatement(sqlToUse, PreparedStatement.RETURN_GENERATED_KEYS);
+					if (generatedKeysColumnNames != null) {
+						ps = con.prepareStatement(sqlToUse, generatedKeysColumnNames);
 					}
 					else {
-						ps = con.prepareStatement(sqlToUse, generatedKeysColumnNames);
+						ps = con.prepareStatement(sqlToUse, PreparedStatement.RETURN_GENERATED_KEYS);
 					}
 				}
 				catch (AbstractMethodError ex) {
@@ -248,7 +249,7 @@ public class PreparedStatementCreatorFactory {
 			for (int i = 0; i < this.parameters.size(); i++) {
 				SqlParameter declaredParameter = (SqlParameter) declaredParameters.get(i);
 				Object in = this.parameters.get(i);
-				if (in instanceof Collection) {
+				if (in instanceof Collection && declaredParameter.getSqlType() != Types.ARRAY) {
 					Collection entries = (Collection) in;
 					for (Iterator it = entries.iterator(); it.hasNext();) {
 						Object entry = it.next();
