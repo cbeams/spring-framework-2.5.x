@@ -3241,8 +3241,8 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
         <programlisting><![CDATA[<bean id="myField"
         class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
   <property name="staticField">
-                <value>java.sql.Connection.TRANSACTION_SERIALIZABLE</value>
-            </property>
+    <value>java.sql.Connection.TRANSACTION_SERIALIZABLE</value>
+</property>
 </bean>]]></programlisting>
         <para>
 			There is also a convenience usage form where the <literal>static</literal> field is
