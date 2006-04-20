@@ -383,8 +383,8 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 	private void logTranslation(String task, String sql, SQLException sqlEx, boolean custom) {
 		if (logger.isDebugEnabled()) {
 			String intro = custom ? "Custom translation of" : "Translating";
-			logger.debug(intro + " SQLException with SQLState '" + sqlEx.getSQLState() +
-					"' and errorCode '" + sqlEx.getErrorCode() + "' and message [" + sqlEx.getMessage() +
+			logger.debug(intro + " SQLException with SQL state '" + sqlEx.getSQLState() +
+					"', error code '" + sqlEx.getErrorCode() + "', message [" + sqlEx.getMessage() +
 					"]; SQL was [" + sql + "] for task [" + task + "]");
 		}
 	}
