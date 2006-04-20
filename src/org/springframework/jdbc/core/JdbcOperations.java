@@ -324,10 +324,13 @@ public interface JdbcOperations {
 	/**
 	 * Query using a prepared statement, reading the ResultSet with a
 	 * ResultSetExtractor.
+	 * <p>A PreparedStatementCreator can either be implemented directly or
+	 * configured through a PreparedStatementCreatorFactory.
 	 * @param psc object that can create a PreparedStatement given a Connection
 	 * @param rse object that will extract results
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if there is any problem
+	 * @see PreparedStatementCreatorFactory
 	 */
 	Object query(PreparedStatementCreator psc, ResultSetExtractor rse) throws DataAccessException;
 
@@ -378,9 +381,12 @@ public interface JdbcOperations {
 	/**
 	 * Query using a prepared statement, reading the ResultSet on a per-row
 	 * basis with a RowCallbackHandler.
+	 * <p>A PreparedStatementCreator can either be implemented directly or
+	 * configured through a PreparedStatementCreatorFactory.
 	 * @param psc object that can create a PreparedStatement given a Connection
 	 * @param rch object that will extract results, one row at a time
 	 * @throws DataAccessException if there is any problem
+	 * @see PreparedStatementCreatorFactory
 	 */
 	void query(PreparedStatementCreator psc, RowCallbackHandler rch) throws DataAccessException;
 	
@@ -430,10 +436,13 @@ public interface JdbcOperations {
 	/**
 	 * Query using a prepared statement, mapping each row to a Java object
 	 * via a RowMapper.
+	 * <p>A PreparedStatementCreator can either be implemented directly or
+	 * configured through a PreparedStatementCreatorFactory.
 	 * @param psc object that can create a PreparedStatement given a Connection
 	 * @param rowMapper object that will map one object per row
 	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if there is any problem
+	 * @see PreparedStatementCreatorFactory
 	 */
 	List query(PreparedStatementCreator psc, RowMapper rowMapper) throws DataAccessException;
 
@@ -781,19 +790,27 @@ public interface JdbcOperations {
 	/**
 	 * Issue an update using a PreparedStatementCreator to provide SQL and any
 	 * required parameters.
+	 * <p>A PreparedStatementCreator can either be implemented directly or
+	 * configured through a PreparedStatementCreatorFactory.
 	 * @param psc object that provides SQL and any necessary parameters
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
+	 * @see PreparedStatementCreatorFactory
 	 */
 	int update(PreparedStatementCreator psc) throws DataAccessException;
 
 	/**
 	 * Issue an update using a PreparedStatementCreator to provide SQL and any
-	 * required parameters.  Generetaed keys will to be returned by the List parameter.
+	 * required parameters. Generated keys will be put into the given KeyHolder.
+	 * <p>Note that the given PreparedStatementCreator has to create a statement
+	 * with activated extraction of generated keys (a JDBC 3.0 feature). This can
+	 * either be done directly or through using a PreparedStatementCreatorFactory.
 	 * @param psc object that provides SQL and any necessary parameters
 	 * @param generatedKeyHolder KeyHolder that will hold the generated keys
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
+	 * @see PreparedStatementCreatorFactory
+	 * @see org.springframework.jdbc.support.GeneratedKeyHolder
 	 */
 	int update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder) throws DataAccessException;
 
@@ -802,7 +819,7 @@ public interface JdbcOperations {
 	 * with given SQL. Simpler than using a PreparedStatementCreator as this
 	 * method will create the PreparedStatement: The PreparedStatementSetter
 	 * just needs to set parameters.
-	 * @param sql SQL, containing bind parameters
+	 * @param sql SQL containing bind parameters
 	 * @param pss helper that sets bind parameters. If this is <code>null</code>
 	 * we run an update with static SQL.
 	 * @return the number of rows affected
@@ -812,7 +829,7 @@ public interface JdbcOperations {
 	
 	/**
 	 * Issue an update via a prepared statement, binding the given arguments.
-	 * @param sql SQL, containing bind parameters
+	 * @param sql SQL containing bind parameters
 	 * @param args arguments to bind to the query
 	 * @param argTypes SQL types of the arguments
 	 * (constants from <code>java.sql.Types</code>)
@@ -824,7 +841,7 @@ public interface JdbcOperations {
 
 	/**
 	 * Issue an update via a prepared statement, binding the given arguments.
-	 * @param sql SQL, containing bind parameters
+	 * @param sql SQL containing bind parameters
 	 * @param args arguments to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @return the number of rows affected
