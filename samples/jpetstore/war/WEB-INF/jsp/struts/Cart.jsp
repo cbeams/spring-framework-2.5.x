@@ -57,7 +57,7 @@
   <c:if test="${!cartForm.cart.cartItemList.firstPage}">
     <a href="<c:url value="viewCart.do?page=previousCart"/>"><font color="green"><B>&lt;&lt; Prev</B></font></a>
   </c:if>
-  <c:if test="${!cartForm.cart.cartItemList.firstPage}">
+  <c:if test="${!cartForm.cart.cartItemList.lastPage}">
     <a href="<c:url value="viewCart.do?page=nextCart"/>"><font color="green"><B>Next &gt;&gt;</B></font></a>
   </c:if>
 </center>
