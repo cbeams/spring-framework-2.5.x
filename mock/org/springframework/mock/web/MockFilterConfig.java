@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,21 @@ public class MockFilterConfig implements FilterConfig {
 	public MockFilterConfig(ServletContext servletContext, String filterName) {
 		this.servletContext = servletContext;
 		this.filterName = filterName;
+	}
+
+	/**
+	 * Create new MockServletConfig with a MockServletContext.
+	 */
+	public MockFilterConfig() {
+		this(new MockServletContext());
+	}
+
+	/**
+	 * Create new MockServletConfig with a MockServletContext.
+	 * @param filterName the name of the filter
+	 */
+	public MockFilterConfig(String filterName) {
+		this(new MockServletContext(), filterName);
 	}
 
 
