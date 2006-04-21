@@ -56,7 +56,7 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 	 * Create a new <code>BeanDefinitionStoreException</code>
 	 */
 	public BeanDefinitionStoreException(String resourceDescription, ParseState parseState, String msg, Throwable ex) {
-		super("Error '" + msg + "' in resource'" + resourceDescription + "' at:\n" + parseState, ex);
+		super("Error '" + msg + "' in resource '" + resourceDescription + "' at:\n" + parseState, ex);
 		this.resourceDescription = resourceDescription;
 	}
 
