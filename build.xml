@@ -18,7 +18,7 @@
 
 	<property file="build.properties"/>
 	<property file="project.properties"/>
-
+	<property name="test.fork.mode" value="perBatch"/>
 
 	<!--
 		Set up properties that indicate whether we're building on JDK 1.5.
@@ -895,7 +895,9 @@
 		<mkdir dir="${target.junit.reports.dir}"/>
 		<mkdir dir="${target.junit.summary.dir}"/>
 
-		<junit forkmode="perBatch" printsummary="yes" haltonfailure="no" haltonerror="no">
+		<echo message="Using forkmode: ${test.fork.mode}"/>
+
+		<junit forkmode="${test.fork.mode}" printsummary="yes" haltonfailure="no" haltonerror="no">
 
 			<jvmarg line="-Djava.awt.headless=true"/>
 
