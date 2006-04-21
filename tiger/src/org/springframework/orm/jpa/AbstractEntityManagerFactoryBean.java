@@ -22,6 +22,7 @@ import javax.persistence.spi.PersistenceProvider;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -104,6 +105,14 @@ public abstract class AbstractEntityManagerFactoryBean implements FactoryBean, I
 					"serviceFactoryClass must implement [javax.persistence.spi.PersistenceProvider]");
 		}
 		this.persistenceProviderClass = persistenceProviderClass;
+	}
+
+	/**
+	 * @return a new instance of the appropriate PersistenceProvider based on the
+	 * persistence provider class
+	 */
+	protected PersistenceProvider instantiatePersistenceProvider() {
+		return (PersistenceProvider) BeanUtils.instantiateClass(this.persistenceProviderClass);
 	}
 
 }

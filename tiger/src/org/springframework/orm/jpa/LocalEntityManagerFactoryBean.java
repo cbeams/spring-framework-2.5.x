@@ -23,7 +23,6 @@ import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceProvider;
 
-import org.springframework.beans.BeanUtils;
 
 /**
  * FactoryBean that creates a local JPA EntityManagerFactory instance.
@@ -89,7 +88,7 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 		if (this.persistenceProviderClass != null) {
 			// Create EntityManagerFactory directly through PersistenceProvider.
 			PersistenceProvider pp =
-					(PersistenceProvider) BeanUtils.instantiateClass(this.persistenceProviderClass);
+					instantiatePersistenceProvider();
 			EntityManagerFactory emf = pp.createEntityManagerFactory(this.entityManagerName, this.jpaProperties);
 			if (emf == null) {
 				throw new IllegalStateException(
