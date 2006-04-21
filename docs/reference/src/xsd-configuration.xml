@@ -1,109 +1,293 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <appendix id="xsd-config">
-	<title>XML Schema-based configuration</title>
-	<section>
-		<title>Introduction</title>
-		<para>This section of the reference documentation details the XML Schema based
+    <title>XML Schema-based configuration</title>
+    <section>
+        <title>Introduction</title>
+        <para>This section of the reference documentation details the XML Schema based
     configuration that was introduced in Spring 2.0.</para>
-		<sidebar>
-			<title>DTD suppport?</title>
-			<para>Authoring Spring configuration files using the older DTD style
-			is still totally supported.</para>
-			<para>Nothing will break if you forego the use of the new XML Schema-based
-			approach to authoring Spring XML configuration files. All that you lose
-			out on is more succinct and clearer configuration... in the end all of the
-			XML configuration, be it DTD- or Schema-based all boils down to the same
-			object model in the container.</para>
-		</sidebar>
-		<para>The central motivation for moving to XML Schema based configuration files was
-		to enable easier Spring (unsurprisingly). The <emphasis>'classic'</emphasis>
-		<literal>&lt;bean/&gt;</literal>-based approach is good (and it still continues
-		to be good), but it does suffer from being a tad generic.</para>
-		<para>From the Spring IoC containers point of view, <emphasis>everything</emphasis>
-		is a bean. Thats great news for the Spring IoC container, because if everything is
-		a bean then everything can be treated the same. The same is not true for
-		developers... the objects (or classes rather) that one defines in a Spring
-		XML configuration file are not all generic, vanilla beans.</para>
-		<para>Spring 2.0's new XML Schema-based configuration addresses this issue.
-		The <literal>&lt;bean/&gt;</literal> element is still present, and if one
-		wanted to one could continue to write the <emphasis>exact same</emphasis>
-		style of Spring XML configuration using only <literal>&lt;bean/&gt;</literal>
-		elements. The new XML Schema-based configuration does however result in
-		Spring XML configuration files that are substantially clearer to read, and
-		that allow one to express the intent of what a bean definition is.
-		</para>
-		<para>The examples included below will hopefully convince you that the inclusion
-		of XML Schema support in Spring 2.0 was a good idea. The Spting team certainly
-		thinks so, and the reception in the community has been encouraging; something that
-		is not covered in this section (at least not right now) is the fact that this
-		new configuration mechanism is totally customisable and extensible. This means
-		that one can write one's own domain specific configuration that allows one
-		to more succinctly express one's domain.</para>
-	</section>
-	<section id="xsd-config-body">
-		<title>XML Schema-based configuration</title>
-		<section id="xsd-config-body-referencing">
-			<title>Referencing the schemas</title>
-			<para>To switch over from the DTD-style to the new XML Schema-style, one needs
-			to effect the following change...</para>
-			<programlisting><lineannotation>&lt;!-- DTDT-style --&gt;</lineannotation>
+        <sidebar>
+            <title>DTD suppport?</title>
+            <para>Authoring Spring configuration files using the older DTD style
+            is still totally supported.</para>
+            <para>Nothing will break if you forego the use of the new XML Schema-based
+            approach to authoring Spring XML configuration files. All that you lose
+            out on is more succinct and clearer configuration... in the end all of the
+            XML configuration, be it DTD- or Schema-based all boils down to the same
+            object model in the container.</para>
+        </sidebar>
+        <para>The central motivation for moving to XML Schema based configuration files was
+        to enable easier Spring XML configuration (unsurprisingly). The <emphasis>'classic'</emphasis>
+        <literal>&lt;bean/&gt;</literal>-based approach is good (and it still continues
+        to be good), but it does suffer from being a tad generic.</para>
+        <para>From the Spring IoC containers point of view, <emphasis>everything</emphasis>
+        is a bean. That's great news for the Spring IoC container, because if everything is
+        a bean then everything can be treated in the exact same fashion. The same is not true for
+        developers... the objects (or classes rather) that one defines in a Spring
+        XML configuration file are not all generic, vanilla beans.</para>
+        <para>Spring 2.0's new XML Schema-based configuration addresses this issue.
+        The <literal>&lt;bean/&gt;</literal> element is still present, and if one
+        wanted to one could continue to write the <emphasis>exact same</emphasis>
+        style of Spring XML configuration using only <literal>&lt;bean/&gt;</literal>
+        elements. The new XML Schema-based configuration does however result in
+        Spring XML configuration files that are substantially clearer to read, and
+        that allow one to express the intent of what a bean definition is.
+        </para>
+        <para>In short, the custom tags are best for infrastructure or integration beans:
+        AOP, collections, transactions, integration with 3rd party frameworks such as Mule, etc.
+        The existing bean tags are best suited to application-specific beans, such as
+        DAOs, service layer objects, validators, etc.
+        </para>
+        <para>The examples included below will hopefully convince one that the inclusion
+        of XML Schema support in Spring 2.0 was a good idea. The reception in the community
+        has been encouraging; something that is not covered in this section (at least
+        not right now) is the fact that this new configuration mechanism is totally
+        customisable and extensible. This means that one can write one's own domain
+        specific configuration tags that allows one to more succinctly express one's
+        domain.</para>
+    </section>
+    <section id="xsd-config-body">
+        <title>XML Schema-based configuration</title>
+        <section id="xsd-config-body-referencing">
+            <title>Referencing the schemas</title>
+            <para>To switch over from the DTD-style to the new XML Schema-style, one needs
+            to effect the following change...</para>
+            <programlisting><lineannotation>&lt;!-- DTD-style --&gt;</lineannotation>
 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
-	"http://www.springframework.org/dtd/spring-beans.dtd">
+    "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
-			<para>
-				The equivalent file in the XML Schema-style would be...
-			</para>
-			<programlisting><lineannotation>&lt;!-- DTDT-style --&gt;</lineannotation>
+            <para>The equivalent file in the XML Schema-style would be...</para>
+            <programlisting><lineannotation>&lt;!-- XML Schema-style --&gt;</lineannotation>
 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-<beans>
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
-			<para>
-				The above Spring XML configuration fragment is pretty much boilerplate;
-				one can certainly simply use this and continue to write
-				<literal>&lt;bean/&gt;</literal> definitions like one has always been doing.
-				However, the entire point of switching over is to enable one to
-				take advantage of the new Spring 2.0 XML tags to enable easier
-				configuration. The section entitled <xref linkend="xsd-config-body-schemas-util"/>
-				demonstrates how one can immediately use some of the more common utility tags.
-			</para>
-		</section>
-		<section id="xsd-config-body-schemas-util">
-			<title>The <literal>util</literal> schema</title>
-			<para>
-				For this first example of the new XML tags, lets immediately jump straight to
-				some before and after style configuration.
-			</para>
-			<para>[TODO : provide examples or links to examples (with screenshots)]</para>
-		</section>
-	</section>
-	<section id="xsd-config-setup">
-		<title>Setting up your IDE</title>
-		<para>This final section documents the steps involved in setting up a number of
-		popular Java IDEs to effect the easier editing of Spring's XML Schema-based
-		configuration files.</para>
-		<para>If your favourite Java IDE or editor is not included in the list of
-		documented IDEs, then please do raise an issue (or ticket) on the Spring
-		Framework
-		<ulink linkend="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA</ulink>
-		and the oversight <emphasis>may</emphasis> well be addressed in the next release.</para>
-		<section id="xsd-config-setup-eclipse">
-			<title>Setting up Eclipse</title>
-			<para>[TODO :  document setting up Eclipse (with screenshots)]</para>
-		</section>
-		<section id="xsd-config-setup-idea">
-			<title>Setting up IDEA</title>
-			<para>[TODO :  document setting up IDEA (with screenshots)]</para>
-		</section>
-	</section>
+            <para>The above Spring XML configuration fragment is pretty much boilerplate;
+            one can certainly simply use this and continue to write
+            <literal>&lt;bean/&gt;</literal> definitions like one has always been doing.
+            However, the entire point of switching over is to enable one to
+            take advantage of the new Spring 2.0 XML tags to enable easier
+            configuration. The section entitled <xref linkend="xsd-config-body-schemas-util"/>
+            demonstrates how one can immediately use some of the more common utility tags.
+            </para>
+        </section>
+        <para>The rest of this chapter is devoted to showing examples of the new Spring XML Schema
+        based configuration, with at least one example for every new tag. The format follows
+        a before and after style, with a <literal>'before'</literal> snippet of XML showing
+        the old (but still 100% legal and supported) style, followed immediately thereafter
+        by an <literal>'after'</literal> example showing the new (equivalent) XML Schema-based
+        style.
+        </para>
+        <section id="xsd-config-body-schemas-util">
+            <title>The <literal>util</literal> schema</title>
+            <para>First up is coverage of the <literal>util</literal> tags. As the name
+            implies, the <literal>util</literal> tags deal with common, <emphasis>utility</emphasis>
+            configuration issues, such as configuring collections and suchlike.
+            </para>
+            <para>To use the tags in the <literal>util</literal> schema, one needs to have
+            the following preamble at the top of one's Spring XML configuration file;
+            the emboldened text in the following snippet references the correct schema so that
+            the tags in the <literal>util</literal> are available to you.</para>
+            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       ]]><emphasis role="bold">xmlns:util="http://www.springframework.org/schema/util"</emphasis><![CDATA[
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       ]]><emphasis role="bold">http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"</emphasis><![CDATA[>
+
+]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+
+</beans>]]></programlisting>
+            <section>
+                <title><literal>&lt;util:constant/&gt;</literal></title>
+                <para>Before...</para>    
+                <programlisting><![CDATA[<bean id="..." class="...">
+  <property name="isolation">
+    <bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
+    class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean" />
+  </property>
+</bean>]]></programlisting>
+                <para>The above configuration uses a Spring <interfacename>FactoryBean</interfacename>
+                implementation, the <classname>FieldRetrievingFactoryBean</classname>, to
+                set the value of the <literal>'isolation'</literal> property on a bean
+                to the value of the <literal>'java.sql.Connection.TRANSACTION_SERIALIZABLE'</literal>
+                constant. This is all well and good, but it is a tad verbose and (unneccessarily)
+                exposes a Spring's internal plumbing to the end user.
+                </para>
+                <para>The following XML Schema-based version is considerably more concise,
+                it clearly expresses the developers intent (<emphasis>'inject this constant
+                value'</emphasis>), and it just plain reads better.
+                </para>
+                <programlisting><![CDATA[<bean id="..." class="...">
+    <property name="isolation">
+        <util:constant static-field="java.sql.Connection.TRANSACTION_SERIALIZABLE"/>
+    </property>
+</bean>]]></programlisting>
+            </section>
+            <section>
+                <title><literal>&lt;util:property-path/&gt;</literal></title>
+                <para>Before...</para>    
+                <programlisting><lineannotation>&lt;!-- target bean to be referenced by name --&gt;</lineannotation><![CDATA[
+<bean id="tb" class="org.springframework.beans.TestBean" singleton="false">
+  <property name="age" value="10"/>
+  <property name="spouse">
+    <bean class="org.springframework.beans.TestBean">
+      <property name="age" value="11"/>
+    </bean>
+  </property>
+</bean>
+
+]]><lineannotation>&lt;!-- will result in 10, which is the value of property 'age' of bean 'tb' --&gt;</lineannotation><![CDATA[
+<bean id="tb.age" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>]]></programlisting>
+                <para>The above configuration uses a Spring <interfacename>FactoryBean</interfacename>
+                implementation, the <classname>PropertyPathFactoryBean</classname>, to
+                create a bean (of type <classname>int</classname>) called
+                <literal>'tb.age'</literal> that has a value equal to the <literal>'age'</literal>
+                property of the <literal>'tb'</literal> bean.
+                </para>
+                <para>After...</para>
+                <programlisting><lineannotation>&lt;!-- target bean to be referenced by name --&gt;</lineannotation><![CDATA[
+<bean id="tb" class="org.springframework.beans.TestBean" singleton="false">
+  <property name="age" value="10"/>
+  <property name="spouse">
+    <bean class="org.springframework.beans.TestBean">
+      <property name="age" value="11"/>
+    </bean>
+  </property>
+</bean>
+
+]]><lineannotation>&lt;!-- will result in 10, which is the value of property 'age' of bean 'tb' --&gt;</lineannotation><![CDATA[
+<util:property-path id="name" path="tb.age"/>]]></programlisting>
+                <para>The value of the <literal>'path'</literal> attribute of the
+                <literal>&lt;property-path/&gt;</literal> tag follows the form <literal>'beanName.beanProperty'</literal>.</para>
+            </section>
+            <section>
+                <title><literal>&lt;util:properties/&gt;</literal></title>
+                <para>Before...</para>    
+                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Properties</classname> instance with values loaded from the supplied location --&gt;</lineannotation><![CDATA[
+<bean id="jdbcConfiguration" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+  <property name="location" value="classpath:com/foo/jdbc-production.properties"/>
+</bean>]]></programlisting>
+                <para>The above configuration uses a Spring <interfacename>FactoryBean</interfacename>
+                implementation, the <classname>PropertiesFactoryBean</classname>, to
+                instantiate a <classname>java.util.Properties</classname> instance with values loaded from
+                the supplied <link linkend="resources"><interfacename>Resource</interfacename></link> location).
+                </para>
+                <para>After...</para>
+                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Properties</classname> instance with values loaded from the supplied location --&gt;</lineannotation><![CDATA[
+<util:properties id="jdbcConfiguration" location="classpath:com/foo/jdbc-production.properties"/>]]></programlisting>
+            </section>
+            <section>
+                <title><literal>&lt;util:list/&gt;</literal></title>
+                <para>Before...</para>    
+                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.List</classname> instance with values loaded from the supplied <literal>'sourceList'</literal> --&gt;</lineannotation><![CDATA[
+<bean id="emails" class="org.springframework.beans.factory.config.ListFactoryBean">
+  <property name="sourceList">
+      <list>
+        <value>pechorin@hero.org</value>
+        <value>raskolnikov@slums.org</value>
+        <value>stavrogin@gov.org</value>
+        <value>porfiry@gov.org</value>
+      </list>
+  </property>
+</bean>]]></programlisting>
+                <para>The above configuration uses a Spring <interfacename>FactoryBean</interfacename>
+                implementation, the <classname>ListFactoryBean</classname>, to
+                create a <classname>java.util.List</classname> instance initialized
+                with values taken from the supplied <literal>'sourceList'</literal>.
+                </para>
+                <para>After...</para>
+                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.List</classname> instance with values loaded from the supplied <literal>'sourceList'</literal> --&gt;</lineannotation><![CDATA[
+<util:list id="emails">
+    <value>pechorin@hero.org</value>
+    <value>raskolnikov@slums.org</value>
+    <value>stavrogin@gov.org</value>
+    <value>porfiry@gov.org</value>
+</util:list>]]></programlisting>
+            </section>
+            <section>
+                <title><literal>&lt;util:map/&gt;</literal></title>
+                <para>Before...</para>    
+                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Map</classname> instance with values loaded from the supplied <literal>'sourceMap'</literal> --&gt;</lineannotation><![CDATA[
+<bean id="emails" class="org.springframework.beans.factory.config.MapFactoryBean">
+  <property name="sourceMap">
+      <map>
+        <entry key="pechorin" value="pechorin@hero.org"/>
+        <entry key="raskolnikov" value="raskolnikov@slums.org"/>
+        <entry key="stavrogin" value="stavrogin@gov.org"/>
+        <entry key="porfiry" value="porfiry@gov.org"/>
+      </list>
+  </property>
+</bean>]]></programlisting>
+                <para>The above configuration uses a Spring <interfacename>FactoryBean</interfacename>
+                implementation, the <classname>MapFactoryBean</classname>, to
+                create a <classname>java.util.Map</classname> instance initialized
+                with key-value pairs taken from the supplied <literal>'sourceMap'</literal>.
+                </para>
+                <para>After...</para>
+                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Map</classname> instance with values loaded from the supplied <literal>'sourceMap'</literal> --&gt;</lineannotation><![CDATA[
+<util:map id="emails">
+    <entry key="pechorin" value="pechorin@hero.org"/>
+    <entry key="raskolnikov" value="raskolnikov@slums.org"/>
+    <entry key="stavrogin" value="stavrogin@gov.org"/>
+    <entry key="porfiry" value="porfiry@gov.org"/>
+</util:map>]]></programlisting>
+            </section>
+            <section>
+                <title><literal>&lt;util:set/&gt;</literal></title>
+                <para>Before...</para>    
+                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Set</classname> instance with values loaded from the supplied <literal>'sourceSet'</literal> --&gt;</lineannotation><![CDATA[
+<bean id="emails" class="org.springframework.beans.factory.config.SetFactoryBean">
+  <property name="sourceSet">
+      <set>
+        <value>pechorin@hero.org</value>
+        <value>raskolnikov@slums.org</value>
+        <value>stavrogin@gov.org</value>
+        <value>porfiry@gov.org</value>
+      </set>
+  </property>
+</bean>]]></programlisting>
+                <para>The above configuration uses a Spring <interfacename>FactoryBean</interfacename>
+                implementation, the <classname>SetFactoryBean</classname>, to
+                create a <classname>java.util.Set</classname> instance initialized
+                with values taken from the supplied <literal>'sourceSet'</literal>.
+                </para>
+                <para>After...</para>
+                <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Set</classname> instance with values loaded from the supplied <literal>'sourceSet'</literal> --&gt;</lineannotation><![CDATA[
+<util:set id="set">
+    <value>pechorin@hero.org</value>
+    <value>raskolnikov@slums.org</value>
+    <value>stavrogin@gov.org</value>
+    <value>porfiry@gov.org</value>
+</util:set>]]></programlisting>
+            </section>
+        </section>
+    </section>
+    <section id="xsd-config-setup">
+        <title>Setting up your IDE</title>
+        <para>This final section documents the steps involved in setting up a number of
+        popular Java IDEs to effect the easier editing of Spring's XML Schema-based
+        configuration files.</para>
+        <para>If your favourite Java IDE or editor is not included in the list of
+        documented IDEs, then please do raise an issue on the Spring Framework
+        <ulink linkend="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA</ulink>
+        and the oversight <emphasis>may</emphasis> well be addressed in the next release.</para>
+        <section id="xsd-config-setup-eclipse">
+            <title>Setting up Eclipse</title>
+            <para>[TODO :  document setting up Eclipse (with screenshots)]</para>
+        </section>
+        <section id="xsd-config-setup-idea">
+            <title>Setting up IDEA</title>
+            <para>[TODO :  document setting up IDEA (with screenshots)]</para>
+        </section>
+    </section>
 </appendix>
