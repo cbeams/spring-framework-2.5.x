@@ -25,7 +25,7 @@ import org.springframework.core.io.support.PropertiesLoaderSupport;
 
 /**
  * Allows for making a properties file from a classpath location available
- * as Properties instance in a bean factory. Can be used for to populate
+ * as Properties instance in a bean factory. Can be used to populate
  * any bean property of type Properties via a bean reference.
  *
  * <p>Supports loading from a properties file and/or setting local properties
