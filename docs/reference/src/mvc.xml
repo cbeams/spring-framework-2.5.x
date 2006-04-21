@@ -1345,7 +1345,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       content on the response stream.</para>
 
       <para>It is sometimes desireable to issue an HTTP redirect back to the
-      client, before the view is rendered. This si desireable for example when
+      client, before the view is rendered. This is desireable for example when
       one controller has been called with POSTed data, and the response is
       actually a delegation to another controller (for example on a successful
       form submission). In this case, a normal internal forward will mean the
