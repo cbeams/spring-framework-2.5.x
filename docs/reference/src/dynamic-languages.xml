@@ -51,7 +51,7 @@
 			Please note that the dynamic language support detailed in this chapter is
 			<emphasis>only</emphasis> available in Spring versions 2.0 and above. There
 			are currently <emphasis>no</emphasis> plans to backport the dynamic language
-			support to the previous versions of Spring (most notably the 1.2.x line).
+			support to previous versions of Spring (most notably the 1.2.x line).
         </para>
 	</section>
 	<section id="dynamic-language-a-first-example">
@@ -117,10 +117,20 @@ class GroovyMessenger implements Messenger {
             Groovy-defined <interfacename>Messenger</interfacename> implementation into
             an instance of the <classname>DefaultBookingService</classname> class.
         </para>
+        <note>
+            <para>
+                To use the custom dynamic language tags to define dynamic-language-backed beans,
+                one needs to have the XML Schema preamble at the top of one's Spring XML
+                configuration file.
+            </para>
+            <para>
+                The chapter entitled <xref linkend="xsd-config"/> may also be of interest.
+            </para>
+        </note>
 		<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:lang="http://www.springframework.org/schema/lang"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/jndi http://www.springframework.org/schema/jndi/spring-jndi.xsd http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
 
     ]]><lineannotation>&lt;!-- this is the bean definition for the Groovy-backed Messenger implementation --&gt;</lineannotation><![CDATA[
     <lang:groovy id="messenger" script-source="classpath:Messenger.groovy">

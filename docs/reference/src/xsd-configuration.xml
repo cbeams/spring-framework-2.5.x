@@ -354,6 +354,31 @@
              proxy-interface="com.myapp.Foo"/>]]></programlisting>
             </section>
         </section>
+        <section id="xsd-config-body-schemas-lang">
+            <title>The <literal>lang</literal> schema</title>
+            <para>The <literal>lang</literal> tags deal with exposing objects that have been
+            written in a dynamic language such as JRuby or Groovy as beans in the Spring
+            container.</para>
+            <para>These tags (and the dynamic language support) are comprehensively covered
+            in the chapter entitled <xref linkend="dynamic-language"/>. Please do consult said
+            chapter for full details on this support and the <literal>lang</literal> tags
+            themselves.</para>
+            <para>In the interest of completeness, to use the tags in the <literal>lang</literal>
+            schema, one needs to have the following preamble at the top of one's Spring XML
+            configuration file; the emboldened text in the following snippet references the
+            correct schema so that the tags in the <literal>lang</literal> namespace are
+            available to you.</para>
+            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       ]]><emphasis role="bold">xmlns:lang="http://www.springframework.org/schema/lang"</emphasis><![CDATA[
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       ]]><emphasis role="bold">http://www.springframework.org/schema/jndi http://www.springframework.org/schema/jndi/spring-jndi.xsd"</emphasis><![CDATA[>
+
+]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+
+</beans>]]></programlisting>
+        </section>
     </section>
     <section id="xsd-config-setup">
         <title>Setting up your IDE</title>
