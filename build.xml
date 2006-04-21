@@ -69,8 +69,8 @@
 	<target name="usage">
 
 		<echo message=""/>
-		<echo message="${name} build file"/>
-		<echo message="------------------------------------------------------"/>
+		<echo message="Spring Framework build script"/>
+		<echo message="-----------------------------------------"/>
 		<echo message=""/>
 		<echo message="Among the available targets are:"/>
 		<echo message=""/>
@@ -85,8 +85,8 @@
 	<target name="clean" description="Clean all output dirs (dist, javadocs, classes, test-classes, etc)">
 
 		<delete dir="${target.classes.dir}"/>
-		<delete dir="${target.testclasses.dir}"/>
 		<delete dir="${target.mockclasses.dir}"/>
+		<delete dir="${target.testclasses.dir}"/>
 		<delete dir="${target.clover.dir}"/>
 		<delete dir="${target.junit.reports.dir}"/>
 		<delete dir="${target.junit.summary.dir}"/>
@@ -426,6 +426,9 @@
 
 		<zip zipfile="${dist.dir}/spring-src.zip">
 			<fileset dir="${src.dir}">
+				<include name="org/springframework/**"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
 				<include name="org/springframework/**"/>
 			</fileset>
 		</zip>
