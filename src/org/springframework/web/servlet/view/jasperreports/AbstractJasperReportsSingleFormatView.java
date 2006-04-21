@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperPrint;
 
 import org.springframework.ui.jasperreports.JasperReportsUtils;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Extends <code>AbstractJasperReportsView</code> to provide basic rendering logic for
@@ -65,16 +66,29 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 		}
 
 		if (useWriter()) {
-			// Copy the encoding configured for the report into the response-
+			// We need to write text to the response Writer.
+
+			// Copy the encoding configured for the report into the response.
+			String contentType = getContentType();
 			String encoding = (String) exporter.getParameter(JRExporterParameter.CHARACTER_ENCODING);
 			if (encoding != null) {
-				response.setCharacterEncoding(encoding);
+				// Only apply encoding if content type is specified but does not contain charset clause already.
+				if (contentType != null && contentType.toLowerCase().indexOf(WebUtils.CONTENT_TYPE_CHARSET_PREFIX) == -1) {
+					contentType = contentType + WebUtils.CONTENT_TYPE_CHARSET_PREFIX + encoding;
+				}
 			}
-			
+			response.setContentType(contentType);
+
 			// Render report into HttpServletResponse's Writer.
 			JasperReportsUtils.render(exporter, populatedReport, response.getWriter());
 		}
+
 		else {
+			// We need to write binary output to the response OutputStream.
+
+			// Apply the content type as specified - we don't need an encoding here.
+			response.setContentType(getContentType());
+
 			// Render report into local OutputStream.
 			// IE workaround: write into byte array first.
 			ByteArrayOutputStream baos = new ByteArrayOutputStream(OUTPUT_BYTE_ARRAY_INITIAL_SIZE);

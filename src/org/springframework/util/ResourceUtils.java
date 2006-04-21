@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,9 @@ public abstract class ResourceUtils {
 	 * @see java.net.URL
 	 */
 	public static boolean isUrl(String resourceLocation) {
+		if (resourceLocation == null) {
+			return false;
+		}
 		if (resourceLocation.startsWith(CLASSPATH_URL_PREFIX)) {
 			return true;
 		}
@@ -87,6 +90,7 @@ public abstract class ResourceUtils {
 	 * @throws FileNotFoundException if the resource cannot be resolved to a URL
 	 */
 	public static URL getURL(String resourceLocation) throws FileNotFoundException {
+		Assert.notNull(resourceLocation, "Resource location must not be null");
 		if (resourceLocation.startsWith(CLASSPATH_URL_PREFIX)) {
 			String path = resourceLocation.substring(CLASSPATH_URL_PREFIX.length());
 			URL url = ClassUtils.getDefaultClassLoader().getResource(path);
@@ -125,6 +129,7 @@ public abstract class ResourceUtils {
 	 * a file in the file system
 	 */
 	public static File getFile(String resourceLocation) throws FileNotFoundException {
+		Assert.notNull(resourceLocation, "Resource location must not be null");
 		if (resourceLocation.startsWith(CLASSPATH_URL_PREFIX)) {
 			String path = resourceLocation.substring(CLASSPATH_URL_PREFIX.length());
 			String description = "class path resource [" + path + "]";
@@ -169,6 +174,7 @@ public abstract class ResourceUtils {
 	 * a file in the file system
 	 */
 	public static File getFile(URL resourceUrl, String description) throws FileNotFoundException {
+		Assert.notNull(resourceUrl, "Resource URL must not be null");
 		if (!URL_PROTOCOL_FILE.equals(resourceUrl.getProtocol())) {
 			throw new FileNotFoundException(
 					description + " cannot be resolved to absolute file path " +

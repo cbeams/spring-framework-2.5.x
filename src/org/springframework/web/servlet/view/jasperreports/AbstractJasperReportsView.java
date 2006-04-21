@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -501,12 +501,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		response.reset();
-		response.setContentType(getContentType());
-
-		// Populate HTTP headers.
-		populateHeaders(response);
-
 		if (this.subReports != null) {
 			// Expose sub-reports as model attributes.
 			model.putAll(this.subReports);
@@ -523,9 +517,13 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		// Expose Spring-managed Locale and MessageSource.
 		exposeLocalizationContext(model, request);
 
-		// Fill and render the report.
+		// Fill the report.
 		JasperPrint filledReport = fillReport(model);
 		postProcessReport(filledReport, model);
+
+		// Prepare response and render report.
+		response.reset();
+		populateHeaders(response);
 		renderReport(filledReport, model, response);
 	}
 
@@ -573,11 +571,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		// Determine JRDataSource for main report.
 		JRDataSource jrDataSource = getReportData(model);
 
-		if (jrDataSource == null && this.jdbcDataSource == null) {
-			throw new IllegalArgumentException(
-					"No report data source found in model and no [javax.sql.DataSource] specified in configuration");
-		}
-
 		if (jrDataSource != null) {
 			// Use the JasperReports JRDataSource.
 			if (logger.isDebugEnabled()) {
@@ -585,7 +578,17 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			}
 			return JasperFillManager.fillReport(this.report, model, jrDataSource);
 		}
+
 		else {
+			if (this.jdbcDataSource == null) {
+				this.jdbcDataSource = (DataSource) CollectionUtils.findValueOfType(model.values(), DataSource.class);
+				if (this.jdbcDataSource == null) {
+					throw new IllegalArgumentException(
+							"No report data source found in model, " +
+							"and no [javax.sql.DataSource] specified in configuration or in model");
+				}
+			}
+
 			// Use the JDBC DataSource.
 			if (logger.isDebugEnabled()) {
 				logger.debug("Filling report with JDBC DataSource [" + this.jdbcDataSource + "].");
@@ -606,7 +609,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Populates the headers in the <code>HttpServletResponse.</code> with the
+	 * Populates the headers in the <code>HttpServletResponse</code> with the
 	 * headers supplied by the user.
 	 */
 	private void populateHeaders(HttpServletResponse response) {
@@ -717,10 +720,21 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
 	/**
 	 * Subclasses should implement this method to perform the actual rendering process.
+	 * <p>Note that the content type has not been set yet: Implementors should build
+	 * a content type String and set it via <code>response.setContentType</code>.
+	 * If necessary, this can include a charset clause for a specific encoding.
+	 * The latter will only be necessary for textual output onto a Writer, and only
+	 * in case of the encoding being specified in the JasperReports exporter parameters.
+	 * <p><b>WARNING:</b> Implementors should not use <code>response.setCharacterEncoding</code>
+	 * unless they are willing to depend on Servlet API 2.4 or higher. Prefer a
+	 * concatenated content type String with a charset clause instead.
 	 * @param populatedReport the populated <code>JasperPrint</code> to render
 	 * @param model the map containing report parameters
 	 * @param response the HTTP response the report should be rendered to
 	 * @throws Exception if rendering failed
+	 * @see #getContentType()
+	 * @see javax.servlet.ServletResponse#setContentType
+	 * @see javax.servlet.ServletResponse#setCharacterEncoding
 	 */
 	protected abstract void renderReport(JasperPrint populatedReport, Map model, HttpServletResponse response)
 			throws Exception;

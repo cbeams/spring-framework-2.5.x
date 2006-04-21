@@ -73,6 +73,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * @author Juergen Hoeller
  * @since 13.06.2003
+ * @see PersistenceManagerFactoryUtils#getPersistenceManager
+ * @see JdoTransactionManager
+ * @see JdoTemplate
  */
 public class JdoInterceptor extends JdoAccessor implements MethodInterceptor {
 

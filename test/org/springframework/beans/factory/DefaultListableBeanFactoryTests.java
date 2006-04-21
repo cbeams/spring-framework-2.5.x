@@ -425,6 +425,34 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertEquals(2, beansOfType.size());
 	}
 
+	public void testRegisterExistingSingletonWithNameOverriding() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		Properties p = new Properties();
+		p.setProperty("test.(class)", "org.springframework.beans.TestBean");
+		p.setProperty("test.name", "Tony");
+		p.setProperty("test.age", "48");
+		p.setProperty("test.spouse(ref)", "singletonObject");
+		p.setProperty("singletonObject.(class)", "org.springframework.beans.factory.config.PropertiesFactoryBean");
+		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
+		Object singletonObject = new TestBean();
+		lbf.registerSingleton("singletonObject", singletonObject);
+		lbf.preInstantiateSingletons();
+
+		assertTrue(lbf.isSingleton("singletonObject"));
+		assertEquals(TestBean.class, lbf.getType("singletonObject"));
+		TestBean test = (TestBean) lbf.getBean("test");
+		assertEquals(singletonObject, lbf.getBean("singletonObject"));
+		assertEquals(singletonObject, test.getSpouse());
+
+		Map beansOfType = lbf.getBeansOfType(TestBean.class, false, true);
+		assertEquals(2, beansOfType.size());
+		assertTrue(beansOfType.containsValue(test));
+		assertTrue(beansOfType.containsValue(singletonObject));
+
+		beansOfType = lbf.getBeansOfType(null, false, true);
+		assertEquals(2, beansOfType.size());
+	}
+
 	public void testRegisterExistingSingletonWithAutowire() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -478,7 +506,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		DependenciesBean bean = (DependenciesBean)
 				lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_NAME, true);
 		TestBean spouse = (TestBean) lbf.getBean("spouse");
-		assertEquals(bean.getSpouse(), spouse);
+		assertEquals(spouse, bean.getSpouse());
 		assertTrue(BeanFactoryUtils.beanOfType(lbf, TestBean.class) == spouse);
 	}
 
@@ -511,7 +539,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		DependenciesBean bean = (DependenciesBean)
 				lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
 		TestBean test = (TestBean) lbf.getBean("test");
-		assertEquals(bean.getSpouse(), test);
+		assertEquals(test, bean.getSpouse());
 	}
 
 	public void testAutowireBeanByTypeWithDependencyCheck() {
@@ -540,7 +568,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.autowireBeanProperties(existingBean, AutowireCapableBeanFactory.AUTOWIRE_BY_NAME, true);
 		TestBean spouse = (TestBean) lbf.getBean("spouse");
 		assertEquals(existingBean.getSpouse(), spouse);
-		assertTrue(BeanFactoryUtils.beanOfType(lbf, TestBean.class) == spouse);
+		assertSame(spouse, BeanFactoryUtils.beanOfType(lbf, TestBean.class));
 	}
 
 	public void testAutowireExistingBeanByNameWithDependencyCheck() {
@@ -782,7 +810,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	public void testBeanPostProcessorWithWrappedObjectAndDestroyMethod() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDestroyMethod.class, null);
+		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDestroyMethod.class);
 		bd.setDestroyMethodName("close");
 		lbf.registerBeanDefinition("test", bd);
 		lbf.addBeanPostProcessor(new BeanPostProcessor() {

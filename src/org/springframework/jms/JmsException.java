@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public abstract class JmsException extends NestedRuntimeException {
 	 * @param cause the cause of the exception. This argument is generally
 	 * expected to be a proper subclass of {@link javax.jms.JMSException}.
 	 */
-	protected JmsException(Throwable cause) {
+	public JmsException(Throwable cause) {
 		super(cause != null ? cause.getMessage() : null, cause);
 	}
 
@@ -78,25 +78,15 @@ public abstract class JmsException extends NestedRuntimeException {
 	 * @see javax.jms.JMSException#getLinkedException
 	 */
 	public String getMessage() {
-		// Even if you cannot set the cause of this exception other than through
-		// the constructor, we check for the cause being "this" here, as the cause
-		// could still be set to "this" via reflection: for example, by a remoting
-		// deserializer like Hessian's.
-		if (getCause() == null || getCause() == this) {
-			return super.getMessage();
-		}
-		else {
-			if (getCause().getClass().isAssignableFrom(JMSException.class) &&
-				  ((JMSException)getCause()).getLinkedException() != null) {
-				Exception le = ((JMSException) getCause()).getLinkedException();
-					return super.getMessage() + "; nested exception is " + le.getClass().getName() +
-							": " + le.getMessage();
-			}
-			else {
-				return super.getMessage() + "; nested exception is " + getCause().getClass().getName() +
-						": " + getCause().getMessage();
+		String message = super.getMessage();
+		Throwable cause = getCause();
+		if (cause instanceof JMSException) {
+			Exception linkedEx = ((JMSException) cause).getLinkedException();
+			if (linkedEx != null) {
+				message = message + "; nested exception is " + linkedEx;
 			}
 		}
+		return message;
 	}
 
 }

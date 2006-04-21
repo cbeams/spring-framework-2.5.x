@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,17 +165,17 @@ public abstract class SessionFactoryUtils {
 			// as TopLinkTemplate will use SQLExceptionTranslator-based handling.
 			return new TopLinkJdbcException((DatabaseException) ex);
 		}
+		if (ex instanceof OptimisticLockException) {
+			return new TopLinkOptimisticLockingFailureException((OptimisticLockException) ex);
+		}
+		if (ex instanceof QueryException) {
+			return new TopLinkQueryException((QueryException) ex);
+		}
 		if (ex instanceof ConcurrencyException) {
 			return new ConcurrencyFailureException(ex.getMessage(), ex);
 		}
 		if (ex instanceof ConversionException) {
 			return new TypeMismatchDataAccessException(ex.getMessage(), ex);
-		}
-		if (ex instanceof QueryException) {
-			return new TopLinkQueryException((QueryException) ex);
-		}
-		if (ex instanceof OptimisticLockException) {
-			return new TopLinkOptimisticLockingFailureException((OptimisticLockException) ex);
 		}
 		// fallback
 		return new TopLinkSystemException(ex);

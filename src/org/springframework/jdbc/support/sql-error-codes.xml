@@ -57,11 +57,11 @@
 		<property name="badSqlGrammarCodes">
 			<value>1054,1064,1146</value>
 		</property>
-		<property name="dataIntegrityViolationCodes">
-			<value>1062</value>
-		</property>
 		<property name="dataAccessResourceFailureCodes">
 			<value>1</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>1062</value>
 		</property>
 		<property name="cannotAcquireLockCodes">
 			<value>1205</value>

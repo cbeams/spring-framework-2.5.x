@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,31 +32,21 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * participates in it.
  *
  * <p>Application code must retrieve a Hibernate Session via the
- * <code>SessionFactoryUtils.getSession</code> method, to be able to detect a
- * thread-bound Session. It is preferable to use <code>getSession</code> with
- * allowCreate=false, if the code relies on the interceptor to provide proper
- * Session handling. Typically, the code will look as follows:
+ * <code>SessionFactoryUtils.getSession</code> method or - preferably -
+ * Hibernate's own <code>SessionFactory.getCurrentSession()</code> method, to be
+ * able to detect a thread-bound Session. Typically, the code will look like as follows:
  *
  * <pre>
  * public void doHibernateAction() {
- *   Session session = SessionFactoryUtils.getSession(this.sessionFactory, false);
- *   try {
- *     ...
- *   }
- *   catch (HibernateException ex) {
- *     throw SessionFactoryUtils.convertHibernateAccessException(ex);
- *   }
+ *   Session session = this.sessionFactory.getCurrentSession();
+ *   ...
+ *   // No need to close the Session or translate exceptions!
  * }</pre>
  *
- * Note that the application must care about handling HibernateExceptions itself,
- * preferably via delegating to the <code>SessionFactoryUtils.convertHibernateAccessException</code>
+ * Note that this interceptor automatically translates HibernateExceptions,
+ * via delegating to the <code>SessionFactoryUtils.convertHibernateAccessException</code>
  * method that converts them to exceptions that are compatible with the
  * <code>org.springframework.dao</code> exception hierarchy (like HibernateTemplate does).
- *
- * <p>Unfortunately, this interceptor cannot convert checked HibernateExceptions
- * to unchecked dao ones automatically. The intercepted method would have to throw
- * HibernateException to be able to achieve this - thus the caller would still have
- * to catch or rethrow it, even if it will never be thrown if intercepted.
  *
  * <p>This class can be considered a declarative alternative to HibernateTemplate's
  * callback approach. The advantages are:
@@ -65,15 +55,16 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <li>the possibility to throw any application exceptions from within data access code.
  * </ul>
  *
- * <p>The drawbacks are:
- * <ul>
- * <li>the dependency on interceptor configuration;
- * <li>the delegating try/catch blocks.
- * </ul>
+ * <p>The drawback is the dependency on interceptor configuration. However, note
+ * that this interceptor is usually <i>not</i> necessary in scenarios where the
+ * data access code always executes within transactions. A transaction will always
+ * have a thread-bound Session in the first place, so adding this interceptor to the
+ * configuration just adds value when fine-tuning Session settings like the flush mode
+ * - or when relying on exception translation.
  *
  * @author Juergen Hoeller
  * @since 1.2
- * @see SessionFactoryUtils#getSession
+ * @see org.hibernate.SessionFactory#getCurrentSession()
  * @see HibernateTransactionManager
  * @see HibernateTemplate
  */

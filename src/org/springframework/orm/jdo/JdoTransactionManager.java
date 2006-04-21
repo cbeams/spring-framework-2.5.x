@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <p>This implementation is appropriate for applications that solely use JDO for
  * transactional data access. JTA (usually through JtaTransactionManager) is necessary for
  * accessing multiple transactional resources. Note that you need to configure your JDO
- * provider accordingly to make it participate in JTA transactions. In contrast to Hibernate,
- * this cannot be transparently provided by the Spring transaction manager implementation.
+ * provider accordingly to make it participate in JTA transactions.
  *
  * <p>With a JdoDialect specified, this implementation also supports direct DataSource
  * access within a transaction (i.e. plain JDBC code working with the same DataSource).
@@ -377,7 +376,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 			tx.commit();
 		}
 		catch (JDOException ex) {
-			// assumably failed to flush changes to database
+			// Assumably failed to flush changes to database.
 			throw convertJdoAccessException(ex);
 		}
 	}
@@ -447,13 +446,12 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 	/**
 	 * Convert the given JDOException to an appropriate exception from the
-	 * org.springframework.dao hierarchy. Delegates to the JdoDialect if set, falls
-	 * back to PersistenceManagerFactoryUtils' standard exception translation else.
+	 * <code>org.springframework.dao</code> hierarchy.
+	 * <p>Default implementation delegates to the JdoDialect.
 	 * May be overridden in subclasses.
 	 * @param ex JDOException that occured
 	 * @return the corresponding DataAccessException instance
 	 * @see JdoDialect#translateException
-	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException
 	 */
 	protected DataAccessException convertJdoAccessException(JDOException ex) {
 		return getJdoDialect().translateException(ex);

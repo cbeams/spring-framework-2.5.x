@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,6 +46,8 @@ import org.springframework.beans.factory.FactoryBean;
  *   &lt;property name="transactionManager" ref="jotm"/&gt;
  *   &lt;property name="driverName" value="..."/&gt;
  *   &lt;property name="url" value="..."/&gt;
+ *   &lt;property name="user" value="..."/&gt;
+ *   &lt;property name="password" value="..."/&gt;
  * &lt;/bean&gt;
  *
  * &lt;bean id="dataSource" class="org.enhydra.jdbc.pool.StandardXAPoolDataSource" destroy-method="shutdown"&gt;

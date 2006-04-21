@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -64,6 +64,7 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 	private static final int MESSAGE_SQL_SQLEX_CONSTRUCTOR = 5;
 
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Error codes used by this translator */
@@ -366,7 +367,7 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 					return null;
 				}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Unable to instantiate custom exception class [" + exceptionClass.getName() + "]", ex);
 			}
@@ -377,8 +378,8 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 	private void logTranslation(String task, String sql, SQLException sqlEx, boolean custom) {
 		if (logger.isDebugEnabled()) {
 			String intro = custom ? "Custom translation of" : "Translating";
-			logger.debug(intro + " SQLException with SQLState '" + sqlEx.getSQLState() +
-					"' and errorCode '" + sqlEx.getErrorCode() + "' and message [" + sqlEx.getMessage() +
+			logger.debug(intro + " SQLException with SQL state '" + sqlEx.getSQLState() +
+					"', error code '" + sqlEx.getErrorCode() + "', message [" + sqlEx.getMessage() +
 					"]; SQL was [" + sql + "] for task [" + task + "]");
 		}
 	}

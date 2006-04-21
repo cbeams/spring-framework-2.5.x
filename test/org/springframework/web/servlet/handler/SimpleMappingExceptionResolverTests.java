@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,11 @@ import junit.framework.TestCase;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * @author Seth Ladd
+ * @author Juergen Hoeller
  */
 public class SimpleMappingExceptionResolverTests extends TestCase {
 
@@ -86,7 +88,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 	public void testNoDefaultStatusCode() {
 		exceptionResolver.setDefaultErrorView("default-view");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
-		assertEquals(200, response.getStatus());
+		assertEquals(HttpServletResponse.SC_OK, response.getStatus());
 	}
 
 	public void testSetDefaultStatusCode() {
@@ -94,6 +96,14 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		exceptionResolver.setDefaultStatusCode(HttpServletResponse.SC_BAD_REQUEST);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
 		assertEquals(HttpServletResponse.SC_BAD_REQUEST, response.getStatus());
+	}
+
+	public void testNoDefaultStatusCodeInInclude() {
+		exceptionResolver.setDefaultErrorView("default-view");
+		exceptionResolver.setDefaultStatusCode(HttpServletResponse.SC_BAD_REQUEST);
+		request.setAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE, "some path");
+		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
+		assertEquals(HttpServletResponse.SC_OK, response.getStatus());
 	}
 
 	public void testSimpleExceptionMapping() {
@@ -173,15 +183,15 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 	}
 
 	public void testThreeMappings() {
-		Exception oddException = new AnotherSomeOddException();
+		Exception oddException = new AnotherOddException();
 		Properties props = new Properties();
 		props.setProperty("java.lang.Exception", "error");
 		props.setProperty("SomeOddException", "another-error");
-		props.setProperty("AnotherSomeOddException", "another-some-error");
+		props.setProperty("AnotherOddException", "another-some-error");
 		exceptionResolver.setMappedHandlers(Collections.singleton(handler1));
 		exceptionResolver.setExceptionMappings(props);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, oddException);
-		assertEquals("another-error", mav.getViewName());
+		assertEquals("another-some-error", mav.getViewName());
 	}
 
 
@@ -190,7 +200,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 	}
 
 
-	private static class AnotherSomeOddException extends Exception {
+	private static class AnotherOddException extends Exception {
 
 	}
 

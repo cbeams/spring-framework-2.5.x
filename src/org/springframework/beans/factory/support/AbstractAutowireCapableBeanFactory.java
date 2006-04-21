@@ -178,7 +178,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * <p>This will typically be used by application contexts to register
 	 * dependencies that are resolved in other ways, like BeanFactory through
 	 * BeanFactoryAware or ApplicationContext through ApplicationContextAware.
-	 * <p>By default, only the BeanFactory interface is ignored.
+	 * <p>By default, only the BeanFactoryAware interface is ignored.
 	 * For further types to ignore, invoke this method for each type.
 	 * @see org.springframework.beans.factory.BeanFactoryAware
 	 * @see org.springframework.context.ApplicationContextAware
@@ -297,7 +297,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (result == null) {
 				throw new BeanCreationException(beanName,
 						"postProcessAfterInitialization method of BeanPostProcessor [" + beanProcessor +
-				    "] returned null for bean [" + result + "] with name [" + beanName + "]");
+						"] returned null for bean [" + result + "] with name [" + beanName + "]");
 			}
 		}
 		return result;
@@ -957,7 +957,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		PropertyDescriptor[] pds = bw.getPropertyDescriptors();
 		for (int i = 0; i < pds.length; i++) {
 			if (pds[i].getWriteMethod() != null && !isExcludedFromDependencyCheck(pds[i]) &&
-			    !pvs.contains(pds[i].getName()) && !BeanUtils.isSimpleProperty(pds[i].getPropertyType())) {
+					!pvs.contains(pds[i].getName()) && !BeanUtils.isSimpleProperty(pds[i].getPropertyType())) {
 				result.add(pds[i].getName());
 			}
 		}
@@ -986,7 +986,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		PropertyDescriptor[] pds = bw.getPropertyDescriptors();
 		for (int i = 0; i < pds.length; i++) {
 			if (pds[i].getWriteMethod() != null && !isExcludedFromDependencyCheck(pds[i]) &&
-			    !pvs.contains(pds[i].getName())) {
+					!pvs.contains(pds[i].getName())) {
 				boolean isSimple = BeanUtils.isSimpleProperty(pds[i].getPropertyType());
 				boolean unsatisfied = (dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_ALL) ||
 					(isSimple && dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_SIMPLE) ||
@@ -994,7 +994,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				if (unsatisfied) {
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, pds[i].getName(),
-							"set this property value or disable dependency checking for this bean");
+							"Set this property value or disable dependency checking for this bean.");
 				}
 			}
 		}

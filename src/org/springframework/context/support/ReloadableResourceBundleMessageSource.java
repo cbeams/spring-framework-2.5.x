@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,9 +195,9 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * Set the number of seconds to cache loaded properties files.
 	 * <ul>
 	 * <li>Default is "-1", indicating to cache forever (just like
-	 * java.util.ResourceBundle).
+	 * <code>java.util.ResourceBundle</code>).
 	 * <li>A positive number will cache loaded properties files for the given
-	 * number of seconds. This is essentially the interval between refresh attempts.
+	 * number of seconds. This is essentially the interval between refresh checks.
 	 * Note that a refresh attempt will first check the last-modified timestamp
 	 * of the file before actually reloading it; so if files don't change, this
 	 * interval can be set rather low, as refresh attempts will not actually reload.
@@ -206,7 +206,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * </ul>
 	 */
 	public void setCacheSeconds(int cacheSeconds) {
-		this.cacheMillis = cacheSeconds * 1000;
+		this.cacheMillis = (cacheSeconds * 1000);
 	}
 
 	/**
@@ -543,10 +543,10 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	/**
 	 * Clear the resource bundle cache.
-	 * Following resolve calls will lead to reloading of the properties files.
+	 * Subsequent resolve calls will lead to reloading of the properties files.
 	 */
 	public void clearCache() {
-		logger.info("Clearing resource bundle cache");
+		logger.debug("Clearing entire resource bundle cache");
 		synchronized (this.cachedProperties) {
 			this.cachedProperties.clear();
 		}

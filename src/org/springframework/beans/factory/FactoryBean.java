@@ -79,11 +79,17 @@ public interface FactoryBean {
 
 	/**
 	 * Is the bean managed by this factory a singleton or a prototype?
-	 * That is, will getObject() always return the same object?
+	 * That is, will <code>getObject()</code> always return the same object
+	 * (a reference that can be cached)?
+	 * <p><b>NOTE:</b> If a FactoryBean indicates to hold a singleton object,
+	 * the object returned from <code>getObject()</code> might get cached
+	 * by the owning BeanFactory. Hence, do not return <code>true</code>
+	 * unless the FactoryBean always exposes the same reference.
 	 * <p>The singleton status of the FactoryBean itself will generally
 	 * be provided by the owning BeanFactory; usually, it has to be
 	 * defined as singleton there.
 	 * @return if this bean is a singleton
+	 * @see #getObject()
 	 */
 	boolean isSingleton();
 

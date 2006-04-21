@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.quartz.Calendar;
 import org.quartz.JobDetail;
 import org.quartz.JobListener;
+import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
@@ -503,15 +504,17 @@ public class SchedulerFactoryBean
 			configTimeNonTransactionalDataSourceHolder.set(this.nonTransactionalDataSource);
 		}
 
-
 		// Get Scheduler instance from SchedulerFactory.
-		this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
-
-		if (this.dataSource != null) {
-			configTimeDataSourceHolder.set(null);
+		try {
+			this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
 		}
-		if (this.nonTransactionalDataSource != null) {
-			configTimeNonTransactionalDataSourceHolder.set(null);
+		finally {
+			if (this.dataSource != null) {
+				configTimeDataSourceHolder.set(null);
+			}
+			if (this.nonTransactionalDataSource != null) {
+				configTimeNonTransactionalDataSourceHolder.set(null);
+			}
 		}
 
 		populateSchedulerContext();
@@ -525,6 +528,7 @@ public class SchedulerFactoryBean
 			startScheduler(this.scheduler, this.startupDelay);
 		}
 	}
+
 
 	/**
 	 * Load and/or apply Quartz properties to the given SchedulerFactory.
@@ -593,6 +597,7 @@ public class SchedulerFactoryBean
 	 */
 	protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
 			throws SchedulerException {
+
 		// StdSchedulerFactory's default "getScheduler" implementation
 		// uses the scheduler name specified in the Quartz properties,
 		// which we have set before (in "initSchedulerFactory").
@@ -619,6 +624,7 @@ public class SchedulerFactoryBean
 			this.scheduler.getContext().put(this.applicationContextSchedulerContextKey, this.applicationContext);
 		}
 	}
+
 
 	/**
 	 * Register all specified listeners with the Scheduler.
@@ -697,20 +703,7 @@ public class SchedulerFactoryBean
 			if (this.triggers != null) {
 				for (Iterator it = this.triggers.iterator(); it.hasNext();) {
 					Trigger trigger = (Trigger) it.next();
-					if (this.scheduler.getTrigger(trigger.getName(), trigger.getGroup()) == null) {
-						// Check if the Trigger is aware of an associated JobDetail.
-						if (trigger instanceof JobDetailAwareTrigger) {
-							JobDetail jobDetail = ((JobDetailAwareTrigger) trigger).getJobDetail();
-							// Automatically register the JobDetail too.
-							if (!this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
-								this.jobDetails.add(jobDetail);
-							}
-						}
-						this.scheduler.scheduleJob(trigger);
-					}
-					else if (this.overwriteExistingJobs) {
-						this.scheduler.rescheduleJob(trigger.getName(), trigger.getGroup(), trigger);
-					}
+					addTriggerToScheduler(trigger);
 				}
 			}
 		}
@@ -744,8 +737,8 @@ public class SchedulerFactoryBean
 	 * Add the given job to the Scheduler, if it doesn't already exist.
 	 * Overwrites the job in any case if "overwriteExistingJobs" is set.
 	 * @param jobDetail the job to add
-	 * @return true if the job was actually added,
-	 * false if it already existed before
+	 * @return <code>true</code> if the job was actually added,
+	 * <code>false</code> if it already existed before
 	 * @see #setOverwriteExistingJobs
 	 */
 	private boolean addJobToScheduler(JobDetail jobDetail) throws SchedulerException {
@@ -794,6 +787,50 @@ public class SchedulerFactoryBean
 			ReflectionUtils.handleReflectionException(ex);
 		}
 	}
+
+	/**
+	 * Add the given trigger to the Scheduler, if it doesn't already exist.
+	 * Overwrites the trigger in any case if "overwriteExistingJobs" is set.
+	 * @param trigger the trigger to add
+	 * @return <code>true</code> if the trigger was actually added,
+	 * <code>false</code> if it already existed before
+	 * @see #setOverwriteExistingJobs
+	 */
+	private boolean addTriggerToScheduler(Trigger trigger) throws SchedulerException {
+		boolean triggerExists = (this.scheduler.getTrigger(trigger.getName(), trigger.getGroup()) != null);
+		if (!triggerExists || this.overwriteExistingJobs) {
+			// Check if the Trigger is aware of an associated JobDetail.
+			if (trigger instanceof JobDetailAwareTrigger) {
+				JobDetail jobDetail = ((JobDetailAwareTrigger) trigger).getJobDetail();
+				// Automatically register the JobDetail too.
+				if (!this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
+					this.jobDetails.add(jobDetail);
+				}
+			}
+			if (!triggerExists) {
+				try {
+					this.scheduler.scheduleJob(trigger);
+				}
+				catch (ObjectAlreadyExistsException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Unexpectedly found existing trigger, assumably due to cluster race condition: " +
+								ex.getMessage() + " - can safely be ignored");
+					}
+					if (this.overwriteExistingJobs) {
+						this.scheduler.rescheduleJob(trigger.getName(), trigger.getGroup(), trigger);
+					}
+				}
+			}
+			else {
+				this.scheduler.rescheduleJob(trigger.getName(), trigger.getGroup(), trigger);
+			}
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
 
 	/**
 	 * Start the Quartz Scheduler, respecting the "startupDelay" setting.

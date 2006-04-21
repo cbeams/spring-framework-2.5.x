@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -91,7 +91,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	}
 
 	/**
-	 * Get a JDO PersistenceManager via the given factory. Is aware of a
+	 * Obtain a JDO PersistenceManager via the given factory. Is aware of a
 	 * corresponding PersistenceManager bound to the current thread,
 	 * for example when using JdoTransactionManager. Will create a new
 	 * PersistenceManager else, if allowCreate is true.
@@ -99,8 +99,9 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * @param allowCreate if a non-transactional PersistenceManager should be created
 	 * when no transactional PersistenceManager can be found for the current thread
 	 * @return the PersistenceManager
-	 * @throws DataAccessResourceFailureException if the PersistenceManager couldn't be created
+	 * @throws DataAccessResourceFailureException if the PersistenceManager couldn't be obtained
 	 * @throws IllegalStateException if no thread-bound PersistenceManager found and allowCreate false
+	 * @see JdoTransactionManager
 	 */
 	public static PersistenceManager getPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate)
 	    throws DataAccessResourceFailureException, IllegalStateException {
@@ -109,12 +110,12 @@ public abstract class PersistenceManagerFactoryUtils {
 			return doGetPersistenceManager(pmf, allowCreate);
 		}
 		catch (JDOException ex) {
-			throw new DataAccessResourceFailureException("Could not open JDO PersistenceManager", ex);
+			throw new DataAccessResourceFailureException("Could not obtain JDO PersistenceManager", ex);
 		}
 	}
 
 	/**
-	 * Get a JDO PersistenceManager via the given factory. Is aware of a
+	 * Obtain a JDO PersistenceManager via the given factory. Is aware of a
 	 * corresponding PersistenceManager bound to the current thread,
 	 * for example when using JdoTransactionManager. Will create a new
 	 * PersistenceManager else, if allowCreate is true.
@@ -125,6 +126,8 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * @return the PersistenceManager
 	 * @throws JDOException if the PersistenceManager couldn't be created
 	 * @throws IllegalStateException if no thread-bound PersistenceManager found and allowCreate false
+	 * @see #getPersistenceManager(javax.jdo.PersistenceManagerFactory, boolean)
+	 * @see JdoTransactionManager
 	 */
 	public static PersistenceManager doGetPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate)
 	    throws JDOException, IllegalStateException {
@@ -134,6 +137,12 @@ public abstract class PersistenceManagerFactoryUtils {
 		PersistenceManagerHolder pmHolder =
 				(PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
 		if (pmHolder != null) {
+			if (!pmHolder.isSynchronizedWithTransaction() &&
+					TransactionSynchronizationManager.isSynchronizationActive()) {
+				pmHolder.setSynchronizedWithTransaction(true);
+				TransactionSynchronizationManager.registerSynchronization(
+						new PersistenceManagerSynchronization(pmHolder, pmf, false));
+			}
 			return pmHolder.getPersistenceManager();
 		}
 
@@ -152,7 +161,7 @@ public abstract class PersistenceManagerFactoryUtils {
 			pmHolder = new PersistenceManagerHolder(pm);
 			pmHolder.setSynchronizedWithTransaction(true);
 			TransactionSynchronizationManager.registerSynchronization(
-					new PersistenceManagerSynchronization(pmHolder, pmf));
+					new PersistenceManagerSynchronization(pmHolder, pmf, true));
 			TransactionSynchronizationManager.bindResource(pmf, pmHolder);
 		}
 
@@ -199,8 +208,8 @@ public abstract class PersistenceManagerFactoryUtils {
 
 	/**
 	 * Convert the given JDOException to an appropriate exception from the
-	 * org.springframework.dao hierarchy.
-	 * <p>The most important cases like object not found or optimistic verification
+	 * <code>org.springframework.dao</code> hierarchy.
+	 * <p>The most important cases like object not found or optimistic locking
 	 * failure are covered here. For more fine-granular conversion, JdoAccessor and
 	 * JdoTransactionManager support sophisticated translation of exceptions via a
 	 * JdoDialect.
@@ -214,25 +223,23 @@ public abstract class PersistenceManagerFactoryUtils {
 		if (ex instanceof JDOObjectNotFoundException) {
 			throw new JdoObjectRetrievalFailureException((JDOObjectNotFoundException) ex);
 		}
-		else if (ex instanceof JDOOptimisticVerificationException) {
+		if (ex instanceof JDOOptimisticVerificationException) {
 			throw new JdoOptimisticLockingFailureException((JDOOptimisticVerificationException) ex);
 		}
-		else if (ex instanceof JDODataStoreException) {
+		if (ex instanceof JDODataStoreException) {
 			return new JdoResourceFailureException((JDODataStoreException) ex);
 		}
-		else if (ex instanceof JDOFatalDataStoreException) {
+		if (ex instanceof JDOFatalDataStoreException) {
 			return new JdoResourceFailureException((JDOFatalDataStoreException) ex);
 		}
-		else if (ex instanceof JDOUserException) {
+		if (ex instanceof JDOUserException) {
 			return new JdoUsageException((JDOUserException) ex);
 		}
-		else if (ex instanceof JDOFatalUserException) {
+		if (ex instanceof JDOFatalUserException) {
 			return new JdoUsageException((JDOFatalUserException) ex);
 		}
-		else {
-			// fallback: assuming internal exception
-			return new JdoSystemException(ex);
-		}
+		// fallback
+		return new JdoSystemException(ex);
 	}
 
 	/**
@@ -297,11 +304,15 @@ public abstract class PersistenceManagerFactoryUtils {
 
 		private final PersistenceManagerFactory persistenceManagerFactory;
 
+		private final boolean newPersistenceManager;
+
 		private boolean holderActive = true;
 
-		public PersistenceManagerSynchronization(PersistenceManagerHolder pmHolder, PersistenceManagerFactory pmf) {
+		public PersistenceManagerSynchronization(
+				PersistenceManagerHolder pmHolder, PersistenceManagerFactory pmf, boolean newPersistenceManager) {
 			this.persistenceManagerHolder = pmHolder;
 			this.persistenceManagerFactory = pmf;
+			this.newPersistenceManager = newPersistenceManager;
 		}
 
 		public int getOrder() {
@@ -322,11 +333,16 @@ public abstract class PersistenceManagerFactoryUtils {
 		}
 
 		public void beforeCompletion() {
-			TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
-			this.holderActive = false;
-			releasePersistenceManager(
-			    this.persistenceManagerHolder.getPersistenceManager(),
-			    this.persistenceManagerFactory);
+			if (this.newPersistenceManager) {
+				TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
+				this.holderActive = false;
+				releasePersistenceManager(
+						this.persistenceManagerHolder.getPersistenceManager(), this.persistenceManagerFactory);
+			}
+		}
+
+		public void afterCompletion(int status) {
+			this.persistenceManagerHolder.setSynchronizedWithTransaction(false);
 		}
 	}
 

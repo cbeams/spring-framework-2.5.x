@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,8 +144,7 @@ public class OpenPersistenceManagerInViewTests extends TestCase {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
-			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(pmf));
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
 			}

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,14 +45,17 @@ import org.springframework.jdbc.core.SqlReturnResultSet;
  * Expert One-On-One J2EE Design and Development</a> by Rod Johnson (Wrox, 2002).
  *
  * <p>This class and subclasses throw runtime exceptions, defined in the
- * org.springframework.dao package (and as thrown by the org.springframework.jdbc.core
- * package, which the classes in this package use to perform raw JDBC actions).
+ * <codeorg.springframework.dao package</code> (and as thrown by the
+ * <code>org.springframework.jdbc.core</code> package, which the classes
+ * in this package use under the hood to perform raw JDBC operations).
  *
  * <p>Subclasses should set SQL and add parameters before invoking the
- * compile() method. The order in which parameters are added is significant.
- * The appropriate execute or update method can then be invoked.
+ * <code>compile()</code> method. The order in which parameters are added is
+ * significant. The appropriate <code>execute</code> or <code>update</code>
+ * method can then be invoked.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see #compile
  * @see org.springframework.dao
  * @see org.springframework.jdbc.core
@@ -376,8 +379,8 @@ public abstract class RdbmsOperation implements InitializingBean {
 			}
 		}
 		else {
-			// no parameters were supplied
-			if (!this.declaredParameters.isEmpty()) {
+			// No parameters were supplied.
+			if (this.declaredParameters != null && !this.declaredParameters.isEmpty()) {
 				throw new InvalidDataAccessApiUsageException(
 						this.declaredParameters.size() + " parameters must be supplied");
 			}

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -60,7 +60,7 @@ public interface Errors {
 	 * <p>For example, an address validator could validate the subobject
 	 * "address" of a customer object.
 	 * @param nestedPath nested path within this object,
-	 * e.g. "address" (defaults to "", null is also acceptable).
+	 * e.g. "address" (defaults to "", <code>null</code> is also acceptable).
 	 * Can end with a dot: both "address" and "address." are valid.
 	 */
 	void setNestedPath(String nestedPath);
@@ -216,6 +216,7 @@ public interface Errors {
 
 	/**
 	 * Get the first error associated with the given field, if any.
+	 * @param field the field name
 	 * @return the field-specific error, or <code>null</code>
 	 */
 	FieldError getFieldError(String field);

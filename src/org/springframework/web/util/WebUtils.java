@@ -4,9 +4,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,8 +42,13 @@ import org.springframework.util.StringUtils;
 public abstract class WebUtils {
 
 	/**
-	 * Default character encoding to use when request.getCharacterEncoding
-	 * returns null, according to the Servlet spec.
+	 * Prefix of the charset clause in a content type String: ";charset="
+	 */
+	public static final String CONTENT_TYPE_CHARSET_PREFIX = ";charset=";
+
+	/**
+	 * Default character encoding to use when <code>request.getCharacterEncoding</code>
+	 * returns <code>null</code>, according to the Servlet spec.
 	 * @see ServletRequest#getCharacterEncoding
 	 */
 	public static final String DEFAULT_CHARACTER_ENCODING = "ISO-8859-1";

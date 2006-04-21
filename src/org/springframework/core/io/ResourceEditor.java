@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,7 @@ package org.springframework.core.io;
 
 import java.beans.PropertyEditorSupport;
 
+import org.springframework.util.StringUtils;
 import org.springframework.util.SystemPropertyUtils;
 
 /**
@@ -61,8 +62,13 @@ public class ResourceEditor extends PropertyEditorSupport {
 
 
 	public void setAsText(String text) {
-		String locationToUse = resolvePath(text).trim();
-		setValue(this.resourceLoader.getResource(locationToUse));
+		if (StringUtils.hasText(text)) {
+			String locationToUse = resolvePath(text).trim();
+			setValue(this.resourceLoader.getResource(locationToUse));
+		}
+		else {
+			setValue(null);
+		}
 	}
 
 	/**
