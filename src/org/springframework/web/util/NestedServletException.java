@@ -93,7 +93,6 @@ public class NestedServletException extends ServletException {
 		}
 		else {
 			ps.println(this);
-			ps.print("Caused by: ");
 			getCause().printStackTrace(ps);
 		}
 	}
@@ -108,7 +107,6 @@ public class NestedServletException extends ServletException {
 		}
 		else {
 			pw.println(this);
-			pw.print("Caused by: ");
 			getCause().printStackTrace(pw);
 		}
 	}

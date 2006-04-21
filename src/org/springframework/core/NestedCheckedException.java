@@ -107,7 +107,6 @@ public abstract class NestedCheckedException extends Exception {
 		}
 		else {
 			ps.println(this);
-			ps.print("Caused by: ");
 			getCause().printStackTrace(ps);
 		}
 	}
@@ -122,7 +121,6 @@ public abstract class NestedCheckedException extends Exception {
 		}
 		else {
 			pw.println(this);
-			pw.print("Caused by: ");
 			getCause().printStackTrace(pw);
 		}
 	}
