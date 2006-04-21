@@ -491,11 +491,12 @@ public abstract class ClassUtils {
 			forName(className);
 			return true;
 		}
-		catch (Exception e) {
+		catch (Exception ex) {
 			if(logger.isDebugEnabled()) {
-				logger.debug("Class '" + className + "'or one of its dependencies is not present.", e);
+				logger.debug("Class '" + className + "' or one of its dependencies is not present.", ex);
 			}
 			return false;
 		}
 	}
+
 }
