@@ -47,7 +47,7 @@
 			include objects instantiated by an O/R mapping framework, and objects
 			simply constructed using the <literal>new</literal> operator. This is a
 			particularly useful mechanism to avoid the
-			<ulink linkend="http://www.martinfowler.com/bliki/AnemicDomainModel.html">'anemic domain model'</ulink>
+			<ulink url="http://www.martinfowler.com/bliki/AnemicDomainModel.html">'anemic domain model'</ulink>
 			criticized by Martin Fowler and other OO experts.
 			</para>
 		<para>
@@ -630,7 +630,7 @@ public class AdviceBindingTestAspect {
 			<listitem>
 				<para>
 					The AspectJ
-					<ulink linkend="http://www.eclipse.org/aspectj/doc/released/progguide/index.html">Programmers Guide</ulink>,
+					<ulink url="http://www.eclipse.org/aspectj/doc/released/progguide/index.html">Programmers Guide</ulink>,
 					included in the AspectJ 5 distribution, is an excellent starting point.
 				</para>
 			</listitem>

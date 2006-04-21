@@ -20,7 +20,7 @@
 				to see support for
 				<quote><emphasis>insert your favourite dynamic language here</emphasis></quote>,
                 you can always raise an issue on Spring's
-                <ulink linkend="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA</ulink>
+                <ulink url="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA</ulink>
                 page (or implement such support yourself).
             </para>
         </sidebar>
