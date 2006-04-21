@@ -261,13 +261,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	public boolean containsBean(String name) {
-		String beanName = transformedBeanName(name);
-		synchronized (this.singletonCache) {
-			if (this.singletonCache.containsKey(beanName)) {
-				return true;
-			}
-		}
-		if (containsBeanDefinition(beanName)) {
+		if (containsLocalBean(name)) {
 			return true;
 		}
 		// Not found -> check parent.
@@ -560,13 +554,13 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		if (logger.isInfoEnabled()) {
 			logger.info("Destroying singletons in factory {" + this + "}");
 		}
-		synchronized (this.disposableBeans) {
-			String[] disposableBeanName = StringUtils.toStringArray(this.disposableBeans.keySet());
-			for (int i = 0; i < disposableBeanName.length; i++) {
-				destroyDisposableBean(disposableBeanName[i]);
-			}
-		}
 		synchronized (this.singletonCache) {
+			synchronized (this.disposableBeans) {
+				String[] disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
+				for (int i = 0; i < disposableBeanNames.length; i++) {
+					destroyDisposableBean(disposableBeanNames[i]);
+				}
+			}
 			this.singletonCache.clear();
 		}
 	}
@@ -853,26 +847,22 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	public boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
-		Object beanInstance = null;
 
 		synchronized (this.singletonCache) {
-			beanInstance = this.singletonCache.get(beanName);
-		}
-
-		if (beanInstance != null) {
-			return (beanInstance instanceof FactoryBean);
-		}
-
-		else {
-			// No singleton instance found -> check bean definition.
-			if (!containsBeanDefinition(beanName) && getParentBeanFactory() instanceof AbstractBeanFactory) {
-				// No bean definition found in this factory -> delegate to parent.
-				return ((AbstractBeanFactory) getParentBeanFactory()).isFactoryBean(name);
+			Object beanInstance = this.singletonCache.get(beanName);
+			if (beanInstance != null) {
+				return (beanInstance instanceof FactoryBean);
 			}
-
-			RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
-			return (bd.hasBeanClass() && FactoryBean.class.equals(bd.getBeanClass()));
 		}
+
+		// No singleton instance found -> check bean definition.
+		if (!containsBeanDefinition(beanName) && getParentBeanFactory() instanceof AbstractBeanFactory) {
+			// No bean definition found in this factory -> delegate to parent.
+			return ((AbstractBeanFactory) getParentBeanFactory()).isFactoryBean(name);
+		}
+
+		RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+		return (bd.hasBeanClass() && FactoryBean.class.equals(bd.getBeanClass()));
 	}
 
 
@@ -1010,15 +1000,15 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param bean the bean instance to destroy
 	 */
 	protected void destroyBean(String beanName, Object bean) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Retrieving dependent beans for bean '" + beanName + "'");
-		}
-
 		Set dependencies = null;
 		synchronized (this.dependentBeanMap) {
 			dependencies = (Set) this.dependentBeanMap.remove(beanName);
 		}
+
 		if (dependencies != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Retrieved dependent beans for bean '" + beanName + "': " + dependencies);
+			}
 			for (Iterator it = dependencies.iterator(); it.hasNext();) {
 				String dependentBeanName = (String) it.next();
 				destroyDisposableBean(dependentBeanName);

@@ -202,7 +202,7 @@ public abstract class StringUtils {
 			return false;
 		}
 
-		String lcStr = str.substring(suffix.length()).toLowerCase();
+		String lcStr = str.substring(str.length() - suffix.length()).toLowerCase();
 		String lcSuffix = suffix.toLowerCase();
 		return lcStr.equals(lcSuffix);
 	}
@@ -457,21 +457,30 @@ public abstract class StringUtils {
 		String[] pathArray = delimitedListToStringArray(pathToUse, FOLDER_SEPARATOR);
 		List pathElements = new LinkedList();
 		int tops = 0;
+
 		for (int i = pathArray.length - 1; i >= 0; i--) {
 			if (CURRENT_PATH.equals(pathArray[i])) {
-				// do nothing
+				// Points to current directory - drop it.
 			}
 			else if (TOP_PATH.equals(pathArray[i])) {
+				// Registering top path found.
 				tops++;
 			}
 			else {
 				if (tops > 0) {
+					// Merging path element with corresponding to top path.
 					tops--;
 				}
 				else {
+					// Normal path element found.
 					pathElements.add(0, pathArray[i]);
 				}
 			}
+		}
+
+		// Remaining top paths need to be retained.
+		for (int i = 0; i < tops; i++) {
+			pathElements.add(0, TOP_PATH);
 		}
 
 		return prefix + collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);
@@ -481,7 +490,7 @@ public abstract class StringUtils {
 	 * Compare two paths after normalization of them.
 	 * @param path1 First path for comparizon
 	 * @param path2 Second path for comparizon
-	 * @return True if the two paths are equivalent after normalization
+	 * @return whether the two paths are equivalent after normalization
 	 */
 	public static boolean pathEquals(String path1, String path2) {
 		return cleanPath(path1).equals(cleanPath(path2));

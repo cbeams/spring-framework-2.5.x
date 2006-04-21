@@ -374,10 +374,8 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("stringArray length = 1", pt.stringArray.length == 1);
 		assertTrue("stringArray elt is ok", pt.stringArray[0].equals("one"));
 
-		bw.setPropertyValue("stringArray", "foo,fi,fi,fum");
-		assertTrue("stringArray length = 4", pt.stringArray.length == 4);
-		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
-				pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
+		bw.setPropertyValue("stringArray", null);
+		assertTrue("stringArray is null", pt.stringArray == null);
 	}
 
 	public void testStringArrayPropertyWithCustomStringEditor() throws Exception {
@@ -416,11 +414,15 @@ public class BeanWrapperTests extends TestCase {
 		bw.setPropertyValue("stringArray", "8one");
 		assertTrue("stringArray length = 1", pt.stringArray.length == 1);
 		assertTrue("correct values", pt.stringArray[0].equals("one"));
+	}
 
-		bw.setPropertyValue("stringArray", "1foo,3fi,2fi,1fum");
-		assertTrue("stringArray length = 4", pt.stringArray.length == 4);
-		assertTrue("correct values", pt.stringArray[0].equals("foo") && pt.stringArray[1].equals("fi") &&
-				pt.stringArray[2].equals("fi") && pt.stringArray[3].equals("fum"));
+	public void testStringArrayPropertyWithStringSplitting() throws Exception {
+		PropsTest pt = new PropsTest();
+		BeanWrapper bw = new BeanWrapperImpl(pt);
+		bw.registerCustomEditor(String[].class, "stringArray", new StringArrayPropertyEditor());
+		bw.setPropertyValue("stringArray", "a1,b2");
+		assertTrue("stringArray length = 2", pt.stringArray.length == 2);
+		assertTrue("correct values", pt.stringArray[0].equals("a1") && pt.stringArray[1].equals("b2"));
 	}
 
 	public void testStringArrayPropertyWithCustomStringDelimiter() throws Exception {

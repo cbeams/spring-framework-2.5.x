@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -72,6 +72,7 @@ public abstract class NestedCheckedException extends Exception {
 		this.cause = ex;
 	}
 
+
 	/**
 	 * Return the nested cause, or <code>null</code> if none.
 	 */
@@ -88,13 +89,12 @@ public abstract class NestedCheckedException extends Exception {
 	 * if there is one.
 	 */
 	public String getMessage() {
-		if (getCause() == null) {
-			return super.getMessage();
+		String message = super.getMessage();
+		Throwable cause = getCause();
+		if (cause != null) {
+			return message + "; nested exception is " + cause;
 		}
-		else {
-			return super.getMessage() + "; nested exception is " + getCause().getClass().getName() +
-					": " + getCause().getMessage();
-		}
+		return message;
 	}
 
 	/**
@@ -107,6 +107,7 @@ public abstract class NestedCheckedException extends Exception {
 		}
 		else {
 			ps.println(this);
+			ps.print("Caused by: ");
 			getCause().printStackTrace(ps);
 		}
 	}
@@ -121,6 +122,7 @@ public abstract class NestedCheckedException extends Exception {
 		}
 		else {
 			pw.println(this);
+			pw.print("Caused by: ");
 			getCause().printStackTrace(pw);
 		}
 	}

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -115,14 +116,14 @@ public class JndiTemplate {
 	 * name bound to JNDI
 	 */
 	public Object lookup(final String name) throws NamingException {
-		if (logger.isInfoEnabled()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("Looking up JNDI object with name [" + name + "]");
 		}
 		return execute(new JndiCallback() {
 			public Object doInContext(Context ctx) throws NamingException {
 				Object located = ctx.lookup(name);
 				if (located == null) {
-					throw new NamingException(
+					throw new NameNotFoundException(
 							"JNDI object with [" + name + "] not found: JNDI implementation returned null");
 				}
 				return located;
@@ -145,7 +146,7 @@ public class JndiTemplate {
 	public Object lookup(String name, Class requiredType) throws NamingException {
 		Object jndiObject = lookup(name);
 		if (requiredType != null && !requiredType.isInstance(jndiObject)) {
-			throw new NamingException(
+			throw new TypeMismatchNamingException(
 					"Object [" + jndiObject + "] available at JNDI location [" +
 					name + "] is not assignable to [" + requiredType.getName() + "]");
 		}
@@ -159,8 +160,8 @@ public class JndiTemplate {
 	 * @throws NamingException thrown by JNDI, mostly name already bound
 	 */
 	public void bind(final String name, final Object object) throws NamingException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Binding JNDI object with name [" + name + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Binding JNDI object with name [" + name + "]");
 		}
 		execute(new JndiCallback() {
 			public Object doInContext(Context ctx) throws NamingException {
@@ -178,8 +179,8 @@ public class JndiTemplate {
 	 * @throws NamingException thrown by JNDI
 	 */
 	public void rebind(final String name, final Object object) throws NamingException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Rebinding JNDI object with name [" + name + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Rebinding JNDI object with name [" + name + "]");
 		}
 		execute(new JndiCallback() {
 			public Object doInContext(Context ctx) throws NamingException {
@@ -195,8 +196,8 @@ public class JndiTemplate {
 	 * @throws NamingException thrown by JNDI, mostly name not found
 	 */
 	public void unbind(final String name) throws NamingException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Unbinding JNDI object with name [" + name + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Unbinding JNDI object with name [" + name + "]");
 		}
 		execute(new JndiCallback() {
 			public Object doInContext(Context ctx) throws NamingException {

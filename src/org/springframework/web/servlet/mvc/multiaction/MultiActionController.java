@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -288,7 +288,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * Return -1, indicating that content must be updated, if there's no such handler.
 	 * @see org.springframework.web.servlet.mvc.LastModified#getLastModified(HttpServletRequest)
 	 */
-	public final long getLastModified(HttpServletRequest request) {
+	public long getLastModified(HttpServletRequest request) {
 		try {
 			String handlerMethodName = this.methodNameResolver.getHandlerMethodName(request);
 			Method lastModifiedMethod = (Method) this.lastModifiedMethodMap.get(handlerMethodName);
@@ -301,7 +301,7 @@ public class MultiActionController extends AbstractController implements LastMod
 				catch (Exception ex) {
 					// We encountered an error invoking the last-modified method.
 					// We can't do anything useful except log this, as we can't throw an exception.
-					logger.error("Failed to invoke lastModified method", ex);
+					logger.error("Failed to invoke last-modified method", ex);
 				}
 			}	// if we had a lastModified method for this request
 		}
@@ -310,15 +310,20 @@ public class MultiActionController extends AbstractController implements LastMod
 			// method shouldn't be called unless a previous invocation of this class
 			// has generated content. Do nothing, that's OK: We'll return default.
 		}
-		// the default if we didn't find a method
 		return -1L;
 	}
 
 
 	//---------------------------------------------------------------------
-	// Implementation of Controller
+	// Implementation of AbstractController
 	//---------------------------------------------------------------------
 
+	/**
+	 * Determine a handler method and invoke it.
+	 * @see MethodNameResolver#getHandlerMethodName
+	 * @see #invokeNamedMethod
+	 * @see #handleNoSuchRequestHandlingMethod
+	 */
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 	    throws Exception {
 		try {
@@ -326,12 +331,30 @@ public class MultiActionController extends AbstractController implements LastMod
 			return invokeNamedMethod(methodName, request, response);
 		}
 		catch (NoSuchRequestHandlingMethodException ex) {
-			pageNotFoundLogger.warn(ex.getMessage());
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return null;
+			return handleNoSuchRequestHandlingMethod(ex, request, response);
 		}
 	}
-	
+
+	/**
+	 * Handle the case where no request handler method was found.
+	 * <p>The default implementation logs a warning and sends an HTTP 404 error.
+	 * Alternatively, a fallback view could be chosen, or the
+	 * NoSuchRequestHandlingMethodException could be rethrown as-is.
+	 * @param ex the NoSuchRequestHandlingMethodException to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @return a ModelAndView to render, or <code>null</code> if handled directly
+	 * @throws Exception an Exception that should be thrown as result of the servlet request
+	 */
+	protected ModelAndView handleNoSuchRequestHandlingMethod(
+			NoSuchRequestHandlingMethodException ex, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
+		pageNotFoundLogger.warn(ex.getMessage());
+		response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		return null;
+	}
+
 	/**
 	 * Invokes the named method.
 	 * <p>Uses a custom exception handler if possible; otherwise, throw an

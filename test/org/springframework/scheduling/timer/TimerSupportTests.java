@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2005 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -91,6 +91,12 @@ public class TimerSupportTests extends TestCase {
 		assertTrue("TimerTask0 works", timerTask0.counter == 1);
 		assertTrue("TimerTask1 works", task1.counter == 1);
 		assertTrue("TimerTask2 works", timerTask2.counter == 1);
+	}
+
+	public void testPlainTimerFactoryBean() {
+		TimerFactoryBean tfb = new TimerFactoryBean();
+		tfb.afterPropertiesSet();
+		tfb.destroy();
 	}
 
 

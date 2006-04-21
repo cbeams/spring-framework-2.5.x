@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,7 @@ package org.springframework.jdbc.support.nativejdbc;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,13 +29,21 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 /**
  * Abstract adapter class for the NativeJdbcExtractor interface,
  * for simplified implementation of basic extractors.
- * Returns the passed-in JDBC objects on all methods.
+ * Basically returns the passed-in JDBC objects on all methods.
  *
  * <p><code>getNativeConnection</code> checks for a ConnectionProxy chain,
  * for example from a TransactionAwareDataSourceProxy, before delegating to
  * <code>doGetNativeConnection</code> for actual unwrapping. You can override
  * either of the two for a specific connection pool, but the latter is
  * recommended to participate in ConnectionProxy unwrapping.
+ *
+ * <p><code>getNativeConnection</code> also applies a fallback if the first
+ * native extraction process failed, that is, returned the same Connection as
+ * passed in. It assumes that some additional proxying is going in this case:
+ * Hence, it retrieves the underlying native Connection from the DatabaseMetaData
+ * via <code>conHandle.getMetaData().getConnection()</code> and retries the native
+ * extraction process based on that Connection handle. This works, for example,
+ * for the Connection proxies exposed by Hibernate 3.1's <code>Session.connection()</code>.
  *
  * <p>The <code>getNativeConnectionFromStatement</code> method is implemented
  * to simply delegate to <code>getNativeConnection</code> with the Statement's
@@ -83,8 +92,25 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	 * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
 	 */
 	public Connection getNativeConnection(Connection con) throws SQLException {
-		Connection conToUse = DataSourceUtils.getTargetConnection(con);
-		return doGetNativeConnection(conToUse);
+		Connection targetCon = DataSourceUtils.getTargetConnection(con);
+		Connection nativeCon = doGetNativeConnection(targetCon);
+		if (nativeCon == targetCon) {
+			// We haven't received a different Connection, so we'll assume that there's
+			// some additional proxying going on. Let's check whether we get something
+			// different back from the DatabaseMetaData.getConnection() call.
+			DatabaseMetaData metaData = targetCon.getMetaData();
+			// The following check is only really there for mock Connections
+			// which might not carry a DatabaseMetaData instance.
+			if (metaData != null) {
+				Connection metaCon = metaData.getConnection();
+				if (metaCon != targetCon) {
+					// We've received a different Connection there:
+					// Let's retry the native extraction process with it.
+					nativeCon = doGetNativeConnection(metaCon);
+				}
+			}
+		}
+		return nativeCon;
 	}
 
 	/**

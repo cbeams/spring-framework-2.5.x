@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,13 @@ import java.rmi.UnknownHostException;
 import java.rmi.UnmarshalException;
 import java.util.Arrays;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
+import org.springframework.remoting.RemoteProxyFailureException;
 
 /**
  * Factored-out methods for performing invocations within an RMI client.
@@ -91,8 +91,8 @@ public abstract class RmiClientInterceptorUtils {
 	 * @throws InvocationTargetException if thrown by reflection
 	 */
 	public static Object doInvoke(MethodInvocation invocation, Remote stub) throws InvocationTargetException {
+		Method method = invocation.getMethod();
 		try {
-			Method method = invocation.getMethod();
 			if (method.getDeclaringClass().isInstance(stub)) {
 				// directly implemented
 				return method.invoke(stub, invocation.getArguments());
@@ -106,8 +106,11 @@ public abstract class RmiClientInterceptorUtils {
 		catch (InvocationTargetException ex) {
 			throw ex;
 		}
+		catch (NoSuchMethodException ex) {
+			throw new RemoteProxyFailureException("No matching RMI stub method found for: " + method, ex);
+		}
 		catch (Throwable ex) {
-			throw new AspectException("Local remote service proxy invocation failed", ex);
+			throw new RemoteProxyFailureException("Invocation of RMI stub method failed: " + method, ex);
 		}
 	}
 

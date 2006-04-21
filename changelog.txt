@@ -3,6 +3,84 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 1.2.8 (23.4.2006)
+------------------------------------
+
+General:
+* included "tiger" source tree in source build (spring-src.zip)
+
+Package org.springframework.aop
+* fixed Cglib2AopProxy to register an explicitly given ClassLoader with the CGLIB Enhancer
+* fixed CustomizableTraceInterceptor to expose the actual invocation time for exception messages
+* added "trackAllInvocations" flag to JamonPerformanceMonitorInterceptor, for gathering statistics without logging
+
+Package org.springframework.beans
+* BeanUtils throws explicit BeanInstantiationException in case of bean instantiation failure
+* fixed BeanWrapperImpl to convert a null input for an array type to a null value rather than an array with null element
+* changed MutablePropertyValues's "addPropertyValue" signature to void, to remain binary compatible with Spring <=1.2.6
+* fixed BeanArrayPropertyEditor to translate null value to null byte array
+* added CharArrayPropertyEditor to translate String value into char array
+* CharacterEditor supports unicode specification passed in as literal String, for example "\u00F6"
+* FieldRetrievingFactoryBean is able to access non-public fields as well
+* added "propertiesArray" bean property to PropertiesFactoryBean, for merging multiple local Properties instances
+* fixed AbstractBeanFactory to avoid potential deadlock on singleton destruction with concurrent singleton creation
+* fixed DefaultListableBeanFactory to not preinstantiate bean definition if explicit singleton object already registered
+
+Package org.springframework.context
+* refined AbstractMessageSource to resolve arguments eagerly, for message defined in parent and msg arg defined in child
+
+Package org.springframework.core
+* refined NestedXxxException to properly handle null message in root cause, through using the cause's "toString()"
+* fixed FileSystemResource/UrlResource to retain leading "../" parts in paths, building correct relative paths for them
+
+Package org.springframework.jdbc
+* refined NativeJdbcExtractorAdapter to retry with DatabaseMetaData Connection if extraction failed (for Hibernate 3.1)
+* turned JdbcTemplate's "query(PreparedStatementCreator,PreparedStatementSetter,ResultSetExtractor rse)" method public
+* improved JdbcTemplate's logging of ignored SQLWarnings, including SQL state and error code in the log output
+
+Package org.springframework.jndi
+* added "defaultObject" property to JndiObjectFactoryBean, allowing to fall back to default object if JNDI lookup fails
+
+Package org.springframework.mail
+* refined JavaMailSenderImpl to avoid "Session.getInstance(Properties)" call, for compatibility with (old) JavaMail 1.1
+
+Package org.springframework.mock
+* added overloaded constructors to MockFilterConfig, using a MockServletContext instead of a ServletContext argument
+
+Package org.springframework.orm
+* fixed LocalSessionFactoryBean's "updateDatabaseSchema" to declare the correct exception (DataAccessException)
+* fixed BlobStringType for Hibernate2/3 to correctly handle SQL NULL
+
+Package org.springframework.remoting
+* RmiClientInterceptorUtils throws clearer exception message in case of proxy mismatch (for underlying RMI stubs)
+* JaxRpcPortClientInterceptor synchronizes creation of JAX-RPC Calls, to make dynamic invocations with Axis thread-safe
+
+Package org.springframework.scheduling
+* fixed TimerFactoryBean to properly initialize even without "scheduledTimerTasks" configured
+
+Package org.springframework.transaction
+* AbstractPlatformTransactionManager logs "Should roll back transaction but cannot" message at debug level (not warn)
+* TransactionInterceptor logs application exception at error level if commit throws an exception
+
+Package org.springframework.util
+* fixed CollectionsUtils's "hasUniqueObject" to correctly handle null values
+
+Package org.springframework.validation
+* fixed ValidationUtils's "invokeValidator" to work correctly even in case of a null reference as object to be validated
+
+Package org.springframework.web
+* ContextLoader throws IllegalStateException if there is already a root application context present
+* fixed CommonsMultipartResolver to go through the "newFileUpload" template method for any FileUpload instance
+* refined FrameworkServlet to log a request handling failure at debug level rather than error level
+* added "propertyEditorRegistrar" bean property to BaseCommandController, as convenience option for a single registrar
+* factored out "handleNoSuchRequestHandlingMethod" method in MultiActionController, to be overridden in subclasses
+* fixed SimpleMappingExceptionResolver to correctly check the depth of all exception mappings before choosing a view
+* refined SimpleMappingExceptionResolver to only apply a "defaultStatusCode" to a top-level request (not to an include)
+* added "clearCache()" method to AbstractCachingViewResolver, for removing all cached view objects
+* optimized BeanNameViewResolver to avoid internal throwing and catching of NoSuchBeanDefinitionExceptions
+* "javaScriptEscape" feature of Spring tags correctly escapes "</script>" inside a literal value
+
+
 Changes in version 1.2.7 (27.2.2006)
 ------------------------------------
 

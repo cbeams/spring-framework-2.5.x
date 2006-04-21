@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -82,23 +82,25 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 		logger.info("Initializing Timer");
 		this.timer = createTimer(this.daemon);
 
-		// register all ScheduledTimerTasks
-		for (int i = 0; i < this.scheduledTimerTasks.length; i++) {
-			ScheduledTimerTask scheduledTask = this.scheduledTimerTasks[i];
-			if (scheduledTask.getPeriod() > 0) {
-				// repeated task execution
-				if (scheduledTask.isFixedRate()) {
-					this.timer.scheduleAtFixedRate(
-							scheduledTask.getTimerTask(), scheduledTask.getDelay(), scheduledTask.getPeriod());
+		// Register all ScheduledTimerTasks.
+		if (this.scheduledTimerTasks != null) {
+			for (int i = 0; i < this.scheduledTimerTasks.length; i++) {
+				ScheduledTimerTask scheduledTask = this.scheduledTimerTasks[i];
+				if (scheduledTask.getPeriod() > 0) {
+					// repeated task execution
+					if (scheduledTask.isFixedRate()) {
+						this.timer.scheduleAtFixedRate(
+								scheduledTask.getTimerTask(), scheduledTask.getDelay(), scheduledTask.getPeriod());
+					}
+					else {
+						this.timer.schedule(
+								scheduledTask.getTimerTask(), scheduledTask.getDelay(), scheduledTask.getPeriod());
+					}
 				}
 				else {
-					this.timer.schedule(
-							scheduledTask.getTimerTask(), scheduledTask.getDelay(), scheduledTask.getPeriod());
+					// One-time task execution.
+					this.timer.schedule(scheduledTask.getTimerTask(), scheduledTask.getDelay());
 				}
-			}
-			else {
-				// one-time task execution
-				this.timer.schedule(scheduledTask.getTimerTask(), scheduledTask.getDelay());
 			}
 		}
 	}

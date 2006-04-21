@@ -781,7 +781,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			updateDatabaseSchema();
 		}
 	}
-	
+
 
 	/**
 	 * Subclasses can override this method to perform custom initialization
@@ -893,7 +893,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
 					Connection con = session.connection();
-					final Dialect dialect = Dialect.getDialect(configuration.getProperties());
+					Dialect dialect = Dialect.getDialect(configuration.getProperties());
 					String[] sql = configuration.generateSchemaCreationScript(dialect);
 					executeSchemaScript(con, sql);
 					return null;
@@ -912,12 +912,12 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * <code>LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");</code>.
 	 * <p>Uses the SessionFactory that this bean generates for accessing a JDBC
 	 * connection to perform the script.
-	 * @throws HibernateException in case of Hibernate initialization errors
+	 * @throws DataAccessException in case of script execution errors
 	 * @see #setSchemaUpdate
 	 * @see org.hibernate.cfg.Configuration#generateSchemaUpdateScript
 	 * @see org.hibernate.tool.hbm2ddl.SchemaUpdate
 	 */
-	public void updateDatabaseSchema() throws HibernateException {
+	public void updateDatabaseSchema() throws DataAccessException {
 		logger.info("Updating database schema for Hibernate SessionFactory");
 		HibernateTemplate hibernateTemplate = new HibernateTemplate(this.sessionFactory);
 		hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
@@ -925,7 +925,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
 					Connection con = session.connection();
-					final Dialect dialect = Dialect.getDialect(configuration.getProperties());
+					Dialect dialect = Dialect.getDialect(configuration.getProperties());
 					DatabaseMetadata metadata = new DatabaseMetadata(con, dialect);
 					String[] sql = configuration.generateSchemaUpdateScript(dialect, metadata);
 					executeSchemaScript(con, sql);

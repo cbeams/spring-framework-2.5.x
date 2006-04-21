@@ -50,9 +50,15 @@ public abstract class WebUtils {
 
 	/**
 	 * Standard Servlet spec context attribute that specifies a temporary
-	 * directory for the current web application, of type java.io.File
+	 * directory for the current web application, of type <code>java.io.File</code>.
 	 */
 	public static final String TEMP_DIR_CONTEXT_ATTRIBUTE = "javax.servlet.context.tempdir";
+
+	/**
+	 * Standard Servlet spec request attribute that implies that we're within an include
+	 * request. Any of the attributes associated with include paths does the job here.
+	 */
+	private static final String INCLUDE_REQUEST_ATTRIBUTE = "javax.servlet.include.request_uri";
 
 	/**
 	 * HTML escape parameter at the servlet context level
@@ -69,11 +75,11 @@ public abstract class WebUtils {
 	/** Default web app root key: "webapp.root" */
 	public static final String DEFAULT_WEB_APP_ROOT_KEY = "webapp.root";
 
-	/* Key for the mutex session attribute */
-	public static final String SESSION_MUTEX_ATTRIBUTE = WebUtils.class.getName() + ".MUTEX";
-
 	/** Name suffixes in case of image buttons */
 	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
+
+	/* Key for the mutex session attribute */
+	public static final String SESSION_MUTEX_ATTRIBUTE = WebUtils.class.getName() + ".MUTEX";
 
 
 	/**
@@ -342,6 +348,18 @@ public abstract class WebUtils {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Determine whether the given request is an include request,
+	 * that is, not a top-level HTTP request coming in from the outside.
+	 * <p>Checks the presence of the "javax.servlet.include.request_uri"
+	 * request attribute. Could check any request attribute that is only
+	 * present in an include request.
+	 * @param request current servlet request
+	 */
+	public static boolean isIncludeRequest(ServletRequest request) {
+		return (request.getAttribute(INCLUDE_REQUEST_ATTRIBUTE) != null);
 	}
 
 	/**

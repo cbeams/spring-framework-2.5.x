@@ -148,8 +148,7 @@ public abstract class BeanUtils {
 			return instantiateClass(clazz.getDeclaredConstructor((Class[]) null), null);
 		}
 		catch (NoSuchMethodException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + clazz.getName() +
-					"]: no default constructor found", ex);
+			throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 		}
 	}
 
@@ -163,7 +162,7 @@ public abstract class BeanUtils {
 	 * @return the new instance
 	 */
 	public static Object instantiateClass(Constructor ctor, Object[] args) throws BeansException {
-		Assert.notNull(ctor, "ctor must not be null");
+		Assert.notNull(ctor, "Constructor must not be null");
 		try {
 			if (!Modifier.isPublic(ctor.getModifiers()) ||
 					!Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) {
@@ -172,20 +171,20 @@ public abstract class BeanUtils {
 			return ctor.newInstance(args);
 		}
 		catch (InstantiationException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + ctor.getDeclaringClass().getName() +
-					"]: Is it an abstract class?", ex);
+			throw new BeanInstantiationException(ctor.getDeclaringClass(),
+					"Is it an abstract class?", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + ctor.getDeclaringClass().getName() +
-					"]: Has the class definition changed? Is the constructor accessible?", ex);
+			throw new BeanInstantiationException(ctor.getDeclaringClass(),
+					"Has the class definition changed? Is the constructor accessible?", ex);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + ctor.getDeclaringClass().getName() +
-					"]: illegal args for constructor", ex);
+			throw new BeanInstantiationException(ctor.getDeclaringClass(),
+					"Illegal arguments for constructor", ex);
 		}
 		catch (InvocationTargetException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + ctor.getDeclaringClass().getName() +
-					"]; constructor threw exception", ex.getTargetException());
+			throw new BeanInstantiationException(ctor.getDeclaringClass(),
+					"Constructor threw exception", ex.getTargetException());
 		}
 	}
 
@@ -199,7 +198,7 @@ public abstract class BeanUtils {
 	 * @param clazz the class to check
 	 * @param methodName the name of the method to find
 	 * @param paramTypes the parameter types of the method to find
-	 * @return the method object, or <code>null</code> if not found
+	 * @return the Method object, or <code>null</code> if not found
 	 * @see java.lang.Class#getMethod
 	 * @see #findDeclaredMethod
 	 */
@@ -220,7 +219,7 @@ public abstract class BeanUtils {
 	 * @param clazz the class to check
 	 * @param methodName the name of the method to find
 	 * @param paramTypes the parameter types of the method to find
-	 * @return the method object, or <code>null</code> if not found
+	 * @return the Method object, or <code>null</code> if not found
 	 * @see java.lang.Class#getDeclaredMethod
 	 */
 	public static Method findDeclaredMethod(Class clazz, String methodName, Class[] paramTypes) {
@@ -244,7 +243,7 @@ public abstract class BeanUtils {
 	 * methods without issues even in environments with restricted Java security settings.
 	 * @param clazz the class to check
 	 * @param methodName the name of the method to find
-	 * @return the method object, or <code>null</code> if not found
+	 * @return the Method object, or <code>null</code> if not found
 	 * @see java.lang.Class#getMethods
 	 * @see #findDeclaredMethodWithMinimalParameters
 	 */
@@ -455,8 +454,8 @@ public abstract class BeanUtils {
 	private static void copyProperties(Object source, Object target, Class editable, String[] ignoreProperties)
 			throws BeansException {
 
-		Assert.notNull(source, "source must not be null");
-		Assert.notNull(target, "target must not be null");
+		Assert.notNull(source, "Source must not be null");
+		Assert.notNull(target, "Target must not be null");
 
 		Class actualEditable = target.getClass();
 		if (editable != null) {

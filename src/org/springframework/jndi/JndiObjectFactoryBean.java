@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -63,6 +63,8 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 
 	private boolean cache = true;
 
+	private Object defaultObject;
+
 	private Object jndiObject;
 
 
@@ -107,22 +109,76 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	}
 
 	/**
+	 * Specify a default object to fall back to if the JNDI lookup fails.
+	 * Default is none.
+	 * <p>This can be an arbitrary bean reference or literal value.
+	 * It is typically used for literal values in scenarios where the JNDI environment
+	 * might define specific config settings but those are not required to be present.
+	 * <p>Note: This is only supported for lookup on startup.
+	 * @see #setLookupOnStartup
+	 */
+	public void setDefaultObject(Object defaultObject) {
+		this.defaultObject = defaultObject;
+	}
+
+
+	/**
 	 * Look up the JNDI object and store it.
 	 */
-	public void afterPropertiesSet() throws NamingException {
+	public void afterPropertiesSet() throws IllegalArgumentException, NamingException {
 		super.afterPropertiesSet();
 
 		if (this.proxyInterface != null) {
+			if (this.defaultObject != null) {
+				throw new IllegalArgumentException("'defaultObject' is not supported in combination with proxyInterface");
+			}
 			// We need a proxy and a JndiObjectTargetSource.
 			this.jndiObject = JndiObjectProxyFactory.createJndiObjectProxy(this);
 		}
+
 		else {
 			if (!this.lookupOnStartup || !this.cache) {
 				throw new IllegalArgumentException(
 				    "Cannot deactivate 'lookupOnStartup' or 'cache' without specifying a 'proxyInterface'");
 			}
+			if (this.defaultObject != null && getExpectedType() != null &&
+					!getExpectedType().isInstance(this.defaultObject)) {
+				throw new IllegalArgumentException("Default object [" + this.defaultObject +
+						"] of type [" + this.defaultObject.getClass().getName() +
+						"] is not of expected type [" + getExpectedType().getName() + "]");
+			}
 			// Locate specified JNDI object.
-			this.jndiObject = lookup();
+			this.jndiObject = lookupWithFallback();
+		}
+	}
+
+	/**
+	 * Lookup variant that that returns the specified "defaultObject"
+	 * (if any) in case of lookup failure.
+	 * @return the located object, or the "defaultObject" as fallback
+	 * @throws NamingException in case of lookup failure without fallback
+	 * @see #setDefaultObject
+	 */
+	protected Object lookupWithFallback() throws NamingException {
+		try {
+			return lookup();
+		}
+		catch (TypeMismatchNamingException ex) {
+			// Always let TypeMismatchNamingException through -
+			// we don't want to fall back to the defaultObject in this case.
+			throw ex;
+		}
+		catch (NamingException ex) {
+			if (this.defaultObject != null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("JNDI lookup failed - returning specified default object instead", ex);
+				}
+				else if (logger.isInfoEnabled()) {
+					logger.debug("JNDI lookup failed - returning specified default object instead: " + ex);
+				}
+				return this.defaultObject;
+			}
+			throw ex;
 		}
 	}
 

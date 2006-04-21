@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import org.springframework.beans.factory.InitializingBean;
  * Convenient FactoryBean for defining Hibernate FilterDefinitions.
  * Exposes a corresponding Hibernate FilterDefinition object.
  *
- * <p>Typically defined as inner bean within a LocalSessionFactoryBean
- * definition, as list element for the "filterDefinitions" bean property.
+ * <p>Typically defined as an inner bean within a LocalSessionFactoryBean
+ * definition, as the list element for the "filterDefinitions" bean property.
  * For example:
  *
  * <pre>
@@ -55,6 +55,12 @@ import org.springframework.beans.factory.InitializingBean;
  *
  * Alternatively, specify a bean id (or name) attribute for the inner bean,
  * instead of the "filterName" property.
+ *
+ * <p><b>NOTE:</b> This FactoryBean uses Hibernate 3.0 API. Unfortunately,
+ * Hibernate 3.1 changed its FilterDefinition class in a non-backwards-compatible
+ * fashion. Consider defining filters within Hibernate's own configuration file
+ * instead of through this FactoryBean, if you intend to run on Hibernate 3.1.
+ * (As of Spring 2.0, this FactoryBean will use Hibernate 3.1 API.)
  *
  * @author Juergen Hoeller
  * @since 1.2

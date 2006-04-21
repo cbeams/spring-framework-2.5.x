@@ -1,10 +1,10 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
@@ -157,17 +157,23 @@ public class ContextLoader {
 
 
 	/**
-	 * Initialize Spring's web application context for the given servlet
-	 * context, regarding the "contextClass" and "contextConfigLocation"
-	 * context-params.
+	 * Initialize Spring's web application context for the given servlet context,
+	 * according to the "contextClass" and "contextConfigLocation" context-params.
 	 * @param servletContext current servlet context
 	 * @return the new WebApplicationContext
-	 * @throws BeansException if the context couldn't be initialized
+	 * @throws IllegalStateException if there is already a root application context present
+	 * @throws BeansException if the context failed to initialize
 	 * @see #CONTEXT_CLASS_PARAM
 	 * @see #CONFIG_LOCATION_PARAM
 	 */
 	public WebApplicationContext initWebApplicationContext(ServletContext servletContext)
-			throws BeansException {
+			throws IllegalStateException, BeansException {
+
+		if (servletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE) != null) {
+			throw new IllegalStateException(
+					"Cannot initialize context because there is already a root application context present - " +
+					"check whether you have multiple ContextLoader* definitions in your web.xml!");
+		}
 
 		long startTime = System.currentTimeMillis();
 		if (logger.isInfoEnabled()) {
@@ -270,7 +276,7 @@ public class ContextLoader {
 		else {
 			contextClassName = defaultStrategies.getProperty(WebApplicationContext.class.getName());
 			try {
-				return Class.forName(contextClassName, true, getClass().getClassLoader());
+				return ClassUtils.forName(contextClassName);
 			}
 			catch (ClassNotFoundException ex) {
 				throw new ApplicationContextException(

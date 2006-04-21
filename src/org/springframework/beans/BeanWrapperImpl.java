@@ -916,7 +916,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 						}
 						return result;
 					}
-					else {
+					else if (convertedValue != null) {
 						// A plain value: convert it to an array with a single component.
 						Object result = Array.newInstance(componentType, 1);
 						Object value = doTypeConversionIfNecessary(

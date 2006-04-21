@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.Ordered;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Exception resolver that allows for mapping exception class names to view names,
@@ -120,11 +121,13 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	}
 
 	/**
-	 * Set the default HTTP status code that this exception resolver
-	 * will apply if it resolves an error view.
-	 * <p>If not specified, no status code will be applied, either
-	 * leaving this to the controller or view, or keeping the servlet
-	 * engine's default of 200 (OK).
+	 * Set the default HTTP status code that this exception resolver will apply
+	 * if it resolves an error view.
+	 * <p>Note that this error code will only get applied in case of a top-level
+	 * request. It will not be set for an include request, since the HTTP status
+	 * cannot be modified from within an include.
+	 * <p>If not specified, no status code will be applied, either leaving this to
+	 * the controller or view, or keeping the servlet engine's default of 200 (OK).
 	 * @param defaultStatusCode HTTP status code value, for example
 	 * 500 (SC_INTERNAL_SERVER_ERROR) or 404 (SC_NOT_FOUND)
 	 * @see javax.servlet.http.HttpServletResponse#SC_INTERNAL_SERVER_ERROR
@@ -168,7 +171,8 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 
 		if (viewName != null) {
 			// Apply HTTP status code for error views, if specified.
-			if (this.defaultStatusCode != null) {
+			// Only apply it if we're processing a top-level request.
+			if (this.defaultStatusCode != null && !WebUtils.isIncludeRequest(request)) {
 				response.setStatus(this.defaultStatusCode.intValue());
 			}
 			return getModelAndView(viewName, ex, request);
@@ -187,16 +191,17 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 * @see #setExceptionMappings
 	 */
 	protected String findMatchingViewName(Properties exceptionMappings, Exception ex) {
+		String viewName = null;
 		int deepest = Integer.MAX_VALUE;
 		for (Enumeration names = this.exceptionMappings.propertyNames(); names.hasMoreElements();) {
 			String exceptionMapping = (String) names.nextElement();
 			int depth = getDepth(exceptionMapping, ex);
 			if (depth >= 0 && depth < deepest) {
 				deepest = depth;
-				return this.exceptionMappings.getProperty(exceptionMapping);
+				viewName = this.exceptionMappings.getProperty(exceptionMapping);
 			}
 		}
-		return null;
+		return viewName;
 	}
 
 	/**

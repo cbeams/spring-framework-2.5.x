@@ -19,21 +19,21 @@ package org.springframework.beans.propertyeditors;
 import java.beans.PropertyEditorSupport;
 
 /**
- * Editor for byte arrays. Strings will simply be converted to
- * their corresponding byte representations.
+ * Editor for char arrays. Strings will simply be converted to
+ * their corresponding char representations.
  *
  * @author Juergen Hoeller
- * @since 1.0.1
- * @see java.lang.String#getBytes
+ * @since 1.2.8
+ * @see String#toCharArray()
  */
-public class ByteArrayPropertyEditor extends PropertyEditorSupport {
+public class CharArrayPropertyEditor extends PropertyEditorSupport {
 
 	public void setAsText(String text) {
-		setValue(text != null ? text.getBytes() : null);
+		setValue(text != null ? text.toCharArray() : null);
 	}
 
 	public String getAsText() {
-		byte[] value = (byte[]) getValue();
+		char[] value = (char[]) getValue();
 		return (value != null ? new String(value) : "");
 	}
 

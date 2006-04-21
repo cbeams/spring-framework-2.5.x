@@ -4,9 +4,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -530,7 +530,11 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		QName portQName = getPortQName();
 
 		// Create JAX-RPC call object, using the method name as operation name.
-		Call call = service.createCall(portQName, invocation.getMethod().getName());
+		// Synchronized because of non-thread-safe Axis implementation!
+		Call call = null;
+		synchronized (service) {
+			call = service.createCall(portQName, invocation.getMethod().getName());
+		}
 
 		// Apply properties to JAX-RPC stub.
 		prepareJaxRpcCall(call);

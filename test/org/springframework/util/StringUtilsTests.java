@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,19 +157,75 @@ public class StringUtilsTests extends TestCase {
 	}
 
 
-	public void testUnqualify() throws Exception {
+	public void testQuote() {
+		assertEquals("'myString'", StringUtils.quote("myString"));
+		assertEquals("''", StringUtils.quote(""));
+		assertNull(StringUtils.quote(null));
+	}
+
+	public void testQuoteIfString() {
+		assertEquals("'myString'", StringUtils.quoteIfString("myString"));
+		assertEquals("''", StringUtils.quoteIfString(""));
+		assertEquals(new Integer(5), StringUtils.quoteIfString(new Integer(5)));
+		assertNull(StringUtils.quoteIfString(null));
+	}
+
+	public void testUnqualify() {
 		String qualified = "i.am.not.unqualified";
 		assertEquals("unqualified", StringUtils.unqualify(qualified));
 	}
 
-	public void testUncapitalize() throws Exception {
+	public void testCapitalize() {
+		String capitalized = "i am not capitalized";
+		assertEquals("I am not capitalized", StringUtils.capitalize(capitalized));
+	}
+
+	public void testUncapitalize() {
 		String capitalized = "I am capitalized";
 		assertEquals("i am capitalized", StringUtils.uncapitalize(capitalized));
 	}
 
-	public void testCapitalize() throws Exception {
-		String capitalized = "i am not capitalized";
-		assertEquals("I am not capitalized", StringUtils.capitalize(capitalized));
+	public void testGetFilename() {
+		assertEquals(null, StringUtils.getFilename(null));
+		assertEquals("", StringUtils.getFilename(""));
+		assertEquals("myfile", StringUtils.getFilename("myfile"));
+		assertEquals("myfile", StringUtils.getFilename("mypath/myfile"));
+		assertEquals("myfile.", StringUtils.getFilename("myfile."));
+		assertEquals("myfile.", StringUtils.getFilename("mypath/myfile."));
+		assertEquals("myfile.txt", StringUtils.getFilename("myfile.txt"));
+		assertEquals("myfile.txt", StringUtils.getFilename("mypath/myfile.txt"));
+	}
+
+	public void testGetFilenameExtension() {
+		assertEquals(null, StringUtils.getFilenameExtension(null));
+		assertEquals(null, StringUtils.getFilenameExtension(""));
+		assertEquals(null, StringUtils.getFilenameExtension("myfile"));
+		assertEquals(null, StringUtils.getFilenameExtension("myPath/myfile"));
+		assertEquals("", StringUtils.getFilenameExtension("myfile."));
+		assertEquals("", StringUtils.getFilenameExtension("myPath/myfile."));
+		assertEquals("txt", StringUtils.getFilenameExtension("myfile.txt"));
+		assertEquals("txt", StringUtils.getFilenameExtension("mypath/myfile.txt"));
+	}
+
+	public void testStripFilenameExtension() {
+		assertEquals(null, StringUtils.stripFilenameExtension(null));
+		assertEquals("", StringUtils.stripFilenameExtension(""));
+		assertEquals("myfile", StringUtils.stripFilenameExtension("myfile"));
+		assertEquals("mypath/myfile", StringUtils.stripFilenameExtension("mypath/myfile"));
+		assertEquals("myfile", StringUtils.stripFilenameExtension("myfile."));
+		assertEquals("mypath/myfile", StringUtils.stripFilenameExtension("mypath/myfile."));
+		assertEquals("myfile", StringUtils.stripFilenameExtension("myfile.txt"));
+		assertEquals("mypath/myfile", StringUtils.stripFilenameExtension("mypath/myfile.txt"));
+	}
+
+	public void testCleanPath() {
+		assertEquals("mypath/myfile", StringUtils.cleanPath("mypath/myfile"));
+		assertEquals("mypath/myfile", StringUtils.cleanPath("mypath\\myfile"));
+		assertEquals("mypath/myfile", StringUtils.cleanPath("mypath/../mypath/myfile"));
+		assertEquals("mypath/myfile", StringUtils.cleanPath("mypath/myfile/../../mypath/myfile"));
+		assertEquals("../mypath/myfile", StringUtils.cleanPath("../mypath/myfile"));
+		assertEquals("../mypath/myfile", StringUtils.cleanPath("../mypath/../mypath/myfile"));
+		assertEquals("../mypath/myfile", StringUtils.cleanPath("mypath/../../mypath/myfile"));
 	}
 
 	public void testPathEquals() {
@@ -217,6 +273,24 @@ public class StringUtilsTests extends TestCase {
 						"/dummy1/dummy2/dummy4"));
 	}
 
+
+	public void testSortStringArray() {
+		String[] input = new String[] {"myString2"};
+		input = StringUtils.addStringToArray(input, "myString1");
+		assertEquals("myString2", input[0]);
+		assertEquals("myString1", input[1]);
+
+		StringUtils.sortStringArray(input);
+		assertEquals("myString1", input[0]);
+		assertEquals("myString2", input[1]);
+	}
+
+	public void testRemoveDuplicateStrings() {
+		String[] input = new String[] {"myString2", "myString1", "myString2"};
+		input = StringUtils.removeDuplicateStrings(input);
+		assertEquals("myString1", input[0]);
+		assertEquals("myString2", input[1]);
+	}
 
 	public void testSplitArrayElementsIntoProperties() {
 		String[] input = new String[] {"key1=value1 ", "key2 =\"value2\""};
@@ -349,8 +423,12 @@ public class StringUtilsTests extends TestCase {
 	public void testEndsWithIgnoreCase() {
 		String suffix = "fOo";
 
+		assertTrue(StringUtils.endsWithIgnoreCase("foo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("Foo", suffix));
 		assertTrue(StringUtils.endsWithIgnoreCase("barfoo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barbarfoo", suffix));
 		assertTrue(StringUtils.endsWithIgnoreCase("barFoo", suffix));
+		assertTrue(StringUtils.endsWithIgnoreCase("barBarFoo", suffix));
 		assertTrue(StringUtils.endsWithIgnoreCase("barfoO", suffix));
 		assertTrue(StringUtils.endsWithIgnoreCase("barFOO", suffix));
 		assertTrue(StringUtils.endsWithIgnoreCase("barfOo", suffix));

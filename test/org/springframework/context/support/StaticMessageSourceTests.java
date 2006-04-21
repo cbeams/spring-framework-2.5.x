@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -226,6 +226,34 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 		messageSource.addMessage("message.format.example1", Locale.UK, MSG_TXT1_UK);
 
 		return sac;
+	}
+
+	public void testNestedMessageSourceWithParamInChild() {
+		StaticMessageSource source = new StaticMessageSource();
+		StaticMessageSource parent = new StaticMessageSource();
+		source.setParentMessageSource(parent);
+
+		source.addMessage("param", Locale.ENGLISH, "value");
+		parent.addMessage("with.param", Locale.ENGLISH, "put {0} here");
+
+		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(
+				new String[] {"with.param"}, new Object[] {new DefaultMessageSourceResolvable("param")});
+
+		assertEquals("put value here", source.getMessage(resolvable, Locale.ENGLISH));
+	}
+
+	public void testNestedMessageSourceWithParamInParent() {
+		StaticMessageSource source = new StaticMessageSource();
+		StaticMessageSource parent = new StaticMessageSource();
+		source.setParentMessageSource(parent);
+
+		parent.addMessage("param", Locale.ENGLISH, "value");
+		source.addMessage("with.param", Locale.ENGLISH, "put {0} here");
+
+		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(
+				new String[] {"with.param"}, new Object[] {new DefaultMessageSourceResolvable("param")});
+
+		assertEquals("put value here", source.getMessage(resolvable, Locale.ENGLISH));
 	}
 
 }

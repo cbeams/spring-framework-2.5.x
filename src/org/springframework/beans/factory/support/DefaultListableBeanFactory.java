@@ -270,7 +270,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		try {
 			for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
 				String beanName = (String) it.next();
-				if (containsBeanDefinition(beanName)) {
+				if (!containsSingleton(beanName) && containsBeanDefinition(beanName)) {
 					RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
 					if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
 						if (bd.hasBeanClass() && FactoryBean.class.isAssignableFrom(bd.getBeanClass())) {

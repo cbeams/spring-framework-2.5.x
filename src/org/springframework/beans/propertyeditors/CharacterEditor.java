@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,35 +28,46 @@ import org.springframework.util.StringUtils;
  * <code>char</code>! BeanWrapperImpl will register this editor by default.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 1.2
  * @see java.lang.Character
  * @see org.springframework.beans.BeanWrapperImpl
  */
 public class CharacterEditor extends PropertyEditorSupport {
 
+	private static final String UNICODE_PREFIX = "\\u";
+
+	private static final int UNICODE_LENGTH = 6;
+
+
 	private final boolean allowEmpty;
 
 
 	/**
 	 * Create a new CharacterEditor instance.
-	 * <p>The "allowEmpty" parameter states if an empty String should
-	 * be allowed for parsing, i.e. get interpreted as null value.
-	 * Else, an IllegalArgumentException gets thrown in that case.
-	 * @param allowEmpty if empty strings should be allowed
+	 * <p>The "allowEmpty" parameter controls whether an empty String is
+	 * to be allowed in parsing, i.e. be interpreted as
+	 * the <code>null</code> value. Else, an IllegalArgumentException gets
+	 * thrown in that case.
+	 * @param allowEmpty if empty strings are to be allowed
 	 */
 	public CharacterEditor(boolean allowEmpty) {
 		this.allowEmpty = allowEmpty;
 	}
-	
+
 
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (this.allowEmpty && !StringUtils.hasText(text)) {
 			// Treat empty String as null value.
 			setValue(null);
 		}
+		else if (text.startsWith(UNICODE_PREFIX) && text.length() == UNICODE_LENGTH) {
+			int code = Integer.parseInt(text.substring(UNICODE_PREFIX.length()), 16);
+			setValue(new Character((char) code));
+		}
 		else if (text.length() != 1) {
-			throw new IllegalArgumentException(
-					"String [" + text + "] with length " + text.length() + " cannot be converted to char type");
+			throw new IllegalArgumentException("String [" + text + "] with length " +
+					text.length() + " cannot be converted to char type");
 		}
 		else {
 			setValue(new Character(text.charAt(0)));

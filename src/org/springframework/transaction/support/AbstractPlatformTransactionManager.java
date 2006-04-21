@@ -598,7 +598,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					}
 				}
 				else {
-					logger.warn("Should roll back transaction but cannot - no transaction available");
+					logger.debug("Should roll back transaction but cannot - no transaction available");
 				}
 			}
 			catch (RuntimeException ex) {

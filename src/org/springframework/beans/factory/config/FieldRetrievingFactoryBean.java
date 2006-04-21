@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
@@ -151,7 +152,7 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, I
 				this.staticField = this.beanName;
 			}
 
-			// try to parse static field into class and field
+			// Try to parse static field into class and field.
 			int lastDotIndex = this.staticField.lastIndexOf('.');
 			if (lastDotIndex == -1 || lastDotIndex == this.staticField.length()) {
 				throw new IllegalArgumentException(
@@ -165,17 +166,22 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, I
 		}
 
 		else if (this.targetField == null) {
-			// either targetClass or targetObject specified
+			// Either targetClass or targetObject specified.
 			throw new IllegalArgumentException("targetField is required");
 		}
 
-		// try to get the exact method first
+		// Try to get the exact method first.
 		Class targetClass = (this.targetObject != null) ? this.targetObject.getClass() : this.targetClass;
 		this.fieldObject = targetClass.getField(this.targetField);
 	}
 
 
 	public Object getObject() throws IllegalAccessException {
+		if (!Modifier.isPublic(this.fieldObject.getModifiers()) ||
+				!Modifier.isPublic(this.fieldObject.getDeclaringClass().getModifiers())) {
+			this.fieldObject.setAccessible(true);
+		}
+
 		if (this.targetObject != null) {
 			// instance field
 			return this.fieldObject.get(this.targetObject);

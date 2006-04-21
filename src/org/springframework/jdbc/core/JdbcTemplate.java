@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -517,7 +517,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if there is any problem
 	 */
-	protected Object query(
+	public Object query(
 			PreparedStatementCreator psc, final PreparedStatementSetter pss, final ResultSetExtractor rse)
 			throws DataAccessException {
 
@@ -657,12 +657,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return (number != null ? number.intValue() : 0);
 	}
 
-	public List queryForList(String sql, Object[] args, int[] argTypes, Class elementType)
-			throws DataAccessException {
+	public List queryForList(String sql, Object[] args, int[] argTypes, Class elementType) throws DataAccessException {
 		return query(sql, args, argTypes, getSingleColumnRowMapper(elementType));
 	}
 
-	public List queryForList(String sql, final Object[] args, Class elementType) throws DataAccessException {
+	public List queryForList(String sql, Object[] args, Class elementType) throws DataAccessException {
 		return query(sql, args, getSingleColumnRowMapper(elementType));
 	}
 
@@ -670,15 +669,15 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(sql, args, argTypes, getColumnMapRowMapper());
 	}
 
-	public List queryForList(String sql, final Object[] args) throws DataAccessException {
+	public List queryForList(String sql, Object[] args) throws DataAccessException {
 		return query(sql, args, getColumnMapRowMapper());
 	}
 
-	public SqlRowSet queryForRowSet(String sql, final Object[] args, int[] argTypes) throws DataAccessException {
+	public SqlRowSet queryForRowSet(String sql, Object[] args, int[] argTypes) throws DataAccessException {
 		return (SqlRowSet) query(sql, args, argTypes, new SqlRowSetResultSetExtractor());
 	}
 
-	public SqlRowSet queryForRowSet(String sql, final Object[] args) throws DataAccessException {
+	public SqlRowSet queryForRowSet(String sql, Object[] args) throws DataAccessException {
 		return (SqlRowSet) query(sql, args, new SqlRowSetResultSetExtractor());
 	}
 
@@ -750,15 +749,15 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return result.intValue();
 	}
 
-	public int update(String sql, final PreparedStatementSetter pss) throws DataAccessException {
+	public int update(String sql, PreparedStatementSetter pss) throws DataAccessException {
 		return update(new SimplePreparedStatementCreator(sql), pss);
 	}
 
-	public int update(String sql, final Object[] args, final int[] argTypes) throws DataAccessException {
+	public int update(String sql, Object[] args, int[] argTypes) throws DataAccessException {
 		return update(sql, new ArgTypePreparedStatementSetter(args, argTypes));
 	}
 
-	public int update(String sql, final Object[] args) throws DataAccessException {
+	public int update(String sql, Object[] args) throws DataAccessException {
 		return update(sql, new ArgPreparedStatementSetter(args));
 	}
 
@@ -848,7 +847,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 	}
 
-	public Object execute(final String callString, CallableStatementCallback action) throws DataAccessException {
+	public Object execute(String callString, CallableStatementCallback action) throws DataAccessException {
 		return execute(new SimpleCallableStatementCreator(callString), action);
 	}
 
@@ -1040,7 +1039,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (warning != null) {
 			if (isIgnoreWarnings()) {
 				if (logger.isWarnEnabled()) {
-					logger.warn("SQLWarning ignored: " + warning);
+					logger.warn("SQLWarning ignored: SQL state '" + warning.getSQLState() + "', error code '" +
+							warning.getErrorCode() + "', message [" + warning.getMessage() + "]");
 				}
 			}
 			else {

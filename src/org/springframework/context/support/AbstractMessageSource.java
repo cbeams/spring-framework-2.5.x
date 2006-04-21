@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,7 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class AbstractMessageSource implements HierarchicalMessageSource {
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private MessageSource parentMessageSource;
@@ -225,6 +226,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		if (locale == null) {
 			locale = Locale.getDefault();
 		}
+		Object[] argsToUse = args;
 
 		if (!isAlwaysUseMessageFormat() && ObjectUtils.isEmpty(args)) {
 			// Optimized resolution: no arguments to apply,
@@ -236,17 +238,23 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 				return message;
 			}
 		}
+
 		else {
+			// Resolve arguments eagerly, for the case where the message
+			// is defined in a parent MessageSource but resolvable arguments
+			// are defined in the child MessageSource.
+			argsToUse = resolveArguments(args, locale);
+
 			MessageFormat messageFormat = resolveCode(code, locale);
 			if (messageFormat != null) {
 				synchronized (messageFormat) {
-					return messageFormat.format(resolveArguments(args, locale));
+					return messageFormat.format(argsToUse);
 				}
 			}
 		}
 
 		// Not found -> check parent, if any.
-		return getMessageFromParent(code, args, locale);
+		return getMessageFromParent(code, argsToUse, locale);
 	}
 
 	/**
@@ -387,7 +395,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 
 	/**
 	 * Subclasses can override this method to resolve a message without
-	 * arguments in an optimized fashion, i.e. to resolve a message
+	 * arguments in an optimized fashion, that is, to resolve a message
 	 * without involving a MessageFormat.
 	 * <p>The default implementation <i>does</i> use MessageFormat,
 	 * through delegating to the <code>resolveCode</code> method.

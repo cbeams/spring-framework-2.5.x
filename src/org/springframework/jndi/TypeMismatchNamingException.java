@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.propertyeditors;
+package org.springframework.jndi;
 
-import java.beans.PropertyEditorSupport;
+import javax.naming.NamingException;
 
 /**
- * Editor for byte arrays. Strings will simply be converted to
- * their corresponding byte representations.
+ * Exception thrown if a type mismatch is encountered for an object
+ * located in a JNDI environment. Thrown by JndiTemplate.
  *
  * @author Juergen Hoeller
- * @since 1.0.1
- * @see java.lang.String#getBytes
+ * @since 1.2.8
+ * @see JndiTemplate#lookup(String, Class)
  */
-public class ByteArrayPropertyEditor extends PropertyEditorSupport {
+public class TypeMismatchNamingException extends NamingException {
 
-	public void setAsText(String text) {
-		setValue(text != null ? text.getBytes() : null);
-	}
-
-	public String getAsText() {
-		byte[] value = (byte[]) getValue();
-		return (value != null ? new String(value) : "");
+	/**
+	 * Construct a new TypeMismatchNamingException.
+	 * @param explanation the explanation text
+	 */
+	public TypeMismatchNamingException(String explanation) {
+		super(explanation);
 	}
 
 }

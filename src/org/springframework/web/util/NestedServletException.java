@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ public class NestedServletException extends ServletException {
 		super(msg, ex);
 	}
 
+
 	/**
 	 * Return the nested cause, or <code>null</code> if none.
 	 */
@@ -74,13 +75,12 @@ public class NestedServletException extends ServletException {
 	 * if there is one.
 	 */
 	public String getMessage() {
-		if (getCause() == null) {
-			return super.getMessage();
+		String message = super.getMessage();
+		Throwable cause = getCause();
+		if (cause != null) {
+			return message + "; nested exception is " + cause;
 		}
-		else {
-			return super.getMessage() + "; nested exception is " + getRootCause().getClass().getName() +
-					": " + getRootCause().getMessage();
-		}
+		return message;
 	}
 
 	/**
@@ -93,6 +93,7 @@ public class NestedServletException extends ServletException {
 		}
 		else {
 			ps.println(this);
+			ps.print("Caused by: ");
 			getCause().printStackTrace(ps);
 		}
 	}
@@ -107,6 +108,7 @@ public class NestedServletException extends ServletException {
 		}
 		else {
 			pw.println(this);
+			pw.print("Caused by: ");
 			getCause().printStackTrace(pw);
 		}
 	}

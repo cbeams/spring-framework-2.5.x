@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 
 	/**
 	 * The <code>$[argumentTypes]</code> placeholder.
-	 * Replaced with a comma seperated list of the argument types for the
+	 * Replaced with a comma-separated list of the argument types for the
 	 * method invocation. Argument types are written as short class names.
 	 */
 	public static final String PLACEHOLDER_ARGUMENT_TYPES = "$[argumentTypes]";
@@ -271,7 +271,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 		}
 		catch (Throwable ex) {
 			exitThroughException = true;
-			logger.trace(replacePlaceholders(this.exceptionMessage, invocation, null, ex, -1), ex);
+			logger.trace(replacePlaceholders(this.exceptionMessage, invocation, null, ex, stopWatch.getTotalTimeMillis()), ex);
 			throw ex;
 		}
 		finally {

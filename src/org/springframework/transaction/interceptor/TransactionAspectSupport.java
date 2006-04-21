@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,12 +62,13 @@ import org.springframework.util.ClassUtils;
 public class TransactionAspectSupport implements InitializingBean, Serializable {
 
 	/**
-	 * Holder to support the currentTransactionStatus() method, and communication
-	 * between different cooperating advices (e.g. before and after advice)
-	 * if the aspect involves more than a single method (as will be the case for
-	 * around advice).
+	 * Holder to support the <code>currentTransactionStatus()</code> method,
+	 * and to support communication between different cooperating advices
+	 * (e.g. before and after advice) if the aspect involves more than a
+	 * single method (as will be the case for around advice).
 	 */
 	private static ThreadLocal currentTransactionInfo = new ThreadLocal();
+
 
 	/**
 	 * Return the transaction status of the current method invocation.
@@ -293,13 +294,23 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 				}
 			}
 			else {
-				// we don't roll back on this exception
+				// We don't roll back on this exception.
 				if (logger.isDebugEnabled()) {
 					logger.debug(txInfo.joinpointIdentification() + " threw throwable [" + ex +
 							"] but this does not force transaction rollback");
 				}
-				// will still roll back if TransactionStatus.rollbackOnly is true
-				this.transactionManager.commit(txInfo.getTransactionStatus());
+				// Will still roll back if TransactionStatus.isRollbackOnly() is true.
+				try {
+					this.transactionManager.commit(txInfo.getTransactionStatus());
+				}
+				catch (RuntimeException ex2) {
+					logger.error("Application exception overridden by commit exception", ex);
+					throw ex2;
+				}
+				catch (Error err) {
+					logger.error("Application exception overridden by commit error", ex);
+					throw err;
+				}
 			}
 		}
 	}
