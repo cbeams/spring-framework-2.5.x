@@ -27,15 +27,29 @@ import org.springframework.util.StopWatch;
 /**
  * Tests for AspectJ auto proxying. Includes mixing with Spring AOP 
  * Advisors to demonstrate that existing autoproxying contract is honoured.
- * 
+ * <p>
+ * Change the return of the getCount() method to MEANINGFUL_NUMBER_OF_PASSES
+ * to make this test actually run a meaningful benchmark. Currently it is set
+ * to execute the test suite quickly, not produce meaningful results.
  * @author Rod Johnson
  */
 public class BenchmarkTests extends TestCase {
 	
+	/**
+	 * Number of passes high enough to produce meaningful results.
+	 */
+	private static final int MEANINGFUL_NUMBER_OF_PASSES = 1000000;
+	
 	private static final String ASPECTJ_CONTEXT = "/org/springframework/aop/aspectj/autoproxy/benchmark/aspectj.xml";
 
+	/**
+	 * Change the return number to MEANINGFUL_NUMBER_OF_PASSES to make this
+	 * test useful
+	 * @return the number of passes to runs
+	 */
 	protected int getCount() {
-		return 1000000;
+		return 10;
+		//return MEANINGFUL_NUMBER_OF_PASSES;
 	}
 	
 	public void testRepeatedAroundAdviceInvocationsWithAspectJ() {
