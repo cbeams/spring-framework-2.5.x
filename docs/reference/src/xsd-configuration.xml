@@ -121,7 +121,7 @@
                 set the value of the <literal>'isolation'</literal> property on a bean
                 to the value of the <literal>'java.sql.Connection.TRANSACTION_SERIALIZABLE'</literal>
                 constant. This is all well and good, but it is a tad verbose and (unneccessarily)
-                exposes a Spring's internal plumbing to the end user.
+                exposes Spring's internal plumbing to the end user.
                 </para>
                 <para>The following XML Schema-based version is considerably more concise,
                 it clearly expresses the developers intent (<emphasis>'inject this constant
@@ -372,8 +372,60 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:lang="http://www.springframework.org/schema/lang"</emphasis><![CDATA[
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       ]]><emphasis role="bold">http://www.springframework.org/schema/jndi http://www.springframework.org/schema/jndi/spring-jndi.xsd"</emphasis><![CDATA[>
+       ]]><emphasis role="bold">xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd"</emphasis><![CDATA[>
+
+]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+
+</beans>]]></programlisting>
+        </section>
+        <section id="xsd-config-body-schemas-tx">
+            <title>The <literal>tx</literal> (transaction) schema</title>
+            <para>The <literal>tx</literal> tags deal with configuring all of those
+            beans in Spring's comprehensive support for transactions. These tags are
+            comprehensively covered in the chapter entitled <xref linkend="transaction"/>.</para>
+            <para>In the interest of completeness, to use the tags in the <literal>tx</literal>
+            schema, one needs to have the following preamble at the top of one's Spring XML
+            configuration file; the emboldened text in the following snippet references the
+            correct schema so that the tags in the <literal>tx</literal> namespace are
+            available to you.</para>
+            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   ]]><emphasis role="bold">xmlns:tx="http://www.springframework.org/schema/tx"</emphasis><![CDATA[
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           ]]><emphasis role="bold">http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd</emphasis><![CDATA[
+                           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+
+</beans>]]></programlisting>
+            <note>
+                <para>Often when using the tags in the <literal>tx</literal> namespace one will also be using
+                the tags from the <literal>aop</literal> namespace (since the declarative transaction support in Spring is implemented using
+                AOP). The above XML snippet contains the relevant lines needed to reference the <literal>aop</literal> schema
+                so that the tags in the <literal>aop</literal> namespace are available to you.</para>
+            </note>
+        </section>
+        <section id="xsd-config-body-schemas-aop">
+            <title>The <literal>aop</literal> schema</title>
+            <para>The <literal>aop</literal> tags deal with configuring all things
+            AOP in Spring: this includes Spring's own proxy-based AOP framework and Spring's
+            integration with the AspectJ AOP framework. These tags are
+            comprehensively covered in the chapters entitled <xref linkend="aop"/> and
+            <xref linkend="aspectj"/>.</para>
+            <para>In the interest of completeness, to use the tags in the <literal>aop</literal>
+            schema, one needs to have the following preamble at the top of one's Spring XML
+            configuration file; the emboldened text in the following snippet references the
+            correct schema so that the tags in the <literal>aop</literal> namespace are
+            available to you.</para>
+            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   ]]><emphasis role="bold">xmlns:aop="http://www.springframework.org/schema/aop"</emphasis><![CDATA[
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           ]]><emphasis role="bold">http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
