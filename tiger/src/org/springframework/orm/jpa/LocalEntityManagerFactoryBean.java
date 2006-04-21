@@ -54,30 +54,10 @@ import org.springframework.beans.BeanUtils;
  */
 public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean {
 
-	private Class persistenceProviderClass;
-
 	private String entityManagerName;
 
 	private Properties jpaProperties;
 
-
-	/**
-	/**
-	 * Set the PersistenceProvider implementation class to use for creating
-	 * the EntityManagerFactory. If not specified (which is the default),
-	 * the <code>Persistence</code> class will be used to create the
-	 * EntityManagerFactory, relying on JPA's autodetection mechanism.
-	 * @see javax.persistence.spi.PersistenceProvider
-	 * @see javax.persistence.Persistence
-	 */
-	public void setPersistenceProviderClass(Class persistenceProviderClass) {
-		if (persistenceProviderClass != null &&
-				!PersistenceProvider.class.isAssignableFrom(persistenceProviderClass)) {
-			throw new IllegalArgumentException(
-					"serviceFactoryClass must implement [javax.persistence.spi.PersistenceProvider]");
-		}
-		this.persistenceProviderClass = persistenceProviderClass;
-	}
 
 	/**
 	 * Set the name of the EntityManager configuration for the factory.

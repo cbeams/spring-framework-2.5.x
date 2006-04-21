@@ -18,6 +18,7 @@ package org.springframework.orm.jpa;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
+import javax.persistence.spi.PersistenceProvider;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +45,8 @@ public abstract class AbstractEntityManagerFactoryBean implements FactoryBean, I
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private EntityManagerFactory entityManagerFactory;
+
+	protected Class persistenceProviderClass;
 
 	/**
 	 * Subclasses must implement this method to create the EntityManagerFactory that
@@ -83,6 +86,24 @@ public abstract class AbstractEntityManagerFactoryBean implements FactoryBean, I
 	
 	public void afterPropertiesSet() throws Exception {
 		this.entityManagerFactory = createEntityManagerFactory();
+	}
+
+	/**
+	/**
+	 * Set the PersistenceProvider implementation class to use for creating
+	 * the EntityManagerFactory. If not specified (which is the default),
+	 * the <code>Persistence</code> class will be used to create the
+	 * EntityManagerFactory, relying on JPA's autodetection mechanism.
+	 * @see javax.persistence.spi.PersistenceProvider
+	 * @see javax.persistence.Persistence
+	 */
+	public void setPersistenceProviderClass(Class persistenceProviderClass) {
+		if (persistenceProviderClass != null &&
+				!PersistenceProvider.class.isAssignableFrom(persistenceProviderClass)) {
+			throw new IllegalArgumentException(
+					"serviceFactoryClass must implement [javax.persistence.spi.PersistenceProvider]");
+		}
+		this.persistenceProviderClass = persistenceProviderClass;
 	}
 
 }
