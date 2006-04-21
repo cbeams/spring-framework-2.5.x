@@ -17,9 +17,11 @@
 package org.springframework.scripting.config;
 
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.scripting.bsh.BshScriptFactory;
 import org.springframework.scripting.groovy.GroovyScriptFactory;
 import org.springframework.scripting.jruby.JRubyScriptFactory;
+import org.springframework.util.ClassUtils;
 
 /**
  * @author Rob Harrop
@@ -28,9 +30,17 @@ import org.springframework.scripting.jruby.JRubyScriptFactory;
 public class LangNamespaceHandler extends NamespaceHandlerSupport {
 
 	public void init() {
-		registerBeanDefinitionParser("groovy", new ScriptBeanDefinitionParser(GroovyScriptFactory.class));
-		registerBeanDefinitionParser("jruby", new ScriptBeanDefinitionParser(JRubyScriptFactory.class));
-		registerBeanDefinitionParser("bsh", new ScriptBeanDefinitionParser(BshScriptFactory.class));
+		if (ClassUtils.isPresent("groovy.lang.GroovyObject")) {
+			registerBeanDefinitionParser("groovy", new ScriptBeanDefinitionParser(GroovyScriptFactory.class));
+		}
+
+		if (ClassUtils.isPresent("org.jruby.IRuby")) {
+			registerBeanDefinitionParser("jruby", new ScriptBeanDefinitionParser(JRubyScriptFactory.class));
+		}
+
+		if (ClassUtils.isPresent("bsh.Interpreter")) {
+			registerBeanDefinitionParser("bsh", new ScriptBeanDefinitionParser(BshScriptFactory.class));
+		}
 	}
 
 }

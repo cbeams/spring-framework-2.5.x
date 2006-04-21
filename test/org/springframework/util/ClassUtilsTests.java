@@ -34,6 +34,7 @@ import org.springframework.beans.TestBean;
 /**
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
+ * @author Rob Harrop
  */
 public class ClassUtilsTests extends TestCase {
 
@@ -175,6 +176,10 @@ public class ClassUtilsTests extends TestCase {
 		assertTrue("Contains IOther", ifcs.contains(IOther.class));
 	}
 
+	public void testIsPresent() throws Exception {
+		assertTrue(ClassUtils.isPresent("java.lang.String"));
+		assertFalse(ClassUtils.isPresent("java.lang.MySpecialString"));
+	}
 
 	public static class InnerClass {
 

@@ -16,6 +16,9 @@
 
 package org.springframework.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.beans.Introspector;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -51,6 +54,11 @@ public abstract class ClassUtils {
 	/** The CGLIB class separator character "$$" */
 	private static final String CGLIB_CLASS_SEPARATOR_CHAR = "$$";
 
+
+	/**
+	 * {@link Log} instance for this class.
+	 */
+	private static final Log logger = LogFactory.getLog(ClassUtils.class);
 
 	/**
 	 * Map with primitive wrapper type as key and corresponding primitive
@@ -473,4 +481,21 @@ public abstract class ClassUtils {
 		return interfaces;
 	}
 
+	/**
+	 * Returns <code>true</code> if the {@link Class} identified by the supplied name
+	 * is present and can be loaded. Will return <code>false</code> if either the class
+	 * or one of its dependencies is not present or cannot be loaded.
+	 */                                                              
+	public static boolean isPresent(String className) {
+		try {
+			forName(className);
+			return true;
+		}
+		catch (Exception e) {
+			if(logger.isDebugEnabled()) {
+				logger.debug("Class '" + className + "'or one of its dependencies is not present.", e);
+			}
+			return false;
+		}
+	}
 }
