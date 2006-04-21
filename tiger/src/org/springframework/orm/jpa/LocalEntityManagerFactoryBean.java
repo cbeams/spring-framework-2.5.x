@@ -23,13 +23,7 @@ import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceProvider;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
 
 /**
  * FactoryBean that creates a local JPA EntityManagerFactory instance.
@@ -58,15 +52,11 @@ import org.springframework.beans.factory.InitializingBean;
  * @see JpaTransactionManager#setEntityManagerFactory
  * @see org.springframework.jndi.JndiObjectFactoryBean
  */
-public class LocalEntityManagerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
-
-	protected final Log logger = LogFactory.getLog(getClass());
+public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean {
 
 	private Class persistenceProviderClass;
 
 	private String entityManagerName;
-
-	private EntityManagerFactory entityManagerFactory;
 
 	private Properties jpaProperties;
 
@@ -115,49 +105,23 @@ public class LocalEntityManagerFactoryBean implements FactoryBean, InitializingB
 	 * Initialize the EntityManagerFactory for the given configuration.
 	 * @throws javax.persistence.PersistenceException in case of JPA initialization errors
 	 */
-	public final void afterPropertiesSet() throws PersistenceException {
+	protected EntityManagerFactory createEntityManagerFactory() throws PersistenceException {
 		if (this.persistenceProviderClass != null) {
 			// Create EntityManagerFactory directly through PersistenceProvider.
 			PersistenceProvider pp =
 					(PersistenceProvider) BeanUtils.instantiateClass(this.persistenceProviderClass);
-			this.entityManagerFactory = pp.createEntityManagerFactory(this.entityManagerName, this.jpaProperties);
-			if (this.entityManagerFactory == null) {
+			EntityManagerFactory emf = pp.createEntityManagerFactory(this.entityManagerName, this.jpaProperties);
+			if (emf == null) {
 				throw new IllegalStateException(
 						"PersistenceProvider [" + this.persistenceProviderClass.getName() +
 						"] did not return an EntityManagerFactory for name '" + this.entityManagerName + "'");
 			}
+			return emf;
 		}
 		else {
 			// Let JPA perform its PersistenceProvider autodetection.
-			this.entityManagerFactory =
-					Persistence.createEntityManagerFactory(this.entityManagerName, this.jpaProperties);
+			return Persistence.createEntityManagerFactory(this.entityManagerName, this.jpaProperties);
 		}
-	}
-
-
-	/**
-	 * Return the singleton EntityManagerFactory.
-	 */
-	public Object getObject() {
-		return this.entityManagerFactory;
-	}
-
-	public Class getObjectType() {
-		return (this.entityManagerFactory != null) ?
-		    this.entityManagerFactory.getClass() : EntityManagerFactory.class;
-	}
-
-	public boolean isSingleton() {
-		return true;
-	}
-
-
-	/**
-	 * Close the EntityManagerFactory on bean factory shutdown.
-	 */
-	public void destroy() {
-		logger.info("Closing JPA EntityManagerFactory");
-		this.entityManagerFactory.close();
 	}
 
 }
