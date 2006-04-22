@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.8 (23.4.2006)
+Changes in version 1.2.8 (28.4.2006)
 ------------------------------------
 
 General:
@@ -37,6 +37,9 @@ Package org.springframework.jdbc
 * refined NativeJdbcExtractorAdapter to retry with DatabaseMetaData Connection if extraction failed (for Hibernate 3.1)
 * turned JdbcTemplate's "query(PreparedStatementCreator,PreparedStatementSetter,ResultSetExtractor rse)" method public
 * improved JdbcTemplate's logging of ignored SQLWarnings, including SQL state and error code in the log output
+* JdbcTemplate's "queryForObject"/"queryForInt"/etc methods correctly detect incorrect result sizes even for null values
+* added "allowsUnusedParameters()" and "checkCompiled()" methods to RdbmsOperation, for better customizing in subclasses
+* refined StoredProcedure to accept unused entries in given parameter Maps by default
 
 Package org.springframework.jndi
 * added "defaultObject" property to JndiObjectFactoryBean, allowing to fall back to default object if JNDI lookup fails
@@ -48,6 +51,7 @@ Package org.springframework.mock
 * added overloaded constructors to MockFilterConfig, using a MockServletContext instead of a ServletContext argument
 
 Package org.springframework.orm
+* refined JDO PersistenceManagerFactoryUtils to explicitly suspend pre-bound PM in the course of transaction suspension
 * fixed LocalSessionFactoryBean's "updateDatabaseSchema" to declare the correct exception (DataAccessException)
 * fixed BlobStringType for Hibernate2/3 to correctly handle SQL NULL
 
@@ -57,6 +61,8 @@ Package org.springframework.remoting
 
 Package org.springframework.scheduling
 * fixed TimerFactoryBean to properly initialize even without "scheduledTimerTasks" configured
+* refined Quartz SchedulerFactoryBean to re-register the associated JobDetail when overwriting a JobDetailAwareTrigger
+* fixed Quartz SchedulerFactoryBean to handle potential cluster race condition on trigger registration
 
 Package org.springframework.transaction
 * AbstractPlatformTransactionManager logs "Should roll back transaction but cannot" message at debug level (not warn)
@@ -70,6 +76,8 @@ Package org.springframework.validation
 
 Package org.springframework.web
 * ContextLoader throws IllegalStateException if there is already a root application context present
+* refined GenericFilterBean to fully support initialization as bean in a Spring bean factory (without FilterConfig)
+* refined OncePerRequestFilter to fall back to bean name or fully qualified class name if no filter name is available
 * fixed CommonsMultipartResolver to go through the "newFileUpload" template method for any FileUpload instance
 * refined FrameworkServlet to log a request handling failure at debug level rather than error level
 * added "propertyEditorRegistrar" bean property to BaseCommandController, as convenience option for a single registrar
@@ -79,6 +87,8 @@ Package org.springframework.web
 * added "clearCache()" method to AbstractCachingViewResolver, for removing all cached view objects
 * optimized BeanNameViewResolver to avoid internal throwing and catching of NoSuchBeanDefinitionExceptions
 * "javaScriptEscape" feature of Spring tags correctly escapes "</script>" inside a literal value
+* fixed AbstractJasperReportsView and subclasses to be compatible with J2EE <1.4 (avoid response.setCharacterEncoding)
+* AbstractJasperReportsView autodetects a JDBC DataSource in the model, as alternative to specifying it in configuration
 
 
 Changes in version 1.2.7 (27.2.2006)
