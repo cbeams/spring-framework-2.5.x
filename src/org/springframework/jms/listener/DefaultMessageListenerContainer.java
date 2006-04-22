@@ -249,9 +249,8 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * @see #setTaskExecutor
 	 */
 	protected void registerListener() throws JMSException {
-		Runnable invoker = new AsyncMessageListenerInvoker();
 		for (int i = 0; i < this.concurrentConsumers; i++) {
-			this.taskExecutor.execute(invoker);
+			this.taskExecutor.execute(new AsyncMessageListenerInvoker());
 		}
 	}
 
