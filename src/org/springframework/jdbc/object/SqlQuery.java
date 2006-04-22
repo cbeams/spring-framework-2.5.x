@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,15 +30,15 @@ import org.springframework.jdbc.core.ResultReader;
  * objects, SqlQuery objects are threadsafe after their initialization is
  * complete. That is, after they are constructed and configured via their
  * setter methods, they can be used safely from multiple threads.
- * <p>
- * Subclasses must implement the <code>newResultReader</code> method to provide an object
- * that can save the results of iterating over the ResultSet.
+ *
+ * <p>Subclasses must implement the <code>newRowMapper</code> method to provide an object
+ * that can extract the results of iterating over the ResultSet.
  *
  * <p>This class provides a number of public <code>execute</code> methods that are
  * analogous to the different convenient JDO query execute methods. Subclasses
  * can either rely on one of these inherited methods, or can add their own
  * custom execution methods, with meaningful names and typed parameters. Each
- * custom query method will invoke one of this class's untype query methods.
+ * custom query method will invoke one of this class's untyped query methods.
  *
  * @author Rod Johnson
  * @author Jean-Pierre Pawlak
@@ -48,10 +48,6 @@ public abstract class SqlQuery extends SqlOperation {
 	/** Number of rows to expect. If 0, unknown. */
 	private int rowsExpected = 0;
 
-
-	//-------------------------------------------------------------------------
-	// Constructors
-	//-------------------------------------------------------------------------
 
 	/**
 	 * Constructor to allow use as a JavaBean. DataSource and SQL
@@ -72,10 +68,6 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 
-	//-------------------------------------------------------------------------
-	// Bean properties
-	//-------------------------------------------------------------------------
-
 	/**
 	 * Set the number of rows expected. This can be used to ensure
 	 * efficient storage of results. The default behavior is not to
@@ -93,40 +85,36 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 
-	//-------------------------------------------------------------------------
-	// Execute methods
-	//-------------------------------------------------------------------------
-
 	/**
 	 * Central execution method. All execution goes through this method.
-	 * @param parameters parameters, similar to JDO query parameters.
+	 * @param params parameters, similar to JDO query parameters.
 	 * Primitive parameters must be represented by their Object wrapper type.
 	 * The ordering of parameters is significant.
-	 * @param context contextual information passed to the callback mapRow method.
-	 * This parameter doesn't rely on the JDBC request itself, but can be useful
-	 * for creating the objects of the result list.
+	 * @param context contextual information passed to the callback <code>mapRow</code> method.
+	 * The JDBC operation itself doesn't rely on this parameter, but can be useful for
+	 * creating the objects of the result list.
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
 	 * will be of the same class, although it is possible to use different types.
 	 */
-	public List execute(final Object[] parameters, Map context) throws DataAccessException {
-		validateParameters(parameters);
-		ResultReader rr = newResultReader(getRowsExpected(), parameters, context);
-		return getJdbcTemplate().query(newPreparedStatementCreator(parameters), rr);
+	public List execute(Object[] params, Map context) throws DataAccessException {
+		validateParameters(params);
+		ResultReader rr = newResultReader(getRowsExpected(), params, context);
+		return getJdbcTemplate().query(newPreparedStatementCreator(params), rr);
 	}
 
 	/**
 	 * Convenient method to execute without context.
-	 * @param parameters parameters, as to JDO queries. Primitive parameters must
+	 * @param params parameters for the query. Primitive parameters must
 	 * be represented by their Object wrapper type. The ordering of parameters is
 	 * significant.
 	 */
-	public List execute(final Object[] parameters) throws DataAccessException {
-		return execute(parameters, null);
+	public List execute(Object[] params) throws DataAccessException {
+		return execute(params, null);
 	}
 
 	/**
 	 * Convenient method to execute without parameters.
-	 * @param context The contextual information for object creation
+	 * @param context the contextual information for object creation
 	 */
 	public List execute(Map context) throws DataAccessException {
 		return execute((Object[]) null, context);
@@ -209,24 +197,31 @@ public abstract class SqlQuery extends SqlOperation {
 		return execute(p1, null);
 	}
 
+
 	/**
-	 * Generic findObject method, used by all other findObject() methods.
-	 * findObject() methods are like EJB entity bean finders, in that it is
+	 * Generic object finder method, used by all other <code>findObject</code> methods.
+	 * Object finder methods are like EJB entity bean finders, in that it is
 	 * considered an error if they return more than one result.
-	 * @return null if not found. Subclasses may choose to treat this
-	 * as an error and throw an exception.
+	 * @param params parameters, similar to JDO query parameters.
+	 * Primitive parameters must be represented by their Object wrapper type.
+	 * The ordering of parameters is significant.
+	 * @param context contextual information passed to the callback <code>mapRow</code> method.
+	 * The JDBC operation itself doesn't rely on this parameter, but can be useful for
+	 * creating the objects of the result list.
+	 * @return the result object, or <code>null</code> if not found. Subclasses may
+	 * choose to treat this as an error and throw an exception.
 	 * @see org.springframework.dao.support.DataAccessUtils#uniqueResult
 	 */
-	public Object findObject(Object[] parameters, Map context) throws DataAccessException {
-		List results = execute(parameters, context);
+	public Object findObject(Object[] params, Map context) throws DataAccessException {
+		List results = execute(params, context);
 		return DataAccessUtils.uniqueResult(results);
 	}
 
 	/**
 	 * Convenient method to find a single object without context.
 	 */
-	public Object findObject(Object[] parameters) throws DataAccessException {
-		return findObject(parameters, null);
+	public Object findObject(Object[] params) throws DataAccessException {
+		return findObject(params, null);
 	}
 
 	/**

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -151,15 +151,15 @@ public class BatchSqlUpdate extends SqlUpdate {
 	 * <p>You need to call <code>flush</code> to actually execute the batch.
 	 * If the specified batch size is reached, an implicit flush will happen;
 	 * you still need to finally call <code>flush</code> to flush all statements.
-	 * @param args array of object arguments
+	 * @param params array of parameter objects
 	 * @return the number of rows affected by the update (always -1,
 	 * meaning "not applicable", as the statement is not actually
 	 * executed by this method)
 	 * @see #flush
 	 */
-	public int update(Object[] args) throws DataAccessException {
-		validateParameters(args);
-		this.parameterQueue.add(args.clone());
+	public int update(Object[] params) throws DataAccessException {
+		validateParameters(params);
+		this.parameterQueue.add(params.clone());
 
 		if (this.parameterQueue.size() == this.batchSize) {
 			if (logger.isDebugEnabled()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.object;
 
+import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -27,8 +29,8 @@ import org.springframework.jdbc.support.KeyHolder;
  * Like a query, an update object is reusable. Like all RdbmsOperation
  * objects, an update can have parameters and is defined in SQL.
  *
- * <p>This class provides a number of update() methods analogous to the
- * execute() methods of query objects.
+ * <p>This class provides a number of <code>update()</code> methods,
+ * analogous to the <code>execute()</code> methods of query objects.
  *
  * <p>This class is concrete. Although it can be subclassed (for example
  * to add a custom update method) it can easily be parameterized by setting
@@ -147,15 +149,16 @@ public class SqlUpdate extends SqlOperation {
 		}
 	}
 
+
 	/**
-	 * Generic method to execute the update given arguments.
+	 * Generic method to execute the update given parameters.
 	 * All other update methods invoke this method.
-	 * @param args array of object arguments
+	 * @param params array of parameters objects
 	 * @return the number of rows affected by the update
 	 */
-	public int update(Object[] args) throws DataAccessException {
-		validateParameters(args);
-		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(args));
+	public int update(Object[] params) throws DataAccessException {
+		validateParameters(params);
+		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(params));
 		checkRowsAffected(rowsAffected);
 		return rowsAffected;
 	}
@@ -163,13 +166,13 @@ public class SqlUpdate extends SqlOperation {
 	/**
 	 * Method to execute the update given arguments and 
 	 * retrieve the generated keys using a KeyHolder.
-	 * @param args array of object arguments
+	 * @param params array of parameter objects
 	 * @param generatedKeyHolder KeyHolder that will hold the generated keys
 	 * @return the number of rows affected by the update
 	 */
-	public int update(Object[] args, KeyHolder generatedKeyHolder) throws DataAccessException {
-		validateParameters(args);
-		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(args), generatedKeyHolder);
+	public int update(Object[] params, KeyHolder generatedKeyHolder) throws DataAccessException {
+		validateParameters(params);
+		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(params), generatedKeyHolder);
 		checkRowsAffected(rowsAffected);
 		return rowsAffected;
 	}

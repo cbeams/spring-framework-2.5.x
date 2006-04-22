@@ -28,6 +28,7 @@ import java.util.List;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
+import org.springframework.util.Assert;
 
 /**
  * Helper class that can efficiently create multiple PreparedStatementCreator
@@ -50,7 +51,7 @@ public class PreparedStatementCreatorFactory {
 	private boolean updatableResults = false;
 
 	private boolean returnGeneratedKeys = false;
-	
+
 	private String[] generatedKeysColumnNames = null;
 
 	private NativeJdbcExtractor nativeJdbcExtractor;
@@ -85,6 +86,7 @@ public class PreparedStatementCreatorFactory {
 		this.sql = sql;
 		this.declaredParameters = declaredParameters;
 	}
+
 
 	/**
 	 * Add a new declared parameter.
@@ -144,9 +146,9 @@ public class PreparedStatementCreatorFactory {
 	 * @param params parameter array. May be <code>null</code>.
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
-		return new PreparedStatementCreatorImpl((params != null) ? Arrays.asList(params) : Collections.EMPTY_LIST);
+		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.EMPTY_LIST);
 	}
-	
+
 	/**
 	 * Return a new PreparedStatementCreator for the given parameters.
 	 * @param params List of parameters. May be <code>null</code>.
@@ -160,7 +162,7 @@ public class PreparedStatementCreatorFactory {
 	 * @param params parameter array. May be <code>null</code>.
 	 */
 	public PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
-		return new PreparedStatementCreatorImpl((params != null) ? Arrays.asList(params) : Collections.EMPTY_LIST);
+		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.EMPTY_LIST);
 	}
 
 	/**
@@ -179,19 +181,20 @@ public class PreparedStatementCreatorFactory {
 			implements PreparedStatementCreator, PreparedStatementSetter, SqlProvider, ParameterDisposer {
 
 		private final List parameters;
-		
+
 		/**
 		 * Create a new PreparedStatementCreatorImpl.
 		 * @param parameters list of parameter objects
 		 */
 		public PreparedStatementCreatorImpl(List parameters) {
+			Assert.notNull(parameters, "Parameters List must not be null");
 			this.parameters = parameters;
 			if (this.parameters.size() != declaredParameters.size())
 				throw new InvalidDataAccessApiUsageException(
 						"SQL [" + sql + "]: given " + this.parameters.size() +
 						" parameters but expected " + declaredParameters.size());
 		}
-		
+
 		public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 			PreparedStatement ps = null;
 			if (returnGeneratedKeys) {
@@ -222,7 +225,7 @@ public class PreparedStatementCreatorFactory {
 		}
 
 		public void setValues(PreparedStatement ps) throws SQLException {
-			// determine PreparedStatement to pass to custom types
+			// Determine PreparedStatement to pass to custom types.
 			PreparedStatement psToUse = ps;
 			if (nativeJdbcExtractor != null) {
 				psToUse = nativeJdbcExtractor.getNativePreparedStatement(ps);
@@ -247,15 +250,8 @@ public class PreparedStatementCreatorFactory {
 
 		public String toString() {
 			StringBuffer buf = new StringBuffer("PreparedStatementCreatorFactory.PreparedStatementCreatorImpl: sql=[");
-			buf.append(sql);
-			buf.append("]: params=[");
-			for (int i = 0; i < this.parameters.size(); i++) {
-				if (i > 0) {
-					buf.append(',');
-				}
-				buf.append(this.parameters.get(i));
-			}
-			return buf.toString() + "]";
+			buf.append(sql).append("]; parameters=").append(this.parameters);
+			return buf.toString();
 		}
 	}
 

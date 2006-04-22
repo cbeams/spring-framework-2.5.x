@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -131,18 +131,9 @@ public class CallableStatementCreatorFactory {
 	private class CallableStatementCreatorImpl
 			implements CallableStatementCreator, SqlProvider, ParameterDisposer {
 
-		private final ParameterMapper inParameterMapper;
+		private ParameterMapper inParameterMapper;
 
 		private Map inParameters;
-
-		/**
-		 * Create a new CallableStatementCreatorImpl.
-		 * @param inParams list of SqlParameter objects. May not be <code>null</code>.
-		 */
-		public CallableStatementCreatorImpl(Map inParams) {
-			this.inParameterMapper = null;
-			this.inParameters = inParams;
-		}
 
 		/**
 		 * Create a new CallableStatementCreatorImpl.
@@ -151,7 +142,14 @@ public class CallableStatementCreatorFactory {
 		 */
 		public CallableStatementCreatorImpl(ParameterMapper inParamMapper) {
 			this.inParameterMapper = inParamMapper;
-			this.inParameters = null;
+		}
+
+		/**
+		 * Create a new CallableStatementCreatorImpl.
+		 * @param inParams list of SqlParameter objects. May not be <code>null</code>.
+		 */
+		public CallableStatementCreatorImpl(Map inParams) {
+			this.inParameters = inParams;
 		}
 
 		public CallableStatement createCallableStatement(Connection con) throws SQLException {
@@ -175,7 +173,7 @@ public class CallableStatementCreatorFactory {
 						updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
 			}
 
-			// determine CallabeStatement to pass to custom types
+			// Determine CallabeStatement to pass to custom types.
 			CallableStatement csToUse = cs;
 			if (nativeJdbcExtractor != null) {
 				csToUse = nativeJdbcExtractor.getNativeCallableStatement(cs);
@@ -190,13 +188,13 @@ public class CallableStatementCreatorFactory {
 					throw new InvalidDataAccessApiUsageException(
 							"Required input parameter '" + declaredParameter.getName() + "' is missing");
 				}
-				// the value may still be <code>null</code>
+				// The value may still be null.
 				Object inValue = this.inParameters.get(declaredParameter.getName());
 				if (!(declaredParameter instanceof SqlOutParameter) && !(declaredParameter instanceof SqlReturnResultSet)) {
 					StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParameter, inValue);
 				}
 				else {
-					// It's an output parameter. Skip SqlReturnResultSet parameters
+					// It's an output parameter: Skip SqlReturnResultSet parameters.
 					// It need not (but may be) supplied by the caller.
 					if (declaredParameter instanceof SqlOutParameter) {
 						if (declaredParameter.getTypeName() != null) {
@@ -230,12 +228,7 @@ public class CallableStatementCreatorFactory {
 
 		public String toString() {
 			StringBuffer buf = new StringBuffer("CallableStatementCreatorFactory.CallableStatementCreatorImpl: sql=[");
-			buf.append(callString);
-			buf.append("]: params=[");
-			if (inParameters != null) {
-				buf.append(inParameters.toString());
-			}
-			buf.append(']');
+			buf.append(callString).append("]; parameters=").append(this.inParameters);
 			return buf.toString();
 		}
 	}
