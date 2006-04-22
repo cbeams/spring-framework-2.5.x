@@ -30,6 +30,7 @@ import org.springframework.web.util.UrlPathHelper;
 
 /**
  * @author Seth Ladd
+ * @author Juergen Hoeller
  */
 public class SimpleMappingExceptionResolverTests extends TestCase {
 

@@ -116,8 +116,8 @@ public class JndiTemplate {
 	 * name bound to JNDI
 	 */
 	public Object lookup(final String name) throws NamingException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Looking up JNDI object with name [" + name + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Looking up JNDI object with name [" + name + "]");
 		}
 		return execute(new JndiCallback() {
 			public Object doInContext(Context ctx) throws NamingException {
@@ -160,8 +160,8 @@ public class JndiTemplate {
 	 * @throws NamingException thrown by JNDI, mostly name already bound
 	 */
 	public void bind(final String name, final Object object) throws NamingException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Binding JNDI object with name [" + name + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Binding JNDI object with name [" + name + "]");
 		}
 		execute(new JndiCallback() {
 			public Object doInContext(Context ctx) throws NamingException {
@@ -179,8 +179,8 @@ public class JndiTemplate {
 	 * @throws NamingException thrown by JNDI
 	 */
 	public void rebind(final String name, final Object object) throws NamingException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Rebinding JNDI object with name [" + name + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Rebinding JNDI object with name [" + name + "]");
 		}
 		execute(new JndiCallback() {
 			public Object doInContext(Context ctx) throws NamingException {
@@ -196,8 +196,8 @@ public class JndiTemplate {
 	 * @throws NamingException thrown by JNDI, mostly name not found
 	 */
 	public void unbind(final String name) throws NamingException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Unbinding JNDI object with name [" + name + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Unbinding JNDI object with name [" + name + "]");
 		}
 		execute(new JndiCallback() {
 			public Object doInContext(Context ctx) throws NamingException {

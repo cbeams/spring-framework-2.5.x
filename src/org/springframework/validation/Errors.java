@@ -60,7 +60,7 @@ public interface Errors {
 	 * <p>For example, an address validator could validate the subobject
 	 * "address" of a customer object.
 	 * @param nestedPath nested path within this object,
-	 * e.g. "address" (defaults to "", null is also acceptable).
+	 * e.g. "address" (defaults to "", <code>null</code> is also acceptable).
 	 * Can end with a dot: both "address" and "address." are valid.
 	 */
 	void setNestedPath(String nestedPath);

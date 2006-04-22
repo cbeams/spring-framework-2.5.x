@@ -23,7 +23,7 @@ import javax.naming.NamingException;
  * located in a JNDI environment. Thrown by JndiTemplate.
  *
  * @author Juergen Hoeller
- * @since 2.0
+ * @since 1.2.8
  * @see JndiTemplate#lookup(String, Class)
  */
 public class TypeMismatchNamingException extends NamingException {

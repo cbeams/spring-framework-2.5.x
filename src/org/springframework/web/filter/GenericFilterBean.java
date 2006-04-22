@@ -31,10 +31,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -107,7 +107,7 @@ public abstract class GenericFilterBean implements
 	 * @see org.springframework.web.context.ServletContextAware
 	 * @see #getServletContext()
 	 */
-	public void setServletContext(ServletContext servletContext) {
+	public final void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 
@@ -182,16 +182,16 @@ public abstract class GenericFilterBean implements
 	 * Alternative way of initializing this filter.
 	 * Used by Servlet Filter version that shipped with WebLogic 6.1.
 	 * @param filterConfig the configuration for this filter
-	 * @throws FatalBeanException wrapping a ServletException
-	 * thrown by the init method
-	 * @see #init
+	 * @throws BeanInitializationException wrapping a ServletException
+	 * thrown by the <code>init</code> method
+	 * @see #init(javax.servlet.FilterConfig)
 	 */
 	public final void setFilterConfig(FilterConfig filterConfig) {
 		try {
 			init(filterConfig);
 		}
 		catch (ServletException ex) {
-			throw new FatalBeanException("Couldn't initialize filter bean", ex);
+			throw new BeanInitializationException("Couldn't initialize filter bean", ex);
 		}
 	}
 

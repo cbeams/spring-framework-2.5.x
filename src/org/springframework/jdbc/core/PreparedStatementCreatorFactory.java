@@ -31,6 +31,7 @@ import java.util.List;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
+import org.springframework.util.Assert;
 
 /**
  * Helper class that can efficiently create multiple PreparedStatementCreator
@@ -198,6 +199,7 @@ public class PreparedStatementCreatorFactory {
 		 * @param parameters list of parameter objects
 		 */
 		public PreparedStatementCreatorImpl(List parameters) {
+			Assert.notNull(parameters, "Parameters List must not be null");
 			this.parameters = parameters;
 			if (this.parameters.size() != declaredParameters.size())
 				throw new InvalidDataAccessApiUsageException(
@@ -272,15 +274,8 @@ public class PreparedStatementCreatorFactory {
 
 		public String toString() {
 			StringBuffer buf = new StringBuffer("PreparedStatementCreatorFactory.PreparedStatementCreatorImpl: sql=[");
-			buf.append(sql);
-			buf.append("]: params=[");
-			for (int i = 0; i < this.parameters.size(); i++) {
-				if (i > 0) {
-					buf.append(',');
-				}
-				buf.append(this.parameters.get(i));
-			}
-			return buf.toString() + "]";
+			buf.append(sql).append("]; parameters=").append(this.parameters);
+			return buf.toString();
 		}
 	}
 

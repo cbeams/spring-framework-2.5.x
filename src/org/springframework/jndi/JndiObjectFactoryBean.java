@@ -174,7 +174,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 					logger.debug("JNDI lookup failed - returning specified default object instead", ex);
 				}
 				else if (logger.isInfoEnabled()) {
-					logger.debug("JNDI lookup failed - returning specified default object instead: " + ex.getMessage());
+					logger.debug("JNDI lookup failed - returning specified default object instead: " + ex);
 				}
 				return this.defaultObject;
 			}

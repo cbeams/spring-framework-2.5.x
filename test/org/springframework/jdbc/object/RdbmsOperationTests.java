@@ -91,7 +91,7 @@ public class RdbmsOperationTests extends TestCase {
 		operation.setSql("select * from mytable");
 		operation.setTypes(new int[] { Types.INTEGER });
 		try {
-			operation.validateParameters((Map) null);
+			operation.validateNamedParameters((Map) null);
 			fail("Shouldn't validate without enough parameters");
 		}
 		catch (InvalidDataAccessApiUsageException idaauex) {
@@ -131,7 +131,7 @@ public class RdbmsOperationTests extends TestCase {
 		try {
 			Map params = new HashMap();
 			params.put("col1", "value");
-			operation.validateParameters(params);
+			operation.validateNamedParameters(params);
 			fail("Shouldn't validate with unspecified parameters");
 		}
 		catch (InvalidDataAccessApiUsageException idaauex) {

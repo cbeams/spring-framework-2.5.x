@@ -110,7 +110,7 @@ public abstract class SqlQuery extends SqlOperation {
 	 * be represented by their Object wrapper type. The ordering of parameters is
 	 * significant.
 	 */
-	public List execute(final Object[] params) throws DataAccessException {
+	public List execute(Object[] params) throws DataAccessException {
 		return execute(params, null);
 	}
 
@@ -212,7 +212,7 @@ public abstract class SqlQuery extends SqlOperation {
 	 * will be of the same class, although it is possible to use different types.
 	 */
 	public List executeByNamedParam(Map paramMap, Map context) throws DataAccessException {
-		validateParameters(paramMap);
+		validateNamedParameters(paramMap);
 		Object[] parameters = NamedParameterUtils.buildValueArray(getSql(), paramMap);
 		RowMapper rowMapper = newRowMapper(parameters, context);
 		return getJdbcTemplate().query(newPreparedStatementCreator(parameters), rowMapper);

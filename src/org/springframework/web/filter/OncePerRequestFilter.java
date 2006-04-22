@@ -68,11 +68,11 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 
 		String alreadyFilteredAttributeName = getAlreadyFilteredAttributeName();
 		if (request.getAttribute(alreadyFilteredAttributeName) != null || shouldNotFilter(httpRequest)) {
-			// proceed without invoking this filter
+			// Proceed without invoking this filter...
 			filterChain.doFilter(request, response);
 		}
 		else {
-			// invoke this filter
+			// Do invoke this filter...
 			request.setAttribute(alreadyFilteredAttributeName, Boolean.TRUE);
 			doFilterInternal(httpRequest, httpResponse, filterChain);
 		}

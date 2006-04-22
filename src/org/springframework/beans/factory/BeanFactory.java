@@ -115,12 +115,11 @@ public interface BeanFactory {
 
 	/**
 	 * Return an instance, which may be shared or independent, of the given bean name.
-	 * This method allows a Spring bean factory to be used as a replacement for
-	 * the Singleton or Prototype design pattern.
-	 * <p>Callers may retain references to returned objects
-	 * in the case of Singleton beans. 
-	 * <p>This method delegates to the parent factory if the 
-	 * bean cannot be found in this factory instance.
+	 * This method allows a Spring BeanFactory to be used as a replacement for the
+	 * Singleton or Prototype design pattern.
+	 * <p>Callers may retain references to returned objects in the case of Singleton beans.
+	 * <p>Translates aliases back to the corresponding canonical bean name.
+	 * Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the name of the bean to return
 	 * @return the instance of the bean
 	 * @throws NoSuchBeanDefinitionException if there is no bean definition
@@ -134,7 +133,7 @@ public interface BeanFactory {
 	 * <p>Behaves the same as getBean(String), but provides a measure of type safety by
 	 * throwing a Spring BeansException if the bean is not of the required type.
 	 * This means that ClassCastException can't be thrown on casting the result correctly,
-	 * as can happen with getBean(String). 
+	 * as can happen with <code>getBean(String)</code>.
 	 * @param name the name of the bean to return
 	 * @param requiredType type the bean must match. Can be an interface or superclass
 	 * of the actual class, or <code>null</code> for any match. For example, if the value

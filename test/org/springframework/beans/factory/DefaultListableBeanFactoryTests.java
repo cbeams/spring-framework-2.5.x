@@ -862,15 +862,15 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.destroySingletons();
 		assertTrue("Destroy method invoked", BeanWithDestroyMethod.closed);
 	}
-	
+
 	public void testFindTypeOfSingletonFactoryMethodOnBeanInstance() {
 		findTypeOfPrototypeFactoryMethodOnBeanInstance(true);
 	}
-	
+
 	public void testFindTypeOfPrototypeFactoryMethodOnBeanInstance() {
 		findTypeOfPrototypeFactoryMethodOnBeanInstance(false);
 	}
-	
+
 	/**
 	 * @param singleton whether the bean created from the factory method on
 	 * the bean instance should be a singleton or prototype. This flag is

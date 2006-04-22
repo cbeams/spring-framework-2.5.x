@@ -178,7 +178,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * BeanFactoryAware or ApplicationContext through ApplicationContextAware.
 	 * <p>By default, only the BeanFactoryAware interface is ignored.
 	 * For further types to ignore, invoke this method for each type.
-	 * @see BeanFactoryAware
+	 * @see org.springframework.beans.factory.BeanFactoryAware
 	 * @see org.springframework.context.ApplicationContextAware
 	 */
 	public void ignoreDependencyInterface(Class ifc) {
@@ -684,7 +684,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mergedBeanDefinition the bean definition the bean was created with
 	 * @param bw the BeanWrapper the bean was created with
 	 * @return an array of bean property names
-	 * @see BeanUtils#isSimpleProperty
+	 * @see org.springframework.beans.BeanUtils#isSimpleProperty
 	 */
 	protected String[] unsatisfiedNonSimpleProperties(RootBeanDefinition mergedBeanDefinition, BeanWrapper bw) {
 		Set result = new TreeSet();
@@ -707,7 +707,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mergedBeanDefinition the bean definition the bean was created with
 	 * @param bw the BeanWrapper the bean was created with
 	 * @param pvs the property values to be applied to the bean
-	 * @see #isExcludedFromDependencyCheck(PropertyDescriptor)
+	 * @see #isExcludedFromDependencyCheck(java.beans.PropertyDescriptor)
 	 */
 	protected void checkDependencies(
 			String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw, PropertyValues pvs)
@@ -742,7 +742,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * are defined by an ignored dependency interface.
 	 * @param pd the PropertyDescriptor of the bean property
 	 * @return whether the bean property is excluded
-	 * @see AutowireUtils#isExcludedFromDependencyCheck(PropertyDescriptor)
+	 * @see AutowireUtils#isExcludedFromDependencyCheck(java.beans.PropertyDescriptor)
 	 * @see #ignoreDependencyType(Class)
 	 * @see #ignoreDependencyInterface(Class)
 	 * @see AutowireUtils#isExcludedFromDependencyCheck
