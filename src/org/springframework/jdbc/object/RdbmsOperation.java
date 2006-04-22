@@ -287,9 +287,9 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	/**
 	 * Compile this query.
-	 * Ignore subsequent attempts to compile
+	 * Ignores subsequent attempts to compile.
 	 * @throws InvalidDataAccessApiUsageException if the object hasn't
-	 * been correctly initialized, for example if no DataSource has been provided.
+	 * been correctly initialized, for example if no DataSource has been provided
 	 */
 	public final void compile() throws InvalidDataAccessApiUsageException {
 		if (!isCompiled()) {
@@ -316,7 +316,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	/**
 	 * Subclasses must implement to perform their own compilation.
 	 * Invoked after this class's compilation is complete.
-	 * Subclasses can assume that sql has been supplied and that
+	 * <p>Subclasses can assume that SQL has been supplied and that
 	 * a DataSource has been supplied.
 	 * @throws InvalidDataAccessApiUsageException if the subclass
 	 * hasn't been properly configured.
@@ -334,16 +334,27 @@ public abstract class RdbmsOperation implements InitializingBean {
 	}
 
 	/**
-	 * Validate the parameters passed to an execute method based on declared parameters.
-	 * Subclasses should invoke this method before every executeQuery() or update() method.
-	 * @param parameters parameters supplied. May be <code>null</code>.
-	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
+	 * Check whether this operation has been compiled already;
+	 * lazily compile it if not already compiled.
+	 * <p>Automatically called by <code>validateNamedParameters</code>.
+	 * @see #validateParameters
 	 */
-	protected void validateParameters(Object[] parameters) throws InvalidDataAccessApiUsageException {
-		if (!this.compiled) {
+	protected void checkCompiled() {
+		if (!isCompiled()) {
 			logger.debug("SQL operation not compiled before execution - invoking compile");
 			compile();
 		}
+	}
+
+	/**
+	 * Validate the parameters passed to an execute method based on declared parameters.
+	 * Subclasses should invoke this method before every <code>executeQuery()</code>
+	 * or <code>update()</code> method.
+	 * @param parameters parameters supplied (may be <code>null</code>)
+	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
+	 */
+	protected void validateParameters(Object[] parameters) throws InvalidDataAccessApiUsageException {
+		checkCompiled();
 
 		int declaredInParameters = 0;
 		if (this.declaredParameters != null) {
@@ -352,10 +363,10 @@ public abstract class RdbmsOperation implements InitializingBean {
 				Object param = it.next();
 				if (!(param instanceof SqlOutParameter) && !(param instanceof SqlReturnResultSet)) {
 					if (!supportsLobParameters() &&
-							(((SqlParameter)param).getSqlType() == Types.BLOB ||
-							((SqlParameter)param).getSqlType() == Types.CLOB)) {
+							(((SqlParameter) param).getSqlType() == Types.BLOB ||
+							((SqlParameter) param).getSqlType() == Types.CLOB)) {
 						throw new InvalidDataAccessApiUsageException(
-								"BLOB or CLOB parameters are not allowed for this kind of operation.");
+								"BLOB or CLOB parameters are not allowed for this kind of operation");
 					}
 					declaredInParameters++;
 				}
@@ -372,7 +383,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 						declaredInParameters + " in parameters were declared in class [" +
 						getClass().getName() + "]");
 			}
-			if (parameters.length > this.declaredParameters.size()) {
+			if (!allowsUnusedParameters() && parameters.length > this.declaredParameters.size()) {
 				throw new InvalidDataAccessApiUsageException(
 						parameters.length + " parameters were supplied, but " +
 						this.declaredParameters.size() + " parameters were declared " +
@@ -390,15 +401,13 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	/**
 	 * Validate the named parameters passed to an execute method based on declared parameters.
-	 * Subclasses should invoke this method before every executeQuery() or update() method.
+	 * Subclasses should invoke this method before every <code>executeQuery()</code> or
+	 * <code>update()</code> method.
 	 * @param parameters parameter Map supplied. May be <code>null</code>.
 	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
 	 */
-	protected void validateParameters(Map parameters) throws InvalidDataAccessApiUsageException {
-		if (!this.compiled) {
-			logger.debug("SQL operation not compiled before execution - invoking compile");
-			compile();
-		}
+	protected void validateNamedParameters(Map parameters) throws InvalidDataAccessApiUsageException {
+		checkCompiled();
 
 		if (this.declaredParameters != null) {
 			Iterator it = this.declaredParameters.iterator();
@@ -411,12 +420,12 @@ public abstract class RdbmsOperation implements InitializingBean {
 						throw new InvalidDataAccessApiUsageException(
 								"BLOB or CLOB parameters are not allowed for this kind of operation");
 					}
-					if (((SqlParameter)param).getName() == null) {
+					if (((SqlParameter) param).getName() == null) {
 						throw new InvalidDataAccessApiUsageException(
 								"All parameters must have name specified when using the methods " +
 									"dedicated to named parameter support");
 					}
-					if (!parameters.containsKey(((SqlParameter)param).getName())) {
+					if (!parameters.containsKey(((SqlParameter) param).getName())) {
 						throw new InvalidDataAccessApiUsageException(
 								"The parameter named '" + ((SqlParameter)param).getName() +
 									"' were not among the parameters supplied: " +
@@ -445,6 +454,15 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 */
 	protected boolean supportsLobParameters() {
 		return true;
+	}
+
+	/**
+	 * Return whether this operation accepts additional parameters that are
+	 * given but not actually used. Applies in particular to parameter Maps.
+	 * @see StoredProcedure
+	 */
+	protected boolean allowsUnusedParameters() {
+		return false;
 	}
 
 }
