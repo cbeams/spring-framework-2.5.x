@@ -1058,6 +1058,7 @@
 			<include name="*.txt"/>
 			<include name="*.xml"/>
 			<include name="*.properties"/>
+			<exclude name="junit*.properties"/>
 		</fileset>
 
 		<zip zipfile="${target.release.dir}/${release.zip}">
