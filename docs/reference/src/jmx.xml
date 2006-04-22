@@ -125,7 +125,7 @@ public class JmxTestBean implements IJmxTestBean {
 				<classname>MBeanServer</classname>.
 			</para>
 			<para>
-				However, this is approach is no use for a standalone environment, or when running inside a
+				However, this approach is of no use in a standalone environment, or when running inside a
 				container that does not provide an <classname>MBeanServer</classname>. To address this you
 				can create an <classname>MBeanServer</classname> instance declaratively by adding an instance
 				of the <classname>org.springframework.jmx.support.MBeanServerFactoryBean</classname> class to
