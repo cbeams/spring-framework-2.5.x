@@ -16,27 +16,25 @@
 
 package org.springframework.jmx.export;
 
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jmx.support.ObjectNameManager;
-import org.springframework.util.Assert;
-
-import javax.management.MalformedObjectNameException;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
-import javax.management.ObjectName;
+
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
 
 /**
  * Helper class that aggregates a {@link javax.management.NotificationListener},
  * a {@link javax.management.NotificationFilter}, and an arbitrary handback
  * object.
- * <p>
- * Also provides support for associating the encapsulated
+ *
+ * <p>Also provides support for associating the encapsulated
  * {@link javax.management.NotificationListener} with any number of
  * MBeans from which it wishes to receive
  * {@link javax.management.Notification Notifications} via the
  * {@link #setMappedObjectNames mappedObjectNames} property.
  *
  * @author Rob Harrop
+ * @since 2.0
  */
 public class NotificationListenerBean implements InitializingBean {
 
@@ -46,18 +44,17 @@ public class NotificationListenerBean implements InitializingBean {
 
 	private Object handback;
 
-	private ObjectName[] mappedObjectNames;
+	private String[] mappedObjectNames;
 
 
 	/**
-	 * Creates a new instance of the {@link NotificationListenerBean} class.
+	 * Create a new instance of the {@link NotificationListenerBean} class.
 	 */
 	public NotificationListenerBean() {
 	}
 
 	/**
-	 * Creates a new instance of the {@link NotificationListenerBean} class.
-	 *
+	 * Create a new instance of the {@link NotificationListenerBean} class.
 	 * @param notificationListener the encapsulated listener
 	 */
 	public NotificationListenerBean(NotificationListener notificationListener) {
@@ -66,17 +63,7 @@ public class NotificationListenerBean implements InitializingBean {
 
 
 	/**
-	 * Gets the {@link javax.management.NotificationListener}.
-	 * 
-	 * @return said {@link javax.management.NotificationListener}
-	 */
-	public NotificationListener getNotificationListener() {
-		return notificationListener;
-	}
-
-	/**
-	 * Sets the {@link javax.management.NotificationListener}.
-	 * 
+	 * Set the {@link javax.management.NotificationListener}.
 	 * @param notificationListener said {@link javax.management.NotificationListener}
 	 */
 	public void setNotificationListener(NotificationListener notificationListener) {
@@ -84,23 +71,17 @@ public class NotificationListenerBean implements InitializingBean {
 	}
 
 	/**
-	 * Gets the {@link javax.management.NotificationFilter} associated
-	 * with the encapsulated {@link #getNotificationFilter() NotificationFilter}.
-	 * <p>
-	 * May be <code>null</code>.
-	 * 
-	 * @return said {@link javax.management.NotificationFilter}
+	 * Get the {@link javax.management.NotificationListener}.
+	 * @return said {@link javax.management.NotificationListener}
 	 */
-	public NotificationFilter getNotificationFilter() {
-		return notificationFilter;
+	public NotificationListener getNotificationListener() {
+		return notificationListener;
 	}
 
 	/**
-	 * Sets the {@link javax.management.NotificationFilter} associated
+	 * Set the {@link javax.management.NotificationFilter} associated
 	 * with the encapsulated {@link #getNotificationFilter() NotificationFilter}.
-	 * <p>
-	 * May be <code>null</code>.
-	 * 
+	 * <p>May be <code>null</code>.
 	 * @param notificationFilter said {@link javax.management.NotificationFilter}
 	 */
 	public void setNotificationFilter(NotificationFilter notificationFilter) {
@@ -108,24 +89,20 @@ public class NotificationListenerBean implements InitializingBean {
 	}
 
 	/**
-	 * Gets the (arbitrary) object that will be 'handed back' as-is by an
-	 * {@link javax.management.NotificationBroadcaster} when notifying
-	 * any {@link javax.management.NotificationListener}.
-	 *
-	 * @return the handback object
-	 * @see javax.management.NotificationListener#handleNotification(javax.management.Notification, Object)
+	 * Return the {@link javax.management.NotificationFilter} associated
+	 * with the encapsulated {@link #getNotificationFilter() NotificationFilter}.
+	 * <p>May be <code>null</code>.
+	 * @return said {@link javax.management.NotificationFilter}
 	 */
-	public Object getHandback() {
-		return handback;
+	public NotificationFilter getNotificationFilter() {
+		return notificationFilter;
 	}
 
 	/**
-	 * Sets the (arbitrary) object that will be 'handed back' as-is by an
+	 * Set the (arbitrary) object that will be 'handed back' as-is by an
 	 * {@link javax.management.NotificationBroadcaster} when notifying
 	 * any {@link javax.management.NotificationListener}.
-	 * <p>
-	 * May be <code>null</code>.
-	 *
+	 * <p>May be <code>null</code>.
 	 * @param handback the handback object.
 	 * @see javax.management.NotificationListener#handleNotification(javax.management.Notification, Object)
 	 */
@@ -134,15 +111,14 @@ public class NotificationListenerBean implements InitializingBean {
 	}
 
 	/**
-	 * Gets the list of {@link javax.management.ObjectName ObjectNames} for which
-	 * the encapsulated {@link #getNotificationFilter() NotificationFilter} will
-	 * be registered as a listener for
-	 * {@link javax.management.Notification Notifications}.
-	 *
-	 * @return said list of {@link javax.management.ObjectName ObjectNames}
+	 * Return the (arbitrary) object that will be 'handed back' as-is by an
+	 * {@link javax.management.NotificationBroadcaster} when notifying
+	 * any {@link javax.management.NotificationListener}.
+	 * @return the handback object
+	 * @see javax.management.NotificationListener#handleNotification(javax.management.Notification, Object)
 	 */
-	public ObjectName[] getMappedObjectNames() {
-		return mappedObjectNames;
+	public Object getHandback() {
+		return handback;
 	}
 
 	/**
@@ -150,70 +126,44 @@ public class NotificationListenerBean implements InitializingBean {
 	 * that the encapsulated {@link #getNotificationFilter() NotificationFilter}
 	 * will be registered with to listen for 
 	 * {@link javax.management.Notification Notifications}.
-	 * 
 	 * @param mappedObjectName the {@link javax.management.ObjectName} identifying the
 	 * target MBean that the encapsulated {@link #getNotificationFilter() NotificationFilter}
 	 * is to be registered with
-	 * @throws IllegalArgumentException if the supplied {@link javax.management.ObjectName} is <code>null</code>
 	 */
-	public void setMappedObjectName(ObjectName mappedObjectName) {
-		Assert.notNull(mappedObjectName);
-		setMappedObjectNames(new ObjectName[]{mappedObjectName});
+	public void setMappedObjectName(String mappedObjectName) {
+		setMappedObjectNames(mappedObjectName != null ? new String[] {mappedObjectName} : null);
 	}
 
 	/**
-	 * Sets the {@link javax.management.ObjectName ObjectNames} of the MBeans
+	 * Set the array of {@link javax.management.ObjectName ObjectNames} of the MBeans
 	 * that the encapsulated {@link #getNotificationFilter() NotificationFilter}
-	 * will be registered with to listen for 
+	 * will be registered with to listen for
 	 * {@link javax.management.Notification Notifications}.
-	 * 
-	 * @param mappedObjectNames the {@link javax.management.ObjectName ObjectName} identifying the
-	 * target MBeans that the encapsulated {@link #getNotificationFilter() NotificationFilter}
-	 * is to be registered with
-	 * @throws IllegalArgumentException if the supplied <code>mappedObjectNames</code> is a
-	 * <code>null</code> or zero-length array
+	 * @param mappedObjectNames the array of {@link javax.management.ObjectName ObjectName}
+	 * String representations, identifying the target MBeans that the encapsulated
+	 * {@link #getNotificationFilter() NotificationFilter} is to be registered with
 	 */
-	public void setMappedObjectNames(ObjectName[] mappedObjectNames) {
-		Assert.notEmpty(mappedObjectNames, "Property [mappedObjectNames] cannot be null or empty.");
+	public void setMappedObjectNames(String[] mappedObjectNames) {
 		this.mappedObjectNames = mappedObjectNames;
 	}
 
 	/**
-	 * Sets the {@link java.lang.String} array of
-	 * {@link javax.management.ObjectName ObjectNames} of the MBeans
-	 * that the encapsulated {@link #getNotificationFilter() NotificationFilter}
-	 * will be registered with to listen for 
-	 * {@link javax.management.Notification Notifications}.
-	 * 
-	 * @param mappedObjectNames the {@link java.lang.String} array of
-	 * {@link javax.management.ObjectName ObjectNames} identifying the
-	 * target MBeans that the encapsulated {@link #getNotificationFilter() NotificationFilter}
-	 * is to be registered with
-	 * @throws IllegalArgumentException if the supplied <code>mappedObjectNames</code> is a
-	 * <code>null</code> or zero-length array
+	 * Return the list of {@link javax.management.ObjectName ObjectNames} String
+	 * representations for which the encapsulated
+	 * {@link #getNotificationFilter() NotificationFilter} will
+	 * be registered as a listener for {@link javax.management.Notification Notifications}.
 	 */
-	public void setMappedObjectNames(String[] mappedObjectNames) throws MalformedObjectNameException {
-		Assert.notEmpty(mappedObjectNames, "Property [mappedObjectNames] cannot be null or empty.");
-		ObjectName[] objectNames = new ObjectName[mappedObjectNames.length];
-		for (int i = 0; i < mappedObjectNames.length; i++) {
-			String name = mappedObjectNames[i];
-			Assert.notNull(name, "A mapped [ObjectName] string cannot be null");
-			objectNames[i] = ObjectNameManager.getInstance(name);
-		}
-		this.mappedObjectNames = objectNames;
+	public String[] getMappedObjectNames() {
+		return mappedObjectNames;
 	}
 
+
 	/**
-	 * Checks that this {@link NotificationListenerBean} has been
+	 * Check that this {@link NotificationListenerBean} has been
 	 * correctly configured.
-	 *
-	 * @throws IllegalArgumentException if a {@link javax.management.NotificationFilter}
-	 * has not been supplied (either via the
-	 * {@link NotificationListenerBean(NotificationListener) constructor} or the
-	 * {@link #setNotificationListener(javax.management.NotificationListener) setter property})
 	 */
-	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(this.notificationListener, "Property [notificationListener] is required.");
+	public void afterPropertiesSet() {
+		Assert.notNull(this.notificationListener, "Property 'notificationListener' is required");
 	}
 
 }

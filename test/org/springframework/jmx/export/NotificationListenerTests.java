@@ -1,7 +1,23 @@
+/*
+ * Copyright 2002-2006 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.jmx.export;
 
-import org.springframework.jmx.AbstractMBeanServerTests;
-import org.springframework.jmx.JmxTestBean;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.management.Attribute;
 import javax.management.AttributeChangeNotification;
@@ -9,8 +25,10 @@ import javax.management.Notification;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.springframework.jmx.AbstractMBeanServerTests;
+import org.springframework.jmx.JmxTestBean;
+import org.springframework.jmx.support.ObjectNameManager;
 
 /**
  * @author Rob Harrop
@@ -65,25 +83,22 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		server.setAttribute(objectName, new Attribute(attributeName, "Rob Harrop"));
 
 		assertEquals("Listener not notified", 1, listener.getCount(attributeName));
-
 	}
 
 	public void testRegisterNotificationListenerWithHandback() throws Exception {
-		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
+		String objectName = "spring:name=Test";
 		JmxTestBean bean = new JmxTestBean();
 
 		Map beans = new HashMap();
-		beans.put(objectName.toString(), bean);
+		beans.put(objectName, bean);
 
 		CountingAttributeChangeNotificationListener listener = new CountingAttributeChangeNotificationListener();
-
 		Object handback = new Object();
 
 		NotificationListenerBean listenerBean = new NotificationListenerBean();
 		listenerBean.setNotificationListener(listener);
-		listenerBean.setMappedObjectName(objectName);
+		listenerBean.setMappedObjectName("spring:name=Test");
 		listenerBean.setHandback(handback);
-
 
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
@@ -93,7 +108,8 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		// update the attribute
 		String attributeName = "Name";
-		server.setAttribute(objectName, new Attribute(attributeName, "Rob Harrop"));
+		server.setAttribute(
+				ObjectNameManager.getInstance("spring:name=Test"), new Attribute(attributeName, "Rob Harrop"));
 
 		assertEquals("Listener not notified", 1, listener.getCount(attributeName));
 		assertEquals("Handback object not transmitted correctly", handback, listener.getLastHandback(attributeName));
@@ -124,7 +140,6 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		server.setAttribute(objectName, new Attribute(attributeName, "Rob Harrop"));
 
 		assertEquals("Listener not notified", 1, listener.getCount(attributeName));
-
 	}
 
 	public void testRegisterNotificationListenerWithFilter() throws Exception {
@@ -166,8 +181,17 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		assertEquals("Listener not notified for Name", 1, listener.getCount(nameAttribute));
 		assertEquals("Listener incorrectly notified for Age", 0, listener.getCount(ageAttribute));
-
 	}
+
+	public void testCreationWithNoNotificationListenerSet() {
+		try {
+			new NotificationListenerBean().afterPropertiesSet();
+			fail("Must have thrown an IllegalArgumentException (no NotificationListener supplied)");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
+
 
 	private static class CountingAttributeChangeNotificationListener implements NotificationListener {
 

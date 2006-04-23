@@ -58,6 +58,8 @@ import org.springframework.jmx.export.notification.ModelMBeanNotificationPublish
 import org.springframework.jmx.export.notification.NotificationPublisherAware;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.MBeanRegistrationSupport;
+import org.springframework.jmx.support.ObjectNameManager;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -327,7 +329,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * Sets the {@link NotificationListenerBean NotificationListenerBeans} containing the
+	 * Set the {@link NotificationListenerBean NotificationListenerBeans} containing the
 	 * {@link javax.management.NotificationListener NotificationListeners} that will be registered
 	 * with the {@link MBeanServer}.
 	 * @see #setNotificationListenerMappings(java.util.Map)
@@ -338,22 +340,20 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * Sets the {@link NotificationListener NotificationListeners} to register with the
+	 * Set the {@link NotificationListener NotificationListeners} to register with the
 	 * {@link javax.management.MBeanServer}. The key of each entry in the <code>Map</code> is
-	 * the {@link javax.management.ObjectName} of the MBean the listener should be registered for.
-	 * Specifying an asterisk (<code>*</code>) will cause the listener to be associated with all
-	 * MBeans registered by this class at startup time.
+	 * a String representation of the {@link javax.management.ObjectName} of the MBean the
+	 * listener should be registered for. Specifying an asterisk (<code>*</code>) will cause
+	 * the listener to be associated with all MBeans registered by this class at startup time.
 	 * <p>The value of each entry is the {@link javax.management.NotificationListener} to register.
 	 * For more advanced options such as registering
 	 * {@link javax.management.NotificationFilter NotificationFilters} and
 	 * handback objects see {@link #setNotificationListeners(NotificationListenerBean[])}.
-	 * @throws MalformedObjectNameException if one of the supplied
-	 * {@link ObjectName ObjectName} instances is malformed
-	 * @throws IllegalArgumentException if any of the values in the supplied listeners map
-	 * is not a {@link NotificationListener} or is <code>null</code>.
 	 */
-	public void setNotificationListenerMappings(Map listeners) throws MalformedObjectNameException {
-		List notificationListeners = new ArrayList();
+	public void setNotificationListenerMappings(Map listeners) {
+		Assert.notNull(listeners, "Property 'notificationListenerMappings' must not be null");
+		List notificationListeners = new ArrayList(listeners.size());
+
 		for (Iterator iterator = listeners.entrySet().iterator(); iterator.hasNext();) {
 			Map.Entry entry = (Map.Entry) iterator.next();
 
@@ -361,26 +361,20 @@ public class MBeanExporter extends MBeanRegistrationSupport
 			Object value = entry.getValue();
 			if (!(value instanceof NotificationListener)) {
 				throw new IllegalArgumentException(
-						"Map entry value [" + value + "] is not a valid NotificationListener");
+						"Map entry value [" + value + "] is not a NotificationListener");
 			}
+			NotificationListenerBean bean = new NotificationListenerBean((NotificationListener) value);
 
 			// Get the ObjectName from the map key.
 			Object key = entry.getKey();
-			ObjectName mappedObjectName = null;
-
-			if (!WILDCARD.equals(key)) {
-				mappedObjectName = JmxUtils.convertToObjectName(entry.getKey());
-			}
-
-			NotificationListenerBean bean = new NotificationListenerBean((NotificationListener) value);
-
-			if (mappedObjectName != null) {
+			if (key != null && !WILDCARD.equals(key)) {
 				// This listener is mapped to a specific ObjectName.
-				bean.setMappedObjectName(mappedObjectName);
+				bean.setMappedObjectName(entry.getKey().toString());
 			}
 
 			notificationListeners.add(bean);
 		}
+
 		this.notificationListeners = (NotificationListenerBean[])
 				notificationListeners.toArray(new NotificationListenerBean[notificationListeners.size()]);
 	}
@@ -484,7 +478,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 
 			// Allow the assembler a chance to vote for bean inclusion.
 			if (isAutodetectModeEnabled(AUTODETECT_ASSEMBLER)
-							&& this.assembler instanceof AutodetectCapableMBeanInfoAssembler) {
+					&& this.assembler instanceof AutodetectCapableMBeanInfoAssembler) {
 				autodetectBeans((AutodetectCapableMBeanInfoAssembler) this.assembler);
 			}
 		}
@@ -502,7 +496,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 				registerBeanNameOrInstance(value, beanKey);
 			}
 
-			// all MBeans are now registered successfully - go ahead and register the notification listeners
+			// All MBeans are now registered successfully - go ahead and register the notification listeners.
 			registerNotificationListeners();
 		}
 		catch (MBeanExportException ex) {
@@ -841,10 +835,10 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * Registers the configured {@link NotificationListener NotificationListeners}
+	 * Register the configured {@link NotificationListener NotificationListeners}
 	 * with the {@link MBeanServer}.
 	 */
-	private void registerNotificationListeners() {
+	private void registerNotificationListeners() throws MBeanExportException {
 		for (int i = 0; i < this.notificationListeners.length; i++) {
 			NotificationListenerBean bean = this.notificationListeners[i];
 			NotificationListener listener = bean.getNotificationListener();
@@ -865,17 +859,31 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * Retrieves the {@link javax.management.ObjectName ObjectNames} for which a
+	 * Retrieve the {@link javax.management.ObjectName ObjectNames} for which a
 	 * {@link NotificationListener} should be registered.
 	 */
-	private ObjectName[] getObjectNamesForNotificationListener(NotificationListenerBean bean) {
-		ObjectName[] mappedObjectNames = bean.getMappedObjectNames();
-		if (mappedObjectNames == null) {
-			// Mapped to all MBeans registered by the MBeanExporter.
-			return (ObjectName[]) this.registeredBeans.toArray(new ObjectName[this.registeredBeans.size()]);
+	private ObjectName[] getObjectNamesForNotificationListener(NotificationListenerBean bean)
+			throws MBeanExportException {
+
+		String[] mappedObjectNames = bean.getMappedObjectNames();
+		if (mappedObjectNames != null) {
+			ObjectName[] objectNames = new ObjectName[mappedObjectNames.length];
+			for (int i = 0; i < mappedObjectNames.length; i++) {
+				String mappedName = mappedObjectNames[i];
+				try {
+					objectNames[i] = ObjectNameManager.getInstance(mappedName);
+				}
+				catch (MalformedObjectNameException ex) {
+					throw new MBeanExportException(
+							"Invalid ObjectName [" + mappedName + "] specified for NotificationListener [" +
+							bean.getNotificationListener() + "]", ex);
+				}
+			}
+			return objectNames;
 		}
 		else {
-			return mappedObjectNames;
+			// Mapped to all MBeans registered by the MBeanExporter.
+			return (ObjectName[]) this.registeredBeans.toArray(new ObjectName[this.registeredBeans.size()]);
 		}
 	}
 
