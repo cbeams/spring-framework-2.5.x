@@ -86,7 +86,7 @@ public class RequiredBeanFactoryPostProcessor implements BeanFactoryPostProcesso
 	/**
 	 * Is the supplied property required to have a value (i.e. be dependency injected)?
 	 * <p>This implementation looks for the existence of a
-	 * {@link #setRequiredAnnotationType(Class<? extends java.lang.annotation.Annotation>) "required" annotation}
+	 * {@link #setRequiredAnnotationType "required" annotation}
 	 * on the supplied {@link PropertyDescriptor property}.
 	 * @param propertyDescriptor the target {@link PropertyDescriptor property}
 	 * (will never be <code>null</code>)
