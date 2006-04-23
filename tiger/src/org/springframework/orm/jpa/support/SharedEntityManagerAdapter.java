@@ -27,7 +27,6 @@ import javax.persistence.EntityManagerFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
-import org.springframework.util.Assert;
 
 /**
  * FactoryBean that exposes a shared JPA EntityManager reference for a
@@ -60,29 +59,12 @@ import org.springframework.util.Assert;
  */
 public class SharedEntityManagerAdapter extends AbstractEntityManagerProxyFactoryBean {
 
-	private Class entityManagerInterface = EntityManager.class;
-
-
-	/**
-	 * Specify the EntityManager interface to expose.
-	 * <p>Default is the standard <code>javax.persistence.EntityManager</code>
-	 * interface. This can be overridden to make the proxy expose a
-	 * vendor-extended EntityManager interface.
-	 * @see javax.persistence.EntityManager
-	 */
-	public void setEntityManagerInterface(Class entityManagerInterface) {
-		Assert.notNull(entityManagerInterface, "entityManagerInterface must not be null");
-		Assert.isAssignable(EntityManager.class, entityManagerInterface);
-		this.entityManagerInterface = entityManagerInterface;
-	}
-
-	
 	@Override
 	protected EntityManager createEntityManagerProxy() {
 		return (EntityManager) Proxy.newProxyInstance(
 				getClass().getClassLoader(),
-				new Class[] {this.entityManagerInterface},
-				new SharedEntityManagerInvocationHandler(getTarget()));
+				new Class[] {getEntityManagerInterface()},
+				new SharedEntityManagerInvocationHandler(getEntityManagerFactory()));
 	}
 
 
@@ -106,15 +88,15 @@ public class SharedEntityManagerAdapter extends AbstractEntityManagerProxyFactor
 
 			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.
-				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+				return (proxy == args[0]);
 			}
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of SessionFactory proxy.
-				return new Integer(hashCode());
+				return hashCode();
 			}
 			else if (method.getName().equals("isOpen")) {
 				// Handle isOpen method: always return true.
-				return Boolean.TRUE;
+				return true;
 			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: suppress, not valid.

@@ -21,6 +21,7 @@ import javax.persistence.EntityManagerFactory;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
 
 /**
  * Abstract base class for FactoryBeans that expose a 
@@ -52,6 +53,26 @@ public abstract class AbstractEntityManagerProxyFactoryBean implements FactoryBe
 	private EntityManagerFactory target;
 
 	private EntityManager shared;
+	
+	private Class entityManagerInterface = EntityManager.class;
+
+
+	/**
+	 * Specify the EntityManager interface to expose.
+	 * <p>Default is the standard <code>javax.persistence.EntityManager</code>
+	 * interface. This can be overridden to make the proxy expose a
+	 * vendor-extended EntityManager interface.
+	 * @see javax.persistence.EntityManager
+	 */
+	public void setEntityManagerInterface(Class entityManagerInterface) {
+		Assert.notNull(entityManagerInterface, "entityManagerInterface must not be null");
+		Assert.isAssignable(EntityManager.class, entityManagerInterface);
+		this.entityManagerInterface = entityManagerInterface;
+	}
+	
+	public Class getEntityManagerInterface() {
+		return entityManagerInterface;
+	}
 
 
 	/**
@@ -64,7 +85,7 @@ public abstract class AbstractEntityManagerProxyFactoryBean implements FactoryBe
 		this.target = target;
 	}
 	
-	public EntityManagerFactory getTarget() {
+	public EntityManagerFactory getEntityManagerFactory() {
 		return target;
 	}
 
@@ -75,7 +96,6 @@ public abstract class AbstractEntityManagerProxyFactoryBean implements FactoryBe
 		}
 		this.shared = createEntityManagerProxy();
 	}
-
 
 
 	/**
