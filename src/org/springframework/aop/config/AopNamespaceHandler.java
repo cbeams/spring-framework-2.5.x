@@ -23,14 +23,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import org.apache.xerces.dom.DeferredNode;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
  * <code>NamespaceHandler</code> for the <code>aop</code> namespace.
@@ -105,6 +103,5 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 			beanDef.getPropertyValues().addPropertyValue("includePatterns", includePatterns);
 		}
 	}
-
 
 }
