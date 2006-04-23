@@ -5,7 +5,7 @@
 <beans>
 
 	<bean 
-		class="org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator" />
+		class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" />
 
 	<bean 
 		class="org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue" >

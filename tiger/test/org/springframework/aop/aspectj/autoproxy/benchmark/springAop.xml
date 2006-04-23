@@ -8,7 +8,7 @@
      
     <!--
 	<bean 
-		class="org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator" />
+		class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" />
 	-->
 	
 	<aop:aspectj-autoproxy/>

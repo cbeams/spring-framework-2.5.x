@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.aop.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.aop.aspectj.autoproxy.AspectJInvocationContextExposingAdvisorAutoProxyCreator;
 import org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvisorAutoProxyCreator;
 import org.springframework.beans.MutablePropertyValues;
@@ -24,9 +27,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Rob Harrop
@@ -38,7 +38,7 @@ public abstract class NamespaceHandlerUtils {
 					"org.springframework.aop.config.internalAutoProxyCreator";
 
 	public static final String ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME =
-					"org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator";
+					"org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator";
 
 	private static final List APC_PRIORITY_LIST = new ArrayList();
 

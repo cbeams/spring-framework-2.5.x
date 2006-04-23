@@ -16,14 +16,13 @@
 
 package org.springframework.aop.aspectj.annotation;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.aspectj.lang.reflect.PerClauseKind;
+
 import org.springframework.aop.Advisor;
-import org.springframework.aop.aspectj.annotation.AspectJAdvisorFactory;
-import org.springframework.aop.aspectj.annotation.AspectMetadata;
-import org.springframework.aop.aspectj.annotation.MetadataAwareAspectInstanceFactory;
-import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory;
-import org.springframework.aop.aspectj.annotation.SingletonMetadataAwareAspectInstanceFactory;
-import org.springframework.aop.aspectj.autoproxy.PrototypeAspectInstanceFactory;
 import org.springframework.aop.aspectj.AspectJProxyUtils;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.AopConfigException;
@@ -32,10 +31,6 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Rob Harrop
@@ -52,6 +47,7 @@ public class AspectJProxyFactory extends AdvisedSupport {
 	 * Caches singleton aspect instances.
 	 */
 	private static final Map aspectCache = new HashMap();
+
 
 	/**
 	 * Create a new <code>AspectJProxyFactory</code>.
@@ -76,6 +72,7 @@ public class AspectJProxyFactory extends AdvisedSupport {
 	public AspectJProxyFactory(Class[] interfaces) {
 		setInterfaces(interfaces);
 	}
+
 
 	/**
 	 * Create a new proxy according to the settings in this factory.

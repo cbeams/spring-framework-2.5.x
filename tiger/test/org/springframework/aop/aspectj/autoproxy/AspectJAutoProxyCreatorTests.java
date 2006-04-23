@@ -21,6 +21,7 @@ import junit.framework.TestCase;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.PerTargetAspect;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.TwoAdviceAspect;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
+import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.PropertyValue;
@@ -65,7 +66,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 			addPropertyValue(new PropertyValue("age", new Integer(34)));
 		childAc.registerBeanDefinition("adrian2", bd);
 		// Register the advisor auto proxy creator with subclass
-		childAc.registerBeanDefinition(AspectJAutoProxyCreator.class.getName(), new RootBeanDefinition(AspectJAutoProxyCreator.class));
+		childAc.registerBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class.getName(), new RootBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class));
 		childAc.refresh();
 		
 		ITestBean beanFromChildContextThatShouldBeWeaved = (ITestBean) childAc.getBean("adrian2");
