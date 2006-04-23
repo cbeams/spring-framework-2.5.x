@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 M4 (21.4.2006)
+Changes in version 2.0 M4 (23.4.2006)
 -------------------------------------
 
 General
@@ -44,6 +44,7 @@ Package org.springframework.beans
 * BeanPostProcessor's "postProcessAfterInitialization" gets applied after "postProcessBeforeInstantiation" as well
 * fixed DefaultListableBeanFactory to not preinstantiate bean definition if explicit singleton object already registered
 * added "loadBeanDefinitions(String[] locations)" method to BeanDefinitionReader and AbstractBeanDefinitionReader
+* added Requiered annotation and RequiredBeanFactoryPostProcessor, allowing to enforce required bean properties
 
 Package org.springframework.context
 * refined AbstractMessageSource to resolve arguments eagerly, for message defined in parent and msg arg defined in child
@@ -66,14 +67,20 @@ Package org.springframework.jdbc
 * improved JdbcTemplate's logging of ignored SQLWarnings, including SQL state and error code in the log output
 * refined NativeJdbcExtractorAdapter to retry with DatabaseMetaData Connection if extraction failed (for Hibernate 3.1)
 * added NamedParameterJdbcTemplate which provides named parameters support for query and update functionality
+* added "allowsUnusedParameters()" and "checkCompiled()" methods to RdbmsOperation, for better customizing in subclasses
+* refined StoredProcedure to accept unused entries in given parameter Maps by default
 * added named parameters support to SqlQuery/SqlUpdate hierarchy of classes
 
 Package org.springframework.jms
 * AbstractMessageListenerContainer prefers SessionAwareMessageListener over MessageListener (if both are implemented)
 * added "exceptionListener" property to AbstractMessageListenerContainer, accepting a standard JMS ExceptionListener
 * added "handleListenerException" template method to AbstractMessageListenerContainer, by default logging at error level
+* fixed DefaultMessageListenerContainer to properly use separate invokers per thread, for actually concurrent Sessions
 * fixed ServerSessionMessageListenerContainer(102) to use "createSession(Connection)" method to avoid JMS 1.1 dependency
 * added MessageListenerAdapter(102), delegating to listener methods that operate on content types (String, byte array)
+
+Package org.springframework.jmx
+* reworked NotificationListenerBean to avoid overloaded bean property setters for "mappedObjectNames"
 
 Package org.springframework.mail
 * refined JavaMailSenderImpl to use "Session.getInstance(properties, null)", for compatibility with (old) JavaMail 1.1
