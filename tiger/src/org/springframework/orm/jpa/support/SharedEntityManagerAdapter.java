@@ -26,9 +26,6 @@ import javax.persistence.EntityManagerFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.util.Assert;
 
@@ -61,24 +58,10 @@ import org.springframework.util.Assert;
  * @see org.springframework.orm.jpa.LocalEntityManagerFactoryBean
  * @see org.springframework.orm.jpa.JpaTransactionManager
  */
-public class SharedEntityManagerAdapter implements FactoryBean, InitializingBean {
-
-	private EntityManagerFactory target;
+public class SharedEntityManagerAdapter extends AbstractEntityManagerProxyFactoryBean {
 
 	private Class entityManagerInterface = EntityManager.class;
 
-	private EntityManager shared;
-
-
-	/**
-	 * Set the EntityManagerFactory that this adapter is supposed to
-	 * expose a shared JPA EntityManager for. This should be the raw
-	 * EntityManagerFactory, as accessed by JpaTransactionManager.
-	 * @see org.springframework.orm.jpa.JpaTransactionManager
-	 */
-	public void setEntityManagerFactory(EntityManagerFactory target) {
-		this.target = target;
-	}
 
 	/**
 	 * Specify the EntityManager interface to expose.
@@ -93,28 +76,13 @@ public class SharedEntityManagerAdapter implements FactoryBean, InitializingBean
 		this.entityManagerInterface = entityManagerInterface;
 	}
 
-
-	public void afterPropertiesSet() {
-		if (this.target == null) {
-			throw new IllegalArgumentException("entityManagerFactory is required");
-		}
-		this.shared = (EntityManager) Proxy.newProxyInstance(
+	
+	@Override
+	protected EntityManager createEntityManagerProxy() {
+		return (EntityManager) Proxy.newProxyInstance(
 				getClass().getClassLoader(),
 				new Class[] {this.entityManagerInterface},
-				new SharedEntityManagerInvocationHandler(this.target));
-	}
-
-
-	public Object getObject() {
-		return this.shared;
-	}
-
-	public Class getObjectType() {
-		return EntityManager.class;
-	}
-
-	public boolean isSingleton() {
-		return true;
+				new SharedEntityManagerInvocationHandler(getTarget()));
 	}
 
 
