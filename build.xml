@@ -1047,10 +1047,10 @@
 			<classpath refid="all-libs"/>
 		</java>
 
-    </target>
+	</target>
 
 
-    <!--
+	<!--
 		Run test suite under Clover coverage analysis, and use Clover
 		to generate Javadoc/style HTML results that may be browsed later.
 	-->
@@ -1083,10 +1083,11 @@
 			</condition>
 		</fail>
 
-        <antcall target="tld.to.docbook"/>
-        <antcall target="xsd.to.docbook"/>
+		<antcall target="tld.to.docbook"/>
+		<antcall target="xsd.to.docbook"/>
 
 	</target>
+
 
 	<target name="doc.pdf" depends="doc.prepare" description="Compile reference documentation to pdf">
 
@@ -1128,99 +1129,105 @@
 		<delete file="${dist.ref.dir}/pdf/docbook_fop.tmp"/>
 
 	</target>
-    
-    <!-- Start of TLD => DocBook targets -->
 
-    <target name="tld.to.docbook"
-            depends="original.tld.to.docbook, forms.tld.to.docbook">
-    </target>
-    <target name="forms.tld.to.docbook">
-        <antcall target="hack.DOCTYPE">
-            <param name="doctype.input.file" value="src/org/springframework/web/servlet/tags/form/spring-form.tld"/>
-            <param name="doctype.scrubbed.file" value="${doc.dir}/spring-form.tld"/>
-        </antcall>
-        <antcall target="private.tld.to.docbook">
-            <param name="input.tld" value="spring-form.tld"/>
-            <param name="input.tld.file" value="${doc.dir}/spring-form.tld"/>
-        </antcall>
-    </target>
-    <target name="original.tld.to.docbook">
-        <antcall target="hack.DOCTYPE">
-            <param name="doctype.input.file" value="src/org/springframework/web/servlet/tags/spring.tld"/>
-            <param name="doctype.scrubbed.file" value="${doc.dir}/spring.tld"/>
-        </antcall>
-        <antcall target="private.tld.to.docbook">
-            <param name="input.tld" value="spring.tld"/>
-            <param name="input.tld.file" value="${doc.dir}/spring.tld"/>
-        </antcall>
-    </target>
-    <target name="private.tld.to.docbook" if="input.tld">
-        <property name="out.file" value="${doc.ref.dir}/src/${input.tld}.xml"/>
-        <xslt processor="trax"
-              in="${input.tld.file}"
-              style="${doc.ref.dir}/styles/tld.to.docbook.xsl"
-              out="${out.file}">
-            <param name="title" expression="${input.tld}"/>
-        </xslt>
-        <antcall target="hack.CDATA">
-            <param name="target.file" value="${out.file}"/>
-        </antcall>
-        <delete file="${input.tld.file}"/>
-    </target>
-    <target name="hack.CDATA" if="target.file">
-        <replace file="${target.file}">
-            <replacetoken><![CDATA[&lt;]]></replacetoken>
-            <replacevalue><![CDATA[<]]></replacevalue>
-        </replace>
-        <replace file="${target.file}">
-            <replacetoken><![CDATA[&gt;]]></replacetoken>
-            <replacevalue><![CDATA[>]]></replacevalue>
-        </replace>
-    </target>
-    <target name="hack.DOCTYPE" if="doctype.input.file">
-        <!--
-            removes the TLD DTD decl. from the TLD files as this messes
-            up the transform (feel free to fix this more elegantly)
-        -->
-        <copy file="${doctype.input.file}" tofile="${doctype.scrubbed.file}" overwrite="true"/>
-        <replace file="${doctype.scrubbed.file}" value="">
-            <replacetoken><![CDATA[<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN" "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">]]></replacetoken>
-        </replace>
-    </target>
-    
-    <!-- End of TLD => DocBook targets -->
-    
-    <!-- Start of Schema => DocBook targets -->
 
-    <target name="xsd.to.docbook"
-            depends="beans.xsd.to.docbook">
-    </target>
-    <target name="beans.xsd.to.docbook">
-        <copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans.xsd"
-              tofile="${doc.dir}/spring-beans.xsd"/>
-        <antcall target="private.xsd.to.docbook">
-            <param name="input.xsd" value="spring-beans.xsd"/>
-            <param name="input.xsd.file" value="${doc.dir}/spring-beans.xsd"/>
-        </antcall>
-    </target>
-    <target name="private.xsd.to.docbook" if="input.xsd">
-        <property name="out.file" value="${doc.ref.dir}/src/${input.xsd}.xml"/>
-        <xslt processor="trax"
-              in="${input.xsd.file}"
-              style="${doc.ref.dir}/styles/xsd.to.docbook.xsl"
-              out="${out.file}">
-            <param name="title" expression="${input.xsd}"/>
-        </xslt>
-        <antcall target="hack.CDATA">
-            <param name="target.file" value="${out.file}"/>
-        </antcall>
-    </target>
+	<!-- Start of TLD => DocBook targets -->
+
+	<target name="tld.to.docbook" depends="original.tld.to.docbook,forms.tld.to.docbook"/>
+
+	<target name="forms.tld.to.docbook">
+			<antcall target="hack.DOCTYPE">
+					<param name="doctype.input.file" value="src/org/springframework/web/servlet/tags/form/spring-form.tld"/>
+					<param name="doctype.scrubbed.file" value="${doc.dir}/spring-form.tld"/>
+			</antcall>
+			<antcall target="private.tld.to.docbook">
+					<param name="input.tld" value="spring-form.tld"/>
+					<param name="input.tld.file" value="${doc.dir}/spring-form.tld"/>
+			</antcall>
+	</target>
+
+	<target name="original.tld.to.docbook">
+			<antcall target="hack.DOCTYPE">
+					<param name="doctype.input.file" value="src/org/springframework/web/servlet/tags/spring.tld"/>
+					<param name="doctype.scrubbed.file" value="${doc.dir}/spring.tld"/>
+			</antcall>
+			<antcall target="private.tld.to.docbook">
+					<param name="input.tld" value="spring.tld"/>
+					<param name="input.tld.file" value="${doc.dir}/spring.tld"/>
+			</antcall>
+	</target>
+
+	<target name="private.tld.to.docbook" if="input.tld">
+			<property name="out.file" value="${doc.ref.dir}/src/${input.tld}.xml"/>
+			<xslt processor="trax"
+						in="${input.tld.file}"
+						style="${doc.ref.dir}/styles/tld.to.docbook.xsl"
+						out="${out.file}">
+					<param name="title" expression="${input.tld}"/>
+			</xslt>
+			<antcall target="hack.CDATA">
+					<param name="target.file" value="${out.file}"/>
+			</antcall>
+			<delete file="${input.tld.file}"/>
+	</target>
+
+	<target name="hack.CDATA" if="target.file">
+			<replace file="${target.file}">
+					<replacetoken><![CDATA[&lt;]]></replacetoken>
+					<replacevalue><![CDATA[<]]></replacevalue>
+			</replace>
+			<replace file="${target.file}">
+					<replacetoken><![CDATA[&gt;]]></replacetoken>
+					<replacevalue><![CDATA[>]]></replacevalue>
+			</replace>
+	</target>
+
+	<target name="hack.DOCTYPE" if="doctype.input.file">
+			<!--
+					removes the TLD DTD decl. from the TLD files as this messes
+					up the transform (feel free to fix this more elegantly)
+			-->
+			<copy file="${doctype.input.file}" tofile="${doctype.scrubbed.file}" overwrite="true"/>
+			<replace file="${doctype.scrubbed.file}" value="">
+					<replacetoken><![CDATA[<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN" "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">]]></replacetoken>
+			</replace>
+	</target>
+
+	<!-- End of TLD => DocBook targets -->
+
+
+	<!-- Start of Schema => DocBook targets -->
+
+	<target name="xsd.to.docbook" depends="beans.xsd.to.docbook"/>
+
+	<target name="beans.xsd.to.docbook">
+		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans.xsd"
+					tofile="${doc.dir}/spring-beans.xsd"/>
+		<antcall target="private.xsd.to.docbook">
+			<param name="input.xsd" value="spring-beans.xsd"/>
+			<param name="input.xsd.file" value="${doc.dir}/spring-beans.xsd"/>
+		</antcall>
+	</target>
+
+	<target name="private.xsd.to.docbook" if="input.xsd">
+		<property name="out.file" value="${doc.ref.dir}/src/${input.xsd}.xml"/>
+		<xslt processor="trax"
+					in="${input.xsd.file}"
+					style="${doc.ref.dir}/styles/xsd.to.docbook.xsl"
+					out="${out.file}">
+			<param name="title" expression="${input.xsd}"/>
+		</xslt>
+		<antcall target="hack.CDATA">
+			<param name="target.file" value="${out.file}"/>
+		</antcall>
+	</target>
     
-    <!-- End of Schema => DocBook targets -->
-    
-    <target name="doc.html" depends="doc.prepare" description="Compile reference documentation to chunked html">
+	<!-- End of Schema => DocBook targets -->
+
+
+	<target name="doc.html" depends="doc.prepare" description="Compile reference documentation to chunked html">
         
-        <mkdir dir="${dist.ref.dir}/html/images"/>
+		<mkdir dir="${dist.ref.dir}/html/images"/>
 
 		<copy todir="${basedir}/${dist.ref.dir}/html/images">
 			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
@@ -1241,7 +1248,7 @@
 			<arg value="${basedir}/${doc.ref.dir}/styles/html_chunk.xsl"/>
 		</java>
 
-    </target>
+	</target>
 
 
 	<target name="doc.htmlsingle" description="Compile reference documentation to single html">
