@@ -990,9 +990,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * @param sql the SQL statements to execute
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #executeSchemaStatement
-	 * @param con the JDBC Connection to execute the script on
-	 * @param sql the SQL statements to execute
-	 * @throws SQLException if thrown by JDBC methods
 	 */
 	protected void executeSchemaScript(Connection con, String[] sql) throws SQLException {
 		if (sql != null && sql.length > 0) {
