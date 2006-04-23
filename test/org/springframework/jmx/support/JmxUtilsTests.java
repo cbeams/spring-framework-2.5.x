@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -83,19 +83,6 @@ public class JmxUtilsTests extends TestCase {
 		PropertyDescriptor pd = new BeanWrapperImpl(AttributeTest.class).getPropertyDescriptor("name");
 		String attributeName = JmxUtils.getAttributeName(pd, false);
 		assertEquals("Incorrect casing on attribute name", "name", attributeName);
-	}
-
-	public void testConvertToObjectName() throws MalformedObjectNameException {
-		ObjectName objectName = ObjectNameManager.getInstance("spring:name=Test");
-		assertEquals(objectName, JmxUtils.convertToObjectName(objectName));
-		assertEquals(objectName, JmxUtils.convertToObjectName(objectName.toString()));
-
-		try {
-			JmxUtils.convertToObjectName(new Integer(1));
-			fail("Should not be able to convert Integer to ObjectName");
-		} catch(IllegalArgumentException ex) {
-			//desired
-		}
 	}
 
 	public void testAppendIdentityToObjectName() throws MalformedObjectNameException {

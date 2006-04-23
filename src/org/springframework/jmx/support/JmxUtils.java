@@ -35,7 +35,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.JdkVersion;
 import org.springframework.jmx.MBeanServerNotFoundException;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -240,31 +239,6 @@ public abstract class JmxUtils {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Attempts to covert the supplied <code>Object</code> to an instance
-	 * {@link javax.management.ObjectName}. If the supplied	<code>Object</code> is
-	 * already an instance of {@link javax.management.ObjectName} then it is returned
-	 * as is. If the <code>Object</code> is an instance of <code>String</code> it is
-	 * treated as the <code>String</code> form the {@link javax.management.ObjectName}.
-	 * Any other type results in an {@link IllegalArgumentException}.
-	 * @param value the value to convert to a JMX ObjectName
-	 * @return the resolved JMX ObjectName
-	 * @throws MalformedObjectNameException in case of an invalid object name specification
-	 */
-	public static ObjectName convertToObjectName(Object value) throws MalformedObjectNameException {
-		Assert.notNull(value, "value must not be null");
-		if (value instanceof ObjectName) {
-			return (ObjectName) value;
-		}
-		else if (value instanceof String) {
-			return ObjectNameManager.getInstance((String) value);
-		}
-		else {
-			throw new IllegalArgumentException(
-					"Unable to convert object of type [" + value.getClass() + "] to ObjectName");
-		}
 	}
 
 	/**
