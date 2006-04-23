@@ -16,7 +16,6 @@
 
 package org.springframework.orm.jpa;
 
-import java.util.Properties;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -46,39 +45,13 @@ import javax.persistence.spi.PersistenceProvider;
  * deployed EntityManagerFactory via JNDI (-> JndiObjectFactoryBean).
  *
  * @author Juergen Hoeller
+ * @author Rod Johnson
  * @since 2.0
  * @see JpaTemplate#setEntityManagerFactory
  * @see JpaTransactionManager#setEntityManagerFactory
  * @see org.springframework.jndi.JndiObjectFactoryBean
  */
 public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean {
-
-	private String entityManagerName;
-
-	private Properties jpaProperties;
-
-
-	/**
-	 * Set the name of the EntityManager configuration for the factory.
-	 * <p>Default is none, indicating the default EntityManager configuration.
-	 * The persistence provider will throw an exception if ambiguous
-	 * EntityManager configurations are found.
-	 * @see javax.persistence.Persistence#createEntityManagerFactory(String)
-	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
-	 */
-	public void setEntityManagerName(String entityManagerName) {
-		this.entityManagerName = entityManagerName;
-	}
-
-	/**
-	 * Set JPA properties, to be passed into
-	 * <code>Persistence.createEntityManagerFactory</code> (if any).
-	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
-	 */
-	public void setJpaProperties(Properties jpaProperties) {
-		this.jpaProperties = jpaProperties;
-	}
-
 
 	/**
 	 * Initialize the EntityManagerFactory for the given configuration.
@@ -89,7 +62,7 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 			// Create EntityManagerFactory directly through PersistenceProvider.
 			PersistenceProvider pp =
 					instantiatePersistenceProvider();
-			EntityManagerFactory emf = pp.createEntityManagerFactory(this.entityManagerName, this.jpaProperties);
+			EntityManagerFactory emf = pp.createEntityManagerFactory(this.entityManagerName, getJpaPropertyMap());
 			if (emf == null) {
 				throw new IllegalStateException(
 						"PersistenceProvider [" + this.persistenceProviderClass.getName() +
@@ -99,7 +72,7 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 		}
 		else {
 			// Let JPA perform its PersistenceProvider autodetection.
-			return Persistence.createEntityManagerFactory(this.entityManagerName, this.jpaProperties);
+			return Persistence.createEntityManagerFactory(this.entityManagerName, getJpaPropertyMap());
 		}
 	}
 

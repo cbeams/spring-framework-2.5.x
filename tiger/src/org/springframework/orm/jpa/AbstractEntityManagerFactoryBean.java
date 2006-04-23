@@ -16,6 +16,9 @@
 
 package org.springframework.orm.jpa;
 
+import java.util.Map;
+import java.util.Properties;
+
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceProvider;
@@ -36,6 +39,7 @@ import org.springframework.beans.factory.InitializingBean;
  * EntityManagerFactory instance is just a matter of configuration!
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  * @see JpaTemplate#setEntityManagerFactory
  * @see JpaTransactionManager#setEntityManagerFactory
@@ -49,6 +53,61 @@ public abstract class AbstractEntityManagerFactoryBean implements FactoryBean, I
 
 	protected Class persistenceProviderClass;
 
+	protected String entityManagerName;
+
+	private Map jpaPropertyMap;
+	
+	/**
+	 * Set the name of the EntityManager configuration for the factory.
+	 * <p>Default is none, indicating the default EntityManager configuration.
+	 * The persistence provider will throw an exception if ambiguous
+	 * EntityManager configurations are found.
+	 * @see javax.persistence.Persistence#createEntityManagerFactory(String)
+	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
+	 */
+	public void setEntityManagerName(String entityManagerName) {
+		this.entityManagerName = entityManagerName;
+	}
+	
+	public String getEntityManagerName() {
+		return entityManagerName;
+	}
+
+	/**
+	 * Set JPA properties, to be passed into
+	 * <code>Persistence.createEntityManagerFactory</code> (if any).
+	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
+	 */
+	public void setJpaProperties(Properties jpaProperties) {
+		this.jpaPropertyMap = jpaProperties;
+	}
+	
+	public void setJpaPropertyMap(Map map) {
+		this.jpaPropertyMap = map;
+	}
+	
+	public Map getJpaPropertyMap() {
+		return jpaPropertyMap;
+	}
+	
+
+	/**
+	 * Set the PersistenceProvider implementation class to use for creating
+	 * the EntityManagerFactory. If not specified (which is the default),
+	 * the <code>Persistence</code> class will be used to create the
+	 * EntityManagerFactory, relying on JPA's autodetection mechanism.
+	 * @see javax.persistence.spi.PersistenceProvider
+	 * @see javax.persistence.Persistence
+	 */
+	public void setPersistenceProviderClass(Class persistenceProviderClass) {
+		if (persistenceProviderClass != null &&
+				!PersistenceProvider.class.isAssignableFrom(persistenceProviderClass)) {
+			throw new IllegalArgumentException(
+					"serviceFactoryClass must implement [javax.persistence.spi.PersistenceProvider]");
+		}
+		this.persistenceProviderClass = persistenceProviderClass;
+	}
+	
 	/**
 	 * Subclasses must implement this method to create the EntityManagerFactory that
 	 * will be returned by the getObject() method
@@ -59,6 +118,11 @@ public abstract class AbstractEntityManagerFactoryBean implements FactoryBean, I
 
 	protected EntityManagerFactory getEntityManagerFactory() {
 		return this.entityManagerFactory;
+	}
+	
+	
+	public final void afterPropertiesSet() throws Exception {
+		this.entityManagerFactory = createEntityManagerFactory();
 	}
 
 	/**
@@ -76,6 +140,7 @@ public abstract class AbstractEntityManagerFactoryBean implements FactoryBean, I
 	public final boolean isSingleton() {
 		return true;
 	}
+	
 
 	/**
 	 * Close the EntityManagerFactory on bean factory shutdown.
@@ -85,27 +150,6 @@ public abstract class AbstractEntityManagerFactoryBean implements FactoryBean, I
 		this.entityManagerFactory.close();
 	}
 	
-	public void afterPropertiesSet() throws Exception {
-		this.entityManagerFactory = createEntityManagerFactory();
-	}
-
-	/**
-	/**
-	 * Set the PersistenceProvider implementation class to use for creating
-	 * the EntityManagerFactory. If not specified (which is the default),
-	 * the <code>Persistence</code> class will be used to create the
-	 * EntityManagerFactory, relying on JPA's autodetection mechanism.
-	 * @see javax.persistence.spi.PersistenceProvider
-	 * @see javax.persistence.Persistence
-	 */
-	public void setPersistenceProviderClass(Class persistenceProviderClass) {
-		if (persistenceProviderClass != null &&
-				!PersistenceProvider.class.isAssignableFrom(persistenceProviderClass)) {
-			throw new IllegalArgumentException(
-					"serviceFactoryClass must implement [javax.persistence.spi.PersistenceProvider]");
-		}
-		this.persistenceProviderClass = persistenceProviderClass;
-	}
 
 	/**
 	 * @return a new instance of the appropriate PersistenceProvider based on the
