@@ -18,6 +18,7 @@ Package org.springframework.aop
 * added "trackAllInvocations" flag to JamonPerformanceMonitorInterceptor, for gathering statistics without logging
 * auto-proxying works for objects created by FactoryBeans as well (rather than just on FactoryBean instances themselves)
 * BeanNameAutoProxyCreator always proxies exposed objects, with "&beanName" syntax for proxying FactoryBean instances
+* renamed "aspectj.autoproxy.AspectJAutoProxyCreator" to "aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator"
 
 Package org.springframework.beans
 * BeanUtils throws explicit BeanInstantiationException in case of bean instantiation failure
