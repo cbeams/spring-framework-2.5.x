@@ -16,9 +16,6 @@
 
 package org.springframework.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.beans.Introspector;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -29,6 +26,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Miscellaneous class utility methods. Mainly for internal use within the
@@ -107,6 +107,24 @@ public abstract class ClassUtils {
 			cl = ClassUtils.class.getClassLoader();
 		}
 		return cl;
+	}
+
+	/**
+	 * Return whether the {@link Class} identified by the supplied name is present
+	 * and can be loaded. Will return <code>false</code> if either the class or
+	 * one of its dependencies is not present or cannot be loaded.
+	 */
+	public static boolean isPresent(String className) {
+		try {
+			forName(className);
+			return true;
+		}
+		catch (Throwable ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Class [" + className + "] or one of its dependencies is not present", ex);
+			}
+			return false;
+		}
 	}
 
 	/**
@@ -479,24 +497,6 @@ public abstract class ClassUtils {
 			clazz = clazz.getSuperclass();
 		}
 		return interfaces;
-	}
-
-	/**
-	 * Returns <code>true</code> if the {@link Class} identified by the supplied name
-	 * is present and can be loaded. Will return <code>false</code> if either the class
-	 * or one of its dependencies is not present or cannot be loaded.
-	 */                                                              
-	public static boolean isPresent(String className) {
-		try {
-			forName(className);
-			return true;
-		}
-		catch (Exception ex) {
-			if(logger.isDebugEnabled()) {
-				logger.debug("Class '" + className + "' or one of its dependencies is not present.", ex);
-			}
-			return false;
-		}
 	}
 
 }
