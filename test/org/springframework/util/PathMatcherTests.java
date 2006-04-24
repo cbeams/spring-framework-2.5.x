@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import junit.framework.TestCase;
+import org.springframework.test.AssertThrows;
 
 /**
  * @author Alef Arendsen
@@ -166,6 +167,20 @@ public class PathMatcherTests extends TestCase {
 		assertFalse(pathMatcher.match(".bla*bla.test", ".blaXXXbl.test"));
 		assertFalse(pathMatcher.match(".*bla.test", "XXXblab.test"));
 		assertFalse(pathMatcher.match(".*bla.test", "XXXbl.test"));
+	}
+
+	public void testAntPathMatcherExtractPathWithinPattern() throws Exception {
+		PathMatcher pathMatcher = new AntPathMatcher();
+		assertEquals("1", "cvs/commit", pathMatcher.extractPathWithinPattern("/docs/*", "/docs/cvs/commit"));
+		assertEquals("2", "commit", pathMatcher.extractPathWithinPattern("/docs/cvs/*.html", "/docs/cvs/commit"));
+		assertEquals("3", "cvs/commit", pathMatcher.extractPathWithinPattern("/docs/**", "/docs/cvs/commit"));
+		assertEquals("4", "cvs/commit", pathMatcher.extractPathWithinPattern("/docs/**/*.html", "/docs/cvs/commit.html"));
+
+		// TODO: what would you assume here - should the ? wildcarded part be in the path?
+		assertEquals("1", "cvs/commit", pathMatcher.extractPathWithinPattern("/d?cs/*", "/docs/cvs/commit"));
+		assertEquals("2", "commit", pathMatcher.extractPathWithinPattern("/docs/c?s/*.html", "/docs/cvs/commit"));
+		assertEquals("3", "cvs/commit", pathMatcher.extractPathWithinPattern("/d?cs/**", "/docs/cvs/commit"));
+		assertEquals("4", "cvs/commit", pathMatcher.extractPathWithinPattern("/d?cs/**/*.html", "/docs/cvs/commit.html"));
 	}
 
 }

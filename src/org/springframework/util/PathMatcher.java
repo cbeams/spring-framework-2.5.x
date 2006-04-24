@@ -52,4 +52,5 @@ public interface PathMatcher {
 	 */
 	boolean match(String pattern, String str);
 
+	String extractPathWithinPattern(String pattern, String path);
 }

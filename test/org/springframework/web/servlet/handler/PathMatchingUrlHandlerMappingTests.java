@@ -224,4 +224,11 @@ public class PathMatchingUrlHandlerMappingTests extends TestCase {
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 	}
 
+	public void testMappingExposedInRequest() throws Exception {
+		Object bean = wac.getBean("mainController");
+		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/show.html");
+		HandlerExecutionChain hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+		assertEquals("Mapping not exposed", "show", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
+	}
 }

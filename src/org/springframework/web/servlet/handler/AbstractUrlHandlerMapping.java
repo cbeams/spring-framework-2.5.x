@@ -133,7 +133,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking up handler for [" + lookupPath + "]");
 		}
-		return lookupHandler(lookupPath);
+		return lookupHandler(lookupPath, request);
 	}
 
 	/**
@@ -147,7 +147,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @return the associated handler instance, or <code>null</code> if not found
 	 * @see org.springframework.util.AntPathMatcher
 	 */
-	protected Object lookupHandler(String urlPath) {
+	protected Object lookupHandler(String urlPath, HttpServletRequest request) {
 		// direct match?
 		Object handler = this.handlerMap.get(urlPath);
 		if (handler == null) {
@@ -156,11 +156,18 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			for (Iterator it = this.handlerMap.keySet().iterator(); it.hasNext();) {
 				String registeredPath = (String) it.next();
 				if (this.pathMatcher.match(registeredPath, urlPath) &&
-						(bestPathMatch == null || bestPathMatch.length() <= registeredPath.length())) {
+								(bestPathMatch == null || bestPathMatch.length() <= registeredPath.length())) {
 					handler = this.handlerMap.get(registeredPath);
 					bestPathMatch = registeredPath;
 				}
 			}
+
+			if (handler != null) {
+				exposePathWithinMapping(this.pathMatcher.extractPathWithinPattern(bestPathMatch, urlPath), request);
+			}
+		}
+		else {
+			exposePathWithinMapping(urlPath, request);
 		}
 		return handler;
 	}
@@ -198,4 +205,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		}
 	}
 
+	protected void exposePathWithinMapping(String pathWithinMapping, HttpServletRequest request) {
+		request.setAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
+	}
 }

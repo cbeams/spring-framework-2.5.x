@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet;
 
+import org.springframework.core.Conventions;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -51,7 +53,13 @@ import javax.servlet.http.HttpServletRequest;
  * @see org.springframework.web.servlet.handler.SimpleUrlHandlerMapping
  */
 public interface HandlerMapping {
-	
+
+	/**
+	 * Name of the {@link HttpServletRequest} attribute that contains the path within the handler mapping.
+	 */
+	public static final String PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE =
+					Conventions.getQualifiedAttributeName(HandlerMapping.class, "pathWithinHandlerMapping");
+
 	/**
 	 * Return a handler and any interceptors for this request. The choice may be made
 	 * on request URL, session state, or any factor the implementing class chooses.
