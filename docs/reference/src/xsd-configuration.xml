@@ -443,7 +443,15 @@
         and the oversight <emphasis>may</emphasis> well be addressed in the next release.</para>
         <section id="xsd-config-setup-eclipse">
             <title>Setting up Eclipse</title>
-            <para>[TODO :  document setting up <ulink url="http://www.eclipse.org/">Eclipse</ulink> (with screenshots)]</para>
+            <para>The following steps illustrate setting up
+            <ulink url="http://www.eclipse.org/">Eclipse</ulink> to be XSD-aware. 
+            (The assumption in the following steps is that you already have an Eclipse
+            project open (either a brand new project or an already existing one).</para>
+            <note>
+                <para>The following steps were created using Eclipse <emphasis role="bold">3.1</emphasis>.
+                The setup will probably be the exact same(or very similar) on an earlier or later
+                version of Eclipse.</para>
+            </note>
         </section>
         <section id="xsd-config-setup-idea">
             <title>Setting up IntelliJ IDEA</title>
@@ -554,7 +562,7 @@
                 <title>Step Six</title>
                 <para>Exiting out of the nested dialogs via the <literal>'OK'</literal> button
                 will then bring back the main editing window, and as can be seen in the
-                following screenshot, the contextual error markers have disppeared; typing
+                following screenshot, the contextual error markers have disappeared; typing
                 the <literal>'&lt;'</literal> character into the editing window now also
                 brings up a handy dropdown box that contains all of the imported tags from
                 the <literal>util</literal> namespace.</para>
