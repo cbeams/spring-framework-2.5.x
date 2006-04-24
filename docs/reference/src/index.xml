@@ -88,12 +88,12 @@
 				<surname>Tung</surname>
 			</author>
 			<author>
-				<firstname>Rick</firstname>
-				<surname>Evans</surname>
-			</author>
-			<author>
 				<firstname>Ben</firstname>
 				<surname>Hale</surname>
+			</author>
+			<author>
+				<firstname>Rick</firstname>
+				<surname>Evans</surname>
 			</author>
 		</authorgroup>
 		<legalnotice>
@@ -136,6 +136,20 @@
 				mature AOP implementation in the Java enterprise space)
 				is also provided.
 			</para>
+			<para>
+			    Finally, the adoption of the test-driven-development (TDD)
+			    approach to software development is certainly advocated by
+			    the Spring team, and so coverage of Spring's sipport for
+			    integration testing is covered (alongside best practices for
+			    unit testing). The Spring team have certainly found that the
+			    correct use of IoC certainly does make both unit and
+			    integration testing easier (in that the presence of setter
+			    methods and appropriate constructors on classes makes them
+			    easier to wire together on a test without having to set up
+			    service locator registries and suchlike)... the chapter
+			    dedicated solely to testing will hopefully convince you of this
+			    as well.
+			</para>
 			<itemizedlist>
 				<listitem>
 					<xref linkend="beans" />
@@ -152,6 +166,9 @@
 				<listitem>
 					<xref linkend="aspectj" />
 				</listitem>
+				<listitem>
+					<xref linkend="testing" />
+				</listitem>
 			</itemizedlist>
 		</partintro>
 		&beans;
@@ -159,6 +176,7 @@
 		&validation;
 		&aop;
 		&aspectj;
+		&testing;
 	</part>
 	<part>
 		<title>Middle Tier Data Access</title>
@@ -274,9 +292,6 @@
 					<xref linkend="dynamic-language" />
 				</listitem>
 				<listitem>
-					<xref linkend="testing" />
-				</listitem>
-				<listitem>
 					<xref linkend="metadata" />
 				</listitem>
 			</itemizedlist>
@@ -289,7 +304,6 @@
 		&mail;
 		&scheduling;
 		&dynamic-languages;
-		&testing;
 		&metadata;
 	</part>
 	<!-- back matter -->
