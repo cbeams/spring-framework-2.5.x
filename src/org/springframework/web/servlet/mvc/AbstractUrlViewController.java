@@ -38,7 +38,6 @@ public abstract class AbstractUrlViewController extends AbstractController {
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
-
 	/**
 	 * Set if URL lookup should always use full path within current servlet
 	 * context. Else, the path within the current servlet mapping is used

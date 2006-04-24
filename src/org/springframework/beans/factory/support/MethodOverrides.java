@@ -100,4 +100,18 @@ public class MethodOverrides {
 		return null;
 	}
 
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		MethodOverrides that = (MethodOverrides) o;
+
+		if (!this.overrides.equals(that.overrides)) return false;
+
+		return true;
+	}
+
+	public int hashCode() {
+		return this.overrides.hashCode();
+	}
 }

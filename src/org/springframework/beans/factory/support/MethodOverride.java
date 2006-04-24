@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.util.ObjectUtils;
+
 import java.lang.reflect.Method;
 
 /**
@@ -90,5 +92,26 @@ public abstract class MethodOverride {
 	 * @return whether this override matches the given method
 	 */
 	public abstract boolean matches(Method method);
+
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		MethodOverride that = (MethodOverride) o;
+
+		if (overloaded != that.overloaded) return false;
+		if (!ObjectUtils.nullSafeEquals(this.methodName, that.methodName)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.source, that.source)) return false;
+
+		return true;
+	}
+
+	public int hashCode() {
+		int result;
+		result = ObjectUtils.nullSafeHashCode(this.methodName);
+		result = ObjectUtils.nullSafeHashCode(this.source);
+		result = 29 * result + (overloaded ? 1 : 0);
+		return result;
+	}
 
 }

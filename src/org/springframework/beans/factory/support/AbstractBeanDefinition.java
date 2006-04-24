@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.core.AttributeAccessorSupport;
 
 /**
@@ -685,6 +687,65 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 		}
 	}
 
+	public boolean equals(Object o) {
+		if (!super.equals(o)) {
+			return false;
+		}
+
+		AbstractBeanDefinition that = (AbstractBeanDefinition) o;
+
+		if (abstractFlag != that.abstractFlag) return false;
+		if (autowireCandidate != that.autowireCandidate) return false;
+		if (autowireMode != that.autowireMode) return false;
+		if (dependencyCheck != that.dependencyCheck) return false;
+		if (enforceDestroyMethod != that.enforceDestroyMethod) return false;
+		if (enforceInitMethod != that.enforceInitMethod) return false;
+		if (lazyInit != that.lazyInit) return false;
+		if (role != that.role) return false;
+		if (singleton != that.singleton) return false;
+		if (!ObjectUtils.nullSafeEquals(this.beanClass, that.beanClass)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.constructorArgumentValues, that.constructorArgumentValues)) return false;
+		if (!Arrays.equals(dependsOn, that.dependsOn)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.destroyMethodName, that.destroyMethodName)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.factoryBeanName, that.factoryBeanName)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.factoryMethodName, that.factoryMethodName)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.initMethodName, that.initMethodName)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.methodOverrides, that.methodOverrides)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.propertyValues, that.propertyValues)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.resourceDescription, that.resourceDescription)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.source, that.source)) return false;
+
+		return true;
+	}
+
+	public int hashCode() {
+		int result;
+		result = ObjectUtils.nullSafeHashCode(this.beanClass);
+		result = 29 * result + (abstractFlag ? 1 : 0);
+		result = 29 * result + (singleton ? 1 : 0);
+		result = 29 * result + (lazyInit ? 1 : 0);
+		result = 29 * result + (autowireCandidate ? 1 : 0);
+		result = 29 * result + autowireMode;
+		result = 29 * result + dependencyCheck;
+		result = 29 * result + ObjectUtils.nullSafeHashCode(this.constructorArgumentValues);
+		result = 29 * result + ObjectUtils.nullSafeHashCode(this.propertyValues);
+		result = 29 * result + ObjectUtils.nullSafeHashCode(this.methodOverrides);
+		result = 29 * result + ObjectUtils.nullSafeHashCode(this.factoryBeanName);
+		result = 29 * result + ObjectUtils.nullSafeHashCode(this.factoryMethodName);
+		result = 29 * result + ObjectUtils.nullSafeHashCode(this.initMethodName);
+		result = 29 * result + ObjectUtils.nullSafeHashCode(this.destroyMethodName);
+		result = 29 * result + ObjectUtils.nullSafeHashCode(this.resourceDescription);
+		result = 29 * result + ObjectUtils.nullSafeHashCode(this.source);
+		result = 29 * result + (enforceInitMethod ? 1 : 0);
+		result = 29 * result + (enforceDestroyMethod ? 1 : 0);
+		result = 29 * result + role;
+		if (this.dependsOn != null) {
+			for (int i = 0; i < dependsOn.length; i++) {
+				result = 29 * result + dependsOn[i].hashCode();
+			}
+		}
+		return result;
+	}
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer("class [");

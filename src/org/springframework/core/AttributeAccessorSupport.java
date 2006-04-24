@@ -40,7 +40,7 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 	private final Map attributes = new HashMap();
 
 
-    public void setAttribute(String name, Object value) {
+	public void setAttribute(String name, Object value) {
 		Assert.notNull(name, "'name' cannot be null.");
 		if (value != null) {
 			this.attributes.put(name, value);
@@ -70,4 +70,18 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 		return (String[]) attributeNames.toArray(new String[attributeNames.size()]);
 	}
 
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		final AttributeAccessorSupport that = (AttributeAccessorSupport) o;
+
+		if (!this.attributes.equals(that.attributes)) return false;
+
+		return true;
+	}
+
+	public int hashCode() {
+		return this.attributes.hashCode();
+	}
 }

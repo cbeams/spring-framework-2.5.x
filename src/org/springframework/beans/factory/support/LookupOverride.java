@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.util.ObjectUtils;
+
 import java.lang.reflect.Method;
 
 /**
@@ -64,4 +66,14 @@ public class LookupOverride extends MethodOverride {
 		return "LookupOverride for method '" + getMethodName() + "'; will return bean '" + beanName + "'";
 	}
 
+	public boolean equals(Object o) {
+		if(!super.equals(o)) {
+			return false;
+		}
+		return ObjectUtils.nullSafeEquals(this.beanName, ((LookupOverride)o).beanName);
+	}
+
+	public int hashCode() {
+		return 29 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.beanName);
+	}
 }

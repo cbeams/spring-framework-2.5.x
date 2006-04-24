@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Bean definition for beans who inherit settings from their parent.
@@ -138,4 +139,14 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 		return sb.toString();
 	}
 
+	public boolean equals(Object o) {
+		if (!super.equals(o)) {
+			return false;
+		}
+		return ObjectUtils.nullSafeEquals(this.parentName, ((ChildBeanDefinition) o).parentName);
+	}
+
+	public int hashCode() {
+		return 29 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.parentName);
+	}
 }

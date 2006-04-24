@@ -269,4 +269,18 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		return sb.toString();
 	}
 
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		MutablePropertyValues that = (MutablePropertyValues) o;
+
+		if (!this.propertyValueList.equals(that.propertyValueList)) return false;
+
+		return true;
+	}
+
+	public int hashCode() {
+		return this.propertyValueList.hashCode();
+	}
 }

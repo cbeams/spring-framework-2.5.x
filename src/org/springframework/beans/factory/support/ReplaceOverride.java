@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.util.ObjectUtils;
+
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
@@ -93,6 +95,24 @@ public class ReplaceOverride extends MethodOverride {
 		return true;			
 	}
 
+	public boolean equals(Object o) {
+		if (!super.equals(o)) {
+			return false;
+		}
+
+		ReplaceOverride that = (ReplaceOverride) o;
+		if (!ObjectUtils.nullSafeEquals(this.methodReplacerBeanName, that.methodReplacerBeanName)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.typeIdentifiers, that.typeIdentifiers)) return false;
+
+		return true;
+	}
+
+	public int hashCode() {
+		int result = super.hashCode();
+		result = 29 * result + ObjectUtils.nullSafeHashCode(this.methodReplacerBeanName);
+		result = 29 * result + ObjectUtils.nullSafeHashCode(this.typeIdentifiers);
+		return result;
+	}
 
 	public String toString() {
 		return "Replace override for method '" + getMethodName() + "; will call bean '" +

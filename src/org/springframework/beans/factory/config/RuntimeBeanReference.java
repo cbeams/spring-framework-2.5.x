@@ -78,4 +78,22 @@ public class RuntimeBeanReference {
 	   return '<' + getBeanName() + '>';
 	}
 
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		RuntimeBeanReference that = (RuntimeBeanReference) o;
+
+		if (this.toParent != that.toParent) return false;
+		if (!this.beanName.equals(that.beanName)) return false;
+
+		return true;
+	}
+
+	public int hashCode() {
+		int result;
+		result = this.beanName.hashCode();
+		result = 29 * result + (this.toParent ? 1 : 0);
+		return result;
+	}
 }

@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Holder for constructor argument values, as part of a bean definition.
@@ -238,6 +239,24 @@ public class ConstructorArgumentValues {
 		this.genericArgumentValues.clear();
 	}
 
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		ConstructorArgumentValues that = (ConstructorArgumentValues) o;
+
+		if (!this.genericArgumentValues.equals(that.genericArgumentValues)) return false;
+		if (!this.indexedArgumentValues.equals(that.indexedArgumentValues)) return false;
+
+		return true;
+	}
+
+	public int hashCode() {
+		int result;
+		result = this.indexedArgumentValues.hashCode();
+		result = 29 * result + this.genericArgumentValues.hashCode();
+		return result;
+	}
 
 	/**
 	 * Holder for a constructor argument value, with an optional type
@@ -290,6 +309,25 @@ public class ConstructorArgumentValues {
 		 */
 		public String getType() {
 			return type;
+		}
+
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			ValueHolder that = (ValueHolder) o;
+
+			if (!ObjectUtils.nullSafeEquals(this.type, that.type)) return false;
+			if (!ObjectUtils.nullSafeEquals(this.value, that.value)) return false;
+
+			return true;
+		}
+
+		public int hashCode() {
+			int result;
+			result = ObjectUtils.nullSafeHashCode(this.value);
+			result = 29 * result + ObjectUtils.nullSafeHashCode(this.type);
+			return result;
 		}
 	}
 
