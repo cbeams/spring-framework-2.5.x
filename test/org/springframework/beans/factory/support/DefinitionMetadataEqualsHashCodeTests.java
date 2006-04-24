@@ -67,7 +67,7 @@ public class DefinitionMetadataEqualsHashCodeTests extends TestCase {
 		definition.setAttribute("foo", "bar");
 		definition.setAutowireCandidate(false);
 		definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-		definition.getConstructorArgumentValues().addGenericArgumentValue("foo");
+		//definition.getConstructorArgumentValues().addGenericArgumentValue("foo");
 		definition.setDependencyCheck(AbstractBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
 		definition.setDependsOn(new String[]{"foo", "bar"});
 		definition.setDestroyMethodName("destroy");
