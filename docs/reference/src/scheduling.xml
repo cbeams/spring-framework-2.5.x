@@ -3,7 +3,7 @@
                       "../lib/docbook-dtd/docbookx.dtd"> -->
 
 <chapter id="scheduling">
-	<title>Scheduling and Thread Pooling using Spring</title>
+    <title>Scheduling and Thread Pooling using Spring</title>
 	<section>
 		<title>Introduction</title>
 		<para>
@@ -14,7 +14,7 @@
   			to <classname>Timer</classname> or <classname>Trigger</classname> instances, respectively.
   			Furthermore, a convenience class for both the Quartz Scheduler and the <classname>Timer</classname> is
   			available that allows you to invoke a method of an existing target object
-			(analogous to normal <classname>MethodInvokingFactoryBean</classname> operation).
+			(analogous to the normal <classname>MethodInvokingFactoryBean</classname> operation).
 			Spring also features classes for thread pooling that abstract
 			away differences between Java 1.3, 1.4, 5 and JEE environments.
   		</para>
@@ -48,7 +48,7 @@
 </bean>]]></programlisting>
 			<para>
 				The job detail bean has all information it needs to run the job (<classname>ExampleJob</classname>).
-				The timeout is specified as the job data map. The job data map is
+				The timeout is specified in the job data map. The job data map is
 				available through the <classname>JobExecutionContext</classname>
 				(passed to you at execution time), but the <classname>JobDetailBean</classname>
 				also maps the properties from the job data map to properties of the actual job.
@@ -79,8 +79,8 @@ public class ExampleJob extends QuartzJobBean {
 		</para>
 			<para>
 				<emphasis>Note: Using the <literal>name</literal> and <literal>group</literal> properties,
-				you can modify the name and the group of the job, respectively. By default the name of
-				the job equals the bean name of the job detail bean (in the example above, this is
+				you can modify the name and the group of the job, respectively. By default, the name of
+				the job matches the bean name of the job detail bean (in the example above, this is
 				<literal>exampleJob</literal>).</emphasis>
 			</para>
 		</section>
@@ -95,8 +95,8 @@ public class ExampleJob extends QuartzJobBean {
   <property name="targetMethod" value="doIt" />
 </bean>]]></programlisting>
 			<para>
-				The above example will result in the <literal>doIt</literal> being called on the
-				<literal>exampleBusinessObject</literal> (see below):
+				The above example will result in the <literal>doIt</literal> method being called on the
+				<literal>exampleBusinessObject</literal> method (see below):
 			</para>
 			<programlisting><![CDATA[public class BusinessObject {
   
@@ -110,7 +110,7 @@ public class ExampleJob extends QuartzJobBean {
 			<programlisting><![CDATA[
 <bean id="exampleBusinessObject" class="examples.ExampleBusinessObject"/>]]></programlisting>
 			<para>	
-				Using the <classname>MethodInvokingJobDetailFactoryBean</classname> you don't need to
+				Using the <classname>MethodInvokingJobDetailFactoryBean</classname>, you don't need to
 				create one-line jobs that just invoke a method, and you only need to create the actual
 				business object and wire up the detail object.
 			</para>
@@ -139,7 +139,7 @@ public class ExampleJob extends QuartzJobBean {
 		<section>
 			<title>Wiring up jobs using triggers and the <classname>SchedulerFactoryBean</classname></title>
 			<para>
-				We've created job details, jobs and we've reviewed the convenience bean
+				We've created job details and jobs. We've also reviewed the convenience bean
 				that allows to you invoke a method on a specific object. Of course, we still need
 				to schedule the jobs themselves. This is done using triggers and a 
 				<classname>SchedulerFactoryBean</classname>. Several triggers are available
@@ -148,7 +148,7 @@ public class ExampleJob extends QuartzJobBean {
 			</para>
 			<para>
 				Triggers need to be scheduled. Spring offers a <classname>SchedulerFactoryBean</classname>
-				exposing properties to set the triggers. <classname>SchedulerFactoryBean</classname>
+				that exposes triggers to be set as properties. <classname>SchedulerFactoryBean</classname>
 				schedules the actual jobs with those triggers.
 			</para>
 			<para>
@@ -193,12 +193,12 @@ public class ExampleJob extends QuartzJobBean {
 	<section>
 		<title>Using JDK Timer support</title>
 		<para>
-  			The other way to schedule jobs in Spring is using JDK Timer objects.
+  			The other way to schedule jobs in Spring is to use JDK Timer objects.
   			More information about the <classname>Timer</classname> class itself can be found at
   			<ulink url="http://java.sun.com/docs/books/tutorial/essential/threads/timer.html" />.
   			The concepts discussed above also apply to the <classname>Timer</classname> support.
-  			You can create custom timers or use the timer that invokes methods. Wiring timers has
-  			to be done using the <classname>TimerFactoryBean</classname>.
+  			You can create custom timers or use the timer that invokes methods. Wiring timers is
+  			done by using the <classname>TimerFactoryBean</classname>.
   		</para>
 		<section>
 			<title>Creating custom timers</title>
@@ -240,7 +240,7 @@ public class ExampleJob extends QuartzJobBean {
 </bean>]]></programlisting>
 			<para>
 				<emphasis>
-					Letting the task only run once can be done by changing the
+					Note that letting the task only run once can be done by changing the
 					<literal>period</literal> property to 0 (or a negative value).
 				</emphasis>
 			</para>
@@ -256,7 +256,7 @@ public class ExampleJob extends QuartzJobBean {
     <property name="targetMethod" value="doIt" />
 </bean>]]></programlisting>
 			<para>
-				The above example will result in the <literal>doIt</literal> being called on the
+				The above example will result in the <literal>doIt</literal> method being called on the
 				<literal>exampleBusinessObject</literal> (see below):
 			</para>
 			<programlisting><![CDATA[public class BusinessObject {
@@ -269,7 +269,7 @@ public class ExampleJob extends QuartzJobBean {
 }]]></programlisting>
 			<para>
 				Changing the reference of the above example (in which the
-				<classname>ScheduledTimerTask</classname> is mentioned) to the
+				<classname>ScheduledTimerTask</classname> is mentioned) to
 				<literal>doIt</literal> will result in this task being executed.
 			</para>
 		</section>
@@ -302,27 +302,27 @@ public class ExampleJob extends QuartzJobBean {
 			Spring 2.0 introduces a new abstraction for dealing with
 			Executors. Executors are the Java 5 name for the concept of
 			thread pools. The odd naming is due to the fact that there
-			is no guarentee that the underlying implementation of is
-			actually a pool. In fact in many cases the executor is
-			single threaded. Spring's abstraction helps bring thread
-			pooling to Java 1.3 and 1.4 environments as well as hiding
-			implementations details between 1.3, 1.4, 5, and JEE
+			is no guarantee that the underlying implementation is
+			actually a pool. In fact, in many cases, the executor is
+			single-threaded. Spring's abstraction helps bring thread
+			pooling to Java 1.3 and 1.4 environments as well as hide
+			implementation details between 1.3, 1.4, 5, and Java EE
 			environments.
 		</para>
 
 		<section>
 			<title>
-				The <classname>TaskExecutor</classname> 	Interface
+				The <classname>TaskExecutor</classname> Interface
 			</title>
 
 			<para>
 				Spring's <classname>TaskExecutor</classname> interface is
 				identical to the <classname>java.util.concurrent.Executor</classname>
-				interface. In fact it's primary reason for existence is
+				interface. In fact, its primary reason for existence is
 				to abstract away the need for Java 5 when using thread
 				pools. The interface has a single method
 				<classname>execute(Runnable task)</classname>
-				which accepts a task for execution based on the
+				that accepts a task for execution based on the
 				semantics and configuration of the thread pool.
 			</para>
 		</section>
@@ -333,14 +333,14 @@ public class ExampleJob extends QuartzJobBean {
 			</title>
 
 			<para>
-				The <classname>TaskExecutor</classname> 	was originally
+				The <classname>TaskExecutor</classname> was originally
 				created to give other Spring components an abstraction
 				for thread pooling where needed. Components such as the
 				<classname>ApplicationEventMulticaster</classname>,
 				JMS's <classname>AbstractMessageListenerContainer</classname>,
-				and Quartz integration use the <classname>TaskExecutor</classname>
+				and Quartz integration all use the <classname>TaskExecutor</classname>
 				abstraction to pool threads. However, if your beans need
-				thread pooling behavior, it is possible to reuse this
+				thread pooling behavior, it is possible to use this
 				abstraction for your own needs.
 			</para>
 		</section>
@@ -352,7 +352,7 @@ public class ExampleJob extends QuartzJobBean {
 
 			<para>
 				There are a number of pre-built implementations of
-				<classname>TaskExecutor</classname> 	included with the
+				<classname>TaskExecutor</classname> included with the
 				Spring distribution. In all likelihood, you shouldn't ever
 				need to implement your own.
 			</para>
@@ -370,7 +370,7 @@ public class ExampleJob extends QuartzJobBean {
 						concurrency limit which will block any
 						invocations that are over the limit until a slot
 						has been freed up. If you're looking for true
-						pooling, keep looking further down the page.
+						pooling, keep scrolling further down the page.
 					</para>
 				</listitem>
 				
@@ -380,8 +380,8 @@ public class ExampleJob extends QuartzJobBean {
 					</para>
 
 					<para>
-						This implementation doesn't even execution
-						invocations asynchronously. Instead each
+						This implementation doesn't execute
+						invocations asynchronously. Instead, each
 						invocation takes place in the calling thread. It
 						is primarily used in situations where
 						mutlithreading isn't necessary such as simple
@@ -401,12 +401,12 @@ public class ExampleJob extends QuartzJobBean {
 						<classname>ThreadPoolTaskExecutor</classname>,
 						that exposes the <classname>Executor</classname>
 						configuration parameters as bean properties. It
-						is rare to use the <classname>ConcurrentTaskExecutor</classname>
+						is rare to need to use the <classname>ConcurrentTaskExecutor</classname>
 						but if the
 						<link linkend="threadPoolTaskExecutor"><classname>ThreadPoolTaskExecutor</classname></link>
 						isn't robust enough for your needs, the
 						<classname>ConcurrentTaskExecutor</classname>
-						is there.
+						is an alternative.
 					</para>
 				</listitem>
 				
@@ -424,7 +424,7 @@ public class ExampleJob extends QuartzJobBean {
 						Quartz and non-Quartz components.
 					</para>
 				</listitem>
-				
+
 				<listitem id="threadPoolTaskExecutor">
 					<para>
 						<classname>ThreadPoolTaskExecutor</classname>
@@ -433,7 +433,7 @@ public class ExampleJob extends QuartzJobBean {
 					<sidebar>
 						<para>
 							It is not possible to use any backport or
-							alternate version of the
+							alternate versions of the
 							<classname>java.util.concurrent</classname>
 							package with this implementation. Both Doug
 							Lea's and Dawid Kurzyniec's implementations
@@ -444,18 +444,20 @@ public class ExampleJob extends QuartzJobBean {
 
 					<para>
 						This implementation can only be used in a Java 5
-						environment but is the most typically used
-						there. It exposes bean properties for
+						environment but is also the most commonly used
+						one in that environment. It exposes bean properties for
 						configuring a 
 						<classname>java.util.concurrent.ThreadPoolExecutor</classname>
 						and wraps it in a <classname>TaskExecutor</classname>.
 						If you need something advanced such as a
 						<classname>ScheduledThreadPoolExecutor</classname>,
 						it is recommended that you use a
-						<link linkend="concurrentTaskExecutor"><classname>ConcurrentTaskExecutor</classname>	</link>
+						<link linkend="concurrentTaskExecutor"><classname>ConcurrentTaskExecutor</classname></link>
 						instead.
-					</para>
-				</listitem>
+                    </para>
+                    <para>&nbsp;</para>
+                    <para>&nbsp;</para>
+                </listitem>
 				
 				<listitem>
 					<para>
@@ -465,14 +467,14 @@ public class ExampleJob extends QuartzJobBean {
 					<para>
 						This implementation uses a single
 						<classname>TimerTask</classname>
-						as it's backing implementation. It's different
+						as its backing implementation. It's different
 						from the
 						<link linkend="syncTaskExecutor"><classname>SyncTaskExecutor</classname></link>
 						in that the method invocations are executed in a
 						separate thread, although they are synchronous
 						in that thread.
 					</para>
-				</listitem>
+                </listitem>
 				
 				<listitem>
 					<para>
@@ -483,7 +485,7 @@ public class ExampleJob extends QuartzJobBean {
 						<para>
 							CommonJ is a set of specifications jointly
 							developed between BEA and IBM. These
-							specifications are not JEE standards, but
+							specifications are not Java EE standards, but
 							are standard across BEA's and IBM's
 							Application Server implementations.
 						</para>
@@ -494,13 +496,14 @@ public class ExampleJob extends QuartzJobBean {
 						as its backing implementation and is the central
 						convience class for setting up a CommonJ
 						WorkManager reference in a Spring context.
-						Similarly to the
+						Similar to the
 						<link linkend="simpleThreadPoolTaskExecutor"><classname>SimpleThreadPoolTaskExecutor</classname></link>,
 						this class implements the WorkManager
 						interface and therefore can be used directly as
 						a WorkManager as well.
 					</para>
-				</listitem>
+                </listitem>
+
 			</itemizedlist>
 		</section>
 	</section>
