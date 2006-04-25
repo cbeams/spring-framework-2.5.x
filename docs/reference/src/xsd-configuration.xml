@@ -4,53 +4,53 @@
     <section>
         <title>Introduction</title>
         <para>This section of the reference documentation details the XML Schema based
-    configuration that was introduced in Spring 2.0.</para>
+    configuration introduced in Spring 2.0.</para>
         <sidebar>
             <title>DTD suppport?</title>
             <para>Authoring Spring configuration files using the older DTD style
-            is still totally supported.</para>
+            is still fully supported.</para>
             <para>Nothing will break if you forego the use of the new XML Schema-based
             approach to authoring Spring XML configuration files. All that you lose
-            out on is more succinct and clearer configuration... in the end all of the
-            XML configuration, be it DTD- or Schema-based all boils down to the same
+            out on is more succinct and clearer configuration. In the end, all of the
+            XML configuration, be it DTD- or Schema-based, all boils down to the same
             object model in the container.</para>
         </sidebar>
         <para>The central motivation for moving to XML Schema based configuration files was
-        to enable easier Spring XML configuration (unsurprisingly). The <emphasis>'classic'</emphasis>
-        <literal>&lt;bean/&gt;</literal>-based approach is good (and it still continues
-        to be good), but it does suffer from being a tad generic.</para>
-        <para>From the Spring IoC containers point of view, <emphasis>everything</emphasis>
+        to make Spring XML configuration easier. The <emphasis>'classic'</emphasis>
+        <literal>&lt;bean/&gt;</literal>-based approach is good, but its generic-nature comes with a price in terms
+        of configuration overhead.</para>
+        <para>From the Spring IoC containers point-of-view, <emphasis>everything</emphasis>
         is a bean. That's great news for the Spring IoC container, because if everything is
-        a bean then everything can be treated in the exact same fashion. The same is not true for
-        developers... the objects (or classes rather) that one defines in a Spring
-        XML configuration file are not all generic, vanilla beans.</para>
+        a bean then everything can be treated in the exact same fashion. The same, however, is not true from
+        a developer's point-of-view. The objects defined in a Spring
+        XML configuration file are not all generic, vanilla beans. Usually, each bean requires some degree of specific
+        configuration.</para>
         <para>Spring 2.0's new XML Schema-based configuration addresses this issue.
-        The <literal>&lt;bean/&gt;</literal> element is still present, and if one
-        wanted to one could continue to write the <emphasis>exact same</emphasis>
+        The <literal>&lt;bean/&gt;</literal> element is still present, and if you
+        wanted to, you could continue to write the <emphasis>exact same</emphasis>
         style of Spring XML configuration using only <literal>&lt;bean/&gt;</literal>
-        elements. The new XML Schema-based configuration does however result in
-        Spring XML configuration files that are substantially clearer to read, and
-        that allow one to express the intent of what a bean definition is.
+        elements. The new XML Schema-based configuration does, however, make
+        Spring XML configuration files substantially clearer to read. In addition, it allows you to express the
+        intent of a bean definition.
         </para>
-        <para>In short, the custom tags are best for infrastructure or integration beans:
-        AOP, collections, transactions, integration with 3rd party frameworks such as Mule, etc.
-        The existing bean tags are best suited to application-specific beans, such as
+        <para>The key thing to remember is that the new custom tags work best for infrastructure or integration beans:
+        for example, AOP, collections, transactions, integration with 3rd party frameworks such as Mule, etc,
+        while the existing bean tags are best suited to application-specific beans, such as
         DAOs, service layer objects, validators, etc.
         </para>
-        <para>The examples included below will hopefully convince one that the inclusion
+        <para>The examples included below will hopefully convince you that the inclusion
         of XML Schema support in Spring 2.0 was a good idea. The reception in the community
         has been encouraging; something that is not covered in this section (at least
         not right now) is the fact that this new configuration mechanism is totally
-        customisable and extensible. This means that one can write one's own domain
-        specific configuration tags that allows one to more succinctly express one's
-        domain.</para>
+        customisable and extensible. This means you can write your own domain-specific
+        configuration tags that would better represent your application's domain.</para>
     </section>
     <section id="xsd-config-body">
         <title>XML Schema-based configuration</title>
         <section id="xsd-config-body-referencing">
             <title>Referencing the schemas</title>
-            <para>To switch over from the DTD-style to the new XML Schema-style, one needs
-            to effect the following change...</para>
+            <para>To switch over from the DTD-style to the new XML Schema-style, you need
+            to make the following change.</para>
             <programlisting><lineannotation>&lt;!-- DTD-style --&gt;</lineannotation>
 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
@@ -72,19 +72,18 @@
 
 </beans>]]></programlisting>
             <para>The above Spring XML configuration fragment is pretty much boilerplate;
-            one can certainly simply use this and continue to write
-            <literal>&lt;bean/&gt;</literal> definitions like one has always been doing.
-            However, the entire point of switching over is to enable one to
-            take advantage of the new Spring 2.0 XML tags to enable easier
-            configuration. The section entitled <xref linkend="xsd-config-body-schemas-util"/>
-            demonstrates how one can immediately use some of the more common utility tags.
+            you can simply use this and continue to write
+            <literal>&lt;bean/&gt;</literal> definitions like you have always done.
+            However, the entire point of switching over is to take advantage of the new Spring 2.0 XML tags since
+            they make configuration easier. The section entitled <xref linkend="xsd-config-body-schemas-util"/>
+            demonstrates how you can start immediately by using some of the more common utility tags.
             </para>
         </section>
         <para>The rest of this chapter is devoted to showing examples of the new Spring XML Schema
         based configuration, with at least one example for every new tag. The format follows
         a before and after style, with a <literal>'before'</literal> snippet of XML showing
-        the old (but still 100% legal and supported) style, followed immediately thereafter
-        by an <literal>'after'</literal> example showing the new (equivalent) XML Schema-based
+        the old (but still 100% legal and supported) style, followed immediately
+        by an <literal>'after'</literal> example showing the equivalent in the new XML Schema-based
         style.
         </para>
         <section id="xsd-config-body-schemas-util">
@@ -93,9 +92,9 @@
             implies, the <literal>util</literal> tags deal with common, <emphasis>utility</emphasis>
             configuration issues, such as configuring collections and suchlike.
             </para>
-            <para>To use the tags in the <literal>util</literal> schema, one needs to have
-            the following preamble at the top of one's Spring XML configuration file;
-            the emboldened text in the following snippet references the correct schema so that
+            <para>To use the tags in the <literal>util</literal> schema, you need to have
+            the following preamble at the top of your Spring XML configuration file;
+            the emboldened text in the snippet below references the correct schema so that
             the tags in the <literal>util</literal> namespace are available to you.</para>
             <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -123,9 +122,9 @@
                 constant. This is all well and good, but it is a tad verbose and (unneccessarily)
                 exposes Spring's internal plumbing to the end user.
                 </para>
-                <para>The following XML Schema-based version is considerably more concise,
-                it clearly expresses the developers intent (<emphasis>'inject this constant
-                value'</emphasis>), and it just plain reads better.
+                <para>The following XML Schema-based version is more concise
+                and clearly expresses the developer's intent (<emphasis>'inject this constant
+                value'</emphasis>), and it just reads better.
                 </para>
                 <programlisting><![CDATA[<bean id="..." class="...">
     <property name="isolation">
@@ -137,7 +136,7 @@
                 <title><literal>&lt;util:property-path/&gt;</literal></title>
                 <para>Before...</para>    
                 <programlisting><lineannotation>&lt;!-- target bean to be referenced by name --&gt;</lineannotation><![CDATA[
-<bean id="tb" class="org.springframework.beans.TestBean" singleton="false">
+<bean id="testBean" class="org.springframework.beans.TestBean" singleton="false">
   <property name="age" value="10"/>
   <property name="spouse">
     <bean class="org.springframework.beans.TestBean">
@@ -146,17 +145,17 @@
   </property>
 </bean>
 
-]]><lineannotation>&lt;!-- will result in 10, which is the value of property 'age' of bean 'tb' --&gt;</lineannotation><![CDATA[
-<bean id="tb.age" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>]]></programlisting>
+]]><lineannotation>&lt;!-- will result in 10, which is the value of property 'age' of bean 'testBean' --&gt;</lineannotation><![CDATA[
+<bean id="testBean.age" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>]]></programlisting>
                 <para>The above configuration uses a Spring <interfacename>FactoryBean</interfacename>
                 implementation, the <classname>PropertyPathFactoryBean</classname>, to
                 create a bean (of type <classname>int</classname>) called
-                <literal>'tb.age'</literal> that has a value equal to the <literal>'age'</literal>
-                property of the <literal>'tb'</literal> bean.
+                <literal>'testBean.age'</literal> that has a value equal to the <literal>'age'</literal>
+                property of the <literal>'testBean'</literal> bean.
                 </para>
                 <para>After...</para>
                 <programlisting><lineannotation>&lt;!-- target bean to be referenced by name --&gt;</lineannotation><![CDATA[
-<bean id="tb" class="org.springframework.beans.TestBean" singleton="false">
+<bean id="testBean" class="org.springframework.beans.TestBean" singleton="false">
   <property name="age" value="10"/>
   <property name="spouse">
     <bean class="org.springframework.beans.TestBean">
@@ -165,8 +164,8 @@
   </property>
 </bean>
 
-]]><lineannotation>&lt;!-- will result in 10, which is the value of property 'age' of bean 'tb' --&gt;</lineannotation><![CDATA[
-<util:property-path id="name" path="tb.age"/>]]></programlisting>
+]]><lineannotation>&lt;!-- will result in 10, which is the value of property 'age' of bean 'testBean' --&gt;</lineannotation><![CDATA[
+<util:property-path id="name" path="testBean.age"/>]]></programlisting>
                 <para>The value of the <literal>'path'</literal> attribute of the
                 <literal>&lt;property-path/&gt;</literal> tag follows the form <literal>'beanName.beanProperty'</literal>.</para>
             </section>
@@ -263,7 +262,7 @@
                 </para>
                 <para>After...</para>
                 <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Set</classname> instance with values loaded from the supplied <literal>'sourceSet'</literal> --&gt;</lineannotation><![CDATA[
-<util:set id="set">
+<util:set id="emails">
     <value>pechorin@hero.org</value>
     <value>raskolnikov@slums.org</value>
     <value>stavrogin@gov.org</value>
@@ -276,8 +275,8 @@
             <para>The <literal>jndi</literal> tags deal with JNDI-related configuration issues,
             such as looking up a JNDI object.
             </para>
-            <para>To use the tags in the <literal>jndi</literal> schema, one needs to have
-            the following preamble at the top of one's Spring XML configuration file;
+            <para>To use the tags in the <literal>jndi</literal> schema, you need to have
+            the following preamble at the top of your Spring XML configuration file;
             the emboldened text in the following snippet references the correct schema so that
             the tags in the <literal>jndi</literal> namespace are available to you.</para>
             <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -360,11 +359,11 @@
             written in a dynamic language such as JRuby or Groovy as beans in the Spring
             container.</para>
             <para>These tags (and the dynamic language support) are comprehensively covered
-            in the chapter entitled <xref linkend="dynamic-language"/>. Please do consult said
+            in the chapter entitled <xref linkend="dynamic-language"/>. Please do consult that
             chapter for full details on this support and the <literal>lang</literal> tags
             themselves.</para>
             <para>In the interest of completeness, to use the tags in the <literal>lang</literal>
-            schema, one needs to have the following preamble at the top of one's Spring XML
+            schema, you need to have the following preamble at the top of your Spring XML
             configuration file; the emboldened text in the following snippet references the
             correct schema so that the tags in the <literal>lang</literal> namespace are
             available to you.</para>
@@ -385,7 +384,7 @@
             beans in Spring's comprehensive support for transactions. These tags are
             comprehensively covered in the chapter entitled <xref linkend="transaction"/>.</para>
             <para>In the interest of completeness, to use the tags in the <literal>tx</literal>
-            schema, one needs to have the following preamble at the top of one's Spring XML
+            schema, you need to have the following preamble at the top of your Spring XML
             configuration file; the emboldened text in the following snippet references the
             correct schema so that the tags in the <literal>tx</literal> namespace are
             available to you.</para>
@@ -402,7 +401,7 @@
 
 </beans>]]></programlisting>
             <note>
-                <para>Often when using the tags in the <literal>tx</literal> namespace one will also be using
+                <para>Often when using the tags in the <literal>tx</literal> namespace you will also be using
                 the tags from the <literal>aop</literal> namespace (since the declarative transaction support in Spring is implemented using
                 AOP). The above XML snippet contains the relevant lines needed to reference the <literal>aop</literal> schema
                 so that the tags in the <literal>aop</literal> namespace are available to you.</para>
@@ -416,7 +415,7 @@
             comprehensively covered in the chapters entitled <xref linkend="aop"/> and
             <xref linkend="aspectj"/>.</para>
             <para>In the interest of completeness, to use the tags in the <literal>aop</literal>
-            schema, one needs to have the following preamble at the top of one's Spring XML
+            schema, you need to have the following preamble at the top of your Spring XML
             configuration file; the emboldened text in the following snippet references the
             correct schema so that the tags in the <literal>aop</literal> namespace are
             available to you.</para>
@@ -439,13 +438,13 @@
         configuration files.</para>
         <para>If your favourite Java IDE or editor is not included in the list of
         documented IDEs, then please do raise an issue on the Spring Framework
-        <ulink url="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA</ulink>
-        and the oversight <emphasis>may</emphasis> well be addressed in the next release.</para>
+        <ulink url="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA Issue Tracker</ulink>
+        and an example with the IDE <emphasis>may</emphasis> may be featured in the next release.</para>
         <section id="xsd-config-setup-eclipse">
             <title>Setting up Eclipse</title>
             <para>The following steps illustrate setting up
             <ulink url="http://www.eclipse.org/">Eclipse</ulink> to be XSD-aware. 
-            (The assumption in the following steps is that you already have an Eclipse
+            The assumption in the following steps is that you already have an Eclipse
             project open (either a brand new project or an already existing one).</para>
             <note>
                 <para>The following steps were created using Eclipse <emphasis role="bold">3.1</emphasis>.
@@ -456,14 +455,14 @@
         <section id="xsd-config-setup-idea">
             <title>Setting up IntelliJ IDEA</title>
             <para>The following steps illustrate how setting up
-            <ulink url="http://www.jetbrains.com/idea/">IntelliJ IDEA</ulink> to be XSD-aware is a cinch.</para>
-            <para>(The assumption in the following steps is that you already have an IDEA project
+            <ulink url="http://www.jetbrains.com/idea/">IntelliJ IDEA</ulink> to be XSD-aware. It is very simple to do so.</para>
+            <para>The assumption in the following steps is that you already have an IDEA project
             open (either a brand new project or an already existing one).</para>
             <step>
                 <title>Step One</title>
-                <para>Create a new XML file. You can name this file whatever you want... in the
-                case of this example, the file is named <literal>'context.xml'</literal>.
-                Copy and paste the following text into this file...</para>
+                <para>Create a new XML file. You can name this file whatever you want. In the
+                example below, the file is named <literal>'context.xml'</literal>.
+                Copy and paste the following text into the file.</para>
 		        <para>
 			        <mediaobject>
 				        <imageobject role="fo">
@@ -502,10 +501,10 @@
             <step>
                 <title>Step Three</title>
                 <para>If the external resource could not be fetched (maybe no active Internet
-                connection is available), then one can manually configure the resource to
-                reference a local copy of the attendant XSD file. To effect this, open up
+                connection is available), you can manually configure the resource to
+                reference a local copy of the attendant XSD file. Simply open up
                 the <literal>'Settings'</literal> dialog
-                (via the <keycombo action='open'>
+                (using the <keycombo action='open'>
                     <keycap>Ctrl</keycap>
                     <keycap>A</keycap>
                     <keycap>S</keycap>
@@ -525,8 +524,8 @@
             <step>
                 <title>Step Four</title>
                 <para>As can be seen in the following screenshot, this will bring up a dialog
-                that allows one to add an explicit reference to a local copy of the
-                <literal>util</literal> schema file. (One can find all of the various Spring
+                that allows you to add an explicit reference to a local copy of the
+                <literal>util</literal> schema file. (You can find all of the various Spring
                 XSD files in the <literal>'src'</literal> directory of the Spring distribution.)</para>
 		        <para>
 			        <mediaobject>
@@ -542,7 +541,7 @@
             <step>
                 <title>Step Five</title>
                 <para>Clicking the <literal>'Add'</literal> button will bring up another dialog
-                that allows one explicitly to associate a namespace URI with the path to the
+                that allows you to explicitly to associate a namespace URI with the path to the
                 relevant XSD file. As can be seen in the following screenshot, the
                 <literal>'http://www.springframework.org/schema/util'</literal> namespace
                 is being associated with the file resource
@@ -560,7 +559,7 @@
             </step>
             <step>
                 <title>Step Six</title>
-                <para>Exiting out of the nested dialogs via the <literal>'OK'</literal> button
+                <para>Exiting out of the nested dialogs by clicking the <literal>'OK'</literal> button
                 will then bring back the main editing window, and as can be seen in the
                 following screenshot, the contextual error markers have disappeared; typing
                 the <literal>'&lt;'</literal> character into the editing window now also
@@ -578,7 +577,7 @@
 		        </para>
             </step>
             <para>
-                Setting up IDEA to reference the other Spring XSD files follows a similar process.
+                Repeat as required for setting up IDEA to reference the other Spring XSD files.
             </para>
         </section>
     </section>
