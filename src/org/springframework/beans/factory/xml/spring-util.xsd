@@ -10,6 +10,12 @@
 	<xsd:import namespace="http://www.springframework.org/schema/beans" />
 
 	<xsd:element name="properties">
+		<xsd:annotation>
+			<xsd:documentation>
+				Loads a Properties instance from the resource location specified by the '<code>location</code>'
+				attribute.
+			</xsd:documentation>
+		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:attribute name="id" type="xsd:string"/>
 			<xsd:attribute name="location" type="xsd:string" use="required"/>

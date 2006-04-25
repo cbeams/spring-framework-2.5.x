@@ -106,4 +106,19 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertTrue(map instanceof TreeMap);
 		assertEquals(this.beanFactory.getBean("testBean"), map.get("bean"));
 	}
+
+	public void testNestedInCollections() throws Exception {
+		TestBean bean = (TestBean) this.beanFactory.getBean("nestedCustomTagBean");
+
+		Integer min = new Integer(Integer.MIN_VALUE);
+
+		Map map = bean.getSomeMap();
+		assertEquals(min, map.get("min"));
+
+		List list = bean.getSomeList();
+		assertEquals(min, list.get(0));
+
+		Set set = bean.getSomeSet();
+		assertTrue(set.contains(min));
+	}
 }

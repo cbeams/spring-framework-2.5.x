@@ -4,3 +4,5 @@ http\://www.springframework.org/schema/lang=org.springframework.scripting.config
 http\://www.springframework.org/schema/jndi=org.springframework.jndi.config.JndiNamespaceHandler
 http\://www.springframework.org/schema/tx=org.springframework.transaction.config.TxNamespaceHandler
 http\://www.springframework.org/schema/mvc=org.springframework.web.servlet.config.MvcNamespaceHandler
+http\://www.springframework.org/schema/jee=org.springframework.jee.JeeNamespaceHandler
+

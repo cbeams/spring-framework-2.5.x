@@ -5,3 +5,4 @@ http\://www.springframework.org/schema/lang/spring-lang.xsd=org/springframework/
 http\://www.springframework.org/schema/jndi/spring-jndi.xsd=org/springframework/jndi/config/spring-jndi.xsd
 http\://www.springframework.org/schema/tx/spring-tx.xsd=org/springframework/transaction/config/spring-tx.xsd
 http\://www.springframework.org/schema/mvc/spring-mvc.xsd=org/springframework/web/servlet/config/spring-mvc.xsd
+http\://www.springframework.org/schema/jee/spring-jee.xsd=org/springframework/jee/spring-jee.xsd

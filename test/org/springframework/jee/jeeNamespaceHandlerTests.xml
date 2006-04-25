@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+			 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xmlns:jee="http://www.springframework.org/schema/jee"
+			 xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd">
+
+	<!-- JNDI Lookup Tests -->
+	<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource"/>
+
+	<jee:jndi-lookup id="complex"
+									 jndi-name="jdbc/MyDataSource"
+									 cache="true"
+									 resource-ref="true"
+									 lookup-on-startup="true"
+									 expected-type="com.myapp.DefaultFoo"
+									 proxy-interface="com.myapp.Foo"/>
+
+	<jee:jndi-lookup id="withEnvironment" jndi-name="jdbc/MyDataSource">
+		<jee:environment>foo=bar</jee:environment>
+	</jee:jndi-lookup>
+
+	<!-- Local EJB Tests -->
+	<jee:local-slsb id="simpleLocalEjb" jndi-name="ejb/MyLocalBean"
+									business-interface="org.springframework.beans.ITestBean"/>
+
+	<jee:local-slsb id="complexLocalEjb"
+									jndi-name="ejb/MyLocalBean"
+									business-interface="org.springframework.beans.ITestBean"
+									cache-home="true"
+									lookup-home-on-startup="true"
+									resource-ref="true">
+		<jee:environment>foo=bar</jee:environment>
+	</jee:local-slsb>
+
+	<!-- Remote EJB Tests -->
+	<jee:remote-slsb id="simpleRemoteEjb" jndi-name="ejb/MyRemoteBean"
+									 business-interface="org.springframework.beans.ITestBean"/>
+
+	<jee:remote-slsb id="complexRemoteEjb"
+									 jndi-name="ejb/MyRemoteBean"
+									 business-interface="org.springframework.beans.ITestBean"
+									 cache-home="true"
+									 lookup-home-on-startup="true"
+									 resource-ref="true"
+									 home-interface="org.springframework.beans.ITestBean"
+									 refresh-home-on-connect-failure="true">
+		<jee:environment>foo=bar</jee:environment>
+	</jee:remote-slsb>
+</beans>

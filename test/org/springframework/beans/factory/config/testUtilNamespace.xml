@@ -25,6 +25,27 @@
 		<property name="name" value="Rob Harrop"/>
 	</bean>
 
+	<bean id="nestedCustomTagBean" class="org.springframework.beans.TestBean">
+	  <property name="someMap">
+	      <map>
+	          <entry>
+							<key><value>min</value></key>
+							<util:constant static-field="java.lang.Integer.MIN_VALUE"/>
+						</entry>
+	      </map>
+	  </property>
+		<property name="someList">
+		    <list>
+		        <util:constant static-field="java.lang.Integer.MIN_VALUE"/>
+		    </list>
+		</property>
+		<property name="someSet">
+		    <set>
+		        <util:constant static-field="java.lang.Integer.MIN_VALUE"/>
+		    </set>
+		</property>
+	</bean>
+
 	<util:map id="simpleMap">
 		<entry key="foo" value="bar"/>
 	</util:map>

@@ -238,6 +238,7 @@
 				<xsd:element ref="set"/>
 				<xsd:element ref="map"/>
 				<xsd:element ref="props"/>
+				<xsd:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="unbounded"/>
 			</xsd:choice>
 		</xsd:sequence>
 	</xsd:group>

@@ -730,10 +730,8 @@ public class XmlBeanDefinitionParserHelper {
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
 				Element candidateEle = (Element) nl.item(i);
-				if (!isDefaultNamespace(candidateEle.getNamespaceURI())) {
-					return parseNestedCustomElement(candidateEle);
-				}
-				else if (DESCRIPTION_ELEMENT.equals(candidateEle.getTagName())) {
+
+				if (DESCRIPTION_ELEMENT.equals(candidateEle.getTagName())) {
 					// Keep going: we don't use this value for now.
 				}
 				else {
@@ -784,7 +782,10 @@ public class XmlBeanDefinitionParserHelper {
 	 * be created.
 	 */
 	public Object parsePropertySubElement(Element ele, String defaultTypeClassName) {
-		if (ele.getTagName().equals(BEAN_ELEMENT)) {
+		if (!isDefaultNamespace(ele.getNamespaceURI())) {
+			return parseNestedCustomElement(ele);
+		}
+		else if (ele.getTagName().equals(BEAN_ELEMENT)) {
 			return parseBeanDefinitionElement(ele, true);
 		}
 		else if (ele.getTagName().equals(REF_ELEMENT)) {
