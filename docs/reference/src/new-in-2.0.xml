@@ -172,13 +172,13 @@
 
       <para>Prior to Spring 2.0, Spring's JMS offering was limited to
       producing messages. This functionality (encapsulated by the
-      <classname>JmsTemplate</classname> class) was good (and continues to be
-      good), but it didn't address the full JMS stack... i.e. the production
+      <classname>JmsTemplate</classname> class) was good, but it didn't
+      address the full JMS stack such as the production
       <emphasis>and</emphasis> consumption of messages.</para>
 
-      <para>This missing piece of the JMS stack has now been addressed, and
+      <para>This missing piece of the JMS stack has been added, and
       Spring 2.0 now ships with full support for the consumption of messages
-      in an ansychronous fashion, as detailed in the section entitled <xref
+      in an asynchronous fashion, as detailed in the section entitled <xref
       linkend="jms-asynchronousMessageReception" />.</para>
     </section>
 
