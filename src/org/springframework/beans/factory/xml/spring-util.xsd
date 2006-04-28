@@ -3,22 +3,35 @@
 <xsd:schema xmlns="http://www.springframework.org/schema/util"
 						xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 						xmlns:beans="http://www.springframework.org/schema/beans"
+						xmlns:tool="http://www.springframework.org/schema/tool"
 						targetNamespace="http://www.springframework.org/schema/util"
 						elementFormDefault="qualified"
 						attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans" />
+	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
 
 	<xsd:element name="properties">
 		<xsd:annotation>
-			<xsd:documentation>
-				Loads a Properties instance from the resource location specified by the '<code>location</code>'
-				attribute.
+			<xsd:documentation source="java:org.springframework.beans.factory.config.PropertiesFactoryBean">
+				Loads a Properties instance from the resource location specified by the
+				'<code>location</code>;' attribute.
 			</xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
-			<xsd:attribute name="id" type="xsd:string"/>
-			<xsd:attribute name="location" type="xsd:string" use="required"/>
+			<xsd:complexContent>
+				<xsd:extension base="beans:identifiedType">
+					<xsd:attribute name="location" type="xsd:string" use="required">
+						<xsd:annotation>
+							<xsd:appinfo>
+								<tool:annotation>
+									<tool:expected-type type="org.springframework.core.io.Resource"/>
+								</tool:annotation>
+							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
 
@@ -56,8 +69,10 @@
 					<xsd:attribute name="map-class" type="xsd:string">
 						<xsd:annotation>
 							<xsd:appinfo>
-								<expected-type class="java.util.Class"/>
-								<assignable-from class="java.util.Map"/>
+								<tool:annotation>
+									<tool:expected-type type="java.util.Class"/>
+									<tool:assignable-to type="java.util.Map"/>
+								</tool:annotation>
 							</xsd:appinfo>
 						</xsd:annotation>
 					</xsd:attribute>
@@ -74,8 +89,10 @@
 					<xsd:attribute name="list-class" type="xsd:string">
 						<xsd:annotation>
 							<xsd:appinfo>
-								<expected-type class="java.util.Class"/>
-								<assignable-from class="java.util.List"/>
+								<tool:annotation>
+									<tool:expected-type type="java.util.Class"/>
+									<tool:assignable-to type="java.util.List"/>
+								</tool:annotation>
 							</xsd:appinfo>
 						</xsd:annotation>
 					</xsd:attribute>
@@ -92,8 +109,10 @@
 					<xsd:attribute name="set-class" type="xsd:string">
 						<xsd:annotation>
 							<xsd:appinfo>
-								<expected-type class="java.util.Class"/>
-								<assignable-from class="java.util.Set"/>
+								<tool:annotation>
+									<tool:expected-type type="java.util.Class"/>
+									<tool:assignable-to type="java.util.Set"/>
+								</tool:annotation>
 							</xsd:appinfo>
 						</xsd:annotation>
 					</xsd:attribute>
