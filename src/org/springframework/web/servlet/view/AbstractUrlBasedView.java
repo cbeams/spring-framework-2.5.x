@@ -47,7 +47,7 @@ public abstract class AbstractUrlBasedView extends AbstractView implements Initi
 
 	public void afterPropertiesSet() throws Exception {
 		if (getUrl() == null) {
-			throw new IllegalArgumentException("url is required");
+			throw new IllegalArgumentException("Property 'url' is required");
 		}
 	}
 
