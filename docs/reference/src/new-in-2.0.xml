@@ -234,8 +234,8 @@
 
       <para>Spring 2.0 now ships with a full featured JSP tag library that
       makes the job of authoring JSP pages much easier when using Spring MVC;
-      the Spring team is confident will satisfy all of those developers who
-      voted for the issue on JIRA. Said tag library is itself covered in the
+      the Spring team is confident it will satisfy all of those developers who
+      voted for the issue on JIRA. The new tag library is itself covered in the
       section entitled <xref linkend="mvc" />, and a quick reference to all of
       the new tags can be found in the appendix entitled <xref
       linkend="spring-form.tld" />.</para>
