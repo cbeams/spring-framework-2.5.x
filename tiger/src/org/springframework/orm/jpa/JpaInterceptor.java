@@ -91,6 +91,7 @@ public class JpaInterceptor extends JpaAccessor implements MethodInterceptor {
 			logger.debug("Creating new EntityManager for JpaInterceptor invocation");
 			em = getEntityManagerFactory().createEntityManager();
 			isNewEm = true;
+			TransactionSynchronizationManager.bindResource(getEntityManagerFactory(), new EntityManagerHolder(em));
 		}
 
 		try {
