@@ -55,7 +55,7 @@ public class FormTag extends AbstractFormTag {
 	private static final String DEFAULT_METHOD = "POST";
 
 	/**
-	 * The default command objcet name.
+	 * The default command object name.
 	 */
 	public static final String DEFAULT_COMMAND_NAME = "command";
 

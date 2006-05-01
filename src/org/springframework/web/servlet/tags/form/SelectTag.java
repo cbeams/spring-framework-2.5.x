@@ -225,7 +225,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Returns '<code>true</code>' if the bound value requires the resultan'<code>select</code>'
+	 * Returns '<code>true</code>' if the bound value requires the resultant '<code>select</code>'
 	 * tag to be multi-select.
 	 */
 	private boolean forceMultiple() throws JspException {
