@@ -129,14 +129,14 @@
                     </xsl:element>
                     <xsl:element name="colspec">
                         <xsl:attribute name="align">
-                            <xsl:text>left</xsl:text>
+                            <xsl:text>center</xsl:text>
                         </xsl:attribute>
                     </xsl:element>
                     <xsl:element name="thead">
                         <xsl:element name="row">
                             <xsl:element name="entry">
                                 <xsl:attribute name="align">
-                                    <xsl:text>left</xsl:text>
+                                    <xsl:text>center</xsl:text>
                                 </xsl:attribute>
                                 <xsl:text>Attribute</xsl:text>
                             </xsl:element>
