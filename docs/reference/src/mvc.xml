@@ -1921,7 +1921,7 @@ public class FileUploadBean {
       </para>
       <para>
 			An equivalent example in which a file is bound straight to a String-typed
-			property on a (form backing) object might look like this:
+			property on a (form backing) object might look like:
       </para>
       <programlisting><![CDATA[public class FileUploadController extends SimpleFormController {
 
@@ -2019,13 +2019,17 @@ public class FileUploadBean {
   <sect1 id="mvc-formtaglib">
     <title>Using Spring's form tag library</title>
 
-    <para>As of version 2.0, Spring provides a comprehensive set of databinding-aware tags for handling form elements
-    when using JSP and Spring MVC. Each tag provides support for the full set of attributes as specified by W3C,
-    making the tags familiar to use. The tag-generated HTML is HTML 4.01/XHTML 1.0 compliant.</para>
+    <para>As of version 2.0, Spring provides a comprehensive set of data binding-aware tags for handling form elements
+    when using JSP and Spring MVC. Each tag provides support for the set of attributes of its corresponding HTML
+    tag counterpart, making the tags familiar and intuitive to use.
+    The tag-generated HTML is HTML 4.01/XHTML 1.0 compliant.</para>
 
     <para>Unlike other form/input tag libraries, Spring's form tag library is integrated with Spring MVC, giving
-    the tags access to the command object and reference data your controller deals with. As you will see from the
+    the tags access to the command object and reference data your controller deals with. As you will see in the
     following examples, the form tags make JSPs easier to develop, read and maintain. </para>
+
+    <para>Let's go through the form tags and look at an example of how each tag is used.
+    We have included generated HTML snippets where certain tags require further commentary.</para>
 
   <sect2 id="mvc-formtaglib-configuration">
     <title><literal>Configuration</literal></title>
@@ -2047,8 +2051,9 @@ public class FileUploadBean {
     </para>
     <para>
         Let's assume we have a domain object called <literal>User</literal>. It is a JavaBean with properties such as
-        <literal>firstName</literal> and <literal>lastName</literal>. We use it as the form backing object of our
-        <literal>FormController</literal> which returns <literal>form.jsp</literal>. Below is an example of what
+        <literal>firstName</literal> and <literal>lastName</literal>. We will use it as the form backing object of our
+        <literal>FormController</literal> which returns <literal>form.jsp</literal>.
+        Below is an example of what
         <literal>form.jsp</literal> would look like:
     </para>
 
@@ -2062,6 +2067,11 @@ public class FileUploadBean {
             <td>Last Name:</td>
             <td><form:input path="lastName" /></td>
         </tr>
+        <tr>
+            <td colspan="3">
+                <input type="submit" value="Save Changes" />
+            </td>
+        </tr>
     </table>
 </form:form>]]></programlisting>
     <para>
@@ -2069,6 +2079,30 @@ public class FileUploadBean {
         placed in the <literal>PageContext</literal> by the page controller. Scroll on to see more complex examples
         of how inner tags are used with the <literal>form</literal> tag.
     </para>
+
+    <para>The generated HTML looks like a standard form:</para>
+
+
+    <programlisting><![CDATA[<form method="POST">
+    <table>
+      <tr>
+          <td>First Name:</td>
+          <td><input name="firstName" type="text" value="Harry"/></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>Last Name:</td>
+          <td><input name="lastName" type="text" value="Potter"/></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td colspan="3">
+            <input type="submit" value="Save Changes" />
+          </td>
+      </tr>
+    </table>
+</form>]]></programlisting>
+
   </sect2>
 
   <sect2 id="mvc-formtaglib-inputtag">
@@ -2080,7 +2114,7 @@ public class FileUploadBean {
   <sect2 id="mvc-formtaglib-checkboxtag">
     <title>The <literal>checkbox</literal> tag</title>
       <para>This tag renders an HTML 'input' tag with type 'checkbox'.</para>
-      <para>Let's assume that our <literal>User</literal> has preferences such as newsletter subscription
+      <para>Let's assume our <literal>User</literal> has preferences such as newsletter subscription
       and a list of hobbies. Below is an example of the <literal>Preferences</literal> class:</para>
   </sect2>      
 
@@ -2118,13 +2152,13 @@ public class FileUploadBean {
 
 }]]></programlisting>
 
-    <para>The <literal>form.jsp</literal> would look like this:</para>
+    <para>The <literal>form.jsp</literal> would look like:</para>
 
     <programlisting><![CDATA[<form:form>
     <table>
         <tr>
             <td>Subscribe to newsletter?:</td>
-            <!-- Approach 1: Property is of type java.lang.Boolean -->
+            <%-- Approach 1: Property is of type java.lang.Boolean --%>
             <td><form:checkbox path="preferences.receiveNewsletter"/></td>
             <td></td>
         </tr>
@@ -2132,7 +2166,7 @@ public class FileUploadBean {
         <tr>
             <td>Interests:</td>
             <td>
-                <!-- Approach 2: Property is of an array or of type java.util.Collection -->
+                <%-- Approach 2: Property is of an array or of type java.util.Collection --%>
                 Quidditch: <form:checkbox path="preferences.interests" value="Quidditch"/>
                 Herbology: <form:checkbox path="preferences.interests" value="Herbology"/>
                 Defence Against the Dark Arts: <form:checkbox path="preferences.interests" value="Defence Against the Dark Arts"/>
@@ -2142,7 +2176,7 @@ public class FileUploadBean {
         <tr>
             <td>Favourite Word:</td>
             <td>
-                <!-- Approach 3: Property is of type java.lang.Object -->
+                <%-- Approach 3: Property is of type java.lang.Object --%>
                 Magic: <form:checkbox path="preferences.favouriteWord" value="Magic"/>
             </td>
             <td></td>
@@ -2169,58 +2203,70 @@ public class FileUploadBean {
           </itemizedlist>
       </para>
 
+      <para>Note that regardless of the approach, the same HTML structure is generated.
+      Below is an HTML snippet of some checkboxes:</para>
+
+    <programlisting><![CDATA[<tr>
+    <td>Interests:</td>
+    <td>
+        Quidditch: <input name="preferences.interests" type="checkbox" value="Quidditch"/>
+        <input type="hidden" boundValue="1" name="_preferences.interests"/>
+        Herbology: <input name="preferences.interests" type="checkbox" value="Herbology"/>
+        <input type="hidden" boundValue="1" name="_preferences.interests"/>
+        Defence Against the Dark Arts: <input name="preferences.interests" type="checkbox" value="Defence Against the Dark Arts"/>
+        <input type="hidden" boundValue="1" name="_preferences.interests"/>
+    </td>
+    <td></td>
+</tr>]]></programlisting>
+
+    <para>What you might not expect to see is the additional field after each checkbox.
+    When a checkbox in an HTML page is not checked, its value will not be sent to the server as part of the HTTP
+    request parameters once the form is submitted, so we need a workaround for this quirk in HTML in order for Spring
+    form data binding to work. The <literal>checkbox</literal> tag follows the existing Spring convention of
+    including a hidden parameter prefixed by an underscore ("_") for each checkbox. By doing this, you are
+    effectively telling Spring that "the checkbox was visible in the form and I want my object to which the form
+    data will be bound to reflect the state of the checkbox no matter what".</para>
+
   <sect2 id="mvc-formtaglib-radiobuttontag">
     <title>The <literal>radiobutton</literal> tag</title>
     <para>This tag renders an HTML 'input' tag with type 'radio'.</para>
-    <para>A typical usage pattern will involved multiple tag instances bound to the same property but with different
+    <para>A typical usage pattern will involve multiple tag instances bound to the same property but with different
     values.</para>
 
-    <programlisting><![CDATA[<form:form>
-    <table>
-        <tr>
-            <td>Sex:</td>
-            <td>Male: <form:radiobutton path="sex" value="M"/> <br/>
-                Female: <form:radiobutton path="sex" value="F"/> </td>
-            <td></td>
-        </tr>
-    </table>
-</form:form>]]></programlisting>
+    <programlisting><![CDATA[<tr>
+    <td>Sex:</td>
+    <td>Male: <form:radiobutton path="sex" value="M"/> <br/>
+        Female: <form:radiobutton path="sex" value="F"/> </td>
+    <td></td>
+</tr>]]></programlisting>
   </sect2>
 
   <sect2 id="mvc-formtaglib-passwordtag">
     <title>The <literal>password</literal> tag</title>
     <para>This tag renders an HTML 'input' tag with type 'password' using the bound value.</para>
 
-    <programlisting><![CDATA[<form:form>
-    <table>
-        <tr>
+    <programlisting><![CDATA[<tr>
             <td>Password:</td>
             <td>
                 <form:password path="password" />
             </td>
-        </tr>
-    </table>
-</form:form>]]></programlisting>
+</tr>]]></programlisting>
   </sect2>
 
   <sect2 id="mvc-formtaglib-selecttag">
     <title>The <literal>select</literal> tag</title>
-    <para>This tag renders an HTML 'select' element. It supports databinding to the selected option. It
-    supports the use of nested <literal>option</literal> and <literal>options</literal> tags.</para>
+    <para>This tag renders an HTML 'select' element. It supports data binding to the selected option as well as
+    the use of nested <literal>option</literal> and <literal>options</literal> tags.</para>
     <para>Let's assume a <literal>User</literal> has a list of skills.</para>
 
-    <programlisting><![CDATA[<form:form>
-    <table>
-    <tr>
-        <td>Skills:</td>
-        <td><form:select path="skills" items="${skills}"/></td>
-        <td></td>
-    </tr>
-    </table>
-</form:form>]]></programlisting>
+    <programlisting><![CDATA[<tr>
+    <td>Skills:</td>
+    <td><form:select path="skills" items="${skills}"/></td>
+    <td></td>
+</tr>]]></programlisting>
 
-    <para>If the <literal>User's</literal> skill was in Herbology, the HTML source of the 'Skills'
-    row would look like this:</para>
+    <para>If the <literal>User's</literal> skill were in Herbology, the HTML source of the 'Skills'
+    row would look like:</para>
 
     <programlisting><![CDATA[<tr>
     <td>Skills:</td>
@@ -2235,11 +2281,9 @@ public class FileUploadBean {
 
   <sect2 id="mvc-formtaglib-optiontag">
     <title>The <literal>option</literal> tag</title>
-    <para>This tag renders an HTML 'option'. It sets 'selected' as appropriate based on bound value.</para>
+    <para>This tag renders an HTML 'option'. It sets 'selected' as appropriate based on the bound value.</para>
 
-    <programlisting><![CDATA[<form:form>
-    <table>
-        <tr>
+    <programlisting><![CDATA[<tr>
             <td>House:</td>
             <td>
                 <form:select path="house">
@@ -2249,12 +2293,10 @@ public class FileUploadBean {
                     <form:option value="Slytherin"/>
                 </form:select>
             </td>
-        </tr>
-    </table>
-</form:form>]]></programlisting>
+</tr>]]></programlisting>
 
     <para>If the <literal>User's</literal> house was in Gryffindor, the HTML source of the 'House'
-    row would look like this:</para>
+    row would look like:</para>
 
     <programlisting><![CDATA[<tr>
     <td>House:</td>
@@ -2272,25 +2314,22 @@ public class FileUploadBean {
 
   <sect2 id="mvc-formtaglib-optionstag">
     <title>The <literal>options</literal> tag</title>
-    <para>This tag renders a list of HTML 'option' tags. It sets 'selected' as appropriate based on bound value.</para>
+    <para>This tag renders a list of HTML 'option' tags. It sets 'selected' as appropriate based on the
+    bound value.</para>
 
-    <programlisting><![CDATA[<form:form>
-    <table>
-        <tr>
-            <td>Country:</td>
-            <td>
-                <form:select path="country">
-                    <form:option value="-" label="--Please Select"/>
-                    <form:options items="${countryList}" itemValue="code" itemLabel="name"/>
-                </form:select>
-            </td>
-            <td></td>
-        </tr>
-    </table>
-</form:form>]]></programlisting>
+    <programlisting><![CDATA[<tr>
+    <td>Country:</td>
+    <td>
+        <form:select path="country">
+            <form:option value="-" label="--Please Select"/>
+            <form:options items="${countryList}" itemValue="code" itemLabel="name"/>
+        </form:select>
+    </td>
+    <td></td>
+</tr>]]></programlisting>
 
-    <para>If the <literal>User's</literal> lived in the UK, the HTML source of the 'Country'
-    row would look like this:</para>
+    <para>If the <literal>User</literal> lived in the UK, the HTML source of the 'Country'
+    row would look like:</para>
 
     <programlisting><![CDATA[ <tr>
     <td>Country:</td>
@@ -2308,36 +2347,170 @@ public class FileUploadBean {
     </tr>
     <td></td>
 </tr>]]></programlisting>
+
+      <para>As the example shows, the combined usage of an <literal>option</literal> tag with the
+      <literal>options</literal> tag generates the same standard HTML, but allows you to explicitly
+      specify a value in the JSP that is for display only (where it belongs) such as the default string in
+      the example: "-- Please Select".
+      </para>
   </sect2>
 
   <sect2 id="mvc-formtaglib-textAreatag">
     <title>The <literal>textarea</literal> tag</title>
     <para>This tag renders an HTML 'textarea'.</para>
 
-    <programlisting><![CDATA[<form:form>
-    <table>
-        <tr>
-            <td>Notes:</td>
-            <td><form:textarea path="notes" rows="3" cols="20" /></td>
-            <td><form:errors path="notes" /></td>
-        </tr>
-    </table>
-</form:form>]]></programlisting>
+    <programlisting><![CDATA[<tr>
+    <td>Notes:</td>
+    <td><form:textarea path="notes" rows="3" cols="20" /></td>
+    <td><form:errors path="notes" /></td>
+</tr>]]></programlisting>
 
   </sect2>
 
   <sect2 id="mvc-formtaglib-hiddeninputtag">
     <title>The <literal>hidden</literal> tag</title>
+    <para>This tag renders an HTML 'input' tag with type 'hidden' using the bound value. To submit an unbound hidden
+    value, use the HTML <literal>input</literal> tag with type 'hidden'.</para>
+
+    <programlisting><![CDATA[<form:hidden path="house" />
+]]></programlisting>
+
+    <para>If we choose to submit the 'house' value as a hidden one, the HTML would look like:</para>
+
+    <programlisting><![CDATA[<input name="house" type="hidden" value="Gryffindor"/>
+]]></programlisting>
+
   </sect2>
 
   <sect2 id="mvc-formtaglib-errorstag">
     <title>The <literal>errors</literal> tag</title>
-    <para>This tag renders an HTML 'input' tag with type 'hidden' using the bound value.</para>      
+    <para>This tag renders field errors in an HTML 'span' tag. It provides access to the errors created in your
+    controller or those that were created by any validators associated with your controller.</para>
+
+    <para>Let's assume we want to display all error messages for the <literal>firstName</literal> and
+    <literal>lastName</literal> fields once we submit the form. We have a validator for the <literal>User</literal>
+    object called <literal>UserValidator</literal>.</para>
+
+    <programlisting><![CDATA[public class UserValidator implements Validator {
+
+    public boolean supports(Class candidate) {
+        return User.class.isAssignableFrom(candidate);
+    }
+
+    public void validate(Object obj, Errors errors) {
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "firstName", "required", "Field is required.");
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "lastName", "required", "Field is required.");
+    }
+}]]></programlisting>
+
+    <para>The <literal>form.jsp</literal> would look like:</para>
+
+    <programlisting><![CDATA[<form:form>
+    <table>
+        <tr>
+            <td>First Name:</td>
+            <td><form:input path="firstName" /></td>
+            <%-- Show errors for firstName field --%>
+            <td><form:errors path="firstName" /></td>
+        </tr>
+
+        <tr>
+            <td>Last Name:</td>
+            <td><form:input path="lastName" /></td>
+            <%-- Show errors for lastName field --%>
+            <td><form:errors path="lastName"  /></td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <input type="submit" value="Save Changes" />
+            </td>
+        </tr>
+    </table>
+</form:form>]]></programlisting>
+
+    <para>If we submit a form with empty values in the <literal>firstHame</literal> and
+    <literal>lastName</literal> fields, this is what the HTML would look like:</para>
+
+    <programlisting><![CDATA[<form method="POST">
+    <table>
+        <tr>
+            <td>First Name:</td>
+            <td><input name="firstName" type="text" value=""/></td>
+            <%-- Associated errors to firstName field displayed --%>
+            <td><span name="firstName.errors">Field is required.</span></td>
+        </tr>
+
+        <tr>
+            <td>Last Name:</td>
+            <td><input name="lastName" type="text" value=""/></td>
+            <%-- Associated errors to lastName field displayed --%>
+            <td><span name="lastName.errors">Field is required.</span></td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <input type="submit" value="Save Changes" />
+            </td>
+        </tr>
+    </table>
+</form>]]></programlisting>
+
+    <para>What if we want to display the entire list of errors for a given page? The example below shows that
+    the <literal>errors</literal> tag also supports some basic wildcarding functionality.
+
+        <itemizedlist>
+            <listitem><literal>path="*"</literal> - displays all errors</listitem>
+            <listitem><literal>path="lastName*"</literal> - displays all errors associated with
+            the <literal>lastName</literal> field</listitem>
+        </itemizedlist>
+    </para>
+
+    <para>The example below will display a list of errors at the top of the page, followed by
+    field-specific errors next to the fields:</para>
+    <programlisting><![CDATA[<form:form>
+    <form:errors path="*" cssClass="errorBox" />
+    <table>
+        <tr>
+            <td>First Name:</td>
+            <td><form:input path="firstName" /></td>
+            <td><form:errors path="firstName" /></td>
+        </tr>
+
+        <tr>
+            <td>Last Name:</td>
+            <td><form:input path="lastName" /></td>
+            <td><form:errors path="lastName"  /></td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <input type="submit" value="Save Changes" />
+            </td>
+        </tr>
+    </table>
+</form:form>]]></programlisting>
+
+    <para>The HTML would look like:</para>
+    <programlisting><![CDATA[<form method="POST">
+    <span name="*.errors" class="errorBox">Field is required.<br/>Field is required.</span>
+    <table>
+        <tr>
+            <td>First Name:</td>
+            <td><input name="firstName" type="text" value=""/></td>
+            <td><span name="firstName.errors">Field is required.</span></td>
+        </tr>
+
+        <tr>
+            <td>Last Name:</td>
+            <td><input name="lastName" type="text" value=""/></td>
+            <td><span name="lastName.errors">Field is required.</span></td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <input type="submit" value="Save Changes" />
+            </td>
+        </tr>
+</form>]]></programlisting>
+
   </sect2>
-
-
-
-
   </sect1>
 
 
