@@ -24,6 +24,7 @@
 			<name>id</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
+            <description>HTML Standard Attribute</description>
 		</attribute>
 
 		<attribute>
@@ -48,79 +49,92 @@
 			<name>lang</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>title</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>dir</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>ondblclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousedown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseover</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousemove</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseout</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeypress</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeyup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeydown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<!-- Form specific attributes -->
 		<attribute>
@@ -151,13 +165,15 @@
 			<name>onsubmit</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onreset</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 	</tag>
 
 	<!-- <form:input/> tag -->
@@ -177,7 +193,8 @@
 			<name>id</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>cssClass</name>
@@ -195,25 +212,29 @@
 			<name>lang</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>title</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>dir</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>tabindex</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>readonly</name>
@@ -231,85 +252,99 @@
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>ondblclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousedown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseover</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousemove</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseout</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeypress</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeyup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeydown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onfocus</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onblur</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onchange</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>accesskey</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<!-- 'input(text)' specific attributes -->
 		<attribute>
@@ -328,7 +363,8 @@
 			<name>onselect</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>size</name>
@@ -355,7 +391,8 @@
 			<name>id</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>cssClass</name>
@@ -373,25 +410,29 @@
 			<name>lang</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>title</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>dir</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>tabindex</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>readonly</name>
@@ -409,85 +450,99 @@
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>ondblclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousedown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseover</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousemove</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseout</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeypress</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeyup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeydown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onfocus</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onblur</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onchange</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>accesskey</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<!-- 'input(password)' specific attributes -->
 		<attribute>
@@ -506,7 +561,8 @@
 			<name>onselect</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>size</name>
@@ -532,7 +588,8 @@
 			<name>id</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 	</tag>
 
@@ -553,7 +610,8 @@
 			<name>id</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>cssClass</name>
@@ -571,25 +629,29 @@
 			<name>lang</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>title</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>dir</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>tabindex</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>disabled</name>
@@ -601,85 +663,99 @@
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>ondblclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousedown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseover</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousemove</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseout</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeypress</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeyup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeydown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onfocus</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onblur</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onchange</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>accesskey</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<!-- 'select' specific attributes -->
 		<attribute>
@@ -778,7 +854,8 @@
 			<name>id</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>cssClass</name>
@@ -796,25 +873,29 @@
 			<name>lang</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>title</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>dir</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>tabindex</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>disabled</name>
@@ -826,85 +907,99 @@
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>ondblclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousedown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseover</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousemove</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseout</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeypress</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeyup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeydown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onfocus</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onblur</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onchange</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>accesskey</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<!-- radio button specific attributes -->
 		<attribute>
@@ -931,7 +1026,8 @@
 			<name>id</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>cssClass</name>
@@ -949,25 +1045,29 @@
 			<name>lang</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>title</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>dir</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>tabindex</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>disabled</name>
@@ -979,85 +1079,99 @@
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>ondblclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousedown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseover</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousemove</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseout</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeypress</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeyup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeydown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onfocus</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onblur</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onchange</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>accesskey</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<!-- checkbox specific attributes -->
 		<attribute>
@@ -1084,7 +1198,8 @@
 			<name>id</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>cssClass</name>
@@ -1102,25 +1217,29 @@
 			<name>lang</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>title</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>dir</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>tabindex</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>disabled</name>
@@ -1132,85 +1251,99 @@
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>ondblclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousedown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseover</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousemove</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseout</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeypress</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeyup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeydown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onfocus</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onblur</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onchange</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>accesskey</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<!-- 'textarea' specific attributes -->
 		<attribute>
@@ -1229,7 +1362,8 @@
 			<name>onselect</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 	</tag>
 
@@ -1250,7 +1384,8 @@
 			<name>id</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>delimiter</name>
@@ -1274,85 +1409,99 @@
 			<name>lang</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>title</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>dir</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>tabindex</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Standard Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>ondblclick</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousedown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseover</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmousemove</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onmouseout</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeypress</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeyup</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 		<attribute>
 			<name>onkeydown</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		</attribute>
+            <description>HTML Event Attribute</description>
+        </attribute>
 
 	</tag>
 </taglib>
