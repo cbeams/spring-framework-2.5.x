@@ -150,10 +150,16 @@
         </listitem>
 
         <listitem>
-          <para>A simple but powerful tag library that avoids HTML generation
-          at any cost, allowing for maximum flexibility in terms of markup
-          code.</para>
+          <para>A simple yet powerful tag library known as the Spring tag library
+          that provides support for features such as data binding and themes. The custom tags
+          allow for maximum flexibility in terms of markup code.
+          For information on the tag library descriptor, see <xref linkend="spring.tld" /></para>
         </listitem>
+
+          <listitem>
+            <para>A convenience form tag library, introduced in Spring 2.0, that makes writing JSP pages much easier.
+            For information on the tag library descriptor, see <xref linkend="spring-form.tld" /></para>
+          </listitem>
       </itemizedlist>
     </sect2>
   </sect1>
@@ -1143,8 +1149,8 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     </sect2>
   </sect1>
 
-  <sect1 id="mvc-viewresolver">
-    <title>Views and resolving them</title>
+     <sect1 id="mvc-viewresolver">
+       <title>Views and resolving them</title>
 
     <para>All MVC frameworks for web applications provide a way to address
     views. Spring provides view resolvers, which enable you to render models
@@ -2009,6 +2015,331 @@ public class FileUploadBean {
 }]]></programlisting>
     </section>
   </section>
+
+  <sect1 id="mvc-formtaglib">
+    <title>Using Spring's form tag library</title>
+
+    <para>As of version 2.0, Spring provides a comprehensive set of databinding-aware tags for handling form elements
+    when using JSP and Spring MVC. Each tag provides support for the full set of attributes as specified by W3C,
+    making the tags familiar to use. The tag-generated HTML is HTML 4.01/XHTML 1.0 compliant.</para>
+
+    <para>Unlike other form/input tag libraries, Spring's form tag library is integrated with Spring MVC, giving
+    the tags access to the command object and reference data your controller deals with. As you will see from the
+    following examples, the form tags make JSPs easier to develop, read and maintain. </para>
+
+  <sect2 id="mvc-formtaglib-configuration">
+    <title><literal>Configuration</literal></title>
+    <para>
+        The form tag library comes bundled in <literal>spring.jar</literal>. The library descriptor is called
+        <literal>spring-form.tld</literal>.</para>
+    <para>To use the tags from this library, add the following directive to top of your JSP page:
+    <programlisting>&lt;@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %&gt;</programlisting>
+    where <literal>form</literal> is the tag name prefix you want to use for the tags from this library.</para>
+
+  </sect2>
+
+  <sect2 id="mvc-formtaglib-formtag">
+    <title>The <literal>form</literal> tag</title>
+    <para>
+        This tag renders an HTML 'form' tag and exposes a binding path to inner tags for binding. It puts the
+        command object in the <literal>PageContext</literal> so that the command object can be accessed by inner tags.
+        All the other tags in this library are nested tags of the <literal>form</literal> tag.
+    </para>
+    <para>
+        Let's assume we have a domain object called <literal>User</literal>. It is a JavaBean with properties such as
+        <literal>firstName</literal> and <literal>lastName</literal>. We use it as the form backing object of our
+        <literal>FormController</literal> which returns <literal>form.jsp</literal>. Below is an example of what
+        <literal>form.jsp</literal> would look like:
+    </para>
+
+    <programlisting><![CDATA[<form:form>
+    <table>
+        <tr>
+            <td>First Name:</td>
+            <td><form:input path="firstName" /></td>
+        </tr>
+        <tr>
+            <td>Last Name:</td>
+            <td><form:input path="lastName" /></td>
+        </tr>
+    </table>
+</form:form>]]></programlisting>
+    <para>
+        The <literal>firstName</literal> and <literal>lastName</literal> values are retrieved from the command object
+        placed in the <literal>PageContext</literal> by the page controller. Scroll on to see more complex examples
+        of how inner tags are used with the <literal>form</literal> tag.
+    </para>
+  </sect2>
+
+  <sect2 id="mvc-formtaglib-inputtag">
+    <title>The <literal>input</literal> tag</title>
+    <para>This tag renders an HTML 'input' tag with type 'text' using the bound value. For an example of this tag,
+     see <xref linkend="mvc-formtaglib-formtag" />.</para>
+  </sect2>
+
+  <sect2 id="mvc-formtaglib-checkboxtag">
+    <title>The <literal>checkbox</literal> tag</title>
+      <para>This tag renders an HTML 'input' tag with type 'checkbox'.</para>
+      <para>Let's assume that our <literal>User</literal> has preferences such as newsletter subscription
+      and a list of hobbies. Below is an example of the <literal>Preferences</literal> class:</para>
+  </sect2>      
+
+   <programlisting><![CDATA[public class Preferences {
+
+    private boolean receiveNewsletter;
+
+    private String[] interests;
+
+    private String favouriteWord;
+
+    public boolean isReceiveNewsletter() {
+        return receiveNewsletter;
+    }
+
+    public void setReceiveNewsletter(boolean receiveNewsletter) {
+        this.receiveNewsletter = receiveNewsletter;
+    }
+
+    public String[] getInterests() {
+        return interests;
+    }
+
+    public void setInterests(String[] interests) {
+        this.interests = interests;
+    }
+
+    public String getFavouriteWord() {
+        return favouriteWord;
+    }
+
+    public void setFavouriteWord(String favouriteWord) {
+        this.favouriteWord = favouriteWord;
+    }
+
+}]]></programlisting>
+
+    <para>The <literal>form.jsp</literal> would look like this:</para>
+
+    <programlisting><![CDATA[<form:form>
+    <table>
+        <tr>
+            <td>Subscribe to newsletter?:</td>
+            <!-- Approach 1: Property is of type java.lang.Boolean -->
+            <td><form:checkbox path="preferences.receiveNewsletter"/></td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <td>Interests:</td>
+            <td>
+                <!-- Approach 2: Property is of an array or of type java.util.Collection -->
+                Quidditch: <form:checkbox path="preferences.interests" value="Quidditch"/>
+                Herbology: <form:checkbox path="preferences.interests" value="Herbology"/>
+                Defence Against the Dark Arts: <form:checkbox path="preferences.interests" value="Defence Against the Dark Arts"/>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Favourite Word:</td>
+            <td>
+                <!-- Approach 3: Property is of type java.lang.Object -->
+                Magic: <form:checkbox path="preferences.favouriteWord" value="Magic"/>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+</form:form>]]></programlisting>
+
+      <para>There are 3 approaches to the <literal>checkbox</literal> tag which should meet all your checkbox needs.
+
+          <itemizedlist>
+            <listitem>Approach One  -  When the bound value is of type <literal>java.lang.Boolean</literal>,
+            the <literal>input(checkbox)</literal> is marked as 'checked' if the bound value is
+            <literal>true</literal>. The <literal>value</literal> attribute corresponds to the
+            resolved value of the <literal>setValue(Object)</literal> value property.</listitem>
+
+            <listitem>Approach Two - When the bound value is of type <literal>array</literal> or
+            <literal>java.util.Collection</literal>, the <literal>input(checkbox)</literal> is marked as 'checked'
+            if the configured <literal>setValue(Object)</literal> value is present in the bound
+            <literal>Collection</literal>.</listitem>
+
+            <listitem>Approach Three - For any other bound value type, the <literal>input(checkbox)</literal>
+            is marked as 'checked' if the the configured <literal>setValue(Object)</literal> is equal to the
+            bound value.</listitem>
+          </itemizedlist>
+      </para>
+
+  <sect2 id="mvc-formtaglib-radiobuttontag">
+    <title>The <literal>radiobutton</literal> tag</title>
+    <para>This tag renders an HTML 'input' tag with type 'radio'.</para>
+    <para>A typical usage pattern will involved multiple tag instances bound to the same property but with different
+    values.</para>
+
+    <programlisting><![CDATA[<form:form>
+    <table>
+        <tr>
+            <td>Sex:</td>
+            <td>Male: <form:radiobutton path="sex" value="M"/> <br/>
+                Female: <form:radiobutton path="sex" value="F"/> </td>
+            <td></td>
+        </tr>
+    </table>
+</form:form>]]></programlisting>
+  </sect2>
+
+  <sect2 id="mvc-formtaglib-passwordtag">
+    <title>The <literal>password</literal> tag</title>
+    <para>This tag renders an HTML 'input' tag with type 'password' using the bound value.</para>
+
+    <programlisting><![CDATA[<form:form>
+    <table>
+        <tr>
+            <td>Password:</td>
+            <td>
+                <form:password path="password" />
+            </td>
+        </tr>
+    </table>
+</form:form>]]></programlisting>
+  </sect2>
+
+  <sect2 id="mvc-formtaglib-selecttag">
+    <title>The <literal>select</literal> tag</title>
+    <para>This tag renders an HTML 'select' element. It supports databinding to the selected option. It
+    supports the use of nested <literal>option</literal> and <literal>options</literal> tags.</para>
+    <para>Let's assume a <literal>User</literal> has a list of skills.</para>
+
+    <programlisting><![CDATA[<form:form>
+    <table>
+    <tr>
+        <td>Skills:</td>
+        <td><form:select path="skills" items="${skills}"/></td>
+        <td></td>
+    </tr>
+    </table>
+</form:form>]]></programlisting>
+
+    <para>If the <literal>User's</literal> skill was in Herbology, the HTML source of the 'Skills'
+    row would look like this:</para>
+
+    <programlisting><![CDATA[<tr>
+    <td>Skills:</td>
+    <td><select name="skills" multiple="true">
+        <option value="Potions">Potions</option>
+        <option value="Herbology" selected="true">Herbology</option>
+        <option value="Quidditch">Quidditch</option></select></td>
+    <td></td>
+</tr>]]></programlisting>
+
+  </sect2>
+
+  <sect2 id="mvc-formtaglib-optiontag">
+    <title>The <literal>option</literal> tag</title>
+    <para>This tag renders an HTML 'option'. It sets 'selected' as appropriate based on bound value.</para>
+
+    <programlisting><![CDATA[<form:form>
+    <table>
+        <tr>
+            <td>House:</td>
+            <td>
+                <form:select path="house">
+                    <form:option value="Gryffindor"/>
+                    <form:option value="Hufflepuff"/>
+                    <form:option value="Ravenclaw"/>
+                    <form:option value="Slytherin"/>
+                </form:select>
+            </td>
+        </tr>
+    </table>
+</form:form>]]></programlisting>
+
+    <para>If the <literal>User's</literal> house was in Gryffindor, the HTML source of the 'House'
+    row would look like this:</para>
+
+    <programlisting><![CDATA[<tr>
+    <td>House:</td>
+    <td>
+        <select name="house">
+            <option value="Gryffindor" selected="true">Gryffindor</option>
+            <option value="Hufflepuff">Hufflepuff</option>
+            <option value="Ravenclaw">Ravenclaw</option>
+            <option value="Slytherin">Slytherin</option>
+        </select>
+    </td>
+ </tr>]]></programlisting>
+
+  </sect2>
+
+  <sect2 id="mvc-formtaglib-optionstag">
+    <title>The <literal>options</literal> tag</title>
+    <para>This tag renders a list of HTML 'option' tags. It sets 'selected' as appropriate based on bound value.</para>
+
+    <programlisting><![CDATA[<form:form>
+    <table>
+        <tr>
+            <td>Country:</td>
+            <td>
+                <form:select path="country">
+                    <form:option value="-" label="--Please Select"/>
+                    <form:options items="${countryList}" itemValue="code" itemLabel="name"/>
+                </form:select>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+</form:form>]]></programlisting>
+
+    <para>If the <literal>User's</literal> lived in the UK, the HTML source of the 'Country'
+    row would look like this:</para>
+
+    <programlisting><![CDATA[ <tr>
+    <td>Country:</td>
+    <tr>
+        <td>Country:</td>
+        <td>
+            <select name="country">
+                <option value="-">--Please Select</option>
+                <option value="AT">Austria</option>
+                <option value="UK" selected="true">United Kingdom</option>
+                <option value="US">United States</option>
+            </select>
+        </td>
+        <td></td>
+    </tr>
+    <td></td>
+</tr>]]></programlisting>
+  </sect2>
+
+  <sect2 id="mvc-formtaglib-textAreatag">
+    <title>The <literal>textarea</literal> tag</title>
+    <para>This tag renders an HTML 'textarea'.</para>
+
+    <programlisting><![CDATA[<form:form>
+    <table>
+        <tr>
+            <td>Notes:</td>
+            <td><form:textarea path="notes" rows="3" cols="20" /></td>
+            <td><form:errors path="notes" /></td>
+        </tr>
+    </table>
+</form:form>]]></programlisting>
+
+  </sect2>
+
+  <sect2 id="mvc-formtaglib-hiddeninputtag">
+    <title>The <literal>hidden</literal> tag</title>
+  </sect2>
+
+  <sect2 id="mvc-formtaglib-errorstag">
+    <title>The <literal>errors</literal> tag</title>
+    <para>This tag renders an HTML 'input' tag with type 'hidden' using the bound value.</para>      
+  </sect2>
+
+
+
+
+  </sect1>
+
 
   <sect1 id="mvc-exceptionhandlers">
     <title>Handling exceptions</title>
