@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,6 +41,21 @@ import org.springframework.beans.factory.HierarchicalBeanFactory;
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 
 	/**
+	 * Scope identifier for the standard singleton scope: "singleton".
+	 * Custom scopes can be added via <code>registerScope</code>.
+	 * @see #registerScope
+	 */
+	String SCOPE_SINGLETON = "singleton";
+
+	/**
+	 * Scope identifier for the standard prototype scope: "prototype".
+	 * Custom scopes can be added via <code>registerScope</code>.
+	 * @see #registerScope
+	 */
+	String SCOPE_PROTOTYPE = "prototype";
+
+
+	/**
 	 * Set the parent of this bean factory.
 	 * <p>Note that the parent shouldn't be changed: It should only be set outside
 	 * a constructor if it isn't available when an object of this class is created.
@@ -67,6 +82,19 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	 * Return the current number of registered BeanPostProcessors.
 	 */
 	int getBeanPostProcessorCount();
+
+	/**
+	 * Register the given scope, backed by the given ScopeMap.
+	 * @param scope the scope identifier
+	 * @param scopeMap the backing ScopeMap
+	 */
+	void registerScope(String scope, ScopeMap scopeMap);
+
+	/**
+	 * Destroy the specified scoped bean in the current target scope.
+	 * @param beanName the name of the scoped bean
+	 */
+	void destroyScopedBean(String beanName);
 
 	/**
 	 * Given a bean name, create an alias. We typically use this method to

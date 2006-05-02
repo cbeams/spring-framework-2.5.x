@@ -17,20 +17,18 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.core.AttributeAccessorSupport;
 
 /**
  * Base class for bean definition objects, factoring out common
@@ -46,6 +44,21 @@ import org.springframework.core.AttributeAccessorSupport;
  * @see ChildBeanDefinition
  */
 public abstract class AbstractBeanDefinition extends AttributeAccessorSupport implements BeanDefinition {
+
+	/**
+	 * Scope identifier for the standard singleton scope: "singleton".
+	 * <p>Note that extended bean factories might support further scopes.
+	 * @see #setScope
+	 */
+	public static final String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
+
+	/**
+	 * Scope identifier for the standard prototype scope: "prototype".
+	 * <p>Note that extended bean factories might support further scopes.
+	 * @see #setScope
+	 */
+	public static final String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+
 
 	/**
 	 * Constant that indicates no autowiring at all.
@@ -108,9 +121,9 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 	private Object beanClass;
 
-	private boolean abstractFlag = false;
+	private String scope = SCOPE_SINGLETON;
 
-	private boolean singleton = true;
+	private boolean abstractFlag = false;
 
 	private boolean lazyInit = false;
 
@@ -171,9 +184,11 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	protected AbstractBeanDefinition(AbstractBeanDefinition original) {
 		this.beanClass = original.beanClass;
 
+		setScope(original.getScope());
 		setAbstract(original.isAbstract());
-		setSingleton(original.isSingleton());
 		setLazyInit(original.isLazyInit());
+
+		setAutowireCandidate(original.isAutowireCandidate());
 		setAutowireMode(original.getAutowireMode());
 		setDependencyCheck(original.getDependencyCheck());
 		setDependsOn(original.getDependsOn());
@@ -213,9 +228,11 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 			this.beanClass = other.beanClass;
 		}
 
+		setScope(other.getScope());
 		setAbstract(other.isAbstract());
-		setSingleton(other.isSingleton());
 		setLazyInit(other.isLazyInit());
+
+		setAutowireCandidate(other.isAutowireCandidate());
 		setAutowireMode(other.getAutowireMode());
 		setDependencyCheck(other.getDependencyCheck());
 		setDependsOn(other.getDependsOn());
@@ -291,6 +308,57 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 
 	/**
+	 * Set the name of the target scope for the bean.
+	 * <p>Default is "singleton"; the out-of-the-box alternative is "prototype".
+	 * Extended bean factories might support further scopes.
+	 * @see #SCOPE_SINGLETON
+	 * @see #SCOPE_PROTOTYPE
+	 */
+	public void setScope(String scope) {
+		Assert.notNull(scope, "Scope must not be null");
+		this.scope = scope;
+	}
+
+	/**
+	 * Return the name of the target scope for the bean.
+	 */
+	public String getScope() {
+		return scope;
+	}
+
+	/**
+	 * Set if this a <b>Singleton</b>, with a single, shared instance returned
+	 * on all calls. In case of "false", the BeanFactory will apply the <b>Prototype</b>
+	 * design pattern, with each caller requesting an instance getting an independent
+	 * instance. How this is exactly defined will depend on the BeanFactory.
+	 * <p>"Singletons" are the commoner type, so the default is "true".
+	 * Note that as of Spring 2.0, this flag is just an alternative way to
+	 * specify scope="singleton" or scope="prototype".
+	 * @see #setScope
+	 * @see #SCOPE_SINGLETON
+	 * @see #SCOPE_PROTOTYPE
+	 */
+	public void setSingleton(boolean singleton) {
+		this.scope = (singleton ? SCOPE_SINGLETON : SCOPE_PROTOTYPE);
+	}
+
+	/**
+	 * Return whether this a <b>Singleton</b>, with a single, shared instance
+	 * returned from all calls.
+	 */
+	public boolean isSingleton() {
+		return (this.scope == SCOPE_SINGLETON);
+	}
+
+	/**
+	 * Return whether this a <b>Prototype</b>, with an independent instance
+	 * returned for each call.
+	 */
+	public boolean isPrototype() {
+		return (this.scope == SCOPE_PROTOTYPE);
+	}
+
+	/**
 	 * Set if this bean is "abstract", i.e. not meant to be instantiated itself but
 	 * rather just serving as parent for concrete child bean definitions.
 	 * <p>Default is "false". Specify true to tell the bean factory to not try to
@@ -306,25 +374,6 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 */
 	public boolean isAbstract() {
 		return abstractFlag;
-	}
-
-	/**
-	 * Set if this a <b>Singleton</b>, with a single, shared instance returned
-	 * on all calls. If false, the BeanFactory will apply the <b>Prototype</b>
-	 * design pattern, with each caller requesting an instance getting an
-	 * independent instance. How this is defined will depend on the BeanFactory.
-	 * <p>"Singletons" are the commoner type, so the default is true.
-	 */
-	public void setSingleton(boolean singleton) {
-		this.singleton = singleton;
-	}
-
-	/**
-	 * Return whether this a <b>Singleton</b>, with a single, shared instance
-	 * returned on all calls.
-	 */
-	public boolean isSingleton() {
-		return singleton;
 	}
 
 	/**
@@ -345,12 +394,21 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 		return lazyInit;
 	}
 
-	public boolean isAutowireCandidate() {
-		return autowireCandidate;
-	}
 
+	/**
+	 * Set whether this bean is a candidate for getting autowired into
+	 * some other bean.
+	 */
 	public void setAutowireCandidate(boolean autowireCandidate) {
 		this.autowireCandidate = autowireCandidate;
+	}
+
+	/**
+	 * Return whether this bean is a candidate for getting autowired into
+	 * some other bean.
+	 */
+	public boolean isAutowireCandidate() {
+		return autowireCandidate;
 	}
 
 	/**
@@ -616,6 +674,10 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 		this.source = source;
 	}
 
+	/**
+	 * Return the <code>Object</code> representing the configuration source
+	 * for this <code>BeanDefinition</code>.
+	 */
 	public Object getSource() {
 		return source;
 	}
@@ -627,16 +689,20 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 		this.role = role;
 	}
 
+	/**
+	 * Return the role hint for this <code>BeanDefinition</code>.
+	 */
 	public int getRole() {
 		return role;
 	}
+
 
 	/**
 	 * Validate this bean definition.
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	public void validate() throws BeanDefinitionValidationException {
-		if (this.lazyInit && !this.singleton) {
+		if (this.lazyInit && !isSingleton()) {
 			throw new BeanDefinitionValidationException(
 					"Lazy initialization is only applicable to singleton beans");
 		}
@@ -687,73 +753,60 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 		}
 	}
 
-	public boolean equals(Object o) {
-		if (!super.equals(o)) {
+
+	public boolean equals(Object other) {
+		if (!super.equals(other)) {
 			return false;
 		}
 
-		AbstractBeanDefinition that = (AbstractBeanDefinition) o;
+		AbstractBeanDefinition that = (AbstractBeanDefinition) other;
 
-		if (abstractFlag != that.abstractFlag) return false;
-		if (autowireCandidate != that.autowireCandidate) return false;
-		if (autowireMode != that.autowireMode) return false;
-		if (dependencyCheck != that.dependencyCheck) return false;
-		if (enforceDestroyMethod != that.enforceDestroyMethod) return false;
-		if (enforceInitMethod != that.enforceInitMethod) return false;
-		if (lazyInit != that.lazyInit) return false;
-		if (role != that.role) return false;
-		if (singleton != that.singleton) return false;
 		if (!ObjectUtils.nullSafeEquals(this.beanClass, that.beanClass)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.scope, that.scope)) return false;
+		if (this.abstractFlag != that.abstractFlag) return false;
+		if (this.lazyInit != that.lazyInit) return false;
+
+		if (this.autowireCandidate != that.autowireCandidate) return false;
+		if (this.autowireMode != that.autowireMode) return false;
+		if (this.dependencyCheck != that.dependencyCheck) return false;
+		if (!Arrays.equals(this.dependsOn, that.dependsOn)) return false;
+
 		if (!ObjectUtils.nullSafeEquals(this.constructorArgumentValues, that.constructorArgumentValues)) return false;
-		if (!Arrays.equals(dependsOn, that.dependsOn)) return false;
-		if (!ObjectUtils.nullSafeEquals(this.destroyMethodName, that.destroyMethodName)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.propertyValues, that.propertyValues)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.methodOverrides, that.methodOverrides)) return false;
+
 		if (!ObjectUtils.nullSafeEquals(this.factoryBeanName, that.factoryBeanName)) return false;
 		if (!ObjectUtils.nullSafeEquals(this.factoryMethodName, that.factoryMethodName)) return false;
 		if (!ObjectUtils.nullSafeEquals(this.initMethodName, that.initMethodName)) return false;
-		if (!ObjectUtils.nullSafeEquals(this.methodOverrides, that.methodOverrides)) return false;
-		if (!ObjectUtils.nullSafeEquals(this.propertyValues, that.propertyValues)) return false;
+		if (this.enforceInitMethod != that.enforceInitMethod) return false;
+		if (!ObjectUtils.nullSafeEquals(this.destroyMethodName, that.destroyMethodName)) return false;
+		if (this.enforceDestroyMethod != that.enforceDestroyMethod) return false;
+
 		if (!ObjectUtils.nullSafeEquals(this.resourceDescription, that.resourceDescription)) return false;
 		if (!ObjectUtils.nullSafeEquals(this.source, that.source)) return false;
+		if (this.role != that.role) return false;
 
 		return true;
 	}
 
 	public int hashCode() {
-		int result;
-		result = ObjectUtils.nullSafeHashCode(this.beanClass);
-		result = 29 * result + (abstractFlag ? 1 : 0);
-		result = 29 * result + (singleton ? 1 : 0);
-		result = 29 * result + (lazyInit ? 1 : 0);
-		result = 29 * result + (autowireCandidate ? 1 : 0);
-		result = 29 * result + autowireMode;
-		result = 29 * result + dependencyCheck;
+		int result = ObjectUtils.nullSafeHashCode(this.beanClass);
+		result = 29 * result + ObjectUtils.nullSafeHashCode(this.scope);
 		result = 29 * result + ObjectUtils.nullSafeHashCode(this.constructorArgumentValues);
 		result = 29 * result + ObjectUtils.nullSafeHashCode(this.propertyValues);
-		result = 29 * result + ObjectUtils.nullSafeHashCode(this.methodOverrides);
 		result = 29 * result + ObjectUtils.nullSafeHashCode(this.factoryBeanName);
 		result = 29 * result + ObjectUtils.nullSafeHashCode(this.factoryMethodName);
-		result = 29 * result + ObjectUtils.nullSafeHashCode(this.initMethodName);
-		result = 29 * result + ObjectUtils.nullSafeHashCode(this.destroyMethodName);
-		result = 29 * result + ObjectUtils.nullSafeHashCode(this.resourceDescription);
-		result = 29 * result + ObjectUtils.nullSafeHashCode(this.source);
-		result = 29 * result + (enforceInitMethod ? 1 : 0);
-		result = 29 * result + (enforceDestroyMethod ? 1 : 0);
-		result = 29 * result + role;
-		if (this.dependsOn != null) {
-			for (int i = 0; i < dependsOn.length; i++) {
-				result = 29 * result + dependsOn[i].hashCode();
-			}
-		}
 		return result;
 	}
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer("class [");
 		sb.append(getBeanClassName()).append("]");
+		sb.append("; scope=").append(this.scope);
 		sb.append("; abstract=").append(this.abstractFlag);
-		sb.append("; singleton=").append(this.singleton);
 		sb.append("; lazyInit=").append(this.lazyInit);
-		sb.append("; autowire=").append(this.autowireMode);
+		sb.append("; autowireCandidate=").append(this.autowireCandidate);
+		sb.append("; autowireMode=").append(this.autowireMode);
 		sb.append("; dependencyCheck=").append(this.dependencyCheck);
 		sb.append("; factoryBeanName=").append(this.factoryBeanName);
 		sb.append("; factoryMethodName=").append(this.factoryMethodName);

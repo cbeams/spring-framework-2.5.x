@@ -49,6 +49,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.beans.factory.config.ScopeMap;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.MethodParameter;
@@ -108,6 +109,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 	/** Map from ChildBeanDefinition to merged RootBeanDefinition */
 	private final Map mergedBeanDefinitions = new HashMap();
+
+	private final Map scopes = new HashMap();
 
 	/** Cache of singletons: bean name --> bean instance */
 	private final Map singletonCache = new HashMap();
@@ -255,9 +258,30 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				}
 				bean = getObjectForBeanInstance(sharedInstance, name, true);
 			}
-			else {
+
+			else if (mergedBeanDefinition.isPrototype()) {
 				// It's a prototype -> create a new instance.
-				bean = createBean(beanName, mergedBeanDefinition, args);
+				Object prototypeInstance = createBean(beanName, mergedBeanDefinition, args);
+				bean = getObjectForBeanInstance(prototypeInstance, name, false);
+			}
+
+			else {
+				String scope = mergedBeanDefinition.getScope();
+				ScopeMap scopeMap = (ScopeMap) this.scopes.get(scope);
+				if (scopeMap == null) {
+					throw new IllegalStateException("No ScopeMap registered for scope '" + scope + "'");
+				}
+				try {
+					Object scopedInstance = scopeMap.get(beanName);
+					if (scopedInstance == null) {
+						scopedInstance = createBean(beanName, mergedBeanDefinition, args);
+						scopeMap.put(beanName, scopedInstance);
+					}
+					bean = getObjectForBeanInstance(scopedInstance, name, false);
+				}
+				catch (IllegalStateException ex) {
+					throw new BeanCreationException(beanName, "Scope '" + scope + "' is not active", ex);
+				}
 			}
 		}
 
@@ -310,7 +334,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		}
 
 		// In case of FactoryBean, return singleton status of created object if not a dereference.
-		if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass) &&
+		if (singleton && beanClass != null && FactoryBean.class.isAssignableFrom(beanClass) &&
 				!BeanFactoryUtils.isFactoryDereference(name)) {
 			FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
 			return factoryBean.isSingleton();
@@ -465,6 +489,35 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	protected boolean hasDestructionAwareBeanPostProcessors() {
 		return this.hasDestructionAwareBeanPostProcessors;
+	}
+
+	public void registerScope(String scope, ScopeMap scopeMap) {
+		Assert.notNull(scope, "Scope identifier must not be null");
+		Assert.notNull(scopeMap, "ScopeMap must not be null");
+		this.scopes.put(scope, scopeMap);
+	}
+
+	public void destroyScopedBean(String beanName) {
+		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName);
+		if (mergedBeanDefinition.isSingleton() || mergedBeanDefinition.isPrototype()) {
+			throw new IllegalArgumentException(
+					"Bean name '" + beanName + "' does not correspond to an object in a ScopeMap");
+		}
+		String scope = mergedBeanDefinition.getScope();
+		ScopeMap scopeMap = (ScopeMap) this.scopes.get(scope);
+		if (scopeMap == null) {
+			throw new IllegalStateException("No ScopeMap registered for scope '" + scope + "'");
+		}
+		Object bean = scopeMap.get(beanName);
+		if (bean != null) {
+			scopeMap.remove(beanName);
+			try {
+				new DisposableBeanAdapter(bean, beanName, mergedBeanDefinition, getBeanPostProcessors()).destroy();
+			}
+			catch (Throwable ex) {
+				logger.error("Destroy method on bean with name '" + beanName + "' threw an exception", ex);
+			}
+		}
 	}
 
 	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
@@ -951,10 +1004,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			// Register a DisposableBean implementation that performs all destruction
 			// work for the given bean: DestructionAwareBeanPostProcessors,
 			// DisposableBean interface, custom destroy method.
-			List beanPostProcessorsToUse =
-					(hasDestructionAwareBeanPostProcessors() ? getBeanPostProcessors() : null);
 			registerDisposableBean(beanName,
-					new DisposableBeanAdapter(bean, beanName, mergedBeanDefinition, beanPostProcessorsToUse));
+					new DisposableBeanAdapter(bean, beanName, mergedBeanDefinition, getBeanPostProcessors()));
 
 			// Register bean as dependent on other beans, if necessary,
 			// for correct shutdown order.
