@@ -39,7 +39,7 @@ import org.springframework.core.CollectionFactory;
 /**
  * Helper class for use by BeanFactory implementations,
  * resolving values contained in BeanDefinition objects
- * into the actual values applied to th target bean instance.
+ * into the actual values applied to the target bean instance.
  *
  * <p>Works on an AbstractBeanFactory and a plain BeanDefinition object.
  * Used by AbstractAutowireCapableBeanFactory.
