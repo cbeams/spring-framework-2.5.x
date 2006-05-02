@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,60 +20,81 @@ import javax.servlet.http.HttpServletRequest;
 
 import junit.framework.TestCase;
 
-import org.springframework.aop.framework.Advised;
-import org.springframework.aop.target.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class RequestAndSessionScopedProxyTests extends TestCase {
 
 	public void testPutBeanInRequest() throws Exception {
 		String targetBeanName = "target";
+
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setScope(WebApplicationContext.SCOPE_REQUEST);
+		bd.getPropertyValues().addPropertyValue("name", "abc");
+		wac.registerBeanDefinition(targetBeanName, bd);
+		wac.refresh();
+
 		HttpServletRequest request = new MockHttpServletRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, false);
-		bd.getPropertyValues().addPropertyValue("name", "abc");
-		beanFactory.registerBeanDefinition(targetBeanName, bd);
-		ScopedProxyFactoryBean fb = new ScopedProxyFactoryBean();
-		fb.setScopeMap(new RequestScopeMap());
-		fb.setScopeKey(targetBeanName);
-		fb.setTargetBeanName(targetBeanName);
-		fb.setBeanFactory(beanFactory);
-		fb.afterPropertiesSet();
-		Advised advised = (Advised) fb.getObject();
-		TestBean target = (TestBean) advised.getTargetSource().getTarget();
+		TestBean target = (TestBean) wac.getBean(targetBeanName);
 		assertEquals("abc", target.getName());
-		target = (TestBean)request.getAttribute(targetBeanName);
-		assertEquals("abc", target.getName());
-		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(null));
+		assertSame(target, request.getAttribute(targetBeanName));
+
+		TestBean target2 = (TestBean) wac.getBean(targetBeanName);
+		assertEquals("abc", target2.getName());
+		assertSame(target2, target);
+		assertSame(target2, request.getAttribute(targetBeanName));
+
+		request = new MockHttpServletRequest();
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+		TestBean target3 = (TestBean) wac.getBean(targetBeanName);
+		assertEquals("abc", target3.getName());
+		assertSame(target3, request.getAttribute(targetBeanName));
+		assertNotSame(target3, target);
+
+		RequestContextHolder.setRequestAttributes(null);
+		try {
+			wac.getBean(targetBeanName);
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+		}
 	}
 	
 	public void testPutBeanInSession() throws Exception {
 		String targetBeanName = "target";
 		HttpServletRequest request = new MockHttpServletRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, false);
+
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setScope(WebApplicationContext.SCOPE_SESSION);
 		bd.getPropertyValues().addPropertyValue("name", "abc");
-		beanFactory.registerBeanDefinition(targetBeanName, bd);
-		ScopedProxyFactoryBean fb = new ScopedProxyFactoryBean();
-		fb.setScopeMap(new SessionScopeMap());
-		fb.setScopeKey(targetBeanName);
-		fb.setTargetBeanName(targetBeanName);
-		fb.setBeanFactory(beanFactory);
-		fb.afterPropertiesSet();
-		Advised advised = (Advised) fb.getObject();
-		TestBean target = (TestBean) advised.getTargetSource().getTarget();
+		wac.registerBeanDefinition(targetBeanName, bd);
+		wac.refresh();
+
+		TestBean target = (TestBean) wac.getBean(targetBeanName);
 		assertEquals("abc", target.getName());
-		target = (TestBean)request.getSession().getAttribute(targetBeanName);
-		assertEquals("abc", target.getName());
-		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(null));
+		assertSame(target, request.getSession().getAttribute(targetBeanName));
+
+		RequestContextHolder.setRequestAttributes(null);
+		try {
+			wac.getBean(targetBeanName);
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+		}
 	}
 
 }
