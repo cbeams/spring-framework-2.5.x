@@ -62,6 +62,9 @@ public class RequestContextListener implements ServletRequestListener {
 	}
 
 	public void requestDestroyed(ServletRequestEvent requestEvent) {
+		ServletRequestAttributes requestAttributes =
+				(ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		requestAttributes.updateAccessedAttributes();
 		RequestContextHolder.setRequestAttributes(null);
 		LocaleContextHolder.setLocale(null);
 		if (logger.isDebugEnabled()) {

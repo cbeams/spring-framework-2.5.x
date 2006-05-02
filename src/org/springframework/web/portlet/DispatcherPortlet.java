@@ -571,7 +571,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		LocaleContextHolder.setLocaleContext(new SimpleLocaleContext(request.getLocale()));
 
 		// Expose current RequestAttributes to current thread.
-		RequestContextHolder.setRequestAttributes(new PortletRequestAttributes(request));
+		PortletRequestAttributes requestAttributes = new PortletRequestAttributes(request);
+		RequestContextHolder.setRequestAttributes(requestAttributes);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Bound request context to thread: " + request);
@@ -631,6 +632,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			}
 
 			// Reset thread-bound RequestAttributes.
+			requestAttributes.updateAccessedAttributes();
 			RequestContextHolder.setRequestAttributes(null);
 
 			// Reset thread-bound LocaleContext.

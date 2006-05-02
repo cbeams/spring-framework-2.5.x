@@ -761,7 +761,8 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Expose current RequestAttributes to current thread.
 		RequestAttributes previousRequestAttributes = RequestContextHolder.getRequestAttributes();
-		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
+		RequestContextHolder.setRequestAttributes(requestAttributes);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Bound request context to thread: " + request);
@@ -846,6 +847,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 
 			// Reset thread-bound RequestAttributes.
+			requestAttributes.updateAccessedAttributes();
 			RequestContextHolder.setRequestAttributes(previousRequestAttributes);
 
 			// Reset thread-bound LocaleContext.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,14 @@
 
 package org.springframework.web.portlet.context;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 
+import org.springframework.util.Assert;
 import org.springframework.web.context.scope.RequestAttributes;
 
 /**
@@ -41,12 +46,17 @@ public class PortletRequestAttributes implements RequestAttributes {
 
 	private final PortletRequest request;
 
+	private final Map sessionAttributesToUpdate = new HashMap();
+
+	private final Map globalSessionAttributesToUpdate = new HashMap();
+
 
 	/**
 	 * Create a new PortletRequestAttributes instance for the given request.
 	 * @param request current HTTP request
 	 */
 	public PortletRequestAttributes(PortletRequest request) {
+		Assert.notNull(request, "Request must not be null");
 		this.request = request;
 	}
 
@@ -59,10 +69,18 @@ public class PortletRequestAttributes implements RequestAttributes {
 			PortletSession session = this.request.getPortletSession(false);
 			if (session != null) {
 				if (scope == SCOPE_GLOBAL_SESSION) {
-					return session.getAttribute(name, PortletSession.APPLICATION_SCOPE);
+					Object value = session.getAttribute(name, PortletSession.APPLICATION_SCOPE);
+					if (value != null) {
+						this.globalSessionAttributesToUpdate.put(name, value);
+					}
+					return value;
 				}
 				else {
-					return session.getAttribute(name);
+					Object value = session.getAttribute(name);
+					if (value != null) {
+						this.sessionAttributesToUpdate.put(name, value);
+					}
+					return value;
 				}
 			}
 			else {
@@ -79,9 +97,11 @@ public class PortletRequestAttributes implements RequestAttributes {
 			PortletSession session = this.request.getPortletSession(true);
 			if (scope == SCOPE_GLOBAL_SESSION) {
 				session.setAttribute(name, value, PortletSession.APPLICATION_SCOPE);
+				this.globalSessionAttributesToUpdate.remove(name);
 			}
 			else {
 				session.setAttribute(name, value);
+				this.sessionAttributesToUpdate.remove(name);
 			}
 		}
 	}
@@ -95,12 +115,45 @@ public class PortletRequestAttributes implements RequestAttributes {
 			if (session != null) {
 				if (scope == SCOPE_GLOBAL_SESSION) {
 					session.removeAttribute(name, PortletSession.APPLICATION_SCOPE);
+					this.globalSessionAttributesToUpdate.remove(name);
 				}
 				else {
 					session.removeAttribute(name);
+					this.sessionAttributesToUpdate.remove(name);
 				}
 			}
 		}
+	}
+
+
+	/**
+	 * Update all accessed session attributes through <code>session.setAttribute</code>
+	 * calls, explicitly indicating to the container that they might have been modified.
+	 */
+	public void updateAccessedAttributes() {
+		PortletSession session = this.request.getPortletSession(false);
+		if (session != null) {
+			for (Iterator it = this.sessionAttributesToUpdate.keySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				String name = (String) entry.getKey();
+				Object newValue = entry.getValue();
+				Object oldValue = session.getAttribute(name);
+				if (oldValue == newValue) {
+					session.setAttribute(name, newValue);
+				}
+			}
+			for (Iterator it = this.globalSessionAttributesToUpdate.keySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				String name = (String) entry.getKey();
+				Object newValue = entry.getValue();
+				Object oldValue = session.getAttribute(name, PortletSession.APPLICATION_SCOPE);
+				if (oldValue == newValue) {
+					session.setAttribute(name, newValue, PortletSession.APPLICATION_SCOPE);
+				}
+			}
+		}
+		this.sessionAttributesToUpdate.clear();
+		this.globalSessionAttributesToUpdate.clear();
 	}
 
 }

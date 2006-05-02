@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,14 @@
 
 package org.springframework.web.context.scope;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import org.springframework.util.Assert;
 
 /**
  * Servlet-based implementation of the RequestAttributes interface.
@@ -33,12 +39,15 @@ public class ServletRequestAttributes implements RequestAttributes {
 
 	private final HttpServletRequest request;
 
+	private final Map sessionAttributesToUpdate = new HashMap();
+
 
 	/**
 	 * Create a new ServletRequestAttributes instance for the given request.
 	 * @param request current HTTP request
 	 */
 	public ServletRequestAttributes(HttpServletRequest request) {
+		Assert.notNull(request, "Request must not be null");
 		this.request = request;
 	}
 
@@ -50,7 +59,11 @@ public class ServletRequestAttributes implements RequestAttributes {
 		else {
 			HttpSession session = this.request.getSession(false);
 			if (session != null) {
-				return session.getAttribute(name);
+				Object value = session.getAttribute(name);
+				if (value != null) {
+					this.sessionAttributesToUpdate.put(name, value);
+				}
+				return value;
 			}
 			else {
 				return null;
@@ -65,6 +78,7 @@ public class ServletRequestAttributes implements RequestAttributes {
 		else {
 			HttpSession session = this.request.getSession(true);
 			session.setAttribute(name, value);
+			this.sessionAttributesToUpdate.remove(name);
 		}
 	}
 
@@ -76,8 +90,30 @@ public class ServletRequestAttributes implements RequestAttributes {
 			HttpSession session = this.request.getSession(false);
 			if (session != null) {
 				session.removeAttribute(name);
+				this.sessionAttributesToUpdate.remove(name);
 			}
 		}
+	}
+
+
+	/**
+	 * Update all accessed session attributes through <code>session.setAttribute</code>
+	 * calls, explicitly indicating to the container that they might have been modified.
+	 */
+	public void updateAccessedAttributes() {
+		HttpSession session = this.request.getSession(false);
+		if (session != null) {
+			for (Iterator it = this.sessionAttributesToUpdate.keySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				String name = (String) entry.getKey();
+				Object newValue = entry.getValue();
+				Object oldValue = session.getAttribute(name);
+				if (oldValue == newValue) {
+					session.setAttribute(name, newValue);
+				}
+			}
+		}
+		this.sessionAttributesToUpdate.clear();
 	}
 
 }

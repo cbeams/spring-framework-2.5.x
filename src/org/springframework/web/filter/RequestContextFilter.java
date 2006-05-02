@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,15 +51,17 @@ public class RequestContextFilter extends OncePerRequestFilter {
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
+		LocaleContextHolder.setLocale(request.getLocale());
+		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
+		RequestContextHolder.setRequestAttributes(requestAttributes);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Bound request context to thread: " + request);
+		}
 		try {
-			LocaleContextHolder.setLocale(request.getLocale());
-			RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-			if (logger.isDebugEnabled()) {
-				logger.debug("Bound request context to thread: " + request);
-			}
 			filterChain.doFilter(request, response);
 		}
 		finally {
+			requestAttributes.updateAccessedAttributes();
 			RequestContextHolder.setRequestAttributes(null);
 			LocaleContextHolder.setLocale(null);
 			if (logger.isDebugEnabled()) {
