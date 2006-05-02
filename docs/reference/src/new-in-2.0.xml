@@ -34,8 +34,7 @@
     <para>This chapter is divided into a number of sections, all of which have
     some <emphasis>small</emphasis> leader text that describes (briefly) a new
     or improved feature, and then provides links to the specific place where
-    said feature is actually described in detail in this reference
-    documentation.</para>
+    said feature is actually described in detail.</para>
   </section>
 
   <section id="new-in-2-ioc">
@@ -146,7 +145,7 @@
   </section>
 
   <section id="new-in-2-middle-tier">
-    <title>Middle tier (data access)</title>
+    <title>Middle Tier (Data Access)</title>
 
     <section id="new-in-2-middle-tier-transaction-configuration">
       <title>Easier configuration of declarative transactions in XML</title>
@@ -244,24 +243,11 @@
     <section id="new-in-2-web-convention">
       <title><emphasis>'convention-over-configuration'</emphasis></title>
 
-      <para>The Ruby-on-Rails (RoR) project certainly has set a lot of people
-      talking... it seems to be the poster-child of the web at the time of
-      writing. If we put to one side the (seemingly endless) debate on the
-      merits of RoR versus J2EE (the Spring reference documentation certainly
-      not being the place to add to the debate), one of the central themes
-      espoused by RoR is that of convention-over-configuration. For a lot of
-      projects, sticking to established conventions and having reasonable
-      defaults is just what they (the projects) need.</para>
-
-      <para>This theme is not just specific to RoR... pretty much any
-      framework, regardless of the host language, be it Ruby, Java, C#, etc.
-      can benefit from the application of said theme. In the context of the
-      <link linkend="mvc">Spring MVC framework</link> the Spring team have
-      chosen to take this theme, the one of convention-over-configuration, to
-      heart, and Spring MVC now ships with a lot of sensible defaults.</para>
-
-      <para>What this means to you, as an application developer using Spring
-      MVC, is that if you establish a set of naming conventions and suchlike,
+      <para>For a lot of projects, sticking to established conventions and
+      having reasonable defaults is just what they (the projects) need...
+      this theme of convention-over-configuration now has explicit support in
+      Spring MVC. What this means is that if you establish a set of naming
+      conventions and suchlike,
       you can <emphasis>substantially</emphasis> cut down on the amount of
       configuration that is required to setup handler mappings, view
       resolvers, <classname>ModelAndView</classname> instances, etc. This is
@@ -342,9 +328,7 @@
       quite compelling support for Tiger. (What follows is a set of pointers
       to Spring Java 5-only features.)</para>
 
-      <para>[TODO : cover the generic bean factory accessor, link to the JDBC
-      section for SimpleJdbcTemplate, etc.] [TODO : cover the new annotations
-      (@Required), etc.]</para>
+      <para>[TODO : cover the generic bean factory accessor]</para>
 
       <itemizedlist>
         <listitem>
