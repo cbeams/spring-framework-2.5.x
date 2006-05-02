@@ -2050,7 +2050,7 @@ public class FileUploadBean {
     <para>
         The form tag library comes bundled in <literal>spring.jar</literal>. The library descriptor is called
         <literal>spring-form.tld</literal>.</para>
-    <para>To use the tags from this library, add the following directive to top of your JSP page:
+    <para>To use the tags from this library, add the following directive to the top of your JSP page:
     <programlisting>&lt;@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %&gt;</programlisting>
     where <literal>form</literal> is the tag name prefix you want to use for the tags from this library.</para>
 
@@ -2117,6 +2117,29 @@ public class FileUploadBean {
     </table>
 </form>]]></programlisting>
 
+    <para>The preceding JSP assumes that the variable name of the form backing object is 
+    <literal>'command'</literal>. If you have put the form backing object into the model
+    under another name (definitely a best practice), then you can bind the form to the
+    named variable like so:</para>
+
+    <programlisting><![CDATA[<form:form ]]><lineannotation><emphasis role="bold">commandName="user"</emphasis></lineannotation><![CDATA[>
+    <table>
+        <tr>
+            <td>First Name:</td>
+            <td><form:input path="firstName" /></td>
+        </tr>
+        <tr>
+            <td>Last Name:</td>
+            <td><form:input path="lastName" /></td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <input type="submit" value="Save Changes" />
+            </td>
+        </tr>
+    </table>
+</form:form>]]></programlisting>
+
   </section>
 
   <section id="mvc-formtaglib-inputtag">
@@ -2163,7 +2186,6 @@ public class FileUploadBean {
     public void setFavouriteWord(String favouriteWord) {
         this.favouriteWord = favouriteWord;
     }
-
 }]]></programlisting>
 
     <para>The <literal>form.jsp</literal> would look like:</para>
@@ -2183,7 +2205,8 @@ public class FileUploadBean {
                 <%-- Approach 2: Property is of an array or of type java.util.Collection --%>
                 Quidditch: <form:checkbox path="preferences.interests" value="Quidditch"/>
                 Herbology: <form:checkbox path="preferences.interests" value="Herbology"/>
-                Defence Against the Dark Arts: <form:checkbox path="preferences.interests" value="Defence Against the Dark Arts"/>
+                Defence Against the Dark Arts: <form:checkbox path="preferences.interests"
+                    value="Defence Against the Dark Arts"/>
             </td>
             <td></td>
         </tr>
@@ -2201,19 +2224,19 @@ public class FileUploadBean {
       <para>There are 3 approaches to the <literal>checkbox</literal> tag which should meet all your checkbox needs.
 
           <itemizedlist>
-            <listitem>Approach One  -  When the bound value is of type <literal>java.lang.Boolean</literal>,
+            <listitem><para>Approach One  -  When the bound value is of type <literal>java.lang.Boolean</literal>,
             the <literal>input(checkbox)</literal> is marked as 'checked' if the bound value is
             <literal>true</literal>. The <literal>value</literal> attribute corresponds to the
-            resolved value of the <literal>setValue(Object)</literal> value property.</listitem>
+            resolved value of the <literal>setValue(Object)</literal> value property.</para></listitem>
 
-            <listitem>Approach Two - When the bound value is of type <literal>array</literal> or
+            <listitem><para>Approach Two - When the bound value is of type <literal>array</literal> or
             <literal>java.util.Collection</literal>, the <literal>input(checkbox)</literal> is marked as 'checked'
             if the configured <literal>setValue(Object)</literal> value is present in the bound
-            <literal>Collection</literal>.</listitem>
+            <literal>Collection</literal>.</para></listitem>
 
-            <listitem>Approach Three - For any other bound value type, the <literal>input(checkbox)</literal>
+            <listitem><para>Approach Three - For any other bound value type, the <literal>input(checkbox)</literal>
             is marked as 'checked' if the the configured <literal>setValue(Object)</literal> is equal to the
-            bound value.</listitem>
+            bound value.</para></listitem>
           </itemizedlist>
       </para>
 
@@ -2227,19 +2250,21 @@ public class FileUploadBean {
         <input type="hidden" boundValue="1" name="_preferences.interests"/>
         Herbology: <input name="preferences.interests" type="checkbox" value="Herbology"/>
         <input type="hidden" boundValue="1" name="_preferences.interests"/>
-        Defence Against the Dark Arts: <input name="preferences.interests" type="checkbox" value="Defence Against the Dark Arts"/>
+        Defence Against the Dark Arts: <input name="preferences.interests" type="checkbox"
+            value="Defence Against the Dark Arts"/>
         <input type="hidden" boundValue="1" name="_preferences.interests"/>
     </td>
     <td></td>
 </tr>]]></programlisting>
 
-    <para>What you might not expect to see is the additional field after each checkbox.
+    <para>What you might not expect to see is the additional hidden field after each checkbox.
     When a checkbox in an HTML page is not checked, its value will not be sent to the server as part of the HTTP
     request parameters once the form is submitted, so we need a workaround for this quirk in HTML in order for Spring
     form data binding to work. The <literal>checkbox</literal> tag follows the existing Spring convention of
     including a hidden parameter prefixed by an underscore ("_") for each checkbox. By doing this, you are
-    effectively telling Spring that "the checkbox was visible in the form and I want my object to which the form
-    data will be bound to reflect the state of the checkbox no matter what".</para>
+    effectively telling Spring that <quote><emphasis>the checkbox was visible in the form and I want my
+    object to which the form data will be bound to reflect the state of the checkbox no matter
+    what</emphasis></quote>.</para>
 
   <section id="mvc-formtaglib-radiobuttontag">
     <title>The <literal>radiobutton</literal> tag</title>
@@ -2260,10 +2285,10 @@ public class FileUploadBean {
     <para>This tag renders an HTML 'input' tag with type 'password' using the bound value.</para>
 
     <programlisting><![CDATA[<tr>
-            <td>Password:</td>
-            <td>
-                <form:password path="password" />
-            </td>
+    <td>Password:</td>
+    <td>
+        <form:password path="password" />
+    </td>
 </tr>]]></programlisting>
   </section>
 
@@ -2298,15 +2323,15 @@ public class FileUploadBean {
     <para>This tag renders an HTML 'option'. It sets 'selected' as appropriate based on the bound value.</para>
 
     <programlisting><![CDATA[<tr>
-            <td>House:</td>
-            <td>
-                <form:select path="house">
-                    <form:option value="Gryffindor"/>
-                    <form:option value="Hufflepuff"/>
-                    <form:option value="Ravenclaw"/>
-                    <form:option value="Slytherin"/>
-                </form:select>
-            </td>
+    <td>House:</td>
+    <td>
+        <form:select path="house">
+            <form:option value="Gryffindor"/>
+            <form:option value="Hufflepuff"/>
+            <form:option value="Ravenclaw"/>
+            <form:option value="Slytherin"/>
+        </form:select>
+    </td>
 </tr>]]></programlisting>
 
     <para>If the <literal>User's</literal> house was in Gryffindor, the HTML source of the 'House'
@@ -2328,8 +2353,8 @@ public class FileUploadBean {
 
   <section id="mvc-formtaglib-optionstag">
     <title>The <literal>options</literal> tag</title>
-    <para>This tag renders a list of HTML 'option' tags. It sets 'selected' as appropriate based on the
-    bound value.</para>
+    <para>This tag renders a list of HTML 'option' tags. It sets the 'selected' attribute
+    as appropriate based on the bound value.</para>
 
     <programlisting><![CDATA[<tr>
     <td>Country:</td>
@@ -2402,8 +2427,8 @@ public class FileUploadBean {
     controller or those that were created by any validators associated with your controller.</para>
 
     <para>Let's assume we want to display all error messages for the <literal>firstName</literal> and
-    <literal>lastName</literal> fields once we submit the form. We have a validator for the <literal>User</literal>
-    object called <literal>UserValidator</literal>.</para>
+    <literal>lastName</literal> fields once we submit the form. We have a validator for instances of the
+    <classname>User</classname> class called <classname>UserValidator</classname>.</para>
 
     <programlisting><![CDATA[public class UserValidator implements Validator {
 
@@ -2468,15 +2493,15 @@ public class FileUploadBean {
     </table>
 </form>]]></programlisting>
 
-    <para>What if we want to display the entire list of errors for a given page? The example below shows that
-    the <literal>errors</literal> tag also supports some basic wildcarding functionality.
+    <para>What if we want to display the entire list of errors for a given page? The example
+    below shows that the <literal>errors</literal> tag also supports some basic wildcarding
+    functionality.</para>
 
-        <itemizedlist>
-            <listitem><literal>path="*"</literal> - displays all errors</listitem>
-            <listitem><literal>path="lastName*"</literal> - displays all errors associated with
-            the <literal>lastName</literal> field</listitem>
-        </itemizedlist>
-    </para>
+    <itemizedlist>
+        <listitem><literal>path="*"</literal> - displays all errors</listitem>
+        <listitem><literal>path="lastName*"</literal> - displays all errors associated with
+        the <literal>lastName</literal> field</listitem>
+    </itemizedlist>
 
     <para>The example below will display a list of errors at the top of the page, followed by
     field-specific errors next to the fields:</para>
@@ -2524,7 +2549,7 @@ public class FileUploadBean {
         </tr>
 </form>]]></programlisting>
 
-  </section>
+    </section>
   </section>
 
 
