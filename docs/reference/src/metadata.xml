@@ -271,7 +271,7 @@ public void echoException(Exception ex) throws Exception {
 				</para>
 				<itemizedlist>
 					<listitem>
-						<para><xref linkend="transaction-attransactional"/></para>
+						<para><xref linkend="transaction-declarative-annotations"/></para>
 					</listitem>
 					<listitem>
 						<para><xref linkend="aspectj-atconfigurable"/></para>
