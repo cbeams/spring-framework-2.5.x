@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,18 @@ import org.w3c.dom.Element;
  * to transform the <code>BeanDefinition</code> of the enclosing <code>&lt;bean&gt;</code> tag,
  * potentially even returning a completely different <code>BeanDefinition</code> to replace
  * the original.
+ *
  * <p>{@link BeanDefinitionDecorator BeanDefinitionDecorators} should be aware that they may be part of
  * a chain. In particular, a {@link BeanDefinitionDecorator} should be aware that a previous
  * {@link BeanDefinitionDecorator} may have replaced the original <code>BeanDefinition</code> with
  * a {@link org.springframework.aop.framework.ProxyFactoryBean} definition allowing for custom
  * {@link org.aopalliance.intercept.MethodInterceptor interceptors} to be added.
+ *
  * <p>{@link BeanDefinitionDecorator BeanDefinitionDecorators} that wish to add an interceptor to the
  * enclosing bean should extend {@link org.springframework.aop.config.AbstractInterceptorDrivenBeanDefinitionDecorator} which handles
  * the chaining ensuring that only one proxy is created and that it contains all interceptors from the
  * chain.
+ *
  * <p>The parser locates a {@link BeanDefinitionDecorator} from the {@link NamespaceHandler} for the
  * namespace in which the custom tag resides.
  *
@@ -45,13 +48,14 @@ import org.w3c.dom.Element;
  */
 public interface BeanDefinitionDecorator {
 
-    /**
-     * Parse the specified {@link Element} and decorate the supplied <code>BeanDefinition</code>, returning
-     * the decorated definition.
-     * <p/>Implementations may choose to return a completely new definition, which will replace
-     * the original definition in the resulting <code>BeanFactory</code>.
-     * <p/>The supplied {@link ParserContext} can be used to register any additional beans
-     * needed to support the main definition.
-     */
-    BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definition, ParserContext parserContext);
+	/**
+	 * Parse the specified {@link Element} and decorate the supplied <code>BeanDefinition</code>,
+	 * returning the decorated definition.
+	 * <p>Implementations may choose to return a completely new definition, which will replace
+	 * the original definition in the resulting <code>BeanFactory</code>.
+	 * <p>The supplied {@link ParserContext} can be used to register any additional beans
+	 * needed to support the main definition.
+	 */
+	BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definition, ParserContext parserContext);
+
 }

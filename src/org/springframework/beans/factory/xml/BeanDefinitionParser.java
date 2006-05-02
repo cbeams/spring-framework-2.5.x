@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,15 @@ import org.springframework.beans.factory.config.BeanDefinition;
  */
 public interface BeanDefinitionParser {
 
-		/**
-		 * Parse the specified {@link Element} and register resulting <code>BeanDefinitions</code>
-		 * with{@link BeanDefinitionRegistry} embedded in the supplied {@link ParserContext}.
-		 * <p/>Implementations should return the primary <code>BeanDefinition</code> that results
-		 * from the parse phase if they which to be used nested inside <code>&lt;property&gt;</code> tag.
-		 * Implementations may return <code>null</code> if they will <strong>not</strong> be used in
-		 * a nested scenario. 
-		 * @return the primary <code>BeanDefinition</code>.
-		 */
-		BeanDefinition parse(Element element, ParserContext parserContext);
+	/**
+	 * Parse the specified {@link Element} and register resulting <code>BeanDefinitions</code>
+	 * with the {@link BeanDefinitionRegistry} embedded in the supplied {@link ParserContext}.
+	 * <p>Implementations should return the primary <code>BeanDefinition</code> that results
+	 * from the parse phase if they which to be used nested inside <code>&lt;property&gt;</code> tag.
+	 * Implementations may return <code>null</code> if they will <strong>not</strong> be used in
+	 * a nested scenario.
+	 * @return the primary <code>BeanDefinition</code>
+	 */
+	BeanDefinition parse(Element element, ParserContext parserContext);
+
 }
