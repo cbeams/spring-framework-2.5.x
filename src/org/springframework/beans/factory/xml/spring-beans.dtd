@@ -13,11 +13,11 @@
 	Typically the bean class is specified, along with JavaBean properties
 	and/or constructor arguments.
 
-	Bean instances can be "singletons" (shared instances) or "prototypes"
-	(independent instances). Further scopes are supposed to be built on top
-	of the core BeanFactory infrastructure and are therefore not part of it.
+	A bean instance can be a "singleton" (shared instance) or a "prototype"
+	(independent instance). Further scopes can be provided by extended
+	bean factories, for example in a web environment.
 
-	References among beans are supported, i.e. setting a JavaBean property
+	References among beans are supported, that is, setting a JavaBean property
 	or a constructor argument to refer to another bean in the same factory
 	(or an ancestor factory).
 
@@ -28,8 +28,8 @@
 	There is also support for lists, sets, maps, and java.util.Properties
 	as bean property types or constructor argument types.
 
-	As the format is simple, a DTD is sufficient, and there's no need
-	for a schema at this point.
+	For simple purposes, this DTD is sufficient. As of Spring 2.0,
+	XSD-based bean definitions are supported as more powerful alternative.
 
 	XML documents that conform to this DTD should declare the following doctype:
 
@@ -162,6 +162,35 @@
 <!ATTLIST bean parent CDATA #IMPLIED>
 
 <!--
+	The scope of this bean: typically "singleton" (one shared instance,
+	which will be returned by all calls to getBean() with the id),
+	or "prototype" (independent instance resulting from each call to
+	getBean(). Default is "singleton".
+
+	Singletons are most commonly used, and are ideal for multi-threaded
+	service objects. Further scopes, such as "request" or "session",
+	might be supported by extended bean factories (for example, in a
+	web environment).
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
+-->
+<!ATTLIST bean scope CDATA #IMPLIED>
+
+<!--
+	Is this bean a "singleton" (one shared instance, which will be returned
+	by all calls to getBean() with the id), or a "prototype" (independent
+	instance resulting from each call to getBean(). Default is singleton.
+
+	Note that as of Spring 2.0, this flag is just an alternative way to
+	specify scope="singleton" or scope="prototype".
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
+-->
+<!ATTLIST bean singleton (true | false) #IMPLIED>
+
+<!--
 	Is this bean "abstract", i.e. not meant to be instantiated itself but
 	rather just serving as parent for concrete child bean definitions.
 	Default is "false". Specify "true" to tell the bean factory to not try to
@@ -170,21 +199,7 @@
 	Note: This attribute will not be inherited by child bean definitions.
 	Hence, it needs to be specified per concrete bean definition.
 -->
-<!ATTLIST bean abstract (true | false) "false">
-
-<!--
-	Is this bean a "singleton" (one shared instance, which will
-	be returned by all calls to getBean() with the id),
-	or a "prototype" (independent instance resulting from each call to
-	getBean(). Default is singleton.
-
-	Singletons are most commonly used, and are ideal for multi-threaded
-	service objects.
-
-	Note: This attribute will not be inherited by child bean definitions.
-	Hence, it needs to be specified per concrete bean definition.
--->
-<!ATTLIST bean singleton (true | false) "true">
+<!ATTLIST bean abstract (true | false) #IMPLIED>
 
 <!--
 	If this bean should be lazily initialized.
@@ -201,7 +216,7 @@
   Indicates whether or not this bean should be considered when looking
   for candidates to satisfy another beans autowiring requirements.
 -->
-<!ATTLIST bean autowire-candidate (true | false) "true">
+<!ATTLIST bean autowire-candidate (true | false) #IMPLIED>
 
 <!--
 	Optional attribute controlling whether to "autowire" bean properties.

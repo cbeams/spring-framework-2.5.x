@@ -32,6 +32,10 @@ import org.w3c.dom.NodeList;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.BeanEntry;
+import org.springframework.beans.factory.ConstructorArgEntry;
+import org.springframework.beans.factory.ParseState;
+import org.springframework.beans.factory.PropertyEntry;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -47,15 +51,11 @@ import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReaderContext;
 import org.springframework.beans.factory.support.ReplaceOverride;
-import org.springframework.beans.factory.ParseState;
-import org.springframework.beans.factory.PropertyEntry;
-import org.springframework.beans.factory.ConstructorArgEntry;
-import org.springframework.beans.factory.BeanEntry;
+import org.springframework.core.AttributeAccessor;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.Assert;
 import org.springframework.util.xml.DomUtils;
-import org.springframework.core.AttributeAccessor;
 
 /**
  * Stateful helper class used to parse XML bean definitions. Intended for use
@@ -110,6 +110,8 @@ public class XmlBeanDefinitionParserHelper {
 	public static final String CLASS_ATTRIBUTE = "class";
 
 	public static final String ABSTRACT_ATTRIBUTE = "abstract";
+
+	public static final String SCOPE_ATTRIBUTE = "scope";
 
 	public static final String SINGLETON_ATTRIBUTE = "singleton";
 
@@ -226,6 +228,19 @@ public class XmlBeanDefinitionParserHelper {
 
 	private String defaultMerge;
 
+
+	/**
+	 * Creates a new <code>XmlBeanDefinitionParserHelper</code> associated with the
+	 * supplied {@link ReaderContext}.
+	 */
+	public XmlBeanDefinitionParserHelper(ReaderContext readerContext, NamespaceHandlerResolver handlerResolver) {
+		Assert.notNull(readerContext, "'readerContext' cannot be null.");
+		Assert.notNull(handlerResolver, "'handlerResolver' cannot be null.");
+		this.readerContext = readerContext;
+		this.handlerResolver = handlerResolver;
+	}
+
+
 	/**
 	 * Gets the {@link ReaderContext} associated with this helper instance.
 	 */
@@ -317,16 +332,6 @@ public class XmlBeanDefinitionParserHelper {
 		return defaultMerge;
 	}
 
-	/**
-	 * Creates a new <code>XmlBeanDefinitionParserHelper</code> associated with the
-	 * supplied {@link ReaderContext}.
-	 */
-	public XmlBeanDefinitionParserHelper(ReaderContext readerContext, NamespaceHandlerResolver handlerResolver) {
-		Assert.notNull(readerContext, "'readerContext' cannot be null.");
-		Assert.notNull(handlerResolver, "'handlerResolver' cannot be null.");
-		this.readerContext = readerContext;
-		this.handlerResolver = handlerResolver;
-	}
 
 	/**
 	 * Initialize the default lazy-init, autowire, dependency check settings,
@@ -413,8 +418,39 @@ public class XmlBeanDefinitionParserHelper {
 
 			parseMetaElements(ele, bd);
 
-			// store the configuration source
-			bd.setSource(extractSource(ele));
+			if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
+				bd.setScope(ele.getAttribute(SCOPE_ATTRIBUTE));
+			}
+			if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
+				bd.setSingleton(TRUE_VALUE.equals(ele.getAttribute(SINGLETON_ATTRIBUTE)));
+			}
+
+			if (ele.hasAttribute(ABSTRACT_ATTRIBUTE)) {
+				bd.setAbstract(TRUE_VALUE.equals(ele.getAttribute(ABSTRACT_ATTRIBUTE)));
+			}
+
+			String lazyInit = ele.getAttribute(LAZY_INIT_ATTRIBUTE);
+			if (DEFAULT_VALUE.equals(lazyInit) && bd.isSingleton()) {
+				// Just apply default to singletons, as lazy-init has no meaning for prototypes.
+				lazyInit = getDefaultLazyInit();
+			}
+			bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
+
+			if (ele.hasAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE)) {
+				bd.setAutowireCandidate(TRUE_VALUE.equals(ele.getAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE)));
+			}
+
+			String autowire = ele.getAttribute(AUTOWIRE_ATTRIBUTE);
+			if (DEFAULT_VALUE.equals(autowire)) {
+				autowire = getDefaultAutowire();
+			}
+			bd.setAutowireMode(getAutowireMode(autowire));
+
+			String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
+			if (DEFAULT_VALUE.equals(dependencyCheck)) {
+				dependencyCheck = getDefaultDependencyCheck();
+			}
+			bd.setDependencyCheck(getDependencyCheck(dependencyCheck));
 
 			if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 				String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
@@ -427,18 +463,6 @@ public class XmlBeanDefinitionParserHelper {
 			if (ele.hasAttribute(FACTORY_BEAN_ATTRIBUTE)) {
 				bd.setFactoryBeanName(ele.getAttribute(FACTORY_BEAN_ATTRIBUTE));
 			}
-
-			String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
-			if (DEFAULT_VALUE.equals(dependencyCheck)) {
-				dependencyCheck = getDefaultDependencyCheck();
-			}
-			bd.setDependencyCheck(getDependencyCheck(dependencyCheck));
-
-			String autowire = ele.getAttribute(AUTOWIRE_ATTRIBUTE);
-			if (DEFAULT_VALUE.equals(autowire)) {
-				autowire = getDefaultAutowire();
-			}
-			bd.setAutowireMode(getAutowireMode(autowire));
 
 			if (ele.hasAttribute(INIT_METHOD_ATTRIBUTE)) {
 				String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
@@ -470,24 +494,8 @@ public class XmlBeanDefinitionParserHelper {
 			parseReplacedMethodSubElements(ele, bd.getMethodOverrides());
 
 			bd.setResourceDescription(getReaderContext().getResource().getDescription());
+			bd.setSource(extractSource(ele));
 
-			if (ele.hasAttribute(ABSTRACT_ATTRIBUTE)) {
-				bd.setAbstract(TRUE_VALUE.equals(ele.getAttribute(ABSTRACT_ATTRIBUTE)));
-			}
-
-			if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
-				bd.setSingleton(TRUE_VALUE.equals(ele.getAttribute(SINGLETON_ATTRIBUTE)));
-			}
-
-			String lazyInit = ele.getAttribute(LAZY_INIT_ATTRIBUTE);
-			if (DEFAULT_VALUE.equals(lazyInit) && bd.isSingleton()) {
-				// Just apply default to singletons, as lazy-init has no meaning for prototypes.
-				lazyInit = getDefaultLazyInit();
-			}
-			bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
-
-
-			bd.setAutowireCandidate(TRUE_VALUE.equals(ele.getAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE)));
 			return bd;
 		}
 		catch (ClassNotFoundException ex) {

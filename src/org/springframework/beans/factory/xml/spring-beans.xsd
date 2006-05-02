@@ -88,8 +88,9 @@
 		<xsd:attribute name="name" type="xsd:string"/>
 		<xsd:attribute name="class" type="xsd:string"/>
 		<xsd:attribute name="parent" type="xsd:string"/>
-		<xsd:attribute name="abstract" default="false" type="xsd:boolean"/>
-		<xsd:attribute name="singleton" default="true" type="xsd:boolean"/>
+		<xsd:attribute name="scope" type="xsd:string"/>
+		<xsd:attribute name="singleton" type="xsd:boolean"/>
+		<xsd:attribute name="abstract" type="xsd:boolean"/>
 		<xsd:attribute name="lazy-init" default="default" type="defaultable-boolean"/>
 		<xsd:attribute name="autowire" default="default">
 			<xsd:simpleType>
@@ -119,7 +120,7 @@
 		<xsd:attribute name="destroy-method" type="xsd:string"/>
 		<xsd:attribute name="factory-method" type="xsd:string"/>
 		<xsd:attribute name="factory-bean" type="xsd:string"/>
-		<xsd:attribute name="autowire-candidate" type="xsd:boolean" default="true"/>
+		<xsd:attribute name="autowire-candidate" type="xsd:boolean"/>
 		<xsd:anyAttribute namespace="##other" processContents="strict"/>
 	</xsd:attributeGroup>
 
