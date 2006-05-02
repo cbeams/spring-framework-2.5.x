@@ -282,7 +282,7 @@ public int countOfActors(Actor exampleActor) {
 			<para>
 				The <classname>SimpleJdbcTemplate</classname> class is a wrapper around
 				the classic Spring <classname>JdbcTemplate</classname>, that takes advantage
-				Java 5 language features such as varargs and autoboxing. The
+				of Java 5 language features such as varargs and autoboxing. The
 				<classname>SimpleJdbcTemplate</classname> class is somewhat of a sop
 				to the syntactic-sugar-like features of Java 5, but as anyone who has
 				developed on Java 5 and then had to move back to developing on a
@@ -306,7 +306,7 @@ public Actor findActor(long id) {
     
         public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
             Actor actor = new Actor();
-            actor.setid(rs.getLong(Long.valueOf(rs.getLong("id"))));
+            actor.setId(rs.getLong(Long.valueOf(rs.getLong("id"))));
             actor.setFirstName(rs.getString("first_name"));
             actor.setLastName(rs.getString("last_name"));
             return actor;
@@ -334,7 +334,7 @@ public Actor findActor(long id) {
         ]]><lineannotation>// notice the return type (c.f. Java 5 covariant return types)</lineannotation><![CDATA[
         public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
             Actor actor = new Actor();
-            actor.setid(rs.getLong(Long.valueOf(rs.getLong("id"))));
+            actor.setId(rs.getLong("id"));
             actor.setFirstName(rs.getString("first_name"));
             actor.setLastName(rs.getString("last_name"));
             return actor;
