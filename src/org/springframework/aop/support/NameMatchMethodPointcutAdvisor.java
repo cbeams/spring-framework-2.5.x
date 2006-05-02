@@ -20,6 +20,7 @@ import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
+import org.springframework.aop.ClassFilter;
 import org.springframework.core.Ordered;
 import org.springframework.util.ObjectUtils;
 
@@ -61,5 +62,9 @@ public class NameMatchMethodPointcutAdvisor extends AbstractPointcutAdvisor {
 
 	public void setMappedNames(String[] mappedNames) {
 		this.pointcut.setMappedNames(mappedNames);
+	}
+
+	public void setClassFilter(ClassFilter classFilter) {
+		this.pointcut.setClassFilter(classFilter);
 	}
 }
