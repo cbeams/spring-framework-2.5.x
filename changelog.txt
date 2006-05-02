@@ -3,6 +3,25 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0 RC1 (15.5.2006)
+--------------------------------------
+
+Package org.springframework.aop
+* reworked support for scoped proxies to build on scoping support in core BeanFactory
+* removed incomplete support for ScopedObject handles and persistent scopes
+
+Package org.springframework.beans
+* added scoping support to core BeanFactory, for creating raw target beans in arbitrary scopes
+* added "scope" attribute at bean level to XML bean definition format, superseding singleton="true"/"false"
+
+Package org.springframework.orm
+* fixed JpaInterceptor to actually bind a new EntityManager to the thread again (worked in M3, didn't work in M4)
+
+Package org.springframework.web
+* added support for request and session scopes to all WebApplicationContexts
+* moved StaticPortletApplicationContext from test tree over to main source tree
+
+
 Changes in version 2.0 M4 (23.4.2006)
 -------------------------------------
 
