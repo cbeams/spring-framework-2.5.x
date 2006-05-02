@@ -347,7 +347,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * returned from all calls.
 	 */
 	public boolean isSingleton() {
-		return (this.scope == SCOPE_SINGLETON);
+		return (SCOPE_SINGLETON.equals(this.scope));
 	}
 
 	/**
@@ -355,7 +355,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * returned for each call.
 	 */
 	public boolean isPrototype() {
-		return (this.scope == SCOPE_PROTOTYPE);
+		return (SCOPE_PROTOTYPE.equals(this.scope));
 	}
 
 	/**
