@@ -69,7 +69,7 @@ import java.util.Properties;
  */
 public class XsltView extends AbstractUrlBasedView {
 
-	protected TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	private TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
 	private ErrorListener errorListener = new SimpleTransformErrorListener(logger);
 
