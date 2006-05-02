@@ -29,18 +29,19 @@ import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.context.scope.RequestScopeMap;
+import org.springframework.web.context.scope.SessionScopeMap;
 
 /**
  * Static WebApplicationContext implementation for testing.
  * Not for use in production applications.
  *
- * <p>Interprets resource paths as servlet context resources, i.e. as paths beneath
- * the web application root. Absolute paths, e.g. for files outside the web app root,
+ * <p>Interprets resource paths as servlet context resources, that is, as paths beneath
+ * the web application root. Absolute paths, for example for files outside the web app root,
  * can be accessed via "file:" URLs, as implemented by AbstractApplicationContext.
  *
  * <p>In addition to the special beans detected by AbstractApplicationContext,
- * this class detects a ThemeSource bean in the context, with the name
- * "themeSource".
+ * this class detects a ThemeSource bean in the context, with the name "themeSource".
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -95,11 +96,11 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 		return this.namespace;
 	}
 
-    /**
-     * The {@link StaticWebApplicationContext} class does not support this method.
-     * @throws UnsupportedOperationException <b>always</b>
-     */
-    public void setConfigLocations(String[] configLocations) {
+	/**
+	 * The {@link StaticWebApplicationContext} class does not support this method.
+	 * @throws UnsupportedOperationException <b>always</b>
+	 */
+	public void setConfigLocations(String[] configLocations) {
 		throw new UnsupportedOperationException("StaticWebApplicationContext does not support configLocations");
 	}
 
@@ -109,6 +110,10 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	 * @see ServletContextAwareProcessor
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		beanFactory.registerScope(SCOPE_REQUEST, new RequestScopeMap());
+		beanFactory.registerScope(SCOPE_SESSION, new SessionScopeMap(false));
+		beanFactory.registerScope(SCOPE_GLOBAL_SESSION, new SessionScopeMap(true));
+
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 		beanFactory.ignoreDependencyInterface(ServletConfigAware.class);

@@ -33,6 +33,8 @@ import org.springframework.util.SystemPropertyUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.context.scope.RequestScopeMap;
+import org.springframework.web.context.scope.SessionScopeMap;
 
 /**
  * AbstractRefreshableApplicationContext subclass that implements the
@@ -51,8 +53,7 @@ import org.springframework.web.context.ServletContextAware;
  * can be accessed via "file:" URLs, as implemented by AbstractApplicationContext.
  *
  * <p>In addition to the special beans detected by AbstractApplicationContext,
- * this class detects a ThemeSource bean in the context, with the name
- * "themeSource".
+ * this class detects a ThemeSource bean in the context, with the name "themeSource".
  *
  * <p><b>This is the web context to be subclassed for a different bean definition format.</b>
  * Such a context implementation can be specified as "contextClass" context-param
@@ -170,6 +171,10 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	 * @see ServletContextAwareProcessor
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		beanFactory.registerScope(SCOPE_REQUEST, new RequestScopeMap());
+		beanFactory.registerScope(SCOPE_SESSION, new SessionScopeMap(false));
+		beanFactory.registerScope(SCOPE_GLOBAL_SESSION, new SessionScopeMap(true));
+
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 		beanFactory.ignoreDependencyInterface(ServletConfigAware.class);

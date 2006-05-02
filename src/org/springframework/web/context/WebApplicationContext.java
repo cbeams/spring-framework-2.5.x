@@ -55,6 +55,25 @@ public interface WebApplicationContext extends ApplicationContext {
 
 
 	/**
+	 * Scope identifier for request scope: "request".
+	 * Supported in addition to the standard scopes "singleton" and "prototype".
+	 */
+	String SCOPE_REQUEST = "request";
+
+	/**
+	 * Scope identifier for session scope: "session".
+	 * Supported in addition to the standard scopes "singleton" and "prototype".
+	 */
+	String SCOPE_SESSION = "session";
+
+	/**
+	 * Scope identifier for global session scope: "globalSession".
+	 * Supported in addition to the standard scopes "singleton" and "prototype".
+	 */
+	String SCOPE_GLOBAL_SESSION = "globalSession";
+
+
+	/**
 	 * Return the standard Servlet API ServletContext for this application.
 	 */
 	ServletContext getServletContext();

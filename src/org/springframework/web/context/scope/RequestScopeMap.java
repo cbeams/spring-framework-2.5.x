@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.context.scope;
 
-import org.springframework.aop.target.scope.ScopeMap;
+import org.springframework.beans.factory.config.ScopeMap;
 
 /**
  * Request-backed ScopeMap implementation. Relies on a thread-bound
@@ -38,10 +38,6 @@ import org.springframework.aop.target.scope.ScopeMap;
  * @see org.springframework.web.portlet.DispatcherPortlet
  */
 public class RequestScopeMap implements ScopeMap {
-
-	public boolean isPersistent() {
-		return false;
-	}
 
 	public Object get(String name) {
 		return RequestContextHolder.currentRequestAttributes().getAttribute(name, RequestAttributes.SCOPE_REQUEST);

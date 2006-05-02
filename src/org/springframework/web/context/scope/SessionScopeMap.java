@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.context.scope;
 
-import org.springframework.aop.target.scope.ScopeMap;
+import org.springframework.beans.factory.config.ScopeMap;
 
 /**
  * Session-backed ScopeMap implementation. Relies on a thread-bound
@@ -40,31 +40,32 @@ import org.springframework.aop.target.scope.ScopeMap;
  */
 public class SessionScopeMap implements ScopeMap {
 
-	private int scope = RequestAttributes.SCOPE_SESSION;
+	private final int scope;
 
 
 	/**
-	 * Set whether to store attributes in the global session,
-	 * provided that such a distinction is available.
-	 * <p>Default is "false:" Do not store in a global session
-	 * but rather prefer a locally isolated session.
-	 * <p>This distinction is important for Portlet environments,
-	 * where there are two notions of a session: "portlet scope"
-	 * and "application scope". If this flag is on, objects will
-	 * be put into the "application scope" session; else they
-	 * will end up in the "portlet scope" session (the default).
+	 * Create a new SessionScopeMap, storing attributes in a locally
+	 * isolated session.
+	 */
+	public SessionScopeMap() {
+		this.scope = RequestAttributes.SCOPE_SESSION;
+	}
+
+	/**
+	 * Create a new SessionScopeMap, specifying whether to store attributes
+	 * in the global session, provided that such a distinction is available.
+	 * <p>This distinction is important for Portlet environments, where there
+	 * are two notions of a session: "portlet scope" and "application scope".
+	 * If this flag is on, objects will be put into the "application scope" session;
+	 * else they will end up in the "portlet scope" session (the typical default).
 	 * <p>In a Servlet environment, this flag is effectively ignored.
 	 * @see org.springframework.web.portlet.context.PortletRequestAttributes
 	 * @see ServletRequestAttributes
 	 */
-	public void setGlobalSession(boolean globalSession) {
+	public SessionScopeMap(boolean globalSession) {
 		this.scope = (globalSession ? RequestAttributes.SCOPE_GLOBAL_SESSION : RequestAttributes.SCOPE_SESSION);
 	}
 
-
-	public boolean isPersistent() {
-		return false;
-	}
 
 	public Object get(String name) {
 		return RequestContextHolder.currentRequestAttributes().getAttribute(name, this.scope);

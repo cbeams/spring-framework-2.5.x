@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.scope.RequestScopeMap;
+import org.springframework.web.context.scope.SessionScopeMap;
 import org.springframework.web.context.support.ServletContextAwareProcessor;
 
 /**
@@ -175,6 +177,10 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 	 * @see PortletContextAwareProcessor
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		beanFactory.registerScope(SCOPE_REQUEST, new RequestScopeMap());
+		beanFactory.registerScope(SCOPE_SESSION, new SessionScopeMap(false));
+		beanFactory.registerScope(SCOPE_GLOBAL_SESSION, new SessionScopeMap(true));
+
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
 		beanFactory.addBeanPostProcessor(new PortletContextAwareProcessor(this.portletContext, this.portletConfig));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
