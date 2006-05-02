@@ -488,7 +488,7 @@
 				<para>
 					The <classname>ClassPathXmlApplicationContext</classname> exposes a number of
 					constructors to enable convenient instantiation. The basic idea is that one
-					supplied merely a string array containing just the filenames of the XML files
+					supplies merely a string array containing just the filenames of the XML files
 					themselves (without the leading path information), and one
 					<emphasis>also</emphasis> supplies a <classname>Class</classname>; the
 					<classname>ClassPathXmlApplicationContext</classname> will derive the
