@@ -435,7 +435,7 @@ public class MakeLockable {
 			<para>
 				As you would expect, it is possible to use auto proxy creation
 				with <literal>@AspectJ</literal> syntax. This is achieved using
-				<classname>org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator</classname>.
+				<classname>org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator</classname>.
 				This is a subclass of <classname>DefaultAdvisorAutoProxyCreator</classname>,
 				meaning that it will also apply any Spring AOP advisors found in the
 				application context to which it applies.
@@ -445,7 +445,7 @@ public class MakeLockable {
 				application context:
 			</para>
 			<programlisting><![CDATA[<bean 
-  class="org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator" />]]></programlisting>
+  class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" />]]></programlisting>
 			<para>
 				No configuration is usually required. See the documentation on
 				<classname>DefaultAutoProxyCreator</classname> and superclasses for the regular configuration
