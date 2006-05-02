@@ -97,14 +97,13 @@ public class ScriptFactoryPostProcessor
 	/**
 	 * The {@link org.springframework.core.io.Resource}-style prefix that denotes
 	 * an inline script.
-	 * <p>
-	 * An inline script is a script that is defined right there in the
-	 * (typically XML) configuration, as opposed to being defined in an
-	 * external file.
+	 * <p>An inline script is a script that is defined right there in the (typically XML)
+	 * configuration, as opposed to being defined in an external file.
 	 */
 	public static final String INLINE_SCRIPT_PREFIX = "inline:";
 
-	public static final String REFRESH_CHECK_DELAY_ATTRIBUTE = Conventions.getQualifiedAttributeName(ScriptFactoryPostProcessor.class, "refreshCheckDelay");
+	public static final String REFRESH_CHECK_DELAY_ATTRIBUTE =
+			Conventions.getQualifiedAttributeName(ScriptFactoryPostProcessor.class, "refreshCheckDelay");
 
 	private static final String SCRIPT_FACTORY_NAME_PREFIX = "scriptFactory.";
 
