@@ -26,7 +26,7 @@ import org.springframework.util.ObjectUtils;
  * inner elements are bound to properties on a {@link #setCommandName command object}.
  *
  * <p>Users should place the command object into the {@link org.springframework.web.servlet.ModelAndView}
- * when populating the data for their view. The name of this command object must
+ * when populating the data for their view. The name of this command object can
  * be configured using the {@link #setCommandName commandName} property.
  *
  * <p>The default value for the {@link #setCommandName commandName} property is
