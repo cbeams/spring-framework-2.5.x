@@ -22,7 +22,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of the TargetSource interface that holds a local object.
+ * Implementation of the TargetSource interface that holds a given object.
  * This is the default implementation of TargetSource used by the AOP framework.
  * There is no need to create objects of this class in application code.
  *
@@ -43,7 +43,7 @@ public final class SingletonTargetSource implements TargetSource, Serializable {
 	 * @param target the target object
 	 */
 	public SingletonTargetSource(Object target) {
-		Assert.notNull(target, "target is required");
+		Assert.notNull(target, "Target is required");
 		this.target = target;
 	}
 

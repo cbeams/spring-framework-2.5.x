@@ -152,7 +152,8 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	/**
 	 * Replaces this object with a SingletonTargetSource on serialization.
 	 * Protected as otherwise it won't be invoked for subclasses.
-	 * (The writeReplace() method must be visible to the class being serialized.)
+	 * (The <code>writeReplace()</code> method must be visible to the class
+	 * being serialized.)
 	 * <p>With this implementation of this method, there is no need to mark
 	 * non-serializable fields in this class or subclasses as transient.
 	 */
@@ -167,7 +168,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 		catch (Exception ex) {
 			logger.error("Cannot get target for disconnecting TargetSource [" + this + "]", ex);
 			throw new NotSerializableException(
-					"Cannot get target for disconnecting TargetSource [" + this + "]: " + ex.getMessage());
+					"Cannot get target for disconnecting TargetSource [" + this + "]: " + ex);
 		}
 	}
 
