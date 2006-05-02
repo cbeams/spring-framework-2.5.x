@@ -19,6 +19,8 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.JspException;
 
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.validation.Errors;
 
 /**
  * Base class for databinding-aware JSP tags that render HTML element. Provides
@@ -454,7 +456,7 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	 */
 	protected void writeDefaultAttributes(TagWriter tagWriter) throws JspException {
 		super.writeDefaultAttributes(tagWriter);
-		tagWriter.writeOptionalAttributeValue(CLASS_ATTRIBUTE, ObjectUtils.getDisplayString(evaluate("cssClass", getCssClass())));
+		tagWriter.writeOptionalAttributeValue(CLASS_ATTRIBUTE, resolveCssClass());
 		tagWriter.writeOptionalAttributeValue(STYLE_ATTRIBUTE, ObjectUtils.getDisplayString(evaluate("cssStyle", getCssStyle())));
 		writeOptionalAttribute(tagWriter, LANG_ATTRIBUTE, getLang());
 		writeOptionalAttribute(tagWriter, TITLE_ATTRIBUTE, getTitle());
@@ -470,6 +472,20 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 		writeOptionalAttribute(tagWriter, ONKEYPRESS_ATTRIBUTE, getOnkeypress());
 		writeOptionalAttribute(tagWriter, ONKEYUP_ATTRIBUTE, getOnkeyup());
 		writeOptionalAttribute(tagWriter, ONKEYDOWN_ATTRIBUTE, getOnkeydown());
+	}
+
+	/**
+	 * Gets the appropriate CSS class to use based on the state of the current
+	 * {@link BindStatus} object.
+	 */
+	private String resolveCssClass() throws JspException {
+		Errors errors = getBindStatus().getErrors();
+		if (errors != null && errors.hasErrors() && StringUtils.hasText(getCssErrorClass())) {
+			return ObjectUtils.getDisplayString(evaluate("cssErrorClass", getCssErrorClass()));
+		}
+		else {
+			return ObjectUtils.getDisplayString(evaluate("cssClass", getCssClass()));
+		}
 	}
 
 }
