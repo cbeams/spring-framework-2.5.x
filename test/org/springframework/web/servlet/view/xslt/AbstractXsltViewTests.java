@@ -1,5 +1,5 @@
 /*
- * XsltViewTests.java
+ * AbstractXsltViewTests.java
  */
 
 package org.springframework.web.servlet.view.xslt;
@@ -18,7 +18,7 @@ import org.springframework.core.io.FileSystemResource;
  * @author Darren Davison
  * @since 11.03.2005
  */
-public class XsltViewTests extends TestCase {
+public class AbstractXsltViewTests extends TestCase {
 
 	private TestXsltView view;
 
