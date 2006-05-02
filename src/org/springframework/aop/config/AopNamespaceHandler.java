@@ -73,8 +73,7 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionParser("config", new ConfigBeanDefinitionParser());
 		registerBeanDefinitionParser("spring-configured", new SpringConfiguredBeanDefinitionParser());
 		registerBeanDefinitionParser("aspectj-autoproxy", new AspectJAutoProxyBeanDefinitionParser());
-
-		registerBeanDefinitionDecorator("scope", new ScopeBeanDefinitionDefinition());
+		registerBeanDefinitionDecorator("scoped-proxy", new ScopedProxyBeanDefinitionDecorator());
 	}
 
 

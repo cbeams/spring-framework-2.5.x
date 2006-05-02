@@ -10,14 +10,14 @@
 	</aop:config>
 
 	<bean id="advice" class="org.springframework.aop.interceptor.DebugInterceptor"/>
-	
-	<bean id="sessionScoped" class="org.springframework.beans.TestBean">
-		<aop:scope type="session"/>
+
+	<bean id="requestScoped" class="org.springframework.beans.TestBean" scope="request">
+		<aop:scoped-proxy/>
 		<property name="name" value="Rob Harrop"/>
 	</bean>
 
-	<bean id="requestScoped" class="org.springframework.beans.TestBean">
-		<aop:scope type="request"/>
+	<bean id="sessionScoped" class="org.springframework.beans.TestBean" scope="session">
+		<aop:scoped-proxy/>
 		<property name="name" value="Rob Harrop"/>
 	</bean>
 

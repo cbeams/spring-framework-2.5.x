@@ -18,22 +18,15 @@
 	</xsd:element>
 
 	<xsd:element name="spring-configured">
-	   <xsd:simpleType>
+		<xsd:simpleType>
 			<xsd:restriction base="xsd:string"/>
 		</xsd:simpleType>
 	</xsd:element>
 
-	<xsd:element name="scope">
-		<xsd:complexType>
-			<xsd:attribute name="type" use="required">
-				<xsd:simpleType>
-					<xsd:restriction base="xsd:string">
-						<xsd:enumeration value="request"/>
-						<xsd:enumeration value="session"/>
-					</xsd:restriction>
-				</xsd:simpleType>
-			</xsd:attribute>
-		</xsd:complexType>
+	<xsd:element name="scoped-proxy">
+		<xsd:simpleType>
+			<xsd:restriction base="xsd:string"/>
+		</xsd:simpleType>
 	</xsd:element>
 	
 	<xsd:element name="aspectj-autoproxy">
