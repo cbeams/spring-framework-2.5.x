@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,11 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 		return this.namespace;
 	}
 
-	public void setConfigLocations(String[] configLocations) {
+    /**
+     * The {@link StaticWebApplicationContext} class does not support this method.
+     * @throws UnsupportedOperationException <b>always</b>
+     */
+    public void setConfigLocations(String[] configLocations) {
 		throw new UnsupportedOperationException("StaticWebApplicationContext does not support configLocations");
 	}
 
