@@ -412,8 +412,7 @@
             <para>The <literal>aop</literal> tags deal with configuring all things
             AOP in Spring: this includes Spring's own proxy-based AOP framework and Spring's
             integration with the AspectJ AOP framework. These tags are
-            comprehensively covered in the chapters entitled <xref linkend="aop"/> and
-            <xref linkend="aspectj"/>.</para>
+            comprehensively covered in the chapter entitled <xref linkend="aop"/>.</para>
             <para>In the interest of completeness, to use the tags in the <literal>aop</literal>
             schema, you need to have the following preamble at the top of your Spring XML
             configuration file; the emboldened text in the following snippet references the

@@ -8,7 +8,7 @@
 <!ENTITY resources			SYSTEM "resources.xml">
 <!ENTITY validation			SYSTEM "validation.xml">
 <!ENTITY aop				SYSTEM "aop.xml">
-<!ENTITY aspectj			SYSTEM "aspectj.xml">
+<!ENTITY aop-api			SYSTEM "aop-api.xml">
 <!ENTITY transaction		SYSTEM "transaction.xml">
 <!ENTITY metadata			SYSTEM "metadata.xml">
 <!ENTITY dao				SYSTEM "dao.xml">
@@ -95,6 +95,10 @@
 				<firstname>Rick</firstname>
 				<surname>Evans</surname>
 			</author>
+			<author>
+				<firstname>Adrian</firstname>
+				<surname>Colyer</surname>
+			</author>
 		</authorgroup>
 		<legalnotice>
 			Copies of this document may be made for your own use and for
@@ -164,7 +168,7 @@
 					<xref linkend="aop" />
 				</listitem>
 				<listitem>
-					<xref linkend="aspectj" />
+					<xref linkend="aop-api" />
 				</listitem>
 				<listitem>
 					<xref linkend="testing" />
@@ -175,7 +179,7 @@
 		&resources;
 		&validation;
 		&aop;
-		&aspectj;
+		&aop-api;
 		&testing;
 	</part>
 	<part>

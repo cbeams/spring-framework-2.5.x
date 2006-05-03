@@ -274,10 +274,10 @@ public void echoException(Exception ex) throws Exception {
 						<para><xref linkend="transaction-declarative-annotations"/></para>
 					</listitem>
 					<listitem>
-						<para><xref linkend="aspectj-atconfigurable"/></para>
+						<para><xref linkend="aop-atconfigurable"/></para>
 					</listitem>
 					<listitem>
-						<para><xref linkend="aspectj-ataspectj"/></para>
+						<para><xref linkend="aop-ataspectj"/></para>
 					</listitem>
 				</itemizedlist>
 			</section>

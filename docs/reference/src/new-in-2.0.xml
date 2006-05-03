@@ -128,19 +128,27 @@
 
     <para>Spring 2.0 has a much improved AOP offering. The Spring AOP
     framework itself is markedly easier to configure in XML (and markedly less
-    verbose as a result); and the AspectJ integration is silkier than an
-    otter's pocket.</para>
+    verbose as a result); and Spring 2.0 integrates with the AspectJ pointcut language
+    and @AspectJ aspect declaration style. <xref linkend="aop" /> is
+    dedicated to describing this new support.</para>
 
     <section id="new-in-2-aop-configuration">
       <title>Easier AOP XML configuration</title>
 
-      <para>[TODO : cover the easier AOP XML configuration)]</para>
+      <para>Spring 2.0 introduces new schema support for defining aspects backed by
+      regular Java objects. This support takes advantage of the AspectJ pointcut
+      language and offers fully typed advice (no more casting and <literal>Object[]</literal>
+      manipulation). Details of this support can be found in 
+      <xref linkend="aop-schema" />.</para>
     </section>
 
     <section id="new-in-2-aop-aspectJ">
-      <title>AspectJ integration</title>
+      <title>Support for @AspectJ aspects</title>
 
-      <para>[TODO : cover the AspectJ integration)]</para>
+      <para>Spring 2.0 also supports aspects defined using the @AspectJ annotations.
+      These aspects can be shared between AspectJ and Spring AOP, and require only
+      trivial configuration. The support for @AspectJ aspects is discussed in
+      <xref linkend="aop-ataspectj" />.</para>
     </section>
   </section>
 
@@ -338,10 +346,10 @@
           <xref linkend="metadata-annotations-required" />
         </listitem>
 		<listitem>
-			<xref linkend="aspectj-atconfigurable"/>
+			<xref linkend="aop-atconfigurable"/>
 		</listitem>
 		<listitem>
-			<xref linkend="aspectj-ataspectj"/>
+			<xref linkend="aop-ataspectj"/>
 		</listitem>
       </itemizedlist>
     </section>
