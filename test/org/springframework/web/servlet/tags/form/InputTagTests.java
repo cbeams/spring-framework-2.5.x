@@ -18,9 +18,17 @@ package org.springframework.web.servlet.tags.form;
 
 import org.springframework.beans.TestBean;
 import org.springframework.web.servlet.tags.NestedPathTag;
+import org.springframework.web.servlet.tags.RequestContextAwareTag;
+import org.springframework.web.servlet.support.RequestContext;
+import org.springframework.validation.Errors;
+import org.springframework.validation.BindException;
+import org.springframework.mock.web.MockPageContext;
 
 import javax.servlet.jsp.tagext.Tag;
+import javax.servlet.http.HttpServletRequest;
 import java.io.StringWriter;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * @author Rob Harrop
@@ -29,6 +37,8 @@ import java.io.StringWriter;
 public class InputTagTests extends AbstractFormTagTests {
 
 	private InputTag tag;
+
+	private TestBean rob;
 
 	protected void onSetUp() {
 		// set up tag instance
@@ -73,9 +83,9 @@ public class InputTagTests extends AbstractFormTagTests {
 		String lang = "en";
 		String dir = "ltr";
 		String tabindex = "2";
-        String readOnly = "true";
-        String disabled = "false";
-        String onclick = "doClick()";
+		String readOnly = "true";
+		String disabled = "false";
+		String onclick = "doClick()";
 		String ondblclick = "doDblclick()";
 		String onkeydown = "doKeydown()";
 		String onkeypress = "doKeypress()";
@@ -102,9 +112,9 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setLang(lang);
 		this.tag.setDir(dir);
 		this.tag.setTabindex(tabindex);
-        this.tag.setReadonly(readOnly);
-        this.tag.setDisabled(disabled);
-        this.tag.setOnclick(onclick);
+		this.tag.setReadonly(readOnly);
+		this.tag.setDisabled(disabled);
+		this.tag.setOnclick(onclick);
 		this.tag.setOndblclick(ondblclick);
 		this.tag.setOnkeydown(onkeydown);
 		this.tag.setOnkeypress(onkeypress);
@@ -176,6 +186,28 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "value", "Sally");
 	}
 
+	public void testWithErrors() throws Exception {
+		this.tag.setPath("name");
+		this.tag.setCssClass("good");
+		this.tag.setCssErrorClass("bad");
+
+		Errors errors = new BindException(this.rob, COMMAND_NAME);
+		errors.rejectValue("name", "some.code", "Default Message");
+		errors.rejectValue("name", "too.short", "Too Short");
+		exposeErrors(errors);
+
+		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+
+		String output = getWriter().toString();
+
+		assertTagOpened(output);
+		assertTagClosed(output);
+
+		assertContainsAttribute(output, "type", getType());
+		assertContainsAttribute(output, "value", "Rob");
+		assertContainsAttribute(output, "class", "bad");
+	}
+	
 	private void assertTagClosed(String output) {
 		assertTrue("Tag not closed properly", output.endsWith("/>"));
 	}
@@ -186,7 +218,7 @@ public class InputTagTests extends AbstractFormTagTests {
 
 	protected TestBean createTestBean() {
 		// set up test data
-		TestBean rob = new TestBean();
+		this.rob = new TestBean();
 		rob.setName("Rob");
 
 		TestBean sally = new TestBean();
@@ -208,4 +240,14 @@ public class InputTagTests extends AbstractFormTagTests {
 		return "text";
 	}
 
+	private void exposeErrors(Errors errors) {
+		// wrap errors in a Model
+		Map model = new HashMap();
+		model.put(BindException.ERROR_KEY_PREFIX + COMMAND_NAME, errors);
+
+		// replace the request context with one containing the errors
+		MockPageContext pageContext = getPageContext();
+		RequestContext context = new RequestContext((HttpServletRequest) pageContext.getRequest(), model);
+		pageContext.setAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE, context);
+	}
 }
