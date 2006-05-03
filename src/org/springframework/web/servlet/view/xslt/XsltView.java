@@ -60,7 +60,7 @@ import java.util.Properties;
  * conversion of objects into {@link Source} implementations. See {@link #getSourceTypes() here}
  * for more details.
  * <p/>
- * All model parameters as well as all {@link #addStaticAttribute static attributes} are
+ * All model parameters are
  * passed to the XSLT {@link Transformer} as parameters. In addition the user can configure
  * {@link #setOutputProperties output properties} to be passed to the {@link Transformer}.
  *
@@ -234,20 +234,17 @@ public class XsltView extends AbstractUrlBasedView {
 
 	/**
 	 * Configures the supplied {@link Transformer} instance. Default implementation copies parameters from
-	 * the model and {@link #setStaticAttribute static attributes} and copies them into the
-	 * {@link Transformer} {@link Transformer#setParameter parameter set}. This implementation also
-	 * copies the {@link #setOutputProperties output properties} into the {@link Transformer}
-	 * {@link Transformer#setOutputProperty output properties}. Indentation properties are also set by
-	 * this implementation.
+	 * the model into the {@link Transformer} {@link Transformer#setParameter parameter set}.
+	 * This implementation also copies the {@link #setOutputProperties output properties}
+	 * into the {@link Transformer} {@link Transformer#setOutputProperty output properties}.
+	 * Indentation properties are also set by this implementation.
 	 *
 	 * @see #copyModelParameters(Map, Transformer)
-	 * @see #copyStaticAttributes(Transformer)
 	 * @see #copyOutputProperties(Transformer)
 	 * @see #configureIndentation(Transformer)
 	 */
 	protected void configureTransformer(Map model, HttpServletResponse response, Transformer transformer) {
 		copyModelParameters(model, transformer);
-		copyStaticAttributes(transformer);
 		copyOutputProperties(transformer);
 		configureIndentation(transformer);
 	}
@@ -279,15 +276,6 @@ public class XsltView extends AbstractUrlBasedView {
 				transformer.setOutputProperty(name, this.outputProperties.getProperty(name));
 			}
 		}
-	}
-
-	/**
-	 * Copies all {@link Map.Entry entries} from the configured {@link #getAttributesMap()} into the
-	 * {@link Transformer#setParameter(String, Object) parameter set} of the supplied
-	 * {@link Transformer}.
-	 */
-	protected final void copyStaticAttributes(Transformer transformer) {
-		copyMapEntriesToTransformerParameters(getAttributesMap(), transformer);
 	}
 
 	/**
