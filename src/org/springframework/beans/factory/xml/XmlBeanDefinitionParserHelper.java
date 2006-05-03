@@ -1081,8 +1081,7 @@ public class XmlBeanDefinitionParserHelper {
 			return null;
 		}
 
-		BeanDefinitionParser parser = handler.findParserForElement(ele);
-		return parser.parse(ele, new ParserContext(getReaderContext(), this, nested));
+		return handler.parse(ele, new ParserContext(getReaderContext(), this, nested));
 	}
 
 	public BeanDefinitionHolder decorateBeanDefinitionIfRequired(Element element, BeanDefinitionHolder definitionHolder) {
@@ -1096,9 +1095,8 @@ public class XmlBeanDefinitionParserHelper {
 				Element childElement = (Element) node;
 				// A node from a namespace outside of the standard - should map to a decorator.
 				NamespaceHandler handler = this.handlerResolver.resolve(uri);
-				BeanDefinitionDecorator decorator = handler.findDecoratorForElement(childElement);
 
-				finalDefinition = decorator.decorate(childElement, finalDefinition, new ParserContext(getReaderContext(), this, false));
+				finalDefinition = handler.decorate(childElement, finalDefinition, new ParserContext(getReaderContext(), this, false));
 			}
 		}
 		return finalDefinition;

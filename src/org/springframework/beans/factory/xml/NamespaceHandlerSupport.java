@@ -24,9 +24,13 @@ import java.util.HashMap;
 import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandler;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
- * Support class for implementing custom {@link NamespaceHandler NamespaceHandlers}. Provides
+ * Support class for implementing custom {@link NamespaceHandler NamespaceHandlers}. Parsing and
+ * decorating of individual {@link Node Nodes} is done via {@link BeanDefinitionParser} and
+ * {@link BeanDefinitionDecorator} strategy interfaces respectively. Provides
  * {@link #registerBeanDefinitionParser} and {@link #registerBeanDefinitionDecorator} methods
  * for registering a {@link BeanDefinitionParser} or {@link BeanDefinitionDecorator} to handle
  * a specific element.
@@ -51,10 +55,26 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	private final Map decorators = new HashMap();
 
 	/**
+	 * Decorates the supplied {@link Node} by delegating to the {@link BeanDefinitionDecorator} that
+	 * is registered to handle that {@link Node}.
+	 */
+	public final BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definition, ParserContext parserContext) {
+		return findDecoratorForElement(element).decorate(element, definition, parserContext);
+	}
+
+	/**
+	 * Parses the supplied {@link Element} by delegating to the {@link BeanDefinitionParser} that is
+	 * registered for that {@link Element}.
+	 */
+	public final BeanDefinition parse(Element element, ParserContext parserContext) {
+		return findParserForElement(element).parse(element, parserContext);
+	}
+
+	/**
 	 * Locates the {@link BeanDefinitionParser} from the register implementations using
 	 * the local name of the supplied {@link Element}.
 	 */
-	public final BeanDefinitionParser findParserForElement(Element element) {
+	protected final BeanDefinitionParser findParserForElement(Element element) {
 		BeanDefinitionParser parser = (BeanDefinitionParser) this.parsers.get(element.getLocalName());
 
 		if (parser == null) {
@@ -69,7 +89,7 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * Locates the {@link BeanDefinitionParser} from the register implementations using
 	 * the local name of the supplied {@link Element}.
 	 */
-	public final BeanDefinitionDecorator findDecoratorForElement(Element element) {
+	protected final BeanDefinitionDecorator findDecoratorForElement(Element element) {
 		BeanDefinitionDecorator decorator = (BeanDefinitionDecorator) this.decorators.get(element.getLocalName());
 
 		if (decorator == null) {
