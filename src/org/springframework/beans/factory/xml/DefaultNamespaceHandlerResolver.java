@@ -110,7 +110,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 			String namespaceUri = (String) en.nextElement();
 			String className = mappings.getProperty(namespaceUri);
 			try {
-				Class handlerClass = ClassUtils.forName(className);
+				Class handlerClass = ClassUtils.forName(className, this.classLoader);
 				if (!NamespaceHandler.class.isAssignableFrom(handlerClass)) {
 					throw new IllegalArgumentException("Class [" + className +
 							"] does not implement the NamespaceHandler interface");

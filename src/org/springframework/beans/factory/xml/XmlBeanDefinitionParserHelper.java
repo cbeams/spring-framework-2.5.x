@@ -210,11 +210,9 @@ public class XmlBeanDefinitionParserHelper {
 	private ParseState parseState = new ParseState();
 
 	/**
-	 * The {@link ReaderContext} used for error reporting.
+	 * The {@link XmlReaderContext} used.
 	 */
-	private final ReaderContext readerContext;
-
-	private final NamespaceHandlerResolver handlerResolver;
+	private final XmlReaderContext readerContext;
 
 	private String defaultLazyInit;
 
@@ -233,11 +231,9 @@ public class XmlBeanDefinitionParserHelper {
 	 * Creates a new <code>XmlBeanDefinitionParserHelper</code> associated with the
 	 * supplied {@link ReaderContext}.
 	 */
-	public XmlBeanDefinitionParserHelper(ReaderContext readerContext, NamespaceHandlerResolver handlerResolver) {
+	public XmlBeanDefinitionParserHelper(XmlReaderContext readerContext) {
 		Assert.notNull(readerContext, "'readerContext' cannot be null.");
-		Assert.notNull(handlerResolver, "'handlerResolver' cannot be null.");
 		this.readerContext = readerContext;
-		this.handlerResolver = handlerResolver;
 	}
 
 
@@ -1074,7 +1070,7 @@ public class XmlBeanDefinitionParserHelper {
 
 	public BeanDefinition parseCustomElement(Element ele, boolean nested) {
 		String namespaceUri = ele.getNamespaceURI();
-		NamespaceHandler handler = this.handlerResolver.resolve(namespaceUri);
+		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 
 		if (handler == null) {
 			getReaderContext().error("Unable to locate NamespaceHandler for namespace [" + namespaceUri + "].", ele);
@@ -1094,7 +1090,7 @@ public class XmlBeanDefinitionParserHelper {
 			if (node.getNodeType() == Node.ELEMENT_NODE && !isDefaultNamespace(uri)) {
 				Element childElement = (Element) node;
 				// A node from a namespace outside of the standard - should map to a decorator.
-				NamespaceHandler handler = this.handlerResolver.resolve(uri);
+				NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(uri);
 
 				finalDefinition = handler.decorate(childElement, finalDefinition, new ParserContext(getReaderContext(), this, false));
 			}

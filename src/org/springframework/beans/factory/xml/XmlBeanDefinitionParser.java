@@ -45,7 +45,7 @@ public interface XmlBeanDefinitionParser {
 	 * @param readerContext the current context of the reader. Includes the resource being parsed
 	 * @throws BeanDefinitionStoreException in case of parsing errors
 	 */
-	void registerBeanDefinitions(Document doc, ReaderContext readerContext)
+	void registerBeanDefinitions(Document doc, XmlReaderContext readerContext)
 			throws BeanDefinitionStoreException;
 
 }

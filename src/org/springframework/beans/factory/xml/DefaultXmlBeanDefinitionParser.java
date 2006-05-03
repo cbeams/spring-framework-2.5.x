@@ -66,7 +66,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private ReaderContext readerContext;
+	private XmlReaderContext readerContext;
 
 
 	/**
@@ -75,7 +75,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * specified at <code>&lt;beans&gt;</code> level; then parses
 	 * the contained bean definitions.
 	 */
-	public void registerBeanDefinitions(Document doc, ReaderContext readerContext) {
+	public void registerBeanDefinitions(Document doc, XmlReaderContext readerContext) {
 		this.readerContext = readerContext;
 
 		logger.debug("Loading bean definitions");
@@ -88,8 +88,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		postProcessXml(root);
 	}
 
-	protected XmlBeanDefinitionParserHelper createHelper(ReaderContext readerContext, Element root) {
-		XmlBeanDefinitionParserHelper helper = new XmlBeanDefinitionParserHelper(readerContext, createNamespaceHandlerResolver());
+	protected XmlBeanDefinitionParserHelper createHelper(XmlReaderContext readerContext, Element root) {
+		XmlBeanDefinitionParserHelper helper = new XmlBeanDefinitionParserHelper(readerContext);
 		helper.initDefaults(root);
 		return helper;
 	}
@@ -112,18 +112,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * @see #getReaderContext()
 	 */
 	protected void preProcessXml(Element root) {
-	}
-
-	/**
-	 * Creates the {@link NamespaceHandlerResolver} used to resolve all {@link NamespaceHandler}
-	 * implementations from their corresponding namespace.
-	 */
-	protected NamespaceHandlerResolver createNamespaceHandlerResolver() {
-		ClassLoader classLoader = getReaderContext().getReader().getBeanClassLoader();
-		if (classLoader == null) {
-			classLoader = Thread.currentThread().getContextClassLoader();
-		}
-		return new DefaultNamespaceHandlerResolver(classLoader);
 	}
 
 	/**

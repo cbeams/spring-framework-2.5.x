@@ -41,7 +41,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ComponentDefinition;
 import org.springframework.beans.factory.support.NullSourceExtractor;
 import org.springframework.beans.factory.support.ProblemReporter;
-import org.springframework.beans.factory.support.ReaderContext;
 import org.springframework.beans.factory.support.ReaderEventListener;
 import org.springframework.beans.factory.support.SourceExtractor;
 import org.springframework.core.Constants;
@@ -154,6 +153,10 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	private SourceExtractor sourceExtractor = new NullSourceExtractor();
 
+	/**
+	 * The {@link NamespaceHandlerResolver} implementation passed to the {@link XmlBeanDefinitionParser}.
+	 */
+	private NamespaceHandlerResolver namespaceHandlerResolver;
 
 	/**
 	 * Create new XmlBeanDefinitionReader for the given bean factory.
@@ -224,6 +227,14 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	public void setSourceExtractor(SourceExtractor sourceExtractor) {
 		Assert.notNull(sourceExtractor, "'sourceExtractor' cannot be null.");
 		this.sourceExtractor = sourceExtractor;
+	}
+
+	/**
+	 * Specifies the {@link NamespaceHandlerResolver} to use. If none is specified a default
+	 * instance will be created by {@link #createDefaultNamespaceHandlerResolver()}.
+	 */
+	public void setNamespaceHandlerResolver(NamespaceHandlerResolver namespaceHandlerResolver) {
+		this.namespaceHandlerResolver = namespaceHandlerResolver;
 	}
 
 	/**
@@ -511,10 +522,23 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Creates the {@link ReaderContext} to pass over to the parser.
+	 * Creates the {@link XmlReaderContext} to pass over to the parser.
 	 */
-	protected ReaderContext createReaderContext(Resource resource) {
-		return new ReaderContext(this, resource, this.problemReporter, this.eventListener, this.sourceExtractor);
+	protected XmlReaderContext createReaderContext(Resource resource) {
+		NamespaceHandlerResolver resolver = (this.namespaceHandlerResolver == null ? createDefaultNamespaceHandlerResolver() : this.namespaceHandlerResolver);
+		return new XmlReaderContext(this, resource, this.problemReporter, this.eventListener, this.sourceExtractor, resolver);
+	}
+
+	/**
+	 * Creates the default implementation of {@link NamespaceHandlerResolver} used if none is specified.
+	 * Default implementation returns an instance of {@link DefaultNamespaceHandlerResolver}.
+	 */
+	protected NamespaceHandlerResolver createDefaultNamespaceHandlerResolver() {
+		ClassLoader classLoader = getBeanClassLoader();
+		if (classLoader == null) {
+			classLoader = Thread.currentThread().getContextClassLoader();
+		}
+		return new DefaultNamespaceHandlerResolver(classLoader);
 	}
 
 	protected XmlBeanDefinitionParser createXmlBeanDefinitionParser() {
