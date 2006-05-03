@@ -18,15 +18,18 @@ package org.springframework.beans.factory.support;
 
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.util.Assert;
 
 /**
  * @author Rob Harrop
+ * @since 2.0
  */
 public class BeanComponentDefinition implements ComponentDefinition {
 
 	private final BeanDefinitionHolder holder;
 
 	public BeanComponentDefinition(BeanDefinitionHolder holder) {
+		Assert.notNull(holder, "'holder' cannot be null.");
 		this.holder = holder;
 	}
 
@@ -36,5 +39,9 @@ public class BeanComponentDefinition implements ComponentDefinition {
 
 	public BeanDefinition[] getBeanDefinitions() {
 		return new BeanDefinition[]{this.holder.getBeanDefinition()};
+	}
+
+	public Object getSource() {
+		return this.holder.getBeanDefinition().getSource();
 	}
 }

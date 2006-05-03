@@ -31,4 +31,6 @@ public interface ComponentDefinition {
 	 * <code>ComponentDefinition</code>.
 	 */
 	BeanDefinition[] getBeanDefinitions();
+
+	Object getSource();
 }
