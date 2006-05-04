@@ -64,7 +64,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 			PropertyValue[] pvs = source.getPropertyValues();
 			this.propertyValueList = new ArrayList(pvs.length);
 			for (int i = 0; i < pvs.length; i++) {
-				PropertyValue newPv = new PropertyValue(pvs[i].getName(), pvs[i].getValue());
+				PropertyValue newPv = new PropertyValue(pvs[i]);
 				this.propertyValueList.add(newPv);
 			}
 		}
@@ -262,6 +262,21 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof MutablePropertyValues)) {
+			return false;
+		}
+		MutablePropertyValues that = (MutablePropertyValues) other;
+		return this.propertyValueList.equals(that.propertyValueList);
+	}
+
+	public int hashCode() {
+		return this.propertyValueList.hashCode();
+	}
+
 	public String toString() {
 		PropertyValue[] pvs = getPropertyValues();
 		StringBuffer sb = new StringBuffer("PropertyValues: length=" + pvs.length + "; ");
@@ -269,18 +284,4 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		return sb.toString();
 	}
 
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		MutablePropertyValues that = (MutablePropertyValues) o;
-
-		if (!this.propertyValueList.equals(that.propertyValueList)) return false;
-
-		return true;
-	}
-
-	public int hashCode() {
-		return this.propertyValueList.hashCode();
-	}
 }

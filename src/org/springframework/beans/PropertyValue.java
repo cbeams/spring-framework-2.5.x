@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,11 +17,10 @@
 package org.springframework.beans;
 
 import java.io.Serializable;
-import java.util.Map;
-import java.util.HashMap;
 
-import org.springframework.util.ObjectUtils;
 import org.springframework.core.AttributeAccessorSupport;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Class to hold information and value for an individual property.
@@ -47,6 +46,7 @@ public class PropertyValue extends AttributeAccessorSupport implements Serializa
 
 	private Object source;
 
+
 	/**
 	 * Create a new PropertyValue instance.
 	 * @param name name of the property
@@ -59,6 +59,18 @@ public class PropertyValue extends AttributeAccessorSupport implements Serializa
 		this.name = name;
 		this.value = value;
 	}
+
+	/**
+	 * Copy constructor.
+	 * @param source the PropertyValue to copy
+	 */
+	public PropertyValue(PropertyValue source) {
+		Assert.notNull(source, "Source must not be null");
+		this.name = source.getName();
+		this.value = source.getValue();
+		copyAttributesFrom(source);
+	}
+
 
 	/**
 	 * Return the name of the property.
@@ -77,12 +89,16 @@ public class PropertyValue extends AttributeAccessorSupport implements Serializa
 		return value;
 	}
 
-	public String toString() {
-		return "PropertyValue: name='" + this.name + "', value=[" + this.value + "]";
+	/**
+	 * Set the configuration source <code>Object</code> for this
+	 * <code>PropertyValue</code>.
+	 */
+	public void setSource(Object source) {
+		this.source = source;
 	}
 
 	/**
-	 * Gets the configuration source <code>Object</code> for this
+	 * Return the configuration source <code>Object</code> for this
 	 * <code>PropertyValue</code>. Exact type will depend on the
 	 * configuration mechanism used.
 	 */
@@ -90,13 +106,6 @@ public class PropertyValue extends AttributeAccessorSupport implements Serializa
 		return source;
 	}
 
-	/**
-	 * Sets the configuration source <code>Object</code> for this
-	 * <code>PropertyValue</code>.
-	 */
-	public void setSource(Object source) {
-		this.source = source;
-	}
 
 	public boolean equals(Object other) {
 		if (this == other) {
@@ -106,12 +115,17 @@ public class PropertyValue extends AttributeAccessorSupport implements Serializa
 			return false;
 		}
 		PropertyValue otherPv = (PropertyValue) other;
-		return (this.name.equals(otherPv.name)
-						&& ObjectUtils.nullSafeEquals(this.value, otherPv.value)
-						&& ObjectUtils.nullSafeEquals(this.source, otherPv.source));
+		return (this.name.equals(otherPv.name) &&
+				ObjectUtils.nullSafeEquals(this.value, otherPv.value) &&
+				ObjectUtils.nullSafeEquals(this.source, otherPv.source));
 	}
 
 	public int hashCode() {
 		return this.name.hashCode() * 29 + (this.value == null ? 0 : this.value.hashCode());
 	}
+
+	public String toString() {
+		return "PropertyValue: name='" + this.name + "', value=[" + this.value + "]";
+	}
+
 }
