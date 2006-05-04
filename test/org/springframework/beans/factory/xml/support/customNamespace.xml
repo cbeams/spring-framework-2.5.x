@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:test="http://www.springframework.org/schema/beans/test"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xmlns:test="http://www.springframework.org/schema/beans/test"
+			 xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/beans/test http://www.springframework.org/schema/beans/factory/xml/support/spring-test.xsd">
 
-    <test:testBean id="testBean" name="Rob Harrop" age="23"/>
+	<test:testBean id="testBean" name="Rob Harrop" age="23"/>
 
-    <bean id="customisedTestBean" class="org.springframework.beans.TestBean">
-        <test:set name="Rob Harrop" age="23"/>
-    </bean>
+	<bean id="customisedTestBean" class="org.springframework.beans.TestBean">
+		<test:set name="Rob Harrop" age="23"/>
+	</bean>
 
-    <bean id="debuggingTestBean" class="org.springframework.beans.TestBean">
-        <test:debug/>
+	<bean id="debuggingTestBean" class="org.springframework.beans.TestBean">
+		<test:debug/>
 		<property name="name" value="Rob Harrop"/>
-        <property name="age" value="23"/>
-    </bean>
+		<property name="age" value="23"/>
+	</bean>
 
-    <bean id="chainedTestBean" class="org.springframework.beans.TestBean">
-        <test:debug/>
-        <test:nop/>
-        <property name="name" value="Rob Harrop"/>
-        <property name="age" value="23"/>
-    </bean>
+	<bean id="chainedTestBean" class="org.springframework.beans.TestBean">
+		<test:debug/>
+		<test:nop/>
+		<property name="name" value="Rob Harrop"/>
+		<property name="age" value="23"/>
+	</bean>
+
+	<bean id="decorateWithAttribute" class="org.springframework.beans.TestBean" test:object-name="foo"/>
 </beans>

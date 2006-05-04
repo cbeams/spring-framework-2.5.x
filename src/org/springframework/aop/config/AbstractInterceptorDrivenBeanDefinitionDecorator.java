@@ -17,6 +17,7 @@
 package org.springframework.aop.config;
 
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.MutablePropertyValues;
@@ -50,7 +51,7 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
-	public final BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definitionHolder, ParserContext parserContext) {
+	public final BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definitionHolder, ParserContext parserContext) {
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 		
 		// get the root bean name - will be the name of the generated proxy factory bean
@@ -58,7 +59,7 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 		BeanDefinition existingDefinition = definitionHolder.getBeanDefinition();
 
 		// delegate to subclass for interceptor def
-		BeanDefinition interceptorDefinition = createInterceptorDefinition(element);
+		BeanDefinition interceptorDefinition = createInterceptorDefinition(node);
 
 		// generate name and register the interceptor
 		String interceptorName = existingBeanName + "." + getInterceptorNameSuffix(interceptorDefinition);
@@ -111,6 +112,6 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 	 * Sub-classes should implement this method to return the <code>BeanDefinition</code> for
 	 * the interceptor they wish to apply to the bean being decorated.
 	 */
-	protected abstract BeanDefinition createInterceptorDefinition(Element element);
+	protected abstract BeanDefinition createInterceptorDefinition(Node node);
 
 }

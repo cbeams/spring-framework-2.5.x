@@ -17,6 +17,8 @@
 package org.springframework.beans.factory.xml;
 
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Attr;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -30,8 +32,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
 /**
  * Support class for implementing custom {@link NamespaceHandler NamespaceHandlers}. Parsing and
  * decorating of individual {@link Node Nodes} is done via {@link BeanDefinitionParser} and
- * {@link BeanDefinitionDecorator} strategy interfaces respectively. Provides
- * {@link #registerBeanDefinitionParser} and {@link #registerBeanDefinitionDecorator} methods
+ * {@link BeanDefinitionDecorator} strategy interfaces respectively. Provides the
+ * {@link #registerBeanDefinitionParser}, {@link #registerBeanDefinitionDecorator} methods
  * for registering a {@link BeanDefinitionParser} or {@link BeanDefinitionDecorator} to handle
  * a specific element.
  *
@@ -55,11 +57,17 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	private final Map decorators = new HashMap();
 
 	/**
+	 * Stores the {@link BeanDefinitionParser} implementations keyed by the local
+	 * name of the {@link Attr Attrs} they handle.
+	 */
+	private final Map attributeDecorators = new HashMap();
+
+	/**
 	 * Decorates the supplied {@link Node} by delegating to the {@link BeanDefinitionDecorator} that
 	 * is registered to handle that {@link Node}.
 	 */
-	public final BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definition, ParserContext parserContext) {
-		return findDecoratorForElement(element).decorate(element, definition, parserContext);
+	public final BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
+		return findDecoratorForNode(node).decorate(node, definition, parserContext);
 	}
 
 	/**
@@ -87,14 +95,25 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 
 	/**
 	 * Locates the {@link BeanDefinitionParser} from the register implementations using
-	 * the local name of the supplied {@link Element}.
+	 * the local name of the supplied {@link Node}. Supports both {@link Element Elements}
+	 * and {@link Attr Attrs}.
 	 */
-	protected final BeanDefinitionDecorator findDecoratorForElement(Element element) {
-		BeanDefinitionDecorator decorator = (BeanDefinitionDecorator) this.decorators.get(element.getLocalName());
+	protected final BeanDefinitionDecorator findDecoratorForNode(Node node) {
+		BeanDefinitionDecorator decorator = null;
+		if (node instanceof Element) {
+			decorator = (BeanDefinitionDecorator) this.decorators.get(node.getLocalName());
+		}
+		else if (node instanceof Attr) {
+			decorator = (BeanDefinitionDecorator) this.attributeDecorators.get(node.getLocalName());
+		}
+		else {
+			throw new IllegalArgumentException("Cannot decorate based on Nodes of type '" + node.getClass().getName() + "'");
+		}
 
 		if (decorator == null) {
-			throw new IllegalArgumentException("Cannot locate BeanDefinitionDecorator for element [" +
-							element.getLocalName() + "].");
+			throw new IllegalArgumentException("Cannot locate BeanDefinitionDecorator for "
+							+ (node instanceof Element ? "element" : "attribute") + " [" +
+							node.getLocalName() + "].");
 		}
 
 		return decorator;
@@ -105,7 +124,7 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * handle the specified element. The element name is the local (non-namespace qualified)
 	 * name.
 	 */
-	protected void registerBeanDefinitionParser(String elementName, BeanDefinitionParser parser) {
+	protected final void registerBeanDefinitionParser(String elementName, BeanDefinitionParser parser) {
 		this.parsers.put(elementName, parser);
 	}
 
@@ -114,7 +133,16 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * handle the specified element. The element name is the local (non-namespace qualified)
 	 * name.
 	 */
-	protected void registerBeanDefinitionDecorator(String elementName, BeanDefinitionDecorator decorator) {
+	protected final void registerBeanDefinitionDecorator(String elementName, BeanDefinitionDecorator decorator) {
 		this.decorators.put(elementName, decorator);
+	}
+
+	/**
+	 * Subclasses can call this to register the supplied {@link BeanDefinitionDecorator} to
+	 * handle the specified attribute. The attribute name is the local (non-namespace qualified)
+	 * name.
+	 */
+	protected final void registerBeanDefinitionDecoratorForAttribute(String attributeName, BeanDefinitionDecorator decorator) {
+		this.attributeDecorators.put(attributeName, decorator);
 	}
 }

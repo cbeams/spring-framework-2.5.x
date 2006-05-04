@@ -19,6 +19,7 @@ package org.springframework.beans.factory.xml;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Base interface used by the {@link DefaultXmlBeanDefinitionParser} handling custom namespaces
@@ -57,13 +58,14 @@ public interface NamespaceHandler {
 	BeanDefinition parse(Element element, ParserContext parserContext);
 
 	/**
-	 * Parse the specified {@link Element} and decorate the supplied <code>BeanDefinition</code>,
-	 * returning the decorated definition.
+	 * Parse the specified {@link Node} and decorate the supplied <code>BeanDefinition</code>,
+	 * returning the decorated definition. The {@link Node} may be either an {@link org.w3c.dom.Attr} or an
+	 * {@link Element}.
 	 * <p>Implementations may choose to return a completely new definition, which will replace
 	 * the original definition in the resulting <code>BeanFactory</code>.
 	 * <p>The supplied {@link ParserContext} can be used to register any additional beans
 	 * needed to support the main definition.
 	 */
-	BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definition, ParserContext parserContext);
+	BeanDefinitionHolder decorate(Node element, BeanDefinitionHolder definition, ParserContext parserContext);
 
 }

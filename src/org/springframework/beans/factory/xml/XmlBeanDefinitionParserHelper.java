@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.NamedNodeMap;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
@@ -1083,17 +1084,29 @@ public class XmlBeanDefinitionParserHelper {
 	public BeanDefinitionHolder decorateBeanDefinitionIfRequired(Element element, BeanDefinitionHolder definitionHolder) {
 		BeanDefinitionHolder finalDefinition = definitionHolder;
 
+		// decorate based on custom attributes first
+		NamedNodeMap attributes = element.getAttributes();
+		for(int i = 0; i < attributes.getLength(); i++) {
+			Node node = attributes.item(i);
+			finalDefinition = decorateIfRequired(node, finalDefinition);
+		}
+
+		// decorate based on custom nested elements
 		NodeList children = element.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			Node node = children.item(i);
-			String uri = node.getNamespaceURI();
-			if (node.getNodeType() == Node.ELEMENT_NODE && !isDefaultNamespace(uri)) {
-				Element childElement = (Element) node;
-				// A node from a namespace outside of the standard - should map to a decorator.
-				NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(uri);
-
-				finalDefinition = handler.decorate(childElement, finalDefinition, new ParserContext(getReaderContext(), this, false));
+			if (node.getNodeType() == Node.ELEMENT_NODE) {
+				finalDefinition = decorateIfRequired(node, finalDefinition);
 			}
+		}
+		return finalDefinition;
+	}
+
+	private BeanDefinitionHolder decorateIfRequired(Node node, BeanDefinitionHolder finalDefinition) {
+		String uri = node.getNamespaceURI();
+		if (!isDefaultNamespace(uri)) {
+			NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(uri);
+			finalDefinition = handler.decorate(node, finalDefinition, new ParserContext(getReaderContext(), this, false));
 		}
 		return finalDefinition;
 	}

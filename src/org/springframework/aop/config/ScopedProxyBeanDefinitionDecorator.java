@@ -16,7 +16,7 @@
 
 package org.springframework.aop.config;
 
-import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -36,7 +36,7 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
 	private static final String TARGET_NAME_PREFIX = "scopedTarget.";
 
-	public BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definition, ParserContext parserContext) {
+	public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 
 		// Must use class proxying for any AOP advice now.

@@ -25,6 +25,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
@@ -80,6 +81,11 @@ public class CustomNamespaceHandlerTests extends TestCase {
 		assertEquals("Incorrect number of advisors", 2, advisors.length);
 		assertEquals("Incorrect advice class.", DebugInterceptor.class, advisors[0].getAdvice().getClass());
 		assertEquals("Incorrect advice class.", NopInterceptor.class, advisors[1].getAdvice().getClass());
+	}
+
+	public void testDecorationViaAttribute() throws Exception {
+		RootBeanDefinition beanDefinition = (RootBeanDefinition)this.beanFactory.getBeanDefinition("decorateWithAttribute");
+		assertEquals("foo", beanDefinition.getAttribute("objectName"));
 	}
 
 	private void assetTestBean(ITestBean bean) {

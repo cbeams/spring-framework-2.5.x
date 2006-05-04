@@ -31,6 +31,8 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Attr;
 
 /**
  * @author Rob Harrop
@@ -43,6 +45,7 @@ public class TestNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionDecorator("set", new PropertyModifyingBeanDefinitionDecorator());
 		registerBeanDefinitionDecorator("debug", new DebugBeanDefinitionDecorator());
 		registerBeanDefinitionDecorator("nop", new NopInterceptorBeanDefinitionDecorator());
+		registerBeanDefinitionDecoratorForAttribute("object-name", new ObjectNameBeanDefinitionDecorator());
 	}
 
 	private static class TestBeanDefinitionParser implements BeanDefinitionParser {
@@ -64,7 +67,8 @@ public class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class PropertyModifyingBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
-		public BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definition, ParserContext parserContext) {
+		public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
+			Element element = (Element)node;
 			BeanDefinition def = definition.getBeanDefinition();
 
 			MutablePropertyValues mpvs = (def.getPropertyValues() == null) ? new MutablePropertyValues() : def.getPropertyValues();
@@ -78,15 +82,24 @@ public class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class DebugBeanDefinitionDecorator extends AbstractInterceptorDrivenBeanDefinitionDecorator {
 
-		protected BeanDefinition createInterceptorDefinition(Element element) {
+		protected BeanDefinition createInterceptorDefinition(Node node) {
 			return new RootBeanDefinition(DebugInterceptor.class);
 		}
 	}
 
 	private static class NopInterceptorBeanDefinitionDecorator extends AbstractInterceptorDrivenBeanDefinitionDecorator {
 
-		protected BeanDefinition createInterceptorDefinition(Element element) {
+		protected BeanDefinition createInterceptorDefinition(Node node) {
 			return new RootBeanDefinition(NopInterceptor.class);
+		}
+	}
+
+	private static class ObjectNameBeanDefinitionDecorator implements BeanDefinitionDecorator {
+
+		public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
+			Attr objectNameAttribute = (Attr)node;
+			definition.getBeanDefinition().setAttribute("objectName", objectNameAttribute.getValue());
+			return definition;
 		}
 	}
 }
