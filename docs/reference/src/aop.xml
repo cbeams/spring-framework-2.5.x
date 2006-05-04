@@ -273,28 +273,872 @@
   <sect1 id="aop-ataspectj">
     <title>@AspectJ support</title>
 
-    <para>xxx</para>
+    <para>If you are able to use Java 5, then Spring's support for @AspectJ aspects
+    is the recommended approach for declaring aspects in Spring 2.0. "@AspectJ"
+    refers to a style of declaring aspects as regular Java classes annotated with
+    Java 5 annotations. The @AspectJ style was introduced by the 
+    <ulink url="http://www.eclipse.org/aspectj">AspectJ project</ulink> as part of
+    the AspectJ 5 release. Spring 2.0 interprets the same annotations as AspectJ 5,
+    using a library supplied by AspectJ for pointcut parsing and matching. The AOP runtime
+    is still pure Spring AOP though, and there is no dependency on the AspectJ compiler
+    or weaver.</para>
 
     <sect2>
       <title>Enabling @AspectJ Support</title>
+	
+	<para>To use @AspectJ aspects in a Spring configuration you need to enable Spring
+	support for configuring Spring AOP based on @AspectJ aspects, and 
+	<emphasis>autoproxying</emphasis> beans based on whether or not they are advised by
+	those aspects. By autoproxying we mean that if Spring determines that a bean is advised
+	by one or more aspects, it will automatically generate a proxy for that bean to intercept
+	method invocations and ensure that advice is dispatched as needed. 
+	</para>
 
+	<para>The @AspectJ support is enabled by including the following element inside
+	your spring configuration:</para>
+	
+	<programlisting><![CDATA[<aop:aspectj-autoproxy/>]]></programlisting>
+	
+	<para>This assumes that you are using schema support as described in
+	<xref linkend="xsd-config" />. See <xref linkend="xsd-config-body-schemas-aop" /> 
+	for how to import the tags in the aop namespace. 
+	</para>
+	
+	<para>If you are using the DTD, it is still possible to enable @AspectJ support by
+	adding the following definition to your application context:
+	</para>
+
+	<programlisting><![CDATA[<bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" />]]></programlisting>
+	
+	<para>You will also need two AspectJ libraries on the classpath of your application:
+	<literal>aspectjweaver.jar</literal> and <literal>aspectjrt.jar</literal>. These libraries
+	are available in the <literal>lib</literal> directory of an AspectJ installation (version
+	1.5.1 or later required), or in the <literal>lib/aspectj</literal> directory of the
+	Spring-with-dependencies distribution.
+	</para>
     </sect2>
 
     <sect2>
       <title>Declaring an aspect</title>
+      
+      <para>With the @AspectJ support enabled, any bean defined in your application context
+      with a class that is an @AspectJ aspect (has the @Aspect annotation) will be automatically
+      detected by Spring and used to configure Spring AOP. The following example shows the
+      minimal definition required for a not-very-useful aspect:
+      </para>
+      
+      <para>A regular bean definition in the application context, pointing to a bean class
+      that has the @Aspect annotation;
+      </para>
+      
+      <programlisting><![CDATA[<bean id="myAspect"
+   class="org.xyz.NotVeryUsefulAspect">
+   <!-- configure properties of aspect here as normal -->
+</bean>
+]]></programlisting>
 
+	  <para>And the <literal>NotVeryUsefulAspect</literal> class definition, annotated with
+	  <literal>org.aspectj.lang.annotation.Aspect</literal>;</para>
+
+      <programlisting><![CDATA[package org.xyz;
+import org.aspectj.lang.annotation.Aspect;
+
+@Aspect
+public class NotVeryUsefulAspect {
+
+}]]></programlisting>
+
+	<para>Aspects (classes annotated with @Aspect) may have methods and fields just like any
+	other class. They may also contain pointcut, advice, and introduction (inter-type)
+	declarations.
+	</para>
+	
     </sect2>
 
     <sect2>
       <title>Declaring a pointcut</title>
 
+	  <para>
+	  Recall that pointcuts determine join points of interest, and thus enable us to control
+	  when advice executes. Spring AOP only supports method execution join points for Spring
+	  beans, so you can think of a pointcut as matching the execution of methods on Spring beans.
+	  A pointcut declaration has two parts: a signature comprising a name and any parameters,
+	  and a pointcut expression that actually determines which method executions we are 
+	  interested in. In @AspectJ a pointcut is signature is provided by a regular method 
+	  definition, and the pointcut expression is indicated using the @Pointcut annotation. The
+	  method must have a <literal>void</literal> return type. The following example defines
+	  a pointcut <literal>transfer</literal> that will match the execution of any methods named "transfer":
+	  </para>
+
+      <programlisting><![CDATA[    @Pointcut("execution(* transfer(..))")
+    private void transfer() {}]]></programlisting>
+
+	  <para>
+	  The pointcut expression that forms the value of the @Pointcut annotation is a
+	  regular AspectJ 5 pointcut expression. For a full discussion of AspectJ's pointcut
+	  language, see the 
+	  <ulink url="http://www.eclipse.org/aspectj/doc/released/progguide/index.html">AspectJ Programming Guide</ulink> (and for
+	  Java 5 based extensions, the 
+	  <ulink url="http://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html">AspectJ 5 Developers Notebook</ulink>) or
+	  one of the books on AspectJ such as "Eclipse AspectJ" by Colyer et. al. or "AspectJ in
+	  Action" by Ramnivas Labbad.
+	  </para>
+
+	<sect3> 
+	  <title>Supported Pointcut Designators</title>
+
+	  <para>Spring AOP supports the following AspectJ pointcut designators for use in pointcut
+	  expressions:</para>
+	  <itemizedlist>
+	    <listitem>
+	      <para><emphasis>execution</emphasis> - for matching method execution join points, this is the primary
+	      pointcut designator you will use when working with Spring AOP</para>
+	    </listitem>
+	    <listitem>
+	      <para><emphasis>within</emphasis> - limits matching to the execution of a method declared in
+	      certain types</para>
+	    </listitem>
+	    <listitem>
+	      <para><emphasis>this</emphasis> - limits matching to the execution of methods where the bean
+	      reference (Spring AOP proxy) is an instance of the given type</para>
+	    </listitem>
+	    <listitem>
+	      <para><emphasis>target</emphasis> - limits matching to the execution of methods where the
+	      target object (application object being proxied) is an instance of the given
+	      type</para>
+	    </listitem>
+	    <listitem>
+	      <para><emphasis>args</emphasis> - limits matching to the execution of methods where the 
+	      arguments passed to the method are instances of the given types</para>
+	    </listitem>
+	    <listitem>
+	      <para><emphasis>@target</emphasis> - limits matching to the execution of methods where the
+	      class of the executing object has an annotation of the given type</para>
+	    </listitem>
+	    <listitem>
+	      <para><emphasis>@args</emphasis> - limits matching to the execution of methods where the
+	      runtime type of the actual arguments passed have annotations of the given type(s)</para>
+	    </listitem>
+	    <listitem>
+	      <para><emphasis>@within</emphasis> - limits matching to the execution of methods defined in 
+	      types that have the given annotation</para>
+	    </listitem>
+	    <listitem>
+	      <para><emphasis>@annotation</emphasis> - limits matching to the execution of methods that have
+	      the given annotation</para>
+	    </listitem>
+	  </itemizedlist>
+
+	  <remark>Because Spring AOP limits matching to only method execution join points, the
+	  discussion of the pointcut designators above gives a narrower definition than you will
+	  find in the AspectJ programming guide. In addition, AspectJ itself has type-based
+	  semantics and at an execution join point both 'this' and 'target' refer to the same
+	  object - the object executing the method. Spring AOP is a proxy based system and
+	  differentiates between the proxy object itself (bound to 'this') and the target
+	  object behind the proxy (bound to 'target').</remark>
+	  
+	  <para>The full AspectJ pointcut language supports additional pointcut designators
+	  that are not supported in Spring. These are: <literal>call, initialization,
+	  preinitialization, staticinitialization, get, set, handler, adviceexecution,
+	  withincode, cflow, cflowbelow, if, @this</literal>, and  <literal>@withincode</literal>.
+	  Use of these pointcut designators in pointcut expressions interpreted by Spring AOP
+	  will result in an IllegalArgumentException.
+	  </para>
+
+	  <para>The set of pointcut designators supported by Spring AOP may be extended in
+	  future releases both to support more of the AspectJ pointcut designators (e.g. "if"),
+	  and potentially to support Spring specific designators such as "bean" (matching on
+	  bean name).
+	  </para>
+
+    </sect3>
+    
+    <sect3>
+     <title>Combining pointcut expressions</title>
+	  <para>
+	  Pointcut expressions can be combined using '&amp;&amp;', '||' and '!'. It is also possible
+	  to refer to pointcut expressions by name. The following example shows three pointcut 
+	  expressions: <literal>anyPublicMethod</literal> (which matches if a method execution
+	  join point represents the execution of any public method); <literal>inTrading</literal> (which matches
+	  if a method execution is in the trading module), and <literal>tradingOperation</literal>
+	  (which matches if an method execution represents any public method in the trading module).
+	  </para>
+
+      <programlisting><![CDATA[    @Pointcut("execution(public * *(..))")
+    private void anyPublicMethod() {}
+    
+    @Pointcut("within(com.xyz.someapp.trading..*")
+    private void inTrading() {}
+    
+    @Pointcut("anyPublicMethod() && inTrading()")
+    private void tradingOperation() {}]]></programlisting>
+
+	  <para>
+	  It is a best practice to build more complex pointcut expressions out of smaller 
+	  named components as shown above. When referring to pointcuts by name, normal Java
+	  visibility rules apply (you can see private pointcuts in the same type, protected
+	  pointcuts in the hierarchy, public pointcuts anywhere and so on).
+	  </para>
+    
+    </sect3>
+	  
+    <sect3>
+     <title>Sharing common pointcut definitions</title>
+    
+    <para>
+      When working with enterprise applications, you often want to refer to modules of the 
+      application and particular sets of operations from within several aspects. We recommend 
+      defining a "SystemArchitecture" aspect that captures common pointcut expressions
+      for this purpose. A typical such aspect would look as follows:
+    </para>
+
+      <programlisting><![CDATA[package com.xyz.someapp;
+
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+
+@Aspect
+public class SystemArchitecture {
+
+  /**
+   * A method execution is in the web layer if the method is defined
+   * in a type in the com.xyz.someapp.web package or any sub-package
+   * under that.
+   */
+  @Pointcut("within(com.xyz.someapp.web..*)")
+  public void inWebLayer() {}
+
+  /**
+   * A method execution is in the service layer if the method is defined
+   * in a type in the com.xyz.someapp.service package or any sub-package
+   * under that.
+   */
+  @Pointcut("within(com.xyz.someapp.service..*)")
+  public void inServiceLayer() {}
+
+  /**
+   * A method execution is in the data access layer if the method is defined
+   * in a type in the com.xyz.someapp.dao package or any sub-package
+   * under that.
+   */
+  @Pointcut("within(com.xyz.someapp.dao..*)")
+  public void inDataAccessLayer() {}
+
+  /**
+   * A business service is the execution of any method defined on a service
+   * interface. This definition assumes that interfaces are placed in the
+   * "service" package, and that implementation types are in sub-packages.
+   * 
+   * If you group service interfaces by functional area (for example, 
+   * in packages com.xyz.someapp.abc.service and com.xyz.def.service) then
+   * the pointcut expression "execution(* com.xyz.someapp..service.*.*(..))"
+   * could be used instead.
+   */
+  @Pointcut("execution(* com.xyz.someapp.service.*.*(..))")
+  public void businessService() {}
+  
+  /**
+   * A data access operation is the execution of any method defined on a 
+   * dao interface. This definition assumes that interfaces are placed in the
+   * "dao" package, and that implementation types are in sub-packages.
+   */
+  @Pointcut("execution(* com.xyz.someapp.dao.*.*(..))")
+  public void dataAccessOperation() {}
+
+}]]></programlisting>
+   
+   <para>The pointcuts defined in such an aspect can be referred to anywhere that you
+   need a pointcut expression. For example, to make the service layer transactional, you
+   could write:</para>
+
+      <programlisting><![CDATA[<aop:config>
+  <aop:advisor 
+      pointcut="com.xyz.someapp.SystemArchitecture.businessService()"
+      advice-ref="tx-advice"/>
+</aop:config>
+
+<tx:advice id="tx-advice">
+<tx:attributes>
+    <tx:method name="*" propagation="REQUIRED"/>
+  </tx:attributes>
+</tx:advice>]]></programlisting>
+   
+   <para>The <literal>&lt;aop:config&gt;</literal> and <literal>&lt;aop:advisor&gt;</literal>
+   tags are discussed in <xref linkend="aop-schema" />. 
+   The transaction tags are discussed in <xref linkend="transaction"/>.
+   </para>
+   
+    </sect3>
+
+    <sect3>
+     <title>Examples</title>
+     <para>Spring AOP users are likely to use the <literal>execution</literal> pointcut
+     designator the most often. The format of an execution expression is:
+     </para>
+     
+     <programlisting><![CDATA[execution(modifiers-pattern? ret-type-pattern declaring-type-pattern? name-pattern(param-pattern) throws-pattern?)]]></programlisting>
+     
+     <para>
+     All parts except the returning type pattern, name pattern, and parameters pattern are optional.
+     The returning type pattern determines what the return type of the method must be in order
+     for a join point to be matched. Most frequently you will use <literal>*</literal> as the
+     returning type pattern, which matches any return type. A fully-qualified type name will
+     match only when the method returns the given type. The name pattern matches the method name.
+     You can use the <literal>*</literal> wildcard as all or part of a name pattern. The
+     parameters pattern is slightly more complex: <literal>()</literal> matches a method that takes
+     no parameters, whereas <literal>(..)</literal> matches any number of parameters (zero or more).
+     The pattern <literal>(*)</literal> matches a method taking one parameter of any type,
+     <literal>(*,String)</literal> matches a method taking two parameters, the first can be of
+     any type, the second must be a String. Consult the 
+     <ulink url="http://www.eclipse.org/aspectj/doc/released/progguide/semantics-pointcuts.html">
+     Language Semantics</ulink> section of the AspectJ Programming Guide for more
+     information.
+     </para>
+     
+     <para>Some examples of common pointcut expressions are given below.</para>
+     
+     <itemizedlist>
+     
+     <listitem>
+     <para>(execution of) any public method:</para>
+     <programlisting><![CDATA[execution(public * *(..))]]></programlisting>
+     </listitem>
+     
+     <listitem>
+     <para>(execution of) any method with a name beginning with "set":</para>
+     <programlisting><![CDATA[execution(* set*(..))]]></programlisting>
+     </listitem>
+     
+     <listitem>
+     <para>(execution of) any method defined by the AccountService interface:</para>
+     <programlisting><![CDATA[execution(* com.xyz.service.AccountService.*(..))]]></programlisting>
+     </listitem>
+
+     <listitem>
+     <para>(execution of) any method defined in the service package:</para>
+     <programlisting><![CDATA[execution(* com.xyz.service.*.*(..))]]></programlisting>
+     </listitem>
+     
+     <listitem>
+     <para>(execution of) any method defined in the service package or a sub-package:</para>
+     <programlisting><![CDATA[execution(* com.xyz.service..*.*(..))]]></programlisting>
+     </listitem>
+     
+     <listitem>
+     <para>any join point (method execution only in Spring AOP) within the service package:</para>
+     <programlisting><![CDATA[within(com.xyz.service.*)]]></programlisting>
+     </listitem>
+
+     <listitem>
+     <para>any join point (method execution only in Spring AOP) within the service package or a sub-package:</para>
+     <programlisting><![CDATA[within(com.xyz.service..*)]]></programlisting>
+     </listitem>
+
+     <listitem>
+     <para>any join point (method execution only in Spring AOP) where the proxy implements the AccountService interface:</para>
+     <programlisting><![CDATA[this(com.xyz.service.AccountService)]]></programlisting>
+     <remark>'this' is more commonly used in a binding form :- see the following section
+     on advice for how to make the proxy object available in the advice body.</remark>
+     </listitem>
+	
+     <listitem>
+     <para>any join point (method execution only in Spring AOP) where the target object implements the AccountService interface:</para>
+     <programlisting><![CDATA[target(com.xyz.service.AccountService)]]></programlisting>
+     <remark>'target' is more commonly used in a binding form :- see the following section
+     on advice for how to make the target object available in the advice body.</remark>
+     </listitem>
+     
+     <listitem>
+     <para>any join point (method execution only in Spring AOP) which takes a single parameter, and where the argument passed at runtime is Serializable:</para>
+     <programlisting><![CDATA[args(java.io.Serializable)]]></programlisting>
+     <remark>'args' is more commonly used in a binding form :- see the following section
+     on advice for how to make the method arguments available in the advice body.</remark>
+     <para>Note that the pointcut given in this example is different to 
+     <literal>execution(* *(java.io.Serializable))</literal>: the args version matches if 
+     the argument passed at runtime is Serializable, the execution version matches if the
+     method signature declares a single parameter of type Serializable.</para>
+     </listitem>
+     
+     <listitem>
+     <para>any join point (method execution only in Spring AOP) where the target object has an @Transactional annotation:</para>
+     <programlisting><![CDATA[@target(org.springframework.transaction.annotation.Transactional)]]></programlisting>
+     <remark>'@target' can also be used in a binding form :- see the following section
+     on advice for how to make the annotation object available in the advice body.</remark>
+     </listitem>
+
+     <listitem>
+     <para>any join point (method execution only in Spring AOP) where the declared type of the target object has an @Transactional annotation:</para>
+     <programlisting><![CDATA[@within(org.springframework.transaction.annotation.Transactional)]]></programlisting>
+     <remark>'@within' can also be used in a binding form :- see the following section
+     on advice for how to make the annotation object available in the advice body.</remark>
+     </listitem>
+
+     <listitem>
+     <para>any join point (method execution only in Spring AOP) where the executing method has an @Transactional annotation:</para>
+     <programlisting><![CDATA[@annotation(org.springframework.transaction.annotation.Transactional)]]></programlisting>
+     <remark>'@annotation' can also be used in a binding form :- see the following section
+     on advice for how to make the annotation object available in the advice body.</remark>
+     </listitem>
+
+     <listitem>
+     <para>any join point (method execution only in Spring AOP) which takes a single parameter, and where the
+     runtime type of the argument passed has the Classified annotation:</para>
+     <programlisting><![CDATA[@args(com.xyz.security.Classified)]]></programlisting>
+     <remark>'@args' can also be used in a binding form :- see the following section
+     on advice for how to make the annotation object(s) available in the advice body.</remark>
+     </listitem>
+
+     </itemizedlist>
+     
+    </sect3>
+	  
     </sect2>
 
     <sect2>
       <title>Declaring advice</title>
 
+	   <para>Advice is associated with a pointcut expression, and runs before, after, or
+	   around method executions matched by the pointcut.</para>
+	   
+	   <sect3><title>Before advice</title>
+	   
+	   <para>Before advice is declared in an aspect using the @Before annotation:</para>
+	   
+     <programlisting><![CDATA[import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+
+@Aspect
+public class BeforeExample {
+
+  @Before("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+  public void doAccessCheck() {
+    // ...
+  }
+
+}]]></programlisting>
+	   
+	   </sect3>
+	   <sect3><title>After returning advice</title>
+	   
+	   <para>After returning advice runs when a matched method execution returns
+	   normally. It is declared using the @AfterReturning annotation:</para>
+
+     <programlisting><![CDATA[import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.AfterReturning;
+
+@Aspect
+public class AfterReturningExample {
+
+  @AfterReturning("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+  public void doAccessCheck() {
+    // ...
+  }
+
+}]]></programlisting>
+
+	<remark>Note: it is of course possible to have multiple advice declarations, and other
+	members as well, all inside the same aspect. We're just showing a single advice declaration
+	in these examples to focus on the issue under discussion at the time.
+	</remark>
+
+	<para>
+	Sometimes you need access in the advice body to the actual value that was returned. You
+	can use the form of AfterReturning that binds the return value for this: 
+	</para>
+	
+     <programlisting><![CDATA[import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.AfterReturning;
+
+@Aspect
+public class AfterReturningExample {
+
+  @AfterReturning(
+    pointcut="com.xyz.myapp.SystemArchitecture.dataAccessOperation()",
+    returning="retVal")
+  public void doAccessCheck(Object retVal) {
+    // ...
+  }
+  
+}]]></programlisting>
+	
+	<para>The name used in the <literal>returning</literal> attribute must correspond to
+	the name of a parameter in the advice method. When a method execution returns, the
+	return value will be passed to the advice method as the corresponding argument value.
+	A <literal>returning</literal> clause also restricts matching to only those method 
+	executions that return a value of the specified type (Object in this case, which will
+	match any return value).
+	</para>
+	
+	</sect3>
+	<sect3><title>After throwing advice</title>
+
+	<para>After throwing advice runs when a matched method execution exits by throwing
+	an exception. It is declared using the @AfterThrowing annotation:</para>
+
+     <programlisting><![CDATA[import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.AfterThrowing;
+
+@Aspect
+public class AfterThrowingExample {
+
+  @AfterThrowing("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+  public void doRecoveryActions() {
+    // ...
+  }
+
+}]]></programlisting>
+	
+	<para>Often you want the advice to run only when exceptions of a given type are
+	thrown, and you also often need access to the thrown exception in the advice
+	body. Use the <literal>throwing</literal> attribute to both restrict matching
+	(if desired, use Throwable as the exception type otherwise) and bind the thrown
+	exception to an advice parameter.
+	</para>
+
+     <programlisting><![CDATA[import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.AfterThrowing;
+
+@Aspect
+public class AfterThrowingExample {
+
+  @AfterThrowing(
+    pointcut="com.xyz.myapp.SystemArchitecture.dataAccessOperation()",
+    throwing="ex")
+  public void doRecoveryActions(DataAccessException ex) {
+    // ...
+  }
+
+}]]></programlisting>
+
+	<para>The name used in the <literal>throwing</literal> attribute must correspond to
+	the name of a parameter in the advice method. When a method execution exits by
+	throwing an exception, the
+	exception will be passed to the advice method as the corresponding argument value.
+	A <literal>throwing</literal> clause also restricts matching to only those method 
+	executions that throw an exception of the specified type (DataAccessException in this case).
+	</para>
+
+	</sect3>
+	<sect3><title>After (finally) advice</title>
+
+	<para>After (finally) advice runs however a matched method execution exits.
+	It is declared using the @After annotation. After advice must be prepared to handle
+	both normal and exception return conditions. It is typically used for releasing
+	resources etc.</para>
+
+     <programlisting><![CDATA[import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.After;
+
+@Aspect
+public class AfterThrowingExample {
+
+  @After("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+  public void doReleaseLock() {
+    // ...
+  }
+
+}]]></programlisting>
+	
+	</sect3>
+	<sect3><title>Around advice</title>
+	
+	<para>The final kind of advice is around advice. Around advice runs "around" a
+	matched method execution. It has the opportunity to do work both before and 
+	after the method executes, and to determine when, how, and even if, the method
+	actually gets to execute at all. Around advice is often used if you need to 
+	share state before and after a method execution in a thread-safe manner (starting
+	and stopping a timer for example).  Always use the least powerful form of 
+	advice that meets your requirements (ie. don't use around advice if simple
+	before advice would do).
+	</para>
+	
+	<para>Around advice is declared using the @Around annotation. The first parameter
+	of the advice method must be of type ProceedingJoinPoint. Within the body of the
+	advice, calling <literal>proceed()</literal> on the ProceedingJoinPoint causes the
+	underlying method to execute. The <literal>proceed</literal> method may also be
+	calling passing in an Object[] - the values in the array will be used as the arguments
+	to the method execution when it proceeds.
+	</para>
+	
+	<remark>The behaviour of proceed when called with an Object[] is a little different
+	than the behaviour of proceed for around advice compiled by the AspectJ compiler. For
+	around advice written using the traditional AspectJ language, the number of arguments 
+	passed to proceed must match the number of arguments passed to the around advice (not the 
+	number of arguments taken by the underlying join point), and the value passed to proceed
+	in a given argument position supplants the original value at the join point for the entity
+	the value was bound to. (Don't worry if this doesn't make sense right now!). The 
+	approach taken by Spring is simpler and a better match to its proxy-based, execution only
+	semantics. You only need to be aware of this difference if you compiling @AspectJ aspects
+	written for Spring and using proceed with arguments with the AspectJ compiler and weaver.
+	There is a way to write such aspects that is 100% compatible across both Spring AOP and 
+	AspectJ, and this is discussed in the following section on advice parameters. 
+	</remark>
+	
+     <programlisting><![CDATA[import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.ProceedingJoinPoint;
+
+@Aspect
+public class AroundExample {
+
+  @Around("com.xyz.myapp.SystemArchitecture.businessService()")
+  public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
+    // start stopwatch
+    Object retVal = pjp.proceed();
+    // stop stopwatch
+    return retVal;
+  }
+
+}]]></programlisting>
+	
+	<para>
+	The value returned by the around advice will be the return value seen by the caller
+	of the method. A simple caching aspect for example could return a value from a cache
+	if it has one, and invoke proceed() if it does not. Note that proceed may be invoked
+	once, many times, or not at all within the body of the around advice, all of these
+	are quite legal.
+	</para>
+	
+	</sect3>
+	
 	   <sect3>
 	   	<title>Advice parameters</title>
+	   	
+	   	<para>Spring 2.0 offers fully typed advice - meaning that you declare the parameters
+	   	you need in the advice signature (as we saw for the returning and throwing examples
+	   	above) rather than work with Object[]s all the time. We'll see how to make argument
+	   	and other contextual values available to the advice body in a moment. First let's take
+	   	a look at how to write generic advice that can find out about the method it's currently
+	   	advising.
+	   	</para>
+	   	 
+	   	<sect4><title>Access to the current JoinPoint</title> 
+	   	<para>
+	   	Any advice method may declare as its first parameter, a parameter of 
+	   	type <literal>org.aspectj.lang.JoinPoint</literal> (around advice is required to
+	   	declare a first parameter of type <literal>ProceedingJoinPoint</literal>, which is a
+	   	subtype of <literal>JoinPoint</literal>. The JoinPoint interface provides a number
+	   	of useful methods such as <literal>getArgs()</literal> (returns the method arguments),
+	   	<literal>getThis()</literal> (returns the proxy object), <literal>getTarget()</literal>
+	   	(returns the target object), <literal>getSignature()</literal> (returns a description
+	   	of the method that is being advised) and <literal>toString()</literal> (prints a
+	   	useful description of the method being advised).
+	   	</para>
+	   	</sect4>
+	   	
+	   	<sect4><title>Passing parameters to advice</title>
+	   	<para>We've already seen how to bind the returned value or exception value (using
+	   	after returning and after throwing advice). To make argument values available to
+	   	the advice body, you can use the binding form of <literal>args</literal>. If
+	   	a parameter name is used in place of a type name in an args expression, then the
+	   	value of the corresponding argument will be passed as the parameter value when the 
+	   	advice is invoked. An example should make this clearer. Suppose you want to advise
+	   	the execution of dao operations that take an Account object as the first parameter,
+	   	and you need access to the account in the advice body. You could write the following:
+	   	</para>
+	   	
+		<programlisting><![CDATA[@Before("com.xyz.myapp.SystemArchitecture.dataAccessOperation() &&" + 
+        "args(account,..)")
+public void validateAccount(Account account) {
+  // ...
+}]]></programlisting>	   	
+	   	
+	   	<para>The <literal>args(account,..)</literal> part of the pointcut expression serves
+	   	two purposes: firstly it restricts matching to only those method executions where
+	   	the method takes at least one parameter, and the argument passed to that parameter
+	   	is an instance of Account; secondly, it makes the actual Account object available to
+	   	the advice via the <literal>account</literal> parameter.
+	   	</para>
+	   	
+	   	<para>Another way of writing this is to declare a pointcut that "provides" the
+	   	Account object value when it matches a join point, and then just refer to the named
+	   	pointcut from the advice. This would look as follows:</para>
+	   	
+		<programlisting><![CDATA[@Pointcut("com.xyz.myapp.SystemArchitecture.dataAccessOperation() &&" + 
+          "args(account,..)")
+private void accountDataAccessOperation(Account account) {}
+
+@Before("accountDataAccessOperation(account)")
+public void validateAccount(Account account) {
+  // ..
+}]]></programlisting>	   	
+	   
+	    <para>Once more we refer you to the AspectJ programming guide for more details.</para>	
+	   	
+	   	<para>The proxy object (<literal>this</literal>), target object (<literal>target</literal>),
+	   	and annotations (<literal>@within, @target, @annotation, @args</literal>) can all 
+	   	be bound in a similar fashion. The following example shows how you could match
+	   	the execution of methods annotated with an @Auditable annotation, and extract the
+	   	audit code.
+	   	</para>
+	   	
+	   	<para>First the definition of the Auditable annotation:
+	   	</para>
+
+		<programlisting><![CDATA[@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Auditable {
+	AuditCode value();
+}
+]]></programlisting>	
+
+		<para>And then the advice that matches the execution of Auditable methods:</para>
+		
+		<programlisting><![CDATA[@Before("com.xyz.lib.Pointcuts.anyPublicMethod() && " + 
+        "@annotation(auditable)")
+public void audit(Auditable auditable) {
+  AuditCode code = auditable.value();
+  // ...
+}        
+]]></programlisting>	
+		
+	   	</sect4>
+
+		<sect4><title>Determining argument names</title>
+		<para>The parameter binding in advice invocations relies on matching names used
+		in pointcut expressions to declared parameter names in (advice and pointcut) method
+		signatures. Parameter names are <emphasis>not</emphasis> available through Java
+		reflection, so Spring AOP uses the following strategies to determine parameter
+		names: 
+		</para>
+		<orderedlist>
+		<listitem><para>If the parameter names have been specified by the user explicitly,
+		then the specified parameter names are used: both the advice and the pointcut
+		annotations have an optional "argNames"attribute which can be used to specify
+		the argument names of the annotated method - these argument names <emphasis>are</emphasis>
+		available at runtime. For example:
+		</para>
+		<programlisting><![CDATA[@Before(
+   value="com.xyz.lib.Pointcuts.anyPublicMethod() && " + 
+         "@annotation(auditable)",
+   argNames="auditable")
+public void audit(Auditable auditable) {
+  AuditCode code = auditable.value();
+  // ...
+}        
+]]></programlisting>	
+		<remark>If an @AspectJ aspect has been compiled by the AspectJ compiler (ajc) then
+		there is no need to add the argNames attribute as the compiler will do this
+		automatically.</remark>
+		</listitem>
+		<listitem>
+		<para>
+		Using the argNames attribute is a little clumsy, so if the argNames attribute has
+		not been specified, then Spring AOP will look at the debug information for the
+		class and try to determine the parameter names from the local variable table. This 
+		information will be present as long as the classes have been compiled with debug
+		information (-g:vars at a minimum). The consequences of compiling with this flag on
+		are: (1) your code will be slightly easier to understand (reverse engineer), (2) the
+		class file sizes will be very slightly bigger (inconsequential), (3) the optimisation
+		to remove unused local variables will not be applied by your compiler. In other words,
+		you should encounter no difficulties building with this flag on.
+		</para>
+		</listitem>
+		<listitem>
+		<para>
+		If the code has been compiled without the necessary debug information, then Spring AOP
+		will attempt to deduce the pairing of binding variables to parameters (for example,
+		if only one variable is bound in the pointcut expression, and the advice method only
+		takes one parameter, the pairing is obvious!). If the binding of variables is ambiguous
+		given the available information, then an AmbiguousBindingException will be thrown.
+		</para>
+		</listitem>
+		<listitem>
+		<para>If all of the above strategies fail then an IllegalArgumentException will be
+		thrown.</para>
+		</listitem>
+		</orderedlist>
+			
+		</sect4>
+	   	
+	   	<sect4><title>Proceeding with arguments</title>
+	   	<para>We remarked earlier that we would describe how to write a proceed call 
+        <emphasis>with arguments</emphasis> that works consistently across Spring AOP 
+        and AspectJ. The solution is simply to ensure that the advice signature binds
+        each of the method parameters in order. For example:
+	   	</para>
+		<programlisting><![CDATA[@Around("execution(List<Account> find*(..)) &&" +
+        "com.xyz.myapp.SystemArchitecture.inDataAccessLayer() && " +
+        "args(accountHolderNamePattern)")		
+public Object preProcessQueryPattern(ProceedingJoinPoint pjp, String accountHolderNamePattern)
+throws Throwable {
+  String newPattern = preProcess(accountHolderNamePattern);
+  return pjp.proceed(new Object[] {newPattern});
+}        
+]]></programlisting>	
+
+	<para>In many cases you will be doing this binding anyway (as in the example above).</para>
+
+	   	</sect4>
+	   </sect3>
+
+	   <sect3>
+	   	<title>Advice ordering</title>
+	   	
+	   	<para>What happens when multiple pieces of advice all want to run at the same
+	   	join point? Spring AOP follows the same precedence rules as AspectJ to determine
+	   	the order of advice execution. The highest precedence advice runs first "on the way in"
+	   	(so given two pieces of before advice, the one with highest precedence runs
+	   	first). "On the way out" from a join point, the highest precedence advice runs last
+	   	(so given two pieces of after advice, the one with the highest precedence will run
+	   	second). For advice defined within the same aspect, precedence is established
+	   	by declaration order. Given the aspect:</para>
+
+		<programlisting><![CDATA[@Aspect
+public class AspectWithMultipleAdviceDeclarations {
+
+  @Pointcut("execution(* foo(..))")
+  public void fooExecution() {}
+  
+  @Before("fooExecution()")
+  public void doBeforeOne() {
+    // ..
+  }
+  
+  @Before("fooExecution()")
+  public void doBeforeTwo() {
+    // ..
+  }
+  
+  @AfterReturning("fooExecution()")
+  public void doAfterOne() {
+    // ..
+  }
+
+  @AfterReturning("fooExecution()")
+  public void doAfterTwo() {
+    //..
+  }
+
+}]]></programlisting>	
+
+	<para>then for any execution of a method named foo, the <literal>doBeforeOne</literal>,
+	<literal>doBeforeTwo</literal>, <literal>doAfterOne</literal>, and <literal>doAfterTwo</literal>
+	advice methods all need to run. The precedence rules are such that the advice will execute
+	in declaration order. In this case the execution trace would be:
+	</para>
+
+		<programlisting><![CDATA[doBeforeOne
+doBeforeTwo
+foo
+doAfterOne
+doAfterTwo
+]]></programlisting>
+
+<para>In other words doBeforeOne has precedence over doBeforeTwo, because it was defined
+before doBeforeTwo, and doAfterTwo has precedence over doAfterOne because it was defined
+after doAfterOne. It's easiest just to remember that advice runs in declaration order ;) - 
+see the AspectJ Programming Guide for the full details. 
+</para>
+
+<para>When two pieces of advice defined in <emphasis>different</emphasis> aspects both need
+to run at the same join point, then unless you specify otherwise the order of execution is 
+undefined. You can control the order of execution by specifying precedence. This is done in 
+the normal Spring way by implemented the org.springframework.core.Ordered interface in the
+aspect class. Given two aspects, the aspect returning the lower value from Ordered.getValue()
+has the higher precedence. 
+</para>
+
 	   </sect3>
 
     </sect2>
@@ -302,11 +1146,98 @@
     <sect2>
       <title>Introductions</title>
 
+	<para>Introductions (known as inter-type declarations in AspectJ) enable an aspect
+	to declare that advised objects implement a given interface, and to provide an implementation
+	of that interface on behalf of those objects.</para>
+
+	<para>An introduction is made using the @DeclareParents annotation. This annotation is
+	used to declare that matching types have a new parent (hence the name). For example, given
+	an interface Lockable, and an implementation of that interface DefaultLockable, the following
+	aspect declares that all types in the service package implement the Lockable interface. 
+	</para>
+
+		<programlisting><![CDATA[@Aspect
+public class LockableSupport {
+
+  @DeclareParents(value="com.xzy.myapp.service.*",
+                  defaultImpl=DefaultLockable.class)
+  public static Lockable mixin;
+  
+  @Before("com.xyz.myapp.SystemArchitecture.businessService() &&" +
+          "this(lockable)")
+  public void lock(Lockable lockable) {
+    lockable.lock();
+  }
+  
+  @After("com.xyz.myapp.SystemArchitecture.businessService() &&" +
+         "this(lockable)")
+  public void unlock(Lockable lockable) {
+    lockable.unlock();
+  }
+  
+}]]></programlisting>	
+
+	<para>
+	The interface to be implemented is determined by the type of the annotated field. The 
+	<literal>value</literal> attribute of the <literal>DeclareParents</literal> annotation
+	is an AspectJ type pattern :- any bean of a matching type will implement the Lockable
+	interface. Note that in the before and after advice of the above example, service
+	beans can be directly used as implementations of the Lockable interface. If accessing
+	a bean programmatically you would write the following:
+	</para>
+
+	<programlisting><![CDATA[Lockable lockable = (Lockable) context.getBean("myService");]]></programlisting>
+
     </sect2>
 
     <sect2>
       <title>Aspect instantiation models</title>
+      
+     <remark>This is an advanced topic...</remark> 
 
+	<para>By default there will be a single instance of each aspect within the application
+	context. AspectJ calls this the singleton instantiation model. It is possible to define
+	aspects with alternate lifecycles :- Spring supports AspectJ's <literal>perthis</literal>
+	and <literal>pertarget</literal> instantiation models (<literal>percflow, percflowbelow,</literal>
+	and <literal>pertypewithin</literal> are not currently supported).
+	</para>
+	
+	<para>A "perthis" aspect is declared by specifying a <literal>perthis</literal> clause
+	in the @Aspect annotation. Let's look at an example, and then we'll explain how it works.
+	</para>
+	
+	<programlisting><![CDATA[@Aspect("perthis(com.xyz.myapp.SystemArchitecture.businessService())")
+public class MyAspect {
+
+  private int someState;
+	
+  @Before(com.xyz.myapp.SystemArchitecture.businessService())
+  public void recordServiceUsage() {
+    // ...
+  }
+  	
+}]]></programlisting>
+	
+	<para>The effect of the perthis clause is that one aspect instance will be created for
+	each unique service object executing a business service (each unique object
+	bound to 'this' at join points matched by the pointcut expression). 
+	The aspect instance is created
+	the first time that a method is invoked on the service object. The aspect goes out
+	of scope when the service object goes out of scope. Before the aspect instance is created,
+	none of the advice within it executes. As soon as the aspect instance has been created,
+	the advice declared within it will execute at matched join points, but only when the service
+	object is the one this aspect is associated with. See the AspectJ programming guide for
+	more information on per-clauses. 
+	</para>
+	
+	<para>The 'pertarget' instantiation model works in exactly the same way as perthis, but
+	creates one aspect instance for each unique target object at matched join points.</para>
+
+    </sect2>
+
+    <sect2>
+      <title>Example</title>
+      retry...
     </sect2>
 
   </sect1>
