@@ -22,11 +22,21 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.ServletException;
+import javax.servlet.ServletContext;
 
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import freemarker.template.ObjectWrapper;
+import freemarker.ext.servlet.ServletContextHashModel;
+import freemarker.ext.servlet.FreemarkerServlet;
+import freemarker.ext.servlet.HttpRequestHashModel;
+import freemarker.ext.jsp.TaglibFactory;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -46,9 +56,10 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  * the encoding of the FreeMarker template file
  * </ul>
  *
- * <p>Depends on a single FreeMarkerConfig object such as FreeMarkerConfigurer
+ * <p>Depends on a single {@link FreeMarkerConfig} object such as {@link FreeMarkerConfigurer}
  * being accessible in the current web application context, with any bean name.
- * Alternatively, you can set the FreeMarker Configuration object as bean property.
+ * Alternatively, you can set the FreeMarker {@link Configuration} object as bean property.
+ * See {@link #setConfiguration} for more details on the impacts of this approach.
  *
  * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3 or higher.
  *
@@ -68,6 +79,9 @@ public class FreeMarkerView extends AbstractTemplateView {
 
 	private Configuration configuration;
 
+	private ServletContextHashModel servletContextHashModel;
+
+	private TaglibFactory taglibFactory;
 
 	/**
 	 * Set the encoding of the FreeMarker template file. Default is determined
@@ -88,9 +102,12 @@ public class FreeMarkerView extends AbstractTemplateView {
 
 	/**
 	 * Set the FreeMarker Configuration to be used by this view.
-	 * If this is not set, the default lookup will occur: A single FreeMarkerConfig
+	 * If this is not set, the default lookup will occur: a single {@link FreeMarkerConfig}
 	 * is expected in the current web application context, with any bean name.
-	 * @see FreeMarkerConfig
+	 * <strong>Note:</strong> using this method will cause a new instance of {@link TaglibFactory}
+	 * to created for every single {@link FreeMarkerView} instance. This can be quite expensive
+	 * in terms of memory and initial CPU usage. In production it is recommended that you use
+	 * a {@link FreeMarkerConfig} which exposes a single shared {@link TaglibFactory}.
 	 */
 	public void setConfiguration(Configuration configuration) {
 		this.configuration = configuration;
@@ -100,9 +117,8 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * Return the FreeMarker configuration used by this view.
 	 */
 	protected Configuration getConfiguration() {
-		return configuration;
+		return this.configuration;
 	}
-
 
 	/**
 	 * Invoked on startup. Looks for a single FreeMarkerConfig bean to
@@ -115,28 +131,32 @@ public class FreeMarkerView extends AbstractTemplateView {
 	protected void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
 
-		if (getConfiguration() == null) {
-			// No explicit Configuration instance: try to autodetect one.
-			setConfiguration(autodetectConfiguration());
+		if (getConfiguration() != null) {
+			this.taglibFactory = new TaglibFactory(getServletContext());
 		}
+		else {
+			FreeMarkerConfig config = autodetectConfiguration();
+			setConfiguration(config.getConfiguration());
+			this.taglibFactory = config.getTaglibFactory();
+		}
+
+		this.servletContextHashModel = new ServletContextHashModel(
+						new GenericServletAdapter(getServletContext()), ObjectWrapper.DEFAULT_WRAPPER);
 
 		checkTemplate();
 	}
 
 	/**
-	 * Autodetect a FreeMarker Configuration object via the ApplicationContext.
-	 * Called if no explicit Configuration instance has been specified.
+	 * Autodetect a {@link FreeMarkerConfig} object via the ApplicationContext.
 	 * @return the Configuration instance to use for FreeMarkerViews
 	 * @throws BeansException if no Configuration instance could be found
 	 * @see #getApplicationContext
 	 * @see #setConfiguration
 	 */
-	protected Configuration autodetectConfiguration() throws BeansException {
+	protected FreeMarkerConfig autodetectConfiguration() throws BeansException {
 		try {
-			FreeMarkerConfig freemarkerConfig = (FreeMarkerConfig)
-					BeanFactoryUtils.beanOfTypeIncludingAncestors(
+			return (FreeMarkerConfig) BeanFactoryUtils.beanOfTypeIncludingAncestors(
 							getApplicationContext(), FreeMarkerConfig.class, true, false);
-			return freemarkerConfig.getConfiguration();
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			throw new ApplicationContextException(
@@ -214,6 +234,11 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * @see #processTemplate
 	 */
 	protected void doRender(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		exposeModelAsRequestAttributes(model, request);
+		model.put(FreemarkerServlet.KEY_APPLICATION, servletContextHashModel);
+		model.put(FreemarkerServlet.KEY_JSP_TAGLIBS, taglibFactory);
+		model.put(FreemarkerServlet.KEY_REQUEST, new HttpRequestHashModel(request, response,
+						ObjectWrapper.DEFAULT_WRAPPER));
 		if (logger.isDebugEnabled()) {
 			logger.debug("Rendering FreeMarker template [" + getUrl() + "] in FreeMarkerView '" + getBeanName() + "'");
 		}
@@ -269,4 +294,24 @@ public class FreeMarkerView extends AbstractTemplateView {
 		template.process(model, response.getWriter());
 	}
 
+	/**
+	 * Simple adapter class that extends {@link GenericServlet} and exposes the currently
+	 * active {@link ServletContext}. Needed for JSP access in FreeMarker.
+	 */
+	private static final class GenericServletAdapter extends GenericServlet {
+
+		private final ServletContext servletContext;
+
+		public GenericServletAdapter(ServletContext servletContext) {
+			this.servletContext = servletContext;
+		}
+
+		public void service(ServletRequest servletRequest, ServletResponse servletResponse) {
+			// no-op
+		}
+
+		public ServletContext getServletContext() {
+			return this.servletContext;
+		}
+	}
 }

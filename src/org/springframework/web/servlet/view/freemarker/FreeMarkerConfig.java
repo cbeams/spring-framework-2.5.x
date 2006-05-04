@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.view.freemarker;
 
 import freemarker.template.Configuration;
+import freemarker.ext.jsp.TaglibFactory;
 
 /**
  * Interface to be implemented by objects that configure and manage a
@@ -24,6 +25,7 @@ import freemarker.template.Configuration;
  * used by FreeMarkerView.
  *
  * @author Darren Davison
+ * @author Rob Harrop
  * @since 03.03.2004
  * @see FreeMarkerConfigurer
  * @see FreeMarkerView
@@ -38,5 +40,11 @@ public interface FreeMarkerConfig {
 	 * @return the FreeMarker Configuration
 	 */
 	Configuration getConfiguration();
+
+	/**
+	 * Returns the {@link TaglibFactory} used to enable JSP tags to be
+	 * accessed from FreeMarker templates.
+	 */
+	TaglibFactory getTaglibFactory();
 
 }

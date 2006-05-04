@@ -22,10 +22,14 @@ import java.util.List;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import freemarker.ext.jsp.TaglibFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
+import org.springframework.web.context.ServletContextAware;
+
+import javax.servlet.ServletContext;
 
 /**
  * JavaBean to configure FreeMarker for web usage, via the "configLocation"
@@ -62,6 +66,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
  * Note: Spring's FreeMarker support requires FreeMarker 2.3 or higher.
  *
  * @author Darren Davison
+ * @author Rob Harrop
  * @since 03.03.2004
  * @see #setConfigLocation
  * @see #setFreemarkerSettings
@@ -71,10 +76,11 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
  * @see FreeMarkerView
  */
 public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
-		implements FreeMarkerConfig, InitializingBean, ResourceLoaderAware {
+		implements FreeMarkerConfig, InitializingBean, ResourceLoaderAware, ServletContextAware {
 
 	private Configuration configuration;
 
+	private TaglibFactory taglibFactory;
 
 	/**
 	 * Set a preconfigured Configuration to use for the FreeMarker web config, e.g. a
@@ -88,9 +94,16 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	}
 
 	/**
+	 * Initialize the {@link TaglibFactory}.
+	 */
+	public void setServletContext(ServletContext servletContext) {
+		this.taglibFactory = new TaglibFactory(servletContext);
+	}
+
+	/**
 	 * Initialize FreeMarkerConfigurationFactory's Configuration
 	 * if not overridden by a preconfigured FreeMarker Configuation.
-   * <p>Sets up a ClassTemplateLoader to use for loading Spring macros.
+	 * <p>Sets up a ClassTemplateLoader to use for loading Spring macros.
 	 * @see #createConfiguration
 	 * @see #setConfiguration
 	 */
@@ -110,11 +123,14 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	}
 
 	/**
-   * Return the Configuration object wrapped by this bean.
+	 * Return the Configuration object wrapped by this bean.
 	 * @see org.springframework.web.servlet.view.freemarker.FreeMarkerConfig#getConfiguration()
 	 */
 	public Configuration getConfiguration() {
 		return this.configuration;
 	}
 
+	public TaglibFactory getTaglibFactory() {
+		return this.taglibFactory;
+	}
 }

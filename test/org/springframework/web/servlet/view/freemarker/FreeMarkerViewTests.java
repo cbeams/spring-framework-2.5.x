@@ -34,7 +34,9 @@ import org.easymock.MockControl;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
@@ -83,7 +85,7 @@ public class FreeMarkerViewTests extends TestCase {
 	public void testValidTemplateName() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
 
-		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
+		MockControl wmc = MockControl.createNiceControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
 		wac.getBeansOfType(FreeMarkerConfig.class, true, false);
 		Map configs = new HashMap();
@@ -109,7 +111,6 @@ public class FreeMarkerViewTests extends TestCase {
 
 		wmc.verify();
 	}
-
 
 	private class TestConfiguration extends Configuration {
 

@@ -25,11 +25,13 @@ import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContext;
+import org.springframework.util.ClassUtils;
 
 /**
  * Abstract View superclass. Standard framework View implementations and
@@ -119,7 +121,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	public String getRequestContextAttribute() {
 			return requestContextAttribute;
 	}
-    
+
 	/**
 	 * Set static attributes as a CSV string.
 	 * Format is: attname0={value1},attname1={value1}
@@ -292,4 +294,37 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 		return sb.toString();
 	}
 
+	/**
+	 * Expose the model objects in the given map as request attributes.
+	 * Names will be taken from the model Map.
+	 * This method is suitable for all resources reachable by {@link javax.servlet.RequestDispatcher}.
+	 * @param model Map of model objects to expose
+	 * @param request current HTTP request
+	 */
+	protected void exposeModelAsRequestAttributes(Map model, HttpServletRequest request) throws Exception {
+		Iterator it = model.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry entry = (Map.Entry) it.next();
+			if (!(entry.getKey() instanceof String)) {
+				throw new ServletException(
+						"Invalid key [" + entry.getKey() + "] in model Map - only Strings allowed as model keys");
+			}
+			String modelName = (String) entry.getKey();
+			Object modelValue = entry.getValue();
+			if (modelValue != null) {
+				request.setAttribute(modelName, modelValue);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Added model object '" + modelName + "' of type [" + modelValue.getClass().getName() +
+							"] to request in " + ClassUtils.getShortName(getClass()) + "'" + getBeanName() + "'");
+				}
+			}
+			else {
+				request.removeAttribute(modelName);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Removed model object '" + modelName +
+							"' from request in " + ClassUtils.getShortName(getClass()) + "'" + getBeanName() + "'");
+				}
+			}
+		}
+	}
 }
