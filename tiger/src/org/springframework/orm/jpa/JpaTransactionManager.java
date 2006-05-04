@@ -293,11 +293,15 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		}
 
 		catch (TransactionException ex) {
-			em.close();
+			if (em != null) {
+				em.close();
+			}
 			throw ex;
 		}
 		catch (Exception ex) {
-			em.close();
+			if (em != null) {
+				em.close();
+			}
 			throw new CannotCreateTransactionException("Could not open JPA EntityManager for transaction", ex);
 		}
 	}
