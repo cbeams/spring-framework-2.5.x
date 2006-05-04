@@ -121,7 +121,7 @@ public abstract class ClassUtils {
 		}
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Class [" + className + "] or one of its dependencies is not present", ex);
+				logger.debug("Class [" + className + "] or one of its dependencies is not present: " + ex);
 			}
 			return false;
 		}
