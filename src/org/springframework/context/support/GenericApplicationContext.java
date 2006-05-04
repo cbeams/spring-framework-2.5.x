@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * <p>In contrast to other ApplicationContext implementations that create a new
  * internal BeanFactory instance for each refresh, the internal BeanFactory of
  * this context is available right from the start, to be able to register bean
- * definitions on it. <code>refresh</code> may only be called once.
+ * definitions on it. <code>refresh()</code> may only be called once.
  *
  * <p>Usage example:
  *
@@ -72,7 +72,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * @author Juergen Hoeller
  * @since 1.1.2
  * @see #registerBeanDefinition
- * @see #refresh
+ * @see #refresh()
  * @see org.springframework.beans.factory.support.BeanDefinitionRegistry
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
  * @see AbstractRefreshableApplicationContext
@@ -203,7 +203,8 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 */
 	protected void refreshBeanFactory() throws IllegalStateException {
 		if (this.refreshed) {
-			throw new IllegalStateException("Multiple refreshs not supported: just call 'refresh' once");
+			throw new IllegalStateException(
+					"GenericApplicationContext does not support multiple refresh attempts: just call 'refresh' once");
 		}
 		this.refreshed = true;
 	}
@@ -218,10 +219,10 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	/**
 	 * Return the underlying bean factory of this context,
 	 * available for registering bean definitions.
-	 * <p><b>NOTE:</b> You need to call <code>refresh</code> to initialize the
+	 * <p><b>NOTE:</b> You need to call <code>refresh()</code> to initialize the
 	 * bean factory and its contained beans with application context semantics
-	 * (auto-detecting BeanFactoryPostProcessors, etc)
-	 * @see #refresh
+	 * (autodetecting BeanFactoryPostProcessors, etc).
+	 * @see #refresh()
 	 */
 	public DefaultListableBeanFactory getDefaultListableBeanFactory() {
 		return this.beanFactory;

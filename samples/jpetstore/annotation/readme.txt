@@ -1,6 +1,6 @@
 This directory tree shows how to use JDK 1.5+ annotations to achieve
 auto-proxying. There's no need to use a TransactionFactoryProxyBean:
-application classes that contain transaction annotations will be
+Methods of application classes that contain transaction annotations will be
 automatically intercepted to perform declarative transaction management.
 
 We need our own build file here to compile on JDK 1.5+.
