@@ -16,32 +16,31 @@
 
 package org.springframework.core;
 
-import org.springframework.util.Assert;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.util.Assert;
+
 /**
- * Support class for {@link AttributeAccessor AttributeAccessors}, providing a
- * base implementation of all methods.
- * 
- * <p>{@link Serializable} if sub-classes and all attribute values are {@link Serializable}.
+ * Support class for {@link AttributeAccessor AttributeAccessors}, providing
+ * a base implementation of all methods. To be extended by subclasses.
+ *
+ * <p>{@link Serializable} if subclasses and all attribute values are {@link Serializable}.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public abstract class AttributeAccessorSupport implements AttributeAccessor, Serializable {
 
-	/**
-	 * Attributes {@link Map}. Attributes are {@link String}/{@link Object} pairs.
-	 */
+	/** Map with String keys and Object values */
 	private final Map attributes = new HashMap();
 
 
 	public void setAttribute(String name, Object value) {
-		Assert.notNull(name, "'name' cannot be null.");
+		Assert.notNull(name, "Name must not be null");
 		if (value != null) {
 			this.attributes.put(name, value);
 		}
@@ -51,17 +50,17 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 	}
 
 	public Object getAttribute(String name) {
-		Assert.notNull(name, "'name' cannot be null.");
+		Assert.notNull(name, "Name must not be null");
 		return this.attributes.get(name);
 	}
 
 	public Object removeAttribute(String name) {
-		Assert.notNull(name, "'name' cannot be null.");
+		Assert.notNull(name, "Name must not be null");
 		return this.attributes.remove(name);
 	}
 
 	public boolean hasAttribute(String name) {
-		Assert.notNull(name, "'name' cannot be null.");
+		Assert.notNull(name, "Name must not be null");
 		return this.attributes.containsKey(name);
 	}
 
@@ -70,18 +69,34 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 		return (String[]) attributeNames.toArray(new String[attributeNames.size()]);
 	}
 
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
 
-		final AttributeAccessorSupport that = (AttributeAccessorSupport) o;
+	/**
+	 * Copy the attributes from the supplied AttributeAccessor to this accessor.
+	 * @param source the AttributeAccessor to copy from
+	 */
+	protected void copyAttributesFrom(AttributeAccessor source) {
+		Assert.notNull(source, "Source must not be null");
+		String[] attributeNames = source.attributeNames();
+		for (int i = 0; i < attributeNames.length; i++) {
+			String attributeName = attributeNames[i];
+			setAttribute(attributeName, source.getAttribute(attributeName));
+		}
+	}
 
-		if (!this.attributes.equals(that.attributes)) return false;
 
-		return true;
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (other instanceof AttributeAccessorSupport) {
+			return false;
+		}
+		AttributeAccessorSupport that = (AttributeAccessorSupport) other;
+		return this.attributes.equals(that.attributes);
 	}
 
 	public int hashCode() {
 		return this.attributes.hashCode();
 	}
+
 }
