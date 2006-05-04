@@ -83,10 +83,10 @@
 		</property>
 		<property name="urlMap">
 			<map>
-				<entry key="/shop/editAccount.do"><ref local="secure_editAccount"/></entry>
-				<entry key="/shop/listOrders.do"><ref local="secure_listOrders"/></entry>
-				<entry key="/shop/newOrder.do"><ref local="secure_newOrder"/></entry>
-				<entry key="/shop/viewOrder.do"><ref local="secure_viewOrder"/></entry>
+				<entry key="/shop/editAccount.do" value-ref="secure_editAccount"/>
+				<entry key="/shop/listOrders.do" value-ref="secure_listOrders"/>
+				<entry key="/shop/newOrder.do" value-ref="secure_newOrder"/>
+				<entry key="/shop/viewOrder.do" value-ref="secure_viewOrder"/>
 			</map>
 		</property>
 	</bean>
