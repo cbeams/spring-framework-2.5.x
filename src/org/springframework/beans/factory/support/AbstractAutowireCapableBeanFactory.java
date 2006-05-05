@@ -344,11 +344,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					"' with merged definition [" + mergedBeanDefinition + "]");
 		}
 
+		// Make sure bean class is actually resolved at this point.
+		Class beanClass = resolveBeanClass(mergedBeanDefinition, beanName);
+
 		Object bean = null;
 
 		// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-		if (mergedBeanDefinition.hasBeanClass()) {
-			bean = applyBeanPostProcessorsBeforeInstantiation(mergedBeanDefinition.getBeanClass(), beanName);
+		if (beanClass != null) {
+			bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
 			if (bean != null) {
 				bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
 				return bean;
@@ -448,10 +451,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		else {
 			// Check declared factory method return type on bean class.
-			if (!mergedBeanDefinition.hasBeanClass()) {
-				return null;
-			}
-			factoryClass = mergedBeanDefinition.getBeanClass();
+			factoryClass = resolveBeanClass(mergedBeanDefinition, beanName);
+		}
+
+		if (factoryClass == null) {
+			return null;
 		}
 
 		// If all factory methods have the same return type, return that type.

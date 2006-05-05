@@ -306,6 +306,22 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 		}
 	}
 
+	/**
+	 * Determine the class of the wrapped bean, resolving it from a
+	 * specified class name if necessary. Will also reload a specified
+	 * Class from its name when called with the bean class already resolved.
+	 * @param classLoader the ClassLoader to use for resolving a (potential) class name
+	 * @return the resolved bean class
+	 */
+	public Class resolveBeanClass(ClassLoader classLoader) throws ClassNotFoundException {
+		if (this.beanClass == null) {
+			return null;
+		}
+		Class resolvedClass = ClassUtils.forName(getBeanClassName(), classLoader);
+		this.beanClass = resolvedClass;
+		return resolvedClass;
+	}
+
 
 	/**
 	 * Set the name of the target scope for the bean.
@@ -702,7 +718,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	public void validate() throws BeanDefinitionValidationException {
-		if (this.lazyInit && !isSingleton()) {
+		if (isLazyInit() && !isSingleton()) {
 			throw new BeanDefinitionValidationException(
 					"Lazy initialization is only applicable to singleton beans");
 		}
@@ -714,21 +730,31 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 		}
 
 		if (hasBeanClass()) {
-			// Check that lookup methods exists
-			for (Iterator it = getMethodOverrides().getOverrides().iterator(); it.hasNext(); ) {
-				MethodOverride mo = (MethodOverride) it.next();
-				validateMethodOverride(mo);
-			}
+			prepareMethodOverrides();
 		}
 	}
 
 	/**
-	 * Validate the given method override.
+	 * Validate and prepare the method overrides defined for this bean.
 	 * Checks for existence of a method with the specified name.
+	 * @throws BeanDefinitionValidationException in case of validation failure
+	 */
+	public void prepareMethodOverrides() throws BeanDefinitionValidationException {
+		// Check that lookup methods exists.
+		for (Iterator it = getMethodOverrides().getOverrides().iterator(); it.hasNext(); ) {
+			MethodOverride mo = (MethodOverride) it.next();
+			prepareMethodOverride(mo);
+		}
+	}
+
+	/**
+	 * Validate and prepare the given method override.
+	 * Checks for existence of a method with the specified name,
+	 * marking it as not overloaded if none found.
 	 * @param mo the MethodOverride object to validate
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
-	protected void validateMethodOverride(MethodOverride mo) throws BeanDefinitionValidationException {
+	protected void prepareMethodOverride(MethodOverride mo) throws BeanDefinitionValidationException {
 		int count = ClassUtils.getMethodCountForName(getBeanClass(), mo.getMethodName());
 		if (count == 0) {
 			throw new BeanDefinitionValidationException(
@@ -741,21 +767,9 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 		}
 	}
 
-	/**
-	 * Copies the attributes from the supplied {@link BeanDefinition} to this
-	 * {@link BeanDefinition}.
-	 */
-	private void copyAttributesFrom(BeanDefinition original) {
-		String[] attributeNames = original.attributeNames();
-		for (int i = 0; i < attributeNames.length; i++) {
-			String attributeName = attributeNames[i];
-			setAttribute(attributeName, original.getAttribute(attributeName));
-		}
-	}
-
 
 	public boolean equals(Object other) {
-		if (!super.equals(other)) {
+		if (!(other instanceof AbstractBeanDefinition) || !super.equals(other)) {
 			return false;
 		}
 

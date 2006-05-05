@@ -118,13 +118,13 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 		setBeanClassName(beanClassName);
 	}
 
+
 	/**
 	 * Return the name of the parent definition of this bean definition.
 	 */
 	public String getParentName() {
 		return parentName;
 	}
-
 
 	public void validate() throws BeanDefinitionValidationException {
 		super.validate();
@@ -133,20 +133,23 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 		}
 	}
 
+
+	public boolean equals(Object other) {
+		if (!(other instanceof ChildBeanDefinition) || !super.equals(other)) {
+			return false;
+		}
+		ChildBeanDefinition that = (ChildBeanDefinition) other;
+		return ObjectUtils.nullSafeEquals(this.parentName, that.parentName);
+	}
+
+	public int hashCode() {
+		return 29 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.parentName);
+	}
+
 	public String toString() {
 		StringBuffer sb = new StringBuffer("Child bean with parent '");
 		sb.append(this.parentName).append("': ").append(super.toString());
 		return sb.toString();
 	}
 
-	public boolean equals(Object o) {
-		if (!super.equals(o)) {
-			return false;
-		}
-		return ObjectUtils.nullSafeEquals(this.parentName, ((ChildBeanDefinition) o).parentName);
-	}
-
-	public int hashCode() {
-		return 29 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.parentName);
-	}
 }

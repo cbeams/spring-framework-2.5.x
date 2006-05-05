@@ -28,6 +28,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.ResourceTestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -73,6 +74,19 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"simpleContext.xml", getClass());
 		assertTrue(ctx.containsBean("someMessageSource"));
+	}
+
+	public void testContextWithInvalidLazyClass() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				"invalidClass.xml", getClass());
+		assertTrue(ctx.containsBean("someMessageSource"));
+		try {
+			ctx.getBean("someMessageSource");
+			fail("Should have thrown BeanDefinitionStoreException");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			assertTrue(ex.contains(ClassNotFoundException.class));
+		}
 	}
 
 	public void testMultipleConfigLocationsWithClass() {

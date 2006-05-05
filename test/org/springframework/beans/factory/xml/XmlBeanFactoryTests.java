@@ -813,16 +813,6 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testFactoryBeanDefinedAsPrototype() {
-		try {
-			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("invalid-factory.xml", getClass()));
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// expected
-		}
-	}
-
 	public void testDependsOn() {
 		doTestDependencies("dependencies-dependsOn.xml", 1);
 	}
@@ -1099,6 +1089,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		try {
 			reader.loadBeanDefinitions(new ClassPathResource("invalidOverridesNoSuchMethod.xml", getClass()));
+			xbf.getBean("constructorOverrides");
 			fail("Shouldn't allow override of bogus method");
 		}
 		catch (BeanDefinitionStoreException ex) {

@@ -66,9 +66,9 @@ public interface BeanDefinitionReader {
 
 	/**
 	 * Return the class loader to use for bean classes.
-	 * <p><code>null</code> suggests to not load bean classes but just register bean
-	 * definitions with class names, for example when just registering beans in a
-	 * registry but not actually instantiating them in a factory.
+	 * <p><code>null</code> suggests to not load bean classes eagerly
+	 * but rather to just register bean definitions with class names,
+	 * with the corresponding Classes to be resolved later (or never).
 	 */
 	ClassLoader getBeanClassLoader();
 

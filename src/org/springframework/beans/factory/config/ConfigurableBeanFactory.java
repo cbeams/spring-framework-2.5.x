@@ -64,6 +64,27 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	void setParentBeanFactory(BeanFactory parentBeanFactory);
 
 	/**
+	 * Set the class loader to use for loading bean classes.
+	 * Default is the thread context class loader.
+	 * <p>Note that this class loader will only apply to bean definitions
+	 * that do not carry a resolved bean class yet. This is the case as of
+	 * Spring 2.0 by default: Bean definitions only carry bean class names,
+	 * to be resolved once the factory processes the bean definition.
+	 * @param beanClassLoader the class loader to use,
+	 * or <code>null</code> for suggesting the default class loader
+	 */
+	void setBeanClassLoader(ClassLoader beanClassLoader);
+
+	/**
+	 * Set whether to cache bean metadata such as given bean definitions
+	 * (in merged fashion) and resolved bean classes. Default is on.
+	 * <p>Turn this flag off to enable hot-refreshing of bean definition objects
+	 * and in particular bean classes. If this flag is off, any creation of a bean
+	 * instance will re-query the bean class loader for newly resolved classes.
+	 */
+	void setCacheBeanMetadata(boolean cacheBeanMetadata);
+
+	/**
 	 * Register the given custom property editor for all properties of the
 	 * given type. To be invoked during factory configuration.
 	 * @param requiredType type of the property

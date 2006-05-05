@@ -279,6 +279,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		refreshBeanFactory();
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 
+		// Tell the internal bean factory to use the context's class loader.
+		beanFactory.setBeanClassLoader(getClassLoader());
+
 		// Populate the bean factory with context-specific resource editors.
 		ConfigurableBeanFactoryUtils.registerResourceEditors(beanFactory, this);
 		beanFactory.registerCustomEditor(Class.class, new ClassEditor(getClassLoader()));
@@ -647,18 +650,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return getBeanFactory().getBeanNamesForType(type);
 	}
 
-	public String[] getBeanNamesForType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {
-		return getBeanFactory().getBeanNamesForType(type, includePrototypes, includeFactoryBeans);
+	public String[] getBeanNamesForType(Class type, boolean includePrototypes, boolean allowEagerInit) {
+		return getBeanFactory().getBeanNamesForType(type, includePrototypes, allowEagerInit);
 	}
 
 	public Map getBeansOfType(Class type) throws BeansException {
 		return getBeanFactory().getBeansOfType(type);
 	}
 
-	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
+	public Map getBeansOfType(Class type, boolean includePrototypes, boolean allowEagerInit)
 			throws BeansException {
 
-		return getBeanFactory().getBeansOfType(type, includePrototypes, includeFactoryBeans);
+		return getBeanFactory().getBeansOfType(type, includePrototypes, allowEagerInit);
 	}
 
 

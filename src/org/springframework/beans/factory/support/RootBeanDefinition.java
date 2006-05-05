@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.support;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 
 /** 
@@ -158,16 +157,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 
-	public void validate() throws BeanDefinitionValidationException {
-		super.validate();
-				
-		if (hasBeanClass()) {
-			if (FactoryBean.class.isAssignableFrom(getBeanClass()) && !isSingleton()) {
-				throw new BeanDefinitionValidationException(
-				    "FactoryBean must be defined as singleton - " +
-				    "FactoryBeans themselves are not allowed to be prototypes");
-			}
-		}
+	public boolean equals(Object other) {
+		return (other instanceof RootBeanDefinition && super.equals(other));
 	}
 
 	public String toString() {

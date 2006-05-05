@@ -85,9 +85,6 @@ public class XmlPortletApplicationContext extends AbstractRefreshablePortletAppl
 		// Configure the bean definition reader with this context's
 		// resource loading environment.
 		beanDefinitionReader.setResourceLoader(this);
-		if (getClassLoader() != null) {
-			beanDefinitionReader.setBeanClassLoader(getClassLoader());
-		}
 		beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
 
 		// Allow a subclass to provide custom initialization of the reader,

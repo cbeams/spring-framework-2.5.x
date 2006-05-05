@@ -28,7 +28,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * Abstract base class for bean definition readers which implement
@@ -49,7 +48,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 	private ResourceLoader resourceLoader;
 
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private ClassLoader beanClassLoader;
 
 
 	/**
@@ -91,7 +90,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	 * will be capable of resolving resource patterns to Resource arrays.
 	 * <p>Default is PathMatchingResourcePatternResolver, also capable of
 	 * resource pattern resolving through the ResourcePatternResolver interface.
-	 * <p>Setting this to null suggests that absolute resource loading
+	 * <p>Setting this to <code>null</code> suggests that absolute resource loading
 	 * is not available for this bean definition reader.
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
@@ -106,11 +105,9 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 	/**
 	 * Set the ClassLoader to use for bean classes.
-	 * Default is the context class loader of the thread that instantiated
-	 * this bean definition reader.
-	 * <p>Setting this to <code>null</code> suggests to not load bean classes but just
-	 * register bean definitions with class names, for example when just registering
-	 * beans in a registry but not actually instantiating them in a factory.
+	 * <p>Default is <code>null</code>, which suggests to not load bean classes
+	 * eagerly but rather to just register bean definitions with class names,
+	 * with the corresponding Classes to be resolved later (or never).
 	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {

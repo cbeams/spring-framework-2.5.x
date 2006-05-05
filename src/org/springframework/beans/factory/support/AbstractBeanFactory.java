@@ -54,6 +54,7 @@ import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -95,6 +96,11 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** Parent bean factory, for bean inheritance support */
 	private BeanFactory parentBeanFactory;
 
+	/** ClassLoader to resolve bean names with, if necessary */
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+
+	private boolean cacheBeanMetadata = true;
+
 	/** Custom PropertyEditors to apply to the beans of this factory */
 	private Map customEditors = new HashMap();
 
@@ -110,6 +116,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** Map from ChildBeanDefinition to merged RootBeanDefinition */
 	private final Map mergedBeanDefinitions = new HashMap();
 
+	/** Map from scope identifier String to corresponding ScopeMap */
 	private final Map scopes = new HashMap();
 
 	/** Cache of singletons: bean name --> bean instance */
@@ -327,9 +334,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 
 			RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
-			if (bd.hasBeanClass()) {
-				beanClass = bd.getBeanClass();
-			}
+			beanClass = resolveBeanClass(bd, beanName);
 			singleton = bd.isSingleton();
 		}
 
@@ -370,12 +375,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				if (mergedBeanDefinition.getFactoryMethodName() != null) {
 					return getTypeForFactoryMethod(name, mergedBeanDefinition);
 				}
-				// Return "undeterminable" for beans without class.
-				if (!mergedBeanDefinition.hasBeanClass()) {
-					return null;
-				}
 
-				beanClass = mergedBeanDefinition.getBeanClass();
+				beanClass = resolveBeanClass(mergedBeanDefinition, beanName);
 			}
 
 			// Check bean class whether we're dealing with a FactoryBean.
@@ -445,6 +446,29 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 	public void setParentBeanFactory(BeanFactory parentBeanFactory) {
 		this.parentBeanFactory = parentBeanFactory;
+	}
+
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+		this.beanClassLoader = (beanClassLoader != null ? beanClassLoader : ClassUtils.getDefaultClassLoader());
+	}
+
+	/**
+	 * Return the class loader to use for loading bean classes.
+	 */
+	public ClassLoader getBeanClassLoader() {
+		return beanClassLoader;
+	}
+
+	public void setCacheBeanMetadata(boolean cacheBeanMetadata) {
+		this.cacheBeanMetadata = cacheBeanMetadata;
+	}
+
+	/**
+	 * Return whether to cache bean metadata such as given bean definitions
+	 * (in merged fashion) and resolved bean classes.
+	 */
+	public boolean isCacheBeanMetadata() {
+		return cacheBeanMetadata;
 	}
 
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
@@ -752,16 +776,16 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	protected RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition bd)
 			throws BeanDefinitionStoreException {
 
-		if (bd instanceof RootBeanDefinition) {
-			// Return root bean definition as-is.
-			return (RootBeanDefinition) bd;
-		}
+		synchronized (this.mergedBeanDefinitions) {
+			RootBeanDefinition mbd = (RootBeanDefinition) this.mergedBeanDefinitions.get(bd);
+			if (mbd == null) {
 
-		else if (bd instanceof ChildBeanDefinition) {
-			synchronized (this.mergedBeanDefinitions) {
-				RootBeanDefinition rbd = (RootBeanDefinition) this.mergedBeanDefinitions.get(bd);
+				if (bd instanceof RootBeanDefinition) {
+					// Use copy of given root bean definition.
+					mbd = new RootBeanDefinition((RootBeanDefinition) bd);
+				}
 
-				if (rbd == null) {
+				else if (bd instanceof ChildBeanDefinition) {
 					// Child bean definition: needs to be merged with parent.
 					ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
 					RootBeanDefinition pbd = null;
@@ -787,32 +811,23 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 					}
 
 					// Deep copy with overridden values.
-					rbd = new RootBeanDefinition(pbd);
-					rbd.overrideFrom(cbd);
-
-					// Validate merged definition: mainly to prepare method overrides.
-					try {
-						rbd.validate();
-					}
-					catch (BeanDefinitionValidationException ex) {
-						throw new BeanDefinitionStoreException(rbd.getResourceDescription(), beanName,
-								"Validation of bean definition failed", ex);
-					}
-
-					// Only cache the merged bean definition if we're already about to create an
-					// instance of the bean, or at least have already created an instance before.
-					if (this.alreadyCreated.contains(beanName)) {
-						this.mergedBeanDefinitions.put(bd, rbd);
-					}
+					mbd = new RootBeanDefinition(pbd);
+					mbd.overrideFrom(cbd);
 				}
 
-				return rbd;
-			}
-		}
+				else {
+					throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanName,
+							"Definition is neither a RootBeanDefinition nor a ChildBeanDefinition");
+				}
 
-		else {
-			throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanName,
-					"Definition is neither a RootBeanDefinition nor a ChildBeanDefinition");
+				// Only cache the merged bean definition if we're already about to create an
+				// instance of the bean, or at least have already created an instance before.
+				if (isCacheBeanMetadata() && this.alreadyCreated.contains(beanName)) {
+					this.mergedBeanDefinitions.put(bd, mbd);
+				}
+			}
+
+			return mbd;
 		}
 	}
 
@@ -834,13 +849,20 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			throw new BeanIsAbstractException(beanName);
 		}
 
-		// Check if required type can match according to the bean definition.
-		// This is only possible at this early stage for conventional beans!
-		if (mergedBeanDefinition.hasBeanClass()) {
-			Class beanClass = mergedBeanDefinition.getBeanClass();
+		Class beanClass = resolveBeanClass(mergedBeanDefinition, beanName);
+		if (beanClass != null) {
+			// Check if required type can match according to the bean definition.
 			if (requiredType != null && mergedBeanDefinition.getFactoryMethodName() == null &&
-					!FactoryBean.class.isAssignableFrom(beanClass) && !requiredType.isAssignableFrom(beanClass)) {
+					FactoryBean.class.isAssignableFrom(beanClass) && !requiredType.isAssignableFrom(beanClass)) {
 				throw new BeanNotOfRequiredTypeException(beanName, requiredType, beanClass);
+			}
+			// Prepare method overrides.
+			try {
+				mergedBeanDefinition.prepareMethodOverrides();
+			}
+			catch (BeanDefinitionValidationException ex) {
+				throw new BeanDefinitionStoreException(mergedBeanDefinition.getResourceDescription(),
+						beanName, "Validation of method overrides failed", ex);
 			}
 		}
 
@@ -855,6 +877,23 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				throw new BeanDefinitionStoreException(
 						"Can only specify arguments in the getBean() method in conjunction with a factory method");
 			}
+		}
+	}
+
+	protected Class resolveBeanClass(RootBeanDefinition bd, String beanName) {
+		if (bd.hasBeanClass()) {
+			return bd.getBeanClass();
+		}
+		try {
+			return bd.resolveBeanClass(getBeanClassLoader());
+		}
+		catch (ClassNotFoundException ex) {
+			throw new BeanDefinitionStoreException(bd.getResourceDescription(),
+					beanName, "Bean class [" + bd.getBeanClassName() + "] not found", ex);
+		}
+		catch (NoClassDefFoundError err) {
+			throw new BeanDefinitionStoreException(bd.getResourceDescription(),
+					beanName, "Class that bean class [" + bd.getBeanClassName() + "] depends on not found", err);
 		}
 	}
 
@@ -976,7 +1015,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		}
 
 		RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
-		return (bd.hasBeanClass() && FactoryBean.class.equals(bd.getBeanClass()));
+		Class beanClass = resolveBeanClass(bd, beanName);
+		return (FactoryBean.class.equals(beanClass));
 	}
 
 

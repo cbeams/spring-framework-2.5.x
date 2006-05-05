@@ -16,15 +16,16 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.TestCase;
+
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.Problem;
 import org.springframework.beans.factory.support.ProblemReporter;
 import org.springframework.core.io.ClassPathResource;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Rob Harrop
@@ -38,6 +39,7 @@ public class CustomProblemReporterTests extends TestCase {
 
 	private XmlBeanDefinitionReader reader;
 
+
 	protected void setUp() throws Exception {
 		this.problemReporter = new CollatingProblemReporter();
 		this.beanFactory = new DefaultListableBeanFactory();
@@ -47,11 +49,12 @@ public class CustomProblemReporterTests extends TestCase {
 
 	public void testErrorsAreCollated() throws Exception {
 		this.reader.loadBeanDefinitions(new ClassPathResource("withErrors.xml", getClass()));
-		assertEquals("Incorrect number of errors collated", 5, this.problemReporter.getErrors().length);
+		assertEquals("Incorrect number of errors collated", 4, this.problemReporter.getErrors().length);
 
 		TestBean bean = (TestBean) this.beanFactory.getBean("validBean");
 		assertNotNull(bean);
 	}
+
 
 	private static class CollatingProblemReporter implements ProblemReporter {
 
@@ -77,4 +80,5 @@ public class CustomProblemReporterTests extends TestCase {
 			return (Problem[]) this.warnings.toArray(new Problem[this.warnings.size()]);
 		}
 	}
+
 }
