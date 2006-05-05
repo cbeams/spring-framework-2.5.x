@@ -17,9 +17,10 @@
 package org.springframework.beans.factory.xml;
 
 import junit.framework.TestCase;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.beans.factory.config.BeanDefinition;
+
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rob Harrop
@@ -35,7 +36,6 @@ public class MetadataAttachmentTests extends TestCase {
 	public void testMetadataAttachment() throws Exception {
 		BeanDefinition beanDefinition1 = this.beanFactory.getMergedBeanDefinition("testBean1");
 		assertEquals("bar", beanDefinition1.getAttribute("foo"));
-
 	}
 
 	public void testMetadataIsInherited() throws Exception {
@@ -49,4 +49,5 @@ public class MetadataAttachmentTests extends TestCase {
 		PropertyValue pv = beanDefinition.getPropertyValues().getPropertyValue("name");
 		assertEquals("Harrop", pv.getAttribute("surname"));
 	}
+
 }
