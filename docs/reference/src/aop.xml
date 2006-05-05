@@ -482,7 +482,7 @@ public class NotVeryUsefulAspect {
     
     </sect3>
 	  
-    <sect3>
+    <sect3 id="aop-common-pointcuts">
      <title>Sharing common pointcut definitions</title>
     
     <para>
@@ -831,7 +831,7 @@ public class AfterThrowingExample {
 import org.aspectj.lang.annotation.After;
 
 @Aspect
-public class AfterThrowingExample {
+public class AfterFinallyExample {
 
   @After("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
   public void doReleaseLock() {
@@ -841,7 +841,7 @@ public class AfterThrowingExample {
 }]]></programlisting>
 	
 	</sect3>
-	<sect3><title>Around advice</title>
+	<sect3 id="aop-ataspectj-around-advice"><title>Around advice</title>
 	
 	<para>The final kind of advice is around advice. Around advice runs "around" a
 	matched method execution. It has the opportunity to do work both before and 
@@ -902,7 +902,7 @@ public class AroundExample {
 	
 	</sect3>
 	
-	   <sect3>
+	   <sect3 id="aop-ataspectj-advice-params">
 	   	<title>Advice parameters</title>
 	   	
 	   	<para>Spring 2.0 offers fully typed advice - meaning that you declare the parameters
@@ -1073,7 +1073,7 @@ throws Throwable {
 	   	</sect4>
 	   </sect3>
 
-	   <sect3>
+	   <sect3 id="aop-ataspectj-advice-ordering">
 	   	<title>Advice ordering</title>
 	   	
 	   	<para>What happens when multiple pieces of advice all want to run at the same
@@ -1167,7 +1167,7 @@ public class UsageTracking {
   
   @Before("com.xyz.myapp.SystemArchitecture.businessService() &&" +
           "this(usageTracked)")
-  public void (UsageTracked usageTracked) {
+  public void recordUsage(UsageTracked usageTracked) {
     usageTracked.incrementUseCount();
   }
   
@@ -1231,7 +1231,7 @@ public class MyAspect {
 
     </sect2>
 
-    <sect2>
+    <sect2 id="aop-ataspectj-example">
       <title>Example</title>
       
       <para>
@@ -1338,48 +1338,584 @@ public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable {
   <sect1 id="aop-schema">
     <title>Schema-based AOP support</title>
 
-    <para>xxx</para>
-
-    <sect2>
-      <title>Overview</title>
-
-    </sect2>
+    <para>If you are unable to use Java 5, or simply prefer an XML-based format, then
+    Spring 2.0 also offers support for defining aspects using the new "aop" namespace
+    tags. The exact same pointcut expressions and advice kinds are supported as when
+    using the @AspectJ style, hence in this section we will focus on the new
+    <emphasis>syntax</emphasis> and refer the reader to the discussion in the previous
+    section (<xref linkend="aop-ataspectj" />) for a understanding of writing pointcut
+    expressions and the binding of advice parameters etc..</para>
+    
+    <para>To use the aop namespace tags described in this section, you need to import
+    the spring-aop schema as described in
+	<xref linkend="xsd-config" />. See <xref linkend="xsd-config-body-schemas-aop" /> 
+	for how to import the tags in the aop namespace.
+    </para>
+    
+    <para>Within your Spring configurations, all aspect and advisor elements must be
+    placed within an <literal>&lt;aop:config&gt;</literal> element. You can have more
+    than one <literal>&lt;aop:config&gt;</literal> element in an application context 
+    configuration. An <literal>&lt;aop:config&gt;</literal> element can contain
+    pointcut, advisor, and aspect elements, and these must be declared in that order.
+    </para>
 
     <sect2>
       <title>Declaring an aspect</title>
+
+	<para>Using the schema support, an aspect is simply a regular Java object 
+	defined as a bean in your spring application context. The state and behaviour is
+	captured in the fields and methods of the object, and the pointcut and advice 
+	information is captured in the XML.</para>
+	
+	<para>An aspect is declared using the &lt;aop:aspect&gt; element, and the backing bean
+	is referenced using the <literal>ref</literal> attribute:</para>
+
+	<programlisting><![CDATA[<aop:config>
+  <aop:aspect id="myAspect" ref="aBean">
+    ...
+  </aop:aspect>
+</aop:config>
+
+<bean id="aBean" class="...">
+  ...
+</bean>]]></programlisting>
+
+ 	<para>
+ 	The bean backing the aspect ("<literal>aBean</literal>" in this case) can of course be
+ 	configured and dependency injected just like any other Spring bean.
+ 	</para>
 
     </sect2>
 
     <sect2>
       <title>Declaring a pointcut</title>
 
+	<para>
+	A pointcut can be declared inside an aspect, in which case it is visible only within
+	that aspect. A pointcut can also be declared directly inside an &lt;aop:config&gt;
+	element, enabling the pointcut definition to be shared across several aspects and 
+	advisors.
+	</para>
+	
+	<para>A pointcut representing the execution of any business service in the service
+	layer could be defined as follows:</para>
+
+	<programlisting><![CDATA[<aop:config>
+
+  <aop:pointcut id="businessService" 
+        expression="execution(* com.xyz.myapp.service.*.*(..))"/>
+
+</aop:config>]]></programlisting>
+
+	<para>Note that the pointcut expression itself is using the same AspectJ pointcut
+	expression language as described in <xref linkend="aop-ataspectj" />. If you are
+	using the schema based declaration style with Java 5, you can refer to named
+	pointcuts defined in types (@Aspects) within the pointcut expression, but this
+	feature is not available on JDK 1.4 and below (it relies on the Java 5 specific
+	AspectJ reflection APIs). On JDK 1.5 therefore, another way of defining the above
+	pointcut would be: 
+	</para>
+
+	<programlisting><![CDATA[<aop:config>
+
+  <aop:pointcut id="businessService" 
+        expression="com.xyz.myapp.SystemArchitecture.businessService()"/>
+
+</aop:config>]]></programlisting>
+
+	<para>Assuming you have a <literal>SystemArchitecture</literal> aspect as described in
+	<xref linkend="aop-common-pointcuts"/>. 
+	</para>
+
+	<para>Declaring a pointcut inside an aspect is very similar to declaring a top-level pointcut:</para>
+
+	<programlisting><![CDATA[<aop:config>
+
+  <aop:aspect id="myAspect" ref="aBean">
+
+    <aop:pointcut id="businessService" 
+          expression="execution(* com.xyz.myapp.service.*.*(..))"/>
+          
+    ...
+    
+  </aop:aspect>
+
+</aop:config>]]></programlisting>
+	
+	<para>When combining pointcut sub-expressions, '&amp;&amp;' is awkward within an XML
+	document, and so the keywords 'and', 'or' and 'not' can be used in place
+	of '&amp;&amp;', '||' and '!' respectively.</para>
+	
+	<para>Note that pointcuts defined in this way are referred to by their XML id, and
+	cannot define pointcut parameters. The named pointcut support in the schema based
+	definition style is thus more limited than that offered by the @AspectJ style.</para>
+
     </sect2>
 
     <sect2>
       <title>Declaring advice</title>
 
-	   <sect3>
-	   	<title>Advice parameters</title>
-	   </sect3>
+	<para>The same five advice kinds are supported as for the @AspectJ style, and they
+	have exactly the same semantics.</para>
+	
+	<sect3><title>Before advice</title>
+	  <para>
+	    Before advice runs before a matched method execution.
+	    It is declared inside an <literal>&lt;aop:aspect&gt;</literal> using
+	    the &lt;aop:before&gt; element.
+	  </para>
 
+	<programlisting><![CDATA[<aop:aspect id="beforeExample" ref="aBean">
+
+    <aop:before 
+      pointcut-ref="dataAccessOperation" 
+      method="doAccessCheck"/>
+          
+    ...
+    
+</aop:aspect>]]></programlisting>
+	  
+	  <para>Here <literal>dataAccessOperation</literal> is the id of a pointcut defined at 
+	  the top (<literal>&lt;aop:config&gt;</literal>) level. To define the pointcut
+	  inline instead, replace the <literal>pointcut-ref</literal> attribute with a
+	  <literal>pointcut</literal> attribute:
+	  </para>
+
+	<programlisting><![CDATA[<aop:aspect id="beforeExample" ref="aBean">
+
+    <aop:before 
+      pointcut="execution(* com.xyz.myapp.dao.*.*(..))" 
+      method="doAccessCheck"/>
+          
+    ...
+    
+</aop:aspect>]]></programlisting>
+	  
+	  <para>As we noted in the discussion of the @AspectJ style, using named pointcuts
+	  can significantly improve the readability of your code.</para>
+	  
+	  <para>The method attribute identifies a method (<literal>doAccessCheck</literal>) that
+	  provides the body of the advice. This method must be defined for the bean referenced
+	  by the aspect element containing the advice. Before a data access operation is 
+	  executed (a method execution join point matched by the pointcut expression), the
+	  "doAccessCheck" method on the aspect bean will be invoked.</para>
+	  
+	</sect3>
+
+	<sect3><title>After returning advice</title>
+
+	  <para>
+	    After returning advice runs when a matched method execution completes normally.
+	    It is declared inside an <literal>&lt;aop:aspect&gt;</literal> in
+	    the same way as before advice. For example:
+	  </para>
+
+	<programlisting><![CDATA[<aop:aspect id="afterReturningExample" ref="aBean">
+
+    <aop:after-returning 
+      pointcut-ref="dataAccessOperation" 
+      method="doAccessCheck"/>
+          
+    ...
+    
+</aop:aspect>]]></programlisting>
+	
+	<para>Just as in the @AspectJ style, it is possible to get hold of the return value within
+	the advice body. Use the returning attribute to specify the name of the parameter to which
+	the return value should be passed:</para>
+
+	<programlisting><![CDATA[<aop:aspect id="afterReturningExample" ref="aBean">
+
+    <aop:after-returning 
+      pointcut-ref="dataAccessOperation"
+      returning="retVal" 
+      method="doAccessCheck"/>
+          
+    ...
+    
+</aop:aspect>]]></programlisting>	
+
+	<para>The doAccessCheck method must declare a parameter named <literal>retVal</literal>. The
+	type of this parameter constrains matching in the same way as described for @AfterReturning.
+	For example, the method signature may be declared as:
+	</para>
+	
+	<programlisting><![CDATA[public void doAccessCheck(Object retVal) {...]]></programlisting>
+
+	</sect3>
+
+	<sect3><title>After throwing advice</title>
+
+	  <para>
+	    After throwing advice executes when a matched method execution exits by throwing
+	    an exception.
+	    It is declared inside an <literal>&lt;aop:aspect&gt;</literal> using
+	    the after-throwing element:
+	  </para>
+
+	<programlisting><![CDATA[<aop:aspect id="afterThrowingExample" ref="aBean">
+
+    <aop:after-throwing
+      pointcut-ref="dataAccessOperation" 
+      method="doRecoveryActions"/>
+          
+    ...
+    
+</aop:aspect>]]></programlisting>
+	
+	<para>Just as in the @AspectJ style, it is possible to get hold of the thrown exception within
+	the advice body. Use the throwing attribute to specify the name of the parameter to which
+	the exception should be passed:</para>
+
+	<programlisting><![CDATA[<aop:aspect id="afterThrowingExample" ref="aBean">
+
+    <aop:after-throwing 
+      pointcut-ref="dataAccessOperation"
+      thowing="dataAccessEx" 
+      method="doRecoveryActions"/>
+          
+    ...
+    
+</aop:aspect>]]></programlisting>	
+
+	<para>The doRecoveryActions method must declare a parameter named <literal>dataAccessEx</literal>. 
+	The type of this parameter constrains matching in the same way as described for 
+	@AfterThrowing.
+	For example, the method signature may be declared as:
+	</para>
+	
+	<programlisting><![CDATA[public void doRecoveryActions(DataAccessException dataAccessEx) {...]]></programlisting>
+
+	</sect3>
+
+	<sect3><title>After (finally) advice</title>
+	
+	<para>
+	After (finally) advice runs however a matched method execution exits. It is declared
+	using the <literal>after</literal> element:
+	</para>
+	
+	<programlisting><![CDATA[<aop:aspect id="afterFinallyExample" ref="aBean">
+
+    <aop:after
+      pointcut-ref="dataAccessOperation" 
+      method="doReleaseLock"/>
+          
+    ...
+    
+</aop:aspect>]]></programlisting>
+	
+	</sect3>
+
+	<sect3><title>Around advice</title>
+	
+		<para>The final kind of advice is around advice. Around advice runs "around" a
+	matched method execution. It has the opportunity to do work both before and 
+	after the method executes, and to determine when, how, and even if, the method
+	actually gets to execute at all. Around advice is often used if you need to 
+	share state before and after a method execution in a thread-safe manner (starting
+	and stopping a timer for example).  Always use the least powerful form of 
+	advice that meets your requirements (ie. don't use around advice if simple
+	before advice would do).
+	</para>
+	
+	<para>Around advice is declared using the <literal>aop:around</literal> element. 
+	The first parameter
+	of the advice method must be of type ProceedingJoinPoint. Within the body of the
+	advice, calling <literal>proceed()</literal> on the ProceedingJoinPoint causes the
+	underlying method to execute. The <literal>proceed</literal> method may also be
+	calling passing in an Object[] - the values in the array will be used as the arguments
+	to the method execution when it proceeds. See <xref linkend="aop-ataspectj-around-advice" />
+	for notes on calling proceed with an Object[].
+	</para>
+
+<programlisting><![CDATA[<aop:aspect id="aroundExample" ref="aBean">
+
+    <aop:around
+      pointcut-ref="businessService" 
+      method="doBasicProfiling"/>
+          
+    ...
+    
+</aop:aspect>]]></programlisting>
+	
+	<para>The implementation of the <literal>doBasicProfiling</literal> advice would be
+	exactly the same as in the @AspectJ example (minus the annotation of course):
+	</para>
+
+     <programlisting><![CDATA[public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
+    // start stopwatch
+    Object retVal = pjp.proceed();
+    // stop stopwatch
+    return retVal;
+}]]></programlisting>
+	
+	</sect3>
+
+	<sect3>
+	   	<title>Advice parameters</title>
+	 <para>
+	 The schema based declaration style supports fully typed advice in the same way as 
+	 described for the @AspectJ support - by matching pointcut parameters by name 
+	 against advice method parameters. See <xref linkend="aop-ataspectj-advice-params" />
+	 for details.
+	 </para>
+	 
+	 <para>If you wish to explicity specify argument names for the advice methods (not
+	 relying on either of the detection strategies previously described) then this is
+	 done using the <literal>arg-names</literal> attribute of the advice element. For
+	 example:</para>
+
+		<programlisting><![CDATA[<aop:before
+  pointcut="com.xyz.lib.Pointcuts.anyPublicMethod() and @annotation(auditable)"
+  method="audit"
+  arg-names="auditable"/>]]></programlisting>	
+	   	
+	<para>The <literal>arg-names</literal> attribute accepts a comma-delimited list of
+	parameter names.</para>
+	   	
+	</sect3>
+	
+	<sect3>
+	   	<title>Advice ordering</title>
+
+	<para>When multiple advice needs to execute at the same join point (executing
+	method) the ordering rules are as described in <xref linkend="aop-ataspectj-advice-ordering"/>.
+	The precedence between aspects is determined by implementing the Ordered interface on the
+	bean backing the aspect.
+	</para>
+
+	</sect3>
+	
     </sect2>
 
     <sect2>
       <title>Introductions</title>
+
+	<para>Introductions (known as inter-type declarations in AspectJ) enable an aspect
+	to declare that advised objects implement a given interface, and to provide an implementation
+	of that interface on behalf of those objects.</para>
+
+	<para>An introduction is made using the <literal>aop:declare-parents</literal> element
+	inside an <literal>aop:aspect</literal> This element is
+	used to declare that matching types have a new parent (hence the name). For example, given
+	an interface UsageTracked, and an implementation of that interface DefaultUsageTracked, the following
+	aspect declares that all implementors of service interfaces also implement the UsageTracked interface.
+	(In order to expose statistics via JMX for example). 
+	</para>
+
+		<programlisting><![CDATA[<aop:aspect id="usageTrackerAspect" ref="usageTracking">
+
+  <aop:declare-parents
+      types-matching="com.xzy.myapp.service.*+",
+      implement-interface="UsageTracked"
+      default-impl="com.xyz.myapp.service.tracking.DefaultUsageTracked"/>
+  
+  <aop:before
+    pointcut="com.xyz.myapp.SystemArchitecture.businessService()
+              and this(usageTracked)"
+    method="recordUsage"/>
+  
+</aop:aspect>]]></programlisting>	
+
+    <para>The class backing the <literal>usageTracking</literal> bean would contain the
+    method:</para>
+    
+  <programlisting><![CDATA[public void (UsageTracked usageTracked) {
+    usageTracked.incrementUseCount();
+}]]></programlisting>
+    
+	<para>
+	The interface to be implemented is determined by <literal>implement-interface</literal>
+	attribute. The value of the 
+	<literal>types-matching</literal> attribute is an AspectJ type pattern :- 
+	any bean of a matching type will implement the UsageTracked
+	interface. Note that in the before advice of the above example, service
+	beans can be directly used as implementations of the UsageTracked interface. If accessing
+	a bean programmatically you would write the following:
+	</para>
+
+	<programlisting><![CDATA[UsageTracked usageTracked = (UsageTracked) context.getBean("myService");]]></programlisting>
 
     </sect2>
 
     <sect2>
       <title>Aspect instantiation models</title>
 
+	<para>The only supported instantiation model for schema-defined aspects is the 
+	singleton model. Other instantiation models may be supported in future releases.</para>
+
     </sect2>
 
     <sect2>
       <title>Advisors</title>
 
-	todo: need order attribute in aop:advisor
+	<para>The concept of "advisors" is brought forward from the AOP support defined 
+	in Spring 1.2 and does not have a direct equivalent in AspectJ. An advisor is
+	like a small self-contained aspect that has a single piece of advice. The advice
+	itself is represented by a bean, and must implement one of the advice 
+	interfaces described in <xref linkend="aop-api-advice-types" />. Advisors can
+	take advantage of AspectJ pointcut expressions though.
+	</para>
+	
+	<para>Spring 2.0 supports the advisor concept with the <literal>&lt;aop:advisor&gt;</literal> 
+	element. You will most commonly see it used in conjunction with transactional advice, 
+	which also has its own namespace support in Spring 2.0. Here's how it looks:
+	</para>
+
+      <programlisting><![CDATA[<aop:config>
+
+  <aop:pointcut id="businessService"
+        expression="execution(* com.xyz.myapp.service.*.*(..))"/>
+
+  <aop:advisor 
+      pointcut-ref="businessService"
+      advice-ref="tx-advice"/>
+      
+</aop:config>
+
+<tx:advice id="tx-advice">
+<tx:attributes>
+    <tx:method name="*" propagation="REQUIRED"/>
+  </tx:attributes>
+</tx:advice>]]></programlisting>
 
     </sect2>
+
+	<para>As well as the <literal>pointcut-ref</literal> attribute used in the above
+	example, you can also use the <literal>pointcut</literal> attribute to define a 
+	pointcut expression inline.</para>
+	
+	<para>To define the precedence of an advisor so that the advice can participate
+	in ordering, use the <literal>order</literal> attribute to define the
+	<literal>Ordered</literal> value of the advisor.</para>
+
+    <sect2>
+      <title>Example</title>
+
+	<para>Let's see how the optimistic locking failure retry example from
+	<xref linkend="aop-ataspectj-example"/> looks when rewritten using the schema support. 
+	</para>
+
+      <para>The execution of business services can sometimes fail
+      due to optimistic locking (someone else gets in first while your transaction is running).
+      If the operation is retried, it is quite likely it will succeed next time round. For
+      business services where it is appropriate to retry in such conditions (idempotent
+      operations that don't need to go back to the user for conflict resolution), we'd like
+      to transparently retry the operation to avoid the client seeing an 
+      OptimisticLockingFailure exception. This is a requirement that clearly cuts across
+      multiple services in the service layer, and hence is ideal for implementing via an aspect.
+      </para>
+      
+      <para>Because we want to retry the operation, we'll need to use around advice so
+      that we can call proceed multiple times. Here's how the basic aspect implementation
+      looks (it's just a regular Java class using the schema support):
+      </para>
+      
+	<programlisting><![CDATA[public class OptimisticOperationExecutor implements Ordered {
+	
+	private static final int DEFAULT_MAX_RETRIES = 2;
+
+	private int maxRetries = DEFAULT_MAX_RETRIES;
+	private int order = 1;
+
+	public void setMaxRetries(int maxRetries) {
+		this.maxRetries = maxRetries;
+	}
+	
+	public int getOrder() {
+		return this.order;
+	}
+	
+	public void setOrder(int order) {
+		this.order = order;
+	}
+	
+	public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable { 
+		int numAttempts = 0;
+		OptimisticLockingFailureException lockFailureException;
+		do {
+			numAttempts++;
+			try { 
+				return pjp.proceed();
+			}
+			catch(OptimisticLockingFailureException ex) {
+				lockFailureException = ex;
+			}
+		}
+		while(numAttempts <= this.maxRetries);
+		throw lockFailureException;
+	}
+
+}]]></programlisting>
+      
+      <para>Note that the aspect implements the Ordered interface so we can set the precedence
+      of the aspect higher than the transaction advice (we want a fresh transaction
+      each time we retry). The <literal>maxRetries</literal> and <literal>order</literal>
+      properties will both be configured by Spring. The main action happens in the
+      <literal>doOptimisticOperation</literal> around advice method. We
+      try to proceed, and if we fail with an <literal>OptimisticLockingFailureException</literal>
+      we simply try again unless we have exhausted all of our retry attempts.
+      </para>
+      
+      <remark>This class is identical to the one used in the @AspectJ example, but
+      with the annotations removed.</remark>
+      
+      <para>The corresponding Spring configuration is:</para>
+      
+	<programlisting><![CDATA[<aop:config>
+
+  <aop:aspect id="optimisticOperationRetry" ref="optimisticOperationExecutor">
+
+    <aop:pointcut id="idempotentOperation"
+        expression="execution(* com.xyz.myapp.service.*.*(..))"/>
+       
+    <aop:around
+       pointcut-ref="idempotentOperation"
+       method="doOptimisticOperation"/>
+  
+  </aop:aspect>
+
+</aop:config>
+
+<bean id="optimisticOperationExecutor"
+  class="com.xyz.myapp.service.impl.OptimisticOperationExecutor">
+     <property name="maxRetries" value="3"/>
+     <property name="order" value="100"/>  
+</bean>]]></programlisting>
+       
+       <para>Notice that for the time being we assume that all business services
+       are idempotent. If this is not the case we can refine the aspect so that it only 
+       retries genuinely idempotent operations, by introducing an 
+       <literal>Idempotent</literal> annotation:</para>
+       
+	<programlisting><![CDATA[@Retention(RetentionPolicy.RUNTIME)
+public @interface Idempotent {
+  // marker annotation
+}]]></programlisting>
+       
+       <para>and using the annotation to annotate the implementation of service operations.
+       The change to the aspect to only retry idempotent operations simply involves
+       refining the pointcut expression so that only @Idempotent operations match:</para>
+
+	<programlisting><![CDATA[  <aop:pointcut id="idempotentOperation"
+        expression="execution(* com.xyz.myapp.service.*.*(..)) and
+                    @annotation(com.xyz.myapp.service.Idempotent)"/>]]></programlisting>
+
+    </sect2>
+
+  </sect1>
+
+  <sect1 id="aop-mixing-styles">
+    <title>Mixing aspect types</title>
+
+    <para>It is perfectly possible to mix @AspectJ style aspects using the autoproxying
+    support, schema-defined <literal>&lt;aop:aspect&gt;</literal> aspects, 
+    <literal>&lt;aop:advisor&gt;</literal> declared advisors and even proxies and 
+    interceptors defined using the Spring 1.2 style in the same configuration. All of
+    these are implemented using the same underlying support mechanism and will co-exist
+    without any difficulty.</para>
+	
   </sect1>
 
   <sect1>
@@ -1455,12 +1991,6 @@ public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable {
 
   </sect1>
 
-  <sect1 id="aop-mixing-styles">
-    <title>Mixing Spring AOP aspects and @AspectJ aspects</title>
-
-    <para>xxx</para>
-	
-  </sect1>
 
   <sect1 id="aop-using-aspectj">
   	<title>Using AspectJ with Spring applications</title>
