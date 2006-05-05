@@ -22,6 +22,8 @@ import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryT
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.TwoAdviceAspect;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
+import org.springframework.aop.config.NamespaceHandlerUtils;
+import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.PropertyValue;
@@ -199,6 +201,13 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals(start++, adrian1.getAge());
 		adrian1.setAge(0);
 		assertEquals(start++, adrian1.getAge());
+	}
+	
+	public void testForceProxyTargetClass() {
+		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
+		"/org/springframework/aop/aspectj/autoproxy/aspectsWithCGLIB.xml");
+		ProxyConfig pc = (ProxyConfig) bf.getBean(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		assertTrue("should be proxying classes",pc.isProxyTargetClass());
 	}
 
 }
