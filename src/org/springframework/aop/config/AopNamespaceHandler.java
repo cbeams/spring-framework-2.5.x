@@ -79,16 +79,24 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 
+		private static final String PROXY_TARGET_CLASS = "proxyTargetClass";
+		private static final String PROXY_TARGET_ATTR = "proxy-target-class";
+		
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
-			NamespaceHandlerUtils.registerAtAspectJAutoProxyCreatorIfNecessary(parserContext.getRegistry());
+			BeanDefinitionRegistry registry = parserContext.getRegistry();
+			NamespaceHandlerUtils.registerAtAspectJAutoProxyCreatorIfNecessary(registry);
+			BeanDefinition beanDef = registry.getBeanDefinition(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+			if (element.hasAttribute(PROXY_TARGET_ATTR)) {
+				String proxyValue = element.getAttribute(PROXY_TARGET_ATTR);
+				beanDef.getPropertyValues().addPropertyValue(PROXY_TARGET_CLASS,proxyValue);
+			}
 			if (element.hasChildNodes()) {
-				addIncludePatterns(element, parserContext.getRegistry());
+				addIncludePatterns(element, beanDef);
 			}
 			return null;
 		}
 		
-		private void addIncludePatterns(Element element, BeanDefinitionRegistry registry) {
-			BeanDefinition beanDef = registry.getBeanDefinition(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		private void addIncludePatterns(Element element, BeanDefinition beanDef) {
 			List includePatterns = new LinkedList();
 			NodeList childNodes = element.getChildNodes();
 			for(int i = 0; i < childNodes.getLength(); i++) {

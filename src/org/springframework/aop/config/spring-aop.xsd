@@ -34,6 +34,7 @@
 			<xsd:sequence>
 				<xsd:element name="include" type="includeType" minOccurs="0" maxOccurs="unbounded"/>
 			</xsd:sequence>
+			<xsd:attribute name="proxy-target-class" type="xsd:boolean" default="false"/>
 		</xsd:complexType>
 	</xsd:element>
 
