@@ -19,12 +19,13 @@ package org.springframework.beans.factory.config;
 import org.springframework.util.Assert;
 
 /** 
- * Immutable placeholder class used for the value of a PropertyValue
- * object when it's a reference to another bean in this factory
- * to be resolved at runtime.
+ * Immutable placeholder class used for a property value object when it's
+ * a reference to another bean in this factory to be resolved at runtime.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see BeanDefinition#getPropertyValues()
+ * @see org.springframework.beans.factory.BeanFactory#getBean
  */
 public class RuntimeBeanReference {
 	
@@ -74,26 +75,25 @@ public class RuntimeBeanReference {
 	}
 
 
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof RuntimeBeanReference)) {
+			return false;
+		}
+		RuntimeBeanReference that = (RuntimeBeanReference) other;
+		return (this.beanName.equals(that.beanName) && this.toParent == that.toParent);
+	}
+
+	public int hashCode() {
+		int result = this.beanName.hashCode();
+		result = 29 * result + (this.toParent ? 1 : 0);
+		return result;
+	}
+
 	public String toString() {
 	   return '<' + getBeanName() + '>';
 	}
 
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		RuntimeBeanReference that = (RuntimeBeanReference) o;
-
-		if (this.toParent != that.toParent) return false;
-		if (!this.beanName.equals(that.beanName)) return false;
-
-		return true;
-	}
-
-	public int hashCode() {
-		int result;
-		result = this.beanName.hashCode();
-		result = 29 * result + (this.toParent ? 1 : 0);
-		return result;
-	}
 }
