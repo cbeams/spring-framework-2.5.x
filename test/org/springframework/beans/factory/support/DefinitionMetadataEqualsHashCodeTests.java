@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import junit.framework.TestCase;
+
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -31,14 +32,14 @@ public class DefinitionMetadataEqualsHashCodeTests extends TestCase {
 		RootBeanDefinition master = new RootBeanDefinition(TestBean.class);
 		RootBeanDefinition equal = new RootBeanDefinition(TestBean.class);
 		RootBeanDefinition notEqual = new RootBeanDefinition(String.class);
-		RootBeanDefinition subclass = new RootBeanDefinition(TestBean.class){};
+		RootBeanDefinition subclass = new RootBeanDefinition(TestBean.class) {};
 		setBaseProperties(master);
 		setBaseProperties(equal);
 		setBaseProperties(notEqual);
 		setBaseProperties(subclass);
 
 		assertEqualsContract(master, equal, notEqual, subclass);
-		assertEquals("Hash code for equal instances should match.", master.hashCode(), equal.hashCode());
+		assertEquals("Hash code for equal instances should match", master.hashCode(), equal.hashCode());
 	}
 
 	public void testChildBeanDefinitionEqualsAndHashCode() throws Exception {
@@ -52,7 +53,7 @@ public class DefinitionMetadataEqualsHashCodeTests extends TestCase {
 		setBaseProperties(subclass);
 
 		assertEqualsContract(master, equal, notEqual, subclass);
-		assertEquals("Hash code for equal instances should match.", master.hashCode(), equal.hashCode());
+		assertEquals("Hash code for equal instances should match", master.hashCode(), equal.hashCode());
 	}
 
 	public void testRuntimeBeanReference() throws Exception {
@@ -87,8 +88,9 @@ public class DefinitionMetadataEqualsHashCodeTests extends TestCase {
 	}
 
 	private void assertEqualsContract(Object master, Object equal, Object notEqual, Object subclass) {
-		assertEquals("Should be equal.", master, equal);
-		assertFalse("Should not be equal.", master.equals(notEqual));
-		assertFalse("Subclass should not be equal.", master.equals(subclass));
+		assertEquals("Should be equal", master, equal);
+		assertFalse("Should not be equal", master.equals(notEqual));
+		assertEquals("Subclass should be equal", master, subclass);
 	}
+
 }
