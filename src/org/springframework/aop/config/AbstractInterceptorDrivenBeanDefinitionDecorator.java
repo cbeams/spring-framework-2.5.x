@@ -16,7 +16,8 @@
 
 package org.springframework.aop.config;
 
-import org.w3c.dom.Element;
+import java.util.List;
+
 import org.w3c.dom.Node;
 
 import org.springframework.aop.framework.ProxyFactoryBean;
@@ -36,13 +37,16 @@ import org.springframework.util.StringUtils;
  * Base implementation for {@link org.springframework.beans.factory.xml.BeanDefinitionDecorator BeanDefinitionDecorators} wishing
  * to add an {@link org.aopalliance.intercept.MethodInterceptor interceptor} to the resulting
  * bean.
- * <p/>This base class controls the creation of the {@link ProxyFactoryBean} bean definition
+ *
+ * <p>This base class controls the creation of the {@link ProxyFactoryBean} bean definition
  * and wraps the original as an inner-bean definition for the <code>target</code> property of
  * {@link ProxyFactoryBean}.
- * <p/>Chaining is correctly handled, ensuring that only one {@link ProxyFactoryBean} definition
+ *
+ * <p>Chaining is correctly handled, ensuring that only one {@link ProxyFactoryBean} definition
  * is created. If a previous {@link org.springframework.beans.factory.xml.BeanDefinitionDecorator} already created the {@link org.springframework.aop.framework.ProxyFactoryBean}
  * then the interceptor is simply added to the existing definition.
- * <p/>Sub-classes have only to create the <code>BeanDefinition</code> to the interceptor they
+ *
+ * <p>Subclasses have only to create the <code>BeanDefinition</code> to the interceptor they
  * wish to add.
  *
  * @author Rob Harrop
@@ -95,12 +99,12 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 	}
 
 	private void addInterceptorNameToList(String interceptorName, BeanDefinition beanDefinition) {
-		ManagedList list = (ManagedList) beanDefinition.getPropertyValues().getPropertyValue("interceptorNames").getValue();
+		List list = (List) beanDefinition.getPropertyValues().getPropertyValue("interceptorNames").getValue();
 		list.add(interceptorName);
 	}
 
 	private boolean isProxyFactoryBeanDefinition(BeanDefinition existingDefinition) {
-		return ((RootBeanDefinition) existingDefinition).getBeanClass().equals(ProxyFactoryBean.class);
+		return ((RootBeanDefinition) existingDefinition).getBeanClassName().equals(ProxyFactoryBean.class.getName());
 	}
 
 	protected String getInterceptorNameSuffix(BeanDefinition interceptorDefinition) {
@@ -109,7 +113,7 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 	}
 
 	/**
-	 * Sub-classes should implement this method to return the <code>BeanDefinition</code> for
+	 * Subclasses should implement this method to return the <code>BeanDefinition</code> for
 	 * the interceptor they wish to apply to the bean being decorated.
 	 */
 	protected abstract BeanDefinition createInterceptorDefinition(Node node);
