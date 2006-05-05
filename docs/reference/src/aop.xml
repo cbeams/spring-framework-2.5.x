@@ -576,7 +576,8 @@ public class SystemArchitecture {
      designator the most often. The format of an execution expression is:
      </para>
      
-     <programlisting><![CDATA[execution(modifiers-pattern? ret-type-pattern declaring-type-pattern? name-pattern(param-pattern) throws-pattern?)]]></programlisting>
+     <programlisting><![CDATA[execution(modifiers-pattern? ret-type-pattern declaring-type-pattern? name-pattern(param-pattern)
+          throws-pattern?)]]></programlisting>
      
      <para>
      All parts except the returning type pattern, name pattern, and parameters pattern are optional.
@@ -1152,27 +1153,22 @@ has the higher precedence.
 
 	<para>An introduction is made using the @DeclareParents annotation. This annotation is
 	used to declare that matching types have a new parent (hence the name). For example, given
-	an interface Lockable, and an implementation of that interface DefaultLockable, the following
-	aspect declares that all types in the service package implement the Lockable interface. 
+	an interface UsageTracked, and an implementation of that interface DefaultUsageTracked, the following
+	aspect declares that all implementors of service interfaces also implement the UsageTracked interface.
+	(In order to expose statistics via JMX for example). 
 	</para>
 
 		<programlisting><![CDATA[@Aspect
-public class LockableSupport {
+public class UsageTracking {
 
-  @DeclareParents(value="com.xzy.myapp.service.*",
-                  defaultImpl=DefaultLockable.class)
-  public static Lockable mixin;
+  @DeclareParents(value="com.xzy.myapp.service.*+",
+                  defaultImpl=DefaultUsageTracked.class)
+  public static UsageTracked mixin;
   
   @Before("com.xyz.myapp.SystemArchitecture.businessService() &&" +
-          "this(lockable)")
-  public void lock(Lockable lockable) {
-    lockable.lock();
-  }
-  
-  @After("com.xyz.myapp.SystemArchitecture.businessService() &&" +
-         "this(lockable)")
-  public void unlock(Lockable lockable) {
-    lockable.unlock();
+          "this(usageTracked)")
+  public void (UsageTracked usageTracked) {
+    usageTracked.incrementUseCount();
   }
   
 }]]></programlisting>	
@@ -1180,13 +1176,13 @@ public class LockableSupport {
 	<para>
 	The interface to be implemented is determined by the type of the annotated field. The 
 	<literal>value</literal> attribute of the <literal>DeclareParents</literal> annotation
-	is an AspectJ type pattern :- any bean of a matching type will implement the Lockable
-	interface. Note that in the before and after advice of the above example, service
-	beans can be directly used as implementations of the Lockable interface. If accessing
+	is an AspectJ type pattern :- any bean of a matching type will implement the UsageTracked
+	interface. Note that in the before advice of the above example, service
+	beans can be directly used as implementations of the UsageTracked interface. If accessing
 	a bean programmatically you would write the following:
 	</para>
 
-	<programlisting><![CDATA[Lockable lockable = (Lockable) context.getBean("myService");]]></programlisting>
+	<programlisting><![CDATA[UsageTracked usageTracked = (UsageTracked) context.getBean("myService");]]></programlisting>
 
     </sect2>
 
@@ -1237,7 +1233,104 @@ public class MyAspect {
 
     <sect2>
       <title>Example</title>
-      retry...
+      
+      <para>
+      Now that you've seen how all the consituent parts work, let's put them together
+      to do something useful!</para>
+      <para>The execution of business services can sometimes fail
+      due to optimistic locking (someone else gets in first while your transaction is running).
+      If the operation is retried, it is quite likely it will succeed next time round. For
+      business services where it is appropriate to retry in such conditions (idempotent
+      operations that don't need to go back to the user for conflict resolution), we'd like
+      to transparently retry the operation to avoid the client seeing an 
+      OptimisticLockingFailure exception. This is a requirement that clearly cuts across
+      multiple services in the service layer, and hence is ideal for implementing via an aspect.
+      </para>
+      
+      <para>Because we want to retry the operation, we'll need to use around advice so
+      that we can call proceed multiple times. Here's how the basic aspect implementation
+      looks:
+      </para>
+      
+	<programlisting><![CDATA[@Aspect
+public class OptimisticOperationExecutor implements Ordered {
+	
+	private static final int DEFAULT_MAX_RETRIES = 2;
+
+	private int maxRetries = DEFAULT_MAX_RETRIES;
+	private int order = 1;
+
+	public void setMaxRetries(int maxRetries) {
+		this.maxRetries = maxRetries;
+	}
+	
+	public int getOrder() {
+		return this.order;
+	}
+	
+	public void setOrder(int order) {
+		this.order = order;
+	}
+	
+	@Around("com.xyz.myapp.SystemArchitecture.businessService()")
+	public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable { 
+		int numAttempts = 0;
+		OptimisticLockingFailureException lockFailureException;
+		do {
+			numAttempts++;
+			try { 
+				return pjp.proceed();
+			}
+			catch(OptimisticLockingFailureException ex) {
+				lockFailureException = ex;
+			}
+		}
+		while(numAttempts <= this.maxRetries);
+		throw lockFailureException;
+	}
+
+}]]></programlisting>
+      
+      <para>Note that the aspect implements the Ordered interface so we can set the precedence
+      of the aspect higher than the transaction advice (we want a fresh transaction
+      each time we retry). The <literal>maxRetries</literal> and <literal>order</literal>
+      properties will both be configured by Spring. The main action happens in the
+      <literal>doOptimisticOperation</literal> around advice. Notice that for the moment
+      we're applying the retry logic to all <literal>businessService()s</literal>. We
+      try to proceed, and if we fail with an <literal>OptimisticLockingFailureException</literal>
+      we simply try again unless we have exhausted all of our retry attempts.
+      </para>
+      
+      <para>The corresponding Spring configuration is:</para>
+      
+	<programlisting><![CDATA[<aop:aspectj-autoproxy/>
+
+<bean id="optimisticOperationExecutor"
+  class="com.xyz.myapp.service.impl.OptimisticOperationExecutor">
+     <property name="maxRetries" value="3"/>
+     <property name="order" value="100"/>  
+</bean>]]></programlisting>
+       
+       <para>To refine the aspect so that it only retries idempotent operations, we might
+       define an <literal>Idempotent</literal> annotation:</para>
+       
+	<programlisting><![CDATA[@Retention(RetentionPolicy.RUNTIME)
+public @interface Idempotent {
+  // marker annotation
+}]]></programlisting>
+       
+       <para>and use the annotation to annotate the implementation of service operations.
+       The change to the aspect to only retry idempotent operations simply involves
+       refining the pointcut expression so that only @Idempotent operations match:</para>
+
+	<programlisting><![CDATA[@Around("com.xyz.myapp.SystemArchitecture.businessService() && " + 
+        "@annotation(com.xyz.myapp.service.Idempotent)")
+public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable { 
+  ...	
+}]]></programlisting>
+
+       
+       
     </sect2>
 
   </sect1>
@@ -1284,8 +1377,19 @@ public class MyAspect {
     <sect2>
       <title>Advisors</title>
 
-    </sect2>
+	todo: need order attribute in aop:advisor
 
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>Proxying mechanisms</title>
+    
+    todo: move some of the discussion on dynamic proxy vs cglib from the next
+    chapter into this one, then describe how to force class proxying for both
+    @AspectJ and schema. :- probably need new proxyTargetClass attribute
+    in aop:aspectj-autoproxy.
+    
     <sect2>
       <title>Forcing use of CGLIB</title>
 		<!--  to be edited!!!  -->
