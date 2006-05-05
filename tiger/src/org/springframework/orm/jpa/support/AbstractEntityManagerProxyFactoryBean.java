@@ -104,7 +104,7 @@ public abstract class AbstractEntityManagerProxyFactoryBean implements FactoryBe
 	 */
 	protected abstract EntityManager createEntityManagerProxy();
 
-	public Object getObject() {
+	public EntityManager getObject() {
 		return this.shared;
 	}
 

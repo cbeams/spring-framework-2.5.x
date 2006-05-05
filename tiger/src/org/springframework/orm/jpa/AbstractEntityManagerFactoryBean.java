@@ -128,7 +128,7 @@ public abstract class AbstractEntityManagerFactoryBean implements FactoryBean, I
 	/**
 	 * Return the singleton EntityManagerFactory.
 	 */
-	public final Object getObject() {
+	public EntityManagerFactory getObject() {
 		return this.entityManagerFactory;
 	}
 
