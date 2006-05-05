@@ -88,7 +88,7 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 		if (this == other) {
 			return true;
 		}
-		if (other instanceof AttributeAccessorSupport) {
+		if (!(other instanceof AttributeAccessorSupport)) {
 			return false;
 		}
 		AttributeAccessorSupport that = (AttributeAccessorSupport) other;
