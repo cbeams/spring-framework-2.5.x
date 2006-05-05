@@ -33,7 +33,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 
 	public final BeanDefinition parse(Element element, ParserContext parserContext) {
 		BeanDefinition definition = parseInternal(element, parserContext);
-		String id = element.getAttribute(ID_ATTRIBUTE);
+		String id = extractId(element);
 		if (StringUtils.hasText(id)) {
 			BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
 			BeanDefinitionReaderUtils.registerBeanDefinition(holder, parserContext.getRegistry());
@@ -46,6 +46,10 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 							+ element.getLocalName() + "' when used as a top-level tag.");
 		}
 		return definition;
+	}
+
+	protected String extractId(Element element) {
+		return element.getAttribute(ID_ATTRIBUTE);
 	}
 
 	protected abstract BeanDefinition parseInternal(Element element, ParserContext parserContext);

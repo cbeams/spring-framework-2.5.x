@@ -56,8 +56,20 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
 	public static class ConstantBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
+		private static final String STATIC_FIELD_ATTRIBUTE = "static-field";
+
 		protected Class getBeanClass(Element element) {
 			return FieldRetrievingFactoryBean.class;
+		}
+
+		protected String extractId(Element element) {
+			String id = super.extractId(element);
+
+			if(!StringUtils.hasText(id)) {
+				id = element.getAttribute(STATIC_FIELD_ATTRIBUTE);
+			}
+
+			return id;
 		}
 	}
 

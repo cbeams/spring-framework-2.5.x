@@ -25,8 +25,6 @@ import org.w3c.dom.Element;
  */
 public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
-	public static final String ID_ATTRIBUTE = "id";
-
 	protected final BeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder.rootBeanDefinition(getBeanClass(element));
 		doParse(element, definitionBuilder);

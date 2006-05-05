@@ -10,6 +10,8 @@
 
 	<util:constant id="min" static-field="java.lang.Integer.MIN_VALUE"/>
 
+	<util:constant static-field="java.lang.Integer.MAX_VALUE"/>
+
 	<util:property-path id="name" path="configuredBean.name"/>
 
 	<bean id="testBean" class="org.springframework.beans.TestBean">

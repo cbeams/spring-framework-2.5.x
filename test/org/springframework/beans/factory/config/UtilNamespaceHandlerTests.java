@@ -58,6 +58,11 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertEquals(Integer.MIN_VALUE, min.intValue());
 	}
 
+	public void testConstantWithDefaultName() throws Exception {
+		Integer max = (Integer) this.beanFactory.getBean("java.lang.Integer.MAX_VALUE");
+		assertEquals(Integer.MAX_VALUE, max.intValue());
+	}
+
 	public void testEvents() throws Exception {
 		ComponentDefinition propertiesComponent = this.listener.getComponentDefinition("myProperties");
 		assertNotNull("Event for 'myProperties' not sent", propertiesComponent);
