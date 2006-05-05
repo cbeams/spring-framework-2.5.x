@@ -1921,76 +1921,58 @@ public @interface Idempotent {
   <sect1>
     <title>Proxying mechanisms</title>
     
-    todo: move some of the discussion on dynamic proxy vs cglib from the next
-    chapter into this one, then describe how to force class proxying for both
-    @AspectJ and schema. :- probably need new proxyTargetClass attribute
-    in aop:aspectj-autoproxy.
+    <para>Spring AOP uses either JDK dynamic proxies or CGLIB to create the proxy for a given
+    target object. (JDK dynamic proxies are preferred whenever you have a choice). </para>
     
-    <sect2>
-      <title>Forcing use of CGLIB</title>
-		<!--  to be edited!!!  -->
-		<sect3 id="aop-pfb-proxy-types-spring2">
-			<title>JDK- and CGLIB-based proxies : Spring 2.0's <literal>&lt;aop-config/&gt;</literal></title>
-			<para>
-				Spring 2.0 introduced a new, streamlined style of XML configuration; one of
-				the areas where this new style configuration is most visible is in the area
-				of defining aspects, pointcuts and the like. All of the old-style configuration
-				(as described above) continues to work in <emphasis>exactly</emphasis> the
-				same way; this section highlights the differences between the old-style
-				configuration and the new Spring 2.0 <literal>&lt;aop-config/&gt;</literal>
-				configuration with regard to JDK- and CGLIB-based proxies.
-			</para>
-			<para>
-				For the purpose of having something concrete to illustrate the proxying strategy
-				semantics in Spring 2.0, find below a snippet of Spring XML 2.0 AOP configuration.
-			</para>			
-			<programlisting><![CDATA[<aop:config>
-]]><lineannotation>&lt;!-- pointcut that matches beans that have methods starting with 'h' --&gt;</lineannotation><![CDATA[
-    <aop:pointcut id="anyMethod" expression="execution(* *.h*(..)))"/>
-    <aop:aspect id="the.advice" ref="advice">
-        <aop:advice kind="before" method="intercept" pointcut-ref="anyMethod"/>
-    </aop:aspect>
-</aop:config>
-
-]]><lineannotation>&lt;!-- the advice that is to be applied at picked out join points --&gt;</lineannotation><![CDATA[
-<bean id="advice" class="x.y.Advice"/>
-
-]]><lineannotation>&lt;!-- a class that doesn't implement any interfaces --&gt;</lineannotation><![CDATA[
-<bean id="plain" class="x.y.PlainClass"/>
-
-]]><lineannotation>&lt;!-- a class that implements exactly one interface --&gt;</lineannotation><![CDATA[
-<bean id="one" class="x.y.OneInterface"/>]]></programlisting>
-			<para>
-				In the case of the above configuration (and assuming that both of the
-				<literal>'plain'</literal> and <literal>'one'</literal> beans have methods
-				starting with <literal>'h'</literal>), the <literal>'plain'</literal> bean
-				will be proxied using CGLIB, whereas the <literal>'one'</literal> bean will
-				be proxied using the JDK dynamic proxying mechanism.
-			</para>
-			<para>
-				If one wants to force CGLIB-based proxying, one can specify this explicitly
-				on the <literal>&lt;aop-config/&gt;</literal> element; to wit...
-			</para>
-			<programlisting><![CDATA[<aop:config ]]><emphasis role="bold">proxyTargetClass="true"</emphasis><![CDATA[>
-    <aop:pointcut id="anyMethod" expression="execution(* *.h*(..)))"/>
-    <aop:aspect id="the.advice" ref="advice">
-        <aop:advice kind="before" method="intercept" pointcut-ref="anyMethod"/>
-    </aop:aspect>
-</aop:config>
-
-]]><lineannotation>&lt;!-- rest of configuration as before --&gt;</lineannotation></programlisting>
-			<para>
-				Please note that this setting applies on a
-				<emphasis>per <literal>&lt;aop-config/&gt;</literal></emphasis> basis; i.e. one
-				can have multiple <literal>&lt;aop-config/&gt;</literal> elements,
-				with some configured to force CGLIB-based proxying and some not to.
-			</para>
-		</sect3>
-
-    </sect2>
-
+    <para>If the target object to be proxied implements at least one interface then a JDK
+    dynamic proxy will be used. All of the interfaces implemented by the target type will be
+    proxied. If the target object does not implement any interfaces then a CGLIB proxy
+    will be created.</para>
+    
+    <para>If you want to force the use of CGLIB proxying (for example, to proxy every
+    method defined for the target object, not just those implemented by its interfaces)
+    you can do so. However, there are some issues to consider:</para>
+    
+    <itemizedlist>
+      <listitem>
+        <para><literal>Final</literal> methods can't be advised, as they can't
+        be overriden</para>
+      </listitem>
+      <listitem>
+        <para>You'll need the CGLIB 2 binaries on your classpath, whereas
+        dynamic proxies are available with the JDK
+        </para>
+      </listitem>
+    </itemizedlist>
+    
+	<para>
+		To force the use of CGLIB proxies set the value of the <literal>proxy-target-class</literal>
+		attribute of the <literal>&lt;aop:config&gt;</literal> element to true:
+	</para>
+    
+	<programlisting><![CDATA[<aop:config ]]><emphasis role="bold">proxy-target-class="true"</emphasis><![CDATA[>
+	
+	...
+	
+</aop:config>]]></programlisting>
+ 
+	<para>
+	 Note that this setting applies on a <emphasis>per <literal>&lt;aop-config/&gt;</literal></emphasis> basis; 
+	 i.e. you can have multiple <literal>&lt;aop-config/&gt;</literal> elements,
+	 with some configured to force CGLIB-based proxying and some not to.
+	</para>
+	
+  	<para>
+  	 To force CGLIB proxying when using the @AspectJ autoproxy support, set the 
+  	 <literal>proxy-target-class</literal> attribute of the 
+  	 <literal>&lt;aop:aspectj-autoproxy&gt;</literal> element as follows:
+  	</para>
+  	
+	<programlisting><![CDATA[<aop:aspectj-autoproxy ]]><emphasis role="bold">proxy-target-class="true"</emphasis><![CDATA[/>]]></programlisting>
+  	
   </sect1>
 
+   todo: add section here on programmatic proxy creation with @AspectJ aspects...
 
   <sect1 id="aop-using-aspectj">
   	<title>Using AspectJ with Spring applications</title>
@@ -2015,6 +1997,8 @@ public @interface Idempotent {
   
   <sect1 id="aop-resources">
   	<title>Further Resources</title>
+  	
+  		todo: aspectj site, eclipse aspectj book
   	
   	    <para>
 		The excellent <emphasis>AspectJ in Action</emphasis> by Ramnivas Laddad (Manning, 2003)
