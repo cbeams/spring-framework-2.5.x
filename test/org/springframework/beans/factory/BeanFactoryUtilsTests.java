@@ -115,21 +115,25 @@ public class BeanFactoryUtilsTests extends TestCase {
 		assertEquals(2, beans.size());
 		assertEquals(t1, beans.get("t1"));
 		assertEquals(t2, beans.get("t2"));
+
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, false, true);
 		assertEquals(3, beans.size());
 		assertEquals(t1, beans.get("t1"));
 		assertEquals(t2, beans.get("t2"));
 		assertEquals(t3.getObject(), beans.get("t3"));
+
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, true);
 		assertEquals(4, beans.size());
 		assertEquals(t1, beans.get("t1"));
 		assertEquals(t2, beans.get("t2"));
 		assertEquals(t3.getObject(), beans.get("t3"));
 		assertTrue(beans.get("t4") instanceof TestBean);
+
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, DummyFactory.class, true, true);
 		assertEquals(2, beans.size());
 		assertEquals(t3, beans.get("&t3"));
 		assertEquals(t4, beans.get("&t4"));
+
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, FactoryBean.class, true, true);
 		assertEquals(2, beans.size());
 		assertEquals(t3, beans.get("&t3"));
@@ -152,11 +156,17 @@ public class BeanFactoryUtilsTests extends TestCase {
 		this.listableBeanFactory.registerSingleton("t4", t4);
 
 		Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true, false);
-		assertEquals(4, beans.size());
+		assertEquals(6, beans.size());
 		assertEquals(test3, beans.get("test3"));
 		assertEquals(test, beans.get("test"));
 		assertEquals(t1, beans.get("t1"));
 		assertEquals(t2, beans.get("t2"));
+		assertEquals(t3.getObject(), beans.get("t3"));
+		assertTrue(beans.get("t4") instanceof TestBean);
+		// t3 and t4 are found here as of Spring 2.0, since they are pre-registered
+		// singleton instances, while testFactory1 and testFactory are *not* found
+		// because they are FactoryBean definitions that haven't been initialized yet.
+
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, false, true);
 		assertEquals(5, beans.size());
 		assertEquals(test, beans.get("test"));
@@ -164,6 +174,7 @@ public class BeanFactoryUtilsTests extends TestCase {
 		assertEquals(t1, beans.get("t1"));
 		assertEquals(t2, beans.get("t2"));
 		assertEquals(t3.getObject(), beans.get("t3"));
+
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true, true);
 		assertEquals(8, beans.size());
 		assertEquals(test3, beans.get("test3"));
@@ -174,12 +185,14 @@ public class BeanFactoryUtilsTests extends TestCase {
 		assertEquals(t2, beans.get("t2"));
 		assertEquals(t3.getObject(), beans.get("t3"));
 		assertTrue(beans.get("t4") instanceof TestBean);
+
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, DummyFactory.class, true, true);
 		assertEquals(4, beans.size());
 		assertEquals(this.listableBeanFactory.getBean("&testFactory1"), beans.get("&testFactory1"));
 		assertEquals(this.listableBeanFactory.getBean("&testFactory2"), beans.get("&testFactory2"));
 		assertEquals(t3, beans.get("&t3"));
 		assertEquals(t4, beans.get("&t4"));
+
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, FactoryBean.class, true, true);
 		assertEquals(4, beans.size());
 		assertEquals(this.listableBeanFactory.getBean("&testFactory1"), beans.get("&testFactory1"));

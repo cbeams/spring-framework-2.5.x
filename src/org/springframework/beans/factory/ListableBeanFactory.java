@@ -137,17 +137,17 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * @param type the class or interface to match, or <code>null</code> for all bean names
 	 * @param includePrototypes whether to include prototype beans too
 	 * or just singletons (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include <i>objects created by
-	 * FactoryBeans</i> (or by factory methods with a "factory-bean" reference)
-	 * too, or just conventional beans. Note that FactoryBeans need to be
-	 * initialized to determine their type: So be aware that passing in "true"
-	 * for this flag will initialize FactoryBeans (and "factory-bean" references).
+	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
+	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
+	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
+	 * eagerly initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans and "factory-bean" references.
 	 * @return the names of beans (or objects created by FactoryBeans) matching
 	 * the given object type (including subclasses), or an empty array if none
 	 * @see FactoryBean#getObjectType
 	 * @see BeanFactoryUtils#beanNamesForTypeIncludingAncestors(ListableBeanFactory, Class, boolean, boolean)
 	 */
-	String[] getBeanNamesForType(Class type, boolean includePrototypes, boolean includeFactoryBeans);
+	String[] getBeanNamesForType(Class type, boolean includePrototypes, boolean allowEagerInit);
 
 	/**
 	 * Return the bean instances that match the given object type (including
@@ -200,18 +200,18 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * @param type the class or interface to match, or <code>null</code> for all concrete beans
 	 * @param includePrototypes whether to include prototype beans too
 	 * or just singletons (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include <i>objects created by
-	 * FactoryBeans</i> (or by factory methods with a "factory-bean" reference)
-	 * too, or just conventional beans. Note that FactoryBeans need to be
-	 * initialized to determine their type: So be aware that passing in "true"
-	 * for this flag will initialize FactoryBeans (and "factory-bean" references).
+	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
+	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
+	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
+	 * eagerly initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans and "factory-bean" references.
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values
 	 * @throws BeansException if a bean could not be created
 	 * @see FactoryBean#getObjectType
 	 * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(ListableBeanFactory, Class, boolean, boolean)
 	 */
-	Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
+	Map getBeansOfType(Class type, boolean includePrototypes, boolean allowEagerInit)
 	    throws BeansException;
 
 }

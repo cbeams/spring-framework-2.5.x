@@ -125,33 +125,33 @@ public abstract class BeanFactoryUtils {
 	/**
 	 * Get all bean names for the given type, including those defined in ancestor
 	 * factories. Will return unique names in case of overridden bean definitions.
-	 * <p>Does consider objects created by FactoryBeans if the "includeFactoryBeans"
+	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit"
 	 * flag is set, which means that FactoryBeans will get initialized. If the
 	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
-	 * will be matched against the type. If "includeFactoryBeans" is not set,
+	 * will be matched against the type. If "allowEagerInit" is not set,
 	 * only raw FactoryBeans will be checked (which doesn't require initialization
 	 * of each FactoryBean).
 	 * @param lbf the bean factory
 	 * @param includePrototypes whether to include prototype beans too or just singletons
 	 * (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include <i>objects created by
-	 * FactoryBeans</i> (or by factory methods with a "factory-bean" reference)
-	 * too, or just conventional beans. Note that FactoryBeans need to be
-	 * initialized to determine their type: So be aware that passing in "true"
-	 * for this flag will initialize FactoryBeans (and "factory-bean" references).
+	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
+	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
+	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
+	 * eagerly initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans and "factory-bean" references.
 	 * @param type the type that beans must match
 	 * @return the array of matching bean names, or an empty array if none
 	 */
 	public static String[] beanNamesForTypeIncludingAncestors(
-			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean includeFactoryBeans) {
+			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean allowEagerInit) {
 
 		Set result = new HashSet();
-		result.addAll(Arrays.asList(lbf.getBeanNamesForType(type, includePrototypes, includeFactoryBeans)));
+		result.addAll(Arrays.asList(lbf.getBeanNamesForType(type, includePrototypes, allowEagerInit)));
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
-						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includePrototypes, includeFactoryBeans);
+						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includePrototypes, allowEagerInit);
 				result.addAll(Arrays.asList(parentResult));
 			}
 		}
@@ -195,35 +195,35 @@ public abstract class BeanFactoryUtils {
 	 * Return all beans of the given type or subtypes, also picking up beans defined in
 	 * ancestor bean factories if the current bean factory is a HierarchicalBeanFactory.
 	 * The returned Map will only contain beans of this type.
-	 * <p>Does consider objects created by FactoryBeans if the "includeFactoryBeans"
+	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit"
 	 * flag is set, which means that FactoryBeans will get initialized. If the
 	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
-	 * will be matched against the type. If "includeFactoryBeans" is not set,
+	 * will be matched against the type. If "allowEagerInit" is not set,
 	 * only raw FactoryBeans will be checked (which doesn't require initialization
 	 * of each FactoryBean).
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
 	 * @param includePrototypes whether to include prototype beans too or just singletons
 	 * (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include <i>objects created by
-	 * FactoryBeans</i> (or by factory methods with a "factory-bean" reference)
-	 * too, or just conventional beans. Note that FactoryBeans need to be
-	 * initialized to determine their type: So be aware that passing in "true"
-	 * for this flag will initialize FactoryBeans (and "factory-bean" references).
+	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
+	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
+	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
+	 * eagerly initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans and "factory-bean" references.
 	 * @return the Map of matching bean instances, or an empty Map if none
 	 * @throws BeansException if a bean could not be created
 	 */
 	public static Map beansOfTypeIncludingAncestors(
-			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean includeFactoryBeans)
+			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean allowEagerInit)
 	    throws BeansException {
 
 		Map result = new HashMap();
-		result.putAll(lbf.getBeansOfType(type, includePrototypes, includeFactoryBeans));
+		result.putAll(lbf.getBeansOfType(type, includePrototypes, allowEagerInit));
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				Map parentResult = beansOfTypeIncludingAncestors(
-						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includePrototypes, includeFactoryBeans);
+						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includePrototypes, allowEagerInit);
 				for (Iterator it = parentResult.entrySet().iterator(); it.hasNext();) {
 					Map.Entry entry = (Map.Entry) it.next();
 					if (!result.containsKey(entry.getKey())) {
@@ -272,21 +272,21 @@ public abstract class BeanFactoryUtils {
 	 * defined in ancestor bean factories if the current bean factory is a
 	 * HierarchicalBeanFactory. Useful convenience method when we expect a
 	 * single bean and don't care about the bean name.
-	 * <p>Does consider objects created by FactoryBeans if the "includeFactoryBeans"
+	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit"
 	 * flag is set, which means that FactoryBeans will get initialized. If the
 	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
-	 * will be matched against the type. If "includeFactoryBeans" is not set,
+	 * will be matched against the type. If "allowEagerInit" is not set,
 	 * only raw FactoryBeans will be checked (which doesn't require initialization
 	 * of each FactoryBean).
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
 	 * @param includePrototypes whether to include prototype beans too or just singletons
 	 * (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include <i>objects created by
-	 * FactoryBeans</i> (or by factory methods with a "factory-bean" reference)
-	 * too, or just conventional beans. Note that FactoryBeans need to be
-	 * initialized to determine their type: So be aware that passing in "true"
-	 * for this flag will initialize FactoryBeans (and "factory-bean" references).
+	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
+	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
+	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
+	 * eagerly initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans and "factory-bean" references.
 	 * @return the matching bean instance
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
@@ -295,10 +295,10 @@ public abstract class BeanFactoryUtils {
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static Object beanOfTypeIncludingAncestors(
-			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean includeFactoryBeans)
+			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean allowEagerInit)
 	    throws BeansException {
 
-		Map beansOfType = beansOfTypeIncludingAncestors(lbf, type, includePrototypes, includeFactoryBeans);
+		Map beansOfType = beansOfTypeIncludingAncestors(lbf, type, includePrototypes, allowEagerInit);
 		if (beansOfType.size() == 1) {
 			return beansOfType.values().iterator().next();
 		}
@@ -339,21 +339,21 @@ public abstract class BeanFactoryUtils {
 	 * Return a single bean of the given type or subtypes, not looking in ancestor
 	 * factories. Useful convenience method when we expect a single bean and
 	 * don't care about the bean name.
-	 * <p>Does consider objects created by FactoryBeans if the "includeFactoryBeans"
+	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit"
 	 * flag is set, which means that FactoryBeans will get initialized. If the
 	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
-	 * will be matched against the type. If "includeFactoryBeans" is not set,
+	 * will be matched against the type. If "allowEagerInit" is not set,
 	 * only raw FactoryBeans will be checked (which doesn't require initialization
 	 * of each FactoryBean).
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
 	 * @param includePrototypes whether to include prototype beans too or just singletons
 	 * (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include <i>objects created by
-	 * FactoryBeans</i> (or by factory methods with a "factory-bean" reference)
-	 * too, or just conventional beans. Note that FactoryBeans need to be
-	 * initialized to determine their type: So be aware that passing in "true"
-	 * for this flag will initialize FactoryBeans (and "factory-bean" references).
+	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
+	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
+	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
+	 * eagerly initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans and "factory-bean" references.
 	 * @return the matching bean instance
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
@@ -362,10 +362,10 @@ public abstract class BeanFactoryUtils {
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static Object beanOfType(
-			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean includeFactoryBeans)
+			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean allowEagerInit)
 	    throws BeansException {
 
-		Map beansOfType = lbf.getBeansOfType(type, includePrototypes, includeFactoryBeans);
+		Map beansOfType = lbf.getBeansOfType(type, includePrototypes, allowEagerInit);
 		if (beansOfType.size() == 1) {
 			return beansOfType.values().iterator().next();
 		}

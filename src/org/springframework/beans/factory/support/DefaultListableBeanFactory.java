@@ -125,7 +125,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return getBeanNamesForType(type, true, true);
 	}
 
-	public String[] getBeanNamesForType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {
+	public String[] getBeanNamesForType(Class type, boolean includePrototypes, boolean allowEagerInit) {
 		List result = new ArrayList();
 
 		// Check all bean definitions.
@@ -133,11 +133,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			String beanName = (String) it.next();
 			RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
 			// Only check bean definition if it is complete.
-			if (!rbd.isAbstract()) {
+			if (!rbd.isAbstract() && (allowEagerInit || !rbd.isLazyInit())) {
 				// In case of FactoryBean, match object created by FactoryBean.
-				boolean isFactoryBean = rbd.hasBeanClass() && FactoryBean.class.isAssignableFrom(rbd.getBeanClass());
+				Class beanClass = resolveBeanClass(rbd, beanName);
+				boolean isFactoryBean = (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
 				if (isFactoryBean || rbd.getFactoryBeanName() != null) {
-					if (includeFactoryBeans && (includePrototypes || isSingleton(beanName)) &&
+					if (allowEagerInit && (includePrototypes || isSingleton(beanName)) &&
 							isBeanTypeMatch(beanName, type)) {
 						result.add(beanName);
 						// Match found for this bean: do not match FactoryBean itself anymore.
@@ -165,8 +166,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (!containsBeanDefinition(beanName)) {
 				// In case of FactoryBean, match object created by FactoryBean.
 				if (isFactoryBean(beanName)) {
-					if (includeFactoryBeans && (includePrototypes || isSingleton(beanName)) &&
-							isBeanTypeMatch(beanName, type)) {
+					if ((includePrototypes || isSingleton(beanName)) && isBeanTypeMatch(beanName, type)) {
 						result.add(beanName);
 						// Match found for this bean: do not match FactoryBean itself anymore.
 						continue;
@@ -188,10 +188,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return getBeansOfType(type, true, true);
 	}
 
-	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
+	public Map getBeansOfType(Class type, boolean includePrototypes, boolean allowEagerInit)
 			throws BeansException {
 
-		String[] beanNames = getBeanNamesForType(type, includePrototypes, includeFactoryBeans);
+		String[] beanNames = getBeanNamesForType(type, includePrototypes, allowEagerInit);
 		Map result = CollectionFactory.createLinkedMapIfPossible(beanNames.length);
 		for (int i = 0; i < beanNames.length; i++) {
 			String beanName = beanNames[i];
