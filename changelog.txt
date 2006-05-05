@@ -11,10 +11,13 @@ Package org.springframework.aop
 * removed incomplete support for ScopedObject handles and persistent scopes
 
 Package org.springframework.beans
+* introduced lazy loading (and lazy validation) of bean classes in standard bean factories and bean definition readers
+* redefined ListableBeanFactory's "includeFactoryBeans" flag for "getBean(Name)sOfType" into "allowEagerInit"
 * added scoping support to core BeanFactory, for creating raw target beans in arbitrary scopes
 * added "scope" attribute at bean level to XML bean definition format, superseding singleton="true"/"false"
 
 Package org.springframework.orm
+* fixed JpaTransactionManager to not cause an NPE when the creation of a transactional EntityManager raises an exception
 * fixed JpaInterceptor to actually bind a new EntityManager to the thread again (worked in M3, didn't work in M4)
 
 Package org.springframework.web
