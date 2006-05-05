@@ -34,6 +34,14 @@ public class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFac
 	private static String actualName;
 	private static Map actualProps;
 	
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		mockEmf.close();
+		emfMc.setVoidCallable();
+		emfMc.replay();
+	}
+	
 	
 	public void testThrowsPersistenceExceptionWithMissingProperties() throws Exception {
 		LocalEntityManagerFactoryBean lemfb = new LocalEntityManagerFactoryBean();

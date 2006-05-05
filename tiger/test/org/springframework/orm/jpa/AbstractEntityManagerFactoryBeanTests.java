@@ -24,6 +24,9 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 /**
+ * Superclass for unit tests for EntityManagerFactory FactoryBeans.
+ * Note: subclasses must set any expectations on the mock
+ * EntityManagerFactory and call close on it
  * @author Rod Johnson
  *
  */
@@ -38,9 +41,8 @@ public abstract class AbstractEntityManagerFactoryBeanTests extends TestCase {
 	protected void setUp() throws Exception {
 		emfMc = MockControl.createControl(EntityManagerFactory.class);
 		mockEmf = (EntityManagerFactory) emfMc.getMock();
-		mockEmf.close();
-		emfMc.setVoidCallable(1);
-		emfMc.replay();
+//		mockEmf.close();
+//		emfMc.setVoidCallable(1);
 	}
 		
 	

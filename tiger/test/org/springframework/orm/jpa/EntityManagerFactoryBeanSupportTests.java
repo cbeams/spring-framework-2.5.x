@@ -23,6 +23,13 @@ package org.springframework.orm.jpa;
  */
 public class EntityManagerFactoryBeanSupportTests extends AbstractEntityManagerFactoryBeanTests {
 	
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		mockEmf.close();
+		emfMc.setVoidCallable();
+		emfMc.replay();
+	}
 		
 	public void testHookIsCalled() throws Exception {
 		DummyEntityManagerFactoryBean demf = new DummyEntityManagerFactoryBean(mockEmf);
