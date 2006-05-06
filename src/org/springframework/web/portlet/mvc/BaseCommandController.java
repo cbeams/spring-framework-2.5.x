@@ -22,6 +22,7 @@ import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingErrorProcessor;
@@ -351,19 +352,20 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Create a new command instance for the command class of this controller.
+	 * <p>This implementation uses <code>BeanUtils.instantiateClass</code>,
+	 * so commands need to have public no-arg constructors.
 	 * @return the new command instance
-	 * @throws InstantiationException if the command class could not be instantiated
-	 * @throws IllegalAccessException if the class or its constructor is not accessible
+	 * @throws Exception if the command object could not be instantiated
 	 */
-	protected final Object createCommand() throws InstantiationException, IllegalAccessException {
+	protected final Object createCommand() throws Exception {
 		if (this.commandClass == null) {
 			throw new IllegalStateException("Cannot create command without commandClass being set - " +
-					"either set commandClass or override formBackingObject");
+					"either set commandClass or (in a form controller) override formBackingObject");
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating new command of class [" + this.commandClass.getName() + "]");
 		}
-		return this.commandClass.newInstance();
+		return BeanUtils.instantiateClass(this.commandClass);
 	}
 
 	/**
