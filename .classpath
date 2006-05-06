@@ -48,7 +48,7 @@
 	<classpathentry kind="lib" path="lib/axis/axis.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/jstl.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-taglibs/standard.jar"/>
-	<classpathentry kind="lib" path="lib/jdo/jdo2.jar"/>
+	<classpathentry kind="lib" path="lib/jdo/jdo2-api.jar"/>
 	<classpathentry kind="lib" path="lib/jotm/jotm.jar"/>
 	<classpathentry kind="lib" path="lib/jotm/xapool.jar"/>
 	<classpathentry kind="lib" path="lib/quartz/quartz-1.5.2.jar"/>

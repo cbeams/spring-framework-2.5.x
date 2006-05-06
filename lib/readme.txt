@@ -22,7 +22,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using parameter name discovery with AspectJ
 
 * aspectj/aspectjweaver.jar, aspectj/aspectjrt.jar, aspectj/aspectjtools.jar
-- AspectJ 1.5.0 (http://www.aspectj.org)
+- AspectJ 1.5.1a (http://www.aspectj.org)
 - required for building the framework
 - required at runtime when using Spring's AspectJ support
 
@@ -257,8 +257,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
-* jdo/jdo2.jar
-- JDO API 2.0 RC1 (jdo2-api-2.0-rc1.jar from the Apache JDO project)
+* jdo/jdo2-api.jar
+- JDO API 2.0 (http://db.apache.org/jdo)
 - required for building the framework
 - required at runtime when using Spring's JDO support (or jdo.jar for JDO 1.0)
 
