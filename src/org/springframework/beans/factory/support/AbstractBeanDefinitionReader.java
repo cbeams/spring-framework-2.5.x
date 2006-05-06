@@ -91,7 +91,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	 * will be capable of resolving resource patterns to Resource arrays.
 	 * <p>Default is PathMatchingResourcePatternResolver, also capable of
 	 * resource pattern resolving through the ResourcePatternResolver interface.
-	 * <p>Setting this to null suggests that absolute resource loading
+	 * <p>Setting this to <code>null</code> suggests that absolute resource loading
 	 * is not available for this bean definition reader.
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
@@ -123,6 +123,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 
 	public int loadBeanDefinitions(Resource[] resources) throws BeansException {
+		Assert.notNull(resources, "Resource array must not be null");
 		int counter = 0;
 		for (int i = 0; i < resources.length; i++) {
 			counter += loadBeanDefinitions(resources[i]);
@@ -161,6 +162,15 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 			}
 			return loadCount;
 		}
+	}
+
+	public int loadBeanDefinitions(String[] locations) throws BeansException {
+		Assert.notNull(locations, "Location array must not be null");
+		int counter = 0;
+		for (int i = 0; i < locations.length; i++) {
+			counter += loadBeanDefinitions(locations[i]);
+		}
+		return counter;
 	}
 
 }
