@@ -161,7 +161,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		Object result = execute(action, isExposeNativeEntityManager());
 		if (!(result instanceof List)) {
 			throw new InvalidDataAccessApiUsageException(
-					"Result object returned from HibernateCallback isn't a List: [" + result + "]");
+					"Result object returned from JpaCallback isn't a List: [" + result + "]");
 		}
 		return (List) result;
 	}
