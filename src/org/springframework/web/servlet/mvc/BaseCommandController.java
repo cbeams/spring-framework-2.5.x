@@ -326,7 +326,6 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Create a new command instance for the command class of this controller.
 	 * <p>This implementation uses <code>BeanUtils.instantiateClass</code>,
 	 * so commands need to have public no-arg constructors.
-	 * Subclasses can override this implementation if desired.
 	 * @return the new command instance
 	 * @throws Exception if the command object could not be instantiated
 	 * @see org.springframework.beans.BeanUtils#instantiateClass(Class)
