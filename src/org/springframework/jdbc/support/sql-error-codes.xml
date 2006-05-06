@@ -21,8 +21,14 @@
 		<property name="badSqlGrammarCodes">
 			<value>-204,-206,-301,-408</value>
 		</property>
+		<property name="dataAccessResourceFailureCodes">
+			<value>-904</value>
+		</property>
 		<property name="dataIntegrityViolationCodes">
 			<value>-803</value>
+		</property>
+		<property name="deadlockLoserCodes">
+			<value>-911,-913</value>
 		</property>
 	</bean>
 
