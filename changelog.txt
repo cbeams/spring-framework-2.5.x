@@ -16,13 +16,22 @@ Package org.springframework.beans
 * added scoping support to core BeanFactory, for creating raw target beans in arbitrary scopes
 * added "scope" attribute at bean level to XML bean definition format, superseding singleton="true"/"false"
 
+Package org.springframework.jdbc
+* refined default SQL error codes for DB2
+
 Package org.springframework.orm
 * fixed JpaTransactionManager to not cause an NPE when the creation of a transactional EntityManager raises an exception
 * fixed JpaInterceptor to actually bind a new EntityManager to the thread again (worked in M3, didn't work in M4)
+* fixed EntityManagerFactoryUtils's "convertJpaAccessException" to always return rather than throw DataAccessExceptions
+
+Package org.springframework.util
+* "ClassUtils.isPresent" logs exception message only instead of full stacktrace for classes that haven't been found
 
 Package org.springframework.web
+* dropped "getCause()" method from NestedServletException, to avoid conflicts with JDK-1.4-based ServletException class
 * added support for request and session scopes to all WebApplicationContexts
 * moved StaticPortletApplicationContext from test tree over to main source tree
+* fixed SimpleMappingExceptionResolver to use local "exceptionMappings" reference
 
 
 Changes in version 2.0 M4 (23.4.2006)
