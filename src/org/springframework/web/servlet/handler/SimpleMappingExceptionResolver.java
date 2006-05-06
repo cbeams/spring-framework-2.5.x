@@ -193,12 +193,12 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	protected String findMatchingViewName(Properties exceptionMappings, Exception ex) {
 		String viewName = null;
 		int deepest = Integer.MAX_VALUE;
-		for (Enumeration names = this.exceptionMappings.propertyNames(); names.hasMoreElements();) {
+		for (Enumeration names = exceptionMappings.propertyNames(); names.hasMoreElements();) {
 			String exceptionMapping = (String) names.nextElement();
 			int depth = getDepth(exceptionMapping, ex);
 			if (depth >= 0 && depth < deepest) {
 				deepest = depth;
-				viewName = this.exceptionMappings.getProperty(exceptionMapping);
+				viewName = exceptionMappings.getProperty(exceptionMapping);
 			}
 		}
 		return viewName;
