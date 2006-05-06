@@ -88,13 +88,13 @@ The "dist" directory contains the following distinct jar files for use in applic
 jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-FULL JAR (dist):
+FULL STANDARD JAR (dist):
 
 * "spring" (~1985 KB)
 - Convenient jar file that combines all standard modules (see "module jars" below)
 - Note: Does NOT include extension modules! (see "extension module jars" below)
 
-MODULE JARS (dist/modules):
+STANDARD MODULE JARS (dist/modules):
 
 * "spring-core" (~155 KB)
 - Contents: core utilities
