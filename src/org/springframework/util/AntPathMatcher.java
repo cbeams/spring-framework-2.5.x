@@ -48,6 +48,7 @@ package org.springframework.util;
  *
  * @author Alef Arendsen
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 16.07.2003
  */
 public class AntPathMatcher implements PathMatcher {
@@ -337,13 +338,13 @@ public class AntPathMatcher implements PathMatcher {
 	/**
 	 * Given a pattern and a full path, returns the non-pattern mapped part. E.g.:
 	 * <ul>
-	 *   <li>'<code>/docs/*</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
-	 *   <li>'<code>/docs/cvs/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>commit</code>'</li>
-	 *   <li>'<code>/docs/**</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
-	 *   <li>'<code>/docs/**\/*.html</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
+	 * <li>'<code>/docs/*</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
+	 * <li>'<code>/docs/cvs/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>commit</code>'</li>
+	 * <li>'<code>/docs/**</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
+	 * <li>'<code>/docs/**\/*.html</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
 	 * </ul>
-	 * <p/>Assumes that {@link #match} returns <code>true</code> for '<code>pattern</code>' and '<code>path</code>',
-	 * but does <strong>not</strong> enforce this.
+	 * <p>Assumes that {@link #match} returns <code>true</code> for '<code>pattern</code>'
+	 * and '<code>path</code>', but does <strong>not</strong> enforce this.
 	 */
 	public String extractPathWithinPattern(String pattern, String path) {
 		String[] patternParts = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
@@ -351,7 +352,7 @@ public class AntPathMatcher implements PathMatcher {
 
 		StringBuffer buffer = new StringBuffer();
 
-		// add any path parts that have a wildcarded pattern part
+		// Add any path parts that have a wildcarded pattern part.
 		int puts = 0;
 		for (int i = 0; i < patternParts.length; i++) {
 			String patternPart = patternParts[i];
@@ -366,7 +367,7 @@ public class AntPathMatcher implements PathMatcher {
 			}
 		}
 
-		// append any trailing path parts
+		// Append any trailing path parts.
 		for (int i = patternParts.length; i < pathParts.length; i++) {
 			if (puts > 0 || i > 0) {
 				buffer.append(this.pathSeparator);
@@ -374,13 +375,14 @@ public class AntPathMatcher implements PathMatcher {
 			buffer.append(pathParts[i]);
 		}
 
-		// remove any trailing file extensions
-		int lastPeriod = buffer.lastIndexOf(".");
+		// Remove any trailing file extensions.
+		String str = buffer.toString();
+		int lastPeriod = str.lastIndexOf(".");
 		if (lastPeriod > -1) {
-			return buffer.substring(0, lastPeriod);
+			return str.substring(0, lastPeriod);
 		}
 		else {
-			return buffer.toString();
+			return str;
 		}
 	}
 
