@@ -27,12 +27,14 @@ import javax.persistence.EntityManagerFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
+import org.springframework.util.ClassUtils;
 
 /**
  * FactoryBean that exposes a shared JPA EntityManager reference for a
  * given EntityManagerFactory. Typically used for an EntityManagerFactory
  * created by LocalEntityManagerFactoryBean, as direct alternative to a
  * JndiObjectFactoryBean definition for a Java EE 5 server's EntityManager.
+ * Also allows convenient creation of shared EntityManager proxies.
  *
  * <p>The shared EntityManager will behave just like an EntityManager fetched
  * from an application server's JNDI environment, as defined by the JPA
@@ -51,6 +53,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryUtils;
  * interface will be exposed.
  *
  * @author Juergen Hoeller
+ * @author Rod Johnson
  * @since 2.0
  * @see #setEntityManagerFactory
  * @see #setEntityManagerInterface
@@ -58,13 +61,39 @@ import org.springframework.orm.jpa.EntityManagerFactoryUtils;
  * @see org.springframework.orm.jpa.JpaTransactionManager
  */
 public class SharedEntityManagerAdapter extends AbstractEntityManagerProxyFactoryBean {
+	
+	/**
+	 * Return a shared transactional EntityManager proxy,
+	 * given this EntityManagerFactory
+	 * @param classLoader class loader to use to create the dynamic proxy
+	 * @param entityManagerInterfaces interfaces to be implemented by the
+	 * EntityManager. Allows the addition or specification of proprietary interfaces.
+	 * @param emf EntityManagerFactory to obtain EntityManagers from as needed
+	 * @return a shareable transaction EntityManager proxy
+	 */
+	public static EntityManager createEntityManagerProxy(ClassLoader classLoader, 
+			Class[] entityManagerInterfaces, EntityManagerFactory emf) {
+		return (EntityManager) Proxy.newProxyInstance(
+				classLoader,
+				entityManagerInterfaces,
+				new SharedEntityManagerInvocationHandler(emf));
+	}
+	
+	public static EntityManager createEntityManagerProxy(ClassLoader classLoader, 
+			EntityManagerFactory emf) {
+		return createEntityManagerProxy(
+				classLoader, 
+				new Class[] { EntityManager.class }, 
+				emf);
+	}
+	
 
 	@Override
 	protected EntityManager createEntityManagerProxy() {
-		return (EntityManager) Proxy.newProxyInstance(
+		return createEntityManagerProxy(
 				getClass().getClassLoader(),
-				new Class[] {getEntityManagerInterface()},
-				new SharedEntityManagerInvocationHandler(getEntityManagerFactory()));
+				new Class[] { getEntityManagerInterface() },
+				getEntityManagerFactory());
 	}
 
 
