@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,8 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 						this.monitor.wait();
 					}
 					catch (InterruptedException ex) {
+						// Re-interrupt current thread, to allow other threads to react.
+						Thread.currentThread().interrupt();
 					}
 				}
 				if (debug) {
@@ -110,6 +112,10 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 		}
 	}
 
+	/**
+	 * To be invoked after the main execution logic of concrete subclasses.
+	 * @see #beforeAccess()
+	 */
 	protected void afterAccess() {
 		if (this.concurrencyLimit >= 0) {
 			synchronized (this.monitor) {
