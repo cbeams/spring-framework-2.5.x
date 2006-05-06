@@ -16,12 +16,13 @@
 
 package org.springframework.beans.factory.wiring;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.Assert;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Convenient superclass for configurers that can perform Dependency Injection on
@@ -45,6 +46,7 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware {
 	private BeanWiringInfoResolver beanWiringInfoResolver = new ClassNameBeanWiringInfoResolver();
 
 	private AutowireCapableBeanFactory beanFactory;
+
 
 	/**
 	 * Set the BeanWiringInfoResolver to use. Default behavior will be to look
