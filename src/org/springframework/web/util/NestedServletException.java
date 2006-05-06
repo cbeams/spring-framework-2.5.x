@@ -22,8 +22,8 @@ import java.io.PrintWriter;
 import javax.servlet.ServletException;
 
 /**
- * Subclass of ServletException that properly handles a root cause,
- * exposing the root cause just like NestedChecked/RuntimeException does.
+ * Subclass of ServletException that properly handles a root cause in terms
+ * of message and stacktrace, just like NestedChecked/RuntimeException does.
  * Note that the plain ServletException doesn't expose its root cause at all,
  * neither in the exception message nor in printed stack traces!
  *
@@ -64,23 +64,12 @@ public class NestedServletException extends ServletException {
 
 
 	/**
-	 * Return the nested cause, or <code>null</code> if none.
-	 */
-	public Throwable getCause() {
-		// Even if you cannot set the cause of this exception other than through
-		// the constructor, we check for the cause being "this" here, as the cause
-		// could still be set to "this" via reflection: for example, by a remoting
-		// deserializer like Hessian's.
-		return (getRootCause() == this ? null : getRootCause());
-	}
-
-	/**
 	 * Return the detail message, including the message from the nested exception
 	 * if there is one.
 	 */
 	public String getMessage() {
 		String message = super.getMessage();
-		Throwable cause = getCause();
+		Throwable cause = getRootCause();
 		if (cause != null) {
 			return message + "; nested exception is " + cause;
 		}
@@ -92,13 +81,14 @@ public class NestedServletException extends ServletException {
 	 * @param ps the print stream
 	 */
 	public void printStackTrace(PrintStream ps) {
-		if (getCause() == null) {
+		Throwable cause = getRootCause();
+		if (cause == null) {
 			super.printStackTrace(ps);
 		}
 		else {
 			ps.println(this);
 			ps.print("Caused by: ");
-			getCause().printStackTrace(ps);
+			cause.printStackTrace(ps);
 		}
 	}
 
@@ -107,13 +97,14 @@ public class NestedServletException extends ServletException {
 	 * @param pw the print writer
 	 */
 	public void printStackTrace(PrintWriter pw) {
-		if (getCause() == null) {
+		Throwable cause = getRootCause();
+		if (cause == null) {
 			super.printStackTrace(pw);
 		}
 		else {
 			pw.println(this);
 			pw.print("Caused by: ");
-			getCause().printStackTrace(pw);
+			cause.printStackTrace(pw);
 		}
 	}
 
