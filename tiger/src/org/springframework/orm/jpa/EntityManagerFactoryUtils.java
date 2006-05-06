@@ -129,16 +129,14 @@ public abstract class EntityManagerFactoryUtils {
 		logger.debug("Opening JPA EntityManager");
 		EntityManager em = emf.createEntityManager();
 
-		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			logger.debug("Registering transaction synchronization for JPA EntityManager");
-			// Use same EntityManager for further JPA actions within the transaction.
-			// Thread object will get removed by synchronization at transaction completion.
-			emHolder = new EntityManagerHolder(em);
-			emHolder.setSynchronizedWithTransaction(true);
-			TransactionSynchronizationManager.registerSynchronization(
-					new EntityManagerSynchronization(emHolder, emf, true));
-			TransactionSynchronizationManager.bindResource(emf, emHolder);
-		}
+		logger.debug("Registering transaction synchronization for JPA EntityManager");
+		// Use same EntityManager for further JPA actions within the transaction.
+		// Thread object will get removed by synchronization at transaction completion.
+		emHolder = new EntityManagerHolder(em);
+		emHolder.setSynchronizedWithTransaction(true);
+		TransactionSynchronizationManager.registerSynchronization(
+				new EntityManagerSynchronization(emHolder, emf, true));
+		TransactionSynchronizationManager.bindResource(emf, emHolder);
 
 		return em;
 	}
@@ -164,13 +162,13 @@ public abstract class EntityManagerFactoryUtils {
 			return new JpaOptimisticLockingFailureException((OptimisticLockException) ex);
 		}
 		if (ex instanceof EntityExistsException) {
-			throw new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
+			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
 		if (ex instanceof NoResultException) {
-			throw new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
+			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
 		if (ex instanceof NonUniqueResultException) {
-			throw new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
+			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
 		// fallback
 		return new JpaSystemException(ex);
