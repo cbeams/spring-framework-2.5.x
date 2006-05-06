@@ -479,6 +479,15 @@ public class NotVeryUsefulAspect {
 	  visibility rules apply (you can see private pointcuts in the same type, protected
 	  pointcuts in the hierarchy, public pointcuts anywhere and so on).
 	  </para>
+
+	  <remark>A bug in AspectJ 1.5.1 (#140357) can sometimes cause the AspectJ pointcut
+	  parsing support used by Spring to fail when a named pointcut refers to another
+	  named pointcut declared in the same type. This bug is fixed in the AspectJ development
+	  builds available from the AspectJ download page, and will be incorporated in the 1.5.2
+	  release. If you run into this issue, you can download an AspectJ development build
+	  and update your copy of aspectjweaver.jar as a temporary measure until AspectJ 1.5.2
+	  is released.
+	  </remark>
     
     </sect3>
 	  
@@ -1972,24 +1981,73 @@ public @interface Idempotent {
   	
   </sect1>
 
-   todo: add section here on programmatic proxy creation with @AspectJ aspects...
+  <sect1 id="aop-aspectj-programmatic">
+  	<title>Programmatic creation of @AspectJ Proxies</title>
 
+	<para>
+	In addition to declaring aspects in your configuration using either &lt;aop:config&gt;
+	or &lt;aop:aspectj-autoproxy&gt; it is also possible to create programmatically create
+	proxies that advise target objects. For the full details of Spring's AOP API, see the
+	next chapter. Here we want to focus on the ability to automatically create proxies
+	using @AspectJ aspects.
+	</para>
+	
+	<para>The class <literal>org.springframework.aop.aspectj.annotation.AspectJProxyFactory</literal>
+	can be used to create a proxy for a target object that is advised by one or more
+	@AspectJ aspects. Basic usage for this class is very simple, as illustrated below. See 
+	the javadoc for full information.
+	</para>
+
+	<programlisting><![CDATA[// create a factory that can generate a proxy for the given target object
+AspectJProxyFactory factory = new AspectJProxyFactory(targetObject); 
+
+// add an aspect, the class must be an @AspectJ aspect
+// you can call this as many times as you need with different aspects
+factory.addAspect(SecurityManager.class);
+
+// you can also add existing aspect instances, the type of the object
+// supplied must be an @AspectJ aspect
+factory.addAspect(usageTracker);	
+
+// now get the proxy object...
+MyInterfaceType proxy = factory.getProxy();]]></programlisting>
+	
+  </sect1>
+  
   <sect1 id="aop-using-aspectj">
   	<title>Using AspectJ with Spring applications</title>
   	
+  	<para>
+  	Everything we've covered so far in this chapter is pure Spring AOP. In this section,
+  	we're going to look at how you can use the AspectJ compiler/weaver instead of or in
+  	addition to Spring AOP if your needs go beyond the facilities offered by Spring AOP
+  	alone.
+  	</para>
+  	
+  	<para>
+  	Spring ships with a small AspectJ aspect library (it's available standalone in
+  	your distribution as <literal>spring-aspects.jar</literal>, the aspects are
+  	also included in the main <literal>spring.jar</literal>. <xref linkend="aop-atconfigurable"/>
+  	and <xref linkend="aop-ajlib-other"/> discuss the content of this library and how you 
+  	can use it. <xref linkend="aop-aj-configure"/> discusses how to dependency inject AspectJ
+  	aspects that are woven using the AspectJ compiler. Finally, 
+  	<xref linkend="aop-aj-ltw"/> provides an 
+  	introduction to load-time weaving for Spring applications using AspectJ.
+  	</para>
+  	
   	<sect2 id="aop-atconfigurable">
-  		<title>Using AspectJ to dependency inject objects with Spring</title>
+  		<title>Using AspectJ to dependency inject domain objects with Spring</title>
   	</sect2>
 
-  	<sect2>
+  	<sect2 id="aop-ajlib-other">
   		<title>Other Spring aspects for AspectJ</title>
   	</sect2>
 
-  	<sect2>
+  	<sect2 id="aop-aj-configure">
   		<title>Configuring AspectJ aspects using Spring IoC</title>
   	</sect2>
 
-  	<sect2>
+  	<sect2 id="aop-aj-ltw">
   		<title>Using AspectJ Load-time weaving (LTW) with Spring applications</title>
   	</sect2>
   	
@@ -1998,14 +2056,22 @@ public @interface Idempotent {
   <sect1 id="aop-resources">
   	<title>Further Resources</title>
   	
-  		todo: aspectj site, eclipse aspectj book
-  	
+  		<para>
+  		More information on AspectJ can be found at the <ulink url="http://www.eclipse.org/aspectj">
+  		AspectJ home page</ulink>.
+  		</para>
+
+  		<para>
+  		The book <emphasis>Eclipse AspectJ</emphasis> by Adrian Colyer et. al. (Addison-Wesley, 
+  		2005) provides a comprehensive introduction and reference for the AspectJ language.
+  		</para>
+
   	    <para>
 		The excellent <emphasis>AspectJ in Action</emphasis> by Ramnivas Laddad (Manning, 2003)
 		comes highly recommended as an introduction to AOP; the focus of the book is on
 		AspectJ, but a lot of general AOP themes are explored in some depth.
     	</para>
-	
+  	
   </sect1>
 
 </chapter>
