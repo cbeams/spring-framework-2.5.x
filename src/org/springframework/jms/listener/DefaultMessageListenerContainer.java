@@ -316,6 +316,8 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 				Thread.sleep(this.receiveTimeout);
 			}
 			catch (InterruptedException ex) {
+				// Re-interrupt current thread, to allow other threads to react.
+				Thread.currentThread().interrupt();
 			}
 		}
 	}

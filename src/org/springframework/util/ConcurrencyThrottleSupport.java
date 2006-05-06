@@ -125,6 +125,8 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 						this.monitor.wait();
 					}
 					catch (InterruptedException ignored) {
+						// Re-interrupt current thread, to allow other threads to react.
+						Thread.currentThread().interrupt();
 					}
 				}
 				if (debug) {
