@@ -174,8 +174,8 @@ public class OpenPersistenceManagerInViewTests extends TestCase {
 
 		pmfControl.verify();
 		pmControl.verify();
-		pmfControl.verify();
-		pmControl.verify();
+		pmf2Control.verify();
+		pm2Control.verify();
 
 		wac.close();
 	}
