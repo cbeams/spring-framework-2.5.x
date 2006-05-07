@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.2.8 (April 2006)
-------------------------------------------------
+THE SPRING FRAMEWORK, release 1.2.8 (May 2006)
+----------------------------------------------
 http://www.springframework.org
 
 

@@ -35,7 +35,7 @@ Package org.springframework.core
 * fixed FileSystemResource/UrlResource to retain leading "../" parts in paths, building correct relative paths for them
 
 Package org.springframework.jdbc
-* refined default SQL error codes for DB2
+* added further default SQL error codes for DB2 and HSQLDB
 * refined NativeJdbcExtractorAdapter to retry with DatabaseMetaData Connection if extraction failed (for Hibernate 3.1)
 * turned JdbcTemplate's "query(PreparedStatementCreator,PreparedStatementSetter,ResultSetExtractor rse)" method public
 * improved JdbcTemplate's logging of ignored SQLWarnings, including SQL state and error code in the log output
