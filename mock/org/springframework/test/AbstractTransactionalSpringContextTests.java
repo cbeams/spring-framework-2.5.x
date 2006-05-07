@@ -17,6 +17,7 @@
 package org.springframework.test;
 
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -89,6 +90,12 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * Number of transactions started
 	 */
 	private int transactionsStarted;
+	
+	/**
+	 * Default transaction definition is used.
+	 * Subclasses can change this to cause different behaviour.
+	 */
+	private TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
 
 	/**
@@ -102,6 +109,24 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 */
 	public AbstractTransactionalSpringContextTests(String name) {
 		super(name);
+	}
+	
+	/**
+	 * Call in an overridden runBare() method to prevent transaction execution.
+	 */
+	protected void preventTransaction() {
+		this.transactionDefinition = null;
+	}
+	
+	
+	/**
+	 * Override the transaction attributes that will be used.
+	 * Call in an overridden runBare() method so that setUp()
+	 * and tearDown() behaviour are modified.
+	 * @param customDefinition custom definition to override with
+	 */
+	protected void setTransactionDefinition(TransactionDefinition customDefinition) {
+		this.transactionDefinition = customDefinition;
 	}
 
 
@@ -134,23 +159,26 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	protected final void onSetUp() throws Exception {
 		this.complete = !this.defaultRollback;
 
-		onSetUpBeforeTransaction();
-
-		if (this.transactionManager != null) {
-			startNewTransaction();
-		}
-		else {
+		if (this.transactionManager == null) {
 			logger.info("No transaction manager set: tests will NOT run within a transaction");
 		}
-
-		onSetUpInTransaction();
+		else if (this.transactionDefinition == null) {
+			logger.info("Transaction definition is null: test " + getName() + " will NOT run within a transaction");
+		}
+		else {
+			onSetUpBeforeTransaction();
+			startNewTransaction();
+			onSetUpInTransaction();
+		}
 	}
 
 
 	/**
 	 * Subclasses can override this method to perform any setup operations,
 	 * such as populating a database table, <i>before</i> the transaction
-	 * created by this class.
+	 * created by this class. Only invoked if there <i>is</i> a transaction--
+	 * that is, if preventTransaction has not been invoked in an overridden
+	 * runTest() method.
 	 * @throws Exception simply let any exception propagate
 	 */
 	protected void onSetUpBeforeTransaction() throws Exception {
@@ -260,7 +288,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 					"Invoke endTransaction() before startNewTransaction()");
 		}
 
-		this.transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
+		this.transactionStatus = this.transactionManager.getTransaction(this.transactionDefinition);
 		++this.transactionsStarted;
 		this.complete = !this.defaultRollback;
 
