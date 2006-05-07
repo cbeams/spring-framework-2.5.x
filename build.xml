@@ -64,7 +64,6 @@
 
 	</path>
 
-
 	<target name="usage">
 
 		<echo message=""/>
@@ -250,6 +249,10 @@
 				<exclude name="org/springframework/orm/hibernate3/**"/>
 				<exclude name="org/springframework/orm/toplink/**"/>
 				<exclude name="org/springframework/orm/ojb/**"/>
+				<!-- exclude content of spring-aspects.jar -->
+				<exclude name="org/springframework/beans/factory/aspectj/**"/>
+				<exclude name="org/springframework/transaction/aspectj/**"/>
+				<exclude name="META-INF/aop.xml"/>	
 			</fileset>
 			<zipfileset src="lib/aopalliance/aopalliance.jar"/>
 			<manifest>
