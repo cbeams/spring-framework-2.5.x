@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.Assert;
 
@@ -37,16 +38,16 @@ import org.springframework.util.Assert;
  * @author Rob Harrop
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Adrian Colyer
  * @since 2.0
  */
-public abstract class BeanConfigurerSupport implements BeanFactoryAware {
+public abstract class BeanConfigurerSupport implements BeanFactoryAware, DisposableBean  {
 
 	protected Log logger = LogFactory.getLog(getClass());
 
 	private BeanWiringInfoResolver beanWiringInfoResolver = new ClassNameBeanWiringInfoResolver();
 
 	private AutowireCapableBeanFactory beanFactory;
-
 
 	/**
 	 * Set the BeanWiringInfoResolver to use. Default behavior will be to look
@@ -71,6 +72,14 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware {
 		this.beanFactory = (AutowireCapableBeanFactory) beanFactory;
 	}
 
+	/**
+	 * Release references to BeanFactory and BeanWiringInfoResolver when
+	 * application context is destroyed
+	 */
+	public void destroy() {
+		this.beanFactory = null;
+		this.beanWiringInfoResolver = null;
+	}
 
 	/**
 	 * Configure the bean instance using the given bean name.
