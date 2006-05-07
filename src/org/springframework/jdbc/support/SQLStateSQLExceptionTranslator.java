@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,8 +29,8 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.UncategorizedSQLException;
 
 /**
- * Implementation of SQLExceptionTranslator that uses the SQLState
- * code in the SQLException.
+ * Implementation of SQLExceptionTranslator that analyzes the SQL state
+ * in the SQLException.
  *
  * <p>Not able to diagnose all problems, but is portable between databases and
  * does need require special initialization (no database vendor detection etc).
@@ -38,7 +38,7 @@ import org.springframework.jdbc.UncategorizedSQLException;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see java.sql.SQLException#getSQLState
+ * @see java.sql.SQLException#getSQLState()
  * @see SQLErrorCodeSQLExceptionTranslator
  */
 public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
@@ -48,6 +48,7 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 
 	/** Set of String 2-digit codes that indicate RDBMS integrity violation */
 	private static final Set INTEGRITY_VIOLATION_CODES = new HashSet(4);
+
 
 	// Populate reference data.
 	static {
