@@ -23,6 +23,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,16 +35,16 @@ import java.util.Map;
 public final class ReflectionBasedBridgeMethodResolver implements BridgeMethodResolver {
 
 	/**
-	 * Given a synthetic {@link java.lang.reflect.Method#isBridge bridge Method} returns the {@link java.lang.reflect.Method}
+	 * Given a synthetic {@link Method#isBridge bridge Method} returns the {@link Method}
 	 * being bridged. A bridge method may be created by the compiler when extending a parameterized
-	 * type whose methods have parameterized arguments. During runtime invocation the bridge {@link java.lang.reflect.Method} may
-	 * be invoked and/or used via reflection. When attempting to locate annotations on {@link java.lang.reflect.Method Methods} it is
-	 * wise to check for bridge {@link java.lang.reflect.Method Methods} as appropriate and find the bridged {@link java.lang.reflect.Method}.
+	 * type whose methods have parameterized arguments. During runtime invocation the bridge {@link Method} may
+	 * be invoked and/or used via reflection. When attempting to locate annotations on {@link Method Methods} it is
+	 * wise to check for bridge {@link Method Methods} as appropriate and find the bridged {@link Method}.
 	 * <p/>See <a href="http://java.sun.com/docs/books/jls/third_edition/html/expressions.html#15.12.4.5">
 	 * The Java Language Specification</a> for more details on the use of bridge methods.
 	 *
-	 * @return the bridged {@link java.lang.reflect.Method} if the supplied {@link java.lang.reflect.Method} is a valid bridge, otherwise the supplied {@link java.lang.reflect.Method}
-	 * @throws IllegalStateException if no bridged {@link java.lang.reflect.Method} can be found.
+	 * @return the bridged {@link Method} if the supplied {@link Method} is a valid bridge, otherwise the supplied {@link Method}
+	 * @throws IllegalStateException if no bridged {@link Method} can be found.
 	 */
 	public Method resolveBridgeMethod(Method bridgeMethod) {
 		Assert.notNull(bridgeMethod, "'bridgeMethod' cannot be null.");
@@ -75,9 +76,10 @@ public final class ReflectionBasedBridgeMethodResolver implements BridgeMethodRe
 	}
 
 	private Method searchCandidates(List candidateMethods, Method bridgeMethod) {
+		Map typeParameterMap = createTypeVariableMap(bridgeMethod.getDeclaringClass());
 		for (int i = 0; i < candidateMethods.size(); i++) {
 			Method candidateMethod = (Method) candidateMethods.get(i);
-			if (isBridgeMethodFor(bridgeMethod, candidateMethod)) {
+			if (isBridgeMethodFor(bridgeMethod, candidateMethod, typeParameterMap)) {
 				return candidateMethod;
 			}
 		}
@@ -89,42 +91,70 @@ public final class ReflectionBasedBridgeMethodResolver implements BridgeMethodRe
 						&& candidateMethod.getParameterTypes().length == bridgeMethod.getParameterTypes().length;
 	}
 
-	protected boolean isBridgeMethodFor(Method bridgeMethod, Method candidateMethod) {
-		return (findGenericDefinition(candidateMethod) == null ? false : true);
+	/**
+	 * Determines whether or not the bridge {@link Method} is the bridge for the supplied candidate
+	 * {@link Method}.
+	 */
+	protected boolean isBridgeMethodFor(Method bridgeMethod, Method candidateMethod, Map typeVariableMap) {
+		Method m = findGenericDeclaration(bridgeMethod);
+		return m == null ? false : isResolvedTypeMatch(m, candidateMethod, typeVariableMap);
+
 	}
 
-	protected Method findGenericDefinition(Method baseMethod) {
-		Map typeVariableMap = createTypeVariableMap(baseMethod.getDeclaringClass());
-		Type genericType = baseMethod.getDeclaringClass().getGenericSuperclass();
-		Class candidateType = baseMethod.getDeclaringClass().getSuperclass();
-
-		// search superclasses
-		while (candidateType != Object.class) {
-			if (genericType instanceof ParameterizedType) {
-				ParameterizedType pt = (ParameterizedType) genericType;
-
-				Method m = searchForGenericDefinition(pt, baseMethod, typeVariableMap);
-				if (m != null) {
-					return m;
-				}
+	/**
+	 * Searches for the generic {@link Method} declaration whose erased signature matches that of the
+	 * supplied bridge method.
+	 * @throws IllegalStateException if the generic declaration cannot be found.
+	 */
+	protected Method findGenericDeclaration(Method bridgeMethod) {
+		// search parent types for method that has same signature as bridge
+		Class superclass = bridgeMethod.getDeclaringClass().getSuperclass();
+		while (superclass != Object.class) {
+			Method m = searchForMatch(superclass, bridgeMethod);
+			if (m != null) {
+				return m;
 			}
-			genericType = candidateType.getGenericSuperclass();
-			candidateType = candidateType.getSuperclass();
+			superclass = superclass.getSuperclass();
 		}
 
 		// search interfaces
-		Type[] interfaces = baseMethod.getDeclaringClass().getGenericInterfaces();
+		Class[] interfaces = bridgeMethod.getDeclaringClass().getInterfaces();
 		for (int i = 0; i < interfaces.length; i++) {
-			Type type = interfaces[i];
-			if (type instanceof ParameterizedType) {
-				Method m = searchForGenericDefinition((ParameterizedType) type, baseMethod, typeVariableMap);
-				if (m != null) {
-					return m;
-				}
+			Class anInterface = interfaces[i];
+			Method m = searchForMatch(anInterface, bridgeMethod);
+			if (m != null) {
+				return m;
 			}
 		}
-		return null;
+
+		throw new IllegalStateException("Unable to locate generic definition for bridge method: '" + bridgeMethod + "'.");
 	}
+
+	private boolean isResolvedTypeMatch(Method m, Method candidateMethod, Map typeVariableMap) {
+		Type[] genericParameters = m.getGenericParameterTypes();
+		Class[] resolvedTypes = new Class[genericParameters.length];
+		for (int i = 0; i < genericParameters.length; i++) {
+			Type genericParameter = genericParameters[i];
+			if (genericParameter instanceof TypeVariable) {
+				TypeVariable tv = (TypeVariable) genericParameter;
+				resolvedTypes[i] = (Class) typeVariableMap.get(tv.getName());
+			}
+			else {
+				resolvedTypes[i] = (Class) genericParameter;
+			}
+		}
+		return Arrays.equals(resolvedTypes, candidateMethod.getParameterTypes());
+	}
+
+	private Method searchForMatch(Class type, Method bridgeMethod) {
+		try {
+			return type.getDeclaredMethod(bridgeMethod.getName(), bridgeMethod.getParameterTypes());
+		}
+		catch (NoSuchMethodException e) {
+			return null;
+		}
+	}
+
 
 	protected Map createTypeVariableMap(Class cls) {
 		Map typeVariableMap = new HashMap();
@@ -143,13 +173,13 @@ public final class ReflectionBasedBridgeMethodResolver implements BridgeMethodRe
 
 		// enclosing class
 		type = cls;
-		while(type.isMemberClass()) {
+		while (type.isMemberClass()) {
 			genericType = type.getGenericSuperclass();
 			if (genericType instanceof ParameterizedType) {
 				ParameterizedType pt1 = (ParameterizedType) genericType;
 				addTypes(typeVariableMap, pt1);
 			}
-			 type = type.getEnclosingClass();
+			type = type.getEnclosingClass();
 		}
 
 		// interfaces
@@ -174,42 +204,5 @@ public final class ReflectionBasedBridgeMethodResolver implements BridgeMethodRe
 				typeVariableMap.put(typeVariables[i].getName(), (Class) actualTypeArgument);
 			}
 		}
-	}
-
-	protected Method searchForGenericDefinition(ParameterizedType pt, Method baseMethod, Map typeVariableMap) {
-		Class candidateType = (Class) pt.getRawType();
-		Method[] methods = candidateType.getDeclaredMethods();
-		Type[] concreteParams = baseMethod.getGenericParameterTypes();
-
-		for (int i = 0; i < methods.length; i++) {
-			Method method = methods[i];
-			Type[] types = method.getGenericParameterTypes();
-			if (baseMethod.getName().equals(method.getName())
-							&& concreteParams.length == method.getParameterTypes().length
-							&& isGenericParameterSetFor(types, concreteParams, typeVariableMap)) {
-				return method;
-			}
-		}
-
-		return null;
-	}
-
-	protected boolean isGenericParameterSetFor(Type[] genericParameters, Type[] concreteParameters, Map typeVariableMap) {
-		for (int i = 0; i < genericParameters.length; i++) {
-			Type genericParameter = genericParameters[i];
-			Type concreteParameter = concreteParameters[i];
-			if (genericParameter instanceof TypeVariable) {
-				TypeVariable typeVariable = (TypeVariable) genericParameter;
-				Class declaredVariableType = (Class)typeVariableMap.get(typeVariable.getName());
-				if (declaredVariableType == null || !declaredVariableType.equals(concreteParameter)) {
-					return false;
-				}
-			}
-			else if (!genericParameter.equals(concreteParameter)) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 }

@@ -42,27 +42,12 @@ public class BridgeMethodResolverTests extends TestCase {
 	}
 
 	public void testIsBridgeMethodFor() throws Exception {
+		Map typeParameterMap = this.resolver.createTypeVariableMap(MyBar.class);
 		Method bridged = MyBar.class.getMethod("someMethod", String.class, Object.class);
 		Method other = MyBar.class.getMethod("someMethod", Integer.class, Object.class);
 		Method bridge = MyBar.class.getMethod("someMethod", Object.class, Object.class);
-		assertTrue("Should be bridge method", this.resolver.isBridgeMethodFor(bridge, bridged));
-		assertFalse("Should not be bridge method", this.resolver.isBridgeMethodFor(bridge, other));
-	}
-
-	public void testFindGenericDefinition() throws Exception {
-		Method typed = MyBar.class.getMethod("someMethod", String.class, Object.class);
-		Method generic = Bar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
-
-		assertEquals(generic, this.resolver.findGenericDefinition(typed));
-
-		typed = MyFoo.class.getMethod("someMethod", String.class, Object.class);
-		generic = Foo.class.getDeclaredMethod("someMethod", Serializable.class, Object.class);
-
-		assertEquals(generic, this.resolver.findGenericDefinition(typed));
-
-		typed = MyFoo.class.getMethod("someMethod", Integer.class, Object.class);
-
-		assertNull(this.resolver.findGenericDefinition(typed));
+		assertTrue("Should be bridge method", this.resolver.isBridgeMethodFor(bridge, bridged, typeParameterMap));
+		assertFalse("Should not be bridge method", this.resolver.isBridgeMethodFor(bridge, other, typeParameterMap));
 	}
 
 
@@ -77,7 +62,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(String.class, typeVariableMap.get("T"));
 	}
 
-	public void xtestDoubleParameterization() throws Exception {
+	public void testDoubleParameterization() throws Exception {
 		Method objectBridge = MyBoo.class.getDeclaredMethod("foo", Object.class);
 		Method serializableBridge = MyBoo.class.getDeclaredMethod("foo", Serializable.class);
 
