@@ -27,6 +27,8 @@ import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
+import org.springframework.util.ClassUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * <p>Implementation of <code>TransactionAttributeSource</code> for working
@@ -55,7 +57,7 @@ public class AnnotationTransactionAttributeSource
 	 * Returns all JDK 1.5+ annotations found for the given method.
 	 */
 	protected Collection findAllAttributes(Method method) {
-		return Arrays.asList(method.getAnnotations());
+		return Arrays.asList(AnnotationUtils.getAnnotations(method));
 	}
 
 	/**

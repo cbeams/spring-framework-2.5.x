@@ -19,6 +19,7 @@ package org.springframework.transaction.annotation;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Collection;
 
 import junit.framework.TestCase;
 
@@ -157,7 +158,20 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
 	}
 
-	
+
+	public void testWithGenericMethod() throws Exception {
+		Method normal = MyFoo.class.getMethod("doSomething", String.class);
+		Method synthetic = MyFoo.class.getMethod("doSomething", Object.class);
+		AnnotationTransactionAttributeSource source = new AnnotationTransactionAttributeSource();
+		Collection normalAttributes = source.findAllAttributes(normal);
+		Collection syntheticAttributes = source.findAllAttributes(synthetic);
+
+		Method[] methods = MyFoo.class.getMethods();
+		for (int i = 0; i < methods.length; i++) {
+			Method method = methods[i];
+			System.out.println(method.isSynthetic() + " " + method.isBridge() + " " + method);
+		}
+	}
 	public interface ITestBean {
 		
 		int getAge();
@@ -358,4 +372,16 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 		}
 	}
 
+	public static interface Foo<T> {
+		void doSomething(T theArgument);
+	}
+
+	public static class MyFoo implements Foo<String> {
+
+		@Transactional
+		public void doSomething(String theArgument) {
+			System.out.println(theArgument);
+		}
+		
+	}
 }

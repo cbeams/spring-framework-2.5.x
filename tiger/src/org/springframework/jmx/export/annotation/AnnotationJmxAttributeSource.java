@@ -29,6 +29,7 @@ import org.springframework.jmx.export.metadata.ManagedNotification;
 import org.springframework.jmx.export.metadata.ManagedOperation;
 import org.springframework.jmx.export.metadata.ManagedOperationParameter;
 import org.springframework.jmx.export.metadata.ManagedResource;
+import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * Implementation of the <code>JmxAttributeSource</code> interface that
@@ -59,7 +60,8 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 	}
 
 	public ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException {
-		org.springframework.jmx.export.annotation.ManagedAttribute ann = method.getAnnotation(org.springframework.jmx.export.annotation.ManagedAttribute.class);
+		org.springframework.jmx.export.annotation.ManagedAttribute ann =
+						AnnotationUtils.getAnnotation(method, org.springframework.jmx.export.annotation.ManagedAttribute.class);
 		if (ann == null) {
 			return null;
 		}
@@ -78,7 +80,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 					"The ManagedOperation attribute is not valid for JavaBean properties. Use ManagedAttribute instead.");
 		}
 
-		Annotation ann = method.getAnnotation(org.springframework.jmx.export.annotation.ManagedOperation.class);
+		Annotation ann = AnnotationUtils.getAnnotation(method, org.springframework.jmx.export.annotation.ManagedOperation.class);
 		if (ann == null) {
 			return null;
 		}
@@ -91,7 +93,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 	public ManagedOperationParameter[] getManagedOperationParameters(Method method)
 			throws InvalidMetadataException {
 
-		ManagedOperationParameters params = method.getAnnotation(ManagedOperationParameters.class);
+		ManagedOperationParameters params = AnnotationUtils.getAnnotation(method, ManagedOperationParameters.class);
 		ManagedOperationParameter[] result = null;
 		if (params == null) {
 			result = new ManagedOperationParameter[0];

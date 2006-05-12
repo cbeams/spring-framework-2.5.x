@@ -27,8 +27,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.util.Assert;
+import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * A {@link BeanFactoryPostProcessor} implementation that ensures that JavaBean
@@ -74,10 +76,14 @@ public class RequiredBeanFactoryPostProcessor implements BeanFactoryPostProcesso
 	}
 
 
-	public final void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		String[] beanDefinitionNames = beanFactory.getBeanDefinitionNames();
+	public final void postProcessBeanFactory(ConfigurableListableBeanFactory listableBeanFactory) throws BeansException {
+		if (!(listableBeanFactory instanceof AbstractBeanFactory)) {
+			throw new IllegalArgumentException(RequiredBeanFactoryPostProcessor.class.getName() + " can only be used in a subclass of AbstractBeanFactory.");
+		}
+		AbstractBeanFactory beanFactory = (AbstractBeanFactory) listableBeanFactory;
+		String[] beanDefinitionNames = listableBeanFactory.getBeanDefinitionNames();
 		for (String beanDefinitionName : beanDefinitionNames) {
-			BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanDefinitionName);
+			RootBeanDefinition beanDefinition = beanFactory.getMergedBeanDefinition(beanDefinitionName);
 			processBeanDefinition(beanDefinition, beanDefinitionName);
 		}
 	}
@@ -95,12 +101,12 @@ public class RequiredBeanFactoryPostProcessor implements BeanFactoryPostProcesso
 	 */
 	protected boolean isRequired(PropertyDescriptor propertyDescriptor) {
 		Method setter = propertyDescriptor.getWriteMethod();
-		return (setter != null && setter.getAnnotation(this.requiredAnnotationType) != null);
+		return (setter != null && AnnotationUtils.getAnnotation(setter, this.requiredAnnotationType) != null);
 	}
 
 
-	private void processBeanDefinition(BeanDefinition beanDefinition, String beanDefinitionName) {
-		Class targetType = ((AbstractBeanDefinition) beanDefinition).getBeanClass();
+	private void processBeanDefinition(RootBeanDefinition beanDefinition, String beanDefinitionName) {
+		Class targetType = beanDefinition.getBeanClass();
 		PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(targetType);
 		List<String> invalidProperties = new ArrayList<String>();
 		for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {

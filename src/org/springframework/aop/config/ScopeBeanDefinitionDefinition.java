@@ -26,6 +26,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.aop.target.scope.ScopedProxyFactoryBean;
 import org.springframework.util.ClassUtils;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * {@link BeanDefinitionDecorator} responsible for parsing the <code>&lt;aop:scope/&gt;</code> tag.
@@ -39,8 +40,8 @@ class ScopeBeanDefinitionDefinition implements BeanDefinitionDecorator {
 
 	private static String SESSION_SCOPE_MAP = "org.springframework.web.context.scope.SessionScopeMap";
 
-	public BeanDefinitionHolder decorate(Element element, BeanDefinitionHolder definition, ParserContext parserContext) {
-
+	public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
+		Element element = (Element) node;
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 
 		// must use class proxying for any AOP advice now

@@ -20,8 +20,10 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -30,6 +32,7 @@ import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Colin Sampaleanu
@@ -135,22 +138,22 @@ public class ClassUtilsTests extends TestCase {
 		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod", (Class[]) null);
 		method.invoke(null, (Object[]) null);
 		assertTrue("no argument method was not invoked.",
-		    InnerClass.noArgCalled);
+				InnerClass.noArgCalled);
 	}
 
 	public void testArgsStaticMethod() throws IllegalAccessException, InvocationTargetException {
 		Method method = ClassUtils.getStaticMethod(InnerClass.class, "argStaticMethod",
-		    new Class[] {String.class});
+				new Class[] {String.class});
 		method.invoke(null, new Object[] {"test"});
 		assertTrue("argument method was not invoked.", InnerClass.argCalled);
 	}
 
 	public void testOverloadedStaticMethod() throws IllegalAccessException, InvocationTargetException {
 		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod",
-		    new Class[] {String.class});
+				new Class[] {String.class});
 		method.invoke(null, new Object[] {"test"});
 		assertTrue("argument method was not invoked.",
-		    InnerClass.overloadedCalled);
+				InnerClass.overloadedCalled);
 	}
 
 	public void testClassPackageAsResourcePath() {
@@ -164,7 +167,7 @@ public class ClassUtilsTests extends TestCase {
 		assertEquals(result, ClassUtils.addResourcePathToPackagePath(Proxy.class, "/xyzabc.xml"));
 
 		assertEquals("java/lang/reflect/a/b/c/d.xml",
-		    ClassUtils.addResourcePathToPackagePath(Proxy.class, "a/b/c/d.xml"));
+				ClassUtils.addResourcePathToPackagePath(Proxy.class, "a/b/c/d.xml"));
 	}
 
 	public void testGetAllInterfaces() {
@@ -179,6 +182,11 @@ public class ClassUtilsTests extends TestCase {
 	public void testIsPresent() throws Exception {
 		assertTrue(ClassUtils.isPresent("java.lang.String"));
 		assertFalse(ClassUtils.isPresent("java.lang.MySpecialString"));
+	}
+
+	public void testFindBridgeMethodPassThrough() throws Exception {
+		Method method = TestBean.class.getMethod("getName", null);
+		assertEquals(method, ClassUtils.findBridgedMethod(method));
 	}
 
 	public static class InnerClass {
@@ -199,5 +207,4 @@ public class ClassUtilsTests extends TestCase {
 			argCalled = true;
 		}
 	}
-
 }

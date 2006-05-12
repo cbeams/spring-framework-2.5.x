@@ -1605,4 +1605,153 @@
 		</attribute>
 
 	</tag>
+
+	<!-- <form:label/> -->
+	<tag>
+		<name>label</name>
+		<tag-class>org.springframework.web.servlet.tags.form.LabelTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>Renders a form field label in an HTML 'label' tag.</description>
+
+		<attribute>
+			<name>path</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Path to errors object for data binding</description>
+		</attribute>
+
+		<attribute>
+			<name>id</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Standard Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>delimiter</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Delimiter for displaying multiple error messages. Defaults to the br tag.</description>
+		</attribute>
+
+		<attribute>
+			<name>cssClass</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Equivalent to "class" - HTML Optional Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>cssErrorClass</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Equivalent to "class" - HTML Optional Attribute. Used only when errors are present.</description>
+		</attribute>
+
+		<attribute>
+			<name>cssStyle</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Equivalent to "style" - HTML Optional Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>lang</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Standard Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>title</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Standard Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>dir</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Standard Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>tabindex</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Standard Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>onclick</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Event Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>ondblclick</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Event Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>onmousedown</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Event Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>onmouseup</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Event Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>onmouseover</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Event Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>onmousemove</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Event Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>onmouseout</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Event Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>onkeypress</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Event Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>onkeyup</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Event Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>onkeydown</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Event Attribute</description>
+		</attribute>
+
+	</tag>
 </taglib>

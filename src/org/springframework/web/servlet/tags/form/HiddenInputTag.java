@@ -35,6 +35,11 @@ import org.springframework.util.ObjectUtils;
 public class HiddenInputTag extends AbstractDataBoundFormElementTag {
 
 	/**
+	 * The CSS class to use when the field bound to a particular tag has errors.
+	 */
+	private String cssErrorClass;
+
+	/**
 	 * Writes the HTML '<code>input</code>' tag to the supplied {@link TagWriter} including the
 	 * databound value.
 	 * @see #writeDefaultAttributes(TagWriter)
@@ -49,4 +54,19 @@ public class HiddenInputTag extends AbstractDataBoundFormElementTag {
 		return EVAL_PAGE;
 	}
 
+	/**
+	 * The CSS class to use when the field bound to a particular tag has errors.
+	 * May be a runtime expression.
+	 */
+	public String getCssErrorClass() {
+		return cssErrorClass;
+	}
+
+	/**
+	 * The CSS class to use when the field bound to a particular tag has errors.
+	 * May be a runtime expression.
+	 */
+	public void setCssErrorClass(String cssErrorClass) {
+		this.cssErrorClass = cssErrorClass;
+	}
 }

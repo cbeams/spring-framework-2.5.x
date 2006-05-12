@@ -258,6 +258,9 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 		for (int i = 0; i < methods.length; i++) {
 			Method method = methods[i];
+			if(method.isSynthetic()) {
+				continue;
+			}
 			ModelMBeanOperationInfo info = null;
 
 			if (method.getDeclaringClass() == Object.class) {

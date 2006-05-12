@@ -54,11 +54,6 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	private String path;
 
 	/**
-	 * The CSS class to use when the field bound to a particular tag has errors.
-	 */
-	private String cssErrorClass;
-
-	/**
 	 * Sets the property path from the {@link FormTag#setCommandName command object}.
 	 * May be a runtime expression. Required.
 	 */
@@ -82,22 +77,6 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 */
 	public String getId() {
 		return this.id;
-	}
-
-	/**
-	 * The CSS class to use when the field bound to a particular tag has errors.
-	 * May be a runtime expression.
-	 */
-	public String getCssErrorClass() {
-		return cssErrorClass;
-	}
-
-	/**
-	 * The CSS class to use when the field bound to a particular tag has errors.
-	 * May be a runtime expression.
-	 */
-	public void setCssErrorClass(String cssErrorClass) {
-		this.cssErrorClass = cssErrorClass;
 	}
 
 	/**

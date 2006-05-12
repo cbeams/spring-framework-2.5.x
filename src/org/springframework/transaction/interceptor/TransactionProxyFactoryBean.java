@@ -24,6 +24,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopProxy;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.framework.AbstractSingletonProxyFactoryBean;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.support.AopUtils;
@@ -110,7 +111,7 @@ import org.springframework.util.ClassUtils;
  * @see TransactionInterceptor
  * @see org.springframework.aop.framework.ProxyFactoryBean
  */
-public class TransactionProxyFactoryBean extends ProxyConfig
+public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBean
 		implements FactoryBean, BeanFactoryAware, InitializingBean {
 
 	private final TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
@@ -360,9 +361,4 @@ public class TransactionProxyFactoryBean extends ProxyConfig
 			return null;
 		}
 	}
-
-	public boolean isSingleton() {
-		return true;
-	}
-
 }

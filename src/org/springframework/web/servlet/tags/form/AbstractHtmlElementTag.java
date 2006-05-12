@@ -119,6 +119,11 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	private String cssClass;
 
 	/**
+	 * The CSS class to use when the field bound to a particular tag has errors.
+	 */
+	private String cssErrorClass;
+
+	/**
 	 * The value of the '<code>style</code>' attribute.
 	 */
 	private String cssStyle;
@@ -208,6 +213,22 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	 */
 	protected String getCssClass() {
 		return this.cssClass;
+	}
+
+	/**
+	 * The CSS class to use when the field bound to a particular tag has errors.
+	 * May be a runtime expression.
+	 */
+	public void setCssErrorClass(String cssErrorClass) {
+		this.cssErrorClass = cssErrorClass;
+	}
+
+	/**
+	 * The CSS class to use when the field bound to a particular tag has errors.
+	 * May be a runtime expression.
+	 */
+	protected String getCssErrorClass() {
+		return this.cssErrorClass;
 	}
 
 	/**
@@ -479,13 +500,11 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	 * {@link BindStatus} object.
 	 */
 	private String resolveCssClass() throws JspException {
-		Errors errors = getBindStatus().getErrors();
-		if (errors != null && errors.hasErrors() && StringUtils.hasText(getCssErrorClass())) {
+		if (getBindStatus().isError() && StringUtils.hasText(getCssErrorClass())) {
 			return ObjectUtils.getDisplayString(evaluate("cssErrorClass", getCssErrorClass()));
 		}
 		else {
 			return ObjectUtils.getDisplayString(evaluate("cssClass", getCssClass()));
 		}
 	}
-
 }
