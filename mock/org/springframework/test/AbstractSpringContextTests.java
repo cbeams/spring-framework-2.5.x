@@ -19,10 +19,6 @@ package org.springframework.test;
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.TestCase;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.StringUtils;
@@ -45,7 +41,7 @@ import org.springframework.util.StringUtils;
  * @see AbstractTransactionalSpringContextTests
  * @see AbstractTransactionalDataSourceSpringContextTests
  */
-public abstract class AbstractSpringContextTests extends TestCase {
+public abstract class AbstractSpringContextTests extends ConditionalTestCase {
 
 	/**
 	 * Map of context keys returned by subclasses of this class, to
@@ -53,11 +49,6 @@ public abstract class AbstractSpringContextTests extends TestCase {
 	 * destroyed and recreated between running individual test methods.
 	 */
 	private static Map contextKeyToContextMap = new HashMap();
-
-	/**
-	 * Logger available to subclasses.
-	 */
-	protected final Log logger = LogFactory.getLog(getClass());
 
 
 	/**
