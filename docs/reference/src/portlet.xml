@@ -49,10 +49,10 @@
 		methods that deal with the request: one for the action phase and one for 
 		the render phase.  For example, where the servlet version of 
 		<classname>AbstractController</classname> has the 
-		<literal>handleRequestInternal</literal> method, the portlet version of 
+		<literal>handleRequestInternal(..)</literal> method, the portlet version of 
 		<classname>AbstractController</classname> has 
-		<literal>handleActionRequestInternal</literal> and 
-		<literal>handledRenderRequestInternal</literal> methods.</para>
+		<literal>handleActionRequestInternal(..)</literal> and 
+		<literal>handleRenderRequestInternal(..)</literal> methods.</para>
 
 		<para>The framework is designed around a 
 		<classname>DispatcherPortlet</classname> that dispatches requests to 
@@ -359,13 +359,13 @@
 		follows:</para>
 
 		<programlisting><![CDATA[<servlet>
-	<servlet-name>ViewRendererServlet</servlet-name>
-	<servlet-class>org.springframework.web.servlet.ViewRendererServlet</servlet-class>
+    <servlet-name>ViewRendererServlet</servlet-name>
+    <servlet-class>org.springframework.web.servlet.ViewRendererServlet</servlet-class>
 </servlet>
 
 <servlet-mapping>
-	<servlet-name>ViewRendererServlet</servlet-name>
-	<url-pattern>/WEB-INF/servlet/view</url-pattern>
+    <servlet-name>ViewRendererServlet</servlet-name>
+    <url-pattern>/WEB-INF/servlet/view</url-pattern>
 </servlet-mapping>]]></programlisting>
 
 		<para>So to perform the actual rendering, 
@@ -418,24 +418,24 @@
 
 		<programlisting><![CDATA[public interface Controller {
 
-	/**
-	 * Process the render request and return a ModelAndView object which the
-	 * DispatcherPortlet will render. A null return is not an error: It
-	 * indicates that this object completed request processing itself,
-	 * thus there is no ModelAndView to render.
-	 */
-	ModelAndView handleRenderRequest(
-		RenderRequest request,
-		RenderResponse response)
-		throws Exception;
+    /**
+     * Process the render request and return a ModelAndView object which the
+     * DispatcherPortlet will render. A null return is not an error: It
+     * indicates that this object completed request processing itself,
+     * thus there is no ModelAndView to render.
+     */
+    ModelAndView handleRenderRequest(
+        RenderRequest request,
+        RenderResponse response)
+        throws Exception;
 
-	/**
-	 * Process the action request.  There is nothing to return.
-	 */
-	void handleActionRequest(
-		ActionRequest request,
-		ActionResponse response)
-		throws Exception;
+    /**
+     * Process the action request. There is nothing to return.
+     */
+    void handleActionRequest(
+        ActionRequest request,
+        ActionResponse response)
+        throws Exception;
 
 }]]></programlisting>
 
@@ -573,13 +573,11 @@ public class SampleController extends AbstractController {
 
     public ModelAndView handleRenderRequestInternal(
         RenderRequest request,
-        RenderResponse response)
-    throws Exception {
+        RenderResponse response) throws Exception {
         ModelAndView mav = new ModelAndView("foo");
         mav.addObject("message", "Hello World!");
         return mav;
     }
-
 }
 
 <bean id="sampleController" class="samples.SampleController">
@@ -694,17 +692,13 @@ public class SampleController extends AbstractController {
 
 			<programlisting><![CDATA[<bean id="wrappingController"
       class="org.springframework.web.portlet.mvc.PortletWrappingController">
-	<property name="portletClass">
-		<value>sample.MyPortlet</value>
-	</property>
-	<property name="portletName">
-		<value>my-portlet</value>
-	</property>
-	<property name="initParameters">
-		<props>
-			<prop key="config">/WEB-INF/my-portlet-config.xml</prop>
-		</props>
-	</property>
+    <property name="portletClass" value="sample.MyPortlet"/>
+    <property name="portletName" value="my-portlet"/>
+    <property name="initParameters">
+        <value>
+            config=/WEB-INF/my-portlet-config.xml
+        </value>
+    </property>
 </bean>]]></programlisting>
 
 			<para>This can be very valuable since you can then use interceptors 
@@ -808,13 +802,13 @@ public class SampleController extends AbstractController {
 
 			<programlisting><![CDATA[<bean id="portletModeHandlerMapping"
       class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
-	<property name="portletModeMap">
-		<map>
-			<entry key="view"><ref bean="viewHandler"/></entry>
-			<entry key="edit"><ref bean="editHandler"/></entry>
-			<entry key="help"><ref bean="helpHandler"/></entry>
-		</map>
-	</property>
+    <property name="portletModeMap">
+        <map>
+            <entry key="view" value-ref="viewHandler"/>
+            <entry key="edit" value-ref="editHandler"/>
+            <entry key="help" value-ref="helpHandler"/>
+        </map>
+    </property>
 </bean>]]></programlisting>
 
 		</section>
@@ -829,21 +823,21 @@ public class SampleController extends AbstractController {
 
 			<para><classname>ParameterHandlerMapping</classname> uses the value 
 			of a specific request parameter to control the mapping.  The default 
-			name of the parameter is "action", but can be changed using the 
-			<literal>parameterName</literal> property.</para>
+			name of the parameter is <literal>'action'</literal>, but can be changed
+			using the <literal>'parameterName'</literal> property.</para>
 
 			<para>The bean configuration for this mapping will look something 
 			like this:</para>
 
 			<programlisting><![CDATA[<bean id="parameterHandlerMapping"
       class="org.springframework.web.portlet.handler.ParameterHandlerMapping”>
-	<property name="parameterMap">
-		<map>
-			<entry key="add"><ref bean="addItemHandler"/></entry>
-			<entry key="edit"><ref bean="editItemHandler"/></entry>
-			<entry key="delete"><ref bean="deleteItemHandler"/></entry>
-		</map>
-	</property>
+    <property name="parameterMap">
+        <map>
+            <entry key="add" value-ref="addItemHandler"/>
+            <entry key="edit" value-ref="editItemHandler"/>
+            <entry key="delete" value-ref="deleteItemHandler"/>
+        </map>
+    </property>
 </bean>]]></programlisting>
 
 		</section>
@@ -873,23 +867,23 @@ public class SampleController extends AbstractController {
 
 			<programlisting><![CDATA[<bean id="portletModeParameterHandlerMapping"
       class="org.springframework.web.portlet.handler.PortletModeParameterHandlerMapping">
-	<property name="portletModeParameterMap">
-		<map>
-			<entry key="view"> <!-- portlet mode: view -->
-				<map>
-					<entry key="add"><ref bean="addItemHandler"/></entry>
-					<entry key="edit"><ref bean="editItemHandler"/></entry>
-					<entry key="delete"><ref bean="deleteItemHandler"/></entry>
-				</map>
-			</entry>
-			<entry key="edit"> <!-- portlet mode: edit -->
-				<map>
-					<entry key="prefs"><ref bean="prefsHandler"/></entry>
-					<entry key="resetPrefs"><ref bean="resetPrefsHandler"/></entry>
-				</map>
-			</entry>
-		</map>
-	</property>
+    <property name="portletModeParameterMap">
+        <map>
+            <entry key="view"> ]]><lineannotation>&lt;!-- 'view' portlet mode --&gt;</lineannotation><![CDATA[
+                <map>
+                    <entry key="add" value-ref="addItemHandler"/>
+                    <entry key="edit" value-ref="editItemHandler"/>
+                    <entry key="delete" value-ref="deleteItemHandler"/>
+                </map>
+            </entry>
+            <entry key="edit"> ]]><lineannotation>&lt;!-- 'edit' portlet mode --&gt;</lineannotation><![CDATA[
+                <map>
+                    <entry key="prefs" value-ref="prefsHandler"/>
+                    <entry key="resetPrefs" value-ref="resetPrefsHandler"/>
+                </map>
+            </entry>
+        </map>
+    </property>
 </bean>]]></programlisting>
 
 		<para>This mapping can be chained ahead of a 
@@ -991,14 +985,15 @@ public class SampleController extends AbstractController {
 
 		<title>Views and resolving them</title>
 
-		<para>As mentioned previously, Spring Portlet MVC completely and 
-		directly reuses all the view technologies from Spring Web MVC.  This 
-		includes not only the Views themselves, but also the ViewResolvers.  For 
-		more information, refer to Section 13.5, Views and resolving them and 
-		Chapter 14, Integrating view technologies.</para>
+		<para>As mentioned previously, Spring Portlet MVC directly reuses all
+		the view technologies from Spring Web MVC. This includes not only the
+		various <interfacename>View</interfacename> implementations themselves,
+		but also the <interfacename>ViewResolver</interfacename> implementations. 
+		For more information, refer to the sections entitled
+		<xref linkend="mvc-viewresolver"/> and <xref linkend="view"/> respectively.</para>
 
-		<para>A few items on using the existing Views and ViewResolvers are 
-		worth mentioning:</para>
+		<para>A few items on using the existing <interfacename>View</interfacename> and
+		<interfacename>ViewResolver</interfacename> implementations	are worth mentioning:</para>
 
 		<itemizedlist>
 
@@ -1009,12 +1004,13 @@ public class SampleController extends AbstractController {
 			context.</para></listitem>
 
 			<listitem><para>There is no such thing as an HTTP redirect from 
-			within a portlet (the sendRedirect method of ActionResponse cannot 
-			be used to stay within the portal).  So, RedirectView and use of the 
-			“redirect:” prefix will not work correctly from within Portlet 
-			MVC.</para></listitem>
+			within a portlet (the <literal>sendRedirect(..)</literal> method of 
+			<interfacename>ActionResponse</interfacename> cannot 
+			be used to stay within the portal).  So, <classname>RedirectView</classname>
+			and use of the <literal>'redirect:'</literal> prefix will
+			<emphasis role="bold">not</emphasis> work correctly from within Portlet MVC.</para></listitem>
 
-			<listitem><para>It may be possible to use the “forward:” prefix from 
+			<listitem><para>It may be possible to use the <literal>'forward:'</literal> prefix from 
 			within Portlet MVC.  However, remember that since you are in a 
 			portlet, you have no idea what the current URL looks like.  This 
 			means you cannot use a relative URL to access other resources in 
@@ -1222,49 +1218,46 @@ public class FileUploadBean {
 
 			<programlisting><![CDATA[public class FileUploadController extends SimpleFormController {
 
-	public void onSubmitAction(
-		ActionRequest request,
-		ActionResponse response,
-		Object command,
-		BindException errors)
-		throws Exception {
+    public void onSubmitAction(
+        ActionRequest request,
+        ActionResponse response,
+        Object command,
+        BindException errors) throws Exception {
 
-		// cast the bean
-		FileUploadBean bean = (FileUploadBean) command;
+        // cast the bean
+        FileUploadBean bean = (FileUploadBean) command;
 
-		// let's see if there's content there
-		String file = bean.getFile();
-		if (file == null) {
-			// hmm, that's strange, the user did not upload anything
-		}
+        // let's see if there's content there
+        String file = bean.getFile();
+        if (file == null) {
+            // hmm, that's strange, the user did not upload anything
+        }
 
-		// do something with the file here
-	}
+        // do something with the file here
+    }
 
-	protected void initBinder(
-			PortletRequest request, PortletRequestDataBinder binder)
-		throws Exception {
-		// to actually be able to convert Multipart instance to a String
-		// we have to register a custom editor
-		binder.registerCustomEditor(String.class,
-				new StringMultipartFileEditor());
-		// now Spring knows how to handle multipart object and convert
-	}
+    protected void initBinder(
+        PortletRequest request, PortletRequestDataBinder binder) throws Exception {
 
+        // to actually be able to convert Multipart instance to a String
+        // we have to register a custom editor
+        binder.registerCustomEditor(String.class,
+            new StringMultipartFileEditor());
+        // now Spring knows how to handle multipart object and convert
+    }
 }
 
 public class FileUploadBean {
 
-	private String file;
+    private String file;
 
-	public void setFile(String file) {
-		this.file = file;
-	}
+    public void setFile(String file) {
+        this.file = file;
+    }
 
-	public String getFile() {
-		return file;
-	}
-
+    public String getFile() {
+        return file;
+    }
 }]]></programlisting>
 
 			<para>Of course, this last example only makes (logical) sense in the 
@@ -1279,38 +1272,36 @@ public class FileUploadBean {
 
 			<programlisting><![CDATA[public class FileUploadController extends SimpleFormController {
 
-	public void onSubmitAction(
-		ActionRequest request,
-		ActionResponse response,
-		Object command,
-		BindException errors)
-		throws Exception {
+    public void onSubmitAction(
+        ActionRequest request,
+        ActionResponse response,
+        Object command,
+        BindException errors) throws Exception {
 
-		// cast the bean
-		FileUploadBean bean = (FileUploadBean) command;
+        // cast the bean
+        FileUploadBean bean = (FileUploadBean) command;
 
-		// let's see if there's content there
-		MultipartFile file = bean.getFile();
-		if (file == null) {
-			// hmm, that's strange, the user did not upload anything
-		}
+        // let's see if there's content there
+        MultipartFile file = bean.getFile();
+        if (file == null) {
+            // hmm, that's strange, the user did not upload anything
+        }
 
-		// do something with the file here
-	}
+        // do something with the file here
+    }
 }
 
 public class FileUploadBean {
 
-	private MultipartFile file;
+    private MultipartFile file;
 
-	public void setFile(MultipartFile file) {
-		this.file = file;
-	}
+    public void setFile(MultipartFile file) {
+        this.file = file;
+    }
 
-	public MultipartFile getFile() {
-		return file;
-	}
-
+    public MultipartFile getFile() {
+        return file;
+    }
 }]]></programlisting>
 
 		</section>
@@ -1344,7 +1335,7 @@ public class FileUploadBean {
 		briefly.</para>
 
 		<para>Generally, the portal/portlet-container runs in one webapp in your 
-		servlet-container and your portlets run is another webapp in your 
+		servlet-container and your portlets run in another webapp in your 
 		servlet-container.  In order for the portlet-container webapp to make 
 		calls into your portlet webapp it must make cross-context calls to a 
 		well-known servlet that provides access to the portlet services defined 
