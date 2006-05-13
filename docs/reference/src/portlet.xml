@@ -1,21 +1,1385 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+
 <chapter id="portlet">
 	<title>Portlet integration</title>
-	<section>
-		<title>Introduction</title>
-		<para>
-			...
-		</para>
+
+
+	<section id="portlet-introduction">
+
+		<title>Introduction to the Portlet MVC framework</title>
+
+		<para>In addition to supporting conventional Web development, Spring 
+		also supports JSR-168 Portlet development.  As much as possible, the 
+		Portlet MVC framework is a mirror image of the Web MVC framework.  It 
+		also uses all the same View technology.  So, be sure to review the 
+		chapters on the Web MVC Framework and on View Technologies before 
+		continuing with this chapter.  There are some notable differences 
+		created by the unique workflow of JSR-168 portlets, but these 
+		differences are reasonably minimal.</para>
+
+		<para>The main way in which portlet workflow differs from servlet 
+		workflow is that the request to the portlet can have two distinct 
+		phases: the action phase and the render phase.  The action phase is 
+		executed only once and is where any “backend” changes or actions occur, 
+		such as making changes in a database.  The render phase then produces 
+		what is displayed to the user each time the display is refreshed.  
+		The critical point here is that for a single overall request, the action 
+		phase is executed only once, but the render phase may be executed 
+		multiple times.  This provides (and requires) a clean separation between 
+		the activities that modify the persistent state of your system and the 
+		activities that generate what is displayed to the user.  For more 
+		general information about portlet development, please review a 
+		whitepaper from Sun entitled 
+		<ulink url="http://developers.sun.com/prodtech/portalserver/reference/techart/jsr168/">"Introduction 
+		to JSR 168—The Java Portlet Specification"</ulink>, and of course the 
+		<ulink url="http://jcp.org/aboutJava/communityprocess/final/jsr168/">JSR-168 
+		Specification</ulink> itself.</para>
+
+		<para>The dual phases of portlet requests are one of the real strengths 
+		of the JSR-168 development.  For example, dynamic search results can be 
+		updated routinely on the display without the user explicitly rerunning 
+		the search.  Most other portlet MVC frameworks attempt to completely 
+		hide the two phases from the developer and make it look as much like 
+		traditional servlet development as possible &mdash; we think this 
+		approach removes one of the main benefits of using portlets.  So, the 
+		separation of the two phases is preserved throughout the Spring Portlet 
+		MVC framework.  The primary manifestation of this approach is that where 
+		the servlet version of the MVC classes will have one method that deals 
+		with the request, the portlet version of the MVC classes will have two 
+		methods that deal with the request: one for the action phase and one for 
+		the render phase.  For example, where the servlet version of 
+		<classname>AbstractController</classname> has the 
+		<literal>handleRequestInternal</literal> method, the portlet version of 
+		<classname>AbstractController</classname> has 
+		<literal>handleActionRequestInternal</literal> and 
+		<literal>handledRenderRequestInternal</literal> methods.</para>
+
+		<para>The framework is designed around a 
+		<classname>DispatcherPortlet</classname> that dispatches requests to 
+		handlers, with configurable handler mappings and view resolution, just 
+		as the <classname>DispatcherServlet</classname> in the web framework 
+		does.  File upload is also support in the same way.</para>
+
+		<para>Locale resolution and theme resolution are not supported in 
+		Portlet MVC &mdash; these areas are in the purview of the 
+		portal/portlet-container and are not appropriate at the Spring level. 
+		However, all mechanisms in Spring that depend on the locale (such as 
+		internationalization of messages) will still function properly because 
+		<classname>DispatcherPortlet</classname> exposes the current locale in 
+		the same way as <classname>DispatcherServlet</classname>.</para>
+
+		<para>The default handler is still a very simple 
+		<interfacename>Controller</interfacename> interface, offering just two 
+		methods: <literal>void handleActionRequest(request,response)</literal> 
+		and <literal>ModelAndView 
+		handleRenderRequest(request,response)</literal>. The framework also 
+		includes most of the same controller implementation hierarchy, such as 
+		<classname>AbstractController</classname>, 
+		<classname>AbstractCommandController</classname>, 
+		<classname>AbstractFormController</classname>, 
+		<classname>SimpleFormController</classname>, and 
+		<classname>AbstractWizardFormController</classname>.  Data binding, 
+		command object usage, model handling, and view resolution are all the 
+		same as in the servlet framework.</para>
+
+		<para>All the view rendering capabilities of the servlet framework are 
+		used directly via a special bridge servlet named 
+		<classname>ViewRendererServlet</classname>.  By using this servlet, the 
+		portlet request is converted into a servlet request and the view can be 
+		rendered using the entire normal servlet infrastructure.  This means all 
+		the existing renderers, such as JSP, Velocity, etc., can still be used 
+		within the portlet.</para>
+
+		<para>Portlet MVC essentially provides all the same features as Web MVC, 
+		so we won’t reiterate them all here.  Again, be sure to review the 
+		chapter on Web MVC before proceeding so that you understand the 
+		capabilities and design of both frameworks.</para>
+
 	</section>
-	<section id="portlet-resources">
-		<title>Further Resources</title>
-		<para>
-            Find below links to further resources about portlets in general.
-        </para>
+
+
+	<section id="portlet-dispatcher">
+
+		<title>The <classname>DispatcherPortlet</classname></title>
+
+		<para>Portlet MVC is a request-driven web MVC framework, designed around 
+		a portlet that dispatches requests to controllers and offers other 
+		functionality facilitating the development of portlet applications. 
+		Spring's <classname>DispatcherPortlet</classname> however, does more 
+		than just that. It is completely integrated with the Spring 
+		<interfacename>ApplicationContext</interfacename> and allows you to use 
+		every other feature Spring has.</para>
+
+		<para>Like ordinary portlets, the 
+		<classname>DispatcherPortlet</classname> is declared in the 
+		<literal>portlet.xml</literal> of your web application:</para>
+
+		<programlisting><![CDATA[<portlet>
+	<portlet-name>sample</portlet-name>
+	<portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+	<supports>
+		<mime-type>text/html</mime-type>
+		<portlet-mode>view</portlet-mode>
+	</supports>
+	<portlet-info>
+		<title>Sample Portlet</title>
+	</portlet-info>
+</portlet>]]></programlisting>
+
+		<para>The <classname>DispatcherPortlet</classname> now needs to be 
+		configured.</para>
+
+		<para>In the Portlet MVC framework, each 
+		<classname>DispatcherPortlet</classname> has its own 
+		<interfacename>WebApplicationContext</interfacename>, which inherits all 
+		the beans already defined in the Root 
+		<interfacename>WebApplicationContext</interfacename>. These inherited 
+		beans can be overridden in the portlet-specific scope, and new scope-
+		specific beans can be defined local to a given portlet instance.</para>
+
+		<para>The framework will, on initialization of a 
+		<classname>DispatcherPortlet</classname>, look for a file named 
+		<literal>[portlet-name]-portlet.xml</literal> in the <literal>WEB-
+		INF</literal> directory of your web application and create the beans 
+		defined there (overriding the definitions of any beans defined with the 
+		same name in the global scope).</para>
+
+		<para>The config location used by the 
+		<classname>DispatcherPortlet</classname> can be modified through a 
+		portlet initialization parameter (see below for details).</para>
+
+		<para>The Spring <classname>DispatcherPortlet</classname> has a few 
+		special beans it uses, in order to be able to process requests and 
+		render the appropriate views. These beans are included in the Spring 
+		framework and can be configured in the 
+		<interfacename>WebApplicationContext</interfacename>, just as any other 
+		bean would be configured. Each of those beans, is described in more 
+		detail below. Right now, we'll just mention them, just to let you know 
+		they exist and to enable us to go on talking about the 
+		<classname>DispatcherPortlet</classname>. For most of the beans, 
+		defaults are provided so you don't have to worry about configuring 
+		them.</para>
+
+		<table frame="all">
+		
+			<title>Special beans in the 
+			<interfacename>WebApplicationContext</interfacename></title>
+
+			<tgroup cols="2">
+
+				<colspec colname="c1" colwidth="1*" align="left" />
+				<colspec colname="c2" colwidth="3*" />
+
+				<thead>
+					<row>
+						<entry>Expression</entry>
+						<entry>Explanation</entry>
+					</row>
+				</thead>
+
+				<tbody>
+
+					<row>
+						<entry>handler mapping(s)</entry>
+						<entry>(<xref linkend="portlet-handlermapping" />) a 
+						list of pre- and post-processors and controllers that 
+						will be executed if they match certain criteria (for 
+						instance a matching portlet mode specified with the 
+						controller)</entry>
+					</row>
+
+					<row>
+						<entry>controller(s)</entry>
+						<entry>(<xref linkend="portlet-controller" />) the beans 
+						providing the actual functionality (or at least, access 
+						to the functionality) as part of the MVC triad</entry>
+					</row>
+
+					<row>
+						<entry>view resolver</entry>
+						<entry>(<xref linkend="portlet-viewresolver" />) capable 
+						of resolving view names to view definitions</entry>
+					</row>
+
+					<row>
+						<entry>multipart resolver</entry>
+						<entry>(<xref linkend="portlet-multipart" />) offers 
+						functionality to process file uploads from HTML 
+						forms</entry>
+					</row>
+
+					<row>
+						<entry>handler exception resolver</entry>
+						<entry>(<xref linkend="portlet-exceptionresolver" />) 
+						offers functionality to map exceptions to views or 
+						implement other more complex exception handling 
+						code</entry>
+					</row>
+
+				</tbody>
+
+			</tgroup>
+
+		</table>
+
+		<para>When a <classname>DispatcherPortlet</classname> is setup for use 
+		and a request comes in for that specific 
+		<classname>DispatcherPortlet</classname> it starts processing the 
+		request. The list below describes the complete process a request goes 
+		through if handled by a <classname>DispatcherPortlet</classname>:</para>
+
+		<orderedlist>
+
+			<listitem><para>The locale returned by 
+			<literal>PortletRequest.getLocale()</literal> is bound to the 
+			request to let elements in the process resolve the locale to use 
+			when processing the request (rendering the view, preparing data, 
+			etc.).</para></listitem>
+
+			<listitem><para>If a multipart resolver is specified and this is an 
+			<interfacename>ActionRequest</interfacename>, the request is 
+			inspected for multiparts and if they are found, it is wrapped in a 
+			<interfacename>MultipartActionRequest</interfacename> for further 
+			processing by other elements in the process. (See <xref 
+			linkend="portlet-multipart" /> for further information about 
+			multipart handling).</para></listitem>
+
+			<listitem><para>An appropriate handler is searched for. If a handler 
+			is found, the execution chain associated with the handler (pre-
+			processors, post-processors, controllers) will be executed in order 
+			to prepare a model.</para></listitem>
+
+			<listitem><para>If a model is returned, the view is rendered, using 
+			the view resolver that has been configured with the 
+			<interfacename>WebApplicationContext</interfacename>. If no model is 
+			returned (which could be due to a pre- or post-processor 
+			intercepting the request, for example, for security reasons), no 
+			view is rendered, since the request could already have been 
+			fulfilled.</para></listitem>
+
+		</orderedlist>
+
+		<para>Exceptions that might be thrown during processing of the request 
+		get picked up by any of the handler exception resolvers that are 
+		declared in the <interfacename>WebApplicationContext</interfacename>. 
+		Using these exception resolvers you can define custom behavior in case 
+		such exceptions get thrown.</para>
+
+		<para>You can customize Spring's 
+		<classname>DispatcherPortlet</classname> by adding context parameters in 
+		the <literal>portlet.xml</literal> file or portlet init parameters. The 
+		possibilities are listed below.</para>
+
+		<table frame="all">
+
+			<title><classname>DispatcherPortlet</classname> initialization 
+			parameters</title>
+
+			<tgroup cols="2">
+
+				<colspec colname="c1" colwidth="1*" align="left" />
+				<colspec colname="c2" colwidth="3*" />
+
+				<thead>
+					<row>
+						<entry>Parameter</entry>
+						<entry>Explanation</entry>
+					</row>
+				</thead>
+
+				<tbody>
+
+					<row>
+						<entry><literal>contextClass</literal></entry>
+						<entry>Class that implements 
+						<interfacename>WebApplicationContext</interfacename>, 
+						which will be used to instantiate the context used by 
+						this portlet. If this parameter isn't specified, the 
+						<classname>XmlPortletApplicationContext</classname> will 
+						be used.</entry>
+					</row>
+
+					<row>
+						<entry><literal>contextConfigLocation</literal></entry>
+						<entry>String which is passed to the context instance 
+						(specified by <literal>contextClass</literal>) to 
+						indicate where context(s) can be found. The String is 
+						potentially split up into multiple Strings (using a 
+						comma as a delimiter) to support multiple contexts (in 
+						case of multiple context locations, of beans that are 
+						defined twice, the latest takes precedence).</entry>
+					</row>
+
+					<row>
+						<entry><literal>namespace</literal></entry>
+						<entry>The namespace of the 
+						<interfacename>WebApplicationContext</interfacename>. 
+						Defaults to <literal>[portlet-name]-
+						portlet</literal>.</entry>
+					</row>
+
+					<row>
+						<entry><literal>viewRendererUrl</literal></entry>
+						<entry>The URL at which 
+						<classname>DispatcherPortlet</classname> can access an 
+						instance of <classname>ViewRendererServlet</classname> 
+						(see <xref linkend="portlet-viewservlet" />).</entry>
+					</row>
+
+				</tbody>
+
+			</tgroup>
+
+		</table>
+
+	</section>
+
+
+	<section id="portlet-viewservlet">
+
+		<title>The <classname>ViewRendererServlet</classname></title>
+
+		<para>The rendering process in Portlet MVC is a bit more complex than in 
+		Web MVC.  In order to reuse all the View technologies from Web MVC (see 
+		<xref linkend="view" />), we must convert the 
+		<interfacename>PortletRequest</interfacename> / 
+		<interfacename>PortletResponse</interfacename> to 
+		<interfacename>HttpServletRequest</interfacename> / 
+		<interfacename>HttpServletResponse</interfacename> and then call the 
+		<literal>render</literal> method of the 
+		<interfacename>View</interfacename>.  To do this, 
+		<classname>DispatcherPortlet</classname> uses a special servlet that 
+		exists for just this purpose: the 
+		<classname>ViewRendererServlet</classname>.</para>
+
+		<para>In order for <classname>DispatcherPortlet</classname> rendering to 
+		work, you must declare an instance of the 
+		<classname>ViewRendererServlet</classname> in the 
+		<literal>web.xml</literal> file for your web application as 
+		follows:</para>
+
+		<programlisting><![CDATA[<servlet>
+	<servlet-name>ViewRendererServlet</servlet-name>
+	<servlet-class>org.springframework.web.servlet.ViewRendererServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+	<servlet-name>ViewRendererServlet</servlet-name>
+	<url-pattern>/WEB-INF/servlet/view</url-pattern>
+</servlet-mapping>]]></programlisting>
+
+		<para>So to perform the actual rendering, 
+		<classname>DispatcherPortlet</classname> does the following:</para>
+
+		<orderedlist>
+
+			<listitem><para>Binds the 
+			<interfacename>WebApplicationContext</interfacename> to the request 
+			as an attribute under the same 
+			<literal>WEB_APPLICATION_CONTEXT_ATTRIBUTE</literal> key that 
+			<classname>DispatcherServlet</classname> uses.</para></listitem>
+
+			<listitem><para>Binds the <interfacename>Model</interfacename> and 
+			<interfacename>View</interfacename> objects to the request to make 
+			them available to the 
+			<classname>ViewRendererServlet</classname>.</para></listitem>
+
+			<listitem><para>Constructs a 
+			<interfacename>PortletRequestDispatcher</interfacename> and performs 
+			an <literal>include</literal> using the <literal>/WEB-
+			INF/servlet/view</literal> URL that is mapped to the 
+			<classname>ViewRendererServlet</classname>.</para></listitem>
+
+		</orderedlist>
+
+		<para>The <classname>ViewRendererServlet</classname> is then able to 
+		call the <literal>render</literal> method on the 
+		<interfacename>View</interfacename> with the appropriate 
+		arguments.</para>
+
+		<para>The actual URL for the <classname>ViewRendererServlet</classname> 
+		can be changed using <classname>DispatcherPortlet</classname>’s 
+		<literal>viewRendererUrl</literal> configuration parameter.</para>
+
+	</section>
+
+
+	<section id="portlet-controller">
+
+		<title>Controllers</title>
+
+		<para>The controllers in Portlet MVC are very similar to the Web MVC 
+		Controllers and porting code from one to the other should be 
+		simple.</para>
+
+		<para>The basis for the Portlet MVC controller architecture is the 
+		<interfacename>org.springframework.web.portlet.mvc.Controller</interfacename> 
+		interface, which is listed below.</para>
+
+		<programlisting><![CDATA[public interface Controller {
+
+	/**
+	 * Process the render request and return a ModelAndView object which the
+	 * DispatcherPortlet will render. A null return is not an error: It
+	 * indicates that this object completed request processing itself,
+	 * thus there is no ModelAndView to render.
+	 */
+	ModelAndView handleRenderRequest(
+		RenderRequest request,
+		RenderResponse response)
+		throws Exception;
+
+	/**
+	 * Process the action request.  There is nothing to return.
+	 */
+	void handleActionRequest(
+		ActionRequest request,
+		ActionResponse response)
+		throws Exception;
+
+}]]></programlisting>
+
+		<para>As you can see, the Portlet 
+		<interfacename>Controller</interfacename> interface requires two methods 
+		that handle the two phases of a portlet request: the action request and 
+		the render request.  The action phase should be capable of handling an 
+		action request and the render phase should be capable of handling a 
+		render request and returning an appropriate model and view.  While the 
+		<interfacename>Controller</interfacename> interface is quite abstract, 
+		Spring Portlet MVC offers a lot of controllers that already contain a 
+		lot of the functionality you might need – most of these are very similar 
+		to controllers from Spring Web MVC. The 
+		<interfacename>Controller</interfacename> interface just defines the 
+		most common functionality required of every controller - handling an 
+		action request, handling a render request, and returning a model and a 
+		view.</para>
+
+		<section id="portlet-controller-abstractcontroller">
+
+			<title><classname>AbstractController</classname> and 
+			<classname>PortletContentGenerator</classname></title>
+
+			<para>Of course, just a <interfacename>Controller</interfacename> 
+			interface isn't enough. To provide a basic infrastructure, all of 
+			Spring Portlet MVC's <interfacename>Controller</interfacename>s 
+			inherit from <classname>AbstractController</classname>, a class 
+			offering access to Spring's 
+			<interfacename>ApplicationContext</interfacename> and control over 
+			caching.</para>
+
+			<table frame="all">
+
+				<title>Features offered by the 
+				<classname>AbstractController</classname></title>
+
+				<tgroup cols="2">
+
+					<colspec colname="c1" colwidth="1*" align="left" />
+					<colspec colname="c2" colwidth="3*" />
+
+					<thead>
+						<row>
+							<entry>Parameter</entry>
+							<entry>Explanation</entry>
+						</row>
+					</thead>
+
+					<tbody>
+
+						<row>
+							<entry><literal>requireSession</literal></entry>
+							<entry>Indicates whether or not this 
+							<interfacename>Controller</interfacename> requires a 
+							session to do its work. This feature is offered to 
+							all controllers. If a session is not present when 
+							such a controller receives a request, the user is 
+							informed using a 
+							<classname>SessionRequiredException</classname>.</entry>
+						</row>
+
+						<row>
+							<entry><literal>synchronizeSession</literal></entry>
+							<entry>Use this if you want handling by this 
+							controller to be synchronized on the user's session. 
+							To be more specific, the extending controller will 
+							override the handleRenderRequestInternal and 
+							handleActionRequestInternal methods, which will be 
+							synchronized on the user’s session if you specify 
+							this variable.</entry>
+						</row>
+
+						<row>
+							<entry><literal>renderWhenMinimized</literal></entry>
+							<entry>If you want your controller to actually 
+							render the view when the portlet is in a minimized 
+							state, set this to true.  By default, this is set to 
+							false so that portlets that are in a minimized state 
+							don’t display any content.</entry>
+						</row>
+
+						<row>
+							<entry><literal>cacheSeconds</literal></entry>
+							<entry>When you want a controller to override the 
+							default cache expiration defined for the portlet, 
+							specify a positive integer here. By default it is 
+							set to -1, which does not change the default 
+							caching.  Setting it to 0 will ensure the result is 
+							never cached.</entry>
+						</row>
+
+					</tbody>
+
+				</tgroup>
+
+			</table>
+
+			<para>The <literal>requireSession</literal> and 
+			<literal>cacheSeconds</literal> properties are actually part of 
+			<classname>PortletContentGenerator</classname> (which is the 
+			superclass of <classname>AbstractController</classname>) but are 
+			included here for completeness.</para>
+
+			<para>When using the <classname>AbstractController</classname> as a 
+			baseclass for your controllers (which is not recommended since there 
+			are a lot of other controllers that might already do the job for 
+			you) you only have to override either the 
+			<literal>handleActionRequestInternal(ActionRequest, 
+			ActionResponse)</literal> method or the 
+			<literal>handleRenderRequestInternal(RenderRequest, 
+			RenderResponse)</literal> method (or both), implement your logic, 
+			and return a <classname>ModelAndView</classname> object (in the case 
+			of <literal>handleRenderRequestInternal</literal>).</para>
+
+			<para>The default implementations of both 
+			<literal>handleActionRequestInternal</literal> and 
+			<literal>handleRenderRequestInternal</literal> throw a 
+			<classname>PortletException</classname>.  This is consistent with 
+			the behavior of <classname>GenericPortlet</classname> from the JSR-
+			168 Specification API.  So you only need to override the method that 
+			your controller is intended to handle.</para>
+
+			<para>Here is short example consisting of a class and a declaration 
+			in the web application context.</para>
+
+			<programlisting><![CDATA[package samples;
+
+import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
+
+import org.springframework.web.portlet.mvc.AbstractController;
+import org.springframework.web.portlet.ModelAndView;
+
+public class SampleController extends AbstractController {
+
+    public ModelAndView handleRenderRequestInternal(
+        RenderRequest request,
+        RenderResponse response)
+    throws Exception {
+        ModelAndView mav = new ModelAndView("foo");
+        mav.addObject("message", "Hello World!");
+        return mav;
+    }
+
+}
+
+<bean id="sampleController" class="samples.SampleController">
+    <property name="cacheSeconds" value="120"/>
+</bean>]]></programlisting>
+
+			<para>The class above and the declaration in the web application 
+			context is all you need besides setting up a handler mapping (see 
+			<xref linkend="portlet-handlermapping" />) to get this very simple 
+			controller working.</para>
+
+		</section>
+
+		<section id="portlet-controller-simple">
+
+			<title>Other simple controllers</title>
+
+			<para>Although you can extend 
+			<classname>AbstractController</classname>, Spring Portlet MVC 
+			provides a number of concrete implementations which offer 
+			functionality that is commonly used in simple MVC 
+			applications.</para>
+
+			<para>The <classname>ParameterizableViewController</classname> is 
+			basically the same as the example above, except for the fact that 
+			you can specify the view name that it will return in the web 
+			application context (no need to hard-code the view name).</para>
+
+			<para>The <classname>PortletModeNameViewController</classname> uses 
+			the current mode of the portlet as the view name.  So, if your 
+			portlet is in View mode (i.e. <literal>PortletMode.VIEW</literal>) 
+			then it uses "view" as the view name. Simple enough.</para>
+
+		</section>
+
+		<section id="portlet-controller-command">
+
+			<title>Command Controllers</title>
+
+			<para>Spring Portlet MVC has the exact same hierarchy of 
+			<emphasis>command controllers</emphasis> as Spring Web MVC.  They 
+			provide a way to interact with data objects and dynamically bind 
+			parameters from the <interfacename>PortletRequest</interfacename> to 
+			the data object specified.  Your data objects don't have to 
+			implement a framework-specific interface, so you can directly 
+			manipulate your persistent objects if you desire. Let's examine what 
+			command controllers available, to get overview of what you can do 
+			with them:</para>
+
+			<itemizedlist>
+
+				<listitem><para><classname>AbstractCommandController</classname> 
+				- a command controller you can use to create your own command 
+				controller, capable of binding request parameters to a data 
+				object you specify. This class does not offer form 
+				functionality, it does however offer validation features and 
+				lets you specify in the controller itself what to do with the 
+				command object that has been filled with the parameters from the 
+				request.</para></listitem>
+
+				<listitem><para><classname>AbstractFormController</classname> -
+				an abstract controller offering form submission support. Using 
+				this controller you can model forms and populate them using a 
+				command object you retrieve in the controller. After a user has 
+				filled the form, <classname>AbstractFormController</classname> 
+				binds the fields, validates, and hands the object back to the 
+				controller to take appropriate action. Supported features are: 
+				invalid form submission (resubmission), validation, and normal 
+				form workflow. You implement methods to determine which views 
+				are used for form presentation and success. Use this controller 
+				if you need forms, but don't want to specify what views you're 
+				going to show the user in the application 
+				context.</para></listitem>
+
+				<listitem><para><classname>SimpleFormController</classname> - a 
+				concrete <classname>AbstractFormController</classname> that 
+				provides even more support when creating a form with a 
+				corresponding command object. The 
+				<classname>SimpleFormController</classname> let's you specify a 
+				command object, a viewname for the form, a viewname for page you 
+				want to show the user when form submission has succeeded, and 
+				more.</para></listitem>
+
+				<listitem><para><classname>AbstractWizardFormController</classname> –
+				a concrete <classname>AbstractFormController</classname> that 
+				provides a wizard-style interface for editing the contents of a 
+				command object across multiple display pages.  Supports multiple 
+				user actions: finish, cancel, or page change, all of which are 
+				easily specified in request parameters from the 
+				view.</para></listitem>
+
+			</itemizedlist>
+
+			<para>These command controllers are quite powerful, but they do 
+			require a detailed understanding of how they operate in order to use 
+			them efficiently.  Carefully review the JavaDocs for this entire 
+			hierarchy and then look at some sample implementations before you 
+			start using them.</para>
+
+		</section>
+
+		<section id="portlet-controller-wrapping">
+
+			<title><classname>PortletWrappingController</classname></title>
+
+			<para>Instead of developing new controllers, it is possible to use 
+			existing portlets and map requests to them from a 
+			<classname>DispatcherPortlet</classname>.  Using the 
+			<classname>PortletWrappingController</classname>, you can 
+			instantiate an existing <interfacename>Portlet</interfacename> as a 
+			<interfacename>Controller</interfacename> as follows:</para>
+
+			<programlisting><![CDATA[<bean id="wrappingController"
+      class="org.springframework.web.portlet.mvc.PortletWrappingController">
+	<property name="portletClass">
+		<value>sample.MyPortlet</value>
+	</property>
+	<property name="portletName">
+		<value>my-portlet</value>
+	</property>
+	<property name="initParameters">
+		<props>
+			<prop key="config">/WEB-INF/my-portlet-config.xml</prop>
+		</props>
+	</property>
+</bean>]]></programlisting>
+
+			<para>This can be very valuable since you can then use interceptors 
+			to pre-process and post-process requests going to these portlets. 
+			Since JSR-168 does not support any kind of Filter mechanism, this is 
+			quite handy.  For example, this can be used to wrap the Hibernate 
+			<classname>OpenSessionInViewInterceptor</classname> around a MyFaces 
+			JSF Portlet.</para>
+
+		</section>
+
+	</section>
+
+
+	<section id="portlet-handlermapping">
+
+		<title>Handler mappings</title>
+
+		<para>Using a handler mapping you can map incoming portlet requests to 
+		appropriate handlers.  There are some handler mappings you can use out 
+		of the box, for example, the 
+		<classname>PortletModeHandlerMapping</classname>, but let's first 
+		examine the general concept of a 
+		<interfacename>HandlerMapping</interfacename>.</para>
+
+		<para>Note: We are intentionally using the term “Handler” here instead 
+		of “Controller”.  <classname>DispatcherPortlet</classname> is designed 
+		to be used with other ways to process requests than just Spring Portlet 
+		MVC’s own Controllers.  A Handler is any Object that can handle portlet 
+		requests.  Controllers are an example of Handlers, and they are of 
+		course the default.  To use some other framework with 
+		<classname>DispatcherPortlet</classname>, a corresponding implementation 
+		of <interfacename>HandlerAdapter</interfacename> is all that is 
+		needed.</para>
+
+		<para>The functionality a basic 
+		<interfacename>HandlerMapping</interfacename> provides is the delivering 
+		of a <classname>HandlerExecutionChain</classname>, which must contain 
+		the handler that matches the incoming request, and may also contain a 
+		list of handler interceptors that are applied to the request. When a 
+		request comes in, the <classname>DispatcherPortlet</classname> will hand 
+		it over to the handler mapping to let it inspect the request and come up 
+		with an appropriate <classname>HandlerExecutionChain</classname>. Then 
+		the <classname>DispatcherPortlet</classname> will execute the handler 
+		and interceptors in the chain (if any).  These concepts are all exactly 
+		the same as in Spring Web MVC.</para>
+
+		<para>The concept of configurable handler mappings that can optionally 
+		contain interceptors (executed before or after the actual handler was 
+		executed, or both) is extremely powerful. A lot of supporting 
+		functionality can be built into a custom 
+		<interfacename>HandlerMapping</interfacename>. Think of a custom handler 
+		mapping that chooses a handler not only based on the portlet mode of the 
+		request coming in, but also on a specific state of the session 
+		associated with the request.</para>
+
+		<para>In Spring Web MVC, handler mappings are commonly based on URLs. 
+		Since there is really no such thing as a URL within a Portlet, we must 
+		use other mechanisms to control mappings.  The two most common are the 
+		portlet mode and a request parameter, but anything available to the 
+		portlet request can be used in a custom handler mapping.</para>
+
+		<para>The rest of this section describes three of Spring Portlet MVC's 
+		most commonly used handler mappings. They all extend 
+		<classname>AbstractHandlerMapping</classname> and share the following 
+		properties:</para>
+
 		<itemizedlist>
-			<listitem>
-				<para>The <ulink url="http://jcp.org/aboutJava/communityprocess/final/jsr168/index.html">JSR 168</ulink> specification</para>
-			</listitem>
+
+			<listitem><para><literal>interceptors</literal>: The list of 
+			interceptors to use. 
+			<interfacename>HandlerInterceptor</interfacename>s are discussed in 
+			<xref linkend="portlet-handlermapping-interceptor" 
+			/>.</para></listitem>
+
+			<listitem><para><literal>defaultHandler</literal>: The default 
+			handler to use, when this handler mapping does not result in a 
+			matching handler.</para></listitem>
+
+			<listitem><para><literal>order</literal>: Based on the value of the 
+			order property (see the 
+			<interfacename>org.springframework.core.Ordered</interfacename> 
+			interface), Spring will sort all handler mappings available in the 
+			context and apply the first matching handler.</para></listitem>
+
+			<listitem><para><literal>lazyInitHandlers</literal>: Allows for lazy 
+			initialization of singleton handlers (prototype handlers are always 
+			lazily initialized). Default value is false.  This property is 
+			directly implemented in the three concrete 
+			Handlers.</para></listitem>
+
 		</itemizedlist>
+
+		<section id="portlet-handlermapping-portletmode">
+
+			<title><classname>PortletModeHandlerMapping</classname></title>
+
+			<para>This is a simple handler mapping that maps incoming requests 
+			based on the current mode of the portlet (e.g. ‘view’, ‘edit’, 
+			‘help’).  An example:</para>
+
+			<programlisting><![CDATA[<bean id="portletModeHandlerMapping"
+      class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
+	<property name="portletModeMap">
+		<map>
+			<entry key="view"><ref bean="viewHandler"/></entry>
+			<entry key="edit"><ref bean="editHandler"/></entry>
+			<entry key="help"><ref bean="helpHandler"/></entry>
+		</map>
+	</property>
+</bean>]]></programlisting>
+
+		</section>
+
+		<section id="portlet-handlermapping-parameter">
+
+			<title><classname>ParameterHandlerMapping</classname></title>
+
+			<para>If we need to navigate around to multiple controllers without 
+			changing portlet mode, the simplest way to do this is with a request 
+			parameter that is used as the key to control the mapping.</para>
+
+			<para><classname>ParameterHandlerMapping</classname> uses the value 
+			of a specific request parameter to control the mapping.  The default 
+			name of the parameter is "action", but can be changed using the 
+			<literal>parameterName</literal> property.</para>
+
+			<para>The bean configuration for this mapping will look something 
+			like this:</para>
+
+			<programlisting><![CDATA[<bean id="parameterHandlerMapping"
+      class="org.springframework.web.portlet.handler.ParameterHandlerMapping”>
+	<property name="parameterMap">
+		<map>
+			<entry key="add"><ref bean="addItemHandler"/></entry>
+			<entry key="edit"><ref bean="editItemHandler"/></entry>
+			<entry key="delete"><ref bean="deleteItemHandler"/></entry>
+		</map>
+	</property>
+</bean>]]></programlisting>
+
+		</section>
+
+		<section id="portlet-handlermapping-portletmodeparameter">
+
+			<title><classname>PortletModeParameterHandlerMapping</classname></title>
+
+			<para>The most powerful built-in handler mapping, 
+			<classname>PortletModeParameterHandlerMapping</classname> combines 
+			the capabilities of the two previous ones to allow different 
+			navigation within each portlet mode.</para>
+
+			<para>Again the default name of the parameter is "action", but can 
+			be changed using the <literal>parameterName</literal> 
+			property.</para>
+
+			<para>By default, the same parameter value may not be used in two 
+			different portlet modes. This is so that if the portal itself 
+			changes the portlet mode, the request will no longer be valid in the 
+			mapping. This behavior can be changed by setting the 
+			<literal>allowDupParameters</literal> property to true.  However, 
+			this is not recommended.</para>
+
+			<para>The bean configuration for this mapping will look something 
+			like this:</para>
+
+			<programlisting><![CDATA[<bean id="portletModeParameterHandlerMapping"
+      class="org.springframework.web.portlet.handler.PortletModeParameterHandlerMapping">
+	<property name="portletModeParameterMap">
+		<map>
+			<entry key="view"> <!-- portlet mode: view -->
+				<map>
+					<entry key="add"><ref bean="addItemHandler"/></entry>
+					<entry key="edit"><ref bean="editItemHandler"/></entry>
+					<entry key="delete"><ref bean="deleteItemHandler"/></entry>
+				</map>
+			</entry>
+			<entry key="edit"> <!-- portlet mode: edit -->
+				<map>
+					<entry key="prefs"><ref bean="prefsHandler"/></entry>
+					<entry key="resetPrefs"><ref bean="resetPrefsHandler"/></entry>
+				</map>
+			</entry>
+		</map>
+	</property>
+</bean>]]></programlisting>
+
+		<para>This mapping can be chained ahead of a 
+		<classname>PortletModeHandlerMapping</classname>, which can then provide 
+		defaults for each mode and an overall default as well.</para>
+
+		</section>
+
+		<section id="portlet-handlermapping-interceptor">
+
+			<title>Adding <interfacename>HandlerInterceptor</interfacename>s</title>
+
+			<para>Spring's handler mapping mechanism has a notion of handler 
+			interceptors, which can be extremely useful when you want to apply 
+			specific functionality to certain requests, for example, checking 
+			for a principal.  Again Spring Portlet MVC implements these concepts 
+			in the same way as Web MVC.</para>
+
+			<para>Interceptors located in the handler mapping must implement 
+			<interfacename>HandlerInterceptor</interfacename> from the 
+			<literal>org.springframework.web.portlet</literal> package. Just 
+			like the servlet version, this interface defines three methods: one 
+			that will be called before the actual handler will be executed 
+			(<literal>preHandle</literal>), one that will be called after the 
+			handler is executed (<literal>postHandle</literal>), and one that is 
+			called after the complete request has finished 
+			(<literal>afterCompletion</literal>). These three methods should 
+			provide enough flexibility to do all kinds of pre- and post-
+			processing.</para>
+
+			<para>The <literal>preHandle</literal> method returns a boolean 
+			value. You can use this method to break or continue the processing 
+			of the execution chain. When this method returns 
+			<literal>true</literal>, the handler execution chain will continue, 
+			when it returns <literal>false</literal>, the 
+			<classname>DispatcherPortlet</classname> assumes the interceptor 
+			itself has taken care of requests (and, for example, rendered an 
+			appropriate view) and does not continue executing the other 
+			interceptors and the actual handler in the execution chain.</para>
+
+			<para>The <literal>postHandle</literal> method is only called on a 
+			<interfacename>RenderRequest</interfacename>.  The 
+			<literal>preHandle</literal> and <literal>afterCompletion</literal> 
+			methods are called on both an 
+			<interfacename>ActionRequest</interfacename> and a 
+			<interfacename>RenderRequest</interfacename>.  If you need to 
+			execute logic in these methods for just one type of request, be sure 
+			to check what kind of request it is before processing it.</para>
+
+		</section>
+
+		<section id="portlet-handlermapping-interceptoradapter">
+
+			<title><classname>HandlerInterceptorAdapter</classname></title>
+
+			<para>As with the servlet package, the portlet package has a 
+			concrete implementation of 
+			<interfacename>HandlerInteceptor</interfacename> called 
+			<classname>HandlerInterceptorAdapter</classname>.  This class has 
+			empty versions of all the methods so that you can inherit from this 
+			class and implement just one or two methods when that is all you 
+			need.</para>
+
+		</section>
+
+		<section id="portlet-handlermapping-parameterinterceptor">
+
+			<title><classname>ParameterMappingInterceptor</classname></title>
+
+			<para>The portlet package also has a concrete interceptor named 
+			<classname>ParameterMappingInterceptor</classname> that is meant to 
+			be used directly with <classname>ParameterHandlerMapping</classname> 
+			and <classname>PortletModeParameterHandlerMapping</classname>.  This 
+			interceptor will cause the parameter that is being used to control 
+			the mapping to be forwarded from an 
+			<interfacename>ActionRequest</interfacename> to the subsequent 
+			<interfacename>RenderRequest</interfacename>.  This will help ensure 
+			that the <interfacename>RenderRequest</interfacename> is mapped to 
+			the same Handler as the 
+			<interfacename>ActionRequest</interfacename>.  This is done in the 
+			<literal>preHandle</literal> method of the interceptor, so you can 
+			still modify the parameter value in your handler to change where the 
+			<interfacename>RenderRequest</interfacename> will be mapped.</para>
+
+			<para>Be aware that this interceptor is calling 
+			<literal>setRenderParameter</literal> on the 
+			<interfacename>ActionResponse</interfacename>, which means that you 
+			cannot call <literal>sendRedirect</literal> in your handler when 
+			using this interceptor.  If you need to do external redirects then 
+			you will either need to forward the mapping parameter manually or 
+			write a different interceptor to handle this for you.</para>
+
+		</section>
+
 	</section>
+
+
+	<section id="portlet-viewresolver">
+
+		<title>Views and resolving them</title>
+
+		<para>As mentioned previously, Spring Portlet MVC completely and 
+		directly reuses all the view technologies from Spring Web MVC.  This 
+		includes not only the Views themselves, but also the ViewResolvers.  For 
+		more information, refer to Section 13.5, Views and resolving them and 
+		Chapter 14, Integrating view technologies.</para>
+
+		<para>A few items on using the existing Views and ViewResolvers are 
+		worth mentioning:</para>
+
+		<itemizedlist>
+
+			<listitem><para>Most portals expect the result of rendering a 
+			portlet to be an HTML fragment.  So, things like JSP/JSTL, Velocity, 
+			FreeMarker, and XSLT all make sense.  But it is unlikely that views 
+			that return other document types will make any sense in a portlet 
+			context.</para></listitem>
+
+			<listitem><para>There is no such thing as an HTTP redirect from 
+			within a portlet (the sendRedirect method of ActionResponse cannot 
+			be used to stay within the portal).  So, RedirectView and use of the 
+			“redirect:” prefix will not work correctly from within Portlet 
+			MVC.</para></listitem>
+
+			<listitem><para>It may be possible to use the “forward:” prefix from 
+			within Portlet MVC.  However, remember that since you are in a 
+			portlet, you have no idea what the current URL looks like.  This 
+			means you cannot use a relative URL to access other resources in 
+			your web application and that you will have to use an absolute 
+			URL.</para></listitem>
+
+		</itemizedlist>
+
+		<para>Also, for JSP development, the new Spring Taglib and the new 
+		Spring Form Taglib both work in portlet views in exactly the same way 
+		that they work in servlet views.</para>
+
+	</section>
+
+
+	<section id="portlet-multipart">
+
+		<title>Multipart (file upload) support</title>
+
+		<para>Spring Portlet MVC has built-in multipart support to handle file 
+		uploads in portlet applications, just like Web MVC does.  The design for 
+		the multipart support is done with pluggable 
+		<interfacename>PortletMultipartResolver</interfacename> objects, defined 
+		in the <literal>org.springframework.web.portlet.multipart</literal> 
+		package.  Spring provides a 
+		<interfacename>PortletMultipartResolver</interfacename> for use with 
+		<ulink url="http://jakarta.apache.org/commons/fileupload">Commons 
+		FileUpload</ulink>. How uploading files is supported will be described 
+		in the rest of this section.</para>
+
+		<para>By default, no multipart handling will be done by Spring Portlet 
+		MVC, as some developers will want to handle multiparts themselves. You 
+		will have to enable it yourself by adding a multipart resolver to the 
+		web application's context. After you have done that, 
+		<classname>DispatcherPortlet</classname> will inspect each request to 
+		see if it contains a multipart. If no multipart is found, the request 
+		will continue as expected. However, if a multipart is found in the 
+		request, the <interfacename>PortletMultipartResolver</interfacename> 
+		that has been declared in your context will be used. After that, the 
+		multipart attribute in your request will be treated like any other 
+		attribute.</para>
+
+		<section id="portlet-multipart-resolver">
+
+			<title>Using the 
+			<interfacename>PortletMultipartResolver</interfacename></title>
+
+			<para>The following example shows how to use the 
+			<classname>CommonsPortletMultipartResolver</classname>:</para>
+
+			<programlisting><![CDATA[<bean id="portletMultipartResolver"
+    class="org.springframework.web.portlet.multipart.CommonsPortletMultipartResolver">
+
+    <!-- one of the properties available; the maximum file size in bytes -->
+    <property name="maxUploadSize" value="100000"/>
+</bean>]]></programlisting>
+
+			<para>Of course you also need to put the appropriate jars in your 
+			classpath for the multipart resolver to work. In the case of the 
+			<classname>CommonsMultipartResolver</classname>, you need to use 
+			<literal>commons-fileupload.jar</literal>.  Be sure to use at least 
+			version 1.1 of Commons FileUpload as previous versions do not 
+			support JSR-168 Portlet applications.</para>
+
+			<para>Now that you have seen how to set Portlet MVC up to handle 
+			multipart requests, let's talk about how to actually use it. When 
+			<classname>DispatcherPortlet</classname> detects a multipart 
+			request, it activates the resolver that has been declared in your 
+			context and hands over the request. What the resolver then does is 
+			wrap the current <interfacename>ActionRequest</interfacename> into a 
+			<interfacename>MultipartActionRequest</interfacename> that has 
+			support for multipart file uploads. Using the 
+			<interfacename>MultipartActionRequest</interfacename> you can get 
+			information about the multiparts contained by this request and 
+			actually get access to the multipart files themselves in your 
+			controllers.</para>
+
+			<para>Note that you can only receive multipart file uploads as part 
+			of an <interfacename>ActionRequest</interfacename>, not as part of a 
+			<interfacename>RenderRequest</interfacename>.</para>
+
+		</section>
+
+		<section id="portlet-multipart-forms">
+
+			<title>Handling a file upload in a form</title>
+
+			<para>After the 
+			<interfacename>PortletMultipartResolver</interfacename> has finished 
+			doing its job, the request will be processed like any other. To use 
+			it, you create a form with an upload field (see immediately below), 
+			then let Spring bind the file onto your form (backing object). To 
+			actually let the user upload a file, we have to create a (JSP/HTML) 
+			form:</para>
+
+			<programlisting><![CDATA[<h1>Please upload a file</h1>
+<form method="post" action="<portlet:actionURL/>" enctype="multipart/form-data">
+	<input type="file" name="file"/>
+	<input type="submit"/>
+</form>]]></programlisting>
+
+			<para>As you can see, we've created a field named “file” after the 
+			property of the bean that holds the <literal>byte[]</literal>. 
+			Furthermore we've added the encoding attribute 
+			(<literal>enctype="multipart/form-data"</literal>), which is 
+			necessary to let the browser know how to encode the multipart fields 
+			(do not forget this!).</para>
+
+			<para>Just as with any other property that's not automagically 
+			convertible to a string or primitive type, to be able to put binary 
+			data in your objects you have to register a custom editor with the 
+			<classname>PortletRequestDatabinder</classname>. There are a couple 
+			of editors available for handling files and setting the results on 
+			an object. There's a 
+			<classname>StringMultipartFileEditor</classname> capable of 
+			converting files to Strings (using a user-defined character set) and 
+			there is a <classname>ByteArrayMultipartFileEditor</classname> which 
+			converts files to byte arrays. They function just as the 
+			<classname>CustomDateEditor</classname> does.</para>
+
+			<para>So, to be able to upload files using a form, declare the 
+			resolver, a mapping to a controller that will process the bean, and 
+			the controller itself.</para>
+
+			<programlisting><![CDATA[<bean id="portletMultipartResolver"
+      class="org.springframework.web.portlet.multipart.CommonsPortletMultipartResolver"/>
+
+<bean id="portletModeHandlerMapping"
+      class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
+	<property name="portletModeMap">
+		<map>
+			<entry key="view"><ref bean="uploadController"/></entry>
+		</map>
+	</property>
+</bean>
+
+<bean id="fileUploadController" class="examples.FileUploadController">
+	<property name="commandClass" value="examples.FileUploadBean"/>
+	<property name="formView" value="fileuploadform"/>
+	<property name="successView" value="confirmation"/>
+</bean>]]></programlisting>
+
+			<para>After that, create the controller and the actual class to hold 
+			the file property.</para>
+
+			<programlisting><![CDATA[public class FileUploadController extends SimpleFormController {
+
+	public void onSubmitAction(
+		ActionRequest request,
+		ActionResponse response,
+		Object command,
+		BindException errors)
+		throws Exception {
+
+		// cast the bean
+		FileUploadBean bean = (FileUploadBean) command;
+
+		// let's see if there's content there
+		byte[] file = bean.getFile();
+		if (file == null) {
+			// hmm, that's strange, the user did not upload anything
+		}
+
+		// do something with the file here
+	}
+
+	protected void initBinder(
+			PortletRequest request, PortletRequestDataBinder binder)
+		throws Exception {
+		// to actually be able to convert Multipart instance to byte[]
+		// we have to register a custom editor
+		binder.registerCustomEditor(byte[].class,
+				new ByteArrayMultipartFileEditor());
+		// now Spring knows how to handle multipart object and convert
+	}
+
+}
+
+public class FileUploadBean {
+
+	private byte[] file;
+
+	public void setFile(byte[] file) {
+		this.file = file;
+	}
+
+	public byte[] getFile() {
+		return file;
+	}
+
+}]]></programlisting>
+
+			<para>As you can see, the <classname>FileUploadBean</classname> has 
+			a property typed <literal>byte[]</literal> that holds the file. The 
+			controller registers a custom editor to let Spring know how to 
+			actually convert the multipart objects the resolver has found to 
+			properties specified by the bean. In this example, nothing is done 
+			with the <literal>byte[]</literal> property of the bean itself, but 
+			in practice you can do whatever you want (save it in a database, 
+			mail it to somebody, etc).</para>
+
+			<para>An equivalent example in which a file is bound straight to a 
+			String-typed property on a (form backing) object might look like 
+			this:</para>
+
+			<programlisting><![CDATA[public class FileUploadController extends SimpleFormController {
+
+	public void onSubmitAction(
+		ActionRequest request,
+		ActionResponse response,
+		Object command,
+		BindException errors)
+		throws Exception {
+
+		// cast the bean
+		FileUploadBean bean = (FileUploadBean) command;
+
+		// let's see if there's content there
+		String file = bean.getFile();
+		if (file == null) {
+			// hmm, that's strange, the user did not upload anything
+		}
+
+		// do something with the file here
+	}
+
+	protected void initBinder(
+			PortletRequest request, PortletRequestDataBinder binder)
+		throws Exception {
+		// to actually be able to convert Multipart instance to a String
+		// we have to register a custom editor
+		binder.registerCustomEditor(String.class,
+				new StringMultipartFileEditor());
+		// now Spring knows how to handle multipart object and convert
+	}
+
+}
+
+public class FileUploadBean {
+
+	private String file;
+
+	public void setFile(String file) {
+		this.file = file;
+	}
+
+	public String getFile() {
+		return file;
+	}
+
+}]]></programlisting>
+
+			<para>Of course, this last example only makes (logical) sense in the 
+			context of uploading a plain text file (it wouldn't work so well in 
+			the case of uploading an image file).</para>
+
+			<para>The third (and final) option is where one binds directly to a 
+			<interfacename>MultipartFile</interfacename> property declared on 
+			the (form backing) object's class. In this case one does not need to 
+			register any custom property editor because there is no type 
+			conversion to be performed.</para>
+
+			<programlisting><![CDATA[public class FileUploadController extends SimpleFormController {
+
+	public void onSubmitAction(
+		ActionRequest request,
+		ActionResponse response,
+		Object command,
+		BindException errors)
+		throws Exception {
+
+		// cast the bean
+		FileUploadBean bean = (FileUploadBean) command;
+
+		// let's see if there's content there
+		MultipartFile file = bean.getFile();
+		if (file == null) {
+			// hmm, that's strange, the user did not upload anything
+		}
+
+		// do something with the file here
+	}
+}
+
+public class FileUploadBean {
+
+	private MultipartFile file;
+
+	public void setFile(MultipartFile file) {
+		this.file = file;
+	}
+
+	public MultipartFile getFile() {
+		return file;
+	}
+
+}]]></programlisting>
+
+		</section>
+
+	</section>
+
+
+	<section id="portlet-exceptionresolver">
+
+		<title>Handling exceptions</title>
+
+		<para>Just like Web MVC, Portlet MVC provides 
+		<interfacename>HandlerExceptionResolver</interfacename>s to ease the 
+		pain of unexpected exceptions occurring while your request is being 
+		processed by a handler that matched the request.  Portlet MVC also 
+		provides the same concrete 
+		<classname>SimpleMappingExceptionResolver</classname> that enables you 
+		to take the class name of any exception that might be thrown and map it 
+		to a view name.</para>
+
+	</section>
+
+
+	<section id="portlet-deployment">
+
+		<title>Portlet application deployment</title>
+
+		<para>The process of deploying a Spring Portlet MVC application is no 
+		different than deploying any JSR-168 Portlet application.  However, this 
+		area is confusing enough in general that it is worth talking about here 
+		briefly.</para>
+
+		<para>Generally, the portal/portlet-container runs in one webapp in your 
+		servlet-container and your portlets run is another webapp in your 
+		servlet-container.  In order for the portlet-container webapp to make 
+		calls into your portlet webapp it must make cross-context calls to a 
+		well-known servlet that provides access to the portlet services defined 
+		in your <literal>portlet.xml</literal> file.</para>
+
+		<para>The JSR-168 specification does not specify exactly how this should 
+		happen, so each portlet-container has its own mechanism for this, which 
+		usually involves some kind of “deployment process” that makes changes to 
+		the portlet webapp itself and then registers the portlets within the 
+		portlet-container.</para>
+
+		<para>At a minimum, the <literal>web.xml</literal> file in your portlet 
+		webapp is modified to inject the well-known servlet that the portlet-
+		container will call.  In some cases a single servlet will service all 
+		portlets in the webapp, in other cases there will be an instance of the 
+		servlet for each portlet.</para>
+
+		<para>Some portlet-containers will also inject libraries and/or 
+		configuration files into the webapp as well.  The portlet-container must 
+		also make its implementation of the Portlet JSP Tag Library available to 
+		your webapp.</para>
+
+		<para>The bottom line is that it is important to understand the 
+		deployment needs of your target portal and make sure they are met 
+		&mdash; usually by following the automated deployment process it 
+		provides.  Be sure to carefully review the documentation from your 
+		portal for this process.</para>
+
+		<para>Once you have deployed your portlet, review the resulting 
+		<literal>web.xml</literal> file for sanity.  Some older portals have 
+		been known to corrupt the definition of the 
+		<classname>ViewRendererServlet</classname>, thus breaking the rendering 
+		of your portlets.</para>
+
+	</section>
+
+
 </chapter>
