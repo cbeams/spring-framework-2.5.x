@@ -58,7 +58,7 @@
 		<classname>DispatcherPortlet</classname> that dispatches requests to 
 		handlers, with configurable handler mappings and view resolution, just 
 		as the <classname>DispatcherServlet</classname> in the web framework 
-		does.  File upload is also support in the same way.</para>
+		does.  File upload is also supported in the same way.</para>
 
 		<para>Locale resolution and theme resolution are not supported in 
 		Portlet MVC &mdash; these areas are in the purview of the 
@@ -153,7 +153,7 @@
 		render the appropriate views. These beans are included in the Spring 
 		framework and can be configured in the 
 		<interfacename>WebApplicationContext</interfacename>, just as any other 
-		bean would be configured. Each of those beans, is described in more 
+		bean would be configured. Each of those beans is described in more 
 		detail below. Right now, we'll just mention them, just to let you know 
 		they exist and to enable us to go on talking about the 
 		<classname>DispatcherPortlet</classname>. For most of the beans, 
@@ -224,7 +224,7 @@
 
 		<para>When a <classname>DispatcherPortlet</classname> is setup for use 
 		and a request comes in for that specific 
-		<classname>DispatcherPortlet</classname> it starts processing the 
+		<classname>DispatcherPortlet</classname>, it starts processing the 
 		request. The list below describes the complete process a request goes 
 		through if handled by a <classname>DispatcherPortlet</classname>:</para>
 
@@ -624,7 +624,7 @@ public class SampleController extends AbstractController {
 			the data object specified.  Your data objects don't have to 
 			implement a framework-specific interface, so you can directly 
 			manipulate your persistent objects if you desire. Let's examine what 
-			command controllers available, to get overview of what you can do 
+			command controllers are available, to get an overview of what you can do 
 			with them:</para>
 
 			<itemizedlist>
@@ -656,8 +656,8 @@ public class SampleController extends AbstractController {
 				concrete <classname>AbstractFormController</classname> that 
 				provides even more support when creating a form with a 
 				corresponding command object. The 
-				<classname>SimpleFormController</classname> let's you specify a 
-				command object, a viewname for the form, a viewname for page you 
+				<classname>SimpleFormController</classname> lets you specify a 
+				command object, a viewname for the form, a viewname for the page you 
 				want to show the user when form submission has succeeded, and 
 				more.</para></listitem>
 
@@ -917,8 +917,8 @@ public class SampleController extends AbstractController {
 			<para>The <literal>preHandle</literal> method returns a boolean 
 			value. You can use this method to break or continue the processing 
 			of the execution chain. When this method returns 
-			<literal>true</literal>, the handler execution chain will continue, 
-			when it returns <literal>false</literal>, the 
+			<literal>true</literal>, the handler execution chain will continue. 
+			When it returns <literal>false</literal>, the 
 			<classname>DispatcherPortlet</classname> assumes the interceptor 
 			itself has taken care of requests (and, for example, rendered an 
 			appropriate view) and does not continue executing the other 
@@ -941,7 +941,7 @@ public class SampleController extends AbstractController {
 
 			<para>As with the servlet package, the portlet package has a 
 			concrete implementation of 
-			<interfacename>HandlerInteceptor</interfacename> called 
+			<interfacename>HandlerInterceptor</interfacename> called 
 			<classname>HandlerInterceptorAdapter</classname>.  This class has 
 			empty versions of all the methods so that you can inherit from this 
 			class and implement just one or two methods when that is all you 
@@ -990,7 +990,7 @@ public class SampleController extends AbstractController {
 		various <interfacename>View</interfacename> implementations themselves,
 		but also the <interfacename>ViewResolver</interfacename> implementations. 
 		For more information, refer to the sections entitled
-		<xref linkend="mvc-viewresolver"/> and <xref linkend="view"/> respectively.</para>
+		<xref linkend="view"/> and <xref linkend="mvc-viewresolver"/> respectively.</para>
 
 		<para>A few items on using the existing <interfacename>View</interfacename> and
 		<interfacename>ViewResolver</interfacename> implementations	are worth mentioning:</para>
@@ -1122,7 +1122,7 @@ public class SampleController extends AbstractController {
 			<para>Just as with any other property that's not automagically 
 			convertible to a string or primitive type, to be able to put binary 
 			data in your objects you have to register a custom editor with the 
-			<classname>PortletRequestDatabinder</classname>. There are a couple 
+			<classname>PortletRequestDataBinder</classname>. There are a couple 
 			of editors available for handling files and setting the results on 
 			an object. There's a 
 			<classname>StringMultipartFileEditor</classname> capable of 
@@ -1142,7 +1142,7 @@ public class SampleController extends AbstractController {
       class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
 	<property name="portletModeMap">
 		<map>
-			<entry key="view"><ref bean="uploadController"/></entry>
+			<entry key="view"><ref bean="fileUploadController"/></entry>
 		</map>
 	</property>
 </bean>
@@ -1243,7 +1243,7 @@ public class FileUploadBean {
         // we have to register a custom editor
         binder.registerCustomEditor(String.class,
             new StringMultipartFileEditor());
-        // now Spring knows how to handle multipart object and convert
+        // now Spring knows how to handle multipart objects and convert
     }
 }
 
