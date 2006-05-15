@@ -261,26 +261,26 @@ public void echoException(Exception ex) throws Exception {
 			<programlisting><![CDATA[<bean class="org.springframework.beans.factory.annotation.RequiredBeanFactoryPostProcessor">
     <property name="requiredAnnotationType" value="your.company.package.Mandatory"/>
 </bean>]]></programlisting>
-			<section>
-				<title>Other @Annotations in Spring</title>
-				<para>
-					Annotations are also used in a number of other places throughout Spring.
-					Rather than being described here, these annotations are described in that
-					section or chapter of the reference documentation to which they are most
-					relevant.
-				</para>
-				<itemizedlist>
-					<listitem>
-						<para><xref linkend="transaction-declarative-annotations"/></para>
-					</listitem>
-					<listitem>
-						<para><xref linkend="aop-atconfigurable"/></para>
-					</listitem>
-					<listitem>
-						<para><xref linkend="aop-ataspectj"/></para>
-					</listitem>
-				</itemizedlist>
-			</section>
+        </section>
+		<section>
+			<title>Other @Annotations in Spring</title>
+			<para>
+				Annotations are also used in a number of other places throughout Spring.
+				Rather than being described here, these annotations are described in that
+				section or chapter of the reference documentation to which they are most
+				relevant.
+			</para>
+			<itemizedlist>
+				<listitem>
+					<para><xref linkend="transaction-declarative-annotations"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="aop-atconfigurable"/></para>
+				</listitem>
+				<listitem>
+					<para><xref linkend="aop-ataspectj"/></para>
+				</listitem>
+			</itemizedlist>
 		</section>
 	</section>
 	<section id="metadata-commons">
