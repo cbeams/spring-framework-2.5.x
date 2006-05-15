@@ -426,26 +426,20 @@ public abstract class ObjectUtils {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Return as hash code for the given object; typically the value of
-	 * <code>{@link Object#hashCode()}</code>. If the object is an array,
-	 * this method will delegate to any of the <code>nullSafeHashCode</code>
-	 * methods for arrays in this class. If the object is <code>null</code>,
-	 * this method returns 0.
-	 * @see #nullSafeHashCode(Object[])
-	 * @see #nullSafeHashCode(boolean[])
-	 * @see #nullSafeHashCode(byte[])
-	 * @see #nullSafeHashCode(char[])
-	 * @see #nullSafeHashCode(double[])
-	 * @see #nullSafeHashCode(float[])
-	 * @see #nullSafeHashCode(int[])
-	 * @see #nullSafeHashCode(long[])
-	 * @see #nullSafeHashCode(short[])
+	 * Return a String representation of the specified Object.
+     * <p>Returns {@link #NULL_STRING the String 'null'} if <code>obj</code> is
+     * <code>null</code>.
+	 * @param obj the object whose String representation to return.
+	 * @return a String representation of <code>obj</code>.
 	 */
 	public static String nullSafeToString(Object obj) {
 		if (obj == null) {
 			return NULL_STRING;
 		}
-		if (obj instanceof Object[]) {
+        if(obj instanceof String) {
+            return (String) obj;
+        }
+        if (obj instanceof Object[]) {
 			return nullSafeToString((Object[]) obj);
 		}
 		if (obj instanceof boolean[]) {

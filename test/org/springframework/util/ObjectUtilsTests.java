@@ -576,6 +576,10 @@ public final class ObjectUtilsTests extends TestCase {
 		assertEquals("null", ObjectUtils.nullSafeToString((long[]) null));
 	}
 
+	public void testNullSafeToStringWithPlainOldString() {
+		assertEquals("I shoh love tha taste of mangoes", ObjectUtils.nullSafeToString("I shoh love tha taste of mangoes"));
+	}
+
 	public void testNullSafeToStringWithObjectArray() {
 		Object[] array = {"Han", new Long(43)};
 		assertEquals("{Han, 43}", ObjectUtils.nullSafeToString(array));
