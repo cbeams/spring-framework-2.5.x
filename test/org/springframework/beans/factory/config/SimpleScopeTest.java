@@ -38,7 +38,7 @@ public class SimpleScopeTest extends TestCase {
 		applicationContext = new GenericApplicationContext();
 		ScopeMap scopeMap = new ScopeMap() {
 			
-			private List<TestBean> objects = new LinkedList<TestBean>(); {
+			private List objects = new LinkedList(); {
 				objects.add(new TestBean());
 				objects.add(new TestBean());
 			}
@@ -47,7 +47,6 @@ public class SimpleScopeTest extends TestCase {
 
 			
 			public Object get(String name) {
-				//System.out.println("GOT FROM SCOPE!!!!");
 				if (index >= objects.size()) {
 					index = 0;
 				}
