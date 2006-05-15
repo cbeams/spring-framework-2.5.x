@@ -22,7 +22,7 @@ import org.springframework.orm.jpa.spi.ContainerEntityManagerFactoryBeanIntegrat
  * @author Costin Leau
  * 
  */
-public abstract class HibernateContainerEntityManagerFactoryBeanTests extends ContainerEntityManagerFactoryBeanIntegrationTests {
+public class HibernateContainerEntityManagerFactoryBeanTests extends ContainerEntityManagerFactoryBeanIntegrationTests {
 	
 	public static final String[] CONFIG_LOCATIONS = new String[] { 
 		"/org/springframework/orm/jpa/hibernate/hb-manager.xml",
