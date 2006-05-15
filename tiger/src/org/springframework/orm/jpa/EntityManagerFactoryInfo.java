@@ -20,12 +20,10 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceUnitInfo;
 
 /**
- * Interface introduced by Spring-managed EntityManagerFactory
- * proxies. This interface does not extend EntityManagerFactory, 
- * so can also be implemented by objects
- * that are not themselves EntityManagerFactorys, but know about the
- * configuration of an EntityManagerFactory (such as 
- * an AbstractEntityManagerFactoryBean).
+ * Interface about a Spring-managed EntityManagerFactory.
+ * This interface can be obtained from Spring-managed EntityManagerFactory
+ * proxies, from the PortableEntityManagerFactoryPlus
+ * interface that they implement.
  * 
  * @author Rod Johnson
  * @since 2.0

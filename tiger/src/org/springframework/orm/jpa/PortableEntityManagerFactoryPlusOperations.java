@@ -24,12 +24,6 @@ package org.springframework.orm.jpa;
  * the JPA API. In that case we will implement these methods to
  * use the standard method, and deprecate our own method.
  * 
- * <p>Spring-created EntityManagerFactory instances also implement
- * the EntityManagerFactoryInfo interface. That interface does not
- * extend EntityManagerFactory, so can also be returned by objects
- * that are not themselves EntityManagerFactorys, but know about the
- * configuration of an EntityManagerFactory.
- * 
  * @author Rod Johnson
  * @since 2.0
  * @see EntityManagerFactoryInfo
@@ -38,9 +32,7 @@ public interface PortableEntityManagerFactoryPlusOperations {
 	
 	void evict(Class clazz);
 	
-	// all methods
-	
-	// EMFInfo?
+	// Will add further methods in Spring 2.1
 	
 	EntityManagerFactoryInfo getEntityManagerFactoryInfo();
 	

@@ -35,9 +35,7 @@ public interface PortableEntityManagerPlusOperations {
 	
 	void evict(Object o);
 	
-	// all methods
-	
-	// EMFInfo?
+	// Further methods to be added in Spring 2.1
 	
 
 }
