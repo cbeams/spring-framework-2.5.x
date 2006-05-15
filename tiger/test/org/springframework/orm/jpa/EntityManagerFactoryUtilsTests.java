@@ -28,6 +28,7 @@ import javax.persistence.PersistenceException;
 import junit.framework.TestCase;
 
 import org.easymock.MockControl;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -82,12 +83,14 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 		}
 	}
 	
+	// TODO test conversion of IllegalArgumentException
+	// and IllegalStateException
 
 	/*
 	 * Test method for
 	 * 'org.springframework.orm.jpa.EntityManagerFactoryUtils.convertJpaAccessException(PersistenceException)'
 	 */
-	public void testConvertJpaAccessException() {
+	public void testConvertJpaPersistenceException() {
 		EntityNotFoundException entityNotFound = new EntityNotFoundException();
 		assertSame(JpaObjectRetrievalFailureException.class, EntityManagerFactoryUtils.convertJpaAccessException(
 				entityNotFound).getClass());
@@ -97,8 +100,9 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 				optimisticLock).getClass());
 
 		EntityExistsException entityExists = new EntityExistsException("foo");
-		assertSame(InvalidDataAccessApiUsageException.class, EntityManagerFactoryUtils.convertJpaAccessException(
-				entityExists).getClass());
+		DataAccessException convertedJpaAccessException = EntityManagerFactoryUtils.convertJpaAccessException(
+						entityExists);
+		assertSame(InvalidDataAccessApiUsageException.class, convertedJpaAccessException.getClass());
 
 		NoResultException noResult = new NoResultException();
 		assertSame(InvalidDataAccessApiUsageException.class, EntityManagerFactoryUtils.convertJpaAccessException(

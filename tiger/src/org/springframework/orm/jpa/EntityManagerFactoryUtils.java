@@ -164,13 +164,13 @@ public abstract class EntityManagerFactoryUtils {
 			return new JpaOptimisticLockingFailureException((OptimisticLockException) ex);
 		}
 		if (ex instanceof EntityExistsException) {
-			throw new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
+			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
 		if (ex instanceof NoResultException) {
-			throw new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
+			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
 		if (ex instanceof NonUniqueResultException) {
-			throw new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
+			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
 		// fallback
 		return new JpaSystemException(ex);
