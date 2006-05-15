@@ -784,25 +784,29 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Subclasses must implement this method to perform the actual configuration load.
-	 * The method is invoked by refresh before any other initialization work.
+	 * The method is invoked by <code>refresh</code> before any other initialization work.
 	 * <p>A subclass will either create a new bean factory and hold a reference to it,
 	 * or return a single bean factory instance that it holds. In the latter case, it will
 	 * usually throw an IllegalStateException if refreshing the context more than once.
+	 * <p>Subclasses will usually declare this method as <code>synchronized</code> if they
+	 * support hot-refreshing of the BeanFactory instance at runtime. However, the entire
+	 * <code>refresh</code> operation will be synchronized on the context instance anyway.
 	 * @throws BeansException if initialization of the bean factory failed
 	 * @throws IllegalStateException if already initialized and multiple refresh
 	 * attempts are not supported
-	 * @see #refresh
+	 * @see #refresh()
 	 */
 	protected abstract void refreshBeanFactory() throws BeansException, IllegalStateException;
 
 	/**
-	 * Subclasses must return their internal bean factory here.
-	 * They should implement the lookup efficiently, so that it can be called
-	 * repeatedly without a performance penalty.
+	 * Subclasses must return their internal bean factory here. They should implement the
+	 * lookup efficiently, so that it can be called repeatedly without a performance penalty.
+	 * <p>Note: Subclasses should implement this method as <code>synchronized</code> on the
+	 * context instance if they will not always return the same BeanFactory instance at runtime.
 	 * @return this application context's internal bean factory
-	 * @throws IllegalStateException if the context does not hold an internal
-	 * bean factory yet (usually if <code>refresh</code> has never been called)
-	 * @see #refresh
+	 * @throws IllegalStateException if the context does not hold an internal bean factory yet
+	 * (usually if <code>refresh</code> has never been called)
+	 * @see #refresh()
 	 */
 	public abstract ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException;
 
