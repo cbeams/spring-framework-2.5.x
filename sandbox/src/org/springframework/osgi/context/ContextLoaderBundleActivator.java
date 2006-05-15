@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  * You can override this default behaviour by adding a bundle manifest header
  * entry of the form
  * 
- * org.springframework.context: &lt;list of context file locations&gt; 
+ * Spring-Context: &lt;comma-delimited list of context file locations&gt; 
  * 
  * The manifest entry may contain any number of resource paths, separated by any
  * number of commas and spaces.
@@ -56,8 +56,8 @@ import org.springframework.util.StringUtils;
  */
 public class ContextLoaderBundleActivator implements BundleActivator {
 
-	private static final String CONTEXT_LOCATION_HEADER = "org.springframework.context";
-	private static final String PARENT_CONTEXT_SERVICE_NAME_HEADER = "org.springframework.parent.context";
+	private static final String CONTEXT_LOCATION_HEADER = "Spring-Context";
+	private static final String PARENT_CONTEXT_SERVICE_NAME_HEADER = "Spring-Parent-Context";
 	private static final String CONTEXT_LOCATION_DELIMITERS = ", ";
 	private static final String DEFAULT_CONTEXT_PREFIX = "/META-INF/";
 	private static final String DEFAULT_CONTEXT_POSTFIX = "-context.xml";

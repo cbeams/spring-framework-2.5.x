@@ -70,7 +70,7 @@ public class ContextLoaderBundleActivatorTests extends TestCase {
 	public void testGetApplicationContextLocationsWithHeader() {
 		this.bundle.getHeaders();
 		Properties headers = new Properties();
-		headers.put("org.springframework.context","/META-INF/applicationContext.xml /META-INF/securityContext.xml");
+		headers.put("Spring-Context","/META-INF/applicationContext.xml /META-INF/securityContext.xml");
 		this.mockBundleControl.setReturnValue(headers);
 		this.mockBundleControl.replay();
 		String[] ret = new ContextLoaderBundleActivator() {
@@ -106,7 +106,7 @@ public class ContextLoaderBundleActivatorTests extends TestCase {
 		this.mockContextControl.setReturnValue(this.bundle);
 		this.bundle.getHeaders();
 		Properties headers = new Properties();
-		headers.put("org.springframework.parent.context","parentContextName");
+		headers.put("Spring-Parent-Context","parentContextName");
 		this.mockBundleControl.setReturnValue(headers);
 		this.bundleContext.getServiceReferences(ApplicationContext.class.getName(), "(org.springframework.context.service.name=parentContextName)");
 		ServiceReference sRef = getServiceReference();
