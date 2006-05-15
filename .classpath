@@ -124,5 +124,6 @@
 	<classpathentry kind="lib" path="lib/toplink/toplink-essentials.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/hibernate-entitymanager.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/jboss-archive-browsing.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat/catalina.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
