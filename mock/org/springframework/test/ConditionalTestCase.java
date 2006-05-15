@@ -69,7 +69,7 @@ public abstract class ConditionalTestCase extends TestCase {
 	public void runBare() throws Throwable {
 		// getName will return the name of the method being run
 		if (isDisabledInThisEnvironment(getName())) {
-			++disabledTestCount;
+			recordDisabled();
 			logger.info("**** " + getClass().getName() + "." + getName() + " disabled in this environment: " +
 					"Total disabled tests=" + getDisabledTestCount());
 			return;
@@ -77,5 +77,9 @@ public abstract class ConditionalTestCase extends TestCase {
 		
 		// Let JUnit handle execution
 		super.runBare();
+	}
+
+	protected int recordDisabled() {
+		return ++disabledTestCount;
 	}
 }
