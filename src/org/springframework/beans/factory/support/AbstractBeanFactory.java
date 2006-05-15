@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
@@ -102,7 +103,10 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	private boolean cacheBeanMetadata = true;
 
 	/** Custom PropertyEditors to apply to the beans of this factory */
-	private Map customEditors = new HashMap();
+	private final Map customEditors = new HashMap();
+
+	/** Cusotm PropertyEditorRegistrars to apply to the beans of this factory */
+	private final Set propertyEditorRegistrars = CollectionFactory.createLinkedSetIfPossible(16);
 
 	/** BeanPostProcessors to apply in createBean */
 	private final List beanPostProcessors = new ArrayList();
@@ -471,6 +475,18 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		return cacheBeanMetadata;
 	}
 
+	public void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar) {
+		Assert.notNull(registrar, "PropertyEditorRegistrar must not be null");
+		this.propertyEditorRegistrars.add(registrar);
+	}
+
+	/**
+	 * Return the set of PropertyEditorRegistrars.
+	 */
+	public Set getPropertyEditorRegistrars() {
+		return propertyEditorRegistrars;
+	}
+
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
 		Assert.notNull(requiredType, "Required type must not be null");
 		Assert.notNull(propertyEditor, "PropertyEditor must not be null");
@@ -679,6 +695,10 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	protected void initBeanWrapper(BeanWrapper bw) {
 		bw.registerCustomEditor(String[].class, new StringArrayPropertyEditor());
+		for (Iterator it = getPropertyEditorRegistrars().iterator(); it.hasNext();) {
+			PropertyEditorRegistrar registrar = (PropertyEditorRegistrar) it.next();
+			registrar.registerCustomEditors(bw);
+		}
 		for (Iterator it = getCustomEditors().entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			Class clazz = (Class) entry.getKey();

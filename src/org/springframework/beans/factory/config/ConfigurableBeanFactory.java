@@ -19,6 +19,7 @@ package org.springframework.beans.factory.config;
 import java.beans.PropertyEditor;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 
@@ -85,10 +86,26 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	void setCacheBeanMetadata(boolean cacheBeanMetadata);
 
 	/**
+	 * Add a PropertyEditorRegistrar to be applied to all bean creation processes.
+	 * <p>Such a registrar creates new PropertyEditor instances and registers them
+	 * on the given registry, fresh for each bean creation attempt. This avoids
+	 * the need for synchronization on custom editors; hence, it is generally
+	 * preferable to use this method instead of <code>registerCustomEditor</code>.
+	 * @param registrar the PropertyEditorRegistrar to register
+	 * @see #registerCustomEditor
+	 */
+	void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar);
+
+	/**
 	 * Register the given custom property editor for all properties of the
 	 * given type. To be invoked during factory configuration.
+	 * <p>Note that this method will register a shared custom editor instance;
+	 * access to that instance will be synchronized for thread-safety. It is
+	 * generally prefable to use <code>addPropertyEditorRegistrar</code> instead
+	 * of this method, to avoid for the need for synchronization on custom editors.
 	 * @param requiredType type of the property
 	 * @param propertyEditor editor to register
+	 * @see #addPropertyEditorRegistrar
 	 */
 	void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor);
 
