@@ -27,9 +27,9 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 
 /**
- * TaskExecutor implementation that uses a single <code>java.util.Timer</code>
- * for executing all tasks, effectively resulting in serialized asynchronous
- * execution on a single thread.
+ * {@link org.springframework.core.task.TaskExecutor} implementation that uses a
+ * single {@link Timer} for executing all tasks, effectively resulting in
+ * serialized asynchronous execution on a single thread.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -37,13 +37,16 @@ import org.springframework.util.Assert;
  */
 public class TimerTaskExecutor implements SchedulingTaskExecutor, InitializingBean, DisposableBean {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+    /**
+     * The shared {@link Log} instance. 
+     */
+    protected final Log logger = LogFactory.getLog(getClass());
 
 	private Timer timer;
 
 	private int delay = 0;
 
-	private boolean internalTimer = false;
+	private boolean usingAnInternalTimer = false;
 
 
 	/**
@@ -56,8 +59,9 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, InitializingBe
 	}
 
 	/**
-	 * Create a new TimerTaskExecutor for the given Timer.
-	 * @param timer the Timer to wrap
+	 * Create a new TimerTaskExecutor for the given {@link Timer}.
+	 * @param timer the {@link Timer} to wrap
+	 * @throws IllegalArgumentException if the supplied {@link Timer} is <code>null</code>
 	 */
 	public TimerTaskExecutor(Timer timer) {
 		Assert.notNull(timer, "Timer must not be null");
@@ -65,9 +69,11 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, InitializingBe
 	}
 
 	/**
-	 * Set the <code>java.util.Timer</code> to use for this TaskExecutor,
-	 * for example a shared Timer instance defined by a TimerFactoryBean.
-	 * <p>If not specified, a default Timer instance will be used.
+	 * Set the {@link Timer} to use for this {@link TimerTaskExecutor},
+	 * for example a shared {@link Timer} instance defined by a
+     * {@link TimerFactoryBean}.
+	 * <p>If not specified, a default {@link Timer} instance will be used.
+     * @param timer the {@link Timer} to use for this {@link TimerTaskExecutor} (may be <code>null</code>) 
 	 * @see TimerFactoryBean
 	 */
 	public void setTimer(Timer timer) {
@@ -77,6 +83,7 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, InitializingBe
 	/**
 	 * Set the delay to use for scheduling tasks passed into the
 	 * <code>execute</code> method. Default is 0.
+     * @param delay the delay in milliseconds before the task is to be executed
 	 */
 	public void setDelay(int delay) {
 		this.delay = delay;
@@ -86,16 +93,18 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, InitializingBe
 	public void afterPropertiesSet() {
 		if (this.timer == null) {
 			logger.info("Initializing Timer");
-			this.timer = new Timer(true);
-			this.internalTimer = true;
+			this.timer = createTimer();
+			this.usingAnInternalTimer = true;
 		}
 	}
 
 	/**
-	 * Create a new Timer instance. Called by <code>afterPropertiesSet</code>
-	 * if no Timer has been specified explicitly.
-	 * <p>Default implementation creates a plain daemon Timer.
-	 * @return a new Timer instance
+	 * Create a new {@link Timer} instance. Called by <code>afterPropertiesSet</code>
+	 * if no {@link Timer} has been specified explicitly.
+	 * <p>Default implementation creates a plain daemon {@link Timer}.
+     * <p>If overridden, subclasses must take care to ensure that a non-null
+     * {@link Timer} is returned from the execution of this method.
+	 * @return a new {@link Timer} instance
 	 * @see #afterPropertiesSet
 	 * @see java.util.Timer#Timer(boolean)
 	 */
@@ -105,25 +114,33 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, InitializingBe
 
 
 	/**
-	 * Schedules the given Runnable on this executor's Timer instance,
-	 * wrapping it in a DelegatingTimerTask.
+	 * Schedules the given {@link Runnable} on this executor's {@link Timer} instance,
+	 * wrapping it in a {@link DelegatingTimerTask}.
+     * @param task the task to be executed
+	 * @throws IllegalArgumentException if the supplied {@link Runnable task} is <code>null</code>,
+     * or if the {@link Timer} encapsulated by this instance has not been set, or
+     * if the {@link #setDelay(int) configured delay} is negative.
 	 */
 	public void execute(Runnable task) {
 		Assert.notNull(this.timer, "timer is required");
 		this.timer.schedule(new DelegatingTimerTask(task), this.delay);
 	}
 
-	public boolean isShortLivedPreferred() {
+    /**
+     * This {@link TimerTaskExecutor} prefers short lived operations.
+     * @return <code>true</code> 
+     */
+    public boolean isShortLivedPreferred() {
 		return true;
 	}
 
 
 	/**
-	 * Cancel the Timer on bean factory shutdown, stopping all scheduled tasks.
+	 * Cancel the {@link Timer} on bean factory shutdown, stopping all scheduled tasks.
 	 * @see java.util.Timer#cancel()
 	 */
 	public void destroy() {
-		if (this.internalTimer) {
+		if (this.usingAnInternalTimer) {
 			logger.info("Cancelling Timer");
 			this.timer.cancel();
 		}
