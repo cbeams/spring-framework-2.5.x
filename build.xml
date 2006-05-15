@@ -497,7 +497,9 @@
 	</target>
 
 
-	<target name="buildmock" depends="build" description="Compile mock source tree Java files into class files">
+	<target name="buildmock" depends="buildmainmock,buildtigermock" description="Compile all mock source files."/>
+
+	<target name="buildmainmock" depends="build" description="Compile mock source tree Java files">
 
 		<mkdir dir="${target.mockclasses.dir}"/>
 
@@ -518,6 +520,26 @@
 
 	</target>
 
+	<target name="buildtigermock" depends="build" description="Compile tiger mock source tree Java files">
+
+		<mkdir dir="${target.mockclasses.dir}"/>
+
+		<javac destdir="${target.mockclasses.dir}" source="1.5" target="1.5" debug="${debug}"
+					 deprecation="false" optimize="false" failonerror="true">
+			<src path="${tiger.mock.dir}"/>
+			<classpath refid="all-libs"/>
+			<classpath location="${target.classes.dir}"/>
+		</javac>
+
+		<!-- Pick up logging config from test directory -->
+		<copy todir="${target.mockclasses.dir}" preservelastmodified="true">
+			<fileset dir="${mock.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+
+	</target>
 
 	<target name="mockjar" depends="buildmock,initdist" description="Create JAR file with Spring mock classes">
 
@@ -771,6 +793,8 @@
 			<fileset dir="${tiger.test.dir}">
 				<include name="**/*.properties"/>
 				<include name="**/*.xml"/>
+				<include name="**/*.jar"/>
+				<include name="**/*.sql"/>
 			</fileset>
 		</copy>
 
@@ -858,7 +882,7 @@
 
 		<junit forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
-			<jvmarg line="-Djava.awt.headless=true -Xmx128m -XX:MaxPermSize=128m"/>
+			<jvmarg line="-javaagent:${lib.dir}/spring/jpa-test-agent.jar -Dprovider=toplink -Djava.awt.headless=true -Xmx128m -XX:MaxPermSize=128m"/>
 
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${target.tigertestclasses.dir}"/>
