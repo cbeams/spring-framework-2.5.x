@@ -37,8 +37,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.ConfigurableBeanFactoryUtils;
-import org.springframework.beans.propertyeditors.ClassEditor;
+import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
@@ -272,7 +271,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 
-	public void refresh() throws BeansException, IllegalStateException {
+	public synchronized void refresh() throws BeansException, IllegalStateException {
 		this.startupTime = System.currentTimeMillis();
 
 		// Tell subclass to refresh the internal bean factory.
@@ -283,8 +282,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.setBeanClassLoader(getClassLoader());
 
 		// Populate the bean factory with context-specific resource editors.
-		ConfigurableBeanFactoryUtils.registerResourceEditors(beanFactory, this);
-		beanFactory.registerCustomEditor(Class.class, new ClassEditor(getClassLoader()));
+		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this));
 
 		// Configure the bean factory with context semantics.
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
