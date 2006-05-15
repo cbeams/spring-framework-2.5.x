@@ -39,6 +39,9 @@
 		<property name="badSqlGrammarCodes">
 			<value>-22,-28</value>
 		</property>
+		<property name="dataAccessResourceFailureCodes">
+			<value>-80</value>
+		</property>
 		<property name="dataIntegrityViolationCodes">
 			<value>-9</value>
 		</property>
