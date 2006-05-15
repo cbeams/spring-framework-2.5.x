@@ -98,7 +98,7 @@ public class ExampleJob extends QuartzJobBean {
 				The above example will result in the <literal>doIt</literal> method being called on the
 				<literal>exampleBusinessObject</literal> method (see below):
 			</para>
-			<programlisting><![CDATA[public class BusinessObject {
+			<programlisting><![CDATA[public class ExampleBusinessObject {
   
   ]]><lineannotation>// properties and collaborators</lineannotation><![CDATA[
   
@@ -268,9 +268,11 @@ public class ExampleJob extends QuartzJobBean {
   }
 }]]></programlisting>
 			<para>
-				Changing the reference of the above example (in which the
-				<classname>ScheduledTimerTask</classname> is mentioned) to
-				<literal>doIt</literal> will result in this task being executed.
+				Changing the <literal>timerTask</literal> reference of the
+				<classname>ScheduledTimerTask</classname> example to
+				the bean <literal>doIt</literal> will result in the
+				<literal>doIt</literal> mehtod being executed on a fixed
+				schedule.
 			</para>
 		</section>
 		<section>
@@ -295,7 +297,7 @@ public class ExampleJob extends QuartzJobBean {
 	</section>
 	<section id="taskexecutor">
 		<title>
-			Using Spring's <classname>TaskExecutor</classname> abstraction
+			The Spring <classname>TaskExecutor</classname> abstraction
 		</title>
 
 		<para>
@@ -455,8 +457,6 @@ public class ExampleJob extends QuartzJobBean {
 						<link linkend="concurrentTaskExecutor"><classname>ConcurrentTaskExecutor</classname></link>
 						instead.
                     </para>
-                    <para>&nbsp;</para>
-                    <para>&nbsp;</para>
                 </listitem>
 				
 				<listitem>
@@ -481,15 +481,13 @@ public class ExampleJob extends QuartzJobBean {
 						<classname>WorkManagerTaskExecutor</classname>
 					</para>
 					
-					<sidebar>
-						<para>
+					<sidebar><para>
 							CommonJ is a set of specifications jointly
 							developed between BEA and IBM. These
 							specifications are not Java EE standards, but
 							are standard across BEA's and IBM's
 							Application Server implementations.
-						</para>
-					</sidebar>
+						</para></sidebar>
 
 					<para>
 						This implementation uses the CommonJ WorkManager
@@ -505,6 +503,72 @@ public class ExampleJob extends QuartzJobBean {
                 </listitem>
 
 			</itemizedlist>
+		</section>
+		<section>
+			<title>
+				Using a <classname>TaskExecutor</classname>
+			</title>
+			
+			<para>
+				Spring's <classname>TaskExecutor</classname> implementations
+				are used as simple JavaBeans.  In the example below, we define
+				a bean that uses the <classname>ThreadPoolTaskExecutor</classname>
+				to asynchronously print out a set of messages.
+			</para>
+			
+			<programlisting><![CDATA[import org.springframework.core.task.TaskExecutor;
+
+public class TaskExecutorExample {
+
+  private class MessagePrinterTask implements Runnable {
+
+    private String message;
+
+    public MessagePrinterTask(String message) {
+      this.message = message;
+    }
+
+    public void run() {
+      System.out.println(message);
+    }
+
+  }
+
+  private TaskExecutor taskExecutor;
+
+  public TaskExecutorExample(TaskExecutor taskExecutor) {
+    this.taskExecutor = taskExecutor;
+  }
+
+  public void printMessages() {
+    for(int i = 0; i < 25; i++) {
+      taskExecutor.execute(new MessagePrinterTask("Message" + i));
+    }
+  }
+
+}]]></programlisting>
+			
+			<para>
+				As you can see, rather than retrieving a thread from the
+				pool and executing yourself, you add your <classname>Runnable</classname>
+				to the queue and the <classname>TaskExecutor</classname>
+				uses it's internal rules to decide when the task gets executed.
+			</para>
+			
+			<para>
+				To configure the rules that the <classname>TaskExecutor</classname>
+				will use, simple bean properties have been exposed.
+			</para>
+			
+			<programlisting><![CDATA[<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+  <property name="corePoolSize" value="5" />
+  <property name="maxPoolSize" value="10" />
+  <property name="queueCapacity" value="25" />
+</bean>
+
+<bean id="taskExecutorExample" class="TaskExecutorExample">
+  <constructor-arg ref="taskExecutor" />
+</bean>]]></programlisting>
 		</section>
 	</section>
 </chapter>
