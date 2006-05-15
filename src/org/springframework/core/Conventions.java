@@ -19,10 +19,9 @@ package org.springframework.core;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.Assert;
-import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 
 /**
  * Provides methods to support various naming and other conventions used
@@ -71,7 +70,7 @@ public abstract class Conventions {
 	}
 
 	/**
-	 * Converts <code>String</code>s in attribute name format (lowercase, hyphens separating words)
+	 * Convert <code>String</code>s in attribute name format (lowercase, hyphens separating words)
 	 * into property name format (camel-cased). For example, <code>transaction-manager</code> is
 	 * converted into <code>transactionManager</code>.
 	 */
@@ -123,7 +122,7 @@ public abstract class Conventions {
 	}
 
 	/**
-	 * Returns an attribute name qualified by the supplied enclosing {@link Class}. For example,
+	 * Return an attribute name qualified by the supplied enclosing {@link Class}. For example,
 	 * the attribute name '<code>foo</code>' qualified by {@link Class} '<code>com.myapp.SomeClass</code>'
 	 * would be '<code>com.myapp.SomeClass.foo</code>'
 	 */
@@ -132,4 +131,5 @@ public abstract class Conventions {
 		Assert.notNull(attributeName, "'attributeName' cannot be null.");
 		return enclosingClass.getName() + "." + attributeName;
 	}
+
 }
