@@ -19,11 +19,12 @@ package org.springframework.validation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
  * This utility class offers convenient methods for invoking a Validator
- * and for rejecting empty fields. Empty field checks in Validator
+ * and for rejecting empty fields. Checks for an empty field in Validator
  * implementations can become one-liners.
  *
  * @author Juergen Hoeller
@@ -38,37 +39,36 @@ public abstract class ValidationUtils {
 
 
 	/**
-	 * Invoke the given validator for the given object and Errors instance.
-	 * @param validator validator to be invoked, or <code>null</code> if no validation
+	 * Invoke the given Validator for the given object and Errors instance.
+	 * @param validator Validator to be invoked (never <code>null</code>)
 	 * @param obj object to bind the parameters to
 	 * @param errors Errors instance that should store the errors
 	 */
 	public static void invokeValidator(Validator validator, Object obj, Errors errors) {
-		if (validator != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking validator [" + validator + "]");
+		Assert.notNull(validator, "Validator must not be null");
+		Assert.notNull(errors, "Errors object must not be null");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Invoking validator [" + validator + "]");
+		}
+		if (obj != null && !validator.supports(obj.getClass())) {
+			throw new IllegalArgumentException("Validator " + validator.getClass() +
+					" does not support " + obj.getClass());
+		}
+		validator.validate(obj, errors);
+		if (logger.isDebugEnabled()) {
+			if (errors.hasErrors()) {
+				logger.debug("Validator found " + errors.getErrorCount() + " errors");
 			}
-			if (obj != null && !validator.supports(obj.getClass())) {
-				throw new IllegalArgumentException("Validator " + validator.getClass() +
-						" does not support " + obj.getClass());
-			}
-			validator.validate(obj, errors);
-			if (logger.isDebugEnabled()) {
-				if (errors.hasErrors()) {
-					logger.debug("Validator found " + errors.getErrorCount() + " errors");
-				}
-				else {
-					logger.debug("Validator found no errors");
-				}
+			else {
+				logger.debug("Validator found no errors");
 			}
 		}
 	}
 	
 	/**
-	 * Reject the given field with the given error code and message
-	 * if the value is empty.
-	 * <p>The object to validate does not have to be passed in,
-	 * as the Errors instance allows to check field values
+	 * Reject the given field with the given error code if the value is empty.
+	 * <p>The object whose field is being validated does not need to be passed
+	 * in because the Errors instance can resolve field values by itself
 	 * (it will usually hold an internal reference to the target object).
 	 * @param errors Errors instance to register errors on
 	 * @param field the field name to check
@@ -79,10 +79,10 @@ public abstract class ValidationUtils {
 	}
 
 	/**
-	 * Reject the given field with the given error code and message
+	 * Reject the given field with the given error code and default message
 	 * if the value is empty.
-	 * <p>The object to validate does not have to be passed in,
-	 * as the Errors instance allows to check field values
+	 * <p>The object whose field is being validated does not need to be passed
+	 * in because the Errors instance can resolve field values by itself
 	 * (it will usually hold an internal reference to the target object).
 	 * @param errors Errors instance to register errors on
 	 * @param field the field name to check
@@ -95,9 +95,9 @@ public abstract class ValidationUtils {
 
 	/**
 	 * Reject the given field with the given error code, error arguments
-	 * and message if the value is empty.
-	 * <p>The object to validate does not have to be passed in,
-	 * as the Errors instance allows to check field values
+	 * and default message if the value is empty.
+	 * <p>The object whose field is being validated does not need to be passed
+	 * in because the Errors instance can resolve field values by itself
 	 * (it will usually hold an internal reference to the target object).
 	 * @param errors Errors instance to register errors on
 	 * @param field the field name to check
@@ -109,6 +109,7 @@ public abstract class ValidationUtils {
 	public static void rejectIfEmpty(
 			Errors errors, String field, String errorCode, Object[] errorArgs, String defaultMessage) {
 
+		Assert.notNull(errors, "Errors object must not be null");
 		Object value = errors.getFieldValue(field);
 		if (value == null || !StringUtils.hasLength(value.toString())) {
 			errors.rejectValue(field, errorCode, errorArgs, defaultMessage);
@@ -116,10 +117,10 @@ public abstract class ValidationUtils {
 	}
 
 	/**
-	 * Reject the given field with the given error code and message
-	 * if the value is empty or just contains whitespace.
-	 * <p>The object to validate does not have to be passed in,
-	 * as the Errors instance allows to check field values
+	 * Reject the given field with the given error code if the value is empty
+	 * or just contains whitespace.
+	 * <p>The object whose field is being validated does not need to be passed
+	 * in because the Errors instance can resolve field values by itself
 	 * (it will usually hold an internal reference to the target object).
 	 * @param errors Errors instance to register errors on
 	 * @param field the field name to check
@@ -130,10 +131,10 @@ public abstract class ValidationUtils {
 	}
 
 	/**
-	 * Reject the given field with the given error code and message
+	 * Reject the given field with the given error code and default message
 	 * if the value is empty or just contains whitespace.
-	 * <p>The object to validate does not have to be passed in,
-	 * as the Errors instance allows to check field values
+	 * <p>The object whose field is being validated does not need to be passed
+	 * in because the Errors instance can resolve field values by itself
 	 * (it will usually hold an internal reference to the target object).
 	 * @param errors Errors instance to register errors on
 	 * @param field the field name to check
@@ -148,9 +149,9 @@ public abstract class ValidationUtils {
 
 	/**
 	 * Reject the given field with the given error code, error arguments
-	 * and message if the value is empty or just contains whitespace.
-	 * <p>The object to validate does not have to be passed in,
-	 * as the Errors instance allows to check field values
+	 * and default message if the value is empty or just contains whitespace.
+	 * <p>The object whose field is being validated does not need to be passed
+	 * in because the Errors instance can resolve field values by itself
 	 * (it will usually hold an internal reference to the target object).
 	 * @param errors Errors instance to register errors on
 	 * @param field the field name to check
@@ -162,6 +163,7 @@ public abstract class ValidationUtils {
 	public static void rejectIfEmptyOrWhitespace(
 			Errors errors, String field, String errorCode, Object[] errorArgs, String defaultMessage) {
 
+		Assert.notNull(errors, "Errors object must not be null");
 		Object value = errors.getFieldValue(field);
 		if (value == null ||!StringUtils.hasText(value.toString())) {
 			errors.rejectValue(field, errorCode, errorArgs, defaultMessage);
