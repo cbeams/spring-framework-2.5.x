@@ -209,7 +209,8 @@ public abstract class AbstractEntityManagerFactoryBean implements FactoryBean, I
 
 	public Class getObjectType() {
 		return (this.entityManagerFactory != null) ?
-		    this.entityManagerFactory.getClass() : EntityManagerFactory.class;
+		    this.entityManagerFactory.getClass() : 
+		    PortableEntityManagerFactoryPlus.class;
 	}
 
 	public final boolean isSingleton() {

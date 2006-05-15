@@ -34,6 +34,8 @@ public class EntityManagerFactoryBeanSupportTests extends AbstractEntityManagerF
 	public void testHookIsCalled() throws Exception {
 		DummyEntityManagerFactoryBean demf = new DummyEntityManagerFactoryBean(mockEmf);
 		
+		demf.setVendorProperties(new DummyVendorProperties());
+		
 		demf.afterPropertiesSet();
 		
 		checkInvariants(demf);

@@ -70,6 +70,8 @@ public class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFac
 		LocalEntityManagerFactoryBean lemfb = new LocalEntityManagerFactoryBean();
 		String entityManagerName = "call me Bob";
 		
+		lemfb.setVendorProperties(new DummyVendorProperties());
+		
 		lemfb.setEntityManagerName(entityManagerName);
 		lemfb.setPersistenceProviderClass(DummyPersistenceProvider.class);
 		if (props != null) {

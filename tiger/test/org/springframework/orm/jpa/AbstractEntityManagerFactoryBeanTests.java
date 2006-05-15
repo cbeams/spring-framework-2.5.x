@@ -28,8 +28,9 @@ import org.easymock.MockControl;
  * Superclass for unit tests for EntityManagerFactory FactoryBeans.
  * Note: subclasses must set any expectations on the mock
  * EntityManagerFactory and call close on it
+ * 
  * @author Rod Johnson
- *
+ * @since 2.0
  */
 public abstract class AbstractEntityManagerFactoryBeanTests extends TestCase {
 	
@@ -49,9 +50,14 @@ public abstract class AbstractEntityManagerFactoryBeanTests extends TestCase {
 	
 	protected void checkInvariants(AbstractEntityManagerFactoryBean demf) {
 		assertTrue(EntityManagerFactory.class.isAssignableFrom(demf.getObjectType()));
-		assertSame(mockEmf, demf.getObject());
-		assertSame(mockEmf, demf.getObject());
-		assertSame(mockEmf, demf.getEntityManagerFactory());
+		Object gotObject = demf.getObject();
+		assertTrue("Object created by factory implements PortableEntityManagerPlus", 
+				gotObject instanceof PortableEntityManagerFactoryPlus);
+		PortableEntityManagerFactoryPlus pemp = (PortableEntityManagerFactoryPlus) demf.getObject();
+		assertSame("Successive invocations of getObject() return same object", pemp, demf.getObject());
+		assertSame(pemp, demf.getObject());
+		assertSame(pemp.getEntityManagerFactoryInfo().getNativeEntityManagerFactory(), 
+				mockEmf);
 	}
 
 
@@ -61,7 +67,6 @@ public abstract class AbstractEntityManagerFactoryBeanTests extends TestCase {
 		public DummyEntityManagerFactoryBean(EntityManagerFactory emf) {
 			this.emf = emf;
 		}
-		
 
 		@Override
 		protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
@@ -75,5 +80,51 @@ public abstract class AbstractEntityManagerFactoryBeanTests extends TestCase {
 		public String getPersistenceUnitName() {
 			throw new UnsupportedOperationException();
 		}
+	}
+	
+	protected static class DummyVendorProperties extends VendorProperties {
+
+		@Override
+		public void applyBeforeProviderCreation(AbstractEntityManagerFactoryBean fb) {
+		}
+
+		@Override
+		public JpaDialect getJpaDialect() {
+			return new DefaultJpaDialect() {
+				@Override
+				public PortableEntityManagerFactoryPlusOperations getPortableEntityManagerFactoryPlusOperations(EntityManagerFactory emf, EntityManagerFactoryInfo emfi) {
+					return new PortableEntityManagerFactoryPlusOperations() {
+
+						public void evict(Class clazz) {
+							throw new UnsupportedOperationException();
+						}
+
+						public EntityManagerFactoryInfo getEntityManagerFactoryInfo() {
+							return new EntityManagerFactoryInfo() {
+
+								public EntityManagerFactory getNativeEntityManagerFactory() {
+									return mockEmf;
+								}
+
+								public PersistenceUnitInfo getPersistenceUnitInfo() {
+									throw new UnsupportedOperationException();
+								}
+
+								public String getPersistenceUnitName() {
+									throw new UnsupportedOperationException();
+								}
+
+								public VendorProperties getVendorProperties() {
+									return DummyVendorProperties.this;
+								}
+								
+							};
+						}
+						
+					};
+				}
+			};
+		}
+		
 	}
 }
