@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 RC1 (15.5.2006)
+Changes in version 2.0 RC1 (18.5.2006)
 --------------------------------------
 
 Package org.springframework.aop
@@ -13,19 +13,33 @@ Package org.springframework.aop
 Package org.springframework.beans
 * introduced lazy loading (and lazy validation) of bean classes in standard bean factories and bean definition readers
 * redefined ListableBeanFactory's "includeFactoryBeans" flag for "getBean(Name)sOfType" into "allowEagerInit"
+* PropertyPlaceholderConfigurer is able to resolve placeholders in lazily loaded bean class names
+* added support for PropertyEditorRegistrars to ConfigurableBeanFactory, for non-synchronized usage of custom editors
+* CustomEditorConfigurer supports PropertyEditorRegistrars, to be applied to its containing BeanFactory
+* reworked ConfigurableBeanFactoryUtils into ResourceEditorRegistrar
 * added scoping support to core BeanFactory, for creating raw target beans in arbitrary scopes
 * added "scope" attribute at bean level to XML bean definition format, superseding singleton="true"/"false"
 
+Package org.springframework.context
+* synchronized AbstractApplicationContext's "refresh()" method, for hot refreshing in concurrent environments
+
 Package org.springframework.jdbc
-* refined default SQL error codes for DB2
+* refined default SQL error codes for DB2 and HSQLDB
 
 Package org.springframework.orm
+* Hibernate3 LocalSessionFactoryBean explicitly calls "buildMappings()" to prepare Configuration metadata for subclasses
 * fixed JpaTransactionManager to not cause an NPE when the creation of a transactional EntityManager raises an exception
 * fixed JpaInterceptor to actually bind a new EntityManager to the thread again (worked in M3, didn't work in M4)
 * fixed EntityManagerFactoryUtils's "convertJpaAccessException" to always return rather than throw DataAccessExceptions
 
+Package org.springframework.transaction
+* added "failEarlyOnGlobalRollbackOnly" flag to AbstractPlatformTransactionManager, for consistent fail-early behavior
+
 Package org.springframework.util
 * "ClassUtils.isPresent" logs exception message only instead of full stacktrace for classes that haven't been found
+
+Package org.springframework.validation
+* reworked ValidationUtils to not accept a null Validator for "invokeValidator" anymore
 
 Package org.springframework.web
 * dropped "getCause()" method from NestedServletException, to avoid conflicts with JDK-1.4-based ServletException class
