@@ -93,4 +93,6 @@ This application has been tested in jetspeed-2 where the underlying portlet-
 container is Apache Pluto -- the JSR-168 reference implementation. To deploy
 the WAR file in jetspeed-2, simply copy it to this directory:
 <jetspeed2-install-dir>/webapps/jetspeed/WEB-INF/deploy
+The 'petportal.psml' file can then be added to this directory:
+<jetspeed2-install-dir>/webapps/jetspeed/WEB-INF/pages
 
