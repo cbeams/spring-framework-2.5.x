@@ -85,7 +85,7 @@ public class JpaInterceptor extends JpaAccessor implements MethodInterceptor {
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		// Determine current EntityManager: either the transactional one
 		// managed by the factory or a temporary one for the given invocation.
-		EntityManager em = EntityManagerFactoryUtils.getEntityManager(getEntityManagerFactory());
+		EntityManager em = EntityManagerFactoryUtils.getTransactionalEntityManager(getEntityManagerFactory());
 		boolean isNewEm = false;
 		if (em == null) {
 			logger.debug("Creating new EntityManager for JpaInterceptor invocation");

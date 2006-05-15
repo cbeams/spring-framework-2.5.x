@@ -244,7 +244,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 			JpaTransactionObject txObject = (JpaTransactionObject) transaction;
 			if (txObject.getEntityManagerHolder() == null) {
 				// Create a new EntityManager with PersistenceContextType.TRANSACTION
-				EntityManager newEm = getEntityManagerFactory().createEntityManager();
+				EntityManager newEm = createEntityManagerForTransaction();
 				if (logger.isDebugEnabled()) {
 					logger.debug("Opened new EntityManager [" + newEm + "] for JPA transaction");
 				}
@@ -299,11 +299,24 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 			throw ex;
 		}
 		catch (Exception ex) {
+			ex.printStackTrace();
 			if (em != null) {
 				em.close();
 			}
 			throw new CannotCreateTransactionException("Could not open JPA EntityManager for transaction", ex);
 		}
+	}
+
+	private EntityManager createEntityManagerForTransaction() {
+		// If the EntityManagerFactory is a Spring proxy,
+		// unwrap it. Otherwise the returned EntityManager
+		// created from calls to createEntityManager() would
+		// try to synchronize with the transaction itself.
+		EntityManagerFactory emfToUse  = getEntityManagerFactory();
+		if (emfToUse instanceof EntityManagerFactoryInfo) {
+			emfToUse = ((EntityManagerFactoryInfo) emfToUse).getNativeEntityManagerFactory();
+		}
+		return emfToUse.createEntityManager();
 	}
 
 	protected Object doSuspend(Object transaction) {

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.orm.jpa;
 
 import javax.persistence.EntityExistsException;
@@ -43,7 +44,7 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 	public void testDoGetEntityManager() {
 		// test null assertion
 		try {
-			EntityManagerFactoryUtils.doGetEntityManager(null);
+			EntityManagerFactoryUtils.doGetTransactionalEntityManager(null);
 			fail("expected exception");
 		}
 		catch (IllegalArgumentException ex) {
@@ -54,7 +55,7 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 
 		mockControl.replay();
 		// no tx active
-		assertNull(EntityManagerFactoryUtils.doGetEntityManager(factory));
+		assertNull(EntityManagerFactoryUtils.doGetTransactionalEntityManager(factory));
 		mockControl.verify();
 	}
 
@@ -71,7 +72,7 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 
 			mockControl.replay();
 			// no tx active
-			assertSame(manager, EntityManagerFactoryUtils.doGetEntityManager(factory));
+			assertSame(manager, EntityManagerFactoryUtils.doGetTransactionalEntityManager(factory));
 			assertSame(manager, ((EntityManagerHolder)TransactionSynchronizationManager.unbindResource(factory)).getEntityManager());
 			
 			mockControl.verify();

@@ -75,9 +75,9 @@ public abstract class EntityManagerFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
 	 * @see JpaTransactionManager
 	 */
-	public static EntityManager getEntityManager(EntityManagerFactory emf) throws DataAccessResourceFailureException {
+	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf) throws DataAccessResourceFailureException {
 		try {
-			return doGetEntityManager(emf);
+			return doGetTransactionalEntityManager(emf);
 		}
 		catch (PersistenceException ex) {
 			throw new DataAccessResourceFailureException("Could not obtain JPA EntityManager", ex);
@@ -92,10 +92,10 @@ public abstract class EntityManagerFactoryUtils {
 	 * @param emf EntityManagerFactory to create the EntityManager with
 	 * @return the EntityManager, or <code>null</code> if none found
 	 * @throws javax.persistence.PersistenceException if the EntityManager couldn't be created
-	 * @see #getEntityManager(javax.persistence.EntityManagerFactory)
+	 * @see #getTransactionalEntityManager(javax.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
 	 */
-	public static EntityManager doGetEntityManager(EntityManagerFactory emf) throws PersistenceException {
+	public static EntityManager doGetTransactionalEntityManager(EntityManagerFactory emf) throws PersistenceException {
 		Assert.notNull(emf, "No EntityManagerFactory specified");
 
 		EntityManagerHolder emHolder =
@@ -129,14 +129,16 @@ public abstract class EntityManagerFactoryUtils {
 		logger.debug("Opening JPA EntityManager");
 		EntityManager em = emf.createEntityManager();
 
-		logger.debug("Registering transaction synchronization for JPA EntityManager");
-		// Use same EntityManager for further JPA actions within the transaction.
-		// Thread object will get removed by synchronization at transaction completion.
-		emHolder = new EntityManagerHolder(em);
-		emHolder.setSynchronizedWithTransaction(true);
-		TransactionSynchronizationManager.registerSynchronization(
-				new EntityManagerSynchronization(emHolder, emf, true));
-		TransactionSynchronizationManager.bindResource(emf, emHolder);
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			logger.debug("Registering transaction synchronization for JPA EntityManager");
+			// Use same EntityManager for further JPA actions within the transaction.
+			// Thread object will get removed by synchronization at transaction completion.
+			emHolder = new EntityManagerHolder(em);
+			emHolder.setSynchronizedWithTransaction(true);
+			TransactionSynchronizationManager.registerSynchronization(
+					new EntityManagerSynchronization(emHolder, emf, true));
+			TransactionSynchronizationManager.bindResource(emf, emHolder);
+		}
 
 		return em;
 	}
@@ -162,13 +164,13 @@ public abstract class EntityManagerFactoryUtils {
 			return new JpaOptimisticLockingFailureException((OptimisticLockException) ex);
 		}
 		if (ex instanceof EntityExistsException) {
-			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
+			throw new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
 		if (ex instanceof NoResultException) {
-			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
+			throw new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
 		if (ex instanceof NonUniqueResultException) {
-			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
+			throw new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
 		// fallback
 		return new JpaSystemException(ex);

@@ -21,6 +21,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceProvider;
+import javax.persistence.spi.PersistenceUnitInfo;
 
 
 /**
@@ -57,7 +58,7 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 	 * Initialize the EntityManagerFactory for the given configuration.
 	 * @throws javax.persistence.PersistenceException in case of JPA initialization errors
 	 */
-	protected EntityManagerFactory createEntityManagerFactory() throws PersistenceException {
+	protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
 		if (this.persistenceProviderClass != null) {
 			// Create EntityManagerFactory directly through PersistenceProvider.
 			PersistenceProvider pp =
@@ -74,6 +75,14 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 			// Let JPA perform its PersistenceProvider autodetection.
 			return Persistence.createEntityManagerFactory(this.entityManagerName, getJpaPropertyMap());
 		}
+	}
+
+	public PersistenceUnitInfo getPersistenceUnitInfo() {
+		return null;
+	}
+
+	public String getPersistenceUnitName() {
+		return getEntityManagerName();
 	}
 
 }

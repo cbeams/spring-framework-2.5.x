@@ -28,7 +28,7 @@ import org.easymock.MockControl;
  * @author Rod Johnson
  *
  */
-public class SharedEntityManagerAdapterTests extends TestCase {
+public class SharedEntityManagerFactoryTests extends TestCase {
 	
 	public void testValidUsage() {
 		Object o = new Object();
@@ -50,7 +50,7 @@ public class SharedEntityManagerAdapterTests extends TestCase {
 		emfMc.setReturnValue(mockEm, 1);
 		emfMc.replay();
 		
-		SharedEntityManagerAdapter proxyFactoryBean = new SharedEntityManagerAdapter();
+		SharedEntityManagerFactory proxyFactoryBean = new SharedEntityManagerFactory();
 		proxyFactoryBean.setEntityManagerFactory(mockEmf);
 		proxyFactoryBean.afterPropertiesSet();
 		

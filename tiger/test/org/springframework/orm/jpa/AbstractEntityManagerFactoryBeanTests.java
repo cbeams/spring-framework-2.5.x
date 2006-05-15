@@ -18,6 +18,7 @@ package org.springframework.orm.jpa;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
+import javax.persistence.spi.PersistenceUnitInfo;
 
 import junit.framework.TestCase;
 
@@ -61,9 +62,18 @@ public abstract class AbstractEntityManagerFactoryBeanTests extends TestCase {
 			this.emf = emf;
 		}
 		
+
 		@Override
-		protected EntityManagerFactory createEntityManagerFactory() throws PersistenceException {
+		protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
 			return emf;
+		}
+
+		public PersistenceUnitInfo getPersistenceUnitInfo() {
+			throw new UnsupportedOperationException();
+		}
+
+		public String getPersistenceUnitName() {
+			throw new UnsupportedOperationException();
 		}
 	}
 }

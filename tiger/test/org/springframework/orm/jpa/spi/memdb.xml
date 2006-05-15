@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd"
+>
+
+<beans>
+	<import resource="weaver.xml"/>
+<!--
+	<bean class="org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator" />
+	
+	<bean class="org.springframework.orm.jpa.ExceptionTranslationAspect" />
+	
+	Semantic pointcut - classes that reference JPA
+-->
+	
+	<!--
+
+	<bean class="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect" 
+		factory-method="aspectOf" />
+		
+	-->
+	
+	<!--
+	<bean 
+		id="entityManagerFactory"
+		class="org.springframework.orm.jpa.spi.ContainerEntityManagerFactoryBean" >
+		<property name="dataSource" ref="dataSource" /> 
+		
+		<property name="persistenceProviderClass" 
+			value="oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider" />
+			
+		<property name="location"
+			value="org/springframework/orm/jpa/domain/persistence.xml" />
+	</bean>
+	
+	
+	<bean 
+		id="entityManagerFactory"
+		class="org.springframework.orm.jpa.spi.TopLinkVendorProperties" >
+		<property name="dataSource" ref="dataSource" /> 
+		
+		<property name="database" value="HSQL" />
+		
+		<property name="generateDDL" value="true" />
+		<property name="loadTimeWeaver" ref="weaver"/>
+		<property name="showSql" value="true" />
+		
+		<property name="location"
+			value="org/springframework/orm/jpa/domain/persistence.xml" />
+	</bean>
+	
+	-->
+	<bean id="entityManager"
+		class="org.springframework.orm.jpa.support.SharedEntityManagerFactory"
+		autowire="byType" />
+
+	
+	<!--
+	<bean id="entityManager"
+		class="org.springframework.orm.jpa.support.SharedEntityManagerProxyFactoryBean"
+		autowire="byType" />
+		-->
+
+	
+	<bean 
+		id="transactionManager"
+		class="org.springframework.orm.jpa.JpaTransactionManager" >
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+		<property name="dataSource" ref="dataSource" />
+	
+	<!-- TODO coordinate into one tag  -->
+	<property name="jpaDialect" ref="jpaDialect"/>
+	<!-- 
+		<bean class="org.springframework.orm.jpa.spi.TopLinkJpaDialect" />
+	</property>
+	 -->
+	</bean>
+	
+
+
+	<bean 
+			id = "dataSource"
+			class="org.apache.commons.dbcp.BasicDataSource" >
+		<property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+		<property name="url" value="jdbc:hsqldb:mem:xdb" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+
+	<!-- Datasource for using an existing database. make sure you turn off generateDLL otherwise
+		on multiple runs it will break it.
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+		<property name="url" value="jdbc:hsqldb:file:target/classes/db/test"/>
+		<property name="username" value="sa"/>
+		<property name="password" value=""/>
+	</bean>
+	 -->
+	
+	
+	<bean id="testBean" class="org.springframework.beans.TestBean" >
+		<property name="name" value="Ramnivas" />
+	</bean>
+	
+	<!--
+		Do not specify class, to avoid dependencies
+	-->
+	<bean id="person" abstract="true"
+			singleton="false" >
+		<property name="testBean" ref="testBean" />
+	</bean>
+
+	
+</beans>

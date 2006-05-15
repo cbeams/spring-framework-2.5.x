@@ -19,6 +19,7 @@ package org.springframework.orm.jpa;
 import java.sql.SQLException;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 
 import org.springframework.dao.DataAccessException;
@@ -104,6 +105,15 @@ public class DefaultJpaDialect implements JpaDialect {
 	 */
 	public DataAccessException translateException(PersistenceException ex) {
 		return EntityManagerFactoryUtils.convertJpaAccessException(ex);
+	}
+	
+	public PortableEntityManagerFactoryPlusOperations getPortableEntityManagerFactoryPlusOperations(
+			EntityManagerFactory emf, EntityManagerFactoryInfo emfi) {
+		return null;
+	}
+	
+	public PortableEntityManagerPlusOperations getPortableEntityManagerPlusOperations(EntityManager em) {
+		return null;
 	}
 
 }

@@ -179,7 +179,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		EntityManager em = getEntityManager();
 		boolean isNewEm = false;
 		if (em == null) {
-			em = EntityManagerFactoryUtils.getEntityManager(getEntityManagerFactory());
+			em = EntityManagerFactoryUtils.getTransactionalEntityManager(getEntityManagerFactory());
 			if (em == null) {
 				logger.debug("Creating new EntityManager for JPA template execution");
 				em = getEntityManagerFactory().createEntityManager();

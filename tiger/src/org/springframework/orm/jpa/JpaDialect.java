@@ -19,6 +19,7 @@ package org.springframework.orm.jpa;
 import java.sql.SQLException;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 
 import org.springframework.dao.DataAccessException;
@@ -31,6 +32,10 @@ import org.springframework.transaction.TransactionException;
  * does not offer, such as access to the underlying JDBC Connection. This
  * strategy is mainly intended for standalone usage of a JPA provider; most
  * of its functionality is not relevant when running with JTA transactions.
+ * 
+ * <p>Also allows for the provision of value-added methods for portable yet
+ * more capable EntityManager and EntityManagerFactory subinterfaces offered
+ * by Spring.
  *
  * <p>In general, it is recommended to derive from DefaultJpaDialect instead of
  * implementing this interface directly. This allows for inheriting common
@@ -38,10 +43,13 @@ import org.springframework.transaction.TransactionException;
  * specific hooks to plug in concrete vendor-specific behavior.
  *
  * @author Juergen Hoeller
+ * @author Rod Johnson
  * @since 2.0
  * @see JpaTransactionManager#setJpaDialect
  * @see JpaAccessor#setJpaDialect
  * @see DefaultJpaDialect
+ * @see PortableEntityManagerPlus
+ * @see PortableEntityManagerFactoryPlus
  */
 public interface JpaDialect {
 
@@ -164,5 +172,28 @@ public interface JpaDialect {
 	 * @see org.springframework.jdbc.support.SQLExceptionTranslator
 	 */
 	DataAccessException translateException(PersistenceException ex);
+	
+	/**
+	 * Return a more capable, yet portable, EntityManager subinterface, given a native
+	 * EntityManager
+	 * @param em native EntityManager of this provider's type
+	 * @return a more capable EntityManager. It is valid to return null if these
+	 * operations are not implementable for a particular provider. However,
+	 * the operations chosen are likely to be supported by all providers.
+	 */
+	PortableEntityManagerPlusOperations getPortableEntityManagerPlusOperations(EntityManager em);
+	
+	
+	/**
+	 * Return a more capable, yet portable, EntityManagerFactory subinterface, given a native
+	 * EntityManagerFactory
+	 * @param nativeEmf native EntityManagerFactory of this provider's type
+	 * @return a more capable EntityManagerFactory. It is valid to return null if these
+	 * operations are not implementable for a particular provider. However,
+	 * the operations chosen are likely to be supported by all providers.
+	 */
+	PortableEntityManagerFactoryPlusOperations getPortableEntityManagerFactoryPlusOperations(
+			EntityManagerFactory nativeEmf, EntityManagerFactoryInfo emfi);
+	
 
 }

@@ -1,0 +1,8 @@
+Agent JAR for use when running JPA integration tests.
+
+
+**** TODO ****
+
+This is not really the best place for this.
+
+There needs to be a build script to build the agent JAR before running tests.

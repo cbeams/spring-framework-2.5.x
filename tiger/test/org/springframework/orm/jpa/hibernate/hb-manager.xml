@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd"
+>
+
+<beans>
+
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.spi.ContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="loadTimeWeaver" ref="weaver" />
+		<property name="location"
+			value="org/springframework/orm/jpa/hibernate/persistence.xml" />
+			
+		<property name="vendorProperties">
+			<bean class="org.springframework.orm.jpa.spi.hibernate.HibernateVendorProperties">
+				<property name="generateDdl" value="true" />
+				<property name="showSql" value="true" />
+			</bean>
+		</property>	
+			
+			
+	</bean>
+
+	<bean id="jpaDialect" class="org.springframework.orm.jpa.spi.hibernate.HibernateJpaDialect" />
+</beans>
