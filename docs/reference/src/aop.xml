@@ -7,11 +7,10 @@
 
     <para><emphasis>Aspect-Oriented Programming</emphasis>
     (<emphasis>AOP</emphasis>) complements OOP by providing another way of
-    thinking about program structure. While OO decomposes applications into a
-    hierarchy of objects, AOP decomposes programs into
-    <emphasis>aspects</emphasis> or <emphasis>concerns</emphasis>. This
-    enables modularization of concerns such as transaction management that
-    would otherwise cut across multiple objects. (Such concerns are often
+    thinking about program structure. In addition to classes, AOP gives you
+	<emphasis>aspects</emphasis>. Aspects
+    enable modularization of concerns such as transaction management that
+    cut across multiple types and objects. (Such concerns are often
     termed <emphasis>crosscutting</emphasis> concerns.)</para>
 
     <para>One of the key components of Spring is the <emphasis>AOP
@@ -79,11 +78,11 @@
 
       <itemizedlist>
         <listitem>
-          <para><emphasis>Aspect</emphasis>: A modularization of a concern for
-          which the implementation might otherwise cut across multiple
-          objects. Transaction management is a good example of a crosscutting
-          concern in J2EE applications. Aspects are implemented using regular
-          classes (schema-based approach) or regular classes annotated with the
+          <para><emphasis>Aspect</emphasis>: A modularization of a concern 
+          that cuts across multiple objects. Transaction management is a good example 
+		  of a crosscutting concern in J2EE applications. In Spring AOP, aspects are 
+		  implemented using 
+		  regular classes (schema-based approach) or regular classes annotated with the
           @Aspect annotation (@AspectJ style).</para>
         </listitem>
 
@@ -97,7 +96,7 @@
         </listitem>
 
         <listitem>
-          <para><emphasis>Advice</emphasis>: Action taken by the AOP framework
+          <para><emphasis>Advice</emphasis>: Action taken by an aspect
           at a particular join point. Different types of advice include
           "around," "before" and "after" advice. Advice types are discussed
           below. Many AOP frameworks, including Spring, model an advice as an
@@ -109,30 +108,34 @@
           <para><emphasis>Pointcut</emphasis>: A predicate that matches join points.
           Advice is associated with a pointcut expression and runs at any join
           point matched by the pointcut (for example, the execution of a method with
-          a certain name). An AOP framework must allow developers
-          to specify pointcuts: Spring uses the AspectJ pointcut language by default.</para>
+          a certain name). The concept of join points as matched by pointcut
+		  expressions is central to AOP: Spring uses the AspectJ pointcut language by default.</para>
         </listitem>
 
         <listitem>
           <para><emphasis>Introduction</emphasis>: (Also known as an 
           inter-type declaration). Declaring additional methods or fields on
-          behalf of an advised class. Spring allows you to introduce new interfaces to
-          any advised object. For example, you could use an introduction to
-          make any object implement an <literal>IsModified</literal>
+          behalf of a type. Spring allows you to introduce new interfaces 
+		  (and a corresponding implementation) to
+          any proxied object. For example, you could use an introduction to
+          make a bean implement an <literal>IsModified</literal>
           interface, to simplify caching.</para>
         </listitem>
 
         <listitem>
           <para><emphasis>Target object</emphasis>: Object being advised
-          by one or more aspects. Also referred to as the <emphasis>advised</emphasis> or
-          <emphasis>proxied</emphasis> object.</para>
+          by one or more aspects. Also referred to as the <emphasis>advised</emphasis>
+		  object. Since Spring AOP is implemented using runtime proxies, this object
+		  will always be a <emphasis>proxied</emphasis> object.</para>
         </listitem>
 
         <listitem>
           <para><emphasis>AOP proxy</emphasis>: Object created by the AOP
           framework in order to implement the aspect contracts (advise method
           executions and so on). In Spring, an AOP proxy will be a JDK
-          dynamic proxy or a CGLIB proxy.</para>
+          dynamic proxy or a CGLIB proxy. <remark> Note: proxy creation is
+		  transparent to users of the schema-based and @AspectJ styles of
+		  aspect declaration introduced in Spring 2.0</remark></para>
         </listitem>
 
         <listitem>
@@ -196,12 +199,13 @@
       method on the <interfacename>JoinPoint</interfacename> used for around advice, and hence can't
       fail to invoke it.</para>
       
-      <para>In Spring 2.0, all advice is fully typed, so that you work with
-	  advice parameters of the appropriates types (the type of the return value
+      <para>In Spring 2.0, all advice parameters are statically typed, so that you work with
+	  advice parameters of the appropriate type (the type of the return value
 	  from a method execution for example) rather than Object arrays.</para>
 
-      <para>The pointcut concept is the key to AOP, distinguishing AOP from
-      older technologies offering interception. Pointcuts enable advice to be
+      <para>The concept of join points, matched by pointcuts, is the key to AOP
+	  which distinguishes it from older technologies offering only interception. 
+	  Pointcuts enable advice to be
       targeted independently of the OO hierarchy. For example, an around
       advice providing declarative transaction management can be applied to a
       set of methods spanning multiple objects (such as all business operations
@@ -235,12 +239,12 @@
       "autoproxying" capabilities): a crucial difference from other AOP
       implementations. There are some things you can't do easily or
       efficiently with Spring AOP, such as advise very fine-grained objects.
-      AspectJ is probably the best choice in such cases. However, our
+      AspectJ is the best choice in such cases. However, our
       experience is that Spring AOP provides an excellent solution to most
       problems in J2EE applications that are amenable to AOP.</para>
 
-      <para>Spring AOP will never strive to compete with AspectJ or
-      AspectWerkz to provide a comprehensive AOP solution. We believe that
+      <para>Spring AOP will never strive to compete with AspectJ to provide 
+	  a comprehensive AOP solution. We believe that
       both proxy-based frameworks like Spring and full-blown frameworks such
       as AspectJ are valuable, and that they are complementary, rather than in
       competition. Spring 2.0 seamlessly
@@ -277,7 +281,8 @@
     <title>@AspectJ support</title>
 
     <para>If you are able to use Java 5, then Spring's support for @AspectJ aspects
-    is the recommended approach for declaring aspects in Spring 2.0. "@AspectJ"
+    is the recommended approach for declaring aspects for use with the Spring AOP
+	framework. "@AspectJ"
     refers to a style of declaring aspects as regular Java classes annotated with
     Java 5 annotations. The @AspectJ style was introduced by the 
     <ulink url="http://www.eclipse.org/aspectj">AspectJ project</ulink> as part of
@@ -285,6 +290,11 @@
     using a library supplied by AspectJ for pointcut parsing and matching. The AOP runtime
     is still pure Spring AOP though, and there is no dependency on the AspectJ compiler
     or weaver.</para>
+	  
+	<remark>
+		Using the AspectJ compiler and weaver enables use of the full AspectJ language,
+		and is discussed in <xref linkend="aop-using-aspectj"/>.
+	</remark>
 
     <sect2>
       <title>Enabling @AspectJ Support</title>
@@ -415,37 +425,48 @@ public class NotVeryUsefulAspect {
 	      pointcut designator you will use when working with Spring AOP</para>
 	    </listitem>
 	    <listitem>
-	      <para><emphasis>within</emphasis> - limits matching to the execution of a method declared in
-	      certain types</para>
+	      <para><emphasis>within</emphasis> - limits matching to 
+		  join points within certain types (simply the execution of a method declared within
+		  a matching type when using Spring AOP)</para>
 	    </listitem>
 	    <listitem>
-	      <para><emphasis>this</emphasis> - limits matching to the execution of methods where the bean
+	      <para><emphasis>this</emphasis> - limits matching to 
+		  join points (the execution of methods when using Spring AOP) where the bean
 	      reference (Spring AOP proxy) is an instance of the given type</para>
 	    </listitem>
 	    <listitem>
-	      <para><emphasis>target</emphasis> - limits matching to the execution of methods where the
+	      <para><emphasis>target</emphasis> - limits matching to 
+		  join points (the execution of methods when using Spring AOP) where the
 	      target object (application object being proxied) is an instance of the given
 	      type</para>
 	    </listitem>
 	    <listitem>
-	      <para><emphasis>args</emphasis> - limits matching to the execution of methods where the 
-	      arguments passed to the method are instances of the given types</para>
+	      <para><emphasis>args</emphasis> - limits matching to 
+		  join points (the execution of methods when using Spring AOP) where the 
+	      arguments are instances of the given types</para>
 	    </listitem>
 	    <listitem>
-	      <para><emphasis>@target</emphasis> - limits matching to the execution of methods where the
+	      <para><emphasis>@target</emphasis> - limits matching to 
+		  join points (the execution of methods when using Spring AOP) where the
 	      class of the executing object has an annotation of the given type</para>
 	    </listitem>
 	    <listitem>
-	      <para><emphasis>@args</emphasis> - limits matching to the execution of methods where the
+	      <para><emphasis>@args</emphasis> - limits matching to 
+		  join points (the execution of methods when using Spring AOP) where the
 	      runtime type of the actual arguments passed have annotations of the given type(s)</para>
 	    </listitem>
 	    <listitem>
-	      <para><emphasis>@within</emphasis> - limits matching to the execution of methods defined in 
-	      types that have the given annotation</para>
+	      <para><emphasis>@within</emphasis> - limits matching to 
+		  join points within 
+	      types that have the given annotation
+		  (the execution of methods declared in types with the given annotation 
+		   when using Spring AOP)  
+		  </para>
 	    </listitem>
 	    <listitem>
-	      <para><emphasis>@annotation</emphasis> - limits matching to the execution of methods that have
-	      the given annotation</para>
+	      <para><emphasis>@annotation</emphasis> - limits matching to 
+		  join points where the subject of the join point (method being executed
+		  in Spring AOP) has the given annotation</para>
 	    </listitem>
 	  </itemizedlist>
 
@@ -464,26 +485,27 @@ public class NotVeryUsefulAspect {
 	  <para>
 	  Pointcut expressions can be combined using '&amp;&amp;', '||' and '!'. It is also possible
 	  to refer to pointcut expressions by name. The following example shows three pointcut 
-	  expressions: <literal>anyPublicMethod</literal> (which matches if a method execution
+	  expressions: <literal>anyPublicOperation</literal> (which matches if a method execution
 	  join point represents the execution of any public method); <literal>inTrading</literal> (which matches
 	  if a method execution is in the trading module), and <literal>tradingOperation</literal>
 	  (which matches if an method execution represents any public method in the trading module).
 	  </para>
 
       <programlisting><![CDATA[    @Pointcut("execution(public * *(..))")
-    private void anyPublicMethod() {}
+    private void anyPublicOperation() {}
     
     @Pointcut("within(com.xyz.someapp.trading..*")
     private void inTrading() {}
     
-    @Pointcut("anyPublicMethod() && inTrading()")
+    @Pointcut("anyPublicOperation() && inTrading()")
     private void tradingOperation() {}]]></programlisting>
 
 	  <para>
 	  It is a best practice to build more complex pointcut expressions out of smaller 
 	  named components as shown above. When referring to pointcuts by name, normal Java
 	  visibility rules apply (you can see private pointcuts in the same type, protected
-	  pointcuts in the hierarchy, public pointcuts anywhere and so on).
+	  pointcuts in the hierarchy, public pointcuts anywhere and so on). Visibility does not
+	  affect pointcut <emphasis>matching</emphasis>.
 	  </para>
 
 	  <remark>A bug in AspectJ 1.5.1 (#140357) can sometimes cause the AspectJ pointcut
@@ -516,7 +538,7 @@ import org.aspectj.lang.annotation.Pointcut;
 public class SystemArchitecture {
 
   /**
-   * A method execution is in the web layer if the method is defined
+   * A join point is in the web layer if the method is defined
    * in a type in the com.xyz.someapp.web package or any sub-package
    * under that.
    */
@@ -524,7 +546,7 @@ public class SystemArchitecture {
   public void inWebLayer() {}
 
   /**
-   * A method execution is in the service layer if the method is defined
+   * A join point is in the service layer if the method is defined
    * in a type in the com.xyz.someapp.service package or any sub-package
    * under that.
    */
@@ -532,7 +554,7 @@ public class SystemArchitecture {
   public void inServiceLayer() {}
 
   /**
-   * A method execution is in the data access layer if the method is defined
+   * A join point is in the data access layer if the method is defined
    * in a type in the com.xyz.someapp.dao package or any sub-package
    * under that.
    */
@@ -616,27 +638,27 @@ public class SystemArchitecture {
      <itemizedlist>
      
      <listitem>
-     <para>(execution of) any public method:</para>
+     <para>the execution of any public method:</para>
      <programlisting><![CDATA[execution(public * *(..))]]></programlisting>
      </listitem>
      
      <listitem>
-     <para>(execution of) any method with a name beginning with "set":</para>
+     <para>the execution of any method with a name beginning with "set":</para>
      <programlisting><![CDATA[execution(* set*(..))]]></programlisting>
      </listitem>
      
      <listitem>
-     <para>(execution of) any method defined by the AccountService interface:</para>
+     <para>the execution of any method defined by the AccountService interface:</para>
      <programlisting><![CDATA[execution(* com.xyz.service.AccountService.*(..))]]></programlisting>
      </listitem>
 
      <listitem>
-     <para>(execution of) any method defined in the service package:</para>
+     <para>the execution of any method defined in the service package:</para>
      <programlisting><![CDATA[execution(* com.xyz.service.*.*(..))]]></programlisting>
      </listitem>
      
      <listitem>
-     <para>(execution of) any method defined in the service package or a sub-package:</para>
+     <para>the execution of any method defined in the service package or a sub-package:</para>
      <programlisting><![CDATA[execution(* com.xyz.service..*.*(..))]]></programlisting>
      </listitem>
      
@@ -714,7 +736,9 @@ public class SystemArchitecture {
       <title>Declaring advice</title>
 
 	   <para>Advice is associated with a pointcut expression, and runs before, after, or
-	   around method executions matched by the pointcut.</para>
+	   around method executions matched by the pointcut. The pointcut expression may be
+	   either a simple reference to a named pointcut, or a pointcut expression declared
+	   in place.</para>
 	   
 	   <sect3><title>Before advice</title>
 	   
@@ -732,7 +756,25 @@ public class BeforeExample {
   }
 
 }]]></programlisting>
-	   
+		   
+	   <para>
+		   If using an in-place pointcut expressio we could rewrite the above example
+		   as:
+	   </para>
+
+	<programlisting><![CDATA[import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+
+@Aspect
+public class BeforeExample {
+
+  @Before("execution(* com.xyz.myapp.dao.*.*(..))")
+  public void doAccessCheck() {
+    // ...
+  }
+
+}]]></programlisting>
+		   
 	   </sect3>
 	   <sect3><title>After returning advice</title>
 	   
