@@ -31,9 +31,9 @@ public class BridgeMethodResolverTests extends TestCase {
 	private ReflectionBasedBridgeMethodResolver resolver = new ReflectionBasedBridgeMethodResolver();
 
 	public void testFindBridgedMethod() throws Exception {
-		Method unbridged = MyFoo.class.getMethod("someMethod", String.class, Object.class);
-		Method bridged = MyFoo.class.getMethod("someMethod", Serializable.class, Object.class);
-		Method other = MyFoo.class.getMethod("someMethod", Integer.class, Object.class);
+		Method unbridged = MyFoo.class.getDeclaredMethod("someMethod", String.class, Object.class);
+		Method bridged = MyFoo.class.getDeclaredMethod("someMethod", Serializable.class, Object.class);
+		Method other = MyFoo.class.getDeclaredMethod("someMethod", Integer.class, Object.class);
 		assertFalse(unbridged.isBridge());
 		assertTrue(bridged.isBridge());
 
@@ -43,9 +43,9 @@ public class BridgeMethodResolverTests extends TestCase {
 
 	public void testIsBridgeMethodFor() throws Exception {
 		Map typeParameterMap = this.resolver.createTypeVariableMap(MyBar.class);
-		Method bridged = MyBar.class.getMethod("someMethod", String.class, Object.class);
-		Method other = MyBar.class.getMethod("someMethod", Integer.class, Object.class);
-		Method bridge = MyBar.class.getMethod("someMethod", Object.class, Object.class);
+		Method bridged = MyBar.class.getDeclaredMethod("someMethod", String.class, Object.class);
+		Method other = MyBar.class.getDeclaredMethod("someMethod", Integer.class, Object.class);
+		Method bridge = MyBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
 		assertTrue("Should be bridge method", this.resolver.isBridgeMethodFor(bridge, bridged, typeParameterMap));
 		assertFalse("Should not be bridge method", this.resolver.isBridgeMethodFor(bridge, other, typeParameterMap));
 	}

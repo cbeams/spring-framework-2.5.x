@@ -47,4 +47,5 @@
 									 refresh-home-on-connect-failure="true">
 		<jee:environment>foo=bar</jee:environment>
 	</jee:remote-slsb>
+
 </beans>

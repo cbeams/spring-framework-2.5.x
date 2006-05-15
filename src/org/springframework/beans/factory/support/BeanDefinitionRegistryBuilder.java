@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.beans.factory.config.BeanDefinition;
+
 /**
  * Programmatic builder-style object to make it easier to construct bean definitions.
  * Intended for use primarily when authoring Spring 2.0 NamespaceHandlers.
@@ -26,7 +28,7 @@ package org.springframework.beans.factory.support;
  * @see org.springframework.beans.factory.support.BeanDefinitionReaderUtils
  */
 public class BeanDefinitionRegistryBuilder {
-	
+
 	private final BeanDefinitionRegistry registry;
 
 
@@ -57,7 +59,7 @@ public class BeanDefinitionRegistryBuilder {
 		this.registry.registerBeanDefinition(name, builder.getBeanDefinition());
 		return builder;
 	}
-	
+
 	/**
 	 * Register a bean without specifying a name. A unique bean name will be generated,
 	 * based on the owning BeanDefinitionRegistry. The bean will still be a top-level
@@ -70,7 +72,6 @@ public class BeanDefinitionRegistryBuilder {
 				BeanDefinitionReaderUtils.generateBeanName(builder.getBeanDefinition(), this.registry, false);
 		return register(generatedBeanName, builder);
 	}
-	
-	// TODO aliases
+
 
 }

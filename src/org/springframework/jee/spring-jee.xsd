@@ -3,11 +3,13 @@
 <xsd:schema xmlns="http://www.springframework.org/schema/jee"
 						xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 						xmlns:beans="http://www.springframework.org/schema/beans"
+						xmlns:tool="http://www.springframework.org/schema/tool"
 						targetNamespace="http://www.springframework.org/schema/jee"
 						elementFormDefault="qualified"
 						attributeFormDefault="unqualified">
 
 	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
 
 	<xsd:element name="jndi-lookup">
 		<xsd:complexType>
@@ -41,6 +43,8 @@
 		</xsd:complexType>
 	</xsd:element>
 
+	<xsd:element name="entity-manager-factory" type="entityManagerFactoryType"/>
+
 	<!-- base types -->
 	<xsd:complexType name="jndiLocatedType" abstract="true">
 		<xsd:complexContent>
@@ -64,6 +68,46 @@
 				<xsd:attribute name="lookup-home-on-startup" type="xsd:boolean"/>
 				<xsd:attribute name="cache-home" type="xsd:boolean"/>
 				<xsd:attribute name="business-interface" type="xsd:string" use="required"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="entityManagerFactoryType">
+		<xsd:complexContent>
+			<xsd:extension base="beans:identifiedType">
+				<xsd:attribute name="persistence-unit-name" type="xsd:string"/>
+				<xsd:attribute name="inject" type="xsd:boolean"/>
+				<xsd:attribute name="translate" type="xsd:boolean"/>
+				<xsd:attribute name="provider">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string">
+							<xsd:enumeration value="toplink"/>
+							<xsd:enumeration value="kodo"/>
+							<xsd:enumeration value="hibernate"/>
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:attribute>
+				<xsd:attribute name="provider-class" type="xsd:string">
+					<xsd:annotation>
+					  <xsd:appinfo>
+							<tool:annotation>
+								<tool:expected-type type="java.lang.Class"/>
+								<!-- TODO: Is there a base type for all providers such that we can add a constraint here? -->
+							</tool:annotation>
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="data-source-ref" type="xsd:string">
+					<xsd:annotation>
+						<xsd:appinfo>
+							<tool:annotation kind="ref">
+								<tool:expected-type type="javax.sql.DataSource"/>
+							</tool:annotation>
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="show-sql" type="xsd:boolean"/>
+				<xsd:attribute name="generate-ddl" type="xsd:boolean"/>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>

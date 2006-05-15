@@ -20,13 +20,19 @@ import junit.framework.TestCase;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.util.PathMatcher;
+import org.springframework.util.AntPathMatcher;
 
 /**
  * @author Juergen Hoeller
  * @since 14.09.2005
  */
 public class UrlFilenameViewControllerTests extends TestCase {
+
+	private PathMatcher pathMatcher = new AntPathMatcher();
 
 	public void testWithPlainFilename() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
@@ -77,4 +83,46 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertTrue(mv.getModel().isEmpty());
 	}
 
+	public void testMultiLevel() throws Exception {
+		UrlFilenameViewController ctrl = new UrlFilenameViewController();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/docs/cvs/commit.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = ctrl.handleRequest(request, response);
+		assertEquals("docs/cvs/commit", mv.getViewName());
+		assertTrue(mv.getModel().isEmpty());
+	}
+
+	public void testMultiLevelWithMapping() throws Exception {
+		UrlFilenameViewController ctrl = new UrlFilenameViewController();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/docs/cvs/commit.html");
+		exposePathInMapping(request, "/docs/**");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = ctrl.handleRequest(request, response);
+		assertEquals("cvs/commit", mv.getViewName());
+		assertTrue(mv.getModel().isEmpty());
+	}
+
+	public void testMultiLevelMappingWithFallback() throws Exception {
+	  UrlFilenameViewController ctrl = new UrlFilenameViewController();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/docs/cvs/commit.html");
+		exposePathInMapping(request, "/docs/cvs/commit.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = ctrl.handleRequest(request, response);
+		assertEquals("docs/cvs/commit", mv.getViewName());
+		assertTrue(mv.getModel().isEmpty());
+	}
+
+	public void testWithContextMapping() throws Exception {
+		UrlFilenameViewController ctrl = new UrlFilenameViewController();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myapp/docs/cvs/commit.html");
+		request.setContextPath("/myapp");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = ctrl.handleRequest(request, response);
+		assertEquals("docs/cvs/commit", mv.getViewName());
+		assertTrue(mv.getModel().isEmpty());
+	}
+	private void exposePathInMapping(MockHttpServletRequest request, String mapping) {
+		String pathInMapping = this.pathMatcher.extractPathWithinPattern(mapping, request.getRequestURI());
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathInMapping);
+	}
 }

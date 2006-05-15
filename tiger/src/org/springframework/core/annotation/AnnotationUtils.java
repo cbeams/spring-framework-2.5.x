@@ -47,7 +47,9 @@ public abstract class AnnotationUtils {
 		}
 		A annotation = getAnnotation(method, annotationType);
 
-		Class cl = clazz;
+
+		// todo: remove clazz arg from method
+		Class cl = method.getDeclaringClass();
 		while (annotation == null) {
 			cl = cl.getSuperclass();
 			if (cl == null || cl.equals(Object.class)) {

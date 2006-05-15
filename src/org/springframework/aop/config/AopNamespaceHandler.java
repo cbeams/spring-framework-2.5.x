@@ -16,19 +16,9 @@
 
 package org.springframework.aop.config;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-import org.springframework.beans.factory.xml.ParserContext;
 
 /**
  * <code>NamespaceHandler</code> for the <code>aop</code> namespace.
@@ -76,39 +66,5 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionDecorator("scoped-proxy", new ScopedProxyBeanDefinitionDecorator());
 	}
 
-
-	private static class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
-
-		private static final String PROXY_TARGET_CLASS = "proxyTargetClass";
-		private static final String PROXY_TARGET_ATTR = "proxy-target-class";
-		
-		public BeanDefinition parse(Element element, ParserContext parserContext) {
-			BeanDefinitionRegistry registry = parserContext.getRegistry();
-			NamespaceHandlerUtils.registerAtAspectJAutoProxyCreatorIfNecessary(registry);
-			BeanDefinition beanDef = registry.getBeanDefinition(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
-			if (element.hasAttribute(PROXY_TARGET_ATTR)) {
-				String proxyValue = element.getAttribute(PROXY_TARGET_ATTR);
-				beanDef.getPropertyValues().addPropertyValue(PROXY_TARGET_CLASS,proxyValue);
-			}
-			if (element.hasChildNodes()) {
-				addIncludePatterns(element, beanDef);
-			}
-			return null;
-		}
-		
-		private void addIncludePatterns(Element element, BeanDefinition beanDef) {
-			List includePatterns = new LinkedList();
-			NodeList childNodes = element.getChildNodes();
-			for(int i = 0; i < childNodes.getLength(); i++) {
-				Node node = childNodes.item(i);
-				if (node instanceof Element) {
-					Element include = (Element) node;
-					String patternText = include.getAttribute("name");
-					includePatterns.add(patternText);
-				}
-			}
-			beanDef.getPropertyValues().addPropertyValue("includePatterns", includePatterns);
-		}
-	}
 
 }

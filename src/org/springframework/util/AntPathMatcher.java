@@ -375,15 +375,7 @@ public class AntPathMatcher implements PathMatcher {
 			buffer.append(pathParts[i]);
 		}
 
-		// Remove any trailing file extensions.
-		String str = buffer.toString();
-		int lastPeriod = str.lastIndexOf(".");
-		if (lastPeriod > -1) {
-			return str.substring(0, lastPeriod);
-		}
-		else {
-			return str;
-		}
+		return buffer.toString();
 	}
 
 }

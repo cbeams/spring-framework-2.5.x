@@ -247,6 +247,21 @@ public class BeanDefinitionBuilder  {
 		return this;
 	}
 
+	/**
+	 * Sets the {@link org.springframework.beans.factory.config.BeanDefinition#setSource source} of this definition.
+	 */
+	public BeanDefinitionBuilder setSource(Object source) {
+		this.beanDefinition.setSource(source);
+		return this;
+	}
+
+	/**
+	 * Sets the {@link org.springframework.beans.factory.config.BeanDefinition#setRole role} of this definition.
+	 */
+	public BeanDefinitionBuilder setRole(int role) {
+		this.beanDefinition.setRole(role);
+		return this;
+	}
 
 	/**
 	 * Called by BeanDefinitionRegistryBuilder to let this object know the name of the

@@ -17,7 +17,6 @@
 package org.springframework.aop.config;
 
 import junit.framework.TestCase;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.CountingBeforeAdvice;

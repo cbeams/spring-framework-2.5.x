@@ -16,58 +16,94 @@
 
 package org.springframework.aop.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.aop.aspectj.autoproxy.AspectJInvocationContextExposingAdvisorAutoProxyCreator;
 import org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvisorAutoProxyCreator;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.BeanComponentDefinition;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
+ * Utility class for handling registration of auto proxy creators used internally by the '<code>aop</code>'
+ * namespace tags.
+ * <p/>
+ * Only a single auto proxy creator can be registered and multiple tags may wish register different concrete
+ * implementations. As such this class wraps a simple escalation protocol allowing clases to request a particular
+ * auto proxy creator and know that class, <code>or a subclass thereof</code>, will eventually be resident in
+ * the {@link BeanFactory}.
+ *
  * @author Rob Harrop
  * @since 2.0
  */
 public abstract class NamespaceHandlerUtils {
 
+	/**
+	 * The bean name of the internally managed auto prxoy creator.
+	 */
 	public static final String AUTO_PROXY_CREATOR_BEAN_NAME =
 					"org.springframework.aop.config.internalAutoProxyCreator";
 
+	/**
+	 * The class name of the '<code>AnnotationAwareAspectJAutoProxyCreator</code>' class. Only available
+	 * with AspectJ and Java 5.
+	 */
 	public static final String ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME =
 					"org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator";
 
+	/**
+	 * Stores the auto proxy creator classes in escalation order.
+	 */
 	private static final List APC_PRIORITY_LIST = new ArrayList();
 
+	/**
+	 * Setup the escalation list.
+	 */
 	static {
 		APC_PRIORITY_LIST.add(InvocationContextExposingAdvisorAutoProxyCreator.class.getName());
 		APC_PRIORITY_LIST.add(AspectJInvocationContextExposingAdvisorAutoProxyCreator.class.getName());
 		APC_PRIORITY_LIST.add(ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME);
 	}
 
-	public static void registerAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
-		registryOrEscalateApcAsRequired(InvocationContextExposingAdvisorAutoProxyCreator.class, registry);
+	/**
+	 * Registers the basic auto proxy creator if required. This provides supports for using
+	 * basic Spring {@link Advisor Advisors} with classic {@link Pointcuts Pointcutss}.
+	 */
+	public static void registerAutoProxyCreatorIfNecessary(ParserContext parserContext) {
+		registryOrEscalateApcAsRequired(InvocationContextExposingAdvisorAutoProxyCreator.class, parserContext);
 	}
 
-	public static void registerAspectJAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
-		registryOrEscalateApcAsRequired(AspectJInvocationContextExposingAdvisorAutoProxyCreator.class, registry);
+	/**
+	 * Registers the AspectJ
+	 *
+	 * @param registry
+	 */
+	public static void registerAspectJAutoProxyCreatorIfNecessary(ParserContext parserContext) {
+		registryOrEscalateApcAsRequired(AspectJInvocationContextExposingAdvisorAutoProxyCreator.class, parserContext);
 	}
 
-	public static void registerAtAspectJAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
+	public static void registerAtAspectJAutoProxyCreatorIfNecessary(ParserContext parserContext) {
 		Class cls = getAspectJAutoProxyCreatorClassIfPossible();
 		if (cls == null) {
 			throw new IllegalStateException("Unable to register AspectJ AutoProxyCreator. Cannot find class [" +
-					ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME + "]. Are you running on Java 5.0+?");
+							ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME + "]. Are you running on Java 5.0+?");
 		}
-		registryOrEscalateApcAsRequired(cls, registry);
+		registryOrEscalateApcAsRequired(cls, parserContext);
 	}
 
-	private static void registryOrEscalateApcAsRequired(Class cls, BeanDefinitionRegistry registry) {
+	private static void registryOrEscalateApcAsRequired(Class cls, ParserContext parserContext) {
 		Assert.notNull(cls, "'cls' cannot be null.");
-		Assert.notNull(registry, "'registry' cannot be null.");
+		Assert.notNull(parserContext, "'parserContext' cannot be null.");
+
+		BeanDefinitionRegistry registry = parserContext.getRegistry();
 
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
 			AbstractBeanDefinition abd = (AbstractBeanDefinition) registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
@@ -84,7 +120,13 @@ public abstract class NamespaceHandlerUtils {
 			}
 		}
 		else {
-			registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, new RootBeanDefinition(cls));
+			RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
+			beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, beanDefinition);
+
+			// notify of bean registration
+			BeanComponentDefinition componentDefinition = new BeanComponentDefinition(beanDefinition, AUTO_PROXY_CREATOR_BEAN_NAME);
+			parserContext.getReaderContext().fireComponentRegistered(componentDefinition);
 		}
 	}
 

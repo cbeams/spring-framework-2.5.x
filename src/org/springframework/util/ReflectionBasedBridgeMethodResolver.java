@@ -29,23 +29,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Implementation of {@link BridgeMethodResolver} that uses reflection to resolve the bridged {@link Method}.
+ *
  * @author Rob Harrop
  * @since 2.0
  */
 public final class ReflectionBasedBridgeMethodResolver implements BridgeMethodResolver {
 
-	/**
-	 * Given a synthetic {@link Method#isBridge bridge Method} returns the {@link Method}
-	 * being bridged. A bridge method may be created by the compiler when extending a parameterized
-	 * type whose methods have parameterized arguments. During runtime invocation the bridge {@link Method} may
-	 * be invoked and/or used via reflection. When attempting to locate annotations on {@link Method Methods} it is
-	 * wise to check for bridge {@link Method Methods} as appropriate and find the bridged {@link Method}.
-	 * <p/>See <a href="http://java.sun.com/docs/books/jls/third_edition/html/expressions.html#15.12.4.5">
-	 * The Java Language Specification</a> for more details on the use of bridge methods.
-	 *
-	 * @return the bridged {@link Method} if the supplied {@link Method} is a valid bridge, otherwise the supplied {@link Method}
-	 * @throws IllegalStateException if no bridged {@link Method} can be found.
-	 */
 	public Method resolveBridgeMethod(Method bridgeMethod) {
 		Assert.notNull(bridgeMethod, "'bridgeMethod' cannot be null.");
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15 || !bridgeMethod.isBridge()) {
@@ -57,7 +47,7 @@ public final class ReflectionBasedBridgeMethodResolver implements BridgeMethodRe
 		Method[] methods = bridgeMethod.getDeclaringClass().getDeclaredMethods();
 		for (int i = 0; i < methods.length; i++) {
 			Method candidateMethod = methods[i];
-			if (isCandidateFor(candidateMethod, bridgeMethod)) {
+			if (isBridgedCandidateFor(candidateMethod, bridgeMethod)) {
 				candidateMethods.add(candidateMethod);
 			}
 		}
@@ -86,7 +76,13 @@ public final class ReflectionBasedBridgeMethodResolver implements BridgeMethodRe
 		return null;
 	}
 
-	private boolean isCandidateFor(Method candidateMethod, Method bridgeMethod) {
+	/**
+	 * Returns <code>true</code> if the supplied '<code>candidateMethod</code>' can be consider a validate
+	 * candidate for the {@link Method} that is {@link Method#isBridge() bridged} by the supploed
+	 * {@link Method bridge Method}. This method performs inexpensive checks and can be used quickly filter
+	 * for a set of possible matches.
+	 */
+	private boolean isBridgedCandidateFor(Method candidateMethod, Method bridgeMethod) {
 		return !candidateMethod.equals(bridgeMethod) && candidateMethod.getName().equals(bridgeMethod.getName())
 						&& candidateMethod.getParameterTypes().length == bridgeMethod.getParameterTypes().length;
 	}
@@ -130,8 +126,14 @@ public final class ReflectionBasedBridgeMethodResolver implements BridgeMethodRe
 		throw new IllegalStateException("Unable to locate generic definition for bridge method: '" + bridgeMethod + "'.");
 	}
 
-	private boolean isResolvedTypeMatch(Method m, Method candidateMethod, Map typeVariableMap) {
-		Type[] genericParameters = m.getGenericParameterTypes();
+	/**
+	 * Returns <code>true</code> if the {@link Type} signature of both the supplied
+	 * {@link Method#getGenericParameterTypes() generic Method} and concrete {@link Method} are equal
+	 * after resolving all {@link TypeVariable TypeVariables} using the supplied
+	 * {@link #createTypeVariableMap TypeVariable Map}, otherwise returns <code>false</code>.
+	 */
+	private boolean isResolvedTypeMatch(Method genericMethod, Method candidateMethod, Map typeVariableMap) {
+		Type[] genericParameters = genericMethod.getGenericParameterTypes();
 		Class[] resolvedTypes = new Class[genericParameters.length];
 		for (int i = 0; i < genericParameters.length; i++) {
 			Type genericParameter = genericParameters[i];
@@ -146,6 +148,11 @@ public final class ReflectionBasedBridgeMethodResolver implements BridgeMethodRe
 		return Arrays.equals(resolvedTypes, candidateMethod.getParameterTypes());
 	}
 
+	/**
+	 * If the supplied {@link Class} has a declared {@link Method} whose signature matches that of
+	 * the supplied {@link Method}, then this matching {@link Method} is returned, otherwise <code>null</code>
+	 * is returned.
+	 */
 	private Method searchForMatch(Class type, Method bridgeMethod) {
 		try {
 			return type.getDeclaredMethod(bridgeMethod.getName(), bridgeMethod.getParameterTypes());
@@ -156,6 +163,11 @@ public final class ReflectionBasedBridgeMethodResolver implements BridgeMethodRe
 	}
 
 
+	/**
+	 * Builds a mapping of {@link TypeVariable#getName TypeVariable names} to concrete {@link Class} for the
+	 * specified {@link Class}. Searches all super types, enclosing types and interfaces.
+	 * @see #populateTypeMapFromParameterizedType(Map, ParameterizedType)
+	 */
 	protected Map createTypeVariableMap(Class cls) {
 		Map typeVariableMap = new HashMap();
 
@@ -165,7 +177,7 @@ public final class ReflectionBasedBridgeMethodResolver implements BridgeMethodRe
 		while (type != Object.class) {
 			if (genericType instanceof ParameterizedType) {
 				ParameterizedType pt1 = (ParameterizedType) genericType;
-				addTypes(typeVariableMap, pt1);
+				populateTypeMapFromParameterizedType(typeVariableMap, pt1);
 			}
 			genericType = type.getGenericSuperclass();
 			type = type.getSuperclass();
@@ -176,8 +188,8 @@ public final class ReflectionBasedBridgeMethodResolver implements BridgeMethodRe
 		while (type.isMemberClass()) {
 			genericType = type.getGenericSuperclass();
 			if (genericType instanceof ParameterizedType) {
-				ParameterizedType pt1 = (ParameterizedType) genericType;
-				addTypes(typeVariableMap, pt1);
+				ParameterizedType pt = (ParameterizedType) genericType;
+				populateTypeMapFromParameterizedType(typeVariableMap, pt);
 			}
 			type = type.getEnclosingClass();
 		}
@@ -188,14 +200,30 @@ public final class ReflectionBasedBridgeMethodResolver implements BridgeMethodRe
 			Type genericInterface = genericInterfaces[i];
 			if (genericInterface instanceof ParameterizedType) {
 				ParameterizedType pt = (ParameterizedType) genericInterface;
-				addTypes(typeVariableMap, pt);
+				populateTypeMapFromParameterizedType(typeVariableMap, pt);
 			}
 		}
 
 		return typeVariableMap;
 	}
 
-	private void addTypes(Map typeVariableMap, ParameterizedType type) {
+	/**
+	 * Reads the {@link TypeVariable TypeVariables} from the supplied {@link ParameterizedType} and adds mappings
+	 * corresponding to the {@link TypeVariable#getName TypeVariable name} -> concrete type to the supplied
+	 * {@link Map}. Consider this case:
+	 * <pre class="code>
+	 * public interface Foo<S, T> {
+	 *  ..
+	 * }
+	 *
+	 * public class FooImpl implements Foo<String, Integer> {
+	 *  ..
+	 * }
+	 * </pre>
+	 * For '<code>FooImpl</code>' the following mappings would be added to the {@link Map}:
+	 * {S=java.lang.String, T=java.lang.Integer}.
+	 */
+	private void populateTypeMapFromParameterizedType(Map typeVariableMap, ParameterizedType type) {
 		Type[] actualTypeArguments = type.getActualTypeArguments();
 		TypeVariable[] typeVariables = ((Class) type.getRawType()).getTypeParameters();
 		for (int i = 0; i < actualTypeArguments.length; i++) {

@@ -38,7 +38,9 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 			BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
 			BeanDefinitionReaderUtils.registerBeanDefinition(holder, parserContext.getRegistry());
 			if (shouldFireEvents()) {
-				parserContext.getReaderContext().fireComponentRegistered(new BeanComponentDefinition(holder));
+				BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
+				postProcessComponentDefinition(componentDefinition);
+				parserContext.getReaderContext().fireComponentRegistered(componentDefinition);
 			}
 		}
 		else if (!parserContext.isNested()) {
@@ -48,11 +50,14 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 		return definition;
 	}
 
+	protected abstract BeanDefinition parseInternal(Element element, ParserContext parserContext);
+
+	protected void postProcessComponentDefinition(BeanComponentDefinition componentDefinition) {
+	}
+
 	protected String extractId(Element element) {
 		return element.getAttribute(ID_ATTRIBUTE);
 	}
-
-	protected abstract BeanDefinition parseInternal(Element element, ParserContext parserContext);
 
 	protected boolean shouldFireEvents() {
 		return true;

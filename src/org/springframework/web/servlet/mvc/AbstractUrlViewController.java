@@ -78,12 +78,12 @@ public abstract class AbstractUrlViewController extends AbstractController {
 
 	/**
 	 * Retrieves the URL path to use for lookup and delegates to
-	 * <code>getViewNameForUrlPath</code>.
-	 * @see #getViewNameForUrlPath
+	 * <code>getViewNameForRequest</code>.
+	 * @see #getViewNameForRequest
 	 */
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) {
 		String urlPath = this.urlPathHelper.getLookupPathForRequest(request);
-		String viewName = getViewNameForUrlPath(urlPath);
+		String viewName = getViewNameForRequest(request);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Returning view name '" + viewName + "' for lookup path: " + urlPath);
 		}
@@ -100,6 +100,6 @@ public abstract class AbstractUrlViewController extends AbstractController {
 	 * @see #setAlwaysUseFullPath
 	 * @see #setUrlDecode
 	 */
-	protected abstract String getViewNameForUrlPath(String urlPath);
+	protected abstract String getViewNameForRequest(HttpServletRequest request);
 
 }

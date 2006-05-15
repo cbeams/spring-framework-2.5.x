@@ -19,22 +19,27 @@ package org.springframework.util;
 import java.lang.reflect.Method;
 
 /**
+ * Strategy for resolving synthetic {@link Method#isBridge bridge Methods} to the {@link Method} being
+ * bridged.
+ * <p/>
+ * Given a synthetic {@link Method#isBridge bridge Method} returns the {@link Method}
+ * being bridged. A bridge method may be created by the compiler when extending a parameterized
+ * type whose methods have parameterized arguments. During runtime invocation the bridge {@link Method} may
+ * be invoked and/or used via reflection. When attempting to locate annotations on {@link Method Methods} it is
+ * wise to check for bridge {@link Method Methods} as appropriate and find the bridged {@link Method}.
+ * <p/>See <a href="http://java.sun.com/docs/books/jls/third_edition/html/expressions.html#15.12.4.5">
+ * The Java Language Specification</a> for more details on the use of bridge methods.
+ *
  * @author Rob Harrop
  * @since 2.0
  */
 public interface BridgeMethodResolver {
 
 	/**
-	 * Given a synthetic {@link java.lang.reflect.Method#isBridge bridge Method} returns the {@link java.lang.reflect.Method}
-	 * being bridged. A bridge method may be created by the compiler when extending a parameterized
-	 * type whose methods have parameterized arguments. During runtime invocation the bridge {@link java.lang.reflect.Method} may
-	 * be invoked and/or used via reflection. When attempting to locate annotations on {@link java.lang.reflect.Method Methods} it is
-	 * wise to check for bridge {@link java.lang.reflect.Method Methods} as appropriate and find the bridged {@link java.lang.reflect.Method}.
-	 * <p/>See <a href="http://java.sun.com/docs/books/jls/third_edition/html/expressions.html#15.12.4.5">
-	 * The Java Language Specification</a> for more details on the use of bridge methods.
-	 *
-	 * @return the bridged {@link java.lang.reflect.Method} if the supplied {@link java.lang.reflect.Method} is a valid bridge, otherwise the supplied {@link java.lang.reflect.Method}
-	 * @throws IllegalStateException if no bridged {@link java.lang.reflect.Method} can be found.
+	 * Resolve the supplied {@link Method bridge Method}. It is safe to call this method passing in a non-bridge
+	 * {@link Method} instance. In such a case, the supplied {@link Method} instance is returned directly to the caller.
+	 * As such callers are <strong>not</strong> required to check for briding before calling this method.
+	 * @throws IllegalStateException if no bridged {@link Method} can be found.
 	 */
 	Method resolveBridgeMethod(Method bridgeMethod);
 }

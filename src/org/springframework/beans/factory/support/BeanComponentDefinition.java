@@ -16,32 +16,55 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.util.Assert;
 
 /**
  * @author Rob Harrop
  * @since 2.0
  */
-public class BeanComponentDefinition implements ComponentDefinition {
+public class BeanComponentDefinition extends AbstractComponentDefinition {
 
-	private final BeanDefinitionHolder holder;
+	private final BeanDefinition beanDefinition;
+
+	private final String beanName;
+
+	private String description;
+
+	public BeanComponentDefinition(BeanDefinition beanDefinition, String beanName) {
+		Assert.notNull(beanDefinition, "'beanDefinition' cannot be null.");
+		Assert.notNull(beanName, "'beanName' cannot be null.");
+		this.beanDefinition = beanDefinition;
+		this.beanName = beanName;
+		createDescription();
+	}
 
 	public BeanComponentDefinition(BeanDefinitionHolder holder) {
 		Assert.notNull(holder, "'holder' cannot be null.");
-		this.holder = holder;
+		this.beanDefinition = holder.getBeanDefinition();
+		this.beanName = holder.getBeanName();
+		createDescription();
+	}
+
+	private void createDescription() {
+		String beanType = ((AbstractBeanDefinition) this.beanDefinition).getBeanClassName();
+		this.description = "Bean '" + getName() + "' of type '" + beanType + "'";
 	}
 
 	public String getName() {
-		return this.holder.getBeanName();
+		return this.beanName;
+	}
+
+	public String getDescription() {
+		return this.description;
 	}
 
 	public BeanDefinition[] getBeanDefinitions() {
-		return new BeanDefinition[]{this.holder.getBeanDefinition()};
+		return new BeanDefinition[]{this.beanDefinition};
 	}
 
 	public Object getSource() {
-		return this.holder.getBeanDefinition().getSource();
+		return this.beanDefinition.getSource();
 	}
 }

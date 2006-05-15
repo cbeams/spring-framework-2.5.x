@@ -42,7 +42,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 
 		// register the APC if needed
-		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
+		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(parserContext);
 
 		String transactionManagerName = element.getAttribute(TxNamespaceHandler.TRANSACTION_MANAGER_ATTRIBUTE);
 

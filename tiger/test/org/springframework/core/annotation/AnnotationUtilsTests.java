@@ -48,7 +48,12 @@ public class AnnotationUtilsTests extends TestCase {
 		Order o = AnnotationUtils.findMethodAnnotation(Order.class, m, Leaf.class);
 		assertNull(o);
 	}
-	
+
+	public void testFindMethodAnnotationOnBridgeMethod() throws Exception {
+		Method m = SimpleFoo.class.getDeclaredMethod("something", Object.class);
+		assertTrue(m.isBridge());
+		Order o = AnnotationUtils.findMethodAnnotation(Order.class, m, SimpleFoo.class);
+	}
 	// TODO consider whether we want this to handle annotations on interfaces
 //	public void testFindMethodAnnotationFromInterfaceImplementedByRoot() throws SecurityException, NoSuchMethodException {
 //		Method m = Leaf.class.getMethod("fromInterfaceImplementedByRoot", (Class[]) null);
@@ -91,6 +96,18 @@ public class AnnotationUtilsTests extends TestCase {
 
 		@Override
 		public void overrideWithoutNewAnnotation() {}
+	}
+
+	public static interface Foo<T> {
+		@Order(1)
+		void something(T arg);
+	}
+
+	public static class SimpleFoo implements Foo<String> {
+
+		public void something(String arg) {
+
+		}
 	}
 
 }

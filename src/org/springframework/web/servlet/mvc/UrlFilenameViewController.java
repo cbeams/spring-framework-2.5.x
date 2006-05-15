@@ -21,6 +21,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.web.util.WebUtils;
+import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.util.StringUtils;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Controller that transforms the virtual filename at the end of a URL
@@ -39,6 +44,8 @@ import org.springframework.web.util.WebUtils;
  * @see #setSuffix
  */
 public class UrlFilenameViewController extends AbstractUrlViewController {
+
+	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	private String prefix = "";
 
@@ -86,7 +93,8 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	 * @see #setPrefix
 	 * @see #setSuffix
 	 */
-	protected String getViewNameForUrlPath(String urlPath) {
+	protected String getViewNameForRequest(HttpServletRequest request) {
+		String urlPath = extractOperableUrl(request);
 		String viewName = (String) this.viewNameCache.get(urlPath);
 		if (viewName == null) {
 			viewName = extractViewNameFromUrlPath(urlPath);
@@ -96,15 +104,26 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 		return viewName;
 	}
 
+	protected String extractOperableUrl(HttpServletRequest request) {
+		String urlPath = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+		if(!StringUtils.hasText(urlPath)) {
+			urlPath = this.urlPathHelper.getPathWithinApplication(request);
+		}
+		return urlPath;
+	}
+
 	/**
 	 * Extract the URL filename from the given request URI.
 	 * Delegates to <code>WebUtils.extractViewNameFromUrlPath(String)</code>.
 	 * @param uri the request URI (e.g. "/index.html")
 	 * @return the extracted URI filename (e.g. "index")
-	 * @see org.springframework.web.util.WebUtils#extractFilenameFromUrlPath
+	 * @see WebUtils#extractFilenameFromUrlPath
 	 */
 	protected String extractViewNameFromUrlPath(String uri) {
-		return WebUtils.extractFilenameFromUrlPath(uri);
+		int start = (uri.charAt(0) == '/' ? 1 : 0);
+		int lastIndex = uri.lastIndexOf(".");
+		int end = (lastIndex < 0 ? uri.length() : lastIndex);
+		return uri.substring(start, end);
 	}
 
 	/**

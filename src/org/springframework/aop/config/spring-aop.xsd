@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <xsd:schema xmlns="http://www.springframework.org/schema/aop"
-			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-			targetNamespace="http://www.springframework.org/schema/aop"
-			elementFormDefault="qualified"
-			attributeFormDefault="unqualified">
+						xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+						xmlns:beans="http://www.springframework.org/schema/beans"
+						xmlns:tool="http://www.springframework.org/schema/tool"
+						targetNamespace="http://www.springframework.org/schema/aop"
+						elementFormDefault="qualified"
+						attributeFormDefault="unqualified">
+
+	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
 
 	<xsd:element name="config">
 		<xsd:complexType>
@@ -28,7 +33,7 @@
 			<xsd:restriction base="xsd:string"/>
 		</xsd:simpleType>
 	</xsd:element>
-	
+
 	<xsd:element name="aspectj-autoproxy">
 		<xsd:complexType>
 			<xsd:sequence>
@@ -39,105 +44,104 @@
 	</xsd:element>
 
 	<xsd:complexType name="aspectType">
-		<xsd:sequence>
-			<xsd:element name="pointcut" type="pointcutType" minOccurs="0" maxOccurs="1"/>
-			<xsd:element name="declare-parents" type="declareParentsType" minOccurs="0" maxOccurs="unbounded"/>
-			<xsd:choice minOccurs="1" maxOccurs="unbounded">
-				<!-- this first element kept for backwards compat, use of the specific
-				     forms is encouraged -->
-				<xsd:element name="advice" type="adviceType"/>
-				<xsd:element name="before" type="basicAdviceType"/>
-				<xsd:element name="after" type="basicAdviceType"/>
-				<xsd:element name="after-returning" type="afterReturningAdviceType"/>
-				<xsd:element name="after-throwing" type="afterThrowingAdviceType"/>
-				<xsd:element name="around" type="basicAdviceType"/>			
-			</xsd:choice>
-		</xsd:sequence>
-		<xsd:attribute name="id" type="xsd:ID"/>
-		<xsd:attribute name="ref" type="xsd:string"/>
+		<xsd:complexContent>
+			<xsd:extension base="beans:identifiedType">
+				<xsd:sequence>
+					<xsd:element name="pointcut" type="pointcutType" minOccurs="0" maxOccurs="1"/>
+					<xsd:element name="declare-parents" type="declareParentsType" minOccurs="0" maxOccurs="unbounded"/>
+					<xsd:choice minOccurs="1" maxOccurs="unbounded">
+						<xsd:element name="before" type="basicAdviceType"/>
+						<xsd:element name="after" type="basicAdviceType"/>
+						<xsd:element name="after-returning" type="afterReturningAdviceType"/>
+						<xsd:element name="after-throwing" type="afterThrowingAdviceType"/>
+						<xsd:element name="around" type="basicAdviceType"/>
+					</xsd:choice>
+				</xsd:sequence>
+				<xsd:attribute name="ref" type="xsd:string"/>
+			</xsd:extension>
+		</xsd:complexContent>
 	</xsd:complexType>
 
 	<xsd:complexType name="includeType">
-	  <xsd:attribute name="name" type="xsd:string"/>
+		<xsd:attribute name="name" type="xsd:string"/>
 	</xsd:complexType>
 
 	<xsd:complexType name="pointcutType">
-		<xsd:attribute name="id" type="xsd:ID"/>
-		<xsd:attribute name="expression" use="required" type="xsd:string"/>
-		<xsd:attribute name="type" default="aspectj">
-			<xsd:simpleType>
-				<xsd:restriction base="xsd:string">
-					<xsd:enumeration value="aspectj"/>
-					<xsd:enumeration value="regex"/>
-				</xsd:restriction>
-			</xsd:simpleType>
-		</xsd:attribute>
+		<xsd:complexContent>
+			<xsd:extension base="beans:identifiedType">
+				<xsd:attribute name="expression" use="required" type="xsd:string"/>
+				<xsd:attribute name="type" default="aspectj">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string">
+							<xsd:enumeration value="aspectj"/>
+							<xsd:enumeration value="regex"/>
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
 	</xsd:complexType>
-	
+
 	<xsd:complexType name="declareParentsType">
 		<xsd:attribute name="types-matching" type="xsd:string" use="required"/>
 		<xsd:attribute name="implement-interface" type="xsd:string" use="required"/>
 		<xsd:attribute name="default-impl" type="xsd:string" use="required"/>
 	</xsd:complexType>
 
-	<xsd:complexType name="adviceType">
+	<xsd:complexType name="basicAdviceType">
 		<xsd:attribute name="pointcut" type="xsd:string"/>
-		<xsd:attribute name="pointcut-ref" type="xsd:string"/>
+		<xsd:attribute name="pointcut-ref" type="pointcutRefType"/>
 		<xsd:attribute name="method" type="xsd:string" use="required"/>
-		<xsd:attribute name="kind" use="required">
-			<xsd:simpleType>
-				<xsd:restriction base="xsd:string">
-					<xsd:enumeration value="before"/>
-					<xsd:enumeration value="after"/>
-					<xsd:enumeration value="afterReturning"/>
-					<xsd:enumeration value="afterThrowing"/>
-					<xsd:enumeration value="around"/>
-				</xsd:restriction>
-			</xsd:simpleType>
-		</xsd:attribute>
-		<xsd:attribute name="returning" type="xsd:string"/>
-		<xsd:attribute name="throwing" type="xsd:string"/>
 		<!-- there is a case to make this next one an element with one sub-element for each
-		     argument name, but that is a lot more verbose that a comma-delimited list of arg names -->
+			argument name, but that is a lot more verbose that a comma-delimited list of arg names -->
 		<xsd:attribute name="arg-names" type="xsd:string"/>
 	</xsd:complexType>
 
-	<xsd:complexType name="basicAdviceType">
-		<xsd:attribute name="pointcut" type="xsd:string"/>
-		<xsd:attribute name="pointcut-ref" type="xsd:string"/>
-		<xsd:attribute name="method" type="xsd:string" use="required"/>
-		<!-- there is a case to make this next one an element with one sub-element for each
-			argument name, but that is a lot more verbose that a comma-delimited list of arg names -->
-		<xsd:attribute name="arg-names" type="xsd:string"/>
-	</xsd:complexType>
-	
 	<xsd:complexType name="afterReturningAdviceType">
-		<xsd:attribute name="pointcut" type="xsd:string"/>
-		<xsd:attribute name="pointcut-ref" type="xsd:string"/>
-		<xsd:attribute name="method" type="xsd:string" use="required"/>
-		<xsd:attribute name="returning" type="xsd:string"/>
-		<!-- there is a case to make this next one an element with one sub-element for each
-			argument name, but that is a lot more verbose that a comma-delimited list of arg names -->
-		<xsd:attribute name="arg-names" type="xsd:string"/>
+		<xsd:complexContent>
+			<xsd:extension base="basicAdviceType">
+				<xsd:attribute name="returning" type="xsd:string"/>
+			</xsd:extension>
+		</xsd:complexContent>
 	</xsd:complexType>
 
 	<xsd:complexType name="afterThrowingAdviceType">
-		<xsd:attribute name="pointcut" type="xsd:string"/>
-		<xsd:attribute name="pointcut-ref" type="xsd:string"/>
-		<xsd:attribute name="method" type="xsd:string" use="required"/>
-		<xsd:attribute name="throwing" type="xsd:string"/>
-		<!-- there is a case to make this next one an element with one sub-element for each
-			argument name, but that is a lot more verbose that a comma-delimited list of arg names -->
-		<xsd:attribute name="arg-names" type="xsd:string"/>
-	</xsd:complexType>
-	
-	<!-- TODO: need to constrain this -->
-	<xsd:complexType name="advisorType">
-		<xsd:attribute name="id" type="xsd:string"/>
-		<xsd:attribute name="advice-ref" type="xsd:string" use="required"/>
-		<xsd:attribute name="pointcut" type="xsd:string"/>
-		<xsd:attribute name="pointcut-ref" type="xsd:string"/>
-		<xsd:attribute name="order" type="xsd:int"/>
+		<xsd:complexContent>
+			<xsd:extension base="basicAdviceType">
+				<xsd:attribute name="throwing" type="xsd:string"/>
+			</xsd:extension>
+		</xsd:complexContent>
 	</xsd:complexType>
 
+	<xsd:complexType name="advisorType">
+		<xsd:complexContent>
+			<xsd:extension base="beans:identifiedType">
+				<xsd:attribute name="advice-ref" type="xsd:string" use="required">
+					<xsd:annotation>
+						<xsd:appinfo>
+							<tool:annotation kind="ref">
+								<tool:expected-type type="org.springframework.aop.Advisor"/>
+							</tool:annotation>
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="pointcut" type="xsd:string"/>
+				<xsd:attribute name="pointcut-ref" type="pointcutRefType"/>
+				<xsd:attribute name="order" type="xsd:int"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+
+	<!-- Base Types -->
+	<xsd:simpleType name="pointcutRefType">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<tool:annotation kind="ref">
+					<tool:expected-type type="org.springframework.aop.Pointcut"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:union memberTypes="xsd:string"/>
+	</xsd:simpleType>
 </xsd:schema>

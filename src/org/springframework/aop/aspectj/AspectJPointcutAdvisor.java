@@ -51,18 +51,18 @@ public class AspectJPointcutAdvisor extends DefaultPointcutAdvisor {
 		AspectJExpressionPointcut newPointcut = (AspectJExpressionPointcut) pointcut;
 		
 		Advice myAdvice = getAdvice();
-		if (myAdvice != null && (myAdvice instanceof AbstractAspectJAdvice)) {
+		if (myAdvice instanceof AbstractAspectJAdvice) {
 			AbstractAspectJAdvice myAjAdvice = (AbstractAspectJAdvice) myAdvice;
 			String adviceExpression = myAjAdvice.getPointcut().getExpression();
-			if (! newPointcut.getExpression().equals(adviceExpression)) {
-				String msg = "Pointcut expression in advisor must match expression in associated advice:\n" +
-				             "expression is '" + newPointcut.getExpression() + "'\n" +
-				             "and expression in advice is '" + adviceExpression + "'";
-				throw new IllegalStateException(msg);
-			}
-			else {
+			if (newPointcut.getExpression().equals(adviceExpression)) {
 				// same expression, safe to use same instance
 				super.setPointcut(myAjAdvice.getPointcut());
+			}
+			else {
+				String msg = "Pointcut expression in advisor must match expression in associated advice:\n" +
+										 "expression is '" + newPointcut.getExpression() + "'\n" +
+										 "and expression in advice is '" + adviceExpression + "'";
+				throw new IllegalStateException(msg);
 			}
 		}
 		else {

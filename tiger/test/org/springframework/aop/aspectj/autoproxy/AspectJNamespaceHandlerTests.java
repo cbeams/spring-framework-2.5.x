@@ -22,29 +22,54 @@ import org.springframework.aop.config.NamespaceHandlerUtils;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.ReaderContext;
+import org.springframework.beans.factory.support.ReaderEventListener;
+import org.springframework.beans.factory.support.ComponentDefinition;
+import org.springframework.beans.factory.support.SourceExtractor;
+import org.springframework.beans.factory.support.BeanDefinitionReader;
+import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.Resource;
+
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * @author Rob Harrop
  */
 public class AspectJNamespaceHandlerTests extends TestCase {
 
-	public void testRegisterAutoProxyCreator() throws Exception {
-		BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
+	private ParserContext parserContext;
 
-		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
+	private MockReaderEventListener readerEventListener = new MockReaderEventListener();
+
+	private BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
+	protected void setUp() throws Exception {
+		SourceExtractor sourceExtractor = new SourceExtractor() {
+			public Object extract(Object sourceCandidate) {
+				return sourceCandidate;
+			}
+		};
+		BeanDefinitionReader reader = new DummyBeanDefinitionReader();
+		ReaderContext readerContext = new ReaderContext(reader, null, null, this.readerEventListener, sourceExtractor);
+
+		this.parserContext = new ParserContext(readerContext, null, false);
+	}
+
+	public void testRegisterAutoProxyCreator() throws Exception {
+		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals("Incorrect number of definitions registered", 1, registry.getBeanDefinitionCount());
 
-		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(registry);
+		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals("Incorrect number of definitions registered", 1, registry.getBeanDefinitionCount());
 	}
 
 	public void testRegisterAspectJAutoProxyCreator() throws Exception {
-		BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
-
-		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(registry);
+		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals("Incorrect number of definitions registered", 1, registry.getBeanDefinitionCount());
 
-		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(registry);
+		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals("Incorrect number of definitions registered", 1, registry.getBeanDefinitionCount());
 
 		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
@@ -52,11 +77,10 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 	}
 
 	public void testRegisterAspectJAutoProxyCreatorWithExistingAutoProxyCreator() throws Exception {
-		BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
-		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
+		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals(1, registry.getBeanDefinitionCount());
 
-		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(registry);
+		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals("Incorrect definition count", 1, registry.getBeanDefinitionCount());
 
 		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
@@ -64,15 +88,60 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 	}
 
 	public void testRegisterAutoProxyCreatorWhenAspectJAutoProxyCreatorAlreadyExists() throws Exception {
-		BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
-		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(registry);
+		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals(1, registry.getBeanDefinitionCount());
 
-		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(registry);
+		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals("Incorrect definition count", 1, registry.getBeanDefinitionCount());
 
 		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		assertEquals("Incorrect APC class", AspectJInvocationContextExposingAdvisorAutoProxyCreator.class, definition.getBeanClass());
 	}
 
+	private static class MockReaderEventListener implements ReaderEventListener {
+
+		private final List componentDefinitions = new ArrayList();
+
+		public void componentRegistered(ComponentDefinition componentDefinition) {
+			this.componentDefinitions.add(componentDefinition);
+		}
+
+		public ComponentDefinition[] getComponentDefinitions() {
+			return (ComponentDefinition[]) componentDefinitions.toArray(new ComponentDefinition[componentDefinitions.size()]);
+		}
+	}
+
+	private class DummyBeanDefinitionReader implements BeanDefinitionReader {
+
+		public BeanDefinitionRegistry getBeanFactory() {
+			return registry;
+		}
+
+		public ResourceLoader getResourceLoader() {
+			return null;
+		}
+
+		public ClassLoader getBeanClassLoader() {
+			return null;
+		}
+
+		public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
+			return 0;
+		}
+
+		public int loadBeanDefinitions(Resource[] resources) throws BeanDefinitionStoreException {
+			return 0;
+
+		}
+
+		public int loadBeanDefinitions(String location) throws BeanDefinitionStoreException {
+			return 0;
+
+		}
+
+		public int loadBeanDefinitions(String[] locations) throws BeanDefinitionStoreException {
+			return 0;
+
+		}
+	}
 }
