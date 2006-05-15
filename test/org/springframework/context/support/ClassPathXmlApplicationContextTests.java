@@ -89,6 +89,13 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		}
 	}
 
+	public void testContextWithClassNameThatContainsPlaceholder() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				"classWithPlaceholder.xml", getClass());
+		assertTrue(ctx.containsBean("someMessageSource"));
+		ctx.getBean("someMessageSource");
+	}
+
 	public void testMultipleConfigLocationsWithClass() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				new String[] {"contextB.xml", "contextC.xml", "contextA.xml"}, getClass());

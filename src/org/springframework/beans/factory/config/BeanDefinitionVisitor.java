@@ -55,10 +55,21 @@ public abstract class BeanDefinitionVisitor {
 	 */
 	public void visitBeanDefinition(BeanDefinition beanDefinition) {
 		MutablePropertyValues pvs = beanDefinition.getPropertyValues();
+		visitBeanClassName(beanDefinition);
 		visitPropertyValues(pvs);
 		ConstructorArgumentValues cas = beanDefinition.getConstructorArgumentValues();
 		visitIndexedArgumentValues(cas.getIndexedArgumentValues());
 		visitGenericArgumentValues(cas.getGenericArgumentValues());
+	}
+
+	protected void visitBeanClassName(BeanDefinition beanDefinition) {
+		String beanClassName = beanDefinition.getBeanClassName();
+		if (beanClassName != null) {
+			String resolvedName = resolveStringValue(beanClassName);
+			if (!beanClassName.equals(resolvedName)) {
+				beanDefinition.setBeanClassName(resolvedName);
+			}
+		}
 	}
 
 	protected void visitPropertyValues(MutablePropertyValues pvs) {

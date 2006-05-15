@@ -66,7 +66,38 @@ public interface BeanDefinition extends AttributeAccessor {
 
 
 	/**
-	 * Return whether this bean is "abstract", i.e. not meant to be instantiated.
+	 * Return the bean class name of this bean definition.
+	 * <p>Note that this does not have to be the actual class name used at runtime,
+	 * in case of a child definition overriding/inheriting the class name from its parent.
+	 * Hence, do <i>not</i> consider this to be the definitive bean type at runtime but
+	 * rather only use it for parsing purposes at the individual bean definition level.
+	 */
+	String getBeanClassName();
+
+	/**
+	 * Set a bean class name for this bean definition.
+	 * <p>The class name can be modified during bean factory post-processing,
+	 * typically replacing the original class name with a parsed variant of it.
+	 */
+	void setBeanClassName(String beanClassName);
+
+	/**
+	 * Return the constructor argument values for this bean.
+	 * <p>The returned instance can be modified during bean factory post-processing.
+	 * @return the ConstructorArgumentValues object (never <code>null</code>)
+	 */
+	ConstructorArgumentValues getConstructorArgumentValues();
+
+	/**
+	 * Return the property values to be applied to a new instance of the bean.
+	 * <p>The returned instance can be modified during bean factory post-processing.
+	 * @return the MutablePropertyValues object (never <code>null</code>)
+	 */
+	MutablePropertyValues getPropertyValues();
+
+
+	/**
+	 * Return whether this bean is "abstract", that is, not meant to be instantiated.
 	 */
 	boolean isAbstract();
 
@@ -77,25 +108,10 @@ public interface BeanDefinition extends AttributeAccessor {
 	boolean isSingleton();
 
 	/**
-	 * Return whether this bean should be lazily initialized, i.e. not
+	 * Return whether this bean should be lazily initialized, that is, not
 	 * eagerly instantiated on startup. Only applicable to a singleton bean.
 	 */
 	boolean isLazyInit();
-
-
-	/**
-	 * Return the constructor argument values for this bean.
-	 * Can be modified during bean factory post-processing.
-	 * @return the ConstructorArgumentValues object (never <code>null</code>)
-	 */
-	ConstructorArgumentValues getConstructorArgumentValues();
-
-	/**
-	 * Return the property values to be applied to a new instance of the bean.
-	 * Can be modified during bean factory post-processing.
-	 * @return the MutablePropertyValues object (never <code>null</code>)
-	 */
-	MutablePropertyValues getPropertyValues();
 
 
 	/**
@@ -124,7 +140,7 @@ public interface BeanDefinition extends AttributeAccessor {
 
 	/**
 	 * Attach a generic, keyed metadata attribute to this bean definition.
-	 * Users should take care to prevent overlaps with other metadata attributes by
+	 * <p>Users should take care to prevent overlaps with other metadata attributes by
 	 * using fully-qualified names, perhaps using class or package names as prefix.
 	 * @param key the unique attribute key
 	 * @param value the attribute value to be attached
