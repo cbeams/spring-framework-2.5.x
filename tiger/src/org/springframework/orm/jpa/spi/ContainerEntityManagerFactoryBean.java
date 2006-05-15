@@ -65,6 +65,7 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 	 */
 	private Resource location; 
 
+	// TODO autodetect
 	private LoadTimeWeaver loadTimeWeaver; 
 
 	// Initialize to allow use without an ApplicationContext,
