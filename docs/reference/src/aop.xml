@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="aop">
-  <title>Spring AOP: Aspect Oriented Programming with Spring</title>
+  <title>Aspect Oriented Programming with Spring</title>
 
   <sect1 id="aop-introduction">
     <title>Concepts</title>
@@ -19,6 +19,21 @@
     ApplicationContext) do not depend on AOP, meaning you don't need to use
     AOP if you don't want to, AOP complements Spring IoC to provide a very
     capable middleware solution.</para>
+
+    <sidebar>
+        <title>Spring 2.0 AOP</title>
+        <para>Spring 2.0 introduces a simpler and more powerful
+        way of writing custom aspects using either a schema-based approach
+        or the @AspectJ annotation style. For new applications, we recommend
+        users use the @AspectJ style for applications written to Java 5, and
+        the schema-based style otherwise. Both of these styles offer fully
+        typed advice and use of the AspectJ pointcut language, while still using
+        Spring AOP for weaving.</para>
+        <para>The Spring 2.0 schema and @AspectJ based AOP support
+        is discussed in this chapter. Spring 2.0 remains fully backwards compatible
+        with Spring 1.2 and the lower-level AOP support offered by the Spring 1.2
+        APIs is discussed in the next chapter.</para>
+    </sidebar>
 
     <para>AOP is used in Spring:</para>
 
@@ -41,18 +56,6 @@
     or use the full power of the Spring AOP framework to implement custom
     aspects.</para>
 
-    <para><emphasis>Spring 2.0 introduces a simpler and more powerful
-    way of writing custom aspects using either a schema-based approach
-    or the @AspectJ annotation style. For new applications, we recommend
-    users use the @AspectJ style for applications written to Java 5, and
-    the schema-based style otherwise. Both of these styles offer fully
-    typed advice and use of the AspectJ pointcut language, while still using
-    Spring AOP for weaving. The Spring 2.0 schema and @AspectJ based AOP support
-    is discussed in this chapter. Spring 2.0 remains fully backwards compatible
-    with Spring 1.2 and the lower-level AOP support offered by the Spring 1.2
-    APIs is discussed in the next chapter. 
-    </emphasis></para>
-    
     <para>
     This chapter first introduces AOP concepts,
     (section 7.1), which you will want to read whatever style of aspect declaration
@@ -71,7 +74,7 @@
 
       <para>Let us begin by defining some central AOP concepts. These terms
       are not Spring-specific. Unfortunately, AOP terminology is not
-      particularly intuitive. However, it would be even more confusing if
+      particularly intuitive.. however, it would be even more confusing if
       Spring used its own terminology.</para>
 
       <itemizedlist>
@@ -89,7 +92,7 @@
           a program, such as the execution of a method or the handling of 
           an exception. In Spring AOP, a join point always represents a method
           execution. Join point information is available in advice
-          bodies by declaring a parameter of type org.aspectj.lang.JoinPoint.
+          bodies by declaring a parameter of type <interfacename>org.aspectj.lang.JoinPoint</interfacename>.
           </para>
         </listitem>
 
@@ -121,7 +124,7 @@
 
         <listitem>
           <para><emphasis>Target object</emphasis>: Object being advised
-          by one or more aspects. Also referred to as <emphasis>advised</emphasis> or
+          by one or more aspects. Also referred to as the <emphasis>advised</emphasis> or
           <emphasis>proxied</emphasis> object.</para>
         </listitem>
 
@@ -190,7 +193,7 @@
       can accomplish the same thing. Using the most specific advice type
       provides a simpler programming model with less potential for errors. For
       example, you don't need to invoke the <literal>proceed()</literal>
-      method on the JoinPoint used for around advice, and hence can't
+      method on the <interfacename>JoinPoint</interfacename> used for around advice, and hence can't
       fail to invoke it.</para>
       
       <para>In Spring 2.0, all advice is fully typed, so that you work with
@@ -381,7 +384,7 @@ public class NotVeryUsefulAspect {
 	  Java 5 based extensions, the 
 	  <ulink url="http://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html">AspectJ 5 Developers Notebook</ulink>) or
 	  one of the books on AspectJ such as "Eclipse AspectJ" by Colyer et. al. or "AspectJ in
-	  Action" by Ramnivas Labbad.
+	  Action" by Ramnivas Laddad.
 	  </para>
 
 	<sect3> 
@@ -389,6 +392,23 @@ public class NotVeryUsefulAspect {
 
 	  <para>Spring AOP supports the following AspectJ pointcut designators for use in pointcut
 	  expressions:</para>
+
+      <sidebar>
+          <title>Other pointcut types</title>       	  
+	        <para>The full AspectJ pointcut language supports additional pointcut designators
+	        that are not supported in Spring. These are: <literal>call, initialization,
+	        preinitialization, staticinitialization, get, set, handler, adviceexecution,
+	        withincode, cflow, cflowbelow, if, @this</literal>, and  <literal>@withincode</literal>.
+	        Use of these pointcut designators in pointcut expressions interpreted by Spring AOP
+	        will result in an IllegalArgumentException.
+	        </para>
+	  	  <para>The set of pointcut designators supported by Spring AOP may be extended in
+ 	       future releases both to support more of the AspectJ pointcut designators (e.g. "if"),
+	       and potentially to support Spring specific designators such as "bean" (matching on
+	       bean name).
+	      </para>
+      </sidebar>
+
 	  <itemizedlist>
 	    <listitem>
 	      <para><emphasis>execution</emphasis> - for matching method execution join points, this is the primary
@@ -429,28 +449,14 @@ public class NotVeryUsefulAspect {
 	    </listitem>
 	  </itemizedlist>
 
-	  <remark>Because Spring AOP limits matching to only method execution join points, the
-	  discussion of the pointcut designators above gives a narrower definition than you will
-	  find in the AspectJ programming guide. In addition, AspectJ itself has type-based
-	  semantics and at an execution join point both 'this' and 'target' refer to the same
-	  object - the object executing the method. Spring AOP is a proxy based system and
-	  differentiates between the proxy object itself (bound to 'this') and the target
-	  object behind the proxy (bound to 'target').</remark>
-	  
-	  <para>The full AspectJ pointcut language supports additional pointcut designators
-	  that are not supported in Spring. These are: <literal>call, initialization,
-	  preinitialization, staticinitialization, get, set, handler, adviceexecution,
-	  withincode, cflow, cflowbelow, if, @this</literal>, and  <literal>@withincode</literal>.
-	  Use of these pointcut designators in pointcut expressions interpreted by Spring AOP
-	  will result in an IllegalArgumentException.
-	  </para>
-
-	  <para>The set of pointcut designators supported by Spring AOP may be extended in
-	  future releases both to support more of the AspectJ pointcut designators (e.g. "if"),
-	  and potentially to support Spring specific designators such as "bean" (matching on
-	  bean name).
-	  </para>
-
+   	  <remark>Because Spring AOP limits matching to only method execution join points, the
+	        discussion of the pointcut designators above gives a narrower definition than you will
+	        find in the AspectJ programming guide. In addition, AspectJ itself has type-based
+	        semantics and at an execution join point both 'this' and 'target' refer to the same
+	        object - the object executing the method. Spring AOP is a proxy based system and
+	        differentiates between the proxy object itself (bound to 'this') and the target
+	        object behind the proxy (bound to 'target').</remark>
+		
     </sect3>
     
     <sect3>
@@ -927,7 +933,7 @@ public class AroundExample {
 	   	Any advice method may declare as its first parameter, a parameter of 
 	   	type <literal>org.aspectj.lang.JoinPoint</literal> (around advice is required to
 	   	declare a first parameter of type <literal>ProceedingJoinPoint</literal>, which is a
-	   	subtype of <literal>JoinPoint</literal>. The JoinPoint interface provides a number
+	   	subtype of <literal>JoinPoint</literal>. The <interfacename>JoinPoint</interfacename> interface provides a number
 	   	of useful methods such as <literal>getArgs()</literal> (returns the method arguments),
 	   	<literal>getThis()</literal> (returns the proxy object), <literal>getTarget()</literal>
 	   	(returns the target object), <literal>getSignature()</literal> (returns a description
@@ -1033,11 +1039,12 @@ public void audit(Auditable auditable) {
 		</listitem>
 		<listitem>
 		<para>
-		Using the argNames attribute is a little clumsy, so if the argNames attribute has
+		Using the <literal>'argNames'</literal> attribute is a little clumsy, so if the
+		<literal>'argNames'</literal> attribute has
 		not been specified, then Spring AOP will look at the debug information for the
 		class and try to determine the parameter names from the local variable table. This 
 		information will be present as long as the classes have been compiled with debug
-		information (-g:vars at a minimum). The consequences of compiling with this flag on
+		information (<literal>'-g:vars'</literal> at a minimum). The consequences of compiling with this flag on
 		are: (1) your code will be slightly easier to understand (reverse engineer), (2) the
 		class file sizes will be very slightly bigger (inconsequential), (3) the optimisation
 		to remove unused local variables will not be applied by your compiler. In other words,
@@ -1050,11 +1057,11 @@ public void audit(Auditable auditable) {
 		will attempt to deduce the pairing of binding variables to parameters (for example,
 		if only one variable is bound in the pointcut expression, and the advice method only
 		takes one parameter, the pairing is obvious!). If the binding of variables is ambiguous
-		given the available information, then an AmbiguousBindingException will be thrown.
+		given the available information, then an <classname>AmbiguousBindingException</classname> will be thrown.
 		</para>
 		</listitem>
 		<listitem>
-		<para>If all of the above strategies fail then an IllegalArgumentException will be
+		<para>If all of the above strategies fail then an <classname>IllegalArgumentException</classname> will be
 		thrown.</para>
 		</listitem>
 		</orderedlist>
@@ -1144,9 +1151,9 @@ see the AspectJ Programming Guide for the full details.
 <para>When two pieces of advice defined in <emphasis>different</emphasis> aspects both need
 to run at the same join point, then unless you specify otherwise the order of execution is 
 undefined. You can control the order of execution by specifying precedence. This is done in 
-the normal Spring way by implemented the org.springframework.core.Ordered interface in the
-aspect class. Given two aspects, the aspect returning the lower value from Ordered.getValue()
-has the higher precedence. 
+the normal Spring way by implementing the <interfacename>org.springframework.core.Ordered</interfacename>
+interface in the aspect class. Given two aspects, the aspect returning the lower value from
+<literal>Ordered.getValue()</literal> has the higher precedence. 
 </para>
 
 	   </sect3>
@@ -1160,10 +1167,12 @@ has the higher precedence.
 	to declare that advised objects implement a given interface, and to provide an implementation
 	of that interface on behalf of those objects.</para>
 
-	<para>An introduction is made using the @DeclareParents annotation. This annotation is
+	<para>An introduction is made using the <interfacename>@DeclareParents</interfacename> annotation. This annotation is
 	used to declare that matching types have a new parent (hence the name). For example, given
-	an interface UsageTracked, and an implementation of that interface DefaultUsageTracked, the following
-	aspect declares that all implementors of service interfaces also implement the UsageTracked interface.
+	an interface <interfacename>UsageTracked</interfacename>, and an implementation of that interface
+	<classname>DefaultUsageTracked</classname>, the following
+	aspect declares that all implementors of service interfaces also implement the
+	<interfacename>UsageTracked</interfacename> interface.
 	(In order to expose statistics via JMX for example). 
 	</para>
 
@@ -1208,7 +1217,8 @@ public class UsageTracking {
 	</para>
 	
 	<para>A "perthis" aspect is declared by specifying a <literal>perthis</literal> clause
-	in the @Aspect annotation. Let's look at an example, and then we'll explain how it works.
+	in the <interfacename>@Aspect</interfacename> annotation. Let's look at an example, and then
+	we'll explain how it works.
 	</para>
 	
 	<programlisting><![CDATA[@Aspect("perthis(com.xyz.myapp.SystemArchitecture.businessService())")
@@ -1300,13 +1310,13 @@ public class OptimisticOperationExecutor implements Ordered {
 
 }]]></programlisting>
       
-      <para>Note that the aspect implements the Ordered interface so we can set the precedence
+      <para>Note that the aspect implements the <interfacename>Ordered</interfacename> interface so we can set the precedence
       of the aspect higher than the transaction advice (we want a fresh transaction
       each time we retry). The <literal>maxRetries</literal> and <literal>order</literal>
       properties will both be configured by Spring. The main action happens in the
       <literal>doOptimisticOperation</literal> around advice. Notice that for the moment
       we're applying the retry logic to all <literal>businessService()s</literal>. We
-      try to proceed, and if we fail with an <literal>OptimisticLockingFailureException</literal>
+      try to proceed, and if we fail with an <classname>OptimisticLockingFailureException</classname>
       we simply try again unless we have exhausted all of our retry attempts.
       </para>
       
@@ -1321,7 +1331,7 @@ public class OptimisticOperationExecutor implements Ordered {
 </bean>]]></programlisting>
        
        <para>To refine the aspect so that it only retries idempotent operations, we might
-       define an <literal>Idempotent</literal> annotation:</para>
+       define an <interfacename>Idempotent</interfacename> annotation:</para>
        
 	<programlisting><![CDATA[@Retention(RetentionPolicy.RUNTIME)
 public @interface Idempotent {
@@ -1330,7 +1340,7 @@ public @interface Idempotent {
        
        <para>and use the annotation to annotate the implementation of service operations.
        The change to the aspect to only retry idempotent operations simply involves
-       refining the pointcut expression so that only @Idempotent operations match:</para>
+       refining the pointcut expression so that only <interfacename>@Idempotent</interfacename> operations match:</para>
 
 	<programlisting><![CDATA[@Around("com.xyz.myapp.SystemArchitecture.businessService() && " + 
         "@annotation(com.xyz.myapp.service.Idempotent)")
@@ -1690,7 +1700,8 @@ public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable {
 
 	<para>When multiple advice needs to execute at the same join point (executing
 	method) the ordering rules are as described in <xref linkend="aop-ataspectj-advice-ordering"/>.
-	The precedence between aspects is determined by implementing the Ordered interface on the
+	The precedence between aspects is determined by implementing the
+	<interfacename>Ordered</interfacename> interface on the
 	bean backing the aspect.
 	</para>
 
@@ -1858,12 +1869,12 @@ public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable {
 
 }]]></programlisting>
       
-      <para>Note that the aspect implements the Ordered interface so we can set the precedence
+      <para>Note that the aspect implements the <interfacename>Ordered</interfacename> interface so we can set the precedence
       of the aspect higher than the transaction advice (we want a fresh transaction
       each time we retry). The <literal>maxRetries</literal> and <literal>order</literal>
       properties will both be configured by Spring. The main action happens in the
       <literal>doOptimisticOperation</literal> around advice method. We
-      try to proceed, and if we fail with an <literal>OptimisticLockingFailureException</literal>
+      try to proceed, and if we fail with an <classname>OptimisticLockingFailureException</classname>
       we simply try again unless we have exhausted all of our retry attempts.
       </para>
       
@@ -1896,7 +1907,7 @@ public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable {
        <para>Notice that for the time being we assume that all business services
        are idempotent. If this is not the case we can refine the aspect so that it only 
        retries genuinely idempotent operations, by introducing an 
-       <literal>Idempotent</literal> annotation:</para>
+       <interfacename>Idempotent</interfacename> annotation:</para>
        
 	<programlisting><![CDATA[@Retention(RetentionPolicy.RUNTIME)
 public @interface Idempotent {
@@ -1905,7 +1916,7 @@ public @interface Idempotent {
        
        <para>and using the annotation to annotate the implementation of service operations.
        The change to the aspect to only retry idempotent operations simply involves
-       refining the pointcut expression so that only @Idempotent operations match:</para>
+       refining the pointcut expression so that only <interfacename>@Idempotent</interfacename> operations match:</para>
 
 	<programlisting><![CDATA[  <aop:pointcut id="idempotentOperation"
         expression="execution(* com.xyz.myapp.service.*.*(..)) and
@@ -2026,8 +2037,8 @@ MyInterfaceType proxy = factory.getProxy();]]></programlisting>
   	
   	<para>
   	Spring ships with a small AspectJ aspect library (it's available standalone in
-  	your distribution as <literal>spring-aspects.jar</literal>, the aspects are
-  	also included in the main <literal>spring.jar</literal>. <xref linkend="aop-atconfigurable"/>
+  	your distribution as <literal>spring-aspects.jar</literal>, you'll need to add
+    this to your classpath to use the aspects in it). <xref linkend="aop-atconfigurable"/>
   	and <xref linkend="aop-ajlib-other"/> discuss the content of this library and how you 
   	can use it. <xref linkend="aop-aj-configure"/> discusses how to dependency inject AspectJ
   	aspects that are woven using the AspectJ compiler. Finally, 
@@ -2037,18 +2048,342 @@ MyInterfaceType proxy = factory.getProxy();]]></programlisting>
   	
   	<sect2 id="aop-atconfigurable">
   		<title>Using AspectJ to dependency inject domain objects with Spring</title>
+		<para>
+		  The Spring container instantiates and configures beans defined in your 
+		  application context. It is also possible to ask a bean factory to configure
+		  a <emphasis>pre-existing</emphasis> object given the name of a bean definition 
+		  containing the configuration to be applied. The spring-aspects.jar contains an 
+		  annotation-driven aspect that exploits this capability to allow dependency-injection
+		  of any object. The support is intended to be used for objects created 
+		  <emphasis>outside of the control of any container</emphasis>. Domain objects
+		  often fall into this category: they may be created programmatically using the
+		  <literal>new</literal> operator, or by an ORM tool as a result of a database query.  			
+		</para>
+		
+		<remark>
+		  Spring provides the <literal>DependencyInjectionInterceptorFactoryBean</literal>
+		  in the <literal>org.springframework.orm.hibernate.support</literal> package. This
+		  can be used to have Spring create and configure prototype domain objects for 
+		  Hibernate (using either autowiring or named prototype bean definitions). See the
+		  javadocs for more information. The interceptor does not of course support 
+		  configuration of objects that you create yourself programmatically rather than
+	      retrieve from the database. Similar techniques may be possible with other
+		  frameworks. As ever, be pragramatic and choose the simplest thing
+		  that meets your requirements.	
+		</remark>  
+		  
+		<para>
+		  The <literal>@Configurable</literal> annotation marks a class as eligible for
+		  Spring-driven configuration. In the simplest case it can be used just as a 
+		  marker annotation:
+		</para>
+
+	<programlisting><![CDATA[package com.xyz.myapp.domain;
+import org.springframework.beans.factory.annotation;
+
+@Configurable
+public class Account {
+   ...
+]]></programlisting>
+		  
+		<para>
+			When used simply as a marker interface in this way, Spring will configure
+			new instances of the annotated type (Account in this case) using a 
+			prototypical bean definition with the same name as the fully-qualified
+			type name (<literal>com.xyz.myapp.domain.Account</literal>). Since the
+			default name for a bean is the fully-qualified name of its type, a 
+			convenient way to declare the protoype definition is simply to omit the
+			id attribute:
+		</para>  
+		  
+	<programlisting><![CDATA[<bean class="com.xyz.myapp.domain.Account" 
+      singleton="false">
+  <property name="fundsTransferService" ref="fundsTransferService"/>
+  ...
+</bean>]]></programlisting>
+		  
+		<para>If you want to explicitly specify the name of the prototype bean 
+		definition to use, you can do so directly in the annotation:</para>
+
+	<programlisting><![CDATA[package com.xyz.myapp.domain;
+import org.springframework.beans.factory.annotation;
+
+@Configurable("account")
+public class Account {
+   ...
+]]></programlisting>
+		  
+		<para>Spring will now look for a bean definition named "account" and 
+		use that as a prototypical definition to configure new Account objects.</para>
+		  
+		<para>You can also use autowiring to avoid having to specify a prototypical
+		bean definition at all. To have Spring apply autowiring use the 
+		autowire property of the @Configurable annotation: specify either
+		<literal>@Configurable(autowire=Autowire.BY_TYPE)</literal> or
+		<literal>@Configurable(autowire=Autowire.BY_NAME</literal> for autowiring
+		by type or by name respectively.</para>
+		  
+		<para>Finally you can enable Spring dependency checking for the object references
+		in the newly created and configured object by using the <literal>dependencyCheck</literal>
+		attribute (for example: 
+			<literal>@Configurable(autowire=Autowire.BY_NAME,dependencyCheck=true)</literal> ).
+		If this attribute is set to true, then Spring will validate after configuration that all properties
+		that are not primitives or collections have been set.
+		</para>
+		  
+		<para>Merely using the annotation on its own does nothing of course. It's the 
+		<literal>AnnotationBeanConfigurerAspect</literal> in spring-aspects.jar that 
+		acts on the presence of the annotation. In essence the aspect says "after 
+		returning from the initialization of a new object of a type with the 
+		@Configurable annotation, configure the newly created object using Spring
+		in accordance with the properties of the annotation". For this to work the
+		annotated types must be woven with the AspectJ weaver - you can either 
+		use a build-time ant or maven task to do this (see for example the
+		<ulink url="http://www.eclipse.org/aspectj/doc/released/devguide/antTasks.html">AspectJ 
+		Development Environment Guide</ulink>) or load-time weaving (see <xref linkend="aop-aj-ltw"/>).
+		</para>
+		  
+		<para>The <literal>AnnotationBeanConfigurerAspect</literal> itself needs
+		configuring by Spring (in order to obtain a reference to the bean factory that
+		is to be used to configure new objects). The Spring AOP namespace defines a
+		convenient tag for doing this. Simply include the following in your
+		application context configuration:</para>
+		  
+		<programlisting><![CDATA[<aop:spring-configured/>]]></programlisting>
+		  
+		<para>If you are using the DTD instead of schema, the equivalent definition is:</para>
+
+  		<programlisting><![CDATA[<bean 
+  class="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"
+  factory-method="aspectOf"/>]]></programlisting>
+		
+		<para>Instances of @Configurable objects created <emphasis>before</emphasis>
+		the aspect has been configured will result in a warning being issued to the
+		log and no configuration of the object taking place. An example might be 
+		a bean in the Spring configuration that creates domain objects when it is 
+		initialized by Spring. In this case you can use the "depends-on" bean
+		attribute to manually specify that the bean depends on the
+		configuration aspect.</para>
+
+  		<programlisting><![CDATA[<bean id="myService"
+  class="com.xzy.myapp.service.MyService"
+  depends-on="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect">
+  ...
+</bean>]]></programlisting>
+		
+	  <sect3>
+		  <title>Unit testing @Configurable objects</title>
+		  <para>One of the goals of the @Configurable support is to enable independent
+		  unit testing of domain objects without the difficulties associated with
+		  hard-coded lookups. If @Configurable types have not been woven by AspectJ
+		  then the annotation has no affect during unit testing, and you can simply
+		  set mock or stub property references in the object under test and proceed
+		  as normal. If @Configurable types <emphasis>have</emphasis> been woven by
+		  AspectJ then you can still unit test outside of the container as normal,
+		  but you will see a warning message each time that you construct an 
+		  @Configurable object indicating that it has not been configured by Spring.</para>
+	  </sect3> 
+		  
+	  <sect3>
+		  <title>Working with multiple application contexts</title>
+		  <para>The <literal>AnnotationBeanConfigurerAspect</literal> used to implement
+		  the @Configurable support is an AspectJ singleton aspect. The scope of a 
+		  singleton aspect is the same as the scope of static members, i.e. there is 
+		  one aspect instance per classloader that defines the type. This means that if
+		  you define multiple application contexts within the same classloader hierarchy
+		  you need to consider where to define the 
+		  <literal>&lt;aop:spring-configured/&gt;</literal> bean and where to place
+		  spring-aspects.jar on the classpath.</para>
+		  
+		  <para>
+			  Consider a typical Spring web-app configuration with a shared parent application
+			  context defining common business services and everything needed to support
+			  them, and one child application context per servlet containing definitions
+			  particular to that servlet. All of these contexts will co-exist within the 
+			  same classloader hierarchy, and so the <literal>AnnotationBeanConfigurerAspect</literal>
+			  can only hold a reference to one of them. In this case we recommend
+			  defining the <literal>&lt;aop:spring-configured/&gt;</literal> bean in the
+			  shared (parent) application context: this defines the services that you are
+			  likely to want to inject into domain objects. A consequence is that you cannot
+			  configure domain objects with references to beans defined in the child 
+			  (servlet-specific) contexts using the @Configurable mechanism 
+			  (probably not something you want to do anyway!).
+		  </para>
+		  <para>
+			  When deploying multiple web-apps within the same container, ensure that each
+			  web-application loads the types in spring-aspects.jar using its own classloader
+			  (for example, by placing spring-aspects.jar in WEB-INF/lib). If spring-aspects.jar
+			  is only added to the container wide classpath (and hence loaded by the shared
+			  parent classloader), all web applications will share the same aspect instance
+			  which is probably not what you want.  
+		  </para>
+	  </sect3>	   
+		  		    		  		  		  
   	</sect2>
 
   	<sect2 id="aop-ajlib-other">
   		<title>Other Spring aspects for AspectJ</title>
+		<para>In addition to the @Configurable support, spring-aspects.jar contains an
+		AspectJ aspect that can be used to drive Spring's transaction management for
+		types and methods annotated with the @Transactional annotation 
+		(see <xref linkend="transaction"/>). This is primarily intended for users
+		who want to use Spring's transaction support outside of the Spring container.</para>
+		  
+		<para>For AspectJ programmers that want to use the Spring configuration and 
+		transaction management support but don't want to (or can't) use annotations,
+		spring-aspects.jar also contains abstract aspects you can extend to provide
+		your own pointcut definitions. See the javadocs for 
+		<literal>AbstractBeanConfigurerAspect</literal> and 
+		<literal>AbstractTransactionAspect</literal> for more information. As an example,
+		the following excerpt shows how you could write an aspect to configure
+		all instances of objects defined in the domain model
+		using prototypical bean definitions that match the fully-qualified class
+		names:</para>
+
+   		<programlisting><![CDATA[public aspect DomainObjectConfiguration extends AbstractBeanConfigurerAspect {
+
+  public DomainObjectConfiguration() {
+    setBeanWiringInfoResolver(new ClassNameBeanWiringInfoResolver());
+  }
+
+  /**
+   * The creation of a new bean (any object in the domain model)
+   */
+  protected pointcut beanCreation(Object beanInstance) :
+    initialization(new(..)) &&
+    SystemArchitecture.inDomainModel() && 
+    this(beanInstance);
+		   		   
+}]]></programlisting>
+		  
+		  
   	</sect2>
 
   	<sect2 id="aop-aj-configure">
   		<title>Configuring AspectJ aspects using Spring IoC</title>
+		<para>When using AspectJ aspects with Spring applications, it's natural to want
+		to configure such aspects using Spring. The AspectJ runtime itself is responsible
+		for aspect creation, and the means of configuring the AspectJ created aspects via
+		Spring depends on the AspectJ instantiation model (per-clause) used by the aspect. 
+		</para>	
+		<para>The majority of AspectJ aspects are
+		<emphasis>singleton</emphasis> aspects. Configuration of these aspects is very
+		easy, simply create a bean definition referencing the aspect type as normal, and 
+		include the bean attribute <literal>factory-method="aspectOf"</literal>. This
+		ensures that Spring obtains the aspect instance by asking AspectJ for it rather
+		than trying to create an instance itself. For example:</para>
+
+	<programlisting><![CDATA[<bean id="profiler" class="com.xyz.profiler.Profiler"
+      factory-method="aspectOf">
+  <property name="profilingStrategy" ref="jamonProfilingStrategy"/>
+</bean>]]></programlisting>
+
+	   <para>For non-singleton aspects the easiest way to configure them is to create
+	   prototypical bean definitions and annotate use the @Configurable support from
+	   spring-aspects.jar to configure the aspect instances once they have bean created
+	   by the AspectJ runtime.</para>  
+		  
+	   <para>If you have some @AspectJ aspects that you want to weave with AspectJ
+	   (for example, using load-time weaving for domain model types) and other @AspectJ
+	   aspects that you want to use with Spring AOP, and these aspects are all configured
+	   using Spring then you'll need to tell the Spring AOP @AspectJ autoproxying support
+	   which subset of the @AspectJ aspects defined in the configuration should be used
+	   for autoproxying. You can do this by using one or more <literal>include</literal>
+	   elements inside the <literal>&lt;aop:aspectj-autoproxy&gt;</literal> declaration.
+	   Each include element specifies a name pattern, and only beans with names matched
+	   by at least one of the patterns will be used for Spring AOP autoproxy configuration:</para>
+
+   	  <programlisting><![CDATA[<aop:aspectj-autoproxy>
+  <include name="thisBean"/>
+  <include name="thatBean"/>
+</aop:aspectj-autoproxy>]]></programlisting>
+		  
+		  
   	</sect2>
 
   	<sect2 id="aop-aj-ltw">
   		<title>Using AspectJ Load-time weaving (LTW) with Spring applications</title>
+		<para>Load-time weaving (or LTW) refers to the process of weaving AspectJ aspects
+		with an application's class files as they are loaded into the VM. For full details
+		on configuring load-time weaving with AspectJ, see the 
+		<ulink url="http://www.eclipse.org/aspectj/doc/released/devguide/ltw.html">
+		LTW section of the AspectJ Development Environment Guide
+		</ulink>. We will focus here on the essentials of configuring load-time weaving
+		for Spring applications running on Java 5.</para>
+		  
+		<para>
+		Load-time weaving is controlled by defining a file '<literal>aop.xml</literal>' in
+		the META-INF directory. AspectJ automatically looks for all 'META-INF/aop.xml' files
+		visible on the classpath and configures itself based on the aggregation of their
+		content.
+		</para>
+		  
+		<para>
+		A basic META-INF/aop.xml for your application should look like this:
+		</para>
+
+   	  <programlisting><![CDATA[<!DOCTYPE aspectj PUBLIC    
+  "-//AspectJ//DTD//EN"    "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">    
+
+<aspectj>    
+   <weaver>
+	 <include within="com.xyz.myapp..*"/>
+   </weaver>
+</aspectj>]]></programlisting>
+		  		  
+		<para>
+			The '<literal>include</literal>' element tells AspectJ what set of types
+			should be included in the weaving process. Use the package prefix for your
+			application followed by "..*" (meaning '... and any type defined in a subpackage
+			of this') as a good default. Using the include element is important as otherwise
+			AspectJ will look at every type loaded in support of your application (including
+			all the Spring library classes and many more besides). Normally you don't want
+			to weave these types and don't want to pay the overhead of AspectJ attempting
+			to match against them.
+		</para>
+		  
+		<para>
+			To get informational messages in your log file regarding the activity of the
+			load-time weaver, add the following options to the weaver element:
+		</para>
+		  
+   	  <programlisting><![CDATA[<!DOCTYPE aspectj PUBLIC    
+  "-//AspectJ//DTD//EN"    "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">    
+
+<aspectj>    
+   <weaver 
+	 options="-showWeaveInfo,
+              -XmessageHandlerClass:org.springframework.aop.aspectj.AspectJWeaverMessageHandler">
+	 <include within="com.xyz.myapp..*"/>
+   </weaver>
+</aspectj>]]></programlisting>
+		  
+    <para>Finally, to control exactly which aspects are used, you can use the 
+	<literal>aspects</literal> element. By default all defined aspects are used for 
+	weaving (spring-aspects.jar contains a META-INF/aop.xml file that defines the
+	configuration and transaction aspects). If you were using spring-aspects.jar, but
+	only want the configuration support and not the transaction support you could 
+	specify this as follows:</para>
+
+   	  <programlisting><![CDATA[<!DOCTYPE aspectj PUBLIC    
+  "-//AspectJ//DTD//EN"    "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">    
+
+<aspectj>
+   <aspects>
+	  <include within="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"/>
+   </aspects>    
+   <weaver 
+	 options="-showWeaveInfo,-XmessageHandlerClass:org.springframework.aop.aspectj.AspectJWeaverMessageHandler">
+	 <include within="com.xyz.myapp..*"/>
+   </weaver>
+</aspectj>]]></programlisting>
+		  		  
+	<para>On the Java 5 platform, load-time weaving is enabled by specifying the following
+	VM argument when launching the Java virtual machine:
+	</para>	  
+
+	<programlisting><![CDATA[-javaagent:<path-to-ajlibs>/aspectjweaver.jar]]></programlisting>   
+	
   	</sect2>
   	
   </sect1>
