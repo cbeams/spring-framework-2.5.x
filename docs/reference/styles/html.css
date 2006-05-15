@@ -252,3 +252,15 @@ HR  {
     background-color: #F4F4F4;
     font-size: 14px;
 }
+
+.programlisting * .classname {
+    font-size: 95%;
+}
+
+.programlisting * .interfacename {
+    font-size: 95%;
+}
+
+.programlisting * .literal {
+    font-size: 95%;
+}
