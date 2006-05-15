@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	}
 
 
-	protected final void refreshBeanFactory() throws BeansException {
+	protected final synchronized void refreshBeanFactory() throws BeansException {
 		// Shut down previous bean factory, if any.
 		if (this.beanFactory != null) {
 			this.beanFactory.destroySingletons();
@@ -98,7 +98,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		}
 	}
 
-	public final ConfigurableListableBeanFactory getBeanFactory() {
+	public final synchronized ConfigurableListableBeanFactory getBeanFactory() {
 		if (this.beanFactory == null) {
 			throw new IllegalStateException("BeanFactory not initialized - " +
 					"call 'refresh' before accessing beans via the context: " + this);
