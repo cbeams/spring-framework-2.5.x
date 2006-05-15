@@ -39,6 +39,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.TransactionTimedOutException;
 import org.springframework.transaction.UnexpectedRollbackException;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -315,6 +316,14 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testParticipatingTransactionWithRollbackOnly() throws Exception {
+		doTestParticipatingTransactionWithRollbackOnly(false);
+	}
+
+	public void testParticipatingTransactionWithRollbackOnlyAndFailEarly() throws Exception {
+		doTestParticipatingTransactionWithRollbackOnly(true);
+	}
+
+	private void doTestParticipatingTransactionWithRollbackOnly(boolean failEarly) throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		con.getAutoCommit();
@@ -333,15 +342,23 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		conControl.replay();
 		dsControl.replay();
 
-		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
-		final TransactionTemplate tt = new TransactionTemplate(tm);
+		DataSourceTransactionManager tm = new DataSourceTransactionManager(ds);
+		if (failEarly) {
+			tm.setFailEarlyOnGlobalRollbackOnly(true);
+		}
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
+		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
+		boolean outerTransactionBoundaryReached = false;
 		try {
+			assertTrue("Is new transaction", ts.isNewTransaction());
+
+			final TransactionTemplate tt = new TransactionTemplate(tm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
-					assertTrue("Is new transaction", status.isNewTransaction());
+					assertTrue("Is existing transaction", !status.isNewTransaction());
+					assertFalse("Is not rollback-only", status.isRollbackOnly());
 					tt.execute(new TransactionCallbackWithoutResult() {
 						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 							assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
@@ -350,13 +367,27 @@ public class DataSourceTransactionManagerTests extends TestCase {
 							status.setRollbackOnly();
 						}
 					});
-					assertTrue("Is new transaction", status.isNewTransaction());
+					assertTrue("Is existing transaction", !status.isNewTransaction());
+					assertTrue("Is rollback-only", status.isRollbackOnly());
 				}
 			});
+
+			outerTransactionBoundaryReached = true;
+			tm.commit(ts);
+
 			fail("Should have thrown UnexpectedRollbackException");
 		}
 		catch (UnexpectedRollbackException ex) {
 			// expected
+			if (!outerTransactionBoundaryReached) {
+				tm.rollback(ts);
+			}
+			if (failEarly) {
+				assertFalse(outerTransactionBoundaryReached);
+			}
+			else {
+				assertTrue(outerTransactionBoundaryReached);
+			}
 		}
 
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));

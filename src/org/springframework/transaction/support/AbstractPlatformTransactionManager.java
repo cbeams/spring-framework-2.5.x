@@ -116,6 +116,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	private boolean globalRollbackOnParticipationFailure = true;
 
+	private boolean failEarlyOnGlobalRollbackOnly = false;
+
 	private boolean rollbackOnCommitFailure = false;
 
 
@@ -181,7 +183,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * decision. If a participating transaction fails with an exception, the caller
 	 * can still decide to continue with a different path within the transaction.
 	 * However, note that this will only work as long as all participating resources
-	 * are capable of contiuing towards a transaction commit even after a data access
+	 * are capable of continuing towards a transaction commit even after a data access
 	 * failure: This is generally not the case for a Hibernate Session, for example;
 	 * neither is it for a sequence of JDBC insert/update/delete operations.
 	 * <p><b>Note:</b>This flag only applies to an explicit rollback attempt for a
@@ -215,9 +217,38 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Set if doRollback should be performed on failure of the doCommit call.
-	 * Typically not necessary and thus to be avoided as it can override the
-	 * commit exception with a subsequent rollback exception. Default is "false".
+	 * Set whether to fail early in case of the transaction being globally marked
+	 * as rollback-only.
+	 * <p>Default is "false", only causing an UnexpectedRollbackException at the
+	 * outermost transaction boundary. Switch this flag on to cause an
+	 * UnexpectedRollbackException as early as the global rollback-only marker
+	 * has been first detected, even from within an inner transaction boundary.
+	 * <p>Note that, as of Spring 2.0, the fail-early behavior for global
+	 * rollback-only markers has been unified: All transaction managers will by
+	 * default only cause UnexpectedRollbackException at the outermost transaction
+	 * boundary. This allows, for example, to continue unit tests even after an
+	 * operation failed and the transaction will never be completed. All transaction
+	 * managers will only fail earlier if this flag has explicitly been set to "true".
+	 * @see org.springframework.transaction.UnexpectedRollbackException
+	 */
+	public void setFailEarlyOnGlobalRollbackOnly(boolean failEarlyOnGlobalRollbackOnly) {
+		this.failEarlyOnGlobalRollbackOnly = failEarlyOnGlobalRollbackOnly;
+	}
+
+	/**
+	 * Return whether to fail early in case of the transaction being globally marked
+	 * as rollback-only.
+	 */
+	public boolean isFailEarlyOnGlobalRollbackOnly() {
+		return failEarlyOnGlobalRollbackOnly;
+	}
+
+	/**
+	 * Set whether <code>doRollback</code> should be performed on failure of the
+	 * <code>doCommit</code> call. Typically not necessary and thus to be avoided,
+	 * as it can potentially override the commit exception with a subsequent
+	 * rollback exception.
+	 * <p>Default is "false".
 	 * @see #doCommit
 	 * @see #doRollback
 	 */
@@ -226,7 +257,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Return if a rollback should be performed on failure of the commit call.
+	 * Return whether <code>doRollback</code> should be performed on failure of the
+	 * <code>doCommit</code> call.
 	 */
 	public boolean isRollbackOnCommitFailure() {
 		return rollbackOnCommitFailure;
@@ -466,8 +498,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				logger.debug("Global transaction is marked as rollback-only but transactional code requested commit");
 			}
 			processRollback(defStatus);
-			throw new UnexpectedRollbackException(
-					"Transaction has been rolled back because it has been marked as rollback-only");
+			// Throw UnexpectedRollbackException only at outermost transaction boundary
+			// or if explicitly asked to .
+			if (status.isNewTransaction() || isFailEarlyOnGlobalRollbackOnly()) {
+				throw new UnexpectedRollbackException(
+						"Transaction rolled back because it has been marked as rollback-only");
+			}
 		}
 
 		processCommit(defStatus);
@@ -486,6 +522,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				triggerBeforeCommit(status);
 				triggerBeforeCompletion(status);
 				beforeCompletionInvoked = true;
+				boolean globalRollbackOnly = false;
+				if (status.isNewTransaction() || isFailEarlyOnGlobalRollbackOnly()) {
+					globalRollbackOnly = status.isGlobalRollbackOnly();
+				}
 				if (status.hasSavepoint()) {
 					if (status.isDebug()) {
 						logger.debug("Releasing transaction savepoint");
@@ -496,14 +536,13 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					if (status.isDebug()) {
 						logger.debug("Initiating transaction commit");
 					}
-					boolean globalRollbackOnly = status.isGlobalRollbackOnly();
 					doCommit(status);
-					// Throw UnexpectedRollbackException if we have a global rollback-only
-					// marker but still didn't get a corresponding exception from commit.
-					if (globalRollbackOnly) {
-						throw new UnexpectedRollbackException(
-								"Transaction has been silently rolled back because it has been marked as rollback-only");
-					}
+				}
+				// Throw UnexpectedRollbackException if we have a global rollback-only
+				// marker but still didn't get a corresponding exception from commit.
+				if (globalRollbackOnly) {
+					throw new UnexpectedRollbackException(
+							"Transaction silently rolled back because it has been marked as rollback-only");
 				}
 			}
 			catch (UnexpectedRollbackException ex) {

@@ -1049,6 +1049,77 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.verify();
 	}
 
+	public void testJtaTransactionManagerWithNoExceptionOnGlobalRollbackOnly() throws Exception {
+		doTestJtaTransactionManagerWithNoExceptionOnGlobalRollbackOnly(false);
+	}
+
+	public void testJtaTransactionManagerWithNoExceptionOnGlobalRollbackOnlyAndFailEarly() throws Exception {
+		doTestJtaTransactionManagerWithNoExceptionOnGlobalRollbackOnly(true);
+	}
+
+	private void doTestJtaTransactionManagerWithNoExceptionOnGlobalRollbackOnly(boolean failEarly) throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_MARKED_ROLLBACK, 2);
+		ut.begin();
+		utControl.setVoidCallable(1);
+		if (failEarly) {
+			ut.getStatus();
+			utControl.setReturnValue(Status.STATUS_MARKED_ROLLBACK, 1);
+			ut.rollback();
+		}
+		else {
+			ut.commit();
+		}
+		utControl.setVoidCallable(1);
+		utControl.replay();
+
+		JtaTransactionManager tm = new JtaTransactionManager(ut);
+		if (failEarly) {
+			tm.setFailEarlyOnGlobalRollbackOnly(true);
+		}
+
+		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
+		boolean outerTransactionBoundaryReached = false;
+		try {
+			assertTrue("Is new transaction", ts.isNewTransaction());
+
+			TransactionTemplate tt = new TransactionTemplate(tm);
+			tt.execute(new TransactionCallbackWithoutResult() {
+				protected void doInTransactionWithoutResult(TransactionStatus status) {
+					// something transactional
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+						public void afterCompletion(int status) {
+							assertTrue("Correct completion status", status == TransactionSynchronization.STATUS_ROLLED_BACK);
+						}
+					});
+				}
+			});
+
+			outerTransactionBoundaryReached = true;
+			tm.commit(ts);
+
+			fail("Should have thrown UnexpectedRollbackException");
+		}
+		catch (UnexpectedRollbackException ex) {
+			// expected
+			if (!outerTransactionBoundaryReached) {
+				tm.rollback(ts);
+			}
+			if (failEarly) {
+				assertFalse(outerTransactionBoundaryReached);
+			}
+			else {
+				assertTrue(outerTransactionBoundaryReached);
+			}
+		}
+
+		utControl.verify();
+	}
+
 	public void testJtaTransactionManagerWithHeuristicMixedExceptionOnCommit() throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
