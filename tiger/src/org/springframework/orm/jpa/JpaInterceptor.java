@@ -107,6 +107,7 @@ public class JpaInterceptor extends JpaAccessor implements MethodInterceptor {
 				throw ex;
 			}
 		}
+		// TODO what about IllegalStateException?
 		finally {
 			if (isNewEm) {
 				TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
