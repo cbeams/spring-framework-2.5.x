@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,13 @@ import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.scope.RequestScopeMap;
+import org.springframework.web.context.scope.SessionScopeMap;
 
 /**
  * Subclass of GenericApplicationContext, suitable for web environments.
- * Implements the WebApplicationContext interface, but not ConfigurableWebApplicationContext,
+ *
+ * <p>Implements the WebApplicationContext interface, but not ConfigurableWebApplicationContext,
  * as it is not intended for declarative setup in <code>web.xml</code>. Instead,
  * it is designed for programmatic setup, for example for building nested contexts.
  *
@@ -80,6 +83,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 		super(beanFactory);
 	}
 
+
 	/**
 	 * Set the ServletContext that this WebApplicationContext runs in.
 	 */
@@ -97,6 +101,10 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	 * @see ServletContextAwareProcessor
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		beanFactory.registerScope(SCOPE_REQUEST, new RequestScopeMap());
+		beanFactory.registerScope(SCOPE_SESSION, new SessionScopeMap(false));
+		beanFactory.registerScope(SCOPE_GLOBAL_SESSION, new SessionScopeMap(true));
+
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 	}
