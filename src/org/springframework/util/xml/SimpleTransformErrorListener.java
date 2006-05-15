@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ public class SimpleTransformErrorListener implements ErrorListener {
 
 	private final Log logger;
 
+
 	/**
 	 * Create a new SimpleTransformErrorListener for the given
 	 * Commons Logging logger instance.
@@ -41,8 +42,9 @@ public class SimpleTransformErrorListener implements ErrorListener {
 		this.logger = logger;
 	}
 
+
 	public void warning(TransformerException ex) throws TransformerException {
-		logger.warn("Ignored XSLT transformation warning: " + ex.getMessage(), ex);
+		logger.warn("Ignored XSLT transformation warning", ex);
 	}
 
 	public void error(TransformerException ex) throws TransformerException {
