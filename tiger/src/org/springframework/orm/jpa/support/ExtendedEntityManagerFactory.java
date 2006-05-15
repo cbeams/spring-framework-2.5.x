@@ -111,7 +111,7 @@ public abstract class ExtendedEntityManagerFactory {
 
 		private final EntityManagerFactory entityManagerFactory;
 		
-		private PortableEntityManagerPlusOperations portableEntityManagerPlusOperations;
+		private final PortableEntityManagerPlusOperations portableEntityManagerPlusOperations;
 
 		private final boolean containerManaged;
 
