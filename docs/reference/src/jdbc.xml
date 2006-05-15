@@ -1116,9 +1116,7 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
 }]]></programlisting>
 		</section>
 		<section id="jdbc-SqlFunction">
-			<title>
-				<classname>SqlFunction</classname>
-			</title>
+			<title><classname>SqlFunction</classname></title>
 			<para>
 				The <classname>SqlFunction</classname> RDBMS operation class encapsulates an
 				SQL "function" wrapper for a query that returns a single row of

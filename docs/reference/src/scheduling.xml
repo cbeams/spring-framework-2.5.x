@@ -296,9 +296,7 @@ public class ExampleJob extends QuartzJobBean {
 		</section>
 	</section>
 	<section id="taskexecutor">
-		<title>
-			The Spring <classname>TaskExecutor</classname> abstraction
-		</title>
+		<title>The Spring <classname>TaskExecutor</classname> abstraction</title>
 
 		<para>
 			Spring 2.0 introduces a new abstraction for dealing with
@@ -313,9 +311,7 @@ public class ExampleJob extends QuartzJobBean {
 		</para>
 
 		<section>
-			<title>
-				The <classname>TaskExecutor</classname> Interface
-			</title>
+			<title>The <classname>TaskExecutor</classname> interface</title>
 
 			<para>
 				Spring's <classname>TaskExecutor</classname> interface is
@@ -330,9 +326,7 @@ public class ExampleJob extends QuartzJobBean {
 		</section>
 
 		<section>
-			<title>
-				Where to use a <classname>TaskExecutor</classname>
-			</title>
+			<title>Where to use a <classname>TaskExecutor</classname></title>
 
 			<para>
 				The <classname>TaskExecutor</classname> was originally
@@ -348,9 +342,7 @@ public class ExampleJob extends QuartzJobBean {
 		</section>
 		
 		<section>
-			<title>
-				Types of <classname>TaskExecutor</classname>s
-			</title>
+			<title><classname>TaskExecutor</classname> types</title>
 
 			<para>
 				There are a number of pre-built implementations of
