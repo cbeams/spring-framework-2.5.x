@@ -49,14 +49,12 @@ import org.apache.commons.logging.LogFactory;
 public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 	/**
-	 * Permit any number of concurrent invocations; i.e. don't throttle
-	 * concurrency.
+	 * Permit any number of concurrent invocations: that is, don't throttle concurrency.
 	 */
 	public static final int UNBOUNDED_CONCURRENCY = -1;
 
 	/**
-	 * Switch concurrency 'off', i.e. don't allow any concurrent
-	 * invocations.
+	 * Switch concurrency 'off': that is, don't allow any concurrent invocations.
 	 */
 	public static final int NO_CONCURRENCY = 0;
 	
@@ -124,7 +122,7 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 					try {
 						this.monitor.wait();
 					}
-					catch (InterruptedException ignored) {
+					catch (InterruptedException ex) {
 						// Re-interrupt current thread, to allow other threads to react.
 						Thread.currentThread().interrupt();
 					}
@@ -139,7 +137,7 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 	/**
 	 * To be invoked after the main execution logic of concrete subclasses.
-	 * @see #beforeAccess() 
+	 * @see #beforeAccess()
 	 */
 	protected void afterAccess() {
 		if (this.concurrencyLimit >= 0) {
