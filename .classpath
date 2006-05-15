@@ -14,6 +14,7 @@
 	<classpathentry kind="src" path="samples/jpetstore/src"/>
 	<classpathentry kind="src" path="samples/jpetstore/annotation/src"/>
 	<classpathentry output="samples/petclinic/.classes" kind="src" path="samples/petclinic/src"/>
+	<classpathentry kind="src" path="samples/petportal/src"/>
 	<classpathentry kind="src" path="samples/tiles-example/src"/>
 	<classpathentry kind="src" path="samples/webapp-minimal/src"/>
 	<classpathentry output="target/autobuilds/classes" kind="src" path="autobuilds/src"/>

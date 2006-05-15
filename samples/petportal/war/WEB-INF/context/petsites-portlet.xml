@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="petSites" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="location" value="WEB-INF/petsites.properties"/>
+	</bean>
+	
+	<!-- Controllers -->
+
+    <bean id="petSitesRedirectController" class="org.springframework.samples.petportal.portlet.PetSitesRedirectController">
+    	<property name="petSites" ref="petSites"/>
+		<property name="commandName" value="redirect"/>
+		<property name="commandClass" value="org.springframework.samples.petportal.domain.PetSite"/>
+		<property name="sessionForm" value="true"/>
+		<property name="formView" value="petSitesView"/>
+		<property name="successView" value="petSitesView"/>
+    </bean>
+    
+    <bean id="petSitesEditController" class="org.springframework.samples.petportal.portlet.PetSitesEditController">
+    	<property name="petSites" ref="petSites"/>
+    </bean>
+    
+    <bean id="petSitesDeleteController" class="org.springframework.samples.petportal.portlet.PetSitesDeleteController">
+    	<property name="petSites" ref="petSites"/>
+    </bean>
+
+    <bean id="petSitesAddController" class="org.springframework.samples.petportal.portlet.PetSitesAddController">
+    	<property name="petSites" ref="petSites"/>
+		<property name="commandName" value="site"/>
+		<property name="commandClass" value="org.springframework.samples.petportal.domain.PetSite"/>
+		<property name="formView" value="petSitesAdd"/>
+		<property name="successView" value="petSitesEdit"/>
+		<property name="validator" ref="petSiteValidator"/>
+    </bean>
+    
+    <bean id="petSiteValidator" class="org.springframework.samples.petportal.validation.PetSiteValidator"/>
+    
+    <!-- Handler Mappings -->
+    
+	<bean id="portletModeParameterHandlerMapping" class="org.springframework.web.portlet.handler.PortletModeParameterHandlerMapping">
+        <property name="order" value="1"/>
+		<property name="interceptors">
+			<list>
+				<ref bean="parameterMappingInterceptor"/>
+			</list>
+		</property>
+		<property name="parameterName" value="action"/>
+		<property name="portletModeParameterMap">
+			<map>
+				<entry key="edit">
+					<map>
+						<entry key="add" value-ref="petSitesAddController"/>
+						<entry key="delete" value-ref="petSitesDeleteController"/>
+					</map>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="portletModeHandlerMapping" class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
+        <property name="order" value="2"/>
+		<property name="portletModeMap">
+			<map>
+				<entry key="view" value-ref="petSitesRedirectController"/>
+				<entry key="edit" value-ref="petSitesEditController"/>
+			</map>
+		</property>
+	</bean>
+	
+	<!-- Exception Handler -->
+
+	<bean id="defaultExceptionHandler" parent="defaultExceptionHandlerTemplate"/>
+
+</beans>

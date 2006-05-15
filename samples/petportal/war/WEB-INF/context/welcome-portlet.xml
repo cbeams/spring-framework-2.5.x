@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<!-- Wrapping a Pre-existing JSR-168-compliant Portlet -->
+
+	<bean id="welcomePortlet" class="org.springframework.web.portlet.mvc.PortletWrappingController">
+		<property name="portletClass">
+			<value>org.springframework.samples.petportal.portlet.WelcomePortlet</value>
+		</property>
+		<property name="useSharedPortletConfig">
+			<value>false</value>
+		</property>
+		<property name="portletName">
+			<value>wrapped-welcome</value>
+		</property>
+		<property name="initParameters">
+			<props>
+				<prop key="dog">Poodle</prop>
+				<prop key="cat">Calico</prop>
+				<prop key="bird">Macaw</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<!-- Alternate method to reuse portlet - simpler, but no ability to rename or set init parameters
+	<bean id="simplePortletHandlerAdapter" class="org.springframework.web.portlet.handler.SimplePortletHandlerAdapter"/>
+	<bean id="simplePortletPostProcessor" class="org.springframework.web.portlet.handler.SimplePortletPostProcessor"/>
+	<bean id="welcomePortlet" class="org.springframework.samples.petportal.portlet.WelcomePortlet"/>
+	-->
+	
+	<!-- Handler Mapping -->
+
+	<bean id="portletModeHandlerMapping" class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
+		<property name="portletModeMap">
+			<map>
+				<entry key="view" value-ref="welcomePortlet"/>
+			</map>
+		</property>
+	</bean>
+	
+	<!-- Exception Handler -->
+
+	<bean id="defaultExceptionHandler" parent="defaultExceptionHandlerTemplate"/>
+
+</beans>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<!-- Multipart Resolver -->
+
+	<bean id="portletMultipartResolver" class="org.springframework.web.portlet.multipart.CommonsPortletMultipartResolver">
+		<property name="maxUploadSize">
+			<value>2048</value>
+		</property>
+	</bean>
+
+	<!-- Controller -->
+
+   <bean id="petDescriptionUploadController" class="org.springframework.samples.petportal.portlet.PetDescriptionUploadController">
+    	<property name="petService" ref="petService"/>
+		<property name="sessionForm" value="false"/>
+		<property name="commandName" value="upload"/>
+		<property name="commandClass" value="org.springframework.samples.petportal.domain.PetDescription"/>
+		<property name="formView" value="upload"/>
+    </bean>
+
+	<!-- Handler Mapping -->
+	
+	<bean id="portletModeHandlerMapping" class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
+		<property name="portletModeMap">
+			<map>
+				<entry key="view"><ref bean="petDescriptionUploadController"/></entry>
+			</map>
+		</property>
+	</bean>
+
+	<!-- Exception Handler -->
+
+	<bean id="customExceptionHandler" class="org.springframework.web.portlet.handler.SimpleMappingExceptionResolver">
+		<property name="order" value="1"/>
+		<property name="exceptionMappings">
+			<props>
+				<prop key="org.springframework.web.multipart.MaxUploadSizeExceededException">maxUploadExceeded</prop>
+				<prop key="org.springframework.samples.petportal.domain.InvalidFileTypeException">invalidFileType</prop>
+			</props>
+		</property> 
+	</bean>
+	
+	<bean id="defaultExceptionHandler" parent="defaultExceptionHandlerTemplate">
+		<property name="order" value="2"/>
+	</bean>
+
+</beans>

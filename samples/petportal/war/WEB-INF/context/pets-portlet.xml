@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<!-- Controllers -->
+
+	<bean id="petControllerTemplate" abstract="true">
+		<property name="petService" ref="petService"/>
+	</bean>
+	
+	<bean id="petController" class="org.springframework.samples.petportal.portlet.PetController" parent="petControllerTemplate"/>
+	
+	<bean id="petHelpController" class="org.springframework.web.portlet.mvc.ParameterizableViewController">
+		<property name="viewName" value="petHelp"/>
+	</bean>
+	
+	<bean id="dateFormatController" class="org.springframework.samples.petportal.portlet.DateFormatController"/>
+	
+	<bean id="petViewController" class="org.springframework.samples.petportal.portlet.PetViewController" parent="petControllerTemplate"/>
+	
+	<bean id="petDeleteController" class="org.springframework.samples.petportal.portlet.PetDeleteController" parent="petControllerTemplate"/>
+	
+    <bean id="petAddController" class="org.springframework.samples.petportal.portlet.PetAddController" parent="petControllerTemplate">
+        <property name="commandName" value="pet"/>
+        <property name="commandClass" value="org.springframework.samples.petportal.domain.Pet"/>
+        <property name="sessionForm" value="true"/>
+        <property name="pageAttribute" value="page"/>
+        <property name="pages" value="petAdd,petAdd,petAdd,petAdd"/>
+        <property name="validator" ref="petValidator"/> 
+    </bean>
+    
+    <bean id="petValidator" class="org.springframework.samples.petportal.validation.PetValidator"/>
+	
+	<!-- Handler Mappings -->
+
+	<bean id="portletModeParameterHandlerMapping" class="org.springframework.web.portlet.handler.PortletModeParameterHandlerMapping">
+        <property name="order" value="1"/>
+		<property name="interceptors">
+			<list>
+				<ref bean="parameterMappingInterceptor"/>
+			</list>
+		</property>
+		<property name="portletModeParameterMap">
+			<map>
+				<entry key="view">
+					<map>
+						<entry key="listPets" value-ref="petController"/>
+						<entry key="viewPet" value-ref="petViewController"/>
+						<entry key="deletePet" value-ref="petDeleteController"/>
+						<entry key="addPet" value-ref="petAddController"/>
+					</map>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="portletModeHandlerMapping" class="org.springframework.web.portlet.handler.PortletModeHandlerMapping">
+        <property name="order" value="2"/>
+		<property name="portletModeMap">
+			<map>
+				<entry key="view"><ref bean="petController"/></entry>
+				<entry key="edit"><ref bean="dateFormatController"/></entry>
+				<entry key="help"><ref bean="petHelpController"/></entry>
+			</map>
+		</property>
+	</bean>
+	
+	<!-- Exception Handler -->
+
+	<bean id="defaultExceptionHandler" parent="defaultExceptionHandlerTemplate"/>
+
+</beans>
