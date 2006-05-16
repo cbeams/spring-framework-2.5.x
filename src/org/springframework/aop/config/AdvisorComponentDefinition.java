@@ -28,11 +28,11 @@ import org.springframework.util.Assert;
  */
 public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 
-	private final BeanDefinition pointcutDefinition;
+	private final String advisorBeanName;
 
 	private final BeanDefinition advisorDefinition;
 
-	private final String advisorBeanName;
+	private final BeanDefinition pointcutDefinition;
 
 	private String description;
 
@@ -40,20 +40,20 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 
 	private BeanDefinition[] beanDefinitions;
 
-	private String expression;
 
 	public AdvisorComponentDefinition(String advisorBeanName, BeanDefinition advisorDefinition) {
 		 this(advisorBeanName, advisorDefinition, null);
 	}
 
 	public AdvisorComponentDefinition(String advisorBeanName, BeanDefinition advisorDefinition, BeanDefinition pointcutDefinition) {
-		Assert.notNull(advisorDefinition, "'advisorDefinition' cannot be null.");
-		Assert.notNull(advisorBeanName, "'advisorBeanName' cannot be null.");
+		Assert.notNull(advisorBeanName, "Advsor bean name must not be null");
+		Assert.notNull(advisorDefinition, "Advisor definition must not be null");
 		this.advisorBeanName = advisorBeanName;
 		this.advisorDefinition = advisorDefinition;
 		this.pointcutDefinition = pointcutDefinition;
 		unwrapDefinitions(advisorDefinition, pointcutDefinition);
 	}
+
 
 	private void unwrapDefinitions(BeanDefinition advisorDefinition, BeanDefinition pointcutDefinition) {
 		MutablePropertyValues propertyValues = advisorDefinition.getPropertyValues();
@@ -75,7 +75,7 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 	}
 
 	private String createDescription(RuntimeBeanReference adviceReference, BeanDefinition pointcutDefinition) {
-		return new StringBuilder().append("Advisor <advice(ref)='")
+		return new StringBuffer("Advisor <advice(ref)='")
 						.append(adviceReference.getBeanName())
 						.append("', pointcut(expression)='")
 						.append(pointcutDefinition.getPropertyValues().getPropertyValue("expression").getValue())
@@ -83,7 +83,7 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 	}
 
 	private String createDescription(RuntimeBeanReference adviceReference, RuntimeBeanReference pointcutReference) {
-		return new StringBuilder().append("Advisor <advice(ref)='")
+		return new StringBuffer("Advisor <advice(ref)='")
 						.append(adviceReference.getBeanName())
 						.append("', pointcut(ref)='")
 						.append(pointcutReference.getBeanName())
@@ -109,4 +109,5 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 	public Object getSource() {
 		return this.advisorDefinition.getSource();
 	}
+
 }

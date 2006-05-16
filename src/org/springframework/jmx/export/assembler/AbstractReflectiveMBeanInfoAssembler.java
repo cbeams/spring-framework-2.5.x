@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import javax.management.modelmbean.ModelMBeanOperationInfo;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.JdkVersion;
 import org.springframework.jmx.support.JmxUtils;
 
 /**
@@ -254,19 +255,19 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 */
 	protected ModelMBeanOperationInfo[] getOperationInfo(Object managedBean, String beanKey) {
 		Method[] methods = getClassToExpose(managedBean).getMethods();
+		boolean syntheticCheck = (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15);
 		List infos = new ArrayList();
 
 		for (int i = 0; i < methods.length; i++) {
 			Method method = methods[i];
-			if(method.isSynthetic()) {
+			if (syntheticCheck && method.isSynthetic()) {
 				continue;
 			}
+			if (method.getDeclaringClass().equals(Object.class)) {
+				continue;
+			}
+
 			ModelMBeanOperationInfo info = null;
-
-			if (method.getDeclaringClass() == Object.class) {
-				continue;
-			}
-
 			PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 			if (pd != null) {
 				if ((method.equals(pd.getReadMethod()) && includeReadAttribute(method, beanKey)) ||
