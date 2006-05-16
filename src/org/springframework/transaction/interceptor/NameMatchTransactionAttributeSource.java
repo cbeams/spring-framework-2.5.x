@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,8 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.util.PatternMatchUtils;
 
 /**
  * Simple implementation of TransactionAttributeSource that
@@ -110,7 +112,7 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 		TransactionAttribute attr = (TransactionAttribute) this.nameMap.get(methodName);
 
 		if (attr == null) {
-			// look for most specific name match
+			// Look for most specific name match.
 			String bestNameMatch = null;
 			for (Iterator it = this.nameMap.keySet().iterator(); it.hasNext();) {
 				String mappedName = (String) it.next();
@@ -127,15 +129,15 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 
 	/**
 	 * Return if the given method name matches the mapped name.
-	 * The default implementation checks for "xxx*" and "*xxx" matches.
-	 * Can be overridden in subclasses.
+	 * <p>The default implementation checks for "xxx*", "*xxx" and "*xxx*" matches,
+	 * as well as direct equality. Can be overridden in subclasses.
 	 * @param methodName the method name of the class
 	 * @param mappedName the name in the descriptor
 	 * @return if the names match
+	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
 	 */
 	protected boolean isMatch(String methodName, String mappedName) {
-		return (mappedName.endsWith("*") && methodName.startsWith(mappedName.substring(0, mappedName.length() - 1))) ||
-				(mappedName.startsWith("*") && methodName.endsWith(mappedName.substring(1, mappedName.length())));
+		return PatternMatchUtils.simpleMatch(mappedName, methodName);
 	}
 
 }

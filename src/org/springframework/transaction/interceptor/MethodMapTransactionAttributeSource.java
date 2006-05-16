@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.transaction.TransactionUsageException;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.PatternMatchUtils;
 
 /**
  * Simple implementation of TransactionAttributeSource that
@@ -116,7 +117,7 @@ public class MethodMapTransactionAttributeSource implements TransactionAttribute
 		Method[] methods = clazz.getDeclaredMethods();
 		List matchingMethods = new ArrayList();
 		for (int i = 0; i < methods.length; i++) {
-			if (methods[i].getName().equals(mappedName) || isMatch(methods[i].getName(), mappedName)) {
+			if (isMatch(methods[i].getName(), mappedName)) {
 				matchingMethods.add(methods[i]);
 			}
 		}
@@ -162,15 +163,15 @@ public class MethodMapTransactionAttributeSource implements TransactionAttribute
 
 	/**
 	 * Return if the given method name matches the mapped name.
-	 * The default implementation checks for "xxx*" and "*xxx" matches.
-	 * Can be overridden in subclasses.
+	 * <p>The default implementation checks for "xxx*", "*xxx" and "*xxx*" matches,
+	 * as well as direct equality. Can be overridden in subclasses.
 	 * @param methodName the method name of the class
 	 * @param mappedName the name in the descriptor
 	 * @return if the names match
+	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
 	 */
 	protected boolean isMatch(String methodName, String mappedName) {
-		return (mappedName.endsWith("*") && methodName.startsWith(mappedName.substring(0, mappedName.length() - 1))) ||
-				(mappedName.startsWith("*") && methodName.endsWith(mappedName.substring(1, mappedName.length())));
+		return PatternMatchUtils.simpleMatch(mappedName, methodName);
 	}
 
 

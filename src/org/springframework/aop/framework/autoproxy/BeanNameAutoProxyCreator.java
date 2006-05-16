@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.PatternMatchUtils;
 
 /**
  * Auto proxy creator that identifies beans to proxy via a list of names.
@@ -75,7 +76,7 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 					}
 					mappedName = mappedName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length());
 				}
-				if (beanName.equals(mappedName) || isMatch(beanName, mappedName)) {
+				if (isMatch(beanName, mappedName)) {
 					return PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS;
 				}
 			}
@@ -85,15 +86,15 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 
 	/**
 	 * Return if the given bean name matches the mapped name.
-	 * The default implementation checks for "xxx*" and "*xxx" matches.
-	 * Can be overridden in subclasses.
+	 * <p>The default implementation checks for "xxx*", "*xxx" and "*xxx*" matches,
+	 * as well as direct equality. Can be overridden in subclasses.
 	 * @param beanName the bean name to check
 	 * @param mappedName the name in the configured list of names
 	 * @return if the names match
+	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
 	 */
 	protected boolean isMatch(String beanName, String mappedName) {
-		return (mappedName.endsWith("*") && beanName.startsWith(mappedName.substring(0, mappedName.length() - 1))) ||
-				(mappedName.startsWith("*") && beanName.endsWith(mappedName.substring(1, mappedName.length())));
+		return PatternMatchUtils.simpleMatch(mappedName, beanName);
 	}
 
 }

@@ -22,8 +22,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.servlet.View;
 import org.springframework.core.Ordered;
+import org.springframework.util.PatternMatchUtils;
+import org.springframework.web.servlet.View;
 
 /**
  * Simple implementation of ViewResolver that allows for direct resolution of
@@ -294,15 +295,26 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	}
 
 	/**
-	 * Gets the order in which this {@link org.springframework.web.servlet.ViewResolver}
-	 * is evaluated.
+	 * Set the view names (or name patterns) that can be handled by this
+	 * {@link org.springframework.web.servlet.ViewResolver}. View names can contain
+	 * simple wildcards such that 'my*', '*Report' and '*Repo*' will all match the
+	 * view name 'myReport'.
+	 * @see #canHandle
 	 */
-	public int getOrder() {
-		return order;
+	public void setViewNames(String[] viewNames) {
+		this.viewNames = (viewNames == null ? new String[]{"*"} : viewNames);
 	}
 
 	/**
-	 * Sets the order in which this {@link org.springframework.web.servlet.ViewResolver}
+	 * Return the view names (or name patterns) that can be handled by this
+	 * {@link org.springframework.web.servlet.ViewResolver}.
+	 */
+	protected String[] getViewNames() {
+		return viewNames;
+	}
+
+	/**
+	 * Set the order in which this {@link org.springframework.web.servlet.ViewResolver}
 	 * is evaluated.
 	 */
 	public void setOrder(int order) {
@@ -310,13 +322,11 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	}
 
 	/**
-	 * Sets the view names (or name patterns) that can be handled by this
-	 * {@link org.springframework.web.servlet.ViewResolver}. View names can contain
-	 * wildcards such that 'my*', '*Report' and 'myReport' will all match the
-	 * view name 'myReport'.
+	 * Return the order in which this {@link org.springframework.web.servlet.ViewResolver}
+	 * is evaluated.
 	 */
-	public void setViewNames(String[] viewNames) {
-		this.viewNames = (viewNames == null ? new String[]{"*"} : viewNames);
+	public int getOrder() {
+		return order;
 	}
 
 	protected void initApplicationContext() {
@@ -369,25 +379,10 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * handle the supplied view name. If not, {@link #createView(String, java.util.Locale)} will
 	 * return <code>null</code>. The default implementation checks against the configured
 	 * {@link #setViewNames view names}.
+	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
 	 */
 	protected boolean canHandle(String viewName, Locale locale) {
-		if (this.viewNames == null) {
-			return true;
-		}
-
-		for (int i = 0; i < this.viewNames.length; i++) {
-			String mappedName = this.viewNames[i];
-			if (viewName.equals(mappedName) || isMatch(viewName, mappedName)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean isMatch(String viewName, String mappedName) {
-		return (mappedName.endsWith("*") && viewName.startsWith(mappedName.substring(0, mappedName.length() - 1))) ||
-						(mappedName.startsWith("*") && viewName.endsWith(mappedName.substring(1)));
+		return (getViewNames() == null || PatternMatchUtils.simpleMatch(getViewNames(), viewName));
 	}
 
 	/**

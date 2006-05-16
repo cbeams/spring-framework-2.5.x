@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.PatternMatchUtils;
 
 /**
  * Pointcut bean for simple method name matches, as alternative to regexp patterns.
@@ -90,16 +91,17 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 
 	/**
 	 * Return if the given method name matches the mapped name.
-	 * The default implementation checks for "xxx*" and "*xxx" matches.
-	 * Can be overridden in subclasses.
+	 * <p>The default implementation checks for "xxx*", "*xxx" and "*xxx*" matches,
+	 * as well as direct equality. Can be overridden in subclasses.
 	 * @param methodName the method name of the class
 	 * @param mappedName the name in the descriptor
 	 * @return if the names match
+	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
 	 */
 	protected boolean isMatch(String methodName, String mappedName) {
-		return (mappedName.endsWith("*") && methodName.startsWith(mappedName.substring(0, mappedName.length() - 1))) ||
-				(mappedName.startsWith("*") && methodName.endsWith(mappedName.substring(1, mappedName.length())));
+		return PatternMatchUtils.simpleMatch(mappedName, methodName);
 	}
+
 
 	public boolean equals(Object other) {
 		if (this == other) {
