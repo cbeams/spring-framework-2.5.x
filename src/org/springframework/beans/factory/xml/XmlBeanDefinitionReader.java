@@ -551,6 +551,14 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		public void componentRegistered(ComponentDefinition componentDefinition) {
 			// no-op
 		}
+
+		public void aliasRegistered(String targetBeanName, String alias) {
+			// no-op
+		}
+
+		public void importProcessed(String importedResource) {
+			// no-op
+		}
 	}
 
 }

@@ -145,6 +145,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			String name = ele.getAttribute(NAME_ATTRIBUTE);
 			String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
 			getReaderContext().getReader().getBeanFactory().registerAlias(name, alias);
+			getReaderContext().fireAliasRegistered(name, alias);
 		}
 		else if (DomUtils.nodeNameEquals(ele, BEAN_ELEMENT)) {
 			BeanDefinitionHolder bdHolder = helper.parseBeanDefinitionElement(ele, false);
@@ -187,6 +188,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				getReaderContext().error("Invalid relative resource location [" + location + "] to import bean definitions from", ele, null, ex);
 			}
 		}
+
+		getReaderContext().fireImportProcessed(location);
 	}
 
 	/**

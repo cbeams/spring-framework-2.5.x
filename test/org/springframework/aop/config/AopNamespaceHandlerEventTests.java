@@ -19,19 +19,16 @@ package org.springframework.aop.config;
 import junit.framework.TestCase;
 import org.springframework.beans.factory.support.ComponentDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.ReaderEventListener;
+import org.springframework.beans.factory.support.MapBasedReaderEventListener;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Rob Harrop
  */
 public class AopNamespaceHandlerEventTests extends TestCase {
 
-	private MockReaderEventListener eventListener = new MockReaderEventListener();
+	private MapBasedReaderEventListener eventListener = new MapBasedReaderEventListener();
 
 	private XmlBeanDefinitionReader reader;
 
@@ -46,9 +43,10 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 		loadBeansFrom("aopNamespaceHandlerPointcutEventTests.xml");
 		ComponentDefinition[] componentDefinitions = this.eventListener.getComponentDefinitions();
 		assertEquals("Incorrect number of events fired", 2, componentDefinitions.length);
-		assertTrue(componentDefinitions[1] instanceof PointcutComponentDefinition);
+		ComponentDefinition pcDefinition = this.eventListener.getComponentDefinition("myPointcut");
+		assertTrue(pcDefinition instanceof PointcutComponentDefinition);
 
-		PointcutComponentDefinition pointcutComponentDefinition = (PointcutComponentDefinition) componentDefinitions[1];
+		PointcutComponentDefinition pointcutComponentDefinition = (PointcutComponentDefinition) pcDefinition;
 		assertEquals("Incorrect number of BeanDefintions", 1, pointcutComponentDefinition.getBeanDefinitions().length);
 	}
 
@@ -59,7 +57,7 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 		AdvisorComponentDefinition acd = null;
 		for (int i = 0; i < componentDefinitions.length; i++) {
 			ComponentDefinition componentDefinition = componentDefinitions[i];
-			if(componentDefinition instanceof AdvisorComponentDefinition) {
+			if (componentDefinition instanceof AdvisorComponentDefinition) {
 				acd = (AdvisorComponentDefinition) componentDefinition;
 				break;
 			}
@@ -77,7 +75,7 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 		AdvisorComponentDefinition acd = null;
 		for (int i = 0; i < componentDefinitions.length; i++) {
 			ComponentDefinition componentDefinition = componentDefinitions[i];
-			if(componentDefinition instanceof AdvisorComponentDefinition) {
+			if (componentDefinition instanceof AdvisorComponentDefinition) {
 				acd = (AdvisorComponentDefinition) componentDefinition;
 				break;
 			}
@@ -94,20 +92,5 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 
 	private void loadBeansFrom(String path) {
 		this.reader.loadBeanDefinitions(new ClassPathResource(path, getClass()));
-	}
-
-
-	private static class MockReaderEventListener implements ReaderEventListener {
-
-		private final List componentDefinitions = new ArrayList();
-
-		public void componentRegistered(ComponentDefinition componentDefinition) {
-			this.componentDefinitions.add(componentDefinition);
-			System.out.println(componentDefinition.toString());
-		}
-
-		public ComponentDefinition[] getComponentDefinitions() {
-			return (ComponentDefinition[]) componentDefinitions.toArray(new ComponentDefinition[componentDefinitions.size()]);
-		}
 	}
 }

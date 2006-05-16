@@ -86,6 +86,14 @@ public class ReaderContext {
 		this.eventListener.componentRegistered(componentDefinition);
 	}
 
+	public void fireAliasRegistered(String targetBeanName, String alias) {
+		this.eventListener.aliasRegistered(targetBeanName, alias);
+	}
+
+	public void fireImportProcessed(String importedResource) {
+		this.eventListener.importProcessed(importedResource);
+	}
+
 	public SourceExtractor getSourceExtractor() {
 		return sourceExtractor;
 	}

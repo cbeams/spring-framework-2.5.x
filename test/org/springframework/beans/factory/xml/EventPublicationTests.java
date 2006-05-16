@@ -17,12 +17,14 @@
 package org.springframework.beans.factory.xml;
 
 import junit.framework.TestCase;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanComponentDefinition;
 import org.springframework.beans.factory.support.ComponentDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MapBasedReaderEventListener;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.io.ClassPathResource;
+
+import java.util.List;
 
 /**
  * @author Rob Harrop
@@ -30,21 +32,36 @@ import org.springframework.core.io.ClassPathResource;
  */
 public class EventPublicationTests extends TestCase {
 
-	public void testBeanEventReceived() throws Exception {
-		MapBasedReaderEventListener eventListener = new MapBasedReaderEventListener();
+	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-		reader.setEventListener(eventListener);
+	private final MapBasedReaderEventListener eventListener = new MapBasedReaderEventListener();
 
+	protected void setUp() throws Exception {
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
+		reader.setEventListener(this.eventListener);
 		reader.loadBeanDefinitions(new ClassPathResource("beanEvents.xml", getClass()));
+	}
 
-		ComponentDefinition componentDefinition = eventListener.getComponentDefinition("testBean");
+	public void testBeanEventReceived() throws Exception {
+		ComponentDefinition componentDefinition = this.eventListener.getComponentDefinition("testBean");
 		assertNotNull("Event not fired for bean", componentDefinition);
 		assertTrue("ComponentDefinition for bean is of wrong type.", componentDefinition instanceof BeanComponentDefinition);
 
 		BeanDefinition beanDefinition = componentDefinition.getBeanDefinitions()[0];
 		assertNotNull("Underlying BeanDefinition is null", beanDefinition);
+	}
+
+	public void testAliasEventReceived() throws Exception {
+		List aliases = this.eventListener.getAliases("testBean");
+		assertEquals(2, aliases.size());
+		assertTrue(aliases.contains("testBeanAlias1"));
+		assertTrue(aliases.contains("testBeanAlias2"));
+	}
+
+	public void testImportEventReceived() throws Exception {
+		List imports = this.eventListener.getImports();
+		assertEquals(1, imports.size());
+		assertTrue(imports.contains("beanEventsImported.xml"));
 	}
 
 }

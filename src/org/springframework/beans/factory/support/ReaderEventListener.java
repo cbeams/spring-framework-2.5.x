@@ -23,4 +23,8 @@ package org.springframework.beans.factory.support;
 public interface ReaderEventListener {
 
 	void componentRegistered(ComponentDefinition componentDefinition);
+
+	void aliasRegistered(String targetBeanName, String alias);
+
+	void importProcessed(String importedResource);
 }

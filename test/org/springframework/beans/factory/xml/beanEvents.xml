@@ -4,6 +4,9 @@
 
 <beans>
 
+	<import resource="beanEventsImported.xml"/>
+	<alias name="testBean" alias="testBeanAlias1"/>
+	<alias name="testBean" alias="testBeanAlias2"/>
 	<bean id="testBean" class="org.springframework.beans.TestBean">
 		<property name="name" value="Rob Harrop"/>
 	</bean>

@@ -17,23 +17,18 @@
 package org.springframework.aop.aspectj.autoproxy;
 
 import junit.framework.TestCase;
-
 import org.springframework.aop.config.NamespaceHandlerUtils;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.MapBasedReaderEventListener;
 import org.springframework.beans.factory.support.ReaderContext;
-import org.springframework.beans.factory.support.ReaderEventListener;
-import org.springframework.beans.factory.support.ComponentDefinition;
 import org.springframework.beans.factory.support.SourceExtractor;
-import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.Resource;
-
-import java.util.List;
-import java.util.ArrayList;
+import org.springframework.core.io.ResourceLoader;
 
 /**
  * @author Rob Harrop
@@ -42,9 +37,10 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 
 	private ParserContext parserContext;
 
-	private MockReaderEventListener readerEventListener = new MockReaderEventListener();
+	private MapBasedReaderEventListener readerEventListener = new MapBasedReaderEventListener();
 
 	private BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
+
 	protected void setUp() throws Exception {
 		SourceExtractor sourceExtractor = new SourceExtractor() {
 			public Object extract(Object sourceCandidate) {
@@ -96,19 +92,6 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 
 		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		assertEquals("Incorrect APC class", AspectJInvocationContextExposingAdvisorAutoProxyCreator.class, definition.getBeanClass());
-	}
-
-	private static class MockReaderEventListener implements ReaderEventListener {
-
-		private final List componentDefinitions = new ArrayList();
-
-		public void componentRegistered(ComponentDefinition componentDefinition) {
-			this.componentDefinitions.add(componentDefinition);
-		}
-
-		public ComponentDefinition[] getComponentDefinitions() {
-			return (ComponentDefinition[]) componentDefinitions.toArray(new ComponentDefinition[componentDefinitions.size()]);
-		}
 	}
 
 	private class DummyBeanDefinitionReader implements BeanDefinitionReader {
