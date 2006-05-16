@@ -30,15 +30,15 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.Conventions;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.Conventions;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
@@ -91,8 +91,8 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @since 2.0
  */
-public class ScriptFactoryPostProcessor
-		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, ResourceLoaderAware, DisposableBean {
+public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
+		implements BeanFactoryAware, ResourceLoaderAware, DisposableBean {
 
 	/**
 	 * The {@link org.springframework.core.io.Resource}-style prefix that denotes
@@ -196,18 +196,6 @@ public class ScriptFactoryPostProcessor
 		}
 
 		return this.scriptBeanFactory.getBean(scriptedObjectBeanName);
-	}
-
-	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
-		return true;
-	}
-
-	public Object postProcessBeforeInitialization(Object bean, String beanName) {
-		return bean;
-	}
-
-	public Object postProcessAfterInitialization(Object bean, String beanName) {
-		return bean;
 	}
 
 	/**

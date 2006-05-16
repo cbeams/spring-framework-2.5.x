@@ -36,7 +36,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
@@ -962,16 +962,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		bd.getPropertyValues().addPropertyValue(new PropertyValue("age", new Integer(ageSetByPropertyValue)));
 		lbf.registerBeanDefinition("test", bd);
 		final String nameSetOnField = "nameSetOnField";
-		lbf.addBeanPostProcessor(new InstantiationAwareBeanPostProcessor() {
-			public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-				return bean;
-			}
-			public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-				return bean;
-			}
-			public Object postProcessBeforeInstantiation(Class beanClass, String beanName) throws BeansException {
-				return null;
-			}
+		lbf.addBeanPostProcessor(new InstantiationAwareBeanPostProcessorAdapter() {
 			public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 				TestBean tb = (TestBean) bean;
 				try {
