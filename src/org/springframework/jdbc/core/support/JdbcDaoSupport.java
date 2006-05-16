@@ -51,6 +51,7 @@ public abstract class JdbcDaoSupport extends DaoSupport {
 	 */
 	public final void setDataSource(DataSource dataSource) {
 	  this.jdbcTemplate = createJdbcTemplate(dataSource);
+		initTemplateConfig();
 	}
 
 	/**
@@ -79,6 +80,7 @@ public abstract class JdbcDaoSupport extends DaoSupport {
 	 */
 	public final void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
+		initTemplateConfig();
 	}
 
 	/**
@@ -87,6 +89,17 @@ public abstract class JdbcDaoSupport extends DaoSupport {
 	 */
 	public final JdbcTemplate getJdbcTemplate() {
 	  return jdbcTemplate;
+	}
+
+	/**
+	 * Initialize the template-based configuration of this DAO.
+	 * Called after a new JdbcTemplate has been set, either directly
+	 * or through a DataSource.
+	 * <p>This implementation is empty. Subclasses may override this
+	 * to configure further objects based on the JdbcTemplate.
+	 * @see #getJdbcTemplate()
+	 */
+	protected void initTemplateConfig() {
 	}
 
 	protected void checkDaoConfig() {
