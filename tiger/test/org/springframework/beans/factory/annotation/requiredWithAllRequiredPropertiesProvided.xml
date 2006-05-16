@@ -4,7 +4,7 @@
 
 <beans>
 
-	<bean class="org.springframework.beans.factory.annotation.RequiredBeanFactoryPostProcessor"/>
+	<bean class="org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor"/>
 
 	<bean id="testBean" class="org.springframework.beans.factory.annotation.RequiredTestBean">
 		<property name="age" value="24"/>

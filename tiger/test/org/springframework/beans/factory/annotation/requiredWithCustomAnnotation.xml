@@ -4,7 +4,7 @@
 
 <beans>
 
-	<bean class="org.springframework.beans.factory.annotation.RequiredBeanFactoryPostProcessor">
+	<bean class="org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor">
 		<property name="requiredAnnotationType" value="org.springframework.beans.factory.annotation.MyRequired"/>
 	</bean>
 

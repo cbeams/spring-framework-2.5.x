@@ -18,39 +18,36 @@ package org.springframework.beans.factory.annotation;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Rob Harrop
  * @since 2.0
  */
-public class RequiredBeanFactoryPostProcessorTests extends TestCase {
+public class RequiredAnnotationBeanPostProcessorTests extends TestCase {
 
-	public void testNothing() {
-	}
-
-	public void XtestWithRequiredPropertyOmitted() throws Exception {
+	public void testWithRequiredPropertyOmitted() throws Exception {
 		try {
-			new ClassPathXmlApplicationContext("org/springframework/beans/factory/annotation/requiredWithOneRequiredPropertyOmitted.xml");
-			fail("Should have thrown IllegalArgumentException.");
+			new ClassPathXmlApplicationContext("requiredWithOneRequiredPropertyOmitted.xml", getClass());
+			fail("Should have thrown BeanCreationException");
 		}
-		catch (IllegalArgumentException ex) {
-			String message = ex.getMessage();
-			System.out.println(message);
+		catch (BeanCreationException ex) {
+			String message = ex.getCause().getMessage();
 			assertTrue(message.indexOf("Property") > -1);
 			assertTrue(message.indexOf("age") > -1);
 			assertTrue(message.indexOf("testBean") > -1);
 		}
 	}
 
-	public void XtestWithThreeRequiredPropertiesOmitted() throws Exception {
+	public void testWithThreeRequiredPropertiesOmitted() throws Exception {
 		try {
-			new ClassPathXmlApplicationContext("org/springframework/beans/factory/annotation/requiredWithThreeRequiredPropertiesOmitted.xml");
-			fail("Should have thrown IllegalArgumentException.");
+			new ClassPathXmlApplicationContext("requiredWithThreeRequiredPropertiesOmitted.xml", getClass());
+			fail("Should have thrown BeanCreationException");
 		}
-		catch (IllegalArgumentException ex) {
-			String message = ex.getMessage();
-			System.out.println(message);
+		catch (BeanCreationException ex) {
+			String message = ex.getCause().getMessage();
 			assertTrue(message.indexOf("Properties") > -1);
 			assertTrue(message.indexOf("age") > -1);
 			assertTrue(message.indexOf("favouriteColour") > -1);
@@ -59,21 +56,21 @@ public class RequiredBeanFactoryPostProcessorTests extends TestCase {
 		}
 	}
 
-	public void XtestWithOnlyRequiredPropertiesSpecified() throws Exception {
-		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("org/springframework/beans/factory/annotation/requiredWithAllRequiredPropertiesProvided.xml");
+	public void testWithOnlyRequiredPropertiesSpecified() throws Exception {
+		ApplicationContext context =
+				new ClassPathXmlApplicationContext("requiredWithAllRequiredPropertiesProvided.xml", getClass());
 		RequiredTestBean bean = (RequiredTestBean) context.getBean("testBean");
 		assertEquals(24, bean.getAge());
 		assertEquals("Blue", bean.getFavouriteColour());
 	}
 
-	public void XtestWithCustomAnnotation() throws Exception {
+	public void testWithCustomAnnotation() throws Exception {
 		try {
-			new ClassPathXmlApplicationContext("org/springframework/beans/factory/annotation/requiredWithCustomAnnotation.xml");
-			fail("Should have thrown IllegalArgumentException.");
+			new ClassPathXmlApplicationContext("requiredWithCustomAnnotation.xml", getClass());
+			fail("Should have thrown BeanCreationException");
 		}
-		catch (IllegalArgumentException ex) {
-			String message = ex.getMessage();
-			System.out.println(message);
+		catch (BeanCreationException ex) {
+			String message = ex.getCause().getMessage();
 			assertTrue(message.indexOf("Property") > -1);
 			assertTrue(message.indexOf("name") > -1);
 			assertTrue(message.indexOf("testBean") > -1);
