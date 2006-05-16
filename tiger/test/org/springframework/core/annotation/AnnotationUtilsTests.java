@@ -27,37 +27,38 @@ public class AnnotationUtilsTests extends TestCase {
 
 	public void testFindMethodAnnotationOnLeaf() throws SecurityException, NoSuchMethodException {
 		Method m = Leaf.class.getMethod("annotatedOnLeaf", (Class[]) null);
-		Order o = AnnotationUtils.findMethodAnnotation(Order.class, m, Leaf.class);
+		Order o = AnnotationUtils.findAnnotation(m, Order.class);
 		assertNotNull(o);
 	}
 	
 	public void testFindMethodAnnotationOnRoot() throws SecurityException, NoSuchMethodException {
 		Method m = Leaf.class.getMethod("annotatedOnRoot", (Class[]) null);
-		Order o = AnnotationUtils.findMethodAnnotation(Order.class, m, Leaf.class);
+		Order o = AnnotationUtils.findAnnotation(m, Order.class);
 		assertNotNull(o);
 	}
 	
 	public void testFindMethodAnnotationOnRootButOverridden() throws SecurityException, NoSuchMethodException {
 		Method m = Leaf.class.getMethod("overrideWithoutNewAnnotation", (Class[]) null);
-		Order o = AnnotationUtils.findMethodAnnotation(Order.class, m, Leaf.class);
+		Order o = AnnotationUtils.findAnnotation(m, Order.class);
 		assertNotNull(o);
 	}
 	
 	public void testFindMethodAnnotationNotAnnotated() throws SecurityException, NoSuchMethodException {
 		Method m = Leaf.class.getMethod("notAnnotated", (Class[]) null);
-		Order o = AnnotationUtils.findMethodAnnotation(Order.class, m, Leaf.class);
+		Order o = AnnotationUtils.findAnnotation(m, Order.class);
 		assertNull(o);
 	}
 
 	public void testFindMethodAnnotationOnBridgeMethod() throws Exception {
 		Method m = SimpleFoo.class.getDeclaredMethod("something", Object.class);
 		assertTrue(m.isBridge());
-		Order o = AnnotationUtils.findMethodAnnotation(Order.class, m, SimpleFoo.class);
+		Order o = AnnotationUtils.findAnnotation(m, Order.class);
 	}
-	// TODO consider whether we want this to handle annotations on interfaces
+
+// TODO consider whether we want this to handle annotations on interfaces
 //	public void testFindMethodAnnotationFromInterfaceImplementedByRoot() throws SecurityException, NoSuchMethodException {
 //		Method m = Leaf.class.getMethod("fromInterfaceImplementedByRoot", (Class[]) null);
-//		Order o = AnnotationUtils.findMethodAnnotation(Order.class, m, Leaf.class);
+//		Order o = AnnotationUtils.findAnnotation(Order.class, m, Leaf.class);
 //		assertNotNull(o);
 //	}
 
