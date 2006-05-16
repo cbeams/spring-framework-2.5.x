@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.beans.BeanWrapperImpl
  * @see JdkVersion
  */
-public abstract class GenericsHelper {
+public abstract class GenericCollectionTypeResolver {
 
 	/**
 	 * Determine the generic element type of the given Collection parameter.

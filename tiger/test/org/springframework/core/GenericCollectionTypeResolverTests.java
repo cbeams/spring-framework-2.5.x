@@ -27,7 +27,7 @@ import java.util.Set;
  * @author Serge Bogatyrjov
  * @author Juergen Hoeller
  */
-public class GenericsHelperTests extends AbstractGenericsTests {
+public class GenericCollectionTypeResolverTests extends AbstractGenericsTests {
 
 	protected void setUp() throws Exception {
 		this.targetClass = Foo.class;
@@ -37,7 +37,7 @@ public class GenericsHelperTests extends AbstractGenericsTests {
 	}
 
 	protected Type getType(Method method) {
-		return GenericsHelper.getMapValueReturnType(method);
+		return GenericCollectionTypeResolver.getMapValueReturnType(method);
 	}
 
 	public void testA() throws Exception {

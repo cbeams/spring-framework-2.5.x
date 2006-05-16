@@ -29,7 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.CollectionFactory;
-import org.springframework.core.GenericsHelper;
+import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
@@ -293,7 +293,7 @@ class PropertyTypeConverter {
 
 		Class elementType = null;
 		if (methodParam != null && JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
-			elementType = GenericsHelper.getCollectionParameterType(methodParam);
+			elementType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
 		}
 		Collection convertedCopy =
 				CollectionFactory.createApproximateCollection(original.getClass(), original.size());
@@ -313,8 +313,8 @@ class PropertyTypeConverter {
 		Class keyType = null;
 		Class valueType = null;
 		if (methodParam != null && JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
-			keyType = GenericsHelper.getMapKeyParameterType(methodParam);
-			valueType = GenericsHelper.getMapValueParameterType(methodParam);
+			keyType = GenericCollectionTypeResolver.getMapKeyParameterType(methodParam);
+			valueType = GenericCollectionTypeResolver.getMapValueParameterType(methodParam);
 		}
 		Map convertedCopy = CollectionFactory.createApproximateMap(original.getClass(), original.size());
 		boolean actuallyConverted = false;

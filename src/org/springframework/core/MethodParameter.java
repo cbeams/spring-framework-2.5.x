@@ -26,11 +26,11 @@ import org.springframework.util.Assert;
  * that is, a Method or Constructor plus a parameter index.
  * Useful as a specification object to pass along.
  *
- * <p>Used by GenericsHelper, BeanWrapperImpl and AbstractBeanFactory.
+ * <p>Used by GenericCollectionTypeResolver, BeanWrapperImpl and AbstractBeanFactory.
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see GenericsHelper
+ * @see GenericCollectionTypeResolver
  * @see org.springframework.beans.BeanWrapperImpl
  * @see org.springframework.beans.factory.support.AbstractBeanFactory
  */

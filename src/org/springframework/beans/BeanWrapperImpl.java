@@ -32,7 +32,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.GenericsHelper;
+import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
@@ -525,7 +525,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						Map map = (Map) value;
 						Class mapKeyType = null;
 						if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
-							mapKeyType = GenericsHelper.getMapKeyReturnType(pd.getReadMethod());
+							mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod());
 						}
 						// IMPORTANT: Do not pass full property name in here - property editors
 						// must not kick in for map keys but rather only for map values.
@@ -627,7 +627,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				PropertyDescriptor pd = getPropertyDescriptorInternal(tokens.actualName);
 				Class requiredType = null;
 				if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
-					requiredType = GenericsHelper.getCollectionReturnType(pd.getReadMethod());
+					requiredType = GenericCollectionTypeResolver.getCollectionReturnType(pd.getReadMethod());
 				}
 				List list = (List) propValue;
 				int index = Integer.parseInt(key);
@@ -667,8 +667,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				Class mapKeyType = null;
 				Class mapValueType = null;
 				if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
-					mapKeyType = GenericsHelper.getMapKeyReturnType(pd.getReadMethod());
-					mapValueType = GenericsHelper.getMapValueReturnType(pd.getReadMethod());
+					mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod());
+					mapValueType = GenericCollectionTypeResolver.getMapValueReturnType(pd.getReadMethod());
 				}
 				Map map = (Map) propValue;
 				Object oldValue = null;
