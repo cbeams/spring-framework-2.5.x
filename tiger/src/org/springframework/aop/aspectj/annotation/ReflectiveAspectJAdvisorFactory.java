@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,7 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.Pointcut;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.PointcutAdvisor;
@@ -43,9 +44,9 @@ import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.aspectj.DeclareParentsAdvisor;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * Factory that can create Spring AOP Advisors given AspectJ classes from classes honouring
@@ -74,7 +75,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		final List<Advisor> advisors = new LinkedList<Advisor>();
 		//final AspectInstanceFactory aif = new AspectInstanceFactory.SingletonAspectInstanceFactory(aspectInstance);
 		ReflectionUtils.doWithMethods(aspectClass, new ReflectionUtils.MethodCallback() {
-			public void doWith(Method m) throws IllegalArgumentException, IllegalAccessException {
+			public void doWith(Method m) throws IllegalArgumentException {
 				// Exclude pointcuts
 				if (AnnotationUtils.getAnnotation(m, Pointcut.class) == null) {
 					PointcutAdvisor pa = getAdvisor(m, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);
@@ -148,12 +149,12 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 			MetadataAwareAspectInstanceFactory aif,
 			int declarationOrderInAspect,
 			String aspectName) {
-		Class<?> candidateAspectClass = aif.getAspectMetadata().getAspectClass();
 
-		validate(aif.getAspectMetadata().getAspectClass());
+		Class<?> candidateAspectClass = aif.getAspectMetadata().getAspectClass();
+		validate(candidateAspectClass);
 
 		AspectJAnnotation<?> aspectJAnnotation =
-				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAspectJAdviceMethod, candidateAspectClass);
+				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAspectJAdviceMethod);
 		if (aspectJAnnotation == null) {
 			//throw new IllegalStateException("Class " + aif.getAspectMetadata().getAspectClass() + " must be an aspect");
 			return null;
@@ -205,7 +206,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		// now to configure the advice...
 		springAdvice.setAspectName(aspectName);
 		springAdvice.setDeclarationOrder(declarationOrderInAspect);
-		String[] argNames = getArgNames(candidateAspectJAdviceMethod,candidateAspectClass);
+		String[] argNames = getArgNames(candidateAspectJAdviceMethod);
 		if (argNames != null) {
 			springAdvice.setArgNamesFromStringArray(argNames);
 		}
@@ -217,8 +218,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		return (Advice) springAdvice;
 	}
 
-	private String[] getArgNames(Method forMethod, Class inClass) {
-		String[] argNames = this.parameterNameDiscoverer.getParameterNames(forMethod,inClass);
+	private String[] getArgNames(Method forMethod) {
+		String[] argNames = this.parameterNameDiscoverer.getParameterNames(forMethod);
 		if (argNames != null) {
 			if (forMethod.getParameterTypes().length == (argNames.length + 1) ) {
 				// may need to add implicit join point arg name
@@ -238,13 +239,13 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 	private AspectJExpressionPointcut getPointcut(Method candidateAspectJAdviceMethod, Class<?> candidateAspectClass) {
 		AspectJAnnotation<?> aspectJAnnotation =
-				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAspectJAdviceMethod,candidateAspectClass);
+				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAspectJAdviceMethod);
 		if (aspectJAnnotation == null) {
 			return null;
 		}
 
 
-		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut(candidateAspectClass,new String[0],new Class[0]);
+		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut(candidateAspectClass, new String[0], new Class[0]);
 		ajexp.setExpression(aspectJAnnotation.getPointcutExpression());
 		return ajexp;
 	}

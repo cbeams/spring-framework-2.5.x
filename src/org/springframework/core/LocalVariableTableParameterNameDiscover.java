@@ -42,7 +42,7 @@ public class LocalVariableTableParameterNameDiscover implements ParameterNameDis
 	private final Log logger = LogFactory.getLog(getClass());
 
 
-	public String[] getParameterNames(Method method, Class clazz) {
+	public String[] getParameterNames(Method method) {
 		ParameterNameDiscoveringVisitor visitor = null;
 		try {
 			visitor = visitMethod(method);

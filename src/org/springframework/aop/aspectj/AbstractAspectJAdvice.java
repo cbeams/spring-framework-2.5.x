@@ -367,8 +367,7 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 			adviceParameterNameDiscoverer.setRaiseExceptions(true);
 			discoverer.addDiscoverer(adviceParameterNameDiscoverer);
 			
-			this.argumentNames = discoverer.getParameterNames(
-					this.aspectJAdviceMethod,this.aspectJAdviceMethod.getDeclaringClass());
+			this.argumentNames = discoverer.getParameterNames(this.aspectJAdviceMethod);
 		}
 		
 		if (this.argumentNames != null) {

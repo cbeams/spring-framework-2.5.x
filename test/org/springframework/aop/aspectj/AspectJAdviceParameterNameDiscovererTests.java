@@ -1,26 +1,27 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
 
-import org.aspectj.lang.JoinPoint;
-import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscoverer.AmbiguousBindingException;
-
 import junit.framework.TestCase;
+import org.aspectj.lang.JoinPoint;
+
+import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscoverer.AmbiguousBindingException;
 
 /**
  * Tests for AspectJAdviceParameterNameDiscoverer. See
@@ -211,7 +212,7 @@ public class AspectJAdviceParameterNameDiscovererTests extends TestCase {
 		discoverer.setRaiseExceptions(true);
 		discoverer.setReturningName(returning);
 		discoverer.setThrowingName(throwing);
-		String[] discoveredNames = discoverer.getParameterNames(m,m.getDeclaringClass());
+		String[] discoveredNames = discoverer.getParameterNames(m);
 		
 		String formattedExpectedNames = format(parameterNames);
 		String formattedActualNames = format(discoveredNames);
@@ -240,7 +241,7 @@ public class AspectJAdviceParameterNameDiscovererTests extends TestCase {
 		discoverer.setThrowingName(throwing);
 
 		try {
-			discoverer.getParameterNames(m,m.getDeclaringClass());
+			discoverer.getParameterNames(m);
 			fail("Expecting " + exceptionType.getName() + " with message '" + message + "'");
 		} catch (RuntimeException rEx) {
 			assertEquals("Expecting exception of type " + exceptionType.getName(),
@@ -261,4 +262,5 @@ public class AspectJAdviceParameterNameDiscovererTests extends TestCase {
 		sb.append(")");
 		return sb.toString();
 	}
+
 }

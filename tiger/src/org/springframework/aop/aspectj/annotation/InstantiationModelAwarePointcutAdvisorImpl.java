@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 
 import org.aopalliance.aop.Advice;
 import org.aspectj.lang.reflect.PerClauseKind;
+
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJPrecedenceInformation;
@@ -36,7 +37,8 @@ import org.springframework.core.Ordered;
  * @author Rod Johnson
  * @since 2.0
  */
-class InstantiationModelAwarePointcutAdvisorImpl implements InstantiationModelAwarePointcutAdvisor,Ordered, AspectJPrecedenceInformation {
+class InstantiationModelAwarePointcutAdvisorImpl
+		implements InstantiationModelAwarePointcutAdvisor, Ordered, AspectJPrecedenceInformation {
 
 	private final AspectJExpressionPointcut declaredPointcut;
 	
@@ -59,7 +61,9 @@ class InstantiationModelAwarePointcutAdvisorImpl implements InstantiationModelAw
 	private int aspectOrder = Ordered.LOWEST_PRECEDENCE;
 	
 	private Boolean isBeforeAdvice = null;
+
 	private Boolean isAfterAdvice = null;
+
 
 	public InstantiationModelAwarePointcutAdvisorImpl(
 			AspectJAdvisorFactory af, 
@@ -94,7 +98,8 @@ class InstantiationModelAwarePointcutAdvisorImpl implements InstantiationModelAw
 			this.lazy = false;
 		}
 	}
-	
+
+
 	/**
 	 * The pointcut for Spring AOP to use. Actual behaviour of the pointcut will change
 	 * depending on the state of the advice.
@@ -222,14 +227,14 @@ class InstantiationModelAwarePointcutAdvisorImpl implements InstantiationModelAw
 		return isAfterAdvice;
 	}
 
-	/** !! duplicates some logic from getAdvice, but importantly does not force 
-	 *     creation of the advice.
-	 *
+	/**
+	 * Duplicates some logic from getAdvice, but importantly does not force
+	 * creation of the advice.
 	 */
 	private void determineAdviceType() {
 		Class<?> candidateAspectClass = aif.getAspectMetadata().getAspectClass();
 		AspectJAnnotation<?> aspectJAnnotation =
-			AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(this.method, candidateAspectClass);
+				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(this.method);
 		if (aspectJAnnotation == null) {
 			isBeforeAdvice = false;
 			isAfterAdvice = false;
@@ -253,4 +258,5 @@ class InstantiationModelAwarePointcutAdvisorImpl implements InstantiationModelAw
 			}
 		}
 	}
+
 }

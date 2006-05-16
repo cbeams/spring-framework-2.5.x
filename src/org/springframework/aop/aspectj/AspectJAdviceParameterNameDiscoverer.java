@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.StringUtils;
 
@@ -92,16 +93,8 @@ import org.springframework.util.StringUtils;
  * @author Adrian Colyer
  * @since 2.0
  */
-public class AspectJAdviceParameterNameDiscoverer implements
-		ParameterNameDiscoverer {
+public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscoverer {
 	
-	public static class AmbiguousBindingException extends RuntimeException {
-		private static final long serialVersionUID = 1L;
-		public AmbiguousBindingException(String explanation) {
-			super(explanation);
-		}
-	}
-
 	private static final String THIS_JOIN_POINT = "thisJoinPoint";
 	private static final String THIS_JOIN_POINT_STATIC_PART = "thisJoinPointStaticPart";
 
@@ -199,7 +192,7 @@ public class AspectJAdviceParameterNameDiscoverer implements
 	 * details of the algorithm used.
 	 * </p>
 	 */
-	public String[] getParameterNames(Method method, Class clazz) {
+	public String[] getParameterNames(Method method) {
 		this.argumentTypes = method.getParameterTypes();
 		this.numberOfRemainingUnboundArguments = this.argumentTypes.length;
 		this.parameterNameBindings = new String[this.numberOfRemainingUnboundArguments];
@@ -691,4 +684,13 @@ public class AspectJAdviceParameterNameDiscoverer implements
 			this.text = text;
 		}
 	}
+
+
+	public static class AmbiguousBindingException extends RuntimeException {
+
+		public AmbiguousBindingException(String explanation) {
+			super(explanation);
+		}
+	}
+
 }
