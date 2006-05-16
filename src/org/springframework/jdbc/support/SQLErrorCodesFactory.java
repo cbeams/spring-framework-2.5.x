@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.support;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+import org.springframework.util.PatternMatchUtils;
 
 /**
  * Factory for creating SQLErrorCodes based on the
@@ -48,8 +50,6 @@ import org.springframework.util.Assert;
  */
 public class SQLErrorCodesFactory {
 
-	protected static final Log logger = LogFactory.getLog(SQLErrorCodesFactory.class);
-
 	/**
 	 * Name of custom SQL error codes file, loading from the root
 	 * of the class path (e.g. in the "WEB-INF/classes" directory).
@@ -61,10 +61,14 @@ public class SQLErrorCodesFactory {
 	 */
 	public static final String SQL_ERROR_CODE_DEFAULT_PATH = "org/springframework/jdbc/support/sql-error-codes.xml";
 
+
+	private static final Log logger = LogFactory.getLog(SQLErrorCodesFactory.class);
+
 	/**
 	 * Keep track of a single instance so we can return it to classes that request it.
 	 */
 	private static final SQLErrorCodesFactory instance = new SQLErrorCodesFactory();
+
 
 	/**
 	 * Return singleton instance.
@@ -75,16 +79,17 @@ public class SQLErrorCodesFactory {
 
 
 	/**
-	 * Map to hold database product name retrieved from database metadata.
-	 * Key is the DataSource, value is the database product name.
-	 */
-	private final Map dataSourceProductNames = new HashMap(10);
-
-	/**
 	 * Map to hold error codes for all databases defined in the config file.
 	 * Key is the database product name, value is the SQLErrorCodes instance.
 	 */
-	private final Map rdbmsErrorCodes;
+	private final Map errorCodesMap;
+
+	/**
+	 * Map to cache the SQLErrorCodes instance per DataSource.
+	 * Key is the DataSource, value is the SQLErrorCodes instance.
+	 */
+	private final Map dataSourceCache = new HashMap(16);
+
 
 	/**
 	 * Not public to enforce Singleton design pattern.
@@ -116,35 +121,18 @@ public class SQLErrorCodesFactory {
 			}
 
 			// Check all beans of type SQLErrorCodes.
-			Map errorCodeBeans = lbf.getBeansOfType(SQLErrorCodes.class, true, false);
+			errorCodes = lbf.getBeansOfType(SQLErrorCodes.class, true, false);
 			if (logger.isInfoEnabled()) {
-				logger.info("SQLErrorCodes loaded: " + errorCodeBeans.keySet());
-			}
-			errorCodes = new HashMap(errorCodeBeans.size());
-
-			for (Iterator it = errorCodeBeans.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String beanName = (String) entry.getKey();
-				SQLErrorCodes ec = (SQLErrorCodes) entry.getValue();
-
-				// If explicit database product names specified, expose error codes for those names.
-				String[] names = ec.getDatabaseProductNames();
-				if (names != null) {
-					for (int i = 0; i < names.length; i++) {
-						errorCodes.put(names[i], ec);
-					}
-				}
-				else {
-					errorCodes.put(beanName, ec);
-				}
+				logger.info("SQLErrorCodes loaded: " + errorCodes.keySet());
 			}
 		}
+
 		catch (BeansException ex) {
 			logger.warn("Error loading SQL error codes from config file", ex);
-			errorCodes = new HashMap(0);
+			errorCodes = Collections.EMPTY_MAP;
 		}
 
-		this.rdbmsErrorCodes = errorCodes;
+		this.errorCodesMap = errorCodes;
 	}
 	
 	/**
@@ -160,6 +148,39 @@ public class SQLErrorCodesFactory {
 		return new ClassPathResource(path);
 	}
 
+
+	/**
+	 * Return SQLErrorCodes instance for the given database.
+	 * No need for a database metadata lookup.
+	 */
+	public SQLErrorCodes getErrorCodes(String dbName) {
+		Assert.notNull(dbName, "Database product name must not be null");
+
+		SQLErrorCodes sec = (SQLErrorCodes) this.errorCodesMap.get(dbName);
+		if (sec == null) {
+			for (Iterator it = this.errorCodesMap.values().iterator(); it.hasNext();) {
+				SQLErrorCodes candidate = (SQLErrorCodes) it.next();
+				if (PatternMatchUtils.simpleMatch(candidate.getDatabaseProductNames(), dbName)) {
+					sec = candidate;
+					break;
+				}
+			}
+		}
+
+		if (sec != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("SQL error codes for '" + dbName + "' found");
+			}
+			return sec;
+		}
+
+		// Could not find the database among the defined ones.
+		if (logger.isDebugEnabled()) {
+			logger.debug("SQL error codes for '" + dbName + "' not found");
+		}
+		return new SQLErrorCodes();
+	}
+
 	/**
 	 * Return SQLErrorCodes for the given DataSource,
 	 * evaluating databaseProductName from DatabaseMetaData,
@@ -172,92 +193,38 @@ public class SQLErrorCodesFactory {
 			logger.debug("Looking up default SQLErrorCodes for DataSource [" + dataSource + "]");
 		}
 
-		// Let's avoid looking up database product info if we can.
-		String dataSourceDbName = (String) this.dataSourceProductNames.get(dataSource);
-		if (dataSourceDbName != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Database product name found in cache for DataSource [" + dataSource +
-				    "]: name is '" + dataSourceDbName + "'");
-			}
-			return getErrorCodes(dataSourceDbName);
-		}
-
-		// We could not find it - got to look it up.
-		try {
-			String dbName = (String)
-					JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
-
-			if (dbName != null) {
-				// Special check for DB2 -- !!! DEPRECATED AS OF Spring 1.1 !!!
-				// !!! This will be removed in a future version !!!
-				// We have added wildcard support so you should add a
-				// <property name="databaseProductName"><value>DB2*</value></property>
-				// entry to your custom sql-error-cdes.xml instead.
-				if (dbName.startsWith("DB2")) {
-					dbName = "DB2";
-				}
-
-				// Special check for wild card match:W we can match on a database name like
-				// 'DB2*' meaning the database name starts with 'DB2', or '*DB2' for ends
-				// with 'DB2', or even '*DB2*' for contains 'DB2'.
-				Iterator dbNameIter = this.rdbmsErrorCodes.keySet().iterator();
-				while (dbNameIter.hasNext()) {
-					String checkDbName = (String) dbNameIter.next();
-					if (checkDbName != null && (checkDbName.startsWith("*") || checkDbName.endsWith("*"))) {
-						if (checkDbName.startsWith("*") && checkDbName.endsWith("*")) {
-							if (dbName.indexOf(checkDbName.substring(1, checkDbName.length() - 1)) >= 0) {
-								dbName = checkDbName;
-							}
-						}
-						else if (checkDbName.startsWith("*")) {
-							if (dbName.endsWith(checkDbName.substring(1, checkDbName.length()))) {
-								dbName = checkDbName;
-							}
-						}
-						else if (checkDbName.endsWith("*")) {
-							if (dbName.startsWith(checkDbName.substring(0, checkDbName.length() - 1))) {
-								dbName = checkDbName;
-							}
-						}
-					}
-				}
-
-				this.dataSourceProductNames.put(dataSource, dbName);
+		synchronized (this.dataSourceCache) {
+			// Let's avoid looking up database product info if we can.
+			SQLErrorCodes sec = (SQLErrorCodes) this.dataSourceCache.get(dataSource);
+			if (sec != null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Database product name cached for DataSource [" + dataSource +
-							"]: name is '" + dbName + "'");
+					logger.debug("SQLErrorCodes found in cache for DataSource [" + dataSource + "]");
 				}
-				return getErrorCodes(dbName);
+				return sec;
+			}
+
+			// We could not find it - got to look it up.
+			try {
+				String dbName = (String)
+						JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
+
+				if (dbName != null) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Database product name cached for DataSource [" + dataSource +
+								"]: name is '" + dbName + "'");
+					}
+					sec = getErrorCodes(dbName);
+					this.dataSourceCache.put(dataSource, sec);
+					return sec;
+				}
+			}
+			catch (MetaDataAccessException ex) {
+				logger.warn("Error while extracting database product name - falling back to empty error codes", ex);
 			}
 		}
-		catch (MetaDataAccessException ex) {
-			logger.warn("Error while extracting database product name - falling back to empty error codes", ex);
-		}
 
-		// Fallback is to return an empty ErrorCodes instance.
+		// Fallback is to return an empty SQLErrorCodes instance.
 		return new SQLErrorCodes();
-	}
-
-	/**
-	 * Return SQLErrorCodes instance for the given database.
-	 * No need for a database metadata lookup.
-	 */
-	public SQLErrorCodes getErrorCodes(String dbName) {
-		Assert.notNull(dbName, "Database product name must not be null");
-		SQLErrorCodes sec = (SQLErrorCodes) this.rdbmsErrorCodes.get(dbName);
-		if (sec != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("SQL error codes for '" + dbName + "' found");
-			}
-			return sec;
-		}
-		else {
-			// Could not find the database among the defined ones.
-			if (logger.isDebugEnabled()) {
-				logger.debug("SQL error codes for '" + dbName + "' not found");
-			}
-			return new SQLErrorCodes();
-		}
 	}
 
 }

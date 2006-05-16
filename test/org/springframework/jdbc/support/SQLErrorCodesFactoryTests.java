@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,6 @@ import org.easymock.MockControl;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.jdbc.datasource.AbstractDataSource;
 
 /**
  * Tests for SQLErrorCodes loading.
@@ -211,7 +210,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		assertEquals(0, sec.getDataIntegrityViolationCodes().length);
 	}
 
-	private SQLErrorCodes getErrorCodesFromDataSourceWithGivenMetadata(String productName, SQLErrorCodesFactory factory) throws Exception {
+	private SQLErrorCodes getErrorCodesFromDataSource(String productName, SQLErrorCodesFactory factory) throws Exception {
 		MockControl mdControl = MockControl.createControl(DatabaseMetaData.class);
 		DatabaseMetaData md = (DatabaseMetaData) mdControl.getMock();
 		md.getDatabaseProductName();
@@ -226,68 +225,48 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		ctrlConnection.setVoidCallable();
 		ctrlConnection.replay();
 
-		/* 
-		 * We can't use an EasyMock mock object here since we cache product name based on data source hashCode 
-		 * and EasyMock always seem to return the same hashCode regardles when/where/how it is created.  
-		 * This messes up the meta data calls - calling classes don't think they have to call since they 
-		 * erroneously think it is the same data source.
-		 */
-		//MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
-		//DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
-		//mockDataSource.getConnection();
-		//ctrlDataSource.setDefaultReturnValue(mockConnection);
-		//ctrlDataSource.replay();
-		DataSource mockDataSource = new SpringMockDataSource(productName, mockConnection);
+		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
+		DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
+		mockDataSource.getConnection();
+		ctrlDataSource.setDefaultReturnValue(mockConnection);
+		ctrlDataSource.replay();
 
 		SQLErrorCodesFactory secf = null;
-		if (factory != null)
+		if (factory != null) {
 			secf = factory;
-		else
+		}
+		else {
 			secf = SQLErrorCodesFactory.getInstance();
+		}
 
 		SQLErrorCodes sec = secf.getErrorCodes(mockDataSource);
 
 		mdControl.verify();
 		ctrlConnection.verify();
-		//ctrlDataSource.verify();
+		ctrlDataSource.verify();
+
+		SQLErrorCodes sec2 = secf.getErrorCodes(mockDataSource);
+		assertSame("Cached per DataSource", sec2, sec);
 
 		return sec;
 	}
 	
-	/* 
-	 * Stand in for the EasyMock mock object - see comment above.
-	 */
-	private class SpringMockDataSource extends AbstractDataSource {
-		String productName;
-		Connection conn;
-		private SpringMockDataSource(String productName, Connection conn) {
-			this.productName = productName;
-			this.conn = conn;
-		}
-		public Connection getConnection() {
-			return conn;
-		}
-		public Connection getConnection(String u, String p) {
-			return null;
-		}
-	}
-
 	public void testOracleRecognizedFromMetadata() throws Exception {
-		SQLErrorCodes sec = getErrorCodesFromDataSourceWithGivenMetadata("Oracle", null);
+		SQLErrorCodes sec = getErrorCodesFromDataSource("Oracle", null);
 		assertIsOracle(sec);
 	}
 	
 	public void testHsqlRecognizedFromMetadata() throws Exception {
-		SQLErrorCodes sec = getErrorCodesFromDataSourceWithGivenMetadata("HSQL Database Engine", null);
+		SQLErrorCodes sec = getErrorCodesFromDataSource("HSQL Database Engine", null);
 		assertIsHsql(sec);
 	}
 
 	public void testDB2RecognizedFromMetadata() throws Exception {
-		SQLErrorCodes sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2", null);
+		SQLErrorCodes sec = getErrorCodesFromDataSource("DB2", null);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2/", null);
+		sec = getErrorCodesFromDataSource("DB2/", null);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB-2", null);
+		sec = getErrorCodesFromDataSource("DB-2", null);
 		assertIsEmpty(sec);
 	}
 
@@ -305,40 +284,40 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		}
 	
 		WildcardSQLErrorCodesFactory factory = new WildcardSQLErrorCodesFactory();
-		SQLErrorCodes sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2", factory);
+		SQLErrorCodes sec = getErrorCodesFromDataSource("DB2", factory);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2 UDB for Xxxxx", factory);
+		sec = getErrorCodesFromDataSource("DB2 UDB for Xxxxx", factory);
 		assertIsDB2(sec);
 		
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB3", factory);
+		sec = getErrorCodesFromDataSource("DB3", factory);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB3/", factory);
+		sec = getErrorCodesFromDataSource("DB3/", factory);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB3", factory);
+		sec = getErrorCodesFromDataSource("/DB3", factory);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB3", factory);
+		sec = getErrorCodesFromDataSource("/DB3", factory);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB3/", factory);
+		sec = getErrorCodesFromDataSource("/DB3/", factory);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB-3", factory);
+		sec = getErrorCodesFromDataSource("DB-3", factory);
 		assertIsEmpty(sec);
 
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB1", factory);
+		sec = getErrorCodesFromDataSource("DB1", factory);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB1/", factory);
+		sec = getErrorCodesFromDataSource("DB1/", factory);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB1", factory);
+		sec = getErrorCodesFromDataSource("/DB1", factory);
 		assertIsEmpty(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB1/", factory);
+		sec = getErrorCodesFromDataSource("/DB1/", factory);
 		assertIsEmpty(sec);
 
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB0", factory);
+		sec = getErrorCodesFromDataSource("DB0", factory);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB0", factory);
+		sec = getErrorCodesFromDataSource("/DB0", factory);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB0/", factory);
+		sec = getErrorCodesFromDataSource("DB0/", factory);
 		assertIsEmpty(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB0/", factory);
+		sec = getErrorCodesFromDataSource("/DB0/", factory);
 		assertIsEmpty(sec);
 	}
 
