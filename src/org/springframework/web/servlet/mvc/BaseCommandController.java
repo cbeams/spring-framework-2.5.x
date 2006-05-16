@@ -393,24 +393,39 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Create a new binder instance for the given command and request.
 	 * <p>Called by <code>bindAndValidate</code>. Can be overridden to plug in
-	 * custom ServletRequestDataBinder subclasses.
-	 * <p>Default implementation creates a standard ServletRequestDataBinder,
-	 * sets the specified MessageCodesResolver and BindingErrorProcessor (if any),
-	 * and invokes <code>initBinder</code>. Note that <code>initBinder</code>
-	 * will not be invoked if you override this method!
+	 * custom ServletRequestDataBinder instances.
+	 * <p>The default implementation creates a standard ServletRequestDataBinder and
+	 * invokes <code>prepareBinder</code> and <code>initBinder</code>.
+	 * <p>Note that neither <code>prepareBinder</code> nor <code>initBinder</code>
+	 * will be invoked automatically if you override this method! Call those methods
+	 * at appropriate points of your overridden method.
 	 * @param request current HTTP request
 	 * @param command the command to bind onto
 	 * @return the new binder instance
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #bindAndValidate
+	 * @see #prepareBinder
 	 * @see #initBinder
-	 * @see #setMessageCodesResolver
-	 * @see #setBindingErrorProcessor
 	 */
 	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command)
 	    throws Exception {
 
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName());
+		prepareBinder(binder);
+		initBinder(request, binder);
+		return binder;
+	}
+
+	/**
+	 * Prepare the given binder, applying the specified MessageCodesResolver,
+	 * BindingErrorProcessor and PropertyEditorRegistrars (if any).
+	 * Called by <code>createBinder</code>.
+	 * @param binder the new binder instance
+	 * @see #createBinder
+	 * @see #setMessageCodesResolver
+	 * @see #setBindingErrorProcessor
+	 */
+	protected final void prepareBinder(ServletRequestDataBinder binder) {
 		if (useDirectFieldAccess()) {
 			binder.initDirectFieldAccess();
 		}
@@ -425,13 +440,13 @@ public abstract class BaseCommandController extends AbstractController {
 				this.propertyEditorRegistrars[i].registerCustomEditors(binder);
 			}
 		}
-		initBinder(request, binder);
-		return binder;
 	}
 
 	/**
 	 * Determine whether to use direct field access instead of bean property access.
+	 * Applied by <code>prepareBinder</code>.
 	 * <p>Default is "false". Can be overridden in subclasses.
+	 * @see #prepareBinder
 	 * @see org.springframework.validation.DataBinder#initDirectFieldAccess()
 	 */
 	protected boolean useDirectFieldAccess() {
@@ -447,7 +462,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * and still be able to set and display them in an HTML interface.
 	 * <p>Default implementation is empty.
 	 * @param request current HTTP request
-	 * @param binder new binder instance
+	 * @param binder the new binder instance
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #createBinder
 	 * @see org.springframework.validation.DataBinder#registerCustomEditor
