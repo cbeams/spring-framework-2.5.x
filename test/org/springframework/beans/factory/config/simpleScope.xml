@@ -6,8 +6,7 @@
        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
 	
-	<bean id="usesScope" class="org.springframework.beans.TestBean"
-		scope="myScope">
+	<bean id="usesScope" class="org.springframework.beans.TestBean" scope="myScope">
 	 
 	</bean>
 

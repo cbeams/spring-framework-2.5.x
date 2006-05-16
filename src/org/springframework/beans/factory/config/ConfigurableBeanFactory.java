@@ -122,11 +122,11 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	int getBeanPostProcessorCount();
 
 	/**
-	 * Register the given scope, backed by the given ScopeMap.
-	 * @param scope the scope identifier
-	 * @param scopeMap the backing ScopeMap
+	 * Register the given scope, backed by the given Scope.
+	 * @param scopeName the scope identifier
+	 * @param scopeMap the backing Scope
 	 */
-	void registerScope(String scope, ScopeMap scopeMap);
+	void registerScope(String scopeName, Scope scope);
 
 	/**
 	 * Destroy the specified scoped bean in the current target scope.

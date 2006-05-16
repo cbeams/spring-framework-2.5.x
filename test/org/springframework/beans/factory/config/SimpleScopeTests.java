@@ -23,6 +23,7 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
@@ -30,13 +31,13 @@ import org.springframework.context.support.GenericApplicationContext;
  * @author Rod Johnson
  * @since 2.0
  */
-public class SimpleScopeTest extends TestCase {
+public class SimpleScopeTests extends TestCase {
 
 	private GenericApplicationContext applicationContext;
 	
 	protected void setUp() {
 		applicationContext = new GenericApplicationContext();
-		ScopeMap scopeMap = new ScopeMap() {
+		Scope scope = new Scope() {
 			
 			private List objects = new LinkedList(); {
 				objects.add(new TestBean());
@@ -46,7 +47,7 @@ public class SimpleScopeTest extends TestCase {
 			private int index;
 
 			
-			public Object get(String name) {
+			public Object get(String name, ObjectFactory objectFactory) {
 				if (index >= objects.size()) {
 					index = 0;
 				}
@@ -57,12 +58,12 @@ public class SimpleScopeTest extends TestCase {
 				throw new UnsupportedOperationException();
 			}
 
-			public void remove(String name) {
+			public Object remove(String name) {
 				throw new UnsupportedOperationException();
 			}
 			
 		};
-		applicationContext.getBeanFactory().registerScope("myScope", scopeMap);
+		applicationContext.getBeanFactory().registerScope("myScope", scope);
 		
 		XmlBeanDefinitionReader xbdr = new XmlBeanDefinitionReader(applicationContext);
 		xbdr.loadBeanDefinitions("org/springframework/beans/factory/config/simpleScope.xml");

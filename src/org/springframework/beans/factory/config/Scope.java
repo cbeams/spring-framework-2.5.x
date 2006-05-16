@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.config;
 
+import org.springframework.beans.factory.ObjectFactory;
+
 /**
  * Strategy interface used by a ConfigurableBeanFactory,
  * representing a target scope to hold beans in.
@@ -25,7 +27,7 @@ package org.springframework.beans.factory.config;
  * this class's <code>get</code> and <code>put</code> methods will identify
  * the target attribute in the scope.
  *
- * <p>ScopeMaps are expected to be thread-safe. One ScopeMap
+ * <p>ScopeMaps are expected to be thread-safe. One Scope
  * can be used with multiple bean factories, if desired.
  *
  * <p>Can be implemented on top of a session API such as the
@@ -38,27 +40,23 @@ package org.springframework.beans.factory.config;
  * @see org.springframework.aop.scope.ScopedProxyFactoryBean
  * @see javax.servlet.http.HttpSession
  */
-public interface ScopeMap {
+public interface Scope {
 
 	/**
-	 * Return the object from the underlying scope,
-	 * or <code>null</code> if not found.
+	 * Return the object from the underlying scope, creating it if not found.
 	 * @param name the name to bind with
+	 * @param  objectFactory the {@link ObjectFactory} used to create the scoped object if not present
 	 * @return object the associated value, or <code>null</code>
 	 */
-	Object get(String name);
-	
-	/**
-	 * Bind the object to the underlying scope.
-	 * @param name the name to bind with
-	 * @param value the object to bind
-	 */
-	void put(String name, Object value);
+	Object get(String name, ObjectFactory objectFactory);
+
 
 	/**
-	 * Remove the object with the given name from the underlying scope.
+	 * Remove the object with the given name from the underlying scope. Returns
+	 * '<code>null</code>' if no object was found otherwise returns the removed
+	 * <code>Object</code>.
 	 * @param name the name of the object to remove
 	 */
-	void remove(String name);
+	Object remove(String name);
 
 }

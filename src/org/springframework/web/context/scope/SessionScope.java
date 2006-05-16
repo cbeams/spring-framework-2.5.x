@@ -16,19 +16,21 @@
 
 package org.springframework.web.context.scope;
 
-import org.springframework.beans.factory.config.ScopeMap;
+import org.springframework.beans.factory.config.Scope;
+import org.springframework.beans.factory.ObjectFactory;
 
 /**
- * Session-backed ScopeMap implementation. Relies on a thread-bound
+ * Session-backed Scope implementation. Relies on a thread-bound
  * RequestAttributes instance, which can be exported through
  * RequestContextListener, RequestContextFilter or DispatcherServlet.
  *
- * <p>This ScopeMap will also work for Portlet environments,
+ * <p>This Scope will also work for Portlet environments,
  * through an alternate RequestAttributes implementation
  * (as exposed out-of-the-box by Spring's DispatcherPortlet).
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 2.0
  * @see RequestContextHolder#currentRequestAttributes()
  * @see RequestAttributes#SCOPE_SESSION
@@ -38,21 +40,21 @@ import org.springframework.beans.factory.config.ScopeMap;
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.portlet.DispatcherPortlet
  */
-public class SessionScopeMap implements ScopeMap {
+public class SessionScope extends AbstractRequestAttributesScope {
 
 	private final int scope;
 
 
 	/**
-	 * Create a new SessionScopeMap, storing attributes in a locally
+	 * Create a new SessionScope, storing attributes in a locally
 	 * isolated session.
 	 */
-	public SessionScopeMap() {
+	public SessionScope() {
 		this.scope = RequestAttributes.SCOPE_SESSION;
 	}
 
 	/**
-	 * Create a new SessionScopeMap, specifying whether to store attributes
+	 * Create a new SessionScope, specifying whether to store attributes
 	 * in the global session, provided that such a distinction is available.
 	 * <p>This distinction is important for Portlet environments, where there
 	 * are two notions of a session: "portlet scope" and "application scope".
@@ -62,21 +64,11 @@ public class SessionScopeMap implements ScopeMap {
 	 * @see org.springframework.web.portlet.context.PortletRequestAttributes
 	 * @see ServletRequestAttributes
 	 */
-	public SessionScopeMap(boolean globalSession) {
+	public SessionScope(boolean globalSession) {
 		this.scope = (globalSession ? RequestAttributes.SCOPE_GLOBAL_SESSION : RequestAttributes.SCOPE_SESSION);
 	}
 
-
-	public Object get(String name) {
-		return RequestContextHolder.currentRequestAttributes().getAttribute(name, this.scope);
+	protected int getScope() {
+		return this.scope;
 	}
-
-	public void put(String name, Object value) {
-		RequestContextHolder.currentRequestAttributes().setAttribute(name, value, this.scope);
-	}
-
-	public void remove(String name) {
-		RequestContextHolder.currentRequestAttributes().removeAttribute(name, this.scope);
-	}
-
 }

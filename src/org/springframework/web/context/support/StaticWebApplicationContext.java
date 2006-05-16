@@ -29,8 +29,8 @@ import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
-import org.springframework.web.context.scope.RequestScopeMap;
-import org.springframework.web.context.scope.SessionScopeMap;
+import org.springframework.web.context.scope.RequestScope;
+import org.springframework.web.context.scope.SessionScope;
 
 /**
  * Static WebApplicationContext implementation for testing.
@@ -114,9 +114,9 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	 * @see ServletContextAwareProcessor
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		beanFactory.registerScope(SCOPE_REQUEST, new RequestScopeMap());
-		beanFactory.registerScope(SCOPE_SESSION, new SessionScopeMap(false));
-		beanFactory.registerScope(SCOPE_GLOBAL_SESSION, new SessionScopeMap(true));
+		beanFactory.registerScope(SCOPE_REQUEST, new RequestScope());
+		beanFactory.registerScope(SCOPE_SESSION, new SessionScope(false));
+		beanFactory.registerScope(SCOPE_GLOBAL_SESSION, new SessionScope(true));
 
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
