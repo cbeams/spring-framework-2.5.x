@@ -17,8 +17,6 @@
 package org.springframework.validation;
 
 import java.beans.PropertyEditor;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -32,6 +30,7 @@ import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.util.Assert;
+import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -110,6 +109,8 @@ public class DataBinder implements PropertyEditorRegistry {
 	private boolean ignoreUnknownFields = true;
 
 	private String[] allowedFields;
+
+	private String[] disallowedFields;
 
 	private String[] requiredFields;
 
@@ -237,18 +238,16 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * Register fields that should be allowed for binding. Default is all
 	 * fields. Restrict this for example to avoid unwanted modifications
 	 * by malicious users when binding HTTP request parameters.
-	 * <p>Supports "xxx*" and "*xxx" patterns. More sophisticated matching
-	 * can be implemented by overriding the isAllowed method.
+	 * <p>Supports "xxx*", "*xxx" and "*xxx*" patterns. More sophisticated matching
+	 * can be implemented by overriding the <code>isAllowed</code> method.
+	 * <p>Alternatively, specify a list of <i>disallowed</i> fields.
 	 * @param allowedFields array of field names
+	 * @see #setDisallowedFields
+	 * @see #isAllowed(String)
 	 * @see org.springframework.web.bind.ServletRequestDataBinder
-	 * @see #isAllowed
 	 */
 	public void setAllowedFields(String[] allowedFields) {
 		this.allowedFields = allowedFields;
-		if (logger.isDebugEnabled()) {
-			logger.debug("DataBinder restricted to binding allowed fields [" +
-					StringUtils.arrayToCommaDelimitedString(allowedFields) + "]");
-		}
 	}
 
 	/**
@@ -257,6 +256,30 @@ public class DataBinder implements PropertyEditorRegistry {
 	 */
 	public String[] getAllowedFields() {
 		return allowedFields;
+	}
+
+	/**
+	 * Register fields that should <i>not</i> be allowed for binding. Default is none.
+	 * Mark fields as disallowed for example to avoid unwanted modifications
+	 * by malicious users when binding HTTP request parameters.
+	 * <p>Supports "xxx*", "*xxx" and "*xxx*" patterns. More sophisticated matching
+	 * can be implemented by overriding the <code>isAllowed</code> method.
+	 * <p>Alternatively, specify a list of <i>allowed</i> fields.
+	 * @param disallowedFields array of field names
+	 * @see #setAllowedFields
+	 * @see #isAllowed(String)
+	 * @see org.springframework.web.bind.ServletRequestDataBinder
+	 */
+	public void setDisallowedFields(String[] disallowedFields) {
+		this.disallowedFields = disallowedFields;
+	}
+
+	/**
+	 * Return the fields that should <i>not</i> be allowed for binding.
+	 * @return array of field names
+	 */
+	public String[] getDisallowedFields() {
+		return disallowedFields;
 	}
 
 	/**
@@ -378,17 +401,15 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @see #isAllowed(String)
 	 */
 	protected void checkAllowedFields(MutablePropertyValues mpvs) {
-		List allowedFieldsList = (getAllowedFields() != null) ? Arrays.asList(getAllowedFields()) : null;
 		PropertyValue[] pvArray = mpvs.getPropertyValues();
 		for (int i = 0; i < pvArray.length; i++) {
 			String field = pvArray[i].getName();
-			if (!((allowedFieldsList != null && allowedFieldsList.contains(field)) || isAllowed(field))) {
+			if (!isAllowed(field)) {
 				mpvs.removePropertyValue(pvArray[i]);
 				getBindingResult().recordSuppressedField(pvArray[i].getName());
 				if (logger.isDebugEnabled()) {
 					logger.debug("Field [" + pvArray[i] + "] has been removed from PropertyValues " +
-							"and will not be bound, because it has not been found in the list of allowed fields " +
-							allowedFieldsList);
+							"and will not be bound, because it has not been found in the list of allowed fields");
 				}
 			}
 		}
@@ -397,27 +418,20 @@ public class DataBinder implements PropertyEditorRegistry {
 	/**
 	 * Return if the given field is allowed for binding.
 	 * Invoked for each passed-in property value.
-	 * <p>The default implementation checks for "xxx*" and "*xxx" matches.
-	 * Can be overridden in subclasses.
-	 * <p>If the field is found in the allowedFields array as direct match,
-	 * this method will not be invoked.
+	 * <p>The default implementation checks for "xxx*", "*xxx" and "*xxx*" matches,
+	 * as well as direct equality, in the specified lists of allowed fields and
+	 * disallowed fields. A field matching a disallowed pattern will not be accepted
+	 * even if it also happens to match a pattern in the allowed list.
+	 * <p>Can be overridden in subclasses.
 	 * @param field the field to check
 	 * @return if the field is allowed
 	 * @see #setAllowedFields
+	 * @see #setDisallowedFields
+	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
 	 */
 	protected boolean isAllowed(String field) {
-		if (getAllowedFields() != null) {
-			String[] allowedFields = getAllowedFields();
-			for (int i = 0; i < allowedFields.length; i++) {
-				String allowed = allowedFields[i];
-				if ((allowed.endsWith("*") && field.startsWith(allowed.substring(0, allowed.length() - 1))) ||
-						(allowed.startsWith("*") && field.endsWith(allowed.substring(1, allowed.length())))) {
-					return true;
-				}
-			}
-			return false;
-		}
-		return true;
+		return ((getAllowedFields() == null || PatternMatchUtils.simpleMatch(getAllowedFields(), field)) &&
+				(getDisallowedFields() == null || !PatternMatchUtils.simpleMatch(getDisallowedFields(), field)));
 	}
 
 	/**
