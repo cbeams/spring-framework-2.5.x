@@ -16,10 +16,6 @@
 
 package org.springframework.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.core.JdkVersion;
-
 import java.beans.Introspector;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -30,6 +26,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Miscellaneous class utility methods. Mainly for internal use within the
@@ -43,30 +42,19 @@ import java.util.Set;
  */
 public abstract class ClassUtils {
 
-	/**
-	 * Suffix for array class names
-	 */
+	/** Suffix for array class names */
 	public static final String ARRAY_SUFFIX = "[]";
 
-	/**
-	 * The package separator character '.'
-	 */
+	/** The package separator character '.' */
 	private static final char PACKAGE_SEPARATOR_CHAR = '.';
 
-	/**
-	 * The inner class separator character '$'
-	 */
+	/** The inner class separator character '$' */
 	private static final char INNER_CLASS_SEPARATOR_CHAR = '$';
 
-	/**
-	 * The CGLIB class separator character "$$"
-	 */
+	/** The CGLIB class separator character "$$" */
 	private static final String CGLIB_CLASS_SEPARATOR_CHAR = "$$";
 
 
-	/**
-	 * {@link Log} instance for this class.
-	 */
 	private static final Log logger = LogFactory.getLog(ClassUtils.class);
 
 	/**
@@ -80,11 +68,6 @@ public abstract class ClassUtils {
 	 * type as value, for example: "int" -> "int.class"
 	 */
 	private static final Map primitiveTypeNameMap = new HashMap(8);
-
-	/**
-	 * The {@link BridgeMethodResolver} implementation. Only present on JDK 5.0+.
-	 */
-	private static BridgeMethodResolver bridgeMethodResolver;
 
 	static {
 		primitiveWrapperTypeMap.put(Boolean.class, boolean.class);
@@ -100,10 +83,6 @@ public abstract class ClassUtils {
 			Class primitiveClass = (Class) it.next();
 			primitiveTypeNameMap.put(primitiveClass.getName(), primitiveClass);
 		}
-
-		if(JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
-			bridgeMethodResolver = new ReflectionBasedBridgeMethodResolver();
-		}
 	}
 
 
@@ -116,7 +95,6 @@ public abstract class ClassUtils {
 	 * for example, for class path resource loading (but not necessarily for
 	 * <code>Class.forName</code>, which accepts a <code>null</code> ClassLoader
 	 * reference as well).
-	 *
 	 * @see Thread#getContextClassLoader()
 	 */
 	public static ClassLoader getDefaultClassLoader() {
@@ -151,7 +129,6 @@ public abstract class ClassUtils {
 	 * for primitives (like "int") and array class names (like "String[]").
 	 * <p>Always uses the default class loader: that is, preferably the thread context
 	 * class loader, or the ClassLoader that loaded the ClassUtils class as fallback.
-	 *
 	 * @param name the name of the Class
 	 * @return Class instance for the supplied name
 	 * @see Class#forName(String, boolean, ClassLoader)
@@ -164,8 +141,7 @@ public abstract class ClassUtils {
 	/**
 	 * Replacement for <code>Class.forName()</code> that also returns Class instances
 	 * for primitives (like "int") and array class names (like "String[]").
-	 *
-	 * @param name				the name of the Class
+	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
 	 * @return Class instance for the supplied name
 	 * @see Class#forName(String, boolean, ClassLoader)
@@ -186,10 +162,9 @@ public abstract class ClassUtils {
 
 	/**
 	 * Resolve the given class name as primitive class, if appropriate.
-	 *
 	 * @param name the name of the potentially primitive class
 	 * @return the primitive class, or <code>null</code> if the name does not denote
-	 *         a primitive class
+	 * a primitive class
 	 */
 	public static Class resolvePrimitiveClassName(String name) {
 		Class result = null;
@@ -204,7 +179,6 @@ public abstract class ClassUtils {
 
 	/**
 	 * Get the class name without the qualified package name.
-	 *
 	 * @param className the className to get the short name for
 	 * @return the class name of the class without the package name
 	 * @throws IllegalArgumentException if the className is empty
@@ -223,7 +197,6 @@ public abstract class ClassUtils {
 
 	/**
 	 * Get the class name without the qualified package name.
-	 *
 	 * @param clazz the class to get the short name for
 	 * @return the class name of the class without the package name
 	 */
@@ -234,7 +207,6 @@ public abstract class ClassUtils {
 	/**
 	 * Return the short string name of a Java class in decapitalized
 	 * JavaBeans property format.
-	 *
 	 * @param clazz the class
 	 * @return the short name rendered in a standard JavaBeans property format
 	 * @see java.beans.Introspector#decapitalize(String)
@@ -246,7 +218,6 @@ public abstract class ClassUtils {
 	/**
 	 * Return the qualified name of the given class: usually simply
 	 * the class name, but component type class name + "[]" for arrays.
-	 *
 	 * @param clazz the class
 	 * @return the qualified name of the class
 	 */
@@ -264,7 +235,6 @@ public abstract class ClassUtils {
 	/**
 	 * Return the qualified name of the given method, consisting of
 	 * fully qualified interface/class name + "." + method name.
-	 *
 	 * @param method the method
 	 * @return the qualified name of the method
 	 */
@@ -276,8 +246,7 @@ public abstract class ClassUtils {
 	/**
 	 * Determine whether the given class has a method with the given signature.
 	 * Essentially translates <code>NoSuchMethodException</code> to "false".
-	 *
-	 * @param clazz			the clazz to analyze
+	 * @param clazz	the clazz to analyze
 	 * @param methodName the name of the method
 	 * @param paramTypes the parameter types of the method
 	 */
@@ -296,8 +265,7 @@ public abstract class ClassUtils {
 	/**
 	 * Return the number of methods with a given name (with any argument types),
 	 * for the given class and/or its superclasses. Includes non-public methods.
-	 *
-	 * @param clazz			the clazz to check
+	 * @param clazz	the clazz to check
 	 * @param methodName the name of the method
 	 * @return the number of methods with the given name
 	 */
@@ -321,8 +289,7 @@ public abstract class ClassUtils {
 	/**
 	 * Does the given class and/or its superclasses at least have one or more
 	 * methods (with any argument types)? Includes non-public methods.
-	 *
-	 * @param clazz			the clazz to check
+	 * @param clazz	the clazz to check
 	 * @param methodName the name of the method
 	 * @return whether there is at least one method with the given name
 	 */
@@ -344,10 +311,9 @@ public abstract class ClassUtils {
 
 	/**
 	 * Return a static method of a class.
-	 *
 	 * @param methodName the static method name
-	 * @param clazz			the class which defines the method
-	 * @param args			 the parameter types to the method
+	 * @param clazz	the class which defines the method
+	 * @param args the parameter types to the method
 	 * @return the static method, or <code>null</code> if no static method was found
 	 * @throws IllegalArgumentException if the method name is blank or the clazz is null
 	 */
@@ -407,7 +373,6 @@ public abstract class ClassUtils {
 	 * Determine if the given target type is assignable from the given value
 	 * type, assuming setting by reflection. Considers primitive wrapper
 	 * classes as assignable to the corresponding primitive types.
-	 *
 	 * @param targetType the target type
 	 * @param valueType	the value type that should be assigned to the target type
 	 * @return if the target type is assignable from the value type
@@ -423,7 +388,6 @@ public abstract class ClassUtils {
 	 * Determine if the given type is assignable from the given value,
 	 * assuming setting by reflection. Considers primitive wrapper classes
 	 * as assignable to the corresponding primitive types.
-	 *
 	 * @param type	the target type
 	 * @param value the value that should be assigned to the type
 	 * @return if the type is assignable from the value
@@ -444,8 +408,7 @@ public abstract class ClassUtils {
 	 * loading a resource file that is in the same package as a class file,
 	 * although {@link org.springframework.core.io.ClassPathResource} is usually
 	 * even more convenient.
-	 *
-	 * @param clazz				the Class whose package will be used as the base
+	 * @param clazz	the Class whose package will be used as the base
 	 * @param resourceName the resource name to append. A leading slash is optional.
 	 * @return the built-up resource path
 	 * @see ClassLoader#getResource
@@ -466,9 +429,8 @@ public abstract class ClassUtils {
 	 * could be concatenated with a slash and the name of a resource, and fed
 	 * directly to ClassLoader.getResource(). For it to be fed to Class.getResource,
 	 * a leading slash would also have to be prepended to the return value.
-	 *
 	 * @param clazz the input class. A null value or the default (empty) package
-	 *              will result in an empty string ("") being returned.
+	 * will result in an empty string ("") being returned.
 	 * @return a path which represents the package name
 	 * @see ClassLoader#getResource
 	 * @see Class#getResource
@@ -483,7 +445,6 @@ public abstract class ClassUtils {
 	/**
 	 * Return all interfaces that the given object implements as array,
 	 * including ones implemented by superclasses.
-	 *
 	 * @param object the object to analyse for interfaces
 	 * @return all interfaces that the given object implements as array
 	 */
@@ -496,7 +457,6 @@ public abstract class ClassUtils {
 	 * Return all interfaces that the given class implements as array,
 	 * including ones implemented by superclasses.
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
-	 *
 	 * @param clazz the class to analyse for interfaces
 	 * @return all interfaces that the given object implements as array
 	 */
@@ -508,7 +468,6 @@ public abstract class ClassUtils {
 	/**
 	 * Return all interfaces that the given object implements as List,
 	 * including ones implemented by superclasses.
-	 *
 	 * @param object the object to analyse for interfaces
 	 * @return all interfaces that the given object implements as List
 	 */
@@ -520,7 +479,6 @@ public abstract class ClassUtils {
 	 * Return all interfaces that the given class implements as Set,
 	 * including ones implemented by superclasses.
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
-	 *
 	 * @param clazz the class to analyse for interfaces
 	 * @return all interfaces that the given object implements as Set
 	 */
@@ -537,27 +495,6 @@ public abstract class ClassUtils {
 			clazz = clazz.getSuperclass();
 		}
 		return interfaces;
-	}
-
-	/**
-	 * Given a synthetic {@link Method#isBridge bridge Method} returns the {@link Method}
-	 * being bridged. A bridge method may be created by the compiler when extending a parameterized
-	 * type whose methods have parameterized arguments. During runtime invocation the bridge {@link Method} may
-	 * be invoked and/or used via reflection. When attempting to locate annotations on {@link Method Methods} it is
-	 * wise to check for bridge {@link Method Methods} as appropriate and find the bridged {@link Method}.
-	 * <p/>See <a href="http://java.sun.com/docs/books/jls/third_edition/html/expressions.html#15.12.4.5">
-	 * The Java Language Specification</a> for more details on the use of bridge methods.
-	 *
-	 * @return the bridged {@link Method} if the supplied {@link Method} is a valid bridge, otherwise the supplied {@link Method}
-	 * @throws IllegalStateException if no bridged {@link Method} can be found.
-	 */
-	public static Method findBridgedMethod(Method bridgeMethod) {
-		if(bridgeMethodResolver == null) {
-			// running < Java 1.5 - bridging is not present
-			return bridgeMethod;
-		} else {
-			return bridgeMethodResolver.resolveBridgeMethod(bridgeMethod);
-		}
 	}
 
 }
