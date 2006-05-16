@@ -36,8 +36,8 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
- * Implementation of SQLExceptionTranslator that uses specific vendor codes.
- * More precise than SQL state implementation, but vendor-specific.
+ * Implementation of SQLExceptionTranslator that analyzes vendor-specific error codes.
+ * More precise than an implementation based on SQL state, but vendor-specific.
  *
  * <p>This class applies the following matching rules:
  * <ul>
@@ -46,10 +46,14 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  * <li>Apply error code matching. Error codes are obtained from the SQLErrorCodesFactory
  * by default. This factory loads a "sql-error-codes.xml" file from the class path,
  * defining error code mappings for database names from database metadata.
- * <li>Fallback to fallback translator. SQLStateSQLExceptionTranslator is the default
- * fallback translator.
+ * <li>Fallback to a fallback translator. SQLStateSQLExceptionTranslator is the
+ * default fallback translator, analyzing the exception's SQL state only.
  * </ul>
- * 
+ *
+ * <p>The configuration file named "sql-error-codes.xml" is by default read from
+ * this package. It can be overridden through a file of the same name in the root
+ * of the class path (e.g. in the "/WEB-INF/classes" directory).
+ *
  * @author Rod Johnson
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -114,7 +118,8 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 	public SQLErrorCodeSQLExceptionTranslator(SQLErrorCodes sec) {
 		this.sqlErrorCodes = sec;		
 	}
-	
+
+
 	/**
 	 * Set the DataSource for this translator.
 	 * <p>Setting this property will cause a Connection to be obtained from
