@@ -234,31 +234,31 @@ public void echoException(Exception ex) throws Exception {
 				annotation and that can process it appropriately.
 			</para>
 			<para>
-				Enter the <classname>RequiredBeanFactoryPostProcessor</classname> class.
-				This is a <interfacename>BeanFactoryPostProcessor</interfacename> implementation
+				Enter the <classname>RequiredAnnotationBeanPostProcessor</classname> class.
+				This is a special <interfacename>BeanPostProcessor</interfacename> implementation
 				that is provided out of the box by Spring that is @<interfacename>Required</interfacename>-aware
 				and actually provides the <emphasis>'blow up if this required property has not been set'</emphasis>
 				logic. It is <emphasis>very</emphasis> easy to configure; simply drop the following
 				bean definition into your Spring XML configuration.
 			</para>
-			<programlisting><![CDATA[<bean class="org.springframework.beans.factory.annotation.RequiredBeanFactoryPostProcessor"/>]]></programlisting>
+			<programlisting><![CDATA[<bean class="org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor"/>]]></programlisting>
 			<para>
 				Finally, one can configure an instance of the
-				<classname>RequiredBeanFactoryPostProcessor</classname> class to look
+				<classname>RequiredAnnotationBeanPostProcessor</classname> class to look
 				for <emphasis>another</emphasis> <interfacename>Annotation</interfacename> type.
 				This is great if you already have your own
 				@<interfacename>Required</interfacename>-style annotation. Simply plug it into
-				the definition of a <classname>RequiredBeanFactoryPostProcessor</classname> and
+				the definition of a <classname>RequiredAnnotationBeanPostProcessor</classname> and
 				you are good to go. 
 			</para>
 			<para>
 				By way of an example, lets suppose you (or your organization / team) have
 				defined an attribute called
 				@<interfacename>Mandatory</interfacename>. You can make a
-				<classname>RequiredBeanFactoryPostProcessor</classname> instance
+				<classname>RequiredAnnotationBeanPostProcessor</classname> instance
 				@<interfacename>Mandatory</interfacename>-aware like so:
 			</para>
-			<programlisting><![CDATA[<bean class="org.springframework.beans.factory.annotation.RequiredBeanFactoryPostProcessor">
+			<programlisting><![CDATA[<bean class="org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor">
     <property name="requiredAnnotationType" value="your.company.package.Mandatory"/>
 </bean>]]></programlisting>
         </section>
